@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	c "github.com/fatih/color"
 	"os"
 	"strconv"
 	"strings"
@@ -16,11 +15,15 @@ const PacmanBin string = "/usr/bin/pacman"
 // SearchMode is search without numbers
 const SearchMode int = -1
 
+// BuildDir is the root for package building
+const BuildDir string = "/tmp/yay/"
+
+// BaseURL givers the AUR default address
+const BaseURL string = "https://aur.archlinux.org"
+
 func getNums() (numbers []int, err error) {
 	var numberString string
-	green := c.New(c.FgGreen).SprintFunc()
-
-	fmt.Printf("%s\nNumbers:", green("Type numbers to install. Separate each number with a space."))
+	fmt.Printf("\x1B[32m%s\033[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
 	numberString, err = reader.ReadString('\n')
 	if err != nil {
@@ -45,14 +48,18 @@ func getNums() (numbers []int, err error) {
 func defaultMode(pkg string) {
 	aurRes := searchAurPackages(pkg)
 	repoRes, err := SearchPackages(pkg)
+	if repoRes.Resultcount == 0 && aurRes.Resultcount == 0 {
+		os.Exit(1)
+	}
 	repoRes.printSearch(0)
 	err = aurRes.printSearch(repoRes.Resultcount)
+
 	nums, err := getNums()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println(nums)
+	aurRes.installAurArray(nums, repoRes.Resultcount)
 
 }
 

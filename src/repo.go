@@ -57,7 +57,6 @@ func SearchPackages(pkg string) (search RepoSearch, err error) {
 			i = true
 		}
 	}
-
 	return
 }
 
@@ -67,9 +66,11 @@ func (s RepoSearch) printSearch(index int) (err error) {
 
 	for i, result := range s.Results {
 		if index != SearchMode {
-			fmt.Printf("%d %s/%s %s\n%s\n", i, result.Repository, yellow(result.Name), green(result.Version), result.Description)
+			fmt.Printf("%d %s/\x1B[33m%s\033[0m \x1B[36m%s\033[0m\n%s\n",
+				i, result.Repository, result.Name, result.Version, result.Description)
 		} else {
-			fmt.Printf("%s/%s %s\n%s\n", result.Repository, yellow(result.Name), green(result.Version), result.Description)
+			fmt.Printf("%s/\x1B[33m%s\033[0m \x1B[36m%s\033[0m\n%s\n",
+				result.Repository, yellow(result.Name), green(result.Version), result.Description)
 		}
 	}
 

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	c "github.com/fatih/color"
 	"net/http"
 	"sort"
 )
@@ -64,18 +63,30 @@ func searchAurPackages(pkg string) (search AurSearch) {
 }
 
 func (r AurSearch) printSearch(index int) (err error) {
-	yellow := c.New(c.FgYellow).SprintFunc()
-	green := c.New(c.FgGreen).SprintFunc()
 
 	for i, result := range r.Results {
 		if index != SearchMode {
-			fmt.Printf("%d aur/%s %s (%d)\n    %s\n", i+index, yellow(result.Name), green(result.Version), result.NumVotes, result.Description)
+			fmt.Printf("%d aur/\x1B[33m%s\033[0m \x1B[36m%s\033[0m (%d)\n    %s\n",
+				i+index, result.Name, result.Version, result.NumVotes, result.Description)
 		} else {
-			fmt.Printf("aur/%s %s (%d)\n    %s\n", yellow(result.Name), green(result.Version), result.NumVotes, result.Description)
+			fmt.Printf("aur/\x1B[33m%s\033[0m \x1B[36m%s\033[0m (%d)\n    %s\n",
+				result.Name, result.Version, result.NumVotes, result.Description)
 		}
 	}
 
 	return
+}
+
+func (r AurSearch) installAurArray(num []int, index int) (err error) {
+	for _, i := range num {
+		fmt.Printf("%+v\n\n", r.Results[i-index])
+		err = r.Results[i-index].installResult()
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
 }
 
 func (a AurResult) installResult() error {
