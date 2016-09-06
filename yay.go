@@ -12,14 +12,24 @@ import (
 // PacmanBin describes the default installation point of pacman
 const PacmanBin string = "/usr/bin/pacman"
 
+// MakepkgBin describes the default installation point of makepkg command
+const MakepkgBin string = "/usr/bin/makepkg"
+
+// TarBin describes the default installation point of tar command
+// Probably will replace untar with code solution
+const TarBin string = "/usr/bin/tar"
+
 // SearchMode is search without numbers
 const SearchMode int = -1
 
 // BuildDir is the root for package building
-const BuildDir string = "/tmp/yay/"
+const BuildDir string = "/tmp/yaytmp/"
 
 // BaseURL givers the AUR default address
 const BaseURL string = "https://aur.archlinux.org"
+
+// Editor gives the default system editor, uses vi in last case
+var Editor = "vi"
 
 func getNums() (numbers []int, err error) {
 	var numberString string
@@ -65,6 +75,9 @@ func defaultMode(pkg string) {
 
 func main() {
 	flag.Parse()
+	if os.Getenv("EDITOR") != "" {
+		Editor = os.Getenv("EDITOR")
+	}
 	searchTerm := flag.Args()
 	defaultMode(searchTerm[0])
 }

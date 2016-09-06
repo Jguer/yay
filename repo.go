@@ -32,8 +32,10 @@ func getInstalledPackage(pkg string) (err error) {
 
 // SearchPackages handles repo searches
 func SearchPackages(pkg string) (search RepoSearch, err error) {
-	cmd := exec.Command(PacmanBin, "-Ss", pkg)
-	cmdOutput, _ := cmd.Output()
+	cmdOutput, err := exec.Command(PacmanBin, "-Ss", pkg).Output()
+	if err != nil {
+		return
+	}
 	outputSlice := strings.Split(string(cmdOutput), "\n")
 	if outputSlice[0] == "" {
 		return

@@ -4,7 +4,7 @@
 # so that import path resolution will prioritize
 # our third party snapshots.
 LDFLAGS=-ldflags "-s -w"
-GOFILES=$(shell ls ./src/*.go)
+GOFILES=$(shell ls *.go)
 BINARY=./bin/yay
 
 default: build
