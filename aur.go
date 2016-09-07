@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -90,47 +91,29 @@ func (r AurSearch) Swap(i, j int) {
 	r.Results[i], r.Results[j] = r.Results[j], r.Results[i]
 }
 
-func searchAurPackages(pkg string) (search AurSearch) {
-	getJSON("https://aur.archlinux.org/rpc/?v=5&type=search&arg="+pkg, &search)
+func searchAurPackages(pkg string) (search AurSearch, err error) {
+	err = getJSON("https://aur.archlinux.org/rpc/?v=5&type=search&arg="+pkg, &search)
 	sort.Sort(search)
-	return search
+	return
 }
 
-func infoAurPackage(pkg string) (info AurInfo) {
-	fmt.Println("https://aur.archlinux.org/rpc/?v=5&type=info&arg[]=" + pkg)
-	getJSON("https://aur.archlinux.org/rpc/?v=5&type=info&arg[]="+pkg, &info)
-	return info
+func infoAurPackage(pkg string) (info AurInfo, err error) {
+	err = getJSON("https://aur.archlinux.org/rpc/?v=5&type=info&arg[]="+pkg, &info)
+	return
 }
 
 func (r AurSearch) printSearch(index int) (err error) {
 	for i, result := range r.Results {
 		if index != SearchMode {
-			fmt.Printf("%d aur/\x1B[33m%s\033[0m \x1B[36m%s\033[0m (%d)\n    %s\n",
+			fmt.Printf("%d \033[1maur/\x1B[33m%s \x1B[36m%s\033[0m (%d)\n    %s\n",
 				i+index, result.Name, result.Version, result.NumVotes, result.Description)
 		} else {
-			fmt.Printf("aur/\x1B[33m%s\033[0m \x1B[36m%s\033[0m (%d)\n    %s\n",
+			fmt.Printf("\033[1maur/\x1B[33m%s \x1B[36m%s\033[0m (%d)\n    %s\n",
 				result.Name, result.Version, result.NumVotes, result.Description)
 		}
 	}
 
 	return
-}
-
-func (r AurSearch) installAurArray(num []int, index int) (err error) {
-	if len(num) == 0 {
-		return nil
-	}
-
-	for _, i := range num {
-		fmt.Printf("%+v\n\n", r.Results[i-index])
-		err = r.Results[i-index].installResult()
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-	}
-
-	return err
 }
 
 func downloadFile(filepath string, url string) (err error) {
@@ -185,29 +168,35 @@ func (a AurResult) getDepsfromFile(pkgbuildLoc string) (err error) {
 	return nil
 }
 
-func (a AurResult) getDepsFromRPC() (err error) {
-	info := infoAurPackage(a.Name)
-	fmt.Printf("%+v\n", info)
-
+func (a AurResult) getDepsFromRPC() (final []string, err error) {
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
+	}
+	info, err := infoAurPackage(a.Name)
+
+	if len(info.Results) == 0 {
+		return final, errors.New("Failed to get deps from RPC")
 	}
 
 	for _, deps := range info.Results[0].MakeDepends {
 		fields := strings.FieldsFunc(deps, f)
-		fmt.Println(fields[0])
+		if !isInRepo(fields[0]) {
+			final = append(final, fields[0])
+		}
 	}
 
 	for _, deps := range info.Results[0].Depends {
 		fields := strings.FieldsFunc(deps, f)
-		fmt.Println(fields[0])
+		if !isInRepo(fields[0]) {
+			final = append(final, fields[0])
+		}
 	}
 
 	return
 }
 
 func (a AurResult) getAURDependencies() (err error) {
-	a.getDepsFromRPC()
+	_, err = a.getDepsFromRPC()
 
 	return nil
 }
@@ -244,7 +233,7 @@ func (a AurResult) installResult() (err error) {
 	a.getAURDependencies()
 	os.Exit(0)
 
-	fmt.Print("==> Edit PKGBUILD? (y/n)")
+	fmt.Print("\x1b[32m==> Edit PKGBUILD? (y/n)\033[0m")
 	var response string
 	fmt.Scanln(&response)
 	if strings.ContainsAny(response, "y & Y") {

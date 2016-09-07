@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	c "github.com/fatih/color"
 	"os"
 	"os/exec"
 	"strings"
@@ -33,12 +32,9 @@ func getInstalledPackage(pkg string) (err error) {
 // SearchPackages handles repo searches
 func SearchPackages(pkg string) (search RepoSearch, err error) {
 	cmdOutput, err := exec.Command(PacmanBin, "-Ss", pkg).Output()
-	if err != nil {
-		return
-	}
 	outputSlice := strings.Split(string(cmdOutput), "\n")
 	if outputSlice[0] == "" {
-		return
+		return search, nil
 	}
 
 	i := true
@@ -62,17 +58,23 @@ func SearchPackages(pkg string) (search RepoSearch, err error) {
 	return
 }
 
+func isInRepo(pkg string) bool {
+	if _, err := exec.Command(PacmanBin, "-Sp", pkg).Output(); err != nil {
+		return false
+	}
+
+	return true
+}
+
 func (s RepoSearch) printSearch(index int) (err error) {
-	yellow := c.New(c.FgYellow).SprintFunc()
-	green := c.New(c.FgGreen).SprintFunc()
 
 	for i, result := range s.Results {
 		if index != SearchMode {
-			fmt.Printf("%d %s/\x1B[33m%s\033[0m \x1B[36m%s\033[0m\n%s\n",
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
 				i, result.Repository, result.Name, result.Version, result.Description)
 		} else {
-			fmt.Printf("%s/\x1B[33m%s\033[0m \x1B[36m%s\033[0m\n%s\n",
-				result.Repository, yellow(result.Name), green(result.Version), result.Description)
+			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+				result.Repository, result.Name, result.Version, result.Description)
 		}
 	}
 

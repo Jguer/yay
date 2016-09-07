@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -55,22 +56,51 @@ func getNums() (numbers []int, err error) {
 	return
 }
 
-func defaultMode(pkg string) {
-	aurRes := searchAurPackages(pkg)
+func installnumArray(num []int, aurRes AurSearch, repoRes RepoSearch) (err error) {
+	if len(num) == 0 {
+		return errors.New("Installing AUR array: No nums selected")
+	}
+
+	var index int
+	for _, i := range num {
+		if i > repoRes.Resultcount-1 {
+			index = i - repoRes.Resultcount
+			fmt.Printf("%+v\n\n", aurRes.Results[i-index])
+			err = aurRes.Results[i-index].installResult()
+			if err != nil {
+				// Do not abandon program, we might still be able to install the rest
+				fmt.Println(err)
+			}
+		} else {
+
+		}
+	}
+
+	return err
+}
+
+func defaultMode(pkg string) (err error) {
+	aurRes, err := searchAurPackages(pkg)
 	repoRes, err := SearchPackages(pkg)
+	if err != nil {
+		return
+	}
+
 	if repoRes.Resultcount == 0 && aurRes.Resultcount == 0 {
-		os.Exit(1)
+		return errors.New("No Packages match search")
 	}
 	repoRes.printSearch(0)
 	err = aurRes.printSearch(repoRes.Resultcount)
 
 	nums, err := getNums()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return
 	}
-	aurRes.installAurArray(nums, repoRes.Resultcount)
-
+	err = installnumArray(nums, aurRes, repoRes)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func main() {
@@ -79,5 +109,9 @@ func main() {
 		Editor = os.Getenv("EDITOR")
 	}
 	searchTerm := flag.Args()
-	defaultMode(searchTerm[0])
+	err := defaultMode(searchTerm[0])
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
