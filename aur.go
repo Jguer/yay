@@ -195,12 +195,25 @@ func (a AurResult) getDepsFromRPC() (final []string, err error) {
 	return
 }
 
-func installAURPackage(pkgList string) (err error) {
+func installAURPackage(pkg string) (err error) {
+	info, err := infoAurPackage(pkg)
+	if err != nil {
+		return
+	}
+
 	return err
 }
 
 func (a AurResult) getAURDependencies() (err error) {
-	_, err = a.getDepsFromRPC()
+	pkglist, err := a.getDepsFromRPC()
+
+	for _, i := range pkglist {
+		err = installAURPackage(i)
+		if err != nil {
+			// uninstall list TODO
+			return
+		}
+	}
 
 	return nil
 }
