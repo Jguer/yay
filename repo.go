@@ -29,6 +29,16 @@ func getInstalledPackage(pkg string) (err error) {
 	return
 }
 
+// InstallPackage handles repo installs
+func InstallPackage(pkg string, flags ...string) (err error) {
+	cmd := exec.Command(PacmanBin, "-S", pkg, strings.Join(flags, " "))
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	return nil
+}
+
 // SearchPackages handles repo searches
 func SearchPackages(pkg string) (search RepoSearch, err error) {
 	cmdOutput, err := exec.Command(PacmanBin, "-Ss", pkg).Output()
@@ -67,7 +77,6 @@ func isInRepo(pkg string) bool {
 }
 
 func (s RepoSearch) printSearch(index int) (err error) {
-
 	for i, result := range s.Results {
 		if index != SearchMode {
 			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",

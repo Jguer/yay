@@ -195,6 +195,10 @@ func (a AurResult) getDepsFromRPC() (final []string, err error) {
 	return
 }
 
+func installAURPackage(pkgList string) (err error) {
+	return err
+}
+
 func (a AurResult) getAURDependencies() (err error) {
 	_, err = a.getDepsFromRPC()
 
@@ -210,10 +214,6 @@ func (a AurResult) installResult() (err error) {
 	}
 
 	tarLocation := BuildDir + a.Name + ".tar.gz"
-	// err = os.MkdirAll(BuildDir+a.Name, 0755)
-	// if err != nil {
-	// 	return
-	// }
 
 	err = downloadFile(tarLocation, BaseURL+a.URLPath)
 	if err != nil {
@@ -225,15 +225,10 @@ func (a AurResult) installResult() (err error) {
 		return
 	}
 
-	err = os.Chdir(BuildDir + a.Name)
-	if err != nil {
-		return
-	}
-
 	a.getAURDependencies()
 	os.Exit(0)
 
-	fmt.Print("\x1b[32m==> Edit PKGBUILD? (y/n)\033[0m")
+	fmt.Print("\033[1m\x1b[32m==> Edit PKGBUILD? (y/n)\033[0m")
 	var response string
 	fmt.Scanln(&response)
 	if strings.ContainsAny(response, "y & Y") {
@@ -242,6 +237,11 @@ func (a AurResult) installResult() (err error) {
 		editcmd.Stderr = os.Stderr
 		editcmd.Stdin = os.Stdin
 		err = editcmd.Run()
+	}
+
+	err = os.Chdir(BuildDir + a.Name)
+	if err != nil {
+		return
 	}
 
 	makepkgcmd := exec.Command(MakepkgBin, "-sri")
