@@ -56,31 +56,8 @@ func getNums() (numbers []int, err error) {
 	return
 }
 
-func installnumArray(num []int, aurRes AurSearch, repoRes RepoSearch) (err error) {
-	if len(num) == 0 {
-		return errors.New("Installing AUR array: No nums selected")
-	}
-
-	var index int
-	for _, i := range num {
-		if i > repoRes.Resultcount-1 {
-			index = i - repoRes.Resultcount
-			fmt.Printf("%+v\n\n", aurRes.Results[i-index])
-			err = aurRes.Results[i-index].installResult()
-			if err != nil {
-				// Do not abandon program, we might still be able to install the rest
-				fmt.Println(err)
-			}
-		} else {
-
-		}
-	}
-
-	return err
-}
-
 func defaultMode(pkg string) (err error) {
-	aurRes, err := searchAurPackages(pkg)
+	aurRes, err := searchAurPackages(pkg, 0)
 	repoRes, err := SearchPackages(pkg)
 	if err != nil {
 		return
@@ -103,13 +80,39 @@ func defaultMode(pkg string) (err error) {
 	return
 }
 
+func searchMode(pkg string) (err error) {
+	aur, err := searchAurPackages(pkg, SearchMode)
+	repo, err := SearchPackages(pkg)
+	if err != nil {
+		return err
+	}
+
+	aur.printSearch(SearchMode)
+	repo.printSearch(SearchMode)
+
+	return nil
+}
+
 func main() {
 	flag.Parse()
+	var err error
 	if os.Getenv("EDITOR") != "" {
 		Editor = os.Getenv("EDITOR")
 	}
-	searchTerm := flag.Args()
-	err := defaultMode(searchTerm[0])
+	args := flag.Args()
+	if args[0] == "-Ss" {
+		err = searchMode(strings.Join(args[2:], " "))
+
+	} else if args[0] == "-S" {
+		if isInRepo(args[1]) {
+			err = InstallPackage(args[1], args[2:]...)
+		} else {
+			err = installAURPackage(args[1], args[2:]...)
+		}
+	} else {
+		err = defaultMode(args[0])
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
