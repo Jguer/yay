@@ -98,17 +98,21 @@ func (a AurResult) install(flags ...string) (err error) {
 	return
 }
 
-// InstallPackage handles repo installs
+// InstallPackage handles package install
 func InstallPackage(pkg string, flags ...string) (err error) {
-	var args string
-	fmt.Println(len(flags))
-	if len(flags) != 0 {
-		args = fmt.Sprintf(" %s", strings.Join(flags, " "))
+	if isInRepo(pkg) {
+		var args string
+		if len(flags) != 0 {
+			args = fmt.Sprintf(" %s", strings.Join(flags, " "))
+		}
+		cmd := exec.Command("sudo", "pacman", "-S", pkg+args)
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+	} else {
+		err = installAURPackage(os.Args[2], os.Args[3:]...)
 	}
-	cmd := exec.Command("sudo", "pacman", "-S", pkg+args)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	err = cmd.Run()
+
 	return nil
 }

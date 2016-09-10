@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/Jguer/go-alpm"
 	"os"
 	"os/exec"
 	"sort"
@@ -20,6 +21,43 @@ func searchAurPackages(pkg string, index int) (search AurSearch, err error) {
 
 // SearchPackages handles repo searches
 func SearchPackages(pkg string) (search RepoSearch, err error) {
+	h, er := alpm.Init("/", "/var/lib/pacman")
+	if er != nil {
+		fmt.Println(er)
+		return
+	}
+	defer h.Release()
+
+	fmt.Println("before dblist")
+	dbList, _ := h.SyncDbs()
+	fmt.Println("after dblist")
+	// db, _ := h.RegisterSyncDb("core", 0)
+	// h.RegisterSyncDb("community", 0)
+	// h.RegisterSyncDb("extra", 0)
+
+	_, err = h.SyncDbByName("core")
+	fmt.Println(err)
+	fmt.Printf("%+v\n", dbList)
+
+    db, _ := h.LocalDb()
+    for _, pkg := range db.PkgCache().Slice() {
+        fmt.Printf("%s %s\n  %s\n",
+        pkg.Name(), pkg.Version(), pkg.Description())
+    }
+
+	for _, db := range dbList.Slice() {
+		fmt.Printf("%+v\n", db)
+		db, _ := h.LocalDb()
+		for _, pkg := range db.PkgCache().Slice() {
+			fmt.Printf("%s %s\n  %s\n",
+				pkg.Name(), pkg.Version(), pkg.Description())
+		}
+	}
+	return
+}
+
+// SearchPackagesa handles repo searches
+func SearchPackagesa(pkg string) (search RepoSearch, err error) {
 	cmdOutput, err := exec.Command(PacmanBin, "-Ss", pkg).Output()
 	outputSlice := strings.Split(string(cmdOutput), "\n")
 	if outputSlice[0] == "" {
@@ -161,5 +199,3 @@ func getInstalledPackage(pkg string) (err error) {
 	err = cmd.Run()
 	return
 }
-
-

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -94,23 +93,17 @@ func searchMode(pkg string) (err error) {
 }
 
 func main() {
-	flag.Parse()
 	var err error
 	if os.Getenv("EDITOR") != "" {
 		Editor = os.Getenv("EDITOR")
 	}
-	args := flag.Args()
-	if args[0] == "-Ss" {
-		err = searchMode(strings.Join(args[2:], " "))
+	if os.Args[1] == "-Ss" {
+		err = searchMode(strings.Join(os.Args[3:], " "))
 
-	} else if args[0] == "-S" {
-		if isInRepo(args[1]) {
-			err = InstallPackage(args[1], args[2:]...)
-		} else {
-			err = installAURPackage(args[1], args[2:]...)
-		}
+	} else if os.Args[1] == "-S" {
+		err = InstallPackage(os.Args[2], os.Args[3:]...)
 	} else {
-		err = defaultMode(args[0])
+		err = defaultMode(os.Args[1])
 	}
 
 	if err != nil {
