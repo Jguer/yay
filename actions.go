@@ -25,7 +25,7 @@ func searchAndInstall(pkgName string, conf alpm.PacmanConfig, flags ...string) (
 		return errors.New("No Packages match search")
 	}
 	repoRes.printSearch(0)
-	// err = aurRes.printSearch(repoRes.Resultcount)
+	aurRes.PrintSearch(repoRes.Resultcount)
 
 	fmt.Printf("\x1B[32m%s\033[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
@@ -71,7 +71,7 @@ func searchMode(pkg string, conf alpm.PacmanConfig) (err error) {
 		return err
 	}
 
-	// aur.printSearch(SearchMode)
+	aur.printSearch(SearchMode)
 	repo.printSearch(SearchMode)
 
 	return nil

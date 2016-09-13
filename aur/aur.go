@@ -76,6 +76,19 @@ func (r Query) Swap(i, j int) {
 	r.Results[i], r.Results[j] = r.Results[j], r.Results[i]
 }
 
+// PrintSearch handles printing search results in a given format
+func (r Query) PrintSearch(searchFormat bool) {
+	for i, result := range r.Results {
+		if searchFormat {
+			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+				"aur", result.Name, result.Version, result.Description)
+		} else {
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+
+		}
+	}
+}
+
 func downloadFile(filepath string, url string) (err error) {
 	// Create the file
 	out, err := os.Create(filepath)

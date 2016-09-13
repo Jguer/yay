@@ -13,7 +13,7 @@ const PacmanBin string = "/usr/bin/pacman"
 const PacmanConf string = "/etc/pacman.conf"
 
 // SearchMode is search without numbers
-const SearchMode int = -1
+const SearchMode bool = true
 
 // BuildDir is the root for package building
 const BuildDir string = "/tmp/yaytmp/"
