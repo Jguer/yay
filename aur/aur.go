@@ -14,16 +14,19 @@ import (
 )
 
 // TarBin describes the default installation point of tar command
-// Probably will replace untar with code solution
+// Probably will replace untar with code solution.
 const TarBin string = "/usr/bin/tar"
 
-// BaseURL givers the AUR default address
+// BaseURL givers the AUR default address.
 const BaseURL string = "https://aur.archlinux.org"
 
-// MakepkgBin describes the default installation point of makepkg command
+// MakepkgBin describes the default installation point of makepkg command.
 const MakepkgBin string = "/usr/bin/makepkg"
 
-// Result describes an AUR package
+// SearchMode is search without numbers.
+const SearchMode int = -1
+
+// Result describes an AUR package.
 type Result struct {
 	ID             int         `json:"ID"`
 	Name           string      `json:"Name"`
@@ -77,14 +80,14 @@ func (r Query) Swap(i, j int) {
 }
 
 // PrintSearch handles printing search results in a given format
-func (r Query) PrintSearch(searchFormat bool) {
+func (r *Query) PrintSearch(start int) {
 	for i, result := range r.Results {
-		if searchFormat {
+		if start == -1 {
 			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
 				"aur", result.Name, result.Version, result.Description)
 		} else {
 			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
-
+				start+i, "aur", result.Name, result.Version, result.Description)
 		}
 	}
 }
@@ -140,7 +143,7 @@ func Info(pkg string) (r Query, err error) {
 }
 
 // Install sends system commands to make and install a package from pkgName
-func Install(pkg string, baseDir string, conf alpm.PacmanConfig, flags ...string) (err error) {
+func Install(pkg string, baseDir string, conf alpm.PacmanConfig, flags string) (err error) {
 	info, err := Info(pkg)
 	if err != nil {
 		return
@@ -150,12 +153,12 @@ func Install(pkg string, baseDir string, conf alpm.PacmanConfig, flags ...string
 		return errors.New("Package '" + pkg + "' does not exist")
 	}
 
-	info.Results[0].Install(baseDir, conf, flags...)
+	info.Results[0].Install(baseDir, conf, flags)
 	return err
 }
 
 // Install handles install from Result
-func (a Result) Install(baseDir string, conf alpm.PacmanConfig, flags ...string) (err error) {
+func (a *Result) Install(baseDir string, conf alpm.PacmanConfig, flags string) (err error) {
 	// No need to use filepath.separators because it won't run on inferior platforms
 	err = os.MkdirAll(baseDir+"builds", 0755)
 	if err != nil {
@@ -196,11 +199,13 @@ func (a Result) Install(baseDir string, conf alpm.PacmanConfig, flags ...string)
 	if err != nil {
 		return
 	}
-	var args string
-	if len(flags) != 0 {
-		args = fmt.Sprintf(" %s", strings.Join(flags, " "))
+
+	var makepkgcmd *exec.Cmd
+	if flags == "" {
+		makepkgcmd = exec.Command(MakepkgBin, "-sri")
+	} else {
+		makepkgcmd = exec.Command(MakepkgBin, "-sri", flags)
 	}
-	makepkgcmd := exec.Command(MakepkgBin, "-sri"+args)
 	makepkgcmd.Stdout = os.Stdout
 	makepkgcmd.Stderr = os.Stderr
 	makepkgcmd.Stdin = os.Stdin
@@ -210,7 +215,7 @@ func (a Result) Install(baseDir string, conf alpm.PacmanConfig, flags ...string)
 }
 
 // Dependencies returns package dependencies splitting between AUR results and Repo Results not installed
-func (a Result) Dependencies(conf alpm.PacmanConfig) (final []string, err error) {
+func (a *Result) Dependencies(conf alpm.PacmanConfig) (final []string, err error) {
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
 	}

@@ -9,40 +9,18 @@ import (
 	"strings"
 )
 
-// RepoResult describes a Repository package
-type RepoResult struct {
-	Description string
+// RepoSearch describes a Repository search.
+type RepoSearch struct {
+	Results []Result
+}
+
+// Result describes a pkg.
+type Result struct {
+	Name        string
 	Repository  string
 	Version     string
-	Name        string
-}
-
-// RepoSearch describes a Repository search
-type RepoSearch struct {
-	Resultcount int
-	Results     []RepoResult
-}
-
-// InstallPackage handles package install
-func InstallPackage(pkg string, conf alpm.PacmanConfig, flags ...string) (err error) {
-	if found, err := aur.IspkgInRepo(pkg, conf); found {
-		if err != nil {
-			return err
-		}
-		var args string
-		if len(flags) != 0 {
-			args = fmt.Sprintf(" %s", strings.Join(flags, " "))
-		}
-		cmd := exec.Command("sudo", "pacman", "-S", pkg+args)
-		cmd.Stdout = os.Stdout
-		cmd.Stdin = os.Stdin
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
-	} else {
-		err = aur.Install(os.Args[2], BuildDir, conf, os.Args[3:]...)
-	}
-
-	return nil
+	Description string
+	Installed   bool
 }
 
 func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
@@ -57,35 +35,77 @@ func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	return
 }
 
-// SearchPackages handles repo searches
-func SearchPackages(pkgName string, conf alpm.PacmanConfig) (search RepoSearch, err error) {
+// InstallPackage handles package install
+func InstallPackage(pkg string, conf alpm.PacmanConfig, flags string) (err error) {
+	if found, err := aur.IspkgInRepo(pkg, conf); found {
+		if err != nil {
+			return err
+		}
+
+		var cmd *exec.Cmd
+		if flags == "" {
+			cmd = exec.Command("sudo", "pacman", "-S", pkg)
+		} else {
+			cmd = exec.Command("sudo", "pacman", "-S", pkg, flags)
+		}
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+	} else {
+		err = aur.Install(pkg, BuildDir, conf, flags)
+	}
+
+	return nil
+}
+
+// SearchPackages handles repo searches. Creates a RepoSearch struct.
+func SearchPackages(pkgName string, conf alpm.PacmanConfig) (s RepoSearch, err error) {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 	}
 
-	dbList, _ := h.SyncDbs()
+	dbList, err := h.SyncDbs()
+	localdb, err := h.LocalDb()
 
+	var installed bool
 	for _, db := range dbList.Slice() {
 		for _, pkg := range db.PkgCache().Slice() {
 			if strings.Contains(pkg.Name(), pkgName) {
-				fmt.Println(pkg.Name())
+				if r, _ := localdb.PkgByName(pkg.Name()); r != nil {
+					installed = true
+				} else {
+					installed = false
+				}
+
+				s.Results = append(s.Results, Result{
+					Name:        pkg.Name(),
+					Description: pkg.Description(),
+					Version:     pkg.Version(),
+					Repository:  db.Name(),
+					Installed:   installed,
+				})
 			}
 		}
 	}
 	return
 }
 
-func (s RepoSearch) printSearch(index int) (err error) {
-	for i, result := range s.Results {
-		if index != SearchMode {
-			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
-				i, result.Repository, result.Name, result.Version, result.Description)
+//PrintSearch receives a RepoSearch type and outputs pretty text.
+func (s *RepoSearch) PrintSearch(mode int, conf alpm.PacmanConfig) {
+	for i, pkg := range s.Results {
+		if mode != SearchMode {
+            if pkg.Installed == true {
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s\x1B[36m%s\033[0m\n%s\n",
+				i, pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
+            } else {
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s (Installed)\x1B[36m%s\033[0m\n%s\n",
+				i, pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
+            }
 		} else {
 			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
-				result.Repository, result.Name, result.Version, result.Description)
+				pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
 		}
 	}
-
-	return nil
 }
