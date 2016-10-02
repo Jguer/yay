@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/Jguer/go-alpm"
@@ -14,6 +15,7 @@ import (
 func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags string) (err error) {
 	var num int
 	var numberString string
+	var pacBuffer bytes.Buffer
 
 	a, err := aur.Search(pkgName, true)
 	r, err := SearchPackages(pkgName, conf)
@@ -35,7 +37,7 @@ func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags string) (er
 		return
 	}
 
-	var index int
+	var aurInstall []aur.Result
 	result := strings.Fields(numberString)
 	for _, numS := range result {
 		num, err = strconv.Atoi(numS)
@@ -46,17 +48,22 @@ func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags string) (er
 
 		// Install package
 		if num > len(r.Results)-1 {
-			index = num - len(r.Results)
-			err = a.Results[index].Install(BuildDir, conf, flags)
-			if err != nil {
-				// Do not abandon program, we might still be able to install the rest
-				fmt.Println(err)
-			}
+			aurInstall = append(aurInstall, a.Results[num-len(r.Results)])
 		} else {
-			InstallPackage(r.Results[num].Name, conf, flags)
+			pacBuffer.WriteString(r.Results[num].Name)
+			pacBuffer.WriteString(" ")
 		}
 	}
 
+	InstallPackage(strings.TrimSpace(pacBuffer.String()), conf, flags)
+
+	for _, aurpkg := range aurInstall {
+		err = aurpkg.Install(BuildDir, conf, flags)
+		if err != nil {
+			// Do not abandon program, we might still be able to install the rest
+			fmt.Println(err)
+		}
+	}
 	return
 }
 

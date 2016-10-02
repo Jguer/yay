@@ -7,9 +7,6 @@ import (
 	"strings"
 )
 
-// PacmanBin describes the default installation point of pacman
-const PacmanBin string = "/usr/bin/pacman"
-
 // PacmanConf describes the default pacman config file
 const PacmanConf string = "/etc/pacman.conf"
 

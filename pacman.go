@@ -143,7 +143,7 @@ func passToPacman(op string, pkg string, flags string) error {
 	if strings.Contains(op, "Q") {
 		cmd = exec.Command("pacman", args...)
 	} else {
-		args = append(args, "pacman")
+		args = append([]string{"pacman"}, args...)
 		cmd = exec.Command("sudo", args...)
 	}
 
