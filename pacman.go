@@ -36,7 +36,7 @@ func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 }
 
 // InstallPackage handles package install
-func InstallPackage(pkg string, conf alpm.PacmanConfig, flags string) (err error) {
+func InstallPackage(pkg string, conf *alpm.PacmanConfig, flags string) error {
 	if found, err := aur.IspkgInRepo(pkg, conf); found {
 		if err != nil {
 			return err
@@ -59,8 +59,23 @@ func InstallPackage(pkg string, conf alpm.PacmanConfig, flags string) (err error
 	return nil
 }
 
+// UpdatePackages handles cache update and upgrade
+func UpdatePackages(flags string) error {
+	var cmd *exec.Cmd
+	if flags == "" {
+		cmd = exec.Command("sudo", "pacman", "-Syu")
+	} else {
+		cmd = exec.Command("sudo", "pacman", "-Syu", flags)
+	}
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
+}
+
 // SearchPackages handles repo searches. Creates a RepoSearch struct.
-func SearchPackages(pkgName string, conf alpm.PacmanConfig) (s RepoSearch, err error) {
+func SearchPackages(pkgName string, conf *alpm.PacmanConfig) (s RepoSearch, err error) {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -93,19 +108,36 @@ func SearchPackages(pkgName string, conf alpm.PacmanConfig) (s RepoSearch, err e
 }
 
 //PrintSearch receives a RepoSearch type and outputs pretty text.
-func (s *RepoSearch) PrintSearch(mode int, conf alpm.PacmanConfig) {
+func (s *RepoSearch) PrintSearch(mode int) {
 	for i, pkg := range s.Results {
-		if mode != SearchMode {
-            if pkg.Installed == true {
-			fmt.Printf("%d \033[1m%s/\x1B[33m%s\x1B[36m%s\033[0m\n%s\n",
+		switch {
+		case mode != SearchMode && pkg.Installed == true:
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
 				i, pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
-            } else {
-			fmt.Printf("%d \033[1m%s/\x1B[33m%s (Installed)\x1B[36m%s\033[0m\n%s\n",
+		case mode != SearchMode && pkg.Installed != true:
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
 				i, pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
-            }
-		} else {
+		case mode == SearchMode && pkg.Installed == true:
+			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
+				pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
+		case mode == SearchMode && pkg.Installed != true:
 			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
 				pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
 		}
 	}
+}
+
+func passToPacman(op string, flags string) error {
+	var cmd *exec.Cmd
+	if flags == "" {
+		cmd = exec.Command("sudo", "pacman", op)
+	} else {
+		cmd = exec.Command("sudo", "pacman", op, flags)
+	}
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
+
 }

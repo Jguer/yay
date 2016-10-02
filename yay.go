@@ -79,11 +79,13 @@ func main() {
 
 	switch op {
 	case "-Ss":
-		err = searchMode(pkg, conf)
+		err = searchMode(pkg, &conf)
 	case "-S":
-		err = InstallPackage(pkg, conf, flag)
+		err = InstallPackage(pkg, &conf, flag)
+	case "-Syu":
+		err = updateAndInstall(&conf, flag)
 	case "yogurt":
-		err = searchAndInstall(pkg, conf, flag)
+		err = searchAndInstall(pkg, &conf, flag)
 	default:
 		fmt.Println("Pass to pacman")
 	}

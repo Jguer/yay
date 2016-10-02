@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func searchAndInstall(pkgName string, conf alpm.PacmanConfig, flags string) (err error) {
+func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags string) (err error) {
 	var num int
 	var numberString string
 
@@ -24,7 +24,7 @@ func searchAndInstall(pkgName string, conf alpm.PacmanConfig, flags string) (err
 	if len(r.Results) == 0 && a.Resultcount == 0 {
 		return errors.New("No Packages match search")
 	}
-	r.PrintSearch(0, conf)
+	r.PrintSearch(0)
 	a.PrintSearch(len(r.Results))
 
 	fmt.Printf("\x1B[32m%s\033[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
@@ -47,7 +47,7 @@ func searchAndInstall(pkgName string, conf alpm.PacmanConfig, flags string) (err
 		// Install package
 		if num > len(r.Results)-1 {
 			index = num - len(r.Results)
-			err = a.Results[num-index].Install(BuildDir, conf, flags)
+			err = a.Results[index].Install(BuildDir, conf, flags)
 			if err != nil {
 				// Do not abandon program, we might still be able to install the rest
 				fmt.Println(err)
@@ -60,7 +60,19 @@ func searchAndInstall(pkgName string, conf alpm.PacmanConfig, flags string) (err
 	return
 }
 
-func searchMode(pkg string, conf alpm.PacmanConfig) (err error) {
+// updateAndInstall handles updating the cache and installing updates
+func updateAndInstall(conf *alpm.PacmanConfig, flags string) error {
+	errp := UpdatePackages(flags)
+	erra := aur.UpdatePackages(BuildDir, conf, flags)
+
+	if errp != nil {
+		return errp
+	}
+
+	return erra
+}
+
+func searchMode(pkg string, conf *alpm.PacmanConfig) (err error) {
 	a, err := aur.Search(pkg, true)
 	if err != nil {
 		return err
@@ -70,7 +82,7 @@ func searchMode(pkg string, conf alpm.PacmanConfig) (err error) {
 		return err
 	}
 
-	r.PrintSearch(SearchMode, conf)
+	r.PrintSearch(SearchMode)
 	a.PrintSearch(SearchMode)
 
 	return nil

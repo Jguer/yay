@@ -48,6 +48,7 @@ type Result struct {
 	Conflicts      []string    `json:"Conflicts"`
 	License        []string    `json:"License"`
 	Keywords       []string    `json:"Keywords"`
+	Installed      bool
 }
 
 // Query describes an AUR json Query
@@ -81,13 +82,20 @@ func (r Query) Swap(i, j int) {
 
 // PrintSearch handles printing search results in a given format
 func (r *Query) PrintSearch(start int) {
-	for i, result := range r.Results {
-		if start == -1 {
+	for i, res := range r.Results {
+		switch {
+		case start != SearchMode && res.Installed == true:
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \033[0m(%d) \x1B[32;40mInstalled\033[0m\n%s\n",
+				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
+		case start != SearchMode && res.Installed != true:
+			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \033[0m(%d)\n%s\n",
+				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
+		case start == SearchMode && res.Installed == true:
+			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
+				"aur", res.Name, res.Version, res.Description)
+		case start == SearchMode && res.Installed != true:
 			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
-				"aur", result.Name, result.Version, result.Description)
-		} else {
-			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
-				start+i, "aur", result.Name, result.Version, result.Description)
+				"aur", res.Name, res.Version, res.Description)
 		}
 	}
 }
@@ -133,6 +141,10 @@ func Search(pkg string, sortS bool) (r Query, err error) {
 	if sortS {
 		sort.Sort(r)
 	}
+
+	for i, res := range r.Results {
+		r.Results[i].Installed, err = IspkgInstalled(res.Name)
+	}
 	return
 }
 
@@ -143,7 +155,7 @@ func Info(pkg string) (r Query, err error) {
 }
 
 // Install sends system commands to make and install a package from pkgName
-func Install(pkg string, baseDir string, conf alpm.PacmanConfig, flags string) (err error) {
+func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags string) (err error) {
 	info, err := Info(pkg)
 	if err != nil {
 		return
@@ -157,8 +169,73 @@ func Install(pkg string, baseDir string, conf alpm.PacmanConfig, flags string) (
 	return err
 }
 
+// UpdatePackages handles AUR updates
+func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags string) error {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return err
+	}
+
+	localDb, err := h.LocalDb()
+	if err != nil {
+		return err
+	}
+	dbList, err := h.SyncDbs()
+	if err != nil {
+		return err
+	}
+
+	var foreign []alpm.Package
+	var outdated []string
+
+	// Find foreign packages in system
+	for _, pkg := range localDb.PkgCache().Slice() {
+		// Change to more effective method
+		found := false
+		for _, db := range dbList.Slice() {
+			_, err = db.PkgByName(pkg.Name())
+			if err == nil {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			foreign = append(foreign, pkg)
+		}
+	}
+
+	// Find outdated packages
+	for _, pkg := range foreign {
+		info, err := Info(pkg.Name())
+		if err != nil {
+			return err
+		}
+
+		if info.Resultcount == 0 {
+			continue
+		}
+
+		// Leaving this here for now, warn about downgrades later
+		if int64(info.Results[0].LastModified) > pkg.InstallDate().Unix() {
+			fmt.Printf("==>\x1b[33;1m %s: \033[0m%s \x1b[33;1m-> \033[0m%s\n",
+				pkg.Name(), pkg.Version(), info.Results[0].Version)
+			outdated = append(outdated, pkg.Name())
+		}
+
+	}
+
+	// Install updated packages
+	for _, pkg := range outdated {
+		Install(pkg, baseDir, conf, flags)
+	}
+
+	return nil
+}
+
 // Install handles install from Result
-func (a *Result) Install(baseDir string, conf alpm.PacmanConfig, flags string) (err error) {
+func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags string) (err error) {
 	// No need to use filepath.separators because it won't run on inferior platforms
 	err = os.MkdirAll(baseDir+"builds", 0755)
 	if err != nil {
@@ -184,7 +261,7 @@ func (a *Result) Install(baseDir string, conf alpm.PacmanConfig, flags string) (
 		return
 	}
 
-	fmt.Print("\033[1m\x1b[32m==> Edit PKGBUILD? (y/n)\033[0m")
+	fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD? (y/n)\033[0m")
 	var response string
 	fmt.Scanln(&response)
 	if strings.ContainsAny(response, "y & Y") {
@@ -215,7 +292,7 @@ func (a *Result) Install(baseDir string, conf alpm.PacmanConfig, flags string) (
 }
 
 // Dependencies returns package dependencies splitting between AUR results and Repo Results not installed
-func (a *Result) Dependencies(conf alpm.PacmanConfig) (final []string, err error) {
+func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err error) {
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
 	}
@@ -280,17 +357,15 @@ func IspkgInstalled(pkgName string) (bool, error) {
 		return false, err
 	}
 
-	for _, pkg := range localDb.PkgCache().Slice() {
-		if pkg.Name() == pkgName {
-			return true, nil
-		}
+	_, err = localDb.PkgByName(pkgName)
+	if err != nil {
+		return false, nil
 	}
-
-	return false, nil
+	return true, nil
 }
 
 // IspkgInRepo returns true if pkgName is in a synced repo
-func IspkgInRepo(pkgName string, conf alpm.PacmanConfig) (bool, error) {
+func IspkgInRepo(pkgName string, conf *alpm.PacmanConfig) (bool, error) {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -299,10 +374,9 @@ func IspkgInRepo(pkgName string, conf alpm.PacmanConfig) (bool, error) {
 
 	dbList, _ := h.SyncDbs()
 	for _, db := range dbList.Slice() {
-		for _, pkg := range db.PkgCache().Slice() {
-			if pkg.Name() == pkgName {
-				return true, nil
-			}
+		_, err = db.PkgByName(pkgName)
+		if err == nil {
+			return true, nil
 		}
 	}
 	return false, nil
