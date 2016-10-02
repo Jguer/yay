@@ -87,7 +87,7 @@ func main() {
 	case "yogurt":
 		err = searchAndInstall(pkg, &conf, flag)
 	default:
-		fmt.Println("Pass to pacman")
+		err = passToPacman(op, pkg, flag)
 	}
 
 	if err != nil {

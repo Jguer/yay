@@ -127,13 +127,26 @@ func (s *RepoSearch) PrintSearch(mode int) {
 	}
 }
 
-func passToPacman(op string, flags string) error {
+func passToPacman(op string, pkg string, flags string) error {
 	var cmd *exec.Cmd
-	if flags == "" {
-		cmd = exec.Command("sudo", "pacman", op)
-	} else {
-		cmd = exec.Command("sudo", "pacman", op, flags)
+	var args []string
+
+	args = append(args, op)
+	if pkg != "" {
+		args = append(args, pkg)
 	}
+
+	if flags != "" {
+		args = append(args, flags)
+	}
+
+	if strings.Contains(op, "Q") {
+		cmd = exec.Command("pacman", args...)
+	} else {
+		args = append(args, "pacman")
+		cmd = exec.Command("sudo", args...)
+	}
+
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
