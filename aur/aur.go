@@ -219,14 +219,19 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags string) error
 
 		// Leaving this here for now, warn about downgrades later
 		if int64(info.Results[0].LastModified) > pkg.InstallDate().Unix() {
-			fmt.Printf("==>\x1b[33;1m %s: \033[0m%s \x1b[33;1m-> \033[0m%s\n",
+			fmt.Printf("\033[1m\x1b[32m==>\x1b[33;1m %s: \033[0m%s \x1b[33;1m-> \033[0m%s\n",
 				pkg.Name(), pkg.Version(), info.Results[0].Version)
 			outdated = append(outdated, pkg.Name())
 		}
-
 	}
 
 	// Install updated packages
+	fmt.Println("\033[1m\x1b[32m==> Proceed with upgrade\033[0m\033[1m (Y/n)\033[0m")
+	var response string
+	fmt.Scanln(&response)
+	if strings.ContainsAny(response, "n & N") {
+		return nil
+	}
 	for _, pkg := range outdated {
 		Install(pkg, baseDir, conf, flags)
 	}
@@ -261,7 +266,7 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags string) 
 		return
 	}
 
-	fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD? (y/n)\033[0m")
+	fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD?\033[0m\033[1m (y/N)\033[0m")
 	var response string
 	fmt.Scanln(&response)
 	if strings.ContainsAny(response, "y & Y") {
