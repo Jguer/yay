@@ -8,6 +8,7 @@ import (
 	"github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/aur"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -55,7 +56,18 @@ func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags string) (er
 		}
 	}
 
-	InstallPackage(strings.TrimSpace(pacBuffer.String()), conf, flags)
+	if pacBuffer.String() != "" {
+		var cmd *exec.Cmd
+		if flags == "" {
+			cmd = exec.Command("sudo", "pacman", "-S", strings.TrimSpace(pacBuffer.String()))
+		} else {
+			cmd = exec.Command("sudo", "pacman", "-S", strings.TrimSpace(pacBuffer.String()), flags)
+		}
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+	}
 
 	for _, aurpkg := range aurInstall {
 		err = aurpkg.Install(BuildDir, conf, flags)

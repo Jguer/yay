@@ -1,6 +1,7 @@
 package aur
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -266,18 +267,25 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags string) 
 		return
 	}
 
-	fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD?\033[0m\033[1m (y/N)\033[0m")
 	var response string
-	fmt.Scanln(&response)
-	if strings.ContainsAny(response, "y & Y") {
-		editcmd := exec.Command(Editor, baseDir+a.Name+"/"+"PKGBUILD")
-		editcmd.Stdout = os.Stdout
-		editcmd.Stderr = os.Stderr
-		editcmd.Stdin = os.Stdin
-		err = editcmd.Run()
-	}
+	var dir bytes.Buffer
+	dir.WriteString(baseDir)
+	dir.WriteString(a.Name)
+	dir.WriteString("/")
 
-	err = os.Chdir(baseDir + a.Name)
+    if _, err := os.Stat(dir.String() + "PKGBUILD"); err == nil {
+        fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD?\033[0m\033[1m (y/N)\033[0m")
+        fmt.Scanln(&response)
+        if strings.ContainsAny(response, "y & Y") {
+            editcmd := exec.Command(Editor, dir.String()+"PKGBUILD")
+            editcmd.Stdout = os.Stdout
+            editcmd.Stderr = os.Stderr
+            editcmd.Stdin = os.Stdin
+            err = editcmd.Run()
+        }
+    }
+
+	err = os.Chdir(dir.String())
 	if err != nil {
 		return
 	}

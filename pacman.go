@@ -36,24 +36,56 @@ func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 }
 
 // InstallPackage handles package install
-func InstallPackage(pkg string, conf *alpm.PacmanConfig, flags string) error {
-	if found, err := aur.IspkgInRepo(pkg, conf); found {
-		if err != nil {
-			return err
+func InstallPackage(pkgs []string, conf *alpm.PacmanConfig, flags string) error {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return err
+	}
+
+	dbList, err := h.SyncDbs()
+	if err != nil {
+		return err
+	}
+
+	var foreign []string
+	var args []string
+	repocnt := 0
+	args = append(args, "pacman")
+	args = append(args, "-S")
+
+	for _, pkg := range pkgs {
+		found := false
+		for _, db := range dbList.Slice() {
+			_, err = db.PkgByName(pkg)
+			if err == nil {
+				found = true
+				args = append(args, pkg)
+				repocnt++
+				break
+			}
 		}
 
-		var cmd *exec.Cmd
-		if flags == "" {
-			cmd = exec.Command("sudo", "pacman", "-S", pkg)
-		} else {
-			cmd = exec.Command("sudo", "pacman", "-S", pkg, flags)
+		if !found {
+			foreign = append(foreign, pkg)
 		}
+	}
+
+	if flags != "" {
+		args = append(args, flags)
+	}
+
+	if repocnt != 0 {
+		var cmd *exec.Cmd
+		cmd = exec.Command("sudo", args...)
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Stderr = os.Stderr
 		err = cmd.Run()
-	} else {
-		err = aur.Install(pkg, BuildDir, conf, flags)
+	}
+
+	for _, aurpkg := range foreign {
+		err = aur.Install(aurpkg, BuildDir, conf, flags)
 	}
 
 	return nil
