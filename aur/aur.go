@@ -226,13 +226,21 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags string) error
 		}
 	}
 
-	// Install updated packages
-	fmt.Println("\033[1m\x1b[32m==> Proceed with upgrade\033[0m\033[1m (Y/n)\033[0m")
-	var response string
-	fmt.Scanln(&response)
-	if strings.ContainsAny(response, "n & N") {
+	//If there are no outdated packages, don't prompt
+	if len(outdated) == 0 {
 		return nil
 	}
+
+	// Install updated packages
+	if !strings.Contains(flags, "noconfirm") {
+		fmt.Println("\033[1m\x1b[32m==> Proceed with upgrade\033[0m\033[1m (Y/n)\033[0m")
+		var response string
+		fmt.Scanln(&response)
+		if strings.ContainsAny(response, "n & N") {
+			return nil
+		}
+	}
+
 	for _, pkg := range outdated {
 		Install(pkg, baseDir, conf, flags)
 	}
@@ -273,17 +281,17 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags string) 
 	dir.WriteString(a.Name)
 	dir.WriteString("/")
 
-    if _, err := os.Stat(dir.String() + "PKGBUILD"); err == nil {
-        fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD?\033[0m\033[1m (y/N)\033[0m")
-        fmt.Scanln(&response)
-        if strings.ContainsAny(response, "y & Y") {
-            editcmd := exec.Command(Editor, dir.String()+"PKGBUILD")
-            editcmd.Stdout = os.Stdout
-            editcmd.Stderr = os.Stderr
-            editcmd.Stdin = os.Stdin
-            err = editcmd.Run()
-        }
-    }
+	if _, err := os.Stat(dir.String() + "PKGBUILD"); err == nil {
+		fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD?\033[0m\033[1m (y/N)\033[0m")
+		fmt.Scanln(&response)
+		if strings.ContainsAny(response, "y & Y") {
+			editcmd := exec.Command(Editor, dir.String()+"PKGBUILD")
+			editcmd.Stdout = os.Stdout
+			editcmd.Stderr = os.Stderr
+			editcmd.Stdin = os.Stdin
+			err = editcmd.Run()
+		}
+	}
 
 	err = os.Chdir(dir.String())
 	if err != nil {
