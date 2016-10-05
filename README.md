@@ -12,7 +12,8 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Know when git packages are due for an upgrade
 
 ### Changelog
-v0.01
+
+
 ### TODO
 
 - Git rev updates
@@ -20,6 +21,7 @@ v0.01
 - Zsh Completions
 - Extract without syscall
 - Add flags for yay
+- Install Groups
 - ~~AUR Install~~
 - ~~Pacman Interface~~
 - ~~Upgrade AUR~~ 
