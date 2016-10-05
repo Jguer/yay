@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+var version = "undefined"
+
 // TarBin describes the default installation point of tar command
 // Probably will replace untar with code solution.
 const TarBin string = "/usr/bin/tar"
@@ -156,7 +158,7 @@ func Info(pkg string) (r Query, err error) {
 }
 
 // Install sends system commands to make and install a package from pkgName
-func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags string) (err error) {
+func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string) (err error) {
 	info, err := Info(pkg)
 	if err != nil {
 		return
@@ -171,7 +173,7 @@ func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags string) 
 }
 
 // UpdatePackages handles AUR updates
-func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags string) error {
+func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -232,7 +234,7 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags string) error
 	}
 
 	// Install updated packages
-	if !strings.Contains(flags, "noconfirm") {
+	if NoConfirm(flags) == false {
 		fmt.Println("\033[1m\x1b[32m==> Proceed with upgrade\033[0m\033[1m (Y/n)\033[0m")
 		var response string
 		fmt.Scanln(&response)
@@ -249,7 +251,7 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags string) error
 }
 
 // Install handles install from Result
-func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags string) (err error) {
+func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string) (err error) {
 	// No need to use filepath.separators because it won't run on inferior platforms
 	err = os.MkdirAll(baseDir+"builds", 0755)
 	if err != nil {
@@ -281,7 +283,7 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags string) 
 	dir.WriteString(a.Name)
 	dir.WriteString("/")
 
-	if _, err := os.Stat(dir.String() + "PKGBUILD"); err == nil {
+	if NoConfirm(flags) == false {
 		fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD?\033[0m\033[1m (y/N)\033[0m")
 		fmt.Scanln(&response)
 		if strings.ContainsAny(response, "y & Y") {
@@ -299,11 +301,10 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags string) 
 	}
 
 	var makepkgcmd *exec.Cmd
-	if flags == "" {
-		makepkgcmd = exec.Command(MakepkgBin, "-sri")
-	} else {
-		makepkgcmd = exec.Command(MakepkgBin, "-sri", flags)
-	}
+	var args []string
+	args = append(args, "-sri")
+	args = append(args, flags...)
+	makepkgcmd = exec.Command(MakepkgBin, args...)
 	makepkgcmd.Stdout = os.Stdout
 	makepkgcmd.Stderr = os.Stderr
 	makepkgcmd.Stdin = os.Stdin
@@ -401,4 +402,17 @@ func IspkgInRepo(pkgName string, conf *alpm.PacmanConfig) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+// NoConfirm returns true if prompts should be ignored
+func NoConfirm(flags []string) bool {
+	noconf := false
+	for _, flag := range flags {
+		if strings.Contains(flag, "noconfirm") {
+			noconf = true
+			break
+		}
+	}
+
+	return noconf
 }

@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"os"
-	"strings"
 )
+
+var version string
 
 // PacmanConf describes the default pacman config file
 const PacmanConf string = "/etc/pacman.conf"
@@ -19,7 +18,7 @@ const SearchMode int = -1
 
 func operation() (operation string, err error) {
 	if len(os.Args) < 2 {
-		return "noop", errors.New("No operation specified.")
+		return "noop", fmt.Errorf("No operation specified.")
 	}
 	for _, arg := range os.Args[1:] {
 		if arg[0] == '-' && arg[1] != '-' {
@@ -39,25 +38,18 @@ func packages() ([]string, error) {
 	return ps, nil
 }
 
-func flags() (flags string, err error) {
-	var fs []string
+func flags() (fs []string, err error) {
 	for _, arg := range os.Args[1:] {
 		if arg[0] == '-' && arg[1] == '-' {
 			fs = append(fs, arg)
 		}
 	}
 
-	if len(fs) == 0 {
-		return "", nil
-	}
-
-	flags = strings.Join(fs, " ")
 	return
 }
 
 func main() {
 	var err error
-	var pkgstring bytes.Buffer
 	conf, err := readConfig(PacmanConf)
 
 	op, err := operation()
@@ -71,6 +63,8 @@ func main() {
 	flag, _ := flags()
 
 	switch op {
+	case "-Qstats":
+		err = stats(&conf)
 	case "-Ss":
 		for _, pkg := range pkgs {
 			err = searchMode(pkg, &conf)
@@ -84,13 +78,7 @@ func main() {
 			err = searchAndInstall(pkg, &conf, flag)
 		}
 	default:
-		for i, pkg := range pkgs {
-			pkgstring.WriteString(pkg)
-			if i != len(pkgs)-1 {
-				pkgstring.WriteString(" ")
-			}
-		}
-		err = passToPacman(op, pkgstring.String(), flag)
+		err = passToPacman(op, pkgs, flag)
 	}
 
 	if err != nil {

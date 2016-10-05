@@ -36,7 +36,7 @@ func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 }
 
 // InstallPackage handles package install
-func InstallPackage(pkgs []string, conf *alpm.PacmanConfig, flags string) error {
+func InstallPackage(pkgs []string, conf *alpm.PacmanConfig, flags []string) error {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -71,9 +71,7 @@ func InstallPackage(pkgs []string, conf *alpm.PacmanConfig, flags string) error 
 		}
 	}
 
-	if flags != "" {
-		args = append(args, flags)
-	}
+	args = append(args, flags...)
 
 	if repocnt != 0 {
 		var cmd *exec.Cmd
@@ -92,13 +90,14 @@ func InstallPackage(pkgs []string, conf *alpm.PacmanConfig, flags string) error 
 }
 
 // UpdatePackages handles cache update and upgrade
-func UpdatePackages(flags string) error {
+func UpdatePackages(flags []string) error {
 	var cmd *exec.Cmd
-	if flags == "" {
-		cmd = exec.Command("sudo", "pacman", "-Syu")
-	} else {
-		cmd = exec.Command("sudo", "pacman", "-Syu", flags)
-	}
+	var args []string
+
+	args = append(args, "pacman", "-Syu")
+	args = append(args, flags...)
+
+	cmd = exec.Command("sudo", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
@@ -159,20 +158,20 @@ func (s *RepoSearch) PrintSearch(mode int) {
 	}
 }
 
-func passToPacman(op string, pkg string, flags string) error {
+func passToPacman(op string, pkgs []string, flags []string) error {
 	var cmd *exec.Cmd
 	var args []string
 
 	args = append(args, op)
-	if pkg != "" {
-		args = append(args, pkg)
+	if len(pkgs) != 0 {
+		args = append(args, pkgs...)
 	}
 
-	if flags != "" {
-		args = append(args, flags)
+	if len(flags) != 0 {
+		args = append(args, flags...)
 	}
 
-	if strings.Contains(op, "Q") {
+	if strings.Contains(op, "-Q") {
 		cmd = exec.Command("pacman", args...)
 	} else {
 		args = append([]string{"pacman"}, args...)
