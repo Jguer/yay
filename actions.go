@@ -29,8 +29,7 @@ func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags []string) (
 	r.PrintSearch(0)
 	a.PrintSearch(len(r.Results))
 
-	args = append(args, "pacman")
-	args = append(args, "-S")
+	args = append(args, "pacman", "-S")
 
 	fmt.Printf("\x1B[32m%s\033[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
@@ -95,12 +94,8 @@ func searchMode(pkg string, conf *alpm.PacmanConfig) (err error) {
 	if err != nil {
 		return err
 	}
-	r, err := SearchPackages(pkg, conf)
-	if err != nil {
-		return err
-	}
 
-	r.PrintSearch(SearchMode)
+	SearchRepos(pkg, conf, SearchMode)
 	a.PrintSearch(SearchMode)
 
 	return nil

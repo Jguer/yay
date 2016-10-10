@@ -105,6 +105,48 @@ func UpdatePackages(flags []string) error {
 	return err
 }
 
+// SearchRepos searches and prints packages in repo
+func SearchRepos(pkgName string, conf *alpm.PacmanConfig, mode int) (err error) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+	}
+
+	dbList, err := h.SyncDbs()
+	localdb, err := h.LocalDb()
+
+	var installed bool
+	var i int
+	for _, db := range dbList.Slice() {
+		for _, pkg := range db.PkgCache().Slice() {
+			if strings.Contains(pkg.Name(), pkgName) {
+				if r, _ := localdb.PkgByName(pkg.Name()); r != nil {
+					installed = true
+				} else {
+					installed = false
+				}
+
+				switch {
+				case mode != SearchMode && installed == true:
+					fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
+						i, db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
+				case mode != SearchMode && installed != true:
+					fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+						i, db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
+				case mode == SearchMode && installed == true:
+					fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
+						db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
+				case mode == SearchMode && installed != true:
+					fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+						db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
+				}
+				i++
+			}
+		}
+	}
+	return
+}
+
 // SearchPackages handles repo searches. Creates a RepoSearch struct.
 func SearchPackages(pkgName string, conf *alpm.PacmanConfig) (s RepoSearch, err error) {
 	h, err := conf.CreateHandle()
