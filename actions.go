@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/aur"
+	"github.com/jguer/go-alpm"
+	"github.com/jguer/yay/aur"
 	"math"
 	"os"
 	"os/exec"
