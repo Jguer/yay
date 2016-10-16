@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Jguer/go-alpm"
+	"github.com/jguer/go-alpm"
 	"io"
 	"net/http"
 	"os"
