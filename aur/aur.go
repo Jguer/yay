@@ -3,15 +3,15 @@ package aur
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/jguer/go-alpm"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"sort"
 	"strings"
+
+	"github.com/jguer/go-alpm"
 )
 
 var version = "undefined"
@@ -88,16 +88,16 @@ func (r *Query) PrintSearch(start int) {
 	for i, res := range r.Results {
 		switch {
 		case start != SearchMode && res.Installed == true:
-			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \033[0m(%d) \x1B[32;40mInstalled\033[0m\n%s\n",
+			fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) \x1b[32;40mInstalled\x1b[0m\n%s\n",
 				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
 		case start != SearchMode && res.Installed != true:
-			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \033[0m(%d)\n%s\n",
+			fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d)\n%s\n",
 				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
 		case start == SearchMode && res.Installed == true:
-			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
+			fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[32;40mInstalled\x1b[0m\n%s\n",
 				"aur", res.Name, res.Version, res.Description)
 		case start == SearchMode && res.Installed != true:
-			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+			fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s\x1b[0m\n%s\n",
 				"aur", res.Name, res.Version, res.Description)
 		}
 	}
@@ -165,7 +165,7 @@ func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string
 	}
 
 	if info.Resultcount == 0 {
-		return errors.New("Package '" + pkg + "' does not exist")
+		return fmt.Errorf("Package %s does not exist", pkg)
 	}
 
 	info.Results[0].Install(baseDir, conf, flags)
@@ -174,6 +174,9 @@ func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string
 
 // UpdatePackages handles AUR updates
 func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
+
+	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
+
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -222,7 +225,7 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) err
 
 		// Leaving this here for now, warn about downgrades later
 		if int64(info.Results[0].LastModified) > pkg.InstallDate().Unix() {
-			fmt.Printf("\033[1m\x1b[32m==>\x1b[33;1m %s: \033[0m%s \x1b[33;1m-> \033[0m%s\n",
+			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
 				pkg.Name(), pkg.Version(), info.Results[0].Version)
 			outdated = append(outdated, pkg.Name())
 		}
@@ -230,12 +233,13 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) err
 
 	//If there are no outdated packages, don't prompt
 	if len(outdated) == 0 {
+		fmt.Println(" there is nothing to do")
 		return nil
 	}
 
 	// Install updated packages
 	if NoConfirm(flags) == false {
-		fmt.Println("\033[1m\x1b[32m==> Proceed with upgrade\033[0m\033[1m (Y/n)\033[0m")
+		fmt.Println("\x1b[1m\x1b[32m==> Proceed with upgrade\x1b[0m\x1b[1m (Y/n)\x1b[0m")
 		var response string
 		fmt.Scanln(&response)
 		if strings.ContainsAny(response, "n & N") {
@@ -284,7 +288,7 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 	dir.WriteString("/")
 
 	if NoConfirm(flags) == false {
-		fmt.Println("\033[1m\x1b[32m==> Edit PKGBUILD?\033[0m\033[1m (y/N)\033[0m")
+		fmt.Println("\x1b[1m\x1b[32m==> Edit PKGBUILD?\x1b[0m\x1b[1m (y/N)\x1b[0m")
 		fmt.Scanln(&response)
 		if strings.ContainsAny(response, "y & Y") {
 			editcmd := exec.Command(Editor, dir.String()+"PKGBUILD")
@@ -324,7 +328,7 @@ func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err erro
 	}
 
 	if len(info.Results) == 0 {
-		return final, errors.New("Failed to get deps from RPC")
+		return final, fmt.Errorf("Failed to get deps from RPC")
 	}
 
 	var found bool

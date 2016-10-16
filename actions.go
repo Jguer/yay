@@ -3,13 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/jguer/go-alpm"
-	"github.com/jguer/yay/aur"
 	"math"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/jguer/go-alpm"
+	"github.com/jguer/yay/aur"
 )
 
 func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags []string) (err error) {
@@ -31,7 +32,7 @@ func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags []string) (
 
 	args = append(args, "pacman", "-S")
 
-	fmt.Printf("\x1B[32m%s\033[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
+	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
 	numberString, err = reader.ReadString('\n')
 	if err != nil {

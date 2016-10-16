@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/jguer/go-alpm"
-	"github.com/jguer/yay/aur"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/jguer/go-alpm"
+	"github.com/jguer/yay/aur"
 )
 
 // RepoSearch describes a Repository search.
@@ -128,16 +129,16 @@ func SearchRepos(pkgName string, conf *alpm.PacmanConfig, mode int) (err error) 
 
 				switch {
 				case mode != SearchMode && installed == true:
-					fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
+					fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[32;40mInstalled\x1b[0m\n%s\n",
 						i, db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
 				case mode != SearchMode && installed != true:
-					fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+					fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s\x1b[0m\n%s\n",
 						i, db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
 				case mode == SearchMode && installed == true:
-					fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
+					fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[32;40mInstalled\x1b[0m\n%s\n",
 						db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
 				case mode == SearchMode && installed != true:
-					fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
+					fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s\x1b[0m\n%s\n",
 						db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
 				}
 				i++

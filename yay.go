@@ -71,7 +71,7 @@ func main() {
 		}
 	case "-S":
 		err = InstallPackage(pkgs, &conf, flag)
-	case "-Syu":
+	case "-Syu", "-Suy":
 		err = updateAndInstall(&conf, flag)
 	case "yogurt":
 		for _, pkg := range pkgs {
