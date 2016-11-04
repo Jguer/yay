@@ -256,6 +256,8 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) err
 
 // Install handles install from Result
 func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string) (err error) {
+	fmt.Printf("\x1b[1m\x1b[32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
+
 	// No need to use filepath.separators because it won't run on inferior platforms
 	err = os.MkdirAll(baseDir+"builds", 0755)
 	if err != nil {
@@ -276,10 +278,6 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 		return
 	}
 	defer os.RemoveAll(baseDir + a.Name)
-	_, err = a.Dependencies(conf)
-	if err != nil {
-		return
-	}
 
 	var response string
 	var dir bytes.Buffer
@@ -297,6 +295,10 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 			editcmd.Stdin = os.Stdin
 			err = editcmd.Run()
 		}
+	}
+	_, err = a.Dependencies(conf)
+	if err != nil {
+		return
 	}
 
 	err = os.Chdir(dir.String())
@@ -319,6 +321,18 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 
 // Dependencies returns package dependencies splitting between AUR results and Repo Results not installed
 func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err error) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	dbList, err := h.SyncDbs()
+	localDb, err := h.LocalDb()
+	if err != nil {
+		return
+	}
+
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
 	}
@@ -331,41 +345,40 @@ func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err erro
 		return final, fmt.Errorf("Failed to get deps from RPC")
 	}
 
-	var found bool
-	for _, deps := range info.Results[0].MakeDepends {
-		fields := strings.FieldsFunc(deps, f)
-
-		if found, err = IspkgInstalled(fields[0]); found {
-			if err != nil {
-				return
-			}
+	deps := append(info.Results[0].MakeDepends, info.Results[0].Depends...)
+	for _, dep := range deps {
+		fields := strings.FieldsFunc(dep, f)
+		fmt.Println(fields[0])
+		// If package is installed let it go.
+		_, err = localDb.PkgByName(fields[0])
+		if err == nil {
 			continue
 		}
 
-		if found, err = IspkgInRepo(fields[0], conf); !found {
-			if err != nil {
-				return
+		fmt.Println(fields[0])
+		// If package is in repo let it be installed by makepkg.
+		found := false
+		for _, db := range dbList.Slice() {
+			_, err = db.PkgByName(fields[0])
+			if err == nil {
+				found = true
 			}
-			final = append(final, fields[0])
 		}
-	}
 
-	for _, deps := range info.Results[0].Depends {
-		fields := strings.FieldsFunc(deps, f)
-
-		if found, err = IspkgInstalled(fields[0]); found {
-			if err != nil {
-				return
-			}
+		if found {
 			continue
 		}
 
-		if found, err = IspkgInRepo(fields[0], conf); !found {
-			if err != nil {
-				return
-			}
-			final = append(final, fields[0])
+		depinfo, err := Search(fields[0], true)
+		if err != nil {
+			return final, err
 		}
+
+		if len(depinfo.Results) == 0 {
+			return final, fmt.Errorf("Unable to find dependency in repos and AUR.")
+		}
+
+		final = append(final, fields[0])
 	}
 	return
 }
