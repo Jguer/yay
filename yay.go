@@ -68,7 +68,7 @@ func main() {
 	var err error
 	conf, err := readConfig(PacmanConf)
 
-	op, pkgs, options, err := parser()
+	op, options, pkgs, err := parser()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -88,6 +88,7 @@ func main() {
 	case "yogurt":
 		for _, pkg := range pkgs {
 			err = searchAndInstall(pkg, &conf, options)
+			break
 		}
 	case "--help", "-h":
 		usage()
