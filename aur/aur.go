@@ -193,7 +193,6 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) err
 	}
 
 	var foreign []alpm.Package
-	var outdated []string
 
 	// Find foreign packages in system
 	for _, pkg := range localDb.PkgCache().Slice() {
@@ -213,21 +212,46 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) err
 	}
 
 	// Find outdated packages
+	type Outdated struct {
+		res        *Result
+		pkgVersion string
+		er         error
+	}
+
+	r := make(chan *Outdated) // Allocate a channel.
 	for _, pkg := range foreign {
-		info, err := Info(pkg.Name())
-		if err != nil {
-			return err
-		}
+		// fmt.Println("Checking number", i, pkg.Name())
+		go func(pkg alpm.Package) {
+			info, err := Info(pkg.Name())
+			if err != nil {
+				r <- nil
+				return
+			}
 
-		if info.Resultcount == 0 {
-			continue
-		}
+			if info.Resultcount == 0 {
+				r <- nil
+				return
+			}
 
-		// Leaving this here for now, warn about downgrades later
-		if int64(info.Results[0].LastModified) > pkg.InstallDate().Unix() {
+			// Leaving this here for now, warn about downgrades later
+			if int64(info.Results[0].LastModified) > pkg.InstallDate().Unix() {
+				r <- &Outdated{&info.Results[0], pkg.Version(), err}
+			} else {
+				r <- nil
+			}
+		}(pkg)
+	}
+
+	var outdated []*Result
+	var checkedPkg *Outdated
+	for i := 0; i < len(foreign); i++ {
+		// fmt.Println("Wait Cycle", i)
+		checkedPkg = <-r
+		// fmt.Println(checkedPkg)
+		if checkedPkg != nil {
 			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
-				pkg.Name(), pkg.Version(), info.Results[0].Version)
-			outdated = append(outdated, pkg.Name())
+				checkedPkg.res.Name, checkedPkg.pkgVersion, checkedPkg.res.Version)
+			outdated = append(outdated, checkedPkg.res)
 		}
 	}
 
@@ -248,7 +272,7 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) err
 	}
 
 	for _, pkg := range outdated {
-		Install(pkg, baseDir, conf, flags)
+		pkg.Install(baseDir, conf, flags)
 	}
 
 	return nil
@@ -296,9 +320,20 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 			err = editcmd.Run()
 		}
 	}
-	_, err = a.Dependencies(conf)
+	depS, err := a.Dependencies(conf)
 	if err != nil {
 		return
+	}
+
+	for _, dep := range depS {
+		q, errD := Info(dep)
+		if errD != nil {
+			return errD
+		}
+
+		if len(q.Results) != 0 {
+			q.Results[0].Install(baseDir, conf, []string{"--asdeps"})
+		}
 	}
 
 	err = os.Chdir(dir.String())
@@ -348,14 +383,12 @@ func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err erro
 	deps := append(info.Results[0].MakeDepends, info.Results[0].Depends...)
 	for _, dep := range deps {
 		fields := strings.FieldsFunc(dep, f)
-		fmt.Println(fields[0])
 		// If package is installed let it go.
 		_, err = localDb.PkgByName(fields[0])
 		if err == nil {
 			continue
 		}
 
-		fmt.Println(fields[0])
 		// If package is in repo let it be installed by makepkg.
 		found := false
 		for _, db := range dbList.Slice() {
