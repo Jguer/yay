@@ -13,7 +13,14 @@ import (
 	"github.com/jguer/yay/aur"
 )
 
-func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags []string) (err error) {
+// BuildDir is the root for package building
+const BuildDir string = "/tmp/yaytmp/"
+
+// SearchMode is search without numbers.
+const SearchMode int = -1
+
+// NumberMenu presents a CLI for selecting packages to install.
+func NumberMenu(pkgName string, flags []string) (err error) {
 	var num int
 	var numberString string
 	var args []string
@@ -25,7 +32,7 @@ func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags []string) (
 	}
 
 	if len(r.Results) == 0 && a.Resultcount == 0 {
-		return fmt.Errorf("No Packages match search.")
+		return fmt.Errorf("no Packages match search")
 	}
 	r.PrintSearch(0)
 	a.PrintSearch(len(r.Results))
@@ -78,8 +85,62 @@ func searchAndInstall(pkgName string, conf *alpm.PacmanConfig, flags []string) (
 	return
 }
 
-// updateAndInstall handles updating the cache and installing updates
-func updateAndInstall(conf *alpm.PacmanConfig, flags []string) error {
+// Install handles package installs
+func Install(pkgs []string, flags []string) error {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return err
+	}
+
+	dbList, err := h.SyncDbs()
+	if err != nil {
+		return err
+	}
+
+	var foreign []string
+	var args []string
+	repocnt := 0
+	args = append(args, "pacman")
+	args = append(args, "-S")
+
+	for _, pkg := range pkgs {
+		found := false
+		for _, db := range dbList.Slice() {
+			_, err = db.PkgByName(pkg)
+			if err == nil {
+				found = true
+				args = append(args, pkg)
+				repocnt++
+				break
+			}
+		}
+
+		if !found {
+			foreign = append(foreign, pkg)
+		}
+	}
+
+	args = append(args, flags...)
+
+	if repocnt != 0 {
+		var cmd *exec.Cmd
+		cmd = exec.Command("sudo", args...)
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+	}
+
+	for _, aurpkg := range foreign {
+		err = aur.Install(aurpkg, BuildDir, conf, flags)
+	}
+
+	return nil
+}
+
+// Upgrade handles updating the cache and installing updates.
+func Upgrade(flags []string) error {
 	errp := UpdatePackages(flags)
 	erra := aur.UpdatePackages(BuildDir, conf, flags)
 
@@ -90,7 +151,8 @@ func updateAndInstall(conf *alpm.PacmanConfig, flags []string) error {
 	return erra
 }
 
-func searchMode(pkg string, conf *alpm.PacmanConfig) (err error) {
+// Search presents a query to the local repos and to the AUR.
+func Search(pkg string) (err error) {
 	a, err := aur.Search(pkg, true)
 	if err != nil {
 		return err
@@ -102,7 +164,8 @@ func searchMode(pkg string, conf *alpm.PacmanConfig) (err error) {
 	return nil
 }
 
-func stats(conf *alpm.PacmanConfig) error {
+// LocalStatistics returns installed packages statistics.
+func LocalStatistics() error {
 	var tS int64 // TotalSize
 	var nPkg int
 	var ePkg int
@@ -148,15 +211,14 @@ func stats(conf *alpm.PacmanConfig) error {
 		}
 	}
 
-	fmt.Printf("\n Yay version r%s\n", version)
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", nPkg)
 	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", ePkg)
-	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", Size(tS))
+	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", size(tS))
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Println("\x1B[1;32mTen biggest packages\x1B[0m")
 	for _, pkg := range pkgs {
-		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), Size(pkg.ISize()))
+		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), size(pkg.ISize()))
 	}
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 
@@ -176,7 +238,7 @@ func countSize(s int64, i float64) float64 {
 
 // Size return a formated string from file size
 // Function by pyk https://github.com/pyk/byten
-func Size(s int64) string {
+func size(s int64) string {
 
 	symbols := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
 	i := index(s)

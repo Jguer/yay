@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/jguer/go-alpm"
-	"github.com/jguer/yay/aur"
 )
 
 // RepoSearch describes a Repository search.
@@ -24,6 +23,15 @@ type Result struct {
 	Installed   bool
 }
 
+// PacmanConf describes the default pacman config file
+const PacmanConf string = "/etc/pacman.conf"
+
+var conf *alpm.PacmanConfig
+
+func init() {
+	*conf, _ = readConfig(PacmanConf)
+}
+
 func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	file, err := os.Open(pacmanconf)
 	if err != nil {
@@ -34,60 +42,6 @@ func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 		return
 	}
 	return
-}
-
-// InstallPackage handles package install
-func InstallPackage(pkgs []string, conf *alpm.PacmanConfig, flags []string) error {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return err
-	}
-
-	dbList, err := h.SyncDbs()
-	if err != nil {
-		return err
-	}
-
-	var foreign []string
-	var args []string
-	repocnt := 0
-	args = append(args, "pacman")
-	args = append(args, "-S")
-
-	for _, pkg := range pkgs {
-		found := false
-		for _, db := range dbList.Slice() {
-			_, err = db.PkgByName(pkg)
-			if err == nil {
-				found = true
-				args = append(args, pkg)
-				repocnt++
-				break
-			}
-		}
-
-		if !found {
-			foreign = append(foreign, pkg)
-		}
-	}
-
-	args = append(args, flags...)
-
-	if repocnt != 0 {
-		var cmd *exec.Cmd
-		cmd = exec.Command("sudo", args...)
-		cmd.Stdout = os.Stdout
-		cmd.Stdin = os.Stdin
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
-	}
-
-	for _, aurpkg := range foreign {
-		err = aur.Install(aurpkg, BuildDir, conf, flags)
-	}
-
-	return nil
 }
 
 // UpdatePackages handles cache update and upgrade

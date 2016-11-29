@@ -3,18 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/jguer/yay"
 )
-
-var version string
-
-// PacmanConf describes the default pacman config file
-const PacmanConf string = "/etc/pacman.conf"
-
-// BuildDir is the root for package building
-const BuildDir string = "/tmp/yaytmp/"
-
-// SearchMode is search without numbers.
-const SearchMode int = -1
 
 func usage() {
 	fmt.Println(`usage:  yay <operation> [...]
@@ -36,7 +27,7 @@ func usage() {
 
 func parser() (op string, options []string, packages []string, err error) {
 	if len(os.Args) < 2 {
-		err = fmt.Errorf("No operation specified.")
+		err = fmt.Errorf("no operation specified")
 		return
 	}
 
@@ -65,8 +56,6 @@ func parser() (op string, options []string, packages []string, err error) {
 }
 
 func main() {
-	var err error
-	conf, err := readConfig(PacmanConf)
 
 	op, options, pkgs, err := parser()
 	if err != nil {
@@ -76,7 +65,7 @@ func main() {
 
 	switch op {
 	case "-Qstats":
-		err = stats(&conf)
+		err = yay.LocalStatistics()
 	case "-Ss":
 		for _, pkg := range pkgs {
 			err = searchMode(pkg, &conf)
@@ -84,10 +73,10 @@ func main() {
 	case "-S":
 		err = InstallPackage(pkgs, &conf, options)
 	case "-Syu", "-Suy":
-		err = updateAndInstall(&conf, options)
+		err = yay.Upgrade(options)
 	case "yogurt":
 		for _, pkg := range pkgs {
-			err = searchAndInstall(pkg, &conf, options)
+			err = yay.NumberMenu(pkg, &conf, options)
 			break
 		}
 	case "--help", "-h":
