@@ -1,4 +1,4 @@
-package main
+package yay
 
 import (
 	"fmt"
@@ -26,10 +26,10 @@ type Result struct {
 // PacmanConf describes the default pacman config file
 const PacmanConf string = "/etc/pacman.conf"
 
-var conf *alpm.PacmanConfig
+var conf alpm.PacmanConfig
 
 func init() {
-	*conf, _ = readConfig(PacmanConf)
+	conf, _ = readConfig(PacmanConf)
 }
 
 func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
@@ -67,8 +67,8 @@ func SearchRepos(pkgName string, conf *alpm.PacmanConfig, mode int) (err error) 
 	if err != nil {
 	}
 
-	dbList, err := h.SyncDbs()
-	localdb, err := h.LocalDb()
+	dbList, _ := h.SyncDbs()
+	localdb, _ := h.LocalDb()
 
 	var installed bool
 	var i int
@@ -82,16 +82,16 @@ func SearchRepos(pkgName string, conf *alpm.PacmanConfig, mode int) (err error) 
 				}
 
 				switch {
-				case mode != SearchMode && installed == true:
+				case mode != SearchMode && !installed:
 					fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[32;40mInstalled\x1b[0m\n%s\n",
 						i, db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
-				case mode != SearchMode && installed != true:
+				case mode != SearchMode && !installed:
 					fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s\x1b[0m\n%s\n",
 						i, db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
-				case mode == SearchMode && installed == true:
+				case mode == SearchMode && !installed:
 					fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[32;40mInstalled\x1b[0m\n%s\n",
 						db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
-				case mode == SearchMode && installed != true:
+				case mode == SearchMode && !installed:
 					fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s\x1b[0m\n%s\n",
 						db.Name(), pkg.Name(), pkg.Version(), pkg.Description())
 				}
@@ -109,8 +109,8 @@ func SearchPackages(pkgName string, conf *alpm.PacmanConfig) (s RepoSearch, err 
 	if err != nil {
 	}
 
-	dbList, err := h.SyncDbs()
-	localdb, err := h.LocalDb()
+	dbList, _ := h.SyncDbs()
+	localdb, _ := h.LocalDb()
 
 	var installed bool
 	for _, db := range dbList.Slice() {
@@ -139,23 +139,24 @@ func SearchPackages(pkgName string, conf *alpm.PacmanConfig) (s RepoSearch, err 
 func (s *RepoSearch) PrintSearch(mode int) {
 	for i, pkg := range s.Results {
 		switch {
-		case mode != SearchMode && pkg.Installed == true:
+		case mode != SearchMode && pkg.Installed:
 			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
 				i, pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
-		case mode != SearchMode && pkg.Installed != true:
+		case mode != SearchMode && !pkg.Installed:
 			fmt.Printf("%d \033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
 				i, pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
-		case mode == SearchMode && pkg.Installed == true:
+		case mode == SearchMode && pkg.Installed:
 			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s \x1B[32;40mInstalled\033[0m\n%s\n",
 				pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
-		case mode == SearchMode && pkg.Installed != true:
+		case mode == SearchMode && !pkg.Installed:
 			fmt.Printf("\033[1m%s/\x1B[33m%s \x1B[36m%s\033[0m\n%s\n",
 				pkg.Repository, pkg.Name, pkg.Version, pkg.Description)
 		}
 	}
 }
 
-func passToPacman(op string, pkgs []string, flags []string) error {
+// PassToPacman outsorces execution to pacman binary without modifications.
+func PassToPacman(op string, pkgs []string, flags []string) error {
 	var cmd *exec.Cmd
 	var args []string
 
