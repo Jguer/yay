@@ -26,7 +26,7 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 	var args []string
 
 	a, err := aur.Search(pkgName, true)
-	r, err := SearchPackages(pkgName, conf)
+	r, err := SearchPackages(pkgName)
 	if err != nil {
 		return
 	}
@@ -76,7 +76,7 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 	}
 
 	for _, aurpkg := range aurInstall {
-		err = aurpkg.Install(BuildDir, conf, flags)
+		err = aurpkg.Install(BuildDir, &conf, flags)
 		if err != nil {
 			// Do not abandon program, we might still be able to install the rest
 			fmt.Println(err)
@@ -133,7 +133,7 @@ func Install(pkgs []string, flags []string) error {
 	}
 
 	for _, aurpkg := range foreign {
-		err = aur.Install(aurpkg, BuildDir, conf, flags)
+		err = aur.Install(aurpkg, BuildDir, &conf, flags)
 	}
 
 	return nil
@@ -142,7 +142,7 @@ func Install(pkgs []string, flags []string) error {
 // Upgrade handles updating the cache and installing updates.
 func Upgrade(flags []string) error {
 	errp := UpdatePackages(flags)
-	erra := aur.UpdatePackages(BuildDir, conf, flags)
+	erra := aur.UpdatePackages(BuildDir, &conf, flags)
 
 	if errp != nil {
 		return errp
@@ -158,7 +158,7 @@ func Search(pkg string) (err error) {
 		return err
 	}
 
-	SearchRepos(pkg, conf, SearchMode)
+	SearchRepos(pkg, SearchMode)
 	a.PrintSearch(SearchMode)
 
 	return nil

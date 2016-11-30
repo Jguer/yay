@@ -68,21 +68,21 @@ func main() {
 		err = yay.LocalStatistics()
 	case "-Ss":
 		for _, pkg := range pkgs {
-			err = searchMode(pkg, &conf)
+			err = yay.Search(pkg)
 		}
 	case "-S":
-		err = InstallPackage(pkgs, &conf, options)
+		err = yay.Install(pkgs, options)
 	case "-Syu", "-Suy":
 		err = yay.Upgrade(options)
 	case "yogurt":
 		for _, pkg := range pkgs {
-			err = yay.NumberMenu(pkg, &conf, options)
+			err = yay.NumberMenu(pkg, options)
 			break
 		}
 	case "--help", "-h":
 		usage()
 	default:
-		err = passToPacman(op, pkgs, options)
+		err = yay.PassToPacman(op, pkgs, options)
 	}
 
 	if err != nil {

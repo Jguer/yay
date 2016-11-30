@@ -61,7 +61,7 @@ func UpdatePackages(flags []string) error {
 }
 
 // SearchRepos searches and prints packages in repo
-func SearchRepos(pkgName string, conf *alpm.PacmanConfig, mode int) (err error) {
+func SearchRepos(pkgName string, mode int) (err error) {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -103,7 +103,7 @@ func SearchRepos(pkgName string, conf *alpm.PacmanConfig, mode int) (err error) 
 }
 
 // SearchPackages handles repo searches. Creates a RepoSearch struct.
-func SearchPackages(pkgName string, conf *alpm.PacmanConfig) (s RepoSearch, err error) {
+func SearchPackages(pkgName string) (s RepoSearch, err error) {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
