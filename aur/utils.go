@@ -7,8 +7,6 @@ import (
 	"os"
 )
 
-
-
 // Editor gives the default system editor, uses vi in last case
 var Editor = "vi"
 
@@ -46,9 +44,5 @@ func downloadFile(filepath string, url string) (err error) {
 
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

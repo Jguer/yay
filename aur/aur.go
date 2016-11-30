@@ -12,8 +12,6 @@ import (
 	"github.com/jguer/yay/pacman"
 )
 
-var version = "undefined"
-
 // TarBin describes the default installation point of tar command.
 const TarBin string = "/usr/bin/tar"
 
@@ -28,27 +26,28 @@ const SearchMode int = -1
 
 // Result describes an AUR package.
 type Result struct {
-	ID             int      `json:"ID"`
-	Name           string   `json:"Name"`
-	PackageBaseID  int      `json:"PackageBaseID"`
-	PackageBase    string   `json:"PackageBase"`
-	Version        string   `json:"Version"`
-	Description    string   `json:"Description"`
-	URL            string   `json:"URL"`
-	NumVotes       int      `json:"NumVotes"`
-	Popularity     float32  `json:"Popularity"`
-	OutOfDate      int      `json:"OutOfDate"`
-	Maintainer     string   `json:"Maintainer"`
-	FirstSubmitted int      `json:"FirstSubmitted"`
-	LastModified   int64    `json:"LastModified"`
-	URLPath        string   `json:"URLPath"`
+	ID             int     `json:"ID"`
+	Name           string  `json:"Name"`
+	PackageBaseID  int     `json:"PackageBaseID"`
+	PackageBase    string  `json:"PackageBase"`
+	Version        string  `json:"Version"`
+	Description    string  `json:"Description"`
+	URL            string  `json:"URL"`
+	NumVotes       int     `json:"NumVotes"`
+	Popularity     float32 `json:"Popularity"`
+	OutOfDate      int     `json:"OutOfDate"`
+	Maintainer     string  `json:"Maintainer"`
+	FirstSubmitted int     `json:"FirstSubmitted"`
+	LastModified   int64   `json:"LastModified"`
+	URLPath        string  `json:"URLPath"`
+	Installed      bool
 	Depends        []string `json:"Depends"`
 	MakeDepends    []string `json:"MakeDepends"`
 	OptDepends     []string `json:"OptDepends"`
 	Conflicts      []string `json:"Conflicts"`
+	Provides       []string `json:"Provides"`
 	License        []string `json:"License"`
 	Keywords       []string `json:"Keywords"`
-	Installed      bool
 }
 
 // Query is a collection of Results
@@ -70,16 +69,16 @@ func (q Query) Swap(i, j int) {
 func (q Query) PrintSearch(start int) {
 	for i, res := range q {
 		switch {
-		case start != SearchMode && res.Installed == true:
+		case start != SearchMode && res.Installed:
 			fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) \x1b[32;40mInstalled\x1b[0m\n%s\n",
 				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
-		case start != SearchMode && res.Installed != true:
+		case start != SearchMode && !res.Installed:
 			fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d)\n%s\n",
 				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
-		case start == SearchMode && res.Installed == true:
+		case start == SearchMode && res.Installed:
 			fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[32;40mInstalled\x1b[0m\n%s\n",
 				"aur", res.Name, res.Version, res.Description)
-		case start == SearchMode && res.Installed != true:
+		case start == SearchMode && !res.Installed:
 			fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s\x1b[0m\n%s\n",
 				"aur", res.Name, res.Version, res.Description)
 		}
@@ -147,7 +146,7 @@ func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string
 		return fmt.Errorf("Package %s does not exist", pkg)
 	}
 
-	q[0].Install(baseDir, conf, flags)
+	q[0].Install(baseDir, flags)
 	return err
 }
 
@@ -161,7 +160,6 @@ func Upgrade(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
 	}
 
 	keys := make([]string, len(foreign))
-
 	i := 0
 	for k := range foreign {
 		keys[i] = k
@@ -178,9 +176,6 @@ func Upgrade(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
 		if _, ok := foreign[res.Name]; ok {
 			// Leaving this here for now, warn about downgrades later
 			if res.LastModified > foreign[res.Name].Date {
-				// o[i] = o[len(o)-1]
-				// o[len(o)-1] = Result{} // Trying to help the GC, not sure if necessary. Time will tell
-				// o = o[:len(o)-1]
 				fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
 					res.Name, res.Version, foreign[res.Name].Version)
 				outdated = append(outdated, res)
@@ -196,7 +191,7 @@ func Upgrade(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
 	}
 
 	// Install updated packages
-	if NoConfirm(flags) == false {
+	if !NoConfirm(flags) {
 		fmt.Println("\x1b[1m\x1b[32m==> Proceed with upgrade\x1b[0m\x1b[1m (Y/n)\x1b[0m")
 		var response string
 		fmt.Scanln(&response)
@@ -206,15 +201,14 @@ func Upgrade(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
 	}
 
 	for _, pkg := range outdated {
-		pkg.Install(baseDir, conf, flags)
+		pkg.Install(baseDir, flags)
 	}
 
 	return nil
 }
 
-
 // Install handles install from Result
-func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string) (err error) {
+func (a *Result) Install(baseDir string, flags []string) (err error) {
 	fmt.Printf("\x1b[1m\x1b[32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
 
 	// No need to use filepath.separators because it won't run on inferior platforms
@@ -244,7 +238,7 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 	dir.WriteString(a.Name)
 	dir.WriteString("/")
 
-	if NoConfirm(flags) == false {
+	if !NoConfirm(flags) {
 		fmt.Println("\x1b[1m\x1b[32m==> Edit PKGBUILD?\x1b[0m\x1b[1m (y/N)\x1b[0m")
 		fmt.Scanln(&response)
 		if strings.ContainsAny(response, "y & Y") {
@@ -252,24 +246,26 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 			editcmd.Stdout = os.Stdout
 			editcmd.Stderr = os.Stderr
 			editcmd.Stdin = os.Stdin
-			err = editcmd.Run()
+			editcmd.Run()
 		}
 	}
-	depS, err := a.Dependencies(conf)
+	aurDeps, repoDeps, err := a.Dependencies()
 	if err != nil {
 		return
 	}
 
-	for _, dep := range depS {
-		q, n, errD := Info(dep)
-		if errD != nil {
-			return errD
-		}
-
-		if n != 0 {
-			q[0].Install(baseDir, conf, []string{"--asdeps"})
-		}
+	aurQ, n, err := MultiInfo(aurDeps)
+	if n != len(aurDeps) {
+		fmt.Printf("Unable to find one package ")
 	}
+
+	// Handle AUR dependencies first
+	for _, dep := range aurQ {
+		dep.Install(baseDir, []string{"--asdeps"})
+	}
+
+	// Repo dependencies
+	pacman.PassToPacman("-S", repoDeps, []string{"--asdeps", "--needed"})
 
 	err = os.Chdir(dir.String())
 	if err != nil {
@@ -289,65 +285,21 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 	return
 }
 
-// Dependencies returns package dependencies splitting between AUR results and Repo Results not installed
-func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	dbList, err := h.SyncDbs()
-	localDb, err := h.LocalDb()
-	if err != nil {
-		return
-	}
-
-	f := func(c rune) bool {
-		return c == '>' || c == '<' || c == '=' || c == ' '
-	}
-	q, n, err := Info(a.Name)
-	if err != nil {
-		return
-	}
-
-	if n == 0 {
-		return final, fmt.Errorf("Failed to get deps from RPC")
-	}
-
-	deps := append(q[0].MakeDepends, q[0].Depends...)
-	for _, dep := range deps {
-		fields := strings.FieldsFunc(dep, f)
-		// If package is installed let it go.
-		_, err = localDb.PkgByName(fields[0])
-		if err == nil {
-			continue
+// Dependencies returns package dependencies not installed belonging to AUR
+func (a *Result) Dependencies() (aur []string, repo []string, err error) {
+	var q Query
+	if len(a.Depends) == 0 && len(a.MakeDepends) == 0 {
+		var n int
+		q, n, err = Info(a.Name)
+		if n == 0 || err != nil {
+			err = fmt.Errorf("Unable to search dependencies, %s", err)
+			return
 		}
-
-		// If package is in repo let it be installed by makepkg.
-		found := false
-		for _, db := range dbList.Slice() {
-			_, err = db.PkgByName(fields[0])
-			if err == nil {
-				found = true
-			}
-		}
-
-		if found {
-			continue
-		}
-
-		_, nd, err := Info(fields[0])
-		if err != nil {
-			return final, err
-		}
-
-		if nd == 0 {
-			return final, fmt.Errorf("Unable to find dependency in repos and AUR.")
-		}
-
-		final = append(final, fields[0])
+	} else {
+		q = append(q, *a)
 	}
+
+	aur, repo, err = pacman.OutofRepo(append(q[0].MakeDepends, q[0].Depends...))
 	return
 }
 
