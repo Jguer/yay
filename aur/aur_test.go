@@ -62,23 +62,6 @@ func TestInfo(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
-	var conf alpm.PacmanConfig
-	file, err := os.Open("/etc/pacman.conf")
-	if err != nil {
-		return
-	}
-	conf, err = alpm.ParseConfig(file)
-	if err != nil {
-		return
-	}
-
-	err = UpdatePackages("/tmp/yaytmp", &conf, []string{})
-	if err != nil {
-		t.Fatalf("Expected err to be nil but it was %s", err)
-	}
-}
-
 func TestUpgrade(t *testing.T) {
 	var conf alpm.PacmanConfig
 	file, err := os.Open("/etc/pacman.conf")
@@ -93,22 +76,6 @@ func TestUpgrade(t *testing.T) {
 	err = Upgrade("/tmp/yaytmp", &conf, []string{})
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
-	}
-}
-
-func BenchmarkUpdate(b *testing.B) {
-	var conf alpm.PacmanConfig
-	file, err := os.Open("/etc/pacman.conf")
-	if err != nil {
-		return
-	}
-	conf, err = alpm.ParseConfig(file)
-	if err != nil {
-		return
-	}
-
-	for n := 0; n < b.N; n++ {
-		UpdatePackages("/tmp/yaytmp", &conf, []string{})
 	}
 }
 
