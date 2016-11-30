@@ -118,6 +118,24 @@ func Info(pkg string) (Query, int, error) {
 	return r.Results, r.ResultCount, err
 }
 
+// MultiInfo takes a slice of strings and returns a slice with the info of each package
+func MultiInfo(pkgS []string) (Query, int, error) {
+	type returned struct {
+		Results     Query `json:"results"`
+		ResultCount int   `json:"resultcount"`
+	}
+	r := returned{}
+
+	var pkg string
+	for _, pkgn := range pkgS {
+		pkg += "&arg[]=" + pkgn
+	}
+
+	err := getJSON("https://aur.archlinux.org/rpc/?v=5&type=info"+pkg, &r)
+
+	return r.Results, r.ResultCount, err
+}
+
 // Install sends system commands to make and install a package from pkgName
 func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string) (err error) {
 	q, n, err := Info(pkg)
@@ -137,53 +155,38 @@ func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string
 func Upgrade(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
 
-	foreign, err := pacman.ForeignPackages()
+	foreign, n, err := pacman.ForeignPackages()
+	if err != nil || n == 0 {
+		return err
+	}
+
+	keys := make([]string, len(foreign))
+
+	i := 0
+	for k := range foreign {
+		keys[i] = k
+		i++
+	}
+
+	q, _, err := MultiInfo(keys)
 	if err != nil {
 		return err
 	}
 
-	// Find outdated packages
-	type Outdated struct {
-		res        *Result
-		pkgVersion string
-		er         error
-	}
-
-	r := make(chan *Outdated) // Allocate a channel.
-	for name, info := range foreign {
-		// fmt.Println("Checking number", i, pkg.Name())
-		go func(name string, date int64, version string) {
-			q, n, err := Info(name)
-			if err != nil {
-				r <- nil
-				return
-			}
-
-			if n == 0 {
-				r <- nil
-				return
-			}
-
+	outdated := q[:0]
+	for _, res := range q {
+		if _, ok := foreign[res.Name]; ok {
 			// Leaving this here for now, warn about downgrades later
-			if int64(q[0].LastModified) > date {
-				r <- &Outdated{&q[0], version, err}
-			} else {
-				r <- nil
+			if res.LastModified > foreign[res.Name].Date {
+				// o[i] = o[len(o)-1]
+				// o[len(o)-1] = Result{} // Trying to help the GC, not sure if necessary. Time will tell
+				// o = o[:len(o)-1]
+				fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
+					res.Name, res.Version, foreign[res.Name].Version)
+				outdated = append(outdated, res)
 			}
-		}(name, info.Date, info.Version)
-	}
-
-	var outdated []*Result
-	var checkedPkg *Outdated
-	for i := 0; i < len(foreign); i++ {
-		// fmt.Println("Wait Cycle", i)
-		checkedPkg = <-r
-		// fmt.Println(checkedPkg)
-		if checkedPkg != nil {
-			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
-				checkedPkg.res.Name, checkedPkg.pkgVersion, checkedPkg.res.Version)
-			outdated = append(outdated, checkedPkg.res)
 		}
+
 	}
 
 	//If there are no outdated packages, don't prompt

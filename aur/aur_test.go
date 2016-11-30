@@ -90,9 +90,40 @@ func TestUpgrade(t *testing.T) {
 		return
 	}
 
-	err = UpdatePackages("/tmp/yaytmp", &conf, []string{})
+	err = Upgrade("/tmp/yaytmp", &conf, []string{})
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
 	}
 }
 
+func BenchmarkUpdate(b *testing.B) {
+	var conf alpm.PacmanConfig
+	file, err := os.Open("/etc/pacman.conf")
+	if err != nil {
+		return
+	}
+	conf, err = alpm.ParseConfig(file)
+	if err != nil {
+		return
+	}
+
+	for n := 0; n < b.N; n++ {
+		UpdatePackages("/tmp/yaytmp", &conf, []string{})
+	}
+}
+
+func BenchmarkUpgrade(b *testing.B) {
+	var conf alpm.PacmanConfig
+	file, err := os.Open("/etc/pacman.conf")
+	if err != nil {
+		return
+	}
+	conf, err = alpm.ParseConfig(file)
+	if err != nil {
+		return
+	}
+
+	for n := 0; n < b.N; n++ {
+		Upgrade("/tmp/yaytmp", &conf, []string{})
+	}
+}
