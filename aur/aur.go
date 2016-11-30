@@ -2,22 +2,19 @@ package aur
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"sort"
 	"strings"
 
-	"github.com/jguer/go-alpm"
+	alpm "github.com/demizer/go-alpm"
+	"github.com/jguer/yay/pacman"
 )
 
 var version = "undefined"
 
-// TarBin describes the default installation point of tar command
-// Probably will replace untar with code solution.
+// TarBin describes the default installation point of tar command.
 const TarBin string = "/usr/bin/tar"
 
 // BaseURL givers the AUR default address.
@@ -31,61 +28,47 @@ const SearchMode int = -1
 
 // Result describes an AUR package.
 type Result struct {
-	ID             int         `json:"ID"`
-	Name           string      `json:"Name"`
-	PackageBaseID  int         `json:"PackageBaseID"`
-	PackageBase    string      `json:"PackageBase"`
-	Version        string      `json:"Version"`
-	Description    string      `json:"Description"`
-	URL            string      `json:"URL"`
-	NumVotes       int         `json:"NumVotes"`
-	Popularity     float32     `json:"Popularity"`
-	OutOfDate      interface{} `json:"OutOfDate"`
-	Maintainer     string      `json:"Maintainer"`
-	FirstSubmitted int         `json:"FirstSubmitted"`
-	LastModified   int         `json:"LastModified"`
-	URLPath        string      `json:"URLPath"`
-	Depends        []string    `json:"Depends"`
-	MakeDepends    []string    `json:"MakeDepends"`
-	OptDepends     []string    `json:"OptDepends"`
-	Conflicts      []string    `json:"Conflicts"`
-	License        []string    `json:"License"`
-	Keywords       []string    `json:"Keywords"`
+	ID             int      `json:"ID"`
+	Name           string   `json:"Name"`
+	PackageBaseID  int      `json:"PackageBaseID"`
+	PackageBase    string   `json:"PackageBase"`
+	Version        string   `json:"Version"`
+	Description    string   `json:"Description"`
+	URL            string   `json:"URL"`
+	NumVotes       int      `json:"NumVotes"`
+	Popularity     float32  `json:"Popularity"`
+	OutOfDate      int      `json:"OutOfDate"`
+	Maintainer     string   `json:"Maintainer"`
+	FirstSubmitted int      `json:"FirstSubmitted"`
+	LastModified   int64    `json:"LastModified"`
+	URLPath        string   `json:"URLPath"`
+	Depends        []string `json:"Depends"`
+	MakeDepends    []string `json:"MakeDepends"`
+	OptDepends     []string `json:"OptDepends"`
+	Conflicts      []string `json:"Conflicts"`
+	License        []string `json:"License"`
+	Keywords       []string `json:"Keywords"`
 	Installed      bool
 }
 
-// Query describes an AUR json Query
-type Query struct {
-	Resultcount int      `json:"resultcount"`
-	Results     []Result `json:"results"`
-	Type        string   `json:"type"`
-	Version     int      `json:"version"`
+// Query is a collection of Results
+type Query []Result
+
+func (q Query) Len() int {
+	return len(q)
 }
 
-// Editor gives the default system editor, uses vi in last case
-var Editor = "vi"
-
-func init() {
-	if os.Getenv("EDITOR") != "" {
-		Editor = os.Getenv("EDITOR")
-	}
+func (q Query) Less(i, j int) bool {
+	return q[i].NumVotes < q[j].NumVotes
 }
 
-func (r Query) Len() int {
-	return len(r.Results)
-}
-
-func (r Query) Less(i, j int) bool {
-	return r.Results[i].NumVotes > r.Results[j].NumVotes
-}
-
-func (r Query) Swap(i, j int) {
-	r.Results[i], r.Results[j] = r.Results[j], r.Results[i]
+func (q Query) Swap(i, j int) {
+	q[i], q[j] = q[j], q[i]
 }
 
 // PrintSearch handles printing search results in a given format
-func (r *Query) PrintSearch(start int) {
-	for i, res := range r.Results {
+func (q Query) PrintSearch(start int) {
+	for i, res := range q {
 		switch {
 		case start != SearchMode && res.Installed == true:
 			fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) \x1b[32;40mInstalled\x1b[0m\n%s\n",
@@ -103,73 +86,127 @@ func (r *Query) PrintSearch(start int) {
 	}
 }
 
-func downloadFile(filepath string, url string) (err error) {
-	// Create the file
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// getJSON handles JSON retrieval and decoding to struct
-func getJSON(url string, target interface{}) error {
-	r, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer r.Body.Close()
-
-	return json.NewDecoder(r.Body).Decode(target)
-}
-
 // Search returns an AUR search
-func Search(pkg string, sortS bool) (r Query, err error) {
-	err = getJSON("https://aur.archlinux.org/rpc/?v=5&type=search&arg="+pkg, &r)
+func Search(pkg string, sortS bool) (Query, int, error) {
+	type returned struct {
+		Results     Query `json:"results"`
+		ResultCount int   `json:"resultcount"`
+	}
+	r := returned{}
+	err := getJSON("https://aur.archlinux.org/rpc/?v=5&type=search&arg="+pkg, &r)
+
 	if sortS {
-		sort.Sort(r)
+		sort.Sort(r.Results)
 	}
 
-	for i, res := range r.Results {
-		r.Results[i].Installed, err = IspkgInstalled(res.Name)
-	}
-	return
+	// for _, res := range r.Results {
+	// 	res.Installed, err = IspkgInstalled(res.Name)
+	// }
+	return r.Results, r.ResultCount, err
 }
 
 // Info returns an AUR search with package details
-func Info(pkg string) (r Query, err error) {
-	err = getJSON("https://aur.archlinux.org/rpc/?v=5&type=info&arg[]="+pkg, &r)
-	return
+func Info(pkg string) (Query, int, error) {
+	type returned struct {
+		Results     Query `json:"results"`
+		ResultCount int   `json:"resultcount"`
+	}
+	r := returned{}
+
+	err := getJSON("https://aur.archlinux.org/rpc/?v=5&type=info&arg[]="+pkg, &r)
+
+	return r.Results, r.ResultCount, err
 }
 
 // Install sends system commands to make and install a package from pkgName
 func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string) (err error) {
-	info, err := Info(pkg)
+	q, n, err := Info(pkg)
 	if err != nil {
 		return
 	}
 
-	if info.Resultcount == 0 {
+	if n == 0 {
 		return fmt.Errorf("Package %s does not exist", pkg)
 	}
 
-	info.Results[0].Install(baseDir, conf, flags)
+	q[0].Install(baseDir, conf, flags)
 	return err
+}
+
+// Upgrade tries to update every foreign package installed in the system
+func Upgrade(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
+	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
+
+	foreign, err := pacman.ForeignPackages()
+	if err != nil {
+		return err
+	}
+
+	// Find outdated packages
+	type Outdated struct {
+		res        *Result
+		pkgVersion string
+		er         error
+	}
+
+	r := make(chan *Outdated) // Allocate a channel.
+	for name, info := range foreign {
+		// fmt.Println("Checking number", i, pkg.Name())
+		go func(name string, date int64, version string) {
+			q, n, err := Info(name)
+			if err != nil {
+				r <- nil
+				return
+			}
+
+			if n == 0 {
+				r <- nil
+				return
+			}
+
+			// Leaving this here for now, warn about downgrades later
+			if int64(q[0].LastModified) > date {
+				r <- &Outdated{&q[0], version, err}
+			} else {
+				r <- nil
+			}
+		}(name, info.Date, info.Version)
+	}
+
+	var outdated []*Result
+	var checkedPkg *Outdated
+	for i := 0; i < len(foreign); i++ {
+		// fmt.Println("Wait Cycle", i)
+		checkedPkg = <-r
+		// fmt.Println(checkedPkg)
+		if checkedPkg != nil {
+			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
+				checkedPkg.res.Name, checkedPkg.pkgVersion, checkedPkg.res.Version)
+			outdated = append(outdated, checkedPkg.res)
+		}
+	}
+
+	//If there are no outdated packages, don't prompt
+	if len(outdated) == 0 {
+		fmt.Println(" there is nothing to do")
+		return nil
+	}
+
+	// Install updated packages
+	if NoConfirm(flags) == false {
+		fmt.Println("\x1b[1m\x1b[32m==> Proceed with upgrade\x1b[0m\x1b[1m (Y/n)\x1b[0m")
+		var response string
+		fmt.Scanln(&response)
+		if strings.ContainsAny(response, "n & N") {
+			return nil
+		}
+	}
+
+	for _, pkg := range outdated {
+		pkg.Install(baseDir, conf, flags)
+	}
+
+	return nil
 }
 
 // UpdatePackages handles AUR updates
@@ -222,20 +259,20 @@ func UpdatePackages(baseDir string, conf *alpm.PacmanConfig, flags []string) err
 	for _, pkg := range foreign {
 		// fmt.Println("Checking number", i, pkg.Name())
 		go func(pkg alpm.Package) {
-			info, err := Info(pkg.Name())
+			q, n, err := Info(pkg.Name())
 			if err != nil {
 				r <- nil
 				return
 			}
 
-			if info.Resultcount == 0 {
+			if n == 0 {
 				r <- nil
 				return
 			}
 
 			// Leaving this here for now, warn about downgrades later
-			if int64(info.Results[0].LastModified) > pkg.InstallDate().Unix() {
-				r <- &Outdated{&info.Results[0], pkg.Version(), err}
+			if int64(q[0].LastModified) > pkg.InstallDate().Unix() {
+				r <- &Outdated{&q[0], pkg.Version(), err}
 			} else {
 				r <- nil
 			}
@@ -326,13 +363,13 @@ func (a *Result) Install(baseDir string, conf *alpm.PacmanConfig, flags []string
 	}
 
 	for _, dep := range depS {
-		q, errD := Info(dep)
+		q, n, errD := Info(dep)
 		if errD != nil {
 			return errD
 		}
 
-		if len(q.Results) != 0 {
-			q.Results[0].Install(baseDir, conf, []string{"--asdeps"})
+		if n != 0 {
+			q[0].Install(baseDir, conf, []string{"--asdeps"})
 		}
 	}
 
@@ -371,16 +408,16 @@ func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err erro
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
 	}
-	info, err := Info(a.Name)
+	q, n, err := Info(a.Name)
 	if err != nil {
 		return
 	}
 
-	if len(info.Results) == 0 {
+	if n == 0 {
 		return final, fmt.Errorf("Failed to get deps from RPC")
 	}
 
-	deps := append(info.Results[0].MakeDepends, info.Results[0].Depends...)
+	deps := append(q[0].MakeDepends, q[0].Depends...)
 	for _, dep := range deps {
 		fields := strings.FieldsFunc(dep, f)
 		// If package is installed let it go.
@@ -402,12 +439,12 @@ func (a *Result) Dependencies(conf *alpm.PacmanConfig) (final []string, err erro
 			continue
 		}
 
-		depinfo, err := Search(fields[0], true)
+		_, nd, err := Info(fields[0])
 		if err != nil {
 			return final, err
 		}
 
-		if len(depinfo.Results) == 0 {
+		if nd == 0 {
 			return final, fmt.Errorf("Unable to find dependency in repos and AUR.")
 		}
 
