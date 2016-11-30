@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strings"
 
-	alpm "github.com/demizer/go-alpm"
 	"github.com/jguer/yay/pacman"
 )
 
@@ -136,7 +135,7 @@ func MultiInfo(pkgS []string) (Query, int, error) {
 }
 
 // Install sends system commands to make and install a package from pkgName
-func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string) (err error) {
+func Install(pkg string, baseDir string, flags []string) (err error) {
 	q, n, err := Info(pkg)
 	if err != nil {
 		return
@@ -151,7 +150,7 @@ func Install(pkg string, baseDir string, conf *alpm.PacmanConfig, flags []string
 }
 
 // Upgrade tries to update every foreign package installed in the system
-func Upgrade(baseDir string, conf *alpm.PacmanConfig, flags []string) error {
+func Upgrade(baseDir string, flags []string) error {
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
 
 	foreign, n, err := pacman.ForeignPackages()
@@ -301,44 +300,6 @@ func (a *Result) Dependencies() (aur []string, repo []string, err error) {
 
 	aur, repo, err = pacman.OutofRepo(append(q[0].MakeDepends, q[0].Depends...))
 	return
-}
-
-// IspkgInstalled returns true if pkgName is installed
-func IspkgInstalled(pkgName string) (bool, error) {
-	h, err := alpm.Init("/", "/var/lib/pacman")
-	defer h.Release()
-	if err != nil {
-		return false, err
-	}
-
-	localDb, err := h.LocalDb()
-	if err != nil {
-		return false, err
-	}
-
-	_, err = localDb.PkgByName(pkgName)
-	if err != nil {
-		return false, nil
-	}
-	return true, nil
-}
-
-// IspkgInRepo returns true if pkgName is in a synced repo
-func IspkgInRepo(pkgName string, conf *alpm.PacmanConfig) (bool, error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return false, err
-	}
-
-	dbList, _ := h.SyncDbs()
-	for _, db := range dbList.Slice() {
-		_, err = db.PkgByName(pkgName)
-		if err == nil {
-			return true, nil
-		}
-	}
-	return false, nil
 }
 
 // NoConfirm returns true if prompts should be ignored

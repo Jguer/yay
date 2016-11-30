@@ -1,11 +1,8 @@
 package aur
 
 import (
-	"os"
 	"reflect"
 	"testing"
-
-	"github.com/demizer/go-alpm"
 )
 
 func TestSearch(t *testing.T) {
@@ -63,34 +60,14 @@ func TestInfo(t *testing.T) {
 }
 
 func TestUpgrade(t *testing.T) {
-	var conf alpm.PacmanConfig
-	file, err := os.Open("/etc/pacman.conf")
-	if err != nil {
-		return
-	}
-	conf, err = alpm.ParseConfig(file)
-	if err != nil {
-		return
-	}
-
-	err = Upgrade("/tmp/yaytmp", &conf, []string{})
+	err := Upgrade("/tmp/yaytmp", []string{})
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
 	}
 }
 
 func BenchmarkUpgrade(b *testing.B) {
-	var conf alpm.PacmanConfig
-	file, err := os.Open("/etc/pacman.conf")
-	if err != nil {
-		return
-	}
-	conf, err = alpm.ParseConfig(file)
-	if err != nil {
-		return
-	}
-
 	for n := 0; n < b.N; n++ {
-		Upgrade("/tmp/yaytmp", &conf, []string{})
+		Upgrade("/tmp/yaytmp", []string{})
 	}
 }
