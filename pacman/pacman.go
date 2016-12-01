@@ -381,6 +381,7 @@ func Statistics() (packages map[string]int64, info struct {
 		}
 	}
 
+	packages = make(map[string]int64)
 	for _, pkg := range pkgs {
 		packages[pkg.Name()] = pkg.ISize()
 	}
