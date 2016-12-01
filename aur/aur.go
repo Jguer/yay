@@ -255,7 +255,7 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 
 	aurQ, n, err := MultiInfo(aurDeps)
 	if n != len(aurDeps) {
-		fmt.Printf("Unable to find one package ")
+		fmt.Printf("Unable to find a dependency on AUR")
 	}
 
 	// Handle AUR dependencies first
@@ -264,7 +264,9 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 	}
 
 	// Repo dependencies
-	pacman.PassToPacman("-S", repoDeps, []string{"--asdeps", "--needed"})
+	if len(repoDeps) != 0 {
+		pacman.PassToPacman("-S", repoDeps, []string{"--asdeps", "--needed"})
+	}
 
 	err = os.Chdir(dir.String())
 	if err != nil {
