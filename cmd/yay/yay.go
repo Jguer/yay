@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/jguer/yay"
+	pac "github.com/jguer/yay/pacman"
 )
 
 func usage() {
@@ -82,7 +83,7 @@ func main() {
 	case "--help", "-h":
 		usage()
 	default:
-		err = yay.PassToPacman(op, pkgs, options)
+		err = pac.PassToPacman(op, pkgs, options)
 	}
 
 	if err != nil {
