@@ -146,12 +146,13 @@ func Search(pkg string) (err error) {
 }
 
 // LocalStatistics returns installed packages statistics.
-func LocalStatistics() error {
+func LocalStatistics(version string) error {
 	pkgmap, info, err := pac.Statistics()
 	if err != nil {
 		return err
 	}
 
+	fmt.Printf("\n Yay version r1.%s\n", version)
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", info.Totaln)
 	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", info.Expln)

@@ -26,6 +26,8 @@ func usage() {
 `)
 }
 
+var version = "55"
+
 func parser() (op string, options []string, packages []string, err error) {
 	if len(os.Args) < 2 {
 		err = fmt.Errorf("no operation specified")
@@ -66,7 +68,7 @@ func main() {
 
 	switch op {
 	case "-Qstats":
-		err = yay.LocalStatistics()
+		err = yay.LocalStatistics(version)
 	case "-Ss":
 		for _, pkg := range pkgs {
 			err = yay.Search(pkg)
