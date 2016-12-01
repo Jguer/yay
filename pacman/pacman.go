@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/demizer/go-alpm"
+	"github.com/jguer/go-alpm"
 )
 
 // RepoSearch describes a Repository search.
