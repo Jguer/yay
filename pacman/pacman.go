@@ -187,6 +187,39 @@ func PassToPacman(op string, pkgs []string, flags []string) error {
 
 }
 
+// PackageSlices separates an input slice into aur and repo slices
+func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	dbList, err := h.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	for _, pkg := range toCheck {
+		// Check if dep is installed
+		found := false
+		for _, db := range dbList.Slice() {
+			_, err = db.PkgByName(pkg)
+			if err == nil {
+				found = true
+				repo = append(repo, pkg)
+				break
+			}
+		}
+
+		if !found {
+			aur = append(aur, pkg)
+		}
+	}
+
+	return
+}
+
 // OutofRepo returns a list of packages not installed and not resolvable
 // Accepts inputs like 'gtk2', 'java-environment=8', 'linux >= 4.20'
 func OutofRepo(toCheck []string) (aur []string, repo []string, err error) {
@@ -291,6 +324,72 @@ func ForeignPackages() (foreign map[string]*struct {
 			}{pkg.Version(), pkg.InstallDate().Unix()}
 			n++
 		}
+	}
+
+	return
+}
+
+// Statistics returns statistics about packages installed in system
+func Statistics() (packages map[string]int64, info struct {
+	Totaln    int
+	Expln     int
+	TotalSize int64
+}, err error) {
+	var pkgs [10]alpm.Package
+	var tS int64 // TotalSize
+	var nPkg int
+	var ePkg int
+
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	localDb, err := h.LocalDb()
+	if err != nil {
+		return
+	}
+
+	var k int
+	for e, pkg := range localDb.PkgCache().Slice() {
+		tS += pkg.ISize()
+		k = -1
+		nPkg++
+		if pkg.Reason() == 0 {
+			ePkg++
+		}
+		if e < 10 {
+			pkgs[e] = pkg
+			continue
+		}
+
+		for i, pkw := range pkgs {
+			if k == -1 {
+				if pkw.ISize() < pkg.ISize() {
+					k = i
+				}
+			} else {
+				if pkw.ISize() < pkgs[k].ISize() && pkw.ISize() < pkg.ISize() {
+					k = i
+				}
+			}
+		}
+
+		if k != -1 {
+			pkgs[k] = pkg
+		}
+	}
+
+	for _, pkg := range pkgs {
+		packages[pkg.Name()] = pkg.ISize()
+	}
+	info = struct {
+		Totaln    int
+		Expln     int
+		TotalSize int64
+	}{
+		nPkg, ePkg, tS,
 	}
 
 	return

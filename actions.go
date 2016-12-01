@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jguer/go-alpm"
 	"github.com/jguer/yay/aur"
+	pac "github.com/jguer/yay/pacman"
 )
 
 // BuildDir is the root for package building
@@ -25,13 +25,13 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 	var numberString string
 	var args []string
 
-	a, err := aur.Search(pkgName, true)
-	r, err := SearchPackages(pkgName)
+	a, n, err := aur.Search(pkgName, true)
+	r, err := pac.SearchPackages(pkgName)
 	if err != nil {
 		return
 	}
 
-	if len(r.Results) == 0 && a.Resultcount == 0 {
+	if len(r.Results) == 0 && n == 0 {
 		return fmt.Errorf("no Packages match search")
 	}
 	r.PrintSearch(0)
@@ -58,7 +58,7 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 
 		// Install package
 		if num > len(r.Results)-1 {
-			aurInstall = append(aurInstall, a.Results[num-len(r.Results)])
+			aurInstall = append(aurInstall, a[num-len(r.Results)])
 		} else {
 			args = append(args, r.Results[num].Name)
 		}
@@ -76,7 +76,7 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 	}
 
 	for _, aurpkg := range aurInstall {
-		err = aurpkg.Install(BuildDir, &conf, flags)
+		err = aurpkg.Install(BuildDir, flags)
 		if err != nil {
 			// Do not abandon program, we might still be able to install the rest
 			fmt.Println(err)
@@ -87,53 +87,34 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 
 // Install handles package installs
 func Install(pkgs []string, flags []string) error {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return err
-	}
-
-	dbList, err := h.SyncDbs()
-	if err != nil {
-		return err
-	}
-
-	var foreign []string
 	var args []string
-	repocnt := 0
 	args = append(args, "pacman")
 	args = append(args, "-S")
 
-	for _, pkg := range pkgs {
-		found := false
-		for _, db := range dbList.Slice() {
-			_, err = db.PkgByName(pkg)
-			if err == nil {
-				found = true
-				args = append(args, pkg)
-				repocnt++
-				break
-			}
-		}
-
-		if !found {
-			foreign = append(foreign, pkg)
-		}
-	}
-
 	args = append(args, flags...)
 
-	if repocnt != 0 {
+	aurs, repos, _ := pac.PackageSlices(pkgs)
+
+	args = append(args, repos...)
+	if len(repos) != 0 {
 		var cmd *exec.Cmd
 		cmd = exec.Command("sudo", args...)
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+		cmd.Run()
 	}
 
-	for _, aurpkg := range foreign {
-		err = aur.Install(aurpkg, BuildDir, &conf, flags)
+	q, n, err := aur.MultiInfo(aurs)
+	if len(aurs) != n {
+		fmt.Println("Unable to get info on some packages")
+	}
+
+	for _, aurpkg := range q {
+		err = aurpkg.Install(BuildDir, flags)
+		if err != nil {
+			fmt.Println("Error installing", aurpkg.Name, ":", err)
+		}
 	}
 
 	return nil
@@ -141,8 +122,8 @@ func Install(pkgs []string, flags []string) error {
 
 // Upgrade handles updating the cache and installing updates.
 func Upgrade(flags []string) error {
-	errp := UpdatePackages(flags)
-	erra := aur.UpdatePackages(BuildDir, &conf, flags)
+	errp := pac.UpdatePackages(flags)
+	erra := aur.Upgrade(BuildDir, flags)
 
 	if errp != nil {
 		return errp
@@ -153,12 +134,12 @@ func Upgrade(flags []string) error {
 
 // Search presents a query to the local repos and to the AUR.
 func Search(pkg string) (err error) {
-	a, err := aur.Search(pkg, true)
+	a, _, err := aur.Search(pkg, true)
 	if err != nil {
 		return err
 	}
 
-	SearchRepos(pkg, SearchMode)
+	pac.SearchRepos(pkg, SearchMode)
 	a.PrintSearch(SearchMode)
 
 	return nil
@@ -166,59 +147,19 @@ func Search(pkg string) (err error) {
 
 // LocalStatistics returns installed packages statistics.
 func LocalStatistics() error {
-	var tS int64 // TotalSize
-	var nPkg int
-	var ePkg int
-	var pkgs [10]alpm.Package
-	h, err := conf.CreateHandle()
-	defer h.Release()
+	pkgmap, info, err := pac.Statistics()
 	if err != nil {
 		return err
-	}
-
-	localDb, err := h.LocalDb()
-	if err != nil {
-		return err
-	}
-
-	var k int
-	for e, pkg := range localDb.PkgCache().Slice() {
-		tS += pkg.ISize()
-		k = -1
-		nPkg++
-		if pkg.Reason() == 0 {
-			ePkg++
-		}
-		if e < 10 {
-			pkgs[e] = pkg
-			continue
-		}
-
-		for i, pkw := range pkgs {
-			if k == -1 {
-				if pkw.ISize() < pkg.ISize() {
-					k = i
-				}
-			} else {
-				if pkw.ISize() < pkgs[k].ISize() && pkw.ISize() < pkg.ISize() {
-					k = i
-				}
-			}
-		}
-
-		if k != -1 {
-			pkgs[k] = pkg
-		}
 	}
 
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
-	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", nPkg)
-	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", ePkg)
-	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", size(tS))
+	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", info.Totaln)
+	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", info.Expln)
+	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", size(info.TotalSize))
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Println("\x1B[1;32mTen biggest packages\x1B[0m")
-	for _, pkg := range pkgs {
-		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), size(pkg.ISize()))
+	for name, psize := range pkgmap {
+		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", name, size(psize))
 	}
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 
