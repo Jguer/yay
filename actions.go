@@ -31,6 +31,7 @@ const (
 // Config copies settings over to AUR and Pacman packages
 func Config() {
 	aur.SortMode = SortMode
+	pac.SortMode = SortMode
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
@@ -40,6 +41,9 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 	var args []string
 
 	a, nA, err := aur.Search(pkgName, true)
+	if err != nil {
+		fmt.Println("Error during AUR search:", err)
+	}
 	r, nR, err := pac.Search(pkgName)
 	if err != nil {
 		return
@@ -158,7 +162,7 @@ func Search(pkg string) (err error) {
 		return err
 	}
 
-	if aur.SortMode == aur.DownTop {
+	if SortMode == aur.DownTop {
 		a.PrintSearch(SearchMode)
 		r.PrintSearch(SearchMode)
 	} else {

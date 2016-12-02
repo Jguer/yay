@@ -25,6 +25,15 @@ type Result struct {
 // PacmanConf describes the default pacman config file
 const PacmanConf string = "/etc/pacman.conf"
 
+// SortMode NumberMenu and Search
+var SortMode = DownTop
+
+// Determines NumberMenu and Search Order
+const (
+	DownTop = iota
+	TopDown
+)
+
 var conf alpm.PacmanConfig
 
 func init() {
@@ -76,26 +85,72 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 	}
 
 	var installed bool
-	for _, db := range dbList.Slice() {
-		for _, pkg := range db.PkgCache().Slice() {
-			if strings.Contains(pkg.Name(), pkgName) {
-				if r, _ := localDb.PkgByName(pkg.Name()); r != nil {
+	dbS := dbList.Slice()
+	var f int
+	if SortMode == DownTop {
+		f = len(dbS) - 1
+	} else {
+		f = 0
+	}
+
+	for {
+		pkgS := dbS[f].PkgCache().Slice()
+
+		var i int
+		if SortMode == DownTop {
+			i = len(pkgS) - 1
+		} else {
+			i = 0
+		}
+
+		for {
+			if strings.Contains(pkgS[i].Name(), pkgName) {
+				if r, _ := localDb.PkgByName(pkgS[i].Name()); r != nil {
 					installed = true
 				} else {
 					installed = false
 				}
 
 				s = append(s, Result{
-					Name:        pkg.Name(),
-					Description: pkg.Description(),
-					Version:     pkg.Version(),
-					Repository:  db.Name(),
-					Group:       strings.Join(pkg.Groups().Slice(), ","),
+					Name:        pkgS[i].Name(),
+					Description: pkgS[i].Description(),
+					Version:     pkgS[i].Version(),
+					Repository:  dbS[f].Name(),
+					Group:       strings.Join(pkgS[i].Groups().Slice(), ","),
 					Installed:   installed,
 				})
 				n++
 			}
+
+			if SortMode == DownTop {
+				if i > 0 {
+					i--
+				} else {
+					break
+				}
+			} else {
+				if i < len(pkgS)-1 {
+					i++
+				} else {
+					break
+				}
+			}
 		}
+
+		if SortMode == DownTop {
+			if f > 0 {
+				f--
+			} else {
+				break
+			}
+		} else {
+			if f < len(dbS)-1 {
+				f++
+			} else {
+				break
+			}
+		}
+
 	}
 	return
 }
