@@ -205,7 +205,7 @@ func Upgrade(baseDir string, flags []string) error {
 			// Leaving this here for now, warn about downgrades later
 			if res.LastModified > foreign[res.Name].Date {
 				fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
-					res.Name, res.Version, foreign[res.Name].Version)
+					res.Name, foreign[res.Name].Version, res.Version)
 				outdated = append(outdated, res)
 			}
 		}
