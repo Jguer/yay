@@ -6,21 +6,30 @@
 VERSION := $(shell git rev-list --count master)
 LDFLAGS=-ldflags "-s -w -X main.version=${VERSION}"
 GOFILES := $(shell ls *.go | grep -v /vendor/)
-BINARY=./bin/yay
+PKGNAME=yay
+BINARY=./bin/${PKGNAME}
+
+ARCH64="amd64"
+ARCH86="386"
 
 default: build
 
 install:
 	go install -v ${LDFLAGS} ${GO_FILES}
-
+test:
+	go test ./...
 build:
-	go build -v -o ${BINARY} ${LDFLAGS} ${GO_FILES}
+	go build -v -o ${BINARY} ${LDFLAGS} ./cmd/yay/
 release:
-	go build -v -o ${BINARY} ./src/main.go
+	GOARCH=${ARCH64} go build -v -o ./${PKGNAME}_1.${VERSION}_${ARCH64}/${PKGNAME} ${LDFLAGS} ./cmd/yay/
+	tar -czvf ${PKGNAME}_1.${VERSION}_${ARCH64}.tar.gz ${PKGNAME}_1.${VERSION}_${ARCH64}
+	#GOARCH=${ARCH86} go build -v -o ./${PKGNAME}_1.${VERSION}_${ARCH86}/${PKGNAME} ${LDFLAGS} ./cmd/yay/
 
-run: build
+run:
+	build
 	${BINARY}
 
 clean:
 	go clean
+	rm -r ./${PKGNAME}_1*
 
