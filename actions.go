@@ -19,23 +19,43 @@ const BuildDir string = "/tmp/yaytmp/"
 // SearchMode is search without numbers.
 const SearchMode int = -1
 
+// SortMode NumberMenu and Search
+var SortMode = DownTop
+
+// Determines NumberMenu and Search Order
+const (
+	DownTop = iota
+	TopDown
+)
+
+// Config copies settings over to AUR and Pacman packages
+func Config() {
+	aur.SortMode = SortMode
+}
+
 // NumberMenu presents a CLI for selecting packages to install.
 func NumberMenu(pkgName string, flags []string) (err error) {
 	var num int
 	var numberString string
 	var args []string
 
-	a, n, err := aur.Search(pkgName, true)
-	r, err := pac.SearchPackages(pkgName)
+	a, nA, err := aur.Search(pkgName, true)
+	r, nR, err := pac.Search(pkgName)
 	if err != nil {
 		return
 	}
 
-	if len(r.Results) == 0 && n == 0 {
-		return fmt.Errorf("no Packages match search")
+	if nR == 0 && nA == 0 {
+		return fmt.Errorf("no packages match search")
 	}
-	r.PrintSearch(0)
-	a.PrintSearch(len(r.Results))
+
+	if aur.SortMode == aur.DownTop {
+		a.PrintSearch(nR)
+		r.PrintSearch(0)
+	} else {
+		r.PrintSearch(0)
+		a.PrintSearch(nR)
+	}
 
 	args = append(args, "pacman", "-S")
 
@@ -52,15 +72,24 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 	for _, numS := range result {
 		num, err = strconv.Atoi(numS)
 		if err != nil {
-			fmt.Println(err)
 			continue
 		}
 
 		// Install package
-		if num > len(r.Results)-1 {
-			aurInstall = append(aurInstall, a[num-len(r.Results)])
+		if num > nA+nR-1 || num < 0 {
+			continue
+		} else if num > nR-1 {
+			if aur.SortMode == aur.DownTop {
+				aurInstall = append(aurInstall, a[nA+nR-num-1])
+			} else {
+				aurInstall = append(aurInstall, a[num-nR])
+			}
 		} else {
-			args = append(args, r.Results[num].Name)
+			if aur.SortMode == aur.DownTop {
+				args = append(args, r[nR-num-1].Name)
+			} else {
+				args = append(args, r[num].Name)
+			}
 		}
 	}
 
@@ -87,23 +116,9 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 
 // Install handles package installs
 func Install(pkgs []string, flags []string) error {
-	var args []string
-	args = append(args, "pacman")
-	args = append(args, "-S")
-
-	args = append(args, flags...)
-
 	aurs, repos, _ := pac.PackageSlices(pkgs)
 
-	args = append(args, repos...)
-	if len(repos) != 0 {
-		var cmd *exec.Cmd
-		cmd = exec.Command("sudo", args...)
-		cmd.Stdout = os.Stdout
-		cmd.Stdin = os.Stdin
-		cmd.Stderr = os.Stderr
-		cmd.Run()
-	}
+	pac.Install(repos, flags)
 
 	q, n, err := aur.MultiInfo(aurs)
 	if len(aurs) != n {
@@ -138,9 +153,18 @@ func Search(pkg string) (err error) {
 	if err != nil {
 		return err
 	}
+	r, _, err := pac.Search(pkg)
+	if err != nil {
+		return err
+	}
 
-	pac.SearchRepos(pkg, SearchMode)
-	a.PrintSearch(SearchMode)
+	if aur.SortMode == aur.DownTop {
+		a.PrintSearch(SearchMode)
+		r.PrintSearch(SearchMode)
+	} else {
+		r.PrintSearch(SearchMode)
+		a.PrintSearch(SearchMode)
+	}
 
 	return nil
 }
@@ -194,4 +218,33 @@ func size(s int64) string {
 	}
 
 	return fmt.Sprintf(format+"%s", size, symbols[int(i)])
+}
+
+// PassToPacman outsorces execution to pacman binary without modifications.
+func PassToPacman(op string, pkgs []string, flags []string) error {
+	var cmd *exec.Cmd
+	var args []string
+
+	args = append(args, op)
+	if len(pkgs) != 0 {
+		args = append(args, pkgs...)
+	}
+
+	if len(flags) != 0 {
+		args = append(args, flags...)
+	}
+
+	if strings.Contains(op, "-Q") {
+		cmd = exec.Command("pacman", args...)
+	} else {
+		args = append([]string{"pacman"}, args...)
+		cmd = exec.Command("sudo", args...)
+	}
+
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
+
 }

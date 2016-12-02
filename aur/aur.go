@@ -23,6 +23,15 @@ const MakepkgBin string = "/usr/bin/makepkg"
 // SearchMode is search without numbers.
 const SearchMode int = -1
 
+// SortMode determines top down package or down top package display
+var SortMode = DownTop
+
+// Describes Sorting method for numberdisplay
+const (
+	DownTop = iota
+	TopDown
+)
+
 // Result describes an AUR package.
 type Result struct {
 	ID             int     `json:"ID"`
@@ -57,7 +66,10 @@ func (q Query) Len() int {
 }
 
 func (q Query) Less(i, j int) bool {
-	return q[i].NumVotes < q[j].NumVotes
+	if SortMode == DownTop {
+		return q[i].NumVotes < q[j].NumVotes
+	}
+	return q[i].NumVotes > q[j].NumVotes
 }
 
 func (q Query) Swap(i, j int) {
@@ -67,20 +79,20 @@ func (q Query) Swap(i, j int) {
 // PrintSearch handles printing search results in a given format
 func (q Query) PrintSearch(start int) {
 	for i, res := range q {
-		switch {
-		case start != SearchMode && res.Installed:
-			fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) \x1b[32;40mInstalled\x1b[0m\n%s\n",
-				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
-		case start != SearchMode && !res.Installed:
-			fmt.Printf("%d \x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d)\n%s\n",
-				start+i, "aur", res.Name, res.Version, res.NumVotes, res.Description)
-		case start == SearchMode && res.Installed:
-			fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[32;40mInstalled\x1b[0m\n%s\n",
-				"aur", res.Name, res.Version, res.Description)
-		case start == SearchMode && !res.Installed:
-			fmt.Printf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s\x1b[0m\n%s\n",
-				"aur", res.Name, res.Version, res.Description)
+		var toprint string
+		if start != SearchMode {
+			if SortMode == DownTop {
+				toprint += fmt.Sprintf("%d ", len(q)+start-i-1)
+			} else {
+				toprint += fmt.Sprintf("%d ", start+i)
+			}
 		}
+		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) ", "aur", res.Name, res.Version, res.NumVotes)
+		if res.Installed == true {
+			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
+		}
+		toprint += "\n" + res.Description
+		fmt.Println(toprint)
 	}
 }
 
@@ -96,11 +108,28 @@ func Search(pkg string, sortS bool) (Query, int, error) {
 	if sortS {
 		sort.Sort(r.Results)
 	}
+	setter := pacman.PFactory(pFSetTrue)
 
-	// for _, res := range r.Results {
-	// 	res.Installed, err = IspkgInstalled(res.Name)
-	// }
+	for i, res := range r.Results {
+		if i == len(r.Results)-1 {
+			setter(res.Name, &r.Results[i], true)
+			continue
+		}
+		setter(res.Name, &r.Results[i], false)
+	}
 	return r.Results, r.ResultCount, err
+}
+
+// This is very dirty but it works so good.
+func pFSetTrue(res interface{}) {
+	f, ok := res.(*Result)
+	if !ok {
+		fmt.Println("Unable to convert back to Result")
+		return
+	}
+	f.Installed = true
+
+	return
 }
 
 // Info returns an AUR search with package details
@@ -180,7 +209,6 @@ func Upgrade(baseDir string, flags []string) error {
 				outdated = append(outdated, res)
 			}
 		}
-
 	}
 
 	//If there are no outdated packages, don't prompt
@@ -265,7 +293,7 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-		pacman.PassToPacman("-S", repoDeps, []string{"--asdeps", "--needed"})
+		pacman.Install(repoDeps, []string{"--asdeps", "--needed"})
 	}
 
 	err = os.Chdir(dir.String())

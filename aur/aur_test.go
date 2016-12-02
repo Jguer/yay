@@ -7,7 +7,7 @@ import (
 
 func TestSearch(t *testing.T) {
 	eN := "yay"
-	eD := "Yet another pacman wrapper with AUR support"
+	eD := "Yet another yogurt. Pacman wrapper with AUR support written in go."
 	result, _, err := Search("yay", true)
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
@@ -39,7 +39,7 @@ func BenchmarkSearchComplexSorted(b *testing.B) { benchmarkSearch("linux", true,
 
 func TestInfo(t *testing.T) {
 	eN := "yay"
-	eD := "Yet another pacman wrapper with AUR support"
+	eD := "Yet another yogurt. Pacman wrapper with AUR support written in go."
 	eM := []string{"go", "git"}
 	result, _, err := Info("yay")
 	if err != nil {

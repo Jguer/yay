@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/jguer/yay"
-	pac "github.com/jguer/yay/pacman"
 )
 
 func usage() {
@@ -42,8 +41,13 @@ func parser() (op string, options []string, packages []string, err error) {
 		if arg[0] == '-' && arg[1] == '-' {
 			if arg == "--help" {
 				op = arg
+			} else if arg == "--topdown" {
+				yay.SortMode = yay.TopDown
+			} else if arg == "--downtop" {
+				yay.SortMode = yay.DownTop
+			} else {
+				options = append(options, arg)
 			}
-			options = append(options, arg)
 		}
 
 		if arg[0] != '-' {
@@ -59,12 +63,13 @@ func parser() (op string, options []string, packages []string, err error) {
 }
 
 func main() {
-
 	op, options, pkgs, err := parser()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	yay.Config()
 
 	switch op {
 	case "-Qstats":
@@ -85,7 +90,7 @@ func main() {
 	case "--help", "-h":
 		usage()
 	default:
-		err = pac.PassToPacman(op, pkgs, options)
+		err = yay.PassToPacman(op, pkgs, options)
 	}
 
 	if err != nil {
