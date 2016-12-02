@@ -21,7 +21,12 @@ func usage() {
     yay {-U --upgrade}  [options] <file(s)>
 
     New operations:
-    yay -Qstats  -  Displays system information
+    yay -Qstats   displays system information
+
+    New options:
+    --topdown     shows repository's packages first and then aur's 
+    --downtop     shows aur's packages first and then repository's
+    --noconfirm   skip user input on package install
 `)
 }
 
