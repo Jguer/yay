@@ -122,10 +122,13 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 func Install(pkgs []string, flags []string) error {
 	aurs, repos, _ := pac.PackageSlices(pkgs)
 
-	pac.Install(repos, flags)
+	err := pac.Install(repos, flags)
+	if err != nil {
+		fmt.Println("Error installing repo packages.")
+	}
 
 	q, n, err := aur.MultiInfo(aurs)
-	if len(aurs) != n {
+	if len(aurs) != n || err != nil {
 		fmt.Println("Unable to get info on some packages")
 	}
 
