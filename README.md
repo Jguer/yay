@@ -12,6 +12,11 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Know when git packages are due for an upgrade
 
 ### Changelog
+#### 1.70
+- Stable for everyday use
+- Bottom up package display
+- Number menu like yaourt/apacman
+- System package statistics
 
 
 ### TODO
