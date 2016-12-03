@@ -23,7 +23,7 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Git rev updates
 - Redesign pacman lib structs
 - Extract without syscall
-- ~~Inverted print ~~
+- ~~Inverted print~~
 - ~~Fish Completions~~
 - ~~Zsh Completions~~
 - ~~AUR Install~~
