@@ -12,16 +12,25 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Know when git packages are due for an upgrade
 
 ### Changelog
+#### 1.70
+- Stable for everyday use
+- Bottom up package display
+- Number menu like yaourt/apacman
+- System package statistics
 
 
 ### TODO
 
-- Git rev updates
-- Fish Completions
-- Zsh Completions
-- Extract without syscall
-- Add flags for yay
+- Warn about orphan packages
 - Install Groups
+- Add more flags for yay
+- Better errors
+- Git rev updates
+- Redesign pacman lib structs
+- Extract without syscall
+- ~~Inverted print~~
+- ~~Fish Completions~~
+- ~~Zsh Completions~~
 - ~~AUR Install~~
 - ~~Pacman Interface~~
 - ~~Upgrade AUR~~ 
