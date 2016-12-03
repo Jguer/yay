@@ -292,6 +292,7 @@ func OutofRepo(toCheck []string) (aur []string, repo []string, err error) {
 		}
 	}
 
+	err = nil
 	return
 }
 
