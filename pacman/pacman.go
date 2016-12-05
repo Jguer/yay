@@ -25,6 +25,9 @@ type Result struct {
 // PacmanConf describes the default pacman config file
 const PacmanConf string = "/etc/pacman.conf"
 
+// NoConfirm ignores prompts.
+var NoConfirm = false
+
 // SortMode NumberMenu and Search
 var SortMode = DownTop
 
@@ -256,9 +259,21 @@ func OutofRepo(toCheck []string) (aur []string, repo []string, err error) {
 		return c == '>' || c == '<' || c == '=' || c == ' '
 	}
 
-	// First, Check if they're provided by package name.
+toCheckLoop:
 	for _, dep := range toCheck {
 		field := strings.FieldsFunc(dep, f)
+
+		for _, checkR := range repo {
+			if field[0] == checkR {
+				continue toCheckLoop
+			}
+		}
+
+		for _, checkA := range aur {
+			if field[0] == checkA {
+				continue toCheckLoop
+			}
+		}
 
 		// Check if dep is installed
 		_, err = localDb.PkgByName(field[0])
@@ -269,6 +284,7 @@ func OutofRepo(toCheck []string) (aur []string, repo []string, err error) {
 		found := false
 	Loop:
 		for _, db := range dbList.Slice() {
+			// First, Check if they're provided by package name.
 			_, err = db.PkgByName(field[0])
 			if err == nil {
 				found = true
@@ -304,10 +320,30 @@ func Install(pkgName []string, flags []string) (err error) {
 
 	var cmd *exec.Cmd
 	var args []string
-	args = append(args, "pacman")
-	args = append(args, "-S")
+	args = append(args, "pacman", "-S")
 	args = append(args, pkgName...)
-	args = append(args, flags...)
+	if len(flags) != 0 {
+		args = append(args, flags...)
+	}
+
+	cmd = exec.Command("sudo", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	cmd.Run()
+	return nil
+}
+
+// CleanRemove sends a full removal command to pacman with the pkgName slice
+func CleanRemove(pkgName []string) (err error) {
+	if len(pkgName) == 0 {
+		return nil
+	}
+
+	var cmd *exec.Cmd
+	var args []string
+	args = append(args, "pacman", "-Rnsc")
+	args = append(args, pkgName...)
 
 	cmd = exec.Command("sudo", args...)
 	cmd.Stdout = os.Stdout

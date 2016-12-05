@@ -23,6 +23,9 @@ const MakepkgBin string = "/usr/bin/makepkg"
 // SearchMode is search without numbers.
 const SearchMode int = -1
 
+// NoConfirm ignores prompts.
+var NoConfirm = false
+
 // SortMode determines top down package or down top package display
 var SortMode = DownTop
 
@@ -218,7 +221,7 @@ func Upgrade(baseDir string, flags []string) error {
 	}
 
 	// Install updated packages
-	if !NoConfirm(flags) {
+	if !NoConfirm {
 		fmt.Println("\x1b[1m\x1b[32m==> Proceed with upgrade\x1b[0m\x1b[1m (Y/n)\x1b[0m")
 		var response string
 		fmt.Scanln(&response)
@@ -265,7 +268,7 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 	dir.WriteString(a.Name)
 	dir.WriteString("/")
 
-	if !NoConfirm(flags) {
+	if !NoConfirm {
 		fmt.Println("\x1b[1m\x1b[32m==> Edit PKGBUILD?\x1b[0m\x1b[1m (y/N)\x1b[0m")
 		fmt.Scanln(&response)
 		if strings.ContainsAny(response, "y & Y") {
@@ -281,19 +284,42 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 		return
 	}
 
+	printDependencies(aurDeps, repoDeps)
+	if !NoConfirm && (len(aurDeps) != 0 || len(repoDeps) != 0) {
+		fmt.Println("\x1b[1m\x1b[32m==> Continue?\x1b[0m\x1b[1m (Y/n)\x1b[0m")
+		fmt.Scanln(&response)
+		if strings.ContainsAny(response, "n & N") {
+			return fmt.Errorf("user did not like the dependencies")
+		}
+	}
+
 	aurQ, n, err := MultiInfo(aurDeps)
 	if n != len(aurDeps) {
-		fmt.Printf("Unable to find a dependency on AUR")
+		missingDeps(aurDeps, aurQ)
+		if !NoConfirm {
+			fmt.Println("\x1b[1m\x1b[32m==> Continue?\x1b[0m\x1b[1m (Y/n)\x1b[0m")
+			fmt.Scanln(&response)
+			if strings.ContainsAny(response, "n & N") {
+				return fmt.Errorf("unable to install dependencies")
+			}
+		}
 	}
 
 	// Handle AUR dependencies first
 	for _, dep := range aurQ {
-		dep.Install(baseDir, []string{"--asdeps"})
+		errA := dep.Install(baseDir, []string{"--asdeps", "--noconfirm"})
+		if errA != nil {
+			return errA
+		}
 	}
 
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-		pacman.Install(repoDeps, []string{"--asdeps", "--needed"})
+		errR := pacman.Install(repoDeps, []string{"--asdeps", "--noconfirm"})
+		if errR != nil {
+			pacman.CleanRemove(aurDeps)
+			return errR
+		}
 	}
 
 	err = os.Chdir(dir.String())
@@ -314,6 +340,41 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 	return
 }
 
+func printDependencies(aurDeps []string, repoDeps []string) {
+	if len(repoDeps) != 0 {
+		fmt.Print("\x1b[1m\x1b[32m==> Repository dependencies: \x1b[0m")
+		for _, repoD := range repoDeps {
+			fmt.Print("\x1b[33m", repoD, " \x1b[0m")
+		}
+		fmt.Print("\n")
+
+	}
+	if len(repoDeps) != 0 {
+		fmt.Print("\x1b[1m\x1b[32m==> AUR dependencies: \x1b[0m")
+		for _, aurD := range aurDeps {
+			fmt.Print("\x1b[33m", aurD, " \x1b[0m")
+		}
+		fmt.Print("\n")
+	}
+}
+
+func missingDeps(aurDeps []string, aurQ Query) {
+	for _, depName := range aurDeps {
+		found := false
+		for _, dep := range aurQ {
+			if dep.Name == depName {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			fmt.Println("\x1b[31mUnable to find", depName, "in AUR\x1b[0m")
+		}
+	}
+	return
+}
+
 // Dependencies returns package dependencies not installed belonging to AUR
 func (a *Result) Dependencies() (aur []string, repo []string, err error) {
 	var q Query
@@ -330,17 +391,4 @@ func (a *Result) Dependencies() (aur []string, repo []string, err error) {
 
 	aur, repo, err = pacman.OutofRepo(append(q[0].MakeDepends, q[0].Depends...))
 	return
-}
-
-// NoConfirm returns true if prompts should be ignored
-func NoConfirm(flags []string) bool {
-	noconf := false
-	for _, flag := range flags {
-		if strings.Contains(flag, "noconfirm") {
-			noconf = true
-			break
-		}
-	}
-
-	return noconf
 }

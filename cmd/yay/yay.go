@@ -24,7 +24,7 @@ func usage() {
     yay -Qstats   displays system information
 
     New options:
-    --topdown     shows repository's packages first and then aur's 
+    --topdown     shows repository's packages first and then aur's
     --downtop     shows aur's packages first and then repository's
     --noconfirm   skip user input on package install
 `)
@@ -50,6 +50,9 @@ func parser() (op string, options []string, packages []string, err error) {
 				yay.SortMode = yay.TopDown
 			} else if arg == "--downtop" {
 				yay.SortMode = yay.DownTop
+			} else if arg == "--noconfirm" {
+				yay.NoConfirm = true
+				options = append(options, arg)
 			} else {
 				options = append(options, arg)
 			}

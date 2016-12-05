@@ -22,6 +22,9 @@ const SearchMode int = -1
 // SortMode NumberMenu and Search
 var SortMode = DownTop
 
+// NoConfirm ignores prompts.
+var NoConfirm = false
+
 // Determines NumberMenu and Search Order
 const (
 	DownTop = iota
@@ -32,13 +35,14 @@ const (
 func Config() {
 	aur.SortMode = SortMode
 	pac.SortMode = SortMode
+	aur.NoConfirm = NoConfirm
+	pac.NoConfirm = NoConfirm
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
 func NumberMenu(pkgName string, flags []string) (err error) {
 	var num int
 	var numberString string
-	var args []string
 
 	a, nA, err := aur.Search(pkgName, true)
 	if err != nil {
@@ -61,8 +65,6 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 		a.PrintSearch(nR)
 	}
 
-	args = append(args, "pacman", "-S")
-
 	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
 	numberString, err = reader.ReadString('\n')
@@ -72,6 +74,7 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 	}
 
 	var aurInstall []aur.Result
+	var repoInstall []string
 	result := strings.Fields(numberString)
 	for _, numS := range result {
 		num, err = strconv.Atoi(numS)
@@ -90,22 +93,15 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 			}
 		} else {
 			if aur.SortMode == aur.DownTop {
-				args = append(args, r[nR-num-1].Name)
+				repoInstall = append(repoInstall, r[nR-num-1].Name)
 			} else {
-				args = append(args, r[num].Name)
+				repoInstall = append(repoInstall, r[num].Name)
 			}
 		}
 	}
 
-	args = append(args, flags...)
-
-	if len(args) > 2 {
-		var cmd *exec.Cmd
-		cmd = exec.Command("sudo", args...)
-		cmd.Stdout = os.Stdout
-		cmd.Stdin = os.Stdin
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+	if len(repoInstall) != 0 {
+		pac.Install(repoInstall, flags)
 	}
 
 	for _, aurpkg := range aurInstall {
