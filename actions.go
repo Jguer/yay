@@ -179,13 +179,17 @@ func LocalStatistics(version string) error {
 		return err
 	}
 
+	_, foreign, _ := pac.ForeignPackages()
+
 	fmt.Printf("\n Yay version r%s\n", version)
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", info.Totaln)
+	fmt.Printf("\x1B[1;32mTotal foreign installed packages: \x1B[0;33m%d\x1B[0m\n", foreign)
 	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", info.Expln)
 	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", size(info.TotalSize))
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Println("\x1B[1;32mTen biggest packages\x1B[0m")
+
 	for name, psize := range pkgmap {
 		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", name, size(psize))
 	}

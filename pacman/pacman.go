@@ -218,7 +218,6 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	}
 
 	for _, pkg := range toCheck {
-		// Check if dep is installed
 		found := false
 		for _, db := range dbList.Slice() {
 			_, err = db.PkgByName(pkg)
@@ -230,7 +229,11 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		}
 
 		if !found {
-			aur = append(aur, pkg)
+			if _, err := dbList.PkgCachebyGroup(pkg); err == nil {
+				repo = append(repo, pkg)
+			} else {
+				aur = append(aur, pkg)
+			}
 		}
 	}
 
