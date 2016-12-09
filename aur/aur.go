@@ -1,7 +1,6 @@
 package aur
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -28,6 +27,9 @@ var NoConfirm = false
 
 // SortMode determines top down package or down top package display
 var SortMode = DownTop
+
+// BaseDir is the default building directory for yay
+var BaseDir = "/tmp/yaytmp/"
 
 // Describes Sorting method for numberdisplay
 const (
@@ -91,6 +93,10 @@ func (q Query) PrintSearch(start int) {
 			}
 		}
 		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) ", "aur", res.Name, res.Version, res.NumVotes)
+		if res.Maintainer == "" {
+			toprint += fmt.Sprintf("\x1b[31;40m(Orphaned)\x1b[0m ")
+		}
+
 		if res.Installed == true {
 			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
 		}
@@ -167,7 +173,7 @@ func MultiInfo(pkgS []string) (Query, int, error) {
 }
 
 // Install sends system commands to make and install a package from pkgName
-func Install(pkg string, baseDir string, flags []string) (err error) {
+func Install(pkg string, flags []string) (err error) {
 	q, n, err := Info(pkg)
 	if err != nil {
 		return
@@ -177,12 +183,12 @@ func Install(pkg string, baseDir string, flags []string) (err error) {
 		return fmt.Errorf("Package %s does not exist", pkg)
 	}
 
-	q[0].Install(baseDir, flags)
+	q[0].Install(flags)
 	return err
 }
 
 // Upgrade tries to update every foreign package installed in the system
-func Upgrade(baseDir string, flags []string) error {
+func Upgrade(flags []string) error {
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
 
 	foreign, n, err := pacman.ForeignPackages()
@@ -221,93 +227,87 @@ func Upgrade(baseDir string, flags []string) error {
 	}
 
 	// Install updated packages
-	if !NoConfirm {
-		fmt.Println("\x1b[1m\x1b[32m==> Proceed with upgrade\x1b[0m\x1b[1m (Y/n)\x1b[0m")
-		var response string
-		fmt.Scanln(&response)
-		if strings.ContainsAny(response, "n & N") {
-			return nil
-		}
+	if !continueTask("Proceed with upgrade?", "n & N") {
+		return nil
 	}
 
 	for _, pkg := range outdated {
-		pkg.Install(baseDir, flags)
+		pkg.Install(flags)
 	}
 
 	return nil
 }
 
-// Install handles install from Result
-func (a *Result) Install(baseDir string, flags []string) (err error) {
-	fmt.Printf("\x1b[1m\x1b[32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
-
+func (a *Result) setupWorkspace() (err error) {
 	// No need to use filepath.separators because it won't run on inferior platforms
-	err = os.MkdirAll(baseDir+"builds", 0755)
+	err = os.MkdirAll(BaseDir+"builds", 0755)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	tarLocation := baseDir + a.Name + ".tar.gz"
-	defer os.Remove(baseDir + a.Name + ".tar.gz")
+	tarLocation := BaseDir + a.PackageBase + ".tar.gz"
+	defer os.Remove(BaseDir + a.PackageBase + ".tar.gz")
 
 	err = downloadFile(tarLocation, BaseURL+a.URLPath)
 	if err != nil {
 		return
 	}
 
-	err = exec.Command(TarBin, "-xf", tarLocation, "-C", baseDir).Run()
+	err = exec.Command(TarBin, "-xf", tarLocation, "-C", BaseDir).Run()
 	if err != nil {
 		return
 	}
-	defer os.RemoveAll(baseDir + a.Name)
 
-	var response string
-	var dir bytes.Buffer
-	dir.WriteString(baseDir)
-	dir.WriteString(a.Name)
-	dir.WriteString("/")
+	return
+}
 
-	if !NoConfirm {
-		fmt.Println("\x1b[1m\x1b[32m==> Edit PKGBUILD?\x1b[0m\x1b[1m (y/N)\x1b[0m")
-		fmt.Scanln(&response)
-		if strings.ContainsAny(response, "y & Y") {
-			editcmd := exec.Command(Editor, dir.String()+"PKGBUILD")
-			editcmd.Stdout = os.Stdout
-			editcmd.Stderr = os.Stderr
-			editcmd.Stdin = os.Stdin
-			editcmd.Run()
+// Install handles install from Info Result
+func (a *Result) Install(flags []string) (err error) {
+	fmt.Printf("\x1b[1;32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
+	if a.Maintainer == "" {
+		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
+	}
+	dir := BaseDir + a.PackageBase + "/"
+
+	if _, err = os.Stat(dir); os.IsNotExist(err) {
+		if err = a.setupWorkspace(); err != nil {
+			return
 		}
 	}
+
+	// defer os.RemoveAll(BaseDir + a.PackageBase)
+
+	if !continueTask("Edit PKGBUILD?", "y & Y") {
+		editcmd := exec.Command(Editor, dir+"PKGBUILD")
+		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+		editcmd.Run()
+	}
+
 	aurDeps, repoDeps, err := a.Dependencies()
 	if err != nil {
 		return
 	}
 
 	printDependencies(aurDeps, repoDeps)
-	if !NoConfirm && (len(aurDeps) != 0 || len(repoDeps) != 0) {
-		fmt.Println("\x1b[1m\x1b[32m==> Continue?\x1b[0m\x1b[1m (Y/n)\x1b[0m")
-		fmt.Scanln(&response)
-		if strings.ContainsAny(response, "n & N") {
+
+	if len(aurDeps) != 0 || len(repoDeps) != 0 {
+		if !continueTask("Continue?", "n & N") {
 			return fmt.Errorf("user did not like the dependencies")
 		}
 	}
 
 	aurQ, n, err := MultiInfo(aurDeps)
 	if n != len(aurDeps) {
-		missingDeps(aurDeps, aurQ)
-		if !NoConfirm {
-			fmt.Println("\x1b[1m\x1b[32m==> Continue?\x1b[0m\x1b[1m (Y/n)\x1b[0m")
-			fmt.Scanln(&response)
-			if strings.ContainsAny(response, "n & N") {
-				return fmt.Errorf("unable to install dependencies")
-			}
+		MissingPackage(aurDeps, aurQ)
+		if !continueTask("Continue?", "n & N") {
+			return fmt.Errorf("unable to install dependencies")
 		}
 	}
 
 	// Handle AUR dependencies first
 	for _, dep := range aurQ {
-		errA := dep.Install(baseDir, []string{"--asdeps", "--noconfirm"})
+		errA := dep.Install([]string{"--asdeps", "--noconfirm"})
 		if errA != nil {
 			return errA
 		}
@@ -322,7 +322,7 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 		}
 	}
 
-	err = os.Chdir(dir.String())
+	err = os.Chdir(dir)
 	if err != nil {
 		return
 	}
@@ -332,17 +332,37 @@ func (a *Result) Install(baseDir string, flags []string) (err error) {
 	args = append(args, "-sri")
 	args = append(args, flags...)
 	makepkgcmd = exec.Command(MakepkgBin, args...)
-	makepkgcmd.Stdout = os.Stdout
-	makepkgcmd.Stderr = os.Stderr
-	makepkgcmd.Stdin = os.Stdin
+	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = makepkgcmd.Run()
-
 	return
+}
+
+func continueTask(s string, def string) (cont bool) {
+	if NoConfirm {
+		return true
+	}
+	var postFix string
+
+	if def == "n & N" {
+		postFix = "(Y/n)"
+	} else {
+		postFix = "(y/N)"
+	}
+
+	var response string
+	fmt.Printf("\x1b[1;32m==> %s\x1b[1;37m %s\x1b[0m\n", s, postFix)
+
+	fmt.Scanln(&response)
+	if strings.ContainsAny(response, def) {
+		return false
+	}
+
+	return true
 }
 
 func printDependencies(aurDeps []string, repoDeps []string) {
 	if len(repoDeps) != 0 {
-		fmt.Print("\x1b[1m\x1b[32m==> Repository dependencies: \x1b[0m")
+		fmt.Print("\x1b[1;32m==> Repository dependencies: \x1b[0m")
 		for _, repoD := range repoDeps {
 			fmt.Print("\x1b[33m", repoD, " \x1b[0m")
 		}
@@ -350,7 +370,7 @@ func printDependencies(aurDeps []string, repoDeps []string) {
 
 	}
 	if len(repoDeps) != 0 {
-		fmt.Print("\x1b[1m\x1b[32m==> AUR dependencies: \x1b[0m")
+		fmt.Print("\x1b[1;32m==> AUR dependencies: \x1b[0m")
 		for _, aurD := range aurDeps {
 			fmt.Print("\x1b[33m", aurD, " \x1b[0m")
 		}
@@ -358,7 +378,8 @@ func printDependencies(aurDeps []string, repoDeps []string) {
 	}
 }
 
-func missingDeps(aurDeps []string, aurQ Query) {
+// MissingPackage warns if the Query was unable to find a package
+func MissingPackage(aurDeps []string, aurQ Query) {
 	for _, depName := range aurDeps {
 		found := false
 		for _, dep := range aurQ {

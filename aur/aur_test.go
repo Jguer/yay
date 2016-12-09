@@ -60,7 +60,7 @@ func TestInfo(t *testing.T) {
 }
 
 func TestUpgrade(t *testing.T) {
-	err := Upgrade("/tmp/yaytmp", []string{})
+	err := Upgrade([]string{})
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
 	}
@@ -68,6 +68,6 @@ func TestUpgrade(t *testing.T) {
 
 func BenchmarkUpgrade(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		Upgrade("/tmp/yaytmp", []string{})
+		Upgrade([]string{})
 	}
 }

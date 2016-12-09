@@ -13,9 +13,6 @@ import (
 	pac "github.com/jguer/yay/pacman"
 )
 
-// BuildDir is the root for package building
-const BuildDir string = "/tmp/yaytmp/"
-
 // SearchMode is search without numbers.
 const SearchMode int = -1
 
@@ -24,6 +21,9 @@ var SortMode = DownTop
 
 // NoConfirm ignores prompts.
 var NoConfirm = false
+
+// BaseDir is the default building directory for yay
+var BaseDir = "/tmp/yaytmp/"
 
 // Determines NumberMenu and Search Order
 const (
@@ -37,6 +37,7 @@ func Config() {
 	pac.SortMode = SortMode
 	aur.NoConfirm = NoConfirm
 	pac.NoConfirm = NoConfirm
+	aur.BaseDir = BaseDir
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
@@ -73,7 +74,7 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 		return
 	}
 
-	var aurInstall []aur.Result
+	var aurInstall []string
 	var repoInstall []string
 	result := strings.Fields(numberString)
 	for _, numS := range result {
@@ -87,9 +88,9 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 			continue
 		} else if num > nR-1 {
 			if aur.SortMode == aur.DownTop {
-				aurInstall = append(aurInstall, a[nA+nR-num-1])
+				aurInstall = append(aurInstall, a[nA+nR-num-1].Name)
 			} else {
-				aurInstall = append(aurInstall, a[num-nR])
+				aurInstall = append(aurInstall, a[num-nR].Name)
 			}
 		} else {
 			if aur.SortMode == aur.DownTop {
@@ -104,14 +105,24 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 		pac.Install(repoInstall, flags)
 	}
 
-	for _, aurpkg := range aurInstall {
-		err = aurpkg.Install(BuildDir, flags)
+	if len(aurInstall) != 0 {
+		q, n, err := aur.MultiInfo(aurInstall)
 		if err != nil {
-			// Do not abandon program, we might still be able to install the rest
-			fmt.Println(err)
+			return err
+		} else if n != len(aurInstall) {
+			aur.MissingPackage(aurInstall, q)
+		}
+
+		for _, aurpkg := range q {
+			err = aurpkg.Install(flags)
+			if err != nil {
+				// Do not abandon program, we might still be able to install the rest
+				fmt.Println(err)
+			}
 		}
 	}
-	return
+
+	return nil
 }
 
 // Install handles package installs
@@ -129,7 +140,7 @@ func Install(pkgs []string, flags []string) error {
 	}
 
 	for _, aurpkg := range q {
-		err = aurpkg.Install(BuildDir, flags)
+		err = aurpkg.Install(flags)
 		if err != nil {
 			fmt.Println("Error installing", aurpkg.Name, ":", err)
 		}
@@ -141,7 +152,7 @@ func Install(pkgs []string, flags []string) error {
 // Upgrade handles updating the cache and installing updates.
 func Upgrade(flags []string) error {
 	errp := pac.UpdatePackages(flags)
-	erra := aur.Upgrade(BuildDir, flags)
+	erra := aur.Upgrade(flags)
 
 	if errp != nil {
 		return errp
@@ -179,7 +190,7 @@ func LocalStatistics(version string) error {
 		return err
 	}
 
-	_, foreign, _ := pac.ForeignPackages()
+	foreignS, foreign, _ := pac.ForeignPackages()
 
 	fmt.Printf("\n Yay version r%s\n", version)
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
@@ -194,6 +205,23 @@ func LocalStatistics(version string) error {
 		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", name, size(psize))
 	}
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
+
+	keys := make([]string, len(foreignS))
+	i := 0
+	for k := range foreignS {
+		keys[i] = k
+		i++
+	}
+	q, _, err := aur.MultiInfo(keys)
+	if err != nil {
+		return err
+	}
+
+	for _, res := range q {
+		if res.Maintainer == "" {
+			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;;40m is orphaned.\x1b[0m\n", res.Name)
+		}
+	}
 
 	return nil
 }
@@ -253,5 +281,4 @@ func PassToPacman(op string, pkgs []string, flags []string) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	return err
-
 }
