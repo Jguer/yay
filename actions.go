@@ -185,7 +185,7 @@ func Search(pkg string) (err error) {
 
 // LocalStatistics returns installed packages statistics.
 func LocalStatistics(version string) error {
-	pkgmap, info, err := pac.Statistics()
+	info, err := pac.Statistics()
 	if err != nil {
 		return err
 	}
@@ -200,10 +200,7 @@ func LocalStatistics(version string) error {
 	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", size(info.TotalSize))
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Println("\x1B[1;32mTen biggest packages\x1B[0m")
-
-	for name, psize := range pkgmap {
-		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", name, size(psize))
-	}
+	pac.BiggestPackages()
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 
 	keys := make([]string, len(foreignS))

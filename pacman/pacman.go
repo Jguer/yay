@@ -405,12 +405,11 @@ func ForeignPackages() (foreign map[string]*struct {
 }
 
 // Statistics returns statistics about packages installed in system
-func Statistics() (packages map[string]int64, info struct {
+func Statistics() (info struct {
 	Totaln    int
 	Expln     int
 	TotalSize int64
 }, err error) {
-	var pkgs [10]alpm.Package
 	var tS int64 // TotalSize
 	var nPkg int
 	var ePkg int
@@ -426,40 +425,14 @@ func Statistics() (packages map[string]int64, info struct {
 		return
 	}
 
-	var k int
-	for e, pkg := range localDb.PkgCache().Slice() {
+	for _, pkg := range localDb.PkgCache().Slice() {
 		tS += pkg.ISize()
-		k = -1
 		nPkg++
 		if pkg.Reason() == 0 {
 			ePkg++
 		}
-		if e < 10 {
-			pkgs[e] = pkg
-			continue
-		}
-
-		for i, pkw := range pkgs {
-			if k == -1 {
-				if pkw.ISize() < pkg.ISize() {
-					k = i
-				}
-			} else {
-				if pkw.ISize() < pkgs[k].ISize() && pkw.ISize() < pkg.ISize() {
-					k = i
-				}
-			}
-		}
-
-		if k != -1 {
-			pkgs[k] = pkg
-		}
 	}
 
-	packages = make(map[string]int64)
-	for _, pkg := range pkgs {
-		packages[pkg.Name()] = pkg.ISize()
-	}
 	info = struct {
 		Totaln    int
 		Expln     int
@@ -469,4 +442,30 @@ func Statistics() (packages map[string]int64, info struct {
 	}
 
 	return
+}
+
+// BiggestPackages prints the name of the ten biggest packages in the system.
+func BiggestPackages() {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	localDb, err := h.LocalDb()
+	if err != nil {
+		return
+	}
+
+	pkgCache := localDb.PkgCache()
+	pkgS := pkgCache.SortBySize().Slice()
+
+	if len(pkgS) < 10 {
+		return
+	}
+
+	for i := 0; i < 10; i++ {
+		fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkgS[i].Name(), pkgS[i].ISize()/(1024*1024))
+	}
+	// Could implement size here as well, but we just want the general idea
 }
