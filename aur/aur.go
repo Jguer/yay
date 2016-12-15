@@ -284,12 +284,13 @@ func (a *Result) Install(flags []string) (err error) {
 		editcmd.Run()
 	}
 
-	aurDeps, repoDeps, err := a.Dependencies()
+	runDeps, makeDeps, err := a.Dependencies()
 	if err != nil {
 		return
 	}
 
-	printDependencies(aurDeps, repoDeps)
+	repoDeps := append(runDeps[0], makeDeps[0]...)
+	aurDeps := append(runDeps[1], makeDeps[1]...)
 
 	if len(aurDeps) != 0 || len(repoDeps) != 0 {
 		if !continueTask("Continue?", "n & N") {
@@ -360,24 +361,6 @@ func continueTask(s string, def string) (cont bool) {
 	return true
 }
 
-func printDependencies(aurDeps []string, repoDeps []string) {
-	if len(repoDeps) != 0 {
-		fmt.Print("\x1b[1;32m==> Repository dependencies: \x1b[0m")
-		for _, repoD := range repoDeps {
-			fmt.Print("\x1b[33m", repoD, " \x1b[0m")
-		}
-		fmt.Print("\n")
-
-	}
-	if len(repoDeps) != 0 {
-		fmt.Print("\x1b[1;32m==> AUR dependencies: \x1b[0m")
-		for _, aurD := range aurDeps {
-			fmt.Print("\x1b[33m", aurD, " \x1b[0m")
-		}
-		fmt.Print("\n")
-	}
-}
-
 // MissingPackage warns if the Query was unable to find a package
 func MissingPackage(aurDeps []string, aurQ Query) {
 	for _, depName := range aurDeps {
@@ -397,7 +380,8 @@ func MissingPackage(aurDeps []string, aurQ Query) {
 }
 
 // Dependencies returns package dependencies not installed belonging to AUR
-func (a *Result) Dependencies() (aur []string, repo []string, err error) {
+// 0 is Repo, 1 is Foreign.
+func (a *Result) Dependencies() (runDeps [2][]string, makeDeps [2][]string, err error) {
 	var q Query
 	if len(a.Depends) == 0 && len(a.MakeDepends) == 0 {
 		var n int
@@ -410,6 +394,35 @@ func (a *Result) Dependencies() (aur []string, repo []string, err error) {
 		q = append(q, *a)
 	}
 
-	aur, repo, err = pacman.OutofRepo(append(q[0].MakeDepends, q[0].Depends...))
+	if len(a.Depends) != 0 {
+		runDeps[0], runDeps[1], err = pacman.DepSatisfier(q[0].Depends)
+		fmt.Println("\x1b[1;32m=>\x1b[1;33m Dependencies: \x1b[0m")
+		printDeps(runDeps[0], runDeps[1])
+	}
+
+	if len(a.MakeDepends) != 0 {
+		makeDeps[0], makeDeps[1], err = pacman.DepSatisfier(q[0].Depends)
+		fmt.Println("\x1b[1;32m=>\x1b[1;33m Make Dependencies: \x1b[0m")
+		printDeps(makeDeps[0], makeDeps[1])
+	}
+	err = nil
 	return
+}
+
+func printDeps(repoDeps []string, aurDeps []string) {
+	if len(repoDeps) != 0 {
+		fmt.Print("\x1b[1;32m==> Repository dependencies: \x1b[0m")
+		for _, repoD := range repoDeps {
+			fmt.Print("\x1b[33m", repoD, " \x1b[0m")
+		}
+		fmt.Print("\n")
+
+	}
+	if len(aurDeps) != 0 {
+		fmt.Print("\x1b[1;32m==> AUR dependencies: \x1b[0m")
+		for _, aurD := range aurDeps {
+			fmt.Print("\x1b[33m", aurD, " \x1b[0m")
+		}
+		fmt.Print("\n")
+	}
 }

@@ -240,6 +240,43 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	return
 }
 
+// DepSatisfier receives a string slice, returns a slice of packages found in
+// repos and one of packages not found in repos. Leaves out installed packages.
+func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	localDb, err := h.LocalDb()
+	if err != nil {
+		return
+	}
+	dbList, err := h.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	f := func(c rune) bool {
+		return c == '>' || c == '<' || c == '=' || c == ' '
+	}
+
+	for _, dep := range toCheck {
+		if _, erp := localDb.PkgCache().FindSatisfier(dep); erp == nil {
+			continue
+		} else if pkg, erp := dbList.FindSatisfier(dep); erp == nil {
+			repo = append(repo, pkg.Name())
+		} else {
+			field := strings.FieldsFunc(dep, f)
+			notFound = append(notFound, field[0])
+		}
+	}
+
+	err = nil
+	return
+}
+
 // OutofRepo returns a list of packages not installed and not resolvable
 // Accepts inputs like 'gtk2', 'java-environment=8', 'linux >= 4.20'
 func OutofRepo(toCheck []string) (aur []string, repo []string, err error) {
@@ -330,9 +367,7 @@ func Install(pkgName []string, flags []string) (err error) {
 	}
 
 	cmd = exec.Command("sudo", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Run()
 	return nil
 }
@@ -349,9 +384,7 @@ func CleanRemove(pkgName []string) (err error) {
 	args = append(args, pkgName...)
 
 	cmd = exec.Command("sudo", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Run()
 	return nil
 }
