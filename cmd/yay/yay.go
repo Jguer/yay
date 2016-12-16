@@ -90,6 +90,8 @@ func main() {
 		err = yay.Install(pkgs, options)
 	case "-Syu", "-Suy":
 		err = yay.Upgrade(options)
+	case "-Si":
+		err = yay.SingleSearch(pkgs, options)
 	case "yogurt":
 		for _, pkg := range pkgs {
 			err = yay.NumberMenu(pkg, options)

@@ -383,6 +383,63 @@ func MissingPackage(aurDeps []string, aurQ Query) {
 	return
 }
 
+// PrintInfo prints package info like pacman -Si
+func (a *Result) PrintInfo() {
+	fmt.Println("\x1b[1;37mRepository      :\x1b[0m", "aur")
+	fmt.Println("\x1b[1;37mName            :\x1b[0m", a.Name)
+	fmt.Println("\x1b[1;37mVersion         :\x1b[0m", a.Version)
+	fmt.Println("\x1b[1;37mDescription     :\x1b[0m", a.Description)
+	if a.URL != "" {
+		fmt.Println("\x1b[1;37mURL             :\x1b[0m", a.URL)
+	} else {
+		fmt.Println("\x1b[1;37mURL             :\x1b[0m", "None")
+	}
+	fmt.Println("\x1b[1;37mLicenses        :\x1b[0m", a.License)
+
+	if len(a.Provides) != 0 {
+		fmt.Println("\x1b[1;37mProvides        :\x1b[0m", a.Provides)
+	} else {
+		fmt.Println("\x1b[1;37mProvides        :\x1b[0m", "None")
+	}
+
+	if len(a.Depends) != 0 {
+		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", a.Depends)
+	} else {
+		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", "None")
+	}
+
+	if len(a.MakeDepends) != 0 {
+		fmt.Println("\x1b[1;37mMake depends On :\x1b[0m", a.MakeDepends)
+	} else {
+		fmt.Println("\x1b[1;37mMake depends On :\x1b[0m", "None")
+	}
+
+	if len(a.OptDepends) != 0 {
+		fmt.Println("\x1b[1;37mOptional Deps   :\x1b[0m", a.OptDepends)
+	} else {
+		fmt.Println("\x1b[1;37mOptional Deps   :\x1b[0m", "None")
+	}
+
+	if len(a.Conflicts) != 0 {
+		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", a.Conflicts)
+	} else {
+		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", "None")
+	}
+
+	if a.Maintainer != "" {
+		fmt.Println("\x1b[1;37mMaintainer      :\x1b[0m", a.Maintainer)
+	} else {
+		fmt.Println("\x1b[1;37mMaintainer      :\x1b[0m", "None")
+	}
+	fmt.Println("\x1b[1;37mVotes           :\x1b[0m", a.NumVotes)
+	fmt.Println("\x1b[1;37mPopularity      :\x1b[0m", a.Popularity)
+
+	if a.OutOfDate != 0 {
+		fmt.Println("\x1b[1;37mOut-of-date     :\x1b[0m", "Yes")
+	}
+
+}
+
 // Dependencies returns package dependencies not installed belonging to AUR
 // 0 is Repo, 1 is Foreign.
 func (a *Result) Dependencies() (runDeps [2][]string, makeDeps [2][]string, err error) {

@@ -183,6 +183,29 @@ func Search(pkg string) (err error) {
 	return nil
 }
 
+// SingleSearch serves as a pacman -Si for repo packages and AUR packages.
+func SingleSearch(pkgS []string, flags []string) (err error) {
+	aurS, repoS, err := pac.PackageSlices(pkgS)
+	if err != nil {
+		return
+	}
+
+	q, _, err := aur.MultiInfo(aurS)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, aurP := range q {
+		aurP.PrintInfo()
+	}
+
+	if len(repoS) != 0 {
+		err = PassToPacman("-Si", repoS, flags)
+	}
+
+	return
+}
+
 // LocalStatistics returns installed packages statistics.
 func LocalStatistics(version string) error {
 	info, err := pac.Statistics()
@@ -218,9 +241,9 @@ func LocalStatistics(version string) error {
 		if res.Maintainer == "" {
 			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;;40m is orphaned.\x1b[0m\n", res.Name)
 		}
-        if res.OutOfDate != 0 {
+		if res.OutOfDate != 0 {
 			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;;40m is out-of-date in AUR.\x1b[0m\n", res.Name)
-        }
+		}
 	}
 
 	return nil
@@ -269,7 +292,7 @@ func PassToPacman(op string, pkgs []string, flags []string) error {
 		args = append(args, flags...)
 	}
 
-	if strings.Contains(op, "-Q") {
+	if strings.Contains(op, "-Q") || op == "-Si" {
 		cmd = exec.Command("pacman", args...)
 	} else {
 		args = append([]string{"pacman"}, args...)
