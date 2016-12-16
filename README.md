@@ -15,9 +15,19 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Have yaourt like search.
 - Know when git packages are due for an upgrade (missing this one for now).
 
-![Yay Qstats](http://jguer.github.io/yay/yay1.png "yay -Qstats")
+![Yay Qstats](http://jguer.github.io/yay/yay2.png "yay -Qstats")
+![Yay NumberMenu](http://jguer.github.io/yay/yay3.png "yay gtk-theme")
+
 
 ### Changelog
+#### 1.85
+- yay now does -Si for AUR packages
+- Fixed package install bugs
+
+#### 1.83
+- Added new dependency resolver for future features
+- Sort package statistics
+
 #### 1.80
 - yay now warns when installing orphan packages
 - Added orphan status to number menu
