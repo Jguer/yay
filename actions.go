@@ -218,6 +218,9 @@ func LocalStatistics(version string) error {
 		if res.Maintainer == "" {
 			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;;40m is orphaned.\x1b[0m\n", res.Name)
 		}
+        if res.OutOfDate != 0 {
+			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;;40m is out-of-date in AUR.\x1b[0m\n", res.Name)
+        }
 	}
 
 	return nil

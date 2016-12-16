@@ -30,7 +30,7 @@ func usage() {
 `)
 }
 
-var version = "55"
+var version = "1.82"
 
 func parser() (op string, options []string, packages []string, err error) {
 	if len(os.Args) < 2 {

@@ -97,6 +97,10 @@ func (q Query) PrintSearch(start int) {
 			toprint += fmt.Sprintf("\x1b[31;40m(Orphaned)\x1b[0m ")
 		}
 
+		if res.OutOfDate != 0 {
+			toprint += fmt.Sprintf("\x1b[31;40m(Out-of-date)\x1b[0m ")
+		}
+
 		if res.Installed == true {
 			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
 		}
