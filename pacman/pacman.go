@@ -240,6 +240,46 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	return
 }
 
+// BuildDependencies finds packages, on the second run
+// compares with a baselist and avoids searching those
+func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
+	h, _ := conf.CreateHandle()
+
+	localDb, _ := h.LocalDb()
+	dbList, _ := h.SyncDbs()
+
+	f := func(c rune) bool {
+		return c == '>' || c == '<' || c == '=' || c == ' '
+	}
+
+	return func(toCheck []string, isBaseList bool, close bool) (repo []string, notFound []string) {
+		if close {
+			h.Release()
+			return
+		}
+
+	Loop:
+		for _, dep := range toCheck {
+			if !isBaseList {
+				for _, base := range baselist {
+					if base == dep {
+						continue Loop
+					}
+				}
+			}
+			if _, erp := localDb.PkgCache().FindSatisfier(dep); erp == nil {
+				continue
+			} else if pkg, erp := dbList.FindSatisfier(dep); erp == nil {
+				repo = append(repo, pkg.Name())
+			} else {
+				field := strings.FieldsFunc(dep, f)
+				notFound = append(notFound, field[0])
+			}
+		}
+		return
+	}
+}
+
 // DepSatisfier receives a string slice, returns a slice of packages found in
 // repos and one of packages not found in repos. Leaves out installed packages.
 func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error) {
@@ -270,81 +310,6 @@ func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error
 		} else {
 			field := strings.FieldsFunc(dep, f)
 			notFound = append(notFound, field[0])
-		}
-	}
-
-	err = nil
-	return
-}
-
-// OutofRepo returns a list of packages not installed and not resolvable
-// Accepts inputs like 'gtk2', 'java-environment=8', 'linux >= 4.20'
-func OutofRepo(toCheck []string) (aur []string, repo []string, err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	localDb, err := h.LocalDb()
-	if err != nil {
-		return
-	}
-	dbList, err := h.SyncDbs()
-	if err != nil {
-		return
-	}
-
-	f := func(c rune) bool {
-		return c == '>' || c == '<' || c == '=' || c == ' '
-	}
-
-toCheckLoop:
-	for _, dep := range toCheck {
-		field := strings.FieldsFunc(dep, f)
-
-		for _, checkR := range repo {
-			if field[0] == checkR {
-				continue toCheckLoop
-			}
-		}
-
-		for _, checkA := range aur {
-			if field[0] == checkA {
-				continue toCheckLoop
-			}
-		}
-
-		// Check if dep is installed
-		_, err = localDb.PkgByName(field[0])
-		if err == nil {
-			continue
-		}
-
-		found := false
-	Loop:
-		for _, db := range dbList.Slice() {
-			// First, Check if they're provided by package name.
-			_, err = db.PkgByName(field[0])
-			if err == nil {
-				found = true
-				repo = append(repo, field[0])
-				break Loop
-			}
-
-			for _, pkg := range db.PkgCache().Slice() {
-				for _, p := range pkg.Provides().Slice() {
-					if p.String() == dep {
-						found = true
-						repo = append(repo, pkg.Name())
-						break Loop
-					}
-				}
-			}
-		}
-
-		if !found {
-			aur = append(aur, field[0])
 		}
 	}
 

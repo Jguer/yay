@@ -394,17 +394,24 @@ func (a *Result) Dependencies() (runDeps [2][]string, makeDeps [2][]string, err 
 		q = append(q, *a)
 	}
 
+	depSearch := pacman.BuildDependencies(a.Depends)
 	if len(a.Depends) != 0 {
-		runDeps[0], runDeps[1], err = pacman.DepSatisfier(q[0].Depends)
-		fmt.Println("\x1b[1;32m=>\x1b[1;33m Dependencies: \x1b[0m")
-		printDeps(runDeps[0], runDeps[1])
+		runDeps[0], runDeps[1] = depSearch(q[0].Depends, true, false)
+		if len(runDeps[0]) != 0 || len(runDeps[1]) != 0 {
+			fmt.Println("\x1b[1;32m=>\x1b[1;33m Run Dependencies: \x1b[0m")
+			printDeps(runDeps[0], runDeps[1])
+		}
 	}
 
 	if len(a.MakeDepends) != 0 {
-		makeDeps[0], makeDeps[1], err = pacman.DepSatisfier(q[0].Depends)
-		fmt.Println("\x1b[1;32m=>\x1b[1;33m Make Dependencies: \x1b[0m")
-		printDeps(makeDeps[0], makeDeps[1])
+		makeDeps[0], makeDeps[1] = depSearch(q[0].MakeDepends, false, false)
+		if len(makeDeps[0]) != 0 || len(makeDeps[1]) != 0 {
+			fmt.Println("\x1b[1;32m=>\x1b[1;33m Make Dependencies: \x1b[0m")
+			printDeps(makeDeps[0], makeDeps[1])
+		}
 	}
+	depSearch(a.MakeDepends, false, true)
+
 	err = nil
 	return
 }
