@@ -348,6 +348,7 @@ func CleanRemove(pkgName []string) (err error) {
 	var args []string
 	args = append(args, "pacman", "-Rnsc")
 	args = append(args, pkgName...)
+	args = append(args, "--noconfirm")
 
 	cmd = exec.Command("sudo", args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -467,4 +468,73 @@ func BiggestPackages() {
 		fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkgS[i].Name(), pkgS[i].ISize()/(1024*1024))
 	}
 	// Could implement size here as well, but we just want the general idea
+}
+
+// HangingPackages returns a list of packages installed as deps
+// and unneeded by the system
+func HangingPackages() (hanging []string, err error) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	localDb, err := h.LocalDb()
+	if err != nil {
+		return
+	}
+
+	f := func(pkg alpm.Package) error {
+		if pkg.Reason() != alpm.PkgReasonDepend {
+			return nil
+		}
+		requiredby := pkg.ComputeRequiredBy()
+		if len(requiredby) == 0 {
+			hanging = append(hanging, pkg.Name())
+			fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkg.Name(), pkg.ISize()/(1024*1024))
+
+		}
+		return nil
+	}
+
+	err = localDb.PkgCache().ForEach(f)
+	return
+}
+
+// SliceHangingPackages returns a list of packages installed as deps
+// and unneeded by the system from a provided list of package names.
+func SliceHangingPackages(pkgS []string) (hanging []string) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	localDb, err := h.LocalDb()
+	if err != nil {
+		return
+	}
+
+big:
+	for _, pkgName := range pkgS {
+		for _, hangN := range hanging {
+			if hangN == pkgName {
+				continue big
+			}
+		}
+
+		pkg, err := localDb.PkgByName(pkgName)
+		if err == nil {
+			if pkg.Reason() != alpm.PkgReasonDepend {
+				continue
+			}
+
+			requiredby := pkg.ComputeRequiredBy()
+			if len(requiredby) == 0 {
+				hanging = append(hanging, pkgName)
+				fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkg.Name(), pkg.ISize()/(1024*1024))
+			}
+		}
+	}
+	return
 }

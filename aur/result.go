@@ -89,8 +89,8 @@ func printDeps(repoDeps []string, aurDeps []string) {
 	}
 }
 
-// Install handles install from Info Result
-func (a *Result) Install(flags []string) (err error) {
+// Install handles install from Info Result.
+func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	fmt.Printf("\x1b[1;32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
 	if a.Maintainer == "" {
 		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
@@ -101,9 +101,14 @@ func (a *Result) Install(flags []string) (err error) {
 		if err = a.setupWorkspace(); err != nil {
 			return
 		}
+	} else {
+		if !continueTask("Directory exists. Clean Build?", "yY") {
+			os.RemoveAll(BaseDir + a.PackageBase)
+			if err = a.setupWorkspace(); err != nil {
+				return
+			}
+		}
 	}
-
-	// defer os.RemoveAll(BaseDir + a.PackageBase)
 
 	if !continueTask("Edit PKGBUILD?", "yY") {
 		editcmd := exec.Command(Editor, dir+"PKGBUILD")
@@ -118,10 +123,12 @@ func (a *Result) Install(flags []string) (err error) {
 
 	repoDeps := append(runDeps[0], makeDeps[0]...)
 	aurDeps := append(runDeps[1], makeDeps[1]...)
+	finalmdeps = append(finalmdeps, makeDeps[0]...)
+	finalmdeps = append(finalmdeps, makeDeps[1]...)
 
 	if len(aurDeps) != 0 || len(repoDeps) != 0 {
 		if !continueTask("Continue?", "nN") {
-			return fmt.Errorf("user did not like the dependencies")
+			return finalmdeps, fmt.Errorf("user did not like the dependencies")
 		}
 	}
 
@@ -129,15 +136,7 @@ func (a *Result) Install(flags []string) (err error) {
 	if n != len(aurDeps) {
 		aurQ.MissingPackage(aurDeps)
 		if !continueTask("Continue?", "nN") {
-			return fmt.Errorf("unable to install dependencies")
-		}
-	}
-
-	// Handle AUR dependencies first
-	for _, dep := range aurQ {
-		errA := dep.Install([]string{"--asdeps", "--noconfirm"})
-		if errA != nil {
-			return errA
+			return finalmdeps, fmt.Errorf("unable to install dependencies")
 		}
 	}
 
@@ -145,8 +144,19 @@ func (a *Result) Install(flags []string) (err error) {
 	if len(repoDeps) != 0 {
 		errR := pacman.Install(repoDeps, []string{"--asdeps", "--noconfirm"})
 		if errR != nil {
+			return finalmdeps, errR
+		}
+	}
+
+	// Handle AUR dependencies first
+	for _, dep := range aurQ {
+		finalmdepsR, errA := dep.Install([]string{"--asdeps", "--noconfirm"})
+		finalmdeps = append(finalmdeps, finalmdepsR...)
+
+		if errA != nil {
+			pacman.CleanRemove(repoDeps)
 			pacman.CleanRemove(aurDeps)
-			return errR
+			return finalmdeps, errA
 		}
 	}
 
@@ -165,7 +175,7 @@ func (a *Result) Install(flags []string) (err error) {
 	return
 }
 
-// PrintInfo prints package info like pacman -Si
+// PrintInfo prints package info like pacman -Si.
 func (a *Result) PrintInfo() {
 	fmt.Println("\x1b[1;37mRepository      :\x1b[0m", "aur")
 	fmt.Println("\x1b[1;37mName            :\x1b[0m", a.Name)
@@ -220,6 +230,21 @@ func (a *Result) PrintInfo() {
 		fmt.Println("\x1b[1;37mOut-of-date     :\x1b[0m", "Yes")
 	}
 
+}
+
+// RemoveMakeDeps receives a make dependency list and removes those
+// that are no longer necessary.
+func RemoveMakeDeps(depS []string) (err error) {
+	hanging := pacman.SliceHangingPackages(depS)
+
+	if len(hanging) != 0 {
+		if !continueTask("Confirm Removal?", "nN") {
+			return nil
+		}
+		err = pacman.CleanRemove(hanging)
+	}
+
+	return
 }
 
 func (a *Result) setupWorkspace() (err error) {

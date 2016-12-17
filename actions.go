@@ -113,12 +113,18 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 			q.MissingPackage(aurInstall)
 		}
 
+		var finalrm []string
 		for _, aurpkg := range q {
-			err = aurpkg.Install(flags)
+			finalmdeps, err := aurpkg.Install(flags)
+			finalrm = append(finalrm, finalmdeps...)
 			if err != nil {
 				// Do not abandon program, we might still be able to install the rest
 				fmt.Println(err)
 			}
+		}
+
+		if len(finalrm) != 0 {
+			aur.RemoveMakeDeps(finalrm)
 		}
 	}
 
@@ -139,11 +145,17 @@ func Install(pkgs []string, flags []string) error {
 		fmt.Println("Unable to get info on some packages")
 	}
 
+	var finalrm []string
 	for _, aurpkg := range q {
-		err = aurpkg.Install(flags)
+		finalmdeps, err := aurpkg.Install(flags)
+		finalrm = append(finalrm, finalmdeps...)
 		if err != nil {
 			fmt.Println("Error installing", aurpkg.Name, ":", err)
 		}
+	}
+
+	if len(finalrm) != 0 {
+		aur.RemoveMakeDeps(finalrm)
 	}
 
 	return nil
@@ -304,4 +316,44 @@ func PassToPacman(op string, pkgs []string, flags []string) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	return err
+}
+
+// CleanDependencies removels all dangling dependencies in system
+func CleanDependencies(pkgs []string) error {
+	hanging, err := pac.HangingPackages()
+	if err != nil {
+		return err
+	}
+
+	if len(hanging) != 0 {
+		if !continueTask("Confirm Removal?", "nN") {
+			return nil
+		}
+		err = pac.CleanRemove(hanging)
+	}
+
+	return err
+}
+
+func continueTask(s string, def string) (cont bool) {
+	if NoConfirm {
+		return true
+	}
+	var postFix string
+
+	if def == "nN" {
+		postFix = "(Y/n)"
+	} else {
+		postFix = "(y/N)"
+	}
+
+	var response string
+	fmt.Printf("\x1b[1;32m==> %s\x1b[1;37m %s\x1b[0m\n", s, postFix)
+
+	fmt.Scanln(&response)
+	if response == string(def[0]) || response == string(def[1]) {
+		return false
+	}
+
+	return true
 }

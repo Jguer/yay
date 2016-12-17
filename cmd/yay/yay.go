@@ -80,6 +80,8 @@ func main() {
 	yay.Config()
 
 	switch op {
+	case "-Cd":
+		err = yay.CleanDependencies(pkgs)
 	case "-Qstats":
 		err = yay.LocalStatistics(version)
 	case "-Ss":
