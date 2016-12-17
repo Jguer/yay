@@ -1,0 +1,247 @@
+package aur
+
+import (
+	"fmt"
+	"os"
+	"os/exec"
+
+	"github.com/jguer/yay/pacman"
+)
+
+// Result describes an AUR package.
+type Result struct {
+	ID             int     `json:"ID"`
+	Name           string  `json:"Name"`
+	PackageBaseID  int     `json:"PackageBaseID"`
+	PackageBase    string  `json:"PackageBase"`
+	Version        string  `json:"Version"`
+	Description    string  `json:"Description"`
+	URL            string  `json:"URL"`
+	NumVotes       int     `json:"NumVotes"`
+	Popularity     float32 `json:"Popularity"`
+	OutOfDate      int     `json:"OutOfDate"`
+	Maintainer     string  `json:"Maintainer"`
+	FirstSubmitted int     `json:"FirstSubmitted"`
+	LastModified   int64   `json:"LastModified"`
+	URLPath        string  `json:"URLPath"`
+	Installed      bool
+	Depends        []string `json:"Depends"`
+	MakeDepends    []string `json:"MakeDepends"`
+	OptDepends     []string `json:"OptDepends"`
+	Conflicts      []string `json:"Conflicts"`
+	Provides       []string `json:"Provides"`
+	License        []string `json:"License"`
+	Keywords       []string `json:"Keywords"`
+}
+
+// Dependencies returns package dependencies not installed belonging to AUR
+// 0 is Repo, 1 is Foreign.
+func (a *Result) Dependencies() (runDeps [2][]string, makeDeps [2][]string, err error) {
+	var q Query
+	if len(a.Depends) == 0 && len(a.MakeDepends) == 0 {
+		var n int
+		q, n, err = Info(a.Name)
+		if n == 0 || err != nil {
+			err = fmt.Errorf("Unable to search dependencies, %s", err)
+			return
+		}
+	} else {
+		q = append(q, *a)
+	}
+
+	depSearch := pacman.BuildDependencies(a.Depends)
+	if len(a.Depends) != 0 {
+		runDeps[0], runDeps[1] = depSearch(q[0].Depends, true, false)
+		if len(runDeps[0]) != 0 || len(runDeps[1]) != 0 {
+			fmt.Println("\x1b[1;32m=>\x1b[1;33m Run Dependencies: \x1b[0m")
+			printDeps(runDeps[0], runDeps[1])
+		}
+	}
+
+	if len(a.MakeDepends) != 0 {
+		makeDeps[0], makeDeps[1] = depSearch(q[0].MakeDepends, false, false)
+		if len(makeDeps[0]) != 0 || len(makeDeps[1]) != 0 {
+			fmt.Println("\x1b[1;32m=>\x1b[1;33m Make Dependencies: \x1b[0m")
+			printDeps(makeDeps[0], makeDeps[1])
+		}
+	}
+	depSearch(a.MakeDepends, false, true)
+
+	err = nil
+	return
+}
+
+func printDeps(repoDeps []string, aurDeps []string) {
+	if len(repoDeps) != 0 {
+		fmt.Print("\x1b[1;32m==> Repository dependencies: \x1b[0m")
+		for _, repoD := range repoDeps {
+			fmt.Print("\x1b[33m", repoD, " \x1b[0m")
+		}
+		fmt.Print("\n")
+
+	}
+	if len(aurDeps) != 0 {
+		fmt.Print("\x1b[1;32m==> AUR dependencies: \x1b[0m")
+		for _, aurD := range aurDeps {
+			fmt.Print("\x1b[33m", aurD, " \x1b[0m")
+		}
+		fmt.Print("\n")
+	}
+}
+
+// Install handles install from Info Result
+func (a *Result) Install(flags []string) (err error) {
+	fmt.Printf("\x1b[1;32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
+	if a.Maintainer == "" {
+		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
+	}
+	dir := BaseDir + a.PackageBase + "/"
+
+	if _, err = os.Stat(dir); os.IsNotExist(err) {
+		if err = a.setupWorkspace(); err != nil {
+			return
+		}
+	}
+
+	// defer os.RemoveAll(BaseDir + a.PackageBase)
+
+	if !continueTask("Edit PKGBUILD?", "yY") {
+		editcmd := exec.Command(Editor, dir+"PKGBUILD")
+		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+		editcmd.Run()
+	}
+
+	runDeps, makeDeps, err := a.Dependencies()
+	if err != nil {
+		return
+	}
+
+	repoDeps := append(runDeps[0], makeDeps[0]...)
+	aurDeps := append(runDeps[1], makeDeps[1]...)
+
+	if len(aurDeps) != 0 || len(repoDeps) != 0 {
+		if !continueTask("Continue?", "nN") {
+			return fmt.Errorf("user did not like the dependencies")
+		}
+	}
+
+	aurQ, n, err := MultiInfo(aurDeps)
+	if n != len(aurDeps) {
+		aurQ.MissingPackage(aurDeps)
+		if !continueTask("Continue?", "nN") {
+			return fmt.Errorf("unable to install dependencies")
+		}
+	}
+
+	// Handle AUR dependencies first
+	for _, dep := range aurQ {
+		errA := dep.Install([]string{"--asdeps", "--noconfirm"})
+		if errA != nil {
+			return errA
+		}
+	}
+
+	// Repo dependencies
+	if len(repoDeps) != 0 {
+		errR := pacman.Install(repoDeps, []string{"--asdeps", "--noconfirm"})
+		if errR != nil {
+			pacman.CleanRemove(aurDeps)
+			return errR
+		}
+	}
+
+	err = os.Chdir(dir)
+	if err != nil {
+		return
+	}
+
+	var makepkgcmd *exec.Cmd
+	var args []string
+	args = append(args, "-sri")
+	args = append(args, flags...)
+	makepkgcmd = exec.Command(MakepkgBin, args...)
+	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	err = makepkgcmd.Run()
+	return
+}
+
+// PrintInfo prints package info like pacman -Si
+func (a *Result) PrintInfo() {
+	fmt.Println("\x1b[1;37mRepository      :\x1b[0m", "aur")
+	fmt.Println("\x1b[1;37mName            :\x1b[0m", a.Name)
+	fmt.Println("\x1b[1;37mVersion         :\x1b[0m", a.Version)
+	fmt.Println("\x1b[1;37mDescription     :\x1b[0m", a.Description)
+	if a.URL != "" {
+		fmt.Println("\x1b[1;37mURL             :\x1b[0m", a.URL)
+	} else {
+		fmt.Println("\x1b[1;37mURL             :\x1b[0m", "None")
+	}
+	fmt.Println("\x1b[1;37mLicenses        :\x1b[0m", a.License)
+
+	if len(a.Provides) != 0 {
+		fmt.Println("\x1b[1;37mProvides        :\x1b[0m", a.Provides)
+	} else {
+		fmt.Println("\x1b[1;37mProvides        :\x1b[0m", "None")
+	}
+
+	if len(a.Depends) != 0 {
+		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", a.Depends)
+	} else {
+		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", "None")
+	}
+
+	if len(a.MakeDepends) != 0 {
+		fmt.Println("\x1b[1;37mMake depends On :\x1b[0m", a.MakeDepends)
+	} else {
+		fmt.Println("\x1b[1;37mMake depends On :\x1b[0m", "None")
+	}
+
+	if len(a.OptDepends) != 0 {
+		fmt.Println("\x1b[1;37mOptional Deps   :\x1b[0m", a.OptDepends)
+	} else {
+		fmt.Println("\x1b[1;37mOptional Deps   :\x1b[0m", "None")
+	}
+
+	if len(a.Conflicts) != 0 {
+		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", a.Conflicts)
+	} else {
+		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", "None")
+	}
+
+	if a.Maintainer != "" {
+		fmt.Println("\x1b[1;37mMaintainer      :\x1b[0m", a.Maintainer)
+	} else {
+		fmt.Println("\x1b[1;37mMaintainer      :\x1b[0m", "None")
+	}
+	fmt.Println("\x1b[1;37mVotes           :\x1b[0m", a.NumVotes)
+	fmt.Println("\x1b[1;37mPopularity      :\x1b[0m", a.Popularity)
+
+	if a.OutOfDate != 0 {
+		fmt.Println("\x1b[1;37mOut-of-date     :\x1b[0m", "Yes")
+	}
+
+}
+
+func (a *Result) setupWorkspace() (err error) {
+	// No need to use filepath.separators because it won't run on inferior platforms
+	err = os.MkdirAll(BaseDir+"builds", 0755)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	tarLocation := BaseDir + a.PackageBase + ".tar.gz"
+	defer os.Remove(BaseDir + a.PackageBase + ".tar.gz")
+
+	err = downloadFile(tarLocation, BaseURL+a.URLPath)
+	if err != nil {
+		return
+	}
+
+	err = exec.Command(TarBin, "-xf", tarLocation, "-C", BaseDir).Run()
+	if err != nil {
+		return
+	}
+
+	return
+}

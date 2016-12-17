@@ -110,7 +110,7 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 		if err != nil {
 			return err
 		} else if n != len(aurInstall) {
-			aur.MissingPackage(aurInstall, q)
+			q.MissingPackage(aurInstall)
 		}
 
 		for _, aurpkg := range q {
