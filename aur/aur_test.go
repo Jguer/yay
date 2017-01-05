@@ -1,11 +1,13 @@
 package aur
 
 import (
+	"os"
 	"reflect"
 	"testing"
 )
 
 func TestSearch(t *testing.T) {
+
 	eN := "yay"
 	eD := "Yet another yogurt. Pacman wrapper with AUR support written in go."
 	result, _, err := Search("yay", true)
@@ -27,6 +29,7 @@ func TestSearch(t *testing.T) {
 }
 
 func benchmarkSearch(search string, sort bool, b *testing.B) {
+
 	for n := 0; n < b.N; n++ {
 		Search(search, sort)
 	}
@@ -38,6 +41,7 @@ func BenchmarkSearchSimpleSorted(b *testing.B)  { benchmarkSearch("yay", true, b
 func BenchmarkSearchComplexSorted(b *testing.B) { benchmarkSearch("linux", true, b) }
 
 func TestInfo(t *testing.T) {
+
 	eN := "yay"
 	eD := "Yet another yogurt. Pacman wrapper with AUR support written in go."
 	eM := []string{"go", "git"}
@@ -60,14 +64,26 @@ func TestInfo(t *testing.T) {
 }
 
 func TestUpgrade(t *testing.T) {
+	old := os.Stdout
+	_, w, _ := os.Pipe()
+	os.Stdout = w
+
 	err := Upgrade([]string{})
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
 	}
+
+	os.Stdout = old
 }
 
 func BenchmarkUpgrade(b *testing.B) {
+	old := os.Stdout
+	_, w, _ := os.Pipe()
+	os.Stdout = w
+
 	for n := 0; n < b.N; n++ {
 		Upgrade([]string{})
 	}
+
+	os.Stdout = old
 }

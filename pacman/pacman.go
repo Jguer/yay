@@ -26,12 +26,6 @@ type Result struct {
 // PacmanConf describes the default pacman config file
 const PacmanConf string = "/etc/pacman.conf"
 
-// Determines NumberMenu and Search Order
-const (
-	DownTop = iota
-	TopDown
-)
-
 var conf alpm.PacmanConfig
 
 func init() {
@@ -85,7 +79,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 	var installed bool
 	dbS := dbList.Slice()
 	var f int
-	if util.SortMode == DownTop {
+	if util.SortMode == util.BottomUp {
 		f = len(dbS) - 1
 	} else {
 		f = 0
@@ -95,7 +89,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 		pkgS := dbS[f].PkgCache().Slice()
 
 		var i int
-		if util.SortMode == DownTop {
+		if util.SortMode == util.BottomUp {
 			i = len(pkgS) - 1
 		} else {
 			i = 0
@@ -120,7 +114,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 				n++
 			}
 
-			if util.SortMode == DownTop {
+			if util.SortMode == util.BottomUp {
 				if i > 0 {
 					i--
 				} else {
@@ -135,7 +129,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 			}
 		}
 
-		if util.SortMode == DownTop {
+		if util.SortMode == util.BottomUp {
 			if f > 0 {
 				f--
 			} else {
