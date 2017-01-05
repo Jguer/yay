@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/jguer/yay"
+	"github.com/jguer/yay/util"
 )
 
 func usage() {
@@ -22,6 +23,7 @@ func usage() {
 
     New operations:
     yay -Qstats   displays system information
+    yay -Cd       remove unneeded dependencies
 
     New options:
     --topdown     shows repository's packages first and then aur's
@@ -47,11 +49,11 @@ func parser() (op string, options []string, packages []string, err error) {
 			if arg == "--help" {
 				op = arg
 			} else if arg == "--topdown" {
-				yay.SortMode = yay.TopDown
-			} else if arg == "--downtop" {
-				yay.SortMode = yay.DownTop
+				util.SortMode = util.TopDown
+			} else if arg == "--bottomup" {
+				util.SortMode = util.BottomUp
 			} else if arg == "--noconfirm" {
-				yay.NoConfirm = true
+				util.NoConfirm = true
 				options = append(options, arg)
 			} else {
 				options = append(options, arg)
@@ -77,14 +79,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	yay.Config()
-
 	switch op {
 	case "-Cd":
 		err = yay.CleanDependencies(pkgs)
 	case "-Qstats":
 		err = yay.LocalStatistics(version)
-	case "-Ss":
+	case "-Ss", "-Ssq":
+		if op == "-Ss" {
+			util.SearchVerbosity = util.Detailed
+		} else {
+			util.SearchVerbosity = util.Minimal
+		}
 		for _, pkg := range pkgs {
 			err = yay.Search(pkg)
 		}
@@ -95,6 +100,7 @@ func main() {
 	case "-Si":
 		err = yay.SingleSearch(pkgs, options)
 	case "yogurt":
+		util.SearchVerbosity = util.NumberMenu
 		for _, pkg := range pkgs {
 			err = yay.NumberMenu(pkg, options)
 			break

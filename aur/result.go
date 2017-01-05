@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/jguer/yay/pacman"
+	"github.com/jguer/yay/util"
 )
 
 // Result describes an AUR package.
@@ -95,22 +96,22 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	if a.Maintainer == "" {
 		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
 	}
-	dir := BaseDir + a.PackageBase + "/"
+	dir := util.BaseDir + a.PackageBase + "/"
 
 	if _, err = os.Stat(dir); os.IsNotExist(err) {
 		if err = a.setupWorkspace(); err != nil {
 			return
 		}
 	} else {
-		if !continueTask("Directory exists. Clean Build?", "yY") {
-			os.RemoveAll(BaseDir + a.PackageBase)
+		if !util.ContinueTask("Directory exists. Clean Build?", "yY") {
+			os.RemoveAll(util.BaseDir + a.PackageBase)
 			if err = a.setupWorkspace(); err != nil {
 				return
 			}
 		}
 	}
 
-	if !continueTask("Edit PKGBUILD?", "yY") {
+	if !util.ContinueTask("Edit PKGBUILD?", "yY") {
 		editcmd := exec.Command(Editor, dir+"PKGBUILD")
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		editcmd.Run()
@@ -127,7 +128,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	finalmdeps = append(finalmdeps, makeDeps[1]...)
 
 	if len(aurDeps) != 0 || len(repoDeps) != 0 {
-		if !continueTask("Continue?", "nN") {
+		if !util.ContinueTask("Continue?", "nN") {
 			return finalmdeps, fmt.Errorf("user did not like the dependencies")
 		}
 	}
@@ -135,7 +136,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	aurQ, n, err := MultiInfo(aurDeps)
 	if n != len(aurDeps) {
 		aurQ.MissingPackage(aurDeps)
-		if !continueTask("Continue?", "nN") {
+		if !util.ContinueTask("Continue?", "nN") {
 			return finalmdeps, fmt.Errorf("unable to install dependencies")
 		}
 	}
@@ -169,7 +170,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	var args []string
 	args = append(args, "-sri")
 	args = append(args, flags...)
-	makepkgcmd = exec.Command(MakepkgBin, args...)
+	makepkgcmd = exec.Command(util.MakepkgBin, args...)
 	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = makepkgcmd.Run()
 	return
@@ -238,7 +239,7 @@ func RemoveMakeDeps(depS []string) (err error) {
 	hanging := pacman.SliceHangingPackages(depS)
 
 	if len(hanging) != 0 {
-		if !continueTask("Confirm Removal?", "nN") {
+		if !util.ContinueTask("Confirm Removal?", "nN") {
 			return nil
 		}
 		err = pacman.CleanRemove(hanging)
@@ -249,21 +250,21 @@ func RemoveMakeDeps(depS []string) (err error) {
 
 func (a *Result) setupWorkspace() (err error) {
 	// No need to use filepath.separators because it won't run on inferior platforms
-	err = os.MkdirAll(BaseDir+"builds", 0755)
+	err = os.MkdirAll(util.BaseDir+"builds", 0755)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	tarLocation := BaseDir + a.PackageBase + ".tar.gz"
-	defer os.Remove(BaseDir + a.PackageBase + ".tar.gz")
+	tarLocation := util.BaseDir + a.PackageBase + ".tar.gz"
+	defer os.Remove(util.BaseDir + a.PackageBase + ".tar.gz")
 
 	err = downloadFile(tarLocation, BaseURL+a.URLPath)
 	if err != nil {
 		return
 	}
 
-	err = exec.Command(TarBin, "-xf", tarLocation, "-C", BaseDir).Run()
+	err = exec.Command(util.TarBin, "-xf", tarLocation, "-C", util.BaseDir).Run()
 	if err != nil {
 		return
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jguer/go-alpm"
+	"github.com/jguer/yay/util"
 )
 
 // RepoSearch describes a Repository search.
@@ -24,12 +25,6 @@ type Result struct {
 
 // PacmanConf describes the default pacman config file
 const PacmanConf string = "/etc/pacman.conf"
-
-// NoConfirm ignores prompts.
-var NoConfirm = false
-
-// SortMode NumberMenu and Search
-var SortMode = DownTop
 
 // Determines NumberMenu and Search Order
 const (
@@ -90,7 +85,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 	var installed bool
 	dbS := dbList.Slice()
 	var f int
-	if SortMode == DownTop {
+	if util.SortMode == DownTop {
 		f = len(dbS) - 1
 	} else {
 		f = 0
@@ -100,7 +95,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 		pkgS := dbS[f].PkgCache().Slice()
 
 		var i int
-		if SortMode == DownTop {
+		if util.SortMode == DownTop {
 			i = len(pkgS) - 1
 		} else {
 			i = 0
@@ -125,7 +120,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 				n++
 			}
 
-			if SortMode == DownTop {
+			if util.SortMode == DownTop {
 				if i > 0 {
 					i--
 				} else {
@@ -140,7 +135,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 			}
 		}
 
-		if SortMode == DownTop {
+		if util.SortMode == DownTop {
 			if f > 0 {
 				f--
 			} else {
@@ -159,15 +154,18 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 }
 
 //PrintSearch receives a RepoSearch type and outputs pretty text.
-func (s RepoSearch) PrintSearch(mode int) {
+func (s RepoSearch) PrintSearch() {
 	for i, res := range s {
 		var toprint string
-		if mode != -1 {
-			if mode == 0 {
+		if util.SearchVerbosity == util.NumberMenu {
+			if util.SortMode == util.BottomUp {
 				toprint += fmt.Sprintf("%d ", len(s)-i-1)
 			} else {
 				toprint += fmt.Sprintf("%d ", i)
 			}
+		} else if util.SearchVerbosity == util.Minimal {
+			fmt.Println(res.Name)
+			continue
 		}
 		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m",
 			res.Repository, res.Name, res.Version)

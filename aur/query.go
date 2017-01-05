@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/jguer/yay/pacman"
+	"github.com/jguer/yay/util"
 )
 
 // Query is a collection of Results
@@ -15,7 +16,7 @@ func (q Query) Len() int {
 }
 
 func (q Query) Less(i, j int) bool {
-	if SortMode == DownTop {
+	if util.SortMode == util.BottomUp {
 		return q[i].NumVotes < q[j].NumVotes
 	}
 	return q[i].NumVotes > q[j].NumVotes
@@ -29,12 +30,15 @@ func (q Query) Swap(i, j int) {
 func (q Query) PrintSearch(start int) {
 	for i, res := range q {
 		var toprint string
-		if start != SearchMode {
-			if SortMode == DownTop {
+		if util.SearchVerbosity == util.NumberMenu {
+			if util.SortMode == util.BottomUp {
 				toprint += fmt.Sprintf("%d ", len(q)+start-i-1)
 			} else {
 				toprint += fmt.Sprintf("%d ", start+i)
 			}
+		} else if util.SearchVerbosity == util.Minimal {
+			fmt.Println(res.Name)
+			continue
 		}
 		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) ", "aur", res.Name, res.Version, res.NumVotes)
 		if res.Maintainer == "" {
@@ -51,6 +55,8 @@ func (q Query) PrintSearch(start int) {
 		toprint += "\n" + res.Description
 		fmt.Println(toprint)
 	}
+
+	return
 }
 
 // Info returns an AUR search with package details

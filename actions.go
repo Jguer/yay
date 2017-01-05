@@ -11,34 +11,8 @@ import (
 
 	"github.com/jguer/yay/aur"
 	pac "github.com/jguer/yay/pacman"
+	"github.com/jguer/yay/util"
 )
-
-// SearchMode is search without numbers.
-const SearchMode int = -1
-
-// SortMode NumberMenu and Search
-var SortMode = DownTop
-
-// NoConfirm ignores prompts.
-var NoConfirm = false
-
-// BaseDir is the default building directory for yay
-var BaseDir = "/tmp/yaytmp/"
-
-// Determines NumberMenu and Search Order
-const (
-	DownTop = iota
-	TopDown
-)
-
-// Config copies settings over to AUR and Pacman packages
-func Config() {
-	aur.SortMode = SortMode
-	pac.SortMode = SortMode
-	aur.NoConfirm = NoConfirm
-	pac.NoConfirm = NoConfirm
-	aur.BaseDir = BaseDir
-}
 
 // NumberMenu presents a CLI for selecting packages to install.
 func NumberMenu(pkgName string, flags []string) (err error) {
@@ -58,11 +32,11 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 		return fmt.Errorf("no packages match search")
 	}
 
-	if aur.SortMode == aur.DownTop {
+	if util.SortMode == util.BottomUp {
 		a.PrintSearch(nR)
-		r.PrintSearch(0)
+		r.PrintSearch()
 	} else {
-		r.PrintSearch(0)
+		r.PrintSearch()
 		a.PrintSearch(nR)
 	}
 
@@ -87,13 +61,13 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 		if num > nA+nR-1 || num < 0 {
 			continue
 		} else if num > nR-1 {
-			if aur.SortMode == aur.DownTop {
+			if util.SortMode == util.BottomUp {
 				aurInstall = append(aurInstall, a[nA+nR-num-1].Name)
 			} else {
 				aurInstall = append(aurInstall, a[num-nR].Name)
 			}
 		} else {
-			if aur.SortMode == aur.DownTop {
+			if util.SortMode == util.BottomUp {
 				repoInstall = append(repoInstall, r[nR-num-1].Name)
 			} else {
 				repoInstall = append(repoInstall, r[num].Name)
@@ -184,12 +158,12 @@ func Search(pkg string) (err error) {
 		return err
 	}
 
-	if SortMode == aur.DownTop {
-		a.PrintSearch(SearchMode)
-		r.PrintSearch(SearchMode)
+	if util.SortMode == util.BottomUp {
+		a.PrintSearch(0)
+		r.PrintSearch()
 	} else {
-		r.PrintSearch(SearchMode)
-		a.PrintSearch(SearchMode)
+		r.PrintSearch()
+		a.PrintSearch(0)
 	}
 
 	return nil
@@ -326,34 +300,11 @@ func CleanDependencies(pkgs []string) error {
 	}
 
 	if len(hanging) != 0 {
-		if !continueTask("Confirm Removal?", "nN") {
+		if !util.ContinueTask("Confirm Removal?", "nN") {
 			return nil
 		}
 		err = pac.CleanRemove(hanging)
 	}
 
 	return err
-}
-
-func continueTask(s string, def string) (cont bool) {
-	if NoConfirm {
-		return true
-	}
-	var postFix string
-
-	if def == "nN" {
-		postFix = "(Y/n)"
-	} else {
-		postFix = "(y/N)"
-	}
-
-	var response string
-	fmt.Printf("\x1b[1;32m==> %s\x1b[1;37m %s\x1b[0m\n", s, postFix)
-
-	fmt.Scanln(&response)
-	if response == string(def[0]) || response == string(def[1]) {
-		return false
-	}
-
-	return true
 }

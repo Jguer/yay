@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jguer/yay/pacman"
+	"github.com/jguer/yay/util"
 )
 
 // Install sends system commands to make and install a package from pkgName
@@ -61,7 +62,7 @@ func Upgrade(flags []string) error {
 	}
 
 	// Install updated packages
-	if !continueTask("Proceed with upgrade?", "nN") {
+	if !util.ContinueTask("Proceed with upgrade?", "nN") {
 		return nil
 	}
 
