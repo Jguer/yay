@@ -78,25 +78,49 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 
 	var installed bool
 	dbS := dbList.Slice()
-	var f int
-	if util.SortMode == util.BottomUp {
-		f = len(dbS) - 1
-	} else {
-		f = 0
+
+	// BottomUp functions
+	initL := func(len int) int {
+		return len - 1
 	}
 
-	for {
-		pkgS := dbS[f].PkgCache().Slice()
+	compL := func(len int, i int) bool {
+		if i > 0 {
+			return true
+		}
+		return false
+	}
 
-		var i int
-		if util.SortMode == util.BottomUp {
-			i = len(pkgS) - 1
-		} else {
-			i = 0
+	finalL := func(i int) int {
+		return i - 1
+	}
+
+	// TopDown functions
+	if util.SortMode == util.TopDown {
+		initL = func(len int) int {
+			return 0
 		}
 
-		for {
-			if strings.Contains(pkgS[i].Name(), pkgName) {
+		compL = func(len int, i int) bool {
+			if i < len {
+				return true
+			}
+			return false
+		}
+
+		finalL = func(i int) int {
+			return i + 1
+		}
+	}
+
+	lenDbs := len(dbS)
+	for f := initL(lenDbs); compL(lenDbs, f); f = finalL(f) {
+		pkgS := dbS[f].PkgCache().Slice()
+		lenPkgs := len(pkgS)
+
+		for i := initL(lenPkgs); compL(lenPkgs, i); i = finalL(i) {
+
+			if strings.Contains(pkgS[i].Name(), pkgName) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgName) {
 				if r, _ := localDb.PkgByName(pkgS[i].Name()); r != nil {
 					installed = true
 				} else {
@@ -113,36 +137,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 				})
 				n++
 			}
-
-			if util.SortMode == util.BottomUp {
-				if i > 0 {
-					i--
-				} else {
-					break
-				}
-			} else {
-				if i < len(pkgS)-1 {
-					i++
-				} else {
-					break
-				}
-			}
 		}
-
-		if util.SortMode == util.BottomUp {
-			if f > 0 {
-				f--
-			} else {
-				break
-			}
-		} else {
-			if f < len(dbS)-1 {
-				f++
-			} else {
-				break
-			}
-		}
-
 	}
 	return
 }
