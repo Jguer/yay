@@ -18,8 +18,19 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 ![Yay Qstats](http://jguer.github.io/yay/yay2.png "yay -Qstats")
 ![Yay NumberMenu](http://jguer.github.io/yay/yay3.png "yay gtk-theme")
 
+### Custom Operations
+
+- `yay <Search Term>` presents package selection menu
+- `yay -Qstats` delivers system statistics
+- `yay -Cd` cleans unneeded dependencies
 
 ### Changelog
+
+#### 1.91
+- `--downtop` has been replaced with `--bottomup` (as is logical)
+- `yay -Ssq` and `yay -Sqs` now displays AUR packages with less information
+- Repository search now uses the same criteria as pacman
+
 #### 1.85
 - yay now does -Si for AUR packages
 - Fixed package install bugs

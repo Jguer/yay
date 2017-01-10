@@ -84,7 +84,7 @@ func main() {
 		err = yay.CleanDependencies(pkgs)
 	case "-Qstats":
 		err = yay.LocalStatistics(version)
-	case "-Ss", "-Ssq":
+	case "-Ss", "-Ssq", "-Sqs":
 		if op == "-Ss" {
 			util.SearchVerbosity = util.Detailed
 		} else {
