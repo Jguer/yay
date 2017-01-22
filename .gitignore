@@ -17,12 +17,6 @@ _cgo_defun.c
 _cgo_gotypes.go
 _cgo_export.*
 
-_testmain.go
-
 *.exe
 *.test
 *.prof
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-bin/yay

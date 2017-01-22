@@ -1,0 +1,169 @@
+'\" t
+.TH "YAY" "8" "22/01/2017" "yay" "yay Manual"
+.nh
+.ad l
+.SH "NAME"
+yay \- AUR Helper written in go.
+.SH "SYNOPSIS"
+.sp
+\fIyay\fR <operation> [options] [packages]
+.SH "DESCRIPTION"
+.sp
+yay is a pacman wrapper with AUR support. It passes options to makepkg and pacman after resolving packages to install/upgrade.
+.SH "OPERATIONS"
+.PP
+\fB\-Cd\fR
+.RS 4
+Remove uneeded dependencies\&.
+.RE
+.PP
+\fB\-Qstats\fR
+.RS 4
+Displays information about installed packages and system health.
+If there are orphaned or out-of-date packages, warnings will be displayed\&.
+.RE
+.PP
+\fB\-Ss\fR
+.RS 4
+Search for package in repositories and AUR\&.
+.RE
+.PP
+\fB\-Si\fR
+.RS 4
+Show information for a package in the repositories or AUR\&.
+.RE
+.PP
+\fB\-Syu\fR
+.RS 4
+Upgrade packages from the repositories and the AUR\&.
+.RE
+.PP
+\fB\-h, \-\-help\fR
+.RS 4
+Show yay usage\&.
+.RE
+.PP
+\fB<NO OPERATION>\fR
+.RS 4
+Displays menu for package install selection (yogurt mode)\&.
+.RE
+.PP
+All other operations will be passed to pacman\&.
+.PP
+.SH "OPTIONS"
+.PP
+\fB\-\-topdown\fR
+.RS 4
+Display repository packages first and then AUR packages\&.
+.RE
+.PP
+\fB\-\-bottomup\fR
+.RS 4
+Show AUR packages first and then repository packages\&.
+.RE
+.PP
+\fB\-\-noconfirm\fR
+.RS 4
+No user intervention needed unless a package conflict happens\&.
+.RE
+.PP
+All other options will be passed to pacman\&.
+.PP
+.SH "EXAMPLES"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Sync and update packages from repository and AUR:
+yay \-Syu
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Check installed packages health:
+yay \-Qstat
+.RE
+.PP
+.sp
+For a package called \fIname\fR:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Search:
+yay \-Ss \fIname\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Install:
+yay \-S \fIname\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Install without confirmations:
+yay \-S \-\-noconfirm \fIname\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Get information about a package:
+yay \-Si \fIname\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Search and install using yogurt mode:
+yay \fIname\fR
+.RE
+.SH "SEE ALSO"
+.sp
+\fBmakepkg\fR(8)
+.sp
+\fBpacman\fR(8)
+.sp
+\fBpacman.conf\fR(5)
+.SH "AUTHORS"
+.sp
+Jguer <joaogg3@gmail\&.com>
