@@ -90,8 +90,9 @@ func main() {
 		} else {
 			util.SearchVerbosity = util.Minimal
 		}
-		for _, pkg := range pkgs {
-			err = yay.Search(pkg)
+
+		if pkgs != nil {
+			err = yay.Search(pkgs[0], pkgs[1:])
 		}
 	case "-S":
 		err = yay.Install(pkgs, options)
@@ -101,9 +102,9 @@ func main() {
 		err = yay.SingleSearch(pkgs, options)
 	case "yogurt":
 		util.SearchVerbosity = util.NumberMenu
-		for _, pkg := range pkgs {
-			err = yay.NumberMenu(pkg, options)
-			break
+
+		if pkgs != nil {
+			err = yay.NumberMenu(pkgs[0], pkgs[1:], options)
 		}
 	case "--help", "-h":
 		usage()

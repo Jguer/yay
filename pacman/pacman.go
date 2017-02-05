@@ -10,8 +10,8 @@ import (
 	"github.com/jguer/yay/util"
 )
 
-// RepoSearch describes a Repository search.
-type RepoSearch []Result
+// Query describes a Repository search.
+type Query []Result
 
 // Result describes a pkg.
 type Result struct {
@@ -61,7 +61,7 @@ func UpdatePackages(flags []string) error {
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
-func Search(pkgName string) (s RepoSearch, n int, err error) {
+func Search(pkgName string) (s Query, n int, err error) {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -143,7 +143,7 @@ func Search(pkgName string) (s RepoSearch, n int, err error) {
 }
 
 //PrintSearch receives a RepoSearch type and outputs pretty text.
-func (s RepoSearch) PrintSearch() {
+func (s Query) PrintSearch() {
 	for i, res := range s {
 		var toprint string
 		if util.SearchVerbosity == util.NumberMenu {

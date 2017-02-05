@@ -9,35 +9,77 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jguer/yay/aur"
+	aur "github.com/jguer/yay/aur"
 	pac "github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
 )
 
+// NarrowSearch removes terms that don't contain narrow terms in the description or name.
+func narrowSearch(aq aur.Query, pq pac.Query, narrow []string) (raq aur.Query, rpq pac.Query) {
+	for _, pr := range pq {
+		match := false
+		for _, narrowS := range narrow {
+			if strings.Contains(strings.ToUpper(pr.Name), strings.ToUpper(narrowS)) || strings.Contains(strings.ToUpper(pr.Description), strings.ToUpper(narrowS)) {
+				match = true
+			} else {
+				match = false
+			}
+		}
+
+		if match {
+			rpq = append(rpq, pr)
+		}
+
+	}
+
+	for _, ar := range aq {
+		match := false
+		for _, narrowS := range narrow {
+			if strings.Contains(strings.ToUpper(ar.Name), strings.ToUpper(narrowS)) || strings.Contains(strings.ToUpper(ar.Description), strings.ToUpper(narrowS)) {
+				match = true
+			} else {
+				match = false
+			}
+		}
+
+		if match {
+			raq = append(raq, ar)
+		}
+	}
+
+	return
+}
+
 // NumberMenu presents a CLI for selecting packages to install.
-func NumberMenu(pkgName string, flags []string) (err error) {
+func NumberMenu(pkgName string, narrow []string, flags []string) (err error) {
 	var num int
 	var numberString string
 
-	a, nA, err := aur.Search(pkgName, true)
+	aq, numaq, err := aur.Search(pkgName, true)
 	if err != nil {
 		fmt.Println("Error during AUR search:", err)
 	}
-	r, nR, err := pac.Search(pkgName)
+	pq, numpq, err := pac.Search(pkgName)
 	if err != nil {
 		return
 	}
 
-	if nR == 0 && nA == 0 {
+	if numpq == 0 && numaq == 0 {
 		return fmt.Errorf("no packages match search")
 	}
 
+	if len(narrow) != 0 {
+		aq, pq = narrowSearch(aq, pq, narrow)
+		numaq = len(aq)
+		numpq = len(pq)
+	}
+
 	if util.SortMode == util.BottomUp {
-		a.PrintSearch(nR)
-		r.PrintSearch()
+		aq.PrintSearch(numpq)
+		pq.PrintSearch()
 	} else {
-		r.PrintSearch()
-		a.PrintSearch(nR)
+		pq.PrintSearch()
+		aq.PrintSearch(numpq)
 	}
 
 	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
@@ -58,19 +100,19 @@ func NumberMenu(pkgName string, flags []string) (err error) {
 		}
 
 		// Install package
-		if num > nA+nR-1 || num < 0 {
+		if num > numaq+numpq-1 || num < 0 {
 			continue
-		} else if num > nR-1 {
+		} else if num > numpq-1 {
 			if util.SortMode == util.BottomUp {
-				aurInstall = append(aurInstall, a[nA+nR-num-1].Name)
+				aurInstall = append(aurInstall, aq[numaq+numpq-num-1].Name)
 			} else {
-				aurInstall = append(aurInstall, a[num-nR].Name)
+				aurInstall = append(aurInstall, aq[num-numpq].Name)
 			}
 		} else {
 			if util.SortMode == util.BottomUp {
-				repoInstall = append(repoInstall, r[nR-num-1].Name)
+				repoInstall = append(repoInstall, pq[numpq-num-1].Name)
 			} else {
-				repoInstall = append(repoInstall, r[num].Name)
+				repoInstall = append(repoInstall, pq[num].Name)
 			}
 		}
 	}
@@ -148,22 +190,26 @@ func Upgrade(flags []string) error {
 }
 
 // Search presents a query to the local repos and to the AUR.
-func Search(pkg string) (err error) {
-	a, _, err := aur.Search(pkg, true)
+func Search(pkg string, narrow []string) (err error) {
+	aq, _, err := aur.Search(pkg, true)
 	if err != nil {
 		return err
 	}
-	r, _, err := pac.Search(pkg)
+	pq, _, err := pac.Search(pkg)
 	if err != nil {
 		return err
 	}
 
+	if len(narrow) != 0 {
+		aq, pq = narrowSearch(aq, pq, narrow)
+	}
+
 	if util.SortMode == util.BottomUp {
-		a.PrintSearch(0)
-		r.PrintSearch()
+		aq.PrintSearch(0)
+		pq.PrintSearch()
 	} else {
-		r.PrintSearch()
-		a.PrintSearch(0)
+		pq.PrintSearch()
+		aq.PrintSearch(0)
 	}
 
 	return nil
