@@ -99,13 +99,13 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	dir := util.BaseDir + a.PackageBase + "/"
 
 	if _, err = os.Stat(dir); os.IsNotExist(err) {
-		if err = a.setupWorkspace(); err != nil {
+		if err = util.DownloadAndUnpack(BaseURL+a.URLPath, util.BaseDir, false); err != nil {
 			return
 		}
 	} else {
 		if !util.ContinueTask("Directory exists. Clean Build?", "yY") {
 			os.RemoveAll(util.BaseDir + a.PackageBase)
-			if err = a.setupWorkspace(); err != nil {
+			if err = util.DownloadAndUnpack(BaseURL+a.URLPath, util.BaseDir, false); err != nil {
 				return
 			}
 		}
@@ -243,30 +243,6 @@ func RemoveMakeDeps(depS []string) (err error) {
 			return nil
 		}
 		err = pacman.CleanRemove(hanging)
-	}
-
-	return
-}
-
-func (a *Result) setupWorkspace() (err error) {
-	// No need to use filepath.separators because it won't run on inferior platforms
-	err = os.MkdirAll(util.BaseDir+"builds", 0755)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	tarLocation := util.BaseDir + a.PackageBase + ".tar.gz"
-	defer os.Remove(util.BaseDir + a.PackageBase + ".tar.gz")
-
-	err = downloadFile(tarLocation, BaseURL+a.URLPath)
-	if err != nil {
-		return
-	}
-
-	err = exec.Command(util.TarBin, "-xf", tarLocation, "-C", util.BaseDir).Run()
-	if err != nil {
-		return
 	}
 
 	return

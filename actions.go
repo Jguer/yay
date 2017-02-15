@@ -29,7 +29,6 @@ func narrowSearch(aq aur.Query, pq pac.Query, narrow []string) (raq aur.Query, r
 		if match {
 			rpq = append(rpq, pr)
 		}
-
 	}
 
 	for _, ar := range aq {
@@ -353,4 +352,21 @@ func CleanDependencies(pkgs []string) error {
 	}
 
 	return err
+}
+
+// GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
+func GetPkgbuild(pkg string) (err error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	wd = wd + "/"
+
+	err = pac.GetPkgbuild(pkg, wd)
+	if err == nil {
+		return
+	}
+
+	err = aur.GetPkgbuild(pkg, wd)
+	return
 }

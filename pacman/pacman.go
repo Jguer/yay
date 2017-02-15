@@ -525,3 +525,35 @@ big:
 	}
 	return
 }
+
+// GetPkgbuild downloads pkgbuild from the ABS.
+func GetPkgbuild(pkgN string, path string) (err error) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	dbList, err := h.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	for _, db := range dbList.Slice() {
+		pkg, err := db.PkgByName(pkgN)
+		if err == nil {
+			var url string
+			if db.Name() == "core" || db.Name() == "extra" {
+				url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg.Name() + ".tar.gz"
+			} else if db.Name() == "community" {
+				url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + pkg.Name() + ".tar.gz"
+			} else {
+				return fmt.Errorf("Not in standard repositories")
+			}
+			fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in ABS.\x1b[0m\n", pkgN)
+			util.DownloadAndUnpack(url, path, true)
+			return nil
+		}
+	}
+	return fmt.Errorf("Package not found.")
+}

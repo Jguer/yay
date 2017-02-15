@@ -26,6 +26,10 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 
 ### Changelog
 
+#### 1.100
+- Added manpage
+- Added -G to get pkgbuild from the AUR or ABS.
+
 #### 1.91
 - `--downtop` has been replaced with `--bottomup` (as is logical)
 - `yay -Ssq` and `yay -Sqs` now displays AUR packages with less information

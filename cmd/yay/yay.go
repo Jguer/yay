@@ -22,8 +22,9 @@ func usage() {
     yay {-U --upgrade}  [options] <file(s)>
 
     New operations:
-    yay -Qstats   displays system information
-    yay -Cd       remove unneeded dependencies
+    yay -Qstats          displays system information
+    yay -Cd              remove unneeded dependencies
+    yay -G [package(s)]  get pkgbuild from ABS or AUR
 
     New options:
     --topdown     shows repository's packages first and then aur's
@@ -82,6 +83,13 @@ func main() {
 	switch op {
 	case "-Cd":
 		err = yay.CleanDependencies(pkgs)
+	case "-G":
+		for _, pkg := range pkgs {
+			err = yay.GetPkgbuild(pkg)
+			if err != nil {
+				fmt.Println(pkg+":", err)
+			}
+		}
 	case "-Qstats":
 		err = yay.LocalStatistics(version)
 	case "-Ss", "-Ssq", "-Sqs":

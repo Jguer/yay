@@ -72,3 +72,19 @@ func Upgrade(flags []string) error {
 
 	return nil
 }
+
+// GetPkgbuild downloads pkgbuild from the AUR.
+func GetPkgbuild(pkgN string, dir string) (err error) {
+	aq, numaq, err := Info(pkgN)
+	if err != nil {
+		return err
+	}
+
+	if numaq == 0 {
+		return fmt.Errorf("no results")
+	}
+
+	fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in AUR.\x1b[0m\n", pkgN)
+	util.DownloadAndUnpack(BaseURL+aq[0].URLPath, dir, false)
+	return
+}
