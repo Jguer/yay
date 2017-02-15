@@ -141,17 +141,23 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
+	var depArgs []string
+	if util.NoConfirm == true {
+		depArgs = []string{"--asdeps", "--noconfirm"}
+	} else {
+		depArgs = []string{"--asdeps"}
+	}
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-		errR := pacman.Install(repoDeps, []string{"--asdeps", "--noconfirm"})
+		errR := pacman.Install(repoDeps, depArgs)
 		if errR != nil {
 			return finalmdeps, errR
 		}
 	}
 
-	// Handle AUR dependencies first
+	// Handle AUR dependencies
 	for _, dep := range aurQ {
-		finalmdepsR, errA := dep.Install([]string{"--asdeps", "--noconfirm"})
+		finalmdepsR, errA := dep.Install(depArgs)
 		finalmdeps = append(finalmdeps, finalmdepsR...)
 
 		if errA != nil {
