@@ -27,9 +27,9 @@ func usage() {
     yay -G [package(s)]  get pkgbuild from ABS or AUR
 
     New options:
-    --topdown     shows repository's packages first and then aur's
-    --bottomup     shows aur's packages first and then repository's
-    --noconfirm   skip user input on package install
+    --topdown            shows repository's packages first and then aur's
+    --bottomup           shows aur's packages first and then repository's
+    --noconfirm          skip user input on package install
 `)
 }
 
