@@ -33,43 +33,48 @@ func usage() {
 `)
 }
 
-var version = "1.92"
+var version = "1.100"
 
 func parser() (op string, options []string, packages []string, err error) {
 	if len(os.Args) < 2 {
 		err = fmt.Errorf("no operation specified")
 		return
 	}
+	op = "yogurt"
 
 	for _, arg := range os.Args[1:] {
 		if arg[0] == '-' && arg[1] != '-' {
-			op = arg
+			switch arg {
+			case "-b":
+				util.Build = true
+			default:
+				op = arg
+			}
+			continue
 		}
 
 		if arg[0] == '-' && arg[1] == '-' {
-			if arg == "--help" {
-				op = arg
-			} else if arg == "--topdown" {
-				util.SortMode = util.TopDown
-			} else if arg == "--bottomup" {
+			switch arg {
+			case "--build":
+				util.Build = true
+			case "--bottomup":
 				util.SortMode = util.BottomUp
-			} else if arg == "--noconfirm" {
+			case "--topdown":
+				util.SortMode = util.TopDown
+			case "--help":
+				usage()
+				os.Exit(0)
+			case "--noconfirm":
 				util.NoConfirm = true
-				options = append(options, arg)
-			} else {
+				fallthrough
+			default:
 				options = append(options, arg)
 			}
+			continue
 		}
 
-		if arg[0] != '-' {
-			packages = append(packages, arg)
-		}
+		packages = append(packages, arg)
 	}
-
-	if op == "" {
-		op = "yogurt"
-	}
-
 	return
 }
 
@@ -114,8 +119,6 @@ func main() {
 		if pkgs != nil {
 			err = yay.NumberMenu(pkgs[0], pkgs[1:], options)
 		}
-	case "--help", "-h":
-		usage()
 	default:
 		err = yay.PassToPacman(op, pkgs, options)
 	}

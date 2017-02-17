@@ -11,28 +11,28 @@ import (
 
 // Result describes an AUR package.
 type Result struct {
-	ID             int     `json:"ID"`
-	Name           string  `json:"Name"`
-	PackageBaseID  int     `json:"PackageBaseID"`
-	PackageBase    string  `json:"PackageBase"`
-	Version        string  `json:"Version"`
-	Description    string  `json:"Description"`
-	URL            string  `json:"URL"`
-	NumVotes       int     `json:"NumVotes"`
-	Popularity     float32 `json:"Popularity"`
-	OutOfDate      int     `json:"OutOfDate"`
-	Maintainer     string  `json:"Maintainer"`
-	FirstSubmitted int     `json:"FirstSubmitted"`
-	LastModified   int64   `json:"LastModified"`
-	URLPath        string  `json:"URLPath"`
-	Installed      bool
-	Depends        []string `json:"Depends"`
-	MakeDepends    []string `json:"MakeDepends"`
-	OptDepends     []string `json:"OptDepends"`
 	Conflicts      []string `json:"Conflicts"`
-	Provides       []string `json:"Provides"`
-	License        []string `json:"License"`
+	Depends        []string `json:"Depends"`
+	Description    string   `json:"Description"`
+	FirstSubmitted int      `json:"FirstSubmitted"`
+	ID             int      `json:"ID"`
 	Keywords       []string `json:"Keywords"`
+	LastModified   int64    `json:"LastModified"`
+	License        []string `json:"License"`
+	Maintainer     string   `json:"Maintainer"`
+	MakeDepends    []string `json:"MakeDepends"`
+	Name           string   `json:"Name"`
+	NumVotes       int      `json:"NumVotes"`
+	OptDepends     []string `json:"OptDepends"`
+	OutOfDate      int      `json:"OutOfDate"`
+	PackageBase    string   `json:"PackageBase"`
+	PackageBaseID  int      `json:"PackageBaseID"`
+	Provides       []string `json:"Provides"`
+	URL            string   `json:"URL"`
+	URLPath        string   `json:"URLPath"`
+	Version        string   `json:"Version"`
+	Installed      bool
+	Popularity     float32 `json:"Popularity"`
 }
 
 // Dependencies returns package dependencies not installed belonging to AUR
@@ -112,7 +112,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	}
 
 	if !util.ContinueTask("Edit PKGBUILD?", "yY") {
-		editcmd := exec.Command(Editor, dir+"PKGBUILD")
+		editcmd := exec.Command(util.Editor(), dir+"PKGBUILD")
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		editcmd.Run()
 	}
@@ -133,7 +133,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	aurQ, n, err := MultiInfo(aurDeps)
+	aurQ, n, _ := MultiInfo(aurDeps)
 	if n != len(aurDeps) {
 		aurQ.MissingPackage(aurDeps)
 		if !util.ContinueTask("Continue?", "nN") {
@@ -142,7 +142,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	}
 
 	var depArgs []string
-	if util.NoConfirm == true {
+	if util.NoConfirm {
 		depArgs = []string{"--asdeps", "--noconfirm"}
 	} else {
 		depArgs = []string{"--asdeps"}
@@ -172,11 +172,9 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 		return
 	}
 
-	var makepkgcmd *exec.Cmd
-	var args []string
-	args = append(args, "-sri")
+	args := []string{"-sri"}
 	args = append(args, flags...)
-	makepkgcmd = exec.Command(util.MakepkgBin, args...)
+	makepkgcmd := exec.Command(util.MakepkgBin, args...)
 	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = makepkgcmd.Run()
 	return

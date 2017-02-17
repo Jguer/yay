@@ -25,6 +25,9 @@ const (
 	Minimal
 )
 
+// Build controls if packages will be built from ABS.
+var Build = false
+
 // NoConfirm ignores prompts.
 var NoConfirm = false
 
@@ -115,4 +118,31 @@ func DownloadAndUnpack(url string, path string, trim bool) (err error) {
 	}
 
 	return
+}
+
+// Editor returns the prefered system editor.
+func Editor() string {
+	if os.Getenv("EDITOR") != "" {
+		return os.Getenv("EDITOR")
+	} else if os.Getenv("VISUAL") != "" {
+		return os.Getenv("VISUAL")
+	} else {
+		fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m$EDITOR\x1b[0;;40m is not set.\x1b[0m\nPlease add $EDITOR or to your environment variables.\n")
+
+	editorLoop:
+		fmt.Printf("\x1b[32m%s\x1b[0m ", "Edit PKGBUILD with:")
+		var editorInput string
+		_, err := fmt.Scanln(&editorInput)
+		if err != nil {
+			fmt.Println(err)
+			goto editorLoop
+		}
+
+		editor, err := exec.LookPath(editorInput)
+		if err != nil {
+			fmt.Println(err)
+			goto editorLoop
+		}
+		return editor
+	}
 }

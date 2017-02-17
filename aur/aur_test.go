@@ -9,7 +9,6 @@ import (
 func TestSearch(t *testing.T) {
 
 	eN := "yay"
-	eD := "Yet another yogurt. Pacman wrapper with AUR support written in go."
 	result, _, err := Search("yay", true)
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
@@ -18,7 +17,7 @@ func TestSearch(t *testing.T) {
 	// t.Logf("Got struct: %+v", result)
 	found := false
 	for _, v := range result {
-		if v.Name == eN && v.Description == eD {
+		if v.Name == eN {
 			found = true
 		}
 	}
@@ -43,7 +42,6 @@ func BenchmarkSearchComplexSorted(b *testing.B) { benchmarkSearch("linux", true,
 func TestInfo(t *testing.T) {
 
 	eN := "yay"
-	eD := "Yet another yogurt. Pacman wrapper with AUR support written in go."
 	eM := []string{"go", "git"}
 	result, _, err := Info("yay")
 	if err != nil {
@@ -53,7 +51,7 @@ func TestInfo(t *testing.T) {
 	// t.Logf("Got struct: %+v", result)
 	found := false
 	for _, v := range result {
-		if v.Name == eN && v.Description == eD && reflect.DeepEqual(v.MakeDepends, eM) {
+		if v.Name == eN && reflect.DeepEqual(v.MakeDepends, eM) {
 			found = true
 		}
 	}

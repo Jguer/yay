@@ -52,7 +52,6 @@ func narrowSearch(aq aur.Query, pq pac.Query, narrow []string) (raq aur.Query, r
 // NumberMenu presents a CLI for selecting packages to install.
 func NumberMenu(pkgName string, narrow []string, flags []string) (err error) {
 	var num int
-	var numberString string
 
 	aq, numaq, err := aur.Search(pkgName, true)
 	if err != nil {
@@ -83,12 +82,13 @@ func NumberMenu(pkgName string, narrow []string, flags []string) (err error) {
 
 	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
-	numberString, err = reader.ReadString('\n')
-	if err != nil {
+	numberBuf, overflow, err := reader.ReadLine()
+	if err != nil || overflow {
 		fmt.Println(err)
 		return
 	}
 
+	numberString := string(numberBuf)
 	var aurInstall []string
 	var repoInstall []string
 	result := strings.Fields(numberString)

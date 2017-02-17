@@ -28,7 +28,11 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 
 #### 1.100
 - Added manpage
-- Added -G to get pkgbuild from the AUR or ABS.
+- Improved search [#3](https://github.com/Jguer/yay/issues/3)
+- Added -G to get pkgbuild from the AUR or ABS. [#6](https://github.com/Jguer/yay/issues/6)
+- Fixed [#8](https://github.com/Jguer/yay/issues/8)
+- Completed and decluttered zsh completions
+- If `$EDITOR` or `$VISUAL` is not set yay will prompt you for an editor [#7](https://github.com/Jguer/yay/issues/7)
 
 #### 1.91
 - `--downtop` has been replaced with `--bottomup` (as is logical)

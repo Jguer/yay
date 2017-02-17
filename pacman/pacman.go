@@ -46,16 +46,10 @@ func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 
 // UpdatePackages handles cache update and upgrade
 func UpdatePackages(flags []string) error {
-	var cmd *exec.Cmd
-	var args []string
+	args := append([]string{"pacman", "-Syu"}, flags...)
 
-	args = append(args, "pacman", "-Syu")
-	args = append(args, flags...)
-
-	cmd = exec.Command("sudo", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
+	cmd := exec.Command("sudo", args...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
 	return err
 }
@@ -85,10 +79,7 @@ func Search(pkgName string) (s Query, n int, err error) {
 	}
 
 	compL := func(len int, i int) bool {
-		if i > 0 {
-			return true
-		}
-		return false
+		return i > 0
 	}
 
 	finalL := func(i int) int {
@@ -102,10 +93,7 @@ func Search(pkgName string) (s Query, n int, err error) {
 		}
 
 		compL = func(len int, i int) bool {
-			if i < len {
-				return true
-			}
-			return false
+			return i < len
 		}
 
 		finalL = func(i int) int {
@@ -163,7 +151,7 @@ func (s Query) PrintSearch() {
 			toprint += fmt.Sprintf("(%s) ", res.Group)
 		}
 
-		if res.Installed == true {
+		if res.Installed {
 			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
 		}
 
@@ -216,7 +204,7 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		}
 
 		if !found {
-			if _, err := dbList.PkgCachebyGroup(pkg); err == nil {
+			if _, errdb := dbList.PkgCachebyGroup(pkg); errdb == nil {
 				repo = append(repo, pkg)
 			} else {
 				aur = append(aur, pkg)
@@ -311,15 +299,11 @@ func Install(pkgName []string, flags []string) (err error) {
 		return nil
 	}
 
-	var cmd *exec.Cmd
-	var args []string
-	args = append(args, "pacman", "-S")
+	args := []string{"pacman", "-S"}
 	args = append(args, pkgName...)
-	if len(flags) != 0 {
-		args = append(args, flags...)
-	}
+	args = append(args, flags...)
 
-	cmd = exec.Command("sudo", args...)
+	cmd := exec.Command("sudo", args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Run()
 	return nil
@@ -331,13 +315,11 @@ func CleanRemove(pkgName []string) (err error) {
 		return nil
 	}
 
-	var cmd *exec.Cmd
-	var args []string
-	args = append(args, "pacman", "-Rnsc")
+	args := []string{"pacman", "-Rnsc"}
 	args = append(args, pkgName...)
 	args = append(args, "--noconfirm")
 
-	cmd = exec.Command("sudo", args...)
+	cmd := exec.Command("sudo", args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Run()
 	return nil
@@ -551,9 +533,9 @@ func GetPkgbuild(pkgN string, path string) (err error) {
 				return fmt.Errorf("Not in standard repositories")
 			}
 			fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in ABS.\x1b[0m\n", pkgN)
-			util.DownloadAndUnpack(url, path, true)
-			return nil
+			errD := util.DownloadAndUnpack(url, path, true)
+			return errD
 		}
 	}
-	return fmt.Errorf("Package not found.")
+	return fmt.Errorf("package not found")
 }
