@@ -10,7 +10,7 @@ func benchmarkPrintSearch(search string, b *testing.B) {
 	os.Stdout = w
 
 	for n := 0; n < b.N; n++ {
-		res, _, _ := Search(search)
+		res, _, _ := Search(append([]string{}, search))
 		res.PrintSearch()
 	}
 	os.Stdout = old
@@ -36,7 +36,7 @@ func BenchmarkPrintSearchComplexBottomUp(b *testing.B) {
 
 func benchmarkSearch(search string, b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		Search(search)
+		Search(append([]string{}, search))
 	}
 }
 func BenchmarkSearchSimpleTopDown(b *testing.B) {

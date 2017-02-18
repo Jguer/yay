@@ -105,20 +105,17 @@ func main() {
 		}
 
 		if pkgs != nil {
-			err = yay.Search(pkgs[0], pkgs[1:])
+			err = yay.SyncSearch(pkgs)
 		}
 	case "-S":
 		err = yay.Install(pkgs, options)
 	case "-Syu", "-Suy":
 		err = yay.Upgrade(options)
 	case "-Si":
-		err = yay.SingleSearch(pkgs, options)
+		err = yay.SyncInfo(pkgs, options)
 	case "yogurt":
 		util.SearchVerbosity = util.NumberMenu
-
-		if pkgs != nil {
-			err = yay.NumberMenu(pkgs[0], pkgs[1:], options)
-		}
+		err = yay.NumberMenu(pkgs, options)
 	default:
 		err = yay.PassToPacman(op, pkgs, options)
 	}

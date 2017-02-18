@@ -3,6 +3,7 @@ package aur
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
@@ -91,27 +92,45 @@ func MultiInfo(pkgS []string) (Query, int, error) {
 }
 
 // Search returns an AUR search
-func Search(pkg string, sortS bool) (Query, int, error) {
+func Search(pkgS []string, sortS bool) (Query, int, error) {
 	type returned struct {
 		Results     Query `json:"results"`
 		ResultCount int   `json:"resultcount"`
 	}
 	r := returned{}
-	err := getJSON("https://aur.archlinux.org/rpc/?v=5&type=search&arg="+pkg, &r)
+	err := getJSON("https://aur.archlinux.org/rpc/?v=5&type=search&arg="+pkgS[0], &r)
+
+	var aq Query
+	n := 0
+	setter := pacman.PFactory(pFSetTrue)
+	var fri int
+
+	for _, res := range r.Results {
+		match := true
+		for _, pkgN := range pkgS[1:] {
+			if !(strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)) {
+				match = false
+				break
+			}
+		}
+
+		if match {
+			n++
+			aq = append(aq, res)
+			fri = len(aq) - 1
+			setter(aq[fri].Name, &aq[fri], false)
+		}
+	}
+
+	if aq != nil {
+		setter(aq[fri].Name, &aq[fri], true)
+	}
 
 	if sortS {
-		sort.Sort(r.Results)
+		sort.Sort(aq)
 	}
-	setter := pacman.PFactory(pFSetTrue)
 
-	for i, res := range r.Results {
-		if i == len(r.Results)-1 {
-			setter(res.Name, &r.Results[i], true)
-			continue
-		}
-		setter(res.Name, &r.Results[i], false)
-	}
-	return r.Results, r.ResultCount, err
+	return aq, n, err
 }
 
 // This is very dirty but it works so good.

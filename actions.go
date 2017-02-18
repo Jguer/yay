@@ -14,62 +14,21 @@ import (
 	"github.com/jguer/yay/util"
 )
 
-// NarrowSearch removes terms that don't contain narrow terms in the description or name.
-func narrowSearch(aq aur.Query, pq pac.Query, narrow []string) (raq aur.Query, rpq pac.Query) {
-	for _, pr := range pq {
-		match := false
-		for _, narrowS := range narrow {
-			if strings.Contains(strings.ToUpper(pr.Name), strings.ToUpper(narrowS)) || strings.Contains(strings.ToUpper(pr.Description), strings.ToUpper(narrowS)) {
-				match = true
-			} else {
-				match = false
-			}
-		}
-
-		if match {
-			rpq = append(rpq, pr)
-		}
-	}
-
-	for _, ar := range aq {
-		match := false
-		for _, narrowS := range narrow {
-			if strings.Contains(strings.ToUpper(ar.Name), strings.ToUpper(narrowS)) || strings.Contains(strings.ToUpper(ar.Description), strings.ToUpper(narrowS)) {
-				match = true
-			} else {
-				match = false
-			}
-		}
-
-		if match {
-			raq = append(raq, ar)
-		}
-	}
-
-	return
-}
-
 // NumberMenu presents a CLI for selecting packages to install.
-func NumberMenu(pkgName string, narrow []string, flags []string) (err error) {
+func NumberMenu(pkgS []string, flags []string) (err error) {
 	var num int
 
-	aq, numaq, err := aur.Search(pkgName, true)
+	aq, numaq, err := aur.Search(pkgS, true)
 	if err != nil {
 		fmt.Println("Error during AUR search:", err)
 	}
-	pq, numpq, err := pac.Search(pkgName)
+	pq, numpq, err := pac.Search(pkgS)
 	if err != nil {
 		return
 	}
 
 	if numpq == 0 && numaq == 0 {
 		return fmt.Errorf("no packages match search")
-	}
-
-	if len(narrow) != 0 {
-		aq, pq = narrowSearch(aq, pq, narrow)
-		numaq = len(aq)
-		numpq = len(pq)
 	}
 
 	if util.SortMode == util.BottomUp {
@@ -188,19 +147,15 @@ func Upgrade(flags []string) error {
 	return erra
 }
 
-// Search presents a query to the local repos and to the AUR.
-func Search(pkg string, narrow []string) (err error) {
-	aq, _, err := aur.Search(pkg, true)
+// SyncSearch presents a query to the local repos and to the AUR.
+func SyncSearch(pkgS []string) (err error) {
+	aq, _, err := aur.Search(pkgS, true)
 	if err != nil {
 		return err
 	}
-	pq, _, err := pac.Search(pkg)
+	pq, _, err := pac.Search(pkgS)
 	if err != nil {
 		return err
-	}
-
-	if len(narrow) != 0 {
-		aq, pq = narrowSearch(aq, pq, narrow)
 	}
 
 	if util.SortMode == util.BottomUp {
@@ -214,8 +169,8 @@ func Search(pkg string, narrow []string) (err error) {
 	return nil
 }
 
-// SingleSearch serves as a pacman -Si for repo packages and AUR packages.
-func SingleSearch(pkgS []string, flags []string) (err error) {
+// SyncInfo serves as a pacman -Si for repo packages and AUR packages.
+func SyncInfo(pkgS []string, flags []string) (err error) {
 	aurS, repoS, err := pac.PackageSlices(pkgS)
 	if err != nil {
 		return

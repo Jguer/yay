@@ -26,6 +26,9 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 
 ### Changelog
 
+#### 1.101
+- Search speed and quality improved [#3](https://github.com/Jguer/yay/issues/3)
+
 #### 1.100
 - Added manpage
 - Improved search [#3](https://github.com/Jguer/yay/issues/3)

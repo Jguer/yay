@@ -55,7 +55,7 @@ func UpdatePackages(flags []string) error {
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
-func Search(pkgName string) (s Query, n int, err error) {
+func Search(pkgInputN []string) (s Query, n int, err error) {
 	h, err := conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
@@ -108,12 +108,20 @@ func Search(pkgName string) (s Query, n int, err error) {
 
 		for i := initL(lenPkgs); compL(lenPkgs, i); i = finalL(i) {
 
-			if strings.Contains(pkgS[i].Name(), pkgName) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgName) {
+			match := true
+			for _, pkgN := range pkgInputN {
+				if !(strings.Contains(pkgS[i].Name(), pkgN) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgN)) {
+					match = false
+					break
+				}
+			}
+
+			if match {
+				installed = false
 				if r, _ := localDb.PkgByName(pkgS[i].Name()); r != nil {
 					installed = true
-				} else {
-					installed = false
 				}
+				n++
 
 				s = append(s, Result{
 					Name:        pkgS[i].Name(),
@@ -123,7 +131,6 @@ func Search(pkgName string) (s Query, n int, err error) {
 					Group:       strings.Join(pkgS[i].Groups().Slice(), ","),
 					Installed:   installed,
 				})
-				n++
 			}
 		}
 	}

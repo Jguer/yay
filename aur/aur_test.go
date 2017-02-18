@@ -9,7 +9,7 @@ import (
 func TestSearch(t *testing.T) {
 
 	eN := "yay"
-	result, _, err := Search("yay", true)
+	result, _, err := Search([]string{"yay"}, true)
 	if err != nil {
 		t.Fatalf("Expected err to be nil but it was %s", err)
 	}
@@ -30,7 +30,7 @@ func TestSearch(t *testing.T) {
 func benchmarkSearch(search string, sort bool, b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
-		Search(search, sort)
+		Search([]string{search}, sort)
 	}
 }
 
