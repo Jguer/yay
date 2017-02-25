@@ -127,7 +127,7 @@ func Editor() string {
 	} else if os.Getenv("VISUAL") != "" {
 		return os.Getenv("VISUAL")
 	} else {
-		fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m$EDITOR\x1b[0;;40m is not set.\x1b[0m\nPlease add $EDITOR or to your environment variables.\n")
+		fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m$EDITOR\x1b[0;37;40m is not set.\x1b[0m\nPlease add $EDITOR or to your environment variables.\n")
 
 	editorLoop:
 		fmt.Printf("\x1b[32m%s\x1b[0m ", "Edit PKGBUILD with:")
