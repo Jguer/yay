@@ -1,4 +1,4 @@
-#compdef yay yay.static=yay
+#compdef yay
 
 typeset -A opt_args
 setopt extendedglob
@@ -6,7 +6,8 @@ setopt extendedglob
 # options for passing to _arguments: main pacman commands
 _pacman_opts_commands=(
 	{-D,--database}'[Modify database]'
-	{-G,--getpkgfile}'[Get PKGBUILD from ABS or AUR]'
+	{-F,--files}'[Query the files database]'
+	{-G,--getpkgbuild}'[Get PKGBUILD from ABS or AUR]'
 	{-Q,--query}'[Query the package database]'
 	{-R,--remove}'[Remove a package from the system]'
 	{-S,--sync}'[Synchronize packages]'
@@ -18,29 +19,40 @@ _pacman_opts_commands=(
 
 # options for passing to _arguments: options common to all commands
 _pacman_opts_common=(
+	'--arch[Set an alternate architecture]'
 	{-b,--dbpath}'[Alternate database location]:database_location:_files -/'
 	'--color[colorize the output]:color options:(always never auto)'
 	{-h,--help}'[Display syntax for the given operation]'
 	{-r,--root}'[Set alternate installation root]:installation root:_files -/'
 	{-v,--verbose}'[Be more verbose]'
-  '--topdown[shows repositorys packages first and then aurs]'
-  '--bottomup[shows aurs packages first and then repositorys]'
 	'--cachedir[Alternate package cache location]:cache_location:_files -/'
 	'--config[An alternate configuration file]:config file:_files'
+	'--confirm[Always ask for confirmation]'
+	'--debug[Display debug messages]'
+	'--gpgdir[Set an alternate directory for GnuPG (instead of /etc/pacman.d/gnupg)]: :_files -/'
+	'--hookdir[Set an alternate hook location]: :_files -/'
 	'--logfile[An alternate log file]:config file:_files'
 	'--noconfirm[Do not ask for confirmation]'
 	'--noprogressbar[Do not show a progress bar when downloading files]'
 	'--noscriptlet[Do not execute the install scriptlet if one exists]'
-	'--print[Only print the targets instead of performing the operation]'
+	'--bottomup[Show AUR packages first]'
+	'--topdown[Show repository packages first]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
 _pacman_opts_pkgfile=(
 	'*-d[Skip dependency checks]'
 	'*--nodeps[Skip dependency checks]'
+	'*--assume-installed[Add virtual package to satisfy dependencies]'
 	'--dbonly[Only remove database entry, do not remove files]'
 	'--force[Overwrite conflicting files]'
 	'--needed[Do not reinstall up to date packages]'
+	'--asdeps[mark packages as non-explicitly installed]'
+	'--asexplicit[mark packages as explicitly installed]'
+	{-p,--print}'[Only print the targets instead of performing the operation]'
+	'*--ignore[Ignore a package upgrade]:package: _pacman_completions_all_packages'
+	'*--ignoregroup[Ignore a group upgrade]:package group:_pacman_completions_all_groups'
+	'--print-format[Specify how the targets should be printed]'
 	'*:package file:_files -g "*.pkg.tar*~*.sig(.,@)"'
 )
 
@@ -63,6 +75,7 @@ _pacman_opts_query_modifiers=(
 	{-l,--list}'[List package contents]'
 	{-m,--foreign}'[List installed packages not found in sync db(s)]'
 	{-n,--native}'[List installed packages found in sync db(s)]'
+	{-q,--quiet}'[Show less information for query and search]'
 	{-t,--unrequired}'[List packages not required by any package]'
 	{-u,--upgrades}'[List packages that can be upgraded]'
 )
@@ -70,10 +83,14 @@ _pacman_opts_query_modifiers=(
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(
 	{-c,--cascade}'[Remove all dependent packages]'
-	{*-d,*--nodeps}'[Skip dependency checks]'
+	{-d,--nodeps}'[Skip dependency checks]'
+	'*--assume-installed[Add virtual package to satisfy dependencies]'
 	{-n,--nosave}'[Remove protected configuration files]'
+	{-p,--print}'[Only print the targets instead of performing the operation]'
 	{\*-s,\*--recursive}'[Remove dependencies not required by other packages]'
+	{-u,--unneeded}'[Remove unneeded packages]'
 	'--dbonly[Only remove database entry, do not remove files]'
+	'--print-format[Specify how the targets should be printed]'
 	'*:installed package:_pacman_completions_installed_packages'
 )
 
@@ -81,6 +98,16 @@ _pacman_opts_database=(
 	'--asdeps[mark packages as non-explicitly installed]'
 	'--asexplicit[mark packages as explicitly installed]'
 	'*:installed package:_pacman_completions_installed_packages'
+)
+
+_pacman_opts_files=(
+	{-l,--list}'[List the files owned by the queried package]:package:_pacman_completions_all_packages'
+	{-o,--owns}'[Query the package that owns]:files:_files'
+	{-s,--search}'[Search package file names for matching strings]:files:_files'
+	{-x,--regex}'[Enable searching using regluar expressions]:regex:'
+	{-y,--refresh}'[Download fresh files databases from the server]'
+	'--machinereadable[Produce machine-readable output]'
+	{-q,--quiet}'[Show less information for query and search]'
 )
 
 # options for passing to _arguments: options for --sync command
@@ -97,9 +124,11 @@ _pacman_opts_sync_actions=(
 # options for passing to _arguments: options for --sync command
 _pacman_opts_sync_modifiers=(
 	{\*-d,\*--nodeps}'[Skip dependency checks]'
+	'*--assume-installed[Add virtual package to satisfy dependencies]'
 	{\*-i,\*--info}'[View package information]'
 	{-l,--list}'[List all packages in a repository]'
 	{-p,--print}'[Print download URIs for each package to be installed]'
+	{-q,--quiet}'[Show less information for query and search]'
 	{\*-u,\*--sysupgrade}'[Upgrade all out-of-date packages]'
 	{-w,--downloadonly}'[Download packages only]'
 	{\*-y,\*--refresh}'[Download fresh package databases]'
@@ -108,6 +137,7 @@ _pacman_opts_sync_modifiers=(
 	'--asdeps[Install packages as non-explicitly installed]'
 	'--asexplicit[Install packages as explicitly installed]'
 	'--force[Overwrite conflicting files]'
+	'--print-format[Specify how the targets should be printed]'
 )
 
 # handles --help subcommand
@@ -176,6 +206,14 @@ _pacman_action_database() {
 		'(--database -D)'{-D,--database} \
 		"$_pacman_opts_common[@]" \
 		"$_pacman_opts_database[@]"
+}
+
+# handles --files subcommand
+_pacman_action_files() {
+	_arguments -s : \
+		'(--files -F)'{-F,--files} \
+		"$_pacman_opts_common[@]" \
+		"$_pacman_opts_files[@]"
 }
 
 _pacman_action_deptest () {
@@ -248,23 +286,36 @@ _pacman_completions_all_groups() {
 	_pacman_get_command
 	groups=( $(_call_program groups $cmd[@] -Sg) )
 	typeset -U groups
-	compadd "$@" -a groups
+
+	if [[ ${words[CURRENT-1]} == '--ignoregroup' ]]; then
+		_sequence compadd -S ',' "$@" -a groups
+	else
+		compadd "$@" -a groups
+	fi
 }
 
 # provides completions for packages available from repositories
 # these can be specified as either 'package' or 'repository/package'
 _pacman_completions_all_packages() {
-	local -a cmd packages repositories packages_long
+	local -a seq sep cmd packages repositories packages_long
 	_pacman_get_command
+
+	if [[ ${words[CURRENT-1]} == '--ignore' ]]; then
+		seq='_sequence'
+		sep=(-S ',')
+	else
+		seq=
+		sep=()
+	fi
 
 	if compset -P1 '*/*'; then
 		packages=( $(_call_program packages $cmd[@] -Sql ${words[CURRENT]%/*}) )
 		typeset -U packages
-		_wanted repo_packages expl "repository/package" compadd ${(@)packages}
+		${seq} _wanted repo_packages expl "repository/package" compadd ${sep[@]} ${(@)packages}
 	else
 		packages=( $(_call_program packages $cmd[@] -Sql) )
 		typeset -U packages
-		_wanted packages expl "packages" compadd - "${(@)packages}"
+		${seq} _wanted packages expl "packages" compadd ${sep[@]} - "${(@)packages}"
 
 		repositories=(${(o)${${${(M)${(f)"$(</etc/pacman.conf)"}:#\[*}/\[/}/\]/}:#options})
 		typeset -U repositories
@@ -284,8 +335,8 @@ _pacman_completions_installed_groups() {
 # provides completions for installed packages
 _pacman_completions_installed_packages() {
 	local -a cmd packages packages_long
-	packages_long=(@localstatedir@/lib/pacman/local/*(/))
-	packages=( ${${packages_long#@localstatedir@/lib/pacman/local/}%-*-*} )
+	packages_long=(/var/lib/pacman/local/*(/))
+	packages=( ${${packages_long#/var/lib/pacman/local/}%-*-*} )
 	compadd "$@" -a packages
 }
 
@@ -339,6 +390,9 @@ _pacman_zsh_comp() {
 			;;
 		D*)
 			_pacman_action_database
+			;;
+		F*)
+			_pacman_action_files
 			;;
 		Q*g*) # ipkg groups
 			_arguments -s : \
@@ -430,6 +484,9 @@ _pacman_zsh_comp() {
 				*--database*)
 					_pacman_action_database
 					;;
+				*--files*)
+					_pacman_action_files
+					;;
 				*--version*)
 					_pacman_action_version
 					;;
@@ -443,7 +500,6 @@ _pacman_zsh_comp() {
 			;;
 	esac
 }
-
 _pacman_comp() {
 	case "$service" in
 		yay)

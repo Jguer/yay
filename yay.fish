@@ -13,6 +13,7 @@ set -l listgroups "(pacman -Sg)\t'Package Group'"
 
 set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
 set -l database '__fish_contains_opt -s D database'
+set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
 set -l query '__fish_contains_opt -s Q query'
 set -l remove '__fish_contains_opt -s R remove'
 set -l sync '__fish_contains_opt -s S sync'
@@ -28,6 +29,7 @@ complete -c $progname -n $noopt -a "-Q" -d "Query the package database"
 # Primary operations
 complete -c $progname -s D -f -l database -n $noopt -d 'Modify the package database'
 complete -c $progname -s Q -f -l query -n $noopt -d 'Query the package database'
+complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
 complete -c $progname -s R -f -l remove -n $noopt -d 'Remove packages from the system'
 complete -c $progname -s S -f -l sync -n $noopt -d 'Synchronize packages'
 complete -c $progname -s T -f -l deptest -n $noopt -d 'Check if dependencies are installed'
@@ -84,6 +86,9 @@ for condition in query sync
     complete -c $progname -n $$condition -s q -l quiet -d 'Show less information' -f
     complete -c $progname -n $$condition -s s -l search -r -d 'Search packages for regexp' -f
 end
+
+# Get PKGBUILD options
+complete -c $progname -n "$getpkgbuild" -xa "$listall"
 
 # Query options
 complete -c $progname -n $query -s c -l changelog -d 'View the change log of PACKAGE' -f
