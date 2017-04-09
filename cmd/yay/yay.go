@@ -62,7 +62,7 @@ func parser() (op string, options []string, packages []string, err error) {
 			case "--topdown":
 				util.SortMode = util.TopDown
 			case "--complete":
-				if len(os.Args) > i + 3 {
+				if len(os.Args) > i+3 {
 					util.Shell = os.Args[i+2]
 				}
 				yay.Complete()
@@ -121,7 +121,10 @@ func main() {
 		err = yay.SyncInfo(pkgs, options)
 	case "yogurt":
 		util.SearchVerbosity = util.NumberMenu
-		err = yay.NumberMenu(pkgs, options)
+
+		if pkgs != nil {
+			err = yay.NumberMenu(pkgs, options)
+		}
 	default:
 		err = yay.PassToPacman(op, pkgs, options)
 	}
