@@ -61,6 +61,9 @@ func parser() (op string, options []string, packages []string, err error) {
 				util.SortMode = util.BottomUp
 			case "--topdown":
 				util.SortMode = util.TopDown
+			case "--complete":
+				yay.Complete()
+				os.Exit(0)
 			case "--help":
 				usage()
 				os.Exit(0)

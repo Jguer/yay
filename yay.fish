@@ -1,13 +1,14 @@
 # Completions for apacman
 # Original Author for pacman: Giorgio Lando <patroclo7@gmail.com>
 # Updated for pacman by maxfl, SanskritFritz, faho, f1u77y
-# Updated for apacman by jguer
+# Updated for yay by jguer
 
 set -l progname yay
 
 set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 # This might be an issue if another package manager is also installed (e.g. for containers)
 set -l listall "(__fish_print_packages)"
+set -l listaur "(yay --complete)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 
@@ -117,7 +118,7 @@ complete -c $progname -n "$sync; and not __fish_contains_opt -s u sysupgrade" -s
 complete -c $progname -n "$sync; and __fish_contains_opt -s u sysupgrade" -s u -l sysupgrade -d 'Also downgrade packages'
 complete -c $progname -n $sync -s w -l downloadonly -d 'Only download the target packages'
 complete -c $progname -n $sync -s y -l refresh -d 'Download fresh copy of the package list'
-complete -c $progname -n "$sync" -xa "$listall $listgroups"
+complete -c $progname -n "$sync" -xa "$listall $listgroups $listaur"
 
 # Database options
 set -l has_db_opt '__fish_contains_opt asdeps asexplicit'

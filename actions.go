@@ -3,7 +3,9 @@ package yay
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
@@ -324,4 +326,18 @@ func GetPkgbuild(pkg string) (err error) {
 
 	err = aur.GetPkgbuild(pkg, wd)
 	return
+}
+
+func Complete() (err error) {
+	// Get the data
+	resp, err := http.Get("https://aur.archlinux.org/packages.gz")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	_, err = io.Copy(os.Stdout, resp.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
