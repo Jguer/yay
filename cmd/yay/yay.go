@@ -63,6 +63,8 @@ func parser() (op string, options []string, packages []string, err error) {
 				util.SortMode = util.TopDown
 			case "--complete":
 				util.Shell = os.Args[i+1]
+				fmt.Println(util.Shell)
+				os.Exit(0)
 				yay.Complete()
 				os.Exit(0)
 			case "--help":

@@ -339,10 +339,13 @@ func Complete() (err error) {
 		if err != nil {
 			return err
 		}
-		defer out.Close()
 
-		aur.CreateAURList(out)
+		if aur.CreateAURList(out) != nil {
+			defer os.Remove(path)
+		}
 		err = pac.CreatePackageList(out)
+
+		out.Close()
 		return err
 	}
 

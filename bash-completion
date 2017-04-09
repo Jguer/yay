@@ -50,7 +50,7 @@ _pacman_pkg() {
   )"
 }
 
-_pacman() {
+_yay() {
   local common core cur database prev query remove sync upgrade o
   COMPREPLY=()
   _get_comp_words_by_ref cur prev
@@ -90,7 +90,7 @@ _pacman() {
           _pacman_pkg Qq;;
       S)
         { _arch_incomp 'g groups' && _pacman_pkg Sg; }      ||
-        { _arch_incomp 'l list'   && _pacman_pkg Sl sort; } ||
+          { _arch_incomp 'l list'   && $(yay --complete bash); } ||
           _pacman_pkg Slq;;
       U)
           _pacman_file;;
@@ -103,6 +103,6 @@ _pacman_file() {
   compopt -o filenames; _filedir 'pkg.tar*'
 }
 
-complete -F _pacman -o default yay
+complete -F _yay -o default yay
 
 # ex:et ts=2 sw=2 ft=sh
