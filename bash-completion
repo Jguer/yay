@@ -90,8 +90,8 @@ _yay() {
           _pacman_pkg Qq;;
       S)
         { _arch_incomp 'g groups' && _pacman_pkg Sg; }      ||
-          { _arch_incomp 'l list'   && $(yay --complete bash); } ||
-          _pacman_pkg Slq;;
+          { _arch_incomp 'l list'   && _arch_compgen "$(yay --complete bash | \sort -u)"; } ||
+          _arch_compgen "$(yay --complete bash)";;
       U)
           _pacman_file;;
       esac
