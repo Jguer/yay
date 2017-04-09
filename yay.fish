@@ -1,17 +1,14 @@
-# Completions for apacman
 # Original Author for pacman: Giorgio Lando <patroclo7@gmail.com>
-# Updated for pacman by maxfl, SanskritFritz, faho, f1u77y
 # Updated for yay by jguer
 
 set -l progname yay
 
 set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 # This might be an issue if another package manager is also installed (e.g. for containers)
-set -l listall "(__fish_print_packages)"
-set -l listaur "(yay --complete)"
+set -l listall "(yay --complete fish)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
-
+set -l listpacman "(__fish_print_packages)"
 set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
 set -l database '__fish_contains_opt -s D database'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
@@ -118,7 +115,7 @@ complete -c $progname -n "$sync; and not __fish_contains_opt -s u sysupgrade" -s
 complete -c $progname -n "$sync; and __fish_contains_opt -s u sysupgrade" -s u -l sysupgrade -d 'Also downgrade packages'
 complete -c $progname -n $sync -s w -l downloadonly -d 'Only download the target packages'
 complete -c $progname -n $sync -s y -l refresh -d 'Download fresh copy of the package list'
-complete -c $progname -n "$sync" -xa "$listall $listgroups $listaur"
+complete -c $progname -n "$sync" -xa "$listall $listgroups"
 
 # Database options
 set -l has_db_opt '__fish_contains_opt asdeps asexplicit'
@@ -134,7 +131,7 @@ complete -c $progname -n "$files; and not $has_file_opt" -xa -l -d 'List files o
 complete -c $progname -n "$files; and not $has_file_opt" -xa --search -d 'Search packages for matching files'
 complete -c $progname -n "$files; and not $has_file_opt" -xa -s -d 'Search packages for matching files'
 complete -c $progname -n "$files" -s y -l refresh -d 'Refresh the files database' -f
-complete -c $progname -n "$files" -s l -l list -d 'List files owned by given packages' -xa $listall
+complete -c $progname -n "$files" -s l -l list -d 'List files owned by given packages' -xa $listpacman
 complete -c $progname -n "$files" -s s -l search -d 'Search packages for matching files'
 complete -c $progname -n "$files" -s o -l owns -d 'Search for packages that include the given files'
 complete -c $progname -n "$files" -s q -l quiet -d 'Show less information' -f

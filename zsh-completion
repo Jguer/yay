@@ -298,7 +298,6 @@ _pacman_completions_all_groups() {
 # these can be specified as either 'package' or 'repository/package'
 _pacman_completions_all_packages() {
 	local -a seq sep cmd packages repositories packages_long
-	_pacman_get_command
 
 	if [[ ${words[CURRENT-1]} == '--ignore' ]]; then
 		seq='_sequence'
@@ -309,11 +308,11 @@ _pacman_completions_all_packages() {
 	fi
 
 	if compset -P1 '*/*'; then
-		packages=( $(_call_program packages $cmd[@] -Sql ${words[CURRENT]%/*}) )
+		packages=( $(_call_program packages yay --complete zsh ${words[CURRENT]%/*}) )
 		typeset -U packages
 		${seq} _wanted repo_packages expl "repository/package" compadd ${sep[@]} ${(@)packages}
 	else
-		packages=( $(_call_program packages $cmd[@] -Sql) )
+		packages=( $(_call_program packages yay --complete zsh) )
 		typeset -U packages
 		${seq} _wanted packages expl "packages" compadd ${sep[@]} - "${(@)packages}"
 

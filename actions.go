@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
@@ -329,68 +328,30 @@ func GetPkgbuild(pkg string) (err error) {
 	return
 }
 
-func createAURList(path string) (err error) {
-	os.MkdirAll(os.Getenv("HOME")+"/.cache/yay", 0755)
-
-	out, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	resp, err := http.Get("https://aur.archlinux.org/packages.gz")
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func updateAURList(out io.Writer) (err error) {
-	resp, err := http.Get("https://aur.archlinux.org/packages.gz")
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-
-}
-
 // Complete provides completion info for shells
 func Complete() (err error) {
 	path := os.Getenv("HOME") + "/.cache/yay/aur.cache"
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = createAURList(path)
+	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
+		os.MkdirAll(os.Getenv("HOME")+"/.cache/yay", 0755)
+
+		out, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		defer out.Close()
+
+		aur.CreateAURList(out)
+		err = pac.CreatePackageList(out)
+		return err
 	}
 
 	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
 	defer in.Close()
-	if err != nil {
-		return err
-	}
 
-	info, err := in.Stat()
-	if time.Since(info.ModTime()).Hours() > 48 {
-		err = updateAURList(in)
-	}
-
-	// Get the data
 	_, err = io.Copy(os.Stdout, in)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

@@ -546,3 +546,39 @@ func GetPkgbuild(pkgN string, path string) (err error) {
 	}
 	return fmt.Errorf("package not found")
 }
+
+//CreatePackageList appends Repo packages to completion cache
+func CreatePackageList(out *os.File) (err error) {
+	h, err := conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+		return
+	}
+
+	dbList, err := h.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	p := func(pkg alpm.Package) error {
+		fmt.Print(pkg.Name())
+		out.WriteString(pkg.Name())
+		if util.Shell == "fish" {
+			fmt.Print("\t" + pkg.DB().Name() + "\n")
+			out.WriteString("\t" + pkg.DB().Name() + "\n")
+		} else {
+			fmt.Print("\n")
+			out.WriteString("\n")
+		}
+
+		return nil
+	}
+
+	f := func(db alpm.Db) error {
+		db.PkgCache().ForEach(p)
+		return nil
+	}
+
+	dbList.ForEach(f)
+	return nil
+}

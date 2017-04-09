@@ -25,6 +25,8 @@ const (
 	Minimal
 )
 
+var Shell = "fish"
+
 // Build controls if packages will be built from ABS.
 var Build = false
 
