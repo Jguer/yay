@@ -1,8 +1,8 @@
 # yay
 Yet another Yogurt - An AUR Helper written in Go
 
-**Packages**  
-[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) - Compile from source  
+**Packages**
+[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) - Compile from source
 [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) - Binary version
 
 There's a point in everyone's life when you feel the need to write an AUR helper because there are only about 20 of them.
@@ -10,8 +10,8 @@ So say hi to 20+1.
 
 Yay was created with a few objectives in mind and based on the design of yaourt and apacman:
 
-- Have almost no dependencies. 
-- Provide an interface for pacman. 
+- Have almost no dependencies.
+- Provide an interface for pacman.
 - Have yaourt like search.
 - Know when git packages are due for an upgrade (missing this one for now).
 
@@ -25,6 +25,9 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - `yay -Cd` cleans unneeded dependencies
 
 ### Changelog
+
+#### 1.115
+- Added AUR completions (updates on first completion every 48h)
 
 #### 1.101
 - Search speed and quality improved [#3](https://github.com/Jguer/yay/issues/3)
