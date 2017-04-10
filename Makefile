@@ -20,19 +20,23 @@ test:
 	go test ./...
 build:
 	go build -v -o ${BINARY} ${LDFLAGS} ./cmd/yay/
-release:
+release64:
 	GOARCH=${ARCH64} go build -v -o ./${PKGNAME}_1.${VERSION}_${ARCH64}/${PKGNAME} ${LDFLAGS} ./cmd/yay/
 	cp ./LICENSE ./${PKGNAME}_1.${VERSION}_${ARCH64}/
 	cp ./yay.fish ./${PKGNAME}_1.${VERSION}_${ARCH64}/
 	cp ./zsh-completion ./${PKGNAME}_1.${VERSION}_${ARCH64}/
 	cp ./bash-completion ./${PKGNAME}_1.${VERSION}_${ARCH64}/
 	tar -czvf ${PKGNAME}_1.${VERSION}_${ARCH64}.tar.gz ${PKGNAME}_1.${VERSION}_${ARCH64}
-	#GOARCH=${ARCH86} go build -v -o ./${PKGNAME}_1.${VERSION}_${ARCH86}/${PKGNAME} ${LDFLAGS} ./cmd/yay/
-
+release86:
+	GOARCH=${ARCH86} go build -v -o ./${PKGNAME}_1.${VERSION}_${ARCH86}/${PKGNAME} ${LDFLAGS} ./cmd/yay/
+	cp ./LICENSE ./${PKGNAME}_1.${VERSION}_${ARCH86}/
+	cp ./yay.fish ./${PKGNAME}_1.${VERSION}_${ARCH86}/
+	cp ./zsh-completion ./${PKGNAME}_1.${VERSION}_${ARCH86}/
+	cp ./bash-completion ./${PKGNAME}_1.${VERSION}_${ARCH86}/
+	tar -czvf ${PKGNAME}_1.${VERSION}_${ARCH86}.tar.gz ${PKGNAME}_1.${VERSION}_${ARCH86}
 run:
 	build
 	${BINARY}
-
 clean:
 	go clean
 	rm -r ./${PKGNAME}_1*
