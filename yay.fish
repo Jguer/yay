@@ -5,7 +5,7 @@ set -l progname yay
 
 set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 # This might be an issue if another package manager is also installed (e.g. for containers)
-set -l listall "(yay --complete fish)"
+set -l listall "(yay --fcomplete)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 set -l listpacman "(__fish_print_packages)"

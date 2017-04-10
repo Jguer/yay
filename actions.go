@@ -330,7 +330,7 @@ func GetPkgbuild(pkg string) (err error) {
 
 // Complete provides completion info for shells
 func Complete() (err error) {
-	path := os.Getenv("HOME") + "/.cache/yay/aur.cache"
+	path := os.Getenv("HOME") + "/.cache/yay/aur_" + util.Shell + ".cache"
 
 	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
 		os.MkdirAll(os.Getenv("HOME")+"/.cache/yay", 0755)

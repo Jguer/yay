@@ -42,7 +42,7 @@ func parser() (op string, options []string, packages []string, err error) {
 	}
 	op = "yogurt"
 
-	for i, arg := range os.Args[1:] {
+	for _, arg := range os.Args[1:] {
 		if arg[0] == '-' && arg[1] != '-' {
 			switch arg {
 			case "-b":
@@ -61,10 +61,13 @@ func parser() (op string, options []string, packages []string, err error) {
 				util.SortMode = util.BottomUp
 			case "--topdown":
 				util.SortMode = util.TopDown
+
 			case "--complete":
-				if len(os.Args) > i+3 {
-					util.Shell = os.Args[i+2]
-				}
+				util.Shell = "sh"
+				yay.Complete()
+				os.Exit(0)
+			case "--fcomplete":
+				util.Shell = "fish"
 				yay.Complete()
 				os.Exit(0)
 			case "--help":

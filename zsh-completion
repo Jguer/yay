@@ -308,11 +308,11 @@ _pacman_completions_all_packages() {
 	fi
 
 	if compset -P1 '*/*'; then
-		packages=( $(_call_program packages yay --complete zsh ${words[CURRENT]%/*}) )
+		packages=( $(_call_program packages yay --complete ${words[CURRENT]%/*}) )
 		typeset -U packages
 		${seq} _wanted repo_packages expl "repository/package" compadd ${sep[@]} ${(@)packages}
 	else
-		packages=( $(_call_program packages yay --complete zsh) )
+		packages=( $(_call_program packages yay --complete ) )
 		typeset -U packages
 		${seq} _wanted packages expl "packages" compadd ${sep[@]} - "${(@)packages}"
 
