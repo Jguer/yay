@@ -13,16 +13,26 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Have almost no dependencies.
 - Provide an interface for pacman.
 - Have yaourt like search.
-- Know when git packages are due for an upgrade (missing this one for now).
+- Minimize user input
+- Know when git packages are due for an upgrade. (TODO)
 
-![Yay Qstats](http://jguer.github.io/yay/yay2.png "yay -Qstats")
-![Yay NumberMenu](http://jguer.github.io/yay/yay3.png "yay gtk-theme")
+## Features
+- AUR Tab completion
+- Search narrowing (`yay linux header` will first search linux and then narrow on header)
+- No sourcing of PKGBuilds is done
+- The binary has no dependencies that pacman doesn't already have.
+- Sources build dependencies
+- Removes make dependencies at the end of build process
 
-### Custom Operations
+#### Custom Operations
 
 - `yay <Search Term>` presents package selection menu
 - `yay -Qstats` delivers system statistics
 - `yay -Cd` cleans unneeded dependencies
+- `yay -G` downloads PKGBuild from ABS or AUR
+
+![Yay Qstats](http://jguer.github.io/yay/yay2.png "yay -Qstats")
+![Yay NumberMenu](http://jguer.github.io/yay/yay3.png "yay gtk-theme")
 
 ### Changelog
 
