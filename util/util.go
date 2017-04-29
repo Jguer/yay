@@ -25,6 +25,7 @@ const (
 	Minimal
 )
 
+// Shell describes the default user shell
 var Shell = "fish"
 
 // Build controls if packages will be built from ABS.
@@ -122,7 +123,7 @@ func DownloadAndUnpack(url string, path string, trim bool) (err error) {
 	return
 }
 
-// Editor returns the prefered system editor.
+// Editor returns the preferred system editor.
 func Editor() string {
 	if os.Getenv("EDITOR") != "" {
 		return os.Getenv("EDITOR")
