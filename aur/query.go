@@ -5,12 +5,16 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
 )
 
 // Query is a collection of Results
 type Query []Result
+
+type returned struct {
+	Results     Query `json:"results"`
+	ResultCount int   `json:"resultcount"`
+}
 
 func (q Query) Len() int {
 	return len(q)
@@ -62,10 +66,6 @@ func (q Query) PrintSearch(start int) {
 
 // Info returns an AUR search with package details
 func Info(pkg string) (Query, int, error) {
-	type returned struct {
-		Results     Query `json:"results"`
-		ResultCount int   `json:"resultcount"`
-	}
 	r := returned{}
 
 	err := getJSON("https://aur.archlinux.org/rpc/?v=5&type=info&arg[]="+pkg, &r)
@@ -75,10 +75,6 @@ func Info(pkg string) (Query, int, error) {
 
 // MultiInfo takes a slice of strings and returns a slice with the info of each package
 func MultiInfo(pkgS []string) (Query, int, error) {
-	type returned struct {
-		Results     Query `json:"results"`
-		ResultCount int   `json:"resultcount"`
-	}
 	r := returned{}
 
 	var pkg string
@@ -93,18 +89,16 @@ func MultiInfo(pkgS []string) (Query, int, error) {
 
 // Search returns an AUR search
 func Search(pkgS []string, sortS bool) (Query, int, error) {
-	type returned struct {
-		Results     Query `json:"results"`
-		ResultCount int   `json:"resultcount"`
-	}
 	r := returned{}
 	err := getJSON("https://aur.archlinux.org/rpc/?v=5&type=search&arg="+pkgS[0], &r)
 
 	var aq Query
 	n := 0
-	setter := pacman.PFactory(pFSetTrue)
-	var fri int
 
+	h, _ := util.Conf.CreateHandle()
+	localDb, _ := h.LocalDb()
+
+	var fri int
 	for _, res := range r.Results {
 		match := true
 		for _, pkgN := range pkgS[1:] {
@@ -118,31 +112,19 @@ func Search(pkgS []string, sortS bool) (Query, int, error) {
 			n++
 			aq = append(aq, res)
 			fri = len(aq) - 1
-			setter(aq[fri].Name, &aq[fri], false)
+			_, err := localDb.PkgByName(res.Name)
+			if err == nil {
+				aq[fri].Installed = true
+			}
 		}
-	}
-
-	if aq != nil {
-		setter(aq[fri].Name, &aq[fri], true)
 	}
 
 	if sortS {
 		sort.Sort(aq)
 	}
 
+	h.Release()
 	return aq, n, err
-}
-
-// This is very dirty but it works so good.
-func pFSetTrue(res interface{}) {
-	f, ok := res.(*Result)
-	if !ok {
-		fmt.Println("Unable to convert back to Result")
-		return
-	}
-	f.Installed = true
-
-	return
 }
 
 // MissingPackage warns if the Query was unable to find a package

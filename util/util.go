@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	alpm "github.com/jguer/go-alpm"
 )
 
 // TarBin describes the default installation point of tar command.
@@ -45,6 +47,16 @@ const (
 	BottomUp = iota
 	TopDown
 )
+
+// PacmanConf describes the default pacman config file
+const PacmanConf string = "/etc/pacman.conf"
+
+// Conf describes the default alpm config
+var Conf alpm.PacmanConfig
+
+func init() {
+	Conf, _ = readConfig(PacmanConf)
+}
 
 // ContinueTask prompts if user wants to continue task.
 //If NoConfirm is set the action will continue without user input.
@@ -148,4 +160,16 @@ func Editor() string {
 		}
 		return editor
 	}
+}
+
+func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
+	file, err := os.Open(pacmanconf)
+	if err != nil {
+		return
+	}
+	conf, err = alpm.ParseConfig(file)
+	if err != nil {
+		return
+	}
+	return
 }

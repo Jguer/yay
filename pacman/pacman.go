@@ -23,27 +23,6 @@ type Result struct {
 	Installed   bool
 }
 
-// PacmanConf describes the default pacman config file
-const PacmanConf string = "/etc/pacman.conf"
-
-var conf alpm.PacmanConfig
-
-func init() {
-	conf, _ = readConfig(PacmanConf)
-}
-
-func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
-	file, err := os.Open(pacmanconf)
-	if err != nil {
-		return
-	}
-	conf, err = alpm.ParseConfig(file)
-	if err != nil {
-		return
-	}
-	return
-}
-
 // UpdatePackages handles cache update and upgrade
 func UpdatePackages(flags []string) error {
 	args := append([]string{"pacman", "-Syu"}, flags...)
@@ -56,7 +35,7 @@ func UpdatePackages(flags []string) error {
 
 // Search handles repo searches. Creates a RepoSearch struct.
 func Search(pkgInputN []string) (s Query, n int, err error) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 	}
@@ -167,28 +146,9 @@ func (s Query) PrintSearch() {
 	}
 }
 
-// PFactory execute an action over a series of packages without reopening the handle everytime.
-// Everybody told me it wouln't work. It does. It's just not pretty.
-// When it worked: https://youtu.be/a4Z5BdEL0Ag?t=1m11s
-func PFactory(action func(interface{})) func(name string, object interface{}, rel bool) {
-	h, _ := conf.CreateHandle()
-	localDb, _ := h.LocalDb()
-
-	return func(name string, object interface{}, rel bool) {
-		_, err := localDb.PkgByName(name)
-		if err == nil {
-			action(object)
-		}
-
-		if rel {
-			h.Release()
-		}
-	}
-}
-
 // PackageSlices separates an input slice into aur and repo slices
 func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -226,7 +186,7 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 // BuildDependencies finds packages, on the second run
 // compares with a baselist and avoids searching those
 func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
-	h, _ := conf.CreateHandle()
+	h, _ := util.Conf.CreateHandle()
 
 	localDb, _ := h.LocalDb()
 	dbList, _ := h.SyncDbs()
@@ -266,7 +226,7 @@ func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool
 // DepSatisfier receives a string slice, returns a slice of packages found in
 // repos and one of packages not found in repos. Leaves out installed packages.
 func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -324,7 +284,7 @@ func CleanRemove(pkgName []string) (err error) {
 
 	args := []string{"pacman", "-Rnsc"}
 	args = append(args, pkgName...)
-	args = append(args, "--noconfirm")
+	args = append(args, "--noutil.Conf.rm")
 
 	cmd := exec.Command("sudo", args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -337,7 +297,7 @@ func ForeignPackages() (foreign map[string]*struct {
 	Version string
 	Date    int64
 }, n int, err error) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -390,7 +350,7 @@ func Statistics() (info struct {
 	var nPkg int
 	var ePkg int
 
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -422,7 +382,7 @@ func Statistics() (info struct {
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
 func BiggestPackages() {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -449,7 +409,7 @@ func BiggestPackages() {
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
 func HangingPackages() (hanging []string, err error) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -480,7 +440,7 @@ func HangingPackages() (hanging []string, err error) {
 // SliceHangingPackages returns a list of packages installed as deps
 // and unneeded by the system from a provided list of package names.
 func SliceHangingPackages(pkgS []string) (hanging []string) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -517,7 +477,7 @@ big:
 
 // GetPkgbuild downloads pkgbuild from the ABS.
 func GetPkgbuild(pkgN string, path string) (err error) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
@@ -549,7 +509,7 @@ func GetPkgbuild(pkgN string, path string) (err error) {
 
 //CreatePackageList appends Repo packages to completion cache
 func CreatePackageList(out *os.File) (err error) {
-	h, err := conf.CreateHandle()
+	h, err := util.Conf.CreateHandle()
 	defer h.Release()
 	if err != nil {
 		return
