@@ -19,23 +19,24 @@ type branches []branch
 
 // Info contains the last commit sha of a repo
 type Info struct {
-	Package string `json:"owner"`
-	Repo    string `json:"Repo"`
+	Package string `json:"pkgname"`
+	URL     string `json:"url"`
 	SHA     string `json:"sha"`
 }
 
 type infos []Info
 
 var savedInfo infos
+var configfile string
 
 func init() {
-	path := os.Getenv("HOME") + "/.config/yay/yay_github.json"
+	configfile = os.Getenv("HOME") + "/.config/yay/yay_vcs.json"
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.MkdirAll(os.Getenv("HOME")+"/.config/yay/yay_github.json", 0755)
+	if _, err := os.Stat(configfile); os.IsNotExist(err) {
+		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
 	}
 
-	file, err := os.Open(path)
+	file, err := os.Open(configfile)
 	if err != nil {
 		fmt.Println("error:", err)
 		return
@@ -47,7 +48,8 @@ func init() {
 	}
 }
 
-func parseSource(source string) (owner string, repo string) {
+// ParseSource returns owner and repo from source
+func ParseSource(source string) (owner string, repo string) {
 	split := strings.Split(source, "github.com/")
 	if len(split) > 1 {
 		secondSplit := strings.Split(split[1], "/")
@@ -58,13 +60,44 @@ func parseSource(source string) (owner string, repo string) {
 				repo = thirdSplit[0]
 			}
 		}
-
 	}
 	return
 }
 
-func checkUpdates() {
+func (info *Info) needsUpdate() bool {
+	var newRepo branches
+	r, err := http.Get(info.URL)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer r.Body.Close()
 
+	err = json.NewDecoder(r.Body).Decode(&newRepo)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	for _, e := range newRepo {
+		if e.Name == "master" {
+			if e.SHA != info.SHA {
+				return true
+			} else {
+				return false
+			}
+		}
+	}
+	return false
+}
+
+func CheckUpdates() (toUpdate []string) {
+	for _, e := range savedInfo {
+		if e.needsUpdate() {
+			toUpdate = append(toUpdate, e.Package)
+		}
+	}
+	return
 }
 
 func inStore(pkgname string) *Info {
@@ -86,7 +119,7 @@ func BranchInfo(pkgname string, owner string, repo string) (err error) {
 	}
 	defer r.Body.Close()
 
-	json.NewDecoder(r.Body).Decode(newRepo)
+	_ = json.NewDecoder(r.Body).Decode(&newRepo)
 
 	packinfo := inStore(pkgname)
 
@@ -94,13 +127,28 @@ func BranchInfo(pkgname string, owner string, repo string) (err error) {
 		if e.Name == "master" {
 			if packinfo != nil {
 				packinfo.Package = pkgname
-				packinfo.Repo = owner + "/" + repo
+				packinfo.URL = url
 				packinfo.SHA = e.SHA
 			} else {
-				savedInfo = append(savedInfo, Info{Package: pkgname, Repo: owner + "/" + repo, SHA: e.SHA})
+				savedInfo = append(savedInfo, Info{Package: pkgname, URL: url, SHA: e.SHA})
 			}
 		}
 	}
 
 	return
+}
+
+func SaveBranchInfo() error {
+	marshalledinfo, _ := json.Marshal(savedInfo)
+	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	_, err = in.Write(marshalledinfo)
+	if err != nil {
+		return err
+	}
+	err = in.Sync()
+	return err
 }

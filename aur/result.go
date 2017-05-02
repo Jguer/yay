@@ -98,17 +98,14 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 	}
 	dir := util.BaseDir + a.PackageBase + "/"
 
-	if _, err = os.Stat(dir); os.IsNotExist(err) {
-		if err = util.DownloadAndUnpack(BaseURL+a.URLPath, util.BaseDir, false); err != nil {
-			return
-		}
-	} else {
+	if _, err = os.Stat(dir); os.IsExist(err) {
 		if !util.ContinueTask("Directory exists. Clean Build?", "yY") {
 			os.RemoveAll(util.BaseDir + a.PackageBase)
-			if err = util.DownloadAndUnpack(BaseURL+a.URLPath, util.BaseDir, false); err != nil {
-				return
-			}
 		}
+	}
+
+	if err = util.DownloadAndUnpack(BaseURL+a.URLPath, util.BaseDir, false); err != nil {
+		return
 	}
 
 	if !util.ContinueTask("Edit PKGBUILD?", "yY") {

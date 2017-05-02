@@ -29,5 +29,4 @@ func TestParsing(t *testing.T) {
 	if ack.owner != "davidgiven" || ack.repo != "ack" {
 		t.Fatalf("Expected to find davidgiven/ack, found %+v/%+v", ack.owner, ack.repo)
 	}
-
 }
