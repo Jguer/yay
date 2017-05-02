@@ -22,6 +22,9 @@ func NarrowSearch(pkgS []string, sortS bool) (Query, error) {
 	r, err := rpc.Search(pkgS[0])
 
 	if len(pkgS) == 1 {
+		if sortS {
+			sort.Sort(Query(r))
+		}
 		return r, err
 	}
 
