@@ -68,11 +68,11 @@ func parser() (op string, options []string, packages []string, err error) {
 
 			case "--complete":
 				util.Shell = "sh"
-				Complete()
+				complete()
 				os.Exit(0)
 			case "--fcomplete":
 				util.Shell = "fish"
-				Complete()
+				complete()
 				os.Exit(0)
 			case "--help":
 				usage()
@@ -100,16 +100,16 @@ func main() {
 
 	switch op {
 	case "-Cd":
-		err = CleanDependencies(pkgs)
+		err = cleanDependencies(pkgs)
 	case "-G":
 		for _, pkg := range pkgs {
-			err = GetPkgbuild(pkg)
+			err = getPkgbuild(pkg)
 			if err != nil {
 				fmt.Println(pkg+":", err)
 			}
 		}
 	case "-Qstats":
-		err = LocalStatistics(version)
+		err = localStatistics(version)
 	case "-Ss", "-Ssq", "-Sqs":
 		if op == "-Ss" {
 			util.SearchVerbosity = util.Detailed
@@ -118,14 +118,14 @@ func main() {
 		}
 
 		if pkgs != nil {
-			err = SyncSearch(pkgs)
+			err = syncSearch(pkgs)
 		}
 	case "-S":
-		err = Install(pkgs, options)
+		err = install(pkgs, options)
 	case "-Syu", "-Suy":
-		err = Upgrade(options)
+		err = upgrade(options)
 	case "-Si":
-		err = SyncInfo(pkgs, options)
+		err = syncInfo(pkgs, options)
 	case "yogurt":
 		util.SearchVerbosity = util.NumberMenu
 
@@ -133,7 +133,7 @@ func main() {
 			err = numberMenu(pkgs, options)
 		}
 	default:
-		err = PassToPacman(op, pkgs, options)
+		err = passToPacman(op, pkgs, options)
 	}
 
 	if err != nil {
@@ -146,10 +146,11 @@ func main() {
 func numberMenu(pkgS []string, flags []string) (err error) {
 	var num int
 
-	aq, numaq, err := aur.Search(pkgS, true)
+	aq, err := aur.NarrowSearch(pkgS, true)
 	if err != nil {
 		fmt.Println("Error during AUR search:", err)
 	}
+	numaq := len(aq)
 	pq, numpq, err := pac.Search(pkgS)
 	if err != nil {
 		return
@@ -160,11 +161,11 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if util.SortMode == util.BottomUp {
-		aq.PrintSearch(numpq)
+		printAURSearch(aq, numpq)
 		pq.PrintSearch()
 	} else {
 		pq.PrintSearch()
-		aq.PrintSearch(numpq)
+		printAURSearch(aq, numpq)
 	}
 
 	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
@@ -208,26 +209,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(aurInstall) != 0 {
-		q, n, err := aur.MultiInfo(aurInstall)
-		if err != nil {
-			return err
-		} else if n != len(aurInstall) {
-			q.MissingPackage(aurInstall)
-		}
-
-		var finalrm []string
-		for _, aurpkg := range q {
-			finalmdeps, err := aurpkg.Install(flags)
-			finalrm = append(finalrm, finalmdeps...)
-			if err != nil {
-				// Do not abandon program, we might still be able to install the rest
-				fmt.Println(err)
-			}
-		}
-
-		if len(finalrm) != 0 {
-			aur.RemoveMakeDeps(finalrm)
-		}
+		aur.Install(aurInstall, flags)
 	}
 
 	return nil

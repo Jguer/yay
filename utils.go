@@ -15,7 +15,7 @@ import (
 )
 
 // PassToPacman outsorces execution to pacman binary without modifications.
-func PassToPacman(op string, pkgs []string, flags []string) error {
+func passToPacman(op string, pkgs []string, flags []string) error {
 	var cmd *exec.Cmd
 	var args []string
 
@@ -43,7 +43,7 @@ func PassToPacman(op string, pkgs []string, flags []string) error {
 }
 
 // Complete provides completion info for shells
-func Complete() (err error) {
+func complete() (err error) {
 	path := os.Getenv("HOME") + "/.cache/yay/aur_" + util.Shell + ".cache"
 
 	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {

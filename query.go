@@ -6,11 +6,52 @@ import (
 	"github.com/jguer/yay/aur"
 	pac "github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
+	rpc "github.com/mikkeloscar/aur"
 )
 
+// PrintSearch handles printing search results in a given format
+func printAURSearch(q aur.Query, start int) {
+	h, err := util.Conf.CreateHandle()
+	defer h.Release()
+	if err != nil {
+	}
+
+	localDb, _ := h.LocalDb()
+
+	for i, res := range q {
+		var toprint string
+		if util.SearchVerbosity == util.NumberMenu {
+			if util.SortMode == util.BottomUp {
+				toprint += fmt.Sprintf("%d ", len(q)+start-i-1)
+			} else {
+				toprint += fmt.Sprintf("%d ", start+i)
+			}
+		} else if util.SearchVerbosity == util.Minimal {
+			fmt.Println(res.Name)
+			continue
+		}
+		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) ", "aur", res.Name, res.Version, res.NumVotes)
+		if res.Maintainer == "" {
+			toprint += fmt.Sprintf("\x1b[31;40m(Orphaned)\x1b[0m ")
+		}
+
+		if res.OutOfDate != 0 {
+			toprint += fmt.Sprintf("\x1b[31;40m(Out-of-date)\x1b[0m ")
+		}
+
+		if _, err := localDb.PkgByName(res.Name); err == nil {
+			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
+		}
+		toprint += "\n" + res.Description
+		fmt.Println(toprint)
+	}
+
+	return
+}
+
 // SyncSearch presents a query to the local repos and to the AUR.
-func SyncSearch(pkgS []string) (err error) {
-	aq, _, err := aur.Search(pkgS, true)
+func syncSearch(pkgS []string) (err error) {
+	aq, err := aur.NarrowSearch(pkgS, true)
 	if err != nil {
 		return err
 	}
@@ -20,41 +61,41 @@ func SyncSearch(pkgS []string) (err error) {
 	}
 
 	if util.SortMode == util.BottomUp {
-		aq.PrintSearch(0)
+		printAURSearch(aq, 0)
 		pq.PrintSearch()
 	} else {
 		pq.PrintSearch()
-		aq.PrintSearch(0)
+		printAURSearch(aq, 0)
 	}
 
 	return nil
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func SyncInfo(pkgS []string, flags []string) (err error) {
+func syncInfo(pkgS []string, flags []string) (err error) {
 	aurS, repoS, err := pac.PackageSlices(pkgS)
 	if err != nil {
 		return
 	}
 
-	q, _, err := aur.MultiInfo(aurS)
+	q, err := rpc.Info(aurS)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	for _, aurP := range q {
-		aurP.PrintInfo()
+		aur.AURPrintInfo(&aurP)
 	}
 
 	if len(repoS) != 0 {
-		err = PassToPacman("-Si", repoS, flags)
+		err = passToPacman("-Si", repoS, flags)
 	}
 
 	return
 }
 
 // LocalStatistics returns installed packages statistics.
-func LocalStatistics(version string) error {
+func localStatistics(version string) error {
 	info, err := pac.Statistics()
 	if err != nil {
 		return err
@@ -79,7 +120,7 @@ func LocalStatistics(version string) error {
 		keys[i] = k
 		i++
 	}
-	q, _, err := aur.MultiInfo(keys)
+	q, err := rpc.Info(keys)
 	if err != nil {
 		return err
 	}

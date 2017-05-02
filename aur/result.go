@@ -7,42 +7,16 @@ import (
 
 	"github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
+	rpc "github.com/mikkeloscar/aur"
 )
-
-// Result describes an AUR package.
-type Result struct {
-	Conflicts      []string `json:"Conflicts"`
-	Depends        []string `json:"Depends"`
-	Description    string   `json:"Description"`
-	FirstSubmitted int      `json:"FirstSubmitted"`
-	ID             int      `json:"ID"`
-	Keywords       []string `json:"Keywords"`
-	LastModified   int64    `json:"LastModified"`
-	License        []string `json:"License"`
-	Maintainer     string   `json:"Maintainer"`
-	MakeDepends    []string `json:"MakeDepends"`
-	Name           string   `json:"Name"`
-	NumVotes       int      `json:"NumVotes"`
-	OptDepends     []string `json:"OptDepends"`
-	OutOfDate      int      `json:"OutOfDate"`
-	PackageBase    string   `json:"PackageBase"`
-	PackageBaseID  int      `json:"PackageBaseID"`
-	Provides       []string `json:"Provides"`
-	URL            string   `json:"URL"`
-	URLPath        string   `json:"URLPath"`
-	Version        string   `json:"Version"`
-	Installed      bool
-	Popularity     float32 `json:"Popularity"`
-}
 
 // Dependencies returns package dependencies not installed belonging to AUR
 // 0 is Repo, 1 is Foreign.
-func (a *Result) Dependencies() (runDeps [2][]string, makeDeps [2][]string, err error) {
+func PkgDependencies(a *rpc.Pkg) (runDeps [2][]string, makeDeps [2][]string, err error) {
 	var q Query
 	if len(a.Depends) == 0 && len(a.MakeDepends) == 0 {
-		var n int
-		q, n, err = Info(a.Name)
-		if n == 0 || err != nil {
+		q, err = rpc.Info([]string{a.Name})
+		if len(q) == 0 || err != nil {
 			err = fmt.Errorf("Unable to search dependencies, %s", err)
 			return
 		}
@@ -91,7 +65,7 @@ func printDeps(repoDeps []string, aurDeps []string) {
 }
 
 // Install handles install from Info Result.
-func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
+func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	fmt.Printf("\x1b[1;32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
 	if a.Maintainer == "" {
 		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
@@ -100,7 +74,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 
 	if _, err = os.Stat(dir); os.IsExist(err) {
 		if !util.ContinueTask("Directory exists. Clean Build?", "yY") {
-			os.RemoveAll(util.BaseDir + a.PackageBase)
+			_ = os.RemoveAll(util.BaseDir + a.PackageBase)
 		}
 	}
 
@@ -114,7 +88,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 		editcmd.Run()
 	}
 
-	runDeps, makeDeps, err := a.Dependencies()
+	runDeps, makeDeps, err := PkgDependencies(a)
 	if err != nil {
 		return
 	}
@@ -130,9 +104,9 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	aurQ, n, _ := MultiInfo(aurDeps)
-	if n != len(aurDeps) {
-		aurQ.MissingPackage(aurDeps)
+	aurQ, _ := rpc.Info(aurDeps)
+	if len(aurQ) != len(aurDeps) {
+		(Query)(aurQ).MissingPackage(aurDeps)
 		if !util.ContinueTask("Continue?", "nN") {
 			return finalmdeps, fmt.Errorf("unable to install dependencies")
 		}
@@ -154,7 +128,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 
 	// Handle AUR dependencies
 	for _, dep := range aurQ {
-		finalmdepsR, errA := dep.Install(depArgs)
+		finalmdepsR, errA := PkgInstall(&dep, depArgs)
 		finalmdeps = append(finalmdeps, finalmdepsR...)
 
 		if errA != nil {
@@ -178,7 +152,7 @@ func (a *Result) Install(flags []string) (finalmdeps []string, err error) {
 }
 
 // PrintInfo prints package info like pacman -Si.
-func (a *Result) PrintInfo() {
+func AURPrintInfo(a *rpc.Pkg) {
 	fmt.Println("\x1b[1;37mRepository      :\x1b[0m", "aur")
 	fmt.Println("\x1b[1;37mName            :\x1b[0m", a.Name)
 	fmt.Println("\x1b[1;37mVersion         :\x1b[0m", a.Version)
@@ -190,11 +164,11 @@ func (a *Result) PrintInfo() {
 	}
 	fmt.Println("\x1b[1;37mLicenses        :\x1b[0m", a.License)
 
-	if len(a.Provides) != 0 {
-		fmt.Println("\x1b[1;37mProvides        :\x1b[0m", a.Provides)
-	} else {
-		fmt.Println("\x1b[1;37mProvides        :\x1b[0m", "None")
-	}
+	// if len(a.Provides) != 0 {
+	// 	fmt.Println("\x1b[1;37mProvides        :\x1b[0m", a.Provides)
+	// } else {
+	// 	fmt.Println("\x1b[1;37mProvides        :\x1b[0m", "None")
+	// }
 
 	if len(a.Depends) != 0 {
 		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", a.Depends)
