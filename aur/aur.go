@@ -13,6 +13,9 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+// BaseURL givers the AUR default address.
+const BaseURL string = "https://aur.archlinux.org"
+
 // NarrowSearch searches AUR and narrows based on subarguments
 func NarrowSearch(pkgS []string, sortS bool) (Query, error) {
 	if len(pkgS) == 0 {

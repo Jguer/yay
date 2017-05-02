@@ -7,8 +7,6 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
-const aurURL = "https://aur.archlinux.org/rpc/?"
-
 // Query is a collection of Results
 type Query []rpc.Pkg
 
