@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jguer/yay/aur"
+	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
 )
@@ -67,11 +68,11 @@ func parser() (op string, options []string, packages []string, err error) {
 				util.SortMode = util.TopDown
 
 			case "--complete":
-				util.Shell = "sh"
+				config.YayConf.Shell = "sh"
 				complete()
 				os.Exit(0)
 			case "--fcomplete":
-				util.Shell = "fish"
+				config.YayConf.Shell = "fish"
 				complete()
 				os.Exit(0)
 			case "--help":
@@ -136,6 +137,7 @@ func main() {
 		err = passToPacman(op, pkgs, options)
 	}
 
+	config.AlpmHandle.Release()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

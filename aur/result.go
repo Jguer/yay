@@ -5,12 +5,13 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/jguer/yay/config"
 	"github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
 	rpc "github.com/mikkeloscar/aur"
 )
 
-// Dependencies returns package dependencies not installed belonging to AUR
+// PkgDependencies returns package dependencies not installed belonging to AUR
 // 0 is Repo, 1 is Foreign.
 func PkgDependencies(a *rpc.Pkg) (runDeps [2][]string, makeDeps [2][]string, err error) {
 	var q Query
@@ -64,26 +65,26 @@ func printDeps(repoDeps []string, aurDeps []string) {
 	}
 }
 
-// Install handles install from Info Result.
+// PkgInstall handles install from Info Result.
 func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	fmt.Printf("\x1b[1;32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
 	if a.Maintainer == "" {
 		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
 	}
-	dir := util.BaseDir + a.PackageBase + "/"
+	dir := config.YayConf.BuildDir + a.PackageBase + "/"
 
 	if _, err = os.Stat(dir); os.IsExist(err) {
-		if !util.ContinueTask("Directory exists. Clean Build?", "yY") {
-			_ = os.RemoveAll(util.BaseDir + a.PackageBase)
+		if !config.ContinueTask("Directory exists. Clean Build?", "yY") {
+			_ = os.RemoveAll(config.YayConf.BuildDir + a.PackageBase)
 		}
 	}
 
-	if err = util.DownloadAndUnpack(BaseURL+a.URLPath, util.BaseDir, false); err != nil {
+	if err = config.DownloadAndUnpack(BaseURL+a.URLPath, config.YayConf.BuildDir, false); err != nil {
 		return
 	}
 
-	if !util.ContinueTask("Edit PKGBUILD?", "yY") {
-		editcmd := exec.Command(util.Editor(), dir+"PKGBUILD")
+	if !config.ContinueTask("Edit PKGBUILD?", "yY") {
+		editcmd := exec.Command(config.Editor(), dir+"PKGBUILD")
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		editcmd.Run()
 	}
@@ -99,7 +100,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	finalmdeps = append(finalmdeps, makeDeps[1]...)
 
 	if len(aurDeps) != 0 || len(repoDeps) != 0 {
-		if !util.ContinueTask("Continue?", "nN") {
+		if !config.ContinueTask("Continue?", "nN") {
 			return finalmdeps, fmt.Errorf("user did not like the dependencies")
 		}
 	}
@@ -107,7 +108,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	aurQ, _ := rpc.Info(aurDeps)
 	if len(aurQ) != len(aurDeps) {
 		(Query)(aurQ).MissingPackage(aurDeps)
-		if !util.ContinueTask("Continue?", "nN") {
+		if !config.ContinueTask("Continue?", "nN") {
 			return finalmdeps, fmt.Errorf("unable to install dependencies")
 		}
 	}
@@ -145,14 +146,14 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 
 	args := []string{"-sri"}
 	args = append(args, flags...)
-	makepkgcmd := exec.Command(util.MakepkgBin, args...)
+	makepkgcmd := exec.Command(config.YayConf.MakepkgBin, args...)
 	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = makepkgcmd.Run()
 	return
 }
 
 // PrintInfo prints package info like pacman -Si.
-func AURPrintInfo(a *rpc.Pkg) {
+func PrintInfo(a *rpc.Pkg) {
 	fmt.Println("\x1b[1;37mRepository      :\x1b[0m", "aur")
 	fmt.Println("\x1b[1;37mName            :\x1b[0m", a.Name)
 	fmt.Println("\x1b[1;37mVersion         :\x1b[0m", a.Version)
@@ -214,7 +215,7 @@ func RemoveMakeDeps(depS []string) (err error) {
 	hanging := pacman.SliceHangingPackages(depS)
 
 	if len(hanging) != 0 {
-		if !util.ContinueTask("Confirm Removal?", "nN") {
+		if !config.ContinueTask("Confirm Removal?", "nN") {
 			return nil
 		}
 		err = pacman.CleanRemove(hanging)

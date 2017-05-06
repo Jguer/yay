@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jguer/go-alpm"
+	"github.com/jguer/yay/config"
 	"github.com/jguer/yay/util"
 )
 
@@ -35,16 +36,11 @@ func UpdatePackages(flags []string) error {
 
 // Search handles repo searches. Creates a RepoSearch struct.
 func Search(pkgInputN []string) (s Query, n int, err error) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-	}
-
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -148,13 +144,7 @@ func (s Query) PrintSearch() {
 
 // PackageSlices separates an input slice into aur and repo slices
 func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -186,10 +176,8 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 // BuildDependencies finds packages, on the second run
 // compares with a baselist and avoids searching those
 func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
-	h, _ := util.Conf.CreateHandle()
-
-	localDb, _ := h.LocalDb()
-	dbList, _ := h.SyncDbs()
+	localDb, _ := config.AlpmHandle.LocalDb()
+	dbList, _ := config.AlpmHandle.SyncDbs()
 
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
@@ -197,7 +185,6 @@ func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool
 
 	return func(toCheck []string, isBaseList bool, close bool) (repo []string, notFound []string) {
 		if close {
-			h.Release()
 			return
 		}
 
@@ -226,17 +213,11 @@ func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool
 // DepSatisfier receives a string slice, returns a slice of packages found in
 // repos and one of packages not found in repos. Leaves out installed packages.
 func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
-
-	localDb, err := h.LocalDb()
-	if err != nil {
-		return
-	}
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -297,17 +278,12 @@ func ForeignPackages() (foreign map[string]*struct {
 	Version string
 	Date    int64
 }, n int, err error) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
 
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -350,13 +326,7 @@ func Statistics() (info struct {
 	var nPkg int
 	var ePkg int
 
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -382,13 +352,8 @@ func Statistics() (info struct {
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
 func BiggestPackages() {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
 
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -409,13 +374,7 @@ func BiggestPackages() {
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
 func HangingPackages() (hanging []string, err error) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -440,13 +399,7 @@ func HangingPackages() (hanging []string, err error) {
 // SliceHangingPackages returns a list of packages installed as deps
 // and unneeded by the system from a provided list of package names.
 func SliceHangingPackages(pkgS []string) (hanging []string) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -477,13 +430,7 @@ big:
 
 // GetPkgbuild downloads pkgbuild from the ABS.
 func GetPkgbuild(pkgN string, path string) (err error) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -500,7 +447,7 @@ func GetPkgbuild(pkgN string, path string) (err error) {
 				return fmt.Errorf("Not in standard repositories")
 			}
 			fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in ABS.\x1b[0m\n", pkgN)
-			errD := util.DownloadAndUnpack(url, path, true)
+			errD := config.DownloadAndUnpack(url, path, true)
 			return errD
 		}
 	}
@@ -509,13 +456,7 @@ func GetPkgbuild(pkgN string, path string) (err error) {
 
 //CreatePackageList appends Repo packages to completion cache
 func CreatePackageList(out *os.File) (err error) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -523,7 +464,7 @@ func CreatePackageList(out *os.File) (err error) {
 	p := func(pkg alpm.Package) error {
 		fmt.Print(pkg.Name())
 		out.WriteString(pkg.Name())
-		if util.Shell == "fish" {
+		if config.YayConf.Shell == "fish" {
 			fmt.Print("\t" + pkg.DB().Name() + "\n")
 			out.WriteString("\t" + pkg.DB().Name() + "\n")
 		} else {

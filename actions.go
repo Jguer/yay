@@ -5,8 +5,8 @@ import (
 	"os"
 
 	aur "github.com/jguer/yay/aur"
+	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
-	"github.com/jguer/yay/util"
 )
 
 // Install handles package installs
@@ -43,7 +43,7 @@ func cleanDependencies(pkgs []string) error {
 	}
 
 	if len(hanging) != 0 {
-		if !util.ContinueTask("Confirm Removal?", "nN") {
+		if !config.ContinueTask("Confirm Removal?", "nN") {
 			return nil
 		}
 		err = pac.CleanRemove(hanging)

@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/jguer/yay/aur"
+	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
-	"github.com/jguer/yay/util"
 )
 
 // PassToPacman outsorces execution to pacman binary without modifications.
@@ -42,7 +42,7 @@ func passToPacman(op string, pkgs []string, flags []string) error {
 
 // Complete provides completion info for shells
 func complete() (err error) {
-	path := os.Getenv("HOME") + "/.cache/yay/aur_" + util.Shell + ".cache"
+	path := os.Getenv("HOME") + "/.cache/yay/aur_" + config.YayConf.Shell + ".cache"
 
 	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
 		os.MkdirAll(os.Getenv("HOME")+"/.cache/yay/", 0755)

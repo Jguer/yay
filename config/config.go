@@ -17,7 +17,8 @@ type Configuration struct {
 	BuildDir   string
 	Editor     string
 	MakepkgBin string
-	NoConfirm  bool
+	Shell      string
+	noConfirm  bool
 	PacmanBin  string
 	PacmanConf string
 	SortMode   string
@@ -31,30 +32,39 @@ var YayConf Configuration
 var AlpmConf alpm.PacmanConfig
 
 // AlpmHandle is the alpm handle used by yay
-var AlpmHandle alpm.Handle
+var AlpmHandle *alpm.Handle
 
 func init() {
+	var err error
 	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
 
-	if _, err := os.Stat(configfile); os.IsNotExist(err) {
+	if _, err = os.Stat(configfile); os.IsNotExist(err) {
 		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
-	}
-
-	file, err := os.Open(configfile)
-	if err != nil {
-		fmt.Println("Error reading config:", err)
-		return
-	}
-
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&YayConf)
-	if err != nil {
-		fmt.Println("Error reading config:", err)
+		defaultSettings(&YayConf)
+	} else {
+		file, err := os.Open(configfile)
+		if err != nil {
+			fmt.Println("Error reading config:", err)
+		} else {
+			decoder := json.NewDecoder(file)
+			err = decoder.Decode(&YayConf)
+			if err != nil {
+				fmt.Println("Loading default Settings\nError reading config:", err)
+				defaultSettings(&YayConf)
+			}
+		}
 	}
 
 	AlpmConf, err = readAlpmConfig(YayConf.PacmanConf)
 	if err != nil {
 		fmt.Println("Unable to read Pacman conf", err)
+		os.Exit(1)
+	}
+
+	AlpmHandle, err = AlpmConf.CreateHandle()
+	if err != nil {
+		fmt.Println("Unable to CreateHandle", err)
+		os.Exit(1)
 	}
 }
 
@@ -74,7 +84,7 @@ func defaultSettings(config *Configuration) {
 	config.BuildDir = "/tmp/yaytmp/"
 	config.Editor = ""
 	config.MakepkgBin = "/usr/bin/makepkg"
-	config.NoConfirm = false
+	config.noConfirm = false
 	config.PacmanBin = "/usr/bin/pacman"
 	config.PacmanConf = "/etc/pacman.conf"
 	config.SortMode = "BottomUp"
@@ -132,7 +142,7 @@ func Editor() string {
 // ContinueTask prompts if user wants to continue task.
 //If NoConfirm is set the action will continue without user input.
 func ContinueTask(s string, def string) (cont bool) {
-	if YayConf.NoConfirm {
+	if YayConf.noConfirm {
 		return true
 	}
 	var postFix string

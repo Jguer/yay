@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/jguer/yay/config"
 	"github.com/jguer/yay/pacman"
-	"github.com/jguer/yay/util"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -126,7 +126,7 @@ func Upgrade(flags []string) error {
 	}
 
 	// Install updated packages
-	if !util.ContinueTask("Proceed with upgrade?", "nN") {
+	if !config.ContinueTask("Proceed with upgrade?", "nN") {
 		return nil
 	}
 
@@ -149,7 +149,7 @@ func GetPkgbuild(pkgN string, dir string) (err error) {
 	}
 
 	fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in AUR.\x1b[0m\n", pkgN)
-	util.DownloadAndUnpack(BaseURL+aq[0].URLPath, dir, false)
+	config.DownloadAndUnpack(BaseURL+aq[0].URLPath, dir, false)
 	return
 }
 
@@ -167,7 +167,7 @@ func CreateAURList(out *os.File) (err error) {
 	for scanner.Scan() {
 		fmt.Print(scanner.Text())
 		out.WriteString(scanner.Text())
-		if util.Shell == "fish" {
+		if config.YayConf.Shell == "fish" {
 			fmt.Print("\tAUR\n")
 			out.WriteString("\tAUR\n")
 		} else {

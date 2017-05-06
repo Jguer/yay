@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jguer/yay/aur"
+	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
 	"github.com/jguer/yay/util"
 	rpc "github.com/mikkeloscar/aur"
@@ -11,12 +12,7 @@ import (
 
 // PrintSearch handles printing search results in a given format
 func printAURSearch(q aur.Query, start int) {
-	h, err := util.Conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-	}
-
-	localDb, _ := h.LocalDb()
+	localDb, _ := config.AlpmHandle.LocalDb()
 
 	for i, res := range q {
 		var toprint string
@@ -84,7 +80,7 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 	}
 
 	for _, aurP := range q {
-		aur.AURPrintInfo(&aurP)
+		aur.PrintInfo(&aurP)
 	}
 
 	if len(repoS) != 0 {
