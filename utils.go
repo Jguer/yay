@@ -35,9 +35,7 @@ func passToPacman(op string, pkgs []string, flags []string) error {
 		cmd = exec.Command("sudo", args...)
 	}
 
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
 	return err
 }
