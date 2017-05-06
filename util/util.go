@@ -67,13 +67,13 @@ func ContinueTask(s string, def string) (cont bool) {
 	var postFix string
 
 	if def == "nN" {
-		postFix = "(Y/n)"
+		postFix = "[Y/n] "
 	} else {
-		postFix = "(y/N)"
+		postFix = "[y/N] "
 	}
 
 	var response string
-	fmt.Printf("\x1b[1;32m==> %s\x1b[1;37m %s\x1b[0m\n", s, postFix)
+	fmt.Printf("\x1b[1;32m==> %s\x1b[1;37m %s\x1b[0m", s, postFix)
 
 	fmt.Scanln(&response)
 	if response == string(def[0]) || response == string(def[1]) {

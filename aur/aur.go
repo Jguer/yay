@@ -23,6 +23,9 @@ func NarrowSearch(pkgS []string, sortS bool) (Query, error) {
 	}
 
 	r, err := rpc.Search(pkgS[0])
+	if err != nil {
+		return nil, err
+	}
 
 	if len(pkgS) == 1 {
 		if sortS {
@@ -32,7 +35,7 @@ func NarrowSearch(pkgS []string, sortS bool) (Query, error) {
 	}
 
 	var aq Query
-	var n int = 0
+	var n int
 
 	for _, res := range r {
 		match := true
