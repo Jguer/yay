@@ -108,14 +108,19 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 
 	for _, pkg := range toCheck {
 		found := false
-		for _, db := range dbList.Slice() {
+
+		_ = dbList.ForEach(func(db alpm.Db) error {
+			if found {
+				return nil
+			}
+
 			_, err = db.PkgByName(pkg)
 			if err == nil {
 				found = true
 				repo = append(repo, pkg)
-				break
 			}
-		}
+			return nil
+		})
 
 		if !found {
 			if _, errdb := dbList.PkgCachebyGroup(pkg); errdb == nil {
@@ -231,7 +236,7 @@ func ForeignPackages() (foreign map[string]alpm.Package, err error) {
 
 	f := func(k alpm.Package) error {
 		found := false
-		dbList.ForEach(func(d alpm.Db) error {
+		_ = dbList.ForEach(func(d alpm.Db) error {
 			if found {
 				return nil
 			}
@@ -397,25 +402,20 @@ func CreatePackageList(out *os.File) (err error) {
 		return
 	}
 
-	p := func(pkg alpm.Package) error {
-		fmt.Print(pkg.Name())
-		out.WriteString(pkg.Name())
-		if config.YayConf.Shell == "fish" {
-			fmt.Print("\t" + pkg.DB().Name() + "\n")
-			out.WriteString("\t" + pkg.DB().Name() + "\n")
-		} else {
-			fmt.Print("\n")
-			out.WriteString("\n")
-		}
-
+	_ = dbList.ForEach(func(db alpm.Db) error {
+		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
+			fmt.Print(pkg.Name())
+			out.WriteString(pkg.Name())
+			if config.YayConf.Shell == "fish" {
+				fmt.Print("\t" + pkg.DB().Name() + "\n")
+				out.WriteString("\t" + pkg.DB().Name() + "\n")
+			} else {
+				fmt.Print("\n")
+				out.WriteString("\n")
+			}
+			return nil
+		})
 		return nil
-	}
-
-	f := func(db alpm.Db) error {
-		db.PkgCache().ForEach(p)
-		return nil
-	}
-
-	dbList.ForEach(f)
+	})
 	return nil
 }
