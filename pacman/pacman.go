@@ -9,32 +9,15 @@ import (
 	"github.com/jguer/yay/config"
 )
 
-// Query describes a Repository search.
-type Query []Result
-
-// Result describes a pkg.
-type Result struct {
-	Name        string
-	Repository  string
-	Version     string
-	Description string
-	Group       string
-	Installed   bool
-}
+// Query holds the results of a repository search.
+type Query []alpm.Package
 
 // Search handles repo searches. Creates a RepoSearch struct.
 func Search(pkgInputN []string) (s Query, n int, err error) {
-	localDb, err := config.AlpmHandle.LocalDb()
-	if err != nil {
-		return
-	}
 	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
-
-	var installed bool
-	dbS := dbList.Slice()
 
 	// BottomUp functions
 	initL := func(len int) int {
@@ -42,7 +25,7 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 	}
 
 	compL := func(len int, i int) bool {
-		return i > 0
+		return i > -1
 	}
 
 	finalL := func(i int) int {
@@ -64,13 +47,12 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 		}
 	}
 
+	dbS := dbList.Slice()
 	lenDbs := len(dbS)
 	for f := initL(lenDbs); compL(lenDbs, f); f = finalL(f) {
 		pkgS := dbS[f].PkgCache().Slice()
 		lenPkgs := len(pkgS)
-
 		for i := initL(lenPkgs); compL(lenPkgs, i); i = finalL(i) {
-
 			match := true
 			for _, pkgN := range pkgInputN {
 				if !(strings.Contains(pkgS[i].Name(), pkgN) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgN)) {
@@ -80,20 +62,8 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 			}
 
 			if match {
-				installed = false
-				if r, _ := localDb.PkgByName(pkgS[i].Name()); r != nil {
-					installed = true
-				}
 				n++
-
-				s = append(s, Result{
-					Name:        pkgS[i].Name(),
-					Description: pkgS[i].Description(),
-					Version:     pkgS[i].Version(),
-					Repository:  dbS[f].Name(),
-					Group:       strings.Join(pkgS[i].Groups().Slice(), ","),
-					Installed:   installed,
-				})
+				s = append(s, pkgS[i])
 			}
 		}
 	}
@@ -111,21 +81,24 @@ func (s Query) PrintSearch() {
 				toprint += fmt.Sprintf("%d ", i)
 			}
 		} else if config.YayConf.SearchMode == config.Minimal {
-			fmt.Println(res.Name)
+			fmt.Println(res.Name())
 			continue
 		}
 		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m",
-			res.Repository, res.Name, res.Version)
+			res.DB().Name(), res.Name(), res.Version())
 
-		if len(res.Group) != 0 {
-			toprint += fmt.Sprintf("(%s) ", res.Group)
+		if len(res.Groups().Slice()) != 0 {
+			toprint += fmt.Sprint(res.Groups().Slice(), " ")
 		}
 
-		if res.Installed {
-			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
+		localDb, err := config.AlpmHandle.LocalDb()
+		if err == nil {
+			if _, err = localDb.PkgByName(res.Name()); err == nil {
+				toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
+			}
 		}
 
-		toprint += "\n" + res.Description
+		toprint += "\n" + res.Description()
 		fmt.Println(toprint)
 	}
 }

@@ -199,9 +199,9 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 			}
 		} else {
 			if config.YayConf.SortMode == config.BottomUp {
-				repoInstall = append(repoInstall, pq[numpq-num-1].Name)
+				repoInstall = append(repoInstall, pq[numpq-num-1].Name())
 			} else {
-				repoInstall = append(repoInstall, pq[num].Name)
+				repoInstall = append(repoInstall, pq[num].Name())
 			}
 		}
 	}

@@ -72,7 +72,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	}
 	dir := config.YayConf.BuildDir + a.PackageBase + "/"
 
-	if _, err = os.Stat(dir); os.IsExist(err) {
+	if _, err = os.Stat(dir); !os.IsNotExist(err) {
 		if !config.ContinueTask("Directory exists. Clean Build?", "yY") {
 			_ = os.RemoveAll(config.YayConf.BuildDir + a.PackageBase)
 		}
