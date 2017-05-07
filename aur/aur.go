@@ -90,11 +90,10 @@ func Install(pkgName []string, flags []string) (err error) {
 func Upgrade(flags []string) error {
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
 
-	foreign, n, err := pacman.ForeignPackages()
-	if err != nil || n == 0 {
+	foreign, err := pacman.ForeignPackages()
+	if err != nil {
 		return err
 	}
-
 	keys := make([]string, len(foreign))
 	i := 0
 	for k := range foreign {
@@ -108,12 +107,14 @@ func Upgrade(flags []string) error {
 	}
 
 	outdated := q[:0]
-	for _, res := range q {
+	for i, res := range q {
+		fmt.Printf("\r Checking %d/%d packages...", i+1, len(q))
+
 		if _, ok := foreign[res.Name]; ok {
 			// Leaving this here for now, warn about downgrades later
-			if res.LastModified > int(foreign[res.Name].Date) {
+			if int64(res.LastModified) > foreign[res.Name].BuildDate().UnixNano() {
 				fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
-					res.Name, foreign[res.Name].Version, res.Version)
+					res.Name, foreign[res.Name].Version(), res.Version)
 				outdated = append(outdated, res)
 			}
 		}
@@ -121,12 +122,12 @@ func Upgrade(flags []string) error {
 
 	//If there are no outdated packages, don't prompt
 	if len(outdated) == 0 {
-		fmt.Println(" there is nothing to do")
+		fmt.Println("\n there is nothing to do")
 		return nil
 	}
 
 	// Install updated packages
-	if !config.ContinueTask("Proceed with upgrade?", "nN") {
+	if !config.ContinueTask("\nProceed with upgrade?", "nN") {
 		return nil
 	}
 

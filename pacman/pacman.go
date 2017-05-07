@@ -23,11 +23,9 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 	initL := func(len int) int {
 		return len - 1
 	}
-
 	compL := func(len int, i int) bool {
 		return i > -1
 	}
-
 	finalL := func(i int) int {
 		return i - 1
 	}
@@ -37,11 +35,9 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 		initL = func(len int) int {
 			return 0
 		}
-
 		compL = func(len int, i int) bool {
 			return i < len
 		}
-
 		finalL = func(i int) int {
 			return i + 1
 		}
@@ -202,6 +198,14 @@ func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error
 	return
 }
 
+// PkgNameSlice returns a slice of package names
+// func (s Query) PkgNameSlice() (pkgNames []string) {
+// 	for _, e := range s {
+// 		pkgNames = append(pkgNames, e.Name())
+// 	}
+// 	return
+// }
+
 // CleanRemove sends a full removal command to pacman with the pkgName slice
 func CleanRemove(pkgName []string) (err error) {
 	if len(pkgName) == 0 {
@@ -213,11 +217,7 @@ func CleanRemove(pkgName []string) (err error) {
 }
 
 // ForeignPackages returns a map of foreign packages, with their version and date as values.
-func ForeignPackages() (foreign map[string]*struct {
-	Version string
-	Date    int64
-}, n int, err error) {
-
+func ForeignPackages() (foreign map[string]alpm.Package, err error) {
 	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
@@ -227,31 +227,28 @@ func ForeignPackages() (foreign map[string]*struct {
 		return
 	}
 
-	foreign = make(map[string]*struct {
-		Version string
-		Date    int64
-	})
-	// Find foreign packages in system
-	for _, pkg := range localDb.PkgCache().Slice() {
-		// Change to more effective method
+	foreign = make(map[string]alpm.Package)
+
+	f := func(k alpm.Package) error {
 		found := false
-		for _, db := range dbList.Slice() {
-			_, err = db.PkgByName(pkg.Name())
+		dbList.ForEach(func(d alpm.Db) error {
+			if found {
+				return nil
+			}
+			_, err = d.PkgByName(k.Name())
 			if err == nil {
 				found = true
-				break
 			}
-		}
+			return nil
+		})
 
 		if !found {
-			foreign[pkg.Name()] = &struct {
-				Version string
-				Date    int64
-			}{pkg.Version(), pkg.InstallDate().Unix()}
-			n++
+			foreign[k.Name()] = k
 		}
+		return nil
 	}
 
+	err = localDb.PkgCache().ForEach(f)
 	return
 }
 
