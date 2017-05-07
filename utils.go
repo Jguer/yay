@@ -5,40 +5,12 @@ import (
 	"io"
 	"math"
 	"os"
-	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/jguer/yay/aur"
 	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
 )
-
-// PassToPacman outsorces execution to pacman binary without modifications.
-func passToPacman(op string, pkgs []string, flags []string) error {
-	var cmd *exec.Cmd
-	var args []string
-
-	args = append(args, op)
-	if len(pkgs) != 0 {
-		args = append(args, pkgs...)
-	}
-
-	if len(flags) != 0 {
-		args = append(args, flags...)
-	}
-
-	if strings.Contains(op, "-Q") {
-		cmd = exec.Command("pacman", args...)
-	} else {
-		args = append([]string{"pacman"}, args...)
-		cmd = exec.Command("sudo", args...)
-	}
-
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err := cmd.Run()
-	return err
-}
 
 // Complete provides completion info for shells
 func complete() (err error) {

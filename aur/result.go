@@ -7,7 +7,6 @@ import (
 
 	"github.com/jguer/yay/config"
 	"github.com/jguer/yay/pacman"
-	"github.com/jguer/yay/util"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -114,14 +113,14 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	}
 
 	var depArgs []string
-	if util.NoConfirm {
+	if config.YayConf.NoConfirm {
 		depArgs = []string{"--asdeps", "--noconfirm"}
 	} else {
 		depArgs = []string{"--asdeps"}
 	}
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-		errR := pacman.Install(repoDeps, depArgs)
+		errR := config.PassToPacman("-S", repoDeps, depArgs)
 		if errR != nil {
 			return finalmdeps, errR
 		}

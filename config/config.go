@@ -12,17 +12,31 @@ import (
 	alpm "github.com/jguer/go-alpm"
 )
 
-// Configuration stores yay's config
+// Verbosity settings for search
+const (
+	NumberMenu = iota
+	Detailed
+	Minimal
+)
+
+// Describes Sorting method for numberdisplay
+const (
+	BottomUp = iota
+	TopDown
+)
+
+// Configuration stores yay's config.
 type Configuration struct {
-	BuildDir   string
-	Editor     string
-	MakepkgBin string
-	Shell      string
-	noConfirm  bool
-	PacmanBin  string
-	PacmanConf string
-	SortMode   string
-	TarBin     string
+	BuildDir   string `json:"buildDir"`
+	Editor     string `json:"editor"`
+	MakepkgBin string `json:"makepkgbin"`
+	Shell      string `json:"-"`
+	NoConfirm  bool   `json:"noconfirm"`
+	PacmanBin  string `json:"pacmanbin"`
+	PacmanConf string `json:"pacmanconf"`
+	SearchMode int    `json:"-"`
+	SortMode   int    `json:"sortmode"`
+	TarBin     string `json:"tarbin"`
 }
 
 // YayConf holds the current config values for yay.
@@ -31,7 +45,7 @@ var YayConf Configuration
 // AlpmConf holds the current config values for pacman.
 var AlpmConf alpm.PacmanConfig
 
-// AlpmHandle is the alpm handle used by yay
+// AlpmHandle is the alpm handle used by yay.
 var AlpmHandle *alpm.Handle
 
 func init() {
@@ -80,14 +94,32 @@ func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	return
 }
 
+// SaveConfig writes yay config to file.
+func SaveConfig() error {
+	YayConf.NoConfirm = false
+	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
+	marshalledinfo, _ := json.Marshal(YayConf)
+	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	_, err = in.Write(marshalledinfo)
+	if err != nil {
+		return err
+	}
+	err = in.Sync()
+	return err
+}
+
 func defaultSettings(config *Configuration) {
 	config.BuildDir = "/tmp/yaytmp/"
 	config.Editor = ""
 	config.MakepkgBin = "/usr/bin/makepkg"
-	config.noConfirm = false
+	config.NoConfirm = false
 	config.PacmanBin = "/usr/bin/pacman"
 	config.PacmanConf = "/etc/pacman.conf"
-	config.SortMode = "BottomUp"
+	config.SortMode = BottomUp
 	config.TarBin = "/usr/bin/bsdtar"
 }
 
@@ -142,7 +174,7 @@ func Editor() string {
 // ContinueTask prompts if user wants to continue task.
 //If NoConfirm is set the action will continue without user input.
 func ContinueTask(s string, def string) (cont bool) {
-	if YayConf.noConfirm {
+	if YayConf.NoConfirm {
 		return true
 	}
 	var postFix string
@@ -218,4 +250,30 @@ func DownloadAndUnpack(url string, path string, trim bool) (err error) {
 	}
 
 	return
+}
+
+// PassToPacman outsorces execution to pacman binary without modifications.
+func PassToPacman(op string, pkgs []string, flags []string) error {
+	var cmd *exec.Cmd
+	var args []string
+
+	args = append(args, op)
+	if len(pkgs) != 0 {
+		args = append(args, pkgs...)
+	}
+
+	if len(flags) != 0 {
+		args = append(args, flags...)
+	}
+
+	if strings.Contains(op, "-Q") {
+		cmd = exec.Command(YayConf.PacmanBin, args...)
+	} else {
+		args = append([]string{YayConf.PacmanBin}, args...)
+		cmd = exec.Command("sudo", args...)
+	}
+
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	err := cmd.Run()
+	return err
 }

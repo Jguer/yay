@@ -3,7 +3,7 @@ package aur
 import (
 	"fmt"
 
-	"github.com/jguer/yay/util"
+	"github.com/jguer/yay/config"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -15,7 +15,7 @@ func (q Query) Len() int {
 }
 
 func (q Query) Less(i, j int) bool {
-	if util.SortMode == util.BottomUp {
+	if config.YayConf.SortMode == config.BottomUp {
 		return q[i].NumVotes < q[j].NumVotes
 	}
 	return q[i].NumVotes > q[j].NumVotes

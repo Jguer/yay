@@ -6,7 +6,6 @@ import (
 	"github.com/jguer/yay/aur"
 	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
-	"github.com/jguer/yay/util"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -16,13 +15,13 @@ func printAURSearch(q aur.Query, start int) {
 
 	for i, res := range q {
 		var toprint string
-		if util.SearchVerbosity == util.NumberMenu {
-			if util.SortMode == util.BottomUp {
+		if config.YayConf.SearchMode == config.NumberMenu {
+			if config.YayConf.SortMode == config.BottomUp {
 				toprint += fmt.Sprintf("%d ", len(q)+start-i-1)
 			} else {
 				toprint += fmt.Sprintf("%d ", start+i)
 			}
-		} else if util.SearchVerbosity == util.Minimal {
+		} else if config.YayConf.SearchMode == config.Minimal {
 			fmt.Println(res.Name)
 			continue
 		}
@@ -56,7 +55,7 @@ func syncSearch(pkgS []string) (err error) {
 		return err
 	}
 
-	if util.SortMode == util.BottomUp {
+	if config.YayConf.SortMode == config.BottomUp {
 		printAURSearch(aq, 0)
 		pq.PrintSearch()
 	} else {
@@ -84,7 +83,7 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(repoS) != 0 {
-		err = passToPacman("-Si", repoS, flags)
+		err = config.PassToPacman("-Si", repoS, flags)
 	}
 
 	return

@@ -3,12 +3,10 @@ package pacman
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/jguer/go-alpm"
 	"github.com/jguer/yay/config"
-	"github.com/jguer/yay/util"
 )
 
 // Query describes a Repository search.
@@ -22,16 +20,6 @@ type Result struct {
 	Description string
 	Group       string
 	Installed   bool
-}
-
-// UpdatePackages handles cache update and upgrade
-func UpdatePackages(flags []string) error {
-	args := append([]string{"pacman", "-Syu"}, flags...)
-
-	cmd := exec.Command("sudo", args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err := cmd.Run()
-	return err
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
@@ -62,7 +50,7 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 	}
 
 	// TopDown functions
-	if util.SortMode == util.TopDown {
+	if config.YayConf.SortMode == config.TopDown {
 		initL = func(len int) int {
 			return 0
 		}
@@ -116,13 +104,13 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 func (s Query) PrintSearch() {
 	for i, res := range s {
 		var toprint string
-		if util.SearchVerbosity == util.NumberMenu {
-			if util.SortMode == util.BottomUp {
+		if config.YayConf.SearchMode == config.NumberMenu {
+			if config.YayConf.SortMode == config.BottomUp {
 				toprint += fmt.Sprintf("%d ", len(s)-i-1)
 			} else {
 				toprint += fmt.Sprintf("%d ", i)
 			}
-		} else if util.SearchVerbosity == util.Minimal {
+		} else if config.YayConf.SearchMode == config.Minimal {
 			fmt.Println(res.Name)
 			continue
 		}
@@ -241,36 +229,14 @@ func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error
 	return
 }
 
-// Install sends an install command to pacman with the pkgName slice
-func Install(pkgName []string, flags []string) (err error) {
-	if len(pkgName) == 0 {
-		return nil
-	}
-
-	args := []string{"pacman", "-S"}
-	args = append(args, pkgName...)
-	args = append(args, flags...)
-
-	cmd := exec.Command("sudo", args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	cmd.Run()
-	return nil
-}
-
 // CleanRemove sends a full removal command to pacman with the pkgName slice
 func CleanRemove(pkgName []string) (err error) {
 	if len(pkgName) == 0 {
 		return nil
 	}
 
-	args := []string{"pacman", "-Rnsc"}
-	args = append(args, pkgName...)
-	args = append(args, "--noutil.Conf.rm")
-
-	cmd := exec.Command("sudo", args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	cmd.Run()
-	return nil
+	err = config.PassToPacman("-Rsnc", pkgName, []string{"--noutil.Conf.rm"})
+	return err
 }
 
 // ForeignPackages returns a map of foreign packages, with their version and date as values.

@@ -13,7 +13,7 @@ import (
 func install(pkgs []string, flags []string) error {
 	aurs, repos, _ := pac.PackageSlices(pkgs)
 
-	err := pac.Install(repos, flags)
+	err := config.PassToPacman("-S", repos, flags)
 	if err != nil {
 		fmt.Println("Error installing repo packages.")
 	}
@@ -25,7 +25,7 @@ func install(pkgs []string, flags []string) error {
 
 // Upgrade handles updating the cache and installing updates.
 func upgrade(flags []string) error {
-	errp := pac.UpdatePackages(flags)
+	errp := config.PassToPacman("-Syu", nil, flags)
 	erra := aur.Upgrade(flags)
 
 	if errp != nil {

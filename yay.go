@@ -10,7 +10,6 @@ import (
 	"github.com/jguer/yay/aur"
 	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
-	"github.com/jguer/yay/util"
 )
 
 func usage() {
@@ -38,20 +37,19 @@ func usage() {
 `)
 }
 
-var version = "1.116"
+var version = "2.116"
 
-func parser() (op string, options []string, packages []string, err error) {
+func parser() (op string, options []string, packages []string, changedConfig bool, err error) {
 	if len(os.Args) < 2 {
 		err = fmt.Errorf("no operation specified")
 		return
 	}
+	changedConfig = false
 	op = "yogurt"
 
 	for _, arg := range os.Args[1:] {
 		if arg[0] == '-' && arg[1] != '-' {
 			switch arg {
-			case "-b":
-				util.Build = true
 			default:
 				op = arg
 			}
@@ -60,13 +58,12 @@ func parser() (op string, options []string, packages []string, err error) {
 
 		if arg[0] == '-' && arg[1] == '-' {
 			switch arg {
-			case "--build":
-				util.Build = true
 			case "--bottomup":
-				util.SortMode = util.BottomUp
+				config.YayConf.SortMode = config.BottomUp
+				changedConfig = true
 			case "--topdown":
-				util.SortMode = util.TopDown
-
+				config.YayConf.SortMode = config.TopDown
+				changedConfig = true
 			case "--complete":
 				config.YayConf.Shell = "sh"
 				complete()
@@ -79,7 +76,7 @@ func parser() (op string, options []string, packages []string, err error) {
 				usage()
 				os.Exit(0)
 			case "--noconfirm":
-				util.NoConfirm = true
+				config.YayConf.NoConfirm = true
 				fallthrough
 			default:
 				options = append(options, arg)
@@ -93,7 +90,7 @@ func parser() (op string, options []string, packages []string, err error) {
 }
 
 func main() {
-	op, options, pkgs, err := parser()
+	op, options, pkgs, changedConfig, err := parser()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -113,9 +110,9 @@ func main() {
 		err = localStatistics(version)
 	case "-Ss", "-Ssq", "-Sqs":
 		if op == "-Ss" {
-			util.SearchVerbosity = util.Detailed
+			config.YayConf.SearchMode = config.Detailed
 		} else {
-			util.SearchVerbosity = util.Minimal
+			config.YayConf.SearchMode = config.Minimal
 		}
 
 		if pkgs != nil {
@@ -128,13 +125,16 @@ func main() {
 	case "-Si":
 		err = syncInfo(pkgs, options)
 	case "yogurt":
-		util.SearchVerbosity = util.NumberMenu
+		config.YayConf.SearchMode = config.NumberMenu
 
 		if pkgs != nil {
 			err = numberMenu(pkgs, options)
 		}
 	default:
-		err = passToPacman(op, pkgs, options)
+		err = config.PassToPacman(op, pkgs, options)
+	}
+	if changedConfig {
+		config.SaveConfig()
 	}
 
 	config.AlpmHandle.Release()
@@ -162,7 +162,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		return fmt.Errorf("no packages match search")
 	}
 
-	if util.SortMode == util.BottomUp {
+	if config.YayConf.SortMode == config.BottomUp {
 		printAURSearch(aq, numpq)
 		pq.PrintSearch()
 	} else {
@@ -192,13 +192,13 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		if num > numaq+numpq-1 || num < 0 {
 			continue
 		} else if num > numpq-1 {
-			if util.SortMode == util.BottomUp {
+			if config.YayConf.SortMode == config.BottomUp {
 				aurInstall = append(aurInstall, aq[numaq+numpq-num-1].Name)
 			} else {
 				aurInstall = append(aurInstall, aq[num-numpq].Name)
 			}
 		} else {
-			if util.SortMode == util.BottomUp {
+			if config.YayConf.SortMode == config.BottomUp {
 				repoInstall = append(repoInstall, pq[numpq-num-1].Name)
 			} else {
 				repoInstall = append(repoInstall, pq[num].Name)
@@ -207,7 +207,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(repoInstall) != 0 {
-		pac.Install(repoInstall, flags)
+		config.PassToPacman("-S", repoInstall, flags)
 	}
 
 	if len(aurInstall) != 0 {
