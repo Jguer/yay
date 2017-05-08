@@ -21,25 +21,24 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 
 	// BottomUp functions
 	initL := func(len int) int {
-		return len - 1
+		if config.YayConf.SortMode == config.TopDown {
+			return 0
+		} else {
+			return len - 1
+		}
 	}
 	compL := func(len int, i int) bool {
-		return i > -1
+		if config.YayConf.SortMode == config.TopDown {
+			return i < len
+		} else {
+			return i > -1
+		}
 	}
 	finalL := func(i int) int {
-		return i - 1
-	}
-
-	// TopDown functions
-	if config.YayConf.SortMode == config.TopDown {
-		initL = func(len int) int {
-			return 0
-		}
-		compL = func(len int, i int) bool {
-			return i < len
-		}
-		finalL = func(i int) int {
+		if config.YayConf.SortMode == config.TopDown {
 			return i + 1
+		} else {
+			return i - 1
 		}
 	}
 
