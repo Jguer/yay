@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jguer/yay/aur"
+	vcs "github.com/jguer/yay/aur/vcs"
 	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
 )
@@ -57,13 +58,18 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 		}
 
 		if arg[0] == '-' && arg[1] == '-' {
+			changedConfig = true
 			switch arg {
-			case "--bottomup":
-				config.YayConf.SortMode = config.BottomUp
-				changedConfig = true
+			case "--gendb":
+				aur.CreateDevelDB()
+				vcs.SaveBranchInfo()
+				os.Exit(0)
+			case "--devel":
+				config.YayConf.Devel = true
+			case "--nodevel":
+				config.YayConf.Devel = false
 			case "--topdown":
 				config.YayConf.SortMode = config.TopDown
-				changedConfig = true
 			case "--complete":
 				config.YayConf.Shell = "sh"
 				complete()
@@ -133,6 +139,11 @@ func main() {
 	default:
 		err = config.PassToPacman(op, pkgs, options)
 	}
+
+	if vcs.Updated {
+		vcs.SaveBranchInfo()
+	}
+
 	if changedConfig {
 		config.SaveConfig()
 	}
@@ -207,12 +218,12 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(repoInstall) != 0 {
-		config.PassToPacman("-S", repoInstall, flags)
+		err = config.PassToPacman("-S", repoInstall, flags)
 	}
 
 	if len(aurInstall) != 0 {
-		aur.Install(aurInstall, flags)
+		err = aur.Install(aurInstall, flags)
 	}
 
-	return nil
+	return err
 }

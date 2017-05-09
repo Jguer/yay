@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	vcs "github.com/jguer/yay/aur/vcs"
 	"github.com/jguer/yay/config"
 	"github.com/jguer/yay/pacman"
 	rpc "github.com/mikkeloscar/aur"
@@ -15,6 +16,8 @@ import (
 
 // BaseURL givers the AUR default address.
 const BaseURL string = "https://aur.archlinux.org"
+
+var specialDBsauce bool = false
 
 // NarrowSearch searches AUR and narrows based on subarguments
 func NarrowSearch(pkgS []string, sortS bool) (Query, error) {
@@ -67,7 +70,7 @@ func Install(pkgName []string, flags []string) (err error) {
 	}
 
 	if len(q) != len(pkgName) {
-		return fmt.Errorf("Some package from list\n%+v\ndoes not exist", pkgName)
+		fmt.Printf("Some package from list\n%+v\ndoes not exist", pkgName)
 	}
 
 	var finalrm []string
@@ -86,9 +89,48 @@ func Install(pkgName []string, flags []string) (err error) {
 	return err
 }
 
+// CreateDevelDB forces yay to create a DB of the existing development packages
+func CreateDevelDB() error {
+	foreign, err := pacman.ForeignPackages()
+	if err != nil {
+		return err
+	}
+
+	keys := make([]string, len(foreign))
+	i := 0
+	for k := range foreign {
+		keys[i] = k
+		i++
+	}
+
+	config.YayConf.NoConfirm = true
+	specialDBsauce = true
+	err = Install(keys, nil)
+	return err
+}
+
+func DevelUpgrade(flags []string) {
+
+}
 // Upgrade tries to update every foreign package installed in the system
 func Upgrade(flags []string) error {
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
+
+	if config.YayConf.Devel {
+		fmt.Println(" Checking development packages...")
+		develUpdates := vcs.CheckUpdates()
+		if len(develUpdates) != 0 {
+			// Install updated packages
+			if !config.ContinueTask("\nProceed with upgrade?", "nN") {
+				return nil
+			}
+
+			err := Install(develUpdates, flags)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
 
 	foreign, err := pacman.ForeignPackages()
 	if err != nil {

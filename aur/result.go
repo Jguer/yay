@@ -5,9 +5,11 @@ import (
 	"os"
 	"os/exec"
 
+	vcs "github.com/jguer/yay/aur/vcs"
 	"github.com/jguer/yay/config"
 	"github.com/jguer/yay/pacman"
 	rpc "github.com/mikkeloscar/aur"
+	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 // PkgDependencies returns package dependencies not installed belonging to AUR
@@ -86,6 +88,24 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		editcmd := exec.Command(config.Editor(), dir+"PKGBUILD")
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		editcmd.Run()
+	}
+
+	pkgb, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+	if err == nil {
+		for _, pkgsource := range pkgb.Source {
+			owner, repo := vcs.ParseSource(pkgsource)
+			if owner != "" && repo != "" {
+				err = vcs.BranchInfo(a.Name, owner, repo)
+				if err != nil {
+					fmt.Println(err)
+				}
+				vcs.SaveBranchInfo()
+			}
+		}
+	}
+
+	if specialDBsauce {
+		return
 	}
 
 	runDeps, makeDeps, err := PkgDependencies(a)

@@ -32,6 +32,7 @@ type Configuration struct {
 	MakepkgBin string `json:"makepkgbin"`
 	Shell      string `json:"-"`
 	NoConfirm  bool   `json:"noconfirm"`
+	Devel      bool   `json:"devel"`
 	PacmanBin  string `json:"pacmanbin"`
 	PacmanConf string `json:"pacmanconf"`
 	SearchMode int    `json:"-"`
@@ -115,6 +116,7 @@ func SaveConfig() error {
 func defaultSettings(config *Configuration) {
 	config.BuildDir = "/tmp/yaytmp/"
 	config.Editor = ""
+	config.Devel = false
 	config.MakepkgBin = "/usr/bin/makepkg"
 	config.NoConfirm = false
 	config.PacmanBin = "/usr/bin/pacman"
