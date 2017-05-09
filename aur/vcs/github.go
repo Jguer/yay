@@ -152,7 +152,10 @@ func BranchInfo(pkgname string, owner string, repo string) (err error) {
 }
 
 func SaveBranchInfo() error {
-	marshalledinfo, _ := json.Marshal(savedInfo)
+	marshalledinfo, err := json.Marshal(savedInfo)
+	if err != nil || string(marshalledinfo) == "null" {
+		return err
+	}
 	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
