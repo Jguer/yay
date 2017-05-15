@@ -2,6 +2,7 @@ package aur
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"net/http"
 	"os"
@@ -112,6 +113,7 @@ func CreateDevelDB() error {
 func DevelUpgrade(flags []string) {
 
 }
+
 // Upgrade tries to update every foreign package installed in the system
 func Upgrade(flags []string) error {
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
@@ -148,28 +150,31 @@ func Upgrade(flags []string) error {
 		return err
 	}
 
+	var buffer bytes.Buffer
+	buffer.WriteString("\n")
 	outdated := q[:0]
 	for i, res := range q {
 		fmt.Printf("\r Checking %d/%d packages...", i+1, len(q))
 
 		if _, ok := foreign[res.Name]; ok {
 			// Leaving this here for now, warn about downgrades later
-			if int64(res.LastModified) > foreign[res.Name].BuildDate().UnixNano() {
-				fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
-					res.Name, foreign[res.Name].Version(), res.Version)
+			if int64(res.LastModified) > foreign[res.Name].BuildDate().Unix() {
+				buffer.WriteString(fmt.Sprintf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
+					res.Name, foreign[res.Name].Version(), res.Version))
 				outdated = append(outdated, res)
 			}
 		}
 	}
+	fmt.Println(buffer.String())
 
 	//If there are no outdated packages, don't prompt
 	if len(outdated) == 0 {
-		fmt.Println("\n there is nothing to do")
+		fmt.Println("there is nothing to do")
 		return nil
 	}
 
 	// Install updated packages
-	if !config.ContinueTask("\nProceed with upgrade?", "nN") {
+	if !config.ContinueTask("Proceed with upgrade?", "nN") {
 		return nil
 	}
 
