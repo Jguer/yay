@@ -66,12 +66,7 @@ func printDeps(repoDeps []string, aurDeps []string) {
 	}
 }
 
-// PkgInstall handles install from Info Result.
-func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
-	fmt.Printf("\x1b[1;32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
-	if a.Maintainer == "" {
-		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
-	}
+func setupPackageSpace(a *rpc.Pkg) (err error) {
 	dir := config.YayConf.BuildDir + a.PackageBase + "/"
 
 	if _, err = os.Stat(dir); !os.IsNotExist(err) {
@@ -99,9 +94,27 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 				if err != nil {
 					fmt.Println(err)
 				}
-				vcs.SaveBranchInfo()
 			}
 		}
+	}
+
+	err = os.Chdir(dir)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// PkgInstall handles install from Info Result.
+func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
+	fmt.Printf("\x1b[1;32m==> Installing\x1b[33m %s\x1b[0m\n", a.Name)
+	if a.Maintainer == "" {
+		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
+	}
+
+	if err = setupPackageSpace(a); err != nil {
+		return
 	}
 
 	if specialDBsauce {
@@ -158,16 +171,14 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	err = os.Chdir(dir)
-	if err != nil {
-		return
-	}
-
 	args := []string{"-sri"}
 	args = append(args, flags...)
 	makepkgcmd := exec.Command(config.YayConf.MakepkgBin, args...)
 	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = makepkgcmd.Run()
+	if err == nil {
+		_ = vcs.SaveBranchInfo()
+	}
 	return
 }
 

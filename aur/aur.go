@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	alpm "github.com/jguer/go-alpm"
 	vcs "github.com/jguer/yay/aur/vcs"
 	"github.com/jguer/yay/config"
 	"github.com/jguer/yay/pacman"
@@ -109,28 +110,30 @@ func CreateDevelDB() error {
 	return err
 }
 
-func DevelUpgrade(flags []string) {
+func develUpgrade(foreign map[string]alpm.Package, flags []string) error {
+	fmt.Println(" Checking development packages...")
+	develUpdates := vcs.CheckUpdates(foreign)
+	if len(develUpdates) != 0 {
+		for _, q := range develUpdates {
+			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s\x1b[0m\n", q)
+		}
+		// Install updated packages
+		if !config.ContinueTask("Proceed with upgrade?", "nN") {
+			return nil
+		}
 
+		err := Install(develUpdates, flags)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	return nil
 }
+
 // Upgrade tries to update every foreign package installed in the system
 func Upgrade(flags []string) error {
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
-
-	if config.YayConf.Devel {
-		fmt.Println(" Checking development packages...")
-		develUpdates := vcs.CheckUpdates()
-		if len(develUpdates) != 0 {
-			// Install updated packages
-			if !config.ContinueTask("\nProceed with upgrade?", "nN") {
-				return nil
-			}
-
-			err := Install(develUpdates, flags)
-			if err != nil {
-				fmt.Println(err)
-			}
-		}
-	}
 
 	foreign, err := pacman.ForeignPackages()
 	if err != nil {
@@ -141,6 +144,13 @@ func Upgrade(flags []string) error {
 	for k := range foreign {
 		keys[i] = k
 		i++
+	}
+
+	if config.YayConf.Devel {
+		err := develUpgrade(foreign, flags)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	q, err := rpc.Info(keys)

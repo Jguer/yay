@@ -137,6 +137,9 @@ func main() {
 			err = numberMenu(pkgs, options)
 		}
 	default:
+		if op[0] == 'R' {
+			vcs.RemovePackage(pkgs)
+		}
 		err = config.PassToPacman(op, pkgs, options)
 	}
 

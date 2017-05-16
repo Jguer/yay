@@ -36,6 +36,13 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 
 ### Changelog
 
+#### 2.
+- Fetching backend changed to Mikkel Oscar's [Aur](https://github.com/mikkeloscar/aur)
+- Added support for development packages from github.
+- Pacman backend rewritten and simplified
+- Added config framework.
+
+
 #### 1.115
 - Added AUR completions (updates on first completion every 48h)
 

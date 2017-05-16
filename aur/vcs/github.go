@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	alpm "github.com/jguer/go-alpm"
 )
 
 // branch contains the information of a repository branch
@@ -103,10 +105,15 @@ func (info *Info) needsUpdate() bool {
 	return false
 }
 
-func CheckUpdates() (toUpdate []string) {
+// CheckUpdates returns list of outdated packages
+func CheckUpdates(foreign map[string]alpm.Package) (toUpdate []string) {
 	for _, e := range savedInfo {
 		if e.needsUpdate() {
-			toUpdate = append(toUpdate, e.Package)
+			if _, ok := foreign[e.Package]; ok {
+				toUpdate = append(toUpdate, e.Package)
+			} else {
+				RemovePackage([]string{e.Package})
+			}
 		}
 	}
 	return
@@ -121,8 +128,23 @@ func inStore(url string) *Info {
 	return nil
 }
 
+// RemovePackage removes package from VCS information
+func RemovePackage(pkgs []string) {
+	for _, pkgName := range pkgs {
+		for i, e := range savedInfo {
+			if e.Package == pkgName {
+				savedInfo[i] = savedInfo[len(savedInfo)-1]
+				savedInfo = savedInfo[:len(savedInfo)-1]
+			}
+		}
+	}
+
+	_ = SaveBranchInfo()
+	return
+}
+
 // BranchInfo updates saved information
-func BranchInfo(pkgname string, owner string, repo string) (err error) {
+func BranchInfo(pkgName string, owner string, repo string) (err error) {
 	Updated = true
 	var newRepo branches
 	url := "https://api.github.com/repos/" + owner + "/" + repo + "/branches"
@@ -139,11 +161,11 @@ func BranchInfo(pkgname string, owner string, repo string) (err error) {
 	for _, e := range newRepo {
 		if e.Name == "master" {
 			if packinfo != nil {
-				packinfo.Package = pkgname
+				packinfo.Package = pkgName
 				packinfo.URL = url
 				packinfo.SHA = e.Commit.SHA
 			} else {
-				savedInfo = append(savedInfo, Info{Package: pkgname, URL: url, SHA: e.Commit.SHA})
+				savedInfo = append(savedInfo, Info{Package: pkgName, URL: url, SHA: e.Commit.SHA})
 			}
 		}
 	}
