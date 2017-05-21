@@ -71,9 +71,9 @@ func (s Query) PrintSearch() {
 		var toprint string
 		if config.YayConf.SearchMode == config.NumberMenu {
 			if config.YayConf.SortMode == config.BottomUp {
-				toprint += fmt.Sprintf("%d ", len(s)-i-1)
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", len(s)-i-1)
 			} else {
-				toprint += fmt.Sprintf("%d ", i)
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", i)
 			}
 		} else if config.YayConf.SearchMode == config.Minimal {
 			fmt.Println(res.Name())
@@ -93,7 +93,7 @@ func (s Query) PrintSearch() {
 			}
 		}
 
-		toprint += "\n" + res.Description()
+		toprint += "\n    " + res.Description()
 		fmt.Println(toprint)
 	}
 }

@@ -184,7 +184,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		printAURSearch(aq, numpq)
 	}
 
-	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers:", "Type numbers to install. Separate each number with a space.")
+	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers: ", "Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil || overflow {
