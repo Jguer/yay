@@ -17,9 +17,9 @@ func printAURSearch(q aur.Query, start int) {
 		var toprint string
 		if config.YayConf.SearchMode == config.NumberMenu {
 			if config.YayConf.SortMode == config.BottomUp {
-				toprint += fmt.Sprintf("%d ", len(q)+start-i-1)
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", len(q)+start-i-1)
 			} else {
-				toprint += fmt.Sprintf("%d ", start+i)
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", start+i)
 			}
 		} else if config.YayConf.SearchMode == config.Minimal {
 			fmt.Println(res.Name)
@@ -37,7 +37,7 @@ func printAURSearch(q aur.Query, start int) {
 		if _, err := localDb.PkgByName(res.Name); err == nil {
 			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
 		}
-		toprint += "\n" + res.Description
+		toprint += "\n    " + res.Description
 		fmt.Println(toprint)
 	}
 
