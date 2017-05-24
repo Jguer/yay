@@ -68,6 +68,8 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 				config.YayConf.Devel = true
 			case "--nodevel":
 				config.YayConf.Devel = false
+			case "--timeupdates":
+				config.YayConf.TimeUpdate = true
 			case "--topdown":
 				config.YayConf.SortMode = config.TopDown
 			case "--complete":

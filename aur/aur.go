@@ -167,7 +167,8 @@ func Upgrade(flags []string) error {
 
 		if _, ok := foreign[res.Name]; ok {
 			// Leaving this here for now, warn about downgrades later
-			if int64(res.LastModified) > foreign[res.Name].BuildDate().Unix() {
+			if (!config.YayConf.TimeUpdate && (int64(res.LastModified) > foreign[res.Name].BuildDate().Unix())) ||
+				alpm.VerCmp(foreign[res.Name].Version(), res.Version) < 0 {
 				buffer.WriteString(fmt.Sprintf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
 					res.Name, foreign[res.Name].Version(), res.Version))
 				outdated = append(outdated, res)
@@ -187,8 +188,18 @@ func Upgrade(flags []string) error {
 		return nil
 	}
 
+	var finalmdeps []string
 	for _, pkgi := range outdated {
-		PkgInstall(&pkgi, flags)
+		mdeps, err := PkgInstall(&pkgi, flags)
+		finalmdeps = append(finalmdeps, mdeps...)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	err = pacman.CleanRemove(finalmdeps)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	return nil

@@ -38,6 +38,7 @@ type Configuration struct {
 	SearchMode int    `json:"-"`
 	SortMode   int    `json:"sortmode"`
 	TarBin     string `json:"tarbin"`
+	TimeUpdate bool   `json:"versionupdate"`
 }
 
 // YayConf holds the current config values for yay.
@@ -123,6 +124,7 @@ func defaultSettings(config *Configuration) {
 	config.PacmanConf = "/etc/pacman.conf"
 	config.SortMode = BottomUp
 	config.TarBin = "/usr/bin/bsdtar"
+	config.TimeUpdate = false
 }
 
 // Editor returns the preferred system editor.
