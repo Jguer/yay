@@ -216,7 +216,7 @@ func CleanRemove(pkgName []string) (err error) {
 		return nil
 	}
 
-	err = config.PassToPacman("-Rsnc", pkgName, []string{"--noutil.Conf.rm"})
+	err = config.PassToPacman("-Rsnc", pkgName, []string{"--noconfirm"})
 	return err
 }
 
