@@ -119,9 +119,9 @@ func CheckUpdates(foreign map[string]alpm.Package) (toUpdate []string) {
 	return
 }
 
-func inStore(url string) *Info {
+func inStore(pkgName string) *Info {
 	for i, e := range savedInfo {
-		if url == e.URL {
+		if pkgName == e.Package {
 			return &savedInfo[i]
 		}
 	}
@@ -156,7 +156,7 @@ func BranchInfo(pkgName string, owner string, repo string) (err error) {
 
 	_ = json.NewDecoder(r.Body).Decode(&newRepo)
 
-	packinfo := inStore(url)
+	packinfo := inStore(pkgName)
 
 	for _, e := range newRepo {
 		if e.Name == "master" {
