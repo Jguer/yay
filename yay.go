@@ -35,6 +35,8 @@ func usage() {
     --topdown            shows repository's packages first and then aur's
     --bottomup           shows aur's packages first and then repository's
     --noconfirm          skip user input on package install
+	--devel			     Check -git/-svn/-hg development version
+	--nodevel			 Disable development version checking
 `)
 }
 
@@ -91,7 +93,6 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 			}
 			continue
 		}
-
 		packages = append(packages, arg)
 	}
 	return

@@ -66,7 +66,7 @@ func printDeps(repoDeps []string, aurDeps []string) {
 	}
 }
 
-func setupPackageSpace(a *rpc.Pkg) (err error) {
+func setupPackageSpace(a *rpc.Pkg) (pkgbuild *gopkg.PKGBUILD, err error) {
 	dir := config.YayConf.BuildDir + a.PackageBase + "/"
 
 	if _, err = os.Stat(dir); !os.IsNotExist(err) {
@@ -85,9 +85,9 @@ func setupPackageSpace(a *rpc.Pkg) (err error) {
 		editcmd.Run()
 	}
 
-	pkgb, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+	pkgbuild, err = gopkg.ParseSRCINFO(dir + ".SRCINFO")
 	if err == nil {
-		for _, pkgsource := range pkgb.Source {
+		for _, pkgsource := range pkgbuild.Source {
 			owner, repo := vcs.ParseSource(pkgsource)
 			if owner != "" && repo != "" {
 				err = vcs.BranchInfo(a.Name, owner, repo)
@@ -113,7 +113,8 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
 	}
 
-	if err = setupPackageSpace(a); err != nil {
+	_, err = setupPackageSpace(a)
+	if err != nil {
 		return
 	}
 
@@ -236,7 +237,6 @@ func PrintInfo(a *rpc.Pkg) {
 	if a.OutOfDate != 0 {
 		fmt.Println("\x1b[1;37mOut-of-date     :\x1b[0m", "Yes")
 	}
-
 }
 
 // RemoveMakeDeps receives a make dependency list and removes those
