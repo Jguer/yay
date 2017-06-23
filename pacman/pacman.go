@@ -306,7 +306,7 @@ func BiggestPackages() {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkgS[i].Name(), pkgS[i].ISize()/(1024*1024))
+		fmt.Printf("%s: \x1B[0;33m%.1fMiB\x1B[0m\n", pkgS[i].Name(), float32(pkgS[i].ISize())/(1024.0*1024.0))
 	}
 	// Could implement size here as well, but we just want the general idea
 }
@@ -326,7 +326,8 @@ func HangingPackages() (hanging []string, err error) {
 		requiredby := pkg.ComputeRequiredBy()
 		if len(requiredby) == 0 {
 			hanging = append(hanging, pkg.Name())
-			fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkg.Name(), pkg.ISize()/(1024*1024))
+			fmt.Println(pkg.ISize())
+			fmt.Printf("%s: \x1B[0;33m%.2f KiB\x1B[0m\n", pkg.Name(), float32(pkg.ISize())/(1024.0))
 
 		}
 		return nil
