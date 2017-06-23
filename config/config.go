@@ -38,7 +38,7 @@ type Configuration struct {
 	SearchMode int    `json:"-"`
 	SortMode   int    `json:"sortmode"`
 	TarBin     string `json:"tarbin"`
-	TimeUpdate bool   `json:"versionupdate"`
+	TimeUpdate bool   `json:"timeupdate"`
 }
 
 // YayConf holds the current config values for yay.
