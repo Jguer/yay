@@ -3,111 +3,51 @@ package pacman
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/jguer/go-alpm"
-	"github.com/jguer/yay/util"
+	"github.com/jguer/yay/config"
 )
 
-// Query describes a Repository search.
-type Query []Result
-
-// Result describes a pkg.
-type Result struct {
-	Name        string
-	Repository  string
-	Version     string
-	Description string
-	Group       string
-	Installed   bool
-}
-
-// PacmanConf describes the default pacman config file
-const PacmanConf string = "/etc/pacman.conf"
-
-var conf alpm.PacmanConfig
-
-func init() {
-	conf, _ = readConfig(PacmanConf)
-}
-
-func readConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
-	file, err := os.Open(pacmanconf)
-	if err != nil {
-		return
-	}
-	conf, err = alpm.ParseConfig(file)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// UpdatePackages handles cache update and upgrade
-func UpdatePackages(flags []string) error {
-	args := append([]string{"pacman", "-Syu"}, flags...)
-
-	cmd := exec.Command("sudo", args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err := cmd.Run()
-	return err
-}
+// Query holds the results of a repository search.
+type Query []alpm.Package
 
 // Search handles repo searches. Creates a RepoSearch struct.
 func Search(pkgInputN []string) (s Query, n int, err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-	}
-
-	localDb, err := h.LocalDb()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
-	dbList, err := h.SyncDbs()
-	if err != nil {
-		return
-	}
-
-	var installed bool
-	dbS := dbList.Slice()
 
 	// BottomUp functions
 	initL := func(len int) int {
-		return len - 1
-	}
-
-	compL := func(len int, i int) bool {
-		return i > 0
-	}
-
-	finalL := func(i int) int {
-		return i - 1
-	}
-
-	// TopDown functions
-	if util.SortMode == util.TopDown {
-		initL = func(len int) int {
+		if config.YayConf.SortMode == config.TopDown {
 			return 0
+		} else {
+			return len - 1
 		}
-
-		compL = func(len int, i int) bool {
+	}
+	compL := func(len int, i int) bool {
+		if config.YayConf.SortMode == config.TopDown {
 			return i < len
+		} else {
+			return i > -1
 		}
-
-		finalL = func(i int) int {
+	}
+	finalL := func(i int) int {
+		if config.YayConf.SortMode == config.TopDown {
 			return i + 1
+		} else {
+			return i - 1
 		}
 	}
 
+	dbS := dbList.Slice()
 	lenDbs := len(dbS)
 	for f := initL(lenDbs); compL(lenDbs, f); f = finalL(f) {
 		pkgS := dbS[f].PkgCache().Slice()
 		lenPkgs := len(pkgS)
-
 		for i := initL(lenPkgs); compL(lenPkgs, i); i = finalL(i) {
-
 			match := true
 			for _, pkgN := range pkgInputN {
 				if !(strings.Contains(pkgS[i].Name(), pkgN) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgN)) {
@@ -117,20 +57,8 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 			}
 
 			if match {
-				installed = false
-				if r, _ := localDb.PkgByName(pkgS[i].Name()); r != nil {
-					installed = true
-				}
 				n++
-
-				s = append(s, Result{
-					Name:        pkgS[i].Name(),
-					Description: pkgS[i].Description(),
-					Version:     pkgS[i].Version(),
-					Repository:  dbS[f].Name(),
-					Group:       strings.Join(pkgS[i].Groups().Slice(), ","),
-					Installed:   installed,
-				})
+				s = append(s, pkgS[i])
 			}
 		}
 	}
@@ -141,74 +69,57 @@ func Search(pkgInputN []string) (s Query, n int, err error) {
 func (s Query) PrintSearch() {
 	for i, res := range s {
 		var toprint string
-		if util.SearchVerbosity == util.NumberMenu {
-			if util.SortMode == util.BottomUp {
-				toprint += fmt.Sprintf("%d ", len(s)-i-1)
+		if config.YayConf.SearchMode == config.NumberMenu {
+			if config.YayConf.SortMode == config.BottomUp {
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", len(s)-i-1)
 			} else {
-				toprint += fmt.Sprintf("%d ", i)
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", i)
 			}
-		} else if util.SearchVerbosity == util.Minimal {
-			fmt.Println(res.Name)
+		} else if config.YayConf.SearchMode == config.Minimal {
+			fmt.Println(res.Name())
 			continue
 		}
 		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m",
-			res.Repository, res.Name, res.Version)
+			res.DB().Name(), res.Name(), res.Version())
 
-		if len(res.Group) != 0 {
-			toprint += fmt.Sprintf("(%s) ", res.Group)
+		if len(res.Groups().Slice()) != 0 {
+			toprint += fmt.Sprint(res.Groups().Slice(), " ")
 		}
 
-		if res.Installed {
-			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
-		}
-
-		toprint += "\n" + res.Description
-		fmt.Println(toprint)
-	}
-}
-
-// PFactory execute an action over a series of packages without reopening the handle everytime.
-// Everybody told me it wouln't work. It does. It's just not pretty.
-// When it worked: https://youtu.be/a4Z5BdEL0Ag?t=1m11s
-func PFactory(action func(interface{})) func(name string, object interface{}, rel bool) {
-	h, _ := conf.CreateHandle()
-	localDb, _ := h.LocalDb()
-
-	return func(name string, object interface{}, rel bool) {
-		_, err := localDb.PkgByName(name)
+		localDb, err := config.AlpmHandle.LocalDb()
 		if err == nil {
-			action(object)
+			if _, err = localDb.PkgByName(res.Name()); err == nil {
+				toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
+			}
 		}
 
-		if rel {
-			h.Release()
-		}
+		toprint += "\n    " + res.Description()
+		fmt.Println(toprint)
 	}
 }
 
 // PackageSlices separates an input slice into aur and repo slices
 func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
 
 	for _, pkg := range toCheck {
 		found := false
-		for _, db := range dbList.Slice() {
+
+		_ = dbList.ForEach(func(db alpm.Db) error {
+			if found {
+				return nil
+			}
+
 			_, err = db.PkgByName(pkg)
 			if err == nil {
 				found = true
 				repo = append(repo, pkg)
-				break
 			}
-		}
+			return nil
+		})
 
 		if !found {
 			if _, errdb := dbList.PkgCachebyGroup(pkg); errdb == nil {
@@ -226,10 +137,8 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 // BuildDependencies finds packages, on the second run
 // compares with a baselist and avoids searching those
 func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
-	h, _ := conf.CreateHandle()
-
-	localDb, _ := h.LocalDb()
-	dbList, _ := h.SyncDbs()
+	localDb, _ := config.AlpmHandle.LocalDb()
+	dbList, _ := config.AlpmHandle.SyncDbs()
 
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
@@ -237,7 +146,6 @@ func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool
 
 	return func(toCheck []string, isBaseList bool, close bool) (repo []string, notFound []string) {
 		if close {
-			h.Release()
 			return
 		}
 
@@ -266,17 +174,11 @@ func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool
 // DepSatisfier receives a string slice, returns a slice of packages found in
 // repos and one of packages not found in repos. Leaves out installed packages.
 func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
-
-	localDb, err := h.LocalDb()
-	if err != nil {
-		return
-	}
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -300,21 +202,13 @@ func DepSatisfier(toCheck []string) (repo []string, notFound []string, err error
 	return
 }
 
-// Install sends an install command to pacman with the pkgName slice
-func Install(pkgName []string, flags []string) (err error) {
-	if len(pkgName) == 0 {
-		return nil
-	}
-
-	args := []string{"pacman", "-S"}
-	args = append(args, pkgName...)
-	args = append(args, flags...)
-
-	cmd := exec.Command("sudo", args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	cmd.Run()
-	return nil
-}
+// PkgNameSlice returns a slice of package names
+// func (s Query) PkgNameSlice() (pkgNames []string) {
+// 	for _, e := range s {
+// 		pkgNames = append(pkgNames, e.Name())
+// 	}
+// 	return
+// }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice
 func CleanRemove(pkgName []string) (err error) {
@@ -322,61 +216,43 @@ func CleanRemove(pkgName []string) (err error) {
 		return nil
 	}
 
-	args := []string{"pacman", "-Rnsc"}
-	args = append(args, pkgName...)
-	args = append(args, "--noconfirm")
-
-	cmd := exec.Command("sudo", args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	cmd.Run()
-	return nil
+	err = config.PassToPacman("-Rsnc", pkgName, []string{"--noconfirm"})
+	return err
 }
 
 // ForeignPackages returns a map of foreign packages, with their version and date as values.
-func ForeignPackages() (foreign map[string]*struct {
-	Version string
-	Date    int64
-}, n int, err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
+func ForeignPackages() (foreign map[string]alpm.Package, err error) {
+	localDb, err := config.AlpmHandle.LocalDb()
+	if err != nil {
+		return
+	}
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
 
-	localDb, err := h.LocalDb()
-	if err != nil {
-		return
-	}
-	dbList, err := h.SyncDbs()
-	if err != nil {
-		return
-	}
+	foreign = make(map[string]alpm.Package)
 
-	foreign = make(map[string]*struct {
-		Version string
-		Date    int64
-	})
-	// Find foreign packages in system
-	for _, pkg := range localDb.PkgCache().Slice() {
-		// Change to more effective method
+	f := func(k alpm.Package) error {
 		found := false
-		for _, db := range dbList.Slice() {
-			_, err = db.PkgByName(pkg.Name())
+		_ = dbList.ForEach(func(d alpm.Db) error {
+			if found {
+				return nil
+			}
+			_, err = d.PkgByName(k.Name())
 			if err == nil {
 				found = true
-				break
 			}
-		}
+			return nil
+		})
 
 		if !found {
-			foreign[pkg.Name()] = &struct {
-				Version string
-				Date    int64
-			}{pkg.Version(), pkg.InstallDate().Unix()}
-			n++
+			foreign[k.Name()] = k
 		}
+		return nil
 	}
 
+	err = localDb.PkgCache().ForEach(f)
 	return
 }
 
@@ -390,13 +266,7 @@ func Statistics() (info struct {
 	var nPkg int
 	var ePkg int
 
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -422,13 +292,8 @@ func Statistics() (info struct {
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
 func BiggestPackages() {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
 
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -441,7 +306,7 @@ func BiggestPackages() {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkgS[i].Name(), pkgS[i].ISize()/(1024*1024))
+		fmt.Printf("%s: \x1B[0;33m%.1fMiB\x1B[0m\n", pkgS[i].Name(), float32(pkgS[i].ISize())/(1024.0*1024.0))
 	}
 	// Could implement size here as well, but we just want the general idea
 }
@@ -449,13 +314,7 @@ func BiggestPackages() {
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
 func HangingPackages() (hanging []string, err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -467,7 +326,8 @@ func HangingPackages() (hanging []string, err error) {
 		requiredby := pkg.ComputeRequiredBy()
 		if len(requiredby) == 0 {
 			hanging = append(hanging, pkg.Name())
-			fmt.Printf("%s: \x1B[0;33m%dMB\x1B[0m\n", pkg.Name(), pkg.ISize()/(1024*1024))
+			fmt.Println(pkg.ISize())
+			fmt.Printf("%s: \x1B[0;33m%.2f KiB\x1B[0m\n", pkg.Name(), float32(pkg.ISize())/(1024.0))
 
 		}
 		return nil
@@ -480,13 +340,7 @@ func HangingPackages() (hanging []string, err error) {
 // SliceHangingPackages returns a list of packages installed as deps
 // and unneeded by the system from a provided list of package names.
 func SliceHangingPackages(pkgS []string) (hanging []string) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	localDb, err := h.LocalDb()
+	localDb, err := config.AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -517,13 +371,7 @@ big:
 
 // GetPkgbuild downloads pkgbuild from the ABS.
 func GetPkgbuild(pkgN string, path string) (err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
-	if err != nil {
-		return
-	}
-
-	dbList, err := h.SyncDbs()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -540,7 +388,7 @@ func GetPkgbuild(pkgN string, path string) (err error) {
 				return fmt.Errorf("Not in standard repositories")
 			}
 			fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in ABS.\x1b[0m\n", pkgN)
-			errD := util.DownloadAndUnpack(url, path, true)
+			errD := config.DownloadAndUnpack(url, path, true)
 			return errD
 		}
 	}
@@ -549,36 +397,25 @@ func GetPkgbuild(pkgN string, path string) (err error) {
 
 //CreatePackageList appends Repo packages to completion cache
 func CreatePackageList(out *os.File) (err error) {
-	h, err := conf.CreateHandle()
-	defer h.Release()
+	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
 
-	dbList, err := h.SyncDbs()
-	if err != nil {
-		return
-	}
-
-	p := func(pkg alpm.Package) error {
-		fmt.Print(pkg.Name())
-		out.WriteString(pkg.Name())
-		if util.Shell == "fish" {
-			fmt.Print("\t" + pkg.DB().Name() + "\n")
-			out.WriteString("\t" + pkg.DB().Name() + "\n")
-		} else {
-			fmt.Print("\n")
-			out.WriteString("\n")
-		}
-
+	_ = dbList.ForEach(func(db alpm.Db) error {
+		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
+			fmt.Print(pkg.Name())
+			out.WriteString(pkg.Name())
+			if config.YayConf.Shell == "fish" {
+				fmt.Print("\t" + pkg.DB().Name() + "\n")
+				out.WriteString("\t" + pkg.DB().Name() + "\n")
+			} else {
+				fmt.Print("\n")
+				out.WriteString("\n")
+			}
+			return nil
+		})
 		return nil
-	}
-
-	f := func(db alpm.Db) error {
-		db.PkgCache().ForEach(p)
-		return nil
-	}
-
-	dbList.ForEach(f)
+	})
 	return nil
 }

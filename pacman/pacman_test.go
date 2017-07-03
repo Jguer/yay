@@ -1,8 +1,11 @@
 package pacman
 
-import "testing"
-import "github.com/jguer/yay/util"
-import "os"
+import (
+	"os"
+	"testing"
+
+	"github.com/jguer/yay/config"
+)
 
 func benchmarkPrintSearch(search string, b *testing.B) {
 	old := os.Stdout
@@ -17,20 +20,20 @@ func benchmarkPrintSearch(search string, b *testing.B) {
 }
 
 func BenchmarkPrintSearchSimpleTopDown(b *testing.B) {
-	util.SortMode = util.TopDown
+	config.YayConf.SortMode = config.TopDown
 	benchmarkPrintSearch("chromium", b)
 }
 func BenchmarkPrintSearchComplexTopDown(b *testing.B) {
-	util.SortMode = util.TopDown
+	config.YayConf.SortMode = config.TopDown
 	benchmarkPrintSearch("linux", b)
 }
 
 func BenchmarkPrintSearchSimpleBottomUp(b *testing.B) {
-	util.SortMode = util.BottomUp
+	config.YayConf.SortMode = config.BottomUp
 	benchmarkPrintSearch("chromium", b)
 }
 func BenchmarkPrintSearchComplexBottomUp(b *testing.B) {
-	util.SortMode = util.BottomUp
+	config.YayConf.SortMode = config.BottomUp
 	benchmarkPrintSearch("linux", b)
 }
 
@@ -40,20 +43,20 @@ func benchmarkSearch(search string, b *testing.B) {
 	}
 }
 func BenchmarkSearchSimpleTopDown(b *testing.B) {
-	util.SortMode = util.TopDown
+	config.YayConf.SortMode = config.TopDown
 	benchmarkSearch("chromium", b)
 }
 
 func BenchmarkSearchSimpleBottomUp(b *testing.B) {
-	util.SortMode = util.BottomUp
+	config.YayConf.SortMode = config.BottomUp
 	benchmarkSearch("chromium", b)
 }
 
 func BenchmarkSearchComplexTopDown(b *testing.B) {
-	util.SortMode = util.TopDown
+	config.YayConf.SortMode = config.TopDown
 	benchmarkSearch("linux", b)
 }
 func BenchmarkSearchComplexBottomUp(b *testing.B) {
-	util.SortMode = util.BottomUp
+	config.YayConf.SortMode = config.BottomUp
 	benchmarkSearch("linux", b)
 }
