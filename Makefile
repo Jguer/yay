@@ -1,16 +1,13 @@
 .PHONY: build doc fmt lint run test vendor_clean vendor_get vendor_update vet
 
-# Prepend our _vendor directory to the system GOPATH
-# so that import path resolution will prioritize
-# our third party snapshots.
 VERSION := $(shell git rev-list --count master)
 LDFLAGS=-ldflags "-s -w -X main.version=${VERSION}"
 GOFILES := $(shell ls *.go | grep -v /vendor/)
+ARCH=$(shell uname -m)
 PKGNAME=yay
-BINARY=./bin/${PKGNAME}
 
-ARCH64="amd64"
-ARCH86="386"
+OUTPUT="${PKGNAME}_2.${VERSION}_${ARCH}/"
+PACKAGE="${PKGNAME}_2.${VERSION}_${ARCH}"
 
 default: build
 
@@ -19,25 +16,17 @@ install:
 test:
 	go test ./...
 build:
-	go build -v -o ${BINARY} ${LDFLAGS} ./cmd/yay/
-release64:
-	GOARCH=${ARCH64} go build -v -o ./${PKGNAME}_1.${VERSION}_${ARCH64}/${PKGNAME} ${LDFLAGS} ./cmd/yay/
-	cp ./LICENSE ./${PKGNAME}_1.${VERSION}_${ARCH64}/
-	cp ./yay.fish ./${PKGNAME}_1.${VERSION}_${ARCH64}/
-	cp ./zsh-completion ./${PKGNAME}_1.${VERSION}_${ARCH64}/
-	cp ./bash-completion ./${PKGNAME}_1.${VERSION}_${ARCH64}/
-	tar -czvf ${PKGNAME}_1.${VERSION}_${ARCH64}.tar.gz ${PKGNAME}_1.${VERSION}_${ARCH64}
-release86:
-	GOARCH=${ARCH86} go build -v -o ./${PKGNAME}_1.${VERSION}_${ARCH86}/${PKGNAME} ${LDFLAGS} ./cmd/yay/
-	cp ./LICENSE ./${PKGNAME}_1.${VERSION}_${ARCH86}/
-	cp ./yay.fish ./${PKGNAME}_1.${VERSION}_${ARCH86}/
-	cp ./zsh-completion ./${PKGNAME}_1.${VERSION}_${ARCH86}/
-	cp ./bash-completion ./${PKGNAME}_1.${VERSION}_${ARCH86}/
-	tar -czvf ${PKGNAME}_1.${VERSION}_${ARCH86}.tar.gz ${PKGNAME}_1.${VERSION}_${ARCH86}
-run:
-	build
-	${BINARY}
+	go build -v -o ${OUTPUT}/${PKGNAME} ${LDFLAGS}
+release:
+	GOARCH=${ARCH64} go build -v -o ${OUTPUT}/${PKGNAME} ${LDFLAGS}
+	cp ./LICENSE ${OUTPUT}
+	cp ./yay.8 ${OUTPUT}
+	cp ./zsh-completion ${OUTPUT}
+	cp ./yay.fish ${OUTPUT}
+	cp ./bash-completion ${OUTPUT}
+	tar -czvf ${PACKAGE}.tar.gz ${PACKAGE}
+	rm -r ${OUTPUT}
 clean:
 	go clean
-	rm -r ./${PKGNAME}_1*
+	rm -r ./${PKGNAME}_*
 
