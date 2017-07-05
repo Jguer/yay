@@ -270,7 +270,7 @@ func PassToPacman(op string, pkgs []string, flags []string) error {
 		args = append(args, flags...)
 	}
 
-	if strings.Contains(op, "-Q") {
+	if strings.Contains(op, "-Q") || op == "Si" {
 		cmd = exec.Command(YayConf.PacmanBin, args...)
 	} else {
 		args = append([]string{YayConf.PacmanBin}, args...)

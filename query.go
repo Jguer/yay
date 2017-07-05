@@ -73,13 +73,14 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 		return
 	}
 
-	q, err := rpc.Info(aurS)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	for _, aurP := range q {
-		aur.PrintInfo(&aurP)
+	if len(aurS) != 0 {
+		q, err := rpc.Info(aurS)
+		if err != nil {
+			fmt.Println(err)
+		}
+		for _, aurP := range q {
+			aur.PrintInfo(&aurP)
+		}
 	}
 
 	if len(repoS) != 0 {
