@@ -326,7 +326,6 @@ func HangingPackages() (hanging []string, err error) {
 		requiredby := pkg.ComputeRequiredBy()
 		if len(requiredby) == 0 {
 			hanging = append(hanging, pkg.Name())
-			fmt.Println(pkg.ISize())
 			fmt.Printf("%s: \x1B[0;33m%.2f KiB\x1B[0m\n", pkg.Name(), float32(pkg.ISize())/(1024.0))
 
 		}
