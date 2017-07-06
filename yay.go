@@ -62,9 +62,18 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 		if arg[0] == '-' && arg[1] == '-' {
 			changedConfig = true
 			switch arg {
+			case "--printconfig":
+				fmt.Printf("%+v", config.YayConf)
+				os.Exit(0)
 			case "--gendb":
-				aur.CreateDevelDB()
-				vcs.SaveBranchInfo()
+				err = aur.CreateDevelDB()
+				if err != nil {
+					fmt.Println(err)
+				}
+				err = vcs.SaveBranchInfo()
+				if err != nil {
+					fmt.Println(err)
+				}
 				os.Exit(0)
 			case "--devel":
 				config.YayConf.Devel = true
@@ -78,11 +87,11 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 				config.YayConf.SortMode = config.TopDown
 			case "--complete":
 				config.YayConf.Shell = "sh"
-				complete()
+				_ = complete()
 				os.Exit(0)
 			case "--fcomplete":
 				config.YayConf.Shell = "fish"
-				complete()
+				_ = complete()
 				os.Exit(0)
 			case "--help":
 				usage()
@@ -148,15 +157,28 @@ func main() {
 		err = config.PassToPacman(op, pkgs, options)
 	}
 
+	var erra error
 	if vcs.Updated {
-		vcs.SaveBranchInfo()
+		erra = vcs.SaveBranchInfo()
+		if erra != nil {
+			fmt.Println(err)
+		}
+
 	}
 
 	if changedConfig {
-		config.SaveConfig()
+		erra = config.SaveConfig()
+		if erra != nil {
+			fmt.Println(err)
+		}
+
 	}
 
-	config.AlpmHandle.Release()
+	erra = config.AlpmHandle.Release()
+	if erra != nil {
+		fmt.Println(err)
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
