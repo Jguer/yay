@@ -27,18 +27,19 @@ const (
 
 // Configuration stores yay's config.
 type Configuration struct {
-	BuildDir   string `json:"buildDir"`
-	Editor     string `json:"editor"`
-	MakepkgBin string `json:"makepkgbin"`
-	Shell      string `json:"-"`
-	NoConfirm  bool   `json:"noconfirm"`
-	Devel      bool   `json:"devel"`
-	PacmanBin  string `json:"pacmanbin"`
-	PacmanConf string `json:"pacmanconf"`
-	SearchMode int    `json:"-"`
-	SortMode   int    `json:"sortmode"`
-	TarBin     string `json:"tarbin"`
-	TimeUpdate bool   `json:"timeupdate"`
+	BuildDir      string `json:"buildDir"`
+	Editor        string `json:"editor"`
+	MakepkgBin    string `json:"makepkgbin"`
+	Shell         string `json:"-"`
+	NoConfirm     bool   `json:"noconfirm"`
+	Devel         bool   `json:"devel"`
+	PacmanBin     string `json:"pacmanbin"`
+	PacmanConf    string `json:"pacmanconf"`
+	RequestSplitN int    `json:"requestsplitn"`
+	SearchMode    int    `json:"-"`
+	SortMode      int    `json:"sortmode"`
+	TarBin        string `json:"tarbin"`
+	TimeUpdate    bool   `json:"timeupdate"`
 }
 
 // YayConf holds the current config values for yay.
@@ -128,6 +129,7 @@ func defaultSettings(config *Configuration) {
 	config.SortMode = BottomUp
 	config.TarBin = "/usr/bin/bsdtar"
 	config.TimeUpdate = false
+	config.RequestSplitN = 150
 }
 
 // Editor returns the preferred system editor.

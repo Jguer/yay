@@ -154,9 +154,18 @@ func Upgrade(flags []string) error {
 		}
 	}
 
-	q, err := rpc.Info(keys)
-	if err != nil {
-		return err
+	var q Query
+	var j int
+	for i = len(keys); i != 0; i = j {
+		j = i - config.YayConf.RequestSplitN
+		if j < 0 {
+			j = 0
+		}
+		qtemp, err := rpc.Info(keys[j:i])
+		q = append(q, qtemp...)
+		if err != nil {
+			return err
+		}
 	}
 
 	var buffer bytes.Buffer
