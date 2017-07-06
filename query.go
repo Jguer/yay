@@ -119,7 +119,35 @@ func localStatistics(version string) error {
 		keys[i] = k
 		i++
 	}
-	q, err := rpc.Info(keys)
+
+	var q aur.Query
+	var j int
+	for i = len(keys); i != 0; i = j {
+		j = i - config.YayConf.RequestSplitN
+		if j < 0 {
+			j = 0
+		}
+		qtemp, err := rpc.Info(keys[j:i])
+		q = append(q, qtemp...)
+		if err != nil {
+			return err
+		}
+	}
+
+	var outcast []string
+	for _, s := range keys {
+		found := false
+		for _, i := range q {
+			if s == i.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			outcast = append(outcast, s)
+		}
+	}
+
 	if err != nil {
 		return err
 	}
@@ -131,6 +159,10 @@ func localStatistics(version string) error {
 		if res.OutOfDate != 0 {
 			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;37;40m is out-of-date in AUR.\x1b[0m\n", res.Name)
 		}
+	}
+
+	for _, res := range outcast {
+		fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;37;40m is not available in AUR.\x1b[0m\n", res)
 	}
 
 	return nil

@@ -36,7 +36,10 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 
 ### Changelog
 
-#### 2.
+#### 2.159
+- Qstats now warns about packages not available in AUR.
+
+#### 2.152
 - Fetching backend changed to Mikkel Oscar's [Aur](https://github.com/mikkeloscar/aur)
 - Added support for development packages from github.
 - Pacman backend rewritten and simplified
