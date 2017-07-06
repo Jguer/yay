@@ -51,12 +51,15 @@ var AlpmConf alpm.PacmanConfig
 var AlpmHandle *alpm.Handle
 
 func init() {
+	defaultSettings(&YayConf)
+
 	var err error
 	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
 
 	if _, err = os.Stat(configfile); os.IsNotExist(err) {
 		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
-		defaultSettings(&YayConf)
+		// Save the default config if nothing is found
+		SaveConfig()
 	} else {
 		file, err := os.Open(configfile)
 		if err != nil {
@@ -100,7 +103,7 @@ func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 func SaveConfig() error {
 	YayConf.NoConfirm = false
 	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
-	marshalledinfo, _ := json.Marshal(YayConf)
+	marshalledinfo, _ := json.MarshalIndent(YayConf, "", "\t")
 	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
