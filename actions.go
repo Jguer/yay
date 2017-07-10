@@ -13,14 +13,20 @@ import (
 func install(pkgs []string, flags []string) error {
 	aurs, repos, _ := pac.PackageSlices(pkgs)
 
-	err := config.PassToPacman("-S", repos, flags)
-	if err != nil {
-		fmt.Println("Error installing repo packages.")
+	if len(repos) != 0 {
+		err := config.PassToPacman("-S", repos, flags)
+		if err != nil {
+			fmt.Println("Error installing repo packages.")
+		}
 	}
 
-	err = aur.Install(aurs, flags)
-
-	return err
+	if len(aurs) != 0 {
+		err := aur.Install(aurs, flags)
+		if err != nil {
+			fmt.Println("Error installing aur packages.")
+		}
+	}
+	return nil
 }
 
 // Upgrade handles updating the cache and installing updates.

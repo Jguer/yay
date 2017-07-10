@@ -3,9 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jguer/yay/aur"
 	vcs "github.com/jguer/yay/aur/vcs"
@@ -255,5 +257,36 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		err = aur.Install(aurInstall, flags)
 	}
 
+	return err
+}
+
+// Complete provides completion info for shells
+func complete() (err error) {
+	path := os.Getenv("HOME") + "/.cache/yay/aur_" + config.YayConf.Shell + ".cache"
+
+	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
+		os.MkdirAll(os.Getenv("HOME")+"/.cache/yay/", 0755)
+
+		out, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+
+		if aur.CreateAURList(out) != nil {
+			defer os.Remove(path)
+		}
+		err = pac.CreatePackageList(out)
+
+		out.Close()
+		return err
+	}
+
+	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	_, err = io.Copy(os.Stdout, in)
 	return err
 }
