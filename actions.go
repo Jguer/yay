@@ -31,14 +31,28 @@ func install(pkgs []string, flags []string) error {
 
 // Upgrade handles updating the cache and installing updates.
 func upgrade(flags []string) error {
-	errp := config.PassToPacman("-Syu", nil, flags)
-	erra := aur.Upgrade(flags)
-
+	errp := config.PassToPacman("-Sy", nil, flags)
 	if errp != nil {
 		return errp
 	}
 
-	return erra
+	aurUpList, err := aur.UpgradeList(flags)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%+v\n", aurUpList)
+	// erra := aur.Upgrade(flags)
+
+	// if errp != nil {
+	// 	return errp
+	// }
+
+	// var buffer bytes.Buffer
+	// buffer.WriteString("\n")
+
+	// fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
+	// return erra
+	return nil
 }
 
 // CleanDependencies removels all dangling dependencies in system

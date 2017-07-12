@@ -256,6 +256,41 @@ func ForeignPackages() (foreign map[string]alpm.Package, err error) {
 	return
 }
 
+// ForeignPackages returns a map of foreign packages, with their version and date as values.
+func ForeignPackageList() (packages []alpm.Package, packageNames []string, err error) {
+	localDb, err := config.AlpmHandle.LocalDb()
+	if err != nil {
+		return
+	}
+	dbList, err := config.AlpmHandle.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	f := func(k alpm.Package) error {
+		found := false
+		_ = dbList.ForEach(func(d alpm.Db) error {
+			if found {
+				return nil
+			}
+			_, err = d.PkgByName(k.Name())
+			if err == nil {
+				found = true
+			}
+			return nil
+		})
+
+		if !found {
+			packages = append(packages, k)
+			packageNames = append(packageNames, k.Name())
+		}
+		return nil
+	}
+
+	err = localDb.PkgCache().ForEach(f)
+	return
+}
+
 // Statistics returns statistics about packages installed in system
 func Statistics() (info struct {
 	Totaln    int
