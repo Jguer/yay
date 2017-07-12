@@ -149,7 +149,7 @@ func UpgradeList(flags []string) (toUpgrade []upgrade, err error) {
 	var routines int
 	var routineDone int
 
-	packageC := make(chan upgrade, 8)
+	packageC := make(chan upgrade)
 	done := make(chan bool)
 
 	for i := len(foreign); i != 0; i = j {
