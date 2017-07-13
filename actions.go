@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	alpm "github.com/jguer/go-alpm"
 	aur "github.com/jguer/yay/aur"
 	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
@@ -36,11 +37,45 @@ func upgrade(flags []string) error {
 		return errp
 	}
 
-	aurUpList, err := aur.UpgradeList(flags)
-	if err != nil {
-		return err
+	pacC := make(chan []alpm.Package)
+	aurC := make(chan []aur.Upgrade)
+	errC := make(chan error)
+	var pacUp []alpm.Package
+	var aurUp []aur.Upgrade
+
+	go func() {
+		pacUpList, err := pac.UpgradeList()
+		errC <- err
+		pacC <- pacUpList
+	}()
+
+	go func() {
+		aurUpList, err := aur.UpgradeList()
+		errC <- err
+		aurC <- aurUpList
+	}()
+
+	var i = 0
+loop:
+	for {
+		select {
+		case pacUp = <-pacC:
+			i++
+		case aurUp = <-aurC:
+			i++
+		case err := <-errC:
+			if err != nil {
+				fmt.Println(err)
+			}
+		default:
+			if i == 2 {
+				break loop
+			}
+		}
 	}
-	fmt.Printf("%+v\n", aurUpList)
+
+	fmt.Printf("%+v\n", aurUp)
+	fmt.Printf("%+v\n", pacUp)
 	// erra := aur.Upgrade(flags)
 
 	// if errp != nil {

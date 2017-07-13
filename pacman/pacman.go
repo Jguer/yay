@@ -134,11 +134,39 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	return
 }
 
+func UpgradeList() ([]alpm.Package, error) {
+	localDb, err := config.AlpmHandle.LocalDb()
+	if err != nil {
+		return nil, err
+	}
+
+	dbList, err := config.AlpmHandle.SyncDbs()
+	if err != nil {
+		return nil, err
+	}
+
+	slice := []alpm.Package{}
+	for _, pkg := range localDb.PkgCache().Slice() {
+		newPkg := pkg.NewVersion(dbList)
+		if newPkg != nil {
+			slice = append(slice, *newPkg)
+		}
+	}
+	return slice, nil
+}
+
 // BuildDependencies finds packages, on the second run
 // compares with a baselist and avoids searching those
 func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
-	localDb, _ := config.AlpmHandle.LocalDb()
-	dbList, _ := config.AlpmHandle.SyncDbs()
+	localDb, err := config.AlpmHandle.LocalDb()
+	if err != nil {
+		panic(err)
+	}
+
+	dbList, err := config.AlpmHandle.SyncDbs()
+	if err != nil {
+		panic(err)
+	}
 
 	f := func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '

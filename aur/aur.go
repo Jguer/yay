@@ -2,7 +2,6 @@ package aur
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"net/http"
 	"os"
@@ -132,13 +131,13 @@ func develUpgrade(foreign map[string]alpm.Package, flags []string) error {
 	return nil
 }
 
-type upgrade struct {
+type Upgrade struct {
 	Name          string
 	LocalVersion  string
 	RemoteVersion string
 }
 
-func UpgradeList(flags []string) (toUpgrade []upgrade, err error) {
+func UpgradeList() (toUpgrade []Upgrade, err error) {
 	foreign, foreignNames, err := pacman.ForeignPackageList()
 	if err != nil {
 		return
@@ -149,7 +148,7 @@ func UpgradeList(flags []string) (toUpgrade []upgrade, err error) {
 	var routines int
 	var routineDone int
 
-	packageC := make(chan upgrade)
+	packageC := make(chan Upgrade)
 	done := make(chan bool)
 
 	for i := len(foreign); i != 0; i = j {
@@ -158,6 +157,7 @@ func UpgradeList(flags []string) (toUpgrade []upgrade, err error) {
 			j = 0
 		}
 
+		//Split requests so AUR RPC doesn't get mad at us.
 		qtemp, err = rpc.Info(foreignNames[j:i])
 		if err != nil {
 			return
@@ -179,7 +179,7 @@ func UpgradeList(flags []string) (toUpgrade []upgrade, err error) {
 				} else if qtemp[x].Name == local[i].Name() {
 					if (config.YayConf.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
 						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
-						packageC <- upgrade{qtemp[x].Name, local[i].Version(), qtemp[x].Version}
+						packageC <- Upgrade{qtemp[x].Name, local[i].Version(), qtemp[x].Version}
 						continue
 					}
 				} else {
@@ -205,86 +205,86 @@ func UpgradeList(flags []string) (toUpgrade []upgrade, err error) {
 }
 
 // Upgrade tries to update every foreign package installed in the system
-func Upgrade(flags []string) error {
-	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
+// func Upgrade(flags []string) error {
+// 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
 
-	foreign, err := pacman.ForeignPackages()
-	if err != nil {
-		return err
-	}
-	keys := make([]string, len(foreign))
-	i := 0
-	for k := range foreign {
-		keys[i] = k
-		i++
-	}
+// 	foreign, err := pacman.ForeignPackages()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	keys := make([]string, len(foreign))
+// 	i := 0
+// 	for k := range foreign {
+// 		keys[i] = k
+// 		i++
+// 	}
 
-	if config.YayConf.Devel {
-		err := develUpgrade(foreign, flags)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
+// 	if config.YayConf.Devel {
+// 		err := develUpgrade(foreign, flags)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 	}
 
-	var q Query
-	var j int
-	for i = len(keys); i != 0; i = j {
-		j = i - config.YayConf.RequestSplitN
-		if j < 0 {
-			j = 0
-		}
-		qtemp, err := rpc.Info(keys[j:i])
-		q = append(q, qtemp...)
-		if err != nil {
-			return err
-		}
-	}
+// 	var q Query
+// 	var j int
+// 	for i = len(keys); i != 0; i = j {
+// 		j = i - config.YayConf.RequestSplitN
+// 		if j < 0 {
+// 			j = 0
+// 		}
+// 		qtemp, err := rpc.Info(keys[j:i])
+// 		q = append(q, qtemp...)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-	var buffer bytes.Buffer
-	buffer.WriteString("\n")
-	outdated := q[:0]
-	for i, res := range q {
-		fmt.Printf("\r Checking %d/%d packages...", i+1, len(q))
+// 	var buffer bytes.Buffer
+// 	buffer.WriteString("\n")
+// 	outdated := q[:0]
+// 	for i, res := range q {
+// 		fmt.Printf("\r Checking %d/%d packages...", i+1, len(q))
 
-		if _, ok := foreign[res.Name]; ok {
-			// Leaving this here for now, warn about downgrades later
-			if (config.YayConf.TimeUpdate && (int64(res.LastModified) > foreign[res.Name].BuildDate().Unix())) ||
-				alpm.VerCmp(foreign[res.Name].Version(), res.Version) < 0 {
-				buffer.WriteString(fmt.Sprintf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
-					res.Name, foreign[res.Name].Version(), res.Version))
-				outdated = append(outdated, res)
-			}
-		}
-	}
-	fmt.Println(buffer.String())
+// 		if _, ok := foreign[res.Name]; ok {
+// 			// Leaving this here for now, warn about downgrades later
+// 			if (config.YayConf.TimeUpdate && (int64(res.LastModified) > foreign[res.Name].BuildDate().Unix())) ||
+// 				alpm.VerCmp(foreign[res.Name].Version(), res.Version) < 0 {
+// 				buffer.WriteString(fmt.Sprintf("\x1b[1m\x1b[32m==>\x1b[33;1m %s: \x1b[0m%s \x1b[33;1m-> \x1b[0m%s\n",
+// 					res.Name, foreign[res.Name].Version(), res.Version))
+// 				outdated = append(outdated, res)
+// 			}
+// 		}
+// 	}
+// 	fmt.Println(buffer.String())
 
-	//If there are no outdated packages, don't prompt
-	if len(outdated) == 0 {
-		fmt.Println("there is nothing to do")
-		return nil
-	}
+// 	//If there are no outdated packages, don't prompt
+// 	if len(outdated) == 0 {
+// 		fmt.Println("there is nothing to do")
+// 		return nil
+// 	}
 
-	// Install updated packages
-	if !config.ContinueTask("Proceed with upgrade?", "nN") {
-		return nil
-	}
+// 	// Install updated packages
+// 	if !config.ContinueTask("Proceed with upgrade?", "nN") {
+// 		return nil
+// 	}
 
-	var finalmdeps []string
-	for _, pkgi := range outdated {
-		mdeps, err := PkgInstall(&pkgi, flags)
-		finalmdeps = append(finalmdeps, mdeps...)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
+// 	var finalmdeps []string
+// 	for _, pkgi := range outdated {
+// 		mdeps, err := PkgInstall(&pkgi, flags)
+// 		finalmdeps = append(finalmdeps, mdeps...)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 	}
 
-	err = pacman.CleanRemove(finalmdeps)
-	if err != nil {
-		fmt.Println(err)
-	}
+// 	err = pacman.CleanRemove(finalmdeps)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // GetPkgbuild downloads pkgbuild from the AUR.
 func GetPkgbuild(pkgN string, dir string) (err error) {
