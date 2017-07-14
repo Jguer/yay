@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "sT9KemwEQt8FOjq/C5no9gpdFgU=",
+			"path": "github.com/jguer/go-alpm",
+			"revision": "f82ad11b38f675991ef2425dbeff03ef346bc113",
+			"revisionTime": "2017-05-07T12:31:44Z"
+		},
+		{
+			"checksumSHA1": "FNyfHWps1OdA3izWdVkxmPtMf1A=",
+			"path": "github.com/mikkeloscar/aur",
+			"revision": "dc2f99767ec5d809269bd3bac3878f6e949f8e64",
+			"revisionTime": "2017-05-02T13:48:13Z"
+		},
+		{
+			"checksumSHA1": "2MqUneYW520vQevWV6MITvYjdf4=",
+			"path": "github.com/mikkeloscar/gopkgbuild",
+			"revision": "46d010163d87513b0f05fb67400475348bd50cc9",
+			"revisionTime": "2017-05-09T09:30:41Z"
+		}
+	],
+	"rootPath": "github.com/jguer/yay"
+}

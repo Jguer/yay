@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	alpm "github.com/jguer/go-alpm"
 	aur "github.com/jguer/yay/aur"
 	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
+	"github.com/jguer/yay/upgrade"
 )
 
 // Install handles package installs
@@ -31,51 +31,16 @@ func install(pkgs []string, flags []string) error {
 }
 
 // Upgrade handles updating the cache and installing updates.
-func upgrade(flags []string) error {
-	errp := config.PassToPacman("-Sy", nil, flags)
-	if errp != nil {
-		return errp
+func upgradePkgs(flags []string) error {
+	aurUp, repoUp, err := upgrade.List()
+	if err != nil {
+		return err
 	}
-
-	pacC := make(chan []alpm.Package)
-	aurC := make(chan []aur.Upgrade)
-	errC := make(chan error)
-	var pacUp []alpm.Package
-	var aurUp []aur.Upgrade
-
-	go func() {
-		pacUpList, err := pac.UpgradeList()
-		errC <- err
-		pacC <- pacUpList
-	}()
-
-	go func() {
-		aurUpList, err := aur.UpgradeList()
-		errC <- err
-		aurC <- aurUpList
-	}()
-
-	var i = 0
-loop:
-	for {
-		select {
-		case pacUp = <-pacC:
-			i++
-		case aurUp = <-aurC:
-			i++
-		case err := <-errC:
-			if err != nil {
-				fmt.Println(err)
-			}
-		default:
-			if i == 2 {
-				break loop
-			}
-		}
-	}
-
 	fmt.Printf("%+v\n", aurUp)
-	fmt.Printf("%+v\n", pacUp)
+	fmt.Printf("%+v\n", repoUp)
+
+	upgrade.Print(len(aurUp), repoUp)
+	upgrade.Print(0, aurUp)
 	// erra := aur.Upgrade(flags)
 
 	// if errp != nil {

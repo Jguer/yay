@@ -134,27 +134,6 @@ func PackageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	return
 }
 
-func UpgradeList() ([]alpm.Package, error) {
-	localDb, err := config.AlpmHandle.LocalDb()
-	if err != nil {
-		return nil, err
-	}
-
-	dbList, err := config.AlpmHandle.SyncDbs()
-	if err != nil {
-		return nil, err
-	}
-
-	slice := []alpm.Package{}
-	for _, pkg := range localDb.PkgCache().Slice() {
-		newPkg := pkg.NewVersion(dbList)
-		if newPkg != nil {
-			slice = append(slice, *newPkg)
-		}
-	}
-	return slice, nil
-}
-
 // BuildDependencies finds packages, on the second run
 // compares with a baselist and avoids searching those
 func BuildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
@@ -284,40 +263,6 @@ func ForeignPackages() (foreign map[string]alpm.Package, err error) {
 	return
 }
 
-// ForeignPackages returns a map of foreign packages, with their version and date as values.
-func ForeignPackageList() (packages []alpm.Package, packageNames []string, err error) {
-	localDb, err := config.AlpmHandle.LocalDb()
-	if err != nil {
-		return
-	}
-	dbList, err := config.AlpmHandle.SyncDbs()
-	if err != nil {
-		return
-	}
-
-	f := func(k alpm.Package) error {
-		found := false
-		_ = dbList.ForEach(func(d alpm.Db) error {
-			if found {
-				return nil
-			}
-			_, err = d.PkgByName(k.Name())
-			if err == nil {
-				found = true
-			}
-			return nil
-		})
-
-		if !found {
-			packages = append(packages, k)
-			packageNames = append(packageNames, k.Name())
-		}
-		return nil
-	}
-
-	err = localDb.PkgCache().ForEach(f)
-	return
-}
 
 // Statistics returns statistics about packages installed in system
 func Statistics() (info struct {

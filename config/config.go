@@ -42,6 +42,7 @@ type Configuration struct {
 	TimeUpdate    bool   `json:"timeupdate"`
 }
 
+
 // YayConf holds the current config values for yay.
 var YayConf Configuration
 

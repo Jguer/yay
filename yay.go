@@ -143,7 +143,7 @@ func main() {
 	case "-S":
 		err = install(pkgs, options)
 	case "-Syu", "-Suy":
-		err = upgrade(options)
+		err = upgradePkgs(options)
 	case "-Si":
 		err = syncInfo(pkgs, options)
 	case "yogurt":
