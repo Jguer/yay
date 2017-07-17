@@ -3,6 +3,7 @@ package upgrade
 
 import (
 	"fmt"
+	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
 	"github.com/jguer/yay/config"
@@ -16,6 +17,41 @@ type Upgrade struct {
 	Repository    string
 	LocalVersion  string
 	RemoteVersion string
+}
+
+// Slice is a slice of Upgrades
+type Slice []Upgrade
+
+func (s Slice) Len() int      { return len(s) }
+func (s Slice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
+func (s Slice) Less(i, j int) bool {
+	iRunes := []rune(s[i].Repository)
+	jRunes := []rune(s[j].Repository)
+
+	max := len(iRunes)
+	if max > len(jRunes) {
+		max = len(jRunes)
+	}
+
+	for idx := 0; idx < max; idx++ {
+		ir := iRunes[idx]
+		jr := jRunes[idx]
+
+		lir := unicode.ToLower(ir)
+		ljr := unicode.ToLower(jr)
+
+		if lir != ljr {
+			return lir > ljr
+		}
+
+		// the lowercase runes are the same, so compare the original
+		if ir != jr {
+			return ir > jr
+		}
+	}
+
+	return false
 }
 
 // FilterPackages filters packages based on source and type.
@@ -57,8 +93,9 @@ func FilterPackages() (local []alpm.Package, remote []alpm.Package,
 	return
 }
 
-func Print(start int, u []Upgrade) {
-	for _, i := range u {
+// Print prints the details of the packages to upgrade.
+func Print(start int, u Slice) {
+	for k, i := range u {
 		old, err := pkgb.NewCompleteVersion(i.LocalVersion)
 		if err != nil {
 			fmt.Println(i.Name, err)
@@ -75,15 +112,15 @@ func Print(start int, u []Upgrade) {
 			}
 			return (hash)%6 + 31
 		}
-		// fmt.Printf("\x1b[33m%-2d\x1b[0m ", len(u)+start-k-1)
-		fmt.Printf("\x1b[1;%dm%s\x1b[0m/\x1b[1;39m%-20s\t\t\x1b[0m", f(i.Repository), i.Repository, i.Name)
+		fmt.Printf("\x1b[33m%-2d\x1b[0m ", len(u)+start-k-1)
+		fmt.Printf("\x1b[1;%dm%s\x1b[0m/\x1b[1;39m%-25s\t\t\x1b[0m", f(i.Repository), i.Repository, i.Name)
 
 		if old.Version != new.Version {
-			fmt.Printf("\x1b[31m%10s\x1b[0m-%d -> \x1b[1;32m%s\x1b[0m-%d\x1b[0m",
+			fmt.Printf("\x1b[31m%18s\x1b[0m-%d -> \x1b[1;32m%s\x1b[0m-%d\x1b[0m",
 				old.Version, old.Pkgrel,
 				new.Version, new.Pkgrel)
 		} else {
-			fmt.Printf("\x1b[0m%10s-\x1b[31m%d\x1b[0m -> %s-\x1b[32m%d\x1b[0m",
+			fmt.Printf("\x1b[0m%18s-\x1b[31m%d\x1b[0m -> %s-\x1b[32m%d\x1b[0m",
 				old.Version, old.Pkgrel,
 				new.Version, new.Pkgrel)
 		}
@@ -92,7 +129,7 @@ func Print(start int, u []Upgrade) {
 }
 
 // List returns lists of packages to upgrade from each source.
-func List() (aurUp []Upgrade, repoUp []Upgrade, err error) {
+func List() (aurUp Slice, repoUp Slice, err error) {
 	err = config.PassToPacman("-Sy", nil, nil)
 	if err != nil {
 		return
@@ -145,7 +182,7 @@ loop:
 
 // aur gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func aur(remote []alpm.Package, remoteNames []string) (toUpgrade []Upgrade, err error) {
+func aur(remote []alpm.Package, remoteNames []string) (toUpgrade Slice, err error) {
 	var j int
 	var routines int
 	var routineDone int
@@ -195,7 +232,6 @@ func aur(remote []alpm.Package, remoteNames []string) (toUpgrade []Upgrade, err 
 	for {
 		select {
 		case pkg := <-packageC:
-			fmt.Println("Package Received")
 			toUpgrade = append(toUpgrade, pkg)
 		case <-done:
 			routineDone++
@@ -209,13 +245,13 @@ func aur(remote []alpm.Package, remoteNames []string) (toUpgrade []Upgrade, err 
 
 // repo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func repo(local []alpm.Package) ([]Upgrade, error) {
+func repo(local []alpm.Package) (Slice, error) {
 	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return nil, err
 	}
 
-	slice := []Upgrade{}
+	slice := Slice{}
 	for _, pkg := range local {
 		newPkg := pkg.NewVersion(dbList)
 		if newPkg != nil {

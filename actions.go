@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"sort"
+	"strconv"
+	"strings"
 
 	aur "github.com/jguer/yay/aur"
 	"github.com/jguer/yay/config"
@@ -36,22 +40,72 @@ func upgradePkgs(flags []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n", aurUp)
-	fmt.Printf("%+v\n", repoUp)
 
-	upgrade.Print(len(aurUp), repoUp)
-	upgrade.Print(0, aurUp)
-	// erra := aur.Upgrade(flags)
+	if len(aurUp)+len(repoUp) > 0 {
+		sort.Sort(repoUp)
+		fmt.Printf("\x1b[1;34;1m:: \x1b[0m\x1b[1m%d Packages to upgrade.\x1b[0m\n", len(aurUp)+len(repoUp))
+		upgrade.Print(len(aurUp), repoUp)
+		upgrade.Print(0, aurUp)
+		fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
+	}
+	reader := bufio.NewReader(os.Stdin)
 
-	// if errp != nil {
-	// 	return errp
-	// }
+	numberBuf, overflow, err := reader.ReadLine()
+	if err != nil || overflow {
+		fmt.Println(err)
+		return err
+	}
 
-	// var buffer bytes.Buffer
-	// buffer.WriteString("\n")
+	result := strings.Fields(string(numberBuf))
+	var repoNums []int
+	var aurNums []int
+	for _, numS := range result {
+		num, err := strconv.Atoi(numS)
+		if err != nil {
+			continue
+		}
+		if num > len(aurUp)+len(repoUp)-1 || num < 0 {
+			continue
+		} else if num < len(aurUp) {
+			num = len(aurUp) - num - 1
+			aurNums = append(aurNums, num)
+		} else {
+			num = len(aurUp) + len(repoUp) - num - 1
+			repoNums = append(repoNums, num)
+		}
+	}
 
-	// fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Starting AUR upgrade...\x1b[0m")
-	// return erra
+	if len(repoUp) != 0 {
+		var repoNames []string
+	repoloop:
+		for i, k := range repoUp {
+			for _, j := range repoNums {
+				if j == i {
+					continue repoloop
+				}
+			}
+			repoNames = append(repoNames, k.Name)
+		}
+
+		err := config.PassToPacman("-S", repoNames, flags)
+		if err != nil {
+			fmt.Println("Error upgrading repo packages.")
+		}
+	}
+
+	if len(aurUp) != 0 {
+		var aurNames []string
+	aurloop:
+		for i, k := range aurUp {
+			for _, j := range aurNums {
+				if j == i {
+					continue aurloop
+				}
+			}
+			aurNames = append(aurNames, k.Name)
+		}
+		aur.Install(aurNames, flags)
+	}
 	return nil
 }
 
