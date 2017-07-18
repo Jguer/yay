@@ -252,24 +252,28 @@ func repo(local []alpm.Package) (Slice, error) {
 	}
 
 	slice := Slice{}
+primeloop:
 	for _, pkg := range local {
-		for _, ignorePkg := range config.AlpmConf.IgnorePkg {
-			if pkg.Name() == ignorePkg {
-				continue primeloop
-			}
-		}
+		newPkg := pkg.NewVersion(dbList)
 
-		for _, ignoreGroup := range config.AlpmConf.IgnoreGroup {
-			for _, group := range pkg.Groups().Slice() {
-				if group == ignoreGroup {
+		if newPkg != nil {
+			for _, ignorePkg := range config.AlpmConf.IgnorePkg {
+				if pkg.Name() == ignorePkg {
+					fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s -> %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
 					continue primeloop
-
 				}
 			}
-		}
 
-		newPkg := pkg.NewVersion(dbList)
-		if newPkg != nil {
+			for _, ignoreGroup := range config.AlpmConf.IgnoreGroup {
+				for _, group := range pkg.Groups().Slice() {
+					if group == ignoreGroup {
+						fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored group) ignoring upgrade (%s -> %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
+						continue primeloop
+
+					}
+				}
+			}
+
 			slice = append(slice, Upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
 		}
 	}
