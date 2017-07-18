@@ -253,6 +253,21 @@ func repo(local []alpm.Package) (Slice, error) {
 
 	slice := Slice{}
 	for _, pkg := range local {
+		for _, ignorePkg := range config.AlpmConf.IgnorePkg {
+			if pkg.Name() == ignorePkg {
+				continue primeloop
+			}
+		}
+
+		for _, ignoreGroup := range config.AlpmConf.IgnoreGroup {
+			for _, group := range pkg.Groups().Slice() {
+				if group == ignoreGroup {
+					continue primeloop
+
+				}
+			}
+		}
+
 		newPkg := pkg.NewVersion(dbList)
 		if newPkg != nil {
 			slice = append(slice, Upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
