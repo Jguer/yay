@@ -110,7 +110,7 @@ func Print(start int, u Slice) {
 			for i := 0; i < len(name); i++ {
 				hash = int(name[i]) + ((hash << 5) + (hash))
 			}
-			return (hash)%6 + 31
+			return hash%6 + 31
 		}
 		fmt.Printf("\x1b[33m%-2d\x1b[0m ", len(u)+start-k-1)
 		fmt.Printf("\x1b[1;%dm%s\x1b[0m/\x1b[1;39m%-25s\t\t\x1b[0m", f(i.Repository), i.Repository, i.Name)
@@ -130,10 +130,6 @@ func Print(start int, u Slice) {
 
 // List returns lists of packages to upgrade from each source.
 func List() (aurUp Slice, repoUp Slice, err error) {
-	err = config.PassToPacman("-Sy", nil, nil)
-	if err != nil {
-		return
-	}
 
 	local, remote, _, remoteNames, err := FilterPackages()
 	if err != nil {

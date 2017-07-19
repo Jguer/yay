@@ -18,7 +18,7 @@ import (
 // BaseURL givers the AUR default address.
 const BaseURL string = "https://aur.archlinux.org"
 
-var specialDBsauce bool = false
+var specialDBsauce = false
 
 // NarrowSearch searches AUR and narrows based on subarguments
 func NarrowSearch(pkgS []string, sortS bool) (Query, error) {

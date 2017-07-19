@@ -142,7 +142,13 @@ func main() {
 		}
 	case "-S":
 		err = install(pkgs, options)
-	case "-Syu", "-Suy":
+	case "-Syu", "-Suy", "-Su":
+		if strings.Contains(op, "y") {
+			err = config.PassToPacman("-Sy", nil, nil)
+			if err != nil {
+				break
+			}
+		}
 		err = upgradePkgs(options)
 	case "-Si":
 		err = syncInfo(pkgs, options)
