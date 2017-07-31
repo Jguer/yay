@@ -140,12 +140,14 @@ func List() (aurUp Slice, repoUp Slice, err error) {
 	aurC := make(chan []Upgrade)
 	errC := make(chan error)
 
+	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Searching databases for updates...\x1b[0m")
 	go func() {
 		repoUpList, err := repo(local)
 		errC <- err
 		repoC <- repoUpList
 	}()
 
+	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Searching AUR for updates...\x1b[0m")
 	go func() {
 		aurUpList, err := aur(remote, remoteNames)
 		errC <- err

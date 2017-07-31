@@ -39,15 +39,16 @@ func upgradePkgs(flags []string) error {
 	aurUp, repoUp, err := upgrade.List()
 	if err != nil {
 		return err
+	} else if len(aurUp)+len(repoUp) == 0 {
+		fmt.Println("\nthere is nothing to do")
+		return err
 	}
 
-	if len(aurUp)+len(repoUp) > 0 {
-		sort.Sort(repoUp)
-		fmt.Printf("\x1b[1;34;1m:: \x1b[0m\x1b[1m%d Packages to upgrade.\x1b[0m\n", len(aurUp)+len(repoUp))
-		upgrade.Print(len(aurUp), repoUp)
-		upgrade.Print(0, aurUp)
-		fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
-	}
+	sort.Sort(repoUp)
+	fmt.Printf("\x1b[1;34;1m:: \x1b[0m\x1b[1m%d Packages to upgrade.\x1b[0m\n", len(aurUp)+len(repoUp))
+	upgrade.Print(len(aurUp), repoUp)
+	upgrade.Print(0, aurUp)
+	fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
 	reader := bufio.NewReader(os.Stdin)
 
 	numberBuf, overflow, err := reader.ReadLine()
