@@ -1,18 +1,23 @@
-// Package upgrade package is responsible for returning lists of outdated packages.
-package upgrade
+package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
 	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
+	"github.com/jguer/yay/aur"
 	"github.com/jguer/yay/config"
 	rpc "github.com/mikkeloscar/aur"
 	pkgb "github.com/mikkeloscar/gopkgbuild"
 )
 
-// Upgrade type describes a system upgrade.
-type Upgrade struct {
+// upgrade type describes a system upgrade.
+type upgrade struct {
 	Name          string
 	Repository    string
 	LocalVersion  string
@@ -20,14 +25,14 @@ type Upgrade struct {
 }
 
 // Slice is a slice of Upgrades
-type Slice []Upgrade
+type upSlice []upgrade
 
-func (s Slice) Len() int      { return len(s) }
-func (s Slice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (u upSlice) Len() int      { return len(u) }
+func (u upSlice) Swap(i, j int) { u[i], u[j] = u[j], u[i] }
 
-func (s Slice) Less(i, j int) bool {
-	iRunes := []rune(s[i].Repository)
-	jRunes := []rune(s[j].Repository)
+func (u upSlice) Less(i, j int) bool {
+	iRunes := []rune(u[i].Repository)
+	jRunes := []rune(u[j].Repository)
 
 	max := len(iRunes)
 	if max > len(jRunes) {
@@ -94,7 +99,7 @@ func FilterPackages() (local []alpm.Package, remote []alpm.Package,
 }
 
 // Print prints the details of the packages to upgrade.
-func Print(start int, u Slice) {
+func (u upSlice) Print(start int) {
 	for k, i := range u {
 		old, err := pkgb.NewCompleteVersion(i.LocalVersion)
 		if err != nil {
@@ -129,27 +134,26 @@ func Print(start int, u Slice) {
 }
 
 // List returns lists of packages to upgrade from each source.
-func List() (aurUp Slice, repoUp Slice, err error) {
-
+func upList() (aurUp upSlice, repoUp upSlice, err error) {
 	local, remote, _, remoteNames, err := FilterPackages()
 	if err != nil {
 		return
 	}
 
-	repoC := make(chan []Upgrade)
-	aurC := make(chan []Upgrade)
+	repoC := make(chan upSlice)
+	aurC := make(chan upSlice)
 	errC := make(chan error)
 
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Searching databases for updates...\x1b[0m")
 	go func() {
-		repoUpList, err := repo(local)
+		repoUpList, err := upRepo(local)
 		errC <- err
 		repoC <- repoUpList
 	}()
 
 	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Searching AUR for updates...\x1b[0m")
 	go func() {
-		aurUpList, err := aur(remote, remoteNames)
+		aurUpList, err := upAUR(remote, remoteNames)
 		errC <- err
 		aurC <- aurUpList
 	}()
@@ -180,12 +184,12 @@ loop:
 
 // aur gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func aur(remote []alpm.Package, remoteNames []string) (toUpgrade Slice, err error) {
+func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err error) {
 	var j int
 	var routines int
 	var routineDone int
 
-	packageC := make(chan Upgrade)
+	packageC := make(chan upgrade)
 	done := make(chan bool)
 
 	for i := len(remote); i != 0; i = j {
@@ -216,7 +220,7 @@ func aur(remote []alpm.Package, remoteNames []string) (toUpgrade Slice, err erro
 				} else if qtemp[x].Name == local[i].Name() {
 					if (config.YayConf.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
 						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
-						packageC <- Upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
+						packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
 					}
 					continue
 				} else {
@@ -243,13 +247,13 @@ func aur(remote []alpm.Package, remoteNames []string) (toUpgrade Slice, err erro
 
 // repo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func repo(local []alpm.Package) (Slice, error) {
+func upRepo(local []alpm.Package) (upSlice, error) {
 	dbList, err := config.AlpmHandle.SyncDbs()
 	if err != nil {
 		return nil, err
 	}
 
-	slice := Slice{}
+	slice := upSlice{}
 primeloop:
 	for _, pkg := range local {
 		newPkg := pkg.NewVersion(dbList)
@@ -272,8 +276,84 @@ primeloop:
 				}
 			}
 
-			slice = append(slice, Upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
+			slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
 		}
 	}
 	return slice, nil
+}
+
+// Upgrade handles updating the cache and installing updates.
+func upgradePkgs(flags []string) error {
+	aurUp, repoUp, err := upList()
+	if err != nil {
+		return err
+	} else if len(aurUp)+len(repoUp) == 0 {
+		fmt.Println("\nthere is nothing to do")
+		return err
+	}
+
+	sort.Sort(repoUp)
+	fmt.Printf("\x1b[1;34;1m:: \x1b[0m\x1b[1m%d Packages to upgrade.\x1b[0m\n", len(aurUp)+len(repoUp))
+	repoUp.Print(len(aurUp))
+	aurUp.Print(0)
+	fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
+	reader := bufio.NewReader(os.Stdin)
+
+	numberBuf, overflow, err := reader.ReadLine()
+	if err != nil || overflow {
+		fmt.Println(err)
+		return err
+	}
+
+	result := strings.Fields(string(numberBuf))
+	var repoNums []int
+	var aurNums []int
+	for _, numS := range result {
+		num, err := strconv.Atoi(numS)
+		if err != nil {
+			continue
+		}
+		if num > len(aurUp)+len(repoUp)-1 || num < 0 {
+			continue
+		} else if num < len(aurUp) {
+			num = len(aurUp) - num - 1
+			aurNums = append(aurNums, num)
+		} else {
+			num = len(aurUp) + len(repoUp) - num - 1
+			repoNums = append(repoNums, num)
+		}
+	}
+
+	if len(repoUp) != 0 {
+		var repoNames []string
+	repoloop:
+		for i, k := range repoUp {
+			for _, j := range repoNums {
+				if j == i {
+					continue repoloop
+				}
+			}
+			repoNames = append(repoNames, k.Name)
+		}
+
+		err := config.PassToPacman("-S", repoNames, flags)
+		if err != nil {
+			fmt.Println("Error upgrading repo packages.")
+		}
+	}
+
+	if len(aurUp) != 0 {
+		var aurNames []string
+	aurloop:
+		for i, k := range aurUp {
+			for _, j := range aurNums {
+				if j == i {
+					continue aurloop
+				}
+			}
+			aurNames = append(aurNames, k.Name)
+		}
+		aur.Install(aurNames, flags)
+	}
+	return nil
 }
