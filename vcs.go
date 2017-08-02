@@ -1,4 +1,4 @@
-package github
+package main
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
+	"github.com/jguer/yay/pacman"
 )
 
 // branch contains the information of a repository branch
@@ -30,35 +31,28 @@ type Info struct {
 
 type infos []Info
 
-var savedInfo infos
-var configfile string
-
-// Updated returns if database has been updated
-var Updated bool
-
-func init() {
-	Updated = false
-	configfile = os.Getenv("HOME") + "/.config/yay/yay_vcs.json"
-
-	if _, err := os.Stat(configfile); os.IsNotExist(err) {
-		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
-		return
-	}
-
-	file, err := os.Open(configfile)
+// CreateDevelDB forces yay to create a DB of the existing development packages
+func createDevelDB() error {
+	foreign, err := pacman.ForeignPackages()
 	if err != nil {
-		fmt.Println("error:", err)
-		return
+		return err
 	}
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&savedInfo)
-	if err != nil {
-		fmt.Println("error:", err)
+
+	keys := make([]string, len(foreign))
+	i := 0
+	for k := range foreign {
+		keys[i] = k
+		i++
 	}
+
+	config.NoConfirm = true
+	specialDBsauce = true
+	err = Install(keys, nil)
+	return err
 }
 
 // ParseSource returns owner and repo from source
-func ParseSource(source string) (owner string, repo string) {
+func parseSource(source string) (owner string, repo string) {
 	if !(strings.Contains(source, "git://") ||
 		strings.Contains(source, ".git") ||
 		strings.Contains(source, "git+https://")) {
@@ -97,16 +91,15 @@ func (info *Info) needsUpdate() bool {
 		if e.Name == "master" {
 			if e.Commit.SHA != info.SHA {
 				return true
-			} else {
-				return false
 			}
+			return false
 		}
 	}
 	return false
 }
 
 // CheckUpdates returns list of outdated packages
-func CheckUpdates(foreign map[string]alpm.Package) (toUpdate []string) {
+func checkUpdates(foreign map[string]alpm.Package) (toUpdate []string) {
 	for _, e := range savedInfo {
 		if e.needsUpdate() {
 			if _, ok := foreign[e.Package]; ok {
@@ -128,23 +121,8 @@ func inStore(pkgName string) *Info {
 	return nil
 }
 
-// RemovePackage removes package from VCS information
-func RemovePackage(pkgs []string) {
-	for _, pkgName := range pkgs {
-		for i, e := range savedInfo {
-			if e.Package == pkgName {
-				savedInfo[i] = savedInfo[len(savedInfo)-1]
-				savedInfo = savedInfo[:len(savedInfo)-1]
-			}
-		}
-	}
-
-	_ = SaveBranchInfo()
-	return
-}
-
 // BranchInfo updates saved information
-func BranchInfo(pkgName string, owner string, repo string) (err error) {
+func branchInfo(pkgName string, owner string, repo string) (err error) {
 	Updated = true
 	var newRepo branches
 	url := "https://api.github.com/repos/" + owner + "/" + repo + "/branches"
@@ -173,8 +151,8 @@ func BranchInfo(pkgName string, owner string, repo string) (err error) {
 	return
 }
 
-func SaveBranchInfo() error {
-	marshalledinfo, err := json.Marshal(savedInfo)
+func saveVCSInfo() error {
+	marshalledinfo, err := json.MarshalIndent(savedInfo)
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}

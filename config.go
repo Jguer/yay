@@ -1,10 +1,8 @@
-package config
+package main
 
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -42,52 +40,28 @@ type Configuration struct {
 	TimeUpdate    bool   `json:"timeupdate"`
 }
 
+var version = "2.116"
+
+// BaseURL givers the AUR default address.
+const BaseURL string = "https://aur.archlinux.org"
+
+var specialDBsauce = false
+
+var savedInfo infos
+
+var configfile string
+
+// Updated returns if database has been updated
+var updated bool
 
 // YayConf holds the current config values for yay.
-var YayConf Configuration
+var config Configuration
 
 // AlpmConf holds the current config values for pacman.
 var AlpmConf alpm.PacmanConfig
 
 // AlpmHandle is the alpm handle used by yay.
 var AlpmHandle *alpm.Handle
-
-func init() {
-	defaultSettings(&YayConf)
-
-	var err error
-	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
-
-	if _, err = os.Stat(configfile); os.IsNotExist(err) {
-		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
-		// Save the default config if nothing is found
-		SaveConfig()
-	} else {
-		file, err := os.Open(configfile)
-		if err != nil {
-			fmt.Println("Error reading config:", err)
-		} else {
-			decoder := json.NewDecoder(file)
-			err = decoder.Decode(&YayConf)
-			if err != nil {
-				fmt.Println("Loading default Settings\nError reading config:", err)
-				defaultSettings(&YayConf)
-			}
-		}
-	}
-
-	AlpmConf, err = readAlpmConfig(YayConf.PacmanConf)
-	if err != nil {
-		fmt.Println("Unable to read Pacman conf", err)
-		os.Exit(1)
-	}
-
-	AlpmHandle, err = AlpmConf.CreateHandle()
-	if err != nil {
-		fmt.Println("Unable to CreateHandle", err)
-		os.Exit(1)
-	}
-}
 
 func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	file, err := os.Open(pacmanconf)
@@ -102,10 +76,10 @@ func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 }
 
 // SaveConfig writes yay config to file.
-func SaveConfig() error {
-	YayConf.NoConfirm = false
+func (config *Configuration) saveConfig() error {
+	config.NoConfirm = false
 	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
-	marshalledinfo, _ := json.MarshalIndent(YayConf, "", "\t")
+	marshalledinfo, _ := json.MarshalIndent(config, "", "\t")
 	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
@@ -134,7 +108,7 @@ func defaultSettings(config *Configuration) {
 }
 
 // Editor returns the preferred system editor.
-func Editor() string {
+func editor() string {
 	switch {
 	case YayConf.Editor != "":
 		editor, err := exec.LookPath(YayConf.Editor)
@@ -183,7 +157,7 @@ func Editor() string {
 
 // ContinueTask prompts if user wants to continue task.
 //If NoConfirm is set the action will continue without user input.
-func ContinueTask(s string, def string) (cont bool) {
+func continueTask(s string, def string) (cont bool) {
 	if YayConf.NoConfirm {
 		return true
 	}
@@ -210,60 +184,8 @@ func ContinueTask(s string, def string) (cont bool) {
 	return true
 }
 
-func downloadFile(path string, url string) (err error) {
-	// Create the file
-	out, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
-	return err
-}
-
-// DownloadAndUnpack downloads url tgz and extracts to path.
-func DownloadAndUnpack(url string, path string, trim bool) (err error) {
-	err = os.MkdirAll(path, 0755)
-	if err != nil {
-		return
-	}
-
-	tokens := strings.Split(url, "/")
-	fileName := tokens[len(tokens)-1]
-
-	tarLocation := path + fileName
-	defer os.Remove(tarLocation)
-
-	err = downloadFile(tarLocation, url)
-	if err != nil {
-		return
-	}
-
-	if trim {
-		err = exec.Command("/bin/sh", "-c",
-			YayConf.TarBin+" --strip-components 2 --include='*/"+fileName[:len(fileName)-7]+"/trunk/' -xf "+tarLocation+" -C "+path).Run()
-		os.Rename(path+"trunk", path+fileName[:len(fileName)-7]) // kurwa
-	} else {
-		err = exec.Command(YayConf.TarBin, "-xf", tarLocation, "-C", path).Run()
-	}
-	if err != nil {
-		return
-	}
-
-	return
-}
-
 // PassToPacman outsorces execution to pacman binary without modifications.
-func PassToPacman(op string, pkgs []string, flags []string) error {
+func passToPacman(op string, pkgs []string, flags []string) error {
 	var cmd *exec.Cmd
 	var args []string
 
@@ -286,17 +208,4 @@ func PassToPacman(op string, pkgs []string, flags []string) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
 	return err
-}
-
-// Human returns results in Human readable format.
-func Human(size int64) string {
-	floatsize := float32(size)
-	units := [...]string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi"}
-	for _, unit := range units {
-		if floatsize < 1024 {
-			return fmt.Sprintf("%.1f %sB", floatsize, unit)
-		}
-		floatsize /= 1024
-	}
-	return fmt.Sprintf("%d%s", size, "B")
 }

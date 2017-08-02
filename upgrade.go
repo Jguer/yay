@@ -10,8 +10,6 @@ import (
 	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
-	"github.com/jguer/yay/aur"
-	"github.com/jguer/yay/config"
 	rpc "github.com/mikkeloscar/aur"
 	pkgb "github.com/mikkeloscar/gopkgbuild"
 )
@@ -62,11 +60,11 @@ func (u upSlice) Less(i, j int) bool {
 // FilterPackages filters packages based on source and type.
 func FilterPackages() (local []alpm.Package, remote []alpm.Package,
 	localNames []string, remoteNames []string, err error) {
-	localDb, err := config.AlpmHandle.LocalDb()
+	localDb, err := AlpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
-	dbList, err := config.AlpmHandle.SyncDbs()
+	dbList, err := AlpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -194,7 +192,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 
 	for i := len(remote); i != 0; i = j {
 		//Split requests so AUR RPC doesn't get mad at us.
-		j = i - config.YayConf.RequestSplitN
+		j = i - config.RequestSplitN
 		if j < 0 {
 			j = 0
 		}
@@ -218,7 +216,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 				if x > max {
 					break
 				} else if qtemp[x].Name == local[i].Name() {
-					if (config.YayConf.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
+					if (config.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
 						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
 						packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
 					}
@@ -248,7 +246,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 // repo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upRepo(local []alpm.Package) (upSlice, error) {
-	dbList, err := config.AlpmHandle.SyncDbs()
+	dbList, err := AlpmHandle.SyncDbs()
 	if err != nil {
 		return nil, err
 	}
@@ -259,14 +257,14 @@ primeloop:
 		newPkg := pkg.NewVersion(dbList)
 
 		if newPkg != nil {
-			for _, ignorePkg := range config.AlpmConf.IgnorePkg {
+			for _, ignorePkg := range AlpmConf.IgnorePkg {
 				if pkg.Name() == ignorePkg {
 					fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s -> %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
 					continue primeloop
 				}
 			}
 
-			for _, ignoreGroup := range config.AlpmConf.IgnoreGroup {
+			for _, ignoreGroup := range AlpmConf.IgnoreGroup {
 				for _, group := range pkg.Groups().Slice() {
 					if group == ignoreGroup {
 						fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored group) ignoring upgrade (%s -> %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
@@ -336,7 +334,7 @@ func upgradePkgs(flags []string) error {
 			repoNames = append(repoNames, k.Name)
 		}
 
-		err := config.PassToPacman("-S", repoNames, flags)
+		err := PassToPacman("-S", repoNames, flags)
 		if err != nil {
 			fmt.Println("Error upgrading repo packages.")
 		}
@@ -353,7 +351,28 @@ func upgradePkgs(flags []string) error {
 			}
 			aurNames = append(aurNames, k.Name)
 		}
-		aur.Install(aurNames, flags)
+		Install(aurNames, flags)
 	}
+	return nil
+}
+
+func develUpgrade(foreign map[string]alpm.Package, flags []string) error {
+	fmt.Println(" Checking development packages...")
+	develUpdates := vcs.CheckUpdates(foreign)
+	if len(develUpdates) != 0 {
+		for _, q := range develUpdates {
+			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s\x1b[0m\n", q)
+		}
+		// Install updated packages
+		if !ContinueTask("Proceed with upgrade?", "nN") {
+			return nil
+		}
+
+		err := Install(develUpdates, flags)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
 	return nil
 }

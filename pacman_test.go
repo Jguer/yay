@@ -1,4 +1,4 @@
-package pacman
+package main
 
 import (
 	"os"

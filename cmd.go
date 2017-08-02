@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -9,9 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jguer/yay/aur"
-	vcs "github.com/jguer/yay/aur/vcs"
-	"github.com/jguer/yay/config"
 	pac "github.com/jguer/yay/pacman"
 )
 
@@ -42,7 +40,61 @@ func usage() {
 `)
 }
 
-var version = "2.116"
+func init() {
+	defaultSettings(&config)
+
+	var err error
+	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
+
+	if _, err = os.Stat(configfile); os.IsNotExist(err) {
+		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
+		// Save the default config if nothing is found
+		config.saveConfig()
+	} else {
+		file, err := os.Open(configfile)
+		if err != nil {
+			fmt.Println("Error reading config:", err)
+		} else {
+			decoder := json.NewDecoder(file)
+			err = decoder.Decode(&config)
+			if err != nil {
+				fmt.Println("Loading default Settings\nError reading config:", err)
+				defaultSettings(&config)
+			}
+		}
+	}
+
+	AlpmConf, err = readAlpmConfig(config.PacmanConf)
+	if err != nil {
+		fmt.Println("Unable to read Pacman conf", err)
+		os.Exit(1)
+	}
+
+	AlpmHandle, err = AlpmConf.CreateHandle()
+	if err != nil {
+		fmt.Println("Unable to CreateHandle", err)
+		os.Exit(1)
+	}
+
+	updated = false
+	configfile = os.Getenv("HOME") + "/.config/yay/yay_vcs.json"
+
+	if _, err := os.Stat(configfile); os.IsNotExist(err) {
+		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
+		return
+	}
+
+	file, err := os.Open(configfile)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&savedInfo)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+}
 
 func parser() (op string, options []string, packages []string, changedConfig bool, err error) {
 	if len(os.Args) < 2 {
@@ -65,41 +117,41 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 			changedConfig = true
 			switch arg {
 			case "--printconfig":
-				fmt.Printf("%+v", config.YayConf)
+				fmt.Printf("%+v", config)
 				os.Exit(0)
 			case "--gendb":
-				err = aur.CreateDevelDB()
+				err = createDevelDB()
 				if err != nil {
 					fmt.Println(err)
 				}
-				err = vcs.SaveBranchInfo()
+				err = saveVCSInfo()
 				if err != nil {
 					fmt.Println(err)
 				}
 				os.Exit(0)
 			case "--devel":
-				config.YayConf.Devel = true
+				config.Devel = true
 			case "--nodevel":
-				config.YayConf.Devel = false
+				config.Devel = false
 			case "--timeupdate":
-				config.YayConf.TimeUpdate = true
+				config.TimeUpdate = true
 			case "--notimeupdate":
-				config.YayConf.TimeUpdate = false
+				config.TimeUpdate = false
 			case "--topdown":
-				config.YayConf.SortMode = config.TopDown
+				config.SortMode = TopDown
 			case "--complete":
-				config.YayConf.Shell = "sh"
+				config.Shell = "sh"
 				_ = complete()
 				os.Exit(0)
 			case "--fcomplete":
-				config.YayConf.Shell = "fish"
+				config.Shell = "fish"
 				_ = complete()
 				os.Exit(0)
 			case "--help":
 				usage()
 				os.Exit(0)
 			case "--noconfirm":
-				config.YayConf.NoConfirm = true
+				config.NoConfirm = true
 				fallthrough
 			default:
 				options = append(options, arg)
@@ -132,9 +184,9 @@ func main() {
 		err = localStatistics(version)
 	case "-Ss", "-Ssq", "-Sqs":
 		if op == "-Ss" {
-			config.YayConf.SearchMode = config.Detailed
+			config.SearchMode = Detailed
 		} else {
-			config.YayConf.SearchMode = config.Minimal
+			config.SearchMode = Minimal
 		}
 
 		if pkgs != nil {
@@ -143,14 +195,14 @@ func main() {
 	case "-S":
 		err = install(pkgs, options)
 	case "-Sy":
-		err = config.PassToPacman("-Sy", nil, nil)
+		err = passToPacman("-Sy", nil, nil)
 		if err != nil {
 			break
 		}
 		err = install(pkgs, options)
 	case "-Syu", "-Suy", "-Su":
 		if strings.Contains(op, "y") {
-			err = config.PassToPacman("-Sy", nil, nil)
+			err = passToPacman("-Sy", nil, nil)
 			if err != nil {
 				break
 			}
@@ -159,36 +211,35 @@ func main() {
 	case "-Si":
 		err = syncInfo(pkgs, options)
 	case "yogurt":
-		config.YayConf.SearchMode = config.NumberMenu
+		config.SearchMode = NumberMenu
 
 		if pkgs != nil {
 			err = numberMenu(pkgs, options)
 		}
 	default:
 		if op[0] == 'R' {
-			vcs.RemovePackage(pkgs)
+			removeVCSPackage(pkgs)
 		}
-		err = config.PassToPacman(op, pkgs, options)
+		err = passToPacman(op, pkgs, options)
 	}
 
 	var erra error
-	if vcs.Updated {
-		erra = vcs.SaveBranchInfo()
+	if updated {
+		erra = saveVCSInfo()
 		if erra != nil {
 			fmt.Println(err)
 		}
-
 	}
 
 	if changedConfig {
-		erra = config.SaveConfig()
+		erra = config.saveConfig()
 		if erra != nil {
 			fmt.Println(err)
 		}
 
 	}
 
-	erra = config.AlpmHandle.Release()
+	erra = AlpmHandle.Release()
 	if erra != nil {
 		fmt.Println(err)
 	}
@@ -203,12 +254,12 @@ func main() {
 func numberMenu(pkgS []string, flags []string) (err error) {
 	var num int
 
-	aq, err := aur.NarrowSearch(pkgS, true)
+	aq, err := narrowSearch(pkgS, true)
 	if err != nil {
 		fmt.Println("Error during AUR search:", err)
 	}
 	numaq := len(aq)
-	pq, numpq, err := pac.Search(pkgS)
+	pq, numpq, err := searchRepo(pkgS)
 	if err != nil {
 		return
 	}
@@ -217,12 +268,12 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		return fmt.Errorf("no packages match search")
 	}
 
-	if config.YayConf.SortMode == config.BottomUp {
-		printAURSearch(aq, numpq)
+	if config.SortMode == BottomUp {
+		aq.printSearch(numpq)
 		pq.PrintSearch()
 	} else {
-		pq.PrintSearch()
-		printAURSearch(aq, numpq)
+		pq.printSearch()
+		aq.printSearch(numpq)
 	}
 
 	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers: ", "Type numbers to install. Separate each number with a space.")
@@ -247,13 +298,13 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		if num > numaq+numpq-1 || num < 0 {
 			continue
 		} else if num > numpq-1 {
-			if config.YayConf.SortMode == config.BottomUp {
+			if config.SortMode == BottomUp {
 				aurInstall = append(aurInstall, aq[numaq+numpq-num-1].Name)
 			} else {
 				aurInstall = append(aurInstall, aq[num-numpq].Name)
 			}
 		} else {
-			if config.YayConf.SortMode == config.BottomUp {
+			if config.SortMode == BottomUp {
 				repoInstall = append(repoInstall, pq[numpq-num-1].Name())
 			} else {
 				repoInstall = append(repoInstall, pq[num].Name())
@@ -266,7 +317,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(aurInstall) != 0 {
-		err = aur.Install(aurInstall, flags)
+		err = Install(aurInstall, flags)
 	}
 
 	return err
@@ -274,7 +325,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 
 // Complete provides completion info for shells
 func complete() (err error) {
-	path := os.Getenv("HOME") + "/.cache/yay/aur_" + config.YayConf.Shell + ".cache"
+	path := os.Getenv("HOME") + "/.cache/yay/aur_" + config.Shell + ".cache"
 
 	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
 		os.MkdirAll(os.Getenv("HOME")+"/.cache/yay/", 0755)
@@ -284,7 +335,7 @@ func complete() (err error) {
 			return err
 		}
 
-		if aur.CreateAURList(out) != nil {
+		if createAURList(out) != nil {
 			defer os.Remove(path)
 		}
 		err = pac.CreatePackageList(out)
