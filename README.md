@@ -31,10 +31,14 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - `yay -Cd` cleans unneeded dependencies
 - `yay -G` downloads PKGBuild from ABS or AUR
 
+![Yay Syu](http://jguer.github.io/yay/yayupgrade.png "yay -Syu")
 ![Yay Qstats](http://jguer.github.io/yay/yay2.png "yay -Qstats")
 ![Yay NumberMenu](http://jguer.github.io/yay/yay3.png "yay gtk-theme")
 
 ### Changelog
+
+#### 2.165
+- Upgrade list now allows skipping upgrade install.
 
 #### 2.159
 - Qstats now warns about packages not available in AUR.
@@ -44,7 +48,6 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Added support for development packages from github.
 - Pacman backend rewritten and simplified
 - Added config framework.
-
 
 #### 1.115
 - Added AUR completions (updates on first completion every 48h)

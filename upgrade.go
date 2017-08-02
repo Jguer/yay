@@ -292,35 +292,38 @@ func upgradePkgs(flags []string) error {
 		return err
 	}
 
+	var repoNums []int
+	var aurNums []int
 	sort.Sort(repoUp)
 	fmt.Printf("\x1b[1;34;1m:: \x1b[0m\x1b[1m%d Packages to upgrade.\x1b[0m\n", len(aurUp)+len(repoUp))
 	repoUp.Print(len(aurUp))
 	aurUp.Print(0)
-	fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
-	reader := bufio.NewReader(os.Stdin)
 
-	numberBuf, overflow, err := reader.ReadLine()
-	if err != nil || overflow {
-		fmt.Println(err)
-		return err
-	}
+	if !config.YayConf.NoConfirm {
+		fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
+		reader := bufio.NewReader(os.Stdin)
 
-	result := strings.Fields(string(numberBuf))
-	var repoNums []int
-	var aurNums []int
-	for _, numS := range result {
-		num, err := strconv.Atoi(numS)
-		if err != nil {
-			continue
+		numberBuf, overflow, err := reader.ReadLine()
+		if err != nil || overflow {
+			fmt.Println(err)
+			return err
 		}
-		if num > len(aurUp)+len(repoUp)-1 || num < 0 {
-			continue
-		} else if num < len(aurUp) {
-			num = len(aurUp) - num - 1
-			aurNums = append(aurNums, num)
-		} else {
-			num = len(aurUp) + len(repoUp) - num - 1
-			repoNums = append(repoNums, num)
+
+		result := strings.Fields(string(numberBuf))
+		for _, numS := range result {
+			num, err := strconv.Atoi(numS)
+			if err != nil {
+				continue
+			}
+			if num > len(aurUp)+len(repoUp)-1 || num < 0 {
+				continue
+			} else if num < len(aurUp) {
+				num = len(aurUp) - num - 1
+				aurNums = append(aurNums, num)
+			} else {
+				num = len(aurUp) + len(repoUp) - num - 1
+				repoNums = append(repoNums, num)
+			}
 		}
 	}
 
@@ -336,7 +339,7 @@ func upgradePkgs(flags []string) error {
 			repoNames = append(repoNames, k.Name)
 		}
 
-		err := config.PassToPacman("-S", repoNames, flags)
+		err := config.PassToPacman("-S", repoNames, append(flags, "--noconfirm"))
 		if err != nil {
 			fmt.Println("Error upgrading repo packages.")
 		}
