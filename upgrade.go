@@ -334,7 +334,7 @@ func upgradePkgs(flags []string) error {
 			repoNames = append(repoNames, k.Name)
 		}
 
-		err := PassToPacman("-S", repoNames, flags)
+		err := passToPacman("-S", repoNames, flags)
 		if err != nil {
 			fmt.Println("Error upgrading repo packages.")
 		}
@@ -351,24 +351,24 @@ func upgradePkgs(flags []string) error {
 			}
 			aurNames = append(aurNames, k.Name)
 		}
-		Install(aurNames, flags)
+		aurInstall(aurNames, flags)
 	}
 	return nil
 }
 
 func develUpgrade(foreign map[string]alpm.Package, flags []string) error {
 	fmt.Println(" Checking development packages...")
-	develUpdates := vcs.CheckUpdates(foreign)
+	develUpdates := checkUpdates(foreign)
 	if len(develUpdates) != 0 {
 		for _, q := range develUpdates {
 			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s\x1b[0m\n", q)
 		}
 		// Install updated packages
-		if !ContinueTask("Proceed with upgrade?", "nN") {
+		if !continueTask("Proceed with upgrade?", "nN") {
 			return nil
 		}
 
-		err := Install(develUpdates, flags)
+		err := aurInstall(develUpdates, flags)
 		if err != nil {
 			fmt.Println(err)
 		}

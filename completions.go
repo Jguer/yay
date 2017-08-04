@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	alpm "github.com/jguer/go-alpm"
 )
 
 //CreateAURList creates a new completion file
@@ -33,9 +35,8 @@ func createAURList(out *os.File) (err error) {
 	return nil
 }
 
-
 //CreatePackageList appends Repo packages to completion cache
-func CreatePackageList(out *os.File) (err error) {
+func createRepoList(out *os.File) (err error) {
 	dbList, err := AlpmHandle.SyncDbs()
 	if err != nil {
 		return

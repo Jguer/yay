@@ -42,8 +42,8 @@ type Configuration struct {
 
 var version = "2.116"
 
-// BaseURL givers the AUR default address.
-const BaseURL string = "https://aur.archlinux.org"
+// baseURL givers the AUR default address.
+const baseURL string = "https://aur.archlinux.org"
 
 var specialDBsauce = false
 
@@ -110,8 +110,8 @@ func defaultSettings(config *Configuration) {
 // Editor returns the preferred system editor.
 func editor() string {
 	switch {
-	case YayConf.Editor != "":
-		editor, err := exec.LookPath(YayConf.Editor)
+	case config.Editor != "":
+		editor, err := exec.LookPath(config.Editor)
 		if err != nil {
 			fmt.Println(err)
 		} else {
@@ -158,7 +158,7 @@ func editor() string {
 // ContinueTask prompts if user wants to continue task.
 //If NoConfirm is set the action will continue without user input.
 func continueTask(s string, def string) (cont bool) {
-	if YayConf.NoConfirm {
+	if config.NoConfirm {
 		return true
 	}
 	var postFix string
@@ -199,9 +199,9 @@ func passToPacman(op string, pkgs []string, flags []string) error {
 	}
 
 	if strings.Contains(op, "-Q") || op == "Si" {
-		cmd = exec.Command(YayConf.PacmanBin, args...)
+		cmd = exec.Command(config.PacmanBin, args...)
 	} else {
-		args = append([]string{YayConf.PacmanBin}, args...)
+		args = append([]string{config.PacmanBin}, args...)
 		cmd = exec.Command("sudo", args...)
 	}
 

@@ -51,10 +51,10 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 
 	if trim {
 		err = exec.Command("/bin/sh", "-c",
-			YayConf.TarBin+" --strip-components 2 --include='*/"+fileName[:len(fileName)-7]+"/trunk/' -xf "+tarLocation+" -C "+path).Run()
+			config.TarBin+" --strip-components 2 --include='*/"+fileName[:len(fileName)-7]+"/trunk/' -xf "+tarLocation+" -C "+path).Run()
 		os.Rename(path+"trunk", path+fileName[:len(fileName)-7]) // kurwa
 	} else {
-		err = exec.Command(YayConf.TarBin, "-xf", tarLocation, "-C", path).Run()
+		err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
 	}
 	if err != nil {
 		return
@@ -75,7 +75,7 @@ func getPkgbuild(pkg string) (err error) {
 		return
 	}
 
-	err = GetPkgbuildfromAUR(pkg, wd)
+	err = getPkgbuildfromAUR(pkg, wd)
 	return
 }
 
@@ -98,7 +98,7 @@ func getPkgbuildfromABS(pkgN string, path string) (err error) {
 				return fmt.Errorf("Not in standard repositories")
 			}
 			fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in ABS.\x1b[0m\n", pkgN)
-			errD := DownloadAndUnpack(url, path, true)
+			errD := downloadAndUnpack(url, path, true)
 			return errD
 		}
 	}
@@ -117,6 +117,6 @@ func getPkgbuildfromAUR(pkgN string, dir string) (err error) {
 	}
 
 	fmt.Printf("\x1b[1;32m==>\x1b[1;33m %s \x1b[1;32mfound in AUR.\x1b[0m\n", pkgN)
-	DownloadAndUnpack(BaseURL+aq[0].URLPath, dir, false)
+	downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
 	return
 }

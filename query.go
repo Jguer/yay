@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
-	pac "github.com/jguer/yay/pacman"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -62,7 +61,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 	if len(pkgS) == 1 {
 		if sortS {
-			sort.Sort(Query(r))
+			sort.Sort(aurQuery(r))
 		}
 		return r, err
 	}
@@ -98,17 +97,17 @@ func syncSearch(pkgS []string) (err error) {
 	if err != nil {
 		return err
 	}
-	pq, _, err := pac.Search(pkgS)
+	pq, _, err := queryRepo(pkgS)
 	if err != nil {
 		return err
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printAURSearch(0)
-		pq.PrintSearch()
+		aq.printSearch(0)
+		pq.printSearch()
 	} else {
-		pq.PrintSearch()
-		aq.printAURSearch(0)
+		pq.printSearch()
+		aq.printSearch(0)
 	}
 
 	return nil
@@ -116,7 +115,7 @@ func syncSearch(pkgS []string) (err error) {
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string, flags []string) (err error) {
-	aurS, repoS, err := pac.PackageSlices(pkgS)
+	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
 	}
@@ -132,7 +131,7 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(repoS) != 0 {
-		err = PassToPacman("-Si", repoS, flags)
+		err = passToPacman("-Si", repoS, flags)
 	}
 
 	return
@@ -140,12 +139,12 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 
 // LocalStatistics returns installed packages statistics.
 func localStatistics(version string) error {
-	info, err := pac.Statistics()
+	info, err := statistics()
 	if err != nil {
 		return err
 	}
 
-	foreignS, err := pac.ForeignPackages()
+	foreignS, err := foreignPackages()
 	if err != nil {
 		return err
 	}
@@ -155,10 +154,10 @@ func localStatistics(version string) error {
 	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", info.Totaln)
 	fmt.Printf("\x1B[1;32mTotal foreign installed packages: \x1B[0;33m%d\x1B[0m\n", len(foreignS))
 	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", info.Expln)
-	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", Human(info.TotalSize))
+	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", human(info.TotalSize))
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Println("\x1B[1;32mTen biggest packages\x1B[0m")
-	pac.BiggestPackages()
+	biggestPackages()
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 
 	keys := make([]string, len(foreignS))
@@ -280,7 +279,7 @@ func pkgDependencies(a *rpc.Pkg) (runDeps [2][]string, makeDeps [2][]string, err
 		q = append(q, *a)
 	}
 
-	depSearch := pacman.BuildDependencies(a.Depends)
+	depSearch := buildDependencies(a.Depends)
 	if len(a.Depends) != 0 {
 		runDeps[0], runDeps[1] = depSearch(q[0].Depends, true, false)
 		if len(runDeps[0]) != 0 || len(runDeps[1]) != 0 {
@@ -389,7 +388,7 @@ func hangingPackages() (hanging []string, err error) {
 		requiredby := pkg.ComputeRequiredBy()
 		if len(requiredby) == 0 {
 			hanging = append(hanging, pkg.Name())
-			fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), Human(pkg.ISize()))
+			fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), human(pkg.ISize()))
 
 		}
 		return nil
@@ -458,7 +457,7 @@ big:
 			requiredby := pkg.ComputeRequiredBy()
 			if len(requiredby) == 0 {
 				hanging = append(hanging, pkgName)
-				fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), Human(pkg.ISize()))
+				fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), human(pkg.ISize()))
 			}
 		}
 	}

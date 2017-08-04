@@ -21,17 +21,17 @@ func human(size int64) string {
 
 // PrintSearch handles printing search results in a given format
 func (q aurQuery) printSearch(start int) {
-	localDb, _ := config.AlpmHandle.LocalDb()
+	localDb, _ := AlpmHandle.LocalDb()
 
 	for i, res := range q {
 		var toprint string
-		if config.YayConf.SearchMode == config.NumberMenu {
-			if config.YayConf.SortMode == config.BottomUp {
+		if config.SearchMode == NumberMenu {
+			if config.SortMode == BottomUp {
 				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", len(q)+start-i-1)
 			} else {
 				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", start+i)
 			}
-		} else if config.YayConf.SearchMode == config.Minimal {
+		} else if config.SearchMode == Minimal {
 			fmt.Println(res.Name)
 			continue
 		}
@@ -177,7 +177,7 @@ func biggestPackages() {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkgS[i].Name(), Human(pkgS[i].ISize()))
+		fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkgS[i].Name(), human(pkgS[i].ISize()))
 	}
 	// Could implement size here as well, but we just want the general idea
 }

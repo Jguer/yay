@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
-	"github.com/jguer/yay/pacman"
 )
 
 // branch contains the information of a repository branch
@@ -33,7 +32,7 @@ type infos []Info
 
 // CreateDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
-	foreign, err := pacman.ForeignPackages()
+	foreign, err := foreignPackages()
 	if err != nil {
 		return err
 	}
@@ -47,7 +46,7 @@ func createDevelDB() error {
 
 	config.NoConfirm = true
 	specialDBsauce = true
-	err = Install(keys, nil)
+	err = aurInstall(keys, nil)
 	return err
 }
 
@@ -105,7 +104,7 @@ func checkUpdates(foreign map[string]alpm.Package) (toUpdate []string) {
 			if _, ok := foreign[e.Package]; ok {
 				toUpdate = append(toUpdate, e.Package)
 			} else {
-				RemovePackage([]string{e.Package})
+				removeVCSPackage([]string{e.Package})
 			}
 		}
 	}
@@ -123,7 +122,7 @@ func inStore(pkgName string) *Info {
 
 // BranchInfo updates saved information
 func branchInfo(pkgName string, owner string, repo string) (err error) {
-	Updated = true
+	updated = true
 	var newRepo branches
 	url := "https://api.github.com/repos/" + owner + "/" + repo + "/branches"
 	r, err := http.Get(url)
@@ -152,7 +151,7 @@ func branchInfo(pkgName string, owner string, repo string) (err error) {
 }
 
 func saveVCSInfo() error {
-	marshalledinfo, err := json.MarshalIndent(savedInfo)
+	marshalledinfo, err := json.MarshalIndent(savedInfo, "", "\t")
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}

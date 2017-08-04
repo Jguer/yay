@@ -5,23 +5,23 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/jguer/yay/pacman"
 	rpc "github.com/mikkeloscar/aur"
+	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 // Install handles package installs
 func install(pkgs []string, flags []string) error {
-	aurs, repos, _ := pac.PackageSlices(pkgs)
+	aurs, repos, _ := packageSlices(pkgs)
 
 	if len(repos) != 0 {
-		err := PassToPacman("-S", repos, flags)
+		err := passToPacman("-S", repos, flags)
 		if err != nil {
 			fmt.Println("Error installing repo packages.")
 		}
 	}
 
 	if len(aurs) != 0 {
-		err := Install(aurs, flags)
+		err := aurInstall(aurs, flags)
 		if err != nil {
 			fmt.Println("Error installing aur packages.")
 		}
@@ -30,7 +30,7 @@ func install(pkgs []string, flags []string) error {
 }
 
 // Install sends system commands to make and install a package from pkgName
-func Install(pkgName []string, flags []string) (err error) {
+func aurInstall(pkgName []string, flags []string) (err error) {
 	q, err := rpc.Info(pkgName)
 	if err != nil {
 		return
@@ -56,22 +56,21 @@ func Install(pkgName []string, flags []string) (err error) {
 	return err
 }
 
-
 func setupPackageSpace(a *rpc.Pkg) (pkgbuild *gopkg.PKGBUILD, err error) {
 	dir := config.BuildDir + a.PackageBase + "/"
 
 	if _, err = os.Stat(dir); !os.IsNotExist(err) {
-		if !ContinueTask("Directory exists. Clean Build?", "yY") {
+		if !continueTask("Directory exists. Clean Build?", "yY") {
 			_ = os.RemoveAll(config.BuildDir + a.PackageBase)
 		}
 	}
 
-	if err = DownloadAndUnpack(BaseURL+a.URLPath, config.BuildDir, false); err != nil {
+	if err = downloadAndUnpack(baseURL+a.URLPath, config.BuildDir, false); err != nil {
 		return
 	}
 
-	if !ContinueTask("Edit PKGBUILD?", "yY") {
-		editcmd := exec.Command(Editor(), dir+"PKGBUILD")
+	if !continueTask("Edit PKGBUILD?", "yY") {
+		editcmd := exec.Command(editor(), dir+"PKGBUILD")
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		editcmd.Run()
 	}
@@ -79,9 +78,9 @@ func setupPackageSpace(a *rpc.Pkg) (pkgbuild *gopkg.PKGBUILD, err error) {
 	pkgbuild, err = gopkg.ParseSRCINFO(dir + ".SRCINFO")
 	if err == nil {
 		for _, pkgsource := range pkgbuild.Source {
-			owner, repo := vcs.ParseSource(pkgsource)
+			owner, repo := parseSource(pkgsource)
 			if owner != "" && repo != "" {
-				err = vcs.BranchInfo(a.Name, owner, repo)
+				err = branchInfo(a.Name, owner, repo)
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -113,7 +112,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		return
 	}
 
-	runDeps, makeDeps, err := PkgDependencies(a)
+	runDeps, makeDeps, err := pkgDependencies(a)
 	if err != nil {
 		return
 	}
@@ -124,15 +123,15 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	finalmdeps = append(finalmdeps, makeDeps[1]...)
 
 	if len(aurDeps) != 0 || len(repoDeps) != 0 {
-		if !ContinueTask("Continue?", "nN") {
+		if !continueTask("Continue?", "nN") {
 			return finalmdeps, fmt.Errorf("user did not like the dependencies")
 		}
 	}
 
 	aurQ, _ := rpc.Info(aurDeps)
 	if len(aurQ) != len(aurDeps) {
-		(Query)(aurQ).MissingPackage(aurDeps)
-		if !ContinueTask("Continue?", "nN") {
+		(aurQuery)(aurQ).missingPackage(aurDeps)
+		if !continueTask("Continue?", "nN") {
 			return finalmdeps, fmt.Errorf("unable to install dependencies")
 		}
 	}
@@ -145,7 +144,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	}
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-		errR := PassToPacman("-S", repoDeps, depArgs)
+		errR := passToPacman("-S", repoDeps, depArgs)
 		if errR != nil {
 			return finalmdeps, errR
 		}
@@ -157,8 +156,8 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		finalmdeps = append(finalmdeps, finalmdepsR...)
 
 		if errA != nil {
-			pacman.CleanRemove(repoDeps)
-			pacman.CleanRemove(aurDeps)
+			cleanRemove(repoDeps)
+			cleanRemove(aurDeps)
 			return finalmdeps, errA
 		}
 	}
@@ -169,7 +168,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = makepkgcmd.Run()
 	if err == nil {
-		_ = vcs.SaveBranchInfo()
+		_ = saveVCSInfo()
 	}
 	return
 }

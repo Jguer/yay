@@ -9,8 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	pac "github.com/jguer/yay/pacman"
 )
 
 func usage() {
@@ -259,7 +257,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		fmt.Println("Error during AUR search:", err)
 	}
 	numaq := len(aq)
-	pq, numpq, err := searchRepo(pkgS)
+	pq, numpq, err := queryRepo(pkgS)
 	if err != nil {
 		return
 	}
@@ -270,7 +268,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 
 	if config.SortMode == BottomUp {
 		aq.printSearch(numpq)
-		pq.PrintSearch()
+		pq.printSearch()
 	} else {
 		pq.printSearch()
 		aq.printSearch(numpq)
@@ -285,8 +283,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	numberString := string(numberBuf)
-	var aurInstall []string
-	var repoInstall []string
+	var aurI []string
+	var repoI []string
 	result := strings.Fields(numberString)
 	for _, numS := range result {
 		num, err = strconv.Atoi(numS)
@@ -299,25 +297,25 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 			continue
 		} else if num > numpq-1 {
 			if config.SortMode == BottomUp {
-				aurInstall = append(aurInstall, aq[numaq+numpq-num-1].Name)
+				aurI = append(aurI, aq[numaq+numpq-num-1].Name)
 			} else {
-				aurInstall = append(aurInstall, aq[num-numpq].Name)
+				aurI = append(aurI, aq[num-numpq].Name)
 			}
 		} else {
 			if config.SortMode == BottomUp {
-				repoInstall = append(repoInstall, pq[numpq-num-1].Name())
+				repoI = append(repoI, pq[numpq-num-1].Name())
 			} else {
-				repoInstall = append(repoInstall, pq[num].Name())
+				repoI = append(repoI, pq[num].Name())
 			}
 		}
 	}
 
-	if len(repoInstall) != 0 {
-		err = config.PassToPacman("-S", repoInstall, flags)
+	if len(repoI) != 0 {
+		err = passToPacman("-S", repoI, flags)
 	}
 
-	if len(aurInstall) != 0 {
-		err = Install(aurInstall, flags)
+	if len(aurI) != 0 {
+		err = aurInstall(aurI, flags)
 	}
 
 	return err
@@ -338,7 +336,7 @@ func complete() (err error) {
 		if createAURList(out) != nil {
 			defer os.Remove(path)
 		}
-		err = pac.CreatePackageList(out)
+		err = createRepoList(out)
 
 		out.Close()
 		return err
