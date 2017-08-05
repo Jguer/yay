@@ -2,8 +2,7 @@
 Yet another Yogurt - An AUR Helper written in Go
 
 #### Packages
-- [![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) - Compile from source
-- [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) - Binary version
+[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/Jguer/yay/master/LICENSE)
 
 There's a point in everyone's life when you feel the need to write an AUR helper because there are only about 20 of them.
 So say hi to 20+1.
