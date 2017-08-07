@@ -30,6 +30,45 @@ func (q aurQuery) Swap(i, j int) {
 	q[i], q[j] = q[j], q[i]
 }
 
+// FilterPackages filters packages based on source and type from local repository.
+func filterPackages() (local []alpm.Package, remote []alpm.Package,
+	localNames []string, remoteNames []string, err error) {
+	localDb, err := AlpmHandle.LocalDb()
+	if err != nil {
+		return
+	}
+	dbList, err := AlpmHandle.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	f := func(k alpm.Package) error {
+		found := false
+		// For each DB search for our secret package.
+		_ = dbList.ForEach(func(d alpm.Db) error {
+			if found {
+				return nil
+			}
+			_, err := d.PkgByName(k.Name())
+			if err == nil {
+				found = true
+				local = append(local, k)
+				localNames = append(localNames, k.Name())
+			}
+			return nil
+		})
+
+		if !found {
+			remote = append(remote, k)
+			remoteNames = append(remoteNames, k.Name())
+		}
+		return nil
+	}
+
+	err = localDb.PkgCache().ForEach(f)
+	return
+}
+
 // MissingPackage warns if the Query was unable to find a package
 func (q aurQuery) missingPackage(pkgS []string) {
 	for _, depName := range pkgS {
@@ -144,7 +183,7 @@ func localStatistics(version string) error {
 		return err
 	}
 
-	foreignS, err := foreignPackages()
+	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return err
 	}
@@ -152,7 +191,7 @@ func localStatistics(version string) error {
 	fmt.Printf("\n Yay version r%s\n", version)
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", info.Totaln)
-	fmt.Printf("\x1B[1;32mTotal foreign installed packages: \x1B[0;33m%d\x1B[0m\n", len(foreignS))
+	fmt.Printf("\x1B[1;32mTotal foreign installed packages: \x1B[0;33m%d\x1B[0m\n", len(remoteNames))
 	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", info.Expln)
 	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", human(info.TotalSize))
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
@@ -160,21 +199,14 @@ func localStatistics(version string) error {
 	biggestPackages()
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 
-	keys := make([]string, len(foreignS))
-	i := 0
-	for k := range foreignS {
-		keys[i] = k
-		i++
-	}
-
 	var q aurQuery
 	var j int
-	for i = len(keys); i != 0; i = j {
+	for i := len(remoteNames); i != 0; i = j {
 		j = i - config.RequestSplitN
 		if j < 0 {
 			j = 0
 		}
-		qtemp, err := rpc.Info(keys[j:i])
+		qtemp, err := rpc.Info(remoteNames[j:i])
 		q = append(q, qtemp...)
 		if err != nil {
 			return err
@@ -182,7 +214,7 @@ func localStatistics(version string) error {
 	}
 
 	var outcast []string
-	for _, s := range keys {
+	for _, s := range remoteNames {
 		found := false
 		for _, i := range q {
 			if s == i.Name {
@@ -265,42 +297,6 @@ func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
 	return
 }
 
-// PkgDependencies returns package dependencies not installed belonging to AUR
-// 0 is Repo, 1 is Foreign.
-func pkgDependencies(a *rpc.Pkg) (runDeps [2][]string, makeDeps [2][]string, err error) {
-	var q aurQuery
-	if len(a.Depends) == 0 && len(a.MakeDepends) == 0 {
-		q, err = rpc.Info([]string{a.Name})
-		if len(q) == 0 || err != nil {
-			err = fmt.Errorf("Unable to search dependencies, %s", err)
-			return
-		}
-	} else {
-		q = append(q, *a)
-	}
-
-	depSearch := buildDependencies(a.Depends)
-	if len(a.Depends) != 0 {
-		runDeps[0], runDeps[1] = depSearch(q[0].Depends, true, false)
-		if len(runDeps[0]) != 0 || len(runDeps[1]) != 0 {
-			fmt.Println("\x1b[1;32m=>\x1b[1;33m Run Dependencies: \x1b[0m")
-			printDeps(runDeps[0], runDeps[1])
-		}
-	}
-
-	if len(a.MakeDepends) != 0 {
-		makeDeps[0], makeDeps[1] = depSearch(q[0].MakeDepends, false, false)
-		if len(makeDeps[0]) != 0 || len(makeDeps[1]) != 0 {
-			fmt.Println("\x1b[1;32m=>\x1b[1;33m Make Dependencies: \x1b[0m")
-			printDeps(makeDeps[0], makeDeps[1])
-		}
-	}
-	depSearch(a.MakeDepends, false, true)
-
-	err = nil
-	return
-}
-
 // PackageSlices separates an input slice into aur and repo slices
 func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	dbList, err := AlpmHandle.SyncDbs()
@@ -334,42 +330,6 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	}
 
 	err = nil
-	return
-}
-
-// ForeignPackages returns a map of foreign packages, with their version and date as values.
-func foreignPackages() (foreign map[string]alpm.Package, err error) {
-	localDb, err := AlpmHandle.LocalDb()
-	if err != nil {
-		return
-	}
-	dbList, err := AlpmHandle.SyncDbs()
-	if err != nil {
-		return
-	}
-
-	foreign = make(map[string]alpm.Package)
-
-	f := func(k alpm.Package) error {
-		found := false
-		_ = dbList.ForEach(func(d alpm.Db) error {
-			if found {
-				return nil
-			}
-			_, err = d.PkgByName(k.Name())
-			if err == nil {
-				found = true
-			}
-			return nil
-		})
-
-		if !found {
-			foreign[k.Name()] = k
-		}
-		return nil
-	}
-
-	err = localDb.PkgCache().ForEach(f)
 	return
 }
 

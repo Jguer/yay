@@ -9,6 +9,27 @@ import (
 	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
+func newInstall(pkgs []string, flags []string) error {
+	aurs, repos, _ := packageSlices(pkgs)
+
+	if len(repos) != 0 {
+		err := passToPacman("-S", repos, flags)
+		if err != nil {
+			fmt.Println("Error installing repo packages.")
+		}
+	}
+
+	if len(aurs) != 0 {
+		err := aurInstall(aurs, flags)
+		if err != nil {
+			fmt.Println("Error installing aur packages.")
+		}
+	}
+	return nil
+
+
+}
+
 // Install handles package installs
 func install(pkgs []string, flags []string) error {
 	aurs, repos, _ := packageSlices(pkgs)

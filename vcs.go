@@ -32,21 +32,14 @@ type infos []Info
 
 // CreateDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
-	foreign, err := foreignPackages()
+	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return err
 	}
 
-	keys := make([]string, len(foreign))
-	i := 0
-	for k := range foreign {
-		keys[i] = k
-		i++
-	}
-
 	config.NoConfirm = true
 	specialDBsauce = true
-	err = aurInstall(keys, nil)
+	err = aurInstall(remoteNames, nil)
 	return err
 }
 

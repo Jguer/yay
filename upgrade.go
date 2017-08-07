@@ -57,45 +57,6 @@ func (u upSlice) Less(i, j int) bool {
 	return false
 }
 
-// FilterPackages filters packages based on source and type.
-func FilterPackages() (local []alpm.Package, remote []alpm.Package,
-	localNames []string, remoteNames []string, err error) {
-	localDb, err := AlpmHandle.LocalDb()
-	if err != nil {
-		return
-	}
-	dbList, err := AlpmHandle.SyncDbs()
-	if err != nil {
-		return
-	}
-
-	f := func(k alpm.Package) error {
-		found := false
-		// For each DB search for our secret package.
-		_ = dbList.ForEach(func(d alpm.Db) error {
-			if found {
-				return nil
-			}
-			_, err := d.PkgByName(k.Name())
-			if err == nil {
-				found = true
-				local = append(local, k)
-				localNames = append(localNames, k.Name())
-			}
-			return nil
-		})
-
-		if !found {
-			remote = append(remote, k)
-			remoteNames = append(remoteNames, k.Name())
-		}
-		return nil
-	}
-
-	err = localDb.PkgCache().ForEach(f)
-	return
-}
-
 // Print prints the details of the packages to upgrade.
 func (u upSlice) Print(start int) {
 	for k, i := range u {
@@ -133,7 +94,7 @@ func (u upSlice) Print(start int) {
 
 // List returns lists of packages to upgrade from each source.
 func upList() (aurUp upSlice, repoUp upSlice, err error) {
-	local, remote, _, remoteNames, err := FilterPackages()
+	local, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return
 	}
