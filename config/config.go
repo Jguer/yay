@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
@@ -119,7 +120,11 @@ func SaveConfig() error {
 }
 
 func defaultSettings(config *Configuration) {
-	config.BuildDir = "/tmp/yaytmp/"
+	u, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	config.BuildDir = fmt.Sprintf("/tmp/yaytmp-%s/", u.Uid)
 	config.Editor = ""
 	config.Devel = false
 	config.MakepkgBin = "/usr/bin/makepkg"
