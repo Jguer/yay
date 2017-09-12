@@ -148,6 +148,9 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 			case "--help":
 				usage()
 				os.Exit(0)
+			case "--version":
+				fmt.Printf("yay v%s\n", version)
+				os.Exit(0)
 			case "--noconfirm":
 				config.NoConfirm = true
 				fallthrough
