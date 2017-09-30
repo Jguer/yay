@@ -66,8 +66,8 @@ func printDeps(repoDeps []string, aurDeps []string) {
 	}
 }
 
-func setupPackageSpace(a *rpc.Pkg) (pkgbuild *gopkg.PKGBUILD, err error) {
-	dir := config.YayConf.BuildDir + a.PackageBase + "/"
+func setupPackageSpace(a *rpc.Pkg) (dir string, pkgbuild *gopkg.PKGBUILD, err error) {
+	dir = config.YayConf.BuildDir + a.PackageBase + "/"
 
 	if _, err = os.Stat(dir); !os.IsNotExist(err) {
 		if !config.ContinueTask("Directory exists. Clean Build?", "yY") {
@@ -98,11 +98,6 @@ func setupPackageSpace(a *rpc.Pkg) (pkgbuild *gopkg.PKGBUILD, err error) {
 		}
 	}
 
-	err = os.Chdir(dir)
-	if err != nil {
-		return
-	}
-
 	return
 }
 
@@ -113,7 +108,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		fmt.Println("\x1b[1;31;40m==> Warning:\x1b[0;;40m This package is orphaned.\x1b[0m")
 	}
 
-	_, err = setupPackageSpace(a)
+	dir, _, err := setupPackageSpace(a)
 	if err != nil {
 		return
 	}
@@ -176,6 +171,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	args = append(args, flags...)
 	makepkgcmd := exec.Command(config.YayConf.MakepkgBin, args...)
 	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	makepkgcmd.Dir = dir
 	err = makepkgcmd.Run()
 	if err == nil {
 		_ = vcs.SaveBranchInfo()
