@@ -2,65 +2,151 @@ package main
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
-	"github.com/jguer/yay/aur"
-	"github.com/jguer/yay/config"
-	pac "github.com/jguer/yay/pacman"
+	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 )
 
-// PrintSearch handles printing search results in a given format
-func printAURSearch(q aur.Query, start int) {
-	localDb, _ := config.AlpmHandle.LocalDb()
+// Query is a collection of Results
+type aurQuery []rpc.Pkg
 
-	for i, res := range q {
-		var toprint string
-		if config.YayConf.SearchMode == config.NumberMenu {
-			if config.YayConf.SortMode == config.BottomUp {
-				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", len(q)+start-i-1)
-			} else {
-				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", start+i)
-			}
-		} else if config.YayConf.SearchMode == config.Minimal {
-			fmt.Println(res.Name)
-			continue
-		}
-		toprint += fmt.Sprintf("\x1b[1m%s/\x1b[33m%s \x1b[36m%s \x1b[0m(%d) ", "aur", res.Name, res.Version, res.NumVotes)
-		if res.Maintainer == "" {
-			toprint += fmt.Sprintf("\x1b[31;40m(Orphaned)\x1b[0m ")
-		}
+// Query holds the results of a repository search.
+type repoQuery []alpm.Package
 
-		if res.OutOfDate != 0 {
-			toprint += fmt.Sprintf("\x1b[31;40m(Out-of-date)\x1b[0m ")
-		}
+func (q aurQuery) Len() int {
+	return len(q)
+}
 
-		if _, err := localDb.PkgByName(res.Name); err == nil {
-			toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
-		}
-		toprint += "\n    " + res.Description
-		fmt.Println(toprint)
+func (q aurQuery) Less(i, j int) bool {
+	if config.SortMode == BottomUp {
+		return q[i].NumVotes < q[j].NumVotes
+	}
+	return q[i].NumVotes > q[j].NumVotes
+}
+
+func (q aurQuery) Swap(i, j int) {
+	q[i], q[j] = q[j], q[i]
+}
+
+// FilterPackages filters packages based on source and type from local repository.
+func filterPackages() (local []alpm.Package, remote []alpm.Package,
+	localNames []string, remoteNames []string, err error) {
+	localDb, err := AlpmHandle.LocalDb()
+	if err != nil {
+		return
+	}
+	dbList, err := AlpmHandle.SyncDbs()
+	if err != nil {
+		return
 	}
 
+	f := func(k alpm.Package) error {
+		found := false
+		// For each DB search for our secret package.
+		_ = dbList.ForEach(func(d alpm.Db) error {
+			if found {
+				return nil
+			}
+			_, err := d.PkgByName(k.Name())
+			if err == nil {
+				found = true
+				local = append(local, k)
+				localNames = append(localNames, k.Name())
+			}
+			return nil
+		})
+
+		if !found {
+			remote = append(remote, k)
+			remoteNames = append(remoteNames, k.Name())
+		}
+		return nil
+	}
+
+	err = localDb.PkgCache().ForEach(f)
 	return
+}
+
+// MissingPackage warns if the Query was unable to find a package
+func (q aurQuery) missingPackage(pkgS []string) {
+	for _, depName := range pkgS {
+		found := false
+		for _, dep := range q {
+			if dep.Name == depName {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			fmt.Println("\x1b[31mUnable to find", depName, "in AUR\x1b[0m")
+		}
+	}
+	return
+}
+
+// NarrowSearch searches AUR and narrows based on subarguments
+func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
+	if len(pkgS) == 0 {
+		return nil, nil
+	}
+
+	r, err := rpc.Search(pkgS[0])
+	if err != nil {
+		return nil, err
+	}
+
+	if len(pkgS) == 1 {
+		if sortS {
+			sort.Sort(aurQuery(r))
+		}
+		return r, err
+	}
+
+	var aq aurQuery
+	var n int
+
+	for _, res := range r {
+		match := true
+		for _, pkgN := range pkgS[1:] {
+			if !(strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)) {
+				match = false
+				break
+			}
+		}
+
+		if match {
+			n++
+			aq = append(aq, res)
+		}
+	}
+
+	if sortS {
+		sort.Sort(aq)
+	}
+
+	return aq, err
 }
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string) (err error) {
-	aq, err := aur.NarrowSearch(pkgS, true)
+	aq, err := narrowSearch(pkgS, true)
 	if err != nil {
 		return err
 	}
-	pq, _, err := pac.Search(pkgS)
+	pq, _, err := queryRepo(pkgS)
 	if err != nil {
 		return err
 	}
 
-	if config.YayConf.SortMode == config.BottomUp {
-		printAURSearch(aq, 0)
-		pq.PrintSearch()
+	if config.SortMode == BottomUp {
+		aq.printSearch(0)
+		pq.printSearch()
 	} else {
-		pq.PrintSearch()
-		printAURSearch(aq, 0)
+		pq.printSearch()
+		aq.printSearch(0)
 	}
 
 	return nil
@@ -68,7 +154,7 @@ func syncSearch(pkgS []string) (err error) {
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string, flags []string) (err error) {
-	aurS, repoS, err := pac.PackageSlices(pkgS)
+	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
 	}
@@ -79,12 +165,12 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 			fmt.Println(err)
 		}
 		for _, aurP := range q {
-			aur.PrintInfo(&aurP)
+			PrintInfo(&aurP)
 		}
 	}
 
 	if len(repoS) != 0 {
-		err = config.PassToPacman("-Si", repoS, flags)
+		err = passToPacman("-Si", repoS, flags)
 	}
 
 	return
@@ -92,12 +178,12 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 
 // LocalStatistics returns installed packages statistics.
 func localStatistics(version string) error {
-	info, err := pac.Statistics()
+	info, err := statistics()
 	if err != nil {
 		return err
 	}
 
-	foreignS, err := pac.ForeignPackages()
+	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return err
 	}
@@ -105,29 +191,22 @@ func localStatistics(version string) error {
 	fmt.Printf("\n Yay version r%s\n", version)
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", info.Totaln)
-	fmt.Printf("\x1B[1;32mTotal foreign installed packages: \x1B[0;33m%d\x1B[0m\n", len(foreignS))
+	fmt.Printf("\x1B[1;32mTotal foreign installed packages: \x1B[0;33m%d\x1B[0m\n", len(remoteNames))
 	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", info.Expln)
-	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", config.Human(info.TotalSize))
+	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", human(info.TotalSize))
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 	fmt.Println("\x1B[1;32mTen biggest packages\x1B[0m")
-	pac.BiggestPackages()
+	biggestPackages()
 	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
 
-	keys := make([]string, len(foreignS))
-	i := 0
-	for k := range foreignS {
-		keys[i] = k
-		i++
-	}
-
-	var q aur.Query
+	var q aurQuery
 	var j int
-	for i = len(keys); i != 0; i = j {
-		j = i - config.YayConf.RequestSplitN
+	for i := len(remoteNames); i != 0; i = j {
+		j = i - config.RequestSplitN
 		if j < 0 {
 			j = 0
 		}
-		qtemp, err := rpc.Info(keys[j:i])
+		qtemp, err := rpc.Info(remoteNames[j:i])
 		q = append(q, qtemp...)
 		if err != nil {
 			return err
@@ -135,7 +214,7 @@ func localStatistics(version string) error {
 	}
 
 	var outcast []string
-	for _, s := range keys {
+	for _, s := range remoteNames {
 		found := false
 		for _, i := range q {
 			if s == i.Name {
@@ -166,4 +245,181 @@ func localStatistics(version string) error {
 	}
 
 	return nil
+}
+
+// Search handles repo searches. Creates a RepoSearch struct.
+func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
+	dbList, err := AlpmHandle.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	// BottomUp functions
+	initL := func(len int) int {
+		if config.SortMode == TopDown {
+			return 0
+		}
+		return len - 1
+	}
+	compL := func(len int, i int) bool {
+		if config.SortMode == TopDown {
+			return i < len
+		}
+		return i > -1
+	}
+	finalL := func(i int) int {
+		if config.SortMode == TopDown {
+			return i + 1
+		}
+		return i - 1
+	}
+
+	dbS := dbList.Slice()
+	lenDbs := len(dbS)
+	for f := initL(lenDbs); compL(lenDbs, f); f = finalL(f) {
+		pkgS := dbS[f].PkgCache().Slice()
+		lenPkgs := len(pkgS)
+		for i := initL(lenPkgs); compL(lenPkgs, i); i = finalL(i) {
+			match := true
+			for _, pkgN := range pkgInputN {
+				if !(strings.Contains(pkgS[i].Name(), pkgN) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgN)) {
+					match = false
+					break
+				}
+			}
+
+			if match {
+				n++
+				s = append(s, pkgS[i])
+			}
+		}
+	}
+	return
+}
+
+// PackageSlices separates an input slice into aur and repo slices
+func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
+	dbList, err := AlpmHandle.SyncDbs()
+	if err != nil {
+		return
+	}
+
+	for _, pkg := range toCheck {
+		found := false
+
+		_ = dbList.ForEach(func(db alpm.Db) error {
+			if found {
+				return nil
+			}
+
+			_, err = db.PkgByName(pkg)
+			if err == nil {
+				found = true
+				repo = append(repo, pkg)
+			}
+			return nil
+		})
+
+		if !found {
+			if _, errdb := dbList.PkgCachebyGroup(pkg); errdb == nil {
+				repo = append(repo, pkg)
+			} else {
+				aur = append(aur, pkg)
+			}
+		}
+	}
+
+	err = nil
+	return
+}
+
+// HangingPackages returns a list of packages installed as deps
+// and unneeded by the system
+func hangingPackages() (hanging []string, err error) {
+	localDb, err := AlpmHandle.LocalDb()
+	if err != nil {
+		return
+	}
+
+	f := func(pkg alpm.Package) error {
+		if pkg.Reason() != alpm.PkgReasonDepend {
+			return nil
+		}
+		requiredby := pkg.ComputeRequiredBy()
+		if len(requiredby) == 0 {
+			hanging = append(hanging, pkg.Name())
+			fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), human(pkg.ISize()))
+
+		}
+		return nil
+	}
+
+	err = localDb.PkgCache().ForEach(f)
+	return
+}
+
+// Statistics returns statistics about packages installed in system
+func statistics() (info struct {
+	Totaln    int
+	Expln     int
+	TotalSize int64
+}, err error) {
+	var tS int64 // TotalSize
+	var nPkg int
+	var ePkg int
+
+	localDb, err := AlpmHandle.LocalDb()
+	if err != nil {
+		return
+	}
+
+	for _, pkg := range localDb.PkgCache().Slice() {
+		tS += pkg.ISize()
+		nPkg++
+		if pkg.Reason() == 0 {
+			ePkg++
+		}
+	}
+
+	info = struct {
+		Totaln    int
+		Expln     int
+		TotalSize int64
+	}{
+		nPkg, ePkg, tS,
+	}
+
+	return
+}
+
+// SliceHangingPackages returns a list of packages installed as deps
+// and unneeded by the system from a provided list of package names.
+func sliceHangingPackages(pkgS []string) (hanging []string) {
+	localDb, err := AlpmHandle.LocalDb()
+	if err != nil {
+		return
+	}
+
+big:
+	for _, pkgName := range pkgS {
+		for _, hangN := range hanging {
+			if hangN == pkgName {
+				continue big
+			}
+		}
+
+		pkg, err := localDb.PkgByName(pkgName)
+		if err == nil {
+			if pkg.Reason() != alpm.PkgReasonDepend {
+				continue
+			}
+
+			requiredby := pkg.ComputeRequiredBy()
+			if len(requiredby) == 0 {
+				hanging = append(hanging, pkgName)
+				fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), human(pkg.ISize()))
+			}
+		}
+	}
+	return
 }
