@@ -22,7 +22,7 @@ type upgrade struct {
 	RemoteVersion string
 }
 
-// Slice is a slice of Upgrades
+// upSlice is a slice of Upgrades
 type upSlice []upgrade
 
 func (u upSlice) Len() int      { return len(u) }
@@ -92,7 +92,7 @@ func (u upSlice) Print(start int) {
 	}
 }
 
-// List returns lists of packages to upgrade from each source.
+// upList returns lists of packages to upgrade from each source.
 func upList() (aurUp upSlice, repoUp upSlice, err error) {
 	local, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -141,7 +141,7 @@ loop:
 	return
 }
 
-// aur gathers foreign packages and checks if they have new versions.
+// upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err error) {
 	var j int
@@ -204,7 +204,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 	}
 }
 
-// repo gathers local packages and checks if they have new versions.
+// upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upRepo(local []alpm.Package) (upSlice, error) {
 	dbList, err := AlpmHandle.SyncDbs()
@@ -241,7 +241,7 @@ primeloop:
 	return slice, nil
 }
 
-// Upgrade handles updating the cache and installing updates.
+// upgradePkgs handles updating the cache and installing updates.
 func upgradePkgs(flags []string) error {
 	aurUp, repoUp, err := upList()
 	if err != nil {

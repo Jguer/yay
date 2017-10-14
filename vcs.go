@@ -30,7 +30,7 @@ type Info struct {
 
 type infos []Info
 
-// CreateDevelDB forces yay to create a DB of the existing development packages
+// createDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -43,7 +43,7 @@ func createDevelDB() error {
 	return err
 }
 
-// ParseSource returns owner and repo from source
+// parseSource returns owner and repo from source
 func parseSource(source string) (owner string, repo string) {
 	if !(strings.Contains(source, "git://") ||
 		strings.Contains(source, ".git") ||
@@ -90,7 +90,7 @@ func (info *Info) needsUpdate() bool {
 	return false
 }
 
-// CheckUpdates returns list of outdated packages
+// checkUpdates returns list of outdated packages
 func checkUpdates(foreign map[string]alpm.Package) (toUpdate []string) {
 	for _, e := range savedInfo {
 		if e.needsUpdate() {
@@ -113,7 +113,7 @@ func inStore(pkgName string) *Info {
 	return nil
 }
 
-// BranchInfo updates saved information
+// branchInfo updates saved information
 func branchInfo(pkgName string, owner string, repo string) (err error) {
 	updated = true
 	var newRepo branches
