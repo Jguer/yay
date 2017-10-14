@@ -81,7 +81,7 @@ func (config *Configuration) saveConfig() error {
 	config.NoConfirm = false
 	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
 	marshalledinfo, _ := json.MarshalIndent(config, "", "\t")
-	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0755)
+	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
