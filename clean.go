@@ -32,7 +32,7 @@ func removeVCSPackage(pkgs []string) {
 	return
 }
 
-// CleanDependencies removels all dangling dependencies in system
+// CleanDependencies removes all dangling dependencies in system
 func cleanDependencies(pkgs []string) error {
 	hanging, err := hangingPackages()
 	if err != nil {
