@@ -163,7 +163,6 @@ func PrintInfo(a *rpc.Pkg) {
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
 func biggestPackages() {
-
 	localDb, err := AlpmHandle.LocalDb()
 	if err != nil {
 		return

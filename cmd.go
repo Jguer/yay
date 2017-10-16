@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -42,10 +43,22 @@ func init() {
 	defaultSettings(&config)
 
 	var err error
-	configfile := os.Getenv("HOME") + "/.config/yay/config.json"
+	if dir := os.Getenv("XDG_CONFIG_HOME"); dir != "" {
+		if info, err := os.Stat(dir); err == nil && info.IsDir() == true {
+			configfile = os.Getenv("XDG_CONFIG_HOME") + "/yay/config.json"
+		} else {
+			configfile = os.Getenv("HOME") + "/.config/yay/config.json"
+		}
+	} else {
+		configfile = os.Getenv("HOME") + "/.config/yay/config.json"
+	}
 
 	if _, err = os.Stat(configfile); os.IsNotExist(err) {
-		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
+		err = os.MkdirAll(filepath.Dir(configfile), 0755)
+		if err != nil {
+			fmt.Println("Unable to create config directory:", filepath.Dir(configfile), err)
+			os.Exit(2)
+		}
 		// Save the default config if nothing is found
 		config.saveConfig()
 	} else {
