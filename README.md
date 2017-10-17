@@ -7,7 +7,7 @@ Yet another Yogurt - An AUR Helper written in Go
 There's a point in everyone's life when you feel the need to write an AUR helper because there are only about 20 of them.
 So say hi to 20+1.
 
-Yay was created with a few objectives in mind and based on the design of yaourt and apacman:
+Yay was created with a few objectives in mind and based on the design of [yaourt](https://github.com/archlinuxfr/yaourt) and [apacman](https://github.com/oshazard/apacman):
 
 - Have almost no dependencies.
 - Provide an interface for pacman.
@@ -18,7 +18,7 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 ## Features
 - AUR Tab completion
 - Search narrowing (`yay linux header` will first search linux and then narrow on header)
-- No sourcing of PKGBuilds is done
+- No sourcing of PKGBUILD is done
 - The binary has no dependencies that pacman doesn't already have.
 - Sources build dependencies
 - Removes make dependencies at the end of build process
@@ -92,4 +92,3 @@ Yay was created with a few objectives in mind and based on the design of yaourt 
 - Bottom up package display
 - Number menu like yaourt/apacman
 - System package statistics
-
