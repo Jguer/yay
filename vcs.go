@@ -90,19 +90,6 @@ func (info *Info) needsUpdate() bool {
 	return false
 }
 
-// checkUpdates returns list of outdated packages
-func checkUpdates(foreign map[string]alpm.Package) (toUpdate []string) {
-	for _, e := range savedInfo {
-		if e.needsUpdate() {
-			if _, ok := foreign[e.Package]; ok {
-				toUpdate = append(toUpdate, e.Package)
-			} else {
-				removeVCSPackage([]string{e.Package})
-			}
-		}
-	}
-	return
-}
 
 func inStore(pkgName string) *Info {
 	for i, e := range savedInfo {
@@ -148,7 +135,7 @@ func saveVCSInfo() error {
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}
-	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0755)
+	in, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}

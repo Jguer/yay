@@ -50,7 +50,14 @@ var specialDBsauce = false
 
 var savedInfo infos
 
-var configfile string
+// configfile holds yay config file path.
+var configFile string
+
+// vcsfile holds yay vcs info file path.
+var vcsFile string
+
+//completion file
+var completionFile string
 
 // Updated returns if database has been updated
 var updated bool
@@ -80,7 +87,7 @@ func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 func (config *Configuration) saveConfig() error {
 	config.NoConfirm = false
 	marshalledinfo, _ := json.MarshalIndent(config, "", "\t")
-	in, err := os.OpenFile(configfile, os.O_RDWR|os.O_CREATE, 0644)
+	in, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}

@@ -141,6 +141,25 @@ loop:
 	return
 }
 
+// checkUpdates returns list of outdated packages
+func checkUpdates(remoteNames []string) (toUpdate []string) {
+	for _, e := range savedInfo {
+		if e.needsUpdate() {
+			if _, ok := foreign[e.Package]; ok {
+				toUpdate = append(toUpdate, e.Package)
+			} else {
+				removeVCSPackage([]string{e.Package})
+			}
+		}
+	}
+	return
+}
+
+func checkIgnored(name string) {
+	for 
+
+}
+
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err error) {
@@ -150,6 +169,10 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 
 	packageC := make(chan upgrade)
 	done := make(chan bool)
+
+	if config.Devel {
+
+	}
 
 	for i := len(remote); i != 0; i = j {
 		//Split requests so AUR RPC doesn't get mad at us.

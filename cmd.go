@@ -40,41 +40,86 @@ func usage() {
 }
 
 func init() {
-	defaultSettings(&config)
-
+	var configHome string // configHome handles config directory home
+	var cacheHome string  // cacheHome handles cache home
 	var err error
-	if dir := os.Getenv("XDG_CONFIG_HOME"); dir != "" {
-		if info, err := os.Stat(dir); err == nil && info.IsDir() == true {
-			configfile = os.Getenv("XDG_CONFIG_HOME") + "/yay/config.json"
-		} else {
-			configfile = os.Getenv("HOME") + "/.config/yay/config.json"
-		}
-	} else {
-		configfile = os.Getenv("HOME") + "/.config/yay/config.json"
+
+	if 0 == os.Geteuid() {
+		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	if _, err = os.Stat(configfile); os.IsNotExist(err) {
-		err = os.MkdirAll(filepath.Dir(configfile), 0755)
+	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
+		if info, err := os.Stat(configHome); err == nil && info.IsDir() == true {
+			configHome = configHome + "/yay"
+		} else {
+			configHome = os.Getenv("HOME") + "/.config/yay"
+		}
+	} else {
+		configHome = os.Getenv("HOME") + "/.config/yay"
+	}
+
+	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
+		if info, err := os.Stat(cacheHome); err == nil && info.IsDir() == true {
+			cacheHome = cacheHome + "/yay"
+		} else {
+			cacheHome = os.Getenv("HOME") + "/.cache/yay"
+		}
+	} else {
+		cacheHome = os.Getenv("HOME") + "/.config/yay"
+	}
+
+	configFile = configHome + "/config.json"
+	vcsFile = configHome + "/yay_vcs.json"
+	completionFile = cacheHome + "/aur_"
+
+	////////////////
+	// yay config //
+	////////////////
+	defaultSettings(&config)
+
+	if _, err = os.Stat(configFile); os.IsNotExist(err) {
+		err = os.MkdirAll(filepath.Dir(configFile), 0700)
 		if err != nil {
-			fmt.Println("Unable to create config directory:", filepath.Dir(configfile), err)
+			fmt.Println("Unable to create config directory:", filepath.Dir(configFile), err)
 			os.Exit(2)
 		}
 		// Save the default config if nothing is found
 		config.saveConfig()
 	} else {
-		file, err := os.Open(configfile)
+		file, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0600)
 		if err != nil {
 			fmt.Println("Error reading config:", err)
 		} else {
+			defer file.Close()
 			decoder := json.NewDecoder(file)
 			err = decoder.Decode(&config)
 			if err != nil {
-				fmt.Println("Loading default Settings\nError reading config:", err)
+				fmt.Println("Loading default Settings.\nError reading config:", err)
 				defaultSettings(&config)
 			}
 		}
 	}
 
+	/////////////////
+	// vcs config //
+	////////////////
+	updated = false
+
+	file, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&savedInfo)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	/////////////////
+	// alpm config //
+	/////////////////
 	AlpmConf, err = readAlpmConfig(config.PacmanConf)
 	if err != nil {
 		fmt.Println("Unable to read Pacman conf", err)
@@ -85,25 +130,6 @@ func init() {
 	if err != nil {
 		fmt.Println("Unable to CreateHandle", err)
 		os.Exit(1)
-	}
-
-	updated = false
-	configfile = os.Getenv("HOME") + "/.config/yay/yay_vcs.json"
-
-	if _, err := os.Stat(configfile); os.IsNotExist(err) {
-		_ = os.MkdirAll(os.Getenv("HOME")+"/.config/yay", 0755)
-		return
-	}
-
-	file, err := os.Open(configfile)
-	if err != nil {
-		fmt.Println("error:", err)
-		return
-	}
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&savedInfo)
-	if err != nil {
-		fmt.Println("error:", err)
 	}
 }
 
@@ -339,11 +365,10 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 
 // Complete provides completion info for shells
 func complete() (err error) {
-	path := os.Getenv("HOME") + "/.cache/yay/aur_" + config.Shell + ".cache"
+	path := completionFile + config.Shell + ".cache"
 
 	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
-		os.MkdirAll(os.Getenv("HOME")+"/.cache/yay/", 0755)
-
+		os.MkdirAll(filepath.Dir(completionFile), 0700)
 		out, err := os.Create(path)
 		if err != nil {
 			return err
@@ -358,7 +383,7 @@ func complete() (err error) {
 		return err
 	}
 
-	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
+	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
 		return err
 	}
