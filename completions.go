@@ -37,7 +37,7 @@ func createAURList(out *os.File) (err error) {
 
 //CreatePackageList appends Repo packages to completion cache
 func createRepoList(out *os.File) (err error) {
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}

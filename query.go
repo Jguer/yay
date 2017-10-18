@@ -33,11 +33,11 @@ func (q aurQuery) Swap(i, j int) {
 // FilterPackages filters packages based on source and type from local repository.
 func filterPackages() (local []alpm.Package, remote []alpm.Package,
 	localNames []string, remoteNames []string, err error) {
-	localDb, err := AlpmHandle.LocalDb()
+	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -249,7 +249,7 @@ func localStatistics(version string) error {
 
 // Search handles repo searches. Creates a RepoSearch struct.
 func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -299,7 +299,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
 
 // PackageSlices separates an input slice into aur and repo slices
 func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
@@ -336,7 +336,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
 func hangingPackages() (hanging []string, err error) {
-	localDb, err := AlpmHandle.LocalDb()
+	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -368,7 +368,7 @@ func statistics() (info struct {
 	var nPkg int
 	var ePkg int
 
-	localDb, err := AlpmHandle.LocalDb()
+	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
@@ -395,7 +395,7 @@ func statistics() (info struct {
 // SliceHangingPackages returns a list of packages installed as deps
 // and unneeded by the system from a provided list of package names.
 func sliceHangingPackages(pkgS []string) (hanging []string) {
-	localDb, err := AlpmHandle.LocalDb()
+	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return
 	}

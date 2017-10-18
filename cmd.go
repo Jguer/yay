@@ -75,13 +75,13 @@ func init() {
 		}
 	}
 
-	AlpmConf, err = readAlpmConfig(config.PacmanConf)
+	alpmConf, err = readAlpmConfig(config.PacmanConf)
 	if err != nil {
 		fmt.Println("Unable to read Pacman conf", err)
 		os.Exit(1)
 	}
 
-	AlpmHandle, err = AlpmConf.CreateHandle()
+	alpmHandle, err = alpmConf.CreateHandle()
 	if err != nil {
 		fmt.Println("Unable to CreateHandle", err)
 		os.Exit(1)
@@ -253,7 +253,7 @@ func main() {
 
 	}
 
-	erra = AlpmHandle.Release()
+	erra = alpmHandle.Release()
 	if erra != nil {
 		fmt.Println(err)
 	}

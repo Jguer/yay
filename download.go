@@ -81,7 +81,7 @@ func getPkgbuild(pkg string) (err error) {
 
 // GetPkgbuild downloads pkgbuild from the ABS.
 func getPkgbuildfromABS(pkgN string, path string) (err error) {
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}

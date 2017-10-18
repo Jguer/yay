@@ -59,10 +59,10 @@ var updated bool
 var config Configuration
 
 // AlpmConf holds the current config values for pacman.
-var AlpmConf alpm.PacmanConfig
+var alpmConf alpm.PacmanConfig
 
 // AlpmHandle is the alpm handle used by yay.
-var AlpmHandle *alpm.Handle
+var alpmHandle *alpm.Handle
 
 func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	file, err := os.Open(pacmanconf)

@@ -141,6 +141,26 @@ loop:
 	return
 }
 
+func isIgnored(pkg alpm.Package) bool {
+	for _, p := range alpmConf.IgnorePkg {
+		if p == pkg.Name() {
+			fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s)\n", pkg.Name(), pkg.Version())
+			return true
+		}
+	}
+
+	for _, g := range alpmConf.IgnoreGroup {
+		for _, pg := range pkg.Groups().Slice() {
+			if g == pg {
+				fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s)\n", pkg.Name(), pkg.Version())
+				return true
+			}
+		}
+
+	}
+	return false
+}
+
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err error) {
@@ -173,6 +193,9 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 			var missing, x int
 
 			for i := range local {
+				if isIgnored(local[i]) {
+					continue
+				}
 				x = i - missing
 				if x > max {
 					break
@@ -207,34 +230,20 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upRepo(local []alpm.Package) (upSlice, error) {
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return nil, err
 	}
 
 	slice := upSlice{}
-primeloop:
+
 	for _, pkg := range local {
+		if isIgnored(pkg) {
+			continue
+		}
 		newPkg := pkg.NewVersion(dbList)
 
 		if newPkg != nil {
-			for _, ignorePkg := range AlpmConf.IgnorePkg {
-				if pkg.Name() == ignorePkg {
-					fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s -> %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
-					continue primeloop
-				}
-			}
-
-			for _, ignoreGroup := range AlpmConf.IgnoreGroup {
-				for _, group := range pkg.Groups().Slice() {
-					if group == ignoreGroup {
-						fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored group) ignoring upgrade (%s -> %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
-						continue primeloop
-
-					}
-				}
-			}
-
 			slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
 		}
 	}

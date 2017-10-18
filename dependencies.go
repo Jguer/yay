@@ -10,12 +10,12 @@ import (
 // BuildDependencies finds packages, on the second run
 // compares with a baselist and avoids searching those
 func buildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
-	localDb, err := AlpmHandle.LocalDb()
+	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		panic(err)
 	}
 
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		panic(err)
 	}
@@ -54,11 +54,11 @@ func buildDependencies(baselist []string) func(toCheck []string, isBaseList bool
 // DepSatisfier receives a string slice, returns a slice of packages found in
 // repos and one of packages not found in repos. Leaves out installed packages.
 func depSatisfier(toCheck []string) (repo []string, notFound []string, err error) {
-	localDb, err := AlpmHandle.LocalDb()
+	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
-	dbList, err := AlpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}

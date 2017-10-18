@@ -21,7 +21,7 @@ func human(size int64) string {
 
 // PrintSearch handles printing search results in a given format
 func (q aurQuery) printSearch(start int) {
-	localDb, _ := AlpmHandle.LocalDb()
+	localDb, _ := alpmHandle.LocalDb()
 
 	for i, res := range q {
 		var toprint string
@@ -75,7 +75,7 @@ func (s repoQuery) printSearch() {
 			toprint += fmt.Sprint(res.Groups().Slice(), " ")
 		}
 
-		localDb, err := AlpmHandle.LocalDb()
+		localDb, err := alpmHandle.LocalDb()
 		if err == nil {
 			if _, err = localDb.PkgByName(res.Name()); err == nil {
 				toprint += fmt.Sprintf("\x1b[32;40mInstalled\x1b[0m")
@@ -163,7 +163,7 @@ func PrintInfo(a *rpc.Pkg) {
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
 func biggestPackages() {
-	localDb, err := AlpmHandle.LocalDb()
+	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return
 	}
