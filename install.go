@@ -57,7 +57,7 @@ func aurInstall(pkgName []string, flags []string) (err error) {
 	}
 
 	if len(q) != len(pkgName) {
-		fmt.Printf("Some package from list\n%+v\ndoes not exist", pkgName)
+		fmt.Printf("Some packages from list\n%+v\n do not exist", pkgName)
 	}
 
 	var finalrm []string

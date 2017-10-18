@@ -161,6 +161,26 @@ func isIgnored(pkg alpm.Package) bool {
 	return false
 }
 
+func upDevel(remoteNames []string, packageC chan upgrade, done chan bool) {
+	for _, e := range savedInfo {
+		if e.needsUpdate() {
+			found := false
+			for _, r := range remoteNames {
+				if r == e.Package {
+					found = true
+				}
+			}
+			if found {
+				packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
+			} else {
+				removeVCSPackage([]string{e.Package})
+			}
+		}
+	}
+	done <- true
+	return
+}
+
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err error) {
@@ -170,6 +190,12 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 
 	packageC := make(chan upgrade)
 	done := make(chan bool)
+
+	if config.Devel {
+		routines++
+		go upDevel(remoteNames, packageC, done)
+		fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Checking development packages...\x1b[0m")
+	}
 
 	for i := len(remote); i != 0; i = j {
 		//Split requests so AUR RPC doesn't get mad at us.
@@ -326,26 +352,5 @@ func upgradePkgs(flags []string) error {
 		}
 		aurInstall(aurNames, flags)
 	}
-	return nil
-}
-
-func develUpgrade(foreign map[string]alpm.Package, flags []string) error {
-	fmt.Println(" Checking development packages...")
-	develUpdates := checkUpdates(foreign)
-	if len(develUpdates) != 0 {
-		for _, q := range develUpdates {
-			fmt.Printf("\x1b[1m\x1b[32m==>\x1b[33;1m %s\x1b[0m\n", q)
-		}
-		// Install updated packages
-		if !continueTask("Proceed with upgrade?", "nN") {
-			return nil
-		}
-
-		err := aurInstall(develUpdates, flags)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
 	return nil
 }
