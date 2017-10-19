@@ -78,7 +78,7 @@ func init() {
 	defaultSettings(&config)
 
 	if _, err = os.Stat(configFile); os.IsNotExist(err) {
-		err = os.MkdirAll(filepath.Dir(configFile), 0700)
+		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
 			fmt.Println("Unable to create config directory:", filepath.Dir(configFile), err)
 			os.Exit(2)
@@ -86,7 +86,7 @@ func init() {
 		// Save the default config if nothing is found
 		config.saveConfig()
 	} else {
-		file, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0600)
+		file, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
 		if err != nil {
 			fmt.Println("Error reading config:", err)
 		} else {
@@ -105,7 +105,7 @@ func init() {
 	////////////////
 	updated = false
 
-	file, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0600)
+	file, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0644)
 	if err == nil {
 		defer file.Close()
 		decoder := json.NewDecoder(file)
@@ -363,7 +363,7 @@ func complete() (err error) {
 	path := completionFile + config.Shell + ".cache"
 
 	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
-		os.MkdirAll(filepath.Dir(completionFile), 0700)
+		os.MkdirAll(filepath.Dir(completionFile), 0755)
 		out, err := os.Create(path)
 		if err != nil {
 			return err
@@ -378,7 +378,7 @@ func complete() (err error) {
 		return err
 	}
 
-	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0600)
+	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
