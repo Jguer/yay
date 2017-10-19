@@ -84,7 +84,6 @@ func (q aurQuery) missingPackage(pkgS []string) {
 			fmt.Println("\x1b[31mUnable to find", depName, "in AUR\x1b[0m")
 		}
 	}
-	return
 }
 
 // NarrowSearch searches AUR and narrows based on subarguments

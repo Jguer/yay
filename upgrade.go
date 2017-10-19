@@ -178,7 +178,6 @@ func upDevel(remoteNames []string, packageC chan upgrade, done chan bool) {
 		}
 	}
 	done <- true
-	return
 }
 
 // upAUR gathers foreign packages and checks if they have new versions.

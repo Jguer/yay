@@ -79,10 +79,7 @@ func (info *Info) needsUpdate() bool {
 
 	for _, e := range newRepo {
 		if e.Name == "master" {
-			if e.Commit.SHA != info.SHA {
-				return true
-			}
-			return false
+			return e.Commit.SHA != info.SHA
 		}
 	}
 	return false

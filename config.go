@@ -30,15 +30,15 @@ type Configuration struct {
 	Editor        string `json:"editor"`
 	MakepkgBin    string `json:"makepkgbin"`
 	Shell         string `json:"-"`
-	NoConfirm     bool   `json:"noconfirm"`
-	Devel         bool   `json:"devel"`
 	PacmanBin     string `json:"pacmanbin"`
 	PacmanConf    string `json:"pacmanconf"`
+	TarBin        string `json:"tarbin"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
-	TarBin        string `json:"tarbin"`
 	TimeUpdate    bool   `json:"timeupdate"`
+	NoConfirm     bool   `json:"noconfirm"`
+	Devel         bool   `json:"devel"`
 }
 
 var version = "2.116"

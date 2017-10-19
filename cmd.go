@@ -14,29 +14,29 @@ import (
 
 func usage() {
 	fmt.Println(`usage:  yay <operation> [...]
-    operations:
-    yay {-h --help}
-    yay {-V --version}
-    yay {-D --database} <options> <package(s)>
-    yay {-F --files}    [options] [package(s)]
-    yay {-Q --query}    [options] [package(s)]
-    yay {-R --remove}   [options] <package(s)>
-    yay {-S --sync}     [options] [package(s)]
-    yay {-T --deptest}  [options] [package(s)]
-    yay {-U --upgrade}  [options] <file(s)>
+	operations:
+	yay {-h --help}
+	yay {-V --version}
+	yay {-D --database} <options> <package(s)>
+	yay {-F --files}    [options] [package(s)]
+	yay {-Q --query}    [options] [package(s)]
+	yay {-R --remove}   [options] <package(s)>
+	yay {-S --sync}     [options] [package(s)]
+	yay {-T --deptest}  [options] [package(s)]
+	yay {-U --upgrade}  [options] <file(s)>
 
-    New operations:
-    yay -Qstats          displays system information
-    yay -Cd              remove unneeded dependencies
-    yay -G [package(s)]  get pkgbuild from ABS or AUR
+	New operations:
+	yay -Qstats          displays system information
+	yay -Cd              remove unneeded dependencies
+	yay -G [package(s)]  get pkgbuild from ABS or AUR
+	yay --gendb          generates development package DB used for updating.
 
-    New options:
-    --topdown            shows repository's packages first and then aur's
-    --bottomup           shows aur's packages first and then repository's
-    --noconfirm          skip user input on package install
-	--devel			     Check -git/-svn/-hg development version
-	--nodevel			 Disable development version checking
-`)
+	New options:
+	--topdown            shows repository's packages first and then aur's
+	--bottomup           shows aur's packages first and then repository's
+	--noconfirm          skip user input on package install
+	--devel              Check -git/-svn/-hg development version
+	--nodevel            Disable development version checking`)
 }
 
 func init() {
@@ -49,7 +49,7 @@ func init() {
 	}
 
 	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
-		if info, err := os.Stat(configHome); err == nil && info.IsDir() == true {
+		if info, err := os.Stat(configHome); err == nil && info.IsDir() {
 			configHome = configHome + "/yay"
 		} else {
 			configHome = os.Getenv("HOME") + "/.config/yay"
@@ -59,13 +59,13 @@ func init() {
 	}
 
 	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
-		if info, err := os.Stat(cacheHome); err == nil && info.IsDir() == true {
+		if info, err := os.Stat(cacheHome); err == nil && info.IsDir() {
 			cacheHome = cacheHome + "/yay"
 		} else {
 			cacheHome = os.Getenv("HOME") + "/.cache/yay"
 		}
 	} else {
-		cacheHome = os.Getenv("HOME") + "/.config/yay"
+		cacheHome = os.Getenv("HOME") + "/.cache/yay"
 	}
 
 	configFile = configHome + "/config.json"
@@ -106,15 +106,10 @@ func init() {
 	updated = false
 
 	file, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		fmt.Println("error:", err)
-		return
-	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&savedInfo)
-	if err != nil {
-		fmt.Println("error:", err)
+	if err == nil {
+		defer file.Close()
+		decoder := json.NewDecoder(file)
+		_ = decoder.Decode(&savedInfo)
 	}
 
 	/////////////////
@@ -181,7 +176,7 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 				_ = complete()
 				os.Exit(0)
 			case "--fcomplete":
-				config.Shell = "fish"
+				config.Shell = fishShell
 				_ = complete()
 				os.Exit(0)
 			case "--help":

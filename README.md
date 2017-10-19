@@ -13,7 +13,7 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 - Provide an interface for pacman.
 - Have yaourt like search.
 - Minimize user input
-- Know when git packages are due for an upgrade. (TODO)
+- Know when git packages are due for an upgrade.
 
 ## Features
 - AUR Tab completion
@@ -28,12 +28,16 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 - `yay -Qstats` delivers system statistics
 - `yay -Cd` cleans unneeded dependencies
 - `yay -G` downloads PKGBuild from ABS or AUR
+- `yay --gendb` generates development package DB used for devel updates.
 
 ![Yay Syu](http://jguer.github.io/yay/yayupgrade.png "yay -Syu")
 ![Yay Qstats](http://jguer.github.io/yay/yay2.png "yay -Qstats")
 ![Yay NumberMenu](http://jguer.github.io/yay/yay3.png "yay gtk-theme")
 
 ### Changelog
+
+#### 2.200
+- Development github package support readded
 
 #### 2.196
 - XDG_CONFIG_HOME support

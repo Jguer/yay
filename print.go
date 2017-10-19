@@ -50,8 +50,6 @@ func (q aurQuery) printSearch(start int) {
 		toprint += "\n    " + res.Description
 		fmt.Println(toprint)
 	}
-
-	return
 }
 
 //PrintSearch receives a RepoSearch type and outputs pretty text.

@@ -9,6 +9,8 @@ import (
 	alpm "github.com/jguer/go-alpm"
 )
 
+const fishShell = "fish"
+
 //CreateAURList creates a new completion file
 func createAURList(out *os.File) (err error) {
 	resp, err := http.Get("https://aur.archlinux.org/packages.gz")
@@ -23,7 +25,7 @@ func createAURList(out *os.File) (err error) {
 	for scanner.Scan() {
 		fmt.Print(scanner.Text())
 		out.WriteString(scanner.Text())
-		if config.Shell == "fish" {
+		if config.Shell == fishShell {
 			fmt.Print("\tAUR\n")
 			out.WriteString("\tAUR\n")
 		} else {
@@ -46,7 +48,7 @@ func createRepoList(out *os.File) (err error) {
 		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
 			fmt.Print(pkg.Name())
 			out.WriteString(pkg.Name())
-			if config.Shell == "fish" {
+			if config.Shell == fishShell {
 				fmt.Print("\t" + pkg.DB().Name() + "\n")
 				out.WriteString("\t" + pkg.DB().Name() + "\n")
 			} else {
