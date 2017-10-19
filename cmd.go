@@ -86,12 +86,12 @@ func init() {
 		// Save the default config if nothing is found
 		config.saveConfig()
 	} else {
-		file, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
+		cfile, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
 		if err != nil {
 			fmt.Println("Error reading config:", err)
 		} else {
-			defer file.Close()
-			decoder := json.NewDecoder(file)
+			defer cfile.Close()
+			decoder := json.NewDecoder(cfile)
 			err = decoder.Decode(&config)
 			if err != nil {
 				fmt.Println("Loading default Settings.\nError reading config:", err)
@@ -105,10 +105,10 @@ func init() {
 	////////////////
 	updated = false
 
-	file, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0644)
+	vfile, err := os.Open(vcsFile)
 	if err == nil {
-		defer file.Close()
-		decoder := json.NewDecoder(file)
+		defer vfile.Close()
+		decoder := json.NewDecoder(vfile)
 		_ = decoder.Decode(&savedInfo)
 	}
 
@@ -216,7 +216,7 @@ func main() {
 			}
 		}
 	case "-Qstats":
-		err = localStatistics(version)
+		err = localStatistics()
 	case "-Ss", "-Ssq", "-Sqs":
 		if op == "-Ss" {
 			config.SearchMode = Detailed

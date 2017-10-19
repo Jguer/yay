@@ -41,7 +41,7 @@ type Configuration struct {
 	Devel         bool   `json:"devel"`
 }
 
-var version = "2.201"
+const version = "2.201"
 
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"

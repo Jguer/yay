@@ -129,7 +129,7 @@ func saveVCSInfo() error {
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}
-	in, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0755)
+	in, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}

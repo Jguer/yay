@@ -178,3 +178,74 @@ func biggestPackages() {
 	}
 	// Could implement size here as well, but we just want the general idea
 }
+
+// localStatistics prints installed packages statistics.
+func localStatistics() error {
+	info, err := statistics()
+	if err != nil {
+		return err
+	}
+
+	_, _, _, remoteNames, err := filterPackages()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("\n Yay version r%s\n", version)
+	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
+	fmt.Printf("\x1B[1;32mTotal installed packages: \x1B[0;33m%d\x1B[0m\n", info.Totaln)
+	fmt.Printf("\x1B[1;32mTotal foreign installed packages: \x1B[0;33m%d\x1B[0m\n", len(remoteNames))
+	fmt.Printf("\x1B[1;32mExplicitly installed packages: \x1B[0;33m%d\x1B[0m\n", info.Expln)
+	fmt.Printf("\x1B[1;32mTotal Size occupied by packages: \x1B[0;33m%s\x1B[0m\n", human(info.TotalSize))
+	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
+	fmt.Println("\x1B[1;32mTen biggest packages\x1B[0m")
+	biggestPackages()
+	fmt.Println("\x1B[1;34m===========================================\x1B[0m")
+
+	var q aurQuery
+	var j int
+	for i := len(remoteNames); i != 0; i = j {
+		j = i - config.RequestSplitN
+		if j < 0 {
+			j = 0
+		}
+		qtemp, err := rpc.Info(remoteNames[j:i])
+		q = append(q, qtemp...)
+		if err != nil {
+			return err
+		}
+	}
+
+	var outcast []string
+	for _, s := range remoteNames {
+		found := false
+		for _, i := range q {
+			if s == i.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			outcast = append(outcast, s)
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	for _, res := range q {
+		if res.Maintainer == "" {
+			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;37;40m is orphaned.\x1b[0m\n", res.Name)
+		}
+		if res.OutOfDate != 0 {
+			fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;37;40m is out-of-date in AUR.\x1b[0m\n", res.Name)
+		}
+	}
+
+	for _, res := range outcast {
+		fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m%s\x1b[0;37;40m is not available in AUR.\x1b[0m\n", res)
+	}
+
+	return nil
+}
