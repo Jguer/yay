@@ -205,7 +205,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 
 		routines++
 		go func(local []alpm.Package, remote []string) {
-			qtemp, err := rpc.Info(remoteNames)
+			qtemp, err := rpc.Info(remote)
 			if err != nil {
 				fmt.Println(err)
 				done <- true
