@@ -137,6 +137,9 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 	op = "yogurt"
 
 	for _, arg := range os.Args[1:] {
+		if len(arg) < 2 {
+			continue
+		}
 		if arg[0] == '-' && arg[1] != '-' {
 			switch arg {
 			default:
