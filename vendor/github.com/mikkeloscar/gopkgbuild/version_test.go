@@ -86,12 +86,13 @@ func TestCompleteVersionComparison(t *testing.T) {
 	a := &CompleteVersion{
 		Version: "2",
 		Epoch:   1,
-		Pkgrel:  2,
+		Pkgrel:  Version("2"),
 	}
 
 	older := []string{
 		"0-3-4",
 		"1-2-1",
+		"1-2-1.5",
 		"1-1-1",
 	}
 
@@ -105,6 +106,7 @@ func TestCompleteVersionComparison(t *testing.T) {
 		"2-1-1",
 		"1-3-1",
 		"1-2-3",
+		"1-2-2.1",
 	}
 
 	for _, n := range newer {

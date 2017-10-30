@@ -64,7 +64,7 @@ type Dependency struct {
 type PKGBUILD struct {
 	Pkgnames     []string
 	Pkgver       Version // required
-	Pkgrel       int     // required
+	Pkgrel       Version // required
 	Pkgdir       string
 	Epoch        int
 	Pkgbase      string
@@ -132,10 +132,10 @@ func (p *PKGBUILD) Older(p2 *PKGBUILD) bool {
 // Version returns the full version of the PKGBUILD (including epoch and rel)
 func (p *PKGBUILD) Version() string {
 	if p.Epoch > 0 {
-		return fmt.Sprintf("%d:%s-%d", p.Epoch, p.Pkgver, p.Pkgrel)
+		return fmt.Sprintf("%d:%s-%s", p.Epoch, p.Pkgver, p.Pkgrel)
 	}
 
-	return fmt.Sprintf("%s-%d", p.Pkgver, p.Pkgrel)
+	return fmt.Sprintf("%s-%s", p.Pkgver, p.Pkgrel)
 }
 
 // CompleteVersion returns a Complete version struct including version, rel and
@@ -144,7 +144,7 @@ func (p *PKGBUILD) CompleteVersion() CompleteVersion {
 	return CompleteVersion{
 		Version: p.Pkgver,
 		Epoch:   uint8(p.Epoch),
-		Pkgrel:  uint8(p.Pkgrel),
+		Pkgrel:  p.Pkgrel,
 	}
 }
 
@@ -257,11 +257,11 @@ Loop:
 			pkgbuild.Pkgver = version
 		case itemPkgrel:
 			next = lexer.nextItem()
-			rel, err := strconv.ParseInt(next.val, 10, 0)
+			rel, err := parseVersion(next.val)
 			if err != nil {
 				return nil, err
 			}
-			pkgbuild.Pkgrel = int(rel)
+			pkgbuild.Pkgrel = rel
 		case itemPkgdir:
 			next = lexer.nextItem()
 			pkgbuild.Pkgdir = next.val

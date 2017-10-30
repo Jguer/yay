@@ -80,11 +80,11 @@ func (u upSlice) Print(start int) {
 		fmt.Printf("\x1b[1;%dm%s\x1b[0m/\x1b[1;39m%-25s\t\t\x1b[0m", f(i.Repository), i.Repository, i.Name)
 
 		if old.Version != new.Version {
-			fmt.Printf("\x1b[31m%18s\x1b[0m-%d -> \x1b[1;32m%s\x1b[0m-%d\x1b[0m",
+			fmt.Printf("\x1b[31m%18s\x1b[0m-%s -> \x1b[1;32m%s\x1b[0m-%s\x1b[0m",
 				old.Version, old.Pkgrel,
 				new.Version, new.Pkgrel)
 		} else {
-			fmt.Printf("\x1b[0m%18s-\x1b[31m%d\x1b[0m -> %s-\x1b[32m%d\x1b[0m",
+			fmt.Printf("\x1b[0m%18s-\x1b[31m%s\x1b[0m -> %s-\x1b[32m%s\x1b[0m",
 				old.Version, old.Pkgrel,
 				new.Version, new.Pkgrel)
 		}

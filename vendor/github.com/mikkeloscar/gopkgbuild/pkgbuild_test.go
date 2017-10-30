@@ -31,9 +31,9 @@ func TestVersionParsing(t *testing.T) {
 // Test complete-version parsing
 func TestCompleteVersionParsing(t *testing.T) {
 	versions := map[string]*CompleteVersion{
-		"1:1.0beta": &CompleteVersion{Version("1.0beta"), 1, 0},
-		"1.0":       &CompleteVersion{Version("1.0"), 0, 0},
-		"2.3-2":     &CompleteVersion{Version("2.3"), 0, 2},
+		"1:1.0beta": &CompleteVersion{Version("1.0beta"), 1, ""},
+		"1.0":       &CompleteVersion{Version("1.0"), 0, ""},
+		"2.3-2":     &CompleteVersion{Version("2.3"), 0, "2"},
 		"1::":       nil,
 		"4.3--1":    nil,
 		"4.1-a":     nil,
@@ -60,22 +60,22 @@ func TestNewer(t *testing.T) {
 	a := &PKGBUILD{
 		Epoch:  0,
 		Pkgver: Version("1.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 	b := &PKGBUILD{
 		Epoch:  0,
 		Pkgver: Version("2.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 	c := &PKGBUILD{
 		Epoch:  1,
 		Pkgver: Version("1.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 	d := &PKGBUILD{
 		Epoch:  0,
 		Pkgver: Version("1.0"),
-		Pkgrel: 2,
+		Pkgrel: "2",
 	}
 
 	if a.Newer(b) {
@@ -100,22 +100,22 @@ func TestOlder(t *testing.T) {
 	a := &PKGBUILD{
 		Epoch:  0,
 		Pkgver: Version("1.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 	b := &PKGBUILD{
 		Epoch:  0,
 		Pkgver: Version("2.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 	c := &PKGBUILD{
 		Epoch:  1,
 		Pkgver: Version("1.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 	d := &PKGBUILD{
 		Epoch:  0,
 		Pkgver: Version("1.0"),
-		Pkgrel: 2,
+		Pkgrel: "2",
 	}
 
 	if !a.Older(b) {
@@ -140,7 +140,7 @@ func TestVersionMethod(t *testing.T) {
 	a := &PKGBUILD{
 		Epoch:  0,
 		Pkgver: Version("1.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 
 	version := "1.0-1"
@@ -152,7 +152,7 @@ func TestVersionMethod(t *testing.T) {
 	b := &PKGBUILD{
 		Epoch:  4,
 		Pkgver: Version("1.0"),
-		Pkgrel: 1,
+		Pkgrel: "1",
 	}
 
 	version = "4:1.0-1"

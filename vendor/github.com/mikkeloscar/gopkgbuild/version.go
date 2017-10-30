@@ -12,7 +12,7 @@ type Version string
 type CompleteVersion struct {
 	Version Version
 	Epoch   uint8
-	Pkgrel  uint8
+	Pkgrel  Version
 }
 
 func (c *CompleteVersion) String() string {
@@ -24,7 +24,7 @@ func (c *CompleteVersion) String() string {
 func NewCompleteVersion(s string) (*CompleteVersion, error) {
 	var err error
 	epoch := 0
-	rel := 0
+	rel := Version("")
 
 	// handle possible epoch
 	versions := strings.Split(s, ":")
@@ -46,10 +46,7 @@ func NewCompleteVersion(s string) (*CompleteVersion, error) {
 	}
 
 	if len(versions) > 1 {
-		rel, err = strconv.Atoi(versions[1])
-		if err != nil {
-			return nil, err
-		}
+		rel = Version(versions[1])
 	}
 
 	// finally check that the actual version is valid
@@ -57,7 +54,7 @@ func NewCompleteVersion(s string) (*CompleteVersion, error) {
 		return &CompleteVersion{
 			Version: Version(versions[0]),
 			Epoch:   uint8(epoch),
-			Pkgrel:  uint8(rel),
+			Pkgrel:  rel,
 		}, nil
 	}
 
@@ -115,11 +112,11 @@ func (a *CompleteVersion) cmp(b *CompleteVersion) int8 {
 		return -1
 	}
 
-	if a.Pkgrel > b.Pkgrel {
+	if a.Pkgrel.bigger(b.Pkgrel) {
 		return 1
 	}
 
-	if a.Pkgrel < b.Pkgrel {
+	if b.Pkgrel.bigger(a.Pkgrel) {
 		return -1
 	}
 
