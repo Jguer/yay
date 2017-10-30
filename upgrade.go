@@ -141,18 +141,18 @@ loop:
 	return
 }
 
-func isIgnored(pkg alpm.Package) bool {
+func isIgnored(name string, groups []string, oldVersion string, newVersion string) bool {
 	for _, p := range alpmConf.IgnorePkg {
-		if p == pkg.Name() {
-			fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s)\n", pkg.Name(), pkg.Version())
+		if p == name {
+			fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s -> %s)\n", name, oldVersion, newVersion)
 			return true
 		}
 	}
 
 	for _, g := range alpmConf.IgnoreGroup {
-		for _, pg := range pkg.Groups().Slice() {
+		for _, pg := range groups {
 			if g == pg {
-				fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s)\n", pkg.Name(), pkg.Version())
+				fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s -> %s)\n", name, oldVersion, newVersion)
 				return true
 			}
 		}
@@ -170,7 +170,7 @@ func upDevel(remoteNames []string, packageC chan upgrade, done chan bool) {
 					found = true
 				}
 			}
-			if found {
+			if found && !isIgnored(e.Package, nil, e.SHA[0:6], "git") {
 				packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
 			} else {
 				removeVCSPackage([]string{e.Package})
@@ -218,16 +218,15 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 			var missing, x int
 
 			for i := range local {
-				if isIgnored(local[i]) {
-					continue
-				}
 				x = i - missing
 				if x > max {
 					break
 				} else if qtemp[x].Name == local[i].Name() {
 					if (config.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
 						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
-						packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
+						if !isIgnored(local[i].Name(), local[i].Groups().Slice(), local[i].Version(), qtemp[x].Version) {
+							packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
+						}
 					}
 					continue
 				} else {
@@ -268,12 +267,9 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 	slice := upSlice{}
 
 	for _, pkg := range local {
-		if isIgnored(pkg) {
-			continue
-		}
 		newPkg := pkg.NewVersion(dbList)
 
-		if newPkg != nil {
+		if newPkg != nil && !isIgnored(pkg.Name(), pkg.Groups().Slice(), pkg.Version(), newPkg.Version()) {
 			slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
 		}
 	}
