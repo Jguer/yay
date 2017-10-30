@@ -241,6 +241,11 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 	for {
 		select {
 		case pkg := <-packageC:
+			for _, w := range toUpgrade {
+				if w.Name == pkg.Name {
+					continue
+				}
+			}
 			toUpgrade = append(toUpgrade, pkg)
 		case <-done:
 			routineDone++
