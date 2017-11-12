@@ -142,10 +142,14 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 		}
 		if arg[0] == '-' && arg[1] != '-' {
 			switch arg {
+			case "-V":
+				arg = "--version"
+			case "-h":
+				arg = "--help"
 			default:
 				op = arg
+				continue
 			}
-			continue
 		}
 
 		if arg[0] == '-' && arg[1] == '-' {
