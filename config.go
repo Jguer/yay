@@ -87,7 +87,7 @@ func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 func (config *Configuration) saveConfig() error {
 	config.NoConfirm = false
 	marshalledinfo, _ := json.MarshalIndent(config, "", "\t")
-	in, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
+	in, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
