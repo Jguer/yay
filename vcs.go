@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -71,9 +72,11 @@ func (info *Info) needsUpdate() bool {
 	}
 	defer r.Body.Close()
 
-	err = json.NewDecoder(r.Body).Decode(&newRepo)
+	body, _ := ioutil.ReadAll(r.Body)
+	err = json.Unmarshal(body, &newRepo)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Cannot update '%v'\nError: %v\nStatus code: %v\nBody: %v\n",
+			info.Package, err, r.StatusCode, string(body))
 		return false
 	}
 
