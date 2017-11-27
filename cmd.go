@@ -152,7 +152,7 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 			}
 		}
 
-		if arg[0] == '-' && arg[1] == '-' {
+		if strings.HasPrefix(arg, "--") {
 			changedConfig = true
 			switch arg {
 			case "--printconfig":
