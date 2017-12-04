@@ -31,12 +31,20 @@ func usage() {
 	yay -G [package(s)]  get pkgbuild from ABS or AUR
 	yay --gendb          generates development package DB used for updating.
 
-	New options:
+	Permanent configuration options:
 	--topdown            shows repository's packages first and then aur's
 	--bottomup           shows aur's packages first and then repository's
-	--noconfirm          skip user input on package install
 	--devel              Check -git/-svn/-hg development version
-	--nodevel            Disable development version checking`)
+	--nodevel            Disable development version checking
+	--afterclean         Clean package sources after successful build
+	--noafterclean       Disable package sources cleaning after successful build
+	--timeupdate         Check package's modification date and version
+	--notimeupdate       Check only package version change
+
+	New options:
+	--noconfirm          skip user input on package install
+	--printconfig        Prints current yay configuration
+	`)
 }
 
 func init() {
@@ -155,8 +163,12 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 		if strings.HasPrefix(arg, "--") {
 			changedConfig = true
 			switch arg {
+			case "--afterclean":
+				config.CleanAfter = true
+			case "--noafterclean":
+				config.CleanAfter = false
 			case "--printconfig":
-				fmt.Printf("%+v", config)
+				fmt.Printf("%#v", config)
 				os.Exit(0)
 			case "--gendb":
 				err = createDevelDB()

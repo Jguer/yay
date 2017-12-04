@@ -164,6 +164,10 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	err = makepkgcmd.Run()
 	if err == nil {
 		_ = saveVCSInfo()
+		if config.CleanAfter {
+			fmt.Println("\x1b[1;32m==> CleanAfter enabled. Deleting source folder.\x1b[0m")
+			os.RemoveAll(dir)
+		}
 	}
 	return
 }

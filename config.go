@@ -27,6 +27,7 @@ const (
 // Configuration stores yay's config.
 type Configuration struct {
 	BuildDir      string `json:"buildDir"`
+	CleanAfter    bool   `json:"cleanAfter"`
 	Editor        string `json:"editor"`
 	MakepkgBin    string `json:"makepkgbin"`
 	Shell         string `json:"-"`
@@ -41,7 +42,7 @@ type Configuration struct {
 	Devel         bool   `json:"devel"`
 }
 
-const version = "2.201"
+const version = "2.217"
 
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
@@ -106,6 +107,7 @@ func defaultSettings(config *Configuration) {
 		panic(err)
 	}
 	config.BuildDir = fmt.Sprintf("/tmp/yaytmp-%s/", u.Uid)
+	config.CleanAfter = false
 	config.Editor = ""
 	config.Devel = false
 	config.MakepkgBin = "/usr/bin/makepkg"
