@@ -94,8 +94,8 @@ func init() {
 		// Save the default config if nothing is found
 		config.saveConfig()
 	} else {
-		cfile, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
-		if err != nil {
+		cfile, errf := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
+		if errf != nil {
 			fmt.Println("Error reading config:", err)
 		} else {
 			defer cfile.Close()
@@ -378,23 +378,23 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 }
 
 // Complete provides completion info for shells
-func complete() (err error) {
+func complete() error {
 	path := completionFile + config.Shell + ".cache"
 
 	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
 		os.MkdirAll(filepath.Dir(completionFile), 0755)
-		out, err := os.Create(path)
-		if err != nil {
-			return err
+		out, errf := os.Create(path)
+		if errf != nil {
+			return errf
 		}
 
 		if createAURList(out) != nil {
 			defer os.Remove(path)
 		}
-		err = createRepoList(out)
+		erra := createRepoList(out)
 
 		out.Close()
-		return err
+		return erra
 	}
 
 	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)

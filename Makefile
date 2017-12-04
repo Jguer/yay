@@ -19,7 +19,6 @@ build:
 	go build -v -o ${OUTPUT}/${PKGNAME} ${LDFLAGS}
 release:
 	GOARCH=${ARCH64} go build -v -o ${OUTPUT}/${PKGNAME} ${LDFLAGS}
-	cp ./LICENSE ${OUTPUT}
 	cp ./yay.8 ${OUTPUT}
 	cp ./zsh-completion ${OUTPUT}
 	cp ./yay.fish ${OUTPUT}

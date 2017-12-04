@@ -27,7 +27,6 @@ const (
 // Configuration stores yay's config.
 type Configuration struct {
 	BuildDir      string `json:"buildDir"`
-	CleanAfter    bool   `json:"cleanAfter"`
 	Editor        string `json:"editor"`
 	MakepkgBin    string `json:"makepkgbin"`
 	Shell         string `json:"-"`
@@ -40,9 +39,10 @@ type Configuration struct {
 	TimeUpdate    bool   `json:"timeupdate"`
 	NoConfirm     bool   `json:"noconfirm"`
 	Devel         bool   `json:"devel"`
+	CleanAfter    bool   `json:"cleanAfter"`
 }
 
-const version = "2.217"
+const version = "2.219"
 
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"

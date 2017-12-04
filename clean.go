@@ -29,7 +29,6 @@ func removeVCSPackage(pkgs []string) {
 	}
 
 	_ = saveVCSInfo()
-	return
 }
 
 // CleanDependencies removes all dangling dependencies in system
