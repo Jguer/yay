@@ -30,11 +30,22 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 - `yay -G` downloads PKGBuild from ABS or AUR
 - `yay --gendb` generates development package DB used for devel updates.
 
-![Yay Syu](http://jguer.github.io/yay/yayupgrade.png "yay -Syu")
-![Yay Qstats](http://jguer.github.io/yay/yay2.png "yay -Qstats")
-![Yay NumberMenu](http://jguer.github.io/yay/yay3.png "yay gtk-theme")
+<img src="http://jguer.github.io/yay/yayupgrade.png" width="450">
+<img src="http://jguer.github.io/yay/yay2.png" width="450">
+<img src="http://jguer.github.io/yay/yay3.png" width="450">
 
 ### Changelog
+#### 2.219
+- Updated manpage
+- Updated --help
+- Fixed AUR update fails with large number of packages #59 
+- Check if package is already in upgrade list and skip it. #60 
+-  Add -V and -h for flag parsing @AnthonyLam 
+-  Prevent file corruption by truncating the files @maximbaz 
+-  Print VCS error details @maximbaz 
+-  Using '-' doesn't raise an error @PietroCarrara 
+-  use Command.Dir in aur.PkgInstall; Fixes #32 #47  @afg984 
+-  Suffix YayConf.BuildDir with uid to avoid permission issues @afg984 (Not included in last changelog)
 
 #### 2.200
 - Development github package support readded
