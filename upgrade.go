@@ -60,14 +60,9 @@ func (u upSlice) Less(i, j int) bool {
 // Print prints the details of the packages to upgrade.
 func (u upSlice) Print(start int) {
 	for k, i := range u {
-		old, err := pkgb.NewCompleteVersion(i.LocalVersion)
-		if err != nil {
-			fmt.Println(i.Name, err)
-		}
-		new, err := pkgb.NewCompleteVersion(i.RemoteVersion)
-		if err != nil {
-			fmt.Println(i.Name, err)
-		}
+		old, errOld := pkgb.NewCompleteVersion(i.LocalVersion)
+		new, errNew := pkgb.NewCompleteVersion(i.RemoteVersion)
+		var left, right string
 
 		f := func(name string) (color int) {
 			var hash = 5381
@@ -79,16 +74,18 @@ func (u upSlice) Print(start int) {
 		fmt.Printf("\x1b[33m%-2d\x1b[0m ", len(u)+start-k-1)
 		fmt.Printf("\x1b[1;%dm%s\x1b[0m/\x1b[1;39m%-25s\t\t\x1b[0m", f(i.Repository), i.Repository, i.Name)
 
-		if old.Version != new.Version {
-			fmt.Printf("\x1b[31m%18s\x1b[0m-%s -> \x1b[1;32m%s\x1b[0m-%s\x1b[0m",
-				old.Version, old.Pkgrel,
-				new.Version, new.Pkgrel)
+		if errOld != nil {
+			left = fmt.Sprintf("\x1b[31m%20s\x1b[0m", "Invalid Version")
 		} else {
-			fmt.Printf("\x1b[0m%18s-\x1b[31m%s\x1b[0m -> %s-\x1b[32m%s\x1b[0m",
-				old.Version, old.Pkgrel,
-				new.Version, new.Pkgrel)
+			left = fmt.Sprintf("\x1b[31m%18s\x1b[0m-%s", old.Version, old.Pkgrel)
 		}
-		print("\n")
+
+		if errNew != nil {
+			right = fmt.Sprintf("\x1b[31m%s\x1b[0m", "Invalid Version")
+		} else {
+			right = fmt.Sprintf("\x1b[31m%s\x1b[0m-%s", new.Version, new.Pkgrel)
+		}
+		fmt.Printf("%s -> %s\n", left, right)
 	}
 }
 
