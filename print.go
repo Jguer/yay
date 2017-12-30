@@ -58,9 +58,9 @@ func (s repoQuery) printSearch() {
 		var toprint string
 		if config.SearchMode == NumberMenu {
 			if config.SortMode == BottomUp {
-				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", len(s)-i-1)
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", len(s)-i)
 			} else {
-				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", i)
+				toprint += fmt.Sprintf("\x1b[33m%d\x1b[0m ", i+1)
 			}
 		} else if config.SearchMode == Minimal {
 			fmt.Println(res.Name())
