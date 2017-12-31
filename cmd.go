@@ -136,173 +136,204 @@ func init() {
 	}
 }
 
-func parser() (op string, options []string, packages []string, changedConfig bool, err error) {
-	if len(os.Args) < 2 {
-		err = fmt.Errorf("no operation specified")
-		return
-	}
-	changedConfig = false
-	op = "yogurt"
-
-	for _, arg := range os.Args[1:] {
-		if len(arg) < 2 {
-			continue
-		}
-		if arg[0] == '-' && arg[1] != '-' {
-			switch arg {
-			case "-V":
-				arg = "--version"
-			case "-h":
-				arg = "--help"
-			default:
-				op = arg
-				continue
-			}
-		}
-
-		if strings.HasPrefix(arg, "--") {
-			changedConfig = true
-			switch arg {
-			case "--afterclean":
-				config.CleanAfter = true
-			case "--noafterclean":
-				config.CleanAfter = false
-			case "--printconfig":
-				fmt.Printf("%#v", config)
-				os.Exit(0)
-			case "--gendb":
-				err = createDevelDB()
-				if err != nil {
-					fmt.Println(err)
-				}
-				err = saveVCSInfo()
-				if err != nil {
-					fmt.Println(err)
-				}
-				os.Exit(0)
-			case "--devel":
-				config.Devel = true
-			case "--nodevel":
-				config.Devel = false
-			case "--timeupdate":
-				config.TimeUpdate = true
-			case "--notimeupdate":
-				config.TimeUpdate = false
-			case "--topdown":
-				config.SortMode = TopDown
-			case "--complete":
-				config.Shell = "sh"
-				_ = complete()
-				os.Exit(0)
-			case "--fcomplete":
-				config.Shell = fishShell
-				_ = complete()
-				os.Exit(0)
-			case "--help":
-				usage()
-				os.Exit(0)
-			case "--version":
-				fmt.Printf("yay v%s\n", version)
-				os.Exit(0)
-			case "--noconfirm":
-				config.NoConfirm = true
-				fallthrough
-			default:
-				options = append(options, arg)
-			}
-			continue
-		}
-		packages = append(packages, arg)
-	}
-	return
-}
-
 func main() {
-	op, options, pkgs, changedConfig, err := parser()
+	var err error
+	var changedConfig bool
+	
+	parser := makeArgParser();
+	err = parser.parseCommandLine();
+	
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	
+	if parser.existsArg("-") {
+		err = parser.parseStdin();
 
-	switch op {
-	case "-Cd":
-		err = cleanDependencies(pkgs)
-	case "-G":
-		for _, pkg := range pkgs {
-			err = getPkgbuild(pkg)
-			if err != nil {
-				fmt.Println(pkg+":", err)
-			}
-		}
-	case "-Qstats":
-		err = localStatistics()
-	case "-Ss", "-Ssq", "-Sqs":
-		if op == "-Ss" {
-			config.SearchMode = Detailed
-		} else {
-			config.SearchMode = Minimal
-		}
-
-		if pkgs != nil {
-			err = syncSearch(pkgs)
-		}
-	case "-S":
-		err = install(pkgs, options)
-	case "-Sy":
-		err = passToPacman("-Sy", nil, nil)
 		if err != nil {
-			break
+			fmt.Println(err)
+			os.Exit(1)
 		}
-		err = install(pkgs, options)
-	case "-Syu", "-Suy", "-Su":
-		if strings.Contains(op, "y") {
-			err = passToPacman("-Sy", nil, nil)
-			if err != nil {
-				break
-			}
-		}
-		err = upgradePkgs(options)
-	case "-Si":
-		err = syncInfo(pkgs, options)
-	case "yogurt":
-		config.SearchMode = NumberMenu
-
-		if pkgs != nil {
-			err = numberMenu(pkgs, options)
-		}
-	default:
-		if op[0] == 'R' {
-			removeVCSPackage(pkgs)
-		}
-		err = passToPacman(op, pkgs, options)
 	}
-
-	var erra error
+	
+	fmt.Println(parser)
+	
+	changedConfig, err = handleCmd(parser)
+	
+	if err != nil {
+		fmt.Println(err)
+	}
+	
 	if updated {
-		erra = saveVCSInfo()
-		if erra != nil {
+		err = saveVCSInfo()
+		
+		if err != nil {
 			fmt.Println(err)
 		}
 	}
 
 	if changedConfig {
-		erra = config.saveConfig()
-		if erra != nil {
+		err = config.saveConfig()
+		
+		if err != nil {
 			fmt.Println(err)
 		}
 
 	}
 
-	erra = alpmHandle.Release()
-	if erra != nil {
-		fmt.Println(err)
-	}
-
+	err = alpmHandle.Release()
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 }
+
+func handleCmd(parser *argParser) (changedConfig bool, err error) {
+	var _changedConfig bool
+	
+	for option, _ := range parser.options {
+		_changedConfig, err = handleConfig(option)
+		
+		if err != nil {
+			return
+		}
+		
+		if _changedConfig {
+			changedConfig = true
+		}
+	}
+
+	switch parser.op {
+	case "V", "version":
+		handleVersion()
+	case "D", "database":
+		//passToPacman()
+	case "F", "files":
+		//passToPacman()
+	case "Q", "query":
+		//passToPacman()
+	case "R", "remove":
+		//
+	case "S", "sync":
+		err = handleSync(parser)
+	case "T", "deptest":
+		//passToPacman()
+	case "U", "upgrade":
+		//passToPacman()
+	case "Y", "--yay":
+		err = handleYogurt(parser)
+	default:
+		//this means we allowed an op but not implement it
+		//if this happens it an error in the code and not the usage
+		err = fmt.Errorf("unhandled operation")
+		}
+	
+	return
+}
+
+//this function should only set config options
+//but currently still uses the switch left over from old code
+//eventuall this should be refactored out futher
+//my current plan is to have yay specific operations in its own operator
+//e.g. yay -Y --gendb
+//e.g yay -Yg
+func handleConfig(option string) (changedConfig bool, err error) {
+	switch option {
+		case "afterclean":
+			config.CleanAfter = true
+		case "noafterclean":
+			config.CleanAfter = false
+		case "printconfig":
+			fmt.Printf("%#v", config)
+			os.Exit(0)
+		case "gendb":
+			err = createDevelDB()
+			if err != nil {
+				fmt.Println(err)
+			}
+			err = saveVCSInfo()
+			if err != nil {
+				fmt.Println(err)
+			}
+			os.Exit(0)
+		case "devel":
+			config.Devel = true
+		case "nodevel":
+			config.Devel = false
+		case "timeupdate":
+			config.TimeUpdate = true
+		case "notimeupdate":
+			config.TimeUpdate = false
+		case "topdown":
+			config.SortMode = TopDown
+		case "complete":
+			config.Shell = "sh"
+			complete()
+			os.Exit(0)
+		case "fcomplete":
+			config.Shell = fishShell
+			complete()
+			os.Exit(0)
+		case "help":
+			usage()
+			os.Exit(0)
+		case "version":
+			fmt.Printf("yay v%s\n", version)
+			os.Exit(0)
+		case "noconfirm":
+			config.NoConfirm = true
+		default:
+			return
+		}
+	
+	changedConfig = true
+	return
+}
+
+func handleVersion() {
+	usage()
+}
+
+func handleYogurt(parser *argParser) (err error) {
+	_, options, targets := parser.formatArgs()
+	
+	config.SearchMode = NumberMenu
+	err = numberMenu(targets, options)
+	
+	return
+}
+
+func handleSync(parser *argParser) (err error) {
+	op, options, targets := parser.formatArgs()
+	
+	fmt.Println("op", op)
+	fmt.Println("options", options)
+	fmt.Println("targets", targets)
+	
+	if parser.existsArg("y") {
+		err = passToPacman("-Sy", nil, nil)
+		if err != nil {
+			return
+		}
+	}
+	
+	if parser.existsArg("s") {
+		if parser.existsArg("i") {
+			config.SearchMode = Detailed
+		} else {
+			config.SortMode = Minimal
+		}
+		
+		err = syncSearch(targets)
+	}
+	
+	if len(targets) > 0 {
+		err = install(targets, options)
+	}
+	
+	return
+}
+
 
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
