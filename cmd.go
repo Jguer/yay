@@ -142,6 +142,18 @@ func init() {
 }
 
 func main() {
+	status := run()
+	
+	err := alpmHandle.Release()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+	}
+	
+	os.Exit(status)
+}
+
+func run() (status int) {
 	var err error
 	var changedConfig bool
 	
@@ -150,7 +162,8 @@ func main() {
 	
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		status = 1
+		return
 	}
 	
 	if parser.existsArg("-") {
@@ -158,16 +171,17 @@ func main() {
 
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(1)
+			status = 1
+			return
 		}
 	}
-	
-	fmt.Println(parser)
 	
 	changedConfig, err = handleCmd(parser)
 	
 	if err != nil {
 		fmt.Println(err)
+		status = 1
+		//try continue onward
 	}
 	
 	if updated {
@@ -175,6 +189,7 @@ func main() {
 		
 		if err != nil {
 			fmt.Println(err)
+			status = 1
 		}
 	}
 
@@ -183,15 +198,15 @@ func main() {
 		
 		if err != nil {
 			fmt.Println(err)
+			status = 1
 		}
 
 	}
-
-	err = alpmHandle.Release()
-	if err != nil {
-		fmt.Println(err)
-	}
+	
+	return
+	
 }
+
 
 func handleCmd(parser *argParser) (changedConfig bool, err error) {
 	var _changedConfig bool
