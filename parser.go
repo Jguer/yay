@@ -7,19 +7,21 @@ import (
 	"io"
 )
 
+type set  map[string]struct{}
+
 type argParser struct {
 	op string
 	options map[string]string
-	doubles map[string]struct{} //tracks args passed twice such as -yy and -dd
-	targets map[string]struct{}
+	doubles set //tracks args passed twice such as -yy and -dd
+	targets set
 }
 
 func makeArgParser() *argParser {
 	return &argParser {
 		"",
 		make(map[string]string),
-		make(map[string]struct{}),
-		make(map[string]struct{}),
+		make(set),
+		make(set),
 	}
 }
 

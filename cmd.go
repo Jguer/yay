@@ -241,6 +241,8 @@ func handleCmd(parser *argParser) (changedConfig bool, err error) {
 		passToPacman(parser)
 	case "U", "upgrade":
 		passToPacman(parser)
+	case "G", "getpkgbuild":
+		err = handleGetpkgbuild(parser)
 	case "Y", "--yay":
 		err = handleYay(parser)
 	default:
@@ -345,6 +347,20 @@ func handleYay(parser *argParser) (err error) {
 	} else {
 		err = handleYogurt(parser)
 	}
+	
+	return
+}
+
+func handleGetpkgbuild(parser *argParser) (err error) {
+	for pkg := range parser.targets {
+			err = getPkgbuild(pkg)
+			if err != nil {
+				//we print the error instead of returning it
+				//seems as we can handle multiple errors without stoping
+				//theres no easy way arround this right now
+				fmt.Println(pkg + ":", err)
+			}
+		}
 	
 	return
 }
