@@ -13,38 +13,43 @@ import (
 )
 
 func usage() {
-	fmt.Println(`usage:  yay <operation> [...]
-	operations:
-	yay {-h --help}
-	yay {-V --version}
-	yay {-D --database} <options> <package(s)>
-	yay {-F --files}    [options] [package(s)]
-	yay {-Q --query}    [options] [package(s)]
-	yay {-R --remove}   [options] <package(s)>
-	yay {-S --sync}     [options] [package(s)]
-	yay {-T --deptest}  [options] [package(s)]
-	yay {-U --upgrade}  [options] <file(s)>
+	fmt.Println(`Usage:
+    yay <operation> [...]
+    yay <package(s)>
+    
+operations:
+    yay {-h --help}
+    yay {-V --version}
+    yay {-D --database}    <options> <package(s)>
+    yay {-F --files}       [options] [package(s)]
+    yay {-Q --query}       [options] [package(s)]
+    yay {-R --remove}      [options] <package(s)>
+    yay {-S --sync}        [options] [package(s)]
+    yay {-T --deptest}     [options] [package(s)]
+    yay {-U --upgrade}     [options] <file(s)>
 
-	New operations:
-	yay -Qstats          displays system information
-	yay -Cd              remove unneeded dependencies
-	yay -G [package(s)]  get pkgbuild from ABS or AUR
-	yay --gendb          generates development package DB used for updating.
+New operations:
+    yay {-Y --yay}         [options] [package(s)]
+    yay {-G --getpkgbuild} [package(s)]
 
-	Permanent configuration options:
-	--topdown            shows repository's packages first and then aur's
-	--bottomup           shows aur's packages first and then repository's
-	--devel              Check -git/-svn/-hg development version
-	--nodevel            Disable development version checking
-	--afterclean         Clean package sources after successful build
-	--noafterclean       Disable package sources cleaning after successful build
-	--timeupdate         Check package's modification date and version
-	--notimeupdate       Check only package version change
+Permanent configuration options:
+    --topdown            Shows repository's packages first and then aur's
+    --bottomup           Shows aur's packages first and then repository's
+    --devel              Check -git/-svn/-hg development version
+    --nodevel            Disable development version checking
+    --afterclean         Clean package sources after successful build
+    --noafterclean       Disable package sources cleaning after successful build
+    --timeupdate         Check package's modification date and version
+    --notimeupdate       Check only package version change
 
-	New options:
-	--noconfirm          skip user input on package install
-	--printconfig        Prints current yay configuration
-	`)
+Yay specific options:
+    --printconfig        Prints current yay configuration
+    --stats              Displays system information
+    --cleandeps          Remove unneeded dependencies
+    --gendb              Generates development package DB used for updating.
+
+If no operation is provided -Y will be assumed
+`)
 }
 
 func init() {
@@ -221,7 +226,7 @@ func handleCmd(parser *argParser) (changedConfig bool, err error) {
 	case "U", "upgrade":
 		//passToPacman()
 	case "Y", "--yay":
-		err = handleYogurt(parser)
+		err = handleYay(parser)
 	default:
 		//this means we allowed an op but not implement it
 		//if this happens it an error in the code and not the usage
@@ -243,19 +248,19 @@ func handleConfig(option string) (changedConfig bool, err error) {
 			config.CleanAfter = true
 		case "noafterclean":
 			config.CleanAfter = false
-		case "printconfig":
-			fmt.Printf("%#v", config)
-			os.Exit(0)
-		case "gendb":
-			err = createDevelDB()
-			if err != nil {
-				fmt.Println(err)
-			}
-			err = saveVCSInfo()
-			if err != nil {
-				fmt.Println(err)
-			}
-			os.Exit(0)
+//		case "printconfig":
+//			fmt.Printf("%#v", config)
+//			os.Exit(0)
+//		case "gendb":
+//			err = createDevelDB()
+//			if err != nil {
+//				fmt.Println(err)
+//			}
+//			err = saveVCSInfo()
+//			if err != nil {
+//				fmt.Println(err)
+//			}
+//			os.Exit(0)
 		case "devel":
 			config.Devel = true
 		case "nodevel":
@@ -266,20 +271,20 @@ func handleConfig(option string) (changedConfig bool, err error) {
 			config.TimeUpdate = false
 		case "topdown":
 			config.SortMode = TopDown
-		case "complete":
-			config.Shell = "sh"
-			complete()
-			os.Exit(0)
-		case "fcomplete":
-			config.Shell = fishShell
-			complete()
-			os.Exit(0)
-		case "help":
-			usage()
-			os.Exit(0)
-		case "version":
-			fmt.Printf("yay v%s\n", version)
-			os.Exit(0)
+//		case "complete":
+//			config.Shell = "sh"
+//			complete()
+//			os.Exit(0)
+//		case "fcomplete":
+//			config.Shell = fishShell
+//			complete()
+//			os.Exit(0)
+//		case "help":
+//			usage()
+//			os.Exit(0)
+//		case "version":
+//			fmt.Printf("yay v%s\n", version)
+//			os.Exit(0)
 		case "noconfirm":
 			config.NoConfirm = true
 		default:
@@ -291,7 +296,40 @@ func handleConfig(option string) (changedConfig bool, err error) {
 }
 
 func handleVersion() {
-	usage()
+	fmt.Printf("yay v%s\n", version)
+}
+
+func handleYay(parser *argParser) (err error) {
+	//_, options, targets := parser.formatArgs()
+	if parser.existsArg("h") || parser.existsArg("help") {
+		usage()
+	} else if parser.existsArg("printconfig") {
+		fmt.Printf("%#v", config)
+	} else if parser.existsArg("gendb") {
+		err = createDevelDB()
+		if err != nil {
+			return
+		}
+		err = saveVCSInfo()
+		if err != nil {
+			return
+		}
+	} else if parser.existsArg("complete") {
+		config.Shell = "sh"
+		complete()
+	} else if parser.existsArg("fcomplete") {
+		config.Shell = "fish"
+		complete()
+	} else if parser.existsArg("stats") {
+		err = localStatistics()
+	} else if parser.existsArg("cleandeps") {
+		_,_,targets := parser.formatArgs()
+		err = cleanDependencies(targets)
+	} else {
+		err = handleYogurt(parser)
+	}
+	
+	return
 }
 
 func handleYogurt(parser *argParser) (err error) {

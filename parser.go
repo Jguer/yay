@@ -134,7 +134,32 @@ func isOp(op string) bool {
 		return true
 	case "U", "upgrade":
 		return true
+        
+    //yay specific
 	case "Y", "yay":
+		return true
+	case "G", "getpkgbuild":
+		return true
+	default:
+		return false
+	}
+}
+
+func isYayParam(arg string) bool {
+	switch arg {
+	case "afterclean":
+		return true
+	case "noafterclean":
+		return true
+	case "devel":
+		return true
+	case "nodevel":
+		return true
+	case "timeupdate":
+		return true
+	case "notimeupdate":
+		return true
+	case "topdown":
 		return true
 	default:
 		return false
