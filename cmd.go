@@ -225,21 +225,21 @@ func handleCmd(parser *argParser) (changedConfig bool, err error) {
 
 	switch parser.op {
 	case "V", "version":
-		handleVersion()
+		handleVersion(parser)
 	case "D", "database":
-		//passToPacman()
+		passToPacman(parser)
 	case "F", "files":
-		//passToPacman()
+		passToPacman(parser)
 	case "Q", "query":
-		//passToPacman()
+		passToPacman(parser)
 	case "R", "remove":
-		//
+		passToPacman(parser)
 	case "S", "sync":
 		err = handleSync(parser)
 	case "T", "deptest":
-		//passToPacman()
+		passToPacman(parser)
 	case "U", "upgrade":
-		//passToPacman()
+		passToPacman(parser)
 	case "Y", "--yay":
 		err = handleYay(parser)
 	default:
@@ -310,7 +310,7 @@ func handleConfig(option string) (changedConfig bool, err error) {
 	return
 }
 
-func handleVersion() {
+func handleVersion(parser *argParser) {
 	fmt.Printf("yay v%s\n", version)
 }
 
@@ -338,8 +338,9 @@ func handleYay(parser *argParser) (err error) {
 	} else if parser.existsArg("stats") {
 		err = localStatistics()
 	} else if parser.existsArg("cleandeps") {
-		_,_,targets := parser.formatArgs()
-		err = cleanDependencies(targets)
+		//TODO
+		//_,_,targets := parser.formatArgs()
+		//err = cleanDependencies(targets)
 	} else {
 		err = handleYogurt(parser)
 	}
@@ -348,41 +349,37 @@ func handleYay(parser *argParser) (err error) {
 }
 
 func handleYogurt(parser *argParser) (err error) {
-	_, options, targets := parser.formatArgs()
-	
-	config.SearchMode = NumberMenu
-	err = numberMenu(targets, options)
-	
+//	TODO
+//	_, options, targets := parser.formatArgs()
+//	
+//	config.SearchMode = NumberMenu
+//	err = numberMenu(targets, options)
+//	
 	return
 }
 
 func handleSync(parser *argParser) (err error) {
-	op, options, targets := parser.formatArgs()
-	
-	fmt.Println("op", op)
-	fmt.Println("options", options)
-	fmt.Println("targets", targets)
-	
-	if parser.existsArg("y") {
-		err = passToPacman("-Sy", nil, nil)
-		if err != nil {
-			return
-		}
-	}
-	
-	if parser.existsArg("s") {
-		if parser.existsArg("i") {
-			config.SearchMode = Detailed
-		} else {
-			config.SortMode = Minimal
-		}
-		
-		err = syncSearch(targets)
-	}
-	
-	if len(targets) > 0 {
-		err = install(targets, options)
-	}
+//TODO
+//	if parser.existsArg("y") || parser.existsArg("refresh") {
+//		err = passToPacman(parser)
+//		if err != nil {
+//			return
+//		}
+//	}
+//	
+//	if parser.existsArg("s") {
+//		if parser.existsArg("i") {
+//			config.SearchMode = Detailed
+//		} else {
+//			config.SortMode = Minimal
+//		}
+//		
+//		err = syncSearch(targets)
+//	}
+//	
+//	if len(targets) > 0 {
+//		err = install(targets, options)
+//	}
 	
 	return
 }
@@ -451,7 +448,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(repoI) != 0 {
-		err = passToPacman("-S", repoI, flags)
+		//TODO
+		//err = passToPacman("-S", repoI, flags)
 	}
 
 	if len(aurI) != 0 {

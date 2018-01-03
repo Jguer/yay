@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"strings"
 
 	alpm "github.com/jguer/go-alpm"
 )
@@ -198,25 +197,18 @@ func continueTask(s string, def string) (cont bool) {
 }
 
 // PassToPacman outsorces execution to pacman binary without modifications.
-func passToPacman(op string, pkgs []string, flags []string) error {
+func passToPacman(parser *argParser) error {
 	var cmd *exec.Cmd
-	var args []string
-
-	args = append(args, op)
-	if len(pkgs) != 0 {
-		args = append(args, pkgs...)
+	args := make([]string, 0)
+	
+	if parser.needRoot() {
+		args = append(args, "sudo")
 	}
-
-	if len(flags) != 0 {
-		args = append(args, flags...)
-	}
-
-	if strings.Contains(op, "-Q") || op == "Si" {
-		cmd = exec.Command(config.PacmanBin, args...)
-	} else {
-		args = append([]string{config.PacmanBin}, args...)
-		cmd = exec.Command("sudo", args...)
-	}
+	
+	args = append(args, "pacman")
+	args = append(args, parser.formatArgs()...)
+	
+	cmd = exec.Command(args[0], args[1:]...)
 
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()

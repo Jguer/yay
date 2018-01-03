@@ -28,6 +28,52 @@ func (praser *argParser) delArg(option string) {
 	delete(praser.doubles, option)
 }
 
+func (parser *argParser) needRoot() bool {
+	if parser.existsArg("h") || parser.existsArg("help") {
+		return false
+	}
+	
+	if parser.existsArg("p") || parser.existsArg("print") {
+			return false
+	}
+	
+	switch parser.op {
+	case "V", "version":
+		return false
+	case "D", "database":
+		return true
+	case "F", "files":
+		if parser.existsArg("y") || parser.existsArg("refresh") {
+			return true
+		}
+		return false
+	case "Q", "query":
+		return false
+	case "R", "remove":
+		return true
+	case "S", "sync":
+		if parser.existsArg("s") || parser.existsArg("search") {
+			return false
+		}
+		if parser.existsArg("l") || parser.existsArg("list") {
+			return false
+		}
+		return true
+	case "T", "deptest":
+		return false
+	case "U", "upgrade":
+		return true
+        
+    //yay specific
+	case "Y", "yay":
+		return false
+	case "G", "getpkgbuild":
+		return false
+	default:
+		return false
+	}
+}
+
 func (praser *argParser) addOP(op string) (err error) {
 	if praser.op != "" {
 		err = fmt.Errorf("only one operation may be used at a time")
@@ -82,24 +128,25 @@ func (parser *argParser) existsDouble(option string) bool {
 	return ok
 }
 
-func (parser *argParser) formatArgs() (op string, options []string, targets []string) {
-	op = formatArg(parser.op)
+func (parser *argParser) formatArgs() (args []string) {
+	op := formatArg(parser.op)
+	args = append(args, op)
 	
 	for option, arg := range parser.options {
 		option = formatArg(option)
-		options = append(options, option)
+		args = append(args, option)
 		
 		if arg != "" {
-			options = append(options, arg)
+			args = append(args, arg)
 		}
 		
 		if parser.existsDouble(option) {
-			options = append(options, option)
+			args = append(args, option)
 		}
 	}
 	
 	for target := range parser.targets {
-		targets = append(targets, target)
+		args = append(args, target)
 	}
 	
 	return

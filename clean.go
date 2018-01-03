@@ -54,6 +54,7 @@ func cleanRemove(pkgName []string) (err error) {
 		return nil
 	}
 
-	err = passToPacman("-Rsnc", pkgName, []string{"--noconfirm"})
+	//TODO
+	//err = passToPacman("-Rsnc", pkgName, []string{"--noconfirm"})
 	return err
 }

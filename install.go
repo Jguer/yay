@@ -14,10 +14,11 @@ func install(pkgs []string, flags []string) error {
 	aurs, repos, _ := packageSlices(pkgs)
 
 	if len(repos) != 0 {
-		err := passToPacman("-S", repos, flags)
-		if err != nil {
-			fmt.Println("Error installing repo packages.")
-		}
+//TODO
+//		err := passToPacman("-S", repos, flags)
+//		if err != nil {
+//			fmt.Println("Error installing repo packages.")
+//		}
 	}
 
 	if len(aurs) != 0 {
@@ -138,10 +139,11 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	}
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-		errR := passToPacman("-S", repoDeps, depArgs)
-		if errR != nil {
-			return finalmdeps, errR
-		}
+//		TODO
+//		errR := passToPacman("-S", repoDeps, depArgs)
+//		if errR != nil {
+//			return finalmdeps, errR
+//		}
 	}
 
 	// Handle AUR dependencies
