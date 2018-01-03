@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -486,5 +487,24 @@ func complete() error {
 	defer in.Close()
 
 	_, err = io.Copy(os.Stdout, in)
+	return err
+}
+
+// PassToPacman outsorces execution to pacman binary without modifications.
+func passToPacman(parser *argParser) error {
+	var cmd *exec.Cmd
+	args := make([]string, 0)
+
+	if parser.needRoot() {
+		args = append(args, "sudo")
+	}
+
+	args = append(args, "pacman")
+	args = append(args, parser.formatArgs()...)
+
+	cmd = exec.Command(args[0], args[1:]...)
+
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	err := cmd.Run()
 	return err
 }
