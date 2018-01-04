@@ -29,14 +29,16 @@ func (set stringSet) toSlice() []string {
 }
 
 func (set stringSet) removeAny() string {
-	v := set.removeAny()
+	v := set.getAny()
 	delete(set, v)
 	return v
 }
 
+
 type arguments struct {
 	op string
 	options map[string]string
+	globals map[string]string
 	doubles stringSet //tracks args passed twice such as -yy and -dd
 	targets stringSet
 }
@@ -45,14 +47,41 @@ func makeArguments() *arguments {
 	return &arguments {
 		"",
 		make(map[string]string),
+		make(map[string]string),
 		make(stringSet),
 		make(stringSet),
 	}
 }
 
+func (parser *arguments) copy() (cp *arguments) {
+	cp = makeArguments()
+	
+	cp.op = parser.op
+	
+	for k,v := range parser.options {
+		cp.options[k] = v
+	}
+	
+	for k,v := range parser.globals {
+		cp.globals[k] = v
+	}
+	
+	for k,v := range parser.targets {
+		cp.targets[k] = v
+	}
+	
+	for k,v := range parser.doubles {
+		cp.doubles[k] = v
+	}
+	
+	return
+}
+		
+
 func (parser *arguments) delArg(options ...string) {
 	for _, option := range options {
 		delete(parser.options, option)
+		delete(parser.globals, option)
 		delete(parser.doubles, option)
 	}
 }
@@ -81,10 +110,19 @@ func (parser *arguments) needRoot() bool {
 	case "R", "remove":
 		return true
 	case "S", "sync":
+		if parser.existsArg("y", "refresh") {
+			return true
+		}
+		if parser.existsArg("u", "sysupgrade") {
+			return true
+		}
 		if parser.existsArg("s", "search") {
 			return false
 		}
 		if parser.existsArg("l", "list") {
+			return false
+		}
+		if parser.existsArg("i", "info") {
 			return false
 		}
 		return true
@@ -93,7 +131,7 @@ func (parser *arguments) needRoot() bool {
 	case "U", "upgrade":
 		return true
         
-    //yay specific
+	//yay specific
 	case "Y", "yay":
 		return false
 	case "G", "getpkgbuild":
@@ -121,6 +159,8 @@ func (parser *arguments) addParam(option string, arg string) (err error) {
 	
 	if parser.existsArg(option) {
 		parser.doubles[option] = struct{}{}
+	} else if isGlobal(option) {
+		parser.globals[option] = arg
 	} else {
 		parser.options[option] = arg
 	}
@@ -135,7 +175,7 @@ func (parser *arguments) addArg(options ...string) (err error) {
 			return
 		}
 	}
-	
+
 	return
 }
 
@@ -146,12 +186,24 @@ func (parser *arguments) existsArg(options ...string) bool {
 		if exists {
 			return true
 		}
+		
+		_, exists = parser.globals[option]
+		if exists {
+			return true
+		}
 	}
 	return false
 }
 
 func (parser *arguments) getArg(option string) (arg string, double bool, exists bool) {
 	arg, exists = parser.options[option]
+	
+	if exists {
+		_, double = parser.doubles[option]
+		return
+	}
+
+	arg, exists = parser.globals[option]
 	_, double = parser.doubles[option]
 	return
 }
@@ -193,15 +245,32 @@ func (parser *arguments) formatArgs() (args []string) {
 	args = append(args, op)
 	
 	for option, arg := range parser.options {
-		option = formatArg(option)
-		args = append(args, option)
+		formatedOption := formatArg(option)
+		args = append(args, formatedOption)
 		
-		if arg != "" {
+		if hasParam(option) {
 			args = append(args, arg)
 		}
 		
 		if parser.existsDouble(option) {
-			args = append(args, option)
+			args = append(args, formatedOption)
+		}
+	}
+	
+	return
+}
+
+func (parser *arguments) formatGlobals() (args []string) {
+	for option, arg := range parser.globals {
+		formatedOption := formatArg(option)
+		args = append(args, formatedOption)
+		
+		if hasParam(option) {
+			args = append(args, arg)
+		}
+		
+		if parser.existsDouble(option) {
+			args = append(args, formatedOption)
 		}
 	}
 	
@@ -242,6 +311,39 @@ func isOp(op string) bool {
 	case "Y", "yay":
 		return true
 	case "G", "getpkgbuild":
+		return true
+	default:
+		return false
+	}
+}
+
+func isGlobal(op string) bool {
+	switch op {
+	case "b", "dbpath":
+		return true
+	case "r", "root":
+		return true
+	case "v", "verbose":
+		return true
+	case "arch":
+		return true
+	case "cachedir":
+		return true
+	case "color":
+		return true
+	case "config":
+		return true
+	case "debug":
+		return true
+	case "gpgdir":
+		return true
+	case "hookdir":
+		return true
+	case "logfile":
+		return true
+	case "noconfirm":
+		return true
+	case "confirm":
 		return true
 	default:
 		return false
