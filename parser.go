@@ -195,16 +195,23 @@ func (parser *arguments) existsArg(options ...string) bool {
 	return false
 }
 
-func (parser *arguments) getArg(option string) (arg string, double bool, exists bool) {
-	arg, exists = parser.options[option]
-	
-	if exists {
-		_, double = parser.doubles[option]
-		return
-	}
+func (parser *arguments) getArg(options ...string) (arg string, double bool, exists bool) {
+	for _, option := range options {
+		arg, exists = parser.options[option]
 
-	arg, exists = parser.globals[option]
-	_, double = parser.doubles[option]
+		if exists {
+			_, double = parser.doubles[option]
+			return
+		}
+
+		arg, exists = parser.globals[option]
+		
+		if exists {
+			_, double = parser.doubles[option]
+			return
+		}
+	}
+	
 	return
 }
 
@@ -521,6 +528,14 @@ func (parser *arguments)parseCommandLine() (err error) {
 	
 	if parser.op == "" {
 		parser.op = "Y"
+	}
+	
+	if cmdArgs.existsArg("-") {
+		err = cmdArgs.parseStdin();
+
+		if err != nil {
+			return
+		}
 	}
 	
 	return

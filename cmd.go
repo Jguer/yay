@@ -55,10 +55,9 @@ If no operation is provided -Y will be assumed
 `)
 }
 
-func init() {
+func initYay() (err error){
 	var configHome string // configHome handles config directory home
 	var cacheHome string  // cacheHome handles cache home
-	var err error
 
 	if 0 == os.Geteuid() {
 		fmt.Println("Please avoid running yay as root/sudo.")
@@ -96,15 +95,15 @@ func init() {
 	if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
-			fmt.Println("Unable to create config directory:", filepath.Dir(configFile), err)
-			os.Exit(2)
+			err = fmt.Errorf("Unable to create config directory:", filepath.Dir(configFile), err)
+			return
 		}
 		// Save the default config if nothing is found
 		config.saveConfig()
 	} else {
 		cfile, errf := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
 		if errf != nil {
-			fmt.Println("Error reading config:", err)
+			fmt.Println("Error reading config: %s", err)
 		} else {
 			defer cfile.Close()
 			decoder := json.NewDecoder(cfile)
@@ -127,64 +126,109 @@ func init() {
 		decoder := json.NewDecoder(vfile)
 		_ = decoder.Decode(&savedInfo)
 	}
+	
+	return
+}
 
+func initAlpm() (err error){
 	/////////////////
 	// alpm config //
 	/////////////////
+	
+	var value string
+	var exists bool
+	//var double bool
+	
+	value, _, exists = cmdArgs.getArg("config")
+	if exists {
+		config.PacmanConf = value
+	}
+	
 	alpmConf, err = readAlpmConfig(config.PacmanConf)
 	if err != nil {
-		fmt.Println("Unable to read Pacman conf", err)
-		os.Exit(1)
+		err = fmt.Errorf("Unable to read Pacman conf: %s", err)
+		return
+	}
+	
+	value, _, exists = cmdArgs.getArg("dbpath", "b")
+	if exists {
+		alpmConf.DBPath = value
+	}
+	
+	value, _, exists = cmdArgs.getArg("root", "r")
+	if exists {
+		alpmConf.RootDir = value
+	}
+	
+	value, _, exists = cmdArgs.getArg("arch")
+	if exists {
+		alpmConf.Architecture = value
+	}
+	
+	//TODO
+	//current system does not allow duplicate arguments
+	//but pacman allows multiple cachdirs to be passed
+	//for now only hanle one cache dir
+	value, _, exists = cmdArgs.getArg("cachdir")
+	if exists {
+		alpmConf.CacheDir = []string{value}
+	}
+	
+	value, _, exists = cmdArgs.getArg("gpgdir")
+	if exists {
+		alpmConf.GPGDir = value
 	}
 
 	alpmHandle, err = alpmConf.CreateHandle()
 	if err != nil {
-		fmt.Println("Unable to CreateHandle", err)
-		os.Exit(1)
+		err = fmt.Errorf("Unable to CreateHandle", err)
+		return
 	}
+	
+	return
 }
 
 func main() {
-	status := run()
-	
-	err := alpmHandle.Release()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-	}
-	
-	os.Exit(status)
-}
-
-func run() (status int) {
+	var status int = 0
 	var err error
 	var changedConfig bool
 	
 	err = cmdArgs.parseCommandLine();
-	
 	if err != nil {
 		fmt.Println(err)
 		status = 1
-		return
+		goto cleanup
 	}
 	
-	if cmdArgs.existsArg("-") {
-		err = cmdArgs.parseStdin();
+	err  = initYay()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+	}
 
-		if err != nil {
-			fmt.Println(err)
-			status = 1
-			return
-		}
+	err = initAlpm()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
 	}
 	
 	changedConfig, err = handleCmd()
-	
 	if err != nil {
 		fmt.Println(err)
 		status = 1
-		//try continue onward
+		goto cleanup
 	}
+	
+	//ive used a goto here
+	//i think its the best way to do this sort of thing
+cleanup:
+	//cleanup
+	//from here on out dont exit if an error occurs
+	//if we fail to save the configuration
+	//atleast continue on and try clean up other parts
+	
 	
 	if updated {
 		err = saveVCSInfo()
@@ -205,10 +249,16 @@ func run() (status int) {
 
 	}
 	
-	return
+	if alpmHandle != nil {
+		err = alpmHandle.Release()
+		if err != nil {
+			fmt.Println(err)
+			status = 1
+		}
+	}
 	
+	os.Exit(status)
 }
-
 
 func handleCmd() (changedConfig bool, err error) {
 	changedConfig = false
@@ -534,10 +584,6 @@ func passToPacman(args *arguments) error {
 	argArr = append(argArr, args.formatArgs()...)
 	argArr = append(argArr, args.formatTargets()...)
 
-	
-	fmt.Println(cmdArgs)
-	fmt.Println(args)
-	fmt.Println(argArr)
 	cmd = exec.Command(argArr[0], argArr[1:]...)
 
 
