@@ -158,7 +158,7 @@ func run() (status int) {
 	var err error
 	var changedConfig bool
 	
-	parser := makeArgParser();
+	parser := makeArguments();
 	err = parser.parseCommandLine();
 	
 	if err != nil {
@@ -209,7 +209,7 @@ func run() (status int) {
 }
 
 
-func handleCmd(parser *argParser) (changedConfig bool, err error) {
+func handleCmd(parser *arguments) (changedConfig bool, err error) {
 	var _changedConfig bool
 	
 	for option, _ := range parser.options {
@@ -234,7 +234,7 @@ func handleCmd(parser *argParser) (changedConfig bool, err error) {
 	case "Q", "query":
 		passToPacman(parser)
 	case "R", "remove":
-		passToPacman(parser)
+		handleRemove(parser)
 	case "S", "sync":
 		err = handleSync(parser)
 	case "T", "deptest":
@@ -313,13 +313,13 @@ func handleConfig(option string) (changedConfig bool, err error) {
 	return
 }
 
-func handleVersion(parser *argParser) {
+func handleVersion(parser *arguments) {
 	fmt.Printf("yay v%s\n", version)
 }
 
-func handleYay(parser *argParser) (err error) {
+func handleYay(parser *arguments) (err error) {
 	//_, options, targets := parser.formatArgs()
-	if parser.existsArg("h") || parser.existsArg("help") {
+	if parser.existsArg("h", "help") {
 		usage()
 	} else if parser.existsArg("printconfig") {
 		fmt.Printf("%#v", config)
@@ -341,9 +341,7 @@ func handleYay(parser *argParser) (err error) {
 	} else if parser.existsArg("stats") {
 		err = localStatistics()
 	} else if parser.existsArg("cleandeps") {
-		//TODO
-		//_,_,targets := parser.formatArgs()
-		//err = cleanDependencies(targets)
+		err = cleanDependencies()
 	} else {
 		err = handleYogurt(parser)
 	}
@@ -351,7 +349,7 @@ func handleYay(parser *argParser) (err error) {
 	return
 }
 
-func handleGetpkgbuild(parser *argParser) (err error) {
+func handleGetpkgbuild(parser *arguments) (err error) {
 	for pkg := range parser.targets {
 			err = getPkgbuild(pkg)
 			if err != nil {
@@ -365,45 +363,59 @@ func handleGetpkgbuild(parser *argParser) (err error) {
 	return
 }
 
-func handleYogurt(parser *argParser) (err error) {
-//	TODO
-//	_, options, targets := parser.formatArgs()
-//	
-//	config.SearchMode = NumberMenu
-//	err = numberMenu(targets, options)
-//	
-	return
-}
-
-func handleSync(parser *argParser) (err error) {
-//TODO
-//	if parser.existsArg("y") || parser.existsArg("refresh") {
-//		err = passToPacman(parser)
-//		if err != nil {
-//			return
-//		}
-//	}
-//	
-//	if parser.existsArg("s") {
-//		if parser.existsArg("i") {
-//			config.SearchMode = Detailed
-//		} else {
-//			config.SortMode = Minimal
-//		}
-//		
-//		err = syncSearch(targets)
-//	}
-//	
-//	if len(targets) > 0 {
-//		err = install(targets, options)
-//	}
+func handleYogurt(parser *arguments) (err error) {
+	options := parser.formatArgs()
+	targets := parser.formatTargets()
+	
+	config.SearchMode = NumberMenu
+	err = numberMenu(targets, options)
 	
 	return
 }
 
+func handleSync(parser *arguments) (err error) {
+	targets := parser.formatTargets()
+	options := parser.formatArgs()
+	
+	if parser.existsArg("y", "refresh") {
+		arguments := makeArguments()
+		arguments.addArg("S", "y")
+		err = passToPacman(arguments)
+		if err != nil {
+			return
+		}
+	}
+	
+	if parser.existsArg("s", "search") {
+		if parser.existsArg("q", "quiet") {
+			config.SearchMode = Minimal
+		} else {
+			config.SearchMode = Detailed
+		}
+		
+		err = syncSearch(targets)
+	} else if parser.existsArg("c", "clean") {
+		err = passToPacman(parser)
+	} else if parser.existsArg("u", "sysupgrade") {
+		err = upgradePkgs(make([]string,0))
+	} else if parser.existsArg("i", "info") {
+		err = syncInfo(targets, options)
+	} else if len(parser.targets) > 0 {
+		err = install(parser)
+	}
+	
+	return
+}
+
+func handleRemove(parser *arguments) (err error){
+	removeVCSPackage(parser.formatTargets())
+	err = passToPacman(parser)
+	return
+}
 
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
+//func numberMenu(parser *arguments) (err error) {
 	var num int
 
 	aq, err := narrowSearch(pkgS, true)
@@ -411,6 +423,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		fmt.Println("Error during AUR search:", err)
 	}
 	numaq := len(aq)
+	
 	pq, numpq, err := queryRepo(pkgS)
 	if err != nil {
 		return
@@ -465,12 +478,14 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(repoI) != 0 {
-		//TODO
-		//err = passToPacman("-S", repoI, flags)
+		arguments := makeArguments()
+		arguments.addArg("S")
+		arguments.addTarget(repoI...)
+		err = passToPacman(arguments)
 	}
 
 	if len(aurI) != 0 {
-		err = aurInstall(aurI, flags)
+		err = aurInstall(aurI, make([]string,0))
 	}
 
 	return err
@@ -507,7 +522,7 @@ func complete() error {
 }
 
 // PassToPacman outsorces execution to pacman binary without modifications.
-func passToPacman(parser *argParser) error {
+func passToPacman(parser *arguments) error {
 	var cmd *exec.Cmd
 	args := make([]string, 0)
 
@@ -517,8 +532,10 @@ func passToPacman(parser *argParser) error {
 
 	args = append(args, "pacman")
 	args = append(args, parser.formatArgs()...)
+	args = append(args, parser.formatTargets()...)
 
 	cmd = exec.Command(args[0], args[1:]...)
+
 
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()

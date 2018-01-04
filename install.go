@@ -10,19 +10,23 @@ import (
 )
 
 // Install handles package installs
-func install(pkgs []string, flags []string) error {
-	aurs, repos, _ := packageSlices(pkgs)
+func install(parser *arguments) error {
+	aurs, repos, _ := packageSlices(parser.targets.toSlice())
 
+	arguments := makeArguments()
+	arguments.op = parser.op
+	arguments.options = arguments.options
+	arguments.addTarget(repos...)
+	
 	if len(repos) != 0 {
-//TODO
-//		err := passToPacman("-S", repos, flags)
-//		if err != nil {
-//			fmt.Println("Error installing repo packages.")
-//		}
+		err := passToPacman(arguments)
+		if err != nil {
+			fmt.Println("Error installing repo packages.")
+		}
 	}
 
 	if len(aurs) != 0 {
-		err := aurInstall(aurs, flags)
+		err := aurInstall(aurs, make([]string,0))
 		if err != nil {
 			fmt.Println("Error installing aur packages.")
 		}
@@ -131,19 +135,19 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	var depArgs []string
+	arguments := makeArguments()
+	arguments.addArg("S", "asdeps")
+	depArgs := arguments.formatArgs()
+	
 	if config.NoConfirm {
-		depArgs = []string{"--asdeps", "--noconfirm"}
-	} else {
-		depArgs = []string{"--asdeps"}
+		arguments.addArg("noconfirm")
 	}
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-//		TODO
-//		errR := passToPacman("-S", repoDeps, depArgs)
-//		if errR != nil {
-//			return finalmdeps, errR
-//		}
+		errR := passToPacman(arguments)
+		if errR != nil {
+			return finalmdeps, errR
+		}
 	}
 
 	// Handle AUR dependencies

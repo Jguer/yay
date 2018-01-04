@@ -332,11 +332,16 @@ func upgradePkgs(flags []string) error {
 			}
 			repoNames = append(repoNames, k.Name)
 		}
-//		TODO
-//		err := passToPacman("-S", repoNames, append(flags, "--noconfirm"))
-//		if err != nil {
-//		fmt.Println("Error upgrading repo packages.")
-//		}
+		
+		arguments := makeArguments()
+		arguments.addArg("-S --noconfirm")
+		arguments.addArg(flags...)
+		arguments.addTarget(repoNames...)
+		
+		err := passToPacman(arguments)
+		if err != nil {
+			fmt.Println("Error upgrading repo packages.")
+		}
 	}
 
 	if len(aurUp) != 0 {
