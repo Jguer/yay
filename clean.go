@@ -55,7 +55,7 @@ func cleanRemove(pkgNames []string) (err error) {
 	}
 	
 	arguments := makeArguments()
-	arguments.addArg("R", "s", "n", "s", "noconfirm")
+	arguments.addArg("R", "noconfirm")
 	arguments.addTarget(pkgNames...)
 
 	err = passToPacman(arguments)

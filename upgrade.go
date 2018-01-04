@@ -334,7 +334,7 @@ func upgradePkgs(flags []string) error {
 		}
 		
 		arguments := makeArguments()
-		arguments.addArg("-S --noconfirm")
+		arguments.addArg("S", "noconfirm")
 		arguments.addArg(flags...)
 		arguments.addTarget(repoNames...)
 		

@@ -13,9 +13,10 @@ import (
 func install(parser *arguments) error {
 	aurs, repos, _ := packageSlices(parser.targets.toSlice())
 
-	arguments := makeArguments()
-	arguments.op = parser.op
-	arguments.options = arguments.options
+	arguments := parser.copy()
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("y", "refresh")
+	arguments.targets = make(stringSet)
 	arguments.addTarget(repos...)
 	
 	if len(repos) != 0 {
@@ -135,13 +136,20 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	arguments := makeArguments()
-	arguments.addArg("S", "asdeps")
-	depArgs := arguments.formatArgs()
+	arguments := cmdArgs.copy()
+	arguments.addArg("asdeps")
+	arguments.delArg("asexplicit", "ase", "asex")
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("y", "refresh")
+	arguments.targets = make(stringSet)
 	
+	var depArgs []string
 	if config.NoConfirm {
-		arguments.addArg("noconfirm")
+		depArgs = []string{"--asdeps", "--noconfirm"}
+	} else {
+		depArgs = []string{"--asdeps"}
 	}
+	
 	// Repo dependencies
 	if len(repoDeps) != 0 {
 		errR := passToPacman(arguments)
