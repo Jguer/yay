@@ -162,18 +162,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	args := []string{"-sri"}
-	args = append(args, flags...)
-	makepkgcmd := exec.Command(config.MakepkgBin, args...)
-	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	makepkgcmd.Dir = dir
-	err = makepkgcmd.Run()
-	if err == nil {
-		_ = saveVCSInfo()
-		if config.CleanAfter {
-			fmt.Println("\x1b[1;32m==> CleanAfter enabled. Deleting source folder.\x1b[0m")
-			os.RemoveAll(dir)
-		}
-	}
+	flags = append(flags, "-sri")
+	err = passToMakepkg(dir, flags...)
 	return
 }

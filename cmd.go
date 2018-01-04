@@ -521,7 +521,7 @@ func complete() error {
 	return err
 }
 
-// PassToPacman outsorces execution to pacman binary without modifications.
+// passToPacman outsorces execution to pacman binary without modifications.
 func passToPacman(parser *arguments) error {
 	var cmd *exec.Cmd
 	args := make([]string, 0)
@@ -540,4 +540,20 @@ func passToPacman(parser *arguments) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
 	return err
+}
+
+// passToMakepkg outsorces execution to makepkg binary without modifications.
+func passToMakepkg(dir string, args ...string) (err error) {
+	cmd := exec.Command(config.MakepkgBin, args...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	cmd.Dir = dir
+	err = cmd.Run()
+	if err == nil {
+		_ = saveVCSInfo()
+		if config.CleanAfter {
+			fmt.Println("\x1b[1;32m==> CleanAfter enabled. Deleting source folder.\x1b[0m")
+			os.RemoveAll(dir)
+		}
+	}
+	return
 }
