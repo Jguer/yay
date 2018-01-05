@@ -389,7 +389,7 @@ func handleYay() (err error) {
 		err = localStatistics()
 	} else if cmdArgs.existsArg("cleandeps") {
 		err = cleanDependencies()
-	} else {
+	} else if len(cmdArgs.targets) > 0 {
 		err = handleYogurt()
 	}
 	
@@ -533,7 +533,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(aurI) != 0 {
-		err = aurInstall(aurI, make([]string,0))
+		err = aurInstall(aurI, nil)
 	}
 
 	return err

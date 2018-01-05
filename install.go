@@ -18,7 +18,7 @@ func install(parser *arguments) error {
 	arguments.delArg("y", "refresh")
 	arguments.targets = make(stringSet)
 	arguments.addTarget(repos...)
-	
+
 	if len(repos) != 0 {
 		err := passToPacman(arguments)
 		if err != nil {
@@ -27,7 +27,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(aurs) != 0 {
-		err := aurInstall(aurs, make([]string,0))
+		err := aurInstall(aurs, []string{"-S"})
 		if err != nil {
 			fmt.Println("Error installing aur packages.")
 		}
@@ -136,18 +136,15 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	arguments := cmdArgs.copy()
-	arguments.addArg("asdeps")
-	arguments.delArg("asexplicit", "ase", "asex")
-	arguments.delArg("u", "sysupgrade")
-	arguments.delArg("y", "refresh")
-	arguments.targets = make(stringSet)
-	
+	arguments := makeArguments()
+	arguments.addArg("S", "asdeps", "noconfirm")
+	arguments.addTarget(repoDeps...)
+
 	var depArgs []string
 	if config.NoConfirm {
-		depArgs = []string{"--asdeps", "--noconfirm"}
+		depArgs = []string{"asdeps", "noconfirm"}
 	} else {
-		depArgs = []string{"--asdeps"}
+		depArgs = []string{"asdeps"}
 	}
 	
 	// Repo dependencies
