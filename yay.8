@@ -1,61 +1,60 @@
 '\" t
-.TH "YAY" "8" "2017-01-05" "Yay v2\&.219" "Yay Manual"
+.TH "YAY" "8" "04/12/2017" "yay" "yay Manual"
 .nh
 .ad l
 .SH "NAME"
-yay \- AUR Helper written in go
+yay \- AUR Helper written in go.
 .SH "SYNOPSIS"
 .sp
-\fIyay\fR <operation> [options] [targets]
-.sp
-\fIyay\fR <search pattern>
+\fIyay\fR <operation> [options] [packages]
 .SH "DESCRIPTION"
 .sp
-Yay is a Pacman wrapper with AUR support\&. It passes options to Makepkg and Pacman after resolving packages to install/upgrade\&.
-.sp
-This manpage only covers options unique to Yay\&. For other options see \fBpacman(8)\fR\&.
-.SH "YAY OPERATIONS"
+yay is a pacman wrapper with AUR support. It passes options to makepkg and pacman after resolving packages to install/upgrade.
+.SH "OPERATIONS"
 .PP
-\fB\-Y, --yay\fR
+\fB\-Cd\fR
 .RS 4
-Perform yay specific operations\&. This is the default if no other operation is selected\&.
+Remove uneeded dependencies\&.
 .RE
 .PP
-\fB\-G, --getpkgbuild\fR
+\fB\-G\fR
 .RS 4
-Downloads PKGBUILD from ABS or AUR\&.
+Downloads PKGBUILD from ABS or AUR.
 .RE
 .PP
-If no operation is selected -Y will be assumed\&.
-.SH "EXTENDED PACMAN OPERATIONS"
-.PP
-\fB\-S, -Si, -Ss, -Su\fR
+\fB\-Qstats\fR
 .RS 4
-These operations are extended to support the AUR as well as repo packages\&.
+Displays information about installed packages and system health. If there are orphaned or out-of-date packages, warnings will be displayed\&.
 .RE
 .PP
-\fB\-R\fR
+\fB\-Ss\fR
 .RS 4
-Yay will also remove cached data about devel packages\&.
-.SH "YAY OPTIONS (APPLY TO -Y AND --YAY)"
+Search for package in repositories and AUR\&.
+.RE
+.PP
+\fB\-Si\fR
+.RS 4
+Show information for a package in the repositories or AUR\&.
+.RE
+.PP
+\fB\-Syu\fR
+.RS 4
+Upgrade packages from the repositories and the AUR\&.
+.RE
+.PP
+\fB\-h, \-\-help\fR
+.RS 4
+Show yay usage\&.
+.RE
 .PP
 \fB<NO OPERATION>\fR
 .RS 4
-Displays List of packages matching search terms and prompts the user on which packages to install(yogurt mode)\&.
+Displays menu for package install selection (yogurt mode)\&.
 .RE
 .PP
-\fB\--stats\fR
-.RS 4
-Displays information about installed packages and system health\&. If there are orphaned or out-of-date packages, warnings will be displayed\&.
-.RE
+All other operations will be passed to pacman\&.
 .PP
-\fB\-\-printconfig\fR
-.RS 4
-Prints current yay configuration\&.
-.RE
-.SH "PERMANENT CONFIGURATION SETTINGS"
-.PP
-These options will be saved to disk and reapplied next time Yay is ran\&.
+.SH "OPTIONS"
 .PP
 \fB\-\-topdown\fR
 .RS 4
@@ -96,52 +95,115 @@ Check package's modification date and version\&.
 .RS 4
 Check only package version change\&.
 .RE
+.PP
+\fB\-\-printconfig\fR
+.RS 4
+Prints current yay configuration\&.
+.RE
+.PP
+\fB\-\-noconfirm\fR
+.RS 4
+No user intervention needed unless a package conflict happens. This option will be passed to pacman and makepkg\&.
+.RE
+.PP
+All other options will be passed to pacman\&.
+.PP
+
 .SH "EXAMPLES"
-.PP
-yay \fIfoo\fR
+.sp
 .RS 4
-Search and install from the repos and the \fBAUR\fR\ using yogurt mode\&.
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Sync and update packages from repository and AUR:
+yay \-Syu
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Check installed packages health:
+yay \-Qstats
 .RE
 .PP
-yay -Syu
+.sp
+For a package called \fIname\fR:
+.sp
 .RS 4
-Update package list and upgrade all currently installed repo and \fBAUR\fR\&.
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Search:
+yay \-Ss \fIname\fR
 .RE
-.PP
-yay -S \fIfoo\fR
+.sp
 .RS 4
-Installs package \fIfoo\fR from the repos or the \fBAUR\fR\&.
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Install:
+yay \-S \fIname\fR
 .RE
-.PP
-yay -Ss \fIfoo\fR
+.sp
 .RS 4
-Searches for package \fIfoo\fR on the repos or the \fBAUR\fR\&.
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Install without confirmations:
+yay \-S \-\-noconfirm \fIname\fR
 .RE
-.PP
-yay -Si \fIfoo\fR
+.sp
 .RS 4
-Gets information about package \fIfoo\fR from the repos or the \fBAUR\fR\&.
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Get information about a package:
+yay \-Si \fIname\fR
 .RE
-.PP
-yay -S \fIfoo\fR
+.sp
 .RS 4
-Installs package \fIfoo\fR from the repos or the \fBAUR\fR\&.
-.RE
-.PP
-yay --stats
-.RS 4
-Shows statistics for installed packages and system health\&.
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Search and install using yogurt mode:
+yay \fIname\fR
 .RE
 .SH "SEE ALSO"
 .sp
 \fBmakepkg\fR(8)
+.sp
 \fBpacman\fR(8)
-\fBpacman\&.conf\fR(5)
-.PP
-See the arch wiki at https://wiki\&.archlinux\&.org/index\&.php/Arch_User_Repository for more info on the \fBAUR\fR\&.
-.SH "BUGS"
-.PP
-Please report bugs to our GitHub page https://github\&.com/Jguer/yay
+.sp
+\fBpacman.conf\fR(5)
 .SH "AUTHORS"
 .sp
 Jguer <joaogg3@gmail\&.com>
