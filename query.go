@@ -141,11 +141,11 @@ func syncSearch(pkgS []string) (err error) {
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printSearch(0)
+		aq.printSearch(1)
 		pq.printSearch()
 	} else {
 		pq.printSearch()
-		aq.printSearch(0)
+		aq.printSearch(1)
 	}
 
 	return nil
