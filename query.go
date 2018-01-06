@@ -158,6 +158,15 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 		return
 	}
 
+	//repo always goes first
+	if len(repoS) != 0 {
+		err = passToPacman("-Si", repoS, flags)
+
+		if err != nil {
+			return
+		}
+	}
+
 	if len(aurS) != 0 {
 		q, err := rpc.Info(aurS)
 		if err != nil {
@@ -166,10 +175,6 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 		for _, aurP := range q {
 			PrintInfo(&aurP)
 		}
-	}
-
-	if len(repoS) != 0 {
-		err = passToPacman("-Si", repoS, flags)
 	}
 
 	return

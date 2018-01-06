@@ -211,7 +211,7 @@ func passToPacman(op string, pkgs []string, flags []string) error {
 		args = append(args, flags...)
 	}
 
-	if strings.Contains(op, "-Q") || op == "Si" {
+	if strings.Contains(op, "-Q") || op == "-Si" {
 		cmd = exec.Command(config.PacmanBin, args...)
 	} else {
 		args = append([]string{config.PacmanBin}, args...)
