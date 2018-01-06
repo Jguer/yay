@@ -190,6 +190,8 @@ func parser() (op string, options []string, packages []string, changedConfig boo
 				config.TimeUpdate = false
 			case "--topdown":
 				config.SortMode = TopDown
+			case "--bottomup":
+				config.SortMode = BottomUp
 			case "--complete":
 				config.Shell = "sh"
 				_ = complete()
