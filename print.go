@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	rpc "github.com/mikkeloscar/aur"
 )
@@ -114,34 +115,35 @@ func PrintInfo(a *rpc.Pkg) {
 	} else {
 		fmt.Println("\x1b[1;37mURL             :\x1b[0m", "None")
 	}
-	fmt.Println("\x1b[1;37mLicenses        :\x1b[0m", a.License)
+	fmt.Println("\x1b[1;37mLicenses        :\x1b[0m", strings.Join(a.License, "  "))
 
 	// if len(a.Provides) != 0 {
-	// 	fmt.Println("\x1b[1;37mProvides        :\x1b[0m", a.Provides)
+	// 	fmt.Println("\x1b[1;37mProvides        :\x1b[0m",
+	// 	Strings.join(a.Provides, "  "))
 	// } else {
 	// 	fmt.Println("\x1b[1;37mProvides        :\x1b[0m", "None")
 	// }
 
 	if len(a.Depends) != 0 {
-		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", a.Depends)
+		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", strings.Join(a.Depends, "  "))
 	} else {
 		fmt.Println("\x1b[1;37mDepends On      :\x1b[0m", "None")
 	}
 
 	if len(a.MakeDepends) != 0 {
-		fmt.Println("\x1b[1;37mMake depends On :\x1b[0m", a.MakeDepends)
+		fmt.Println("\x1b[1;37mMake depends On :\x1b[0m", strings.Join(a.MakeDepends, "  "))
 	} else {
 		fmt.Println("\x1b[1;37mMake depends On :\x1b[0m", "None")
 	}
 
 	if len(a.OptDepends) != 0 {
-		fmt.Println("\x1b[1;37mOptional Deps   :\x1b[0m", a.OptDepends)
+		fmt.Println("\x1b[1;37mOptional Deps   :\x1b[0m", strings.Join(a.OptDepends, "  "))
 	} else {
 		fmt.Println("\x1b[1;37mOptional Deps   :\x1b[0m", "None")
 	}
 
 	if len(a.Conflicts) != 0 {
-		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", a.Conflicts)
+		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m",strings.Join(a.Conflicts, "  "))
 	} else {
 		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", "None")
 	}
@@ -151,12 +153,15 @@ func PrintInfo(a *rpc.Pkg) {
 	} else {
 		fmt.Println("\x1b[1;37mMaintainer      :\x1b[0m", "None")
 	}
+
 	fmt.Println("\x1b[1;37mVotes           :\x1b[0m", a.NumVotes)
 	fmt.Println("\x1b[1;37mPopularity      :\x1b[0m", a.Popularity)
 
 	if a.OutOfDate != 0 {
 		fmt.Println("\x1b[1;37mOut-of-date     :\x1b[0m", "Yes")
 	}
+
+	fmt.Println()
 }
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
