@@ -482,11 +482,11 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printSearch(numpq)
+		aq.printSearch(numpq + 1)
 		pq.printSearch()
 	} else {
 		pq.printSearch()
-		aq.printSearch(numpq)
+		aq.printSearch(numpq + 1)
 	}
 
 	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers: ", "Type numbers to install. Separate each number with a space.")
@@ -508,19 +508,19 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		}
 
 		// Install package
-		if num > numaq+numpq-1 || num < 0 {
+		if num > numaq+numpq || num <= 0 {
 			continue
-		} else if num > numpq-1 {
+		} else if num > numpq {
 			if config.SortMode == BottomUp {
-				aurI = append(aurI, aq[numaq+numpq-num-1].Name)
+				aurI = append(aurI, aq[numaq+numpq-num].Name)
 			} else {
-				aurI = append(aurI, aq[num-numpq].Name)
+				aurI = append(aurI, aq[num-numpq-1].Name)
 			}
 		} else {
 			if config.SortMode == BottomUp {
-				repoI = append(repoI, pq[numpq-num-1].Name())
+				repoI = append(repoI, pq[numpq-num].Name())
 			} else {
-				repoI = append(repoI, pq[num].Name())
+				repoI = append(repoI, pq[num-1].Name())
 			}
 		}
 	}
