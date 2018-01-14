@@ -79,11 +79,13 @@ func TestPkginfo(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	pkginfo_tpl.Execute(buf, PrettyPackage{*pkg})
 	t.Logf("%s...", buf.Bytes()[:1024])
+	t.Logf("Should ignore %t", pkg.ShouldIgnore())
 
 	pkg, _ = db.PkgByName("linux")
 	if pkg != nil {
 		buf = bytes.NewBuffer(nil)
 		pkginfo_tpl.Execute(buf, PrettyPackage{*pkg})
 		t.Logf("%s...", buf.Bytes()[:1024])
+		t.Logf("Should ignore %t", pkg.ShouldIgnore())
 	}
 }

@@ -204,6 +204,13 @@ func ParseSRCINFO(path string) (*PKGBUILD, error) {
 	return parsePKGBUILD(string(f))
 }
 
+// ParseSRCINFOContent parses a .SRCINFO formatted byte slice.
+// This is a safe alternative to ParsePKGBUILD given that the .SRCINFO content
+// is available
+func ParseSRCINFOContent(content []byte) (*PKGBUILD, error) {
+	return parsePKGBUILD(string(content))
+}
+
 // parse a PKGBUILD and check that the required fields has a non-empty value
 func parsePKGBUILD(input string) (*PKGBUILD, error) {
 	pkgb, err := parse(input)
@@ -447,6 +454,10 @@ func parseDependency(dep string, deps []*Dependency) ([]*Dependency, error) {
 	var name string
 	var dependency *Dependency
 
+	if dep == "" {
+		return deps, nil
+	}
+
 	if dep[0] == '-' {
 		return nil, fmt.Errorf("invalid dependency name")
 	}
@@ -526,5 +537,5 @@ func isValidPkgnameChar(c uint8) bool {
 
 // check if c is a valid pkgver char
 func isValidPkgverChar(c uint8) bool {
-	return isAlphaNumeric(c) || c == '_' || c == '+' || c == '.'
+	return isAlphaNumeric(c) || c == '_' || c == '+' || c == '.' || c == '~'
 }

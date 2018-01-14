@@ -10,18 +10,24 @@ import (
 )
 
 // Install handles package installs
-func install(pkgs []string, flags []string) error {
-	aurs, repos, _ := packageSlices(pkgs)
+func install(parser *arguments) error {
+	aurs, repos, _ := packageSlices(parser.targets.toSlice())
+
+	arguments := parser.copy()
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("y", "refresh")
+	arguments.targets = make(stringSet)
+	arguments.addTarget(repos...)
 
 	if len(repos) != 0 {
-		err := passToPacman("-S", repos, flags)
+		err := passToPacman(arguments)
 		if err != nil {
 			fmt.Println("Error installing repo packages.")
 		}
 	}
 
 	if len(aurs) != 0 {
-		err := aurInstall(aurs, flags)
+		err := aurInstall(aurs, []string{"-S"})
 		if err != nil {
 			fmt.Println("Error installing aur packages.")
 		}
@@ -130,15 +136,20 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
+	arguments := makeArguments()
+	arguments.addArg("S", "asdeps", "noconfirm")
+	arguments.addTarget(repoDeps...)
+
 	var depArgs []string
 	if config.NoConfirm {
-		depArgs = []string{"--asdeps", "--noconfirm"}
+		depArgs = []string{"asdeps", "noconfirm"}
 	} else {
-		depArgs = []string{"--asdeps"}
+		depArgs = []string{"asdeps"}
 	}
+	
 	// Repo dependencies
 	if len(repoDeps) != 0 {
-		errR := passToPacman("-S", repoDeps, depArgs)
+		errR := passToPacman(arguments)
 		if errR != nil {
 			return finalmdeps, errR
 		}
@@ -156,18 +167,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 		}
 	}
 
-	args := []string{"-sri"}
-	args = append(args, flags...)
-	makepkgcmd := exec.Command(config.MakepkgBin, args...)
-	makepkgcmd.Stdin, makepkgcmd.Stdout, makepkgcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	makepkgcmd.Dir = dir
-	err = makepkgcmd.Run()
-	if err == nil {
-		_ = saveVCSInfo()
-		if config.CleanAfter {
-			fmt.Println("\x1b[1;32m==> CleanAfter enabled. Deleting source folder.\x1b[0m")
-			os.RemoveAll(dir)
-		}
-	}
+	flags = append(flags, "-sri")
+	err = passToMakepkg(dir, flags...)
 	return
 }

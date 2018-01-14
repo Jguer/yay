@@ -22,7 +22,7 @@ var pacmanConfRef = PacmanConfig{
 	XferCommand:  "/usr/bin/wget --passive-ftp -c -O %o %u",
 	Architecture: "auto",
 	CleanMethod:  "KeepInstalled",
-	UseDelta:     "0.7",
+	UseDelta:     0.7,
 	IgnorePkg:    []string{"hello", "world"},
 	IgnoreGroup:  []string{"kde"},
 	NoUpgrade:    nil,
