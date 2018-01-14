@@ -211,7 +211,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 							fmt.Printf("\x1b[33mwarning:\x1b[0m %s ignoring package upgrade (%s => %s)\n", local[i].Name(), local[i].Version(), qtemp[x].Version)
 						} else {
 							packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
-						} 
+						}
 					}
 					continue
 				} else {
@@ -320,12 +320,12 @@ func upgradePkgs(flags []string) error {
 			}
 			repoNames = append(repoNames, k.Name)
 		}
-		
+
 		arguments := makeArguments()
 		arguments.addArg("S", "noconfirm")
 		arguments.addArg(flags...)
 		arguments.addTarget(repoNames...)
-		
+
 		err := passToPacman(arguments)
 		if err != nil {
 			fmt.Println("Error upgrading repo packages.")
