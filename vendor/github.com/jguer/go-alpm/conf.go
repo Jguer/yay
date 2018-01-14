@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -43,6 +44,7 @@ type PacmanConfig struct {
 	RootDir            string
 	DBPath             string
 	CacheDir           []string
+	HookDir            []string
 	GPGDir             string
 	LogFile            string
 	HoldPkg            []string
@@ -57,7 +59,7 @@ type PacmanConfig struct {
 	SigLevel           SigLevel
 	LocalFileSigLevel  SigLevel
 	RemoteFileSigLevel SigLevel
-	UseDelta           string
+	UseDelta           float64
 	Options            PacmanOption
 	Repos              []RepoConfig
 }
@@ -112,14 +114,18 @@ func (rdr *confReader) ParseLine() (tok iniToken, err error) {
 	rdr.Lineno++
 
 	line = bytes.TrimSpace(line)
+
+	comment := bytes.IndexByte(line, '#')
+	if comment >= 0 {
+		line = line[:comment]
+	}
+
 	if len(line) == 0 {
 		tok.Type = tokenComment
 		return
 	}
+
 	switch line[0] {
-	case '#':
-		tok.Type = tokenComment
-		return
 	case '[':
 		closing := bytes.IndexByte(line, ']')
 		if closing < 0 {
@@ -208,6 +214,17 @@ lineloop:
 				rdr = newConfReader(f)
 				rdrStack = append(rdrStack, rdr)
 				continue lineloop
+			case "UseDelta":
+				if len(line.Values) > 0 {
+					deltaRatio, err := strconv.ParseFloat(line.Values[0], 64)
+
+					if err != nil {
+						return conf, err
+					}
+
+					conf.UseDelta = deltaRatio
+				}
+				continue lineloop
 			}
 
 			if currentSection != "options" {
@@ -233,7 +250,7 @@ lineloop:
 					*fieldP = strings.Join(line.Values, " ")
 				case *[]string:
 					//many valued option.
-					*fieldP = append(*fieldP, line.Values...)
+					*fieldP = line.Values
 				}
 			}
 		}
@@ -243,6 +260,17 @@ lineloop:
 func (conf *PacmanConfig) SetDefaults() {
 	conf.RootDir = "/"
 	conf.DBPath = "/var/lib/pacman"
+	conf.DBPath = "/var/lib/pacman/"
+	conf.CacheDir = []string{"/var/cache/pacman/pkg/"}
+	conf.HookDir = []string{"/etc/pacman.d/hooks/"}
+	conf.GPGDir = "/etc/pacman.d/gnupg/"
+	conf.LogFile = "/var/log/pacman.log"
+	conf.UseDelta = 0.7
+	conf.CleanMethod = "KeepInstalled"
+
+	conf.SigLevel = SigPackage | SigPackageOptional | SigDatabase | SigDatabaseOptional
+	conf.LocalFileSigLevel = SigUseDefault
+	conf.RemoteFileSigLevel = SigUseDefault
 }
 
 func getArch() (string, error) {
@@ -272,6 +300,7 @@ func (conf *PacmanConfig) CreateHandle() (*Handle, error) {
 			return nil, fmt.Errorf("architecture is 'auto' but couldn't uname()")
 		}
 	}
+
 	for _, repoconf := range conf.Repos {
 		// TODO: set SigLevel
 		db, err := h.RegisterSyncDb(repoconf.Name, 0)
@@ -284,5 +313,85 @@ func (conf *PacmanConfig) CreateHandle() (*Handle, error) {
 			db.SetServers(repoconf.Servers)
 		}
 	}
+
+	err = h.SetCacheDirs(conf.CacheDir...)
+	if err != nil {
+		return nil, err
+	}
+		
+	// add hook directories 1-by-1 to avoid overwriting the system directory
+	for _,dir := range conf.HookDir {
+		err = h.AddHookDir(dir)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = h.SetGPGDir(conf.GPGDir)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetLogFile(conf.LogFile)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetIgnorePkgs(conf.IgnorePkg...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetIgnoreGroups(conf.IgnoreGroup...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetArch(conf.Architecture)
+	if err != nil {
+		return nil, err
+	}
+	
+	h.SetNoUpgrades(conf.NoUpgrade...)
+	if err != nil {
+		return nil, err
+	}
+
+	h.SetNoExtracts(conf.NoExtract...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetDefaultSigLevel(conf.SigLevel)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetLocalFileSigLevel(conf.LocalFileSigLevel)
+	if err != nil {
+		return nil, err
+	}
+
+
+	err = h.SetRemoteFileSigLevel(conf.RemoteFileSigLevel)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetDeltaRatio(conf.UseDelta)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetUseSyslog(conf.Options & ConfUseSyslog > 0)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.SetCheckSpace(conf.Options & ConfCheckSpace > 0)
+	if err != nil {
+		return nil, err
+	}
+
 	return h, nil
 }
