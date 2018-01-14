@@ -279,7 +279,7 @@ func upgradePkgs(flags []string) error {
 	if err != nil {
 		return err
 	} else if len(aurUp)+len(repoUp) == 0 {
-		fmt.Println("\nthere is nothing to do")
+		fmt.Println("\nThere is nothing to do")
 		return err
 	}
 
@@ -302,18 +302,26 @@ func upgradePkgs(flags []string) error {
 
 		result := strings.Fields(string(numberBuf))
 		for _, numS := range result {
+			var numbers []int
 			num, err := strconv.Atoi(numS)
 			if err != nil {
-				continue
-			}
-			if num > len(aurUp)+len(repoUp)-1 || num < 0 {
-				continue
-			} else if num < len(aurUp) {
-				num = len(aurUp) - num - 1
-				aurNums = append(aurNums, num)
+				numbers, err = BuildRange(numS)
+				if err != nil {
+					continue
+				}
 			} else {
-				num = len(aurUp) + len(repoUp) - num - 1
-				repoNums = append(repoNums, num)
+				numbers = []int{num}
+			}
+			for _, target := range numbers {
+				if target > len(aurUp)+len(repoUp)-1 || target < 0 {
+					continue
+				} else if target < len(aurUp) {
+					target = len(aurUp) - target - 1
+					aurNums = append(aurNums, target)
+				} else {
+					target = len(aurUp) + len(repoUp) - target - 1
+					repoNums = append(repoNums, target)
+				}
 			}
 		}
 	}

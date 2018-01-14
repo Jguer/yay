@@ -309,7 +309,7 @@ func main() {
 	}
 }
 
-func buildRange(input string) (numbers []int, err error) {
+func BuildRange(input string) (numbers []int, err error) {
 	multipleNums := strings.Split(input, "-")
 	if len(multipleNums) != 2 {
 		return nil, errors.New("Invalid range")
@@ -367,8 +367,9 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		aq.printSearch(numpq + 1)
 	}
 
-	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers: ",
-		"Type numbers to install. Separate each number with a space.")
+	fmt.Printf("\x1b[32m%s %s\x1b[0m\nNumbers: ",
+		"Type the numbers or ranges (e.g. 1-10) you want to install.",
+		"Separate each one of them with a space.")
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil || overflow {
@@ -384,7 +385,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		var numbers []int
 		num, err = strconv.Atoi(numS)
 		if err != nil {
-			numbers, err = buildRange(numS)
+			numbers, err = BuildRange(numS)
 			if err != nil {
 				continue
 			}
