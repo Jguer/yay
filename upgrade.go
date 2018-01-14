@@ -273,7 +273,8 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 	return slice, nil
 }
 
-func contains(s []int, e int) bool {
+//Contains returns wheter e is present in s
+func containsInt(s []int, e int) bool {
 	for _, a := range s {
 		if a == e {
 			return true
@@ -282,10 +283,11 @@ func contains(s []int, e int) bool {
 	return false
 }
 
-func removeListFromList(src, target []int) []int {
+// RemoveIntListFromList removes all src's elements that are present in target
+func removeIntListFromList(src, target []int) []int {
 	max := len(target)
 	for i := 0; i < max; i++ {
-		if contains(src, target[i]) {
+		if containsInt(src, target[i]) {
 			target = append(target[:i], target[i+1:]...)
 			max--
 			i--
@@ -359,7 +361,8 @@ func upgradePkgs(flags []string) error {
 				}
 			}
 		}
-		if len(repoNums) == 0 && len(aurNums) == 0 {
+		if len(repoNums) == 0 && len(aurNums) == 0 &&
+			(len(excludeRepo) > 0 || len(excludeAur) > 0) {
 			if len(repoUp) > 0 {
 				repoNums = BuildIntRange(0, len(repoUp)-1)
 			}
@@ -367,9 +370,8 @@ func upgradePkgs(flags []string) error {
 				aurNums = BuildIntRange(0, len(aurUp)-1)
 			}
 		}
-		aurNums = removeListFromList(excludeAur, aurNums)
-		repoNums = removeListFromList(excludeRepo, repoNums)
-		fmt.Println(repoNums, aurNums, excludeAur, excludeRepo)
+		aurNums = removeIntListFromList(excludeAur, aurNums)
+		repoNums = removeIntListFromList(excludeRepo, repoNums)
 	}
 
 	if len(repoUp) != 0 {

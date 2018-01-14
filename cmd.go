@@ -347,16 +347,39 @@ func BuildRange(input string) ([]int, error) {
 	return BuildIntRange(rangeStart, rangeEnd), err
 }
 
+// Contains returns wheter e is present in s
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+// RemoveIntListFromList removes all src's elements that are present in target
+func removeListFromList(src, target []string) []string {
+	max := len(target)
+	for i := 0; i < max; i++ {
+		if contains(src, target[i]) {
+			target = append(target[:i], target[i+1:]...)
+			max--
+			i--
+		}
+	}
+	return target
+}
+
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
 	var num int
 
-	aq, err := narrowSearch(pkgS, true)
+	aurQ, err := narrowSearch(pkgS, true)
 	if err != nil {
 		fmt.Println("Error during AUR search:", err)
 	}
-	numaq := len(aq)
-	pq, numpq, err := queryRepo(pkgS)
+	numaq := len(aurQ)
+	repoQ, numpq, err := queryRepo(pkgS)
 	if err != nil {
 		return
 	}
@@ -366,11 +389,11 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printSearch(numpq + 1)
-		pq.printSearch()
+		aurQ.printSearch(numpq + 1)
+		repoQ.printSearch()
 	} else {
-		pq.printSearch()
-		aq.printSearch(numpq + 1)
+		repoQ.printSearch()
+		aurQ.printSearch(numpq + 1)
 	}
 
 	fmt.Printf("\x1b[32m%s %s\x1b[0m\nNumbers: ",
@@ -384,10 +407,13 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	numberString := string(numberBuf)
-	var aurI []string
-	var repoI []string
+	var aurI, aurNI, repoNI, repoI []string
 	result := strings.Fields(numberString)
 	for _, numS := range result {
+		negate := numS[0] == '^'
+		if negate {
+			numS = numS[1:]
+		}
 		var numbers []int
 		num, err = strconv.Atoi(numS)
 		if err != nil {
@@ -401,23 +427,48 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 
 		// Install package
 		for _, x := range numbers {
+			var target string
 			if x > numaq+numpq || x <= 0 {
 				continue
 			} else if x > numpq {
 				if config.SortMode == BottomUp {
-					aurI = append(aurI, aq[numaq+numpq-x].Name)
+					target = aurQ[numaq+numpq-x].Name
 				} else {
-					aurI = append(aurI, aq[x-numpq-1].Name)
+					target = aurQ[x-numpq-1].Name
+				}
+				if negate {
+					aurNI = append(aurNI, target)
+				} else {
+					aurI = append(aurI, target)
 				}
 			} else {
 				if config.SortMode == BottomUp {
-					repoI = append(repoI, pq[numpq-x].Name())
+					target = repoQ[numpq-x].Name()
 				} else {
-					repoI = append(repoI, pq[x-1].Name())
+					target = repoQ[x-1].Name()
+				}
+				if negate {
+					repoNI = append(repoNI, target)
+				} else {
+					repoI = append(repoI, target)
 				}
 			}
 		}
 	}
+
+	if len(repoI) == 0 && len(aurI) == 0 &&
+		(len(aurNI) > 0 || len(repoNI) > 0) {
+		// If no package was specified, only exclusions, exclude from all the
+		// packages
+		for _, pack := range aurQ {
+			aurI = append(aurI, pack.Name)
+		}
+		for _, pack := range repoQ {
+			repoI = append(repoI, pack.Name())
+		}
+	}
+	aurI = removeListFromList(aurNI, aurI)
+	repoI = removeListFromList(repoNI, repoI)
 
 	if len(repoI) != 0 {
 		err = passToPacman("-S", repoI, flags)
