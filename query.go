@@ -169,7 +169,11 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(repoS) != 0 {
-		err = passToPacman("-Si", repoS, flags)
+		arguments := makeArguments()
+		arguments.addArg("S", "i")
+		//arguments.addArg(flags...)
+		arguments.addTarget(repoS...)
+		err = passToPacman(arguments)
 	}
 
 	return
