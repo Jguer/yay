@@ -273,6 +273,27 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 	return slice, nil
 }
 
+func contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func removeListFromList(src, target []int) []int {
+	max := len(target)
+	for i := 0; i < max; i++ {
+		if contains(src, target[i]) {
+			target = append(target[:i], target[i+1:]...)
+			max--
+			i--
+		}
+	}
+	return target
+}
+
 // upgradePkgs handles updating the cache and installing updates.
 func upgradePkgs(flags []string) error {
 	aurUp, repoUp, err := upList()
@@ -301,7 +322,13 @@ func upgradePkgs(flags []string) error {
 		}
 
 		result := strings.Fields(string(numberBuf))
+		excludeAur := make([]int, 0)
+		excludeRepo := make([]int, 0)
 		for _, numS := range result {
+			negate := numS[0] == '^'
+			if negate {
+				numS = numS[1:]
+			}
 			var numbers []int
 			num, err := strconv.Atoi(numS)
 			if err != nil {
@@ -317,13 +344,32 @@ func upgradePkgs(flags []string) error {
 					continue
 				} else if target < len(aurUp) {
 					target = len(aurUp) - target - 1
-					aurNums = append(aurNums, target)
+					if negate {
+						excludeAur = append(excludeAur, target)
+					} else {
+						aurNums = append(aurNums, target)
+					}
 				} else {
 					target = len(aurUp) + len(repoUp) - target - 1
-					repoNums = append(repoNums, target)
+					if negate {
+						excludeRepo = append(excludeRepo, target)
+					} else {
+						repoNums = append(repoNums, target)
+					}
 				}
 			}
 		}
+		if len(repoNums) == 0 && len(aurNums) == 0 {
+			if len(repoUp) > 0 {
+				repoNums = BuildIntRange(0, len(repoUp)-1)
+			}
+			if len(aurUp) > 0 {
+				aurNums = BuildIntRange(0, len(aurUp)-1)
+			}
+		}
+		aurNums = removeListFromList(excludeAur, aurNums)
+		repoNums = removeListFromList(excludeRepo, repoNums)
+		fmt.Println(repoNums, aurNums, excludeAur, excludeRepo)
 	}
 
 	if len(repoUp) != 0 {

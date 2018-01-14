@@ -309,7 +309,27 @@ func main() {
 	}
 }
 
-func BuildRange(input string) (numbers []int, err error) {
+// BuildIntRange build the range from start to end
+func BuildIntRange(rangeStart, rangeEnd int) []int {
+	if rangeEnd-rangeStart == 0 {
+		// rangeEnd == rangeStart, which means no range
+		return []int{rangeStart}
+	}
+	if rangeEnd < rangeStart {
+		swap := rangeEnd
+		rangeEnd = rangeStart
+		rangeStart = swap
+	}
+
+	final := make([]int, 0)
+	for i := rangeStart; i <= rangeEnd; i++ {
+		final = append(final, i)
+	}
+	return final
+}
+
+// BuildRange construct a range of ints from the format 1-10
+func BuildRange(input string) ([]int, error) {
 	multipleNums := strings.Split(input, "-")
 	if len(multipleNums) != 2 {
 		return nil, errors.New("Invalid range")
@@ -324,21 +344,7 @@ func BuildRange(input string) (numbers []int, err error) {
 		return nil, err
 	}
 
-	if rangeEnd-rangeStart == 0 {
-		// rangeEnd == rangeStart, which means no range
-		return []int{rangeStart}, nil
-	}
-	if rangeEnd < rangeStart {
-		swap := rangeEnd
-		rangeEnd = rangeStart
-		rangeStart = swap
-	}
-
-	final := make([]int, 0)
-	for i := rangeStart; i <= rangeEnd; i++ {
-		final = append(final, i)
-	}
-	return final, nil
+	return BuildIntRange(rangeStart, rangeEnd), err
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
