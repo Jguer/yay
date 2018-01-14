@@ -138,37 +138,23 @@ loop:
 	return
 }
 
-func isIgnored(name string, groups []string, oldVersion string, newVersion string) bool {
-	for _, p := range alpmConf.IgnorePkg {
-		if p == name {
-			fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s -> %s)\n", name, oldVersion, newVersion)
-			return true
-		}
-	}
-
-	for _, g := range alpmConf.IgnoreGroup {
-		for _, pg := range groups {
-			if g == pg {
-				fmt.Printf("\x1b[33mwarning:\x1b[0m %s (ignored pkg) ignoring upgrade (%s -> %s)\n", name, oldVersion, newVersion)
-				return true
-			}
-		}
-
-	}
-	return false
-}
-
-func upDevel(remoteNames []string, packageC chan upgrade, done chan bool) {
+func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 	for _, e := range savedInfo {
 		if e.needsUpdate() {
 			found := false
-			for _, r := range remoteNames {
-				if r == e.Package {
+			var pkg alpm.Package
+			for _, r := range remote {
+				if r.Name() == e.Package {
 					found = true
+					pkg = r
 				}
 			}
-			if found && !isIgnored(e.Package, nil, e.SHA[0:6], "git") {
-				packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
+			if found {
+				if pkg.ShouldIgnore() {
+					fmt.Printf("\x1b[33mwarning:\x1b[0m %s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
+				} else {
+					packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
+				}
 			} else {
 				removeVCSPackage([]string{e.Package})
 			}
@@ -189,7 +175,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 
 	if config.Devel {
 		routines++
-		go upDevel(remoteNames, packageC, done)
+		go upDevel(remote, packageC, done)
 		fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Checking development packages...\x1b[0m")
 	}
 
@@ -221,9 +207,11 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 				} else if qtemp[x].Name == local[i].Name() {
 					if (config.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
 						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
-						if !isIgnored(local[i].Name(), local[i].Groups().Slice(), local[i].Version(), qtemp[x].Version) {
+						if local[i].ShouldIgnore() {
+							fmt.Printf("\x1b[33mwarning:\x1b[0m %s ignoring package upgrade (%s => %s)\n", local[i].Name(), local[i].Version(), qtemp[x].Version)
+						} else {
 							packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
-						}
+						} 
 					}
 					continue
 				} else {
@@ -265,9 +253,12 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 
 	for _, pkg := range local {
 		newPkg := pkg.NewVersion(dbList)
-
-		if newPkg != nil && !isIgnored(pkg.Name(), pkg.Groups().Slice(), pkg.Version(), newPkg.Version()) {
-			slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
+		if newPkg != nil {
+			if pkg.ShouldIgnore() {
+				fmt.Printf("\x1b[33mwarning:\x1b[0m %s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
+			} else {
+				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
+			}
 		}
 	}
 	return slice, nil
