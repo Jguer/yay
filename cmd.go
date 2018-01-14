@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -88,7 +89,8 @@ func init() {
 	if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
-			fmt.Println("Unable to create config directory:", filepath.Dir(configFile), err)
+			fmt.Println("Unable to create config directory:",
+				filepath.Dir(configFile), err)
 			os.Exit(2)
 		}
 		// Save the default config if nothing is found
@@ -102,7 +104,8 @@ func init() {
 			decoder := json.NewDecoder(cfile)
 			err = decoder.Decode(&config)
 			if err != nil {
-				fmt.Println("Loading default Settings.\nError reading config:", err)
+				fmt.Println("Loading default Settings.\nError reading config:",
+					err)
 				defaultSettings(&config)
 			}
 		}
@@ -136,7 +139,7 @@ func init() {
 	}
 }
 
-func parser() (op string, options []string, packages []string, changedConfig bool, err error) {
+func parser() (op string, options, packages []string, changedConfig bool, err error) {
 	if len(os.Args) < 2 {
 		err = fmt.Errorf("no operation specified")
 		return
@@ -306,6 +309,38 @@ func main() {
 	}
 }
 
+func buildRange(input string) (numbers []int, err error) {
+	multipleNums := strings.Split(input, "-")
+	if len(multipleNums) != 2 {
+		return nil, errors.New("Invalid range")
+	}
+
+	rangeStart, err := strconv.Atoi(multipleNums[0])
+	if err != nil {
+		return nil, err
+	}
+	rangeEnd, err := strconv.Atoi(multipleNums[1])
+	if err != nil {
+		return nil, err
+	}
+
+	if rangeEnd-rangeStart == 0 {
+		// rangeEnd == rangeStart, which means no range
+		return []int{rangeStart}, nil
+	}
+	if rangeEnd < rangeStart {
+		swap := rangeEnd
+		rangeEnd = rangeStart
+		rangeStart = swap
+	}
+
+	final := make([]int, 0)
+	for i := rangeStart; i <= rangeEnd; i++ {
+		final = append(final, i)
+	}
+	return final, nil
+}
+
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
 	var num int
@@ -332,7 +367,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		aq.printSearch(numpq + 1)
 	}
 
-	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers: ", "Type numbers to install. Separate each number with a space.")
+	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers: ",
+		"Type numbers to install. Separate each number with a space.")
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil || overflow {
@@ -345,25 +381,33 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	var repoI []string
 	result := strings.Fields(numberString)
 	for _, numS := range result {
+		var numbers []int
 		num, err = strconv.Atoi(numS)
 		if err != nil {
-			continue
+			numbers, err = buildRange(numS)
+			if err != nil {
+				continue
+			}
+		} else {
+			numbers = []int{num}
 		}
 
 		// Install package
-		if num > numaq+numpq || num <= 0 {
-			continue
-		} else if num > numpq {
-			if config.SortMode == BottomUp {
-				aurI = append(aurI, aq[numaq+numpq-num].Name)
+		for _, x := range numbers {
+			if x > numaq+numpq || x <= 0 {
+				continue
+			} else if x > numpq {
+				if config.SortMode == BottomUp {
+					aurI = append(aurI, aq[numaq+numpq-x].Name)
+				} else {
+					aurI = append(aurI, aq[x-numpq-1].Name)
+				}
 			} else {
-				aurI = append(aurI, aq[num-numpq-1].Name)
-			}
-		} else {
-			if config.SortMode == BottomUp {
-				repoI = append(repoI, pq[numpq-num].Name())
-			} else {
-				repoI = append(repoI, pq[num-1].Name())
+				if config.SortMode == BottomUp {
+					repoI = append(repoI, pq[numpq-x].Name())
+				} else {
+					repoI = append(repoI, pq[x-1].Name())
+				}
 			}
 		}
 	}
@@ -382,8 +426,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 // Complete provides completion info for shells
 func complete() error {
 	path := completionFile + config.Shell + ".cache"
-
-	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
 		os.MkdirAll(filepath.Dir(completionFile), 0755)
 		out, errf := os.Create(path)
 		if errf != nil {
