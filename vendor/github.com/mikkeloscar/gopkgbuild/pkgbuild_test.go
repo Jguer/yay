@@ -9,11 +9,16 @@ func TestVersionParsing(t *testing.T) {
 		"1.0.0.0.2": true,
 		"a.3_4":     true,
 		"A.2":       true,
+		"a~b~c":     true,
 		"_1.2":      false,
 		".2":        false,
 		"a.2Ø":      false,
 		"1.?":       false,
 		"1.-":       false,
+		"1 2":       false,
+		"1\t2":      false,
+		"1\n2":      false,
+		"1\r2":      false,
 	}
 
 	for version, valid := range versions {
@@ -172,6 +177,7 @@ func TestRandomCoreSRCINFOs(t *testing.T) {
 		"glibc",
 		"systemd",
 		"linux",
+		"pip2pkgbuild",
 	}
 
 	for _, srcinfo := range srcinfos {

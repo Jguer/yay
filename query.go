@@ -141,11 +141,11 @@ func syncSearch(pkgS []string) (err error) {
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printSearch(0)
+		aq.printSearch(1)
 		pq.printSearch()
 	} else {
 		pq.printSearch()
-		aq.printSearch(0)
+		aq.printSearch(1)
 	}
 
 	return nil
@@ -175,6 +175,14 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 		for _, aurP := range q {
 			PrintInfo(&aurP)
 		}
+	}
+
+	if len(repoS) != 0 {
+		arguments := makeArguments()
+		arguments.addArg("S", "i")
+		//arguments.addArg(flags...)
+		arguments.addTarget(repoS...)
+		err = passToPacman(arguments)
 	}
 
 	return

@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
-  revision = "f82ad11b38f675991ef2425dbeff03ef346bc113"
+  revision = "542c122094f863fd9f5d412ab7c0bb57474e08ef"
 
 [[projects]]
   branch = "master"
@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/mikkeloscar/gopkgbuild"
   packages = ["."]
-  revision = "a185f55210904932d0a58aaf30890f2c17218604"
+  revision = "a8070a8ab45a0f8cd4201ca7ed0f3efe4897bd2f"
 
 [solve-meta]
   analyzer-name = "dep"

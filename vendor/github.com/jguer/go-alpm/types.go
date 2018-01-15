@@ -19,14 +19,41 @@ import (
 type Depend struct {
 	Name    string
 	Version string
+	Description string
+	NameHash uint
 	Mod     DepMod
 }
 
 func convertDepend(dep *C.alpm_depend_t) Depend {
 	return Depend{
-		Name:    C.GoString(dep.name),
-		Version: C.GoString(dep.version),
-		Mod:     DepMod(dep.mod)}
+		Name:        C.GoString(dep.name),
+		Version:     C.GoString(dep.version),
+		Mod:         DepMod(dep.mod),
+		Description: C.GoString(dep.desc),
+		NameHash:    uint(dep.name_hash),
+	}
+}
+
+func convertCDepend(dep Depend) *C.alpm_depend_t {
+	c_name := C.CString(dep.Name)
+	c_version := C.CString(dep.Version)
+	c_desc := C.CString(dep.Description)
+
+	c_dep := C.alpm_depend_t{
+		name:      c_name,
+		version:   c_version,
+		desc:      c_desc,
+		name_hash: C.ulong(dep.NameHash),
+		mod:       C.alpm_depmod_t(dep.Mod),
+	}
+
+	return &c_dep
+}
+
+func freeCDepend(dep *C.alpm_depend_t) {
+	defer C.free(unsafe.Pointer(dep.name))
+	defer C.free(unsafe.Pointer(dep.version))
+	defer C.free(unsafe.Pointer(dep.desc))
 }
 
 func (dep Depend) String() string {

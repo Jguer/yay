@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"strings"
 
 	alpm "github.com/jguer/go-alpm"
 )
@@ -221,4 +220,5 @@ func passToPacman(op string, pkgs []string, flags []string) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
 	return err
+}
 }
