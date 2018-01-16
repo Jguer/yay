@@ -120,7 +120,7 @@ func initYay() (err error) {
 	////////////////
 	updated = false
 
-	vfile, err := os.Open(vcsFile)
+	vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
 	if err == nil {
 		defer vfile.Close()
 		decoder := json.NewDecoder(vfile)
