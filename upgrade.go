@@ -365,8 +365,14 @@ func upgradePkgs(flags []string) error {
 		repoNums = removeIntListFromList(excludeRepo, repoNums)
 	}
 
+	arguments := cmdArgs.copy()
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("y", "refresh")
+	
+	var repoNames []string
+	var aurNames []string
+
 	if len(repoUp) != 0 {
-		var repoNames []string
 	repoloop:
 		for i, k := range repoUp {
 			for _, j := range repoNums {
@@ -376,20 +382,9 @@ func upgradePkgs(flags []string) error {
 			}
 			repoNames = append(repoNames, k.Name)
 		}
-
-		arguments := makeArguments()
-		arguments.addArg("S", "noconfirm")
-		arguments.addArg(flags...)
-		arguments.addTarget(repoNames...)
-
-		err := passToPacman(arguments)
-		if err != nil {
-			fmt.Println("Error upgrading repo packages.")
-		}
 	}
 
 	if len(aurUp) != 0 {
-		var aurNames []string
 	aurloop:
 		for i, k := range aurUp {
 			for _, j := range aurNums {
@@ -399,7 +394,10 @@ func upgradePkgs(flags []string) error {
 			}
 			aurNames = append(aurNames, k.Name)
 		}
-		aurInstall(aurNames, flags)
 	}
-	return nil
+	
+	arguments.addTarget(repoNames...)
+	arguments.addTarget(aurNames...)
+	err = install(arguments)
+	return err
 }

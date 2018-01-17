@@ -153,7 +153,7 @@ func syncSearch(pkgS []string) (err error) {
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string, flags []string) (err error) {
-	aurS, repoS, err := packageSlices(pkgS)
+	aurS, repoS, _, err := packageSlices(pkgS)
 	if err != nil {
 		return
 	}
@@ -180,6 +180,11 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 			PrintInfo(&aurP)
 		}
 	}
+	
+	//todo
+	//if len(missing) != 0 {
+	//	printMissing(missing)
+	//}
 
 	return
 }
@@ -235,38 +240,51 @@ func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
+func packageSlices(toCheck []string) (aur []string, repo []string, missing []string, err error) {
+	possibleAur := make([]string, 0)
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
 
-	for _, pkg := range toCheck {
-		found := false
+	for _, _pkg := range toCheck {
+		pkg := getNameFromDep(_pkg)
 
-		_ = dbList.ForEach(func(db alpm.Db) error {
-			if found {
-				return nil
-			}
-
-			_, err = db.PkgByName(pkg)
-			if err == nil {
-				found = true
-				repo = append(repo, pkg)
-			}
-			return nil
-		})
+		_, errdb := dbList.FindSatisfier(_pkg)
+		found := errdb == nil
 
 		if !found {
-			if _, errdb := dbList.PkgCachebyGroup(pkg); errdb == nil {
-				repo = append(repo, pkg)
-			} else {
-				aur = append(aur, pkg)
-			}
+			_, errdb = dbList.PkgCachebyGroup(_pkg)
+			found = errdb == nil
+		}
+
+		if found {
+			repo = append(repo, pkg)
+		} else {
+			possibleAur = append(possibleAur, pkg)
 		}
 	}
+	
+	if len(possibleAur) == 0 {
+		return
+	}
 
-	err = nil
+	info, err := rpc.Info(possibleAur)
+	if err != nil {
+		return
+	}
+
+	outer:
+	for _, pkg := range possibleAur {
+		for _, rpcpkg := range info {
+			if rpcpkg.Name == pkg {
+				aur = append(aur, pkg)
+				continue outer
+			}
+		}
+		missing = append(missing, pkg)
+	}
+
 	return
 }
 

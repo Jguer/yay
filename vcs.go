@@ -38,7 +38,9 @@ func createDevelDB() error {
 
 	config.NoConfirm = true
 	specialDBsauce = true
-	err = aurInstall(remoteNames, nil)
+	arguments := makeArguments()
+	arguments.addTarget(remoteNames...)
+	err = install(arguments)
 	return err
 }
 
