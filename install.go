@@ -27,7 +27,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(aurs) != 0 {
-		err := aurInstall(aurs, []string{"-S"})
+		err := aurInstall(aurs, []string{})
 		if err != nil {
 			fmt.Println("Error installing aur packages.")
 		}
