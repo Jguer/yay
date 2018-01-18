@@ -264,13 +264,36 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 	return slice, nil
 }
 
+//Contains returns wheter e is present in s
+func containsInt(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+// RemoveIntListFromList removes all src's elements that are present in target
+func removeIntListFromList(src, target []int) []int {
+	max := len(target)
+	for i := 0; i < max; i++ {
+		if containsInt(src, target[i]) {
+			target = append(target[:i], target[i+1:]...)
+			max--
+			i--
+		}
+	}
+	return target
+}
+
 // upgradePkgs handles updating the cache and installing updates.
 func upgradePkgs(flags []string) error {
 	aurUp, repoUp, err := upList()
 	if err != nil {
 		return err
 	} else if len(aurUp)+len(repoUp) == 0 {
-		fmt.Println("\nthere is nothing to do")
+		fmt.Println("\nThere is nothing to do")
 		return err
 	}
 
@@ -292,21 +315,54 @@ func upgradePkgs(flags []string) error {
 		}
 
 		result := strings.Fields(string(numberBuf))
+		excludeAur := make([]int, 0)
+		excludeRepo := make([]int, 0)
 		for _, numS := range result {
+			negate := numS[0] == '^'
+			if negate {
+				numS = numS[1:]
+			}
+			var numbers []int
 			num, err := strconv.Atoi(numS)
 			if err != nil {
-				continue
-			}
-			if num > len(aurUp)+len(repoUp)-1 || num < 0 {
-				continue
-			} else if num < len(aurUp) {
-				num = len(aurUp) - num - 1
-				aurNums = append(aurNums, num)
+				numbers, err = BuildRange(numS)
+				if err != nil {
+					continue
+				}
 			} else {
-				num = len(aurUp) + len(repoUp) - num - 1
-				repoNums = append(repoNums, num)
+				numbers = []int{num}
+			}
+			for _, target := range numbers {
+				if target > len(aurUp)+len(repoUp)-1 || target < 0 {
+					continue
+				} else if target < len(aurUp) {
+					target = len(aurUp) - target - 1
+					if negate {
+						excludeAur = append(excludeAur, target)
+					} else {
+						aurNums = append(aurNums, target)
+					}
+				} else {
+					target = len(aurUp) + len(repoUp) - target - 1
+					if negate {
+						excludeRepo = append(excludeRepo, target)
+					} else {
+						repoNums = append(repoNums, target)
+					}
+				}
 			}
 		}
+		if len(repoNums) == 0 && len(aurNums) == 0 &&
+			(len(excludeRepo) > 0 || len(excludeAur) > 0) {
+			if len(repoUp) > 0 {
+				repoNums = BuildIntRange(0, len(repoUp)-1)
+			}
+			if len(aurUp) > 0 {
+				aurNums = BuildIntRange(0, len(aurUp)-1)
+			}
+		}
+		aurNums = removeIntListFromList(excludeAur, aurNums)
+		repoNums = removeIntListFromList(excludeRepo, repoNums)
 	}
 
 	if len(repoUp) != 0 {

@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-var cmdArgs *arguments = makeArguments()
+var cmdArgs = makeArguments()
 
 func usage() {
 	fmt.Println(`Usage:
@@ -95,7 +96,8 @@ func initYay() (err error) {
 	if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
-			err = fmt.Errorf("Unable to create config directory:", filepath.Dir(configFile), err)
+			err = fmt.Errorf("Unable to create config directory:\n%s\n"+
+				"The error was:\n%s", filepath.Dir(configFile), err)
 			return
 		}
 		// Save the default config if nothing is found
@@ -103,13 +105,14 @@ func initYay() (err error) {
 	} else {
 		cfile, errf := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
 		if errf != nil {
-			fmt.Println("Error reading config: %s", err)
+			fmt.Printf("Error reading config: %s\n", err)
 		} else {
 			defer cfile.Close()
 			decoder := json.NewDecoder(cfile)
 			err = decoder.Decode(&config)
 			if err != nil {
-				fmt.Println("Loading default Settings.\nError reading config:", err)
+				fmt.Println("Loading default Settings.\nError reading config:",
+					err)
 				defaultSettings(&config)
 			}
 		}
@@ -181,7 +184,7 @@ func initAlpm() (err error) {
 
 	alpmHandle, err = alpmConf.CreateHandle()
 	if err != nil {
-		err = fmt.Errorf("Unable to CreateHandle", err)
+		err = fmt.Errorf("Unable to CreateHandle: %s", err)
 		return
 	}
 
@@ -261,11 +264,11 @@ cleanup:
 func handleCmd() (changedConfig bool, err error) {
 	changedConfig = false
 
-	for option, _ := range cmdArgs.options {
+	for option := range cmdArgs.options {
 		changedConfig = changedConfig || handleConfig(option)
 	}
 
-	for option, _ := range cmdArgs.globals {
+	for option := range cmdArgs.globals {
 		changedConfig = changedConfig || handleConfig(option)
 	}
 
@@ -461,18 +464,78 @@ func handleRemove() (err error) {
 	return
 }
 
+// BuildIntRange build the range from start to end
+func BuildIntRange(rangeStart, rangeEnd int) []int {
+	if rangeEnd-rangeStart == 0 {
+		// rangeEnd == rangeStart, which means no range
+		return []int{rangeStart}
+	}
+	if rangeEnd < rangeStart {
+		swap := rangeEnd
+		rangeEnd = rangeStart
+		rangeStart = swap
+	}
+
+	final := make([]int, 0)
+	for i := rangeStart; i <= rangeEnd; i++ {
+		final = append(final, i)
+	}
+	return final
+}
+
+// BuildRange construct a range of ints from the format 1-10
+func BuildRange(input string) ([]int, error) {
+	multipleNums := strings.Split(input, "-")
+	if len(multipleNums) != 2 {
+		return nil, errors.New("Invalid range")
+	}
+
+	rangeStart, err := strconv.Atoi(multipleNums[0])
+	if err != nil {
+		return nil, err
+	}
+	rangeEnd, err := strconv.Atoi(multipleNums[1])
+	if err != nil {
+		return nil, err
+	}
+
+	return BuildIntRange(rangeStart, rangeEnd), err
+}
+
+// Contains returns wheter e is present in s
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+// RemoveIntListFromList removes all src's elements that are present in target
+func removeListFromList(src, target []string) []string {
+	max := len(target)
+	for i := 0; i < max; i++ {
+		if contains(src, target[i]) {
+			target = append(target[:i], target[i+1:]...)
+			max--
+			i--
+		}
+	}
+	return target
+}
+
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
 	//func numberMenu(cmdArgs *arguments) (err error) {
 	var num int
 
-	aq, err := narrowSearch(pkgS, true)
+	aurQ, err := narrowSearch(pkgS, true)
 	if err != nil {
 		fmt.Println("Error during AUR search:", err)
 	}
-	numaq := len(aq)
-
-	pq, numpq, err := queryRepo(pkgS)
+	numaq := len(aurQ)
+	repoQ, numpq, err := queryRepo(pkgS)
 	if err != nil {
 		return
 	}
@@ -482,14 +545,16 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printSearch(numpq + 1)
-		pq.printSearch()
+		aurQ.printSearch(numpq + 1)
+		repoQ.printSearch()
 	} else {
-		pq.printSearch()
-		aq.printSearch(numpq + 1)
+		repoQ.printSearch()
+		aurQ.printSearch(numpq + 1)
 	}
 
-	fmt.Printf("\x1b[32m%s\x1b[0m\nNumbers: ", "Type numbers to install. Separate each number with a space.")
+	fmt.Printf("\x1b[32m%s %s\x1b[0m\nNumbers: ",
+		"Type the numbers or ranges (e.g. 1-10) you want to install.",
+		"Separate each one of them with a space.")
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil || overflow {
@@ -498,32 +563,68 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	numberString := string(numberBuf)
-	var aurI []string
-	var repoI []string
+	var aurI, aurNI, repoNI, repoI []string
 	result := strings.Fields(numberString)
 	for _, numS := range result {
+		negate := numS[0] == '^'
+		if negate {
+			numS = numS[1:]
+		}
+		var numbers []int
 		num, err = strconv.Atoi(numS)
 		if err != nil {
-			continue
+			numbers, err = BuildRange(numS)
+			if err != nil {
+				continue
+			}
+		} else {
+			numbers = []int{num}
 		}
 
 		// Install package
-		if num > numaq+numpq || num <= 0 {
-			continue
-		} else if num > numpq {
-			if config.SortMode == BottomUp {
-				aurI = append(aurI, aq[numaq+numpq-num].Name)
+		for _, x := range numbers {
+			var target string
+			if x > numaq+numpq || x <= 0 {
+				continue
+			} else if x > numpq {
+				if config.SortMode == BottomUp {
+					target = aurQ[numaq+numpq-x].Name
+				} else {
+					target = aurQ[x-numpq-1].Name
+				}
+				if negate {
+					aurNI = append(aurNI, target)
+				} else {
+					aurI = append(aurI, target)
+				}
 			} else {
-				aurI = append(aurI, aq[num-numpq-1].Name)
-			}
-		} else {
-			if config.SortMode == BottomUp {
-				repoI = append(repoI, pq[numpq-num].Name())
-			} else {
-				repoI = append(repoI, pq[num-1].Name())
+				if config.SortMode == BottomUp {
+					target = repoQ[numpq-x].Name()
+				} else {
+					target = repoQ[x-1].Name()
+				}
+				if negate {
+					repoNI = append(repoNI, target)
+				} else {
+					repoI = append(repoI, target)
+				}
 			}
 		}
 	}
+
+	if len(repoI) == 0 && len(aurI) == 0 &&
+		(len(aurNI) > 0 || len(repoNI) > 0) {
+		// If no package was specified, only exclusions, exclude from all the
+		// packages
+		for _, pack := range aurQ {
+			aurI = append(aurI, pack.Name)
+		}
+		for _, pack := range repoQ {
+			repoI = append(repoI, pack.Name())
+		}
+	}
+	aurI = removeListFromList(aurNI, aurI)
+	repoI = removeListFromList(repoNI, repoI)
 
 	if len(repoI) != 0 {
 		arguments := makeArguments()
@@ -542,8 +643,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 // Complete provides completion info for shells
 func complete() error {
 	path := completionFile + config.Shell + ".cache"
-
-	if info, err := os.Stat(path); os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
 		os.MkdirAll(filepath.Dir(completionFile), 0755)
 		out, errf := os.Create(path)
 		if errf != nil {
