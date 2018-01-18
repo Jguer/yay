@@ -301,8 +301,8 @@ func upgradePkgs(flags []string) error {
 	var aurNums []int
 	sort.Sort(repoUp)
 	fmt.Printf("\x1b[1;34;1m:: \x1b[0m\x1b[1m%d Packages to upgrade.\x1b[0m\n", len(aurUp)+len(repoUp))
-	repoUp.Print(len(aurUp))
-	aurUp.Print(0)
+	repoUp.Print(len(aurUp) + 1)
+	aurUp.Print(1)
 
 	if !config.NoConfirm {
 		fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
@@ -333,17 +333,17 @@ func upgradePkgs(flags []string) error {
 				numbers = []int{num}
 			}
 			for _, target := range numbers {
-				if target > len(aurUp)+len(repoUp)-1 || target < 0 {
+				if target > len(aurUp)+len(repoUp) || target <= 0 {
 					continue
-				} else if target < len(aurUp) {
-					target = len(aurUp) - target - 1
+				} else if target <= len(aurUp) {
+					target = len(aurUp) - target
 					if negate {
 						excludeAur = append(excludeAur, target)
 					} else {
 						aurNums = append(aurNums, target)
 					}
 				} else {
-					target = len(aurUp) + len(repoUp) - target - 1
+					target = len(aurUp) + len(repoUp) - target
 					if negate {
 						excludeRepo = append(excludeRepo, target)
 					} else {
