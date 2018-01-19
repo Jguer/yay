@@ -178,6 +178,7 @@ func TestRandomCoreSRCINFOs(t *testing.T) {
 		"systemd",
 		"linux",
 		"pip2pkgbuild",
+		"biicode",
 	}
 
 	for _, srcinfo := range srcinfos {

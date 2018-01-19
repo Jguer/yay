@@ -116,6 +116,14 @@ func TestCompleteVersionComparison(t *testing.T) {
 	}
 }
 
+func TestCompleteVersionString(t *testing.T) {
+	str := "42:3.14-1"
+	version, _ := NewCompleteVersion(str)
+	if version.String() != str {
+		t.Errorf("%v should equal %s", version, str)
+	}
+}
+
 // Benchmark rpmvercmp
 func BenchmarkVersionCompare(b *testing.B) {
 	for i := 0; i < b.N; i++ {
