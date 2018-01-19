@@ -53,7 +53,7 @@ func cleanRemove(pkgNames []string) (err error) {
 	if len(pkgNames) == 0 {
 		return nil
 	}
-	
+
 	arguments := makeArguments()
 	arguments.addArg("R", "noconfirm")
 	arguments.addTarget(pkgNames...)

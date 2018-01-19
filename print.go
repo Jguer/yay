@@ -143,7 +143,7 @@ func PrintInfo(a *rpc.Pkg) {
 	}
 
 	if len(a.Conflicts) != 0 {
-		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m",strings.Join(a.Conflicts, "  "))
+		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", strings.Join(a.Conflicts, "  "))
 	} else {
 		fmt.Println("\x1b[1;37mConflicts With  :\x1b[0m", "None")
 	}

@@ -1,30 +1,30 @@
 package main
 
 import (
-	"os"
 	"fmt"
-	"strings"
 	"io"
+	"os"
+	"strings"
 )
 
-type stringSet  map[string]struct{}
+type stringSet map[string]struct{}
 
 func (set stringSet) getAny() string {
 	for v := range set {
 		return v
 	}
-    
+
 	//maybe should return error instrad
 	return ""
 }
 
 func (set stringSet) toSlice() []string {
 	slice := make([]string, 0, len(set))
-	
+
 	for v := range set {
 		slice = append(slice, v)
 	}
-	
+
 	return slice
 }
 
@@ -34,9 +34,8 @@ func (set stringSet) removeAny() string {
 	return v
 }
 
-
 type arguments struct {
-	op string
+	op      string
 	options map[string]string
 	globals map[string]string
 	doubles stringSet //tracks args passed twice such as -yy and -dd
@@ -44,7 +43,7 @@ type arguments struct {
 }
 
 func makeArguments() *arguments {
-	return &arguments {
+	return &arguments{
 		"",
 		make(map[string]string),
 		make(map[string]string),
@@ -55,28 +54,27 @@ func makeArguments() *arguments {
 
 func (parser *arguments) copy() (cp *arguments) {
 	cp = makeArguments()
-	
+
 	cp.op = parser.op
-	
-	for k,v := range parser.options {
+
+	for k, v := range parser.options {
 		cp.options[k] = v
 	}
-	
-	for k,v := range parser.globals {
+
+	for k, v := range parser.globals {
 		cp.globals[k] = v
 	}
-	
-	for k,v := range parser.targets {
+
+	for k, v := range parser.targets {
 		cp.targets[k] = v
 	}
-	
-	for k,v := range parser.doubles {
+
+	for k, v := range parser.doubles {
 		cp.doubles[k] = v
 	}
-	
+
 	return
 }
-		
 
 func (parser *arguments) delArg(options ...string) {
 	for _, option := range options {
@@ -90,11 +88,11 @@ func (parser *arguments) needRoot() bool {
 	if parser.existsArg("h", "help") {
 		return false
 	}
-	
+
 	if parser.existsArg("p", "print") {
-			return false
+		return false
 	}
-	
+
 	switch parser.op {
 	case "V", "version":
 		return false
@@ -130,7 +128,7 @@ func (parser *arguments) needRoot() bool {
 		return false
 	case "U", "upgrade":
 		return true
-        
+
 	//yay specific
 	case "Y", "yay":
 		return false
@@ -146,7 +144,7 @@ func (parser *arguments) addOP(op string) (err error) {
 		err = fmt.Errorf("only one operation may be used at a time")
 		return
 	}
-	
+
 	parser.op = op
 	return
 }
@@ -156,7 +154,7 @@ func (parser *arguments) addParam(option string, arg string) (err error) {
 		err = parser.addOP(option)
 		return
 	}
-	
+
 	if parser.existsArg(option) {
 		parser.doubles[option] = struct{}{}
 	} else if isGlobal(option) {
@@ -164,7 +162,7 @@ func (parser *arguments) addParam(option string, arg string) (err error) {
 	} else {
 		parser.options[option] = arg
 	}
-	
+
 	return
 }
 
@@ -186,7 +184,7 @@ func (parser *arguments) existsArg(options ...string) bool {
 		if exists {
 			return true
 		}
-		
+
 		_, exists = parser.globals[option]
 		if exists {
 			return true
@@ -205,13 +203,13 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 		}
 
 		arg, exists = parser.globals[option]
-		
+
 		if exists {
 			_, double = parser.doubles[option]
 			return
 		}
 	}
-	
+
 	return
 }
 
@@ -235,7 +233,7 @@ func (parser *arguments) existsDouble(options ...string) bool {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -243,27 +241,27 @@ func (parser *arguments) formatTargets() (args []string) {
 	for target := range parser.targets {
 		args = append(args, target)
 	}
-	
+
 	return
 }
 
 func (parser *arguments) formatArgs() (args []string) {
 	op := formatArg(parser.op)
 	args = append(args, op)
-	
+
 	for option, arg := range parser.options {
 		formatedOption := formatArg(option)
 		args = append(args, formatedOption)
-		
+
 		if hasParam(option) {
 			args = append(args, arg)
 		}
-		
+
 		if parser.existsDouble(option) {
 			args = append(args, formatedOption)
 		}
 	}
-	
+
 	return
 }
 
@@ -271,18 +269,18 @@ func (parser *arguments) formatGlobals() (args []string) {
 	for option, arg := range parser.globals {
 		formatedOption := formatArg(option)
 		args = append(args, formatedOption)
-		
+
 		if hasParam(option) {
 			args = append(args, arg)
 		}
-		
+
 		if parser.existsDouble(option) {
 			args = append(args, formatedOption)
 		}
 	}
-	
+
 	return
-	
+
 }
 
 func formatArg(arg string) string {
@@ -291,7 +289,7 @@ func formatArg(arg string) string {
 	} else {
 		arg = "-" + arg
 	}
-	
+
 	return arg
 }
 
@@ -313,8 +311,8 @@ func isOp(op string) bool {
 		return true
 	case "U", "upgrade":
 		return true
-        
-    //yay specific
+
+		//yay specific
 	case "Y", "yay":
 		return true
 	case "G", "getpkgbuild":
@@ -424,24 +422,24 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 		err = parser.addArg("-")
 		return
 	}
-	
+
 	arg = arg[1:]
-	
+
 	for k, _char := range arg {
 		char := string(_char)
-		
+
 		if hasParam(char) {
-			if k < len(arg) - 2 {
+			if k < len(arg)-2 {
 				err = parser.addParam(char, arg[k+2:])
 			} else {
 				usedNext = true
 				err = parser.addParam(char, param)
 			}
-			
+
 			break
 		} else {
 			err = parser.addArg(char)
-			
+
 			if err != nil {
 				return
 			}
@@ -453,21 +451,21 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 
 //parses full length options such as:
 //--sync --refresh --sysupgrade --dbpath /some/path --
-func (parser *arguments) parseLongOption(arg string, param string) (usedNext bool, err error){
+func (parser *arguments) parseLongOption(arg string, param string) (usedNext bool, err error) {
 	if arg == "--" {
 		err = parser.addArg(arg)
 		return
 	}
-	
+
 	arg = arg[2:]
-	
+
 	if hasParam(arg) {
 		err = parser.addParam(arg, param)
 		usedNext = true
 	} else {
 		err = parser.addArg(arg)
 	}
-	
+
 	return
 }
 
@@ -475,25 +473,25 @@ func (parser *arguments) parseStdin() (err error) {
 	for true {
 		var target string
 		_, err = fmt.Scan(&target)
-		
+
 		if err != nil {
 			if err == io.EOF {
 				err = nil
 			}
-			
+
 			return
 		}
-		
+
 		parser.addTarget(target)
 	}
-	
+
 	return
 }
 
-func (parser *arguments)parseCommandLine() (err error) {
+func (parser *arguments) parseCommandLine() (err error) {
 	args := os.Args[1:]
 	usedNext := false
-	
+
 	if len(args) < 1 {
 		err = fmt.Errorf("no operation specified (use -h for help)")
 		return
@@ -501,16 +499,16 @@ func (parser *arguments)parseCommandLine() (err error) {
 
 	for k, arg := range args {
 		var nextArg string
-		
+
 		if usedNext {
 			usedNext = false
 			continue
 		}
-		
-		if k + 1 < len(args) {
-			nextArg = args[k + 1]
+
+		if k+1 < len(args) {
+			nextArg = args[k+1]
 		}
-		
+
 		if parser.existsArg("--") {
 			parser.addTarget(arg)
 		} else if strings.HasPrefix(arg, "--") {
@@ -520,23 +518,23 @@ func (parser *arguments)parseCommandLine() (err error) {
 		} else {
 			parser.addTarget(arg)
 		}
-		
-		if err != nil {
-			return
-		}
-	}
-	
-	if parser.op == "" {
-		parser.op = "Y"
-	}
-	
-	if cmdArgs.existsArg("-") {
-		err = cmdArgs.parseStdin();
 
 		if err != nil {
 			return
 		}
 	}
-	
+
+	if parser.op == "" {
+		parser.op = "Y"
+	}
+
+	if cmdArgs.existsArg("-") {
+		err = cmdArgs.parseStdin()
+
+		if err != nil {
+			return
+		}
+	}
+
 	return
 }

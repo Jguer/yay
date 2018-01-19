@@ -146,7 +146,7 @@ func PkgInstall(a *rpc.Pkg, flags []string) (finalmdeps []string, err error) {
 	} else {
 		depArgs = []string{"asdeps"}
 	}
-	
+
 	// Repo dependencies
 	if len(repoDeps) != 0 {
 		errR := passToPacman(arguments)
