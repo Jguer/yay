@@ -28,7 +28,6 @@ type Configuration struct {
 	BuildDir      string `json:"buildDir"`
 	Editor        string `json:"editor"`
 	MakepkgBin    string `json:"makepkgbin"`
-	Shell         string `json:"-"`
 	PacmanBin     string `json:"pacmanbin"`
 	PacmanConf    string `json:"pacmanconf"`
 	TarBin        string `json:"tarbin"`

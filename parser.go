@@ -145,6 +145,8 @@ func (parser *arguments) needRoot() bool {
 	//yay specific
 	case "Y", "yay":
 		return false
+	case "P", "print":
+		return false
 	case "G", "getpkgbuild":
 		return false
 	default:
@@ -327,6 +329,8 @@ func isOp(op string) bool {
 
 		//yay specific
 	case "Y", "yay":
+		return true
+	case "P", "print":
 		return true
 	case "G", "getpkgbuild":
 		return true

@@ -5,18 +5,20 @@ set -l progname yay
 
 set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 # This might be an issue if another package manager is also installed (e.g. for containers)
-set -l listall "(yay --fcomplete)"
+set -l listall "(yay -Pcf)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 set -l listpacman "(__fish_print_packages)"
 set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
 set -l database '__fish_contains_opt -s D database'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
+set -l print '__fish_contains_opt -s P print'
 set -l query '__fish_contains_opt -s Q query'
 set -l remove '__fish_contains_opt -s R remove'
 set -l sync '__fish_contains_opt -s S sync'
 set -l upgrade '__fish_contains_opt -s U upgrade'
 set -l files '__fish_contains_opt -s F files'
+set -l yayspecific '__fish_contains_opt -s Y yay'
 
 complete -c pacman -e
 complete -c pacman -f
@@ -28,6 +30,7 @@ complete -c $progname -n $noopt -a "-Q" -d "Query the package database"
 complete -c $progname -s D -f -l database -n $noopt -d 'Modify the package database'
 complete -c $progname -s Q -f -l query -n $noopt -d 'Query the package database'
 complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
+complete -c $progname -s P -f -l print -n $noopt -d 'Print information'
 complete -c $progname -s R -f -l remove -n $noopt -d 'Remove packages from the system'
 complete -c $progname -s S -f -l sync -n $noopt -d 'Synchronize packages'
 complete -c $progname -s T -f -l deptest -n $noopt -d 'Check if dependencies are installed'
