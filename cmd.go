@@ -626,16 +626,10 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	aurI = removeListFromList(aurNI, aurI)
 	repoI = removeListFromList(repoNI, repoI)
 
-	if len(repoI) != 0 {
-		arguments := makeArguments()
-		arguments.addArg("S")
-		arguments.addTarget(repoI...)
-		err = passToPacman(arguments)
-	}
-
-	if len(aurI) != 0 {
-		err = aurInstall(aurI, nil)
-	}
+	arguments := makeArguments()
+	arguments.addTarget(repoI...)
+	arguments.addTarget(aurI...)
+	err = install(arguments)
 
 	return err
 }

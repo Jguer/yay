@@ -1,119 +1,290 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	rpc "github.com/mikkeloscar/aur"
+	alpm "github.com/jguer/go-alpm"
 )
 
-// BuildDependencies finds packages, on the second run
-// compares with a baselist and avoids searching those
-func buildDependencies(baselist []string) func(toCheck []string, isBaseList bool, last bool) (repo []string, notFound []string) {
-	localDb, err := alpmHandle.LocalDb()
-	if err != nil {
-		panic(err)
+type depTree struct {
+	ToProcess []string
+	Repo map[string]*alpm.Package
+	Aur map[string]*rpc.Pkg
+	Missing stringSet
+}
+
+type depCatagories struct {
+	Repo []*alpm.Package
+	RepoMake []*alpm.Package
+	Aur []*rpc.Pkg
+	AurMake []*rpc.Pkg
+}
+
+func makeDepTree() *depTree {
+	dt := depTree{
+		make([]string, 0),
+		make(map[string]*alpm.Package),
+		make(map[string]*rpc.Pkg),
+		make(stringSet),
 	}
 
-	dbList, err := alpmHandle.SyncDbs()
-	if err != nil {
-		panic(err)
+	return &dt
+}
+
+func makeDependCatagories() *depCatagories {
+	dc := depCatagories{
+		make([]*alpm.Package, 0),
+		make([]*alpm.Package, 0),
+		make([]*rpc.Pkg, 0),
+		make([]*rpc.Pkg, 0),
 	}
 
-	f := func(c rune) bool {
+	return &dc
+}
+
+func getNameFromDep(dep string) string {
+	return strings.FieldsFunc(dep, func(c rune) bool {
 		return c == '>' || c == '<' || c == '=' || c == ' '
-	}
+	})[0]
+}
 
-	return func(toCheck []string, isBaseList bool, close bool) (repo []string, notFound []string) {
-		if close {
-			return
+func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
+	dc := makeDependCatagories()
+
+	for _, pkg := range pkgs {
+		dep := getNameFromDep(pkg)
+		alpmpkg, exists := dt.Repo[dep]
+		if exists {
+			repoDepCatagoriesRecursive(alpmpkg, dc, dt, false)
+			dc.Repo = append(dc.Repo, alpmpkg)
+			delete(dt.Repo, dep)
 		}
 
-	Loop:
-		for _, dep := range toCheck {
-			if !isBaseList {
-				for _, base := range baselist {
-					if base == dep {
-						continue Loop
-					}
-				}
-			}
-			if _, erp := localDb.PkgCache().FindSatisfier(dep); erp == nil {
-				continue
-			} else if pkg, erp := dbList.FindSatisfier(dep); erp == nil {
-				repo = append(repo, pkg.Name())
+		aurpkg, exists := dt.Aur[dep]
+		if exists {
+			depCatagoriesRecursive(aurpkg, dc, dt, false)
+			dc.Aur = append(dc.Aur, aurpkg)
+			delete(dt.Aur, dep)
+		}
+	}
+
+	return dc, nil
+}
+
+func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTree, isMake bool) {
+	pkg.Depends().ForEach(func(_dep alpm.Depend) error {
+		dep := _dep.Name
+		alpmpkg, exists := dt.Repo[dep]
+		if exists {
+			delete(dt.Repo, dep)
+			repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
+		
+			if isMake {
+				dc.RepoMake = append(dc.RepoMake, alpmpkg)
 			} else {
-				field := strings.FieldsFunc(dep, f)
-				notFound = append(notFound, field[0])
+				dc.Repo = append(dc.Repo, alpmpkg)
 			}
+
 		}
-		return
+
+		return nil
+	})
+}
+
+func depCatagoriesRecursive(pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake bool) {
+	for _, deps := range [2][]string{pkg.Depends, pkg.MakeDepends} {
+		for _, _dep := range deps {
+			dep := getNameFromDep(_dep)
+			
+			aurpkg, exists := dt.Aur[dep]
+			if exists {
+				delete(dt.Aur, dep)
+				depCatagoriesRecursive(aurpkg, dc, dt, isMake)
+
+				if isMake {
+					dc.AurMake = append(dc.AurMake, aurpkg)
+				} else {
+					dc.Aur = append(dc.Aur, aurpkg)
+				}
+
+			}
+
+			alpmpkg, exists := dt.Repo[dep]
+			if exists {
+				delete(dt.Repo, dep)
+				repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
+
+				if isMake {
+					dc.RepoMake = append(dc.RepoMake, alpmpkg)
+				} else {
+					dc.Repo = append(dc.Repo, alpmpkg)
+				}
+
+			}
+
+		}
+		isMake = true
 	}
 }
 
-// DepSatisfier receives a string slice, returns a slice of packages found in
-// repos and one of packages not found in repos. Leaves out installed packages.
-func depSatisfier(toCheck []string) (repo []string, notFound []string, err error) {
+func getDepTree(pkgs []string) (*depTree, error) {
+	dt := makeDepTree()
+
 	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
+		return dt, err
+	}
+	syncDb, err := alpmHandle.SyncDbs()
+	if err != nil {
+		return dt, err
+	}
+
+	for _,pkg := range pkgs {
+		//if they explicitly asked for it still look for installed pkgs
+		/*installedPkg, isInstalled := localDb.PkgCache().FindSatisfier(pkg)
+		if isInstalled == nil {
+			dt.Repo[installedPkg.Name()] = installedPkg
+			continue
+		}//*/
+
+		//check the repos for a matching dep
+		repoPkg, inRepos := syncDb.FindSatisfier(pkg)
+		if inRepos == nil {
+			repoTreeRecursive(repoPkg, dt, localDb, syncDb)
+			continue
+		}
+		
+		dt.ToProcess = append(dt.ToProcess, pkg)
+	}
+
+	if len(dt.ToProcess) > 0 {
+		err = depTreeRecursive(dt, localDb, syncDb, false)
+	}
+
+	return dt, err
+}
+
+
+
+//takes a repo package
+//gives all of the non installed deps
+//does again on each sub dep
+func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb alpm.DbList) (err error){
+	_, exists := dt.Repo[pkg.Name()]
+	if exists {
 		return
 	}
-	dbList, err := alpmHandle.SyncDbs()
+
+	dt.Repo[pkg.Name()] = pkg
+
+	(*pkg).Depends().ForEach(func(dep alpm.Depend) (err error) {
+		_, exists := dt.Repo[dep.Name]
+		if exists {
+			return
+		}
+
+		_, isInstalled := localDb.PkgCache().FindSatisfier(dep.String())
+		if isInstalled == nil {
+			return
+		}	
+	
+		repoPkg, inRepos := syncDb.FindSatisfier(dep.String())
+		if inRepos == nil {
+			repoTreeRecursive(repoPkg, dt, localDb, syncDb)
+			return
+		} else {
+			dt.Missing.set(dep.String())
+		}
+
+		return
+	})
+
+	return
+}
+
+func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake bool) (err error) {
+	nextProcess := make([]string, 0)
+	currentProcess := make([]string, 0, len(dt.ToProcess))
+
+	//strip version conditions
+	for _, dep := range dt.ToProcess {
+		currentProcess = append(currentProcess, getNameFromDep(dep))
+	}
+
+	//assume toprocess only contains aur stuff we have not seen
+	info, err := rpc.Info(currentProcess)
 	if err != nil {
 		return
 	}
 
-	f := func(c rune) bool {
-		return c == '>' || c == '<' || c == '=' || c == ' '
+	//cache the results
+	for _, pkg := range info {
+		//copying to p fixes a bug
+		//would rather not copy but cant find another way to fix
+		p := pkg
+		dt.Aur[pkg.Name] = &p
+
 	}
 
-	for _, dep := range toCheck {
-		if _, erp := localDb.PkgCache().FindSatisfier(dep); erp == nil {
+	//loop through to process and check if we now have
+	//each packaged cached
+	//if its not cached we assume its missing
+	for k, pkgName := range currentProcess {
+		pkg, exists := dt.Aur[pkgName]
+
+		//didnt get it in the request
+		if !exists {
+			dt.Missing.set(dt.ToProcess[k])
 			continue
-		} else if pkg, erp := dbList.FindSatisfier(dep); erp == nil {
-			repo = append(repo, pkg.Name())
-		} else {
-			field := strings.FieldsFunc(dep, f)
-			notFound = append(notFound, field[0])
+		}
+
+		//for reach dep and makedep
+		for _, deps := range [2][]string{pkg.Depends, pkg.MakeDepends} {
+			for _, versionedDep := range deps {
+				dep := getNameFromDep(versionedDep)
+
+				_, exists = dt.Aur[dep]
+				//we have it cached so skip
+				if exists {
+					continue
+				}
+				
+				_, exists = dt.Repo[dep]
+				//we have it cached so skip
+				if exists {
+					continue
+				}
+				
+				_, exists = dt.Missing[dep]
+				//we know it doesnt resolve so skip
+				if exists {
+					continue
+				}
+
+				//check if already installed
+				_, isInstalled := localDb.PkgCache().FindSatisfier(versionedDep)
+				if isInstalled == nil {
+					continue
+				}
+
+				//check the repos for a matching dep
+				repoPkg, inRepos := syncDb.FindSatisfier(versionedDep)
+				if inRepos == nil {
+					repoTreeRecursive(repoPkg, dt, localDb, syncDb)
+					continue
+				}
+
+
+				//if all else failes add it to next search
+				nextProcess = append(nextProcess, versionedDep)
+			}
 		}
 	}
 
-	err = nil
+	dt.ToProcess = nextProcess
+	depTreeRecursive(dt, localDb, syncDb, true)
+	
 	return
 }
 
-// PkgDependencies returns package dependencies not installed belonging to AUR
-// 0 is Repo, 1 is Foreign.
-func pkgDependencies(a *rpc.Pkg) (runDeps [2][]string, makeDeps [2][]string, err error) {
-	var q aurQuery
-	if len(a.Depends) == 0 && len(a.MakeDepends) == 0 {
-		q, err = rpc.Info([]string{a.Name})
-		if len(q) == 0 || err != nil {
-			err = fmt.Errorf("Unable to search dependencies, %s", err)
-			return
-		}
-	} else {
-		q = append(q, *a)
-	}
-
-	depSearch := buildDependencies(a.Depends)
-	if len(a.Depends) != 0 {
-		runDeps[0], runDeps[1] = depSearch(q[0].Depends, true, false)
-		if len(runDeps[0]) != 0 || len(runDeps[1]) != 0 {
-			fmt.Println("\x1b[1;32m=>\x1b[1;33m Run Dependencies: \x1b[0m")
-			printDeps(runDeps[0], runDeps[1])
-		}
-	}
-
-	if len(a.MakeDepends) != 0 {
-		makeDeps[0], makeDeps[1] = depSearch(q[0].MakeDepends, false, false)
-		if len(makeDeps[0]) != 0 || len(makeDeps[1]) != 0 {
-			fmt.Println("\x1b[1;32m=>\x1b[1;33m Make Dependencies: \x1b[0m")
-			printDeps(makeDeps[0], makeDeps[1])
-		}
-	}
-	depSearch(a.MakeDepends, false, true)
-
-	err = nil
-	return
-}

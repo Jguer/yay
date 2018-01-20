@@ -9,6 +9,19 @@ import (
 
 type stringSet map[string]struct{}
 
+func (set stringSet) set(v string) {
+	set[v] = struct{}{}
+}
+
+func (set stringSet) get(v string) bool {
+	_, exists := set[v]
+	return exists
+}
+
+func (set stringSet) remove(v string) {
+	delete(set, v)
+}
+
 func (set stringSet) getAny() string {
 	for v := range set {
 		return v
@@ -30,7 +43,7 @@ func (set stringSet) toSlice() []string {
 
 func (set stringSet) removeAny() string {
 	v := set.getAny()
-	delete(set, v)
+	set.remove(v)
 	return v
 }
 
