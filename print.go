@@ -258,8 +258,8 @@ func localStatistics() error {
 //todo make pretty
 func printMissing(missing stringSet) {
 	fmt.Print("Packages not found in repos or aur:")
-		for pkg := range missing {
-			fmt.Print(" ", pkg)
-		}
-		fmt.Println()
+	for pkg := range missing {
+		fmt.Print(" ", pkg)
+	}
+	fmt.Println()
 }

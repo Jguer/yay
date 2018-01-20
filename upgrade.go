@@ -368,7 +368,7 @@ func upgradePkgs(flags []string) error {
 	arguments := cmdArgs.copy()
 	arguments.delArg("u", "sysupgrade")
 	arguments.delArg("y", "refresh")
-	
+
 	var repoNames []string
 	var aurNames []string
 
@@ -395,7 +395,7 @@ func upgradePkgs(flags []string) error {
 			aurNames = append(aurNames, k.Name)
 		}
 	}
-	
+
 	arguments.addTarget(repoNames...)
 	arguments.addTarget(aurNames...)
 	err = install(arguments)

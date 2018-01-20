@@ -180,7 +180,7 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 			PrintInfo(&aurP)
 		}
 	}
-	
+
 	//todo
 	//if len(missing) != 0 {
 	//	printMissing(missing)
@@ -264,7 +264,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, missing []str
 			possibleAur = append(possibleAur, pkg)
 		}
 	}
-	
+
 	if len(possibleAur) == 0 {
 		return
 	}
@@ -274,7 +274,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, missing []str
 		return
 	}
 
-	outer:
+outer:
 	for _, pkg := range possibleAur {
 		for _, rpcpkg := range info {
 			if rpcpkg.Name == pkg {

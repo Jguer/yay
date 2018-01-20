@@ -1,18 +1,17 @@
 package main
 
-
 import (
 	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
 
+	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 	gopkg "github.com/mikkeloscar/gopkgbuild"
-	alpm "github.com/jguer/go-alpm"
 )
 
-// Install handles package installs	
+// Install handles package installs
 func install(parser *arguments) error {
 	aurs, repos, missing, err := packageSlices(parser.targets.toSlice())
 	if err != nil {
@@ -40,17 +39,17 @@ func install(parser *arguments) error {
 	if len(aurs) != 0 {
 		//todo make pretty
 		fmt.Println("Resolving Dependencies")
-		
+
 		dt, err := getDepTree(aurs)
 		if err != nil {
 			return err
 		}
 
-		if len(dt.Missing) >  0 {
+		if len(dt.Missing) > 0 {
 			fmt.Println(dt.Missing)
 			return fmt.Errorf("Could not find all Deps")
 		}
-		
+
 		dc, err := getDepCatagories(aurs, dt)
 		if err != nil {
 			return err
@@ -58,18 +57,17 @@ func install(parser *arguments) error {
 
 		for _, pkg := range dc.AurMake {
 			if pkg.Maintainer == "" {
-				fmt.Printf("\x1b[1;31;40m==> Warning:\x1b[0;;40m %s is orphaned.\x1b[0m\n", pkg.Name + "-" + pkg.Version)
+				fmt.Printf("\x1b[1;31;40m==> Warning:\x1b[0;;40m %s is orphaned.\x1b[0m\n", pkg.Name+"-"+pkg.Version)
 			}
 		}
 
 		for _, pkg := range dc.Aur {
 			if pkg.Maintainer == "" {
-				fmt.Printf("\x1b[1;31;40m==> Warning:\x1b[0;;40m %s is orphaned.\x1b[0m\n", pkg.Name + "-" + pkg.Version)
+				fmt.Printf("\x1b[1;31;40m==> Warning:\x1b[0;;40m %s is orphaned.\x1b[0m\n", pkg.Name+"-"+pkg.Version)
 			}
 		}
 
 		fmt.Println()
-
 
 		p1 := func(a []*alpm.Package) {
 			for _, v := range a {
@@ -100,7 +98,7 @@ func install(parser *arguments) error {
 		fmt.Println()
 
 		fmt.Println()
-	
+
 		askCleanBuilds(dc.AurMake)
 		askCleanBuilds(dc.Aur)
 
@@ -144,14 +142,14 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		if len(dc.RepoMake) + len(dc.AurMake) > 0 {
+		if len(dc.RepoMake)+len(dc.AurMake) > 0 {
 			if continueTask("Remove make dependancies?", "yY") {
 				return nil
 			}
 
 			removeArguments := makeArguments()
 			removeArguments.addArg("R")
-			
+
 			for _, pkg := range dc.RepoMake {
 				removeArguments.addTarget(pkg.Name())
 			}
@@ -162,7 +160,7 @@ func install(parser *arguments) error {
 
 			passToPacman(removeArguments)
 		}
-	
+
 		return nil
 	}
 
@@ -172,9 +170,9 @@ func install(parser *arguments) error {
 func askCleanBuilds(pkgs []*rpc.Pkg) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		
+
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			if !continueTask(pkg.Name + " Directory exists. Clean Build?", "yY") {
+			if !continueTask(pkg.Name+" Directory exists. Clean Build?", "yY") {
 				_ = os.RemoveAll(config.BuildDir + pkg.PackageBase)
 			}
 		}
@@ -184,8 +182,8 @@ func askCleanBuilds(pkgs []*rpc.Pkg) {
 func askEditPkgBuilds(pkgs []*rpc.Pkg) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		
-		if !continueTask(pkg.Name + " Edit PKGBUILD?", "yY") {
+
+		if !continueTask(pkg.Name+" Edit PKGBUILD?", "yY") {
 			editcmd := exec.Command(editor(), dir+"PKGBUILD")
 			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 			editcmd.Run()
@@ -210,10 +208,10 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg) {
 func dowloadPkgBuilds(pkgs []*rpc.Pkg) (err error) {
 	for _, pkg := range pkgs {
 		//todo make pretty
-		fmt.Println("Downloading:", pkg.Name + "-" + pkg.Version)
+		fmt.Println("Downloading:", pkg.Name+"-"+pkg.Version)
 
-		err = downloadAndUnpack(baseURL + pkg.URLPath, config.BuildDir, false)
-		if err != nil{
+		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
+		if err != nil {
 			return
 		}
 	}

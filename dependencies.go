@@ -3,22 +3,22 @@ package main
 import (
 	"strings"
 
-	rpc "github.com/mikkeloscar/aur"
 	alpm "github.com/jguer/go-alpm"
+	rpc "github.com/mikkeloscar/aur"
 )
 
 type depTree struct {
 	ToProcess []string
-	Repo map[string]*alpm.Package
-	Aur map[string]*rpc.Pkg
-	Missing stringSet
+	Repo      map[string]*alpm.Package
+	Aur       map[string]*rpc.Pkg
+	Missing   stringSet
 }
 
 type depCatagories struct {
-	Repo []*alpm.Package
+	Repo     []*alpm.Package
 	RepoMake []*alpm.Package
-	Aur []*rpc.Pkg
-	AurMake []*rpc.Pkg
+	Aur      []*rpc.Pkg
+	AurMake  []*rpc.Pkg
 }
 
 func makeDepTree() *depTree {
@@ -79,7 +79,7 @@ func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTre
 		if exists {
 			delete(dt.Repo, dep)
 			repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
-		
+
 			if isMake {
 				dc.RepoMake = append(dc.RepoMake, alpmpkg)
 			} else {
@@ -96,7 +96,7 @@ func depCatagoriesRecursive(pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake
 	for _, deps := range [2][]string{pkg.Depends, pkg.MakeDepends} {
 		for _, _dep := range deps {
 			dep := getNameFromDep(_dep)
-			
+
 			aurpkg, exists := dt.Aur[dep]
 			if exists {
 				delete(dt.Aur, dep)
@@ -140,7 +140,7 @@ func getDepTree(pkgs []string) (*depTree, error) {
 		return dt, err
 	}
 
-	for _,pkg := range pkgs {
+	for _, pkg := range pkgs {
 		//if they explicitly asked for it still look for installed pkgs
 		/*installedPkg, isInstalled := localDb.PkgCache().FindSatisfier(pkg)
 		if isInstalled == nil {
@@ -154,7 +154,7 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			repoTreeRecursive(repoPkg, dt, localDb, syncDb)
 			continue
 		}
-		
+
 		dt.ToProcess = append(dt.ToProcess, pkg)
 	}
 
@@ -165,12 +165,10 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	return dt, err
 }
 
-
-
 //takes a repo package
 //gives all of the non installed deps
 //does again on each sub dep
-func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb alpm.DbList) (err error){
+func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb alpm.DbList) (err error) {
 	_, exists := dt.Repo[pkg.Name()]
 	if exists {
 		return
@@ -187,8 +185,8 @@ func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb 
 		_, isInstalled := localDb.PkgCache().FindSatisfier(dep.String())
 		if isInstalled == nil {
 			return
-		}	
-	
+		}
+
 		repoPkg, inRepos := syncDb.FindSatisfier(dep.String())
 		if inRepos == nil {
 			repoTreeRecursive(repoPkg, dt, localDb, syncDb)
@@ -249,13 +247,13 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 				if exists {
 					continue
 				}
-				
+
 				_, exists = dt.Repo[dep]
 				//we have it cached so skip
 				if exists {
 					continue
 				}
-				
+
 				_, exists = dt.Missing[dep]
 				//we know it doesnt resolve so skip
 				if exists {
@@ -275,7 +273,6 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 					continue
 				}
 
-
 				//if all else failes add it to next search
 				nextProcess = append(nextProcess, versionedDep)
 			}
@@ -284,7 +281,6 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 
 	dt.ToProcess = nextProcess
 	depTreeRecursive(dt, localDb, syncDb, true)
-	
+
 	return
 }
-
