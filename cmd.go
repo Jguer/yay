@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var cmdArgs = makeArguments()
@@ -291,6 +289,8 @@ func handleCmd() (changedConfig bool, err error) {
 		passToPacman(cmdArgs)
 	case "G", "getpkgbuild":
 		err = handleGetpkgbuild()
+	case "P", "print":
+		err = handlePrint()
 	case "Y", "--yay":
 		err = handleYay()
 	default:
@@ -314,9 +314,6 @@ func handleConfig(option string) (changedConfig bool) {
 		config.CleanAfter = true
 	case "noafterclean":
 		config.CleanAfter = false
-		//		case "printconfig":
-		//			fmt.Printf("%#v", config)
-		//			os.Exit(0)
 		//		case "gendb":
 		//			err = createDevelDB()
 		//			if err != nil {
@@ -339,14 +336,6 @@ func handleConfig(option string) (changedConfig bool) {
 		config.SortMode = TopDown
 	case "--bottomup":
 		config.SortMode = BottomUp
-		//		case "complete":
-		//			config.Shell = "sh"
-		//			complete()
-		//			os.Exit(0)
-		//		case "fcomplete":
-		//			config.Shell = fishShell
-		//			complete()
-		//			os.Exit(0)
 		//		case "help":
 		//			usage()
 		//			os.Exit(0)
@@ -367,12 +356,31 @@ func handleVersion() {
 	fmt.Printf("yay v%s\n", version)
 }
 
+func handlePrint() (err error) {
+	switch {
+	case cmdArgs.existsArg("d", "defaultconfig"):
+		fmt.Printf("%#v", config)
+	case cmdArgs.existsArg("n", "numberupgrades"):
+	case cmdArgs.existsArg("u", "upgrades"):
+	case cmdArgs.existsArg("c", "complete"):
+		switch {
+		case cmdArgs.existsArg("f", "fish"):
+			complete("fish")
+		default:
+			complete("sh")
+		}
+	case cmdArgs.existsArg("d", "defaultconfig"):
+	default:
+		return nil
+	}
+
+	return nil
+}
+
 func handleYay() (err error) {
 	//_, options, targets := cmdArgs.formatArgs()
 	if cmdArgs.existsArg("h", "help") {
 		usage()
-	} else if cmdArgs.existsArg("printconfig") {
-		fmt.Printf("%#v", config)
 	} else if cmdArgs.existsArg("gendb") {
 		err = createDevelDB()
 		if err != nil {
@@ -382,12 +390,6 @@ func handleYay() (err error) {
 		if err != nil {
 			return
 		}
-	} else if cmdArgs.existsArg("complete") {
-		config.Shell = "sh"
-		complete()
-	} else if cmdArgs.existsArg("fcomplete") {
-		config.Shell = "fish"
-		complete()
 	} else if cmdArgs.existsArg("stats") {
 		err = localStatistics()
 	} else if cmdArgs.existsArg("cleandeps") {
@@ -637,36 +639,6 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		err = aurInstall(aurI, nil)
 	}
 
-	return err
-}
-
-// Complete provides completion info for shells
-func complete() error {
-	path := completionFile + config.Shell + ".cache"
-	info, err := os.Stat(path)
-	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
-		os.MkdirAll(filepath.Dir(completionFile), 0755)
-		out, errf := os.Create(path)
-		if errf != nil {
-			return errf
-		}
-
-		if createAURList(out) != nil {
-			defer os.Remove(path)
-		}
-		erra := createRepoList(out)
-
-		out.Close()
-		return erra
-	}
-
-	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	_, err = io.Copy(os.Stdout, in)
 	return err
 }
 
