@@ -369,7 +369,8 @@ func handlePrint() (err error) {
 		default:
 			complete("sh")
 		}
-	case cmdArgs.existsArg("d", "defaultconfig"):
+	case cmdArgs.existsArg("s", "stats"):
+		err = localStatistics()
 	default:
 		return nil
 	}
@@ -390,8 +391,6 @@ func handleYay() (err error) {
 		if err != nil {
 			return
 		}
-	} else if cmdArgs.existsArg("stats") {
-		err = localStatistics()
 	} else if cmdArgs.existsArg("cleandeps") {
 		err = cleanDependencies()
 	} else if len(cmdArgs.targets) > 0 {
