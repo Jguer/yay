@@ -261,7 +261,12 @@ func (parser *arguments) formatTargets() (args []string) {
 }
 
 func (parser *arguments) formatArgs() (args []string) {
-	op := formatArg(parser.op)
+	var op string
+
+	if parser.op != "" {
+		op = formatArg(parser.op)
+	}
+
 	args = append(args, op)
 
 	for option, arg := range parser.options {
