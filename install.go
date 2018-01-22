@@ -26,6 +26,7 @@ func install(parser *arguments) error {
 	arguments := parser.copy()
 	arguments.delArg("u", "sysupgrade")
 	arguments.delArg("y", "refresh")
+	arguments.op = "S"
 	arguments.targets = make(stringSet)
 	arguments.addTarget(repos...)
 
