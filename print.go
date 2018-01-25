@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	rpc "github.com/mikkeloscar/aur"
@@ -262,4 +263,37 @@ func printMissing(missing stringSet) {
 		fmt.Print(" ", pkg)
 	}
 	fmt.Println()
+}
+
+//todo make it less hacky
+func printNumberOfUpdates() error {
+	old := os.Stdout // keep backup of the real stdout
+	os.Stdout = nil
+	aurUp, repoUp, err := upList()
+	os.Stdout = old // restoring the real stdout
+	if err != nil {
+		return err
+	}
+	fmt.Println(len(aurUp) + len(repoUp))
+	return nil
+}
+
+//todo make it less hacky
+func printUpdateList() error {
+	old := os.Stdout // keep backup of the real stdout
+	os.Stdout = nil
+	aurUp, repoUp, err := upList()
+	os.Stdout = old // restoring the real stdout
+	if err != nil {
+		return err
+	}
+	for _, pkg := range repoUp {
+		fmt.Println(pkg.Name)
+	}
+
+	for _, pkg := range aurUp {
+		fmt.Println(pkg.Name)
+	}
+
+	return nil
 }

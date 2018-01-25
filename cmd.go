@@ -361,7 +361,15 @@ func handlePrint() (err error) {
 	case cmdArgs.existsArg("d", "defaultconfig"):
 		fmt.Printf("%#v", config)
 	case cmdArgs.existsArg("n", "numberupgrades"):
+		err = printNumberOfUpdates()
+		if err != nil {
+			return
+		}
 	case cmdArgs.existsArg("u", "upgrades"):
+		err = printUpdateList()
+		if err != nil {
+			return
+		}
 	case cmdArgs.existsArg("c", "complete"):
 		switch {
 		case cmdArgs.existsArg("f", "fish"):
