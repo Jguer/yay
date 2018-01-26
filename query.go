@@ -81,7 +81,7 @@ func (q aurQuery) missingPackage(pkgS []string) {
 		}
 
 		if !found {
-			fmt.Println("\x1b[31mUnable to find", depName, "in AUR\x1b[0m")
+			fmt.Println(redFg("Unable to find" + depName + "in AUR"))
 		}
 	}
 }
@@ -303,7 +303,7 @@ func hangingPackages() (hanging []string, err error) {
 		requiredby := pkg.ComputeRequiredBy()
 		if len(requiredby) == 0 {
 			hanging = append(hanging, pkg.Name())
-			fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), human(pkg.ISize()))
+			fmt.Println(pkg.Name() + ": " + yellowFg(human(pkg.ISize())))
 
 		}
 		return nil
@@ -372,7 +372,7 @@ big:
 			requiredby := pkg.ComputeRequiredBy()
 			if len(requiredby) == 0 {
 				hanging = append(hanging, pkgName)
-				fmt.Printf("%s: \x1B[0;33m%s\x1B[0m\n", pkg.Name(), human(pkg.ISize()))
+				fmt.Println(pkg.Name() + ": " + yellowFg(human(pkg.ISize())))
 			}
 		}
 	}

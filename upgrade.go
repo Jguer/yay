@@ -64,28 +64,30 @@ func (u upSlice) Print(start int) {
 		new, errNew := pkgb.NewCompleteVersion(i.RemoteVersion)
 		var left, right string
 
-		f := func(name string) (color int) {
+		f := func(name string) (output string) {
 			var hash = 5381
 			for i := 0; i < len(name); i++ {
 				hash = int(name[i]) + ((hash << 5) + (hash))
 			}
-			return hash%6 + 31
+			return fmt.Sprintf("\x1b[1;%dm%s\x1b[0m", hash%6+31, name)
 		}
-		fmt.Printf("\x1b[33m%-2d\x1b[0m ", len(u)+start-k-1)
-		fmt.Printf("\x1b[1;%dm%s\x1b[0m/\x1b[1;39m%-25s\t\t\x1b[0m", f(i.Repository), i.Repository, i.Name)
+		fmt.Printf("%2s ", yellowFg(strconv.Itoa(len(u)+start-k-1)))
+		fmt.Print(f(i.Repository), "/", boldWhiteFg(i.Name))
 
 		if errOld != nil {
-			left = fmt.Sprintf("\x1b[31m%20s\x1b[0m", "Invalid Version")
+			left = redFg("Invalid Version")
 		} else {
-			left = fmt.Sprintf("\x1b[31m%18s\x1b[0m-%s", old.Version, old.Pkgrel)
+			left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
 		}
 
 		if errNew != nil {
-			right = fmt.Sprintf("\x1b[31m%s\x1b[0m", "Invalid Version")
+			right = redFg("Invalid Version")
 		} else {
-			right = fmt.Sprintf("\x1b[31m%s\x1b[0m-%s", new.Version, new.Pkgrel)
+			right = redFg(string(new.Version)) + "-" + string(new.Pkgrel)
 		}
-		fmt.Printf("%s -> %s\n", left, right)
+		w := 100 - len(i.Repository) - len(i.Name) - len(left)
+		fmt.Printf(fmt.Sprintf("%%%ds", w),
+			fmt.Sprintf("%s -> %s\n", left, right))
 	}
 }
 
@@ -151,7 +153,8 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 			}
 			if found {
 				if pkg.ShouldIgnore() {
-					fmt.Printf("\x1b[33mwarning:\x1b[0m %s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
+					fmt.Print(warning)
+					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
 				} else {
 					packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
 				}
@@ -208,7 +211,8 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 					if (config.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
 						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
 						if local[i].ShouldIgnore() {
-							fmt.Printf("\x1b[33mwarning:\x1b[0m %s ignoring package upgrade (%s => %s)\n", local[i].Name(), local[i].Version(), qtemp[x].Version)
+							fmt.Print(warning)
+							fmt.Printf("%s ignoring package upgrade (%s => %s)\n", local[i].Name(), local[i].Version(), qtemp[x].Version)
 						} else {
 							packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
 						}
@@ -255,7 +259,8 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		newPkg := pkg.NewVersion(dbList)
 		if newPkg != nil {
 			if pkg.ShouldIgnore() {
-				fmt.Printf("\x1b[33mwarning:\x1b[0m %s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
+				fmt.Print(warning)
+				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
 			} else {
 				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
 			}
