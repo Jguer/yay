@@ -305,12 +305,13 @@ func upgradePkgs(flags []string) error {
 	var repoNums []int
 	var aurNums []int
 	sort.Sort(repoUp)
-	fmt.Printf("\x1b[1;34;1m:: \x1b[0m\x1b[1m%d Packages to upgrade.\x1b[0m\n", len(aurUp)+len(repoUp))
+	fmt.Println(boldBlueFg("::"), len(aurUp)+len(repoUp), boldWhiteFg("Packages to upgrade."))
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
 
 	if !config.NoConfirm {
-		fmt.Print("\x1b[32mEnter packages you don't want to upgrade.\x1b[0m\nNumbers: ")
+		fmt.Println(greenFg("Enter packages you don't want to upgrade."))
+		fmt.Print("Numbers: ")
 		reader := bufio.NewReader(os.Stdin)
 
 		numberBuf, overflow, err := reader.ReadLine()

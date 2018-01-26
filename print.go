@@ -287,6 +287,14 @@ func redFg(in string) string {
 	return in
 }
 
+func greenFg(in string) string {
+	if alpmConf.Options&alpm.ConfColor > 0 {
+		return "\x1b[0;32m" + in + "\x1b[0m"
+	}
+
+	return in
+}
+
 func yellowFg(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
 		return "\x1b[0;33m" + in + "\x1b[0m"
@@ -311,6 +319,14 @@ func boldYellowFg(in string) string {
 	return in
 }
 
+func boldBlueFg(in string) string {
+	if alpmConf.Options&alpm.ConfColor > 0 {
+		return "\x1b[1;34m" + in + "\x1b[0m"
+	}
+
+	return in
+}
+
 func boldCyanFg(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
 		return "\x1b[1;36m" + in + "\x1b[0m"
@@ -329,7 +345,7 @@ func boldWhiteFg(in string) string {
 
 func redFgBlackBg(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[31;40m" + in + "\x1b[0m"
+		return "\x1b[0;31;40m" + in + "\x1b[0m"
 	}
 
 	return in
@@ -337,7 +353,7 @@ func redFgBlackBg(in string) string {
 
 func greenFgBlackBg(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[32;40m" + in + "\x1b[0m"
+		return "\x1b[0;32;40m" + in + "\x1b[0m"
 	}
 
 	return in
