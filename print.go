@@ -10,7 +10,6 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
-const warning = "\x1b[33mWarning:\x1b[0m "
 const arrow = "==>"
 
 // Human returns results in Human readable format.
@@ -303,6 +302,13 @@ func yellowFg(in string) string {
 	return in
 }
 
+func boldFg(in string) string {
+	if alpmConf.Options&alpm.ConfColor > 0 {
+		return "\x1b[1m" + in + "\x1b[0m"
+	}
+
+	return in
+}
 func boldGreenFg(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
 		return "\x1b[1;32m" + in + "\x1b[0m"

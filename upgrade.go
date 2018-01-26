@@ -102,14 +102,14 @@ func upList() (aurUp upSlice, repoUp upSlice, err error) {
 	aurC := make(chan upSlice)
 	errC := make(chan error)
 
-	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Searching databases for updates...\x1b[0m")
+	fmt.Println(boldCyanFg("::"), boldFg("Searching databases for updates..."))
 	go func() {
 		repoUpList, err := upRepo(local)
 		errC <- err
 		repoC <- repoUpList
 	}()
 
-	fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Searching AUR for updates...\x1b[0m")
+	fmt.Println(boldCyanFg("::"), boldFg("Searching AUR for updates..."))
 	go func() {
 		aurUpList, err := upAUR(remote, remoteNames)
 		errC <- err
@@ -153,7 +153,7 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 			}
 			if found {
 				if pkg.ShouldIgnore() {
-					fmt.Print(warning)
+					fmt.Print(yellowFg("Warning: "))
 					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
 				} else {
 					packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
@@ -179,7 +179,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 	if config.Devel {
 		routines++
 		go upDevel(remote, packageC, done)
-		fmt.Println("\x1b[1;36;1m::\x1b[0m\x1b[1m Checking development packages...\x1b[0m")
+		fmt.Println(boldCyanFg("::"), boldFg("Checking development packages..."))
 	}
 
 	for i := len(remote); i != 0; i = j {
@@ -211,7 +211,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 					if (config.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
 						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
 						if local[i].ShouldIgnore() {
-							fmt.Print(warning)
+							fmt.Print(yellowFg("Warning: "))
 							fmt.Printf("%s ignoring package upgrade (%s => %s)\n", local[i].Name(), local[i].Version(), qtemp[x].Version)
 						} else {
 							packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
@@ -259,7 +259,7 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		newPkg := pkg.NewVersion(dbList)
 		if newPkg != nil {
 			if pkg.ShouldIgnore() {
-				fmt.Print(warning)
+				fmt.Print(yellowFg("Warning: "))
 				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
 			} else {
 				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
