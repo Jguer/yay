@@ -71,21 +71,30 @@ func (u upSlice) Print(start int) {
 			}
 			return fmt.Sprintf("\x1b[1;%dm%s\x1b[0m", hash%6+31, name)
 		}
-		fmt.Printf("%2s ", yellowFg(strconv.Itoa(len(u)+start-k-1)))
+		fmt.Print(yellowFg(fmt.Sprintf("%2d ", len(u)+start-k-1)))
 		fmt.Print(f(i.Repository), "/", boldWhiteFg(i.Name))
 
 		if errOld != nil {
 			left = redFg("Invalid Version")
 		} else {
-			left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
+			if old.Version == new.Version {
+				left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
+			} else {
+				left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
+			}
 		}
 
 		if errNew != nil {
 			right = redFg("Invalid Version")
 		} else {
-			right = redFg(string(new.Version)) + "-" + string(new.Pkgrel)
+			if old.Version == new.Version {
+				right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
+			} else {
+				right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
+			}
 		}
-		w := 100 - len(i.Repository) - len(i.Name) - len(left)
+
+		w := 70 - len(i.Repository) - len(i.Name) + len(left)
 		fmt.Printf(fmt.Sprintf("%%%ds", w),
 			fmt.Sprintf("%s -> %s\n", left, right))
 	}
