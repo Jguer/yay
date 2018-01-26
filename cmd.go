@@ -561,9 +561,9 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		aurQ.printSearch(numpq + 1)
 	}
 
-	fmt.Printf("\x1b[32m%s %s\x1b[0m\nNumbers: ",
-		"Type the numbers or ranges (e.g. 1-10) you want to install.",
-		"Separate each one of them with a space.")
+	fmt.Println(greenFg("Type the numbers or ranges (e.g. 1-10) you want to install. " +
+		"Separate each one of them with a space."))
+	fmt.Print("Numbers: ")
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil || overflow {
@@ -673,7 +673,8 @@ func passToMakepkg(dir string, args ...string) (err error) {
 	if err == nil {
 		_ = saveVCSInfo()
 		if config.CleanAfter {
-			fmt.Println("\x1b[1;32m==> CleanAfter enabled. Deleting source folder.\x1b[0m")
+			fmt.Println(boldGreenFg(arrow +
+				" CleanAfter enabled. Deleting source folder."))
 			os.RemoveAll(dir)
 		}
 	}

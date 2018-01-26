@@ -146,10 +146,12 @@ func editor() string {
 		}
 		fallthrough
 	default:
-		fmt.Printf("\x1b[1;31;40mWarning: \x1B[1;33;40m$EDITOR\x1b[0;37;40m is not set.\x1b[0m\nPlease add $EDITOR or to your environment variables.\n")
+		fmt.Println(boldRedFgBlackBg("Warning:"),
+			boldYellowFgBlackBg("$EDITOR"), whiteFgBlackBg("is not set"))
+		fmt.Println("Please add $EDITOR or to your environment variables.")
 
 	editorLoop:
-		fmt.Printf("\x1b[32m%s\x1b[0m ", "Edit PKGBUILD with:")
+		fmt.Print(greenFg("Edit PKGBUILD with:"))
 		var editorInput string
 		_, err := fmt.Scanln(&editorInput)
 		if err != nil {
@@ -181,7 +183,7 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	var response string
-	fmt.Printf("\x1b[1;32m==> %s\x1b[1;37m %s\x1b[0m", s, postFix)
+	fmt.Println(boldGreenFg(arrow+" "+s), boldWhiteFg(postFix))
 
 	n, err := fmt.Scanln(&response)
 	if err != nil || n == 0 {

@@ -58,13 +58,15 @@ func install(parser *arguments) error {
 
 		for _, pkg := range dc.AurMake {
 			if pkg.Maintainer == "" {
-				fmt.Printf("\x1b[1;31;40m==> Warning:\x1b[0;;40m %s is orphaned.\x1b[0m\n", pkg.Name+"-"+pkg.Version)
+				fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
+					blackBg(pkg.Name+"-"+pkg.Version+"is orphaned"))
 			}
 		}
 
 		for _, pkg := range dc.Aur {
 			if pkg.Maintainer == "" {
-				fmt.Printf("\x1b[1;31;40m==> Warning:\x1b[0;;40m %s is orphaned.\x1b[0m\n", pkg.Name+"-"+pkg.Version)
+				fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
+					blackBg(pkg.Name+"-"+pkg.Version+"is orphaned"))
 			}
 		}
 
