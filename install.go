@@ -146,7 +146,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(dc.RepoMake)+len(dc.AurMake) > 0 {
-			if continueTask("Remove make dependancies?", "yY") {
+			if continueTask("Remove make dependencies?", "yY") {
 				return nil
 			}
 
