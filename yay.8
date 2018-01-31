@@ -1,5 +1,5 @@
 '\" t
-.TH "YAY" "8" "2017-01-05" "Yay v2\&.219" "Yay Manual"
+.TH "YAY" "8" "2018-01-31" "Yay v2\&.295" "Yay Manual"
 .nh
 .ad l
 .SH "NAME"
@@ -21,6 +21,11 @@ This manpage only covers options unique to Yay\&. For other options see \fBpacma
 Perform yay specific operations\&. This is the default if no other operation is selected\&.
 .RE
 .PP
+\fB\-P, --print\fR
+.RS 4
+Perform yay specific print operations\&.
+.RE
+.PP
 \fB\-G, --getpkgbuild\fR
 .RS 4
 Downloads PKGBUILD from ABS or AUR\&.
@@ -37,22 +42,46 @@ These operations are extended to support the AUR as well as repo packages\&.
 \fB\-R\fR
 .RS 4
 Yay will also remove cached data about devel packages\&.
+.RE
 .SH "YAY OPTIONS (APPLY TO -Y AND --YAY)"
 .PP
-\fB<NO OPERATION>\fR
+\fB<NO OPTION>\fR
 .RS 4
-Displays List of packages matching search terms and prompts the user on which packages to install(yogurt mode)\&.
+Displays list of packages matching search terms and prompts the user on which packages to install(yogurt mode)\&.
 .RE
 .PP
-\fB\--stats\fR
+\fB\-g \-\-getpkgbuild\fR
+.RS 4
+Downloads PKGBUILD from ABS or AUR\&.
+.RE
+.RE
+.PP
+\fB\-c \-\-clean\fR
+.RS 4
+Remove unneeded dependencies\&.
+.RE
+.SH "PRINT OPTIONS (APPLY TO -P AND --PRINT)"
+\fB\-d \-\-defaultconfig\fR
+.RS 4
+Print current yay configuration\&.
+.RE
+.PP
+\fB\-n \-\-numberupgrades\fR
+.RS 4
+Print number of updates\&.
+.RE
+.PP
+\fB\-s \-\-stats\fR
 .RS 4
 Displays information about installed packages and system health\&. If there are orphaned or out-of-date packages, warnings will be displayed\&.
 .RE
 .PP
-\fB\-\-printconfig\fR
+\fB\-u \-\-upgrades\fR
 .RS 4
-Prints current yay configuration\&.
+Print update list\&.
 .RE
+.PP
+
 .SH "PERMANENT CONFIGURATION SETTINGS"
 .PP
 These options will be saved to disk and reapplied next time Yay is ran\&.

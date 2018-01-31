@@ -30,12 +30,15 @@ complete -c $progname -n $noopt -a "-Q" -d "Query the package database"
 complete -c $progname -s D -f -l database -n $noopt -d 'Modify the package database'
 complete -c $progname -s Q -f -l query -n $noopt -d 'Query the package database'
 complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
-complete -c $progname -s P -f -l print -n $noopt -d 'Print information'
 complete -c $progname -s R -f -l remove -n $noopt -d 'Remove packages from the system'
 complete -c $progname -s S -f -l sync -n $noopt -d 'Synchronize packages'
 complete -c $progname -s T -f -l deptest -n $noopt -d 'Check if dependencies are installed'
 complete -c $progname -s U -f -l upgrade -n $noopt -d 'Upgrade or add a local package'
 complete -c $progname -s F -f -l files -n $noopt -d 'Query the files database'
+complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
+complete -c $progname -s P -f -l print -n $noopt -d 'Print information'
+complete -c $progname -s Y -f -l yay -n $noopt -d 'Yay specific operations'
+
 complete -c $progname -s V -f -l version -d 'Display version and exit'
 complete -c $progname -s h -f -l help -d 'Display help'
 
@@ -53,7 +56,27 @@ complete -c $progname -n "not $noopt" -l debug -d 'Display debug messages' -f
 complete -c $progname -n "not $noopt" -l gpgdir -d 'GPG directory to verify signatures'
 complete -c $progname -n "not $noopt" -l hookdir -d 'Hook file directory'
 complete -c $progname -n "not $noopt" -l logfile -d 'Specify alternative log file'
+
 complete -c $progname -n "not $noopt" -l noconfirm -d 'Bypass any question' -f
+complete -c $progname -n "not $noopt" -l topdown -d 'Shows repository packages first and then aur' -f
+complete -c $progname -n "not $noopt" -l bottomup -d 'Shows aur packages first and then repository' -f
+complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg development version' -f
+complete -c $progname -n "not $noopt" -l nodevel -d 'Disable development version checking' -f
+complete -c $progname -n "not $noopt" -l afterclean -d 'Clean package sources after successful build' -f
+complete -c $progname -n "not $noopt" -l noafterclean -d 'Disable package sources cleaning' -f
+complete -c $progname -n "not $noopt" -l timeupdate -d 'Check package modification date and version' -f
+complete -c $progname -n "not $noopt" -l notimeupdate -d 'Check only package version change' -f
+
+# Yay options
+complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
+complete -c $progname -n $yayspecific -s g -l getpkgbuild -d 'Download PKGBuild from ABS or AUR' -xa "$listall" -f
+complete -c $progname -n $yayspecific -l gendb -d 'Display system package statistics' -f
+
+# Print options
+complete -c $progname -n $print -s d -l defaultconfig -d 'Print current yay configuration' -f
+complete -c $progname -n $print -s n -l numberupgrades -d 'Print number of updates' -f
+complete -c $progname -n $print -s s -l stats -d 'Display system package statistics' -f
+complete -c $progname -n $print -s u -l upgrades -d 'Print update list' -f
 
 # Transaction options (sync, remove, upgrade)
 for condition in sync remove upgrade

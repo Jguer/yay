@@ -17,24 +17,44 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 ## Features
 - AUR Tab completion
+- Download PKGBuild from ABS or AUR
+- Ask all questions first and then start building
 - Search narrowing (`yay linux header` will first search linux and then narrow on header)
 - No sourcing of PKGBUILD is done
 - The binary has no dependencies that pacman doesn't already have.
 - Sources build dependencies
 - Removes make dependencies at the end of build process
 
-#### Custom Operations
+#### Example of Custom Operations
 - `yay <Search Term>` presents package selection menu
-- `yay -Qstats` delivers system statistics
-- `yay -Cd` cleans unneeded dependencies
-- `yay -G` downloads PKGBuild from ABS or AUR
-- `yay --gendb` generates development package DB used for devel updates.
+- `yay -Ps` prints system statistics
+- `yay -Pu` prints update list
+- `yay -Yc` cleans unneeded dependencies
+- `yay -Yg` `yay -g` downloads PKGBuild from ABS or AUR
+- `yay -Y --gendb` generates development package DB used for devel updates.
 
 <img src="http://jguer.github.io/yay/yayupgrade.png" width="450">
 <img src="http://jguer.github.io/yay/yay2.png" width="450">
 <img src="http://jguer.github.io/yay/yay3.png" width="450">
 
 ### Changelog
+
+#### 2.296
+- New argument parsing @Morganamilo (check manpage or --help for new
+  information)
+- yay -Qstats changed to yay -Ps or yay -P --stats
+- yay -Cd changed to yay -Yc or yay -Y --clean
+- yay -Pu (--upgrades) prints update list
+- yay -Pn (--numberupgrades) prints number of updates
+- yay -G also possible through -Yg or -Y --getpkgbuild (yay -G will be
+  discontinued once it's possible to add options to the getpkgbuild operation)
+- yay now counts from 1 instead of 0 @Morganamilo
+- Support for ranges when selecting packages @samosaara
+- Pacaur style ask all questions first and download first @Morganamilo
+- Updated vendor dependencies (Fixes pacman.conf parsing errors and PKGBUILD
+  parsing errors)
+- Updated completions
+
 #### 2.219
 - Updated manpage
 - Updated --help

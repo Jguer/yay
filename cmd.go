@@ -32,6 +32,7 @@ operations:
 
 New operations:
     yay {-Y --yay}         [options] [package(s)]
+    yay {-P --print}       [options]
     yay {-G --getpkgbuild} [package(s)]
 
 Permanent configuration options:
@@ -44,10 +45,16 @@ Permanent configuration options:
     --timeupdate         Check package's modification date and version
     --notimeupdate       Check only package version change
 
+Print specific options:
+    -c --complete        Used for completions
+    -d --defaultconfig   Print current yay configuration
+    -n --numberupgrades  Print number of updates
+    -s --stats           Display system package statistics
+    -u --upgrades        Print update list
+
 Yay specific options:
-    --printconfig        Prints current yay configuration
-    --stats              Displays system information
-    --cleandeps          Remove unneeded dependencies
+    -g --getpkgbuild     Download PKGBuild from ABS or AUR
+    -c --clean           Remove unneeded dependencies
     --gendb              Generates development package DB used for updating.
 
 If no operation is provided -Y will be assumed
@@ -399,8 +406,10 @@ func handleYay() (err error) {
 		if err != nil {
 			return
 		}
-	} else if cmdArgs.existsArg("cleandeps") {
+	} else if cmdArgs.existsArg("c", "clean") {
 		err = cleanDependencies()
+	} else if cmdArgs.existsArg("g", "getpkgbuild") {
+		err = handleGetpkgbuild()
 	} else if len(cmdArgs.targets) > 0 {
 		err = handleYogurt()
 	}
