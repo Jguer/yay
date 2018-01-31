@@ -2,66 +2,12 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
-	"strings"
+	"path"
 
 	rpc "github.com/mikkeloscar/aur"
 )
-
-func downloadFile(path string, url string) (err error) {
-	// Create the file
-	out, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
-	return err
-}
-
-// DownloadAndUnpack downloads url tgz and extracts to path.
-func downloadAndUnpack(url string, path string, trim bool) (err error) {
-	err = os.MkdirAll(path, 0755)
-	if err != nil {
-		return
-	}
-
-	tokens := strings.Split(url, "/")
-	fileName := tokens[len(tokens)-1]
-
-	tarLocation := path + fileName
-	defer os.Remove(tarLocation)
-
-	err = downloadFile(tarLocation, url)
-	if err != nil {
-		return
-	}
-
-	if trim {
-		err = exec.Command("/bin/sh", "-c",
-			config.TarBin+" --strip-components 2 --include='*/"+fileName[:len(fileName)-7]+"/trunk/' -xf "+tarLocation+" -C "+path).Run()
-		os.Rename(path+"trunk", path+fileName[:len(fileName)-7]) // kurwa
-	} else {
-		err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
-	}
-	if err != nil {
-		return
-	}
-
-	return
-}
 
 func getPkgbuild(pkg string) (err error) {
 	wd, err := os.Getwd()
@@ -80,7 +26,7 @@ func getPkgbuild(pkg string) (err error) {
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildfromABS(pkgN string, path string) (err error) {
+func getPkgbuildfromABS(pkgN string, dir string) (err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
@@ -91,14 +37,14 @@ func getPkgbuildfromABS(pkgN string, path string) (err error) {
 		if err == nil {
 			var url string
 			if db.Name() == "core" || db.Name() == "extra" {
-				url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg.Name() + ".tar.gz"
+				url = "https://git.archlinux.org/svntogit/packages.git"
 			} else if db.Name() == "community" {
-				url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + pkg.Name() + ".tar.gz"
+				url = "https://git.archlinux.org/svntogit/community.git"
 			} else {
 				return fmt.Errorf("Not in standard repositories")
 			}
 			fmt.Println(boldGreenFg(arrow), boldYellowFg(pkgN), boldGreenFg("found in ABS."))
-			errD := downloadAndUnpack(url, path, true)
+			errD := exec.Command("git", "clone", "--single-branch", "--branch", "packages/"+pkg.Name(), url, path.Join(dir, pkg.Name())).Run()
 			return errD
 		}
 	}
@@ -117,6 +63,11 @@ func getPkgbuildfromAUR(pkgN string, dir string) (err error) {
 	}
 
 	fmt.Println(boldGreenFg(arrow), boldYellowFg(pkgN), boldGreenFg("found in AUR."))
-	downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
+	url := "aur@aur.archlinux.org/" + aq[0].Name + ".git"
+	err = exec.Command("git", "clone", "ssh+git://"+url, path.Join(dir, aq[0].Name)).Run()
+	if err != nil {
+		// attempt https protocol which does not require SSH key setup
+		err = exec.Command("git", "clone", "https://"+url, path.Join(dir, aq[0].Name)).Run()
+	}
 	return
 }

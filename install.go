@@ -213,7 +213,7 @@ func dowloadPkgBuilds(pkgs []*rpc.Pkg) (err error) {
 		//todo make pretty
 		fmt.Println("Downloading:", pkg.Name+"-"+pkg.Version)
 
-		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
+		err = getPkgbuildfromAUR(pkg.Name, config.BuildDir)
 		if err != nil {
 			return
 		}
