@@ -61,6 +61,9 @@ var completionFile string
 // Updated returns if database has been updated
 var updated bool
 
+// changedConfig holds whether or not the config has changed
+var changedConfig bool
+
 // YayConf holds the current config values for yay.
 var config Configuration
 

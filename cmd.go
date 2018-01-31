@@ -199,7 +199,6 @@ func initAlpm() (err error) {
 func main() {
 	var status int
 	var err error
-	var changedConfig bool
 
 	err = cmdArgs.parseCommandLine()
 	if err != nil {
@@ -222,7 +221,7 @@ func main() {
 		goto cleanup
 	}
 
-	changedConfig, err = handleCmd()
+	err = handleCmd()
 	if err != nil {
 		fmt.Println(err)
 		status = 1
@@ -266,15 +265,17 @@ cleanup:
 	os.Exit(status)
 }
 
-func handleCmd() (changedConfig bool, err error) {
-	changedConfig = false
-
+func handleCmd() (err error) {
 	for option := range cmdArgs.options {
-		changedConfig = changedConfig || handleConfig(option)
+		if handleConfig(option) {
+			cmdArgs.delArg(option)
+		}
 	}
 
 	for option := range cmdArgs.globals {
-		changedConfig = changedConfig || handleConfig(option)
+		if handleConfig(option) {
+			cmdArgs.delArg(option)
+		}
 	}
 
 	switch cmdArgs.op {
@@ -315,7 +316,7 @@ func handleCmd() (changedConfig bool, err error) {
 //my current plan is to have yay specific operations in its own operator
 //e.g. yay -Y --gendb
 //e.g yay -Yg
-func handleConfig(option string) (changedConfig bool) {
+func handleConfig(option string) bool {
 	switch option {
 	case "afterclean":
 		config.CleanAfter = true
@@ -341,7 +342,7 @@ func handleConfig(option string) (changedConfig bool) {
 		config.TimeUpdate = false
 	case "topdown":
 		config.SortMode = TopDown
-	case "--bottomup":
+	case "bottomup":
 		config.SortMode = BottomUp
 		//		case "help":
 		//			usage()
@@ -352,11 +353,11 @@ func handleConfig(option string) (changedConfig bool) {
 	case "noconfirm":
 		config.NoConfirm = true
 	default:
-		return
+		return false
 	}
 
 	changedConfig = true
-	return
+	return true
 }
 
 func handleVersion() {

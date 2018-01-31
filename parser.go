@@ -447,10 +447,6 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 
 	arg = arg[1:]
 
-	if isYayParam(arg) {
-		return
-	}
-
 	for k, _char := range arg {
 		char := string(_char)
 
@@ -484,10 +480,6 @@ func (parser *arguments) parseLongOption(arg string, param string) (usedNext boo
 	}
 
 	arg = arg[2:]
-
-	if isYayParam(arg) {
-		return
-	}
 
 	if hasParam(arg) {
 		err = parser.addParam(arg, param)
