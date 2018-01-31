@@ -183,7 +183,7 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	var response string
-	fmt.Println(boldGreenFg(arrow+" "+s), boldWhiteFg(postFix))
+	fmt.Print(boldGreenFg(arrow+" "+s), boldWhiteFg(postFix))
 
 	n, err := fmt.Scanln(&response)
 	if err != nil || n == 0 {
