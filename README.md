@@ -39,6 +39,8 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 ### Changelog
 
+#### 2.298
+- Adds #115
 #### 2.296
 - New argument parsing @Morganamilo (check manpage or --help for new
   information)
@@ -58,13 +60,13 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 #### 2.219
 - Updated manpage
 - Updated --help
-- Fixed AUR update fails with large number of packages #59 
-- Check if package is already in upgrade list and skip it. #60 
--  Add -V and -h for flag parsing @AnthonyLam 
--  Prevent file corruption by truncating the files @maximbaz 
--  Print VCS error details @maximbaz 
--  Using '-' doesn't raise an error @PietroCarrara 
--  use Command.Dir in aur.PkgInstall; Fixes #32 #47  @afg984 
+- Fixed AUR update fails with large number of packages #59
+- Check if package is already in upgrade list and skip it. #60
+-  Add -V and -h for flag parsing @AnthonyLam
+-  Prevent file corruption by truncating the files @maximbaz
+-  Print VCS error details @maximbaz
+-  Using '-' doesn't raise an error @PietroCarrara
+-  use Command.Dir in aur.PkgInstall; Fixes #32 #47  @afg984
 -  Suffix YayConf.BuildDir with uid to avoid permission issues @afg984 (Not included in last changelog)
 
 #### 2.200

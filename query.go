@@ -248,6 +248,9 @@ func packageSlices(toCheck []string) (aur []string, repo []string, missing []str
 	}
 
 	for _, _pkg := range toCheck {
+		if i := strings.Index(_pkg, "/"); i != -1 {
+			_pkg = _pkg[i+1:]
+		}
 		pkg := getNameFromDep(_pkg)
 
 		_, errdb := dbList.FindSatisfier(_pkg)
