@@ -94,6 +94,34 @@ func (s repoQuery) printSearch() {
 	}
 }
 
+// printDownloadsFromRepo prints repository packages to be downloaded
+func printDownloadsFromRepo(repoType string, repo []*alpm.Package) {
+	var packages string
+	for _, v := range repo {
+		packages += v.Name() + " "
+	}
+	if len(repo) > 0 {
+		printDownloads(repoType, packages, len(repo))
+	}
+}
+
+// printDownloadsFromAur prints AUR packages to be downloaded
+func printDownloadsFromAur(repoType string, repo []*rpc.Pkg) {
+	var packages string
+	for _, v := range repo {
+		packages += v.Name + " "
+	}
+	if len(repo) > 0 {
+		printDownloads(repoType, packages, len(repo))
+	}
+}
+
+func printDownloads(repoType, packages string, numPackages int) {
+	fmt.Println(
+		redFg("["+repoType+", "+strconv.Itoa(numPackages)+" packages] ") +
+			yellowFg(packages))
+}
+
 func printDeps(repoDeps []string, aurDeps []string) {
 	if len(repoDeps) != 0 {
 		fmt.Print(boldGreenFg(arrow + " Repository dependencies: "))

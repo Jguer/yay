@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 
-	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
@@ -70,37 +68,10 @@ func install(parser *arguments) error {
 			}
 		}
 
-		fmt.Println()
-
-		p1 := func(a []*alpm.Package) {
-			for _, v := range a {
-				fmt.Print("  ", v.Name())
-			}
-		}
-
-		p2 := func(a []*rpc.Pkg) {
-			for _, v := range a {
-				fmt.Print("  ", v.Name)
-			}
-		}
-
-		fmt.Print("Repo (" + strconv.Itoa(len(dc.Repo)) + "):")
-		p1(dc.Repo)
-		fmt.Println()
-
-		fmt.Print("Repo Make (" + strconv.Itoa(len(dc.RepoMake)) + "):")
-		p1(dc.RepoMake)
-		fmt.Println()
-
-		fmt.Print("Aur (" + strconv.Itoa(len(dc.Aur)) + "):")
-		p2(dc.Aur)
-		fmt.Println()
-
-		fmt.Print("Aur Make (" + strconv.Itoa(len(dc.AurMake)) + "):")
-		p2(dc.AurMake)
-		fmt.Println()
-
-		fmt.Println()
+		printDownloadsFromRepo("Repo", dc.Repo)
+		printDownloadsFromRepo("Repo Make", dc.RepoMake)
+		printDownloadsFromAur("AUR", dc.Aur)
+		printDownloadsFromAur("AUR Make", dc.AurMake)
 
 		askCleanBuilds(dc.AurMake)
 		askCleanBuilds(dc.Aur)
