@@ -17,7 +17,7 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 ## Features
 - AUR Tab completion
-- Download PKGBuild from ABS or AUR
+- Download PKGBUILD from ABS or AUR
 - Ask all questions first and then start building
 - Search narrowing (`yay linux header` will first search linux and then narrow on header)
 - No sourcing of PKGBUILD is done
@@ -30,7 +30,7 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 - `yay -Ps` prints system statistics
 - `yay -Pu` prints update list
 - `yay -Yc` cleans unneeded dependencies
-- `yay -Yg` `yay -g` downloads PKGBuild from ABS or AUR
+- `yay -Yg` `yay -g` downloads PKGBUILD from ABS or AUR
 - `yay -Y --gendb` generates development package DB used for devel updates.
 
 <img src="http://jguer.github.io/yay/yayupgrade.png" width="450">

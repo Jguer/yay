@@ -69,7 +69,7 @@ complete -c $progname -n "not $noopt" -l notimeupdate -d 'Check only package ver
 
 # Yay options
 complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
-complete -c $progname -n $yayspecific -s g -l getpkgbuild -d 'Download PKGBuild from ABS or AUR' -xa "$listall" -f
+complete -c $progname -n $yayspecific -s g -l getpkgbuild -d 'Download PKGBUILD from ABS or AUR' -xa "$listall" -f
 complete -c $progname -n $yayspecific -l gendb -d 'Display system package statistics' -f
 
 # Print options

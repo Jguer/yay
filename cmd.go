@@ -53,7 +53,7 @@ Print specific options:
     -u --upgrades        Print update list
 
 Yay specific options:
-    -g --getpkgbuild     Download PKGBuild from ABS or AUR
+    -g --getpkgbuild     Download PKGBUILD from ABS or AUR
     -c --clean           Remove unneeded dependencies
     --gendb              Generates development package DB used for updating.
 
