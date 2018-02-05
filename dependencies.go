@@ -235,7 +235,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	for k, pkgName := range currentProcess {
 		pkg, exists := dt.Aur[pkgName]
 
-		//didnt get it in the request
+		//did not get it in the request
 		if !exists {
 			dt.Missing.set(dt.ToProcess[k])
 			continue
@@ -259,7 +259,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 				}
 
 				_, exists = dt.Missing[dep]
-				//we know it doesnt resolve so skip
+				//we know it does not resolve so skip
 				if exists {
 					continue
 				}
@@ -277,7 +277,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 					continue
 				}
 
-				//if all else failes add it to next search
+				//if all else fails add it to next search
 				nextProcess = append(nextProcess, versionedDep)
 			}
 		}

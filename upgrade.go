@@ -278,7 +278,7 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 	return slice, nil
 }
 
-//Contains returns wheter e is present in s
+//Contains returns whether e is present in s
 func containsInt(s []int, e int) bool {
 	for _, a := range s {
 		if a == e {

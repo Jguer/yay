@@ -36,8 +36,8 @@ New operations:
     yay {-G --getpkgbuild} [package(s)]
 
 Permanent configuration options:
-    --topdown            Shows repository's packages first and then aur's
-    --bottomup           Shows aur's packages first and then repository's
+    --topdown            Shows repository's packages first and then AUR's
+    --bottomup           Shows AUR's packages first and then repository's
     --devel              Check -git/-svn/-hg development version
     --nodevel            Disable development version checking
     --afterclean         Clean package sources after successful build
@@ -176,7 +176,7 @@ func initAlpm() (err error) {
 	//TODO
 	//current system does not allow duplicate arguments
 	//but pacman allows multiple cachdirs to be passed
-	//for now only hanle one cache dir
+	//for now only handle one cache dir
 	value, _, exists = cmdArgs.getArg("cachdir")
 	if exists {
 		alpmConf.CacheDir = []string{value}
@@ -234,7 +234,7 @@ cleanup:
 	//cleanup
 	//from here on out dont exit if an error occurs
 	//if we fail to save the configuration
-	//atleast continue on and try clean up other parts
+	//at least continue on and try clean up other parts
 
 	if updated {
 		err = saveVCSInfo()
@@ -312,7 +312,7 @@ func handleCmd() (err error) {
 
 //this function should only set config options
 //but currently still uses the switch left over from old code
-//eventuall this should be refactored out futher
+//eventually this should be refactored out futher
 //my current plan is to have yay specific operations in its own operator
 //e.g. yay -Y --gendb
 //e.g yay -Yg
@@ -424,7 +424,7 @@ func handleGetpkgbuild() (err error) {
 		if err != nil {
 			//we print the error instead of returning it
 			//seems as we can handle multiple errors without stoping
-			//theres no easy way arround this right now
+			//theres no easy way around this right now
 			fmt.Println(pkg+":", err)
 		}
 	}
@@ -521,7 +521,7 @@ func BuildRange(input string) ([]int, error) {
 	return BuildIntRange(rangeStart, rangeEnd), err
 }
 
-// Contains returns wheter e is present in s
+// Contains returns whether e is present in s
 func contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -653,7 +653,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	return err
 }
 
-// passToPacman outsorces execution to pacman binary without modifications.
+// passToPacman outsources execution to pacman binary without modifications.
 func passToPacman(args *arguments) error {
 	var cmd *exec.Cmd
 	argArr := make([]string, 0)
@@ -674,7 +674,7 @@ func passToPacman(args *arguments) error {
 	return err
 }
 
-// passToMakepkg outsorces execution to makepkg binary without modifications.
+// passToMakepkg outsources execution to makepkg binary without modifications.
 func passToMakepkg(dir string, args ...string) (err error) {
 	cmd := exec.Command(config.MakepkgBin, args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
