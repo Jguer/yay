@@ -100,8 +100,10 @@ func printDownloadsFromRepo(repoType string, repo []*alpm.Package) {
 	for _, v := range repo {
 		packages += v.Name() + " "
 	}
+	repoInfo := boldBlueFg(
+		"[" + repoType + ", " + strconv.Itoa(len(repo)) + " packages] ")
 	if len(repo) > 0 {
-		printDownloads(repoType, packages, len(repo))
+		printDownloads(repoInfo, packages)
 	}
 }
 
@@ -111,15 +113,15 @@ func printDownloadsFromAur(repoType string, repo []*rpc.Pkg) {
 	for _, v := range repo {
 		packages += v.Name + " "
 	}
+	repoInfo := redFg(
+		"[" + repoType + ", " + strconv.Itoa(len(repo)) + " packages] ")
 	if len(repo) > 0 {
-		printDownloads(repoType, packages, len(repo))
+		printDownloads(repoInfo, packages)
 	}
 }
 
-func printDownloads(repoType, packages string, numPackages int) {
-	fmt.Println(
-		redFg("["+repoType+", "+strconv.Itoa(numPackages)+" packages] ") +
-			yellowFg(packages))
+func printDownloads(repoInfo, packages string) {
+	fmt.Println(repoInfo + yellowFg(packages))
 }
 
 func printDeps(repoDeps []string, aurDeps []string) {
