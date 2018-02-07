@@ -665,6 +665,10 @@ func passToPacman(args *arguments) error {
 	argArr = append(argArr, "pacman")
 	argArr = append(argArr, cmdArgs.formatGlobals()...)
 	argArr = append(argArr, args.formatArgs()...)
+	if config.NoConfirm {
+		argArr = append(argArr, "--noconfirm")
+	}
+
 	argArr = append(argArr, args.formatTargets()...)
 
 	cmd = exec.Command(argArr[0], argArr[1:]...)
@@ -676,6 +680,11 @@ func passToPacman(args *arguments) error {
 
 // passToMakepkg outsources execution to makepkg binary without modifications.
 func passToMakepkg(dir string, args ...string) (err error) {
+
+	if config.NoConfirm {
+		args = append(args)
+	}
+
 	cmd := exec.Command(config.MakepkgBin, args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Dir = dir

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/user"
 
 	alpm "github.com/jguer/go-alpm"
 )
@@ -103,11 +102,7 @@ func (config *Configuration) saveConfig() error {
 }
 
 func defaultSettings(config *Configuration) {
-	u, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-	config.BuildDir = fmt.Sprintf("/tmp/yaytmp-%s/", u.Uid)
+	config.BuildDir = fmt.Sprintf("%s/.cache/yay/", os.Getenv("HOME"))
 	config.CleanAfter = false
 	config.Editor = ""
 	config.Devel = false
