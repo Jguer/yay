@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 
+	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
@@ -37,7 +38,7 @@ func install(parser *arguments) error {
 
 	if len(aurs) != 0 {
 		//todo make pretty
-		fmt.Println("Resolving Dependencies")
+		fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
 
 		dt, err := getDepTree(aurs)
 		if err != nil {
@@ -75,11 +76,18 @@ func install(parser *arguments) error {
 
 		askCleanBuilds(dc.AurMake)
 		askCleanBuilds(dc.Aur)
-
 		fmt.Println()
 
-		if !continueTask("Proceed with download?", "nN") {
+		if !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
+		}
+		// if !continueTask("Proceed with download?", "nN") {
+		// 	return fmt.Errorf("Aborting due to user")
+		// }
+
+		err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
+		if err != nil {
+			return err
 		}
 
 		err = dowloadPkgBuilds(dc.AurMake)
@@ -94,9 +102,9 @@ func install(parser *arguments) error {
 		askEditPkgBuilds(dc.AurMake)
 		askEditPkgBuilds(dc.Aur)
 
-		if !continueTask("Proceed with install?", "nN") {
-			return fmt.Errorf("Aborting due to user")
-		}
+		// if !continueTask("Proceed with install?", "nN") {
+		// 	return fmt.Errorf("Aborting due to user")
+		// }
 
 		err = downloadPkgBuildsSources(dc.AurMake)
 		if err != nil {
@@ -122,7 +130,7 @@ func install(parser *arguments) error {
 			}
 
 			removeArguments := makeArguments()
-			removeArguments.addArg("R")
+			removeArguments.addOP("R")
 
 			for _, pkg := range dc.RepoMake {
 				removeArguments.addTarget(pkg.Name())
@@ -132,7 +140,10 @@ func install(parser *arguments) error {
 				removeArguments.addTarget(pkg.Name)
 			}
 
+			oldValue := config.NoConfirm
+			config.NoConfirm = true
 			passToPacman(removeArguments)
+			config.NoConfirm = oldValue
 		}
 
 		return nil
@@ -151,6 +162,76 @@ func askCleanBuilds(pkgs []*rpc.Pkg) {
 			}
 		}
 	}
+}
+
+func checkForConflicts(aur []*rpc.Pkg, aurMake []*rpc.Pkg, repo []*alpm.Package,
+	repoMake []*alpm.Package) error {
+
+	localDb, err := alpmHandle.LocalDb()
+	if err != nil {
+		return err
+	}
+	var toRemove []string
+
+	for _, pkg := range aur {
+		for _, cpkg := range pkg.Conflicts {
+			if _, err := localDb.PkgByName(cpkg); err == nil {
+				toRemove = append(toRemove, cpkg)
+			}
+		}
+	}
+
+	for _, pkg := range aurMake {
+		for _, cpkg := range pkg.Conflicts {
+			if _, err := localDb.PkgByName(cpkg); err == nil {
+				toRemove = append(toRemove, cpkg)
+			}
+		}
+	}
+
+	for _, pkg := range repo {
+		pkg.Conflicts().ForEach(func(conf alpm.Depend) error {
+			if _, err := localDb.PkgByName(conf.Name); err == nil {
+				toRemove = append(toRemove, conf.Name)
+			}
+			return nil
+		})
+	}
+
+	for _, pkg := range repoMake {
+		pkg.Conflicts().ForEach(func(conf alpm.Depend) error {
+			if _, err := localDb.PkgByName(conf.Name); err == nil {
+				toRemove = append(toRemove, conf.Name)
+			}
+			return nil
+		})
+	}
+
+	if len(toRemove) != 0 {
+		fmt.Println(
+			redFg("The following packages conflict with packages to install:"))
+		for _, pkg := range toRemove {
+			fmt.Println(yellowFg(pkg))
+		}
+
+		if !continueTask("Remove conflicting package(s)?", "nN") {
+			return fmt.Errorf("Aborting due to user")
+		}
+
+		removeArguments := makeArguments()
+		removeArguments.addArg("R", "d", "d")
+
+		for _, pkg := range toRemove {
+			removeArguments.addTarget(pkg)
+		}
+
+		oldValue := config.NoConfirm
+		config.NoConfirm = true
+		passToPacman(removeArguments)
+		config.NoConfirm = oldValue
+	}
+
+	return nil
 }
 
 func askEditPkgBuilds(pkgs []*rpc.Pkg) {
