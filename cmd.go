@@ -662,7 +662,7 @@ func passToPacman(args *arguments) error {
 		argArr = append(argArr, "sudo")
 	}
 
-	argArr = append(argArr, "pacman")
+	argArr = append(argArr, config.PacmanBin)
 	argArr = append(argArr, cmdArgs.formatGlobals()...)
 	argArr = append(argArr, args.formatArgs()...)
 	if config.NoConfirm {
