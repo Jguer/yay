@@ -274,7 +274,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, missing []str
 
 	info, err := rpc.Info(possibleAur)
 	if err != nil {
-		return
+		fmt.Println(err)
 	}
 
 outer:

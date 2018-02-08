@@ -19,7 +19,7 @@ func install(parser *arguments) error {
 
 	if len(missing) > 0 {
 		fmt.Println(missing)
-		return fmt.Errorf("Could not find all Targets")
+		fmt.Println("Could not find all Targets")
 	}
 
 	arguments := parser.copy()
@@ -57,15 +57,15 @@ func install(parser *arguments) error {
 
 		for _, pkg := range dc.AurMake {
 			if pkg.Maintainer == "" {
-				fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-					blackBg(pkg.Name+"-"+pkg.Version+"is orphaned"))
+				fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
+					blackBg(pkg.Name+"-"+pkg.Version+" is orphaned"))
 			}
 		}
 
 		for _, pkg := range dc.Aur {
 			if pkg.Maintainer == "" {
-				fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-					blackBg(pkg.Name+"-"+pkg.Version+"is orphaned"))
+				fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
+					blackBg(pkg.Name+"-"+pkg.Version+" is orphaned"))
 			}
 		}
 
@@ -85,9 +85,11 @@ func install(parser *arguments) error {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
 
-		err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
-		if err != nil {
-			return err
+		if _, ok := arguments.options["gendb"]; !ok {
+			err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
+			if err != nil {
+				return err
+			}
 		}
 
 		err = dowloadPkgBuilds(dc.AurMake)
@@ -101,6 +103,10 @@ func install(parser *arguments) error {
 
 		askEditPkgBuilds(dc.AurMake)
 		askEditPkgBuilds(dc.Aur)
+		if _, ok := arguments.options["gendb"]; ok {
+			fmt.Println("GenDB finished. No packages were installed")
+			return nil
+		}
 
 		// if !continueTask("Proceed with install?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")

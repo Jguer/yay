@@ -44,8 +44,6 @@ var version = "2.297"
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
 
-var specialDBsauce = false
-
 var savedInfo infos
 
 // configfile holds yay config file path.
