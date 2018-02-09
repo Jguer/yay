@@ -664,8 +664,14 @@ func passToPacman(args *arguments) error {
 
 	argArr = append(argArr, "pacman")
 	argArr = append(argArr, cmdArgs.formatGlobals()...)
+	
+	if config.NoConfirm {
+		argArr = append(argArr, "--noconfirm")
+	}
+
 	argArr = append(argArr, args.formatArgs()...)
 	argArr = append(argArr, args.formatTargets()...)
+
 
 	cmd = exec.Command(argArr[0], argArr[1:]...)
 
