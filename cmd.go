@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var cmdArgs = makeArguments()
@@ -265,6 +266,18 @@ cleanup:
 	os.Exit(status)
 }
 
+func sudoLoop() {
+	for {
+		cmd := exec.Command("sudo", "-v")
+		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println(err)
+		}
+		time.Sleep(298 * time.Second)
+	}
+}
+
 func handleCmd() (err error) {
 	for option := range cmdArgs.options {
 		if handleConfig(option) {
@@ -276,6 +289,10 @@ func handleCmd() (err error) {
 		if handleConfig(option) {
 			cmdArgs.delArg(option)
 		}
+	}
+
+	if cmdArgs.needRoot() {
+		go sudoLoop()
 	}
 
 	switch cmdArgs.op {
@@ -370,14 +387,8 @@ func handlePrint() (err error) {
 		fmt.Printf("%#v", config)
 	case cmdArgs.existsArg("n", "numberupgrades"):
 		err = printNumberOfUpdates()
-		if err != nil {
-			return
-		}
 	case cmdArgs.existsArg("u", "upgrades"):
 		err = printUpdateList()
-		if err != nil {
-			return
-		}
 	case cmdArgs.existsArg("c", "complete"):
 		switch {
 		case cmdArgs.existsArg("f", "fish"):
@@ -388,10 +399,10 @@ func handlePrint() (err error) {
 	case cmdArgs.existsArg("s", "stats"):
 		err = localStatistics()
 	default:
-		return nil
+		err = nil
 	}
 
-	return nil
+	return err
 }
 
 func handleYay() (err error) {
@@ -645,6 +656,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	aurI = removeListFromList(aurNI, aurI)
 	repoI = removeListFromList(repoNI, repoI)
 
+	go sudoLoop()
 	arguments := makeArguments()
 	arguments.addTarget(repoI...)
 	arguments.addTarget(aurI...)

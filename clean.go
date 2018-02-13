@@ -2,21 +2,6 @@ package main
 
 // GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
 
-// RemoveMakeDeps receives a make dependency list and removes those
-// that are no longer necessary.
-func removeMakeDeps(depS []string) (err error) {
-	hanging := sliceHangingPackages(depS)
-
-	if len(hanging) != 0 {
-		if !continueTask("Confirm Removal?", "nN") {
-			return nil
-		}
-		err = cleanRemove(hanging)
-	}
-
-	return
-}
-
 // RemovePackage removes package from VCS information
 func removeVCSPackage(pkgs []string) {
 	for _, pkgName := range pkgs {
