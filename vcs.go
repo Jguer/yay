@@ -37,8 +37,8 @@ func createDevelDB() error {
 	}
 
 	config.NoConfirm = true
-	specialDBsauce = true
 	arguments := makeArguments()
+	arguments.addArg("gendb")
 	arguments.addTarget(remoteNames...)
 	err = install(arguments)
 	return err

@@ -54,10 +54,12 @@ func cleanRemove(pkgNames []string) (err error) {
 		return nil
 	}
 
+	oldvalue := config.NoConfirm
+	config.NoConfirm = true
 	arguments := makeArguments()
-	arguments.addArg("R", "noconfirm")
+	arguments.addArg("R")
 	arguments.addTarget(pkgNames...)
-
 	err = passToPacman(arguments)
+	config.NoConfirm = oldvalue
 	return err
 }
