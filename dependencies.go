@@ -195,9 +195,9 @@ func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb 
 		if inRepos == nil {
 			repoTreeRecursive(repoPkg, dt, localDb, syncDb)
 			return
-		} else {
-			dt.Missing.set(dep.String())
 		}
+
+		dt.Missing.set(dep.String())
 
 		return
 	})

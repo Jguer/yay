@@ -14,7 +14,6 @@ type branch struct {
 	Name   string `json:"name"`
 	Commit struct {
 		SHA string `json:"sha"`
-		URL string `json:"url"`
 	} `json:"commit"`
 }
 
@@ -28,6 +27,13 @@ type Info struct {
 }
 
 type infos []Info
+
+// Repo contains information about the repository
+type repo struct {
+	Name          string `json:"name"`
+	FullName      string `json:"full_name"`
+	DefaultBranch string `json:"default_branch"`
+}
 
 // createDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
@@ -66,24 +72,46 @@ func parseSource(source string) (owner string, repo string) {
 }
 
 func (info *Info) needsUpdate() bool {
-	var newRepo branches
-	r, err := http.Get(info.URL)
-	if err != nil {
-		fmt.Println(err)
+	var newRepo repo
+	var newBranches branches
+	if strings.HasSuffix(info.URL, "/branches") {
+		info.URL = info.URL[:len(info.URL)-9]
+	}
+	infoResp, infoErr := http.Get(info.URL)
+	if infoErr != nil {
+		fmt.Println(infoErr)
 		return false
 	}
-	defer r.Body.Close()
+	defer infoResp.Body.Close()
 
-	body, _ := ioutil.ReadAll(r.Body)
-	err = json.Unmarshal(body, &newRepo)
+	infoBody, _ := ioutil.ReadAll(infoResp.Body)
+	var err = json.Unmarshal(infoBody, &newRepo)
 	if err != nil {
 		fmt.Printf("Cannot update '%v'\nError: %v\nStatus code: %v\nBody: %v\n",
-			info.Package, err, r.StatusCode, string(body))
+			info.Package, err, infoResp.StatusCode, string(infoBody))
 		return false
 	}
 
-	for _, e := range newRepo {
-		if e.Name == "master" {
+	defaultBranch := newRepo.DefaultBranch
+	branchesURL := info.URL + "/branches"
+
+	branchResp, branchErr := http.Get(branchesURL)
+	if branchErr != nil {
+		fmt.Println(branchErr)
+		return false
+	}
+	defer branchResp.Body.Close()
+
+	branchBody, _ := ioutil.ReadAll(branchResp.Body)
+	err = json.Unmarshal(branchBody, &newBranches)
+	if err != nil {
+		fmt.Printf("Cannot update '%v'\nError: %v\nStatus code: %v\nBody: %v\n",
+			info.Package, err, branchResp.StatusCode, string(branchBody))
+		return false
+	}
+
+	for _, e := range newBranches {
+		if e.Name == defaultBranch {
 			return e.Commit.SHA != info.SHA
 		}
 	}
@@ -100,22 +128,33 @@ func inStore(pkgName string) *Info {
 }
 
 // branchInfo updates saved information
-func branchInfo(pkgName string, owner string, repo string) (err error) {
+func branchInfo(pkgName string, owner string, repoName string) (err error) {
 	updated = true
-	var newRepo branches
-	url := "https://api.github.com/repos/" + owner + "/" + repo + "/branches"
-	r, err := http.Get(url)
+	var newRepo repo
+	var newBranches branches
+	url := "https://api.github.com/repos/" + owner + "/" + repoName
+	repoResp, err := http.Get(url)
 	if err != nil {
 		return
 	}
-	defer r.Body.Close()
+	defer repoResp.Body.Close()
 
-	_ = json.NewDecoder(r.Body).Decode(&newRepo)
+	_ = json.NewDecoder(repoResp.Body).Decode(&newRepo)
+	defaultBranch := newRepo.DefaultBranch
+	branchesURL := url + "/branches"
+
+	branchResp, err := http.Get(branchesURL)
+	if err != nil {
+		return
+	}
+	defer branchResp.Body.Close()
+
+	_ = json.NewDecoder(branchResp.Body).Decode(&newBranches)
 
 	packinfo := inStore(pkgName)
 
-	for _, e := range newRepo {
-		if e.Name == "master" {
+	for _, e := range newBranches {
+		if e.Name == defaultBranch {
 			if packinfo != nil {
 				packinfo.Package = pkgName
 				packinfo.URL = url
