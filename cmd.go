@@ -455,7 +455,6 @@ func handleYogurt() (err error) {
 
 func handleSync() (err error) {
 	targets := cmdArgs.formatTargets()
-	options := cmdArgs.formatArgs()
 
 	if cmdArgs.existsArg("y", "refresh") {
 		arguments := cmdArgs.copy()
@@ -480,7 +479,7 @@ func handleSync() (err error) {
 	} else if cmdArgs.existsArg("u", "sysupgrade") {
 		err = upgradePkgs(make([]string, 0))
 	} else if cmdArgs.existsArg("i", "info") {
-		err = syncInfo(targets, options)
+		err = syncInfo(targets)
 	} else if len(cmdArgs.targets) > 0 {
 		err = install(cmdArgs)
 	}
