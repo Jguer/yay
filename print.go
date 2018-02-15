@@ -95,32 +95,81 @@ func (s repoQuery) printSearch() {
 }
 
 // printDownloadsFromRepo prints repository packages to be downloaded
-func printDownloadsFromRepo(repoType string, repo []*alpm.Package) {
-	var packages string
-	for _, v := range repo {
-		packages += v.Name() + " "
+func printDepCatagories(dc *depCatagories) {
+	repo := ""
+	repoMake := ""
+	aur := ""
+	aurMake := ""
+
+	repoLen := 0
+	repoMakeLen := 0
+	aurLen := 0
+	aurMakeLen := 0
+
+	for _, pkg := range dc.Repo {
+		if dc.MakeOnly.get(pkg.Name()) {
+			repoMake += "  " + pkg.Name()
+			repoMakeLen++
+		} else {
+			repo += "  " + pkg.Name()
+			repoLen++
+		}
 	}
+
+	for _, pkg := range dc.Aur {
+		pkgStr := "  " + pkg.PackageBase
+		pkgStrMake := pkgStr
+
+		push := false
+		pushMake := false
+
+		if len(dc.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+			pkgStr += " ("
+			pkgStrMake += " ("
+
+			for _, split := range dc.Bases[pkg.PackageBase] {
+				if dc.MakeOnly.get(split.Name) {
+					pkgStrMake += split.Name + " "
+					aurMakeLen++
+					pushMake = true
+				} else {
+					pkgStr += split.Name + " "
+					aurLen++
+					push = true
+				}
+			}
+
+			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
+			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
+		} else if dc.MakeOnly.get(pkg.Name) {
+			aurMakeLen++
+			pushMake = true
+		} else {
+			aurLen++
+			push = true
+		}
+
+		if push {
+			aur += pkgStr
+		}
+		if pushMake {
+			aurMake += pkgStrMake
+		}
+	}
+
+	printDownloads("Repo", repoLen,  repo)
+	printDownloads("Repo Make", repoMakeLen,  repoMake)
+	printDownloads("Aur", aurLen,  aur)
+	printDownloads("Aur Make", aurMakeLen,  aurMake)
+}
+
+func printDownloads(repoName string, length int, packages string) {
+	if length < 1 {
+		return
+	}
+
 	repoInfo := boldBlueFg(
-		"[" + repoType + ", " + strconv.Itoa(len(repo)) + " packages] ")
-	if len(repo) > 0 {
-		printDownloads(repoInfo, packages)
-	}
-}
-
-// printDownloadsFromAur prints AUR packages to be downloaded
-func printDownloadsFromAur(repoType string, repo []*rpc.Pkg) {
-	var packages string
-	for _, v := range repo {
-		packages += v.Name + " "
-	}
-	repoInfo := redFg(
-		"[" + repoType + ", " + strconv.Itoa(len(repo)) + " packages] ")
-	if len(repo) > 0 {
-		printDownloads(repoInfo, packages)
-	}
-}
-
-func printDownloads(repoInfo, packages string) {
+		"[" + repoName + ": " + strconv.Itoa(length) + "]")
 	fmt.Println(repoInfo + yellowFg(packages))
 }
 

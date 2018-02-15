@@ -40,7 +40,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(aurs) != 0 {
-		//todo make pretty
+		//todo mamakeke pretty
 		fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
 
 		dt, err := getDepTree(aurs)
@@ -58,13 +58,6 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		for _, pkg := range dc.AurMake {
-			if pkg.Maintainer == "" {
-				fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
-					blackBg(pkg.Name+"-"+pkg.Version+" is orphaned"))
-			}
-		}
-
 		for _, pkg := range dc.Aur {
 			if pkg.Maintainer == "" {
 				fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
@@ -72,20 +65,24 @@ func install(parser *arguments) error {
 			}
 		}
 
-		printDownloadsFromRepo("Repo", dc.Repo)
-		printDownloadsFromRepo("Repo Make", dc.RepoMake)
-		printDownloadsFromAur("AUR", dc.Aur)
-		printDownloadsFromAur("AUR Make", dc.AurMake)
+		//printDownloadsFromRepo("Repo", dc.Repo)
+		//printDownloadsFromRepo("Repo Make", dc.RepoMake)
+		//printDownloadsFromAur("AUR", dc.Aur)
+		//printDownloadsFromAur("AUR Make", dc.AurMake)
+		
+		//fmt.Println(dc.MakeOnly)
+		//fmt.Println(dc.AurSet)
 
-		askCleanBuilds(dc.AurMake)
-		askCleanBuilds(dc.Aur)
+		printDepCatagories(dc)
+
+		askCleanBuilds(dc.Aur, dc.Bases)
 		fmt.Println()
 
 		if !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
 
-		if len(dc.RepoMake) + len(dc.Repo) > 0 {
+		if len(dc.Repo) > 0 {
 			arguments := parser.copy()
 			arguments.delArg("u", "sysupgrade")
 			arguments.delArg("y", "refresh")
@@ -93,9 +90,6 @@ func install(parser *arguments) error {
 			arguments.targets = make(stringSet)
 			arguments.addArg("needed", "asdeps")
 			for _, pkg := range dc.Repo {
-				arguments.addTarget(pkg.Name())
-			}
-			for _, pkg := range dc.RepoMake {
 				arguments.addTarget(pkg.Name())
 			}
 
@@ -113,26 +107,18 @@ func install(parser *arguments) error {
 		// }
 
 		if _, ok := arguments.options["gendb"]; !ok {
-			err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
+			//err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
 			if err != nil {
 				return err
 			}
 		}
 
-		err = dowloadPkgBuilds(dc.AurMake)
-		if err != nil {
-			return err
-		}
-		err = dowloadPkgBuilds(dc.Aur)
+		err = dowloadPkgBuilds(dc.Aur, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		err = askEditPkgBuilds(dc.AurMake)
-		if err != nil {
-			return err
-		}
-		err = askEditPkgBuilds(dc.Aur)
+		err = askEditPkgBuilds(dc.Aur, dc.Bases)
 		if err != nil {
 			return err
 		}
@@ -146,34 +132,22 @@ func install(parser *arguments) error {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
 
-		err = downloadPkgBuildsSources(dc.AurMake)
-		if err != nil {
-			return err
-		}
 		err = downloadPkgBuildsSources(dc.Aur)
 		if err != nil {
 			return err
 		}
 
-		err = parsesrcinfos(dc.AurMake, srcinfos)
-		if err != nil {
-			return err
-		}
 		err = parsesrcinfos(dc.Aur, srcinfos)
 		if err != nil {
 			return err
 		}
 
-		err = buildInstallPkgBuilds(dc.AurMake, srcinfos, parser.targets, parser)
-		if err != nil {
-			return err
-		}
-		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser)
+		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		if len(dc.RepoMake)+len(dc.AurMake) > 0 {
+		if len(dc.MakeOnly) > 0 {
 			if continueTask("Remove make dependencies?", "yY") {
 				return nil
 			}
@@ -181,12 +155,8 @@ func install(parser *arguments) error {
 			removeArguments := makeArguments()
 			removeArguments.addArg("R", "u")
 
-			for _, pkg := range dc.RepoMake {
-				removeArguments.addTarget(pkg.Name())
-			}
-
-			for _, pkg := range dc.AurMake {
-				removeArguments.addTarget(pkg.Name)
+			for pkg := range dc.MakeOnly {
+				removeArguments.addTarget(pkg)
 			}
 
 			oldValue := config.NoConfirm
@@ -196,7 +166,6 @@ func install(parser *arguments) error {
 		}
 
 		if config.CleanAfter {
-			clean(dc.AurMake)
 			clean(dc.Aur)
 		}
 
@@ -206,12 +175,21 @@ func install(parser *arguments) error {
 	return nil
 }
 
-func askCleanBuilds(pkgs []*rpc.Pkg) {
+func askCleanBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			if !continueTask(pkg.Name+" Directory exists. Clean Build?", "yY") {
+			str := pkg.Name
+			if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+				str += " ("
+				for _, split := range bases[pkg.PackageBase] {
+					str += split.Name + " "
+				}
+				str = str[:len(str)-1] + ")"
+			}
+
+			if !continueTask(str + " Directory exists. Clean Build?",  "yY") {
 				_ = os.RemoveAll(config.BuildDir + pkg.PackageBase)
 			}
 		}
@@ -288,11 +266,20 @@ func checkForConflicts(aur []*rpc.Pkg, aurMake []*rpc.Pkg, repo []*alpm.Package,
 	return nil
 }
 
-func askEditPkgBuilds(pkgs []*rpc.Pkg) (error)  {
+func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (error)  {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		if !continueTask(pkg.Name+" Edit PKGBUILD?", "yY") {
+		str := "Edit PKGBUILD? " + pkg.PackageBase
+		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+			str += " ("
+			for _, split := range bases[pkg.PackageBase] {
+				str += split.Name + " "
+			}
+			str = str[:len(str)-1] + ")"
+		}
+
+		if !continueTask(str, "yY") {
 			editcmd := exec.Command(editor(), dir+"PKGBUILD")
 			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 			editcmd.Run()
@@ -336,10 +323,18 @@ func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) (error)
 	return nil
 }
 
-func dowloadPkgBuilds(pkgs []*rpc.Pkg) (err error) {
+func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
 	for _, pkg := range pkgs {
 		//todo make pretty
-		fmt.Println("Downloading:", pkg.Name+"-"+pkg.Version)
+		str := "Downloading: " +  pkg.PackageBase+"-"+pkg.Version
+		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+			str += " ("
+			for _, split := range bases[pkg.PackageBase] {
+				str += split.Name + " "
+			}
+			str = str[:len(str)-1] + ")"
+		}
+		fmt.Println(str)
 
 		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
 		if err != nil {
@@ -362,32 +357,35 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg) (err error) {
 	return
 }
 
-func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments) (error) {
+func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg) (error) {
 	//for n := len(pkgs) -1 ; n > 0; n-- {
 	for n := 0; n < len(pkgs); n++ {
 		pkg := pkgs[n]
+
 		dir := config.BuildDir + pkg.PackageBase + "/"
+		built := true
 
 		srcinfo := srcinfos[pkg.PackageBase]
 		version := srcinfo.CompleteVersion()
-		file, err := completeFileName(dir, pkg.Name + "-" + version.String())
 
-		if file != "" {
-			fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
-				blackBg(pkg.Name+"-"+pkg.Version+ " Already made -- skipping build"))
-		} else {
-			err = passToMakepkg(dir, "-Cscf", "--noconfirm")
-			if err != nil {
-				return err
-			}
-
-			file, err = completeFileName(dir, pkg.Name + "-" + version.String())
+		for _, split:= range bases[pkg.PackageBase] {
+			file, err := completeFileName(dir, split.Name + "-" + version.String())
 			if err != nil {
 				return err
 			}
 
 			if file == "" {
-				return fmt.Errorf("Could not find built package")
+				built = false
+			}
+		}
+
+		if built {
+			fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
+				blackBg(pkg.Name+"-"+pkg.Version+ " Already made -- skipping build"))
+		} else {
+			err := passToMakepkg(dir, "-Cscf", "--noconfirm")
+			if err != nil {
+				return err
 			}
 		}
 
@@ -402,20 +400,38 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		arguments.delArg("u", "sysupgrade")
 		arguments.delArg("w", "downloadonly")
 
+		depArguments := makeArguments()
+		depArguments.addArg("D", "asdeps")
+
+		for _, split := range bases[pkg.PackageBase] {
+			file, err := completeFileName(dir, split.Name + "-" + version.String())
+			if err != nil {
+				return err
+			}
+
+			if file == "" {
+				return fmt.Errorf("Could not find built package " + split.Name + "-" + version.String())
+			}
+			
+			arguments.addTarget(file)
+			if !targets.get(split.Name) {
+				depArguments.addTarget(split.Name)
+			}
+		}
+
 		oldConfirm := config.NoConfirm
 		config.NoConfirm = true
-
-		if targets.get(pkg.Name) {
-			arguments.addArg("asdeps")
-		}
-
-		arguments.addTarget(file)
-
-		err = passToPacman(arguments)
-		config.NoConfirm = oldConfirm
-		if err !=nil {
+		err := passToPacman(arguments)
+		if err != nil {
 			return err
 		}
+		if len(depArguments.targets) > 0 {
+			err = passToPacman(depArguments)
+			if err != nil {
+				return err
+			}
+		}
+		config.NoConfirm = oldConfirm
 	}
 
 	return nil

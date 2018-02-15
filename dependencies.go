@@ -16,9 +16,10 @@ type depTree struct {
 
 type depCatagories struct {
 	Repo     []*alpm.Package
-	RepoMake []*alpm.Package
-	Aur      []*rpc.Pkg
-	AurMake  []*rpc.Pkg
+	Aur[]*rpc.Pkg
+	MakeOnly stringSet
+	Bases map[string][]*rpc.Pkg
+
 }
 
 func makeDepTree() *depTree {
@@ -35,9 +36,9 @@ func makeDepTree() *depTree {
 func makeDependCatagories() *depCatagories {
 	dc := depCatagories{
 		make([]*alpm.Package, 0),
-		make([]*alpm.Package, 0),
 		make([]*rpc.Pkg, 0),
-		make([]*rpc.Pkg, 0),
+		make(stringSet),
+		make(map[string][]*rpc.Pkg),
 	}
 
 	return &dc
@@ -51,6 +52,7 @@ func getNameFromDep(dep string) string {
 
 func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 	dc := makeDependCatagories()
+	seen := make(stringSet)
 
 	for _, pkg := range pkgs {
 		dep := getNameFromDep(pkg)
@@ -63,11 +65,21 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 
 		aurpkg, exists := dt.Aur[dep]
 		if exists {
-			depCatagoriesRecursive(aurpkg, dc, dt, false)
-			dc.Aur = append(dc.Aur, aurpkg)
+			depCatagoriesRecursive(aurpkg, dc, dt, false, seen)
+			if !seen.get(aurpkg.PackageBase) {
+				dc.Aur = append(dc.Aur, aurpkg)
+				seen.set(aurpkg.PackageBase)
+			}
+
+			_, ok := dc.Bases[aurpkg.PackageBase]
+			if !ok {
+				dc.Bases[aurpkg.PackageBase] = make([]*rpc.Pkg, 0)
+			}
+			dc.Bases[aurpkg.PackageBase] = append(dc.Bases[aurpkg.PackageBase], aurpkg)
 			delete(dt.Aur, dep)
 		}
 	}
+
 
 	return dc, nil
 }
@@ -81,33 +93,40 @@ func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTre
 			repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
 
 			if isMake {
-				dc.RepoMake = append(dc.RepoMake, alpmpkg)
-			} else {
-				dc.Repo = append(dc.Repo, alpmpkg)
+				dc.MakeOnly.set(alpmpkg.Name())
 			}
 
+			dc.Repo = append(dc.Repo, alpmpkg)
 		}
 
 		return nil
 	})
 }
 
-func depCatagoriesRecursive(pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake bool) {
+func depCatagoriesRecursive(pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake bool, seen stringSet) {
 	for _, deps := range [2][]string{pkg.Depends, pkg.MakeDepends} {
 		for _, _dep := range deps {
 			dep := getNameFromDep(_dep)
 
 			aurpkg, exists := dt.Aur[dep]
 			if exists {
-				delete(dt.Aur, dep)
-				depCatagoriesRecursive(aurpkg, dc, dt, isMake)
+				_, ok := dc.Bases[aurpkg.PackageBase]
+				if !ok {
+					dc.Bases[aurpkg.PackageBase] = make([]*rpc.Pkg, 0)
+				}
+				dc.Bases[aurpkg.PackageBase] = append(dc.Bases[aurpkg.PackageBase], aurpkg)
 
-				if isMake {
-					dc.AurMake = append(dc.AurMake, aurpkg)
-				} else {
+				delete(dt.Aur, dep)
+				depCatagoriesRecursive(aurpkg, dc, dt, isMake, seen)
+
+				if !seen.get(aurpkg.PackageBase) {
 					dc.Aur = append(dc.Aur, aurpkg)
+					seen.set(aurpkg.PackageBase)
 				}
 
+				if isMake {
+					dc.MakeOnly.set(aurpkg.Name)
+				}
 			}
 
 			alpmpkg, exists := dt.Repo[dep]
@@ -116,11 +135,10 @@ func depCatagoriesRecursive(pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake
 				repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
 
 				if isMake {
-					dc.RepoMake = append(dc.RepoMake, alpmpkg)
-				} else {
-					dc.Repo = append(dc.Repo, alpmpkg)
+					dc.MakeOnly.set(alpmpkg.Name())
 				}
 
+				dc.Repo = append(dc.Repo, alpmpkg)
 			}
 
 		}
