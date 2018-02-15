@@ -101,8 +101,15 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		askEditPkgBuilds(dc.AurMake)
-		askEditPkgBuilds(dc.Aur)
+		err = askEditPkgBuilds(dc.AurMake)
+		if err != nil {
+			return err
+		}
+		err = askEditPkgBuilds(dc.Aur)
+		if err != nil {
+			return err
+		}
+		
 		if _, ok := arguments.options["gendb"]; ok {
 			fmt.Println("GenDB finished. No packages were installed")
 			return nil
@@ -240,7 +247,7 @@ func checkForConflicts(aur []*rpc.Pkg, aurMake []*rpc.Pkg, repo []*alpm.Package,
 	return nil
 }
 
-func askEditPkgBuilds(pkgs []*rpc.Pkg) {
+func askEditPkgBuilds(pkgs []*rpc.Pkg) (error)  {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
@@ -248,7 +255,23 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg) {
 			editcmd := exec.Command(editor(), dir+"PKGBUILD")
 			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 			editcmd.Run()
+
+			file, err := os.OpenFile(dir + ".SRCINFO", os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
+			cmd.Stdout, cmd.Stderr = file, os.Stderr
+			cmd.Dir = dir
+			err = cmd.Run()
+
+			if err != nil {
+				return err
+			}
 		}
+
 
 		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
 		if err == nil {
@@ -264,6 +287,8 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg) {
 		}
 
 	}
+
+	return nil
 }
 
 func dowloadPkgBuilds(pkgs []*rpc.Pkg) (err error) {
