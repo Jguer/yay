@@ -136,7 +136,7 @@ func install(parser *arguments) error {
 			}
 
 			removeArguments := makeArguments()
-			removeArguments.addOP("R")
+			removeArguments.addArg("R", "u")
 
 			for _, pkg := range dc.RepoMake {
 				removeArguments.addTarget(pkg.Name())
