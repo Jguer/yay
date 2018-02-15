@@ -173,9 +173,9 @@ func continueTask(s string, def string) (cont bool) {
 	var postFix string
 
 	if def == "nN" {
-		postFix = "[Y/n] "
+		postFix = " [Y/n] "
 	} else {
-		postFix = "[y/N] "
+		postFix = " [y/N] "
 	}
 
 	var response string
