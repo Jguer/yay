@@ -110,6 +110,15 @@ func install(parser *arguments) error {
 			return err
 		}
 		
+		err = parseSRCINFOs(dc.AurMake)
+		if err != nil {
+			return err
+		}
+		err = parseSRCINFOs(dc.Aur)
+		if err != nil {
+			return err
+		}
+
 		if _, ok := arguments.options["gendb"]; ok {
 			fmt.Println("GenDB finished. No packages were installed")
 			return nil
@@ -270,8 +279,15 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg) (error)  {
 			if err != nil {
 				return err
 			}
-		}
+		}	
+	}
 
+	return nil
+}
+
+func parseSRCINFOs(pkgs []*rpc.Pkg) error {
+	for _, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
 
 		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
 		if err == nil {
@@ -280,12 +296,11 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg) (error)  {
 				if owner != "" && repo != "" {
 					err = branchInfo(pkg.Name, owner, repo)
 					if err != nil {
-						fmt.Println(err)
+						return err
 					}
 				}
 			}
 		}
-
 	}
 
 	return nil
