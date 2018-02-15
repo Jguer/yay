@@ -152,7 +152,7 @@ func syncSearch(pkgS []string) (err error) {
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(pkgS []string, flags []string) (err error) {
+func syncInfo(pkgS []string) (err error) {
 	aurS, repoS, _, err := packageSlices(pkgS)
 	if err != nil {
 		return
@@ -160,10 +160,8 @@ func syncInfo(pkgS []string, flags []string) (err error) {
 
 	//repo always goes first
 	if len(repoS) != 0 {
-		arguments := makeArguments()
-		arguments.addArg("S", "i")
-		//arguments.addArg(flags...)
-		arguments.addTarget(repoS...)
+		arguments := cmdArgs.copy()
+		arguments.delTarget(aurS...)
 		err = passToPacman(arguments)
 
 		if err != nil {
