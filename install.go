@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"io/ioutil"
+	"strings"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -13,6 +15,7 @@ import (
 // Install handles package installs
 func install(parser *arguments) error {
 	aurs, repos, missing, err := packageSlices(parser.targets.toSlice())
+	srcinfos := make(map[string]*gopkg.PKGBUILD)
 	if err != nil {
 		return err
 	}
@@ -128,20 +131,20 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		err = parseSRCINFOs(dc.AurMake)
+		err = parsesrcinfos(dc.AurMake, srcinfos)
 		if err != nil {
 			return err
 		}
-		err = parseSRCINFOs(dc.Aur)
+		err = parsesrcinfos(dc.Aur, srcinfos)
 		if err != nil {
 			return err
 		}
 
-		err = buildInstallPkgBuilds(dc.AurMake, parser.targets)
+		err = buildInstallPkgBuilds(dc.AurMake, srcinfos, parser.targets, parser)
 		if err != nil {
 			return err
 		}
-		err = buildInstallPkgBuilds(dc.Aur, parser.targets)
+		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser)
 		if err != nil {
 			return err
 		}
@@ -264,33 +267,31 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg) (error)  {
 			editcmd := exec.Command(editor(), dir+"PKGBUILD")
 			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 			editcmd.Run()
-
-			file, err := os.OpenFile(dir + ".SRCINFO", os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0666)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
-			cmd.Stdout, cmd.Stderr = file, os.Stderr
-			cmd.Dir = dir
-			err = cmd.Run()
-
-			if err != nil {
-				return err
-			}
-		}	
+		}
 	}
 
 	return nil
 }
 
-func parseSRCINFOs(pkgs []*rpc.Pkg) error {
+
+func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) (error) {
+
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
+		
+		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
+		cmd.Stderr = os.Stderr
+		cmd.Dir = dir
+		srcinfo, err := cmd.Output()
 
-		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		if err != nil {
+			return err
+		}
+
+		pkgbuild, err := gopkg.ParseSRCINFOContent(srcinfo)
 		if err == nil {
+			srcinfos[pkg.PackageBase] = pkgbuild
+
 			for _, pkgsource := range pkgbuild.Source {
 				owner, repo := parseSource(pkgsource)
 				if owner != "" && repo != "" {
@@ -332,21 +333,80 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg) (err error) {
 	return
 }
 
-func buildInstallPkgBuilds(pkgs []*rpc.Pkg, targets stringSet) (err error) {
+func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments) (error) {
 	//for n := len(pkgs) -1 ; n > 0; n-- {
 	for n := 0; n < len(pkgs); n++ {
 		pkg := pkgs[n]
-
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		if targets.get(pkg.Name) {
-			err = passToMakepkg(dir, "-Cscfi", "--noconfirm")
+
+		srcinfo := srcinfos[pkg.PackageBase]
+		version := srcinfo.CompleteVersion()
+		file, err := completeFileName(dir, pkg.Name + "-" + version.String())
+
+		if file != "" {
+			fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
+				blackBg(pkg.Name+"-"+pkg.Version+ " Already made -- skipping build"))
 		} else {
-			err = passToMakepkg(dir, "-Cscfi", "--noconfirm", "--asdeps")
+			err = passToMakepkg(dir, "-Cscf", "--noconfirm")
+			if err != nil {
+				return err
+			}
+
+			file, err = completeFileName(dir, pkg.Name + "-" + version.String())
+			if err != nil {
+				return err
+			}
+
+			if file == "" {
+				return fmt.Errorf("Could not find built package")
+			}
 		}
-		if err != nil {
-			return
+
+		arguments := parser.copy()
+		arguments.targets = make(stringSet)
+		arguments.op = "U"
+		arguments.delArg("confirm")
+		arguments.delArg("c", "clean")
+		arguments.delArg("q", "quiet")
+		arguments.delArg("q", "quiet")
+		arguments.delArg("y", "refresh")
+		arguments.delArg("u", "sysupgrade")
+		arguments.delArg("w", "downloadonly")
+
+		oldConfirm := config.NoConfirm
+		config.NoConfirm = true
+
+		if targets.get(pkg.Name) {
+			arguments.addArg("asdeps")
+		}
+
+		arguments.addTarget(file)
+
+		err = passToPacman(arguments)
+		config.NoConfirm = oldConfirm
+		if err !=nil {
+			return err
 		}
 	}
 
-	return
+	return nil
+}
+
+func completeFileName(dir, name string) (string, error) {
+        files, err := ioutil.ReadDir(dir)
+        if err != nil {
+                return "", err
+        }
+
+        for _, file := range files {
+                if file.IsDir() {
+                        continue
+                }
+
+                if strings.HasPrefix(file.Name(), name) {
+                        return dir + file.Name(), nil
+                }
+        }
+
+        return "", nil
 }
