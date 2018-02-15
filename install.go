@@ -195,6 +195,11 @@ func install(parser *arguments) error {
 			config.NoConfirm = oldValue
 		}
 
+		if config.CleanAfter {
+			clean(dc.AurMake)
+			clean(dc.Aur)
+		}
+
 		return nil
 	}
 
@@ -415,6 +420,17 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 	return nil
 }
+
+func clean(pkgs []*rpc.Pkg) {
+	for _, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+
+		fmt.Println(boldGreenFg(arrow +
+			" CleanAfter enabled. Deleting " + pkg.Name  +" source folder."))
+		os.RemoveAll(dir)
+	}
+}
+
 
 func completeFileName(dir, name string) (string, error) {
         files, err := ioutil.ReadDir(dir)

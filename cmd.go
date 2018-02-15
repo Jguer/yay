@@ -702,11 +702,6 @@ func passToMakepkg(dir string, args ...string) (err error) {
 	err = cmd.Run()
 	if err == nil {
 		_ = saveVCSInfo()
-		if config.CleanAfter {
-			fmt.Println(boldGreenFg(arrow +
-				" CleanAfter enabled. Deleting source folder."))
-			os.RemoveAll(dir)
-		}
 	}
 	return
 }
