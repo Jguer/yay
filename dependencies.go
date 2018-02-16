@@ -80,6 +80,22 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 		}
 	}
 
+	for _, base := range dc.Bases {
+		for _, pkg := range base {
+			for _, dep := range pkg.Depends {
+				dc.MakeOnly.remove(dep)
+			}
+		}
+	}
+
+	for _, pkg := range dc.Repo {
+		pkg.Depends().ForEach(func(_dep alpm.Depend) error {
+			dep := _dep.Name
+			dc.MakeOnly.remove(dep)
+
+			return nil
+		})
+	}
 
 	return dc, nil
 }
