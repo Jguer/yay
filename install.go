@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -13,6 +15,7 @@ import (
 // Install handles package installs
 func install(parser *arguments) error {
 	aurs, repos, missing, err := packageSlices(parser.targets.toSlice())
+	srcinfos := make(map[string]*gopkg.PKGBUILD)
 	if err != nil {
 		return err
 	}
@@ -37,7 +40,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(aurs) != 0 {
-		//todo make pretty
+		//todo mamakeke pretty
 		fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
 
 		dt, err := getDepTree(aurs)
@@ -55,13 +58,6 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		for _, pkg := range dc.AurMake {
-			if pkg.Maintainer == "" {
-				fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
-					blackBg(pkg.Name+"-"+pkg.Version+" is orphaned"))
-			}
-		}
-
 		for _, pkg := range dc.Aur {
 			if pkg.Maintainer == "" {
 				fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
@@ -69,40 +65,64 @@ func install(parser *arguments) error {
 			}
 		}
 
-		printDownloadsFromRepo("Repo", dc.Repo)
-		printDownloadsFromRepo("Repo Make", dc.RepoMake)
-		printDownloadsFromAur("AUR", dc.Aur)
-		printDownloadsFromAur("AUR Make", dc.AurMake)
+		//printDownloadsFromRepo("Repo", dc.Repo)
+		//printDownloadsFromRepo("Repo Make", dc.RepoMake)
+		//printDownloadsFromAur("AUR", dc.Aur)
+		//printDownloadsFromAur("AUR Make", dc.AurMake)
 
-		askCleanBuilds(dc.AurMake)
-		askCleanBuilds(dc.Aur)
+		//fmt.Println(dc.MakeOnly)
+		//fmt.Println(dc.AurSet)
+
+		printDepCatagories(dc)
+
+		askCleanBuilds(dc.Aur, dc.Bases)
 		fmt.Println()
 
 		if !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
+
 		// if !continueTask("Proceed with download?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
 
 		if _, ok := arguments.options["gendb"]; !ok {
-			err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
+			//err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
 			if err != nil {
 				return err
 			}
 		}
 
-		err = dowloadPkgBuilds(dc.AurMake)
-		if err != nil {
-			return err
-		}
-		err = dowloadPkgBuilds(dc.Aur)
+		err = dowloadPkgBuilds(dc.Aur, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		askEditPkgBuilds(dc.AurMake)
-		askEditPkgBuilds(dc.Aur)
+		err = askEditPkgBuilds(dc.Aur, dc.Bases)
+		if err != nil {
+			return err
+		}
+
+		if len(dc.Repo) > 0 {
+			arguments := parser.copy()
+			arguments.delArg("u", "sysupgrade")
+			arguments.delArg("y", "refresh")
+			arguments.op = "S"
+			arguments.targets = make(stringSet)
+			arguments.addArg("needed", "asdeps")
+			for _, pkg := range dc.Repo {
+				arguments.addTarget(pkg.Name())
+			}
+
+			oldConfirm := config.NoConfirm
+			config.NoConfirm = true
+			passToPacman(arguments)
+			config.NoConfirm = oldConfirm
+			if err != nil {
+				return err
+			}
+		}
+
 		if _, ok := arguments.options["gendb"]; ok {
 			fmt.Println("GenDB finished. No packages were installed")
 			return nil
@@ -112,38 +132,31 @@ func install(parser *arguments) error {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
 
-		err = downloadPkgBuildsSources(dc.AurMake)
-		if err != nil {
-			return err
-		}
 		err = downloadPkgBuildsSources(dc.Aur)
 		if err != nil {
 			return err
 		}
 
-		err = buildInstallPkgBuilds(dc.AurMake, parser.targets)
-		if err != nil {
-			return err
-		}
-		err = buildInstallPkgBuilds(dc.Aur, parser.targets)
+		err = parsesrcinfos(dc.Aur, srcinfos)
 		if err != nil {
 			return err
 		}
 
-		if len(dc.RepoMake)+len(dc.AurMake) > 0 {
+		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases)
+		if err != nil {
+			return err
+		}
+
+		if len(dc.MakeOnly) > 0 {
 			if continueTask("Remove make dependencies?", "yY") {
 				return nil
 			}
 
 			removeArguments := makeArguments()
-			removeArguments.addOP("R")
+			removeArguments.addArg("R", "u")
 
-			for _, pkg := range dc.RepoMake {
-				removeArguments.addTarget(pkg.Name())
-			}
-
-			for _, pkg := range dc.AurMake {
-				removeArguments.addTarget(pkg.Name)
+			for pkg := range dc.MakeOnly {
+				removeArguments.addTarget(pkg)
 			}
 
 			oldValue := config.NoConfirm
@@ -152,18 +165,31 @@ func install(parser *arguments) error {
 			config.NoConfirm = oldValue
 		}
 
+		if config.CleanAfter {
+			clean(dc.Aur)
+		}
+
 		return nil
 	}
 
 	return nil
 }
 
-func askCleanBuilds(pkgs []*rpc.Pkg) {
+func askCleanBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			if !continueTask(pkg.Name+" Directory exists. Clean Build?", "yY") {
+			str := pkg.Name
+			if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+				str += " ("
+				for _, split := range bases[pkg.PackageBase] {
+					str += split.Name + " "
+				}
+				str = str[:len(str)-1] + ")"
+			}
+
+			if !continueTask(str+" Directory exists. Clean Build?", "yY") {
 				_ = os.RemoveAll(config.BuildDir + pkg.PackageBase)
 			}
 		}
@@ -240,36 +266,74 @@ func checkForConflicts(aur []*rpc.Pkg, aurMake []*rpc.Pkg, repo []*alpm.Package,
 	return nil
 }
 
-func askEditPkgBuilds(pkgs []*rpc.Pkg) {
+func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		if !continueTask(pkg.Name+" Edit PKGBUILD?", "yY") {
+		str := "Edit PKGBUILD? " + pkg.PackageBase
+		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+			str += " ("
+			for _, split := range bases[pkg.PackageBase] {
+				str += split.Name + " "
+			}
+			str = str[:len(str)-1] + ")"
+		}
+
+		if !continueTask(str, "yY") {
 			editcmd := exec.Command(editor(), dir+"PKGBUILD")
 			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 			editcmd.Run()
 		}
+	}
 
-		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+	return nil
+}
+
+func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
+
+	for _, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+
+		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
+		cmd.Stderr = os.Stderr
+		cmd.Dir = dir
+		srcinfo, err := cmd.Output()
+
+		if err != nil {
+			return err
+		}
+
+		pkgbuild, err := gopkg.ParseSRCINFOContent(srcinfo)
 		if err == nil {
+			srcinfos[pkg.PackageBase] = pkgbuild
+
 			for _, pkgsource := range pkgbuild.Source {
 				owner, repo := parseSource(pkgsource)
 				if owner != "" && repo != "" {
 					err = branchInfo(pkg.Name, owner, repo)
 					if err != nil {
-						fmt.Println(err)
+						return err
 					}
 				}
 			}
 		}
-
 	}
+
+	return nil
 }
 
-func dowloadPkgBuilds(pkgs []*rpc.Pkg) (err error) {
+func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
 	for _, pkg := range pkgs {
 		//todo make pretty
-		fmt.Println("Downloading:", pkg.Name+"-"+pkg.Version)
+		str := "Downloading: " + pkg.PackageBase + "-" + pkg.Version
+		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+			str += " ("
+			for _, split := range bases[pkg.PackageBase] {
+				str += split.Name + " "
+			}
+			str = str[:len(str)-1] + ")"
+		}
+		fmt.Println(str)
 
 		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
 		if err != nil {
@@ -283,7 +347,7 @@ func dowloadPkgBuilds(pkgs []*rpc.Pkg) (err error) {
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg) (err error) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		err = passToMakepkg(dir, "-f", "--verifysource")
+		err = passToMakepkg(dir, "--nobuild", "--nocheck", "--noprepare", "--nodeps")
 		if err != nil {
 			return
 		}
@@ -292,21 +356,111 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg) (err error) {
 	return
 }
 
-func buildInstallPkgBuilds(pkgs []*rpc.Pkg, targets stringSet) (err error) {
+func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg) error {
 	//for n := len(pkgs) -1 ; n > 0; n-- {
 	for n := 0; n < len(pkgs); n++ {
 		pkg := pkgs[n]
 
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		if targets.get(pkg.Name) {
-			err = passToMakepkg(dir, "-Cscfi", "--noconfirm")
-		} else {
-			err = passToMakepkg(dir, "-Cscfi", "--noconfirm", "--asdeps")
+		built := true
+
+		srcinfo := srcinfos[pkg.PackageBase]
+		version := srcinfo.CompleteVersion()
+
+		for _, split := range bases[pkg.PackageBase] {
+			file, err := completeFileName(dir, split.Name+"-"+version.String())
+			if err != nil {
+				return err
+			}
+
+			if file == "" {
+				built = false
+			}
 		}
+
+		if built {
+			fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
+				blackBg(pkg.Name+"-"+pkg.Version+" Already made -- skipping build"))
+		} else {
+			err := passToMakepkg(dir, "-Cscf", "--noconfirm")
+			if err != nil {
+				return err
+			}
+		}
+
+		arguments := parser.copy()
+		arguments.targets = make(stringSet)
+		arguments.op = "U"
+		arguments.delArg("confirm")
+		arguments.delArg("c", "clean")
+		arguments.delArg("q", "quiet")
+		arguments.delArg("q", "quiet")
+		arguments.delArg("y", "refresh")
+		arguments.delArg("u", "sysupgrade")
+		arguments.delArg("w", "downloadonly")
+
+		depArguments := makeArguments()
+		depArguments.addArg("D", "asdeps")
+
+		for _, split := range bases[pkg.PackageBase] {
+			file, err := completeFileName(dir, split.Name+"-"+version.String())
+			if err != nil {
+				return err
+			}
+
+			if file == "" {
+				return fmt.Errorf("Could not find built package " + split.Name + "-" + version.String())
+			}
+
+			arguments.addTarget(file)
+			if !targets.get(split.Name) {
+				depArguments.addTarget(split.Name)
+			}
+		}
+
+		oldConfirm := config.NoConfirm
+		config.NoConfirm = true
+		err := passToPacman(arguments)
 		if err != nil {
-			return
+			return err
+		}
+		if len(depArguments.targets) > 0 {
+			err = passToPacman(depArguments)
+			if err != nil {
+				return err
+			}
+		}
+		config.NoConfirm = oldConfirm
+	}
+
+	return nil
+}
+
+func clean(pkgs []*rpc.Pkg) {
+	for _, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+
+		fmt.Println(boldGreenFg(arrow +
+			" CleanAfter enabled. Deleting " + pkg.Name + " source folder."))
+		os.RemoveAll(dir)
+	}
+}
+
+func completeFileName(dir, name string) (string, error) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		if strings.HasPrefix(file.Name(), name) {
+			return dir + file.Name(), nil
 		}
 	}
 
-	return
+	return "", nil
 }
