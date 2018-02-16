@@ -81,27 +81,7 @@ func install(parser *arguments) error {
 		if !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
-
-		if len(dc.Repo) > 0 {
-			arguments := parser.copy()
-			arguments.delArg("u", "sysupgrade")
-			arguments.delArg("y", "refresh")
-			arguments.op = "S"
-			arguments.targets = make(stringSet)
-			arguments.addArg("needed", "asdeps")
-			for _, pkg := range dc.Repo {
-				arguments.addTarget(pkg.Name())
-			}
-
-			oldConfirm := config.NoConfirm
-			config.NoConfirm = true
-			passToPacman(arguments)
-			config.NoConfirm = oldConfirm
-			if err != nil {
-				return err
-			}
-		}
-
+	
 		// if !continueTask("Proceed with download?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
@@ -122,6 +102,27 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
+		
+		if len(dc.Repo) > 0 {
+			arguments := parser.copy()
+			arguments.delArg("u", "sysupgrade")
+			arguments.delArg("y", "refresh")
+			arguments.op = "S"
+			arguments.targets = make(stringSet)
+			arguments.addArg("needed", "asdeps")
+			for _, pkg := range dc.Repo {
+				arguments.addTarget(pkg.Name())
+			}
+
+			oldConfirm := config.NoConfirm
+			config.NoConfirm = true
+			passToPacman(arguments)
+			config.NoConfirm = oldConfirm
+			if err != nil {
+				return err
+			}
+		}
+
 			
 		if _, ok := arguments.options["gendb"]; ok {
 			fmt.Println("GenDB finished. No packages were installed")
