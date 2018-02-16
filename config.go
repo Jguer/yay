@@ -33,6 +33,7 @@ type Configuration struct {
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
+	SudoLoop      bool   `json:"sudoloop"`
 	TimeUpdate    bool   `json:"timeupdate"`
 	NoConfirm     bool   `json:"noconfirm"`
 	Devel         bool   `json:"devel"`
@@ -109,6 +110,7 @@ func defaultSettings(config *Configuration) {
 	config.PacmanBin = "/usr/bin/pacman"
 	config.PacmanConf = "/etc/pacman.conf"
 	config.SortMode = BottomUp
+	config.SudoLoop = false
 	config.TarBin = "/usr/bin/bsdtar"
 	config.TimeUpdate = false
 	config.RequestSplitN = 150
