@@ -35,7 +35,7 @@ type Configuration struct {
 	SortMode      int    `json:"sortmode"`
 	SudoLoop      bool   `json:"sudoloop"`
 	TimeUpdate    bool   `json:"timeupdate"`
-	NoConfirm     bool   `json:"noconfirm"`
+	NoConfirm     bool   `json:"-"`
 	Devel         bool   `json:"devel"`
 	CleanAfter    bool   `json:"cleanAfter"`
 }
