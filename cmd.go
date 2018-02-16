@@ -266,15 +266,29 @@ cleanup:
 	os.Exit(status)
 }
 
+func sudoLoopBackground() {
+	updateSudo()
+	go sudoLoop()
+}
+
 func sudoLoop() {
+	for {
+		updateSudo()	
+		time.Sleep(298 * time.Second)
+	}
+}
+
+
+func updateSudo() {
 	for {
 		cmd := exec.Command("sudo", "-v")
 		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		err := cmd.Run()
 		if err != nil {
 			fmt.Println(err)
+		} else {
+			break
 		}
-		time.Sleep(298 * time.Second)
 	}
 }
 
@@ -292,7 +306,7 @@ func handleCmd() (err error) {
 	}
 
 	if config.SudoLoop == true && cmdArgs.needRoot() {
-		go sudoLoop()
+		sudoLoopBackground()
 	}
 
 	switch cmdArgs.op {
@@ -656,9 +670,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	repoI = removeListFromList(repoNI, repoI)
 
 	if config.SudoLoop == true {
-		go sudoLoop()
+		sudoLoopBackground()
 	}
-
 	arguments := makeArguments()
 	arguments.addTarget(repoI...)
 	arguments.addTarget(aurI...)
