@@ -157,10 +157,10 @@ func printDepCatagories(dc *depCatagories) {
 		}
 	}
 
-	printDownloads("Repo", repoLen,  repo)
-	printDownloads("Repo Make", repoMakeLen,  repoMake)
-	printDownloads("Aur", aurLen,  aur)
-	printDownloads("Aur Make", aurMakeLen,  aurMake)
+	printDownloads("Repo", repoLen, repo)
+	printDownloads("Repo Make", repoMakeLen, repoMake)
+	printDownloads("Aur", aurLen, aur)
+	printDownloads("Aur Make", aurMakeLen, aurMake)
 }
 
 func printDownloads(repoName string, length int, packages string) {

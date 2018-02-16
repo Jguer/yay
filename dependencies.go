@@ -16,10 +16,9 @@ type depTree struct {
 
 type depCatagories struct {
 	Repo     []*alpm.Package
-	Aur[]*rpc.Pkg
+	Aur      []*rpc.Pkg
 	MakeOnly stringSet
-	Bases map[string][]*rpc.Pkg
-
+	Bases    map[string][]*rpc.Pkg
 }
 
 func makeDepTree() *depTree {

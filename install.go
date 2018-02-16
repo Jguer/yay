@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
-	"io/ioutil"
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
@@ -69,7 +69,7 @@ func install(parser *arguments) error {
 		//printDownloadsFromRepo("Repo Make", dc.RepoMake)
 		//printDownloadsFromAur("AUR", dc.Aur)
 		//printDownloadsFromAur("AUR Make", dc.AurMake)
-		
+
 		//fmt.Println(dc.MakeOnly)
 		//fmt.Println(dc.AurSet)
 
@@ -81,7 +81,7 @@ func install(parser *arguments) error {
 		if !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
-	
+
 		// if !continueTask("Proceed with download?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
@@ -102,7 +102,7 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
-		
+
 		if len(dc.Repo) > 0 {
 			arguments := parser.copy()
 			arguments.delArg("u", "sysupgrade")
@@ -123,7 +123,6 @@ func install(parser *arguments) error {
 			}
 		}
 
-			
 		if _, ok := arguments.options["gendb"]; ok {
 			fmt.Println("GenDB finished. No packages were installed")
 			return nil
@@ -190,7 +189,7 @@ func askCleanBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) {
 				str = str[:len(str)-1] + ")"
 			}
 
-			if !continueTask(str + " Directory exists. Clean Build?",  "yY") {
+			if !continueTask(str+" Directory exists. Clean Build?", "yY") {
 				_ = os.RemoveAll(config.BuildDir + pkg.PackageBase)
 			}
 		}
@@ -267,7 +266,7 @@ func checkForConflicts(aur []*rpc.Pkg, aurMake []*rpc.Pkg, repo []*alpm.Package,
 	return nil
 }
 
-func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (error)  {
+func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
@@ -290,12 +289,11 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (error)  {
 	return nil
 }
 
-
-func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) (error) {
+func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
 
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		
+
 		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
 		cmd.Stderr = os.Stderr
 		cmd.Dir = dir
@@ -327,7 +325,7 @@ func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) (error)
 func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
 	for _, pkg := range pkgs {
 		//todo make pretty
-		str := "Downloading: " +  pkg.PackageBase+"-"+pkg.Version
+		str := "Downloading: " + pkg.PackageBase + "-" + pkg.Version
 		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
 			str += " ("
 			for _, split := range bases[pkg.PackageBase] {
@@ -358,7 +356,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg) (err error) {
 	return
 }
 
-func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg) (error) {
+func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg) error {
 	//for n := len(pkgs) -1 ; n > 0; n-- {
 	for n := 0; n < len(pkgs); n++ {
 		pkg := pkgs[n]
@@ -369,8 +367,8 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		srcinfo := srcinfos[pkg.PackageBase]
 		version := srcinfo.CompleteVersion()
 
-		for _, split:= range bases[pkg.PackageBase] {
-			file, err := completeFileName(dir, split.Name + "-" + version.String())
+		for _, split := range bases[pkg.PackageBase] {
+			file, err := completeFileName(dir, split.Name+"-"+version.String())
 			if err != nil {
 				return err
 			}
@@ -382,7 +380,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 		if built {
 			fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
-				blackBg(pkg.Name+"-"+pkg.Version+ " Already made -- skipping build"))
+				blackBg(pkg.Name+"-"+pkg.Version+" Already made -- skipping build"))
 		} else {
 			err := passToMakepkg(dir, "-Cscf", "--noconfirm")
 			if err != nil {
@@ -405,7 +403,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		depArguments.addArg("D", "asdeps")
 
 		for _, split := range bases[pkg.PackageBase] {
-			file, err := completeFileName(dir, split.Name + "-" + version.String())
+			file, err := completeFileName(dir, split.Name+"-"+version.String())
 			if err != nil {
 				return err
 			}
@@ -413,7 +411,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			if file == "" {
 				return fmt.Errorf("Could not find built package " + split.Name + "-" + version.String())
 			}
-			
+
 			arguments.addTarget(file)
 			if !targets.get(split.Name) {
 				depArguments.addTarget(split.Name)
@@ -443,27 +441,26 @@ func clean(pkgs []*rpc.Pkg) {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
 		fmt.Println(boldGreenFg(arrow +
-			" CleanAfter enabled. Deleting " + pkg.Name  +" source folder."))
+			" CleanAfter enabled. Deleting " + pkg.Name + " source folder."))
 		os.RemoveAll(dir)
 	}
 }
 
-
 func completeFileName(dir, name string) (string, error) {
-        files, err := ioutil.ReadDir(dir)
-        if err != nil {
-                return "", err
-        }
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
 
-        for _, file := range files {
-                if file.IsDir() {
-                        continue
-                }
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
 
-                if strings.HasPrefix(file.Name(), name) {
-                        return dir + file.Name(), nil
-                }
-        }
+		if strings.HasPrefix(file.Name(), name) {
+			return dir + file.Name(), nil
+		}
+	}
 
-        return "", nil
+	return "", nil
 }
