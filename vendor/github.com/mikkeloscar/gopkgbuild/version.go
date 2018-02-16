@@ -16,7 +16,11 @@ type CompleteVersion struct {
 }
 
 func (c *CompleteVersion) String() string {
-	return fmt.Sprintf("%d:%s-%s", c.Epoch, c.Version, c.Pkgrel)
+	if c.Epoch > 0 {
+		return fmt.Sprintf("%d:%s-%s", c.Epoch, c.Version, c.Pkgrel)
+	}
+
+	return fmt.Sprintf("%s-%s", c.Version, c.Pkgrel)
 }
 
 // NewCompleteVersion creates a CompleteVersion including basic version, epoch
