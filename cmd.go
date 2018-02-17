@@ -472,7 +472,10 @@ func handleSync() (err error) {
 
 	if cmdArgs.existsArg("y", "refresh") {
 		arguments := cmdArgs.copy()
+		cmdArgs.delArg("y", "refresh")
 		arguments.delArg("u", "sysupgrade")
+		arguments.delArg("s", "search")
+		arguments.delArg("i", "info")
 		arguments.targets = make(stringSet)
 		err = passToPacman(arguments)
 		if err != nil {
