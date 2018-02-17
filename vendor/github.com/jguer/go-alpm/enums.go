@@ -96,3 +96,15 @@ const (
 	LogDebug
 	LogFunction
 )
+
+type Question uint
+
+const (
+	QuestionInstallIgnorepkg Question = 1 << iota
+	QuestionReplacePkg
+	QuestionConflictPkg
+	QuestionCorruptedPkg
+	QuestionRemovePkgs
+	QuestionSelectProvider
+	QuestionImportKey
+)
