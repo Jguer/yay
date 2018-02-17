@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"strconv"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -65,6 +66,8 @@ func install(parser *arguments) error {
 			}
 		}
 
+
+
 		//printDownloadsFromRepo("Repo", dc.Repo)
 		//printDownloadsFromRepo("Repo Make", dc.RepoMake)
 		//printDownloadsFromAur("AUR", dc.Aur)
@@ -74,6 +77,14 @@ func install(parser *arguments) error {
 		//fmt.Println(dc.AurSet)
 
 		printDepCatagories(dc)
+		fmt.Println()
+
+		if !arguments.existsArg("gendb") {
+			err = checkForConflicts(dc)
+			if err != nil {
+				return err
+			}
+		}
 
 		askCleanBuilds(dc.Aur, dc.Bases)
 		fmt.Println()
@@ -84,14 +95,7 @@ func install(parser *arguments) error {
 
 		// if !continueTask("Proceed with download?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
-		// }
-
-		if _, ok := arguments.options["gendb"]; !ok {
-			//err = checkForConflicts(dc.Aur, dc.AurMake, dc.Repo, dc.RepoMake)
-			if err != nil {
-				return err
-			}
-		}
+		// }	
 
 		err = dowloadPkgBuilds(dc.Aur, dc.Bases)
 		if err != nil {
@@ -123,7 +127,7 @@ func install(parser *arguments) error {
 			}
 		}
 
-		if _, ok := arguments.options["gendb"]; ok {
+		if arguments.existsArg("gendb") {
 			fmt.Println("GenDB finished. No packages were installed")
 			return nil
 		}
@@ -196,44 +200,33 @@ func askCleanBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) {
 	}
 }
 
-func checkForConflicts(aur []*rpc.Pkg, aurMake []*rpc.Pkg, repo []*alpm.Package,
-	repoMake []*alpm.Package) error {
-
+func checkForConflicts(dc *depCatagories) error {
 	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return err
 	}
-	var toRemove []string
+	toRemove := make(map[string]stringSet)
 
-	for _, pkg := range aur {
+	for _, pkg := range dc.Aur {
 		for _, cpkg := range pkg.Conflicts {
 			if _, err := localDb.PkgByName(cpkg); err == nil {
-				toRemove = append(toRemove, cpkg)
+				_, ok := toRemove[pkg.Name]
+				if !ok {
+					toRemove[pkg.Name] = make(stringSet)
+				}
+				toRemove[pkg.Name].set(cpkg)
 			}
 		}
 	}
 
-	for _, pkg := range aurMake {
-		for _, cpkg := range pkg.Conflicts {
-			if _, err := localDb.PkgByName(cpkg); err == nil {
-				toRemove = append(toRemove, cpkg)
-			}
-		}
-	}
-
-	for _, pkg := range repo {
+	for _, pkg := range dc.Repo {
 		pkg.Conflicts().ForEach(func(conf alpm.Depend) error {
 			if _, err := localDb.PkgByName(conf.Name); err == nil {
-				toRemove = append(toRemove, conf.Name)
-			}
-			return nil
-		})
-	}
-
-	for _, pkg := range repoMake {
-		pkg.Conflicts().ForEach(func(conf alpm.Depend) error {
-			if _, err := localDb.PkgByName(conf.Name); err == nil {
-				toRemove = append(toRemove, conf.Name)
+				_, ok := toRemove[pkg.Name()]
+				if !ok {
+					toRemove[pkg.Name()] = make(stringSet)
+				}
+				toRemove[pkg.Name()].set(conf.Name)
 			}
 			return nil
 		})
@@ -241,26 +234,23 @@ func checkForConflicts(aur []*rpc.Pkg, aurMake []*rpc.Pkg, repo []*alpm.Package,
 
 	if len(toRemove) != 0 {
 		fmt.Println(
-			redFg("The following packages conflict with packages to install:"))
-		for _, pkg := range toRemove {
-			fmt.Println(yellowFg(pkg))
+			redFg("Package conflicts found:"))
+		for name, pkgs := range toRemove {
+			str := yellowFg("\t" + name) + " Replaces"
+			for pkg := range pkgs {
+				str += " " + yellowFg(pkg)
+			}
+
+			fmt.Println(str)
 		}
 
-		if !continueTask("Remove conflicting package(s)?", "nN") {
+		if !continueTask("Continue with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
 
-		removeArguments := makeArguments()
-		removeArguments.addArg("R", "d", "d")
-
-		for _, pkg := range toRemove {
-			removeArguments.addTarget(pkg)
-		}
-
-		oldValue := config.NoConfirm
-		config.NoConfirm = true
-		passToPacman(removeArguments)
-		config.NoConfirm = oldValue
+		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
+		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 	}
 
 	return nil
