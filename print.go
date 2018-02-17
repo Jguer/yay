@@ -256,53 +256,7 @@ func localStatistics() error {
 	biggestPackages()
 	fmt.Println(boldCyanFg("==========================================="))
 
-	var q aurQuery
-	var j int
-	for i := len(remoteNames); i != 0; i = j {
-		j = i - config.RequestSplitN
-		if j < 0 {
-			j = 0
-		}
-		qtemp, err := rpc.Info(remoteNames[j:i])
-		q = append(q, qtemp...)
-		if err != nil {
-			return err
-		}
-	}
-
-	var outcast []string
-	for _, s := range remoteNames {
-		found := false
-		for _, i := range q {
-			if s == i.Name {
-				found = true
-				break
-			}
-		}
-		if !found {
-			outcast = append(outcast, s)
-		}
-	}
-
-	if err != nil {
-		return err
-	}
-
-	for _, res := range q {
-		if res.Maintainer == "" {
-			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-				boldYellowFgBlackBg(res.Name), whiteFgBlackBg("is orphaned"))
-		}
-		if res.OutOfDate != 0 {
-			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-				boldYellowFgBlackBg(res.Name), whiteFgBlackBg("is out-of-date in AUR"))
-		}
-	}
-
-	for _, res := range outcast {
-		fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-			boldYellowFgBlackBg(res), whiteFgBlackBg("is not available in AUR"))
-	}
+	aurInfo(remoteNames)
 
 	return nil
 }
