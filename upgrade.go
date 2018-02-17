@@ -10,7 +10,6 @@ import (
 	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
-	rpc "github.com/mikkeloscar/aur"
 	pkgb "github.com/mikkeloscar/gopkgbuild"
 )
 
@@ -203,7 +202,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 
 		routines++
 		go func(local []alpm.Package, remote []string) {
-			qtemp, err := rpc.Info(remote)
+			qtemp, err := aurInfo(remote)
 			if err != nil {
 				fmt.Println(err)
 				done <- true

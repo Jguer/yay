@@ -2,13 +2,12 @@ package main
 
 import (
 	"strings"
-
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 )
 
 type depTree struct {
-	ToProcess []string
+	ToProcess stringSet
 	Repo      map[string]*alpm.Package
 	Aur       map[string]*rpc.Pkg
 	Missing   stringSet
@@ -23,7 +22,7 @@ type depCatagories struct {
 
 func makeDepTree() *depTree {
 	dt := depTree{
-		make([]string, 0),
+		make(stringSet),
 		make(map[string]*alpm.Package),
 		make(map[string]*rpc.Pkg),
 		make(stringSet),
@@ -188,12 +187,10 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}
 
-		dt.ToProcess = append(dt.ToProcess, pkg)
+		dt.ToProcess.set(pkg)
 	}
 
-	if len(dt.ToProcess) > 0 {
-		err = depTreeRecursive(dt, localDb, syncDb, false)
-	}
+	err = depTreeRecursive(dt, localDb, syncDb, false)
 
 	return dt, err
 }
@@ -239,16 +236,20 @@ func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb 
 }
 
 func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake bool) (err error) {
-	nextProcess := make([]string, 0)
-	currentProcess := make([]string, 0, len(dt.ToProcess))
+	if len(dt.ToProcess) == 0 {
+		return
+	}
 
+	nextProcess := make(stringSet)
+	currentProcess := make(stringSet)
 	//strip version conditions
-	for _, dep := range dt.ToProcess {
-		currentProcess = append(currentProcess, getNameFromDep(dep))
+	for dep := range dt.ToProcess {
+		currentProcess.set(getNameFromDep(dep))
 	}
 
 	//assume toprocess only contains aur stuff we have not seen
-	info, err := rpc.Info(currentProcess)
+	info, err := aurInfo(currentProcess.toSlice())
+
 	if err != nil {
 		return
 	}
@@ -265,16 +266,16 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	//loop through to process and check if we now have
 	//each packaged cached
 	//if its not cached we assume its missing
-	for k, pkgName := range currentProcess {
+	for pkgName := range currentProcess {
 		pkg, exists := dt.Aur[pkgName]
 
 		//did not get it in the request
 		if !exists {
-			dt.Missing.set(dt.ToProcess[k])
+			dt.Missing.set(pkgName)
 			continue
 		}
 
-		//for reach dep and makedep
+		//for each dep and makedep
 		for _, deps := range [2][]string{pkg.Depends, pkg.MakeDepends} {
 			for _, versionedDep := range deps {
 				dep := getNameFromDep(versionedDep)
@@ -311,7 +312,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 				}
 
 				//if all else fails add it to next search
-				nextProcess = append(nextProcess, versionedDep)
+				nextProcess.set(versionedDep)
 			}
 		}
 	}

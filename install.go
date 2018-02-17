@@ -59,15 +59,6 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		for _, pkg := range dc.Aur {
-			if pkg.Maintainer == "" {
-				fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
-					blackBg(pkg.Name+"-"+pkg.Version+" is orphaned"))
-			}
-		}
-
-
-
 		//printDownloadsFromRepo("Repo", dc.Repo)
 		//printDownloadsFromRepo("Repo Make", dc.RepoMake)
 		//printDownloadsFromAur("AUR", dc.Aur)
