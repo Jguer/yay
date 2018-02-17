@@ -21,4 +21,5 @@ _cgo_export.*
 *.test
 *.prof
 yay
+yay_*/
 *.tar.gz
