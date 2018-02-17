@@ -380,3 +380,50 @@ big:
 	}
 	return
 }
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return a
+}
+
+func aurInfo(names []string) ([]rpc.Pkg, error) {
+	info := make([]rpc.Pkg, 0, len(names))
+	seen := make(map[string]int)
+
+	for n := 0; n < len(names); n += config.RequestSplitN {
+		max := min(len(names), n + config.RequestSplitN)
+		tempInfo, err := rpc.Info(names[n:max])
+		if err != nil {
+			return info, err
+		}
+		info = append(info, tempInfo...)
+	}
+
+	for k, pkg := range info {
+		seen[pkg.Name] = k
+	}
+
+	for _, name := range names {
+		i, ok := seen[name]
+		if !ok {
+			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
+				boldYellowFgBlackBg(name), whiteFgBlackBg("is not available in AUR"))
+			continue
+		}
+
+		pkg := info[i]
+
+		if pkg.Maintainer == "" {
+			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
+				boldYellowFgBlackBg(pkg.Name), whiteFgBlackBg("is orphaned"))
+		}
+		if pkg.OutOfDate != 0 {
+			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
+				boldYellowFgBlackBg(pkg.Name), whiteFgBlackBg("is out-of-date in AUR"))
+		}
+	}
+
+	return info, nil
+}
