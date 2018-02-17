@@ -1,7 +1,7 @@
 .PHONY: build doc fmt lint run test vendor_clean vendor_get vendor_update vet
 
-VERSION := $(shell git rev-list --count master)
-LDFLAGS=-ldflags "-s -w -X main.version=${VERSION}"
+VERSION := "$(shell git rev-list --count master)"
+LDFLAGS=-ldflags "-s -w -X main.version=2.${VERSION}"
 GOFILES := $(shell ls *.go | grep -v /vendor/)
 ARCH=$(shell uname -m)
 PKGNAME=yay
