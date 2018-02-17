@@ -448,16 +448,7 @@ func handleYay() (err error) {
 }
 
 func handleGetpkgbuild() (err error) {
-	for pkg := range cmdArgs.targets {
-		err = getPkgbuild(pkg)
-		if err != nil {
-			//we print the error instead of returning it
-			//seems as we can handle multiple errors without stoping
-			//theres no easy way around this right now
-			fmt.Println(pkg+":", err)
-		}
-	}
-
+	err = getPkgbuilds(cmdArgs.formatTargets())
 	return
 }
 
