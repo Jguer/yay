@@ -280,7 +280,6 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 }
 
 func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
-
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
@@ -294,16 +293,18 @@ func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
 		}
 
 		pkgbuild, err := gopkg.ParseSRCINFOContent(srcinfo)
-		if err == nil {
-			srcinfos[pkg.PackageBase] = pkgbuild
+		if err != nil {
+			return fmt.Errorf("%s: %s", pkg.Name, err)
+		}
 
-			for _, pkgsource := range pkgbuild.Source {
-				owner, repo := parseSource(pkgsource)
-				if owner != "" && repo != "" {
-					err = branchInfo(pkg.Name, owner, repo)
-					if err != nil {
-						return err
-					}
+		srcinfos[pkg.PackageBase] = pkgbuild
+
+		for _, pkgsource := range pkgbuild.Source {
+			owner, repo := parseSource(pkgsource)
+			if owner != "" && repo != "" {
+				err = branchInfo(pkg.Name, owner, repo)
+				if err != nil {
+					return err
 				}
 			}
 		}
