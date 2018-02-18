@@ -488,10 +488,10 @@ func handleSync() (err error) {
 		err = syncSearch(targets)
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = passToPacman(cmdArgs)
-	} else if cmdArgs.existsArg("u", "sysupgrade") {
-		err = upgradePkgs(make([]string, 0))
 	} else if cmdArgs.existsArg("i", "info") {
 		err = syncInfo(targets)
+	} else if cmdArgs.existsArg("u", "sysupgrade") {
+		err = install(cmdArgs)
 	} else if len(cmdArgs.targets) > 0 {
 		err = install(cmdArgs)
 	}

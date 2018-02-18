@@ -15,46 +15,96 @@ import (
 
 // Install handles package installs
 func install(parser *arguments) error {
-	aurs, repos, missing, err := packageSlices(parser.targets.toSlice())
+	aur, repo, err := packageSlices(parser.targets.toSlice())
+	if err != nil {
+		return  err
+	}
+
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
+	var dc *depCatagories
+
+	//fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
+	requestTargets := aur
+
+	//remotenames: names of all non repo packages on the system
+	_, _, _, remoteNames, err := filterPackages()
+	if err != nil {
+		return  err
+	}
+
+	//cache as a stringset. maybe make it return a string set in the first
+	//place
+	remoteNamesCache := make(stringSet)
+	for _, name := range remoteNames {
+		remoteNamesCache.set(name)
+	}
+
+	//if we are doing -u also request every non repo package on the system
+	if parser.existsArg("u", "sysupgrade") {
+		requestTargets = append(requestTargets, remoteNames...)
+	}
+
+
+	fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
+	dt , err := getDepTree(requestTargets)
 	if err != nil {
 		return err
 	}
 
-	if len(missing) > 0 {
-		fmt.Println(missing)
-		fmt.Println("Could not find all Targets")
+	//only error if direct targets or deps are missing
+	missing := make(stringSet)
+		for missingName := range dt.Missing {
+		if !remoteNamesCache.get(missingName) {
+			missing.set(missingName)
+		}
 	}
 
+	if len(missing) > 0 {
+		printMissing(missing)
+		return fmt.Errorf("Could not find all required packages")
+	}
+
+	//create the arguments to pass for the repo install
 	arguments := parser.copy()
 	arguments.delArg("u", "sysupgrade")
 	arguments.delArg("y", "refresh")
 	arguments.op = "S"
 	arguments.targets = make(stringSet)
-	arguments.addTarget(repos...)
-
-	if len(repos) != 0 {
-		err := passToPacman(arguments)
-		if err != nil {
-			fmt.Println("Error installing repo packages.")
-		}
-	}
-
-	if len(aurs) != 0 {
-		//todo mamakeke pretty
-		fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
-
-		dt, err := getDepTree(aurs)
+	
+	if parser.existsArg("u", "sysupgrade") {
+		repoUp, aurUp, err  := upgradePkgs(dt)
 		if err != nil {
 			return err
 		}
 
-		if len(dt.Missing) > 0 {
-			fmt.Println(dt.Missing)
-			return fmt.Errorf("Could not find all Deps")
+		for pkg := range aurUp {
+			parser.addTarget(pkg)
+		}
+		
+		for pkg := range repoUp {
+			arguments.addTarget(pkg)
 		}
 
-		dc, err := getDepCatagories(aurs, dt)
+	
+		//discard stuff thats
+		//not a target and
+		//not an upgrade and
+		//is installed
+		for pkg := range dt.Aur {
+			if !parser.targets.get(pkg) && remoteNamesCache.get(pkg) {
+				delete(dt.Aur, pkg)
+			}
+		}
+	}
+
+	for _, pkg := range repo {
+		arguments.addTarget(pkg)
+	}
+
+
+	hasAur := len(dt.Aur) != 0
+	if hasAur {
+		dc, err = getDepCatagories(parser.formatTargets(), dt)
 		if err != nil {
 			return err
 		}
@@ -69,8 +119,17 @@ func install(parser *arguments) error {
 
 		printDepCatagories(dc)
 		fmt.Println()
+	}
+		
+	if len(arguments.targets) > 0 {
+		err := passToPacman(arguments)
+		if err != nil {
+			fmt.Println("Error installing repo packages.")
+		}
+	}
 
-		if !arguments.existsArg("gendb") {
+	if hasAur {
+		if !parser.existsArg("gendb") {
 			err = checkForConflicts(dc)
 			if err != nil {
 				return err
@@ -98,7 +157,7 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		if len(dc.Repo) > 0 {
+		/*if len(dc.Repo) > 0 {
 			arguments := parser.copy()
 			arguments.delArg("u", "sysupgrade")
 			arguments.delArg("y", "refresh")
@@ -116,7 +175,7 @@ func install(parser *arguments) error {
 			if err != nil {
 				return err
 			}
-		}
+		}*/
 
 		if arguments.existsArg("gendb") {
 			fmt.Println("GenDB finished. No packages were installed")

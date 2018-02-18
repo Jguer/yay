@@ -153,16 +153,23 @@ func syncSearch(pkgS []string) (err error) {
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string) (err error) {
-	aurS, repoS, missing, err := packageSlices(pkgS)
+	var info []rpc.Pkg
+	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
+	}
+
+	if len(aurS) != 0 {
+		info, err = aurInfo(aurS)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	//repo always goes first
 	if len(repoS) != 0 {
 		arguments := cmdArgs.copy()
 		arguments.delTarget(aurS...)
-		arguments.delTarget(missing...)
 		err = passToPacman(arguments)
 
 		if err != nil {
@@ -171,19 +178,10 @@ func syncInfo(pkgS []string) (err error) {
 	}
 
 	if len(aurS) != 0 {
-		q, err := rpc.Info(aurS)
-		if err != nil {
-			fmt.Println(err)
-		}
-		for _, aurP := range q {
-			PrintInfo(&aurP)
+		for _, pkg := range info {
+			PrintInfo(&pkg)
 		}
 	}
-
-	//todo
-	//if len(missing) != 0 {
-	//	printMissing(missing)
-	//}
 
 	return
 }
@@ -239,8 +237,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string) (aur []string, repo []string, missing []string, err error) {
-	possibleAur := make([]string, 0)
+func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
@@ -263,28 +260,8 @@ func packageSlices(toCheck []string) (aur []string, repo []string, missing []str
 		if found {
 			repo = append(repo, pkg)
 		} else {
-			possibleAur = append(possibleAur, pkg)
+			aur = append(aur, pkg)
 		}
-	}
-
-	if len(possibleAur) == 0 {
-		return
-	}
-
-	info, err := rpc.Info(possibleAur)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-outer:
-	for _, pkg := range possibleAur {
-		for _, rpcpkg := range info {
-			if rpcpkg.Name == pkg {
-				aur = append(aur, pkg)
-				continue outer
-			}
-		}
-		missing = append(missing, pkg)
 	}
 
 	return
