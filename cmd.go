@@ -593,9 +593,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		aurQ.printSearch(numpq + 1)
 	}
 
-	fmt.Println(greenFg("Type the numbers or ranges (e.g. 1-10) you want to install. " +
-		"Separate each one of them with a space."))
-	fmt.Print("Numbers: ")
+	fmt.Println(boldGreenFg(arrow) + boldGreenFg(" Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)"))
+	fmt.Print(boldGreenFg(arrow + " "))
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil || overflow {

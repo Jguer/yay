@@ -56,12 +56,34 @@ func (u upSlice) Less(i, j int) bool {
 	return false
 }
 
+func getVersionDiff(oldVersion, newversion string) (left, right string) {
+		old, errOld := pkgb.NewCompleteVersion(oldVersion)
+		new, errNew := pkgb.NewCompleteVersion(newversion)
+		
+		if errOld != nil {
+			left = redFg("Invalid Version")
+		}
+		if errNew != nil {
+			right = redFg("Invalid Version")
+		}
+
+		if errOld == nil && errNew == nil {
+			if old.Version == new.Version {
+				left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
+				right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
+			} else {
+				left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
+				right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
+			}
+		}
+
+		return
+}
+
 // Print prints the details of the packages to upgrade.
 func (u upSlice) Print(start int) {
 	for k, i := range u {
-		old, errOld := pkgb.NewCompleteVersion(i.LocalVersion)
-		new, errNew := pkgb.NewCompleteVersion(i.RemoteVersion)
-		var left, right string
+		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
 
 		f := func(name string) (output string) {
 			if alpmConf.Options&alpm.ConfColor == 0 {
@@ -75,26 +97,6 @@ func (u upSlice) Print(start int) {
 		}
 		fmt.Print(yellowFg(fmt.Sprintf("%2d ", len(u)+start-k-1)))
 		fmt.Print(f(i.Repository), "/", boldWhiteFg(i.Name))
-
-		if errOld != nil {
-			left = redFg("Invalid Version")
-		} else {
-			if old.Version == new.Version {
-				left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
-			} else {
-				left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
-			}
-		}
-
-		if errNew != nil {
-			right = redFg("Invalid Version")
-		} else {
-			if old.Version == new.Version {
-				right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
-			} else {
-				right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
-			}
-		}
 
 		w := 70 - len(i.Repository) - len(i.Name) + len(left)
 		fmt.Printf(fmt.Sprintf("%%%ds", w),
@@ -167,7 +169,7 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 					fmt.Print(yellowFg("Warning: "))
 					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
 				} else {
-					packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
+					packageC <- upgrade{e.Package, "devel", pkg.Version() , "commit-" + e.SHA[0:6]}
 				}
 			} else {
 				removeVCSPackage([]string{e.Package})
@@ -203,8 +205,9 @@ func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade 
 			if (config.TimeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
 				(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
 				if pkg.ShouldIgnore() {
+					left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
 					fmt.Print(yellowFg("Warning: "))
-					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), aurPkg.Version)
+					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), left, right)
 				} else {
 					packageC <- upgrade{aurPkg.Name, "aur", pkg.Version(), aurPkg.Version}
 				}
@@ -306,8 +309,8 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	aurUp.Print(1)
 
 	if !config.NoConfirm {
-		fmt.Println(greenFg("Enter packages you don't want to upgrade."))
-		fmt.Print("Numbers: ")
+		fmt.Println(boldGreenFg(arrow) + greenFg(" Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)"))
+		fmt.Print(boldGreenFg(arrow + " "))
 		reader := bufio.NewReader(os.Stdin)
 
 		numberBuf, overflow, err := reader.ReadLine()
