@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-//	"os"
+	"os"
 	"strconv"
 	"strings"
 
@@ -273,24 +273,28 @@ func printMissing(missing stringSet) {
 //todo make it less hacky
 func printNumberOfUpdates() error {
 	//todo
-	/*old := os.Stdout // keep backup of the real stdout
+	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList()
+	_, _, localNames, remoteNames, err := filterPackages()
+	dt, _ := getDepTree(append(localNames, remoteNames...))
+	aurUp, repoUp, err := upList(dt)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
 	}
 	fmt.Println(len(aurUp) + len(repoUp))
-	*/
+	
 	return nil
 }
 
 //todo make it less hacky
 func printUpdateList() error {
-	/*
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList()
+	_, _, localNames, remoteNames, err := filterPackages()
+	dt, _ := getDepTree(append(localNames, remoteNames...))
+	aurUp, repoUp, err := upList(dt)
+
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -302,7 +306,7 @@ func printUpdateList() error {
 	for _, pkg := range aurUp {
 		fmt.Println(pkg.Name)
 	}
-*/
+
 	return nil
 }
 
