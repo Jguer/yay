@@ -118,7 +118,7 @@ func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTre
 }
 
 func depCatagoriesRecursive(pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake bool, seen stringSet) {
-	for _, deps := range [2][]string{pkg.Depends, pkg.MakeDepends} {
+	for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 		for _, _dep := range deps {
 			dep := getNameFromDep(_dep)
 
@@ -276,7 +276,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 		}
 
 		//for each dep and makedep
-		for _, deps := range [2][]string{pkg.Depends, pkg.MakeDepends} {
+		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, versionedDep := range deps {
 				dep := getNameFromDep(versionedDep)
 

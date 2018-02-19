@@ -201,6 +201,7 @@ func PrintInfo(a *rpc.Pkg) {
 	fmt.Println(boldWhiteFg("Licenses        :"), strings.Join(a.License, "  "))
 	fmt.Println(boldWhiteFg("Depends On      :"), strings.Join(a.Depends, "  "))
 	fmt.Println(boldWhiteFg("Make Deps       :"), strings.Join(a.MakeDepends, "  "))
+	fmt.Println(boldWhiteFg("Check Deps      :"), strings.Join(a.CheckDepends, "  "))
 	fmt.Println(boldWhiteFg("Optional Deps   :"), strings.Join(a.OptDepends, "  "))
 	fmt.Println(boldWhiteFg("Conflicts With  :"), strings.Join(a.Conflicts, "  "))
 	fmt.Println(boldWhiteFg("Maintainer      :"), a.Maintainer)
