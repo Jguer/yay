@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -368,14 +369,36 @@ func min(a, b int) int {
 func aurInfo(names []string) ([]rpc.Pkg, error) {
 	info := make([]rpc.Pkg, 0, len(names))
 	seen := make(map[string]int)
+	var mux sync.Mutex
+	var wg sync.WaitGroup
+	var err error
+
+	makeRequest := func(n, max int) {
+		tempInfo, requestErr := rpc.Info(names[n:max])
+		if err != nil {
+			return
+		}
+		if requestErr != nil {
+			//return info, err
+			err = requestErr
+			return
+		}
+		mux.Lock()
+		info = append(info, tempInfo...)
+		mux.Unlock()
+		wg.Done()
+	}
 
 	for n := 0; n < len(names); n += config.RequestSplitN {
 		max := min(len(names), n + config.RequestSplitN)
-		tempInfo, err := rpc.Info(names[n:max])
-		if err != nil {
-			return info, err
-		}
-		info = append(info, tempInfo...)
+		wg.Add(1)
+		go makeRequest(n, max)
+	}
+
+	wg.Wait()
+
+	if err != nil {
+		return info, err
 	}
 
 	for k, pkg := range info {
