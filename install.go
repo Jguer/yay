@@ -44,8 +44,9 @@ func install(parser *arguments) error {
 		requestTargets = append(requestTargets, remoteNames...)
 	}
 
-
-	fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
+	if len(requestTargets) > 0 {
+		fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
+	}
 	dt , err := getDepTree(requestTargets)
 	if err != nil {
 		return err
