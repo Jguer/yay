@@ -373,6 +373,10 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	var wg sync.WaitGroup
 	var err error
 
+	missing := make([]string, 0, len(names))
+	orphans := make([]string, 0, len(names))
+	outOfDate := make([]string, 0, len(names))
+
 	makeRequest := func(n, max int) {
 		tempInfo, requestErr := rpc.Info(names[n:max])
 		if err != nil {
@@ -408,21 +412,42 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	for _, name := range names {
 		i, ok := seen[name]
 		if !ok {
-			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-				boldYellowFgBlackBg(name), whiteFgBlackBg("is not available in AUR"))
+			missing = append(missing, name)
 			continue
 		}
 
 		pkg := info[i]
 
 		if pkg.Maintainer == "" {
-			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-				boldYellowFgBlackBg(pkg.Name), whiteFgBlackBg("is orphaned"))
+			orphans = append(orphans, name)
 		}
 		if pkg.OutOfDate != 0 {
-			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-				boldYellowFgBlackBg(pkg.Name), whiteFgBlackBg("is out-of-date in AUR"))
+			outOfDate = append(outOfDate, name)
 		}
+	}
+
+	if len(missing) > 0 {
+		fmt.Print(boldRedFgBlackBg(arrow + " Missing AUR Packages:"))
+		for _, name := range missing {
+				fmt.Print(" " + boldYellowFgBlackBg(name))
+		}
+		fmt.Println()
+	}
+
+	if len(orphans) > 0 {
+		fmt.Print(boldRedFgBlackBg(arrow + " Orphaned AUR Packages:"))
+		for _, name := range orphans {
+				fmt.Print(" " + boldYellowFgBlackBg(name))
+		}
+		fmt.Println()
+	}
+
+	if len(outOfDate) > 0 {
+		fmt.Print(boldRedFgBlackBg(arrow + " Out Of Date AUR Packages:"))
+		for _, name := range outOfDate {
+				fmt.Print(" " + boldYellowFgBlackBg(name))
+		}
+		fmt.Println()
 	}
 
 	return info, nil
