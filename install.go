@@ -24,7 +24,7 @@ func install(parser *arguments) error {
 	var dc *depCatagories
 
 	//fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
-	requestTargets := aur
+	requestTargets := append(aur, repo...)
 
 	//remotenames: names of all non repo packages on the system
 	_, _, _, remoteNames, err := filterPackages()
@@ -44,7 +44,7 @@ func install(parser *arguments) error {
 		requestTargets = append(requestTargets, remoteNames...)
 	}
 
-	if len(requestTargets) > 0 {
+	if len(aur) > 0 {
 		fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
 	}
 	dt , err := getDepTree(requestTargets)
@@ -93,28 +93,32 @@ func install(parser *arguments) error {
 		}
 	}
 
+	hasAur := len(dt.Aur) != 0
+	dc, err = getDepCatagories(parser.formatTargets(), dt)
+	if err != nil {
+		return err
+	}
+
+	for _, pkg := range dc.Repo {
+		arguments.addTarget(pkg.Name())
+	}
+
 	for _, pkg := range repo {
 		arguments.addTarget(pkg)
 	}
 
 
-	hasAur := len(dt.Aur) != 0
+
 	if hasAur {
-		dc, err = getDepCatagories(parser.formatTargets(), dt)
-		if err != nil {
-			return err
-		}
-
-		//printDownloadsFromRepo("Repo", dc.Repo)
-		//printDownloadsFromRepo("Repo Make", dc.RepoMake)
-		//printDownloadsFromAur("AUR", dc.Aur)
-		//printDownloadsFromAur("AUR Make", dc.AurMake)
-
-		//fmt.Println(dc.MakeOnly)
-		//fmt.Println(dc.AurSet)
-
 		printDepCatagories(dc)
 		fmt.Println()
+
+		if !parser.existsArg("gendb") {
+			err = checkForConflicts(dc)
+			if err != nil {
+				return err
+			}
+		}
 	}
 		
 	if len(arguments.targets) > 0 {
@@ -125,12 +129,10 @@ func install(parser *arguments) error {
 	}
 
 	if hasAur {
-		if !parser.existsArg("gendb") {
-			err = checkForConflicts(dc)
-			if err != nil {
-				return err
-			}
-		}
+		//conflicts have been checked so answer y for them
+		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
+		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
 		askCleanBuilds(dc.Aur, dc.Bases)
 		fmt.Println()
@@ -304,10 +306,6 @@ func checkForConflicts(dc *depCatagories) error {
 		if !continueTask("Continue with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
-
-		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
-		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
-		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 	}
 
 	return nil
