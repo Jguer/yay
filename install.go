@@ -52,16 +52,11 @@ func install(parser *arguments) error {
 	}
 
 	//only error if direct targets or deps are missing
-	missing := make(stringSet)
-		for missingName := range dt.Missing {
+	for missingName := range dt.Missing {
 		if !remoteNamesCache.get(missingName) {
-			missing.set(missingName)
+			return fmt.Errorf(boldRedFgBlackBg(arrow+" Error: ") +
+				blackBg("Could not find all required package"))
 		}
-	}
-
-	if len(missing) > 0 {
-		printMissing(missing)
-		return fmt.Errorf("Could not find all required packages")
 	}
 
 	//create the arguments to pass for the repo install
@@ -124,7 +119,7 @@ func install(parser *arguments) error {
 	if len(arguments.targets) > 0 {
 		err := passToPacman(arguments)
 		if err != nil {
-			fmt.Println("Error installing repo packages.")
+			fmt.Errorf("Error installing repo packages.")
 		}
 	}
 
@@ -176,22 +171,33 @@ func install(parser *arguments) error {
 				return err
 			}
 		}*/
-
-		if arguments.existsArg("gendb") {
-			fmt.Println("GenDB finished. No packages were installed")
-			return nil
-		}
-
+	
 		// if !continueTask("Proceed with install?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
+
+		//this downloads the package build sources but also causes
+		//a version bumb for vsc packages
+		//that should not edit the sources so we should be safe to skip
+		//it and parse the srcinfo at the current version
+		if arguments.existsArg("gendb") {	
+			err = parsesrcinfosFile(dc.Aur, srcinfos, dc.Bases)
+			if err != nil {
+				return err
+			}
+
+
+			fmt.Println(boldGreenFg(arrow+" GenDB finished. No packages were installed"))
+			return nil
+		}
 
 		err = downloadPkgBuildsSources(dc.Aur)
 		if err != nil {
 			return err
 		}
 
-		err = parsesrcinfos(dc.Aur, srcinfos)
+
+		err = parsesrcinfosGenerate(dc.Aur, srcinfos, dc.Bases)
 		if err != nil {
 			return err
 		}
@@ -329,10 +335,67 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	return nil
 }
 
-func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
-	for _, pkg := range pkgs {
+func updateVSCdb(pkgbuild *gopkg.PKGBUILD) {
+	for _, pkgsource := range pkgbuild.Source {
+		owner, repo := parseSource(pkgsource)
+		if owner != "" && repo != "" {
+			err := branchInfo(pkgbuild.Pkgbase, owner, repo)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+}
+
+func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
+	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
+		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s-%s")
+		str2 := ""
+		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+			str2 += " ("
+			for _, split := range bases[pkg.PackageBase] {
+				str2 += split.Name + " "
+			}
+			str2 = str2[:len(str2)-1] + ")"
+		}
+		fmt.Printf(str, k+1, len(pkgs), pkg.PackageBase, pkg.Version)
+		fmt.Print(str2)
+		fmt.Println()
+
+
+		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		if err != nil {
+			return fmt.Errorf("%s: %s", pkg.Name, err)
+		}
+
+		srcinfos[pkg.PackageBase] = pkgbuild
+		updateVSCdb(pkgbuild)
+	}
+
+	return nil
+}
+
+func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
+	for k, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+
+		str := "Parsing SRCINFO (%d/%d): %s-%s"
+		str2 := ""
+		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+			str2 += " ("
+			for _, split := range bases[pkg.PackageBase] {
+				str2 += split.Name + " "
+			}
+			str2 = str2[:len(str2)-1] + ")"
+		}
+		fmt.Printf(str, k+1, len(pkgs), pkg.PackageBase, pkg.Version)
+		fmt.Print(str2)
+		fmt.Println()
+
+
+		
 		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
 		cmd.Stderr = os.Stderr
 		cmd.Dir = dir
@@ -348,33 +411,27 @@ func parsesrcinfos(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
 		}
 
 		srcinfos[pkg.PackageBase] = pkgbuild
-
-		for _, pkgsource := range pkgbuild.Source {
-			owner, repo := parseSource(pkgsource)
-			if owner != "" && repo != "" {
-				err = branchInfo(pkg.Name, owner, repo)
-				if err != nil {
-					return err
-				}
-			}
-		}
+		updateVSCdb(pkgbuild)
 	}
 
 	return nil
 }
 
 func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
-	for _, pkg := range pkgs {
+	for k, pkg := range pkgs {
 		//todo make pretty
-		str := "Downloading: " + pkg.PackageBase + "-" + pkg.Version
+		str := boldCyanFg("::") + boldFg(" Downloading (%d/%d): %s-%s")
+		str2 := ""
 		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
-			str += " ("
+			str2 += " ("
 			for _, split := range bases[pkg.PackageBase] {
-				str += split.Name + " "
+				str2 += split.Name + " "
 			}
-			str = str[:len(str)-1] + ")"
+			str2 = str2[:len(str2)-1] + ")"
 		}
-		fmt.Println(str)
+		fmt.Printf(str, k+1, len(pkgs), pkg.PackageBase, pkg.Version)
+		fmt.Print(str2)
+		fmt.Println()
 
 		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
 		if err != nil {
