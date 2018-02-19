@@ -481,7 +481,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
 				blackBg(pkg.Name+"-"+pkg.Version+" Already made -- skipping build"))
 		} else {
-			err := passToMakepkg(dir, "-Cscf", "--noconfirm")
+			err := passToMakepkg(dir, "-Ccf", "--noconfirm")
 			if err != nil {
 				return err
 			}
