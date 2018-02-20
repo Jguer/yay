@@ -295,7 +295,7 @@ func checkForConflicts(dc *depCatagories) error {
 		fmt.Println(
 			redFg("Package conflicts found:"))
 		for name, pkgs := range toRemove {
-			str := yellowFg("\t" + name) + " Replaces"
+			str := "\tInstalling " + yellowFg(name) + " will remove"
 			for pkg := range pkgs {
 				str += " " + yellowFg(pkg)
 			}
