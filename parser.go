@@ -270,6 +270,10 @@ func (parser *arguments) formatArgs() (args []string) {
 	args = append(args, op)
 
 	for option, arg := range parser.options {
+		if option == "--" {
+			continue
+		}
+
 		formatedOption := formatArg(option)
 		args = append(args, formatedOption)
 
