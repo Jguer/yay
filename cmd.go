@@ -273,11 +273,10 @@ func sudoLoopBackground() {
 
 func sudoLoop() {
 	for {
-		updateSudo()	
+		updateSudo()
 		time.Sleep(298 * time.Second)
 	}
 }
-
 
 func updateSudo() {
 	for {
@@ -398,7 +397,7 @@ func handleVersion() {
 func handlePrint() (err error) {
 	switch {
 	case cmdArgs.existsArg("d", "defaultconfig"):
-		fmt.Printf("%#v", config)
+		fmt.Printf("%v", config)
 	case cmdArgs.existsArg("n", "numberupgrades"):
 		err = printNumberOfUpdates()
 	case cmdArgs.existsArg("u", "upgrades"):
