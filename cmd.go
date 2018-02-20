@@ -48,7 +48,8 @@ Permanent configuration options:
 
 Print specific options:
     -c --complete        Used for completions
-    -d --defaultconfig   Print current yay configuration
+    -d --defaultconfig   Print default yay configuration
+    -g --config		 Print current yay configuration
     -n --numberupgrades  Print number of updates
     -s --stats           Display system package statistics
     -u --upgrades        Print update list
@@ -397,6 +398,10 @@ func handleVersion() {
 func handlePrint() (err error) {
 	switch {
 	case cmdArgs.existsArg("d", "defaultconfig"):
+		var tmpConfig Configuration
+		defaultSettings(&tmpConfig)
+		fmt.Printf("%v", tmpConfig)
+	case cmdArgs.existsArg("g", "config"):
 		fmt.Printf("%v", config)
 	case cmdArgs.existsArg("n", "numberupgrades"):
 		err = printNumberOfUpdates()
