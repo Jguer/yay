@@ -44,7 +44,7 @@ func install(parser *arguments) error {
 		requestTargets = append(requestTargets, remoteNames...)
 	}
 
-	if len(aur) > 0 {
+	if len(aur) > 0 ||  parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
 		fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
 	}
 	dt , err := getDepTree(requestTargets)
@@ -107,6 +107,10 @@ func install(parser *arguments) error {
 		arguments.addTarget(pkg)
 	}
 
+	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
+		fmt.Println("nothing to do ")
+		return nil
+	}
 
 
 	if hasAur {
@@ -119,12 +123,17 @@ func install(parser *arguments) error {
 				return err
 			}
 		}
+
+		if !continueTask("Proceed with install?", "nN") {
+			return fmt.Errorf("Aborting due to user")
+		}
+
 	}
-		
-	if len(arguments.targets) > 0 {
+
+	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
 		err := passToPacman(arguments)
 		if err != nil {
-			fmt.Errorf("Error installing repo packages.")
+			return fmt.Errorf("Error installing repo packages.")
 		}
 	}
 
@@ -134,12 +143,8 @@ func install(parser *arguments) error {
 		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
 		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
+		
 		askCleanBuilds(dc.Aur, dc.Bases)
-		fmt.Println()
-
-		if !continueTask("Proceed with install?", "nN") {
-			return fmt.Errorf("Aborting due to user")
-		}
 
 		// if !continueTask("Proceed with download?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
@@ -302,10 +307,6 @@ func checkForConflicts(dc *depCatagories) error {
 
 			fmt.Println(str)
 		}
-
-		if !continueTask("Continue with install?", "nN") {
-			return fmt.Errorf("Aborting due to user")
-		}
 	}
 
 	return nil
@@ -350,18 +351,8 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s-%s")
-		str2 := ""
-		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
-			str2 += " ("
-			for _, split := range bases[pkg.PackageBase] {
-				str2 += split.Name + " "
-			}
-			str2 = str2[:len(str2)-1] + ")"
-		}
-		fmt.Printf(str, k+1, len(pkgs), pkg.PackageBase, pkg.Version)
-		fmt.Print(str2)
-		fmt.Println()
+		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s\n")
+		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
 
 		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
@@ -380,20 +371,8 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		str := "Parsing SRCINFO (%d/%d): %s-%s"
-		str2 := ""
-		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
-			str2 += " ("
-			for _, split := range bases[pkg.PackageBase] {
-				str2 += split.Name + " "
-			}
-			str2 = str2[:len(str2)-1] + ")"
-		}
-		fmt.Printf(str, k+1, len(pkgs), pkg.PackageBase, pkg.Version)
-		fmt.Print(str2)
-		fmt.Println()
-
-
+		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s\n")
+		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 		
 		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
 		cmd.Stderr = os.Stderr
@@ -419,18 +398,9 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
 	for k, pkg := range pkgs {
 		//todo make pretty
-		str := boldCyanFg("::") + boldFg(" Downloading (%d/%d): %s-%s")
-		str2 := ""
-		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
-			str2 += " ("
-			for _, split := range bases[pkg.PackageBase] {
-				str2 += split.Name + " "
-			}
-			str2 = str2[:len(str2)-1] + ")"
-		}
-		fmt.Printf(str, k+1, len(pkgs), pkg.PackageBase, pkg.Version)
-		fmt.Print(str2)
-		fmt.Println()
+		str := boldCyanFg("::") + boldFg(" Downloading (%d/%d): %s\n")
+
+		fmt.Printf(str, k+1, len(pkgs),  formatPkgbase(pkg, bases))
 
 		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
 		if err != nil {
@@ -446,7 +416,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg) (err error) {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 		err = passToMakepkg(dir, "--nobuild", "--nocheck", "--noprepare", "--nodeps")
 		if err != nil {
-			return
+			return fmt.Errorf("Error downloading sources: %s", pkg)
 		}
 	}
 
@@ -481,7 +451,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		} else {
 			err := passToMakepkg(dir, "-Ccf", "--noconfirm")
 			if err != nil {
-				return err
+				return fmt.Errorf("Error making: %s", pkg.Name)
 			}
 		}
 

@@ -94,6 +94,22 @@ func (s repoQuery) printSearch() {
 	}
 }
 
+func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
+	str := pkg.PackageBase
+	if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+		str2 := " ("
+		for _, split := range bases[pkg.PackageBase] {
+			str2 += split.Name + " "
+		}
+		str2 = str2[:len(str2)-1] + ")"
+
+		str += str2
+	}
+
+	return str
+}
+
+
 // printDownloadsFromRepo prints repository packages to be downloaded
 func printDepCatagories(dc *depCatagories) {
 	repo := ""
