@@ -49,7 +49,7 @@ Permanent configuration options:
 Print specific options:
     -c --complete        Used for completions
     -d --defaultconfig   Print default yay configuration
-    -g --config		 Print current yay configuration
+    -g --config          Print current yay configuration
     -n --numberupgrades  Print number of updates
     -s --stats           Display system package statistics
     -u --upgrades        Print update list
