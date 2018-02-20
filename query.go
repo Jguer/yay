@@ -70,23 +70,6 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 	return
 }
 
-// MissingPackage warns if the Query was unable to find a package
-func (q aurQuery) missingPackage(pkgS []string) {
-	for _, depName := range pkgS {
-		found := false
-		for _, dep := range q {
-			if dep.Name == depName {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			fmt.Println(redFg("Unable to find" + depName + "in AUR"))
-		}
-	}
-}
-
 // NarrowSearch searches AUR and narrows based on subarguments
 func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 	if len(pkgS) == 0 {
@@ -324,38 +307,6 @@ func statistics() (info struct {
 		nPkg, ePkg, tS,
 	}
 
-	return
-}
-
-// SliceHangingPackages returns a list of packages installed as deps
-// and unneeded by the system from a provided list of package names.
-func sliceHangingPackages(pkgS []string) (hanging []string) {
-	localDb, err := alpmHandle.LocalDb()
-	if err != nil {
-		return
-	}
-
-big:
-	for _, pkgName := range pkgS {
-		for _, hangN := range hanging {
-			if hangN == pkgName {
-				continue big
-			}
-		}
-
-		pkg, err := localDb.PkgByName(pkgName)
-		if err == nil {
-			if pkg.Reason() != alpm.PkgReasonDepend {
-				continue
-			}
-
-			requiredby := pkg.ComputeRequiredBy()
-			if len(requiredby) == 0 {
-				hanging = append(hanging, pkgName)
-				fmt.Println(pkg.Name() + ": " + yellowFg(human(pkg.ISize())))
-			}
-		}
-	}
 	return
 }
 

@@ -304,7 +304,7 @@ func handleCmd() (err error) {
 		}
 	}
 
-	if config.SudoLoop == true && cmdArgs.needRoot() {
+	if config.SudoLoop && cmdArgs.needRoot() {
 		sudoLoopBackground()
 	}
 
@@ -665,7 +665,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	aurI = removeListFromList(aurNI, aurI)
 	repoI = removeListFromList(repoNI, repoI)
 
-	if config.SudoLoop == true {
+	if config.SudoLoop {
 		sudoLoopBackground()
 	}
 	arguments := makeArguments()
