@@ -299,7 +299,6 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	if err != nil {
 		return repoNames, aurNames, err
 	} else if len(aurUp)+len(repoUp) == 0 {
-		fmt.Println("\nThere is nothing to do")
 		return repoNames, aurNames, err
 	}
 

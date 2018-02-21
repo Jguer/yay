@@ -15,6 +15,7 @@ import (
 
 // Install handles package installs
 func install(parser *arguments) error {
+	removeMake := false
 	aur, repo, err := packageSlices(parser.targets.toSlice())
 	if err != nil {
 		return err
@@ -73,6 +74,8 @@ func install(parser *arguments) error {
 			return err
 		}
 
+		fmt.Println()
+
 		for pkg := range aurUp {
 			parser.addTarget(pkg)
 		}
@@ -107,25 +110,13 @@ func install(parser *arguments) error {
 	}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
-		fmt.Println("nothing to do ")
+		fmt.Println("There is nothing to do")
 		return nil
 	}
 
 	if hasAur {
 		printDepCatagories(dc)
 		fmt.Println()
-
-		if !parser.existsArg("gendb") {
-			err = checkForConflicts(dc)
-			if err != nil {
-				return err
-			}
-		}
-
-		if !continueTask("Proceed with install?", "nN") {
-			return fmt.Errorf("Aborting due to user")
-		}
-
 	}
 
 	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
@@ -136,16 +127,24 @@ func install(parser *arguments) error {
 	}
 
 	if hasAur {
-		//conflicts have been checked so answer y for them
-		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
-		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
-		cmdArgs.globals["ask"] = fmt.Sprint(uask)
+		if !parser.existsArg("gendb") {
+			err = checkForConflicts(dc)
+			if err != nil {
+				return err
+			}
+		}
+
+		if len(dc.MakeOnly) > 0 {
+			if !continueTask("Remove make dependencies after install?", "yY") {
+				removeMake = true
+			}
+		}
 
 		askCleanBuilds(dc.Aur, dc.Bases)
 
-		// if !continueTask("Proceed with download?", "nN") {
-		// 	return fmt.Errorf("Aborting due to user")
-		// }
+		if !continueTask("Proceed with Download?", "nN") {
+			return fmt.Errorf("Aborting due to user")
+		}
 
 		err = dowloadPkgBuilds(dc.Aur, dc.Bases)
 		if err != nil {
@@ -157,29 +156,14 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		/*if len(dc.Repo) > 0 {
-			arguments := parser.copy()
-			arguments.delArg("u", "sysupgrade")
-			arguments.delArg("y", "refresh")
-			arguments.op = "S"
-			arguments.targets = make(stringSet)
-			arguments.addArg("needed", "asdeps")
-			for _, pkg := range dc.Repo {
-				arguments.addTarget(pkg.Name())
-			}
+		if !continueTask("Proceed with install?", "nN") {
+			return fmt.Errorf("Aborting due to user")
+		}
 
-			oldConfirm := config.NoConfirm
-			config.NoConfirm = true
-			passToPacman(arguments)
-			config.NoConfirm = oldConfirm
-			if err != nil {
-				return err
-			}
-		}*/
-
-		// if !continueTask("Proceed with install?", "nN") {
-		// 	return fmt.Errorf("Aborting due to user")
-		// }
+		//conflicts have been checked so answer y for them
+		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
+		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
 		//this downloads the package build sources but also causes
 		//a version bumb for vsc packages
@@ -211,7 +195,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(dc.MakeOnly) > 0 {
-			if continueTask("Remove make dependencies?", "yY") {
+			if !removeMake {
 				return nil
 			}
 
