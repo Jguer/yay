@@ -438,6 +438,9 @@ func handleYay() (err error) {
 		err = handleGetpkgbuild()
 	} else if len(cmdArgs.targets) > 0 {
 		err = handleYogurt()
+	} else {
+		args := cmdArgs.formatArgs()
+		err = fmt.Errorf("unknown command: %s", strings.Join(args, " "))
 	}
 
 	return
