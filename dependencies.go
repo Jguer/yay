@@ -1,9 +1,9 @@
 package main
 
 import (
-	"strings"
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
+	"strings"
 )
 
 type depTree struct {

@@ -61,7 +61,7 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 	return
 }
 
-func getPkgbuilds(pkgs []string) (error) {
+func getPkgbuilds(pkgs []string) error {
 	//possibleAurs := make([]string, 0, 0)
 	wd, err := os.Getwd()
 	if err != nil {
@@ -85,7 +85,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (missing []string, err erro
 		return
 	}
 
-	nextPkg:
+nextPkg:
 	for _, pkgN := range pkgs {
 		for _, db := range dbList.Slice() {
 			pkg, err := db.PkgByName(pkgN)
@@ -103,7 +103,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (missing []string, err erro
 				if errD != nil {
 					fmt.Println(boldYellowFg(pkg.Name()), boldGreenFg(errD.Error()))
 				}
-				
+
 				fmt.Println(boldGreenFg(arrow), boldGreenFg("Downloaded"), boldYellowFg(pkg.Name()), boldGreenFg("from ABS"))
 				continue nextPkg
 			}

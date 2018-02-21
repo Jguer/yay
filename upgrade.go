@@ -57,27 +57,27 @@ func (u upSlice) Less(i, j int) bool {
 }
 
 func getVersionDiff(oldVersion, newversion string) (left, right string) {
-		old, errOld := pkgb.NewCompleteVersion(oldVersion)
-		new, errNew := pkgb.NewCompleteVersion(newversion)
-		
-		if errOld != nil {
-			left = redFg("Invalid Version")
-		}
-		if errNew != nil {
-			right = redFg("Invalid Version")
-		}
+	old, errOld := pkgb.NewCompleteVersion(oldVersion)
+	new, errNew := pkgb.NewCompleteVersion(newversion)
 
-		if errOld == nil && errNew == nil {
-			if old.Version == new.Version {
-				left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
-				right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
-			} else {
-				left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
-				right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
-			}
-		}
+	if errOld != nil {
+		left = redFg("Invalid Version")
+	}
+	if errNew != nil {
+		right = redFg("Invalid Version")
+	}
 
-		return
+	if errOld == nil && errNew == nil {
+		if old.Version == new.Version {
+			left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
+			right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
+		} else {
+			left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
+			right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
+		}
+	}
+
+	return
 }
 
 // Print prints the details of the packages to upgrade.
@@ -169,7 +169,7 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 					fmt.Print(yellowFg("Warning: "))
 					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
 				} else {
-					packageC <- upgrade{e.Package, "devel", pkg.Version() , "commit-" + e.SHA[0:6]}
+					packageC <- upgrade{e.Package, "devel", pkg.Version(), "commit-" + e.SHA[0:6]}
 				}
 			} else {
 				removeVCSPackage([]string{e.Package})
@@ -216,7 +216,7 @@ func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade 
 
 		done <- true
 	}(remote, remoteNames, dt)
-			
+
 	if routineDone == routines {
 		err = nil
 		return
@@ -370,7 +370,6 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 		repoNums = removeIntListFromList(excludeRepo, repoNums)
 	}
 
-	
 	if len(repoUp) != 0 {
 	repoloop:
 		for i, k := range repoUp {

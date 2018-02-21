@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 	"strconv"
+	"strings"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -17,7 +17,7 @@ import (
 func install(parser *arguments) error {
 	aur, repo, err := packageSlices(parser.targets.toSlice())
 	if err != nil {
-		return  err
+		return err
 	}
 
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
@@ -29,7 +29,7 @@ func install(parser *arguments) error {
 	//remotenames: names of all non repo packages on the system
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
-		return  err
+		return err
 	}
 
 	//cache as a stringset. maybe make it return a string set in the first
@@ -44,10 +44,10 @@ func install(parser *arguments) error {
 		requestTargets = append(requestTargets, remoteNames...)
 	}
 
-	if len(aur) > 0 ||  parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
+	if len(aur) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
 		fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
 	}
-	dt , err := getDepTree(requestTargets)
+	dt, err := getDepTree(requestTargets)
 	if err != nil {
 		return err
 	}
@@ -66,9 +66,9 @@ func install(parser *arguments) error {
 	arguments.delArg("y", "refresh")
 	arguments.op = "S"
 	arguments.targets = make(stringSet)
-	
+
 	if parser.existsArg("u", "sysupgrade") {
-		repoUp, aurUp, err  := upgradePkgs(dt)
+		repoUp, aurUp, err := upgradePkgs(dt)
 		if err != nil {
 			return err
 		}
@@ -76,12 +76,11 @@ func install(parser *arguments) error {
 		for pkg := range aurUp {
 			parser.addTarget(pkg)
 		}
-		
+
 		for pkg := range repoUp {
 			arguments.addTarget(pkg)
 		}
 
-	
 		//discard stuff thats
 		//not a target and
 		//not an upgrade and
@@ -111,7 +110,6 @@ func install(parser *arguments) error {
 		fmt.Println("nothing to do ")
 		return nil
 	}
-
 
 	if hasAur {
 		printDepCatagories(dc)
@@ -143,12 +141,11 @@ func install(parser *arguments) error {
 		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
 		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
-		
 		askCleanBuilds(dc.Aur, dc.Bases)
 
 		// if !continueTask("Proceed with download?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
-		// }	
+		// }
 
 		err = dowloadPkgBuilds(dc.Aur, dc.Bases)
 		if err != nil {
@@ -179,7 +176,7 @@ func install(parser *arguments) error {
 				return err
 			}
 		}*/
-	
+
 		// if !continueTask("Proceed with install?", "nN") {
 		// 	return fmt.Errorf("Aborting due to user")
 		// }
@@ -188,14 +185,13 @@ func install(parser *arguments) error {
 		//a version bumb for vsc packages
 		//that should not edit the sources so we should be safe to skip
 		//it and parse the srcinfo at the current version
-		if arguments.existsArg("gendb") {	
+		if arguments.existsArg("gendb") {
 			err = parsesrcinfosFile(dc.Aur, srcinfos, dc.Bases)
 			if err != nil {
 				return err
 			}
 
-
-			fmt.Println(boldGreenFg(arrow+" GenDB finished. No packages were installed"))
+			fmt.Println(boldGreenFg(arrow + " GenDB finished. No packages were installed"))
 			return nil
 		}
 
@@ -203,7 +199,6 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
-
 
 		err = parsesrcinfosGenerate(dc.Aur, srcinfos, dc.Bases)
 		if err != nil {
@@ -354,7 +349,6 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
-
 		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
 		if err != nil {
 			return fmt.Errorf("%s: %s", pkg.Name, err)
@@ -373,7 +367,7 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
-		
+
 		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
 		cmd.Stderr = os.Stderr
 		cmd.Dir = dir
@@ -400,7 +394,7 @@ func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) 
 		//todo make pretty
 		str := boldCyanFg("::") + boldFg(" Downloading (%d/%d): %s\n")
 
-		fmt.Printf(str, k+1, len(pkgs),  formatPkgbase(pkg, bases))
+		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
 		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
 		if err != nil {

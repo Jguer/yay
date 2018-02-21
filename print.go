@@ -109,7 +109,6 @@ func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
 	return str
 }
 
-
 // printDownloadsFromRepo prints repository packages to be downloaded
 func printDepCatagories(dc *depCatagories) {
 	repo := ""
@@ -300,7 +299,7 @@ func printNumberOfUpdates() error {
 		return err
 	}
 	fmt.Println(len(aurUp) + len(repoUp))
-	
+
 	return nil
 }
 

@@ -394,7 +394,7 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	}
 
 	for n := 0; n < len(names); n += config.RequestSplitN {
-		max := min(len(names), n + config.RequestSplitN)
+		max := min(len(names), n+config.RequestSplitN)
 		wg.Add(1)
 		go makeRequest(n, max)
 	}
@@ -429,7 +429,7 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	if len(missing) > 0 {
 		fmt.Print(boldRedFgBlackBg(arrow + " Missing AUR Packages:"))
 		for _, name := range missing {
-				fmt.Print(" " + boldYellowFgBlackBg(name))
+			fmt.Print(" " + boldYellowFgBlackBg(name))
 		}
 		fmt.Println()
 	}
@@ -437,7 +437,7 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	if len(orphans) > 0 {
 		fmt.Print(boldRedFgBlackBg(arrow + " Orphaned AUR Packages:"))
 		for _, name := range orphans {
-				fmt.Print(" " + boldYellowFgBlackBg(name))
+			fmt.Print(" " + boldYellowFgBlackBg(name))
 		}
 		fmt.Println()
 	}
@@ -445,7 +445,7 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	if len(outOfDate) > 0 {
 		fmt.Print(boldRedFgBlackBg(arrow + " Out Of Date AUR Packages:"))
 		for _, name := range outOfDate {
-				fmt.Print(" " + boldYellowFgBlackBg(name))
+			fmt.Print(" " + boldYellowFgBlackBg(name))
 		}
 		fmt.Println()
 	}
