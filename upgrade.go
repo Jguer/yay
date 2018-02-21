@@ -65,6 +65,9 @@ func (u upSlice) Print(start int) {
 		var left, right string
 
 		f := func(name string) (output string) {
+			if alpmConf.Options&alpm.ConfColor == 0 {
+				return name
+			}
 			var hash = 5381
 			for i := 0; i < len(name); i++ {
 				hash = int(name[i]) + ((hash << 5) + (hash))
