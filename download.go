@@ -91,9 +91,9 @@ func getPkgbuildfromABS(pkgN string, path string) (err error) {
 		if err == nil {
 			var url string
 			if db.Name() == "core" || db.Name() == "extra" {
-				url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg.Name() + ".tar.gz"
+				url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg.Base() + ".tar.gz"
 			} else if db.Name() == "community" {
-				url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + pkg.Name() + ".tar.gz"
+				url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + pkg.Base() + ".tar.gz"
 			} else {
 				return fmt.Errorf("Not in standard repositories")
 			}
