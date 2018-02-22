@@ -45,7 +45,7 @@ func makeDependCatagories() *depCatagories {
 
 func getNameFromDep(dep string) string {
 	return strings.FieldsFunc(dep, func(c rune) bool {
-		return c == '>' || c == '<' || c == '=' || c == ' '
+		return c == '>' || c == '<' || c == '='
 	})[0]
 }
 
