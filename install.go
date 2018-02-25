@@ -326,7 +326,7 @@ func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) 
 		}
 		fmt.Println(str)
 
-		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
+		err = getPkgbuildfromAUR(pkg.Name, config.BuildDir)
 		if err != nil {
 			return
 		}
