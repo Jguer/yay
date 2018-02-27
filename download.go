@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	rpc "github.com/mikkeloscar/aur"
 )
 
 func downloadFile(path string, url string) (err error) {
@@ -63,60 +61,71 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 	return
 }
 
-func getPkgbuild(pkg string) (err error) {
+func getPkgbuilds(pkgs []string) error {
+	//possibleAurs := make([]string, 0, 0)
 	wd, err := os.Getwd()
 	if err != nil {
-		return
+		return err
 	}
 	wd = wd + "/"
 
-	err = getPkgbuildfromABS(pkg, wd)
-	if err == nil {
-		return
+	missing, err := getPkgbuildsfromABS(pkgs, wd)
+	if err != nil {
+		return err
 	}
 
-	err = getPkgbuildfromAUR(pkg, wd)
-	return
+	err = getPkgbuildsfromAUR(missing, wd)
+	return err
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildfromABS(pkgN string, path string) (err error) {
+func getPkgbuildsfromABS(pkgs []string, path string) (missing []string, err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
 
-	for _, db := range dbList.Slice() {
-		pkg, err := db.PkgByName(pkgN)
-		if err == nil {
-			var url string
-			if db.Name() == "core" || db.Name() == "extra" {
-				url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg.Base() + ".tar.gz"
-			} else if db.Name() == "community" {
-				url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + pkg.Base() + ".tar.gz"
-			} else {
-				return fmt.Errorf("Not in standard repositories")
+nextPkg:
+	for _, pkgN := range pkgs {
+		for _, db := range dbList.Slice() {
+			pkg, err := db.PkgByName(pkgN)
+			if err == nil {
+				var url string
+				if db.Name() == "core" || db.Name() == "extra" {
+					url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg.Base() + ".tar.gz"
+				} else if db.Name() == "community" {
+					url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + pkg.Base() + ".tar.gz"
+				} else {
+					fmt.Println(pkgN + " not in standard repositories")
+				}
+
+				errD := downloadAndUnpack(url, path, true)
+				if errD != nil {
+					fmt.Println(boldYellowFg(pkg.Name()), boldGreenFg(errD.Error()))
+				}
+
+				fmt.Println(boldGreenFg(arrow), boldGreenFg("Downloaded"), boldYellowFg(pkg.Name()), boldGreenFg("from ABS"))
+				continue nextPkg
 			}
-			fmt.Println(boldGreenFg(arrow), boldYellowFg(pkgN), boldGreenFg("found in ABS."))
-			errD := downloadAndUnpack(url, path, true)
-			return errD
 		}
+
+		missing = append(missing, pkgN)
 	}
-	return fmt.Errorf("package not found")
+
+	return
 }
 
 // GetPkgbuild downloads pkgbuild from the AUR.
-func getPkgbuildfromAUR(pkgN string, dir string) (err error) {
-	aq, err := rpc.Info([]string{pkgN})
+func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
+	aq, err := aurInfo(pkgs)
 	if err != nil {
 		return err
 	}
 
-	if len(aq) == 0 {
-		return fmt.Errorf("no results")
+	for _, pkg := range aq {
+		downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
+		fmt.Println(boldGreenFg(arrow), boldGreenFg("Downloaded"), boldYellowFg(pkg.Name), boldGreenFg("from AUR"))
 	}
 
-	fmt.Println(boldGreenFg(arrow), boldYellowFg(pkgN), boldGreenFg("found in AUR."))
-	downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
 	return
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -153,16 +154,23 @@ func syncSearch(pkgS []string) (err error) {
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string) (err error) {
-	aurS, repoS, missing, err := packageSlices(pkgS)
+	var info []rpc.Pkg
+	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
+	}
+
+	if len(aurS) != 0 {
+		info, err = aurInfo(aurS)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	//repo always goes first
 	if len(repoS) != 0 {
 		arguments := cmdArgs.copy()
 		arguments.delTarget(aurS...)
-		arguments.delTarget(missing...)
 		err = passToPacman(arguments)
 
 		if err != nil {
@@ -171,19 +179,10 @@ func syncInfo(pkgS []string) (err error) {
 	}
 
 	if len(aurS) != 0 {
-		q, err := rpc.Info(aurS)
-		if err != nil {
-			fmt.Println(err)
-		}
-		for _, aurP := range q {
-			PrintInfo(&aurP)
+		for _, pkg := range info {
+			PrintInfo(&pkg)
 		}
 	}
-
-	//todo
-	//if len(missing) != 0 {
-	//	printMissing(missing)
-	//}
 
 	return
 }
@@ -239,8 +238,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string) (aur []string, repo []string, missing []string, err error) {
-	possibleAur := make([]string, 0)
+func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
@@ -263,28 +261,8 @@ func packageSlices(toCheck []string) (aur []string, repo []string, missing []str
 		if found {
 			repo = append(repo, pkg)
 		} else {
-			possibleAur = append(possibleAur, pkg)
+			aur = append(aur, pkg)
 		}
-	}
-
-	if len(possibleAur) == 0 {
-		return
-	}
-
-	info, err := rpc.Info(possibleAur)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-outer:
-	for _, pkg := range possibleAur {
-		for _, rpcpkg := range info {
-			if rpcpkg.Name == pkg {
-				aur = append(aur, pkg)
-				continue outer
-			}
-		}
-		missing = append(missing, pkg)
 	}
 
 	return
@@ -379,4 +357,98 @@ big:
 		}
 	}
 	return
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return a
+}
+
+func aurInfo(names []string) ([]rpc.Pkg, error) {
+	info := make([]rpc.Pkg, 0, len(names))
+	seen := make(map[string]int)
+	var mux sync.Mutex
+	var wg sync.WaitGroup
+	var err error
+
+	missing := make([]string, 0, len(names))
+	orphans := make([]string, 0, len(names))
+	outOfDate := make([]string, 0, len(names))
+
+	makeRequest := func(n, max int) {
+		tempInfo, requestErr := rpc.Info(names[n:max])
+		if err != nil {
+			return
+		}
+		if requestErr != nil {
+			//return info, err
+			err = requestErr
+			return
+		}
+		mux.Lock()
+		info = append(info, tempInfo...)
+		mux.Unlock()
+		wg.Done()
+	}
+
+	for n := 0; n < len(names); n += config.RequestSplitN {
+		max := min(len(names), n+config.RequestSplitN)
+		wg.Add(1)
+		go makeRequest(n, max)
+	}
+
+	wg.Wait()
+
+	if err != nil {
+		return info, err
+	}
+
+	for k, pkg := range info {
+		seen[pkg.Name] = k
+	}
+
+	for _, name := range names {
+		i, ok := seen[name]
+		if !ok {
+			missing = append(missing, name)
+			continue
+		}
+
+		pkg := info[i]
+
+		if pkg.Maintainer == "" {
+			orphans = append(orphans, name)
+		}
+		if pkg.OutOfDate != 0 {
+			outOfDate = append(outOfDate, name)
+		}
+	}
+
+	if len(missing) > 0 {
+		fmt.Print(boldRedFgBlackBg(arrow + " Missing AUR Packages:"))
+		for _, name := range missing {
+			fmt.Print(" " + boldYellowFgBlackBg(name))
+		}
+		fmt.Println()
+	}
+
+	if len(orphans) > 0 {
+		fmt.Print(boldRedFgBlackBg(arrow + " Orphaned AUR Packages:"))
+		for _, name := range orphans {
+			fmt.Print(" " + boldYellowFgBlackBg(name))
+		}
+		fmt.Println()
+	}
+
+	if len(outOfDate) > 0 {
+		fmt.Print(boldRedFgBlackBg(arrow + " Out Of Date AUR Packages:"))
+		for _, name := range outOfDate {
+			fmt.Print(" " + boldYellowFgBlackBg(name))
+		}
+		fmt.Println()
+	}
+
+	return info, nil
 }

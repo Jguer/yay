@@ -448,16 +448,7 @@ func handleYay() (err error) {
 }
 
 func handleGetpkgbuild() (err error) {
-	for pkg := range cmdArgs.targets {
-		err = getPkgbuild(pkg)
-		if err != nil {
-			//we print the error instead of returning it
-			//seems as we can handle multiple errors without stoping
-			//theres no easy way around this right now
-			fmt.Println(pkg+":", err)
-		}
-	}
-
+	err = getPkgbuilds(cmdArgs.formatTargets())
 	return
 }
 
@@ -497,10 +488,10 @@ func handleSync() (err error) {
 		err = syncSearch(targets)
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = passToPacman(cmdArgs)
-	} else if cmdArgs.existsArg("u", "sysupgrade") {
-		err = upgradePkgs(make([]string, 0))
 	} else if cmdArgs.existsArg("i", "info") {
 		err = syncInfo(targets)
+	} else if cmdArgs.existsArg("u", "sysupgrade") {
+		err = install(cmdArgs)
 	} else if len(cmdArgs.targets) > 0 {
 		err = install(cmdArgs)
 	}
@@ -602,9 +593,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		aurQ.printSearch(numpq + 1)
 	}
 
-	fmt.Println(greenFg("Type the numbers or ranges (e.g. 1-10) you want to install. " +
-		"Separate each one of them with a space."))
-	fmt.Print("Numbers: ")
+	fmt.Println(boldGreenFg(arrow) + boldGreenFg(" Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)"))
+	fmt.Print(boldGreenFg(arrow + " "))
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil || overflow {

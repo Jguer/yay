@@ -94,6 +94,21 @@ func (s repoQuery) printSearch() {
 	}
 }
 
+func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
+	str := pkg.PackageBase
+	if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+		str2 := " ("
+		for _, split := range bases[pkg.PackageBase] {
+			str2 += split.Name + " "
+		}
+		str2 = str2[:len(str2)-1] + ")"
+
+		str += str2
+	}
+
+	return str
+}
+
 // printDownloadsFromRepo prints repository packages to be downloaded
 func printDepCatagories(dc *depCatagories) {
 	repo := ""
@@ -201,6 +216,7 @@ func PrintInfo(a *rpc.Pkg) {
 	fmt.Println(boldWhiteFg("Licenses        :"), strings.Join(a.License, "  "))
 	fmt.Println(boldWhiteFg("Depends On      :"), strings.Join(a.Depends, "  "))
 	fmt.Println(boldWhiteFg("Make Deps       :"), strings.Join(a.MakeDepends, "  "))
+	fmt.Println(boldWhiteFg("Check Deps      :"), strings.Join(a.CheckDepends, "  "))
 	fmt.Println(boldWhiteFg("Optional Deps   :"), strings.Join(a.OptDepends, "  "))
 	fmt.Println(boldWhiteFg("Conflicts With  :"), strings.Join(a.Conflicts, "  "))
 	fmt.Println(boldWhiteFg("Maintainer      :"), a.Maintainer)
@@ -256,53 +272,7 @@ func localStatistics() error {
 	biggestPackages()
 	fmt.Println(boldCyanFg("==========================================="))
 
-	var q aurQuery
-	var j int
-	for i := len(remoteNames); i != 0; i = j {
-		j = i - config.RequestSplitN
-		if j < 0 {
-			j = 0
-		}
-		qtemp, err := rpc.Info(remoteNames[j:i])
-		q = append(q, qtemp...)
-		if err != nil {
-			return err
-		}
-	}
-
-	var outcast []string
-	for _, s := range remoteNames {
-		found := false
-		for _, i := range q {
-			if s == i.Name {
-				found = true
-				break
-			}
-		}
-		if !found {
-			outcast = append(outcast, s)
-		}
-	}
-
-	if err != nil {
-		return err
-	}
-
-	for _, res := range q {
-		if res.Maintainer == "" {
-			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-				boldYellowFgBlackBg(res.Name), whiteFgBlackBg("is orphaned"))
-		}
-		if res.OutOfDate != 0 {
-			fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-				boldYellowFgBlackBg(res.Name), whiteFgBlackBg("is out-of-date in AUR"))
-		}
-	}
-
-	for _, res := range outcast {
-		fmt.Println(boldRedFgBlackBg(arrow+"Warning:"),
-			boldYellowFgBlackBg(res), whiteFgBlackBg("is not available in AUR"))
-	}
+	aurInfo(remoteNames)
 
 	return nil
 }
@@ -318,14 +288,18 @@ func printMissing(missing stringSet) {
 
 //todo make it less hacky
 func printNumberOfUpdates() error {
+	//todo
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList()
+	_, _, localNames, remoteNames, err := filterPackages()
+	dt, _ := getDepTree(append(localNames, remoteNames...))
+	aurUp, repoUp, err := upList(dt)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
 	}
 	fmt.Println(len(aurUp) + len(repoUp))
+
 	return nil
 }
 
@@ -333,7 +307,10 @@ func printNumberOfUpdates() error {
 func printUpdateList() error {
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList()
+	_, _, localNames, remoteNames, err := filterPackages()
+	dt, _ := getDepTree(append(localNames, remoteNames...))
+	aurUp, repoUp, err := upList(dt)
+
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err

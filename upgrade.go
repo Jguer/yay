@@ -10,7 +10,6 @@ import (
 	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
-	rpc "github.com/mikkeloscar/aur"
 	pkgb "github.com/mikkeloscar/gopkgbuild"
 )
 
@@ -57,12 +56,34 @@ func (u upSlice) Less(i, j int) bool {
 	return false
 }
 
+func getVersionDiff(oldVersion, newversion string) (left, right string) {
+	old, errOld := pkgb.NewCompleteVersion(oldVersion)
+	new, errNew := pkgb.NewCompleteVersion(newversion)
+
+	if errOld != nil {
+		left = redFg("Invalid Version")
+	}
+	if errNew != nil {
+		right = redFg("Invalid Version")
+	}
+
+	if errOld == nil && errNew == nil {
+		if old.Version == new.Version {
+			left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
+			right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
+		} else {
+			left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
+			right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
+		}
+	}
+
+	return
+}
+
 // Print prints the details of the packages to upgrade.
 func (u upSlice) Print(start int) {
 	for k, i := range u {
-		old, errOld := pkgb.NewCompleteVersion(i.LocalVersion)
-		new, errNew := pkgb.NewCompleteVersion(i.RemoteVersion)
-		var left, right string
+		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
 
 		f := func(name string) (output string) {
 			if alpmConf.Options&alpm.ConfColor == 0 {
@@ -77,26 +98,6 @@ func (u upSlice) Print(start int) {
 		fmt.Print(yellowFg(fmt.Sprintf("%2d ", len(u)+start-k-1)))
 		fmt.Print(f(i.Repository), "/", boldWhiteFg(i.Name))
 
-		if errOld != nil {
-			left = redFg("Invalid Version")
-		} else {
-			if old.Version == new.Version {
-				left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
-			} else {
-				left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
-			}
-		}
-
-		if errNew != nil {
-			right = redFg("Invalid Version")
-		} else {
-			if old.Version == new.Version {
-				right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
-			} else {
-				right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
-			}
-		}
-
 		w := 70 - len(i.Repository) - len(i.Name) + len(left)
 		fmt.Printf(fmt.Sprintf("%%%ds", w),
 			fmt.Sprintf("%s -> %s\n", left, right))
@@ -104,7 +105,7 @@ func (u upSlice) Print(start int) {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList() (aurUp upSlice, repoUp upSlice, err error) {
+func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 	local, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return
@@ -123,7 +124,7 @@ func upList() (aurUp upSlice, repoUp upSlice, err error) {
 
 	fmt.Println(boldCyanFg("::"), boldFg("Searching AUR for updates..."))
 	go func() {
-		aurUpList, err := upAUR(remote, remoteNames)
+		aurUpList, err := upAUR(remote, remoteNames, dt)
 		errC <- err
 		aurC <- aurUpList
 	}()
@@ -168,7 +169,7 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 					fmt.Print(yellowFg("Warning: "))
 					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
 				} else {
-					packageC <- upgrade{e.Package, "devel", e.SHA[0:6], "git"}
+					packageC <- upgrade{e.Package, "devel", pkg.Version(), "commit-" + e.SHA[0:6]}
 				}
 			} else {
 				removeVCSPackage([]string{e.Package})
@@ -180,8 +181,7 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err error) {
-	var j int
+func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade upSlice, err error) {
 	var routines int
 	var routineDone int
 
@@ -194,48 +194,32 @@ func upAUR(remote []alpm.Package, remoteNames []string) (toUpgrade upSlice, err 
 		fmt.Println(boldCyanFg("::"), boldFg("Checking development packages..."))
 	}
 
-	for i := len(remote); i != 0; i = j {
-		//Split requests so AUR RPC doesn't get mad at us.
-		j = i - config.RequestSplitN
-		if j < 0 {
-			j = 0
-		}
-
-		routines++
-		go func(local []alpm.Package, remote []string) {
-			qtemp, err := rpc.Info(remote)
-			if err != nil {
-				fmt.Println(err)
-				done <- true
-				return
+	routines++
+	go func(remote []alpm.Package, remoteNames []string, dt *depTree) {
+		for _, pkg := range remote {
+			aurPkg, ok := dt.Aur[pkg.Name()]
+			if !ok {
+				continue
 			}
-			// For each item in query: Search equivalent in foreign.
-			// We assume they're ordered and are returned ordered
-			// and will only be missing if they don't exist in AUR.
-			max := len(qtemp) - 1
-			var missing, x int
 
-			for i := range local {
-				x = i - missing
-				if x > max {
-					break
-				} else if qtemp[x].Name == local[i].Name() {
-					if (config.TimeUpdate && (int64(qtemp[x].LastModified) > local[i].BuildDate().Unix())) ||
-						(alpm.VerCmp(local[i].Version(), qtemp[x].Version) < 0) {
-						if local[i].ShouldIgnore() {
-							fmt.Print(yellowFg("Warning: "))
-							fmt.Printf("%s ignoring package upgrade (%s => %s)\n", local[i].Name(), local[i].Version(), qtemp[x].Version)
-						} else {
-							packageC <- upgrade{qtemp[x].Name, "aur", local[i].Version(), qtemp[x].Version}
-						}
-					}
-					continue
+			if (config.TimeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
+				(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
+				if pkg.ShouldIgnore() {
+					left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
+					fmt.Print(yellowFg("Warning: "))
+					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), left, right)
 				} else {
-					missing++
+					packageC <- upgrade{aurPkg.Name, "aur", pkg.Version(), aurPkg.Version}
 				}
 			}
-			done <- true
-		}(remote[j:i], remoteNames[j:i])
+		}
+
+		done <- true
+	}(remote, remoteNames, dt)
+
+	if routineDone == routines {
+		err = nil
+		return
 	}
 
 	for {
@@ -305,31 +289,33 @@ func removeIntListFromList(src, target []int) []int {
 }
 
 // upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(flags []string) error {
-	aurUp, repoUp, err := upList()
-	if err != nil {
-		return err
-	} else if len(aurUp)+len(repoUp) == 0 {
-		fmt.Println("\nThere is nothing to do")
-		return err
-	}
-
+func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	var repoNums []int
 	var aurNums []int
+	repoNames := make(stringSet)
+	aurNames := make(stringSet)
+
+	aurUp, repoUp, err := upList(dt)
+	if err != nil {
+		return repoNames, aurNames, err
+	} else if len(aurUp)+len(repoUp) == 0 {
+		return repoNames, aurNames, err
+	}
+
 	sort.Sort(repoUp)
 	fmt.Println(boldBlueFg("::"), len(aurUp)+len(repoUp), boldWhiteFg("Packages to upgrade."))
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
 
 	if !config.NoConfirm {
-		fmt.Println(greenFg("Enter packages you don't want to upgrade."))
-		fmt.Print("Numbers: ")
+		fmt.Println(boldGreenFg(arrow) + greenFg(" Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)"))
+		fmt.Print(boldGreenFg(arrow + " "))
 		reader := bufio.NewReader(os.Stdin)
 
 		numberBuf, overflow, err := reader.ReadLine()
 		if err != nil || overflow {
 			fmt.Println(err)
-			return err
+			return repoNames, aurNames, err
 		}
 
 		result := strings.Fields(string(numberBuf))
@@ -383,13 +369,6 @@ func upgradePkgs(flags []string) error {
 		repoNums = removeIntListFromList(excludeRepo, repoNums)
 	}
 
-	arguments := cmdArgs.copy()
-	arguments.delArg("u", "sysupgrade")
-	arguments.delArg("y", "refresh")
-
-	var repoNames []string
-	var aurNames []string
-
 	if len(repoUp) != 0 {
 	repoloop:
 		for i, k := range repoUp {
@@ -398,7 +377,7 @@ func upgradePkgs(flags []string) error {
 					continue repoloop
 				}
 			}
-			repoNames = append(repoNames, k.Name)
+			repoNames.set(k.Name)
 		}
 	}
 
@@ -410,12 +389,9 @@ func upgradePkgs(flags []string) error {
 					continue aurloop
 				}
 			}
-			aurNames = append(aurNames, k.Name)
+			aurNames.set(k.Name)
 		}
 	}
 
-	arguments.addTarget(repoNames...)
-	arguments.addTarget(aurNames...)
-	err = install(arguments)
-	return err
+	return repoNames, aurNames, err
 }
