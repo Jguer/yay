@@ -22,15 +22,6 @@ func (set stringSet) remove(v string) {
 	delete(set, v)
 }
 
-func (set stringSet) getAny() string {
-	for v := range set {
-		return v
-	}
-
-	//maybe should return error instrad
-	return ""
-}
-
 func (set stringSet) toSlice() []string {
 	slice := make([]string, 0, len(set))
 
@@ -39,12 +30,6 @@ func (set stringSet) toSlice() []string {
 	}
 
 	return slice
-}
-
-func (set stringSet) removeAny() string {
-	v := set.getAny()
-	set.remove(v)
-	return v
 }
 
 type arguments struct {
@@ -381,27 +366,6 @@ func isGlobal(op string) bool {
 	}
 }
 
-func isYayParam(arg string) bool {
-	switch arg {
-	case "afterclean":
-		return true
-	case "noafterclean":
-		return true
-	case "devel":
-		return true
-	case "nodevel":
-		return true
-	case "timeupdate":
-		return true
-	case "notimeupdate":
-		return true
-	case "topdown":
-		return true
-	default:
-		return false
-	}
-}
-
 func hasParam(arg string) bool {
 	switch arg {
 	case "dbpath", "b":
@@ -496,7 +460,7 @@ func (parser *arguments) parseLongOption(arg string, param string) (usedNext boo
 }
 
 func (parser *arguments) parseStdin() (err error) {
-	for true {
+	for {
 		var target string
 		_, err = fmt.Scan(&target)
 

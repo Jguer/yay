@@ -188,24 +188,6 @@ func printDownloads(repoName string, length int, packages string) {
 	fmt.Println(repoInfo + yellowFg(packages))
 }
 
-func printDeps(repoDeps []string, aurDeps []string) {
-	if len(repoDeps) != 0 {
-		fmt.Print(boldGreenFg(arrow + " Repository dependencies: "))
-		for _, repoD := range repoDeps {
-			fmt.Print(yellowFg(repoD) + " ")
-		}
-		fmt.Print("\n")
-
-	}
-	if len(aurDeps) != 0 {
-		fmt.Print(boldGreenFg(arrow + " AUR dependencies: "))
-		for _, aurD := range aurDeps {
-			fmt.Print(yellowFg(aurD) + " ")
-		}
-		fmt.Print("\n")
-	}
-}
-
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *rpc.Pkg) {
 	fmt.Println(boldWhiteFg("Repository      :"), "aur")
@@ -275,15 +257,6 @@ func localStatistics() error {
 	aurInfo(remoteNames)
 
 	return nil
-}
-
-//todo make pretty
-func printMissing(missing stringSet) {
-	fmt.Print("Packages not found in repos or aur:")
-	for pkg := range missing {
-		fmt.Print(" ", pkg)
-	}
-	fmt.Println()
 }
 
 //todo make it less hacky
