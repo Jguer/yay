@@ -40,7 +40,7 @@ type Configuration struct {
 	CleanAfter    bool   `json:"cleanAfter"`
 }
 
-var version = "2.297"
+var version = "2.365"
 
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"

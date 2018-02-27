@@ -177,12 +177,12 @@ lineloop:
 			// pop reader stack.
 			l := len(rdrStack)
 			if l == 1 {
-				return conf, nil
+				break lineloop
 			}
 			rdr = rdrStack[l-2]
 			rdrStack = rdrStack[:l-1]
 		default:
-			return conf, err
+			break lineloop
 		case nil:
 			// Ok.
 		}
@@ -209,7 +209,7 @@ lineloop:
 				if err != nil {
 					err = fmt.Errorf("error while processing Include directive at line %d: %s",
 						rdr.Lineno, err)
-					return conf, err
+					break lineloop
 				}
 				rdr = newConfReader(f)
 				rdrStack = append(rdrStack, rdr)
@@ -219,7 +219,7 @@ lineloop:
 					deltaRatio, err := strconv.ParseFloat(line.Values[0], 64)
 
 					if err != nil {
-						return conf, err
+						break lineloop
 					}
 
 					conf.UseDelta = deltaRatio
@@ -230,7 +230,7 @@ lineloop:
 			if currentSection != "options" {
 				err = fmt.Errorf("option %s outside of [options] section, at line %d",
 					line.Name, rdr.Lineno)
-				return conf, err
+				break lineloop
 			}
 			// main options.
 			if opt, ok := optionsMap[line.Name]; ok {
@@ -250,19 +250,24 @@ lineloop:
 					*fieldP = strings.Join(line.Values, " ")
 				case *[]string:
 					//many valued option.
-					*fieldP = line.Values
+					*fieldP = append(*fieldP, line.Values...)
 				}
 			}
 		}
 	}
+
+	if len(conf.CacheDir) == 0 {
+		conf.CacheDir = []string{"/var/cache/pacman/pkg/"} //should only be set if the config does not specify this
+	}
+
+	return conf, err
 }
 
 func (conf *PacmanConfig) SetDefaults() {
 	conf.RootDir = "/"
 	conf.DBPath = "/var/lib/pacman"
 	conf.DBPath = "/var/lib/pacman/"
-	conf.CacheDir = []string{"/var/cache/pacman/pkg/"}
-	conf.HookDir = []string{"/etc/pacman.d/hooks/"}
+	conf.HookDir = []string{"/etc/pacman.d/hooks/"} //should be added to whatever the config states
 	conf.GPGDir = "/etc/pacman.d/gnupg/"
 	conf.LogFile = "/var/log/pacman.log"
 	conf.UseDelta = 0.7

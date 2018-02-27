@@ -93,9 +93,32 @@ func (l DependList) Slice() []Depend {
 	return slice
 }
 
+
+func (pkg Package) FileName() string {
+	return C.GoString(C.alpm_pkg_get_filename(pkg.pmpkg))
+}
+
+func (pkg Package) Base() string {
+	return C.GoString(C.alpm_pkg_get_base(pkg.pmpkg))
+}
+
+func (pkg Package) Base64Signature() string {
+	return C.GoString(C.alpm_pkg_get_base64_sig(pkg.pmpkg))
+}
+
+
+func (pkg Package) Validation() Validation {
+	return Validation(C.alpm_pkg_get_validation(pkg.pmpkg))
+}
+
 // Architecture returns the package target Architecture.
 func (pkg Package) Architecture() string {
 	return C.GoString(C.alpm_pkg_get_arch(pkg.pmpkg))
+}
+
+func (pkg Package) Deltas() StringList {
+	ptr := unsafe.Pointer(C.alpm_pkg_get_deltas(pkg.pmpkg))
+	return StringList{(*list)(ptr)}
 }
 
 // Backup returns a list of package backups.
@@ -130,6 +153,26 @@ func (pkg Package) Depends() DependList {
 	ptr := unsafe.Pointer(C.alpm_pkg_get_depends(pkg.pmpkg))
 	return DependList{(*list)(ptr)}
 }
+
+// Depends returns the package's optional dependency list.
+func (pkg Package) OptionalDepends() DependList {
+	ptr := unsafe.Pointer(C.alpm_pkg_get_optdepends(pkg.pmpkg))
+	return DependList{(*list)(ptr)}
+}
+
+// Depends returns the package's check dependency list.
+//Exists in futre alpm
+/*func (pkg Package) CheckDepends() DependList {
+	ptr := unsafe.Pointer(C.alpm_pkg_get_checkdepends(pkg.pmpkg))
+	return DependList{(*list)(ptr)}
+}*/
+
+// Depends returns the package's make dependency list.
+//Exists in futre alpm
+/*func (pkg Package) MakeDepends() DependList {
+	ptr := unsafe.Pointer(C.alpm_pkg_get_makedepends(pkg.pmpkg))
+	return DependList{(*list)(ptr)}
+}*/
 
 // Description returns the package's description.
 func (pkg Package) Description() string {

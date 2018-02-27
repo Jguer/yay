@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/demizer/go-alpm"
+	"github.com/jguer/go-alpm"
 	"log"
 	"os"
 )

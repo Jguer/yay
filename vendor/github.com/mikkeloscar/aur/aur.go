@@ -35,6 +35,7 @@ type Pkg struct {
 	URLPath        string   `json:"URLPath"`
 	Depends        []string `json:"Depends"`
 	MakeDepends    []string `json:"MakeDepends"`
+	CheckDepends   []string `json:"CheckDepends"`
 	Conflicts      []string `json:"Conflicts"`
 	Replaces       []string `json:"Replaces"`
 	OptDepends     []string `json:"OptDepends"`

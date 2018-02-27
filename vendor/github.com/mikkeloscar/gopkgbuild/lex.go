@@ -244,9 +244,7 @@ func lexVariable(l *lexer) stateFn {
 			// strip arch from source_arch like constructs
 			witharch := strings.SplitN(variable, "_", 2)
 			if len(witharch) == 2 {
-				if _, ok := archs[witharch[1]]; ok {
-					variable = witharch[0]
-				}
+				variable = witharch[0]
 			}
 
 			if _, ok := variables[variable]; ok {

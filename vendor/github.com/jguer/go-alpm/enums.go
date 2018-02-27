@@ -108,3 +108,13 @@ const (
 	QuestionSelectProvider
 	QuestionImportKey
 )
+
+type Validation int
+
+const (
+	ValidationNone Validation = 1 << iota
+	ValidationMD5Sum
+	ValidationSHA256Sum
+	ValidationSignature
+	ValidationUnkown Validation = 0
+)

@@ -9,17 +9,17 @@ This project is MIT Licensed. See LICENSE for details.
 
 1. Import the go-alpm repository in your go script
 
-	import "github.com/demizer/go-alpm"
+	import "github.com/jguer/go-alpm"
 
 2. Copy the library to your GOPATH
 
 	mkdir ~/go
 	export GOPATH=~/go
-	go get github.com/demizer/go-alpm
+	go get github.com/jguer/go-alpm
 
 3. Try the included examples
 
-	cd $GOPATH/src/github.com/demizer/go-alpm/examples
+	cd $GOPATH/src/github.com/jguer/go-alpm/examples
 	go run installed.go
 
 ## Contributors

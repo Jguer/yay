@@ -179,6 +179,7 @@ func TestRandomCoreSRCINFOs(t *testing.T) {
 		"linux",
 		"pip2pkgbuild",
 		"biicode",
+		"teamviewer",
 	}
 
 	for _, srcinfo := range srcinfos {
