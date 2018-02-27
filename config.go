@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -193,4 +194,14 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	return true
+}
+
+func (config Configuration) String() string {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetIndent("", "\t")
+	if err := enc.Encode(config); err != nil {
+		fmt.Println(err)
+	}
+	return buf.String()
 }
