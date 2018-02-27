@@ -179,7 +179,7 @@ func install(parser *arguments) error {
 			return nil
 		}
 
-		err = downloadPkgBuildsSources(dc.Aur)
+		err = downloadPkgBuildsSources(dc.Aur, dc.Bases)
 		if err != nil {
 			return err
 		}
@@ -389,12 +389,12 @@ func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) 
 	return
 }
 
-func downloadPkgBuildsSources(pkgs []*rpc.Pkg) (err error) {
+func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 		err = passToMakepkg(dir, "--nobuild", "--nocheck", "--noprepare", "--nodeps")
 		if err != nil {
-			return fmt.Errorf("Error downloading sources: %s", pkg)
+			return fmt.Errorf("Error downloading sources: %s", formatPkgbase(pkg, bases))
 		}
 	}
 
