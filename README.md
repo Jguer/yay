@@ -43,6 +43,18 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 ### Changelog
 
+#### 3.373
+
+* Version bump to V3 to reflect all of the changes to syntax
+* `yay -Pd` prints default config
+* `yay -Pg` prints current config
+* Fixes #174
+* Fixes #176
+* Fixes -G being unable to download split packages
+* Fixes #171
+* Fixes -Si failing when given a non existing package on https://github.com/Jguer/yay/pull/155
+* Fixes other small bugs on 2.350 without adding new features
+
 #### 2.350
 
 * Adds sudo loop (off by default, enable only by editing config file) #147
