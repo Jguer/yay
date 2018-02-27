@@ -59,8 +59,7 @@ Yay specific options:
     -c --clean           Remove unneeded dependencies
     --gendb              Generates development package DB used for updating.
 
-If no operation is provided -Y will be assumed
-`)
+If no operation is provided -Y will be assumed`)
 }
 
 func initYay() (err error) {
