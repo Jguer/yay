@@ -127,8 +127,6 @@ func initYay() (err error) {
 	/////////////////
 	// vcs config //
 	////////////////
-	updated = false
-
 	vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
 	if err == nil {
 		defer vfile.Close()
@@ -236,15 +234,6 @@ cleanup:
 	//from here on out dont exit if an error occurs
 	//if we fail to save the configuration
 	//at least continue on and try clean up other parts
-
-	if updated {
-		err = saveVCSInfo()
-
-		if err != nil {
-			fmt.Println(err)
-			status = 1
-		}
-	}
 
 	if changedConfig {
 		err = config.saveConfig()

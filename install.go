@@ -314,13 +314,15 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	return nil
 }
 
-func updateVSCdb(pkgbuild *gopkg.PKGBUILD) {
+func updateVSCdb(pkgs []*rpc.Pkg, pkgbuild *gopkg.PKGBUILD) {
 	for _, pkgsource := range pkgbuild.Source {
 		owner, repo := parseSource(pkgsource)
 		if owner != "" && repo != "" {
-			err := branchInfo(pkgbuild.Pkgbase, owner, repo)
-			if err != nil {
-				fmt.Println(err)
+			for _, pkg := range pkgs {
+				err := branchInfo(pkg.Name, owner, repo)
+				if err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 	}
@@ -339,7 +341,7 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 		}
 
 		srcinfos[pkg.PackageBase] = pkgbuild
-		updateVSCdb(pkgbuild)
+		updateVSCdb(bases[pkg.PackageBase], pkgbuild)
 	}
 
 	return nil
@@ -367,7 +369,6 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		}
 
 		srcinfos[pkg.PackageBase] = pkgbuild
-		updateVSCdb(pkgbuild)
 	}
 
 	return nil
@@ -402,10 +403,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err
 }
 
 func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg) error {
-	//for n := len(pkgs) -1 ; n > 0; n-- {
-	for n := 0; n < len(pkgs); n++ {
-		pkg := pkgs[n]
-
+	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 		built := true
 
@@ -469,6 +467,8 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		if err != nil {
 			return err
 		}
+
+		updateVSCdb(bases[pkg.PackageBase], srcinfo)
 		if len(depArguments.targets) > 0 {
 			err = passToPacman(depArguments)
 			if err != nil {

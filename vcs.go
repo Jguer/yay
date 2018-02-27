@@ -129,7 +129,7 @@ func inStore(pkgName string) *Info {
 
 // branchInfo updates saved information
 func branchInfo(pkgName string, owner string, repoName string) (err error) {
-	updated = true
+	updated := false
 	var newRepo repo
 	var newBranches branches
 	url := "https://api.github.com/repos/" + owner + "/" + repoName
@@ -155,6 +155,8 @@ func branchInfo(pkgName string, owner string, repoName string) (err error) {
 
 	for _, e := range newBranches {
 		if e.Name == defaultBranch {
+			updated = true
+
 			if packinfo != nil {
 				packinfo.Package = pkgName
 				packinfo.URL = url
@@ -163,6 +165,10 @@ func branchInfo(pkgName string, owner string, repoName string) (err error) {
 				savedInfo = append(savedInfo, Info{Package: pkgName, URL: url, SHA: e.Commit.SHA})
 			}
 		}
+	}
+
+	if updated {
+		saveVCSInfo()
 	}
 
 	return
