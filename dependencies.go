@@ -187,6 +187,12 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}
 
+		
+		_, isGroup := syncDb.PkgCachebyGroup(pkg)
+		if isGroup == nil {
+			continue
+		}
+
 		dt.ToProcess.set(pkg)
 	}
 
