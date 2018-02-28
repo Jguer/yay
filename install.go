@@ -137,9 +137,9 @@ func install(parser *arguments) error {
 		}
 
 		if len(depArguments.targets) > 0 {
-			err = passToPacman(depArguments)
+			_, stderr, err := passToPacmanCapture(depArguments)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s%s", stderr, err)
 			}
 		}
 	}
@@ -495,9 +495,9 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 		updateVSCdb(bases[pkg.PackageBase], srcinfo)
 		if len(depArguments.targets) > 0 {
-			err = passToPacman(depArguments)
+			_, stderr, err := passToPacmanCapture(depArguments)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s%s", stderr, err)
 			}
 		}
 		config.NoConfirm = oldConfirm
