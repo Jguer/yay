@@ -39,12 +39,12 @@ New operations:
 Permanent configuration options:
     --topdown            Shows repository's packages first and then AUR's
     --bottomup           Shows AUR's packages first and then repository's
-    --devel              Check -git/-svn/-hg development version
-    --nodevel            Disable development version checking
-    --afterclean         Clean package sources after successful build
-    --noafterclean       Disable package sources cleaning after successful build
-    --timeupdate         Check package's modification date and version
-    --notimeupdate       Check only package version change
+    --devel              Check development packages during sysupgrade
+    --nodevel            Do not check development packages
+    --afterclean         Remove package sources after successful install
+    --noafterclean       Do not remove package sources after successful build
+    --timeupdate         Check package's AUR page for changes during sysupgrade
+    --notimeupdate       Do not checking of AUR page changes
 
 Print specific options:
     -c --complete        Used for completions
@@ -55,9 +55,8 @@ Print specific options:
     -u --upgrades        Print update list
 
 Yay specific options:
-    -g --getpkgbuild     Download PKGBUILD from ABS or AUR
     -c --clean           Remove unneeded dependencies
-    --gendb              Generates development package DB used for updating.
+       --gendb           Generates development package DB used for updating
 
 If no operation is provided -Y will be assumed`)
 }
@@ -426,8 +425,6 @@ func handleYay() (err error) {
 		}
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = cleanDependencies()
-	} else if cmdArgs.existsArg("g", "getpkgbuild") {
-		err = handleGetpkgbuild()
 	} else if len(cmdArgs.targets) > 0 {
 		err = handleYogurt()
 	}
