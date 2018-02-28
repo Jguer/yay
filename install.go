@@ -16,7 +16,7 @@ import (
 // Install handles package installs
 func install(parser *arguments) error {
 	removeMake := false
-	aur, repo, err := packageSlices(parser.targets.toSlice())
+	aurTargets, repoTargets, err := packageSlices(parser.targets.toSlice())
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func install(parser *arguments) error {
 	var dc *depCatagories
 
 	//fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
-	requestTargets := append(aur, repo...)
+	requestTargets := append(aurTargets, repoTargets...)
 
 	//remotenames: names of all non repo packages on the system
 	_, _, _, remoteNames, err := filterPackages()
@@ -45,7 +45,7 @@ func install(parser *arguments) error {
 		requestTargets = append(requestTargets, remoteNames...)
 	}
 
-	if len(aur) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
+	if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
 		fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
 	}
 	dt, err := getDepTree(requestTargets)
@@ -105,9 +105,9 @@ func install(parser *arguments) error {
 		arguments.addTarget(pkg.Name())
 	}
 
-	for _, pkg := range repo {
-		arguments.addTarget(pkg)
-	}
+	//for _, pkg := range repoTargets {
+		//arguments.addTarget(pkg)
+	//}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
 		fmt.Println("There is nothing to do")
@@ -123,6 +123,24 @@ func install(parser *arguments) error {
 		err := passToPacman(arguments)
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages.")
+		}
+
+
+		depArguments := makeArguments()
+		depArguments.addArg("D", "asdeps")
+
+		for _, pkg := range dc.Repo {
+			depArguments.addTarget(pkg.Name())
+		}
+		for _, pkg := range repoTargets {
+			depArguments.delTarget(pkg)
+		}
+
+		if len(depArguments.targets) > 0 {
+			err = passToPacman(depArguments)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -208,8 +226,12 @@ func install(parser *arguments) error {
 
 			oldValue := config.NoConfirm
 			config.NoConfirm = true
-			passToPacman(removeArguments)
+			err = passToPacman(removeArguments)
 			config.NoConfirm = oldValue
+
+			if err != nil {
+				return err
+			}
 		}
 
 		if config.CleanAfter {
