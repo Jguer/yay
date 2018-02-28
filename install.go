@@ -307,7 +307,10 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 		if !continueTask(str, "yY") {
 			editcmd := exec.Command(editor(), dir+"PKGBUILD")
 			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-			editcmd.Run()
+			err := editcmd.Run()
+			if err != nil {
+				return fmt.Errorf("Editor did not exit successfully, Abotring: %s", err)
+			}
 		}
 	}
 
