@@ -52,6 +52,15 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 	dc := makeDependCatagories()
 	seen := make(stringSet)
 
+	for _, pkg := range dt.Aur {
+		_, ok := dc.Bases[pkg.PackageBase]
+		if !ok {
+			dc.Bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
+		}
+		dc.Bases[pkg.PackageBase] = append(dc.Bases[pkg.PackageBase], pkg)
+	}
+
+
 	for _, pkg := range pkgs {
 		dep := getNameFromDep(pkg)
 		alpmpkg, exists := dt.Repo[dep]
@@ -69,11 +78,6 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 				seen.set(aurpkg.PackageBase)
 			}
 
-			_, ok := dc.Bases[aurpkg.PackageBase]
-			if !ok {
-				dc.Bases[aurpkg.PackageBase] = make([]*rpc.Pkg, 0)
-			}
-			dc.Bases[aurpkg.PackageBase] = append(dc.Bases[aurpkg.PackageBase], aurpkg)
 			delete(dt.Aur, dep)
 		}
 	}
@@ -117,46 +121,42 @@ func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTre
 	})
 }
 
-func depCatagoriesRecursive(pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake bool, seen stringSet) {
-	for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
-		for _, _dep := range deps {
-			dep := getNameFromDep(_dep)
+func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake bool, seen stringSet) {
+	for _, pkg := range dc.Bases[_pkg.PackageBase] {
+		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+			for _, _dep := range deps {
+				dep := getNameFromDep(_dep)
 
-			aurpkg, exists := dt.Aur[dep]
-			if exists {
-				_, ok := dc.Bases[aurpkg.PackageBase]
-				if !ok {
-					dc.Bases[aurpkg.PackageBase] = make([]*rpc.Pkg, 0)
+				aurpkg, exists := dt.Aur[dep]
+				if exists {
+					delete(dt.Aur, dep)
+					depCatagoriesRecursive(aurpkg, dc, dt, isMake, seen)
+
+					if !seen.get(aurpkg.PackageBase) {
+						dc.Aur = append(dc.Aur, aurpkg)
+						seen.set(aurpkg.PackageBase)
+					}
+
+					if isMake {
+						dc.MakeOnly.set(aurpkg.Name)
+					}
 				}
-				dc.Bases[aurpkg.PackageBase] = append(dc.Bases[aurpkg.PackageBase], aurpkg)
 
-				delete(dt.Aur, dep)
-				depCatagoriesRecursive(aurpkg, dc, dt, isMake, seen)
+				alpmpkg, exists := dt.Repo[dep]
+				if exists {
+					delete(dt.Repo, dep)
+					repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
 
-				if !seen.get(aurpkg.PackageBase) {
-					dc.Aur = append(dc.Aur, aurpkg)
-					seen.set(aurpkg.PackageBase)
+					if isMake {
+						dc.MakeOnly.set(alpmpkg.Name())
+					}
+
+					dc.Repo = append(dc.Repo, alpmpkg)
 				}
 
-				if isMake {
-					dc.MakeOnly.set(aurpkg.Name)
-				}
 			}
-
-			alpmpkg, exists := dt.Repo[dep]
-			if exists {
-				delete(dt.Repo, dep)
-				repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
-
-				if isMake {
-					dc.MakeOnly.set(alpmpkg.Name())
-				}
-
-				dc.Repo = append(dc.Repo, alpmpkg)
-			}
-
+			isMake = true
 		}
-		isMake = true
 	}
 }
 
