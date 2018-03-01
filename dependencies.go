@@ -99,6 +99,20 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 		})
 	}
 
+	dupes := make(map[*alpm.Package]struct{})
+	filteredRepo := make([]*alpm.Package, 0)
+
+	for _, pkg := range dc.Repo {
+		_, ok := dupes[pkg]
+		if ok {
+			continue
+		}
+		dupes[pkg] = struct{}{}
+		filteredRepo = append(filteredRepo, pkg)
+	}
+
+	dc.Repo = filteredRepo
+
 	return dc, nil
 }
 
