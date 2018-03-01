@@ -28,6 +28,11 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 * Sources build dependencies
 * Removes make dependencies at the end of build process
 
+### Frequently Asked Questions
+
+- Yay does not display colored output
+  Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
+  
 #### Example of Custom Operations
 
 * `yay <Search Term>` presents package selection menu
