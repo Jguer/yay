@@ -98,6 +98,20 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 		})
 	}
 
+	dupes := make(map[*alpm.Package]struct{})
+	filteredRepo := make([]*alpm.Package, 0)
+
+	for _, pkg := range dc.Repo {
+		_, ok := dupes[pkg]
+		if ok {
+			continue
+		}
+		dupes[pkg] = struct{}{}
+		filteredRepo = append(filteredRepo, pkg)
+	}
+
+	dc.Repo = filteredRepo
+
 	return dc, nil
 }
 
@@ -209,10 +223,10 @@ func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb 
 	}
 
 	dt.Repo[pkg.Name()] = pkg
-	/*(*pkg).Provides().ForEach(func(dep alpm.Depend) (err error) {
+	(*pkg).Provides().ForEach(func(dep alpm.Depend) (err error) {
 		dt.Repo[dep.Name] = pkg
 		return nil
-	})*/
+	})
 
 	(*pkg).Depends().ForEach(func(dep alpm.Depend) (err error) {
 		_, exists := dt.Repo[dep.Name]
