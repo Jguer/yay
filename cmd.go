@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -690,6 +691,38 @@ func passToPacman(args *arguments) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
 	return err
+}
+
+//passToPacman but return the output instead of showing the user
+func passToPacmanCapture(args *arguments) (string, string, error) {
+	var outbuf, errbuf bytes.Buffer
+	var cmd *exec.Cmd
+	argArr := make([]string, 0)
+
+	if args.needRoot() {
+		argArr = append(argArr, "sudo")
+	}
+
+	argArr = append(argArr, config.PacmanBin)
+	argArr = append(argArr, cmdArgs.formatGlobals()...)
+	argArr = append(argArr, args.formatArgs()...)
+	if config.NoConfirm {
+		argArr = append(argArr, "--noconfirm")
+	}
+
+	argArr = append(argArr, "--")
+
+	argArr = append(argArr, args.formatTargets()...)
+
+	cmd = exec.Command(argArr[0], argArr[1:]...)
+	cmd.Stdout = &outbuf
+	cmd.Stderr = &errbuf
+
+	err := cmd.Run()
+	stdout := outbuf.String()
+	stderr := errbuf.String()
+
+	return stdout, stderr, err
 }
 
 // passToMakepkg outsources execution to makepkg binary without modifications.
