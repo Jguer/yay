@@ -1,5 +1,5 @@
-'\" t
-.TH "YAY" "8" "2018-01-31" "Yay v2\&.295" "Yay Manual"
+/n'\" t
+.TH "YAY" "8" "2018-02-29" "Yay v3\&.411+" "Yay Manual"
 .nh
 .ad l
 .SH "NAME"
@@ -11,14 +11,17 @@ yay \- AUR Helper written in go
 \fIyay\fR <search pattern>
 .SH "DESCRIPTION"
 .sp
-Yay is a Pacman wrapper with AUR support\&. It passes options to Makepkg and Pacman after resolving packages to install/upgrade\&.
+Yay is a Pacman wrapper with AUR support\&. It passes options to Makepkg and
+Pacman after resolving packages to install/upgrade\&.
 .sp
-This manpage only covers options unique to Yay\&. For other options see \fBpacman(8)\fR\&.
+This manpage only covers options unique to Yay\&. For other options see
+\fBpacman(8)\fR\&.
 .SH "YAY OPERATIONS"
 .PP
 \fB\-Y, --yay\fR
 .RS 4
-Perform yay specific operations\&. This is the default if no other operation is selected\&.
+Perform yay specific operations\&. This is the default if no other operation is
+selected\&.
 .RE
 .PP
 \fB\-P, --print\fR
@@ -36,7 +39,7 @@ If no operation is selected -Y will be assumed\&.
 .PP
 \fB\-S, -Si, -Ss, -Su\fR
 .RS 4
-These operations are extended to support the AUR as well as repo packages\&.
+These operations are extended to support both AUR and repo packages\&.
 .RE
 .PP
 \fB\-R\fR
@@ -47,13 +50,16 @@ Yay will also remove cached data about devel packages\&.
 .PP
 \fB<NO OPTION>\fR
 .RS 4
-Displays list of packages matching search terms and prompts the user on which packages to install(yogurt mode)\&.
+Displays a list of packages matching the search terms and prompts the user on
+which packages to install (yogurt mode)\&.
 .RE
 .PP
-\fB\-g \-\-getpkgbuild\fR
+\fB   \-\-gendb\fR
 .RS 4
-Downloads PKGBUILD from ABS or AUR\&.
-.RE
+Generate development package databse\&. Tracks the latest commit for each
+development package, when there is a new commit Yay will know to update\&. This
+is done per package whenever a package is synced. This option should only be
+used when migrating to Yay from another AUR helper.
 .RE
 .PP
 \fB\-c \-\-clean\fR
@@ -61,6 +67,17 @@ Downloads PKGBUILD from ABS or AUR\&.
 Remove unneeded dependencies\&.
 .RE
 .SH "PRINT OPTIONS (APPLY TO -P AND --PRINT)"
+\fB\-c \-\-complete\fR
+.RS 4
+Print a list of all AUR and repo packages\&. This is to allow shell completion
+and is not intended to be used directly by the user\&.
+.RE
+.PP
+\fB\-f \-\-fish\fR
+.RS 4
+During complete adjust the output for the fish shell\&.
+.RE
+.PP
 \fB\-d \-\-defaultconfig\fR
 .RS 4
 Print default yay configuration\&.
@@ -73,20 +90,22 @@ Print current yay configuration\&.
 .PP
 \fB\-n \-\-numberupgrades\fR
 .RS 4
-Print number of updates\&.
+Print number of packages that need to be updated\&. Note this does not preform
+a database refresh\&. Run \fByay -Sy\fR Before this for an up to date result\&.
 .RE
 .PP
 \fB\-s \-\-stats\fR
 .RS 4
-Displays information about installed packages and system health\&. If there are orphaned or out-of-date packages, warnings will be displayed\&.
+Displays information about installed packages and system health\&. If there are
+orphaned, out-of-date or packages that no longer exist on the AUR warnings will
+be displayed\&.
 .RE
 .PP
 \fB\-u \-\-upgrades\fR
 .RS 4
-Print update list\&.
-.RE
+Print Names of packages that need to be updated\&. Note this does not preform
+a database refresh\&. Run \fByay -Sy\fR Before this for an up to date result\&.
 .PP
-
 .SH "PERMANENT CONFIGURATION SETTINGS"
 .PP
 These options will be saved to disk and reapplied next time Yay is ran\&.
@@ -103,32 +122,34 @@ Show AUR packages first and then repository packages\&.
 .PP
 \fB\-\-devel\fR
 .RS 4
-Check -git/-svn/-hg development version\&.
+During sysupgrade also check AUR development packages for updates\&. Currently
+only GitHub packages are supported\&.
 .RE
 .PP
 \fB\-\-nodevel\fR
 .RS 4
-Disable development version checking\&.
+Do not check for development packages updates during sysupgrade\&.
 .RE
 .PP
 \fB\-\-afterclean\fR
 .RS 4
-Clean package sources after successful build\&.
+Remove package sources after successful Install\&.
 .RE
 .PP
 \fB\-\-noafterclean\fR
 .RS 4
-Disable package sources cleaning after successful build\&.
+Do not remove package sources after successful Install\&.
 .RE
 .PP
 \fB\-\-timeupdate\fR
 .RS 4
-Check package's modification date and version\&.
+During sysupgrade also compare the build time of installed packages against
+the last modification time of each package's AUR page\&.
 .RE
 .PP
 \fB\-\-notimeupdate\fR
 .RS 4
-Check only package version change\&.
+Do not consider build times during sysupgrade\&.
 .RE
 .SH "EXAMPLES"
 .PP
@@ -179,3 +200,5 @@ Please report bugs to our GitHub page https://github\&.com/Jguer/yay
 .SH "AUTHORS"
 .sp
 Jguer <joaogg3@gmail\&.com>
+.br
+Morgana <morganamilo@gmail\&.com>

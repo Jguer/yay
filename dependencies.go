@@ -60,7 +60,6 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 		dc.Bases[pkg.PackageBase] = append(dc.Bases[pkg.PackageBase], pkg)
 	}
 
-
 	for _, pkg := range pkgs {
 		dep := getNameFromDep(pkg)
 		alpmpkg, exists := dt.Repo[dep]
@@ -187,7 +186,6 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}
 
-		
 		_, isGroup := syncDb.PkgCachebyGroup(pkg)
 		if isGroup == nil {
 			continue
