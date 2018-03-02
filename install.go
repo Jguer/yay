@@ -106,7 +106,7 @@ func install(parser *arguments) error {
 	}
 
 	//for _, pkg := range repoTargets {
-		//arguments.addTarget(pkg)
+	//arguments.addTarget(pkg)
 	//}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
@@ -124,7 +124,6 @@ func install(parser *arguments) error {
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages.")
 		}
-
 
 		depArguments := makeArguments()
 		depArguments.addArg("D", "asdeps")
