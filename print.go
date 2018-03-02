@@ -41,7 +41,7 @@ func (q aurQuery) printSearch(start int) {
 			fmt.Println(res.Name)
 			continue
 		}
-		toprint += boldWhiteFg("aur/") + boldYellowFg(res.Name) +
+		toprint += colourHash("aur") + "/" + boldYellowFg(res.Name) +
 			" " + boldCyanFg(res.Version) +
 			" (" + strconv.Itoa(res.NumVotes) + ") "
 
@@ -75,7 +75,7 @@ func (s repoQuery) printSearch() {
 			fmt.Println(res.Name())
 			continue
 		}
-		toprint += boldWhiteFg(res.DB().Name()+"/") + boldYellowFg(res.Name()) +
+		toprint += colourHash(res.DB().Name()) + "/" + boldYellowFg(res.Name()) +
 			" " + boldCyanFg(res.Version()) + " "
 
 		if len(res.Groups().Slice()) != 0 {
@@ -85,7 +85,7 @@ func (s repoQuery) printSearch() {
 		localDb, err := alpmHandle.LocalDb()
 		if err == nil {
 			if _, err = localDb.PkgByName(res.Name()); err == nil {
-				toprint += greenFgBlackBg("Installed")
+				toprint += greenFgBlueBg("Installed")
 			}
 		}
 
@@ -416,4 +416,15 @@ func boldYellowFgBlackBg(in string) string {
 	}
 
 	return in
+}
+
+func colourHash(name string) (output string) {
+	if alpmConf.Options&alpm.ConfColor == 0 {
+		return name
+	}
+	var hash = 5381
+	for i := 0; i < len(name); i++ {
+		hash = int(name[i]) + ((hash << 5) + (hash))
+	}
+	return fmt.Sprintf("\x1b[1;%dm%s\x1b[0m", hash%6+31, name)
 }

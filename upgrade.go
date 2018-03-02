@@ -85,18 +85,8 @@ func (u upSlice) Print(start int) {
 	for k, i := range u {
 		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
 
-		f := func(name string) (output string) {
-			if alpmConf.Options&alpm.ConfColor == 0 {
-				return name
-			}
-			var hash = 5381
-			for i := 0; i < len(name); i++ {
-				hash = int(name[i]) + ((hash << 5) + (hash))
-			}
-			return fmt.Sprintf("\x1b[1;%dm%s\x1b[0m", hash%6+31, name)
-		}
 		fmt.Print(yellowFg(fmt.Sprintf("%2d ", len(u)+start-k-1)))
-		fmt.Print(f(i.Repository), "/", boldWhiteFg(i.Name))
+		fmt.Print(colourHash(i.Repository), "/", boldWhiteFg(i.Name))
 
 		w := 70 - len(i.Repository) - len(i.Name) + len(left)
 		fmt.Printf(fmt.Sprintf("%%%ds", w),
