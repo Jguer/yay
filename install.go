@@ -24,7 +24,7 @@ func install(parser *arguments) error {
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
 	var dc *depCatagories
 
-	//fmt.Println(greenFg(arrow), greenFg("Resolving Dependencies"))
+	//fmt.Println(green(arrow), green("Resolving Dependencies"))
 	requestTargets := append(aurTargets, repoTargets...)
 
 	//remotenames: names of all non repo packages on the system
@@ -46,7 +46,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
-		fmt.Println(boldCyanFg("::"), boldFg("Querying AUR..."))
+		fmt.Println(bold(cyan("::") + " Querying AUR..."))
 	}
 	dt, err := getDepTree(requestTargets)
 	if err != nil {
@@ -56,7 +56,7 @@ func install(parser *arguments) error {
 	//only error if direct targets or deps are missing
 	for missingName := range dt.Missing {
 		if !remoteNamesCache.get(missingName) {
-			return fmt.Errorf(boldRedFgBlackBg(arrow+" Error: ") +
+			return fmt.Errorf(bold(red(blackBg(arrow+" Error: "))) +
 				blackBg("Could not find all required package"))
 		}
 	}
@@ -193,7 +193,7 @@ func install(parser *arguments) error {
 				return err
 			}
 
-			fmt.Println(boldGreenFg(arrow + " GenDB finished. No packages were installed"))
+			fmt.Println(bold(green(arrow + " GenDB finished. No packages were installed")))
 			return nil
 		}
 
@@ -299,11 +299,11 @@ func checkForConflicts(dc *depCatagories) error {
 
 	if len(toRemove) != 0 {
 		fmt.Println(
-			redFg("Package conflicts found:"))
+			red("Package conflicts found:"))
 		for name, pkgs := range toRemove {
-			str := "\tInstalling " + yellowFg(name) + " will remove"
+			str := "\tInstalling " + yellow(name) + " will remove"
 			for pkg := range pkgs {
-				str += " " + yellowFg(pkg)
+				str += " " + yellow(pkg)
 			}
 
 			fmt.Println(str)
@@ -357,7 +357,7 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s\n")
+		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
 		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
@@ -376,7 +376,7 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		str := boldCyanFg("::") + boldFg(" Parsing SRCINFO (%d/%d): %s\n")
+		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
 		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
@@ -402,7 +402,7 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
 	for k, pkg := range pkgs {
 		//todo make pretty
-		str := boldCyanFg("::") + boldFg(" Downloading (%d/%d): %s\n")
+		str := bold(cyan("::") + " Downloading (%d/%d): %s\n")
 
 		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
@@ -447,7 +447,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		}
 
 		if built {
-			fmt.Println(boldRedFgBlackBg(arrow+" Warning:"),
+			fmt.Println(bold(red(blackBg(arrow+" Warning:"))),
 				blackBg(pkg.Name+"-"+pkg.Version+" Already made -- skipping build"))
 		} else {
 			err := passToMakepkg(dir, "-Ccf", "--noconfirm")
@@ -510,8 +510,8 @@ func clean(pkgs []*rpc.Pkg) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		fmt.Println(boldGreenFg(arrow +
-			" CleanAfter enabled. Deleting " + pkg.Name + " source folder."))
+		fmt.Println(bold(green(arrow +
+			" CleanAfter enabled. Deleting " + pkg.Name + " source folder.")))
 		os.RemoveAll(dir)
 	}
 }
