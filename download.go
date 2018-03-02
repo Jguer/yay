@@ -101,10 +101,10 @@ nextPkg:
 
 				errD := downloadAndUnpack(url, path, true)
 				if errD != nil {
-					fmt.Println(bold(yellow(pkg.Name())), bold(green(errD.Error())))
+					fmt.Println(bold(magenta(pkg.Name())), bold(green(errD.Error())))
 				}
 
-				fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(yellow(pkg.Name())), bold(green("from ABS")))
+				fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(magenta(pkg.Name())), bold(green("from ABS")))
 				continue nextPkg
 			}
 		}
@@ -124,7 +124,7 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
 
 	for _, pkg := range aq {
 		downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
-		fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(yellow(pkg.Name)), bold(green("from AUR")))
+		fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(magenta(pkg.Name)), bold(green("from AUR")))
 	}
 
 	return

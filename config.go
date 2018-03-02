@@ -142,8 +142,8 @@ func editor() string {
 		}
 		fallthrough
 	default:
-		fmt.Println(bold(red(blackBg("Warning:"))),
-			bold(yellow(blackBg("$EDITOR"))), white(blackBg("is not set")))
+		fmt.Println(bold(red("Warning:")),
+			bold(magenta("$EDITOR")), "is not set")
 		fmt.Println("Please add $EDITOR or to your environment variables.")
 
 	editorLoop:
@@ -179,7 +179,7 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	var response string
-	fmt.Print(bold(green(arrow+" "+s+" ")), bold(white(postFix)))
+	fmt.Print(bold(green(arrow+" "+s+" ")), bold(postFix))
 
 	n, err := fmt.Scanln(&response)
 	if err != nil || n == 0 {

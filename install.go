@@ -56,8 +56,8 @@ func install(parser *arguments) error {
 	//only error if direct targets or deps are missing
 	for missingName := range dt.Missing {
 		if !remoteNamesCache.get(missingName) {
-			return fmt.Errorf(bold(red(blackBg(arrow+" Error: "))) +
-				blackBg("Could not find all required package"))
+			return fmt.Errorf(bold(red(arrow+" Error: ")) +
+				"Could not find all required package")
 		}
 	}
 
@@ -106,7 +106,7 @@ func install(parser *arguments) error {
 	}
 
 	//for _, pkg := range repoTargets {
-		//arguments.addTarget(pkg)
+	//arguments.addTarget(pkg)
 	//}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
@@ -124,7 +124,6 @@ func install(parser *arguments) error {
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages.")
 		}
-
 
 		depArguments := makeArguments()
 		depArguments.addArg("D", "asdeps")
@@ -301,9 +300,9 @@ func checkForConflicts(dc *depCatagories) error {
 		fmt.Println(
 			red("Package conflicts found:"))
 		for name, pkgs := range toRemove {
-			str := "\tInstalling " + yellow(name) + " will remove"
+			str := "\tInstalling " + magenta(name) + " will remove"
 			for pkg := range pkgs {
-				str += " " + yellow(pkg)
+				str += " " + magenta(pkg)
 			}
 
 			fmt.Println(str)
@@ -447,8 +446,8 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		}
 
 		if built {
-			fmt.Println(bold(red(blackBg(arrow+" Warning:"))),
-				blackBg(pkg.Name+"-"+pkg.Version+" Already made -- skipping build"))
+			fmt.Println(bold(red(arrow+" Warning:")),
+				pkg.Name+"-"+pkg.Version+" Already made -- skipping build")
 		} else {
 			err := passToMakepkg(dir, "-Ccf", "--noconfirm")
 			if err != nil {

@@ -579,7 +579,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		aurQ.printSearch(numpq + 1)
 	}
 
-	fmt.Println(bold(green(arrow) + green(" Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)")))
+	fmt.Println(bold(green(arrow + " Packages to install (eg: 1 2 3, 1-3 or ^4)")))
 	fmt.Print(bold(green(arrow + " ")))
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()

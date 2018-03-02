@@ -266,7 +266,7 @@ func hangingPackages() (hanging []string, err error) {
 		requiredby := pkg.ComputeRequiredBy()
 		if len(requiredby) == 0 {
 			hanging = append(hanging, pkg.Name())
-			fmt.Println(pkg.Name() + ": " + yellow(human(pkg.ISize())))
+			fmt.Println(pkg.Name() + ": " + magenta(human(pkg.ISize())))
 
 		}
 		return nil
@@ -378,25 +378,25 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	}
 
 	if len(missing) > 0 {
-		fmt.Print(bold(red(blackBg(arrow + " Missing AUR Packages:"))))
+		fmt.Print(bold(red(arrow + " Missing AUR Packages:")))
 		for _, name := range missing {
-			fmt.Print(" " + bold(yellow(blackBg(name))))
+			fmt.Print(" " + bold(magenta(name)))
 		}
 		fmt.Println()
 	}
 
 	if len(orphans) > 0 {
-		fmt.Print(bold(red(blackBg(arrow + " Orphaned AUR Packages:"))))
+		fmt.Print(bold(red(arrow + " Orphaned AUR Packages:")))
 		for _, name := range orphans {
-			fmt.Print(" " + bold(yellow(blackBg(name))))
+			fmt.Print(" " + bold(magenta(name)))
 		}
 		fmt.Println()
 	}
 
 	if len(outOfDate) > 0 {
-		fmt.Print(bold(red(blackBg(arrow + " Out Of Date AUR Packages:"))))
+		fmt.Print(bold(red(arrow + " Out Of Date AUR Packages:")))
 		for _, name := range outOfDate {
-			fmt.Print(" " + bold(yellow(blackBg(name))))
+			fmt.Print(" " + bold(magenta(name)))
 		}
 		fmt.Println()
 	}
