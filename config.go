@@ -142,12 +142,12 @@ func editor() string {
 		}
 		fallthrough
 	default:
-		fmt.Println(boldRedFgBlackBg("Warning:"),
-			boldYellowFgBlackBg("$EDITOR"), whiteFgBlackBg("is not set"))
+		fmt.Println(bold(red("Warning:")),
+			bold(magenta("$EDITOR")), "is not set")
 		fmt.Println("Please add $EDITOR or to your environment variables.")
 
 	editorLoop:
-		fmt.Print(greenFg("Edit PKGBUILD with:"))
+		fmt.Print(green("Edit PKGBUILD with:"))
 		var editorInput string
 		_, err := fmt.Scanln(&editorInput)
 		if err != nil {
@@ -179,7 +179,7 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	var response string
-	fmt.Print(boldGreenFg(arrow+" "+s+" "), boldWhiteFg(postFix))
+	fmt.Print(bold(green(arrow+" "+s+" ")), bold(postFix))
 
 	n, err := fmt.Scanln(&response)
 	if err != nil || n == 0 {

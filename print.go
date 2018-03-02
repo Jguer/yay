@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -33,28 +34,30 @@ func (q aurQuery) printSearch(start int) {
 		var toprint string
 		if config.SearchMode == NumberMenu {
 			if config.SortMode == BottomUp {
-				toprint += yellowFg(strconv.Itoa(len(q)+start-i-1) + " ")
+				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			} else {
-				toprint += yellowFg(strconv.Itoa(start+i) + " ")
+				toprint += magenta(strconv.Itoa(start+i) + " ")
 			}
 		} else if config.SearchMode == Minimal {
 			fmt.Println(res.Name)
 			continue
 		}
-		toprint += boldWhiteFg("aur/") + boldYellowFg(res.Name) +
-			" " + boldCyanFg(res.Version) +
-			" (" + strconv.Itoa(res.NumVotes) + ") "
+
+		toprint += bold(colourHash("aur")) + "/" + bold(res.Name) +
+			" " + cyan(res.Version) +
+			bold(" (+"+strconv.Itoa(res.NumVotes)) +
+			" " + bold(strconv.FormatFloat(res.Popularity, 'f', 2, 64)+"%) ")
 
 		if res.Maintainer == "" {
-			toprint += redFgBlackBg("(Orphaned)") + " "
+			toprint += bold(red("(Orphaned)")) + " "
 		}
 
 		if res.OutOfDate != 0 {
-			toprint += redFgBlackBg("(Out-of-date)") + " "
+			toprint += bold(red("(Out-of-date "+formatTime(res.OutOfDate)+")")) + " "
 		}
 
 		if _, err := localDb.PkgByName(res.Name); err == nil {
-			toprint += greenFgBlackBg("Installed")
+			toprint += bold(green("(Installed)"))
 		}
 		toprint += "\n    " + res.Description
 		fmt.Println(toprint)
@@ -67,16 +70,19 @@ func (s repoQuery) printSearch() {
 		var toprint string
 		if config.SearchMode == NumberMenu {
 			if config.SortMode == BottomUp {
-				toprint += yellowFg(strconv.Itoa(len(s)-i) + " ")
+				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
 			} else {
-				toprint += yellowFg(strconv.Itoa(i+1) + " ")
+				toprint += magenta(strconv.Itoa(i+1) + " ")
 			}
 		} else if config.SearchMode == Minimal {
 			fmt.Println(res.Name())
 			continue
 		}
-		toprint += boldWhiteFg(res.DB().Name()+"/") + boldYellowFg(res.Name()) +
-			" " + boldCyanFg(res.Version()) + " "
+
+		toprint += bold(colourHash(res.DB().Name())) + "/" + bold(res.Name()) +
+			" " + cyan(res.Version()) +
+			bold(" ("+human(res.Size())+
+				" "+human(res.ISize())+") ")
 
 		if len(res.Groups().Slice()) != 0 {
 			toprint += fmt.Sprint(res.Groups().Slice(), " ")
@@ -85,7 +91,7 @@ func (s repoQuery) printSearch() {
 		localDb, err := alpmHandle.LocalDb()
 		if err == nil {
 			if _, err = localDb.PkgByName(res.Name()); err == nil {
-				toprint += greenFgBlackBg("Installed")
+				toprint += bold(green("(Installed)"))
 			}
 		}
 
@@ -183,29 +189,29 @@ func printDownloads(repoName string, length int, packages string) {
 		return
 	}
 
-	repoInfo := boldBlueFg(
-		"[" + repoName + ": " + strconv.Itoa(length) + "]")
-	fmt.Println(repoInfo + yellowFg(packages))
+	repoInfo := bold(blue(
+		"[" + repoName + ": " + strconv.Itoa(length) + "]"))
+	fmt.Println(repoInfo + magenta(packages))
 }
 
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *rpc.Pkg) {
-	fmt.Println(boldWhiteFg("Repository      :"), "aur")
-	fmt.Println(boldWhiteFg("Name            :"), a.Name)
-	fmt.Println(boldWhiteFg("Version         :"), a.Version)
-	fmt.Println(boldWhiteFg("Description     :"), a.Description)
-	fmt.Println(boldWhiteFg("URL             :"), a.URL)
-	fmt.Println(boldWhiteFg("Licenses        :"), strings.Join(a.License, "  "))
-	fmt.Println(boldWhiteFg("Depends On      :"), strings.Join(a.Depends, "  "))
-	fmt.Println(boldWhiteFg("Make Deps       :"), strings.Join(a.MakeDepends, "  "))
-	fmt.Println(boldWhiteFg("Check Deps      :"), strings.Join(a.CheckDepends, "  "))
-	fmt.Println(boldWhiteFg("Optional Deps   :"), strings.Join(a.OptDepends, "  "))
-	fmt.Println(boldWhiteFg("Conflicts With  :"), strings.Join(a.Conflicts, "  "))
-	fmt.Println(boldWhiteFg("Maintainer      :"), a.Maintainer)
-	fmt.Println(boldWhiteFg("Votes           :"), a.NumVotes)
-	fmt.Println(boldWhiteFg("Popularity      :"), a.Popularity)
+	fmt.Println(bold("Repository      :"), "aur")
+	fmt.Println(bold("Name            :"), a.Name)
+	fmt.Println(bold("Version         :"), a.Version)
+	fmt.Println(bold("Description     :"), a.Description)
+	fmt.Println(bold("URL             :"), a.URL)
+	fmt.Println(bold("Licenses        :"), strings.Join(a.License, "  "))
+	fmt.Println(bold("Depends On      :"), strings.Join(a.Depends, "  "))
+	fmt.Println(bold("Make Deps       :"), strings.Join(a.MakeDepends, "  "))
+	fmt.Println(bold("Check Deps      :"), strings.Join(a.CheckDepends, "  "))
+	fmt.Println(bold("Optional Deps   :"), strings.Join(a.OptDepends, "  "))
+	fmt.Println(bold("Conflicts With  :"), strings.Join(a.Conflicts, "  "))
+	fmt.Println(bold("Maintainer      :"), a.Maintainer)
+	fmt.Println(bold("Votes           :"), a.NumVotes)
+	fmt.Println(bold("Popularity      :"), a.Popularity)
 	if a.OutOfDate != 0 {
-		fmt.Println(boldWhiteFg("Out-of-date     :"), "Yes")
+		fmt.Println(bold("Out-of-date     :"), "Yes", "["+formatTime(a.OutOfDate)+"]")
 	}
 
 	fmt.Println()
@@ -226,7 +232,7 @@ func biggestPackages() {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Println(pkgS[i].Name() + ": " + yellowFg(human(pkgS[i].ISize())))
+		fmt.Println(bold(pkgS[i].Name()) + ": " + cyan(human(pkgS[i].ISize())))
 	}
 	// Could implement size here as well, but we just want the general idea
 }
@@ -243,16 +249,16 @@ func localStatistics() error {
 		return err
 	}
 
-	fmt.Printf("\n Yay version r%s\n", version)
-	fmt.Println(boldCyanFg("==========================================="))
-	fmt.Println(boldGreenFg("Total installed packages: ") + yellowFg(strconv.Itoa(info.Totaln)))
-	fmt.Println(boldGreenFg("Total foreign installed packages: ") + yellowFg(strconv.Itoa(len(remoteNames))))
-	fmt.Println(boldGreenFg("Explicitly installed packages: ") + yellowFg(strconv.Itoa(info.Expln)))
-	fmt.Println(boldGreenFg("Total Size occupied by packages: ") + yellowFg(human(info.TotalSize)))
-	fmt.Println(boldCyanFg("==========================================="))
-	fmt.Println(boldGreenFg("Ten biggest packages"))
+	fmt.Printf(bold("Yay version v%s\n"), version)
+	fmt.Println(bold(cyan("===========================================")))
+	fmt.Println(bold(green("Total installed packages: ")) + magenta(strconv.Itoa(info.Totaln)))
+	fmt.Println(bold(green("Total foreign installed packages: ")) + magenta(strconv.Itoa(len(remoteNames))))
+	fmt.Println(bold(green("Explicitly installed packages: ")) + magenta(strconv.Itoa(info.Expln)))
+	fmt.Println(bold(green("Total Size occupied by packages: ")) + magenta(human(info.TotalSize)))
+	fmt.Println(bold(cyan("===========================================")))
+	fmt.Println(bold(green("Ten biggest packages:")))
 	biggestPackages()
-	fmt.Println(boldCyanFg("==========================================="))
+	fmt.Println(bold(cyan("===========================================")))
 
 	aurInfo(remoteNames)
 
@@ -299,121 +305,74 @@ func printUpdateList() error {
 	return nil
 }
 
-func blackBg(in string) string {
+func formatTime(i int) string {
+	t := time.Unix(int64(i), 0)
+	return fmt.Sprintf("%d/%d/%d", t.Year(), int(t.Month()), t.Day())
+}
+
+func red(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[0;;40m" + in + "\x1b[0m"
+		return "\x1b[31m" + in + "\x1b[0m"
 	}
 
 	return in
 }
 
-func redFg(in string) string {
+func green(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[0;31m" + in + "\x1b[0m"
+		return "\x1b[32m" + in + "\x1b[0m"
 	}
 
 	return in
 }
 
-func greenFg(in string) string {
+func yellow(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[0;32m" + in + "\x1b[0m"
+		return "\x1b[33m" + in + "\x1b[0m"
 	}
 
 	return in
 }
 
-func yellowFg(in string) string {
+func blue(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[0;33m" + in + "\x1b[0m"
+		return "\x1b[34m" + in + "\x1b[0m"
 	}
 
 	return in
 }
 
-func boldFg(in string) string {
+func cyan(in string) string {
+	if alpmConf.Options&alpm.ConfColor > 0 {
+		return "\x1b[36m" + in + "\x1b[0m"
+	}
+
+	return in
+}
+
+func magenta(in string) string {
+	if alpmConf.Options&alpm.ConfColor > 0 {
+		return "\x1b[35m" + in + "\x1b[0m"
+	}
+
+	return in
+}
+
+func bold(in string) string {
 	if alpmConf.Options&alpm.ConfColor > 0 {
 		return "\x1b[1m" + in + "\x1b[0m"
 	}
 
 	return in
 }
-func boldGreenFg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[1;32m" + in + "\x1b[0m"
+
+func colourHash(name string) (output string) {
+	if alpmConf.Options&alpm.ConfColor == 0 {
+		return name
 	}
-
-	return in
-}
-
-func boldYellowFg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[1;33m" + in + "\x1b[0m"
+	var hash = 5381
+	for i := 0; i < len(name); i++ {
+		hash = int(name[i]) + ((hash << 5) + (hash))
 	}
-
-	return in
-}
-
-func boldBlueFg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[1;34m" + in + "\x1b[0m"
-	}
-
-	return in
-}
-
-func boldCyanFg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[1;36m" + in + "\x1b[0m"
-	}
-
-	return in
-}
-
-func boldWhiteFg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[1;37m" + in + "\x1b[0m"
-	}
-
-	return in
-}
-
-func redFgBlackBg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[0;31;40m" + in + "\x1b[0m"
-	}
-
-	return in
-}
-
-func greenFgBlackBg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[0;32;40m" + in + "\x1b[0m"
-	}
-
-	return in
-}
-
-func whiteFgBlackBg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[0;37;40m" + in + "\x1b[0m"
-	}
-
-	return in
-}
-
-func boldRedFgBlackBg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[1;31;40m" + in + "\x1b[0m"
-	}
-
-	return in
-}
-
-func boldYellowFgBlackBg(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
-		return "\x1b[1;33;40m" + in + "\x1b[0m"
-	}
-
-	return in
+	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
 }

@@ -61,19 +61,19 @@ func getVersionDiff(oldVersion, newversion string) (left, right string) {
 	new, errNew := pkgb.NewCompleteVersion(newversion)
 
 	if errOld != nil {
-		left = redFg("Invalid Version")
+		left = red("Invalid Version")
 	}
 	if errNew != nil {
-		right = redFg("Invalid Version")
+		right = red("Invalid Version")
 	}
 
 	if errOld == nil && errNew == nil {
 		if old.Version == new.Version {
-			left = string(old.Version) + "-" + redFg(string(old.Pkgrel))
-			right = string(new.Version) + "-" + greenFg(string(new.Pkgrel))
+			left = string(old.Version) + "-" + red(string(old.Pkgrel))
+			right = string(new.Version) + "-" + green(string(new.Pkgrel))
 		} else {
-			left = redFg(string(old.Version)) + "-" + string(old.Pkgrel)
-			right = boldGreenFg(string(new.Version)) + "-" + string(new.Pkgrel)
+			left = red(string(old.Version)) + "-" + string(old.Pkgrel)
+			right = bold(green(string(new.Version))) + "-" + string(new.Pkgrel)
 		}
 	}
 
@@ -85,18 +85,8 @@ func (u upSlice) Print(start int) {
 	for k, i := range u {
 		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
 
-		f := func(name string) (output string) {
-			if alpmConf.Options&alpm.ConfColor == 0 {
-				return name
-			}
-			var hash = 5381
-			for i := 0; i < len(name); i++ {
-				hash = int(name[i]) + ((hash << 5) + (hash))
-			}
-			return fmt.Sprintf("\x1b[1;%dm%s\x1b[0m", hash%6+31, name)
-		}
-		fmt.Print(yellowFg(fmt.Sprintf("%2d ", len(u)+start-k-1)))
-		fmt.Print(f(i.Repository), "/", boldWhiteFg(i.Name))
+		fmt.Print(magenta(fmt.Sprintf("%2d ", len(u)+start-k-1)))
+		fmt.Print(bold(colourHash(i.Repository)), "/", cyan(i.Name))
 
 		w := 70 - len(i.Repository) - len(i.Name) + len(left)
 		fmt.Printf(fmt.Sprintf("%%%ds", w),
@@ -115,14 +105,14 @@ func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 	aurC := make(chan upSlice)
 	errC := make(chan error)
 
-	fmt.Println(boldCyanFg("::"), boldFg("Searching databases for updates..."))
+	fmt.Println(bold(cyan("::") + " Searching databases for updates..."))
 	go func() {
 		repoUpList, err := upRepo(local)
 		errC <- err
 		repoC <- repoUpList
 	}()
 
-	fmt.Println(boldCyanFg("::"), boldFg("Searching AUR for updates..."))
+	fmt.Println(bold(cyan("::") + " Searching AUR for updates..."))
 	go func() {
 		aurUpList, err := upAUR(remote, remoteNames, dt)
 		errC <- err
@@ -166,8 +156,8 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 			}
 			if found {
 				if pkg.ShouldIgnore() {
-					fmt.Print(yellowFg("Warning: "))
-					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), "git")
+					fmt.Print(magenta("Warning: "))
+					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), pkg.Version(), "git")
 				} else {
 					packageC <- upgrade{e.Package, "devel", pkg.Version(), "commit-" + e.SHA[0:6]}
 				}
@@ -191,7 +181,7 @@ func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade 
 	if config.Devel {
 		routines++
 		go upDevel(remote, packageC, done)
-		fmt.Println(boldCyanFg("::"), boldFg("Checking development packages..."))
+		fmt.Println(bold(cyan("::") + "Checking development packages..."))
 	}
 
 	routines++
@@ -206,8 +196,8 @@ func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade 
 				(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
 				if pkg.ShouldIgnore() {
 					left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
-					fmt.Print(yellowFg("Warning: "))
-					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), left, right)
+					fmt.Print(magenta("Warning: "))
+					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
 				} else {
 					packageC <- upgrade{aurPkg.Name, "aur", pkg.Version(), aurPkg.Version}
 				}
@@ -255,7 +245,7 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		newPkg := pkg.NewVersion(dbList)
 		if newPkg != nil {
 			if pkg.ShouldIgnore() {
-				fmt.Print(yellowFg("Warning: "))
+				fmt.Print(magenta("Warning: "))
 				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
 			} else {
 				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
@@ -303,13 +293,13 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	}
 
 	sort.Sort(repoUp)
-	fmt.Println(boldBlueFg("::"), len(aurUp)+len(repoUp), boldWhiteFg("Packages to upgrade."))
+	fmt.Println(bold(blue("::")), len(aurUp)+len(repoUp), bold("Packages to upgrade."))
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
 
 	if !config.NoConfirm {
-		fmt.Println(boldGreenFg(arrow) + greenFg(" Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)"))
-		fmt.Print(boldGreenFg(arrow + " "))
+		fmt.Println(bold(green(arrow + " Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)")))
+		fmt.Print(bold(green(arrow + " ")))
 		reader := bufio.NewReader(os.Stdin)
 
 		numberBuf, overflow, err := reader.ReadLine()
