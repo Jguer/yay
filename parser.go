@@ -7,11 +7,12 @@ import (
 	"strings"
 )
 
-//a basic set implementatrion for strings. this is used a lot so it deserves
-//its own type. Other types of sets are used throughout the code but tont have
-//their own typedef.
-//stringsets and <type>sets should be used throught the code when applicable,
-//they are a lot more flexable than slices and provide easy lookup,
+// A basic set implementation for strings. 
+// This is used a lot so it deserves its own type. 
+// Other types of sets are used throughout the code but do not have
+// their own typedef.
+// String sets and <type>sets should be used throughout the code when applicable,
+// they are a lot more flexable than slices and provide easy lookup.
 type stringSet map[string]struct{}
 
 func (set stringSet) set(v string) {
@@ -37,13 +38,13 @@ func (set stringSet) toSlice() []string {
 	return slice
 }
 
-//Parses command line arguments in a way we can interact with progamaticly but
-//also in a way that can easily be passed to pacman later on.
+// Parses command line arguments in a way we can interact with programmatically but
+// also in a way that can easily be passed to pacman later on.
 type arguments struct {
 	op      string
 	options map[string]string
 	globals map[string]string
-	doubles stringSet //tracks args passed twice such as -yy and -dd
+	doubles stringSet // Tracks args passed twice such as -yy and -dd
 	targets stringSet
 }
 
@@ -134,7 +135,7 @@ func (parser *arguments) needRoot() bool {
 	case "U", "upgrade":
 		return true
 
-	//yay specific
+	// yay specific
 	case "Y", "yay":
 		return false
 	case "P", "print":
@@ -184,7 +185,7 @@ func (parser *arguments) addArg(options ...string) (err error) {
 	return
 }
 
-//multiple args acts as an OR operator
+// Multiple args acts as an OR operator
 func (parser *arguments) existsArg(options ...string) bool {
 	for _, option := range options {
 		_, exists := parser.options[option]
@@ -232,7 +233,7 @@ func (parser *arguments) delTarget(targets ...string) {
 	}
 }
 
-//multiple args acts as an OR operator
+// Multiple args acts as an OR operator
 func (parser *arguments) existsDouble(options ...string) bool {
 	for _, option := range options {
 		_, exists := parser.doubles[option]
@@ -328,7 +329,7 @@ func isOp(op string) bool {
 	case "U", "upgrade":
 		return true
 
-		//yay specific
+		// yay specific
 	case "Y", "yay":
 		return true
 	case "P", "print":
@@ -412,8 +413,8 @@ func hasParam(arg string) bool {
 	}
 }
 
-//parses short hand options such as:
-//-Syu -b/some/path -
+// Parses short hand options such as:
+// -Syu -b/some/path -
 func (parser *arguments) parseShortOption(arg string, param string) (usedNext bool, err error) {
 	if arg == "-" {
 		err = parser.addArg("-")
@@ -446,8 +447,8 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 	return
 }
 
-//parses full length options such as:
-//--sync --refresh --sysupgrade --dbpath /some/path --
+// Parses full length options such as:
+// --sync --refresh --sysupgrade --dbpath /some/path --
 func (parser *arguments) parseLongOption(arg string, param string) (usedNext bool, err error) {
 	if arg == "--" {
 		err = parser.addArg(arg)

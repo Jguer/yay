@@ -43,44 +43,44 @@ func makeDependCatagories() *depCatagories {
 	return &dc
 }
 
-//cut the version requirement from a dependency leaving just the name
+// Cut the version requirement from a dependency leaving just the name.
 func getNameFromDep(dep string) string {
 	return strings.FieldsFunc(dep, func(c rune) bool {
 		return c == '>' || c == '<' || c == '='
 	})[0]
 }
 
-//step two of dependency reloving. We already have all the information on the
-//packages we need, now it's just about ordering them correctly.
-//pkgs is a list of targets, the packages we want to install, dependencies not
-//included.
-//For each package we want we iterate down the tree until we hit the bottom.
-//This is done recursivley for each branch.
-//The start of the tree is defined as the package we want.
-//When we hit the bottom of the branch we know thats the first package
-//we need to install so we add it to the start of the to install
-//list (dc.Aur and dc.Repo).
-//We work our way up until there is another branch to go down and do it all
-//again.
+// Step two of dependency resolving. We already have all the information on the
+// packages we need, now it's just about ordering them correctly.
+// pkgs is a list of targets, the packages we want to install. Dependencies are
+// not included.
+// For each package we want we iterate down the tree until we hit the bottom.
+// This is done recursively for each branch.
+// The start of the tree is defined as the package we want.
+// When we hit the bottom of the branch we know thats the first package
+// we need to install so we add it to the start of the to install
+// list (dc.Aur and dc.Repo).
+// We work our way up until there is another branch to go down and do it all
+// again.
 //
-//Here is a visual example
+// Here is a visual example:
 //
-//      a
+//       a
+//      / \
+//      b  c
 //     / \
-//     b  c
-//    / \
-//   d   e
+//    d   e
 //
-//we see a and it needs b and c
-//we see b and it needs d and e
-//we see d it needs nothing so we add d to our list and move up
-//we see e it needs nothing so we add e to our list and move up
-//we see c it needs nothign so we add c to our list and move up
+// We see a and it needs b and c
+// We see b and it needs d and e
+// We see d - it needs nothing so we add d to our list and move up
+// We see e - it needs nothing so we add e to our list and move up
+// We see c - it needs nothing so we add c to our list and move up
 //
-//The final install order would come out as debca
+// The final install order would come out as debca
 //
-//Theres a little more to this, handling provide, multiple packages wanting the
-//same dependencies and so on this is just the basic premise.
+// There is a little more to this, handling provides, multiple packages wanting the
+// same dependencies, etc. This is just the basic premise.
 func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 	dc := makeDependCatagories()
 	seen := make(stringSet)
@@ -206,21 +206,23 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 	}
 }
 
-//This is step one for dependency resolving. pkgs is a slice of the packages you
-//want to resolve the dependencioes for. They can be a mix of aur and repo
-//dependencies. All unmet dependencies will be resolved.
-//For Aur dependencies depends, makedepends and checkdepends are resolved but
-//for repo packages only depends are resolved as they are pre buiild.
-//The return will be split into three catagories. Repo, Aur and Missing.
-//The return is in no way ordered this step is is just aimed at gathering the
-//packaghes we need.
-//This has been designed to make the leat amount or rpc requests as possible.
-//Web requests are probably going to be the bottleneck here so minimizing them
-//provides a nice spead boost.
+// This is step one for dependency resolving. pkgs is a slice of the packages you
+// want to resolve the dependencies for. They can be a mix of aur and repo
+// dependencies. All unmet dependencies will be resolved.
 //
-//Here is a visual expample of the request system.
-//Remember only unsatisfied packages are requested, if a package is already
-//installed we dont bother.
+// For Aur dependencies depends, makedepends and checkdepends are resolved but
+// for repo packages only depends are resolved as they are prebuilt.
+// The return will be split into three catagories: Repo, Aur and Missing.
+// The return is in no way ordered. This step is is just aimed at gathering the
+// packages we need.
+//
+// This has been designed to make the least amount of rpc requests as possible.
+// Web requests are probably going to be the bottleneck here so minimizing them
+// provides a nice speed boost.
+//
+// Here is a visual expample of the request system.
+// Remember only unsatisfied packages are requested, if a package is already
+// installed we dont bother.
 //
 //      a
 //     / \
@@ -228,14 +230,14 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 //    / \
 //   d   e
 //
-//We see a so we send a request for a
-//we see wants b and c so we send a request for b and c
-//we see d and e so we send a request for d and e
+// We see a so we send a request for a
+// We see a wants b and c so we send a request for b and c
+// We see d and e so we send a request for d and e
 //
-//Thats 5 packages in 3 requests.The amount of requests needed should always be
-//the same as the height of the tree.
-//The example does not really do this justice, In the real world where packages
-//have 10+ dependencies each this is a very nice optimization.
+// Thats 5 packages in 3 requests. The amount of requests needed should always be
+// the same as the height of the tree.
+// The example does not really do this justice, In the real world where packages
+// have 10+ dependencies each this is a very nice optimization.
 func getDepTree(pkgs []string) (*depTree, error) {
 	dt := makeDepTree()
 
@@ -249,14 +251,14 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	}
 
 	for _, pkg := range pkgs {
-		//if they explicitly asked for it still look for installed pkgs
+		// If they explicitly asked for it still look for installed pkgs
 		/*installedPkg, isInstalled := localDb.PkgCache().FindSatisfier(pkg)
 		if isInstalled == nil {
 			dt.Repo[installedPkg.Name()] = installedPkg
 			continue
 		}//*/
 
-		//check the repos for a matching dep
+		// Check the repos for a matching dep
 		repoPkg, inRepos := syncDb.FindSatisfier(pkg)
 		if inRepos == nil {
 			repoTreeRecursive(repoPkg, dt, localDb, syncDb)
@@ -276,9 +278,9 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	return dt, err
 }
 
-//takes a repo package
-//gives all of the non installed deps
-//does again on each sub dep
+// Takes a repo package,
+// gives all of the non installed deps,
+// repeats on each sub dep.
 func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb alpm.DbList) (err error) {
 	_, exists := dt.Repo[pkg.Name()]
 	if exists {
@@ -323,76 +325,76 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 
 	nextProcess := make(stringSet)
 	currentProcess := make(stringSet)
-	//strip version conditions
+	// Strip version conditions
 	for dep := range dt.ToProcess {
 		currentProcess.set(getNameFromDep(dep))
 	}
 
-	//assume toprocess only contains aur stuff we have not seen
+	// Assume toprocess only contains aur stuff we have not seen
 	info, err := aurInfo(currentProcess.toSlice())
 
 	if err != nil {
 		return
 	}
 
-	//cache the results
+	// Cache the results
 	for _, pkg := range info {
-		//copying to p fixes a bug
-		//would rather not copy but cant find another way to fix
+		// Copying to p fixes a bug.
+		// Would rather not copy but cant find another way to fix.
 		p := pkg
 		dt.Aur[pkg.Name] = &p
 
 	}
 
-	//loop through to process and check if we now have
-	//each packaged cached
-	//if its not cached we assume its missing
+	// Loop through to process and check if we now have
+	// each packaged cached.
+	// If not cached, we assume it is missing.
 	for pkgName := range currentProcess {
 		pkg, exists := dt.Aur[pkgName]
 
-		//did not get it in the request
+		// Did not get it in the request.
 		if !exists {
 			dt.Missing.set(pkgName)
 			continue
 		}
 
-		//for each dep and makedep
+		// for each dep and makedep
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, versionedDep := range deps {
 				dep := getNameFromDep(versionedDep)
 
 				_, exists = dt.Aur[dep]
-				//we have it cached so skip
+				// We have it cached so skip.
 				if exists {
 					continue
 				}
 
 				_, exists = dt.Repo[dep]
-				//we have it cached so skip
+				// We have it cached so skip.
 				if exists {
 					continue
 				}
 
 				_, exists = dt.Missing[dep]
-				//we know it does not resolve so skip
+				// We know it does not resolve so skip.
 				if exists {
 					continue
 				}
 
-				//check if already installed
+				// Check if already installed.
 				_, isInstalled := localDb.PkgCache().FindSatisfier(versionedDep)
 				if isInstalled == nil {
 					continue
 				}
 
-				//check the repos for a matching dep
+				// Check the repos for a matching dep.
 				repoPkg, inRepos := syncDb.FindSatisfier(versionedDep)
 				if inRepos == nil {
 					repoTreeRecursive(repoPkg, dt, localDb, syncDb)
 					continue
 				}
 
-				//if all else fails add it to next search
+				// If all else fails add it to next search.
 				nextProcess.set(versionedDep)
 			}
 		}
