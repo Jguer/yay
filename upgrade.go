@@ -181,7 +181,7 @@ func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade 
 	if config.Devel {
 		routines++
 		go upDevel(remote, packageC, done)
-		fmt.Println(bold(cyan("::") + "Checking development packages..."))
+		fmt.Println(bold(cyan("::") + " Checking development packages..."))
 	}
 
 	routines++
