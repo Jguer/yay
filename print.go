@@ -100,6 +100,9 @@ func (s repoQuery) printSearch() {
 	}
 }
 
+//pretty print a set of packages from the the same package base
+//packages foo and bar from a pkgbase named base would print like so
+//base (foo bar)
 func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
 	str := pkg.PackageBase
 	if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
@@ -305,6 +308,7 @@ func printUpdateList() error {
 	return nil
 }
 
+//formats a unix timestamp to yyy/m/d
 func formatTime(i int) string {
 	t := time.Unix(int64(i), 0)
 	return fmt.Sprintf("%d/%d/%d", t.Year(), int(t.Month()), t.Day())
@@ -366,6 +370,8 @@ func bold(in string) string {
 	return in
 }
 
+//colours text using a hashing algorithm the same text will always produce the
+//same colour while different text will produce a different colour
 func colourHash(name string) (output string) {
 	if alpmConf.Options&alpm.ConfColor == 0 {
 		return name

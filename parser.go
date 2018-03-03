@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+//a basic set implementatrion for strings. this is used a lot so it deserves
+//its own type. Other types of sets are used throughout the code but tont have
+//their own typedef.
+//stringsets and <type>sets should be used throught the code when applicable,
+//they are a lot more flexable than slices and provide easy lookup,
 type stringSet map[string]struct{}
 
 func (set stringSet) set(v string) {
@@ -32,6 +37,8 @@ func (set stringSet) toSlice() []string {
 	return slice
 }
 
+//Parses command line arguments in a way we can interact with progamaticly but
+//also in a way that can easily be passed to pacman later on.
 type arguments struct {
 	op      string
 	options map[string]string

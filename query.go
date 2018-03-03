@@ -317,6 +317,11 @@ func min(a, b int) int {
 	return a
 }
 
+//Queriers the aur for information about specified packages
+//all packages should be queried in a single rpc request except when the number
+//of packages exceeds the number set in config.RequestSplitN
+//if the number does exceed config.RequestSplitN multiple rpc requests will be
+//preformed concurrently
 func aurInfo(names []string) ([]rpc.Pkg, error) {
 	info := make([]rpc.Pkg, 0, len(names))
 	seen := make(map[string]int)

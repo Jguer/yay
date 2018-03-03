@@ -43,12 +43,44 @@ func makeDependCatagories() *depCatagories {
 	return &dc
 }
 
+//cut the version requirement from a dependency leaving just the name
 func getNameFromDep(dep string) string {
 	return strings.FieldsFunc(dep, func(c rune) bool {
 		return c == '>' || c == '<' || c == '='
 	})[0]
 }
 
+//step two of dependency reloving. We already have all the information on the
+//packages we need, now it's just about ordering them correctly.
+//pkgs is a list of targets, the packages we want to install, dependencies not
+//included.
+//For each package we want we iterate down the tree until we hit the bottom.
+//This is done recursivley for each branch.
+//The start of the tree is defined as the package we want.
+//When we hit the bottom of the branch we know thats the first package
+//we need to install so we add it to the start of the to install
+//list (dc.Aur and dc.Repo).
+//We work our way up until there is another branch to go down and do it all
+//again.
+//
+//Here is a visual example
+//
+//      a
+//     / \
+//     b  c
+//    / \
+//   d   e
+//
+//we see a and it needs b and c
+//we see b and it needs d and e
+//we see d it needs nothing so we add d to our list and move up
+//we see e it needs nothing so we add e to our list and move up
+//we see c it needs nothign so we add c to our list and move up
+//
+//The final install order would come out as debca
+//
+//Theres a little more to this, handling provide, multiple packages wanting the
+//same dependencies and so on this is just the basic premise.
 func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 	dc := makeDependCatagories()
 	seen := make(stringSet)
@@ -174,6 +206,36 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 	}
 }
 
+//This is step one for dependency resolving. pkgs is a slice of the packages you
+//want to resolve the dependencioes for. They can be a mix of aur and repo
+//dependencies. All unmet dependencies will be resolved.
+//For Aur dependencies depends, makedepends and checkdepends are resolved but
+//for repo packages only depends are resolved as they are pre buiild.
+//The return will be split into three catagories. Repo, Aur and Missing.
+//The return is in no way ordered this step is is just aimed at gathering the
+//packaghes we need.
+//This has been designed to make the leat amount or rpc requests as possible.
+//Web requests are probably going to be the bottleneck here so minimizing them
+//provides a nice spead boost.
+//
+//Here is a visual expample of the request system.
+//Remember only unsatisfied packages are requested, if a package is already
+//installed we dont bother.
+//
+//      a
+//     / \
+//     b  c
+//    / \
+//   d   e
+//
+//We see a so we send a request for a
+//we see wants b and c so we send a request for b and c
+//we see d and e so we send a request for d and e
+//
+//Thats 5 packages in 3 requests.The amount of requests needed should always be
+//the same as the height of the tree.
+//The example does not really do this justice, In the real world where packages
+//have 10+ dependencies each this is a very nice optimization.
 func getDepTree(pkgs []string) (*depTree, error) {
 	dt := makeDepTree()
 
