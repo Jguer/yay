@@ -116,6 +116,7 @@ func install(parser *arguments) error {
 
 	if hasAur {
 		printDepCatagories(dc)
+		hasAur = len(dc.Aur) != 0
 		fmt.Println()
 	}
 
