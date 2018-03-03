@@ -150,7 +150,7 @@ func syncInfo(pkgS []string) (err error) {
 		}
 	}
 
-	//repo always goes first
+	// Repo always goes first
 	if len(repoS) != 0 {
 		arguments := cmdArgs.copy()
 		arguments.delTarget(aurS...)
@@ -317,6 +317,11 @@ func min(a, b int) int {
 	return a
 }
 
+// Queries the aur for information about specified packages.
+// All packages should be queried in a single rpc request except when the number
+// of packages exceeds the number set in config.RequestSplitN.
+// If the number does exceed config.RequestSplitN multiple rpc requests will be
+// performed concurrently.
 func aurInfo(names []string) ([]rpc.Pkg, error) {
 	info := make([]rpc.Pkg, 0, len(names))
 	seen := make(map[string]int)

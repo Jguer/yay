@@ -13,7 +13,7 @@ import (
 
 const arrow = "==>"
 
-// Human returns results in Human readable format.
+// human method returns results in human readable format.
 func human(size int64) string {
 	floatsize := float32(size)
 	units := [...]string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi"}
@@ -64,7 +64,7 @@ func (q aurQuery) printSearch(start int) {
 	}
 }
 
-//PrintSearch receives a RepoSearch type and outputs pretty text.
+// PrintSearch receives a RepoSearch type and outputs pretty text.
 func (s repoQuery) printSearch() {
 	for i, res := range s {
 		var toprint string
@@ -100,6 +100,9 @@ func (s repoQuery) printSearch() {
 	}
 }
 
+// Pretty print a set of packages from the same package base.
+// Packages foo and bar from a pkgbase named base would print like so:
+// base (foo bar)
 func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
 	str := pkg.PackageBase
 	if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
@@ -265,7 +268,7 @@ func localStatistics() error {
 	return nil
 }
 
-//todo make it less hacky
+//TODO: Make it less hacky
 func printNumberOfUpdates() error {
 	//todo
 	old := os.Stdout // keep backup of the real stdout
@@ -282,15 +285,15 @@ func printNumberOfUpdates() error {
 	return nil
 }
 
-//todo make it less hacky
+//TODO: Make it less hacky
 func printUpdateList() error {
-	old := os.Stdout // keep backup of the real stdout
+	old := os.Stdout // Keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()
 	dt, _ := getDepTree(append(localNames, remoteNames...))
 	aurUp, repoUp, err := upList(dt)
 
-	os.Stdout = old // restoring the real stdout
+	os.Stdout = old // Restoring the real stdout
 	if err != nil {
 		return err
 	}
@@ -305,9 +308,10 @@ func printUpdateList() error {
 	return nil
 }
 
+// Formats a unix timestamp to yyyy/mm/dd
 func formatTime(i int) string {
 	t := time.Unix(int64(i), 0)
-	return fmt.Sprintf("%d/%d/%d", t.Year(), int(t.Month()), t.Day())
+	return fmt.Sprintf("%d/%02d/%02d", t.Year(), int(t.Month()), t.Day())
 }
 
 func red(in string) string {
@@ -366,6 +370,8 @@ func bold(in string) string {
 	return in
 }
 
+// Colours text using a hashing algorithm. The same text will always produce the
+// same colour while different text will produce a different colour.
 func colourHash(name string) (output string) {
 	if alpmConf.Options&alpm.ConfColor == 0 {
 		return name
