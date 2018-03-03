@@ -44,7 +44,7 @@ Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://
 
 <img src="http://jguer.github.io/yay/yayupgrade.png" width="450">
 <img src="http://jguer.github.io/yay/yay2.png" width="450">
-<img src="http://jguer.github.io/yay/yay3.png" width="450">
+<img src="http://jguer.github.io/yay/yay4.png" width="450">
 
 ### Changelog
 
