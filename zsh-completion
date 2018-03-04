@@ -88,9 +88,20 @@ _pacman_opts_query_modifiers=(
   {-u,--upgrades}'[List packages that can be upgraded]'
 )
 
+# -Y
 _pacman_opts_yay_modifiers=(
   {-c,--clean}'[Remove unneeded dependencies]'
   '--gendb[Generates development package DB used for updating]'
+)
+
+# -P
+_pacman_opts_print_modifiers=(
+    {-c,--complete}'[Used for completions]'
+    {-d,--defaultconfig}'[Print default yay configuration]'
+    {-g,--config}'[Print current yay configuration]'
+    {-n,--numberupgrades}'[Print number of updates]'
+    {-s,--stats}'[Display system package statistics]'
+    {-u,--upgrades}'[Print update list]'
 )
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(
@@ -429,6 +440,10 @@ _pacman_zsh_comp() {
     Q*)
       _pacman_action_query
       ;;
+    P*)
+       _arguments -s : \
+        "$_pacman_opts_print_modifiers[@]"
+      ;;
     R*)
       _pacman_action_remove
       ;;
@@ -471,8 +486,8 @@ _pacman_zsh_comp() {
       _pacman_action_version
       ;;
     Y*)
-      "$_pacman_opts_common[@]" \
-      "$_pacman_opts_sync_modifiers[@]"
+      _arguments -s : \
+        "$_pacman_opts_yay_modifiers[@]"
       ;;
     *)
 
