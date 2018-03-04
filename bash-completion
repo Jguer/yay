@@ -51,7 +51,7 @@ _pacman_pkg() {
 }
 
 _yay() {
-  local common core cur database prev query remove sync upgrade o
+  local common core cur database prev query remove sync upgrade yays print o
   COMPREPLY=()
   _get_comp_words_by_ref cur prev
   database=('asdeps asexplicit')
@@ -63,11 +63,14 @@ _yay() {
          info list needed nodeps assume-installed print refresh recursive search sysupgrade'
         'c g i l p s u w y')
   upgrade=('asdeps asexplicit force needed nodeps assume-installed print recursive' 'p')
+  yays=('clean gendb' 'c')
+  print=('complete defaultconfig config numberupgrades stats upgrades' 'c d g n
+  s u')
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
            noconfirm noprogressbar noscriptlet quiet root verbose' 'b d h q r v')
   core=('database files help query remove sync upgrade version' 'D F Q R S U V h')
 
-  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade'; do
+  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P print'; do
     _arch_incomp "$o" && break
   done
 
