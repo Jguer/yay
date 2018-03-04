@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// A basic set implementation for strings. 
-// This is used a lot so it deserves its own type. 
+// A basic set implementation for strings.
+// This is used a lot so it deserves its own type.
 // Other types of sets are used throughout the code but do not have
 // their own typedef.
 // String sets and <type>sets should be used throughout the code when applicable,
