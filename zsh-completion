@@ -10,9 +10,11 @@ _pacman_opts_commands=(
   {-G,--getpkgbuild}'[Get PKGBUILD from ABS or AUR]'
   {-Q,--query}'[Query the package database]'
   {-R,--remove}'[Remove a package from the system]'
+  {-P,--print}'[Print yay information]'
   {-S,--sync}'[Synchronize packages]'
   {-T,--deptest}'[Check if dependencies are installed]'
   {-U,--upgrade}'[Upgrade a package]'
+  {-Y,--yay}'[Yay specific options]'
   {-V,--version}'[Display version and exit]'
   '(-h --help)'{-h,--help}'[Display usage]'
 )
@@ -37,6 +39,12 @@ _pacman_opts_common=(
   '--noscriptlet[Do not execute the install scriptlet if one exists]'
   '--bottomup[Show AUR packages first]'
   '--topdown[Show repository packages first]'
+  '--devel[Check -git/-svn/-hg development version]'
+  '--nodevel[Disable development version checking]'
+  '--afterclean[Clean package sources after successful build]'
+  '--noafterclean[Disable package sources cleaning after successful build]'
+  '--timeupdate[Check packages modification date and version]'
+  '--notimeupdate[Check only package version change]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
@@ -80,6 +88,21 @@ _pacman_opts_query_modifiers=(
   {-u,--upgrades}'[List packages that can be upgraded]'
 )
 
+# -Y
+_pacman_opts_yay_modifiers=(
+  {-c,--clean}'[Remove unneeded dependencies]'
+  '--gendb[Generates development package DB used for updating]'
+)
+
+# -P
+_pacman_opts_print_modifiers=(
+    {-c,--complete}'[Used for completions]'
+    {-d,--defaultconfig}'[Print default yay configuration]'
+    {-g,--config}'[Print current yay configuration]'
+    {-n,--numberupgrades}'[Print number of updates]'
+    {-s,--stats}'[Display system package statistics]'
+    {-u,--upgrades}'[Print update list]'
+)
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(
   {-c,--cascade}'[Remove all dependent packages]'
@@ -417,6 +440,10 @@ _pacman_zsh_comp() {
     Q*)
       _pacman_action_query
       ;;
+    P*)
+       _arguments -s : \
+        "$_pacman_opts_print_modifiers[@]"
+      ;;
     R*)
       _pacman_action_remove
       ;;
@@ -457,6 +484,10 @@ _pacman_zsh_comp() {
       ;;
     V*)
       _pacman_action_version
+      ;;
+    Y*)
+      _arguments -s : \
+        "$_pacman_opts_yay_modifiers[@]"
       ;;
     *)
 
