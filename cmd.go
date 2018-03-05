@@ -420,10 +420,6 @@ func handleYay() (err error) {
 		if err != nil {
 			return
 		}
-		err = saveVCSInfo()
-		if err != nil {
-			return
-		}
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = cleanDependencies()
 	} else if len(cmdArgs.targets) > 0 {

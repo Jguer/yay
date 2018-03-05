@@ -46,7 +46,8 @@ var version = "3.373"
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
 
-var savedInfo infos
+// savedInfo holds the current vcs info
+var savedInfo vcsInfo
 
 // configfile holds yay config file path.
 var configFile string
@@ -54,7 +55,7 @@ var configFile string
 // vcsfile holds yay vcs info file path.
 var vcsFile string
 
-//completion file
+// completion file
 var completionFile string
 
 // changedConfig holds whether or not the config has changed

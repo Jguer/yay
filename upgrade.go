@@ -144,12 +144,12 @@ loop:
 }
 
 func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
-	for _, e := range savedInfo {
+	for vcsName, e := range savedInfo {
 		if e.needsUpdate() {
 			found := false
 			var pkg alpm.Package
 			for _, r := range remote {
-				if r.Name() == e.Package {
+				if r.Name() == vcsName {
 					found = true
 					pkg = r
 				}
@@ -159,10 +159,10 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 					fmt.Print(magenta("Warning: "))
 					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), pkg.Version(), "git")
 				} else {
-					packageC <- upgrade{e.Package, "devel", pkg.Version(), "commit-" + e.SHA[0:6]}
+					packageC <- upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"}
 				}
 			} else {
-				removeVCSPackage([]string{e.Package})
+				removeVCSPackage([]string{vcsName})
 			}
 		}
 	}

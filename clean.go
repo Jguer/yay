@@ -4,16 +4,19 @@ package main
 
 // RemovePackage removes package from VCS information
 func removeVCSPackage(pkgs []string) {
+	updated := false
+
 	for _, pkgName := range pkgs {
-		for i, e := range savedInfo {
-			if e.Package == pkgName {
-				savedInfo[i] = savedInfo[len(savedInfo)-1]
-				savedInfo = savedInfo[:len(savedInfo)-1]
-			}
+		_, ok := savedInfo[pkgName]
+		if ok {
+			delete(savedInfo, pkgName)
+			updated = true
 		}
 	}
 
-	_ = saveVCSInfo()
+	if updated {
+		saveVCSInfo()
+	}
 }
 
 // CleanDependencies removes all dangling dependencies in system
