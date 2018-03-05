@@ -33,7 +33,7 @@ func createDevelDB() error {
 	return err
 }
 
-// parseSource returns the git url and efault branch
+// parseSource returns the git url, default branch and protocols it supports
 func parseSource(source string) (url string, branch string, protocols []string) {
 	if !(strings.Contains(source, "git://") ||
 		strings.Contains(source, ".git") ||

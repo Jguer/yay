@@ -90,9 +90,9 @@ func initYay() (err error) {
 		cacheHome = os.Getenv("HOME") + "/.cache/yay"
 	}
 
-	configFile = configHome + "/config.json"
-	vcsFile = configHome + "/yay_vcs.json"
-	completionFile = cacheHome + "/aur_"
+	configFile = configHome + "/" + configFileName
+	vcsFile = cacheHome + "/" + vcsFileName
+	completionFile = cacheHome + "/" + completionFilePrefix
 
 	////////////////
 	// yay config //
