@@ -4,29 +4,64 @@ import (
 	"testing"
 )
 
+func isEqual(a, b []string) bool {
+
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func TestParsing(t *testing.T) {
 	type source struct {
-		sourceurl string
-		owner     string
-		repo      string
+		URL       string
+		Branch    string
+		Protocols []string
 	}
 
-	neovim := source{sourceurl: "git+https://github.com/neovim/neovim.git"}
-	neovim.owner, neovim.repo = parseSource(neovim.sourceurl)
-
-	if neovim.owner != "neovim" || neovim.repo != "neovim" {
-		t.Fatalf("Expected to find neovim/neovim, found %+v/%+v", neovim.owner, neovim.repo)
+	urls := []string{
+		"git+https://github.com/neovim/neovim.git",
+		"git://github.com/jguer/yay.git#branch=master",
+		"git://github.com/davidgiven/ack",
+		"git://github.com/jguer/yay.git#tag=v3.440",
+		"git://github.com/jguer/yay.git#commit=e5470c88c6e2f9e0f97deb4728659ffa70ef5d0c",
+		"a+b+c+d+e+f://github.com/jguer/yay.git#branch=foo",
 	}
 
-	yay := source{sourceurl: "git://github.com/jguer/yay.git#branch=master"}
-	yay.owner, yay.repo = parseSource(yay.sourceurl)
-	if yay.owner != "jguer" || yay.repo != "yay" {
-		t.Fatalf("Expected to find jguer/yay, found %+v/%+v", yay.owner, yay.repo)
+	sources := []source{
+		{"github.com/neovim/neovim.git", "HEAD", []string{"git", "https"}},
+		{"github.com/jguer/yay.git", "master", []string{"git"}},
+		{"github.com/davidgiven/ack", "HEAD", []string{"git"}},
+		{"", "", nil},
+		{"", "", nil},
+		{"github.com/jguer/yay.git", "foo", []string{"a", "b", "c", "d", "e", "f"}},
 	}
 
-	ack := source{sourceurl: "git://github.com/davidgiven/ack"}
-	ack.owner, ack.repo = parseSource(ack.sourceurl)
-	if ack.owner != "davidgiven" || ack.repo != "ack" {
-		t.Fatalf("Expected to find davidgiven/ack, found %+v/%+v", ack.owner, ack.repo)
+	for n, url := range urls {
+		url, branch, protocols := parseSource(url)
+		compare := sources[n]
+
+		if url != compare.URL ||
+			branch != compare.Branch ||
+			!isEqual(protocols, compare.Protocols) {
+
+			t.Fatalf("Expected url=%+v branch=%+v protocols=%+v\ngot url=%+v branch=%+v protocols=%+v", url, branch, protocols, compare.URL, compare.Branch, compare.Protocols)
+		}
 	}
+
 }

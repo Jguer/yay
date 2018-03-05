@@ -38,14 +38,14 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	if !(strings.Contains(source, "git://") ||
 		strings.Contains(source, ".git") ||
 		strings.Contains(source, "git+https://")) {
-		return
+		return "", "", nil
 	}
 	split := strings.Split(source, "::")
 	source = split[len(split)-1]
 	split = strings.SplitN(source, "://", 2)
 
 	if len(split) != 2 {
-		return
+		return "", "", nil
 	}
 
 	protocols = strings.Split(split[0], "+")
@@ -55,7 +55,7 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 		if secondSplit[0] != "branch" {
 			//source has #commit= or #tag= which makes them not vcs
 			//packages because they reference a specific point
-			return
+			return "", "", nil
 		}
 
 		if len(secondSplit) == 2 {
