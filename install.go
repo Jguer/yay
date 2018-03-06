@@ -339,20 +339,6 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	return nil
 }
 
-func updateVSCdb(pkgs []*rpc.Pkg, pkgbuild *gopkg.PKGBUILD) {
-	for _, pkgsource := range pkgbuild.Source {
-		owner, repo := parseSource(pkgsource)
-		if owner != "" && repo != "" {
-			for _, pkg := range pkgs {
-				err := branchInfo(pkg.Name, owner, repo)
-				if err != nil {
-					fmt.Println(err)
-				}
-			}
-		}
-	}
-}
-
 func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
@@ -366,7 +352,11 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 		}
 
 		srcinfos[pkg.PackageBase] = pkgbuild
-		updateVSCdb(bases[pkg.PackageBase], pkgbuild)
+
+		for _, pkg := range bases[pkg.PackageBase] {
+			updateVCSData(pkg.Name, pkgbuild.Source)
+		}
+
 	}
 
 	return nil
@@ -493,7 +483,10 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			return err
 		}
 
-		updateVSCdb(bases[pkg.PackageBase], srcinfo)
+		for _, pkg := range bases[pkg.PackageBase] {
+			updateVCSData(pkg.Name, srcinfo.Source)
+		}
+
 		if len(depArguments.targets) > 0 {
 			_, stderr, err := passToPacmanCapture(depArguments)
 			if err != nil {

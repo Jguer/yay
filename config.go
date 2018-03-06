@@ -43,10 +43,20 @@ type Configuration struct {
 
 var version = "3.373"
 
+// configFileName holds the name of the config file.
+const configFileName string = "config.json"
+
+// vcsFileName holds the name of the vcs file.
+const vcsFileName string = "vcs.json"
+
+// completionFilePrefix holds the prefix used for storing shell completion files.
+const completionFilePrefix string = "aur_"
+
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
 
-var savedInfo infos
+// savedInfo holds the current vcs info
+var savedInfo vcsInfo
 
 // configfile holds yay config file path.
 var configFile string
@@ -54,7 +64,7 @@ var configFile string
 // vcsfile holds yay vcs info file path.
 var vcsFile string
 
-//completion file
+// completion file
 var completionFile string
 
 // changedConfig holds whether or not the config has changed

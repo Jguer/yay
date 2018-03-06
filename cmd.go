@@ -90,9 +90,9 @@ func initYay() (err error) {
 		cacheHome = os.Getenv("HOME") + "/.cache/yay"
 	}
 
-	configFile = configHome + "/config.json"
-	vcsFile = configHome + "/yay_vcs.json"
-	completionFile = cacheHome + "/aur_"
+	configFile = configHome + "/" + configFileName
+	vcsFile = cacheHome + "/" + vcsFileName
+	completionFile = cacheHome + "/" + completionFilePrefix
 
 	////////////////
 	// yay config //
@@ -417,10 +417,6 @@ func handleYay() (err error) {
 		usage()
 	} else if cmdArgs.existsArg("gendb") {
 		err = createDevelDB()
-		if err != nil {
-			return
-		}
-		err = saveVCSInfo()
 		if err != nil {
 			return
 		}

@@ -1,38 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
+	"os/exec"
 	"strings"
+	"time"
 )
 
-// branch contains the information of a repository branch
-type branch struct {
-	Name   string `json:"name"`
-	Commit struct {
-		SHA string `json:"sha"`
-	} `json:"commit"`
-}
-
-type branches []branch
-
 // Info contains the last commit sha of a repo
-type Info struct {
-	Package string `json:"pkgname"`
-	URL     string `json:"url"`
-	SHA     string `json:"sha"`
-}
-
-type infos []Info
-
-// Repo contains information about the repository
-type repo struct {
-	Name          string `json:"name"`
-	FullName      string `json:"full_name"`
-	DefaultBranch string `json:"default_branch"`
+type vcsInfo map[string]shaInfos
+type shaInfos map[string]shaInfo
+type shaInfo struct {
+	Protocols []string `json:"protocols"`
+	Brach     string   `json:"branch"`
+	SHA       string   `json:"sha"`
 }
 
 // createDevelDB forces yay to create a DB of the existing development packages
@@ -50,128 +33,127 @@ func createDevelDB() error {
 	return err
 }
 
-// parseSource returns owner and repo from source
-func parseSource(source string) (owner string, repo string) {
+// parseSource returns the git url, default branch and protocols it supports
+func parseSource(source string) (url string, branch string, protocols []string) {
 	if !(strings.Contains(source, "git://") ||
 		strings.Contains(source, ".git") ||
 		strings.Contains(source, "git+https://")) {
-		return
+		return "", "", nil
 	}
-	split := strings.Split(source, "github.com/")
-	if len(split) > 1 {
-		secondSplit := strings.Split(split[1], "/")
-		if len(secondSplit) > 1 {
-			owner = secondSplit[0]
-			thirdSplit := strings.Split(secondSplit[1], ".git")
-			if len(thirdSplit) > 0 {
-				repo = thirdSplit[0]
-			}
+	split := strings.Split(source, "::")
+	source = split[len(split)-1]
+	split = strings.SplitN(source, "://", 2)
+
+	if len(split) != 2 {
+		return "", "", nil
+	}
+
+	protocols = strings.Split(split[0], "+")
+	split = strings.SplitN(split[1], "#", 2)
+	if len(split) == 2 {
+		secondSplit := strings.SplitN(split[1], "=", 2)
+		if secondSplit[0] != "branch" {
+			//source has #commit= or #tag= which makes them not vcs
+			//packages because they reference a specific point
+			return "", "", nil
 		}
+
+		if len(secondSplit) == 2 {
+			url = split[0]
+			branch = secondSplit[1]
+		}
+	} else {
+		url = split[0]
+		branch = "HEAD"
 	}
+
 	return
 }
 
-func (info *Info) needsUpdate() bool {
-	var newRepo repo
-	var newBranches branches
-	if strings.HasSuffix(info.URL, "/branches") {
-		info.URL = info.URL[:len(info.URL)-9]
-	}
-	infoResp, infoErr := http.Get(info.URL)
-	if infoErr != nil {
-		fmt.Println(infoErr)
-		return false
-	}
-	defer infoResp.Body.Close()
-
-	infoBody, _ := ioutil.ReadAll(infoResp.Body)
-	var err = json.Unmarshal(infoBody, &newRepo)
-	if err != nil {
-		fmt.Printf("Cannot update '%v'\nError: %v\nStatus code: %v\nBody: %v\n",
-			info.Package, err, infoResp.StatusCode, string(infoBody))
-		return false
+func updateVCSData(pkgName string, sources []string) {
+	if savedInfo == nil {
+		savedInfo = make(vcsInfo)
 	}
 
-	defaultBranch := newRepo.DefaultBranch
-	branchesURL := info.URL + "/branches"
+	info := make(shaInfos)
 
-	branchResp, branchErr := http.Get(branchesURL)
-	if branchErr != nil {
-		fmt.Println(branchErr)
-		return false
+	for _, source := range sources {
+		url, branch, protocols := parseSource(source)
+		if url == "" || branch == "" {
+			continue
+		}
+
+		commit := getCommit(url, branch, protocols)
+		if commit == "" {
+			continue
+		}
+
+		info[url] = shaInfo{
+			protocols,
+			branch,
+			commit,
+		}
+
+		savedInfo[pkgName] = info
+		saveVCSInfo()
 	}
-	defer branchResp.Body.Close()
+}
 
-	branchBody, _ := ioutil.ReadAll(branchResp.Body)
-	err = json.Unmarshal(branchBody, &newBranches)
-	if err != nil {
-		fmt.Printf("Cannot update '%v'\nError: %v\nStatus code: %v\nBody: %v\n",
-			info.Package, err, branchResp.StatusCode, string(branchBody))
-		return false
+func getCommit(url string, branch string, protocols []string) string {
+	for _, protocol := range protocols {
+		var outbuf bytes.Buffer
+
+		cmd := exec.Command("git", "ls-remote", protocol+"://"+url, branch)
+		cmd.Stdout = &outbuf
+
+		err := cmd.Start()
+		if err != nil {
+			continue
+		}
+
+		//for some reason
+		//git://bitbucket.org/volumesoffun/polyvox.git` hangs on my
+		//machine but using http:// instead of git does not hang.
+		//Introduce a time out so this can not hang
+		timer := time.AfterFunc(5*time.Second, func() {
+			cmd.Process.Kill()
+		})
+
+		err = cmd.Wait()
+		timer.Stop()
+
+		if err != nil {
+			continue
+		}
+		err = cmd.Run()
+
+		stdout := outbuf.String()
+		split := strings.Fields(stdout)
+
+		if len(split) < 2 {
+			continue
+		}
+
+		commit := split[0]
+		return commit
 	}
 
-	for _, e := range newBranches {
-		if e.Name == defaultBranch {
-			return e.Commit.SHA != info.SHA
+	return ""
+}
+
+func (infos shaInfos) needsUpdate() bool {
+	for url, info := range infos {
+		hash := getCommit(url, info.Brach, info.Protocols)
+		if hash != info.SHA {
+			return true
 		}
 	}
+
 	return false
 }
 
-func inStore(pkgName string) *Info {
-	for i, e := range savedInfo {
-		if pkgName == e.Package {
-			return &savedInfo[i]
-		}
-	}
-	return nil
-}
-
-// branchInfo updates saved information
-func branchInfo(pkgName string, owner string, repoName string) (err error) {
-	updated := false
-	var newRepo repo
-	var newBranches branches
-	url := "https://api.github.com/repos/" + owner + "/" + repoName
-	repoResp, err := http.Get(url)
-	if err != nil {
-		return
-	}
-	defer repoResp.Body.Close()
-
-	_ = json.NewDecoder(repoResp.Body).Decode(&newRepo)
-	defaultBranch := newRepo.DefaultBranch
-	branchesURL := url + "/branches"
-
-	branchResp, err := http.Get(branchesURL)
-	if err != nil {
-		return
-	}
-	defer branchResp.Body.Close()
-
-	_ = json.NewDecoder(branchResp.Body).Decode(&newBranches)
-
-	packinfo := inStore(pkgName)
-
-	for _, e := range newBranches {
-		if e.Name == defaultBranch {
-			updated = true
-
-			if packinfo != nil {
-				packinfo.Package = pkgName
-				packinfo.URL = url
-				packinfo.SHA = e.Commit.SHA
-			} else {
-				savedInfo = append(savedInfo, Info{Package: pkgName, URL: url, SHA: e.Commit.SHA})
-			}
-		}
-	}
-
-	if updated {
-		saveVCSInfo()
-	}
-
-	return
+func inStore(pkgName string) shaInfos {
+	return savedInfo[pkgName]
 }
 
 func saveVCSInfo() error {
