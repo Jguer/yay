@@ -39,6 +39,7 @@ type Configuration struct {
 	NoConfirm     bool   `json:"-"`
 	Devel         bool   `json:"devel"`
 	CleanAfter    bool   `json:"cleanAfter"`
+	ReDownload    bool   `json:"redownload"`
 }
 
 var version = "3.373"
@@ -112,6 +113,7 @@ func defaultSettings(config *Configuration) {
 	config.TarBin = "/usr/bin/bsdtar"
 	config.TimeUpdate = false
 	config.RequestSplitN = 150
+	config.ReDownload = false
 }
 
 // Editor returns the preferred system editor.

@@ -341,16 +341,6 @@ func handleConfig(option string) bool {
 		config.CleanAfter = true
 	case "noafterclean":
 		config.CleanAfter = false
-		//		case "gendb":
-		//			err = createDevelDB()
-		//			if err != nil {
-		//				fmt.Println(err)
-		//			}
-		//			err = saveVCSInfo()
-		//			if err != nil {
-		//				fmt.Println(err)
-		//			}
-		//			os.Exit(0)
 	case "devel":
 		config.Devel = true
 	case "nodevel":
@@ -363,14 +353,12 @@ func handleConfig(option string) bool {
 		config.SortMode = TopDown
 	case "bottomup":
 		config.SortMode = BottomUp
-		//		case "help":
-		//			usage()
-		//			os.Exit(0)
-		//		case "version":
-		//			fmt.Printf("yay v%s\n", version)
-		//			os.Exit(0)
 	case "noconfirm":
 		config.NoConfirm = true
+	case "redownload":
+		config.ReDownload = true
+	case "noredownload":
+		config.ReDownload = false
 	default:
 		return false
 	}
