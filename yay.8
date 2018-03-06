@@ -151,6 +151,17 @@ the last modification time of each package's AUR page\&.
 .RS 4
 Do not consider build times during sysupgrade\&.
 .RE
+.PP
+\fB\-\-redownload\fR
+.RS 4
+When downloading pkgbuilds if the pkgbuild is found in cache and is equal or
+newer than the AUR's version use that instead of downloading a new one\&.
+.RE
+.PP
+\fB\-\-noredownload\fR
+.RS 4
+Always download pkgbuilds even when a copy is avaliable in cache\&.
+.RE
 .SH "EXAMPLES"
 .PP
 yay \fIfoo\fR

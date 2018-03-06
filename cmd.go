@@ -46,6 +46,8 @@ Permanent configuration options:
     --noafterclean       Do not remove package sources after successful build
     --timeupdate         Check package's AUR page for changes during sysupgrade
     --notimeupdate       Do not checking of AUR page changes
+    --redownload         Always download pkgbuilds
+    --noredownload       Skip pkgbuild download if in cache and up to date
 
 Print specific options:
     -c --complete        Used for completions
