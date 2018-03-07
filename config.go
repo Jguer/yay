@@ -32,6 +32,7 @@ type Configuration struct {
 	PacmanConf    string `json:"pacmanconf"`
 	TarBin        string `json:"tarbin"`
 	ReDownload    string `json:"redownload"`
+	GitBin        string `json:"gitbin"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
@@ -115,17 +116,18 @@ func (config *Configuration) saveConfig() error {
 }
 
 func defaultSettings(config *Configuration) {
-	config.BuildDir = fmt.Sprintf("%s/.cache/yay/", os.Getenv("HOME"))
+	config.BuildDir = cacheHome + "/"
 	config.CleanAfter = false
 	config.Editor = ""
 	config.Devel = false
-	config.MakepkgBin = "/usr/bin/makepkg"
+	config.MakepkgBin = "makepkg"
 	config.NoConfirm = false
-	config.PacmanBin = "/usr/bin/pacman"
+	config.PacmanBin = "pacman"
 	config.PacmanConf = "/etc/pacman.conf"
 	config.SortMode = BottomUp
 	config.SudoLoop = false
-	config.TarBin = "/usr/bin/bsdtar"
+	config.TarBin = "bsdtar"
+	config.GitBin = "git"
 	config.TimeUpdate = false
 	config.RequestSplitN = 150
 	config.ReDownload = "no"

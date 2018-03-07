@@ -103,7 +103,7 @@ func getCommit(url string, branch string, protocols []string) string {
 	for _, protocol := range protocols {
 		var outbuf bytes.Buffer
 
-		cmd := exec.Command("git", "ls-remote", protocol+"://"+url, branch)
+		cmd := exec.Command(config.GitBin, "ls-remote", protocol+"://"+url, branch)
 		cmd.Stdout = &outbuf
 
 		err := cmd.Start()
@@ -144,7 +144,7 @@ func getCommit(url string, branch string, protocols []string) string {
 func (infos shaInfos) needsUpdate() bool {
 	for url, info := range infos {
 		hash := getCommit(url, info.Brach, info.Protocols)
-		if hash != info.SHA {
+		if hash != "" && hash != info.SHA {
 			return true
 		}
 	}
