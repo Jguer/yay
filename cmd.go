@@ -52,6 +52,7 @@ Permanent configuration options:
     --redownload         Always download pkgbuilds of targets
     --redownloadall      Always download pkgbuilds of all AUR packages
     --noredownload       Skip pkgbuild download if in cache and up to date
+    --mflags             Pass arguments to makepkg
 
 Print specific options:
     -c --complete        Used for completions
