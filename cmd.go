@@ -38,6 +38,9 @@ New operations:
     yay {-G --getpkgbuild} [package(s)]
 
 Permanent configuration options:
+    --save               Causes the following options to be saved back to the
+                         config file when used
+
     --topdown            Shows repository's packages first and then AUR's
     --bottomup           Shows AUR's packages first and then repository's
     --devel              Check development packages during sysupgrade
@@ -248,15 +251,6 @@ cleanup:
 	//if we fail to save the configuration
 	//at least continue on and try clean up other parts
 
-	if changedConfig {
-		err = config.saveConfig()
-
-		if err != nil {
-			fmt.Println(err)
-			status = 1
-		}
-	}
-
 	if alpmHandle != nil {
 		err = alpmHandle.Release()
 		if err != nil {
@@ -306,6 +300,10 @@ func handleCmd() (err error) {
 		}
 	}
 
+	if shouldSaveConfig {
+		config.saveConfig()
+	}
+
 	if config.SudoLoop && cmdArgs.needRoot() {
 		sudoLoopBackground()
 	}
@@ -350,6 +348,8 @@ func handleCmd() (err error) {
 //e.g yay -Yg
 func handleConfig(option string) bool {
 	switch option {
+	case "save":
+		shouldSaveConfig = true
 	case "afterclean":
 		config.CleanAfter = true
 	case "noafterclean":
@@ -378,7 +378,6 @@ func handleConfig(option string) bool {
 		return false
 	}
 
-	changedConfig = true
 	return true
 }
 
