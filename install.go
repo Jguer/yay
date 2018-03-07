@@ -105,9 +105,9 @@ func install(parser *arguments) error {
 		arguments.addTarget(pkg.Name())
 	}
 
-	//for _, pkg := range repoTargets {
-	//arguments.addTarget(pkg)
-	//}
+	for _, pkg := range repoTargets {
+		arguments.addTarget(pkg)
+	}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
 		fmt.Println("There is nothing to do")
