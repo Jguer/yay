@@ -33,6 +33,7 @@ type Configuration struct {
 	TarBin        string `json:"tarbin"`
 	ReDownload    string `json:"redownload"`
 	GitBin        string `json:"gitbin"`
+	MFlags        string `json:"mflags"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
@@ -124,6 +125,7 @@ func defaultSettings(config *Configuration) {
 	config.NoConfirm = false
 	config.PacmanBin = "pacman"
 	config.PacmanConf = "/etc/pacman.conf"
+	config.MFlags = ""
 	config.SortMode = BottomUp
 	config.SudoLoop = false
 	config.TarBin = "bsdtar"

@@ -408,6 +408,10 @@ func hasParam(arg string) bool {
 		return true
 	case "color":
 		return true
+
+	//yay params
+	case "mflags":
+		return true
 	default:
 		return false
 	}

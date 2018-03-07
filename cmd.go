@@ -52,6 +52,7 @@ Permanent configuration options:
     --redownload         Always download pkgbuilds of targets
     --redownloadall      Always download pkgbuilds of all AUR packages
     --noredownload       Skip pkgbuild download if in cache and up to date
+    --mflags             Pass arguments to makepkg
 
 Print specific options:
     -c --complete        Used for completions
@@ -288,14 +289,14 @@ func updateSudo() {
 }
 
 func handleCmd() (err error) {
-	for option := range cmdArgs.options {
-		if handleConfig(option) {
+	for option, value := range cmdArgs.options {
+		if handleConfig(option, value) {
 			cmdArgs.delArg(option)
 		}
 	}
 
-	for option := range cmdArgs.globals {
-		if handleConfig(option) {
+	for option, value := range cmdArgs.globals {
+		if handleConfig(option, value) {
 			cmdArgs.delArg(option)
 		}
 	}
@@ -346,7 +347,7 @@ func handleCmd() (err error) {
 //my current plan is to have yay specific operations in its own operator
 //e.g. yay -Y --gendb
 //e.g yay -Yg
-func handleConfig(option string) bool {
+func handleConfig(option, value string) bool {
 	switch option {
 	case "save":
 		shouldSaveConfig = true
@@ -374,6 +375,8 @@ func handleConfig(option string) bool {
 		config.ReDownload = "all"
 	case "noredownload":
 		config.ReDownload = "no"
+	case "mflags":
+		config.MFlags = value
 	default:
 		return false
 	}
@@ -726,6 +729,9 @@ func passToMakepkg(dir string, args ...string) (err error) {
 	if config.NoConfirm {
 		args = append(args)
 	}
+
+	mflags := strings.Fields(config.MFlags)
+	args = append(args, mflags...)
 
 	cmd := exec.Command(config.MakepkgBin, args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr

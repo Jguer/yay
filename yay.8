@@ -1,5 +1,5 @@
 /n'\" t
-.TH "YAY" "8" "2018-02-29" "Yay v3\&.411+" "Yay Manual"
+.TH "YAY" "8" "2018-02-29" "Yay v3\&.460+" "Yay Manual"
 .nh
 .ad l
 .SH "NAME"
@@ -173,6 +173,14 @@ in cache\&.
 When downloading pkgbuilds if the pkgbuild is found in cache and is equal or
 newer than the AUR's version use that instead of downloading a new one\&.
 .RE
+.PP
+\fB\-\-mflags\fR
+.RS 4
+Passes arguments to makepkg\&. These flags get passed to every instance where
+makepkg is called by Yay. Arguments are split on whitespace before being
+passed to makepkg. Multiple arguments may be passed by suplying a space
+seperated list that is quoted by the shell.
+.RE
 .SH "EXAMPLES"
 .PP
 yay \fIfoo\fR
@@ -200,9 +208,9 @@ yay -Si \fIfoo\fR
 Gets information about package \fIfoo\fR from the repos or the \fBAUR\fR\&.
 .RE
 .PP
-yay -S \fIfoo\fR
+yay -S \fIfoo\fR --mflags "--skipchecksums --skippgpcheck"
 .RS 4
-Installs package \fIfoo\fR from the repos or the \fBAUR\fR\&.
+Installs \fIfoo\fR while skipping checksums and pgp checks\&.
 .RE
 .PP
 yay --devel --save
