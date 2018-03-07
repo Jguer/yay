@@ -154,13 +154,19 @@ Do not consider build times during sysupgrade\&.
 .PP
 \fB\-\-redownload\fR
 .RS 4
-When downloading pkgbuilds if the pkgbuild is found in cache and is equal or
-newer than the AUR's version use that instead of downloading a new one\&.
+Always download pkgbuilds of targets even when a copy is avaliable in cache\&.
+.RE
+.PP
+\fB\-\-redownloadall\fR
+.RS 4
+Always download pkgbuilds of all AUR packages even when a copy is avaliable 
+in cache\&.
 .RE
 .PP
 \fB\-\-noredownload\fR
 .RS 4
-Always download pkgbuilds even when a copy is avaliable in cache\&.
+When downloading pkgbuilds if the pkgbuild is found in cache and is equal or
+newer than the AUR's version use that instead of downloading a new one\&.
 .RE
 .SH "EXAMPLES"
 .PP

@@ -46,7 +46,8 @@ Permanent configuration options:
     --noafterclean       Do not remove package sources after successful build
     --timeupdate         Check package's AUR page for changes during sysupgrade
     --notimeupdate       Do not checking of AUR page changes
-    --redownload         Always download pkgbuilds
+    --redownload         Always download pkgbuilds of targets
+    --redownloadall      Always download pkgbuilds of all AUR packages
     --noredownload       Skip pkgbuild download if in cache and up to date
 
 Print specific options:
@@ -358,9 +359,11 @@ func handleConfig(option string) bool {
 	case "noconfirm":
 		config.NoConfirm = true
 	case "redownload":
-		config.ReDownload = true
+		config.ReDownload = "yes"
+	case "redownloadall":
+		config.ReDownload = "all"
 	case "noredownload":
-		config.ReDownload = false
+		config.ReDownload = "no"
 	default:
 		return false
 	}
@@ -370,6 +373,7 @@ func handleConfig(option string) bool {
 }
 
 func handleVersion() {
+	fmt.Print(config.ReDownload)
 	fmt.Printf("yay v%s\n", version)
 }
 

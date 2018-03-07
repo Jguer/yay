@@ -164,7 +164,7 @@ func install(parser *arguments) error {
 			return fmt.Errorf("Aborting due to user")
 		}
 
-		err = dowloadPkgBuilds(dc.Aur, dc.Bases)
+		err = downloadPkgBuilds(dc.Aur, parser.targets, dc.Bases)
 		if err != nil {
 			return err
 		}
@@ -399,9 +399,9 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 	return nil
 }
 
-func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
+func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
-		if !config.ReDownload {
+		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
 			dir := config.BuildDir + pkg.PackageBase + "/.SRCINFO"
 			pkgbuild, err := gopkg.ParseSRCINFO(dir)
 
