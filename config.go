@@ -55,6 +55,12 @@ const completionFilePrefix string = "aur_"
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
 
+// configHome handles config directory home
+var configHome string
+
+// cacheHome handles cache home
+var cacheHome string
+
 // savedInfo holds the current vcs info
 var savedInfo vcsInfo
 
