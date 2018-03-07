@@ -89,6 +89,8 @@ func initPaths() {
 }
 
 func initConfig() (err error) {
+	defaultSettings(&config)
+
 	if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
@@ -114,7 +116,6 @@ func initConfig() (err error) {
 		}
 	}
 
-	defaultSettings(&config)
 	return
 }
 
