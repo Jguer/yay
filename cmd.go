@@ -62,14 +62,7 @@ Yay specific options:
 If no operation is provided -Y will be assumed`)
 }
 
-func initYay() (err error) {
-	var configHome string // configHome handles config directory home
-	var cacheHome string  // cacheHome handles cache home
-
-	if 0 == os.Geteuid() {
-		fmt.Println("Please avoid running yay as root/sudo.")
-	}
-
+func initPaths() {
 	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
 		if info, err := os.Stat(configHome); err == nil && info.IsDir() {
 			configHome = configHome + "/yay"
@@ -93,12 +86,9 @@ func initYay() (err error) {
 	configFile = configHome + "/" + configFileName
 	vcsFile = cacheHome + "/" + vcsFileName
 	completionFile = cacheHome + "/" + completionFilePrefix
+}
 
-	////////////////
-	// yay config //
-	////////////////
-	defaultSettings(&config)
-
+func initConfig() (err error) {
 	if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
@@ -124,24 +114,31 @@ func initYay() (err error) {
 		}
 	}
 
-	/////////////////
-	// vcs config //
-	////////////////
-	vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
-	if err == nil {
-		defer vfile.Close()
-		decoder := json.NewDecoder(vfile)
-		_ = decoder.Decode(&savedInfo)
+	defaultSettings(&config)
+	return
+}
+
+func initVCS() (err error) {
+	if _, err = os.Stat(vcsFile); os.IsNotExist(err) {
+		err = os.MkdirAll(filepath.Dir(vcsFile), 0755)
+		if err != nil {
+			err = fmt.Errorf("Unable to create vcs directory:\n%s\n"+
+				"The error was:\n%s", filepath.Dir(configFile), err)
+			return
+		}
+	} else {
+		vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
+		if err == nil {
+			defer vfile.Close()
+			decoder := json.NewDecoder(vfile)
+			_ = decoder.Decode(&savedInfo)
+		}
 	}
 
 	return
 }
 
 func initAlpm() (err error) {
-	/////////////////
-	// alpm config //
-	/////////////////
-
 	var value string
 	var exists bool
 	//var double bool
@@ -199,6 +196,10 @@ func main() {
 	var status int
 	var err error
 
+	if 0 == os.Geteuid() {
+		fmt.Println("Please avoid running yay as root/sudo.")
+	}
+
 	err = cmdArgs.parseCommandLine()
 	if err != nil {
 		fmt.Println(err)
@@ -206,11 +207,21 @@ func main() {
 		goto cleanup
 	}
 
-	err = initYay()
+	initPaths()
+
+	err = initConfig()
 	if err != nil {
 		fmt.Println(err)
 		status = 1
 		goto cleanup
+	}
+
+	err = initVCS()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+
 	}
 
 	err = initAlpm()
@@ -227,8 +238,6 @@ func main() {
 		goto cleanup
 	}
 
-	//ive used a goto here
-	//i think its the best way to do this sort of thing
 cleanup:
 	//cleanup
 	//from here on out dont exit if an error occurs
