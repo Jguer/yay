@@ -382,7 +382,6 @@ func handleConfig(option string) bool {
 }
 
 func handleVersion() {
-	fmt.Print(config.ReDownload)
 	fmt.Printf("yay v%s\n", version)
 }
 
