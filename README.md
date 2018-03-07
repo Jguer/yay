@@ -39,7 +39,7 @@ Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://
 * `yay -Ps` prints system statistics
 * `yay -Pu` prints update list
 * `yay -Yc` cleans unneeded dependencies
-* `yay -Yg` `yay -g` downloads PKGBUILD from ABS or AUR
+* `yay -G` downloads PKGBUILD from ABS or AUR
 * `yay -Y --gendb` generates development package DB used for devel updates.
 
 <img src="http://jguer.github.io/yay/yayupgrade.png" width="450">
