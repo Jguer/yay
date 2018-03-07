@@ -108,7 +108,12 @@ a database refresh\&. Run \fByay -Sy\fR Before this for an up to date result\&.
 .PP
 .SH "PERMANENT CONFIGURATION SETTINGS"
 .PP
-These options will be saved to disk and reapplied next time Yay is ran\&.
+\fB\-\-save\fR
+.RS 4
+Causes the following options to be saved back to the config file\&. This
+provides an easy way to change config options without directly editing the
+file\&.
+.RE
 .PP
 \fB\-\-topdown\fR
 .RS 4
@@ -198,6 +203,11 @@ Gets information about package \fIfoo\fR from the repos or the \fBAUR\fR\&.
 yay -S \fIfoo\fR
 .RS 4
 Installs package \fIfoo\fR from the repos or the \fBAUR\fR\&.
+.RE
+.PP
+yay --devel --save
+.RS 4
+Sets devel to true in the config\&.
 .RE
 .PP
 yay --stats

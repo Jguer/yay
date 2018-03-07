@@ -38,6 +38,9 @@ New operations:
     yay {-G --getpkgbuild} [package(s)]
 
 Permanent configuration options:
+    --save               Causes the following options to be saved back to the
+                         config file when used
+
     --topdown            Shows repository's packages first and then AUR's
     --bottomup           Shows AUR's packages first and then repository's
     --devel              Check development packages during sysupgrade
