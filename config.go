@@ -31,6 +31,7 @@ type Configuration struct {
 	PacmanBin     string `json:"pacmanbin"`
 	PacmanConf    string `json:"pacmanconf"`
 	TarBin        string `json:"tarbin"`
+	ReDownload    string `json:"redownload"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
@@ -128,6 +129,7 @@ func defaultSettings(config *Configuration) {
 	config.TarBin = "/usr/bin/bsdtar"
 	config.TimeUpdate = false
 	config.RequestSplitN = 150
+	config.ReDownload = "no"
 }
 
 // Editor returns the preferred system editor.

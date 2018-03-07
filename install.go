@@ -164,7 +164,7 @@ func install(parser *arguments) error {
 			return fmt.Errorf("Aborting due to user")
 		}
 
-		err = dowloadPkgBuilds(dc.Aur, dc.Bases)
+		err = downloadPkgBuilds(dc.Aur, parser.targets, dc.Bases)
 		if err != nil {
 			return err
 		}
@@ -389,20 +389,35 @@ func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 	return nil
 }
 
-func dowloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
+func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
-		//todo make pretty
-		str := bold(cyan("::") + " Downloading (%d/%d): %s\n")
+		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
+			dir := config.BuildDir + pkg.PackageBase + "/.SRCINFO"
+			pkgbuild, err := gopkg.ParseSRCINFO(dir)
+
+			if err == nil {
+				version, err := gopkg.NewCompleteVersion(pkg.Version)
+				if err == nil {
+					if !version.Newer(pkgbuild.Version()) {
+						str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
+						fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
+						continue
+					}
+				}
+			}
+		}
+
+		str := bold(cyan("::") + " Downloading PKGBUILD (%d/%d): %s\n")
 
 		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
-		err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
+		err := downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
 		if err != nil {
-			return
+			return err
 		}
 	}
 
-	return
+	return nil
 }
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {

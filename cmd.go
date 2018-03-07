@@ -46,6 +46,9 @@ Permanent configuration options:
     --noafterclean       Do not remove package sources after successful build
     --timeupdate         Check package's AUR page for changes during sysupgrade
     --notimeupdate       Do not checking of AUR page changes
+    --redownload         Always download pkgbuilds of targets
+    --redownloadall      Always download pkgbuilds of all AUR packages
+    --noredownload       Skip pkgbuild download if in cache and up to date
 
 Print specific options:
     -c --complete        Used for completions
@@ -351,16 +354,6 @@ func handleConfig(option string) bool {
 		config.CleanAfter = true
 	case "noafterclean":
 		config.CleanAfter = false
-		//		case "gendb":
-		//			err = createDevelDB()
-		//			if err != nil {
-		//				fmt.Println(err)
-		//			}
-		//			err = saveVCSInfo()
-		//			if err != nil {
-		//				fmt.Println(err)
-		//			}
-		//			os.Exit(0)
 	case "devel":
 		config.Devel = true
 	case "nodevel":
@@ -373,14 +366,14 @@ func handleConfig(option string) bool {
 		config.SortMode = TopDown
 	case "bottomup":
 		config.SortMode = BottomUp
-		//		case "help":
-		//			usage()
-		//			os.Exit(0)
-		//		case "version":
-		//			fmt.Printf("yay v%s\n", version)
-		//			os.Exit(0)
 	case "noconfirm":
 		config.NoConfirm = true
+	case "redownload":
+		config.ReDownload = "yes"
+	case "redownloadall":
+		config.ReDownload = "all"
+	case "noredownload":
+		config.ReDownload = "no"
 	default:
 		return false
 	}
@@ -390,6 +383,7 @@ func handleConfig(option string) bool {
 }
 
 func handleVersion() {
+	fmt.Print(config.ReDownload)
 	fmt.Printf("yay v%s\n", version)
 }
 
