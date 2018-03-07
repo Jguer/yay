@@ -74,8 +74,8 @@ var vcsFile string
 // completion file
 var completionFile string
 
-// changedConfig holds whether or not the config has changed
-var changedConfig bool
+// shouldSaveConfig holds whether or not the config should be saved
+var shouldSaveConfig bool
 
 // YayConf holds the current config values for yay.
 var config Configuration
@@ -100,7 +100,6 @@ func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 
 // SaveConfig writes yay config to file.
 func (config *Configuration) saveConfig() error {
-	config.NoConfirm = false
 	marshalledinfo, _ := json.MarshalIndent(config, "", "\t")
 	in, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
