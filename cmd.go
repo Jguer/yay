@@ -41,6 +41,16 @@ Permanent configuration options:
     --save               Causes the following options to be saved back to the
                          config file when used
 
+    --builddir <dir>     Directory to use for building AUR Packages
+    --editor   <file>    Editor to use when editing PKGBUILDs
+    --makepkg  <file>    makepkg command to use
+    --pacman   <file>    pacman command to use
+    --tar      <file>    bsdtar command to use
+    --git      <file>    git command to use
+    --config   <file>    pacman.conf file to use
+
+    --requestsplitn <n>  Max amount of packages to query per AUR request
+
     --topdown            Shows repository's packages first and then AUR's
     --bottomup           Shows AUR's packages first and then repository's
     --devel              Check development packages during sysupgrade
@@ -52,7 +62,9 @@ Permanent configuration options:
     --redownload         Always download pkgbuilds of targets
     --redownloadall      Always download pkgbuilds of all AUR packages
     --noredownload       Skip pkgbuild download if in cache and up to date
-    --mflags             Pass arguments to makepkg
+    --mflags <flags>     Pass arguments to makepkg
+    --sudoloop           Loop sudo calls in the backgroud to avoid timeout
+    --nosudoloop         Do not loop sudo calls in the backgrount
 
 Print specific options:
     -c --complete        Used for completions
@@ -377,6 +389,23 @@ func handleConfig(option, value string) bool {
 		config.ReDownload = "no"
 	case "mflags":
 		config.MFlags = value
+	case "builddir":
+		config.BuildDir = value
+	case "editor":
+		config.Editor = value
+	case "makepkg":
+		config.MakepkgBin = value
+	case "pacman":
+		config.PacmanBin = value
+	case "tar":
+		config.TarBin = value
+	case "git":
+		config.GitBin = value
+	case "requestsplitn":
+		n, err := strconv.Atoi(value)
+		if err == nil && n > 0 {
+			config.RequestSplitN = n
+		}
 	default:
 		return false
 	}

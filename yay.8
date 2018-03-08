@@ -115,6 +115,56 @@ provides an easy way to change config options without directly editing the
 file\&.
 .RE
 .PP
+\fB\-\-builddir <dir>\fR
+.RS 4
+Directory to use for Building AUR Packages\&. This directory is also used as
+the AUR cache when deciding if Yay should should skip builds\&.
+.RE
+.PP
+\fB\-\-editor <file>\fR
+.RS 4
+Editor to use when editing PKGBUILDs\&. If this is not set the \fBEDITOR\fR
+environment variable will be checked, followed by \fBVISUAL\fR\&. If none of
+these are set Yay will prompt the user for an editor\&.
+.RE
+.PP
+\fB\-\-makepkg <file>\fR
+.RS 4
+The command to use for \fBmakepkg\fR calls. This can be a command in
+\fBPATH\fR or an absolute path to the file\&.
+.RE
+.PP
+\fB\-\-pacman <file>\fR
+.RS 4
+The command to use for \fBpacman\fR calls. This can be a command in
+\fBPATH\fR or an absolute path to the file\&.
+.RE
+.PP
+\fB\-\-tar <file>\fR
+.RS 4
+The command to use for \fBbsdtar\fR calls. This can be a command in
+\fBPATH\fR or an absolute path to the file\&.
+.RE
+.PP
+\fB\-\-git <file>\fR
+.RS 4
+The command to use for \fBgit\fR calls. This can be a command in
+\fBPATH\fR or an absolute path to the file\&.
+.RE
+.PP
+\fB\-\-config <file>\fR
+.RS 4
+The pacman config file to use\&.
+.RE
+.PP
+\fB\-\-requestsplitn <n>\fR
+.RS 4
+The maximum amount of packages to request per AUR query\&. The higher the
+number the faster AUR requests will be\&. Requesting too many packages in one
+AUR query will cause an error\%. This should only make a noticeable difference
+with very large requests (>500) packages\&.
+.RE
+.PP
 \fB\-\-topdown\fR
 .RS 4
 Display repository packages first and then AUR packages\&.
@@ -159,12 +209,12 @@ Do not consider build times during sysupgrade\&.
 .PP
 \fB\-\-redownload\fR
 .RS 4
-Always download pkgbuilds of targets even when a copy is avaliable in cache\&.
+Always download pkgbuilds of targets even when a copy is available in cache\&.
 .RE
 .PP
 \fB\-\-redownloadall\fR
 .RS 4
-Always download pkgbuilds of all AUR packages even when a copy is avaliable 
+Always download pkgbuilds of all AUR packages even when a copy is available
 in cache\&.
 .RE
 .PP
@@ -174,12 +224,23 @@ When downloading pkgbuilds if the pkgbuild is found in cache and is equal or
 newer than the AUR's version use that instead of downloading a new one\&.
 .RE
 .PP
-\fB\-\-mflags\fR
+\fB\-\-mflags <flags>\fR
 .RS 4
 Passes arguments to makepkg\&. These flags get passed to every instance where
 makepkg is called by Yay. Arguments are split on whitespace before being
-passed to makepkg. Multiple arguments may be passed by suplying a space
-seperated list that is quoted by the shell.
+passed to makepkg. Multiple arguments may be passed by supplying a space
+separated list that is quoted by the shell.
+.RE
+.PP
+\fB\-\-sudoloop\fR
+.RS 4
+Loop sudo calls in the background to prevent sudo from timing out during long
+builds\&.
+.RE
+.PP
+\fB\-\-noloop\fR
+.RS 4
+Do not loop sudo calls in the background\&.
 .RE
 .SH "EXAMPLES"
 .PP
