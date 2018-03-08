@@ -406,6 +406,10 @@ func handleConfig(option, value string) bool {
 		if err == nil && n > 0 {
 			config.RequestSplitN = n
 		}
+	case "sudoloop":
+		config.SudoLoop = true
+	case "nosudoloop":
+		config.SudoLoop = false
 	default:
 		return false
 	}
