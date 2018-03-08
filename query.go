@@ -314,7 +314,7 @@ func min(a, b int) int {
 	if a < b {
 		return a
 	}
-	return a
+	return b
 }
 
 // Queries the aur for information about specified packages.
