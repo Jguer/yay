@@ -336,11 +336,13 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	makeRequest := func(n, max int) {
 		tempInfo, requestErr := rpc.Info(names[n:max])
 		if err != nil {
+			wg.Done()
 			return
 		}
 		if requestErr != nil {
 			//return info, err
 			err = requestErr
+			wg.Done()
 			return
 		}
 		mux.Lock()
