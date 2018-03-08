@@ -412,6 +412,20 @@ func hasParam(arg string) bool {
 	//yay params
 	case "mflags":
 		return true
+	case "builddir":
+		return true
+	case "editor":
+		return true
+	case "makepkg":
+		return true
+	case "pacman":
+		return true
+	case "tar":
+		return true
+	case "git":
+		return true
+	case "requestsplitn":
+		return true
 	default:
 		return false
 	}
