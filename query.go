@@ -338,21 +338,18 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 	outOfDate := make([]string, 0, len(names))
 
 	makeRequest := func(n, max int) {
+		defer wg.Done()
 		tempInfo, requestErr := rpc.Info(names[n:max])
 		if err != nil {
-			wg.Done()
 			return
 		}
 		if requestErr != nil {
-			//return info, err
 			err = requestErr
-			wg.Done()
 			return
 		}
 		mux.Lock()
 		info = append(info, tempInfo...)
 		mux.Unlock()
-		wg.Done()
 	}
 
 	for n := 0; n < len(names); n += config.RequestSplitN {

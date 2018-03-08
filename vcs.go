@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -142,14 +143,25 @@ func getCommit(url string, branch string, protocols []string) string {
 }
 
 func (infos shaInfos) needsUpdate() bool {
-	for url, info := range infos {
+	var wg sync.WaitGroup
+	hasUpdate := false
+
+	checkHash := func(url string, info shaInfo) {
+		defer wg.Done()
 		hash := getCommit(url, info.Brach, info.Protocols)
 		if hash != "" && hash != info.SHA {
-			return true
+			hasUpdate = true
 		}
 	}
 
-	return false
+	for url, info := range infos {
+		wg.Add(1)
+		go checkHash(url, info)
+	}
+
+	wg.Wait()
+
+	return hasUpdate
 }
 
 func inStore(pkgName string) shaInfos {
