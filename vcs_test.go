@@ -60,7 +60,7 @@ func TestParsing(t *testing.T) {
 			branch != compare.Branch ||
 			!isEqual(protocols, compare.Protocols) {
 
-			t.Fatalf("Expected url=%+v branch=%+v protocols=%+v\ngot url=%+v branch=%+v protocols=%+v", url, branch, protocols, compare.URL, compare.Branch, compare.Protocols)
+			t.Fatalf("Test %d failed: Expected: url=%+v branch=%+v protocols=%+v\ngot url=%+v branch=%+v protocols=%+v", n+1, url, branch, protocols, compare.URL, compare.Branch, compare.Protocols)
 		}
 	}
 
