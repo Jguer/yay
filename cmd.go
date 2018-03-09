@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -525,67 +524,6 @@ func handleRemove() (err error) {
 	return
 }
 
-// BuildIntRange build the range from start to end
-func BuildIntRange(rangeStart, rangeEnd int) []int {
-	if rangeEnd-rangeStart == 0 {
-		// rangeEnd == rangeStart, which means no range
-		return []int{rangeStart}
-	}
-	if rangeEnd < rangeStart {
-		swap := rangeEnd
-		rangeEnd = rangeStart
-		rangeStart = swap
-	}
-
-	final := make([]int, 0)
-	for i := rangeStart; i <= rangeEnd; i++ {
-		final = append(final, i)
-	}
-	return final
-}
-
-// BuildRange construct a range of ints from the format 1-10
-func BuildRange(input string) ([]int, error) {
-	multipleNums := strings.Split(input, "-")
-	if len(multipleNums) != 2 {
-		return nil, errors.New("Invalid range")
-	}
-
-	rangeStart, err := strconv.Atoi(multipleNums[0])
-	if err != nil {
-		return nil, err
-	}
-	rangeEnd, err := strconv.Atoi(multipleNums[1])
-	if err != nil {
-		return nil, err
-	}
-
-	return BuildIntRange(rangeStart, rangeEnd), err
-}
-
-// Contains returns whether e is present in s
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-// RemoveIntListFromList removes all src's elements that are present in target
-func removeListFromList(src, target []string) []string {
-	max := len(target)
-	for i := 0; i < max; i++ {
-		if contains(src, target[i]) {
-			target = append(target[:i], target[i+1:]...)
-			max--
-			i--
-		}
-	}
-	return target
-}
-
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
 	aurQ, err := narrowSearch(pkgS, true)
@@ -653,7 +591,7 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 			arguments.addTarget(pkg.Name)
 		}
 		if !isInclude && !exclude.get(target) {
-				arguments.addTarget(pkg.Name)
+			arguments.addTarget(pkg.Name)
 		}
 	}
 
