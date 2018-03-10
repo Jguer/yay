@@ -285,14 +285,50 @@ Shows statistics for installed packages and system health\&.
 .RE
 .SH "FILES"
 .sp
-Yay's config files are stored in \fI$XDG_CONFIG_HOME/yay/\fR\&. You should not edit these files directly,
-instead use the options described in \fBPERMANENT CONFIGURATION SETTINGS\fR\&.
-.sp
-Yay also inherits options from \fBpacman\&.conf\fR(5), e\&.g\&. \fIcolor\fR\&.
+\fBCONFIG DIRECTORY\fR
+.RS 4
+The config directory is \fI$XDG_CONFIG_HOME/yay/\fR\&. if
+\fB$XDG_CONFIG_HOME\fR is unset, the config directory will fall back to
+\fI$HOME/.config/yay\fR\%.
+.PP
+\fIconfig.json\fR\& Is used to store all of Yay's config options\&. Editing
+this file should be done through Yay, using the options
+mentioned in \fBPERMANENT CONFIGURATION SETTINGS\fR\&.
 .RE
+.PP
+\fBCACHE DIRECTORY\fR
+.RS 4
+The cache directory is \fI$XDG_CACHE_HOME/yay/\fR\&. if
+\fB$XDG_CACHE_HOME\fR is unset, the cache directory will fall back to
+\fI$HOME/.cache/yay\fR\&.
+.PP
+\fIaur_<shellname>\fR holds a list of of all packages, including the AUR,
+for shell completion\&. The completion files are refreshed every 48 hours\&.
+.PP
+\fIvcs.json\fR tracks VCS packages and the latest commit of each source. If
+any of these commits change the package will be upgraded during a devel update.
+.RE
+.PP
+\fBBUILD DIRECTORY\fR
+.RS 4
+Unless otherwise set this should be the same as \fBCACHE DIRECTORY\fR. This
+directory is used to store downloaded AUR Packages as well as any source files
+and built packages from  those packages\&.
+.RE
+.PP
+\fBPACMAN.CONF\fR
+.RS 4
+Yay uses Pacman's config file to set certain pacman options either through
+go-alpm or Yay itself. Options inherited include most libalpm options and
+pacman options\&.
+.PP
+Notably \fBDatabases\fR, \fBColor\fR and \fB*Path/*Dir\fR options are used\&.
+.RE
+.PP
 .SH "SEE ALSO"
 .sp
 \fBmakepkg\fR(8)
+\fBPKGBUILD\fR(5)
 \fBpacman\fR(8)
 \fBpacman\&.conf\fR(5)
 .PP
