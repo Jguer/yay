@@ -574,10 +574,10 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		}
 
 		if isInclude && include.get(target) {
-			arguments.addTarget(pkg.Name())
+			arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 		}
 		if !isInclude && !exclude.get(target) {
-			arguments.addTarget(pkg.Name())
+			arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 		}
 	}
 
@@ -588,10 +588,10 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		}
 
 		if isInclude && include.get(target) {
-			arguments.addTarget(pkg.Name)
+			arguments.addTarget("aur/" + pkg.Name)
 		}
 		if !isInclude && !exclude.get(target) {
-			arguments.addTarget(pkg.Name)
+			arguments.addTarget("aur/" + pkg.Name)
 		}
 	}
 

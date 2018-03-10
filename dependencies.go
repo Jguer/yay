@@ -50,6 +50,17 @@ func getNameFromDep(dep string) string {
 	})[0]
 }
 
+//split apart db/package to db and package
+func splitDbFromName(pkg string) (string, string) {
+	split := strings.SplitN(pkg, "/", 2)
+
+	if len(split) == 2 {
+		return split[0], split[1]
+	} else {
+		return "", split[0]
+	}
+}
+
 // Step two of dependency resolving. We already have all the information on the
 // packages we need, now it's just about ordering them correctly.
 // pkgs is a list of targets, the packages we want to install. Dependencies are
@@ -94,7 +105,8 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 	}
 
 	for _, pkg := range pkgs {
-		dep := getNameFromDep(pkg)
+		_, name := splitDbFromName(pkg)
+		dep := getNameFromDep(name)
 		alpmpkg, exists := dt.Repo[dep]
 		if exists {
 			repoDepCatagoriesRecursive(alpmpkg, dc, dt, false)
@@ -258,10 +270,13 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}//*/
 
+		db, name := splitDbFromName(pkg)
+
 		// Check the repos for a matching dep
-		repoPkg, inRepos := syncDb.FindSatisfier(pkg)
-		if inRepos == nil {
-			repoTreeRecursive(repoPkg, dt, localDb, syncDb)
+		foundPkg, errdb := syncDb.FindSatisfier(name)
+		found := errdb == nil && (foundPkg.DB().Name() == db || db == "")
+		if found {
+			repoTreeRecursive(foundPkg, dt, localDb, syncDb)
 			continue
 		}
 
@@ -270,7 +285,11 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}
 
-		dt.ToProcess.set(pkg)
+		if db == "" || db == "aur" {
+			dt.ToProcess.set(name)
+		} else {
+			dt.Missing.set(pkg)
+		}
 	}
 
 	err = depTreeRecursive(dt, localDb, syncDb, false)

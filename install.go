@@ -17,16 +17,14 @@ import (
 // Install handles package installs
 func install(parser *arguments) error {
 	removeMake := false
-	aurTargets, repoTargets, err := packageSlices(parser.targets.toSlice())
+	requestTargets := parser.targets.toSlice()
+	aurTargets, repoTargets, err := packageSlices(requestTargets)
 	if err != nil {
 		return err
 	}
 
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
 	var dc *depCatagories
-
-	//fmt.Println(green(arrow), green("Resolving Dependencies"))
-	requestTargets := append(aurTargets, repoTargets...)
 
 	//remotenames: names of all non repo packages on the system
 	_, _, _, remoteNames, err := filterPackages()
@@ -106,9 +104,9 @@ func install(parser *arguments) error {
 		arguments.addTarget(pkg.Name())
 	}
 
-	for _, pkg := range repoTargets {
-		arguments.addTarget(pkg)
-	}
+	//for _, pkg := range repoTargets {
+	//	arguments.addTarget(pkg)
+	//}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
 		fmt.Println("There is nothing to do")

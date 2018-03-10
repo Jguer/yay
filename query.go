@@ -228,13 +228,10 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	}
 
 	for _, _pkg := range toCheck {
-		if i := strings.Index(_pkg, "/"); i != -1 {
-			_pkg = _pkg[i+1:]
-		}
-		pkg := getNameFromDep(_pkg)
+		db, name := splitDbFromName(_pkg)
 
-		_, errdb := dbList.FindSatisfier(_pkg)
-		found := errdb == nil
+		foundPkg, errdb := dbList.FindSatisfier(name)
+		found := errdb == nil && (foundPkg.DB().Name() == db || db == "")
 
 		if !found {
 			_, errdb = dbList.PkgCachebyGroup(_pkg)
@@ -242,9 +239,9 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		}
 
 		if found {
-			repo = append(repo, pkg)
+			repo = append(repo, _pkg)
 		} else {
-			aur = append(aur, pkg)
+			aur = append(aur, _pkg)
 		}
 	}
 
