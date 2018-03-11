@@ -490,6 +490,7 @@ func handleSync() (err error) {
 		arguments.delArg("u", "sysupgrade")
 		arguments.delArg("s", "search")
 		arguments.delArg("i", "info")
+		arguments.delArg("l", "list")
 		arguments.targets = make(stringSet)
 		err = passToPacman(arguments)
 		if err != nil {
@@ -505,6 +506,8 @@ func handleSync() (err error) {
 		}
 
 		err = syncSearch(targets)
+	} else if cmdArgs.existsArg("l", "list") {
+		err = passToPacman(cmdArgs)
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = passToPacman(cmdArgs)
 	} else if cmdArgs.existsArg("i", "info") {
