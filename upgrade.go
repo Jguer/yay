@@ -80,20 +80,6 @@ func getVersionDiff(oldVersion, newversion string) (left, right string) {
 	return
 }
 
-// Print prints the details of the packages to upgrade.
-func (u upSlice) Print(start int) {
-	for k, i := range u {
-		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
-
-		fmt.Print(magenta(fmt.Sprintf("%2d ", len(u)+start-k-1)))
-		fmt.Print(bold(colourHash(i.Repository)), "/", cyan(i.Name))
-
-		w := 70 - len(i.Repository) - len(i.Name) + len(left)
-		fmt.Printf(fmt.Sprintf("%%%ds", w),
-			fmt.Sprintf("%s -> %s\n", left, right))
-	}
-}
-
 // upList returns lists of packages to upgrade from each source.
 func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 	local, remote, _, remoteNames, err := filterPackages()
