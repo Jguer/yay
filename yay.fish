@@ -67,6 +67,22 @@ complete -c $progname -n "not $noopt" -l noafterclean -d 'Disable package source
 complete -c $progname -n "not $noopt" -l timeupdate -d 'Check package modification date and version' -f
 complete -c $progname -n "not $noopt" -l notimeupdate -d 'Check only package version change' -f
 
+complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
+complete -c $progname -n "not $noopt" -l mflags -d 'Pass the following options to makepkg' -f
+complete -c $progname -n "not $noopt" -l buildir -d 'Specify the build directory' -f
+complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -f
+complete -c $progname -n "not $noopt" -l makepkg -d 'Makepkg command to use' -f
+complete -c $progname -n "not $noopt" -l pacman -d 'Pacman command to use' -f
+complete -c $progname -n "not $noopt" -l tar -d 'Tar command to use' -f
+complete -c $progname -n "not $noopt" -l git -d 'Git command to use' -f
+complete -c $progname -n "not $noopt" -l config -d 'config command to use' -f
+complete -c $progname -n "not $noopt" -l requestsplitn -d 'Max amount of packages to query per AUR request' -f
+complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the backgroud to avoid timeout' -f
+complete -c $progname -n "not $noopt" -l nosudoloop -d 'Do not loop sudo calls in the background' -f
+complete -c $progname -n "not $noopt" -l redownload -d 'Redownload PKGBUILD of package even if up-to-date' -f
+complete -c $progname -n "not $noopt" -l noredownload -d 'Do not redownload up-to-date PKGBUILDs' -f
+complete -c $progname -n "not $noopt" -l redownloadall -d 'Redownload PKGBUILD of package and deps even if up-to-date' -f
+
 # Yay options
 complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
 complete -c $progname -n $yayspecific -s g -l getpkgbuild -d 'Download PKGBUILD from ABS or AUR' -xa "$listall" -f
