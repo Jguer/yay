@@ -91,12 +91,18 @@ nextPkg:
 			pkg, err := db.PkgByName(pkgN)
 			if err == nil {
 				var url string
+				name := pkg.Base()
+				if name == "" {
+					name = pkg.Name()
+				}
+
 				if db.Name() == "core" || db.Name() == "extra" {
-					url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg.Base() + ".tar.gz"
-				} else if db.Name() == "community" {
-					url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + pkg.Base() + ".tar.gz"
+					url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
+				} else if db.Name() == "community" || db.Name() == "multilib" {
+					url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + name + ".tar.gz"
 				} else {
 					fmt.Println(pkgN + " not in standard repositories")
+					continue nextPkg
 				}
 
 				errD := downloadAndUnpack(url, path, true)
