@@ -37,6 +37,16 @@ _pacman_opts_common=(
   '--noconfirm[Do not ask for confirmation]'
   '--noprogressbar[Do not show a progress bar when downloading files]'
   '--noscriptlet[Do not execute the install scriptlet if one exists]'
+
+  '--save[Causes config options to be saved back to the config file]'
+
+  '--builddir[Directory to use for building AUR Packages]:build dir:_files -/'
+  '--editor[Editor to use when editing PKGBUILDs]:editor:_files'
+  '--makepkg[makepkg command to use]:makepkg:_files'
+  '--pacman[pacman command to use]:pacman:_files'
+  '--tar[bsdtar command to use]:tar:_files'
+  '--git[git command to use]:git:_files'
+
   '--bottomup[Show AUR packages first]'
   '--topdown[Show repository packages first]'
   '--devel[Check -git/-svn/-hg development version]'
@@ -45,6 +55,12 @@ _pacman_opts_common=(
   '--noafterclean[Disable package sources cleaning after successful build]'
   '--timeupdate[Check packages modification date and version]'
   '--notimeupdate[Check only package version change]'
+  '--redownload[Always download pkgbuilds of targets]'
+  '--redownloadall[Always download pkgbuilds of all AUR packages]'
+  '--noredownload[Skip pkgbuild download if in cache and up to date]'
+  '--mflags[Pass arguments to makepkg]:mflags'
+  '--sudoloop[Loop sudo calls in the backgroud to avoid timeout]'
+  '--nosudoloop[Do not loop sudo calls in the backgrount]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
