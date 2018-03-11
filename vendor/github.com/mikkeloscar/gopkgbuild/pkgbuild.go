@@ -385,7 +385,7 @@ func validPkgname(name string) bool {
 	}
 
 	for _, r := range name {
-		if !isValidPkgnameChar(uint8(r)) {
+		if !isValidPkgnameChar(r) {
 			return false
 		}
 	}
@@ -399,12 +399,12 @@ func validPkgver(version string) bool {
 		return false
 	}
 
-	if !isAlphaNumeric(version[0]) {
+	if !isAlphaNumeric(rune(version[0])) {
 		return false
 	}
 
 	for _, r := range version[1:] {
-		if !isValidPkgverChar(uint8(r)) {
+		if !isValidPkgverChar(r) {
 			return false
 		}
 	}
@@ -443,7 +443,7 @@ func parseDependency(dep string, deps []*Dependency) ([]*Dependency, error) {
 
 	i := 0
 	for _, c := range dep {
-		if !isValidPkgnameChar(uint8(c)) {
+		if !isValidPkgnameChar(c) {
 			break
 		}
 		i++
@@ -505,16 +505,16 @@ func parseDependency(dep string, deps []*Dependency) ([]*Dependency, error) {
 }
 
 // isLowerAlpha reports whether c is a lowercase alpha character
-func isLowerAlpha(c uint8) bool {
+func isLowerAlpha(c rune) bool {
 	return 'a' <= c && c <= 'z'
 }
 
 // check if c is a valid pkgname char
-func isValidPkgnameChar(c uint8) bool {
+func isValidPkgnameChar(c rune) bool {
 	return isLowerAlpha(c) || isDigit(c) || c == '@' || c == '.' || c == '_' || c == '+' || c == '-'
 }
 
 // check if c is a valid pkgver char
-func isValidPkgverChar(c uint8) bool {
+func isValidPkgverChar(c rune) bool {
 	return isAlphaNumeric(c) || c == '_' || c == '+' || c == '.' || c == '~'
 }

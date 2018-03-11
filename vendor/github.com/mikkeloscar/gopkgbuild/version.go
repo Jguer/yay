@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // Version string
@@ -134,10 +135,11 @@ func (a *CompleteVersion) cmp(b *CompleteVersion) int8 {
 //
 // This is based on the rpmvercmp function used in libalpm
 // https://projects.archlinux.org/pacman.git/tree/lib/libalpm/version.c
-func rpmvercmp(a, b Version) int {
-	if a == b {
+func rpmvercmp(av, bv Version) int {
+	if av == bv {
 		return 0
 	}
+	a, b := []rune(string(av)), []rune(string(bv))
 
 	var one, two, ptr1, ptr2 int
 	var isNum bool
@@ -248,8 +250,8 @@ func rpmvercmp(a, b Version) int {
 
 // alphaCompare compares two alpha version segments and will return a positive
 // value if a is bigger than b and a negative if b is bigger than a else 0
-func alphaCompare(a, b Version) int8 {
-	if a == b {
+func alphaCompare(a, b []rune) int8 {
+	if string(a) == string(b) {
 		return 0
 	}
 
@@ -275,16 +277,16 @@ func (v Version) bigger(v2 Version) bool {
 }
 
 // isAlphaNumeric reports whether c is an alpha character or digit
-func isAlphaNumeric(c uint8) bool {
+func isAlphaNumeric(c rune) bool {
 	return isDigit(c) || isAlpha(c)
 }
 
 // isAlpha reports whether c is an alpha character
-func isAlpha(c uint8) bool {
-	return 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z'
+func isAlpha(c rune) bool {
+	return unicode.IsLetter(c)
 }
 
 // isDigit reports whether d is an ASCII digit
-func isDigit(d uint8) bool {
-	return '0' <= d && d <= '9'
+func isDigit(d rune) bool {
+	return unicode.IsDigit(d)
 }
