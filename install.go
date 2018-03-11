@@ -200,12 +200,17 @@ func install(parser *arguments) error {
 			return nil
 		}
 
-		err = downloadPkgBuildsSources(dc.Aur, dc.Bases)
+		err = parsesrcinfosGenerate(dc.Aur, srcinfos, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		err = parsesrcinfosGenerate(dc.Aur, srcinfos, dc.Bases)
+		err = checkPgpKeys(dc.Aur, srcinfos, dc.Bases, nil)
+		if err != nil {
+			return err
+		}
+
+		err = downloadPkgBuildsSources(dc.Aur, dc.Bases)
 		if err != nil {
 			return err
 		}

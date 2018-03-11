@@ -33,6 +33,7 @@ type Configuration struct {
 	TarBin        string `json:"tarbin"`
 	ReDownload    string `json:"redownload"`
 	GitBin        string `json:"gitbin"`
+	GpgBin        string `json:"gpgbin"`
 	MFlags        string `json:"mflags"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
@@ -130,6 +131,7 @@ func defaultSettings(config *Configuration) {
 	config.SudoLoop = false
 	config.TarBin = "bsdtar"
 	config.GitBin = "git"
+	config.GpgBin = "gpg"
 	config.TimeUpdate = false
 	config.RequestSplitN = 150
 	config.ReDownload = "no"
