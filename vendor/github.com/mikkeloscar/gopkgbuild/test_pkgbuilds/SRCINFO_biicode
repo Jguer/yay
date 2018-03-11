@@ -1,0 +1,22 @@
+
+pkgbase = biicode
+	pkgdesc = Simple C/C++ file-based dependency manager
+	pkgver = 3.3
+	pkgrel = 1
+	url = https://www.biicode.com
+	arch = i686
+	arch = x86_64
+	arch = armv6h
+	license = unknown
+	depends = cmake>=3.0.2
+	depends = zlib
+	depends = glibc
+	depends = sqlite
+	depends = wget
+	depends = python2-pmw
+	noextract = ${_package}
+	options = !strip
+	source = https://s3.amazonaws.com/biibinaries/release/3.3/bii-_3_3.deb
+
+pkgname = biicode
+
