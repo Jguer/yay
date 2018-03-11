@@ -118,6 +118,21 @@ func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
 	return str
 }
 
+// Print prints the details of the packages to upgrade.
+func (u upSlice) Print(start int) {
+	for k, i := range u {
+		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
+
+		fmt.Print(magenta(fmt.Sprintf("%3d ", len(u)+start-k-1)))
+		fmt.Print(bold(colourHash(i.Repository)), "/", cyan(i.Name))
+
+		w := 70 - len(i.Repository) - len(i.Name)
+		padding := fmt.Sprintf("%%%ds", w)
+		fmt.Printf(padding, left)
+		fmt.Printf(" -> %s\n", right)
+	}
+}
+
 // printDownloadsFromRepo prints repository packages to be downloaded
 func printDepCatagories(dc *depCatagories) {
 	repo := ""
