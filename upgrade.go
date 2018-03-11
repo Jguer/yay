@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
-	"strings"
 	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
@@ -266,8 +264,6 @@ func removeIntListFromList(src, target []int) []int {
 
 // upgradePkgs handles updating the cache and installing updates.
 func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
-	var repoNums []int
-	var aurNums []int
 	repoNames := make(stringSet)
 	aurNames := make(stringSet)
 
@@ -283,89 +279,61 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
 
-	if !config.NoConfirm {
-		fmt.Println(bold(green(arrow + " Packages to not upgrade (eg: 1 2 3, 1-3 or ^4)")))
-		fmt.Print(bold(green(arrow + " ")))
-		reader := bufio.NewReader(os.Stdin)
-
-		numberBuf, overflow, err := reader.ReadLine()
-		if err != nil || overflow {
-			fmt.Println(err)
-			return repoNames, aurNames, err
+	if config.NoConfirm {
+		for _, up := range repoUp {
+			repoNames.set(up.Name)
 		}
-
-		result := strings.Fields(string(numberBuf))
-		excludeAur := make([]int, 0)
-		excludeRepo := make([]int, 0)
-		for _, numS := range result {
-			negate := numS[0] == '^'
-			if negate {
-				numS = numS[1:]
-			}
-			var numbers []int
-			num, err := strconv.Atoi(numS)
-			if err != nil {
-				numbers, err = BuildRange(numS)
-				if err != nil {
-					continue
-				}
-			} else {
-				numbers = []int{num}
-			}
-			for _, target := range numbers {
-				if target > len(aurUp)+len(repoUp) || target <= 0 {
-					continue
-				} else if target <= len(aurUp) {
-					target = len(aurUp) - target
-					if negate {
-						excludeAur = append(excludeAur, target)
-					} else {
-						aurNums = append(aurNums, target)
-					}
-				} else {
-					target = len(aurUp) + len(repoUp) - target
-					if negate {
-						excludeRepo = append(excludeRepo, target)
-					} else {
-						repoNums = append(repoNums, target)
-					}
-				}
-			}
+		for _, up := range aurUp {
+			aurNames.set(up.Name)
 		}
-		if len(repoNums) == 0 && len(aurNums) == 0 &&
-			(len(excludeRepo) > 0 || len(excludeAur) > 0) {
-			if len(repoUp) > 0 {
-				repoNums = BuildIntRange(0, len(repoUp)-1)
-			}
-			if len(aurUp) > 0 {
-				aurNums = BuildIntRange(0, len(aurUp)-1)
-			}
-		}
-		aurNums = removeIntListFromList(excludeAur, aurNums)
-		repoNums = removeIntListFromList(excludeRepo, repoNums)
+		return repoNames, aurNames, nil
 	}
 
-	if len(repoUp) != 0 {
-	repoloop:
-		for i, k := range repoUp {
-			for _, j := range repoNums {
-				if j == i {
-					continue repoloop
-				}
-			}
-			repoNames.set(k.Name)
+	fmt.Println(bold(green(arrow + " Packages to not upgrade (eg: 1 2 3, 1-3, ^4 or repo name)")))
+	fmt.Print(bold(green(arrow + " ")))
+	reader := bufio.NewReader(os.Stdin)
+
+	numberBuf, overflow, err := reader.ReadLine()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if overflow {
+		return nil, nil, fmt.Errorf("Input too long")
+	}
+
+	//upgrade menu asks you which packages to NOT upgrade so in this case
+	//include and exclude are kind of swaped
+	//include, exclude, other := parseNumberMenu(string(numberBuf))
+	include, exclude, otherInclude, otherExclude := parseNumberMenu(string(numberBuf))
+
+	isInclude := len(exclude) == 0 && len(otherExclude) == 0
+
+	for i, pkg := range repoUp {
+		if isInclude && otherInclude.get(pkg.Repository) {
+			continue
+		}
+
+		if isInclude && !include.get(len(repoUp)-i+len(aurUp)) {
+			repoNames.set(pkg.Name)
+		}
+
+		if !isInclude && (exclude.get(len(repoUp)-i+len(aurUp)) || otherExclude.get(pkg.Repository)) {
+			repoNames.set(pkg.Name)
 		}
 	}
 
-	if len(aurUp) != 0 {
-	aurloop:
-		for i, k := range aurUp {
-			for _, j := range aurNums {
-				if j == i {
-					continue aurloop
-				}
-			}
-			aurNames.set(k.Name)
+	for i, pkg := range aurUp {
+		if isInclude && otherInclude.get(pkg.Repository) {
+			continue
+		}
+
+		if isInclude && !include.get(len(aurUp)-i) {
+			aurNames.set(pkg.Name)
+		}
+
+		if !isInclude && (exclude.get(len(aurUp)-i) || otherExclude.get(pkg.Repository)) {
+			aurNames.set(pkg.Name)
 		}
 	}
 

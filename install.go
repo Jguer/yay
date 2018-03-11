@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -118,6 +119,13 @@ func install(parser *arguments) error {
 		printDepCatagories(dc)
 		hasAur = len(dc.Aur) != 0
 		fmt.Println()
+
+		if !parser.existsArg("gendb") {
+			err = checkForConflicts(dc)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
@@ -145,36 +153,31 @@ func install(parser *arguments) error {
 	}
 
 	if hasAur {
-		if !parser.existsArg("gendb") {
-			err = checkForConflicts(dc)
-			if err != nil {
-				return err
-			}
-		}
-
 		if len(dc.MakeOnly) > 0 {
 			if !continueTask("Remove make dependencies after install?", "yY") {
 				removeMake = true
 			}
 		}
 
-		askCleanBuilds(dc.Aur, dc.Bases)
-
-		if !continueTask("Proceed with Download?", "nN") {
-			return fmt.Errorf("Aborting due to user")
+		toClean, toEdit, err := cleanEditNumberMenu(dc.Aur, dc.Bases, remoteNamesCache)
+		if err != nil {
+			return err
 		}
+		cleanBuilds(toClean)
 
 		err = downloadPkgBuilds(dc.Aur, parser.targets, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		err = askEditPkgBuilds(dc.Aur, dc.Bases)
-		if err != nil {
-			return err
+		if len(toEdit) > 0 {
+			err = editPkgBuilds(toEdit)
+			if err != nil {
+				return err
+			}
 		}
 
-		if !continueTask("Proceed with install?", "nN") {
+		if len(toEdit) > 0 && !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
 
@@ -244,6 +247,154 @@ func install(parser *arguments) error {
 	return nil
 }
 
+func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
+	toPrint := ""
+	askClean := false
+
+	toClean := make([]*rpc.Pkg, 0)
+	toEdit := make([]*rpc.Pkg, 0)
+
+	if config.NoConfirm {
+		return toClean, toEdit, nil
+	}
+
+	for n, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+
+		toPrint += magenta(strconv.Itoa(len(pkgs)-n)) + " " + bold(formatPkgbase(pkg, bases))
+		if installed.get(pkg.Name) {
+			toPrint += bold(green(" (Installed)"))
+		}
+
+		if _, err := os.Stat(dir); !os.IsNotExist(err) {
+			toPrint += bold(green(" (Build Files Exist)"))
+			askClean = true
+		}
+
+		toPrint += "\n"
+	}
+
+	fmt.Print(toPrint)
+
+	if askClean {
+		fmt.Println(bold(green(arrow+" Packages to cleanBuild?")))
+		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
+		fmt.Print(bold(green(arrow + " ")))
+		reader := bufio.NewReader(os.Stdin)
+
+		numberBuf, overflow, err := reader.ReadLine()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if overflow {
+			return nil, nil, fmt.Errorf("Input too long")
+		}
+
+		cleanInput := string(numberBuf)
+
+		cInclude, cExclude, cOtherInclude, cOtherExclude := parseNumberMenu(cleanInput)
+		cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
+
+		if cOtherInclude.get("abort") || cOtherInclude.get("ab") {
+			return nil, nil, fmt.Errorf("Aborting due to user")
+		}
+
+		if !cOtherInclude.get("n") && !cOtherInclude.get("none") {
+			for i, pkg := range pkgs {
+				dir := config.BuildDir + pkg.PackageBase + "/"
+				if _, err := os.Stat(dir); os.IsNotExist(err) {
+					continue
+				}
+
+				if !cIsInclude && cExclude.get(len(pkgs)-i) {
+					continue
+				}
+
+				if installed.get(pkg.Name) && (cOtherInclude.get("i") || cOtherInclude.get("installed")) {
+					toClean = append(toClean, pkg)
+					continue
+				}
+
+				if !installed.get(pkg.Name) && (cOtherInclude.get("no") || cOtherInclude.get("notinstalled")) {
+					toClean = append(toClean, pkg)
+					continue
+				}
+
+				if cOtherInclude.get("a") || cOtherInclude.get("all") {
+					toClean = append(toClean, pkg)
+					continue
+				}
+
+				if cIsInclude && cInclude.get(len(pkgs)-i) {
+					toClean = append(toClean, pkg)
+				}
+
+				if !cIsInclude && !cExclude.get(len(pkgs)-i) {
+					toClean = append(toClean, pkg)
+				}
+			}
+		}
+	}
+
+	fmt.Println(bold(green(arrow+" PKGBUILDs to edit?")))
+	fmt.Println(bold(green(arrow) +cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
+
+	fmt.Print(bold(green(arrow + " ")))
+	reader := bufio.NewReader(os.Stdin)
+
+	numberBuf, overflow, err := reader.ReadLine()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if overflow {
+		return nil, nil, fmt.Errorf("Input too long")
+	}
+
+	editInput := string(numberBuf)
+
+	eInclude, eExclude, eOtherInclude, eOtherExclude := parseNumberMenu(editInput)
+	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
+
+	if eOtherInclude.get("abort") || eOtherInclude.get("ab") {
+		return nil, nil, fmt.Errorf("Aborting due to user")
+	}
+
+	if !eOtherInclude.get("n") && !eOtherInclude.get("none") {
+		for i, pkg := range pkgs {
+			if !eIsInclude && eExclude.get(len(pkgs)-i) {
+				continue
+			}
+
+			if installed.get(pkg.Name) && (eOtherInclude.get("i") || eOtherInclude.get("installed")) {
+				toEdit = append(toEdit, pkg)
+				continue
+			}
+
+			if !installed.get(pkg.Name) && (eOtherInclude.get("no") || eOtherInclude.get("notinstalled")) {
+				toEdit = append(toEdit, pkg)
+				continue
+			}
+
+			if eOtherInclude.get("a") || eOtherInclude.get("all") {
+				toEdit = append(toEdit, pkg)
+				continue
+			}
+
+			if eIsInclude && eInclude.get(len(pkgs)-i) {
+				toEdit = append(toEdit, pkg)
+			}
+
+			if !eIsInclude && !eExclude.get(len(pkgs)-i) {
+				toEdit = append(toEdit, pkg)
+			}
+		}
+	}
+
+	return toClean, toEdit, nil
+}
+
 func askCleanBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
@@ -262,6 +413,14 @@ func askCleanBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) {
 				_ = os.RemoveAll(config.BuildDir + pkg.PackageBase)
 			}
 		}
+	}
+}
+
+func cleanBuilds(pkgs []*rpc.Pkg) {
+	for i, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase
+		fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(pkgs), dir)
+		os.RemoveAll(dir)
 	}
 }
 
@@ -308,6 +467,8 @@ func checkForConflicts(dc *depCatagories) error {
 
 			fmt.Println(str)
 		}
+
+		fmt.Println()
 	}
 
 	return nil
@@ -334,6 +495,23 @@ func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 				return fmt.Errorf("Editor did not exit successfully, Abotring: %s", err)
 			}
 		}
+	}
+
+	return nil
+}
+
+func editPkgBuilds(pkgs []*rpc.Pkg) error {
+	pkgbuilds := make([]string, 0, len(pkgs))
+	for _, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+		pkgbuilds = append(pkgbuilds, dir+"PKGBUILD")
+	}
+
+	editcmd := exec.Command(editor(), pkgbuilds...)
+	editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	err := editcmd.Run()
+	if err != nil {
+		return fmt.Errorf("Editor did not exit successfully, Abotring: %s", err)
 	}
 
 	return nil

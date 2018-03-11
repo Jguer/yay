@@ -147,16 +147,16 @@ func printDepCatagories(dc *depCatagories) {
 
 	for _, pkg := range dc.Repo {
 		if dc.MakeOnly.get(pkg.Name()) {
-			repoMake += "  " + pkg.Name()
+			repoMake += "  " + pkg.Name() + "-" + pkg.Version()
 			repoMakeLen++
 		} else {
-			repo += "  " + pkg.Name()
+			repo += "  " + pkg.Name() + "-" + pkg.Version()
 			repoLen++
 		}
 	}
 
 	for _, pkg := range dc.Aur {
-		pkgStr := "  " + pkg.PackageBase
+		pkgStr := "  " + pkg.PackageBase + "-" + pkg.Version
 		pkgStrMake := pkgStr
 
 		push := false

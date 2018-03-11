@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -525,72 +524,8 @@ func handleRemove() (err error) {
 	return
 }
 
-// BuildIntRange build the range from start to end
-func BuildIntRange(rangeStart, rangeEnd int) []int {
-	if rangeEnd-rangeStart == 0 {
-		// rangeEnd == rangeStart, which means no range
-		return []int{rangeStart}
-	}
-	if rangeEnd < rangeStart {
-		swap := rangeEnd
-		rangeEnd = rangeStart
-		rangeStart = swap
-	}
-
-	final := make([]int, 0)
-	for i := rangeStart; i <= rangeEnd; i++ {
-		final = append(final, i)
-	}
-	return final
-}
-
-// BuildRange construct a range of ints from the format 1-10
-func BuildRange(input string) ([]int, error) {
-	multipleNums := strings.Split(input, "-")
-	if len(multipleNums) != 2 {
-		return nil, errors.New("Invalid range")
-	}
-
-	rangeStart, err := strconv.Atoi(multipleNums[0])
-	if err != nil {
-		return nil, err
-	}
-	rangeEnd, err := strconv.Atoi(multipleNums[1])
-	if err != nil {
-		return nil, err
-	}
-
-	return BuildIntRange(rangeStart, rangeEnd), err
-}
-
-// Contains returns whether e is present in s
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-// RemoveIntListFromList removes all src's elements that are present in target
-func removeListFromList(src, target []string) []string {
-	max := len(target)
-	for i := 0; i < max; i++ {
-		if contains(src, target[i]) {
-			target = append(target[:i], target[i+1:]...)
-			max--
-			i--
-		}
-	}
-	return target
-}
-
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
-	//func numberMenu(cmdArgs *arguments) (err error) {
-	var num int
-
 	aurQ, err := narrowSearch(pkgS, true)
 	if err != nil {
 		fmt.Println("Error during AUR search:", err)
@@ -615,83 +550,55 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 
 	fmt.Println(bold(green(arrow + " Packages to install (eg: 1 2 3, 1-3 or ^4)")))
 	fmt.Print(bold(green(arrow + " ")))
+
 	reader := bufio.NewReader(os.Stdin)
 	numberBuf, overflow, err := reader.ReadLine()
-	if err != nil || overflow {
-		fmt.Println(err)
-		return
+
+	if err != nil {
+		return err
 	}
 
-	numberString := string(numberBuf)
-	var aurI, aurNI, repoNI, repoI []string
-	result := strings.Fields(numberString)
-	for _, numS := range result {
-		negate := numS[0] == '^'
-		if negate {
-			numS = numS[1:]
-		}
-		var numbers []int
-		num, err = strconv.Atoi(numS)
-		if err != nil {
-			numbers, err = BuildRange(numS)
-			if err != nil {
-				continue
-			}
-		} else {
-			numbers = []int{num}
+	if overflow {
+		return fmt.Errorf("Input too long")
+	}
+
+	include, exclude, _, otherExclude := parseNumberMenu(string(numberBuf))
+	arguments := makeArguments()
+
+	isInclude := len(exclude) == 0 && len(otherExclude) == 0
+
+	for i, pkg := range repoQ {
+		target := len(repoQ) - i
+		if config.SortMode == TopDown {
+			target = i + 1
 		}
 
-		// Install package
-		for _, x := range numbers {
-			var target string
-			if x > numaq+numpq || x <= 0 {
-				continue
-			} else if x > numpq {
-				if config.SortMode == BottomUp {
-					target = aurQ[numaq+numpq-x].Name
-				} else {
-					target = aurQ[x-numpq-1].Name
-				}
-				if negate {
-					aurNI = append(aurNI, target)
-				} else {
-					aurI = append(aurI, target)
-				}
-			} else {
-				if config.SortMode == BottomUp {
-					target = repoQ[numpq-x].Name()
-				} else {
-					target = repoQ[x-1].Name()
-				}
-				if negate {
-					repoNI = append(repoNI, target)
-				} else {
-					repoI = append(repoI, target)
-				}
-			}
+		if isInclude && include.get(target) {
+			arguments.addTarget(pkg.Name())
+		}
+		if !isInclude && !exclude.get(target) {
+			arguments.addTarget(pkg.Name())
 		}
 	}
 
-	if len(repoI) == 0 && len(aurI) == 0 &&
-		(len(aurNI) > 0 || len(repoNI) > 0) {
-		// If no package was specified, only exclusions, exclude from all the
-		// packages
-		for _, pack := range aurQ {
-			aurI = append(aurI, pack.Name)
+	for i, pkg := range aurQ {
+		target := len(aurQ) - i + len(repoQ)
+		if config.SortMode == TopDown {
+			target = i + 1 + len(repoQ)
 		}
-		for _, pack := range repoQ {
-			repoI = append(repoI, pack.Name())
+
+		if isInclude && include.get(target) {
+			arguments.addTarget(pkg.Name)
+		}
+		if !isInclude && !exclude.get(target) {
+			arguments.addTarget(pkg.Name)
 		}
 	}
-	aurI = removeListFromList(aurNI, aurI)
-	repoI = removeListFromList(repoNI, repoI)
 
 	if config.SudoLoop {
 		sudoLoopBackground()
 	}
-	arguments := makeArguments()
-	arguments.addTarget(repoI...)
-	arguments.addTarget(aurI...)
+
 	err = install(arguments)
 
 	return err

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -36,6 +37,20 @@ func (set stringSet) toSlice() []string {
 	}
 
 	return slice
+}
+
+func SliceToStringSet(in []string) stringSet {
+	set := make(stringSet)
+
+	for _, v := range in {
+		set.set(v)
+	}
+
+	return set
+}
+
+func makeStringSet(in ...string) stringSet {
+	return SliceToStringSet(in)
 }
 
 // Parses command line arguments in a way we can interact with programmatically but
@@ -553,4 +568,94 @@ func (parser *arguments) parseCommandLine() (err error) {
 	}
 
 	return
+}
+
+type intRange struct {
+	min int
+	max int
+}
+
+func makeIntRange(min, max int) intRange {
+	return intRange{
+		min,
+		max,
+	}
+}
+
+func (r intRange) get(n int) bool {
+	return n >= r.min && n <= r.max
+}
+
+type intRanges []intRange
+
+func (rs intRanges) get(n int) bool {
+	for _, r := range rs {
+		if r.get(n) {
+			return true
+		}
+	}
+
+	return false
+}
+
+//parses input for number menus
+//supports individual selection: 1 2 3 4
+//supports range selections: 1-4 10-20
+//supports negation: ^1 ^1-4
+//
+//include and excule holds numbers that should be added and should not be added
+//respectively. other holds anythign that can't be parsed as an int. This is
+//intended to allow words inside of number menus. e.g. 'all' 'none' 'abort'
+//of course the implementation is up to the caller, this function mearley parses
+//the input and organizes it
+func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) {
+	include := make(intRanges, 0, 0)
+	exclude := make(intRanges, 0, 0)
+	otherInclude := make(stringSet)
+	otherExclude := make(stringSet)
+
+	words := strings.Fields(input)
+
+	for _, word := range words {
+		var num1 int
+		var num2 int
+		var err error
+		invert := false
+		other := otherInclude
+
+		if word[0] == '^' {
+			invert = true
+			other = otherExclude
+			word = word[1:]
+		}
+
+		ranges := strings.SplitN(word, "-", 2)
+
+		num1, err = strconv.Atoi(ranges[0])
+		if err != nil {
+			other.set(strings.ToLower(word))
+			continue
+		}
+
+		if len(ranges) == 2 {
+			num2, err = strconv.Atoi(ranges[1])
+			if err != nil {
+				other.set(strings.ToLower(word))
+				continue
+			}
+		} else {
+			num2 = num1
+		}
+
+		mi := min(num1, num2)
+		ma := max(num1, num2)
+
+		if !invert {
+			include = append(include, makeIntRange(mi, ma))
+		} else {
+			exclude = append(exclude, makeIntRange(mi, ma))
+		}
+	}
+
+	return include, exclude, otherInclude, otherExclude
 }
