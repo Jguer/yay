@@ -62,8 +62,8 @@ Permanent configuration options:
     --redownloadall      Always download pkgbuilds of all AUR packages
     --noredownload       Skip pkgbuild download if in cache and up to date
     --mflags <flags>     Pass arguments to makepkg
-    --sudoloop           Loop sudo calls in the backgroud to avoid timeout
-    --nosudoloop         Do not loop sudo calls in the backgrount
+    --sudoloop           Loop sudo calls in the background to avoid timeout
+    --nosudoloop         Do not loop sudo calls in the background
 
 Print specific options:
     -c --complete        Used for completions
