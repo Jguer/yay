@@ -261,7 +261,8 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	for n, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		toPrint += magenta(strconv.Itoa(len(pkgs)-n)) + " " + bold(formatPkgbase(pkg, bases))
+		toPrint += fmt.Sprintf("%s %-40s", magenta(strconv.Itoa(len(pkgs)-n)),
+			bold(formatPkgbase(pkg, bases)))
 		if installed.get(pkg.Name) {
 			toPrint += bold(green(" (Installed)"))
 		}
@@ -277,7 +278,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	fmt.Print(toPrint)
 
 	if askClean {
-		fmt.Println(bold(green(arrow+" Packages to cleanBuild?")))
+		fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
 		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
 		fmt.Print(bold(green(arrow + " ")))
 		reader := bufio.NewReader(os.Stdin)
@@ -337,8 +338,8 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 		}
 	}
 
-	fmt.Println(bold(green(arrow+" PKGBUILDs to edit?")))
-	fmt.Println(bold(green(arrow) +cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
+	fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
+	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
 
 	fmt.Print(bold(green(arrow + " ")))
 	reader := bufio.NewReader(os.Stdin)
