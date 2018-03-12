@@ -188,6 +188,17 @@ func initAlpm() (err error) {
 		alpmConf.Architecture = value
 	}
 
+	value, _, exists = cmdArgs.getArg("ignore")
+	if exists {
+		alpmConf.IgnorePkg = append(alpmConf.IgnorePkg, strings.Split(value, ",")...)
+	}
+
+	value, _, exists = cmdArgs.getArg("ignoregroup")
+	if exists {
+		alpmConf.IgnoreGroup = append(alpmConf.IgnoreGroup, strings.Split(value, ",")...)
+	}
+
+
 	//TODO
 	//current system does not allow duplicate arguments
 	//but pacman allows multiple cachdirs to be passed

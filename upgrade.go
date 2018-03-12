@@ -140,8 +140,9 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 			}
 			if found {
 				if pkg.ShouldIgnore() {
+					left, right := getVersionDiff(pkg.Version(), "latest-commit")
 					fmt.Print(magenta("Warning: "))
-					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), pkg.Version(), "git")
+					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
 				} else {
 					packageC <- upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"}
 				}
@@ -229,8 +230,9 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		newPkg := pkg.NewVersion(dbList)
 		if newPkg != nil {
 			if pkg.ShouldIgnore() {
+				left, right := getVersionDiff(pkg.Version(), newPkg.Version())
 				fmt.Print(magenta("Warning: "))
-				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", pkg.Name(), pkg.Version(), newPkg.Version())
+				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
 			} else {
 				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
 			}
