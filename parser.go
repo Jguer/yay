@@ -560,11 +560,21 @@ func (parser *arguments) parseCommandLine() (err error) {
 	}
 
 	if cmdArgs.existsArg("-") {
+		var file *os.File
 		err = cmdArgs.parseStdin()
+		cmdArgs.delArg("-")
 
 		if err != nil {
 			return
 		}
+
+		file, err = os.Open("/dev/tty")
+
+		if err != nil {
+			return
+		}
+
+		os.Stdin = file
 	}
 
 	return
