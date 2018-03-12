@@ -131,6 +131,10 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 		})
 	}
 
+	for _, pkg := range pkgs {
+		dc.MakeOnly.remove(pkg)
+	}
+
 	dupes := make(map[*alpm.Package]struct{})
 	filteredRepo := make([]*alpm.Package, 0)
 
