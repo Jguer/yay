@@ -67,7 +67,9 @@ _yay() {
   print=('complete defaultconfig config numberupgrades stats upgrades' 'c d g n
   s u')
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
-           noconfirm noprogressbar noscriptlet quiet root verbose' 'b d h q r v')
+           noconfirm noprogressbar noscriptlet quiet save mflags buildir editor
+           makepkg pacman tar git config requestsplitn sudoloop nosudoloop
+           redownload noredownload redownloadall root verbose' 'b d h q r v')
   core=('database files help query remove sync upgrade version' 'D F Q R S U V h')
 
   for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P print'; do
