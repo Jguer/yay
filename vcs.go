@@ -142,14 +142,38 @@ func getCommit(url string, branch string, protocols []string) string {
 }
 
 func (infos shaInfos) needsUpdate() bool {
-	for url, info := range infos {
+	//used to signal we have gone through all sources and found nothing
+	finished := make(chan struct{})
+	alive := 0
+	
+	//if we find an update we use this to exit early and return true
+	hasUpdate := make(chan struct{})
+
+	checkHash := func(url string, info shaInfo) {
 		hash := getCommit(url, info.Brach, info.Protocols)
 		if hash != "" && hash != info.SHA {
-			return true
+			hasUpdate <- struct{}{}
+		} else {
+			finished <- struct{}{}
 		}
 	}
 
-	return false
+	for url, info := range infos {
+		alive++
+		go checkHash(url, info)
+	}
+
+	for {
+		select {
+		case <- hasUpdate:
+			return true
+		case <- finished:
+			alive--
+			if alive == 0 {
+				return false
+			}
+		}
+	}
 }
 
 func inStore(pkgName string) shaInfos {

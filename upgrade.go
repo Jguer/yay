@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"sync"
 	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
@@ -128,29 +129,50 @@ loop:
 }
 
 func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
-	for vcsName, e := range savedInfo {
+	toUpdate := make([]alpm.Package, 0, 0)
+	toRemove := make([]string, 0, 0)
+
+	var mux1 sync.Mutex
+	var mux2 sync.Mutex
+	var wg sync.WaitGroup
+
+	checkUpdate := func(vcsName string, e shaInfos) {
+		defer wg.Done()
+
 		if e.needsUpdate() {
-			found := false
-			var pkg alpm.Package
-			for _, r := range remote {
-				if r.Name() == vcsName {
-					found = true
-					pkg = r
+			for _, pkg := range remote {
+				if pkg.Name() == vcsName {
+					mux1.Lock()
+					toUpdate = append(toUpdate, pkg)
+					mux1.Unlock()
+					return
 				}
 			}
-			if found {
-				if pkg.ShouldIgnore() {
-					left, right := getVersionDiff(pkg.Version(), "latest-commit")
-					fmt.Print(magenta("Warning: "))
-					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
-				} else {
-					packageC <- upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"}
-				}
-			} else {
-				removeVCSPackage([]string{vcsName})
-			}
+
+			mux2.Lock()
+			toRemove = append(toRemove, vcsName)
+			mux2.Unlock()
 		}
 	}
+
+	for vcsName, e := range savedInfo {
+		wg.Add(1)
+		go checkUpdate(vcsName, e)
+	}
+
+	wg.Wait()
+
+	for _, pkg := range toUpdate {
+		if pkg.ShouldIgnore() {
+			left, right := getVersionDiff(pkg.Version(), "latest-commit")
+			fmt.Print(magenta("Warning: "))
+			fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
+		} else {
+			packageC <- upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"}
+		}
+	}
+
+	removeVCSPackage(toRemove)
 	done <- true
 }
 
