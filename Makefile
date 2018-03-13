@@ -1,11 +1,11 @@
 .PHONY: all default install test build release clean
 VERSION := $(shell git rev-list --count master)
-LDFLAGS=-ldflags '-s -w -X main.version=3.${VERSION}'
+LDFLAGS=-ldflags '-s -w -X main.version=4.${VERSION}'
 GOFILES := $(shell ls *.go | grep -v /vendor/)
 ARCH=$(shell uname -m)
 PKGNAME=yay
 
-PACKAGE=${PKGNAME}_3.${VERSION}_${ARCH}
+PACKAGE=${PKGNAME}_4.${VERSION}_${ARCH}
 
 default: build
 
