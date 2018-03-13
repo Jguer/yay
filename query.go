@@ -144,7 +144,14 @@ func syncInfo(pkgS []string) (err error) {
 	}
 
 	if len(aurS) != 0 {
-		info, err = aurInfo(aurS)
+		noDb := make([]string, 0, len(aurS))
+
+		for _, pkg := range aurS {
+			_, name := splitDbFromName(pkg)
+			noDb = append(noDb, name)
+		}
+
+		info, err = aurInfo(noDb)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -230,8 +237,16 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 	for _, _pkg := range toCheck {
 		db, name := splitDbFromName(_pkg)
 
-		foundPkg, errdb := dbList.FindSatisfier(name)
-		found := errdb == nil && (foundPkg.DB().Name() == db || db == "")
+		if db == "aur" {
+			aur = append(aur, _pkg)
+			continue
+		} else if db != "" {
+			repo = append(repo, _pkg)
+			continue
+		}
+
+		_, errdb := dbList.FindSatisfier(name)
+		found := errdb == nil
 
 		if !found {
 			_, errdb = dbList.PkgCachebyGroup(_pkg)

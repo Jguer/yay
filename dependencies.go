@@ -276,6 +276,12 @@ func getDepTree(pkgs []string) (*depTree, error) {
 
 		db, name := splitDbFromName(pkg)
 
+		if db == "aur" {
+			dt.ToProcess.set(name)
+			continue
+		}
+
+
 		// Check the repos for a matching dep
 		foundPkg, errdb := syncDb.FindSatisfier(name)
 		found := errdb == nil && (foundPkg.DB().Name() == db || db == "")
@@ -289,7 +295,7 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}
 
-		if db == "" || db == "aur" {
+		if db == "" {
 			dt.ToProcess.set(name)
 		} else {
 			dt.Missing.set(pkg)
