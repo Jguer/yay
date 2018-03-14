@@ -95,6 +95,9 @@ func install(parser *arguments) error {
 	}
 
 	hasAur := len(dt.Aur) != 0
+	if hasAur && 0 == os.Geteuid() {
+		return fmt.Errorf(red(arrow + " Refusing to install AUR Packages as root, Aborting."))
+	}
 	dc, err = getDepCatagories(parser.formatTargets(), dt)
 	if err != nil {
 		return err
