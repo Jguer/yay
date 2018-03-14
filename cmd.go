@@ -397,6 +397,14 @@ func handleConfig(option, value string) bool {
 		config.ReDownload = "all"
 	case "noredownload":
 		config.ReDownload = "no"
+	case "rebuild":
+		config.ReBuild = "yes"
+	case "rebuildall":
+		config.ReBuild = "all"
+	case "rebuildtree":
+		config.ReBuild = "tree"
+	case "norebuild":
+		config.ReBuild = "no"
 	case "mflags":
 		config.MFlags = value
 	case "builddir":

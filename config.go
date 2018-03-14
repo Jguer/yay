@@ -32,6 +32,7 @@ type Configuration struct {
 	PacmanConf    string `json:"pacmanconf"`
 	TarBin        string `json:"tarbin"`
 	ReDownload    string `json:"redownload"`
+	ReBuild       string `json:"rebuild"`
 	GitBin        string `json:"gitbin"`
 	GpgBin        string `json:"gpgbin"`
 	MFlags        string `json:"mflags"`
@@ -135,6 +136,7 @@ func defaultSettings(config *Configuration) {
 	config.TimeUpdate = false
 	config.RequestSplitN = 150
 	config.ReDownload = "no"
+	config.ReBuild = "no"
 }
 
 // Editor returns the preferred system editor.
