@@ -5,6 +5,7 @@ import (
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
+	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 type depTree struct {
@@ -309,6 +310,13 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	}
 
 	err = depTreeRecursive(dt, localDb, syncDb, false)
+	if err != nil {
+		return dt, err
+	}
+
+	if !cmdArgs.existsArg("d", "nodeps") {
+		err = checkVersions(dt)
+	}
 
 	return dt, err
 }
@@ -444,4 +452,65 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	depTreeRecursive(dt, localDb, syncDb, true)
 
 	return
+}
+
+func checkVersions(dt *depTree) error {
+	depStrings := make([]string, 0)
+	has := make(map[string]string)
+
+	for _, pkg := range dt.Aur {
+		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+			for _, dep := range deps {
+				depStrings = append(depStrings, dep)
+			}
+		}
+
+		has[pkg.Name] = pkg.Version
+
+		for _, name := range pkg.Provides {
+			_name, _ver := splitNameFromDep(name)
+			if _ver != "" {
+				has[_name] = _ver
+			}
+		}
+	}
+
+	for _, pkg := range dt.Repo {
+		pkg.Depends().ForEach(func(dep alpm.Depend) error {
+			if dep.Mod != alpm.DepModAny {
+				has[dep.Name] = dep.Version
+			}
+			return nil
+		})
+
+		has[pkg.Name()] = pkg.Version()
+
+		pkg.Provides().ForEach(func(dep alpm.Depend) error {
+			if dep.Mod != alpm.DepModAny {
+				has[dep.Name] = dep.Version
+			}
+			return nil
+		})
+
+	}
+
+	deps, _ := gopkg.ParseDeps(depStrings)
+
+	for _, dep := range deps {
+		verStr, ok := has[dep.Name]
+		if !ok {
+			continue
+		}
+
+		version, err := gopkg.NewCompleteVersion(verStr)
+		if err != nil {
+			return err
+		}
+
+		if !version.Satisfies(dep) {
+			dt.Missing.set(dep.String())
+		}
+	}
+
+	return nil
 }
