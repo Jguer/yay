@@ -625,15 +625,19 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		srcinfo := srcinfos[pkg.PackageBase]
 		version := srcinfo.CompleteVersion()
 
-		for _, split := range bases[pkg.PackageBase] {
-			file, err := completeFileName(dir, split.Name+"-"+version.String())
-			if err != nil {
-				return err
-			}
+		if config.ReBuild == "no" || (config.ReBuild == "yes" && !targets.get(pkg.Name)) {
+			for _, split := range bases[pkg.PackageBase] {
+				file, err := completeFileName(dir, split.Name+"-"+version.String())
+				if err != nil {
+					return err
+				}
 
-			if file == "" {
-				built = false
+				if file == "" {
+					built = false
+				}
 			}
+		} else {
+			built = false
 		}
 
 		if built {

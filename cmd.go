@@ -61,6 +61,10 @@ Permanent configuration options:
     --redownload         Always download pkgbuilds of targets
     --redownloadall      Always download pkgbuilds of all AUR packages
     --noredownload       Skip pkgbuild download if in cache and up to date
+    --rebuild            Always build target packages
+    --rebuildall         Always build all AUR packages
+    --rebuildtree       Always build all AUR packages even if installed
+    --norebuild          Skip package build if in cache and up to date
     --mflags <flags>     Pass arguments to makepkg
     --sudoloop           Loop sudo calls in the background to avoid timeout
     --nosudoloop         Do not loop sudo calls in the background
@@ -397,6 +401,14 @@ func handleConfig(option, value string) bool {
 		config.ReDownload = "all"
 	case "noredownload":
 		config.ReDownload = "no"
+	case "rebuild":
+		config.ReBuild = "yes"
+	case "rebuildall":
+		config.ReBuild = "all"
+	case "rebuildtree":
+		config.ReBuild = "tree"
+	case "norebuild":
+		config.ReBuild = "no"
 	case "mflags":
 		config.MFlags = value
 	case "builddir":

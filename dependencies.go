@@ -412,13 +412,17 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 
 				// Check if already installed.
 				_, isInstalled := localDb.PkgCache().FindSatisfier(versionedDep)
-				if isInstalled == nil {
+				if isInstalled == nil && config.ReBuild != "tree" {
 					continue
 				}
 
 				// Check the repos for a matching dep.
 				repoPkg, inRepos := syncDb.FindSatisfier(versionedDep)
 				if inRepos == nil {
+					if isInstalled == nil && config.ReBuild == "tree" {
+						continue
+					}
+
 					repoTreeRecursive(repoPkg, dt, localDb, syncDb)
 					continue
 				}

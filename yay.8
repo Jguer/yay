@@ -224,6 +224,31 @@ When downloading pkgbuilds if the pkgbuild is found in cache and is equal or
 newer than the AUR's version use that instead of downloading a new one\&.
 .RE
 .PP
+\fB\-\-rebuild\fR
+.RS 4
+Always build target packages even when a copy is available in cache\&.
+.RE
+.PP
+\fB\-\-rebuildall\fR
+.RS 4
+Always build all AUR packages even when a copy is available
+in cache\&.
+.RE
+.PP
+\fB\-\-rebuildtree\fR
+.RS 4
+When installing an AUR package rebuild and reinstall all of its AUR
+dependencies recursivley, even the ones already installed. This flag allows
+you to easily rebuild packages against your current system's libraries if they
+have become incompatible.
+.RE
+.PP
+\fB\-\-norebuild\fR
+.RS 4
+When building packages if the package is found in cache and is an equal version
+to the one wanted skip the package build and use the existing package\&.
+.RE
+.PP
 \fB\-\-mflags <flags>\fR
 .RS 4
 Passes arguments to makepkg\&. These flags get passed to every instance where
