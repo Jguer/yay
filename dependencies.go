@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
@@ -13,6 +14,7 @@ type depTree struct {
 	Repo      map[string]*alpm.Package
 	Aur       map[string]*rpc.Pkg
 	Missing   stringSet
+	Groups    stringSet
 }
 
 type depCatagories struct {
@@ -27,6 +29,7 @@ func makeDepTree() *depTree {
 		make(stringSet),
 		make(map[string]*alpm.Package),
 		make(map[string]*rpc.Pkg),
+		make(stringSet),
 		make(stringSet),
 	}
 
@@ -273,14 +276,9 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	}
 
 	for _, pkg := range pkgs {
-		// If they explicitly asked for it still look for installed pkgs
-		/*installedPkg, isInstalled := localDb.PkgCache().FindSatisfier(pkg)
-		if isInstalled == nil {
-			dt.Repo[installedPkg.Name()] = installedPkg
-			continue
-		}//*/
-
 		db, name := splitDbFromName(pkg)
+		var foundPkg *alpm.Package
+		var singleDb *alpm.Db
 
 		if db == "aur" {
 			dt.ToProcess.set(name)
@@ -288,16 +286,30 @@ func getDepTree(pkgs []string) (*depTree, error) {
 		}
 
 		// Check the repos for a matching dep
-		foundPkg, errdb := syncDb.FindSatisfier(name)
-		found := errdb == nil && (foundPkg.DB().Name() == db || db == "")
-		if found {
-			repoTreeRecursive(foundPkg, dt, localDb, syncDb)
-			continue
+		if db != "" {
+			singleDb, err = alpmHandle.SyncDbByName(db)
+			if err != nil {
+				return dt, err
+			}
+			foundPkg, err = singleDb.PkgCache().FindSatisfier(name)
+		} else {
+			foundPkg, err = syncDb.FindSatisfier(name)
 		}
 
-		_, isGroup := syncDb.PkgCachebyGroup(name)
-		if isGroup == nil {
+		if err == nil {
+			repoTreeRecursive(foundPkg, dt, localDb, syncDb)
 			continue
+		} else {
+			//would be better to check the groups from singleDb if
+			//the user specified a db but theres no easy way to do
+			//it without making alpm_lists so dont bother for now
+			//db/group is probably a rare use case
+			_, err := syncDb.PkgCachebyGroup(name)
+
+			if err == nil {
+				dt.Groups.set(pkg)
+				continue
+			}
 		}
 
 		if db == "" {
@@ -305,6 +317,10 @@ func getDepTree(pkgs []string) (*depTree, error) {
 		} else {
 			dt.Missing.set(pkg)
 		}
+	}
+
+	if len(dt.ToProcess) > 0 {
+		fmt.Println(bold(cyan("::") + " Querying AUR..."))
 	}
 
 	err = depTreeRecursive(dt, localDb, syncDb, false)
