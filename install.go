@@ -104,12 +104,20 @@ func install(parser *arguments) error {
 	}
 
 	for _, pkg := range dc.Repo {
-		arguments.addTarget(pkg.Name())
+		arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 	}
 
-	//for _, pkg := range repoTargets {
-	//	arguments.addTarget(pkg)
-	//}
+	dbList, err := alpmHandle.SyncDbs()
+	if err != nil {
+		return err
+	}
+	for _, pkg := range repoTargets {
+		_, name := splitDbFromName(pkg)
+		_, errdb := dbList.PkgCachebyGroup(name)
+		if errdb == nil {
+			arguments.addTarget(pkg)
+		}
+	}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
 		fmt.Println("There is nothing to do")
