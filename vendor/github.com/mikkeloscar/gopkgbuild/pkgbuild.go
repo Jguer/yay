@@ -17,6 +17,108 @@ type Dependency struct {
 	slt    bool             // defines if max version is strictly less than
 }
 
+// Restrict merges two dependencies together into a new dependency where the
+// conditions of both a and b are met
+func (a *Dependency) Restrict(b *Dependency) *Dependency {
+	newDep := &Dependency{
+		Name: a.Name,
+	}
+
+	if a.MaxVer != nil || b.MaxVer != nil {
+		newDep.MaxVer = &CompleteVersion{}
+
+		if a.MaxVer == nil {
+			*newDep.MaxVer = *b.MaxVer
+			newDep.slt = b.slt
+		} else if b.MaxVer == nil {
+			*newDep.MaxVer = *a.MaxVer
+			newDep.slt = a.slt
+		} else {
+			cmpMax := a.MaxVer.cmp(b.MaxVer)
+			if cmpMax >= 1 {
+				*newDep.MaxVer = *b.MaxVer
+				newDep.slt = b.slt
+			} else if cmpMax <= -1 {
+				*newDep.MaxVer = *a.MaxVer
+				newDep.slt = a.slt
+			} else if cmpMax == 0 {
+				if len(a.MaxVer.Pkgrel) > len(b.MaxVer.Pkgrel) {
+					*newDep.MaxVer = *a.MaxVer
+				} else {
+					*newDep.MaxVer = *b.MaxVer
+				}
+				if a.slt != b.slt {
+					newDep.slt = true
+				} else {
+					newDep.slt = a.slt
+				}
+			}
+		}
+	}
+
+	if a.MinVer != nil || b.MinVer != nil {
+		newDep.MinVer = &CompleteVersion{}
+
+		if a.MinVer == nil {
+			*newDep.MinVer = *b.MinVer
+			newDep.sgt = b.slt
+		} else if b.MinVer == nil {
+			*newDep.MinVer = *a.MinVer
+			newDep.sgt = a.sgt
+		} else {
+			cmpMin := a.MinVer.cmp(b.MinVer)
+			if cmpMin >= 1 {
+				*newDep.MinVer = *a.MinVer
+				newDep.sgt = a.sgt
+			} else if cmpMin <= -1 {
+				*newDep.MinVer = *b.MinVer
+				newDep.sgt = b.sgt
+			} else if cmpMin == 0 {
+				if len(a.MinVer.Pkgrel) > len(b.MinVer.Pkgrel) {
+					*newDep.MinVer = *a.MinVer
+				} else {
+					*newDep.MinVer = *b.MinVer
+				}
+				if a.sgt != b.sgt {
+					newDep.sgt = true
+				} else {
+					newDep.sgt = a.sgt
+				}
+			}
+		}
+	}
+
+	return newDep
+}
+
+func (dep *Dependency) String() string {
+	str := ""
+	greaterThan := ">"
+	lessThan := "<"
+
+	if !dep.sgt {
+		greaterThan = ">="
+	}
+
+	if !dep.slt {
+		lessThan = "<="
+	}
+
+	if dep.MinVer != nil {
+		str += dep.Name + greaterThan + dep.MinVer.String()
+
+		if dep.MaxVer != nil {
+			str += " "
+		}
+	}
+
+	if dep.MaxVer != nil {
+		str += dep.Name + lessThan + dep.MaxVer.String()
+	}
+
+	return str
+}
+
 // PKGBUILD is a struct describing a parsed PKGBUILD file.
 // Required fields are:
 //	pkgname
@@ -432,6 +534,7 @@ func ParseDeps(deps []string) ([]*Dependency, error) {
 func parseDependency(dep string, deps []*Dependency) ([]*Dependency, error) {
 	var name string
 	var dependency *Dependency
+	index := -1
 
 	if dep == "" {
 		return deps, nil
@@ -451,54 +554,56 @@ func parseDependency(dep string, deps []*Dependency) ([]*Dependency, error) {
 
 	// check if the dependency has been set before
 	name = dep[0:i]
-	for _, d := range deps {
+	for n, d := range deps {
 		if d.Name == name {
-			dependency = d
+			index = n
+			break
 		}
 	}
 
-	if dependency == nil {
-		dependency = &Dependency{
-			Name: name,
-			sgt:  false,
-			slt:  false,
+	dependency = &Dependency{
+		Name: name,
+		sgt:  false,
+		slt:  false,
+	}
+
+	if len(dep) != len(name) {
+		var eq bytes.Buffer
+		for _, c := range dep[i:] {
+			if c == '<' || c == '>' || c == '=' {
+				i++
+				eq.WriteRune(c)
+				continue
+			}
+			break
 		}
+
+		version, err := NewCompleteVersion(dep[i:])
+		if err != nil {
+			return nil, err
+		}
+
+		switch eq.String() {
+		case "=":
+			dependency.MinVer = version
+			dependency.MaxVer = version
+		case "<=":
+			dependency.MaxVer = version
+		case ">=":
+			dependency.MinVer = version
+		case "<":
+			dependency.MaxVer = version
+			dependency.slt = true
+		case ">":
+			dependency.MinVer = version
+			dependency.sgt = true
+		}
+	}
+
+	if index == -1 {
 		deps = append(deps, dependency)
-	}
-
-	if len(dep) == len(name) {
-		return deps, nil
-	}
-
-	var eq bytes.Buffer
-	for _, c := range dep[i:] {
-		if c == '<' || c == '>' || c == '=' {
-			i++
-			eq.WriteRune(c)
-			continue
-		}
-		break
-	}
-
-	version, err := NewCompleteVersion(dep[i:])
-	if err != nil {
-		return nil, err
-	}
-
-	switch eq.String() {
-	case "==":
-		dependency.MinVer = version
-		dependency.MaxVer = version
-	case "<=":
-		dependency.MaxVer = version
-	case ">=":
-		dependency.MinVer = version
-	case "<":
-		dependency.MaxVer = version
-		dependency.slt = true
-	case ">":
-		dependency.MinVer = version
-		dependency.sgt = true
+	} else {
+		deps[index] = deps[index].Restrict(dependency)
 	}
 
 	return deps, nil

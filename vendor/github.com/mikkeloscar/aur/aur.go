@@ -37,6 +37,7 @@ type Pkg struct {
 	MakeDepends    []string `json:"MakeDepends"`
 	CheckDepends   []string `json:"CheckDepends"`
 	Conflicts      []string `json:"Conflicts"`
+	Provides       []string `json:"Provides"`
 	Replaces       []string `json:"Replaces"`
 	OptDepends     []string `json:"OptDepends"`
 	License        []string `json:"License"`

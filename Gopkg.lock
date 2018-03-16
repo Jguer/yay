@@ -11,13 +11,13 @@
   branch = "master"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
-  revision = "03627b6521ed20e90583c747d106f65a33bd3720"
+  revision = "9050804dc7d471393053322aaaa40428fbd32de3"
 
 [[projects]]
   branch = "master"
   name = "github.com/mikkeloscar/gopkgbuild"
   packages = ["."]
-  revision = "3cdebdb8609f66a83e1b8bf5bf33b6d12d29940d"
+  revision = "32274fc52aa8f5eb28711da734179e9aea27b31f"
 
 [solve-meta]
   analyzer-name = "dep"
