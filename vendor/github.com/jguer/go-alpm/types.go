@@ -13,6 +13,7 @@ import "C"
 import (
 	"reflect"
 	"unsafe"
+	"fmt"
 )
 
 // Description of a dependency.
@@ -149,4 +150,100 @@ func (l BackupList) Slice() (slice []BackupFile) {
 		return nil
 	})
 	return
+}
+
+type QuestionAny struct {
+	ptr *C.alpm_question_any_t
+}
+
+func (question QuestionAny) SetAnswer(answer bool) {
+	if answer {
+		question.ptr.answer = 1
+	} else {
+		question.ptr.answer = 0
+	}
+}
+
+type QuestionInstallIgnorepkg struct {
+	ptr *C.alpm_question_install_ignorepkg_t
+}
+
+func (question QuestionAny) Type() QuestionType{
+	return QuestionType(question.ptr._type)
+}
+
+func (question QuestionAny) Answer() bool {
+	return question.ptr.answer == 1
+}
+
+func (question QuestionAny) QuestionInstallIgnorepkg() (QuestionInstallIgnorepkg, error) {
+	if question.Type() == QuestionTypeInstallIgnorepkg {
+		return *(*QuestionInstallIgnorepkg)(unsafe.Pointer(&question)), nil
+	}
+
+	return QuestionInstallIgnorepkg{}, fmt.Errorf("Can not convert to QuestionInstallIgnorepkg")
+}
+
+func (question QuestionInstallIgnorepkg) SetInstall(install bool) {
+	if install {
+		question.ptr.install = 1
+	} else {
+		question.ptr.install = 0
+	}
+}
+
+func (question QuestionInstallIgnorepkg) Type() QuestionType {
+	return QuestionType(question.ptr._type)
+}
+
+func (question QuestionInstallIgnorepkg) Install() bool {
+	return question.ptr.install == 1
+}
+
+func (question QuestionInstallIgnorepkg) Pkg(h *Handle) Package {
+	return Package {
+		question.ptr.pkg,
+		*h,
+	}
+}
+
+type QuestionReplace struct {
+	ptr *C.alpm_question_replace_t
+}
+
+func (question QuestionReplace) Type() QuestionType {
+	return QuestionType(question.ptr._type)
+}
+
+func (question QuestionReplace) SetReplace(replace bool) {
+	if replace {
+		question.ptr.replace = 1
+	} else {
+		question.ptr.replace = 0
+	}
+}
+
+func (question QuestionReplace) Replace() bool {
+	return  question.ptr.replace == 1
+}
+
+func (question QuestionReplace) NewPkg(h *Handle) Package {
+	return Package {
+		question.ptr.newpkg,
+		*h,
+	}
+}
+
+func (question QuestionReplace) OldPkg(h *Handle) Package {
+	return Package {
+		question.ptr.oldpkg,
+		*h,
+	}
+}
+
+func (question QuestionReplace) newDb(h *Handle) Db {
+	return Db {
+		question.ptr.newdb,
+		*h,
+	}
 }

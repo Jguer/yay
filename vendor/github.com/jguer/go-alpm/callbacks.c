@@ -10,6 +10,7 @@
 #include <alpm.h>
 
 void logCallback(uint16_t level, char *cstring);
+void questionCallback(alpm_question_t *question);
 
 void go_alpm_log_cb(alpm_loglevel_t level, const char *fmt, va_list arg) {
   char *s = malloc(128);
@@ -25,7 +26,14 @@ void go_alpm_log_cb(alpm_loglevel_t level, const char *fmt, va_list arg) {
   }
 }
 
-void go_alpm_set_logging(alpm_handle_t *handle) {
-  alpm_option_set_logcb(handle, go_alpm_log_cb);
+void go_alpm_question_cb(alpm_question_t *question) {
+	questionCallback(question);
 }
 
+void go_alpm_set_logging(alpm_handle_t *handle) {
+	alpm_option_set_logcb(handle, go_alpm_log_cb);
+}
+
+void go_alpm_set_question(alpm_handle_t *handle) {
+	alpm_option_set_questioncb(handle, go_alpm_question_cb);
+}

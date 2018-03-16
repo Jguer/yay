@@ -97,16 +97,16 @@ const (
 	LogFunction
 )
 
-type Question uint
+type QuestionType uint
 
 const (
-	QuestionInstallIgnorepkg Question = 1 << iota
-	QuestionReplacePkg
-	QuestionConflictPkg
-	QuestionCorruptedPkg
-	QuestionRemovePkgs
-	QuestionSelectProvider
-	QuestionImportKey
+	QuestionTypeInstallIgnorepkg QuestionType = 1 << iota
+	QuestionTypeReplacePkg
+	QuestionTypeConflictPkg
+	QuestionTypeCorruptedPkg
+	QuestionTypeRemovePkgs
+	QuestionTypeSelectProvider
+	QuestionTypeImportKey
 )
 
 type Validation int

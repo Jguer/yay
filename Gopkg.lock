@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
-  revision = "946a37df2f6cbb5b3c26870a9a51d3fc02ea0fe1"
+  revision = "c2766b2ff83df422e2be6073099849aab33cc1e7"
 
 [[projects]]
   branch = "master"

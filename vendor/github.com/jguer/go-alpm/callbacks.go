@@ -12,8 +12,16 @@ package alpm
 void logCallback(uint16_t level, char *cstring);
 void go_alpm_log_cb(alpm_loglevel_t level, const char *fmt, va_list arg);
 void go_alpm_set_logging(alpm_handle_t *handle);
+void go_alpm_set_question(alpm_handle_t *handle);
 */
 import "C"
+
+import (
+	"unsafe"
+)
+
+type logCallbackSig func(uint16, string)
+type questionCallbackSig func(QuestionAny)
 
 var DefaultLogLevel = LogWarning
 
@@ -23,14 +31,26 @@ func DefaultLogCallback(lvl uint16, s string) {
 	}
 }
 
-var log_callback = DefaultLogCallback
+var log_callback logCallbackSig
+var question_callback questionCallbackSig
 
 //export logCallback
 func logCallback(level uint16, cstring *C.char) {
 	log_callback(level, C.GoString(cstring))
 }
 
-func (h *Handle) SetLogCallback(cb func(uint16, string)) {
+//export questionCallback
+func questionCallback(question *C.alpm_question_t) {
+	q := (*C.alpm_question_any_t)(unsafe.Pointer(question))
+	question_callback(QuestionAny{q})
+}
+
+func (h *Handle) SetLogCallback(cb logCallbackSig) {
 	log_callback = cb
 	C.go_alpm_set_logging(h.ptr)
+}
+
+func (h *Handle) SetQuestionCallback(cb questionCallbackSig) {
+	question_callback = cb
+	C.go_alpm_set_question(h.ptr)
 }
