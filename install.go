@@ -184,7 +184,7 @@ func install(parser *arguments) error {
 
 		//conflicts have been checked so answer y for them
 		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
-		uask := alpm.Question(ask) | alpm.QuestionConflictPkg
+		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
 		//this downloads the package build sources but also causes
