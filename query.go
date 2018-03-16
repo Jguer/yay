@@ -249,7 +249,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		found := errdb == nil
 
 		if !found {
-			_, errdb = dbList.PkgCachebyGroup(_pkg)
+			_, errdb = dbList.PkgCachebyGroup(name)
 			found = errdb == nil
 		}
 

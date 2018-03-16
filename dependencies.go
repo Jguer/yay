@@ -290,7 +290,7 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}
 
-		_, isGroup := syncDb.PkgCachebyGroup(pkg)
+		_, isGroup := syncDb.PkgCachebyGroup(name)
 		if isGroup == nil {
 			continue
 		}
