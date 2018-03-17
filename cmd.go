@@ -46,6 +46,7 @@ Permanent configuration options:
     --pacman   <file>    pacman command to use
     --tar      <file>    bsdtar command to use
     --git      <file>    git command to use
+    --gpg      <file>    gpg command to use
     --config   <file>    pacman.conf file to use
 
     --requestsplitn <n>  Max amount of packages to query per AUR request
@@ -63,9 +64,10 @@ Permanent configuration options:
     --noredownload       Skip pkgbuild download if in cache and up to date
     --rebuild            Always build target packages
     --rebuildall         Always build all AUR packages
-    --rebuildtree       Always build all AUR packages even if installed
+    --rebuildtree        Always build all AUR packages even if installed
     --norebuild          Skip package build if in cache and up to date
     --mflags <flags>     Pass arguments to makepkg
+    --gpgflags <flags>   Pass arguments to gpg
     --sudoloop           Loop sudo calls in the background to avoid timeout
     --nosudoloop         Do not loop sudo calls in the background
 
@@ -201,7 +203,6 @@ func initAlpm() (err error) {
 	if exists {
 		alpmConf.IgnoreGroup = append(alpmConf.IgnoreGroup, strings.Split(value, ",")...)
 	}
-
 
 	//TODO
 	//current system does not allow duplicate arguments
@@ -411,6 +412,8 @@ func handleConfig(option, value string) bool {
 		config.ReBuild = "tree"
 	case "norebuild":
 		config.ReBuild = "no"
+	case "gpgflags":
+		config.GpgFlags = value
 	case "mflags":
 		config.MFlags = value
 	case "builddir":
@@ -425,6 +428,8 @@ func handleConfig(option, value string) bool {
 		config.TarBin = value
 	case "git":
 		config.GitBin = value
+	case "gpg":
+		config.GpgBin = value
 	case "requestsplitn":
 		n, err := strconv.Atoi(value)
 		if err == nil && n > 0 {

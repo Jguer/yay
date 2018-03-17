@@ -214,7 +214,7 @@ func install(parser *arguments) error {
 			return nil
 		}
 
-		err = checkPgpKeys(dc.Aur, dc.Bases, nil)
+		err = checkPgpKeys(dc.Aur, dc.Bases)
 		if err != nil {
 			return err
 		}

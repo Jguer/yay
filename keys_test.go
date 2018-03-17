@@ -143,7 +143,7 @@ func TestImportKeys(t *testing.T) {
 	defer os.RemoveAll(keyringDir)
 
 	config.GpgBin = "gpg"
-	keyringArgs := []string{"--homedir", keyringDir}
+	config.GpgFlags = fmt.Sprintf("--homedir %s", keyringDir)
 
 	casetests := []struct {
 		keys      []string
@@ -183,7 +183,7 @@ func TestImportKeys(t *testing.T) {
 	}
 
 	for _, tt := range casetests {
-		err := importKeys(keyringArgs, tt.keys)
+		err := importKeys(tt.keys)
 		if !tt.wantError {
 			if err != nil {
 				t.Fatalf("Got error %q, want no error", err)
@@ -212,7 +212,7 @@ func TestCheckPgpKeys(t *testing.T) {
 
 	config.BuildDir = buildDir
 	config.GpgBin = "gpg"
-	keyringArgs := []string{"--homedir", keyringDir}
+	config.GpgFlags = fmt.Sprintf("--homedir %s", keyringDir)
 
 	// Creating the dummy package data used in the tests.
 	dummyData := map[string]string{
@@ -292,7 +292,7 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 
 	for _, tt := range casetests {
-		err := checkPgpKeys(tt.pkgs, tt.bases, keyringArgs)
+		err := checkPgpKeys(tt.pkgs, tt.bases)
 		if !tt.wantError {
 			if err != nil {
 				t.Fatalf("Got error %q, want no error", err)
