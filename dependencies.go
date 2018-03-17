@@ -5,6 +5,7 @@ import (
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
+	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 type depTree struct {
@@ -44,10 +45,16 @@ func makeDependCatagories() *depCatagories {
 }
 
 // Cut the version requirement from a dependency leaving just the name.
-func getNameFromDep(dep string) string {
-	return strings.FieldsFunc(dep, func(c rune) bool {
+func splitNameFromDep(dep string) (string, string) {
+	split :=  strings.FieldsFunc(dep, func(c rune) bool {
 		return c == '>' || c == '<' || c == '='
-	})[0]
+	})
+
+	if len(split) == 1 {
+		return split[0], ""
+	}
+
+	return split[0], split[1]
 }
 
 //split apart db/package to db and package
@@ -106,7 +113,7 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 
 	for _, pkg := range pkgs {
 		_, name := splitDbFromName(pkg)
-		dep := getNameFromDep(name)
+		dep, _ := splitNameFromDep(name)
 		alpmpkg, exists := dt.Repo[dep]
 		if exists {
 			repoDepCatagoriesRecursive(alpmpkg, dc, dt, false)
@@ -187,7 +194,7 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 	for _, pkg := range dc.Bases[_pkg.PackageBase] {
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, _dep := range deps {
-				dep := getNameFromDep(_dep)
+				dep, _ := splitNameFromDep(_dep)
 
 				aurpkg, exists := dt.Aur[dep]
 				if exists {
@@ -303,6 +310,13 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	}
 
 	err = depTreeRecursive(dt, localDb, syncDb, false)
+	if err != nil {
+		return dt, err
+	}
+
+	if !cmdArgs.existsArg("d", "nodeps") {
+		err = checkVersions(dt)
+	}
 
 	return dt, err
 }
@@ -355,8 +369,9 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	nextProcess := make(stringSet)
 	currentProcess := make(stringSet)
 	// Strip version conditions
-	for dep := range dt.ToProcess {
-		currentProcess.set(getNameFromDep(dep))
+	for _dep := range dt.ToProcess {
+		dep, _ := splitNameFromDep(_dep)
+		currentProcess.set(dep)
 	}
 
 	// Assume toprocess only contains aur stuff we have not seen
@@ -390,7 +405,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 		// for each dep and makedep
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, versionedDep := range deps {
-				dep := getNameFromDep(versionedDep)
+				dep, _ := splitNameFromDep(versionedDep)
 
 				_, exists = dt.Aur[dep]
 				// We have it cached so skip.
@@ -437,4 +452,65 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	depTreeRecursive(dt, localDb, syncDb, true)
 
 	return
+}
+
+func checkVersions(dt *depTree) error {
+	depStrings := make([]string, 0)
+	has := make(map[string]string)
+
+	for _, pkg := range dt.Aur {
+		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+			for _, dep := range deps {
+				depStrings = append(depStrings, dep)
+			}
+		}
+
+		has[pkg.Name] = pkg.Version
+
+		for _, name := range pkg.Provides {
+			_name, _ver := splitNameFromDep(name)
+			if _ver != "" {
+				has[_name] = _ver
+			}
+		}
+	}
+
+	for _, pkg := range dt.Repo {
+		pkg.Depends().ForEach(func(dep alpm.Depend) error {
+			if dep.Mod != alpm.DepModAny {
+				has[dep.Name] = dep.Version
+			}
+			return nil
+		})
+
+		has[pkg.Name()] = pkg.Version()
+
+		pkg.Provides().ForEach(func(dep alpm.Depend) error {
+			if dep.Mod != alpm.DepModAny {
+				has[dep.Name] = dep.Version
+			}
+			return nil
+		})
+
+	}
+
+	deps, _ := gopkg.ParseDeps(depStrings)
+
+	for _, dep := range deps {
+		verStr, ok := has[dep.Name]
+		if !ok {
+			continue
+		}
+
+		version, err := gopkg.NewCompleteVersion(verStr)
+		if err != nil {
+			return err
+		}
+
+		if !version.Satisfies(dep) {
+			dt.Missing.set(dep.String())
+		}
+	}
+
+	return nil
 }
