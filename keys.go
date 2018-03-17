@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 
 	rpc "github.com/mikkeloscar/aur"
@@ -51,8 +52,8 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, gpgExtraArgs []s
 
 	// Mapping all the keys.
 	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		srcinfo := path.Join(config.BuildDir, pkg.PackageBase, ".SRCINFO")
+		pkgbuild, err := gopkg.ParseSRCINFO(srcinfo)
 		if err != nil {
 			return fmt.Errorf("%s: %s", pkg.Name, err)
 		}
