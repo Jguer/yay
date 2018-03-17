@@ -43,7 +43,7 @@ func (set pgpKeySet) get(key string) bool {
 // asks the user whether yay should try to import them. gpgExtraArgs are extra
 // parameters to pass to gpg, in order to facilitate testing, such as using a
 // different keyring. It can be nil.
-func checkPgpKeys(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg, gpgExtraArgs []string) error {
+func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, gpgExtraArgs []string) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
@@ -51,7 +51,13 @@ func checkPgpKeys(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases ma
 
 	// Mapping all the keys.
 	for _, pkg := range pkgs {
-		for _, key := range srcinfos[pkg.PackageBase].Validpgpkeys {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		if err != nil {
+			return fmt.Errorf("%s: %s", pkg.Name, err)
+		}
+
+		for _, key := range pkgbuild.Validpgpkeys {
 			// If key already marked as problematic, indicate the current
 			// PKGBUILD requires it.
 			if problematic.get(key) {
