@@ -54,7 +54,7 @@ func install(parser *arguments) error {
 
 	//only error if direct targets or deps are missing
 	for missingName := range dt.Missing {
-		if !remoteNamesCache.get(missingName) {
+		if !remoteNamesCache.get(missingName) || parser.targets.get(missingName) {
 			str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
 
 			for name := range dt.Missing {

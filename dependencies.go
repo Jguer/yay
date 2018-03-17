@@ -46,7 +46,7 @@ func makeDependCatagories() *depCatagories {
 
 // Cut the version requirement from a dependency leaving just the name.
 func splitNameFromDep(dep string) (string, string) {
-	split :=  strings.FieldsFunc(dep, func(c rune) bool {
+	split := strings.FieldsFunc(dep, func(c rune) bool {
 		return c == '>' || c == '<' || c == '='
 	})
 
@@ -288,7 +288,6 @@ func getDepTree(pkgs []string) (*depTree, error) {
 			continue
 		}
 
-
 		// Check the repos for a matching dep
 		foundPkg, errdb := syncDb.FindSatisfier(name)
 		found := errdb == nil && (foundPkg.DB().Name() == db || db == "")
@@ -456,21 +455,34 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 
 func checkVersions(dt *depTree) error {
 	depStrings := make([]string, 0)
-	has := make(map[string]string)
+	has := make(map[string][]string)
+
+	add := func(h map[string][]string, n string, v string) {
+		_, ok := h[n]
+		if !ok {
+			h[n] = make([]string, 0, 1)
+		}
+		h[n] = append(h[n], v)
+	}
 
 	for _, pkg := range dt.Aur {
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, dep := range deps {
-				depStrings = append(depStrings, dep)
+				_, _dep := splitNameFromDep(dep)
+				if _dep != "" {
+					depStrings = append(depStrings, dep)
+				}
 			}
 		}
 
-		has[pkg.Name] = pkg.Version
+		add(has, pkg.Name, pkg.Version)
 
 		for _, name := range pkg.Provides {
 			_name, _ver := splitNameFromDep(name)
 			if _ver != "" {
-				has[_name] = _ver
+				add(has, _name, _ver)
+			} else {
+				delete(has, _name)
 			}
 		}
 	}
@@ -478,17 +490,20 @@ func checkVersions(dt *depTree) error {
 	for _, pkg := range dt.Repo {
 		pkg.Depends().ForEach(func(dep alpm.Depend) error {
 			if dep.Mod != alpm.DepModAny {
-				has[dep.Name] = dep.Version
+				depStrings = append(depStrings, dep.String())
 			}
 			return nil
 		})
 
-		has[pkg.Name()] = pkg.Version()
+		add(has, pkg.Name(), pkg.Version())
 
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
 			if dep.Mod != alpm.DepModAny {
-				has[dep.Name] = dep.Version
+				add(has, dep.Name, dep.Version)
+			} else {
+				delete(has, dep.Name)
 			}
+
 			return nil
 		})
 
@@ -497,17 +512,25 @@ func checkVersions(dt *depTree) error {
 	deps, _ := gopkg.ParseDeps(depStrings)
 
 	for _, dep := range deps {
-		verStr, ok := has[dep.Name]
+		satisfied := false
+		verStrs, ok := has[dep.Name]
 		if !ok {
 			continue
 		}
 
-		version, err := gopkg.NewCompleteVersion(verStr)
-		if err != nil {
-			return err
+		for _, verStr := range verStrs {
+			version, err := gopkg.NewCompleteVersion(verStr)
+			if err != nil {
+				return err
+			}
+
+			if version.Satisfies(dep) {
+				satisfied = true
+				break
+			}
 		}
 
-		if !version.Satisfies(dep) {
+		if !satisfied {
 			dt.Missing.set(dep.String())
 		}
 	}
