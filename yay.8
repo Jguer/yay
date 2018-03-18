@@ -152,6 +152,12 @@ The command to use for \fBgit\fR calls. This can be a command in
 \fBPATH\fR or an absolute path to the file\&.
 .RE
 .PP
+\fB\-\-gpg <file>\fR
+.RS 4
+The command to use for \fBgpg\fR calls. This can be a command in
+\fBPATH\fR or an absolute path to the file\&.
+.RE
+.PP
 \fB\-\-config <file>\fR
 .RS 4
 The pacman config file to use\&.
@@ -254,6 +260,14 @@ to the one wanted skip the package build and use the existing package\&.
 Passes arguments to makepkg\&. These flags get passed to every instance where
 makepkg is called by Yay. Arguments are split on whitespace before being
 passed to makepkg. Multiple arguments may be passed by supplying a space
+separated list that is quoted by the shell.
+.RE
+.PP
+\fB\-\-gpgflags <flags>\fR
+.RS 4
+Passes arguments to gpg\&. These flags get passed to every instance where
+gpg is called by Yay. Arguments are split on whitespace before being
+passed to gpg. Multiple arguments may be passed by supplying a space
 separated list that is quoted by the shell.
 .RE
 .PP

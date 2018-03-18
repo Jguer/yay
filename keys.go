@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 
 	rpc "github.com/mikkeloscar/aur"
@@ -40,19 +41,17 @@ func (set pgpKeySet) get(key string) bool {
 }
 
 // checkPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
-// asks the user whether yay should try to import them. gpgExtraArgs are extra
-// parameters to pass to gpg, in order to facilitate testing, such as using a
-// different keyring. It can be nil.
-func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, gpgExtraArgs []string) error {
+// asks the user whether yay should try to import them.
+func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
-	args := append(gpgExtraArgs, "--list-keys")
+	args := append(strings.Fields(config.GpgFlags), "--list-keys")
 
 	// Mapping all the keys.
 	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		srcinfo := path.Join(config.BuildDir, pkg.PackageBase, ".SRCINFO")
+		pkgbuild, err := gopkg.ParseSRCINFO(srcinfo)
 		if err != nil {
 			return fmt.Errorf("%s: %s", pkg.Name, err)
 		}
@@ -83,16 +82,15 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, gpgExtraArgs []s
 		return err
 	}
 	if continueTask(question, "nN") {
-		return importKeys(gpgExtraArgs, problematic.toSlice())
+		return importKeys(problematic.toSlice())
 	}
 
 	return nil
 }
 
-// importKeys tries to import the list of keys specified in its argument. As
-// in checkGpgKeys, gpgExtraArgs are extra parameters to pass to gpg.
-func importKeys(gpgExtraArgs, keys []string) error {
-	args := append(gpgExtraArgs, "--recv-keys")
+// importKeys tries to import the list of keys specified in its argument.
+func importKeys(keys []string) error {
+	args := append(strings.Fields(config.GpgFlags), "--recv-keys")
 	cmd := exec.Command(config.GpgBin, append(args, keys...)...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 

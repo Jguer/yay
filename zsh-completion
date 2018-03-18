@@ -46,6 +46,7 @@ _pacman_opts_common=(
   '--pacman[pacman command to use]:pacman:_files'
   '--tar[bsdtar command to use]:tar:_files'
   '--git[git command to use]:git:_files'
+  '--gpg[gpg command to use]:gpg:_files'
 
   '--bottomup[Show AUR packages first]'
   '--topdown[Show repository packages first]'
@@ -59,6 +60,7 @@ _pacman_opts_common=(
   '--redownloadall[Always download pkgbuilds of all AUR packages]'
   '--noredownload[Skip pkgbuild download if in cache and up to date]'
   '--mflags[Pass arguments to makepkg]:mflags'
+  '--gpgflags[Pass arguments to gpg]:gpgflags'
   '--sudoloop[Loop sudo calls in the backgroud to avoid timeout]'
   '--nosudoloop[Do not loop sudo calls in the backgrount]'
 )

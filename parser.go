@@ -427,6 +427,8 @@ func hasParam(arg string) bool {
 	//yay params
 	case "mflags":
 		return true
+	case "gpgflags":
+		return true
 	case "builddir":
 		return true
 	case "editor":
@@ -438,6 +440,8 @@ func hasParam(arg string) bool {
 	case "tar":
 		return true
 	case "git":
+		return true
+	case "gpg":
 		return true
 	case "requestsplitn":
 		return true

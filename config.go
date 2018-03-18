@@ -35,6 +35,7 @@ type Configuration struct {
 	ReBuild       string `json:"rebuild"`
 	GitBin        string `json:"gitbin"`
 	GpgBin        string `json:"gpgbin"`
+	GpgFlags      string `json:"gpgflags"`
 	MFlags        string `json:"mflags"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
@@ -127,6 +128,7 @@ func defaultSettings(config *Configuration) {
 	config.NoConfirm = false
 	config.PacmanBin = "pacman"
 	config.PacmanConf = "/etc/pacman.conf"
+	config.GpgFlags = ""
 	config.MFlags = ""
 	config.SortMode = BottomUp
 	config.SudoLoop = false
