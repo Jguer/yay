@@ -16,13 +16,15 @@ import (
 
 // Install handles package installs
 func install(parser *arguments) error {
-	removeMake := false
 	requestTargets := parser.targets.toSlice()
 	aurTargets, repoTargets, err := packageSlices(requestTargets)
 	if err != nil {
 		return err
 	}
 
+	var incompatable stringSet
+	removeMake := false
+	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
 	var dc *depCatagories
 
@@ -200,26 +202,37 @@ func install(parser *arguments) error {
 		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
-		//this downloads the package build sources but also causes
-		//a version bumb for vsc packages
-		//that should not edit the sources so we should be safe to skip
-		//it and parse the srcinfo at the current version
+		//inital srcinfo parse before pkgver() bump
+		err = parsesrcinfosFile(dc.Aur, srcinfosStale, dc.Bases)
+		if err != nil {
+			return err
+		}
+
 		if arguments.existsArg("gendb") {
-			err = parsesrcinfosFile(dc.Aur, srcinfos, dc.Bases)
-			if err != nil {
-				return err
+			for _, pkg := range dc.Aur {
+				pkgbuild := srcinfosStale[pkg.PackageBase]
+
+				for _, pkg := range dc.Bases[pkg.PackageBase] {
+					updateVCSData(pkg.Name, pkgbuild.Source)
+				}
 			}
 
 			fmt.Println(bold(green(arrow + " GenDB finished. No packages were installed")))
 			return nil
 		}
 
-		err = checkPgpKeys(dc.Aur, dc.Bases)
+		incompatable, err = getIncompatable(dc.Aur, srcinfosStale, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		err = downloadPkgBuildsSources(dc.Aur, dc.Bases)
+
+		err = checkPgpKeys(dc.Aur, dc.Bases, srcinfosStale)
+		if err != nil {
+			return err
+		}
+
+		err = downloadPkgBuildsSources(dc.Aur, dc.Bases, incompatable)
 		if err != nil {
 			return err
 		}
@@ -228,8 +241,8 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
-
-		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases)
+	
+		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases, incompatable)
 		if err != nil {
 			return err
 		}
@@ -264,6 +277,41 @@ func install(parser *arguments) error {
 	}
 
 	return nil
+}
+
+func getIncompatable(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) (stringSet, error) {
+	incompatable := make(stringSet)
+	alpmArch, err := alpmHandle.Arch()
+	if err != nil {
+		return nil, err
+	}
+
+	nextpkg:
+	for _, pkg := range pkgs {
+		for _, arch := range srcinfos[pkg.PackageBase].Arch {
+			if arch == "any" || arch == alpmArch {
+				continue nextpkg
+			}
+		}
+
+		incompatable.set(pkg.PackageBase)
+	}
+
+	if len(incompatable) > 0 {
+		fmt.Print(
+			bold(green(("\nThe following packages are not compatable with your architecture:"))))
+		for pkg := range incompatable {
+			fmt.Print("  " + cyan(pkg))
+		}
+
+		fmt.Println()
+
+		if !continueTask("Try to build them anyway?", "nN") {
+			return nil, fmt.Errorf("Aborting due to user")
+		}
+	}
+
+	return incompatable, nil
 }
 
 func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
@@ -502,12 +550,7 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 			return fmt.Errorf("%s: %s", pkg.Name, err)
 		}
 
-		srcinfos[pkg.PackageBase] = pkgbuild
-
-		for _, pkg := range bases[pkg.PackageBase] {
-			updateVCSData(pkg.Name, pkgbuild.Source)
-		}
-
+		srcinfos[pkg.PackageBase] = pkgbuild	
 	}
 
 	return nil
@@ -571,10 +614,16 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 	return nil
 }
 
-func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
+func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatable stringSet) (err error) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		err = passToMakepkg(dir, "--nobuild", "--nocheck", "--noprepare", "--nodeps")
+		args := []string{"--nobuild", "--nocheck", "--noprepare", "--nodeps"}
+
+		if incompatable.get(pkg.PackageBase) {
+			args = append(args, "--ignorearch")
+		}
+
+		err = passToMakepkg(dir, args...)
 		if err != nil {
 			return fmt.Errorf("Error downloading sources: %s", formatPkgbase(pkg, bases))
 		}
@@ -583,7 +632,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err
 	return
 }
 
-func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg) error {
+func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg, incompatable stringSet) error {
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
 		return err
@@ -622,7 +671,13 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			fmt.Println(bold(red(arrow+" Warning:")),
 				pkg.Name+"-"+pkg.Version+" Already made -- skipping build")
 		} else {
-			err := passToMakepkg(dir, "-Ccf", "--noconfirm")
+			args := []string{"-Ccf", "--noconfirm"}
+
+			if incompatable.get(pkg.PackageBase) {
+				args = append(args, "--ignorearch")
+			}
+
+			err := passToMakepkg(dir, args...)
 			if err != nil {
 				return fmt.Errorf("Error making: %s", pkg.Name)
 			}

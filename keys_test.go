@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"testing"
 
 	rpc "github.com/mikkeloscar/aur"
@@ -18,31 +16,6 @@ func newPkg(basename string) *rpc.Pkg {
 
 func newSplitPkg(basename, name string) *rpc.Pkg {
 	return &rpc.Pkg{Name: name, PackageBase: basename}
-}
-
-func createSrcinfo(pkgbase, srcinfoData string) error {
-	dir := path.Join(config.BuildDir, pkgbase)
-	if err := os.Mkdir(dir, 0755); err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(path.Join(dir, ".SRCINFO"), []byte(srcinfoData), 0666)
-}
-
-func createDummyPkg(pkgbase string, keys []string, split []string) string {
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("pkgbase = %s\n\tpkgver = 42\n\tarch = x86_64\n", pkgbase))
-	// Keys.
-	for _, k := range keys {
-		buffer.WriteString(fmt.Sprintf("validpgpkeys = %s\n", k))
-	}
-
-	buffer.WriteString(fmt.Sprintf("\npkgname = %s\n", pkgbase))
-
-	for _, s := range split {
-		buffer.WriteString(fmt.Sprintf("\npkgname = %s%s\n", pkgbase, s))
-	}
-	return buffer.String()
 }
 
 func TestFormatKeysToImport(t *testing.T) {
@@ -214,25 +187,6 @@ func TestCheckPgpKeys(t *testing.T) {
 	config.GpgBin = "gpg"
 	config.GpgFlags = fmt.Sprintf("--homedir %s", keyringDir)
 
-	// Creating the dummy package data used in the tests.
-	dummyData := map[string]string{
-		"cower":   createDummyPkg("cower", []string{"487EACC08557AD082088DABA1EB2638FF56C0C53"}, nil),
-		"libc++":  createDummyPkg("libc++", []string{"11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D"}, []string{"abi", "experimental"}),
-		"dummy-1": createDummyPkg("dummy-1", []string{"ABAF11C65A2970B130ABE3C479BE3E4300411886"}, nil),
-		"dummy-2": createDummyPkg("dummy-2", []string{"ABAF11C65A2970B130ABE3C479BE3E4300411886"}, nil),
-		"dummy-3": createDummyPkg("dummy-3", []string{"11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB"}, nil),
-		"dummy-4": createDummyPkg("dummy-4", []string{"11E521D646982372EB577A1F8F0871F202119294"}, nil),
-		"dummy-5": createDummyPkg("dummy-5", []string{"C52048C0C0748FEE227D47A2702353E0F7E48EDB"}, nil),
-		"dummy-6": createDummyPkg("dummy-6", []string{"THIS-SHOULD-FAIL"}, nil),
-		"dummy-7": createDummyPkg("dummy-7", []string{"A314827C4E4250A204CE6E13284FC34C8E4B1A25", "THIS-SHOULD-FAIL"}, nil),
-	}
-
-	for pkgbase, srcinfoData := range dummyData {
-		if err = createSrcinfo(pkgbase, srcinfoData); err != nil {
-			t.Fatalf("Unable to create dummy data for package %q: %v\n", pkgbase, err)
-		}
-	}
-
 	casetests := []struct {
 		pkgs      []*rpc.Pkg
 		srcinfos  map[string]*gopkg.PKGBUILD
@@ -243,6 +197,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 487EACC08557AD082088DABA1EB2638FF56C0C53: Dave Reisner.
 		{
 			pkgs:      []*rpc.Pkg{newPkg("cower")},
+			srcinfos:  map[string]*gopkg.PKGBUILD{"cower": &gopkg.PKGBUILD{Pkgbase: "cower", Validpgpkeys: []string{"487EACC08557AD082088DABA1EB2638FF56C0C53"}}},
 			bases:     map[string][]*rpc.Pkg{"cower": {newPkg("cower")}},
 			wantError: false,
 		},
@@ -251,6 +206,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// B6C8F98282B944E3B0D5C2530FC3042E345AD05D: Hans Wennborg.
 		{
 			pkgs:      []*rpc.Pkg{newPkg("libc++")},
+			srcinfos:  map[string]*gopkg.PKGBUILD{"libc++": &gopkg.PKGBUILD{Pkgbase: "libc++", Validpgpkeys: []string{"11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D"}}},
 			bases:     map[string][]*rpc.Pkg{"libc++": {newPkg("libc++")}},
 			wantError: false,
 		},
@@ -258,6 +214,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// ABAF11C65A2970B130ABE3C479BE3E4300411886: Linus Torvalds.
 		{
 			pkgs:      []*rpc.Pkg{newPkg("dummy-1"), newPkg("dummy-2")},
+			srcinfos:  map[string]*gopkg.PKGBUILD{"dummy-1": &gopkg.PKGBUILD{Pkgbase: "dummy-1", Validpgpkeys: []string{"ABAF11C65A2970B130ABE3C479BE3E4300411886"}}, "dummy-2": &gopkg.PKGBUILD{Pkgbase: "dummy-2", Validpgpkeys: []string{"ABAF11C65A2970B130ABE3C479BE3E4300411886"}}},
 			bases:     map[string][]*rpc.Pkg{"dummy-1": {newPkg("dummy-1")}, "dummy-2": {newPkg("dummy-2")}},
 			wantError: false,
 		},
@@ -267,32 +224,36 @@ func TestCheckPgpKeys(t *testing.T) {
 		// C52048C0C0748FEE227D47A2702353E0F7E48EDB: Thomas Dickey.
 		{
 			pkgs:      []*rpc.Pkg{newPkg("dummy-3")},
+			srcinfos:  map[string]*gopkg.PKGBUILD{"dummy-3": &gopkg.PKGBUILD{Pkgbase: "dummy-3", Validpgpkeys: []string{"11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB"}}},
 			bases:     map[string][]*rpc.Pkg{"dummy-3": {newPkg("dummy-3")}},
 			wantError: false,
 		},
 		// Two dummy packages with existing keys.
 		{
 			pkgs:      []*rpc.Pkg{newPkg("dummy-4"), newPkg("dummy-5")},
+			srcinfos:  map[string]*gopkg.PKGBUILD{"dummy-4": &gopkg.PKGBUILD{Pkgbase: "dummy-4", Validpgpkeys: []string{"11E521D646982372EB577A1F8F0871F202119294"}}, "dummy-5": &gopkg.PKGBUILD{Pkgbase: "dummy-5", Validpgpkeys: []string{"C52048C0C0748FEE227D47A2702353E0F7E48EDB"}}},
 			bases:     map[string][]*rpc.Pkg{"dummy-4": {newPkg("dummy-4")}, "dummy-5": {newPkg("dummy-5")}},
 			wantError: false,
 		},
 		// Dummy package with invalid key, should fail.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("dummy-6")},
-			bases:     map[string][]*rpc.Pkg{"dummy-6": {newPkg("dummy-6")}},
+			pkgs:      []*rpc.Pkg{newPkg("dummy-7")},
+			srcinfos:  map[string]*gopkg.PKGBUILD{"dummy-7": &gopkg.PKGBUILD{Pkgbase: "dummy-7", Validpgpkeys: []string{"THIS-SHOULD-FAIL"}}},
+			bases:     map[string][]*rpc.Pkg{"dummy-7": {newPkg("dummy-7")}},
 			wantError: true,
 		},
 		// Dummy package with both an invalid an another valid key, should fail.
 		// A314827C4E4250A204CE6E13284FC34C8E4B1A25: Thomas Bächler.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("dummy-7")},
-			bases:     map[string][]*rpc.Pkg{"dummy-7": {newPkg("dummy-7")}},
+			pkgs:      []*rpc.Pkg{newPkg("dummy-8")},
+			srcinfos:  map[string]*gopkg.PKGBUILD{"dummy-8": &gopkg.PKGBUILD{Pkgbase: "dummy-8", Validpgpkeys: []string{"A314827C4E4250A204CE6E13284FC34C8E4B1A25", "THIS-SHOULD-FAIL"}}},
+			bases:     map[string][]*rpc.Pkg{"dummy-8": {newPkg("dummy-8")}},
 			wantError: true,
 		},
 	}
 
 	for _, tt := range casetests {
-		err := checkPgpKeys(tt.pkgs, tt.bases)
+		err := checkPgpKeys(tt.pkgs, tt.bases, tt.srcinfos)
 		if !tt.wantError {
 			if err != nil {
 				t.Fatalf("Got error %q, want no error", err)
