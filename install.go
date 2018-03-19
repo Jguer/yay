@@ -631,16 +631,28 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err
 }
 
 func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg) error {
+	alpmArch, err := alpmHandle.Arch()
+	if err != nil {
+		return err
+	}
+
 	for _, pkg := range pkgs {
+		var arch string
 		dir := config.BuildDir + pkg.PackageBase + "/"
 		built := true
 
 		srcinfo := srcinfos[pkg.PackageBase]
 		version := srcinfo.CompleteVersion()
 
+		if srcinfos[pkg.PackageBase].Arch[0] == "any" {
+			arch = "any"
+		} else {
+			arch = alpmArch
+		}
+
 		if config.ReBuild == "no" || (config.ReBuild == "yes" && !targets.get(pkg.Name)) {
 			for _, split := range bases[pkg.PackageBase] {
-				file, err := completeFileName(dir, split.Name+"-"+version.String())
+				file, err := completeFileName(dir, split.Name+"-"+version.String()+"-"+arch+".pkg")
 				if err != nil {
 					return err
 				}
@@ -678,13 +690,13 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		depArguments.addArg("D", "asdeps")
 
 		for _, split := range bases[pkg.PackageBase] {
-			file, err := completeFileName(dir, split.Name+"-"+version.String())
+			file, err := completeFileName(dir, split.Name+"-"+version.String()+"-"+arch+".pkg")
 			if err != nil {
 				return err
 			}
 
 			if file == "" {
-				return fmt.Errorf("Could not find built package " + split.Name + "-" + version.String())
+				return fmt.Errorf("Could not find built package " + split.Name + "-" + version.String() + "-" + arch + ".pkg")
 			}
 
 			arguments.addTarget(file)
