@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -619,14 +620,18 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 }
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) (err error) {
+	var wg sync.WaitGroup
 	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-		err = passToMakepkg(dir, "--nobuild", "--nocheck", "--noprepare", "--nodeps")
-		if err != nil {
-			return fmt.Errorf("Error downloading sources: %s", formatPkgbase(pkg, bases))
-		}
+		wg.Add(1)
+		go func(pkg *rpc.Pkg) {
+			defer wg.Done()
+			err = passToMakepkg(config.BuildDir+pkg.PackageBase+"/", "--nobuild", "--nocheck", "--noprepare", "--nodeps")
+			if err != nil {
+				fmt.Printf("Error downloading sources: %s", formatPkgbase(pkg, bases))
+			}
+		}(pkg)
 	}
-
+	wg.Wait()
 	return
 }
 
