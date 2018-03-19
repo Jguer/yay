@@ -63,9 +63,8 @@ func splitDbFromName(pkg string) (string, string) {
 
 	if len(split) == 2 {
 		return split[0], split[1]
-	} else {
-		return "", split[0]
 	}
+	return "", split[0]
 }
 
 // Step two of dependency resolving. We already have all the information on the

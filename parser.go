@@ -39,7 +39,7 @@ func (set stringSet) toSlice() []string {
 	return slice
 }
 
-func SliceToStringSet(in []string) stringSet {
+func sliceToStringSet(in []string) stringSet {
 	set := make(stringSet)
 
 	for _, v := range in {
@@ -50,7 +50,7 @@ func SliceToStringSet(in []string) stringSet {
 }
 
 func makeStringSet(in ...string) stringSet {
-	return SliceToStringSet(in)
+	return sliceToStringSet(in)
 }
 
 // Parses command line arguments in a way we can interact with programmatically but
@@ -519,8 +519,6 @@ func (parser *arguments) parseStdin() (err error) {
 
 		parser.addTarget(target)
 	}
-
-	return
 }
 
 func (parser *arguments) parseCommandLine() (err error) {

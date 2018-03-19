@@ -145,7 +145,7 @@ func install(parser *arguments) error {
 	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
 		err := passToPacman(arguments)
 		if err != nil {
-			return fmt.Errorf("Error installing repo packages.")
+			return fmt.Errorf("Error installing repo packages")
 		}
 
 		depArguments := makeArguments()
