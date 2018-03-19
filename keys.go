@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 
 	rpc "github.com/mikkeloscar/aur"
@@ -42,7 +41,7 @@ func (set pgpKeySet) get(key string) bool {
 
 // checkPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
+func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
@@ -50,13 +49,9 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 
 	// Mapping all the keys.
 	for _, pkg := range pkgs {
-		srcinfo := path.Join(config.BuildDir, pkg.PackageBase, ".SRCINFO")
-		pkgbuild, err := gopkg.ParseSRCINFO(srcinfo)
-		if err != nil {
-			return fmt.Errorf("%s: %s", pkg.Name, err)
-		}
+		srcinfo := srcinfos[pkg.PackageBase]
 
-		for _, key := range pkgbuild.Validpgpkeys {
+		for _, key := range srcinfo.Validpgpkeys {
 			// If key already marked as problematic, indicate the current
 			// PKGBUILD requires it.
 			if problematic.get(key) {
@@ -77,6 +72,7 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 		return nil
 	}
 
+	fmt.Println()
 	question, err := formatKeysToImport(problematic, bases)
 	if err != nil {
 		return err
