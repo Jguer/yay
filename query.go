@@ -236,6 +236,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 
 	for _, _pkg := range toCheck {
 		db, name := splitDbFromName(_pkg)
+		found := false
 
 		if db == "aur" {
 			aur = append(aur, _pkg)
@@ -245,11 +246,19 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 			continue
 		}
 
-		_, errdb := dbList.FindSatisfier(name)
-		found := errdb == nil
+		_ = dbList.ForEach(func(db alpm.Db) error {
+			_, err := db.PkgByName(name)
+
+			if err == nil {
+				found = true
+				return fmt.Errorf("")
+
+			}
+			return nil
+		})
 
 		if !found {
-			_, errdb = dbList.PkgCachebyGroup(name)
+			_, errdb := dbList.PkgCachebyGroup(name)
 			found = errdb == nil
 		}
 
