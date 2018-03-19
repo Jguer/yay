@@ -145,7 +145,7 @@ func install(parser *arguments) error {
 	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
 		err := passToPacman(arguments)
 		if err != nil {
-			return fmt.Errorf("Error installing repo packages.")
+			return fmt.Errorf("Error installing repo packages")
 		}
 
 		depArguments := makeArguments()
@@ -415,27 +415,6 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	return toClean, toEdit, nil
 }
 
-func askCleanBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) {
-	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-
-		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			str := pkg.Name
-			if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
-				str += " ("
-				for _, split := range bases[pkg.PackageBase] {
-					str += split.Name + " "
-				}
-				str = str[:len(str)-1] + ")"
-			}
-
-			if !continueTask(str+" Directory exists. Clean Build?", "yY") {
-				_ = os.RemoveAll(config.BuildDir + pkg.PackageBase)
-			}
-		}
-	}
-}
-
 func cleanBuilds(pkgs []*rpc.Pkg) {
 	for i, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase
@@ -489,32 +468,6 @@ func checkForConflicts(dc *depCatagories) error {
 		}
 
 		fmt.Println()
-	}
-
-	return nil
-}
-
-func askEditPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
-	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-
-		str := "Edit PKGBUILD? " + pkg.PackageBase
-		if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
-			str += " ("
-			for _, split := range bases[pkg.PackageBase] {
-				str += split.Name + " "
-			}
-			str = str[:len(str)-1] + ")"
-		}
-
-		if !continueTask(str, "yY") {
-			editcmd := exec.Command(editor(), dir+"PKGBUILD")
-			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-			err := editcmd.Run()
-			if err != nil {
-				return fmt.Errorf("Editor did not exit successfully, Abotring: %s", err)
-			}
-		}
 	}
 
 	return nil

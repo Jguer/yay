@@ -224,7 +224,7 @@ func initAlpm() (err error) {
 		return
 	}
 
-	alpmHandle.SetQuestionCallback(QuestionCallback)
+	alpmHandle.SetQuestionCallback(questionCallback)
 
 	return
 }
