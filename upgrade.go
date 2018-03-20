@@ -139,10 +139,21 @@ func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 
 	if len(errs) > 0 {
 		err = fmt.Errorf("%s", strings.Join(errs, "\n"))
+		return nil, nil, err
 	}
 
 	if develUp != nil {
-		aurUp = append(aurUp, develUp...)
+		names := make(stringSet)
+		for _, up := range develUp {
+			names.set(up.Name)
+		}
+		for _, up := range aurUp {
+			if !names.get(up.Name) {
+				develUp = append(develUp, up)
+			}
+		}
+
+		aurUp = develUp
 	}
 
 	return aurUp, repoUp, err
