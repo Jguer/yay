@@ -65,7 +65,7 @@ func (h Handle) LastError() error {
 //
 
 //helper functions for wrapping list_t getters and setters
-func (h Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringList, error){
+func (h Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringList, error) {
 	alpmList := f(h.ptr)
 	goList := StringList{(*list)(unsafe.Pointer(alpmList))}
 
@@ -74,7 +74,6 @@ func (h Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringLi
 	}
 	return goList, nil
 }
-
 
 func (h Handle) optionSetList(hookDirs []string, f func(*C.alpm_handle_t, *C.alpm_list_t) C.int) error {
 	var list *C.alpm_list_t = nil
@@ -141,9 +140,9 @@ func (h Handle) optionSetStr(str string, f func(*C.alpm_handle_t, *C.char) C.int
 	ok := f(h.ptr, c_str)
 
 	if ok < 0 {
-		 h.LastError()
+		h.LastError()
 	}
-	return  nil
+	return nil
 }
 
 //
@@ -167,7 +166,6 @@ func (h Handle) Lockfile() (string, error) {
 		return C.alpm_option_get_lockfile(handle)
 	})
 }
-
 
 func (h Handle) CacheDirs() (StringList, error) {
 	return h.optionGetList(func(handle *C.alpm_handle_t) *C.alpm_list_t {
@@ -472,7 +470,6 @@ func (h Handle) SetArch(str string) error {
 	})
 }
 
-
 func (h Handle) DeltaRatio() (float64, error) {
 	ok := C.alpm_option_get_deltaratio(h.ptr)
 	if ok < 0 {
@@ -488,7 +485,6 @@ func (h Handle) SetDeltaRatio(ratio float64) error {
 	}
 	return nil
 }
-
 
 func (h Handle) CheckSpace() (bool, error) {
 	ok := C.alpm_option_get_checkspace(h.ptr)
@@ -539,7 +535,7 @@ func (h Handle) GetDefaultSigLevel() (SigLevel, error) {
 
 func (h Handle) SetDefaultSigLevel(siglevel SigLevel) error {
 	ok := C.alpm_option_set_default_siglevel(h.ptr, C.alpm_siglevel_t(siglevel))
-	
+
 	if ok < 0 {
 		return h.LastError()
 	}
@@ -557,7 +553,7 @@ func (h Handle) GetLocalFileSigLevel() (SigLevel, error) {
 
 func (h Handle) SetLocalFileSigLevel(siglevel SigLevel) error {
 	ok := C.alpm_option_set_local_file_siglevel(h.ptr, C.alpm_siglevel_t(siglevel))
-	
+
 	if ok < 0 {
 		return h.LastError()
 	}

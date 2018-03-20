@@ -323,9 +323,9 @@ func (conf *PacmanConfig) CreateHandle() (*Handle, error) {
 	if err != nil {
 		return nil, err
 	}
-		
+
 	// add hook directories 1-by-1 to avoid overwriting the system directory
-	for _,dir := range conf.HookDir {
+	for _, dir := range conf.HookDir {
 		err = h.AddHookDir(dir)
 		if err != nil {
 			return nil, err
@@ -356,7 +356,7 @@ func (conf *PacmanConfig) CreateHandle() (*Handle, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	h.SetNoUpgrades(conf.NoUpgrade...)
 	if err != nil {
 		return nil, err
@@ -377,7 +377,6 @@ func (conf *PacmanConfig) CreateHandle() (*Handle, error) {
 		return nil, err
 	}
 
-
 	err = h.SetRemoteFileSigLevel(conf.RemoteFileSigLevel)
 	if err != nil {
 		return nil, err
@@ -388,12 +387,12 @@ func (conf *PacmanConfig) CreateHandle() (*Handle, error) {
 		return nil, err
 	}
 
-	err = h.SetUseSyslog(conf.Options & ConfUseSyslog > 0)
+	err = h.SetUseSyslog(conf.Options&ConfUseSyslog > 0)
 	if err != nil {
 		return nil, err
 	}
 
-	err = h.SetCheckSpace(conf.Options & ConfCheckSpace > 0)
+	err = h.SetCheckSpace(conf.Options&ConfCheckSpace > 0)
 	if err != nil {
 		return nil, err
 	}

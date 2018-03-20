@@ -93,7 +93,6 @@ func (l DependList) Slice() []Depend {
 	return slice
 }
 
-
 func (pkg Package) FileName() string {
 	return C.GoString(C.alpm_pkg_get_filename(pkg.pmpkg))
 }
@@ -105,7 +104,6 @@ func (pkg Package) Base() string {
 func (pkg Package) Base64Signature() string {
 	return C.GoString(C.alpm_pkg_get_base64_sig(pkg.pmpkg))
 }
-
 
 func (pkg Package) Validation() Validation {
 	return Validation(C.alpm_pkg_get_validation(pkg.pmpkg))

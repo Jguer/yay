@@ -11,18 +11,18 @@ package alpm
 import "C"
 
 import (
+	"fmt"
 	"reflect"
 	"unsafe"
-	"fmt"
 )
 
 // Description of a dependency.
 type Depend struct {
-	Name    string
-	Version string
+	Name        string
+	Version     string
 	Description string
-	NameHash uint
-	Mod     DepMod
+	NameHash    uint
+	Mod         DepMod
 }
 
 func convertDepend(dep *C.alpm_depend_t) Depend {
@@ -168,7 +168,7 @@ type QuestionInstallIgnorepkg struct {
 	ptr *C.alpm_question_install_ignorepkg_t
 }
 
-func (question QuestionAny) Type() QuestionType{
+func (question QuestionAny) Type() QuestionType {
 	return QuestionType(question.ptr._type)
 }
 
@@ -182,6 +182,14 @@ func (question QuestionAny) QuestionInstallIgnorepkg() (QuestionInstallIgnorepkg
 	}
 
 	return QuestionInstallIgnorepkg{}, fmt.Errorf("Can not convert to QuestionInstallIgnorepkg")
+}
+
+func (question QuestionAny) QuestionSelectProvider() (QuestionSelectProvider, error) {
+	if question.Type() == QuestionTypeSelectProvider {
+		return *(*QuestionSelectProvider)(unsafe.Pointer(&question)), nil
+	}
+
+	return QuestionSelectProvider{}, fmt.Errorf("Can not convert to QuestionInstallIgnorepkg")
 }
 
 func (question QuestionInstallIgnorepkg) SetInstall(install bool) {
@@ -201,7 +209,7 @@ func (question QuestionInstallIgnorepkg) Install() bool {
 }
 
 func (question QuestionInstallIgnorepkg) Pkg(h *Handle) Package {
-	return Package {
+	return Package{
 		question.ptr.pkg,
 		*h,
 	}
@@ -224,26 +232,53 @@ func (question QuestionReplace) SetReplace(replace bool) {
 }
 
 func (question QuestionReplace) Replace() bool {
-	return  question.ptr.replace == 1
+	return question.ptr.replace == 1
 }
 
 func (question QuestionReplace) NewPkg(h *Handle) Package {
-	return Package {
+	return Package{
 		question.ptr.newpkg,
 		*h,
 	}
 }
 
 func (question QuestionReplace) OldPkg(h *Handle) Package {
-	return Package {
+	return Package{
 		question.ptr.oldpkg,
 		*h,
 	}
 }
 
 func (question QuestionReplace) newDb(h *Handle) Db {
-	return Db {
+	return Db{
 		question.ptr.newdb,
 		*h,
 	}
+}
+
+type QuestionSelectProvider struct {
+	ptr *C.alpm_question_select_provider_t
+}
+
+func (question QuestionSelectProvider) Type() QuestionType {
+	return QuestionType(question.ptr._type)
+}
+
+func (question QuestionSelectProvider) SetUseIndex(index int) {
+	question.ptr.use_index = C.int(index)
+}
+
+func (question QuestionSelectProvider) UseIndex() int {
+	return int(question.ptr.use_index)
+}
+
+func (question QuestionSelectProvider) Providers(h *Handle) PackageList {
+	return PackageList{
+		(*list)(unsafe.Pointer(question.ptr.providers)),
+		*h,
+	}
+}
+
+func (question QuestionSelectProvider) Dep() Depend {
+	return convertDepend(question.ptr.depend)
 }
