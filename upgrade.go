@@ -28,9 +28,18 @@ func (u upSlice) Len() int      { return len(u) }
 func (u upSlice) Swap(i, j int) { u[i], u[j] = u[j], u[i] }
 
 func (u upSlice) Less(i, j int) bool {
-	iRunes := []rune(u[i].Repository)
-	jRunes := []rune(u[j].Repository)
+	if u[i].Repository != u[j].Repository {
+		iRunes := []rune(u[i].Repository)
+		jRunes := []rune(u[j].Repository)
+		return lessRunes(iRunes, jRunes)
+	} else {
+		iRunes := []rune(u[i].Name)
+		jRunes := []rune(u[j].Name)
+		return lessRunes(iRunes, jRunes)
+	}
+}
 
+func lessRunes(iRunes, jRunes []rune) bool {
 	max := len(iRunes)
 	if max > len(jRunes) {
 		max = len(jRunes)
@@ -44,16 +53,16 @@ func (u upSlice) Less(i, j int) bool {
 		ljr := unicode.ToLower(jr)
 
 		if lir != ljr {
-			return lir > ljr
+			return lir < ljr
 		}
 
 		// the lowercase runes are the same, so compare the original
 		if ir != jr {
-			return ir > jr
+			return ir < jr
 		}
 	}
 
-	return false
+	return len(iRunes) < len(jRunes)
 }
 
 func getVersionDiff(oldVersion, newversion string) (left, right string) {
@@ -272,6 +281,7 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	}
 
 	sort.Sort(repoUp)
+	sort.Sort(aurUp)
 	fmt.Println(bold(blue("::")), len(aurUp)+len(repoUp), bold("Packages to upgrade."))
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
