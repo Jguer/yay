@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	"sort"
 	"sync"
 	"unicode"
@@ -83,52 +84,62 @@ func getVersionDiff(oldVersion, newversion string) (left, right string) {
 func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 	local, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
-		return
+		return nil, nil, err
 	}
 
-	repoC := make(chan upSlice)
-	aurC := make(chan upSlice)
-	errC := make(chan error)
+	var wg sync.WaitGroup
+	var develUp upSlice
+
+	var repoErr error
+	var aurErr error
+	var develErr error
 
 	fmt.Println(bold(cyan("::") + " Searching databases for updates..."))
+	wg.Add(1)
 	go func() {
-		repoUpList, err := upRepo(local)
-		errC <- err
-		repoC <- repoUpList
+		repoUp, repoErr = upRepo(local)
+		wg.Done()
 	}()
 
 	fmt.Println(bold(cyan("::") + " Searching AUR for updates..."))
+	wg.Add(1)
 	go func() {
-		aurUpList, err := upAUR(remote, remoteNames, dt)
-		errC <- err
-		aurC <- aurUpList
+		aurUp, aurErr = upAUR(remote, remoteNames, dt)
+		wg.Done()
 	}()
 
-	var i = 0
-loop:
-	for {
-		select {
-		case repoUp = <-repoC:
-			i++
-		case aurUp = <-aurC:
-			i++
-		case err := <-errC:
-			if err != nil {
-				fmt.Println(err)
-			}
-		default:
-			if i == 2 {
-				close(repoC)
-				close(aurC)
-				close(errC)
-				break loop
-			}
+
+	if config.Devel {
+		fmt.Println(bold(cyan("::") + " Checking development packages..."))
+		wg.Add(1)
+		go func() {
+			develUp, develErr = upDevel(remote)
+			wg.Done()
+		}()
+	}
+
+
+	wg.Wait()
+
+	errs := make([]string, 0)
+	for _, e := range []error{repoErr, aurErr, develErr} {
+		if e != nil {
+			errs = append(errs, e.Error())
 		}
 	}
-	return
+
+	if len(errs) > 0 {
+		err = fmt.Errorf("%s", strings.Join(errs, "\n"))
+	}
+
+	if develUp != nil {
+		aurUp = append(aurUp, develUp...)
+	}
+
+	return aurUp, repoUp, err
 }
 
-func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
+func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
 	toUpdate := make([]alpm.Package, 0, 0)
 	toRemove := make([]string, 0, 0)
 
@@ -168,74 +179,36 @@ func upDevel(remote []alpm.Package, packageC chan upgrade, done chan bool) {
 			fmt.Print(magenta("Warning: "))
 			fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
 		} else {
-			packageC <- upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"}
+			toUpgrade = append(toUpgrade, upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"})
 		}
 	}
 
 	removeVCSPackage(toRemove)
-	done <- true
+	return
 }
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade upSlice, err error) {
-	var routines int
-	var routineDone int
-
-	packageC := make(chan upgrade)
-	done := make(chan bool)
-
-	if config.Devel {
-		routines++
-		go upDevel(remote, packageC, done)
-		fmt.Println(bold(cyan("::") + " Checking development packages..."))
-	}
-
-	routines++
-	go func(remote []alpm.Package, remoteNames []string, dt *depTree) {
-		for _, pkg := range remote {
-			aurPkg, ok := dt.Aur[pkg.Name()]
-			if !ok {
-				continue
-			}
-
-			if (config.TimeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
-				(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
-				if pkg.ShouldIgnore() {
-					left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
-					fmt.Print(magenta("Warning: "))
-					fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
-				} else {
-					packageC <- upgrade{aurPkg.Name, "aur", pkg.Version(), aurPkg.Version}
-				}
-			}
+	for _, pkg := range remote {
+		aurPkg, ok := dt.Aur[pkg.Name()]
+		if !ok {
+			continue
 		}
 
-		done <- true
-	}(remote, remoteNames, dt)
-
-	if routineDone == routines {
-		err = nil
-		return
-	}
-
-	for {
-		select {
-		case pkg := <-packageC:
-			for _, w := range toUpgrade {
-				if w.Name == pkg.Name {
-					continue
-				}
-			}
-			toUpgrade = append(toUpgrade, pkg)
-		case <-done:
-			routineDone++
-			if routineDone == routines {
-				err = nil
-				return
+		if (config.TimeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
+			(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
+			if pkg.ShouldIgnore() {
+				left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
+				fmt.Print(magenta("Warning: "))
+				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
+			} else {
+				toUpgrade = append(toUpgrade, upgrade{aurPkg.Name, "aur", pkg.Version(), aurPkg.Version})
 			}
 		}
 	}
+
+	return
 }
 
 // upRepo gathers local packages and checks if they have new versions.
