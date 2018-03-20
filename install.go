@@ -17,7 +17,7 @@ import (
 // Install handles package installs
 func install(parser *arguments) error {
 	requestTargets := parser.targets.toSlice()
-	aurTargets, repoTargets, err := packageSlices(requestTargets)
+	var err error
 	if err != nil {
 		return err
 	}
@@ -36,19 +36,16 @@ func install(parser *arguments) error {
 
 	//cache as a stringset. maybe make it return a string set in the first
 	//place
-	remoteNamesCache := make(stringSet)
-	for _, name := range remoteNames {
-		remoteNamesCache.set(name)
-	}
+	remoteNamesCache := sliceToStringSet(remoteNames)
 
 	//if we are doing -u also request every non repo package on the system
 	if parser.existsArg("u", "sysupgrade") {
 		requestTargets = append(requestTargets, remoteNames...)
 	}
 
-	if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
-		fmt.Println(bold(cyan("::") + " Querying AUR..."))
-	}
+	//if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
+	//	fmt.Println(bold(cyan("::") + " Querying AUR..."))
+	//}
 	dt, err := getDepTree(requestTargets)
 	if err != nil {
 		return err
@@ -114,16 +111,8 @@ func install(parser *arguments) error {
 		arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 	}
 
-	dbList, err := alpmHandle.SyncDbs()
-	if err != nil {
-		return err
-	}
-	for _, pkg := range repoTargets {
-		_, name := splitDbFromName(pkg)
-		_, errdb := dbList.PkgCachebyGroup(name)
-		if errdb == nil {
-			arguments.addTarget(pkg)
-		}
+	for pkg := range dt.Groups {
+		arguments.addTarget(pkg)
 	}
 
 	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
@@ -156,7 +145,7 @@ func install(parser *arguments) error {
 		for _, pkg := range dc.Repo {
 			depArguments.addTarget(pkg.Name())
 		}
-		for _, pkg := range repoTargets {
+		for pkg := range dt.Repo {
 			depArguments.delTarget(pkg)
 		}
 

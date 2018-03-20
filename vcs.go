@@ -145,7 +145,7 @@ func (infos shaInfos) needsUpdate() bool {
 	//used to signal we have gone through all sources and found nothing
 	finished := make(chan struct{})
 	alive := 0
-	
+
 	//if we find an update we use this to exit early and return true
 	hasUpdate := make(chan struct{})
 
@@ -165,9 +165,9 @@ func (infos shaInfos) needsUpdate() bool {
 
 	for {
 		select {
-		case <- hasUpdate:
+		case <-hasUpdate:
 			return true
-		case <- finished:
+		case <-finished:
 			alive--
 			if alive == 0 {
 				return false
