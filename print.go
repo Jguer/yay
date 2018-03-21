@@ -301,7 +301,7 @@ func printNumberOfUpdates() error {
 }
 
 //TODO: Make it less hacky
-func printUpdateList() error {
+func printUpdateList(parser *arguments) error {
 	old := os.Stdout // Keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()
@@ -312,12 +312,29 @@ func printUpdateList() error {
 	if err != nil {
 		return err
 	}
-	for _, pkg := range repoUp {
-		fmt.Println(pkg.Name)
+
+	noTargets := len(parser.targets) == 0
+
+	if !parser.existsArg("m", "foreigne") {
+		for _, pkg := range repoUp {
+			if noTargets || parser.targets.get(pkg.Name) {
+				fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+				delete(parser.targets, pkg.Name)
+			}
+		}
 	}
 
-	for _, pkg := range aurUp {
-		fmt.Println(pkg.Name)
+	if !parser.existsArg("n", "native") {
+		for _, pkg := range aurUp {
+			if noTargets || parser.targets.get(pkg.Name) {
+				fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+				delete(parser.targets, pkg.Name)
+			}
+		}
+	}
+
+	for pkg := range parser.targets {
+		fmt.Println(red(bold("error:")), "package '" + pkg + "' was not found")
 	}
 
 	return nil
