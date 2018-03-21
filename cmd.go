@@ -342,19 +342,19 @@ func handleCmd() (err error) {
 	case "V", "version":
 		handleVersion()
 	case "D", "database":
-		passToPacman(cmdArgs)
+		err = passToPacman(cmdArgs)
 	case "F", "files":
-		passToPacman(cmdArgs)
+		err = passToPacman(cmdArgs)
 	case "Q", "query":
-		passToPacman(cmdArgs)
+		err = handleQuery()
 	case "R", "remove":
-		handleRemove()
+		err = handleRemove()
 	case "S", "sync":
 		err = handleSync()
 	case "T", "deptest":
-		passToPacman(cmdArgs)
+		err = passToPacman(cmdArgs)
 	case "U", "upgrade":
-		passToPacman(cmdArgs)
+		err =passToPacman(cmdArgs)
 	case "G", "getpkgbuild":
 		err = handleGetpkgbuild()
 	case "P", "print":
@@ -368,6 +368,18 @@ func handleCmd() (err error) {
 	}
 
 	return
+}
+
+func handleQuery() error {
+	var err error
+
+	if cmdArgs.existsArg("u", "upgrades") {
+		err = printUpdateList(cmdArgs)
+	} else {
+		err = passToPacman(cmdArgs)
+	}
+
+	return err
 }
 
 //this function should only set config options
@@ -461,7 +473,7 @@ func handlePrint() (err error) {
 	case cmdArgs.existsArg("n", "numberupgrades"):
 		err = printNumberOfUpdates()
 	case cmdArgs.existsArg("u", "upgrades"):
-		err = printUpdateList()
+		err = printUpdateList(cmdArgs)
 	case cmdArgs.existsArg("c", "complete"):
 		switch {
 		case cmdArgs.existsArg("f", "fish"):
