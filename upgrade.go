@@ -281,14 +281,14 @@ func removeIntListFromList(src, target []int) []int {
 
 // upgradePkgs handles updating the cache and installing updates.
 func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
-	repoNames := make(stringSet)
+	ignore := make(stringSet)
 	aurNames := make(stringSet)
 
 	aurUp, repoUp, err := upList(dt)
 	if err != nil {
-		return repoNames, aurNames, err
+		return ignore, aurNames, err
 	} else if len(aurUp)+len(repoUp) == 0 {
-		return repoNames, aurNames, err
+		return ignore, aurNames, err
 	}
 
 	sort.Sort(repoUp)
@@ -298,13 +298,10 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	aurUp.Print(1)
 
 	if config.NoConfirm {
-		for _, up := range repoUp {
-			repoNames.set(up.Name)
-		}
 		for _, up := range aurUp {
 			aurNames.set(up.Name)
 		}
-		return repoNames, aurNames, nil
+		return ignore, aurNames, nil
 	}
 
 	fmt.Println(bold(green(arrow + " Packages to not upgrade (eg: 1 2 3, 1-3, ^4 or repo name)")))
@@ -329,16 +326,18 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 
 	for i, pkg := range repoUp {
 		if isInclude && otherInclude.get(pkg.Repository) {
-			continue
+			ignore.set(pkg.Name)
 		}
 
 		if isInclude && !include.get(len(repoUp)-i+len(aurUp)) {
-			repoNames.set(pkg.Name)
+			continue
 		}
 
 		if !isInclude && (exclude.get(len(repoUp)-i+len(aurUp)) || otherExclude.get(pkg.Repository)) {
-			repoNames.set(pkg.Name)
+			continue
 		}
+
+		ignore.set(pkg.Name)
 	}
 
 	for i, pkg := range aurUp {
@@ -355,5 +354,5 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 		}
 	}
 
-	return repoNames, aurNames, err
+	return ignore, aurNames, err
 }

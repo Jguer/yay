@@ -64,25 +64,21 @@ func install(parser *arguments) error {
 
 	//create the arguments to pass for the repo install
 	arguments := parser.copy()
-	arguments.delArg("u", "sysupgrade")
 	arguments.delArg("y", "refresh")
 	arguments.op = "S"
 	arguments.targets = make(stringSet)
 
 	if parser.existsArg("u", "sysupgrade") {
-		repoUp, aurUp, err := upgradePkgs(dt)
+		ignore, aurUp, err := upgradePkgs(dt)
 		if err != nil {
 			return err
 		}
 
+		arguments.addParam("ignore", strings.Join(ignore.toSlice(), ","))
 		fmt.Println()
 
 		for pkg := range aurUp {
 			parser.addTarget(pkg)
-		}
-
-		for pkg := range repoUp {
-			arguments.addTarget(pkg)
 		}
 
 		//discard stuff thats
@@ -184,7 +180,7 @@ func install(parser *arguments) error {
 		}
 	}
 
-	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
+	if !parser.existsArg("gendb") && (len(arguments.targets) > 0 || arguments.existsArg("u")) {
 		err := passToPacman(arguments)
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages")
