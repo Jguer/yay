@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	alpm "github.com/jguer/go-alpm"
 )
 
 var cmdArgs = makeArguments()
@@ -222,6 +224,15 @@ func initAlpm() (err error) {
 	if err != nil {
 		err = fmt.Errorf("Unable to CreateHandle: %s", err)
 		return
+	}
+
+	value, _, exists = cmdArgs.getArg("color")
+	if value == "always" || value == "auto" {
+		useColor = true
+	} else if value == "never" {
+		useColor = false
+	} else {
+		useColor = alpmConf.Options&alpm.ConfColor > 0
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)

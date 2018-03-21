@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -347,7 +346,7 @@ func formatTime(i int) string {
 }
 
 func red(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
+	if useColor {
 		return "\x1b[31m" + in + "\x1b[0m"
 	}
 
@@ -355,7 +354,7 @@ func red(in string) string {
 }
 
 func green(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
+	if useColor {
 		return "\x1b[32m" + in + "\x1b[0m"
 	}
 
@@ -363,7 +362,7 @@ func green(in string) string {
 }
 
 func yellow(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
+	if useColor {
 		return "\x1b[33m" + in + "\x1b[0m"
 	}
 
@@ -371,7 +370,7 @@ func yellow(in string) string {
 }
 
 func blue(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
+	if useColor {
 		return "\x1b[34m" + in + "\x1b[0m"
 	}
 
@@ -379,7 +378,7 @@ func blue(in string) string {
 }
 
 func cyan(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
+	if useColor {
 		return "\x1b[36m" + in + "\x1b[0m"
 	}
 
@@ -387,7 +386,7 @@ func cyan(in string) string {
 }
 
 func magenta(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
+	if useColor {
 		return "\x1b[35m" + in + "\x1b[0m"
 	}
 
@@ -395,7 +394,7 @@ func magenta(in string) string {
 }
 
 func bold(in string) string {
-	if alpmConf.Options&alpm.ConfColor > 0 {
+	if useColor {
 		return "\x1b[1m" + in + "\x1b[0m"
 	}
 
@@ -405,7 +404,7 @@ func bold(in string) string {
 // Colours text using a hashing algorithm. The same text will always produce the
 // same colour while different text will produce a different colour.
 func colourHash(name string) (output string) {
-	if alpmConf.Options&alpm.ConfColor == 0 {
+	if !useColor {
 		return name
 	}
 	var hash = 5381
