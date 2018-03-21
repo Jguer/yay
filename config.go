@@ -61,6 +61,9 @@ const completionFilePrefix string = "aur_"
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
 
+// useColor enables/disables colored printing
+var useColor bool
+
 // configHome handles config directory home
 var configHome string
 
