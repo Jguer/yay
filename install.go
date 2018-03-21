@@ -18,16 +18,14 @@ import (
 func install(parser *arguments) error {
 	requestTargets := parser.targets.toSlice()
 	var err error
-	if err != nil {
-		return err
-	}
-
 	var incompatable stringSet
+	var dc *depCatagories
+	var toClean []*rpc.Pkg
+	var toEdit []*rpc.Pkg
+
 	removeMake := false
 	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
-	var dc *depCatagories
-
 	//remotenames: names of all non repo packages on the system
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -131,40 +129,14 @@ func install(parser *arguments) error {
 				return err
 			}
 		}
-	}
 
-	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
-		err := passToPacman(arguments)
-		if err != nil {
-			return fmt.Errorf("Error installing repo packages")
-		}
-
-		depArguments := makeArguments()
-		depArguments.addArg("D", "asdeps")
-
-		for _, pkg := range dc.Repo {
-			depArguments.addTarget(pkg.Name())
-		}
-		for pkg := range dt.Repo {
-			depArguments.delTarget(pkg)
-		}
-
-		if len(depArguments.targets) > 0 {
-			_, stderr, err := passToPacmanCapture(depArguments)
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
-		}
-	}
-
-	if hasAur {
 		if len(dc.MakeOnly) > 0 {
 			if !continueTask("Remove make dependencies after install?", "yY") {
 				removeMake = true
 			}
 		}
 
-		toClean, toEdit, err := cleanEditNumberMenu(dc.Aur, dc.Bases, remoteNamesCache)
+		toClean, toEdit, err = cleanEditNumberMenu(dc.Aur, dc.Bases, remoteNamesCache)
 		if err != nil {
 			return err
 		}
@@ -181,15 +153,6 @@ func install(parser *arguments) error {
 				return err
 			}
 		}
-
-		if len(toEdit) > 0 && !continueTask("Proceed with install?", "nN") {
-			return fmt.Errorf("Aborting due to user")
-		}
-
-		//conflicts have been checked so answer y for them
-		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
-		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
-		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
 		//inital srcinfo parse before pkgver() bump
 		err = parsesrcinfosFile(dc.Aur, srcinfosStale, dc.Bases)
@@ -215,11 +178,45 @@ func install(parser *arguments) error {
 			return err
 		}
 
-
 		err = checkPgpKeys(dc.Aur, dc.Bases, srcinfosStale)
 		if err != nil {
 			return err
 		}
+	}
+
+	if !parser.existsArg("gendb") && len(arguments.targets) > 0 {
+		err := passToPacman(arguments)
+		if err != nil {
+			return fmt.Errorf("Error installing repo packages")
+		}
+
+		depArguments := makeArguments()
+		depArguments.addArg("D", "asdeps")
+
+		for _, pkg := range dc.Repo {
+			depArguments.addTarget(pkg.Name())
+		}
+		for pkg := range dt.Repo {
+			depArguments.delTarget(pkg)
+		}
+
+		if len(depArguments.targets) > 0 {
+			_, stderr, err := passToPacmanCapture(depArguments)
+			if err != nil {
+				return fmt.Errorf("%s%s", stderr, err)
+			}
+		}
+	} else if hasAur {
+		if len(toEdit) > 0 && !continueTask("Proceed with install?", "nN") {
+			return fmt.Errorf("Aborting due to user")
+		}
+	}
+
+	if hasAur {
+		//conflicts have been checked so answer y for them
+		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
+		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
 		err = downloadPkgBuildsSources(dc.Aur, dc.Bases, incompatable)
 		if err != nil {
@@ -230,7 +227,7 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
-	
+
 		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases, incompatable)
 		if err != nil {
 			return err
@@ -275,7 +272,7 @@ func getIncompatable(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases
 		return nil, err
 	}
 
-	nextpkg:
+nextpkg:
 	for _, pkg := range pkgs {
 		for _, arch := range srcinfos[pkg.PackageBase].Arch {
 			if arch == "any" || arch == alpmArch {
@@ -539,7 +536,7 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 			return fmt.Errorf("%s: %s", pkg.Name, err)
 		}
 
-		srcinfos[pkg.PackageBase] = pkgbuild	
+		srcinfos[pkg.PackageBase] = pkgbuild
 	}
 
 	return nil
