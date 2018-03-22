@@ -137,7 +137,7 @@ func syncSearch(pkgS []string) (err error) {
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string) (err error) {
-	var info []rpc.Pkg
+	var info []*rpc.Pkg
 	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
@@ -170,7 +170,7 @@ func syncInfo(pkgS []string) (err error) {
 
 	if len(aurS) != 0 {
 		for _, pkg := range info {
-			PrintInfo(&pkg)
+			PrintInfo(pkg)
 		}
 	}
 
@@ -336,8 +336,8 @@ func statistics() (info struct {
 // of packages exceeds the number set in config.RequestSplitN.
 // If the number does exceed config.RequestSplitN multiple rpc requests will be
 // performed concurrently.
-func aurInfo(names []string) ([]rpc.Pkg, error) {
-	info := make([]rpc.Pkg, 0, len(names))
+func aurInfo(names []string) ([]*rpc.Pkg, error) {
+	info := make([]*rpc.Pkg, 0, len(names))
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
@@ -358,7 +358,10 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 			return
 		}
 		mux.Lock()
-		info = append(info, tempInfo...)
+		for _, _i := range tempInfo {
+			i := _i
+			info = append(info, &i)
+		}
 		mux.Unlock()
 	}
 

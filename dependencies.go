@@ -397,10 +397,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 
 	// Cache the results
 	for _, pkg := range info {
-		// Copying to p fixes a bug.
-		// Would rather not copy but cant find another way to fix.
-		p := pkg
-		dt.Aur[pkg.Name] = &p
+		dt.Aur[pkg.Name] = pkg
 
 	}
 
