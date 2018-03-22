@@ -122,6 +122,8 @@ func updateVCSData(pkgName string, sources []string) {
 		}
 
 		savedInfo[pkgName] = info
+
+		fmt.Println(bold(green(arrow + " Found git repo: ")) + cyan(url))
 		saveVCSInfo()
 	}
 }
