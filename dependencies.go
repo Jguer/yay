@@ -472,14 +472,6 @@ func checkVersions(dt *depTree) error {
 	depStrings := make([]string, 0)
 	has := make(map[string][]string)
 
-	add := func(h map[string][]string, n string, v string) {
-		_, ok := h[n]
-		if !ok {
-			h[n] = make([]string, 0, 1)
-		}
-		h[n] = append(h[n], v)
-	}
-
 	for _, pkg := range dt.Aur {
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, dep := range deps {
@@ -490,12 +482,12 @@ func checkVersions(dt *depTree) error {
 			}
 		}
 
-		add(has, pkg.Name, pkg.Version)
+		addMapStringSlice(has, pkg.Name, pkg.Version)
 
 		for _, name := range pkg.Provides {
 			_name, _ver := splitNameFromDep(name)
 			if _ver != "" {
-				add(has, _name, _ver)
+				addMapStringSlice(has, _name, _ver)
 			} else {
 				delete(has, _name)
 			}
@@ -510,11 +502,11 @@ func checkVersions(dt *depTree) error {
 			return nil
 		})
 
-		add(has, pkg.Name(), pkg.Version())
+		addMapStringSlice(has, pkg.Name(), pkg.Version())
 
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
 			if dep.Mod != alpm.DepModAny {
-				add(has, dep.Name, dep.Version)
+				addMapStringSlice(has, dep.Name, dep.Version)
 			} else {
 				delete(has, dep.Name)
 			}

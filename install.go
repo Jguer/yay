@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -675,24 +674,4 @@ func clean(pkgs []*rpc.Pkg) {
 			" CleanAfter enabled. Deleting " + pkg.Name + " source folder.")))
 		os.RemoveAll(dir)
 	}
-}
-
-func completeFileName(dir, name string) (string, error) {
-
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return "", err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-
-		if strings.HasPrefix(file.Name(), name) {
-			return dir + file.Name(), nil
-		}
-	}
-
-	return "", nil
 }

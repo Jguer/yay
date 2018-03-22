@@ -331,20 +331,6 @@ func statistics() (info struct {
 	return
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a < b {
-		return b
-	}
-	return a
-}
-
 // Queries the aur for information about specified packages.
 // All packages should be queried in a single rpc request except when the number
 // of packages exceeds the number set in config.RequestSplitN.
