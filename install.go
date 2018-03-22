@@ -190,10 +190,9 @@ func install(parser *arguments) error {
 		depArguments.addArg("D", "asdeps")
 
 		for _, pkg := range dc.Repo {
-			depArguments.addTarget(pkg.Name())
-		}
-		for pkg := range dt.Repo {
-			depArguments.delTarget(pkg)
+			if !parser.targets.get(pkg.Name()) {
+				depArguments.addTarget(pkg.Name())
+			}
 		}
 
 		if len(depArguments.targets) > 0 {
