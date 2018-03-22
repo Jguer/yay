@@ -120,7 +120,7 @@ func install(parser *arguments) error {
 		fmt.Println()
 
 		if !parser.existsArg("gendb") {
-			err = checkForConflicts(dc)
+			err = checkForAllConflicts(dc)
 			if err != nil {
 				return err
 			}
@@ -452,56 +452,6 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 	}
 }
 
-func checkForConflicts(dc *depCatagories) error {
-	localDb, err := alpmHandle.LocalDb()
-	if err != nil {
-		return err
-	}
-	toRemove := make(map[string]stringSet)
-
-	for _, pkg := range dc.Aur {
-		for _, cpkg := range pkg.Conflicts {
-			if _, err := localDb.PkgByName(cpkg); err == nil {
-				_, ok := toRemove[pkg.Name]
-				if !ok {
-					toRemove[pkg.Name] = make(stringSet)
-				}
-				toRemove[pkg.Name].set(cpkg)
-			}
-		}
-	}
-
-	for _, pkg := range dc.Repo {
-		pkg.Conflicts().ForEach(func(conf alpm.Depend) error {
-			if _, err := localDb.PkgByName(conf.Name); err == nil {
-				_, ok := toRemove[pkg.Name()]
-				if !ok {
-					toRemove[pkg.Name()] = make(stringSet)
-				}
-				toRemove[pkg.Name()].set(conf.Name)
-			}
-			return nil
-		})
-	}
-
-	if len(toRemove) != 0 {
-		fmt.Println(
-			red("Package conflicts found:"))
-		for name, pkgs := range toRemove {
-			str := "\tInstalling " + magenta(name) + " will remove"
-			for pkg := range pkgs {
-				str += " " + magenta(pkg)
-			}
-
-			fmt.Println(str)
-		}
-
-		fmt.Println()
-	}
-
-	return nil
-}
-
 func editPkgBuilds(pkgs []*rpc.Pkg) error {
 	pkgbuilds := make([]string, 0, len(pkgs))
 	for _, pkg := range pkgs {
@@ -728,6 +678,7 @@ func clean(pkgs []*rpc.Pkg) {
 }
 
 func completeFileName(dir, name string) (string, error) {
+
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return "", err
