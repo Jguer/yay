@@ -314,6 +314,11 @@ func checkForAllConflicts(dc *depCatagories) error {
 	}()
 
 	wg.Wait()
+
+	if err != nil {
+		return err
+	}
+
 	if len(innerConflicts) != 0 {
 		fmt.Println(
 			red("\nInner conflicts found:"))
