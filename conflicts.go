@@ -9,6 +9,8 @@ import (
 	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
+// Checks a single conflict against every other to be installed package's
+// name and its provides.
 func checkInnerConflict(name string, conflict string, conflicts map[string]stringSet, dc *depCatagories) {
 	add := func(h map[string]stringSet, n string, v string) {
 		_, ok := h[n]
@@ -17,7 +19,6 @@ func checkInnerConflict(name string, conflict string, conflicts map[string]strin
 		}
 		h[n].set(v)
 	}
-
 
 	deps, err := gopkg.ParseDeps([]string{conflict})
 	if err != nil {
@@ -118,6 +119,8 @@ func checkInnerConflict(name string, conflict string, conflicts map[string]strin
 	}
 }
 
+// Checks every to be installed package's conflicts against every other to be
+// installed package and its provides.
 func checkForInnerConflicts(dc *depCatagories) (map[string]stringSet) {
 	conflicts := make(map[string]stringSet)
 
@@ -137,6 +140,8 @@ func checkForInnerConflicts(dc *depCatagories) (map[string]stringSet) {
 	return conflicts
 }
 
+// Checks a provide or packagename from a to be installed package
+// against every already installed package's conflicts
 func checkReverseConflict(name string, provide string, conflicts map[string]stringSet) error {
 	add := func(h map[string]stringSet, n string, v string) {
 		_, ok := h[n]
@@ -201,6 +206,8 @@ func checkReverseConflict(name string, provide string, conflicts map[string]stri
 	return nil
 }
 
+// Checks the conflict of a to be installed package against the package name and
+// provides of every installed package.
 func checkConflict(name string, conflict string, conflicts map[string]stringSet) error {
 	add := func(h map[string]stringSet, n string, v string) {
 		_, ok := h[n]
@@ -273,7 +280,9 @@ func checkConflict(name string, conflict string, conflicts map[string]stringSet)
 	return nil
 }
 
-
+// Checks every to be installed package's conflicts against the names and
+// provides of every already installed package and checks every to be installed
+// package's name and provides against every already installed package.
 func checkForConflicts(dc *depCatagories) (map[string]stringSet, error)  {
 	conflicts := make(map[string]stringSet)
 
@@ -308,6 +317,8 @@ func checkForConflicts(dc *depCatagories) (map[string]stringSet, error)  {
 	return conflicts, nil
 }
 
+// Combiles checkForConflicts() and checkForInnerConflicts() in parallel and
+// does some printing.
 func checkForAllConflicts(dc *depCatagories) error {
 	var err error
 	var conflicts map[string]stringSet
