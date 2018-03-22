@@ -91,7 +91,14 @@ func install(parser *arguments) error {
 		}
 	}
 
-	hasAur := len(dt.Aur) != 0
+	hasAur := false
+	for pkg := range parser.targets {
+		_, ok := dt.Aur[pkg]
+		if ok {
+			hasAur = true
+		}
+	}
+
 	if hasAur && 0 == os.Geteuid() {
 		return fmt.Errorf(red(arrow + " Refusing to install AUR Packages as root, Aborting."))
 	}
@@ -108,7 +115,7 @@ func install(parser *arguments) error {
 		arguments.addTarget(pkg)
 	}
 
-	if len(dc.Aur) == 0 && len(arguments.targets) == 0 {
+	if len(dc.Aur) == 0 && len(arguments.targets) == 0 && !parser.existsArg("u", "sysupgrade") {
 		fmt.Println("There is nothing to do")
 		return nil
 	}
