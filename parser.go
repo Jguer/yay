@@ -582,34 +582,6 @@ func (parser *arguments) parseCommandLine() (err error) {
 	return
 }
 
-type intRange struct {
-	min int
-	max int
-}
-
-func makeIntRange(min, max int) intRange {
-	return intRange{
-		min,
-		max,
-	}
-}
-
-func (r intRange) get(n int) bool {
-	return n >= r.min && n <= r.max
-}
-
-type intRanges []intRange
-
-func (rs intRanges) get(n int) bool {
-	for _, r := range rs {
-		if r.get(n) {
-			return true
-		}
-	}
-
-	return false
-}
-
 //parses input for number menus
 //supports individual selection: 1 2 3 4
 //supports range selections: 1-4 10-20

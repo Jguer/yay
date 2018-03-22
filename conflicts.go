@@ -12,14 +12,6 @@ import (
 // Checks a single conflict against every other to be installed package's
 // name and its provides.
 func checkInnerConflict(name string, conflict string, conflicts map[string]stringSet, dc *depCatagories) {
-	add := func(h map[string]stringSet, n string, v string) {
-		_, ok := h[n]
-		if !ok {
-			h[n] = make(stringSet)
-		}
-		h[n].set(v)
-	}
-
 	deps, err := gopkg.ParseDeps([]string{conflict})
 	if err != nil {
 		return
@@ -36,7 +28,7 @@ func checkInnerConflict(name string, conflict string, conflicts map[string]strin
 			return
 		}
 		if dep.Name == pkg.Name && version.Satisfies(dep) {
-			add(conflicts, name, pkg.Name)
+			addMapStringSet(conflicts, name, pkg.Name)
 			continue
 		}
 
@@ -65,7 +57,7 @@ func checkInnerConflict(name string, conflict string, conflicts map[string]strin
 			}
 
 			if version != nil && version.Satisfies(dep) {
-				add(conflicts, name, pkg.Name)
+				addMapStringSet(conflicts, name, pkg.Name)
 				break
 			}
 
@@ -83,7 +75,7 @@ func checkInnerConflict(name string, conflict string, conflicts map[string]strin
 		}
 
 		if dep.Name == pkg.Name() && version.Satisfies(dep) {
-			add(conflicts, name, pkg.Name())
+			addMapStringSet(conflicts, name, pkg.Name())
 			continue
 		}
 
@@ -100,7 +92,7 @@ func checkInnerConflict(name string, conflict string, conflicts map[string]strin
 			}
 
 			if provide.Mod == alpm.DepModAny {
-				add(conflicts, name, pkg.Name())
+				addMapStringSet(conflicts, name, pkg.Name())
 				return fmt.Errorf("")
 			}
 
@@ -110,7 +102,7 @@ func checkInnerConflict(name string, conflict string, conflicts map[string]strin
 			}
 
 			if  version.Satisfies(dep) {
-				add(conflicts, name, pkg.Name())
+				addMapStringSet(conflicts, name, pkg.Name())
 				return fmt.Errorf("")
 			}
 
@@ -143,14 +135,6 @@ func checkForInnerConflicts(dc *depCatagories) (map[string]stringSet) {
 // Checks a provide or packagename from a to be installed package
 // against every already installed package's conflicts
 func checkReverseConflict(name string, provide string, conflicts map[string]stringSet) error {
-	add := func(h map[string]stringSet, n string, v string) {
-		_, ok := h[n]
-		if !ok {
-			h[n] = make(stringSet)
-		}
-		h[n].set(v)
-	}
-
 	var version *gopkg.CompleteVersion
 	var err error
 
@@ -193,7 +177,7 @@ func checkReverseConflict(name string, provide string, conflicts map[string]stri
 
 			if version == nil ||  version.Satisfies(dep) {
 				// Todo
-				add(conflicts, name, pkg.Name() + " (" + provide + ")")
+				addMapStringSet(conflicts, name, pkg.Name() + " (" + provide + ")")
 				return fmt.Errorf("")
 			}
 
@@ -209,14 +193,6 @@ func checkReverseConflict(name string, provide string, conflicts map[string]stri
 // Checks the conflict of a to be installed package against the package name and
 // provides of every installed package.
 func checkConflict(name string, conflict string, conflicts map[string]stringSet) error {
-	add := func(h map[string]stringSet, n string, v string) {
-		_, ok := h[n]
-		if !ok {
-			h[n] = make(stringSet)
-		}
-		h[n].set(v)
-	}
-
 	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
 		return err
@@ -240,7 +216,7 @@ func checkConflict(name string, conflict string, conflicts map[string]stringSet)
 		}
 
 		if dep.Name == pkg.Name() && version.Satisfies(dep) {
-			add(conflicts, name, pkg.Name())
+			addMapStringSet(conflicts, name, pkg.Name())
 			return nil
 		}
 
@@ -257,7 +233,7 @@ func checkConflict(name string, conflict string, conflicts map[string]stringSet)
 			}
 
 			if provide.Mod == alpm.DepModAny {
-				add(conflicts, name, pkg.Name() + " (" + provide.Name + ")")
+				addMapStringSet(conflicts, name, pkg.Name() + " (" + provide.Name + ")")
 				return fmt.Errorf("")
 			}
 
@@ -267,7 +243,7 @@ func checkConflict(name string, conflict string, conflicts map[string]stringSet)
 			}
 
 			if version.Satisfies(dep) {
-				add(conflicts, name, pkg.Name() + " (" + provide.Name + ")")
+				addMapStringSet(conflicts, name, pkg.Name() + " (" + provide.Name + ")")
 				return fmt.Errorf("")
 			}
 

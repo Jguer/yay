@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sort"
 	"sync"
-	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
 	pkgb "github.com/mikkeloscar/gopkgbuild"
@@ -37,32 +36,6 @@ func (u upSlice) Less(i, j int) bool {
 		jRunes := []rune(u[j].Name)
 		return lessRunes(iRunes, jRunes)
 	}
-}
-
-func lessRunes(iRunes, jRunes []rune) bool {
-	max := len(iRunes)
-	if max > len(jRunes) {
-		max = len(jRunes)
-	}
-
-	for idx := 0; idx < max; idx++ {
-		ir := iRunes[idx]
-		jr := jRunes[idx]
-
-		lir := unicode.ToLower(ir)
-		ljr := unicode.ToLower(jr)
-
-		if lir != ljr {
-			return lir < ljr
-		}
-
-		// the lowercase runes are the same, so compare the original
-		if ir != jr {
-			return ir < jr
-		}
-	}
-
-	return len(iRunes) < len(jRunes)
 }
 
 func getVersionDiff(oldVersion, newversion string) (left, right string) {
@@ -254,29 +227,6 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		}
 	}
 	return slice, nil
-}
-
-//Contains returns whether e is present in s
-func containsInt(s []int, e int) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-// RemoveIntListFromList removes all src's elements that are present in target
-func removeIntListFromList(src, target []int) []int {
-	max := len(target)
-	for i := 0; i < max; i++ {
-		if containsInt(src, target[i]) {
-			target = append(target[:i], target[i+1:]...)
-			max--
-			i--
-		}
-	}
-	return target
 }
 
 // upgradePkgs handles updating the cache and installing updates.
