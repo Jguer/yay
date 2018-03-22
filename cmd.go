@@ -288,9 +288,6 @@ func handleYay() (err error) {
 		usage()
 	} else if cmdArgs.existsArg("gendb") {
 		err = createDevelDB()
-		if err != nil {
-			return
-		}
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = cleanDependencies()
 	} else if len(cmdArgs.targets) > 0 {

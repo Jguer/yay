@@ -70,6 +70,20 @@ func splitDbFromName(pkg string) (string, string) {
 	return "", split[0]
 }
 
+func getBases(pkgs map[string]*rpc.Pkg) map[string][]*rpc.Pkg {
+	bases := make(map[string][]*rpc.Pkg)
+
+	for _, pkg := range pkgs {
+		_, ok := bases[pkg.PackageBase]
+		if !ok {
+			bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
+		}
+		bases[pkg.PackageBase] = append(bases[pkg.PackageBase], pkg)
+	}
+
+	return bases
+}
+
 // Step two of dependency resolving. We already have all the information on the
 // packages we need, now it's just about ordering them correctly.
 // pkgs is a list of targets, the packages we want to install. Dependencies are
@@ -105,13 +119,7 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 	dc := makeDependCatagories()
 	seen := make(stringSet)
 
-	for _, pkg := range dt.Aur {
-		_, ok := dc.Bases[pkg.PackageBase]
-		if !ok {
-			dc.Bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
-		}
-		dc.Bases[pkg.PackageBase] = append(dc.Bases[pkg.PackageBase], pkg)
-	}
+	dc.Bases = getBases(dt.Aur)
 
 	for _, pkg := range pkgs {
 		_, name := splitDbFromName(pkg)

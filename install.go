@@ -125,11 +125,9 @@ func install(parser *arguments) error {
 		hasAur = len(dc.Aur) != 0
 		fmt.Println()
 
-		if !parser.existsArg("gendb") {
-			err = checkForAllConflicts(dc)
-			if err != nil {
-				return err
-			}
+		err = checkForAllConflicts(dc)
+		if err != nil {
+			return err
 		}
 
 		if len(dc.MakeOnly) > 0 {
@@ -162,19 +160,6 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		if arguments.existsArg("gendb") {
-			for _, pkg := range dc.Aur {
-				pkgbuild := srcinfosStale[pkg.PackageBase]
-
-				for _, pkg := range dc.Bases[pkg.PackageBase] {
-					updateVCSData(pkg.Name, pkgbuild.Source)
-				}
-			}
-
-			fmt.Println(bold(green(arrow + " GenDB finished. No packages were installed")))
-			return nil
-		}
-
 		incompatable, err = getIncompatable(dc.Aur, srcinfosStale, dc.Bases)
 		if err != nil {
 			return err
@@ -186,7 +171,7 @@ func install(parser *arguments) error {
 		}
 	}
 
-	if !parser.existsArg("gendb") && (len(arguments.targets) > 0 || arguments.existsArg("u")) {
+	if len(arguments.targets) > 0 || arguments.existsArg("u") {
 		err := passToPacman(arguments)
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages")
