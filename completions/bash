@@ -1,3 +1,4 @@
+# vim:fdm=marker foldlevel=0 tabstop=2 shiftwidth=2 filetype=bash
 # This file is in the public domain.
 
 _arch_compgen() {
