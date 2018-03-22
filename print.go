@@ -333,7 +333,7 @@ func printUpdateList(parser *arguments) error {
 	}
 
 	for pkg := range parser.targets {
-		fmt.Println(red(bold("error:")), "package '" + pkg + "' was not found")
+		fmt.Println(red(bold("error:")), "package '"+pkg+"' was not found")
 	}
 
 	return nil

@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
-	"fmt"
-	"encoding/json"
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
@@ -224,4 +224,3 @@ cleanup:
 
 	os.Exit(status)
 }
-

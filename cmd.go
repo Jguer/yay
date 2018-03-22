@@ -146,7 +146,7 @@ func handleCmd() (err error) {
 	case "T", "deptest":
 		err = passToPacman(cmdArgs)
 	case "U", "upgrade":
-		err =passToPacman(cmdArgs)
+		err = passToPacman(cmdArgs)
 	case "G", "getpkgbuild":
 		err = handleGetpkgbuild()
 	case "P", "print":

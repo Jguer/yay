@@ -471,7 +471,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 func checkVersions(dt *depTree) error {
 	depStrings := make([]string, 0)
 	has := make(map[string][]string)
-	
+
 	for _, pkg := range dt.Aur {
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, dep := range deps {

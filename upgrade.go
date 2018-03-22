@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 	"sort"
+	"strings"
 	"sync"
 
 	alpm "github.com/jguer/go-alpm"
@@ -90,7 +90,6 @@ func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 		wg.Done()
 	}()
 
-
 	if config.Devel {
 		fmt.Println(bold(cyan("::") + " Checking development packages..."))
 		wg.Add(1)
@@ -99,7 +98,6 @@ func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 			wg.Done()
 		}()
 	}
-
 
 	wg.Wait()
 
