@@ -1,11 +1,11 @@
 .PHONY: all default install test build release clean
-VERSION := $(shell git rev-list --count master)
-LDFLAGS=-ldflags '-s -w -X main.version=4.${VERSION}'
+VERSION := 5.$(shell git rev-list --count master)
+LDFLAGS=-ldflags '-s -w -X main.version=${VERSION}'
 GOFILES := $(shell ls *.go | grep -v /vendor/)
 ARCH=$(shell uname -m)
 PKGNAME=yay
 
-PACKAGE=${PKGNAME}_4.${VERSION}_${ARCH}
+PACKAGE=${PKGNAME}_${VERSION}_${ARCH}
 
 default: build
 
@@ -20,10 +20,10 @@ build:
 release:
 	mkdir ${PACKAGE}
 	cp ./yay ${PACKAGE}/
-	cp ./yay.8 ${PACKAGE}/
-	cp ./zsh-completion ${PACKAGE}/
-	cp ./yay.fish ${PACKAGE}/
-	cp ./bash-completion ${PACKAGE}/
+	cp ./doc/yay.8 ${PACKAGE}/
+	cp ./completions/zsh ${PACKAGE}/
+	cp ./completions/fish ${PACKAGE}/
+	cp ./completions/bash ${PACKAGE}/
 package:
 	tar -czvf ${PACKAGE}.tar.gz ${PACKAGE}
 clean:
