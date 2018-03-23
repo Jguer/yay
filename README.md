@@ -31,8 +31,8 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 #### Frequently Asked Questions
 
 * Yay does not display colored output. How do I fix it?  
-Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
-  
+  Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
+
 #### Example of Custom Operations
 
 * `yay <Search Term>` presents package selection menu
@@ -47,6 +47,24 @@ Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://
 <img src="http://jguer.github.io/yay/yay4.png" width="450">
 
 ### Changelog
+
+#### 4.505
+
+* `yay` used to auto save permanent configuration options, now `--save` must be passed to save permanent configuration options
+* Competions updated
+* Number menu is now used to edit PKGBuilds and Clean Builds
+* Devel updates of `-git` packages now uses `git ls-remote` which makes it compatible with other platforms besides github.
+* Devel update checking is faster as well
+* Updated man page
+
+#### 3.440
+
+* Closed a lot of issues
+* Updated bash and zsh completions
+* New colour scheme
+* Small parsing fixes
+* Automatically delete package from transaction if $EDITOR exits with non-zero #140
+* Added check depends support
 
 #### 3.373
 
