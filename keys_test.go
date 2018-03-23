@@ -1,14 +1,36 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"path"
+	"regexp"
 	"testing"
 
 	rpc "github.com/mikkeloscar/aur"
 	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
+
+const (
+	// The default port used by the PGP key server.
+	gpgServerPort = 11371
+)
+
+func init() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		regex := regexp.MustCompile(`search=0[xX]([a-fA-F0-9]+)`)
+		matches := regex.FindStringSubmatch(r.RequestURI)
+		data := ""
+		if matches != nil {
+			data = getPgpKey(matches[1])
+		}
+		w.Header().Set("Content-Type", "application/pgp-keys")
+		w.Write([]byte(data))
+	})
+}
 
 func newPkg(basename string) *rpc.Pkg {
 	return &rpc.Pkg{Name: basename, PackageBase: basename}
@@ -16,6 +38,28 @@ func newPkg(basename string) *rpc.Pkg {
 
 func newSplitPkg(basename, name string) *rpc.Pkg {
 	return &rpc.Pkg{Name: name, PackageBase: basename}
+}
+
+func getPgpKey(key string) string {
+	var buffer bytes.Buffer
+
+	if contents, err := ioutil.ReadFile(path.Join("testdata", "keys", key)); err == nil {
+		buffer.WriteString("-----BEGIN PGP PUBLIC KEY BLOCK-----\n")
+		buffer.WriteString("Version: SKS 1.1.6\n")
+		buffer.WriteString("Comment: Hostname: yay\n\n")
+		buffer.Write(contents)
+		buffer.WriteString("\n-----END PGP PUBLIC KEY BLOCK-----\n")
+	}
+	return buffer.String()
+}
+
+func startPgpKeyServer() *http.Server {
+	srv := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", gpgServerPort)}
+
+	go func() {
+		srv.ListenAndServe()
+	}()
+	return srv
 }
 
 func TestFormatKeysToImport(t *testing.T) {
@@ -111,12 +155,13 @@ func TestImportKeys(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to init test keyring %q: %v\n", keyringDir, err)
 	}
-
-	// Removing the leftovers.
 	defer os.RemoveAll(keyringDir)
 
 	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s", keyringDir)
+	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
+
+	server := startPgpKeyServer()
+	defer server.Shutdown(nil)
 
 	casetests := []struct {
 		keys      []string
@@ -177,15 +222,11 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 	defer os.RemoveAll(keyringDir)
 
-	buildDir, err := ioutil.TempDir("/tmp", "yay-test-build-dir")
-	if err != nil {
-		t.Fatalf("Unable to init temp build dir: %v\n", err)
-	}
-	defer os.RemoveAll(buildDir)
-
-	config.BuildDir = buildDir
 	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s", keyringDir)
+	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
+
+	server := startPgpKeyServer()
+	defer server.Shutdown(nil)
 
 	casetests := []struct {
 		pkgs      []*rpc.Pkg
