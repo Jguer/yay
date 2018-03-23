@@ -48,8 +48,17 @@ func install(parser *arguments) error {
 		return err
 	}
 
+	// Deptree will handle db/pkg prefixes. Now they can be striped from the
+	// targets.
+	for pkg := range parser.targets {
+		_, name := splitDbFromName(pkg)
+		parser.targets.remove(pkg)
+		parser.targets.set(name)
+	}
+
 	//only error if direct targets or deps are missing
-	for missingName := range dt.Missing {
+	for missing := range dt.Missing {
+		_, missingName := splitDbFromName(missing)
 		if !remoteNamesCache.get(missingName) || parser.targets.get(missingName) {
 			str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
 
@@ -102,6 +111,7 @@ func install(parser *arguments) error {
 	if hasAur && 0 == os.Geteuid() {
 		return fmt.Errorf(red(arrow + " Refusing to install AUR Packages as root, Aborting."))
 	}
+
 	dc, err = getDepCatagories(parser.formatTargets(), dt)
 	if err != nil {
 		return err
