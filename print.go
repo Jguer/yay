@@ -219,6 +219,7 @@ func PrintInfo(a *rpc.Pkg) {
 	fmt.Println(bold("Description     :"), a.Description)
 	fmt.Println(bold("URL             :"), a.URL)
 	fmt.Println(bold("Licenses        :"), strings.Join(a.License, "  "))
+	fmt.Println(bold("Provides        :"), strings.Join(a.Provides, "  "))
 	fmt.Println(bold("Depends On      :"), strings.Join(a.Depends, "  "))
 	fmt.Println(bold("Make Deps       :"), strings.Join(a.MakeDepends, "  "))
 	fmt.Println(bold("Check Deps      :"), strings.Join(a.CheckDepends, "  "))
