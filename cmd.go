@@ -465,7 +465,11 @@ func passToPacman(args *arguments) error {
 
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
-	return err
+
+	if err != nil {
+		return fmt.Errorf("")
+	}
+	return nil
 }
 
 //passToPacman but return the output instead of showing the user

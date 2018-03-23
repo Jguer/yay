@@ -333,8 +333,28 @@ func printUpdateList(parser *arguments) error {
 		}
 	}
 
+	missing := false
+
+outer:
 	for pkg := range parser.targets {
+		for _, name := range localNames {
+			if name == pkg {
+				continue outer
+			}
+		}
+
+		for _, name := range remoteNames {
+			if name == pkg {
+				continue outer
+			}
+		}
+
 		fmt.Println(red(bold("error:")), "package '"+pkg+"' was not found")
+		missing = true
+	}
+
+	if missing {
+		return fmt.Errorf("")
 	}
 
 	return nil
