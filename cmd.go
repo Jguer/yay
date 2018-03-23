@@ -291,8 +291,10 @@ func handleYay() (err error) {
 		if err != nil {
 			return
 		}
+	} else if cmdArgs.existsDouble("c") {
+		err = cleanDependencies(true)
 	} else if cmdArgs.existsArg("c", "clean") {
-		err = cleanDependencies()
+		err = cleanDependencies(false)
 	} else if len(cmdArgs.targets) > 0 {
 		err = handleYogurt()
 	}
