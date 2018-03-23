@@ -282,6 +282,21 @@ func (pkg Package) ComputeRequiredBy() []string {
 	return requiredby
 }
 
+// ComputeOptionalFor returns the names of packages that optionally require the given package
+func (pkg Package) ComputeOptionalFor() []string {
+	result := C.alpm_pkg_compute_optionalfor(pkg.pmpkg)
+	optionalfor := make([]string, 0)
+	for i := (*list)(unsafe.Pointer(result)); i != nil; i = i.Next {
+		defer C.free(unsafe.Pointer(i))
+		if i.Data != nil {
+			defer C.free(unsafe.Pointer(i.Data))
+			name := C.GoString((*C.char)(unsafe.Pointer(i.Data)))
+			optionalfor = append(optionalfor, name)
+		}
+	}
+	return optionalfor
+}
+
 // NewVersion checks if there is a new version of the package in the Synced DBs.
 func (pkg Package) NewVersion(l DbList) *Package {
 	ptr := C.alpm_sync_newversion(pkg.pmpkg,
