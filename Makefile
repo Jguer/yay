@@ -1,31 +1,62 @@
-.PHONY: all default install test build release clean
-VERSION := 5.$(shell git rev-list --count master)
-LDFLAGS=-ldflags '-s -w -X main.version=${VERSION}'
-GOFILES := $(shell ls *.go | grep -v /vendor/)
-ARCH=$(shell uname -m)
-PKGNAME=yay
+.PHONY: all default install uninstall test build release clean
 
-PACKAGE=${PKGNAME}_${VERSION}_${ARCH}
+PREFIX := /usr
+DESTDIR :=
+
+ifndef VERSION
+MAJORVERSION := 5
+MINORVERSION ?= $(shell git rev-list --count master)
+endif
+VERSION := ${MAJORVERSION}.${MINORVERSION}
+
+LDFLAGS := -ldflags '-s -w -X main.version=${VERSION}'
+GOFILES := $(shell ls *.go | grep -v /vendor/)
+ARCH := $(shell uname -m)
+PKGNAME := yay
+BINNAME := yay
+PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
+
+export GOPATH=$(shell pwd)/.go
+export GOROOT=/usr/lib/go
 
 default: build
 
-all: clean build release package
+all: | clean package
 
 install:
-	go install -v ${LDFLAGS} ${GO_FILES}
+	install -Dm755 ${BINNAME} $(DESTDIR)$(PREFIX)/bin/${BINNAME}
+	install -Dm644 doc/${PKGNAME}.8 $(DESTDIR)$(PREFIX)/share/man/man8/${PKGNAME}.8
+	install -Dm644 completions/bash $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
+	install -Dm644 completions/zsh $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
+	install -Dm644 completions/fish $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
+
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/${BINNAME}
+	rm -f $(DESTDIR)$(PREFIX)/share/man/man8/${PKGNAME}.8
+	rm -f $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
+	rm -f $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
+	rm -f $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
+
 test:
-	go test ./...
+	gofmt -l *.go
+	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted" && false)
+	go vet
+	go test -v
+
 build:
-	go build -v ${LDFLAGS}
-release:
+	go build -v ${LDFLAGS} -o ${BINNAME}
+
+release: | test build
 	mkdir ${PACKAGE}
-	cp ./yay ${PACKAGE}/
-	cp ./doc/yay.8 ${PACKAGE}/
+	cp ./${BINNAME} ${PACKAGE}/
+	cp ./doc/${PKGNAME}.8 ${PACKAGE}/
 	cp ./completions/zsh ${PACKAGE}/
 	cp ./completions/fish ${PACKAGE}/
 	cp ./completions/bash ${PACKAGE}/
-package:
+
+package: release
 	tar -czvf ${PACKAGE}.tar.gz ${PACKAGE}
 clean:
-	-rm -rf ${PKGNAME}_*
+	rm -rf ${PKGNAME}_*
+	rm -f ${BINNAME}
 
