@@ -299,13 +299,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 		}
 
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
-			if deps, ok := provides[dep.Name]; ok {
-				deps.set(pkg.Name())
-			} else {
-				ss := make(stringSet)
-				ss.set(pkg.Name())
-				provides[dep.Name] = ss
-			}
+			addMapStringSet(provides, dep.Name, pkg.Name())
 			return nil
 		})
 		return nil
