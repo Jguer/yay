@@ -356,7 +356,6 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 		return nil
 	})
 
-
 	return
 }
 
