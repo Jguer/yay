@@ -287,8 +287,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	// State = 2 - Keep package and have iterated over dependencies
 	safePackages := make(map[string]uint8)
 	// provides stores a mapping from the provides name back to the original package name
-	// Assumption - multiple installed packages don't provide the same dependency
-	provides := make(map[string]string)
+	provides := make(map[string]stringSet)
 	packages := localDb.PkgCache()
 
 	// Mark explicit dependencies and enumerate the provides list
@@ -300,7 +299,13 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 		}
 
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
-			provides[dep.Name] = pkg.Name()
+			if deps, ok := provides[dep.Name]; ok {
+				deps.set(pkg.Name())
+			} else {
+				ss := make(stringSet)
+				ss.set(pkg.Name())
+				provides[dep.Name] = ss
+			}
 			return nil
 		})
 		return nil
@@ -321,9 +326,13 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 			state, ok := safePackages[dep.Name]
 			if !ok {
 				// Check if dep is a provides rather than actual package name
-				if p, ok2 := provides[dep.Name]; ok2 {
-					iterateAgain = true
-					safePackages[p] = 1
+				if pset, ok2 := provides[dep.Name]; ok2 {
+					for p := range pset {
+						if safePackages[p] == 0 {
+							iterateAgain = true
+							safePackages[p] = 1
+						}
+					}
 				}
 
 				return nil
