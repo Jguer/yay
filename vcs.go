@@ -3,10 +3,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	rpc "github.com/mikkeloscar/aur"
+	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 // Info contains the last commit sha of a repo
@@ -20,16 +24,39 @@ type shaInfo struct {
 
 // createDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
+	infoMap := make(map[string]*rpc.Pkg)
+	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
+
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return err
 	}
 
-	config.NoConfirm = true
-	arguments := makeArguments()
-	arguments.addArg("gendb")
-	arguments.addTarget(remoteNames...)
-	err = install(arguments)
+	info, err := aurInfo(remoteNames)
+	if err != nil {
+		return err
+	}
+	
+	for _, pkg := range info {
+		infoMap[pkg.Name] = pkg
+	}
+	
+
+	bases := getBases(infoMap)
+
+	downloadPkgBuilds(info, sliceToStringSet(remoteNames), bases)
+	err = parsesrcinfosFile(info, srcinfosStale, bases)
+
+	for _, pkg := range info {
+		pkgbuild := srcinfosStale[pkg.PackageBase]
+
+		for _, pkg := range bases[pkg.PackageBase] {
+			updateVCSData(pkg.Name, pkgbuild.Source)
+		}
+	}
+
+	fmt.Println(bold(green(arrow + " GenDB finished. No packages were installed")))
+
 	return err
 }
 
@@ -95,6 +122,8 @@ func updateVCSData(pkgName string, sources []string) {
 		}
 
 		savedInfo[pkgName] = info
+
+		fmt.Println(bold(green(arrow + " Found git repo: ")) + cyan(url))
 		saveVCSInfo()
 	}
 }
