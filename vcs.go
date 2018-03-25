@@ -36,11 +36,10 @@ func createDevelDB() error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, pkg := range info {
 		infoMap[pkg.Name] = pkg
 	}
-	
 
 	bases := getBases(infoMap)
 
@@ -123,7 +122,7 @@ func updateVCSData(pkgName string, sources []string) {
 
 		savedInfo[pkgName] = info
 
-		fmt.Println(bold(green(arrow + " Found git repo: ")) + cyan(url))
+		fmt.Println(bold(green(arrow+" Found git repo: ")) + cyan(url))
 		saveVCSInfo()
 	}
 }
