@@ -376,8 +376,8 @@ _pacman_completions_installed_groups() {
 # provides completions for installed packages
 _pacman_completions_installed_packages() {
   local -a cmd packages packages_long
-  packages=( ${${packages_long#/var/lib/pacman/local/}%-*-*} )
   packages_long=(/var/lib/pacman/local/*(/))
+  packages=( ${${packages_long#/var/lib/pacman/local/}%-*-*} )
   compadd "$@" -a packages
 }
 
