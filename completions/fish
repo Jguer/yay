@@ -70,12 +70,14 @@ complete -c $progname -n "not $noopt" -l notimeupdate -d 'Check only package ver
 
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
 complete -c $progname -n "not $noopt" -l mflags -d 'Pass the following options to makepkg' -f
+complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options to gpg' -f
 complete -c $progname -n "not $noopt" -l buildir -d 'Specify the build directory' -f
 complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -f
 complete -c $progname -n "not $noopt" -l makepkg -d 'Makepkg command to use' -f
 complete -c $progname -n "not $noopt" -l pacman -d 'Pacman command to use' -f
 complete -c $progname -n "not $noopt" -l tar -d 'Tar command to use' -f
 complete -c $progname -n "not $noopt" -l git -d 'Git command to use' -f
+complete -c $progname -n "not $noopt" -l gpg -d 'Gpg command to use' -f
 complete -c $progname -n "not $noopt" -l config -d 'config command to use' -f
 complete -c $progname -n "not $noopt" -l requestsplitn -d 'Max amount of packages to query per AUR request' -f
 complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the backgroud to avoid timeout' -f
