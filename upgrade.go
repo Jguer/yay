@@ -27,15 +27,40 @@ func (u upSlice) Len() int      { return len(u) }
 func (u upSlice) Swap(i, j int) { u[i], u[j] = u[j], u[i] }
 
 func (u upSlice) Less(i, j int) bool {
-	if u[i].Repository != u[j].Repository {
-		iRunes := []rune(u[i].Repository)
-		jRunes := []rune(u[j].Repository)
-		return lessRunes(iRunes, jRunes)
-	} else {
+	if u[i].Repository == u[j].Repository {
 		iRunes := []rune(u[i].Name)
 		jRunes := []rune(u[j].Name)
 		return lessRunes(iRunes, jRunes)
 	}
+
+	syncDb, err := alpmHandle.SyncDbs()
+	if err != nil {
+		iRunes := []rune(u[i].Repository)
+		jRunes := []rune(u[j].Repository)
+		return lessRunes(iRunes, jRunes)
+	}
+
+	less := false
+	found := syncDb.ForEach(func(db alpm.Db) error {
+		if db.Name() == u[i].Repository {
+			less = true
+		} else if db.Name() == u[j].Repository {
+			less = false
+		} else {
+			return nil
+		}
+
+		return fmt.Errorf("")
+	})
+
+	if found != nil {
+		return less
+	} else {
+		iRunes := []rune(u[i].Repository)
+		jRunes := []rune(u[j].Repository)
+		return lessRunes(iRunes, jRunes)
+	}
+
 }
 
 func getVersionDiff(oldVersion, newversion string) (left, right string) {
