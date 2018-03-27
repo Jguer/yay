@@ -84,6 +84,10 @@ complete -c $progname -n "not $noopt" -l nosudoloop -d 'Do not loop sudo calls i
 complete -c $progname -n "not $noopt" -l redownload -d 'Redownload PKGBUILD of package even if up-to-date' -f
 complete -c $progname -n "not $noopt" -l noredownload -d 'Do not redownload up-to-date PKGBUILDs' -f
 complete -c $progname -n "not $noopt" -l redownloadall -d 'Redownload PKGBUILD of package and deps even if up-to-date' -f
+complete -c $progname -n "not $noopt" -l rebuild -d 'Always build target packages' -f
+complete -c $progname -n "not $noopt" -l rebuildall -d 'Always build all AUR packages' -f
+complete -c $progname -n "not $noopt" -l rebuildtree -d 'Always build all AUR packages even if installed' -f
+complete -c $progname -n "not $noopt" -l norebuild -d 'Skip package build if in cache and up to date' -f
 
 # Yay options
 complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
