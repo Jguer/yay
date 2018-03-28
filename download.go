@@ -6,8 +6,27 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
+
+// Decide what download method to use:
+// Use the config option when the destination does not already exits
+// If .git exists in the destination uer git
+// Otherwise use a tarrball
+func shouldUseGit(path string) bool {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return config.GitClone
+	}
+
+	_, err = os.Stat(filepath.Join(path, ".git"))
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
 
 func downloadFile(path string, url string) (err error) {
 	// Create the file
@@ -27,6 +46,37 @@ func downloadFile(path string, url string) (err error) {
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+func gitDownload(url string, path string, name string) error {
+	_, err := os.Stat(filepath.Join(path, name, ".git"))
+	if os.IsNotExist(err) {
+		err = passToGit(path, "clone", url, name)
+		if err != nil {
+			return fmt.Errorf("error cloning %s", name)
+		}
+
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+	}
+
+	err = passToGit(filepath.Join(path, name), "fetch")
+	if err != nil {
+		return fmt.Errorf("error fetching %s", name)
+	}
+
+	err = passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD")
+	if err != nil {
+		return fmt.Errorf("error reseting %s", name)
+	}
+
+	err = passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff")
+	if err != nil {
+		return fmt.Errorf("error merging %s", name)
+	}
+
+	return nil
 }
 
 // DownloadAndUnpack downloads url tgz and extracts to path.
@@ -129,8 +179,18 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
 	}
 
 	for _, pkg := range aq {
-		downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
-		fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name), "from AUR")
+		var err error
+		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
+			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
+		} else {
+			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
+		}
+
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(magenta(pkg.Name)), bold(green("from AUR")))
+		}
 	}
 
 	return
