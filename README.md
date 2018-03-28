@@ -48,6 +48,18 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 ### Changelog
 
+#### v5.608
+
+* Updated Shell completions
+* Added `-Qu` to extended pacman options
+* Provides now supported in `-Si`
+* Improved build method
+* Improved conflict checking
+* PKGBUILDs with unsupported arch can force build now
+* PGP Key automatic importing
+* GPG option passing
+* `db/name` support readded
+
 #### 4.505
 
 * `yay` used to auto save permanent configuration options, now `--save` must be passed to save permanent configuration options
