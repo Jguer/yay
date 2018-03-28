@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -556,7 +557,12 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 
 		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
 
-		err := downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
+		var err error
+		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
+			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
+		} else {
+			err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
+		}
 		if err != nil {
 			return err
 		}

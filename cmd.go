@@ -563,3 +563,15 @@ func passToMakepkg(dir string, args ...string) (err error) {
 	}
 	return
 }
+
+func passToGit(dir string, _args ...string) (err error) {
+	gitflags := strings.Fields(config.GitFlags)
+	args := []string{"-C", dir}
+	args = append(args, gitflags...)
+	args = append(args, _args...)
+
+	cmd := exec.Command(config.GitBin, args...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	err = cmd.Run()
+	return
+}
