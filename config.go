@@ -42,6 +42,7 @@ type Configuration struct {
 	GpgFlags      string `json:"gpgflags"`
 	MFlags        string `json:"mflags"`
 	SortBy        string `json:"sortby"`
+	GitFlags      string `json:"gitflags"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
@@ -50,6 +51,7 @@ type Configuration struct {
 	NoConfirm     bool   `json:"-"`
 	Devel         bool   `json:"devel"`
 	CleanAfter    bool   `json:"cleanAfter"`
+	GitClone      bool   `json:"gitclone"`
 }
 
 var version = "3.373"
@@ -138,6 +140,7 @@ func defaultSettings(config *Configuration) {
 	config.PacmanConf = "/etc/pacman.conf"
 	config.GpgFlags = ""
 	config.MFlags = ""
+	config.GitFlags = ""
 	config.SortMode = BottomUp
 	config.SortBy = "votes"
 	config.SudoLoop = false
@@ -151,6 +154,7 @@ func defaultSettings(config *Configuration) {
 	config.AnswerClean = ""
 	config.AnswerEdit = ""
 	config.AnswerUpgrade = ""
+	config.GitClone = true
 }
 
 // Editor returns the preferred system editor.
