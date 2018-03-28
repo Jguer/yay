@@ -253,10 +253,16 @@ func handleConfig(option, value string) bool {
 		config.AnswerUpgrade = value
 	case "noanswerupgrade":
 		config.AnswerUpgrade = ""
+	case "gitclone":
+		config.GitClone = true
+	case "nogitclone":
+		config.GitClone = false
 	case "gpgflags":
 		config.GpgFlags = value
 	case "mflags":
 		config.MFlags = value
+	case "gitflags":
+		config.GitFlags = value
 	case "builddir":
 		config.BuildDir = value
 	case "editor":

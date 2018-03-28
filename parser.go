@@ -429,6 +429,8 @@ func hasParam(arg string) bool {
 		return true
 	case "gpgflags":
 		return true
+	case "gitflags":
+		return true
 	case "builddir":
 		return true
 	case "editor":
