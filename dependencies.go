@@ -70,6 +70,16 @@ func splitDbFromName(pkg string) (string, string) {
 	return "", split[0]
 }
 
+func isDevelName(name string) bool {
+	for _, suffix := range []string{"git", "svn", "hg", "bzr", "nightly"} {
+		if strings.HasSuffix(name, suffix) {
+			return true
+		}
+	}
+
+	return strings.Contains(name, "-always-")
+}
+
 func getBases(pkgs map[string]*rpc.Pkg) map[string][]*rpc.Pkg {
 	bases := make(map[string][]*rpc.Pkg)
 
@@ -489,12 +499,14 @@ func checkVersions(dt *depTree) error {
 
 		addMapStringSlice(has, pkg.Name, pkg.Version)
 
-		for _, name := range pkg.Provides {
-			_name, _ver := splitNameFromDep(name)
-			if _ver != "" {
-				addMapStringSlice(has, _name, _ver)
-			} else {
-				delete(has, _name)
+		if !isDevelName(pkg.Name) {
+			for _, name := range pkg.Provides {
+				_name, _ver := splitNameFromDep(name)
+				if _ver != "" {
+					addMapStringSlice(has, _name, _ver)
+				} else {
+					delete(has, _name)
+				}
 			}
 		}
 	}
