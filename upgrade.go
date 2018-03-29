@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	alpm "github.com/jguer/go-alpm"
+	rpc "github.com/mikkeloscar/aur"
 	pkgb "github.com/mikkeloscar/gopkgbuild"
 )
 
@@ -88,7 +89,7 @@ func getVersionDiff(oldVersion, newversion string) (left, right string) {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
+func upList() (aurUp upSlice, repoUp upSlice, err error) {
 	local, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return nil, nil, err
@@ -111,7 +112,7 @@ func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 	fmt.Println(bold(cyan("::") + " Searching AUR for updates..."))
 	wg.Add(1)
 	go func() {
-		aurUp, aurErr = upAUR(remote, remoteNames, dt)
+		aurUp, aurErr = upAUR(remote, remoteNames)
 		wg.Done()
 	}()
 
@@ -205,9 +206,20 @@ func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade upSlice, err error) {
+func upAUR(remote []alpm.Package, remoteNames []string) (upSlice, error) {
+	toUpgrade := make(upSlice, 0)
+	_pkgdata, err := aurInfo(remoteNames)
+	if err != nil {
+		return nil, err
+	}
+
+	pkgdata := make(map[string]*rpc.Pkg)
+	for _, pkg := range _pkgdata {
+		pkgdata[pkg.Name] = pkg
+	}
+
 	for _, pkg := range remote {
-		aurPkg, ok := dt.Aur[pkg.Name()]
+		aurPkg, ok := pkgdata[pkg.Name()]
 		if !ok {
 			continue
 		}
@@ -224,7 +236,7 @@ func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade 
 		}
 	}
 
-	return
+	return toUpgrade, nil
 }
 
 // upRepo gathers local packages and checks if they have new versions.
@@ -253,15 +265,12 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 }
 
 // upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
+func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	ignore := make(stringSet)
 	aurNames := make(stringSet)
 
-	aurUp, repoUp, err := upList(dt)
-	if err != nil {
-		return ignore, aurNames, err
-	} else if len(aurUp)+len(repoUp) == 0 {
-		return ignore, aurNames, err
+	if len(aurUp)+len(repoUp) == 0 {
+		return ignore, aurNames, nil
 	}
 
 	sort.Sort(repoUp)
