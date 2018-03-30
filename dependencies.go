@@ -15,6 +15,7 @@ type depTree struct {
 	Aur       map[string]*rpc.Pkg
 	Missing   stringSet
 	Groups    stringSet
+	Provides  map[string]string
 }
 
 type depCatagories struct {
@@ -31,6 +32,7 @@ func makeDepTree() *depTree {
 		make(map[string]*rpc.Pkg),
 		make(stringSet),
 		make(stringSet),
+		make(map[string]string),
 	}
 
 	return &dt
@@ -83,7 +85,14 @@ func isDevelName(name string) bool {
 func getBases(pkgs map[string]*rpc.Pkg) map[string][]*rpc.Pkg {
 	bases := make(map[string][]*rpc.Pkg)
 
+nextpkg:
 	for _, pkg := range pkgs {
+		for _, base := range bases[pkg.PackageBase] {
+			if base == pkg {
+				continue nextpkg
+			}
+		}
+
 		_, ok := bases[pkg.PackageBase]
 		if !ok {
 			bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
@@ -92,6 +101,46 @@ func getBases(pkgs map[string]*rpc.Pkg) map[string][]*rpc.Pkg {
 	}
 
 	return bases
+}
+
+func aurFindProvider(name string, dt *depTree) (string, *rpc.Pkg) {
+	dep, _ := splitNameFromDep(name)
+	aurpkg, exists := dt.Aur[dep]
+
+	if exists {
+		return dep, aurpkg
+	}
+
+	dep, exists = dt.Provides[dep]
+	if exists {
+		aurpkg, exists = dt.Aur[dep]
+		if exists {
+			return dep, aurpkg
+		}
+	}
+
+	return "", nil
+
+}
+
+func repoFindProvider(name string, dt *depTree) (string, *alpm.Package) {
+	dep, _ := splitNameFromDep(name)
+	alpmpkg, exists := dt.Repo[dep]
+
+	if exists {
+		return dep, alpmpkg
+	}
+
+	dep, exists = dt.Provides[dep]
+	if exists {
+		alpmpkg, exists = dt.Repo[dep]
+		if exists {
+			return dep, alpmpkg
+		}
+	}
+
+	return "", nil
+
 }
 
 // Step two of dependency resolving. We already have all the information on the
@@ -132,17 +181,15 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 	dc.Bases = getBases(dt.Aur)
 
 	for _, pkg := range pkgs {
-		_, name := splitDbFromName(pkg)
-		dep, _ := splitNameFromDep(name)
-		alpmpkg, exists := dt.Repo[dep]
-		if exists {
+		dep, alpmpkg := repoFindProvider(pkg, dt)
+		if alpmpkg != nil {
 			repoDepCatagoriesRecursive(alpmpkg, dc, dt, false)
 			dc.Repo = append(dc.Repo, alpmpkg)
 			delete(dt.Repo, dep)
 		}
 
-		aurpkg, exists := dt.Aur[dep]
-		if exists {
+		dep, aurpkg := aurFindProvider(pkg, dt)
+		if aurpkg != nil {
 			depCatagoriesRecursive(aurpkg, dc, dt, false, seen)
 			if !seen.get(aurpkg.PackageBase) {
 				dc.Aur = append(dc.Aur, aurpkg)
@@ -193,9 +240,8 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 
 func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTree, isMake bool) {
 	pkg.Depends().ForEach(func(_dep alpm.Depend) error {
-		dep := _dep.Name
-		alpmpkg, exists := dt.Repo[dep]
-		if exists {
+		dep, alpmpkg := repoFindProvider(_dep.Name, dt)
+		if alpmpkg != nil {
 			delete(dt.Repo, dep)
 			repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
 
@@ -213,11 +259,9 @@ func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTre
 func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMake bool, seen stringSet) {
 	for _, pkg := range dc.Bases[_pkg.PackageBase] {
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
-			for _, _dep := range deps {
-				dep, _ := splitNameFromDep(_dep)
-
-				aurpkg, exists := dt.Aur[dep]
-				if exists {
+			for _, pkg := range deps {
+				dep, aurpkg := aurFindProvider(pkg, dt)
+				if aurpkg != nil {
 					delete(dt.Aur, dep)
 					depCatagoriesRecursive(aurpkg, dc, dt, isMake, seen)
 
@@ -231,8 +275,8 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 					}
 				}
 
-				alpmpkg, exists := dt.Repo[dep]
-				if exists {
+				dep, alpmpkg := repoFindProvider(pkg, dt)
+				if alpmpkg != nil {
 					delete(dt.Repo, dep)
 					repoDepCatagoriesRecursive(alpmpkg, dc, dt, isMake)
 
@@ -362,9 +406,14 @@ func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb 
 		return
 	}
 
+	_, exists = dt.Provides[pkg.Name()]
+	if exists {
+		return
+	}
+
 	dt.Repo[pkg.Name()] = pkg
 	(*pkg).Provides().ForEach(func(dep alpm.Depend) (err error) {
-		dt.Repo[dep.Name] = pkg
+		dt.Provides[dep.Name] = pkg.Name()
 		return nil
 	})
 
@@ -417,6 +466,10 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	for _, pkg := range info {
 		dt.Aur[pkg.Name] = pkg
 
+		for _, provide := range pkg.Provides {
+			name, _ := splitNameFromDep(provide)
+			dt.Provides[name] = pkg.Name
+		}
 	}
 
 	// Loop through to process and check if we now have
@@ -437,6 +490,12 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 				dep, _ := splitNameFromDep(versionedDep)
 
 				_, exists = dt.Aur[dep]
+				// We have it cached so skip.
+				if exists {
+					continue
+				}
+
+				_, exists = dt.Provides[dep]
 				// We have it cached so skip.
 				if exists {
 					continue
