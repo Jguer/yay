@@ -44,7 +44,7 @@ func createDevelDB() error {
 	bases := getBases(infoMap)
 
 	downloadPkgBuilds(info, sliceToStringSet(remoteNames), bases)
-	err = parsesrcinfosFile(info, srcinfosStale, bases)
+	err = parseSRCINFOFiles(info, srcinfosStale, bases)
 
 	for _, pkg := range info {
 		pkgbuild := srcinfosStale[pkg.PackageBase]

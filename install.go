@@ -17,7 +17,7 @@ import (
 func install(parser *arguments) error {
 	requestTargets := parser.targets.toSlice()
 	var err error
-	var incompatable stringSet
+	var incompatible stringSet
 	var dc *depCatagories
 	var toClean []*rpc.Pkg
 	var toEdit []*rpc.Pkg
@@ -165,12 +165,12 @@ func install(parser *arguments) error {
 		}
 
 		//inital srcinfo parse before pkgver() bump
-		err = parsesrcinfosFile(dc.Aur, srcinfosStale, dc.Bases)
+		err = parseSRCINFOFiles(dc.Aur, srcinfosStale, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		incompatable, err = getIncompatable(dc.Aur, srcinfosStale, dc.Bases)
+		incompatible, err = getIncompatible(dc.Aur, srcinfosStale, dc.Bases)
 		if err != nil {
 			return err
 		}
@@ -214,17 +214,17 @@ func install(parser *arguments) error {
 		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
-		err = downloadPkgBuildsSources(dc.Aur, dc.Bases, incompatable)
+		err = downloadPkgBuildsSources(dc.Aur, dc.Bases, incompatible)
 		if err != nil {
 			return err
 		}
 
-		err = parsesrcinfosGenerate(dc.Aur, srcinfos, dc.Bases)
+		err = parseSRCINFOGenerate(dc.Aur, srcinfos, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases, incompatable)
+		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases, incompatible)
 		if err != nil {
 			return err
 		}
@@ -261,8 +261,8 @@ func install(parser *arguments) error {
 	return nil
 }
 
-func getIncompatable(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) (stringSet, error) {
-	incompatable := make(stringSet)
+func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) (stringSet, error) {
+	incompatible := make(stringSet)
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
 		return nil, err
@@ -276,13 +276,13 @@ nextpkg:
 			}
 		}
 
-		incompatable.set(pkg.PackageBase)
+		incompatible.set(pkg.PackageBase)
 	}
 
-	if len(incompatable) > 0 {
+	if len(incompatible) > 0 {
 		fmt.Print(
 			bold(green(("\nThe following packages are not compatable with your architecture:"))))
-		for pkg := range incompatable {
+		for pkg := range incompatible {
 			fmt.Print("  " + cyan(pkg))
 		}
 
@@ -293,7 +293,7 @@ nextpkg:
 		}
 	}
 
-	return incompatable, nil
+	return incompatible, nil
 }
 
 func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
@@ -464,13 +464,13 @@ func editPkgBuilds(pkgs []*rpc.Pkg) error {
 	editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := editcmd.Run()
 	if err != nil {
-		return fmt.Errorf("Editor did not exit successfully, Abotring: %s", err)
+		return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
 	}
 
 	return nil
 }
 
-func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
+func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
@@ -488,7 +488,7 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 	return nil
 }
 
-func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
+func parseSRCINFOGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
