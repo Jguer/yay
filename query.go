@@ -72,11 +72,22 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 
 // NarrowSearch searches AUR and narrows based on subarguments
 func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
+	var r []rpc.Pkg
+	var err error
+	var usedIndex int
+
 	if len(pkgS) == 0 {
 		return nil, nil
 	}
 
-	r, err := rpc.Search(pkgS[0])
+	for i, word := range pkgS {
+		r, err = rpc.Search(word)
+		if err == nil {
+			usedIndex = i
+			break
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +104,11 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 	for _, res := range r {
 		match := true
-		for _, pkgN := range pkgS[1:] {
+		for i, pkgN := range pkgS {
+			if usedIndex == i {
+				continue
+			}
+
 			if !(strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)) {
 				match = false
 				break

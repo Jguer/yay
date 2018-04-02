@@ -362,7 +362,7 @@ func handleRemove() (err error) {
 func numberMenu(pkgS []string, flags []string) (err error) {
 	aurQ, err := narrowSearch(pkgS, true)
 	if err != nil {
-		fmt.Println("Error during AUR search:", err)
+		return fmt.Errorf("Error during AUR search: %s", err)
 	}
 	numaq := len(aurQ)
 	repoQ, numpq, err := queryRepo(pkgS)
