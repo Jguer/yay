@@ -22,9 +22,13 @@ func install(parser *arguments) error {
 	var toClean []*rpc.Pkg
 	var toEdit []*rpc.Pkg
 
+	var aurUp upSlice
+	var repoUp upSlice
+
 	removeMake := false
 	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
+
 	//remotenames: names of all non repo packages on the system
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -35,9 +39,21 @@ func install(parser *arguments) error {
 	//place
 	remoteNamesCache := sliceToStringSet(remoteNames)
 
-	//if we are doing -u also request every non repo package on the system
+	//if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
-		requestTargets = append(requestTargets, remoteNames...)
+		aurUp, repoUp, err = upList()
+		if err != nil {
+			return err
+		}
+
+		for _, up := range aurUp {
+			requestTargets = append(requestTargets, up.Name)
+		}
+
+		for _, up := range repoUp {
+			requestTargets = append(requestTargets, up.Name)
+		}
+
 	}
 
 	//if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
@@ -56,18 +72,14 @@ func install(parser *arguments) error {
 		parser.targets.set(name)
 	}
 
-	//only error if direct targets or deps are missing
-	for missing := range dt.Missing {
-		_, missingName := splitDbFromName(missing)
-		if !remoteNamesCache.get(missingName) || parser.targets.get(missingName) {
-			str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
+	if len(dt.Missing) > 0 {
+		str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
 
-			for name := range dt.Missing {
-				str += "\n\t" + name
-			}
-
-			return fmt.Errorf("%s", str)
+		for name := range dt.Missing {
+			str += "\n\t" + name
 		}
+
+		return fmt.Errorf("%s", str)
 	}
 
 	//create the arguments to pass for the repo install
@@ -77,7 +89,7 @@ func install(parser *arguments) error {
 	arguments.targets = make(stringSet)
 
 	if parser.existsArg("u", "sysupgrade") {
-		ignore, aurUp, err := upgradePkgs(dt)
+		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
 		if err != nil {
 			return err
 		}
@@ -87,16 +99,6 @@ func install(parser *arguments) error {
 
 		for pkg := range aurUp {
 			parser.addTarget(pkg)
-		}
-
-		//discard stuff thats
-		//not a target and
-		//not an upgrade and
-		//is installed
-		for pkg := range dt.Aur {
-			if !parser.targets.get(pkg) && remoteNamesCache.get(pkg) {
-				delete(dt.Aur, pkg)
-			}
 		}
 	}
 
@@ -112,7 +114,7 @@ func install(parser *arguments) error {
 		return fmt.Errorf(red(arrow + " Refusing to install AUR Packages as root, Aborting."))
 	}
 
-	dc, err = getDepCatagories(parser.formatTargets(), dt)
+	dc, err = getDepCatagories(requestTargets, dt)
 	if err != nil {
 		return err
 	}

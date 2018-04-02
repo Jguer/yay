@@ -288,9 +288,7 @@ func printNumberOfUpdates() error {
 	//todo
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	_, _, localNames, remoteNames, err := filterPackages()
-	dt, _ := getDepTree(append(localNames, remoteNames...))
-	aurUp, repoUp, err := upList(dt)
+	aurUp, repoUp, err := upList()
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -302,13 +300,11 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
-	old := os.Stdout // Keep backup of the real stdout
+	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()
-	dt, _ := getDepTree(append(localNames, remoteNames...))
-	aurUp, repoUp, err := upList(dt)
-
-	os.Stdout = old // Restoring the real stdout
+	aurUp, repoUp, err := upList()
+	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
 	}
