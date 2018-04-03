@@ -125,6 +125,11 @@ func handleCmd() (err error) {
 	if shouldSaveConfig {
 		config.saveConfig()
 	}
+	
+	if cmdArgs.existsArg("h", "help") {
+		err = handleHelp()
+		return
+	}
 
 	if config.SudoLoop && cmdArgs.needRoot() {
 		sudoLoopBackground()
@@ -172,6 +177,15 @@ func handleQuery() error {
 	}
 
 	return err
+}
+
+func handleHelp() error {
+	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
+		usage()
+		return nil
+	} else {
+		return passToPacman(cmdArgs)
+	}
 }
 
 //this function should only set config options
@@ -284,9 +298,7 @@ func handlePrint() (err error) {
 
 func handleYay() (err error) {
 	//_, options, targets := cmdArgs.formatArgs()
-	if cmdArgs.existsArg("h", "help") {
-		usage()
-	} else if cmdArgs.existsArg("gendb") {
+	if cmdArgs.existsArg("gendb") {
 		err = createDevelDB()
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = cleanDependencies()
@@ -378,7 +390,6 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		repoQ.printSearch()
 		aurQ.printSearch(numpq + 1)
 	}
-
 
 	if aurErr != nil {
 		fmt.Printf("Error during AUR search: %s\n", aurErr)

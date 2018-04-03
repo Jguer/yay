@@ -72,7 +72,10 @@ func install(parser *arguments) error {
 		parser.targets.set(name)
 	}
 
-	requestTargets = parser.targets.toSlice()
+	for i, pkg := range requestTargets {
+		_, name := splitDbFromName(pkg)
+		requestTargets[i] = name
+	}
 
 	if len(dt.Missing) > 0 {
 		str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
