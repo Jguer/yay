@@ -379,7 +379,6 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		aurQ.printSearch(numpq + 1)
 	}
 
-
 	if aurErr != nil {
 		fmt.Printf("Error during AUR search: %s\n", aurErr)
 		fmt.Println("Showing repo packages only")
