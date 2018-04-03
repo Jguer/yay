@@ -44,10 +44,13 @@ func createDevelDB() error {
 	bases := getBases(infoMap)
 
 	downloadPkgBuilds(info, sliceToStringSet(remoteNames), bases)
-	err = parseSRCINFOFiles(info, srcinfosStale, bases)
+	tryParsesrcinfosFile(info, srcinfosStale, bases)
 
 	for _, pkg := range info {
-		pkgbuild := srcinfosStale[pkg.PackageBase]
+		pkgbuild, ok := srcinfosStale[pkg.PackageBase]
+		if !ok {
+			continue
+		}
 
 		for _, pkg := range bases[pkg.PackageBase] {
 			updateVCSData(pkg.Name, pkgbuild.Source)

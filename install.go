@@ -492,6 +492,23 @@ func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 	return nil
 }
 
+func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) {
+	for k, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+
+		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
+		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
+
+		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		if err != nil {
+			fmt.Printf("cannot parse %s skipping: %s\n", pkg.Name, err)
+			continue
+		}
+
+		srcinfos[pkg.PackageBase] = pkgbuild
+	}
+}
+
 func parseSRCINFOGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
