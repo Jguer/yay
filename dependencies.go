@@ -543,15 +543,23 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 }
 
 func checkVersions(dt *depTree) error {
-	depStrings := make([]string, 0)
 	has := make(map[string][]string)
+	allDeps := make([]*gopkg.Dependency, 0)
+
+	localDb, err := alpmHandle.LocalDb()
+	if err != nil {
+		return err
+	}
 
 	for _, pkg := range dt.Aur {
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, dep := range deps {
 				_, _dep := splitNameFromDep(dep)
 				if _dep != "" {
-					depStrings = append(depStrings, dep)
+					deps, _ := gopkg.ParseDeps([]string{dep})
+					if deps[0] != nil {
+						allDeps = append(allDeps, deps[0])
+					}
 				}
 			}
 		}
@@ -573,7 +581,10 @@ func checkVersions(dt *depTree) error {
 	for _, pkg := range dt.Repo {
 		pkg.Depends().ForEach(func(dep alpm.Depend) error {
 			if dep.Mod != alpm.DepModAny {
-				depStrings = append(depStrings, dep.String())
+				deps, _ := gopkg.ParseDeps([]string{dep.String()})
+				if deps[0] != nil {
+					allDeps = append(allDeps, deps[0])
+				}
 			}
 			return nil
 		})
@@ -592,9 +603,21 @@ func checkVersions(dt *depTree) error {
 
 	}
 
-	deps, _ := gopkg.ParseDeps(depStrings)
+	localDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+		pkg.Provides().ForEach(func(dep alpm.Depend) error {
+			if dep.Mod != alpm.DepModAny {
+				addMapStringSlice(has, dep.Name, dep.Version)
+			} else {
+				delete(has, dep.Name)
+			}
 
-	for _, dep := range deps {
+			return nil
+		})
+
+		return nil
+	})
+
+	for _, dep := range allDeps {
 		satisfied := false
 		verStrs, ok := has[dep.Name]
 		if !ok {

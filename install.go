@@ -72,7 +72,6 @@ func install(parser *arguments) error {
 		parser.targets.set(name)
 	}
 
-
 	requestTargets = parser.targets.toSlice()
 
 	if len(dt.Missing) > 0 {
