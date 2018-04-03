@@ -360,10 +360,7 @@ func handleRemove() (err error) {
 
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
-	aurQ, err := narrowSearch(pkgS, true)
-	if err != nil {
-		return fmt.Errorf("Error during AUR search: %s", err)
-	}
+	aurQ, aurErr := narrowSearch(pkgS, true)
 	numaq := len(aurQ)
 	repoQ, numpq, err := queryRepo(pkgS)
 	if err != nil {
@@ -380,6 +377,12 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	} else {
 		repoQ.printSearch()
 		aurQ.printSearch(numpq + 1)
+	}
+
+
+	if aurErr != nil {
+		fmt.Printf("Error during AUR search: %s\n", aurErr)
+		fmt.Println("Showing repo packages only")
 	}
 
 	fmt.Println(bold(green(arrow + " Packages to install (eg: 1 2 3, 1-3 or ^4)")))

@@ -130,10 +130,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string) (err error) {
-	aq, err := narrowSearch(pkgS, true)
-	if err != nil {
-		return err
-	}
+	aq, aurErr := narrowSearch(pkgS, true)
 	pq, _, err := queryRepo(pkgS)
 	if err != nil {
 		return err
@@ -145,6 +142,11 @@ func syncSearch(pkgS []string) (err error) {
 	} else {
 		pq.printSearch()
 		aq.printSearch(1)
+	}
+
+	if aurErr != nil {
+		fmt.Printf("Error during AUR search: %s\n", aurErr)
+		fmt.Println("Showing Repo packags only")
 	}
 
 	return nil
