@@ -216,9 +216,12 @@ func install(parser *arguments) error {
 			}
 		}
 	} else if hasAur {
+		oldValue := config.NoConfirm
+		config.NoConfirm = false
 		if len(toEdit) > 0 && !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
+		config.NoConfirm = oldValue
 	}
 
 	if hasAur {
@@ -315,10 +318,6 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 
 	toClean := make([]*rpc.Pkg, 0)
 	toEdit := make([]*rpc.Pkg, 0)
-
-	if config.NoConfirm {
-		return toClean, toEdit, nil
-	}
 
 	for n, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"

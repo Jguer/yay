@@ -233,7 +233,7 @@ func continueTask(s string, def string) (cont bool) {
 }
 
 func getInput(defaultValue string) (string, error) {
-	if defaultValue != "" {
+	if defaultValue != "" || config.NoConfirm {
 		fmt.Println(defaultValue)
 		return defaultValue, nil
 	}
