@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -72,11 +71,6 @@ func install(parser *arguments) error {
 		parser.targets.set(name)
 	}
 
-	for i, pkg := range requestTargets {
-		_, name := splitDbFromName(pkg)
-		requestTargets[i] = name
-	}
-
 	if len(dt.Missing) > 0 {
 		str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
 
@@ -97,6 +91,18 @@ func install(parser *arguments) error {
 		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
 		if err != nil {
 			return err
+		}
+
+		requestTargets = make([]string, 0, len(repoUp)-len(ignore)+len(aurUp))
+
+		for _, up := range repoUp {
+			if !ignore.get(up.Name) {
+				requestTargets = append(requestTargets, up.Name)
+			}
+		}
+
+		for up := range aurUp {
+			requestTargets = append(requestTargets, up)
 		}
 
 		arguments.addParam("ignore", strings.Join(ignore.toSlice(), ","))
@@ -337,18 +343,10 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 		fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
 		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
 		fmt.Print(bold(green(arrow + " ")))
-		reader := bufio.NewReader(os.Stdin)
-
-		numberBuf, overflow, err := reader.ReadLine()
+		cleanInput, err := getInput(config.AnswerClean)
 		if err != nil {
 			return nil, nil, err
 		}
-
-		if overflow {
-			return nil, nil, fmt.Errorf("Input too long")
-		}
-
-		cleanInput := string(numberBuf)
 
 		cInclude, cExclude, cOtherInclude, cOtherExclude := parseNumberMenu(cleanInput)
 		cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
@@ -398,18 +396,11 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
 
 	fmt.Print(bold(green(arrow + " ")))
-	reader := bufio.NewReader(os.Stdin)
 
-	numberBuf, overflow, err := reader.ReadLine()
+	editInput, err := getInput(config.AnswerEdit)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	if overflow {
-		return nil, nil, fmt.Errorf("Input too long")
-	}
-
-	editInput := string(numberBuf)
 
 	eInclude, eExclude, eOtherInclude, eOtherExclude := parseNumberMenu(editInput)
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0

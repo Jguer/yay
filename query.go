@@ -21,10 +21,32 @@ func (q aurQuery) Len() int {
 }
 
 func (q aurQuery) Less(i, j int) bool {
-	if config.SortMode == BottomUp {
-		return q[i].NumVotes < q[j].NumVotes
+	var result bool
+
+	switch config.SortBy {
+	case "votes":
+		result = q[i].NumVotes > q[j].NumVotes
+	case "popularity":
+		result = q[i].Popularity > q[j].Popularity
+	case "name":
+		result = lessRunes([]rune(q[i].Name), []rune(q[j].Name))
+	case "base":
+		result = lessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
+	case "submitted":
+		result = q[i].FirstSubmitted < q[j].FirstSubmitted
+	case "modified":
+		result = q[i].LastModified < q[j].LastModified
+	case "id":
+		result = q[i].ID < q[j].ID
+	case "baseid":
+		result = q[i].PackageBaseID < q[j].PackageBaseID
 	}
-	return q[i].NumVotes > q[j].NumVotes
+
+	if config.SortMode == BottomUp {
+		return !result
+	}
+
+	return result
 }
 
 func (q aurQuery) Swap(i, j int) {

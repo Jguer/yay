@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -288,21 +286,16 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 
 	fmt.Println(bold(green(arrow + " Packages to not upgrade (eg: 1 2 3, 1-3, ^4 or repo name)")))
 	fmt.Print(bold(green(arrow + " ")))
-	reader := bufio.NewReader(os.Stdin)
 
-	numberBuf, overflow, err := reader.ReadLine()
+	numbers, err := getInput(config.AnswerUpgrade)
 	if err != nil {
 		return nil, nil, err
-	}
-
-	if overflow {
-		return nil, nil, fmt.Errorf("Input too long")
 	}
 
 	//upgrade menu asks you which packages to NOT upgrade so in this case
 	//include and exclude are kind of swaped
 	//include, exclude, other := parseNumberMenu(string(numberBuf))
-	include, exclude, otherInclude, otherExclude := parseNumberMenu(string(numberBuf))
+	include, exclude, otherInclude, otherExclude := parseNumberMenu(numbers)
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 

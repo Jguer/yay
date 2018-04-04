@@ -445,6 +445,14 @@ func hasParam(arg string) bool {
 		return true
 	case "requestsplitn":
 		return true
+	case "answerclean":
+		return true
+	case "answeredit":
+		return true
+	case "answerupgrade":
+		return true
+	case "sortby":
+		return true
 	default:
 		return false
 	}
