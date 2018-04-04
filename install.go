@@ -71,11 +71,6 @@ func install(parser *arguments) error {
 		parser.targets.set(name)
 	}
 
-	for i, pkg := range requestTargets {
-		_, name := splitDbFromName(pkg)
-		requestTargets[i] = name
-	}
-
 	if len(dt.Missing) > 0 {
 		str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
 
@@ -96,6 +91,18 @@ func install(parser *arguments) error {
 		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
 		if err != nil {
 			return err
+		}
+
+		requestTargets = make([]string, 0, len(repoUp)-len(ignore)+len(aurUp))
+
+		for _, up := range repoUp {
+			if !ignore.get(up.Name) {
+				requestTargets = append(requestTargets, up.Name)
+			}
+		}
+
+		for up := range aurUp {
+			requestTargets = append(requestTargets, up)
 		}
 
 		arguments.addParam("ignore", strings.Join(ignore.toSlice(), ","))
