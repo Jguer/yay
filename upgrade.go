@@ -277,13 +277,6 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
 
-	if config.NoConfirm {
-		for _, up := range aurUp {
-			aurNames.set(up.Name)
-		}
-		return ignore, aurNames, nil
-	}
-
 	fmt.Println(bold(green(arrow + " Packages to not upgrade (eg: 1 2 3, 1-3, ^4 or repo name)")))
 	fmt.Print(bold(green(arrow + " ")))
 
