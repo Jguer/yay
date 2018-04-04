@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -33,10 +34,14 @@ type Configuration struct {
 	TarBin        string `json:"tarbin"`
 	ReDownload    string `json:"redownload"`
 	ReBuild       string `json:"rebuild"`
+	AnswerClean   string `json:"answerclean"`
+	AnswerEdit    string `json:"answeredit"`
+	AnswerUpgrade string `json:"answerupgrade"`
 	GitBin        string `json:"gitbin"`
 	GpgBin        string `json:"gpgbin"`
 	GpgFlags      string `json:"gpgflags"`
 	MFlags        string `json:"mflags"`
+	SortBy        string `json:"sortby"`
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
@@ -134,6 +139,7 @@ func defaultSettings(config *Configuration) {
 	config.GpgFlags = ""
 	config.MFlags = ""
 	config.SortMode = BottomUp
+	config.SortBy = "votes"
 	config.SudoLoop = false
 	config.TarBin = "bsdtar"
 	config.GitBin = "git"
@@ -142,6 +148,9 @@ func defaultSettings(config *Configuration) {
 	config.RequestSplitN = 150
 	config.ReDownload = "no"
 	config.ReBuild = "no"
+	config.AnswerClean = ""
+	config.AnswerEdit = ""
+	config.AnswerUpgrade = ""
 }
 
 // Editor returns the preferred system editor.
@@ -221,6 +230,26 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	return true
+}
+
+func getInput(defaultValue string) (string, error) {
+	if defaultValue != "" {
+		fmt.Println(defaultValue)
+		return defaultValue, nil
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+
+	buf, overflow, err := reader.ReadLine()
+	if err != nil {
+		return "", err
+	}
+
+	if overflow {
+		return "", fmt.Errorf("Input too long")
+	}
+
+	return string(buf), nil
 }
 
 func (config Configuration) String() string {

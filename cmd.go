@@ -125,7 +125,7 @@ func handleCmd() (err error) {
 	if shouldSaveConfig {
 		config.saveConfig()
 	}
-	
+
 	if cmdArgs.existsArg("h", "help") {
 		err = handleHelp()
 		return
@@ -214,6 +214,8 @@ func handleConfig(option, value string) bool {
 		config.SortMode = TopDown
 	case "bottomup":
 		config.SortMode = BottomUp
+	case "sortby":
+		config.SortBy = value
 	case "noconfirm":
 		config.NoConfirm = true
 	case "redownload":
@@ -230,6 +232,18 @@ func handleConfig(option, value string) bool {
 		config.ReBuild = "tree"
 	case "norebuild":
 		config.ReBuild = "no"
+	case "answerclean":
+		config.AnswerClean = value
+	case "noanswerclean":
+		config.AnswerClean = ""
+	case "answeredit":
+		config.AnswerEdit = value
+	case "noansweredit":
+		config.AnswerEdit = ""
+	case "answerupgrade":
+		config.AnswerUpgrade = value
+	case "noanswerupgrade":
+		config.AnswerUpgrade = ""
 	case "gpgflags":
 		config.GpgFlags = value
 	case "mflags":
