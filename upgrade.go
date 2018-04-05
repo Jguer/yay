@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"unicode"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -74,13 +75,50 @@ func getVersionDiff(oldVersion, newversion string) (left, right string) {
 	}
 
 	if errOld == nil && errNew == nil {
-		if old.Version == new.Version {
-			left = string(old.Version) + "-" + red(string(old.Pkgrel))
-			right = string(new.Version) + "-" + green(string(new.Pkgrel))
-		} else {
-			left = red(string(old.Version)) + "-" + string(old.Pkgrel)
-			right = bold(green(string(new.Version))) + "-" + string(new.Pkgrel)
+		oldVersion := old.String()
+		newVersion := new.String()
+
+		if oldVersion == newVersion {
+			return oldVersion, newVersion
 		}
+
+		diffPosition := 0
+
+		checkWords := func(str string, index int, words ...string) bool {
+			for _, word := range words {
+				wordLength := len(word)
+				nextIndex := index + 1
+				if (index < len(str)-wordLength) &&
+					(str[nextIndex:(nextIndex+wordLength)] == word) {
+					return true
+				}
+			}
+			return false
+		}
+
+		for index, char := range oldVersion {
+			charIsSpecial := !(unicode.IsLetter(char) || unicode.IsNumber(char))
+
+			if (index >= len(newVersion)) || (char != rune(newVersion[index])) {
+				if charIsSpecial {
+					diffPosition = index
+				}
+				break
+			}
+
+			if charIsSpecial ||
+				(((index == len(oldVersion)-1) || (index == len(newVersion)-1)) &&
+					((len(oldVersion) != len(newVersion)) ||
+						(oldVersion[index] == newVersion[index]))) ||
+				checkWords(oldVersion, index, "rc", "pre", "alpha", "beta") {
+				diffPosition = index + 1
+			}
+		}
+
+		samePart := oldVersion[0:diffPosition]
+
+		left = samePart + red(oldVersion[diffPosition:len(oldVersion)])
+		right = samePart + green(newVersion[diffPosition:len(newVersion)])
 	}
 
 	return
