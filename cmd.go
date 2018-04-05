@@ -48,6 +48,13 @@ Permanent configuration options:
     --config   <file>    pacman.conf file to use
 
     --requestsplitn <n>  Max amount of packages to query per AUR request
+    --sortby <field>     Sort AUR results by a specific field during search
+    --answerclean   <a>  Set a predetermined answer for the clean build menu
+    --answeredit    <a>  Set a predetermined answer for the edit pkgbuild menu
+    --answerupgrade <a>  Set a predetermined answer for the upgrade menu
+    --noanswerclean      Unset the answer for the clean build menu
+    --noansweredit       Unset the answer for the edit pkgbuild menu
+    --noanswerupgrade    Unset the answer for the upgrade menu
 
     --topdown            Shows repository's packages first and then AUR's
     --bottomup           Shows AUR's packages first and then repository's

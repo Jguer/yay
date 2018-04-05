@@ -171,6 +171,47 @@ AUR query will cause an error\%. This should only make a noticeable difference
 with very large requests (>500) packages\&.
 .RE
 .PP
+\fB\-\-sortby <votes|popularity|id|baseid|name|base|submitted|modified>\fR
+.RS 4
+Sort AUR results by a specific field during search\&.
+.RE
+.PP
+\fB\-\-answerclean <All|None|Installed|NotInstalled|...>\fR
+.RS 4
+Set a predetermined answer for the clean build menu question\&. This answer
+will be used instead of reading from standard input but will be treaded exactly
+the same when parsed\&.
+.RE
+.PP
+\fB\-\-answeredit <All|None|Installed|NotInstalled|...>\fR
+.RS 4
+Set a predetermined answer for the edit pkgbuild  menu question\&. This answer
+will be used instead of reading from standard input but will be treaded exactly
+the same when parsed\&.
+.RE
+.PP
+\fB\-\-answerupgrade\fR <Repo|^Repo|None|...>
+.RS 4
+Set a predetermined answer for the upgrade  menu question\&. This answer
+will be used instead of reading from standard input but will be treaded exactly
+the same\&.
+.RE
+.PP
+\fB\-\-noanswerclean\fR
+.RS 4
+Unset the answer for the clean build menu\&.
+.RE
+.PP
+\fB\-\-noansweredit\fR
+.RS 4
+Unset the answer for the edit pkgbuild menu\&.
+.RE
+.PP
+\fB\-\-noanswerupgrade\fR
+.RS 4
+Unset the answer for the upgrade menu\&.
+.RE
+.PP
 \fB\-\-topdown\fR
 .RS 4
 Display repository packages first and then AUR packages\&.
