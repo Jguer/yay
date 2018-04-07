@@ -362,60 +362,52 @@ func formatTime(i int) string {
 	return fmt.Sprintf("%d/%02d/%02d", t.Year(), int(t.Month()), t.Day())
 }
 
-func red(in string) string {
+const (
+	redCode     = "\x1b[31m"
+	greenCode   = "\x1b[32m"
+	yellowCode  = "\x1b[33m"
+	blueCode    = "\x1b[34m"
+	magentaCode = "\x1b[35m"
+	cyanCode    = "\x1b[36m"
+	boldCode    = "\x1b[1m"
+
+	resetCode = "\x1b[0m"
+)
+
+func stylize(startCode, in string) string {
 	if useColor {
-		return "\x1b[31m" + in + "\x1b[0m"
+		return startCode + in + resetCode
 	}
 
 	return in
+}
+
+func red(in string) string {
+	return stylize(redCode, in)
 }
 
 func green(in string) string {
-	if useColor {
-		return "\x1b[32m" + in + "\x1b[0m"
-	}
-
-	return in
+	return stylize(greenCode, in)
 }
 
 func yellow(in string) string {
-	if useColor {
-		return "\x1b[33m" + in + "\x1b[0m"
-	}
-
-	return in
+	return stylize(yellowCode, in)
 }
 
 func blue(in string) string {
-	if useColor {
-		return "\x1b[34m" + in + "\x1b[0m"
-	}
-
-	return in
+	return stylize(blueCode, in)
 }
 
 func cyan(in string) string {
-	if useColor {
-		return "\x1b[36m" + in + "\x1b[0m"
-	}
-
-	return in
+	return stylize(cyanCode, in)
 }
 
 func magenta(in string) string {
-	if useColor {
-		return "\x1b[35m" + in + "\x1b[0m"
-	}
-
-	return in
+	return stylize(magentaCode, in)
 }
 
 func bold(in string) string {
-	if useColor {
-		return "\x1b[1m" + in + "\x1b[0m"
-	}
-
-	return in
+	return stylize(boldCode, in)
 }
 
 // Colours text using a hashing algorithm. The same text will always produce the
