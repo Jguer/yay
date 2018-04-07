@@ -55,11 +55,11 @@ func (u upSlice) Less(i, j int) bool {
 
 	if found != nil {
 		return less
-	} else {
-		iRunes := []rune(u[i].Repository)
-		jRunes := []rune(u[j].Repository)
-		return lessRunes(iRunes, jRunes)
 	}
+
+	iRunes := []rune(u[i].Repository)
+	jRunes := []rune(u[j].Repository)
+	return lessRunes(iRunes, jRunes)
 
 }
 
