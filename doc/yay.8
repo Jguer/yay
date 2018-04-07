@@ -1,4 +1,4 @@
-/n'\" t
+'\" t
 .TH "YAY" "8" "2018-02-29" "Yay v3\&.460+" "Yay Manual"
 .nh
 .ad l
@@ -37,7 +37,7 @@ Downloads PKGBUILD from ABS or AUR\&.
 If no operation is selected -Y will be assumed\&.
 .SH "EXTENDED PACMAN OPERATIONS"
 .PP
-\fB\-S, -Si, -Ss, -Su\fR
+\fB\-S, -Si, -Ss, -Su, -Qu\fR
 .RS 4
 These operations are extended to support both AUR and repo packages\&.
 .RE
@@ -56,7 +56,7 @@ which packages to install (yogurt mode)\&.
 .PP
 \fB   \-\-gendb\fR
 .RS 4
-Generate development package databse\&. Tracks the latest commit for each
+Generate development package database\&. Tracks the latest commit for each
 development package, when there is a new commit Yay will know to update\&. This
 is done per package whenever a package is synced. This option should only be
 used when migrating to Yay from another AUR helper.
@@ -169,6 +169,47 @@ The maximum amount of packages to request per AUR query\&. The higher the
 number the faster AUR requests will be\&. Requesting too many packages in one
 AUR query will cause an error\%. This should only make a noticeable difference
 with very large requests (>500) packages\&.
+.RE
+.PP
+\fB\-\-sortby <votes|popularity|id|baseid|name|base|submitted|modified>\fR
+.RS 4
+Sort AUR results by a specific field during search\&.
+.RE
+.PP
+\fB\-\-answerclean <All|None|Installed|NotInstalled|...>\fR
+.RS 4
+Set a predetermined answer for the clean build menu question\&. This answer
+will be used instead of reading from standard input but will be treaded exactly
+the same when parsed\&.
+.RE
+.PP
+\fB\-\-answeredit <All|None|Installed|NotInstalled|...>\fR
+.RS 4
+Set a predetermined answer for the edit pkgbuild  menu question\&. This answer
+will be used instead of reading from standard input but will be treaded exactly
+the same when parsed\&.
+.RE
+.PP
+\fB\-\-answerupgrade\fR <Repo|^Repo|None|...>
+.RS 4
+Set a predetermined answer for the upgrade  menu question\&. This answer
+will be used instead of reading from standard input but will be treaded exactly
+the same\&.
+.RE
+.PP
+\fB\-\-noanswerclean\fR
+.RS 4
+Unset the answer for the clean build menu\&.
+.RE
+.PP
+\fB\-\-noansweredit\fR
+.RS 4
+Unset the answer for the edit pkgbuild menu\&.
+.RE
+.PP
+\fB\-\-noanswerupgrade\fR
+.RS 4
+Unset the answer for the upgrade menu\&.
 .RE
 .PP
 \fB\-\-topdown\fR
@@ -318,7 +359,7 @@ yay --devel --save
 Sets devel to true in the config\&.
 .RE
 .PP
-yay --stats
+yay -P --stats
 .RS 4
 Shows statistics for installed packages and system health\&.
 .RE

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,14 +16,18 @@ import (
 func install(parser *arguments) error {
 	requestTargets := parser.targets.toSlice()
 	var err error
-	var incompatable stringSet
+	var incompatible stringSet
 	var dc *depCatagories
 	var toClean []*rpc.Pkg
 	var toEdit []*rpc.Pkg
 
+	var aurUp upSlice
+	var repoUp upSlice
+
 	removeMake := false
 	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
+
 	//remotenames: names of all non repo packages on the system
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -35,9 +38,21 @@ func install(parser *arguments) error {
 	//place
 	remoteNamesCache := sliceToStringSet(remoteNames)
 
-	//if we are doing -u also request every non repo package on the system
+	//if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
-		requestTargets = append(requestTargets, remoteNames...)
+		aurUp, repoUp, err = upList()
+		if err != nil {
+			return err
+		}
+
+		for _, up := range aurUp {
+			requestTargets = append(requestTargets, up.Name)
+		}
+
+		for _, up := range repoUp {
+			requestTargets = append(requestTargets, up.Name)
+		}
+
 	}
 
 	//if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
@@ -56,18 +71,19 @@ func install(parser *arguments) error {
 		parser.targets.set(name)
 	}
 
-	//only error if direct targets or deps are missing
-	for missing := range dt.Missing {
-		_, missingName := splitDbFromName(missing)
-		if !remoteNamesCache.get(missingName) || parser.targets.get(missingName) {
-			str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
+	for i, pkg := range requestTargets {
+		_, name := splitDbFromName(pkg)
+		requestTargets[i] = name
+	}
 
-			for name := range dt.Missing {
-				str += "\n\t" + name
-			}
+	if len(dt.Missing) > 0 {
+		str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
 
-			return fmt.Errorf("%s", str)
+		for name := range dt.Missing {
+			str += "\n\t" + name
 		}
+
+		return fmt.Errorf("%s", str)
 	}
 
 	//create the arguments to pass for the repo install
@@ -77,9 +93,21 @@ func install(parser *arguments) error {
 	arguments.targets = make(stringSet)
 
 	if parser.existsArg("u", "sysupgrade") {
-		ignore, aurUp, err := upgradePkgs(dt)
+		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
 		if err != nil {
 			return err
+		}
+
+		requestTargets = parser.targets.toSlice()
+
+		for _, up := range repoUp {
+			if !ignore.get(up.Name) {
+				requestTargets = append(requestTargets, up.Name)
+			}
+		}
+
+		for up := range aurUp {
+			requestTargets = append(requestTargets, up)
 		}
 
 		arguments.addParam("ignore", strings.Join(ignore.toSlice(), ","))
@@ -87,16 +115,6 @@ func install(parser *arguments) error {
 
 		for pkg := range aurUp {
 			parser.addTarget(pkg)
-		}
-
-		//discard stuff thats
-		//not a target and
-		//not an upgrade and
-		//is installed
-		for pkg := range dt.Aur {
-			if !parser.targets.get(pkg) && remoteNamesCache.get(pkg) {
-				delete(dt.Aur, pkg)
-			}
 		}
 	}
 
@@ -112,7 +130,7 @@ func install(parser *arguments) error {
 		return fmt.Errorf(red(arrow + " Refusing to install AUR Packages as root, Aborting."))
 	}
 
-	dc, err = getDepCatagories(parser.formatTargets(), dt)
+	dc, err = getDepCatagories(requestTargets, dt)
 	if err != nil {
 		return err
 	}
@@ -135,11 +153,9 @@ func install(parser *arguments) error {
 		hasAur = len(dc.Aur) != 0
 		fmt.Println()
 
-		if !parser.existsArg("gendb") {
-			err = checkForAllConflicts(dc)
-			if err != nil {
-				return err
-			}
+		err = checkForAllConflicts(dc)
+		if err != nil {
+			return err
 		}
 
 		if len(dc.MakeOnly) > 0 {
@@ -167,25 +183,12 @@ func install(parser *arguments) error {
 		}
 
 		//inital srcinfo parse before pkgver() bump
-		err = parsesrcinfosFile(dc.Aur, srcinfosStale, dc.Bases)
+		err = parseSRCINFOFiles(dc.Aur, srcinfosStale, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		if arguments.existsArg("gendb") {
-			for _, pkg := range dc.Aur {
-				pkgbuild := srcinfosStale[pkg.PackageBase]
-
-				for _, pkg := range dc.Bases[pkg.PackageBase] {
-					updateVCSData(pkg.Name, pkgbuild.Source)
-				}
-			}
-
-			fmt.Println(bold(green(arrow + " GenDB finished. No packages were installed")))
-			return nil
-		}
-
-		incompatable, err = getIncompatable(dc.Aur, srcinfosStale, dc.Bases)
+		incompatible, err = getIncompatible(dc.Aur, srcinfosStale, dc.Bases)
 		if err != nil {
 			return err
 		}
@@ -196,7 +199,7 @@ func install(parser *arguments) error {
 		}
 	}
 
-	if !parser.existsArg("gendb") && (len(arguments.targets) > 0 || arguments.existsArg("u")) {
+	if len(arguments.targets) > 0 || arguments.existsArg("u") {
 		err := passToPacman(arguments)
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages")
@@ -218,9 +221,12 @@ func install(parser *arguments) error {
 			}
 		}
 	} else if hasAur {
+		oldValue := config.NoConfirm
+		config.NoConfirm = false
 		if len(toEdit) > 0 && !continueTask("Proceed with install?", "nN") {
 			return fmt.Errorf("Aborting due to user")
 		}
+		config.NoConfirm = oldValue
 	}
 
 	if hasAur {
@@ -229,17 +235,17 @@ func install(parser *arguments) error {
 		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
-		err = downloadPkgBuildsSources(dc.Aur, dc.Bases, incompatable)
+		err = downloadPkgBuildsSources(dc.Aur, dc.Bases, incompatible)
 		if err != nil {
 			return err
 		}
 
-		err = parsesrcinfosGenerate(dc.Aur, srcinfos, dc.Bases)
+		err = parseSRCINFOGenerate(dc.Aur, srcinfos, dc.Bases)
 		if err != nil {
 			return err
 		}
 
-		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases, incompatable)
+		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases, incompatible)
 		if err != nil {
 			return err
 		}
@@ -276,8 +282,8 @@ func install(parser *arguments) error {
 	return nil
 }
 
-func getIncompatable(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) (stringSet, error) {
-	incompatable := make(stringSet)
+func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) (stringSet, error) {
+	incompatible := make(stringSet)
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
 		return nil, err
@@ -291,13 +297,13 @@ nextpkg:
 			}
 		}
 
-		incompatable.set(pkg.PackageBase)
+		incompatible.set(pkg.PackageBase)
 	}
 
-	if len(incompatable) > 0 {
+	if len(incompatible) > 0 {
 		fmt.Print(
 			bold(green(("\nThe following packages are not compatable with your architecture:"))))
-		for pkg := range incompatable {
+		for pkg := range incompatible {
 			fmt.Print("  " + cyan(pkg))
 		}
 
@@ -308,7 +314,7 @@ nextpkg:
 		}
 	}
 
-	return incompatable, nil
+	return incompatible, nil
 }
 
 func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
@@ -317,10 +323,6 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 
 	toClean := make([]*rpc.Pkg, 0)
 	toEdit := make([]*rpc.Pkg, 0)
-
-	if config.NoConfirm {
-		return toClean, toEdit, nil
-	}
 
 	for n, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
@@ -345,18 +347,10 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 		fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
 		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
 		fmt.Print(bold(green(arrow + " ")))
-		reader := bufio.NewReader(os.Stdin)
-
-		numberBuf, overflow, err := reader.ReadLine()
+		cleanInput, err := getInput(config.AnswerClean)
 		if err != nil {
 			return nil, nil, err
 		}
-
-		if overflow {
-			return nil, nil, fmt.Errorf("Input too long")
-		}
-
-		cleanInput := string(numberBuf)
 
 		cInclude, cExclude, cOtherInclude, cOtherExclude := parseNumberMenu(cleanInput)
 		cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
@@ -406,18 +400,11 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
 
 	fmt.Print(bold(green(arrow + " ")))
-	reader := bufio.NewReader(os.Stdin)
 
-	numberBuf, overflow, err := reader.ReadLine()
+	editInput, err := getInput(config.AnswerEdit)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	if overflow {
-		return nil, nil, fmt.Errorf("Input too long")
-	}
-
-	editInput := string(numberBuf)
 
 	eInclude, eExclude, eOtherInclude, eOtherExclude := parseNumberMenu(editInput)
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
@@ -479,13 +466,13 @@ func editPkgBuilds(pkgs []*rpc.Pkg) error {
 	editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := editcmd.Run()
 	if err != nil {
-		return fmt.Errorf("Editor did not exit successfully, Abotring: %s", err)
+		return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
 	}
 
 	return nil
 }
 
-func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
+func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
@@ -503,7 +490,24 @@ func parsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 	return nil
 }
 
-func parsesrcinfosGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
+func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) {
+	for k, pkg := range pkgs {
+		dir := config.BuildDir + pkg.PackageBase + "/"
+
+		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
+		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
+
+		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		if err != nil {
+			fmt.Printf("cannot parse %s skipping: %s\n", pkg.Name, err)
+			continue
+		}
+
+		srcinfos[pkg.PackageBase] = pkgbuild
+	}
+}
+
+func parseSRCINFOGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
@@ -580,30 +584,30 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 }
 
 func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg, incompatable stringSet) error {
-	alpmArch, err := alpmHandle.Arch()
+	arch, err := alpmHandle.Arch()
 	if err != nil {
 		return err
 	}
 
 	for _, pkg := range pkgs {
-		var arch string
 		dir := config.BuildDir + pkg.PackageBase + "/"
 		built := true
 
 		srcinfo := srcinfos[pkg.PackageBase]
 		version := srcinfo.CompleteVersion()
 
-		if srcinfos[pkg.PackageBase].Arch[0] == "any" {
-			arch = "any"
-		} else {
-			arch = alpmArch
-		}
-
 		if config.ReBuild == "no" || (config.ReBuild == "yes" && !targets.get(pkg.Name)) {
 			for _, split := range bases[pkg.PackageBase] {
 				file, err := completeFileName(dir, split.Name+"-"+version.String()+"-"+arch+".pkg")
 				if err != nil {
 					return err
+				}
+
+				if file == "" {
+					file, err = completeFileName(dir, split.Name+"-"+version.String()+"-"+"any"+".pkg")
+					if err != nil {
+						return err
+					}
 				}
 
 				if file == "" {
@@ -648,6 +652,13 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			file, err := completeFileName(dir, split.Name+"-"+version.String()+"-"+arch+".pkg")
 			if err != nil {
 				return err
+			}
+
+			if file == "" {
+				file, err = completeFileName(dir, split.Name+"-"+version.String()+"-"+"any"+".pkg")
+				if err != nil {
+					return err
+				}
 			}
 
 			if file == "" {

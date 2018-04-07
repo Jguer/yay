@@ -48,6 +48,13 @@ Permanent configuration options:
     --config   <file>    pacman.conf file to use
 
     --requestsplitn <n>  Max amount of packages to query per AUR request
+    --sortby <field>     Sort AUR results by a specific field during search
+    --answerclean   <a>  Set a predetermined answer for the clean build menu
+    --answeredit    <a>  Set a predetermined answer for the edit pkgbuild menu
+    --answerupgrade <a>  Set a predetermined answer for the upgrade menu
+    --noanswerclean      Unset the answer for the clean build menu
+    --noansweredit       Unset the answer for the edit pkgbuild menu
+    --noanswerupgrade    Unset the answer for the upgrade menu
 
     --topdown            Shows repository's packages first and then AUR's
     --bottomup           Shows AUR's packages first and then repository's
@@ -126,6 +133,11 @@ func handleCmd() (err error) {
 		config.saveConfig()
 	}
 
+	if cmdArgs.existsArg("h", "help") {
+		err = handleHelp()
+		return
+	}
+
 	if config.SudoLoop && cmdArgs.needRoot() {
 		sudoLoopBackground()
 	}
@@ -174,6 +186,15 @@ func handleQuery() error {
 	return err
 }
 
+func handleHelp() error {
+	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
+		usage()
+		return nil
+	} else {
+		return passToPacman(cmdArgs)
+	}
+}
+
 //this function should only set config options
 //but currently still uses the switch left over from old code
 //eventually this should be refactored out futher
@@ -200,6 +221,8 @@ func handleConfig(option, value string) bool {
 		config.SortMode = TopDown
 	case "bottomup":
 		config.SortMode = BottomUp
+	case "sortby":
+		config.SortBy = value
 	case "noconfirm":
 		config.NoConfirm = true
 	case "redownload":
@@ -216,6 +239,18 @@ func handleConfig(option, value string) bool {
 		config.ReBuild = "tree"
 	case "norebuild":
 		config.ReBuild = "no"
+	case "answerclean":
+		config.AnswerClean = value
+	case "noanswerclean":
+		config.AnswerClean = ""
+	case "answeredit":
+		config.AnswerEdit = value
+	case "noansweredit":
+		config.AnswerEdit = ""
+	case "answerupgrade":
+		config.AnswerUpgrade = value
+	case "noanswerupgrade":
+		config.AnswerUpgrade = ""
 	case "gpgflags":
 		config.GpgFlags = value
 	case "mflags":
@@ -284,13 +319,8 @@ func handlePrint() (err error) {
 
 func handleYay() (err error) {
 	//_, options, targets := cmdArgs.formatArgs()
-	if cmdArgs.existsArg("h", "help") {
-		usage()
-	} else if cmdArgs.existsArg("gendb") {
+	if cmdArgs.existsArg("gendb") {
 		err = createDevelDB()
-		if err != nil {
-			return
-		}
 	} else if cmdArgs.existsDouble("c") {
 		err = cleanDependencies(true)
 	} else if cmdArgs.existsArg("c", "clean") {
@@ -365,10 +395,7 @@ func handleRemove() (err error) {
 
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
-	aurQ, err := narrowSearch(pkgS, true)
-	if err != nil {
-		fmt.Println("Error during AUR search:", err)
-	}
+	aurQ, aurErr := narrowSearch(pkgS, true)
 	numaq := len(aurQ)
 	repoQ, numpq, err := queryRepo(pkgS)
 	if err != nil {
@@ -385,6 +412,11 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	} else {
 		repoQ.printSearch()
 		aurQ.printSearch(numpq + 1)
+	}
+
+	if aurErr != nil {
+		fmt.Printf("Error during AUR search: %s\n", aurErr)
+		fmt.Println("Showing repo packages only")
 	}
 
 	fmt.Println(bold(green(arrow + " Packages to install (eg: 1 2 3, 1-3 or ^4)")))
@@ -467,7 +499,11 @@ func passToPacman(args *arguments) error {
 
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := cmd.Run()
-	return err
+
+	if err != nil {
+		return fmt.Errorf("")
+	}
+	return nil
 }
 
 //passToPacman but return the output instead of showing the user

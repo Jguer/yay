@@ -21,10 +21,32 @@ func (q aurQuery) Len() int {
 }
 
 func (q aurQuery) Less(i, j int) bool {
-	if config.SortMode == BottomUp {
-		return q[i].NumVotes < q[j].NumVotes
+	var result bool
+
+	switch config.SortBy {
+	case "votes":
+		result = q[i].NumVotes > q[j].NumVotes
+	case "popularity":
+		result = q[i].Popularity > q[j].Popularity
+	case "name":
+		result = lessRunes([]rune(q[i].Name), []rune(q[j].Name))
+	case "base":
+		result = lessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
+	case "submitted":
+		result = q[i].FirstSubmitted < q[j].FirstSubmitted
+	case "modified":
+		result = q[i].LastModified < q[j].LastModified
+	case "id":
+		result = q[i].ID < q[j].ID
+	case "baseid":
+		result = q[i].PackageBaseID < q[j].PackageBaseID
 	}
-	return q[i].NumVotes > q[j].NumVotes
+
+	if config.SortMode == BottomUp {
+		return !result
+	}
+
+	return result
 }
 
 func (q aurQuery) Swap(i, j int) {
@@ -72,11 +94,22 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 
 // NarrowSearch searches AUR and narrows based on subarguments
 func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
+	var r []rpc.Pkg
+	var err error
+	var usedIndex int
+
 	if len(pkgS) == 0 {
 		return nil, nil
 	}
 
-	r, err := rpc.Search(pkgS[0])
+	for i, word := range pkgS {
+		r, err = rpc.Search(word)
+		if err == nil {
+			usedIndex = i
+			break
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +126,11 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 	for _, res := range r {
 		match := true
-		for _, pkgN := range pkgS[1:] {
+		for i, pkgN := range pkgS {
+			if usedIndex == i {
+				continue
+			}
+
 			if !(strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)) {
 				match = false
 				break
@@ -115,10 +152,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string) (err error) {
-	aq, err := narrowSearch(pkgS, true)
-	if err != nil {
-		return err
-	}
+	aq, aurErr := narrowSearch(pkgS, true)
 	pq, _, err := queryRepo(pkgS)
 	if err != nil {
 		return err
@@ -132,12 +166,17 @@ func syncSearch(pkgS []string) (err error) {
 		aq.printSearch(1)
 	}
 
+	if aurErr != nil {
+		fmt.Printf("Error during AUR search: %s\n", aurErr)
+		fmt.Println("Showing Repo packags only")
+	}
+
 	return nil
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string) (err error) {
-	var info []rpc.Pkg
+	var info []*rpc.Pkg
 	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
@@ -170,7 +209,7 @@ func syncInfo(pkgS []string) (err error) {
 
 	if len(aurS) != 0 {
 		for _, pkg := range info {
-			PrintInfo(&pkg)
+			PrintInfo(pkg)
 		}
 	}
 
@@ -401,8 +440,8 @@ func statistics() (info struct {
 // of packages exceeds the number set in config.RequestSplitN.
 // If the number does exceed config.RequestSplitN multiple rpc requests will be
 // performed concurrently.
-func aurInfo(names []string) ([]rpc.Pkg, error) {
-	info := make([]rpc.Pkg, 0, len(names))
+func aurInfo(names []string) ([]*rpc.Pkg, error) {
+	info := make([]*rpc.Pkg, 0, len(names))
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
@@ -423,7 +462,10 @@ func aurInfo(names []string) ([]rpc.Pkg, error) {
 			return
 		}
 		mux.Lock()
-		info = append(info, tempInfo...)
+		for _, _i := range tempInfo {
+			i := _i
+			info = append(info, &i)
+		}
 		mux.Unlock()
 	}
 

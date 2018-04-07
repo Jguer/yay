@@ -445,6 +445,14 @@ func hasParam(arg string) bool {
 		return true
 	case "requestsplitn":
 		return true
+	case "answerclean":
+		return true
+	case "answeredit":
+		return true
+	case "answerupgrade":
+		return true
+	case "sortby":
+		return true
 	default:
 		return false
 	}
@@ -526,34 +534,33 @@ func (parser *arguments) parseCommandLine() (err error) {
 	usedNext := false
 
 	if len(args) < 1 {
-		err = fmt.Errorf("no operation specified (use -h for help)")
-		return
-	}
+		parser.parseShortOption("-Syu", "")
+	} else {
+		for k, arg := range args {
+			var nextArg string
 
-	for k, arg := range args {
-		var nextArg string
+			if usedNext {
+				usedNext = false
+				continue
+			}
 
-		if usedNext {
-			usedNext = false
-			continue
-		}
+			if k+1 < len(args) {
+				nextArg = args[k+1]
+			}
 
-		if k+1 < len(args) {
-			nextArg = args[k+1]
-		}
+			if parser.existsArg("--") {
+				parser.addTarget(arg)
+			} else if strings.HasPrefix(arg, "--") {
+				usedNext, err = parser.parseLongOption(arg, nextArg)
+			} else if strings.HasPrefix(arg, "-") {
+				usedNext, err = parser.parseShortOption(arg, nextArg)
+			} else {
+				parser.addTarget(arg)
+			}
 
-		if parser.existsArg("--") {
-			parser.addTarget(arg)
-		} else if strings.HasPrefix(arg, "--") {
-			usedNext, err = parser.parseLongOption(arg, nextArg)
-		} else if strings.HasPrefix(arg, "-") {
-			usedNext, err = parser.parseShortOption(arg, nextArg)
-		} else {
-			parser.addTarget(arg)
-		}
-
-		if err != nil {
-			return
+			if err != nil {
+				return
+			}
 		}
 	}
 

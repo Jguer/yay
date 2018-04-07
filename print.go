@@ -288,9 +288,7 @@ func printNumberOfUpdates() error {
 	//todo
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	_, _, localNames, remoteNames, err := filterPackages()
-	dt, _ := getDepTree(append(localNames, remoteNames...))
-	aurUp, repoUp, err := upList(dt)
+	aurUp, repoUp, err := upList()
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -302,13 +300,11 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
-	old := os.Stdout // Keep backup of the real stdout
+	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()
-	dt, _ := getDepTree(append(localNames, remoteNames...))
-	aurUp, repoUp, err := upList(dt)
-
-	os.Stdout = old // Restoring the real stdout
+	aurUp, repoUp, err := upList()
+	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
 	}
@@ -333,8 +329,28 @@ func printUpdateList(parser *arguments) error {
 		}
 	}
 
+	missing := false
+
+outer:
 	for pkg := range parser.targets {
+		for _, name := range localNames {
+			if name == pkg {
+				continue outer
+			}
+		}
+
+		for _, name := range remoteNames {
+			if name == pkg {
+				continue outer
+			}
+		}
+
 		fmt.Println(red(bold("error:")), "package '"+pkg+"' was not found")
+		missing = true
+	}
+
+	if missing {
+		return fmt.Errorf("")
 	}
 
 	return nil

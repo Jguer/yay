@@ -203,7 +203,10 @@ func main() {
 
 	err = handleCmd()
 	if err != nil {
-		fmt.Println(err)
+		if err.Error() != "" {
+			fmt.Println(err)
+		}
+
 		status = 1
 		goto cleanup
 	}

@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"sync"
 
 	alpm "github.com/jguer/go-alpm"
+	rpc "github.com/mikkeloscar/aur"
 	pkgb "github.com/mikkeloscar/gopkgbuild"
 )
 
@@ -27,15 +26,40 @@ func (u upSlice) Len() int      { return len(u) }
 func (u upSlice) Swap(i, j int) { u[i], u[j] = u[j], u[i] }
 
 func (u upSlice) Less(i, j int) bool {
-	if u[i].Repository != u[j].Repository {
-		iRunes := []rune(u[i].Repository)
-		jRunes := []rune(u[j].Repository)
-		return lessRunes(iRunes, jRunes)
-	} else {
+	if u[i].Repository == u[j].Repository {
 		iRunes := []rune(u[i].Name)
 		jRunes := []rune(u[j].Name)
 		return lessRunes(iRunes, jRunes)
 	}
+
+	syncDb, err := alpmHandle.SyncDbs()
+	if err != nil {
+		iRunes := []rune(u[i].Repository)
+		jRunes := []rune(u[j].Repository)
+		return lessRunes(iRunes, jRunes)
+	}
+
+	less := false
+	found := syncDb.ForEach(func(db alpm.Db) error {
+		if db.Name() == u[i].Repository {
+			less = true
+		} else if db.Name() == u[j].Repository {
+			less = false
+		} else {
+			return nil
+		}
+
+		return fmt.Errorf("")
+	})
+
+	if found != nil {
+		return less
+	} else {
+		iRunes := []rune(u[i].Repository)
+		jRunes := []rune(u[j].Repository)
+		return lessRunes(iRunes, jRunes)
+	}
+
 }
 
 func getVersionDiff(oldVersion, newversion string) (left, right string) {
@@ -63,7 +87,7 @@ func getVersionDiff(oldVersion, newversion string) (left, right string) {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
+func upList() (aurUp upSlice, repoUp upSlice, err error) {
 	local, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return nil, nil, err
@@ -86,7 +110,7 @@ func upList(dt *depTree) (aurUp upSlice, repoUp upSlice, err error) {
 	fmt.Println(bold(cyan("::") + " Searching AUR for updates..."))
 	wg.Add(1)
 	go func() {
-		aurUp, aurErr = upAUR(remote, remoteNames, dt)
+		aurUp, aurErr = upAUR(remote, remoteNames)
 		wg.Done()
 	}()
 
@@ -180,9 +204,20 @@ func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade upSlice, err error) {
+func upAUR(remote []alpm.Package, remoteNames []string) (upSlice, error) {
+	toUpgrade := make(upSlice, 0)
+	_pkgdata, err := aurInfo(remoteNames)
+	if err != nil {
+		return nil, err
+	}
+
+	pkgdata := make(map[string]*rpc.Pkg)
+	for _, pkg := range _pkgdata {
+		pkgdata[pkg.Name] = pkg
+	}
+
 	for _, pkg := range remote {
-		aurPkg, ok := dt.Aur[pkg.Name()]
+		aurPkg, ok := pkgdata[pkg.Name()]
 		if !ok {
 			continue
 		}
@@ -199,7 +234,7 @@ func upAUR(remote []alpm.Package, remoteNames []string, dt *depTree) (toUpgrade 
 		}
 	}
 
-	return
+	return toUpgrade, nil
 }
 
 // upRepo gathers local packages and checks if they have new versions.
@@ -228,15 +263,12 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 }
 
 // upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
+func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	ignore := make(stringSet)
 	aurNames := make(stringSet)
 
-	aurUp, repoUp, err := upList(dt)
-	if err != nil {
-		return ignore, aurNames, err
-	} else if len(aurUp)+len(repoUp) == 0 {
-		return ignore, aurNames, err
+	if len(aurUp)+len(repoUp) == 0 {
+		return ignore, aurNames, nil
 	}
 
 	sort.Sort(repoUp)
@@ -245,30 +277,18 @@ func upgradePkgs(dt *depTree) (stringSet, stringSet, error) {
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
 
-	if config.NoConfirm {
-		for _, up := range aurUp {
-			aurNames.set(up.Name)
-		}
-		return ignore, aurNames, nil
-	}
-
 	fmt.Println(bold(green(arrow + " Packages to not upgrade (eg: 1 2 3, 1-3, ^4 or repo name)")))
 	fmt.Print(bold(green(arrow + " ")))
-	reader := bufio.NewReader(os.Stdin)
 
-	numberBuf, overflow, err := reader.ReadLine()
+	numbers, err := getInput(config.AnswerUpgrade)
 	if err != nil {
 		return nil, nil, err
-	}
-
-	if overflow {
-		return nil, nil, fmt.Errorf("Input too long")
 	}
 
 	//upgrade menu asks you which packages to NOT upgrade so in this case
 	//include and exclude are kind of swaped
 	//include, exclude, other := parseNumberMenu(string(numberBuf))
-	include, exclude, otherInclude, otherExclude := parseNumberMenu(string(numberBuf))
+	include, exclude, otherInclude, otherExclude := parseNumberMenu(numbers)
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
