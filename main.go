@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
+	gotext "github.com/leonelquinteros/gotext"
 )
 
 func initPaths() {
@@ -169,12 +170,18 @@ func initAlpm() (err error) {
 	return
 }
 
+func initGoText() {
+	gotext.Configure("locale", "en_UK", "yay")
+}
+
 func main() {
 	var status int
 	var err error
 
+	initGoText()
+
 	if 0 == os.Geteuid() {
-		fmt.Println("Please avoid running yay as root/sudo.")
+		fmt.Println(gotext.Get("Please avoid running yay as root/sudo."))
 	}
 
 	err = cmdArgs.parseCommandLine()

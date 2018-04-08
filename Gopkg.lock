@@ -9,6 +9,15 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/leonelquinteros/gotext"
+  packages = [
+    ".",
+    "plurals"
+  ]
+  revision = "7c73cc29758589140bf2190547aae1ee72ebe554"
+
+[[projects]]
+  branch = "master"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
   revision = "837b260b8e90895c45737e2e72313fe5bce6f2c4"
@@ -22,6 +31,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "456465ee334310996a51a2282bf4cfe9f6269db508479c962474d61a4ce0a08c"
+  inputs-digest = "4ea067c2c824630934353c154c78050f96f61c120522783412c80d23ea4a24b3"
   solver-name = "gps-cdcl"
   solver-version = 1

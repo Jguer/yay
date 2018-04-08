@@ -14,3 +14,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/mikkeloscar/gopkgbuild"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/leonelquinteros/gotext"
