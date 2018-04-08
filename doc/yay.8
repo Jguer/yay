@@ -9,6 +9,8 @@ yay \- AUR Helper written in go
 \fIyay\fR <operation> [options] [targets]
 .sp
 \fIyay\fR <search pattern>
+.sp
+\fIyay\fR
 .SH "DESCRIPTION"
 .sp
 Yay is a Pacman wrapper with AUR support\&. It passes options to Makepkg and
@@ -32,6 +34,9 @@ Perform yay specific print operations\&.
 \fB\-G, --getpkgbuild\fR
 .RS 4
 Downloads PKGBUILD from ABS or AUR\&.
+.RE
+.PP
+If no arguments are provided 'yay -Syu' will be performed\&.
 .RE
 .PP
 If no operation is selected -Y will be assumed\&.
