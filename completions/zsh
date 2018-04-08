@@ -49,6 +49,15 @@ _pacman_opts_common=(
   '--git[git command to use]:git:_files'
   '--gpg[gpg command to use]:gpg:_files'
 
+  '--sortby[Sort AUR results by a specific field during search]:sortby options:(votes popularity id baseid name base submitted modified)'
+  '--answerclean[Set a predetermined answer for the clean build menu]:answer'
+  '--answeredit[Set a predetermined answer for the edit pkgbuild menu]:answer'
+  '--answerupgrade[Set a predetermined answer for the upgrade menu]:answe'
+  '--noanswerclean[Unset the answer for the clean build menu]'
+  '--noansweredit[Unset the answer for the edit pkgbuild menu]'
+  '--noanswerupgrade[Unset the answer for the upgrade menu]'
+
+
   '--bottomup[Show AUR packages first]'
   '--topdown[Show repository packages first]'
   '--devel[Check -git/-svn/-hg development version]'
