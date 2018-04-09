@@ -48,6 +48,19 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 ### Changelog
 
+#### v5.657
+
+* By default running `yay` will trigger `yay -Syu`
+* Updated Shell completions
+* `-Ss` shows difference between installed and in-repo versions
+* Allow sorting AUR results by fields other than votes
+  * votes|popularity|id|baseid|name|base|submitted|modified
+* Added flags for automatic menu input
+  * --answerclean --answeredit --answerupgrade
+  * --noanswerclean --noansweredit --noanswerupgrade
+* Fixed versioned dep checking
+* Usual fixes to parsing, dependency sourcing and other PKGBUILD atrocities
+
 #### v5.608
 
 * Updated Shell completions
