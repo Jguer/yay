@@ -15,6 +15,7 @@ var cmdArgs = makeArguments()
 
 func usage() {
 	fmt.Println(`Usage:
+    yay
     yay <operation> [...]
     yay <package(s)>
 
@@ -88,6 +89,7 @@ Yay specific options:
     -c --clean           Remove unneeded dependencies
        --gendb           Generates development package DB used for updating
 
+If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed`)
 }
 
