@@ -89,6 +89,15 @@ complete -c $progname -n "not $noopt" -l rebuildall -d 'Always build all AUR pac
 complete -c $progname -n "not $noopt" -l rebuildtree -d 'Always build all AUR packages even if installed' -f
 complete -c $progname -n "not $noopt" -l norebuild -d 'Skip package build if in cache and up to date' -f
 
+complete -c $progname -n "not $noopt" -l sortby -d 'Sort AUR results by a specific field during search' -f
+
+complete -c $progname -n "not $noopt" -l answerclean -d 'Set a predetermined answer for the clean build menu' -f
+complete -c $progname -n "not $noopt" -l answeredit -d 'Set a predetermined answer for the edit pkgbuild menu' -f
+complete -c $progname -n "not $noopt" -l answerupgrade -d 'Set a predetermined answer for the upgrade menu' -f
+complete -c $progname -n "not $noopt" -l noanswerclean -d 'Unset the answer for the clean build menu' -f
+complete -c $progname -n "not $noopt" -l noansweredit -d 'Unset the answer for the edit pkgbuild menu' -f
+complete -c $progname -n "not $noopt" -l noanswerupgrade -d 'Unset the answer for the upgrade menu' -f
+
 # Yay options
 complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
 complete -c $progname -n $yayspecific -s g -l getpkgbuild -d 'Download PKGBUILD from ABS or AUR' -xa "$listall" -f
