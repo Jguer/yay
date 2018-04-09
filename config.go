@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	alpm "github.com/jguer/go-alpm"
 )
@@ -28,6 +29,7 @@ const (
 type Configuration struct {
 	BuildDir      string `json:"buildDir"`
 	Editor        string `json:"editor"`
+	EditorFlags   string `json:"editorflags"`
 	MakepkgBin    string `json:"makepkgbin"`
 	PacmanBin     string `json:"pacmanbin"`
 	PacmanConf    string `json:"pacmanconf"`
@@ -131,6 +133,7 @@ func defaultSettings(config *Configuration) {
 	config.BuildDir = cacheHome + "/"
 	config.CleanAfter = false
 	config.Editor = ""
+	config.EditorFlags = ""
 	config.Devel = false
 	config.MakepkgBin = "makepkg"
 	config.NoConfirm = false
@@ -154,52 +157,56 @@ func defaultSettings(config *Configuration) {
 }
 
 // Editor returns the preferred system editor.
-func editor() string {
+func editor() (string, []string) {
 	switch {
 	case config.Editor != "":
 		editor, err := exec.LookPath(config.Editor)
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			return editor
+			return editor, strings.Fields(config.EditorFlags)
 		}
 		fallthrough
 	case os.Getenv("EDITOR") != "":
-		editor, err := exec.LookPath(os.Getenv("EDITOR"))
+		editorArgs := strings.Fields(os.Getenv("EDITOR"))
+		editor, err := exec.LookPath(editorArgs[0])
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			return editor
+			return editor, editorArgs[1:]
 		}
 		fallthrough
 	case os.Getenv("VISUAL") != "":
-		editor, err := exec.LookPath(os.Getenv("VISUAL"))
+		editorArgs := strings.Fields(os.Getenv("VISUAL"))
+		editor, err := exec.LookPath(editorArgs[0])
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			return editor
+			return editor, editorArgs[1:]
 		}
 		fallthrough
 	default:
-		fmt.Println(bold(red("Warning:")),
-			bold(magenta("$EDITOR")), "is not set")
-		fmt.Println("Please add $EDITOR or to your environment variables.")
+		fmt.Println()
+		fmt.Println(bold(red(arrow) + " Warning:"), cyan("$EDITOR"), "is not set")
+		fmt.Println(bold(arrow) + " Please add " + cyan("$EDITOR") + " or " + cyan("$VISUAL") + " to your environment variables.")
 
-	editorLoop:
-		fmt.Print(green("Edit PKGBUILD with:"))
-		var editorInput string
-		_, err := fmt.Scanln(&editorInput)
-		if err != nil {
-			fmt.Println(err)
-			goto editorLoop
-		}
+		for {
+			fmt.Print(green(bold(arrow)) + green(" Edit PKGBUILD with: "))
+			editorInput, err := getInput("")
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
 
-		editor, err := exec.LookPath(editorInput)
-		if err != nil {
-			fmt.Println(err)
-			goto editorLoop
+			editorArgs := strings.Fields(editorInput)
+
+			editor, err := exec.LookPath(editorArgs[0])
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			return editor, editorArgs[1:]
 		}
-		return editor
 	}
 }
 

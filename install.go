@@ -462,7 +462,9 @@ func editPkgBuilds(pkgs []*rpc.Pkg) error {
 		pkgbuilds = append(pkgbuilds, dir+"PKGBUILD")
 	}
 
-	editcmd := exec.Command(editor(), pkgbuilds...)
+	editor, editorArgs := editor()
+	editorArgs = append(editorArgs, pkgbuilds...)
+	editcmd := exec.Command(editor, editorArgs...)
 	editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err := editcmd.Run()
 	if err != nil {
