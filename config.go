@@ -69,6 +69,8 @@ type Configuration struct {
 
 var version = "5.688"
 
+var localePath = "/usr/share/locale"
+
 // configFileName holds the name of the config file.
 const configFileName string = "config.json"
 

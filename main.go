@@ -170,15 +170,15 @@ func initAlpm() (err error) {
 	return
 }
 
-func initGoText() {
-	gotext.Configure("locale", "en_UK", "yay")
+func initGotext() {
+	gotext.Configure(localePath, os.Getenv("LANG"), "yay")
 }
 
 func main() {
 	var status int
 	var err error
 
-	initGoText()
+	initGotext()
 
 	if 0 == os.Geteuid() {
 		fmt.Println(gotext.Get("Please avoid running yay as root/sudo."))

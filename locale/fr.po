@@ -1,0 +1,26 @@
+# French translations for PACKAGE package.
+# Copyright (C) 2018 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <morganamilo@gmail.com>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-09 13:30+0100\n"
+"PO-Revision-Date: 2018-04-09 13:30+0100\n"
+"Last-Translator:  <morganamilo@gmail.com>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: main.go:177
+msgid "Please avoid running yay as root/sudo."
+msgstr "This but in french"
+
+#: completions.go:17
+msgid "https://aur.archlinux.org/packages.gz"
+msgstr ""
