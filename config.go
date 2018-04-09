@@ -186,26 +186,27 @@ func editor() (string, []string) {
 		}
 		fallthrough
 	default:
-		fmt.Println(bold(red("Warning:")),
-			bold(magenta("$EDITOR")), "is not set")
-		fmt.Println("Please add $EDITOR or to your environment variables.")
+		fmt.Println()
+		fmt.Println(bold(red(arrow) + " Warning:"), cyan("$EDITOR"), "is not set")
+		fmt.Println(bold(arrow) + " Please add " + cyan("$EDITOR") + " or " + cyan("$VISUAL") + " to your environment variables.")
 
-	editorLoop:
-		fmt.Print(green("Edit PKGBUILD with:"))
-		editorInput, err := getInput("")
-		if err != nil {
-			fmt.Println(err)
-			goto editorLoop
+		for {
+			fmt.Print(green(bold(arrow)) + green(" Edit PKGBUILD with: "))
+			editorInput, err := getInput("")
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			editorArgs := strings.Fields(editorInput)
+
+			editor, err := exec.LookPath(editorArgs[0])
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			return editor, editorArgs[1:]
 		}
-
-		editorArgs := strings.Fields(editorInput)
-
-		editor, err := exec.LookPath(editorArgs[0])
-		if err != nil {
-			fmt.Println(err)
-			goto editorLoop
-		}
-		return editor, editorArgs[1:]
 	}
 }
 
