@@ -323,8 +323,10 @@ func handleYay() (err error) {
 	//_, options, targets := cmdArgs.formatArgs()
 	if cmdArgs.existsArg("gendb") {
 		err = createDevelDB()
+	} else if cmdArgs.existsDouble("c") {
+		err = cleanDependencies(true)
 	} else if cmdArgs.existsArg("c", "clean") {
-		err = cleanDependencies()
+		err = cleanDependencies(false)
 	} else if len(cmdArgs.targets) > 0 {
 		err = handleYogurt()
 	}

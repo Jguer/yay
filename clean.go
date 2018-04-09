@@ -20,16 +20,13 @@ func removeVCSPackage(pkgs []string) {
 }
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies() error {
-	hanging, err := hangingPackages()
+func cleanDependencies(removeOptional bool) error {
+	hanging, err := hangingPackages(removeOptional)
 	if err != nil {
 		return err
 	}
 
 	if len(hanging) != 0 {
-		if !continueTask("Confirm Removal?", "nN") {
-			return nil
-		}
 		err = cleanRemove(hanging)
 	}
 
@@ -42,12 +39,9 @@ func cleanRemove(pkgNames []string) (err error) {
 		return nil
 	}
 
-	oldvalue := config.NoConfirm
-	config.NoConfirm = true
 	arguments := makeArguments()
 	arguments.addArg("R")
 	arguments.addTarget(pkgNames...)
 	err = passToPacman(arguments)
-	config.NoConfirm = oldvalue
 	return err
 }
