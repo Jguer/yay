@@ -433,6 +433,8 @@ func hasParam(arg string) bool {
 		return true
 	case "editor":
 		return true
+	case "editorflags":
+		return true
 	case "makepkg":
 		return true
 	case "pacman":

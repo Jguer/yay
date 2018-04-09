@@ -261,6 +261,8 @@ func handleConfig(option, value string) bool {
 		config.BuildDir = value
 	case "editor":
 		config.Editor = value
+	case "editorflags":
+		config.EditorFlags = value
 	case "makepkg":
 		config.MakepkgBin = value
 	case "pacman":
