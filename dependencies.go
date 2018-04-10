@@ -382,7 +382,7 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	}
 
 	if len(dt.ToProcess) > 0 {
-		fmt.Println(bold(cyan("::") + " Querying AUR..."))
+		fmt.Println(bold(cyan("::") + bold(" Querying AUR...")))
 	}
 
 	err = depTreeRecursive(dt, localDb, syncDb, false)

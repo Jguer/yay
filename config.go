@@ -187,11 +187,11 @@ func editor() (string, []string) {
 		fallthrough
 	default:
 		fmt.Println()
-		fmt.Println(bold(red(arrow)+" Warning:"), cyan("$EDITOR"), "is not set")
-		fmt.Println(bold(arrow) + " Please add " + cyan("$EDITOR") + " or " + cyan("$VISUAL") + " to your environment variables.")
+		fmt.Println(bold(red(arrow)), cyan("$EDITOR"), "is not set")
+		fmt.Println(bold(red(arrow)) + " Please add " + cyan("$EDITOR") + " or " + cyan("$VISUAL") + " to your environment variables.")
 
 		for {
-			fmt.Print(green(bold(arrow)) + green(" Edit PKGBUILD with: "))
+			fmt.Print(green(bold(arrow)) + " Edit PKGBUILD with: ")
 			editorInput, err := getInput("")
 			if err != nil {
 				fmt.Println(err)
@@ -225,7 +225,7 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	var response string
-	fmt.Print(bold(green(arrow+" "+s+" ")), bold(postFix))
+	fmt.Print(bold(green(arrow)+" "+s+" "), bold(postFix))
 
 	n, err := fmt.Scanln(&response)
 	if err != nil || n == 0 {

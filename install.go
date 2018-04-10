@@ -129,7 +129,7 @@ func install(parser *arguments) error {
 	}
 
 	if hasAur && 0 == os.Geteuid() {
-		return fmt.Errorf(red(arrow + " Refusing to install AUR Packages as root, Aborting."))
+		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
 	dc, err = getDepCatagories(requestTargets, dt)
@@ -303,8 +303,8 @@ nextpkg:
 	}
 
 	if len(incompatible) > 0 {
-		fmt.Print(
-			bold(green(("\nThe following packages are not compatable with your architecture:"))))
+		fmt.Println()
+		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatable with your architecture:")
 		for pkg := range incompatible {
 			fmt.Print("  " + cyan(pkg))
 		}
@@ -347,7 +347,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 
 	if askClean {
 		fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
-		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
+		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
 		fmt.Print(bold(green(arrow + " ")))
 		cleanInput, err := getInput(config.AnswerClean)
 		if err != nil {
@@ -399,7 +399,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	}
 
 	fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + green("[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)")))
+	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
 
 	fmt.Print(bold(green(arrow + " ")))
 
@@ -452,7 +452,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 func cleanBuilds(pkgs []*rpc.Pkg) {
 	for i, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase
-		fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(pkgs), dir)
+		fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(pkgs), cyan(dir))
 		os.RemoveAll(dir)
 	}
 }
@@ -481,7 +481,7 @@ func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
+		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
 		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
 		if err != nil {
@@ -499,7 +499,7 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, 
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
+		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
 		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
 		if err != nil {
@@ -549,7 +549,7 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 				if err == nil {
 					if !version.Newer(pkgbuild.Version()) {
 						str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
-						fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
+						fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 						continue
 					}
 				}
@@ -558,7 +558,7 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 
 		str := bold(cyan("::") + " Downloading PKGBUILD (%d/%d): %s\n")
 
-		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
+		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
 		err := downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir, false)
 		if err != nil {
@@ -580,7 +580,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 
 		err = passToMakepkg(dir, args...)
 		if err != nil {
-			return fmt.Errorf("Error downloading sources: %s", formatPkgbase(pkg, bases))
+			return fmt.Errorf("Error downloading sources: %s", cyan(formatPkgbase(pkg, bases)))
 		}
 	}
 
@@ -623,8 +623,8 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		}
 
 		if built {
-			fmt.Println(bold(red(arrow+" Warning:")),
-				pkg.Name+"-"+pkg.Version+" Already made -- skipping build")
+			fmt.Println(bold(yellow(arrow)),
+				cyan(pkg.Name+"-"+pkg.Version) + bold(" Already made -- skipping build"))
 		} else {
 			args := []string{"-Ccf", "--noconfirm"}
 

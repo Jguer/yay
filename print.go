@@ -131,7 +131,7 @@ func (u upSlice) Print(start int) {
 		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
 
 		fmt.Print(magenta(fmt.Sprintf("%3d ", len(u)+start-k-1)))
-		fmt.Print(bold(colourHash(i.Repository)), "/", cyan(i.Name))
+		fmt.Print(bold(colourHash(i.Repository)), "/", bold(i.Name))
 
 		w := 70 - len(i.Repository) - len(i.Name)
 		padding := fmt.Sprintf("%%%ds", w)
@@ -216,7 +216,7 @@ func printDownloads(repoName string, length int, packages string) {
 
 	repoInfo := bold(blue(
 		"[" + repoName + ": " + strconv.Itoa(length) + "]"))
-	fmt.Println(repoInfo + magenta(packages))
+	fmt.Println(repoInfo + cyan(packages))
 }
 
 // PrintInfo prints package info like pacman -Si.
@@ -277,10 +277,10 @@ func localStatistics() error {
 
 	fmt.Printf(bold("Yay version v%s\n"), version)
 	fmt.Println(bold(cyan("===========================================")))
-	fmt.Println(bold(green("Total installed packages: ")) + magenta(strconv.Itoa(info.Totaln)))
-	fmt.Println(bold(green("Total foreign installed packages: ")) + magenta(strconv.Itoa(len(remoteNames))))
-	fmt.Println(bold(green("Explicitly installed packages: ")) + magenta(strconv.Itoa(info.Expln)))
-	fmt.Println(bold(green("Total Size occupied by packages: ")) + magenta(human(info.TotalSize)))
+	fmt.Println(bold(green("Total installed packages: ")) + cyan(strconv.Itoa(info.Totaln)))
+	fmt.Println(bold(green("Total foreign installed packages: ")) + cyan(strconv.Itoa(len(remoteNames))))
+	fmt.Println(bold(green("Explicitly installed packages: ")) + cyan(strconv.Itoa(info.Expln)))
+	fmt.Println(bold(green("Total Size occupied by packages: ")) + cyan(human(info.TotalSize)))
 	fmt.Println(bold(cyan("===========================================")))
 	fmt.Println(bold(green("Ten biggest packages:")))
 	biggestPackages()

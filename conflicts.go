@@ -301,13 +301,13 @@ func checkForAllConflicts(dc *depCatagories) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	fmt.Println(bold(cyan("::") + " Checking for conflicts..."))
+	fmt.Println(bold(cyan("::") + bold(" Checking for conflicts...")))
 	go func() {
 		conflicts, err = checkForConflicts(dc)
 		wg.Done()
 	}()
 
-	fmt.Println(bold(cyan("::") + " Checking for inner conflicts..."))
+	fmt.Println(bold(cyan("::") + bold(" Checking for inner conflicts...")))
 	go func() {
 		innerConflicts = checkForInnerConflicts(dc)
 		wg.Done()
@@ -325,7 +325,7 @@ func checkForAllConflicts(dc *depCatagories) error {
 		for name, pkgs := range innerConflicts {
 			str := "\t" + name + ":"
 			for pkg := range pkgs {
-				str += " " + magenta(pkg)
+				str += " " + cyan(pkg)
 			}
 
 			fmt.Println(str)
@@ -338,9 +338,9 @@ func checkForAllConflicts(dc *depCatagories) error {
 		fmt.Println(
 			red("\nPackage conflicts found:"))
 		for name, pkgs := range conflicts {
-			str := "\tInstalling " + magenta(name) + " will remove:"
+			str := "\tInstalling " + cyan(name) + " will remove:"
 			for pkg := range pkgs {
-				str += " " + magenta(pkg)
+				str += " " + cyan(pkg)
 			}
 
 			fmt.Println(str)

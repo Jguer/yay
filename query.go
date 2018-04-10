@@ -503,25 +503,25 @@ func aurInfo(names []string) ([]*rpc.Pkg, error) {
 	}
 
 	if len(missing) > 0 {
-		fmt.Print(bold(red(arrow + " Missing AUR Packages:")))
+		fmt.Print(bold(yellow("==> ")) + "Missing AUR Packages:")
 		for _, name := range missing {
-			fmt.Print(" " + bold(magenta(name)))
+			fmt.Print(" " + cyan(name))
 		}
 		fmt.Println()
 	}
 
 	if len(orphans) > 0 {
-		fmt.Print(bold(red(arrow + " Orphaned AUR Packages:")))
+		fmt.Print(bold(yellow("==> ")) + "Orphaned AUR Packages:")
 		for _, name := range orphans {
-			fmt.Print(" " + bold(magenta(name)))
+			fmt.Print(" " + cyan(name))
 		}
 		fmt.Println()
 	}
 
 	if len(outOfDate) > 0 {
-		fmt.Print(bold(red(arrow + " Out Of Date AUR Packages:")))
+		fmt.Print(bold(yellow("==> ")) + "Out Of Date AUR Packages:")
 		for _, name := range outOfDate {
-			fmt.Print(" " + bold(magenta(name)))
+			fmt.Print(" " + cyan(name))
 		}
 		fmt.Println()
 	}

@@ -57,7 +57,7 @@ func createDevelDB() error {
 		}
 	}
 
-	fmt.Println(bold(green(arrow + " GenDB finished. No packages were installed")))
+	fmt.Println(bold(yellow(arrow) + bold(" GenDB finished. No packages were installed")))
 
 	return err
 }
@@ -125,7 +125,7 @@ func updateVCSData(pkgName string, sources []string) {
 
 		savedInfo[pkgName] = info
 
-		fmt.Println(bold(green(arrow+" Found git repo: ")) + cyan(url))
+		fmt.Println(bold(yellow(arrow)) + " Found git repo: " + cyan(url))
 		saveVCSInfo()
 	}
 }

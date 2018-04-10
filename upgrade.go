@@ -138,14 +138,14 @@ func upList() (aurUp upSlice, repoUp upSlice, err error) {
 	var aurErr error
 	var develErr error
 
-	fmt.Println(bold(cyan("::") + " Searching databases for updates..."))
+	fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 	wg.Add(1)
 	go func() {
 		repoUp, repoErr = upRepo(local)
 		wg.Done()
 	}()
 
-	fmt.Println(bold(cyan("::") + " Searching AUR for updates..."))
+	fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
 	wg.Add(1)
 	go func() {
 		aurUp, aurErr = upAUR(remote, remoteNames)
@@ -153,7 +153,7 @@ func upList() (aurUp upSlice, repoUp upSlice, err error) {
 	}()
 
 	if config.Devel {
-		fmt.Println(bold(cyan("::") + " Checking development packages..."))
+		fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
 		wg.Add(1)
 		go func() {
 			develUp, develErr = upDevel(remote)
@@ -229,7 +229,7 @@ func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
 	for _, pkg := range toUpdate {
 		if pkg.ShouldIgnore() {
 			left, right := getVersionDiff(pkg.Version(), "latest-commit")
-			fmt.Print(magenta("Warning: "))
+			fmt.Print(cyan("Warning: "))
 			fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
 		} else {
 			toUpgrade = append(toUpgrade, upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"})
@@ -264,7 +264,7 @@ func upAUR(remote []alpm.Package, remoteNames []string) (upSlice, error) {
 			(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
 			if pkg.ShouldIgnore() {
 				left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
-				fmt.Print(magenta("Warning: "))
+				fmt.Print(cyan("Warning: "))
 				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
 			} else {
 				toUpgrade = append(toUpgrade, upgrade{aurPkg.Name, "aur", pkg.Version(), aurPkg.Version})
@@ -290,7 +290,7 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		if newPkg != nil {
 			if pkg.ShouldIgnore() {
 				left, right := getVersionDiff(pkg.Version(), newPkg.Version())
-				fmt.Print(magenta("Warning: "))
+				fmt.Print(cyan("Warning: "))
 				fmt.Printf("%s ignoring package upgrade (%s => %s)\n", cyan(pkg.Name()), left, right)
 			} else {
 				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
@@ -311,7 +311,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
-	fmt.Println(bold(blue("::")), len(aurUp)+len(repoUp), bold("Packages to upgrade."))
+	fmt.Printf("%s"+bold(" %d ")+"%s\n", bold(cyan("::")), len(aurUp)+len(repoUp), bold("Packages to upgrade."))
 	repoUp.Print(len(aurUp) + 1)
 	aurUp.Print(1)
 
