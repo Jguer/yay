@@ -29,7 +29,7 @@ func install(parser *arguments) error {
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
 
 	//remotenames: names of all non repo packages on the system
-	_, _, _, remoteNames, err := filterPackages()
+	_, _, localNames, remoteNames, err := filterPackages()
 	if err != nil {
 		return err
 	}
@@ -37,6 +37,7 @@ func install(parser *arguments) error {
 	//cache as a stringset. maybe make it return a string set in the first
 	//place
 	remoteNamesCache := sliceToStringSet(remoteNames)
+	localNamesCache := sliceToStringSet(localNames)
 
 	//if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
@@ -103,6 +104,7 @@ func install(parser *arguments) error {
 		for _, up := range repoUp {
 			if !ignore.get(up.Name) {
 				requestTargets = append(requestTargets, up.Name)
+				parser.addTarget(up.Name)
 			}
 		}
 
@@ -209,7 +211,7 @@ func install(parser *arguments) error {
 		depArguments.addArg("D", "asdeps")
 
 		for _, pkg := range dc.Repo {
-			if !parser.targets.get(pkg.Name()) {
+			if !parser.targets.get(pkg.Name()) && !localNamesCache.get(pkg.Name()) && !remoteNamesCache.get(pkg.Name()) {
 				depArguments.addTarget(pkg.Name())
 			}
 		}
@@ -650,6 +652,17 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		depArguments := makeArguments()
 		depArguments.addArg("D", "asdeps")
 
+		//remotenames: names of all non repo packages on the system
+		_, _, localNames, remoteNames, err := filterPackages()
+		if err != nil {
+			return err
+		}
+
+		//cache as a stringset. maybe make it return a string set in the first
+		//place
+		remoteNamesCache := sliceToStringSet(remoteNames)
+		localNamesCache := sliceToStringSet(localNames)
+
 		for _, split := range bases[pkg.PackageBase] {
 			file, err := completeFileName(dir, split.Name+"-"+version.String()+"-"+arch+".pkg")
 			if err != nil {
@@ -668,14 +681,15 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			}
 
 			arguments.addTarget(file)
-			if !targets.get(split.Name) {
+			//if !targets.get(split.Name) {
+			if !targets.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
 				depArguments.addTarget(split.Name)
 			}
 		}
 
 		oldConfirm := config.NoConfirm
 		config.NoConfirm = true
-		err := passToPacman(arguments)
+		err = passToPacman(arguments)
 		if err != nil {
 			return err
 		}
