@@ -187,7 +187,7 @@ func editor() (string, []string) {
 		fallthrough
 	default:
 		fmt.Println()
-		fmt.Println(bold(red(arrow) + " Warning:"), cyan("$EDITOR"), "is not set")
+		fmt.Println(bold(red(arrow)+" Warning:"), cyan("$EDITOR"), "is not set")
 		fmt.Println(bold(arrow) + " Please add " + cyan("$EDITOR") + " or " + cyan("$VISUAL") + " to your environment variables.")
 
 		for {
