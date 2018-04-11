@@ -48,6 +48,13 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 ### Changelog
 
+#### v5.675
+
+* Recursively remove dependencies when using yay -Yc
+* Highlight diff between old and new versions better
+* Fix regression where repo upgrades were marked as deps during sysupgrades
+* Added `--editorflags` to add flags to editor execution
+
 #### v5.657
 
 * By default running `yay` will trigger `yay -Syu`
