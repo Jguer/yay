@@ -225,7 +225,7 @@ func continueTask(s string, def string) (cont bool) {
 	}
 
 	var response string
-	fmt.Print(bold(green(arrow)+" "+s+" "), bold(postFix))
+	fmt.Print(bold(green(arrow)+" "+s), bold(postFix))
 
 	n, err := fmt.Scanln(&response)
 	if err != nil || n == 0 {

@@ -173,6 +173,7 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
+
 		cleanBuilds(toClean)
 
 		err = downloadPkgBuilds(dc.Aur, parser.targets, dc.Bases)
@@ -232,13 +233,6 @@ func install(parser *arguments) error {
 				return fmt.Errorf("%s%s", stderr, err)
 			}
 		}
-	} else if hasAur {
-		oldValue := config.NoConfirm
-		config.NoConfirm = false
-		if len(toEdit) > 0 && !continueTask("Proceed with install?", "nN") {
-			return fmt.Errorf("Aborting due to user")
-		}
-		config.NoConfirm = oldValue
 	}
 
 	if hasAur {
