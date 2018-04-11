@@ -72,12 +72,16 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[str
 		return nil
 	}
 
-	fmt.Println()
-	question, err := formatKeysToImport(problematic, bases)
+	str, err := formatKeysToImport(problematic, bases)
 	if err != nil {
 		return err
 	}
-	if continueTask(question, "nN") {
+
+
+	fmt.Println()
+	fmt.Println(str)
+
+	if continueTask(bold(green("Import?")), "nN") {
 		return importKeys(problematic.toSlice())
 	}
 
@@ -90,7 +94,7 @@ func importKeys(keys []string) error {
 	cmd := exec.Command(config.GpgBin, append(args, keys...)...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
-	fmt.Printf("%s Importing keys with gpg...\n", bold(cyan("::")))
+	fmt.Printf("%s %s...\n", bold(cyan("::")), bold("Importing keys with gpg..."))
 	err := cmd.Run()
 
 	if err != nil {
@@ -107,15 +111,15 @@ func formatKeysToImport(keys pgpKeySet, bases map[string][]*rpc.Pkg) (string, er
 	}
 
 	var buffer bytes.Buffer
-	buffer.WriteString(bold(green(("GPG keys need importing:\n"))))
+	buffer.WriteString(bold(green(arrow)))
+	buffer.WriteString(bold(green(" PGP keys need importing:")))
 	for key, pkgs := range keys {
 		pkglist := ""
 		for _, pkg := range pkgs {
 			pkglist += formatPkgbase(pkg, bases) + " "
 		}
 		pkglist = strings.TrimRight(pkglist, " ")
-		buffer.WriteString(fmt.Sprintf("\t%s, required by: %s\n", green(key), cyan(pkglist)))
+		buffer.WriteString(fmt.Sprintf("\n%s %s, required by: %s", yellow(bold(smallArrow)), cyan(key), cyan(pkglist)))
 	}
-	buffer.WriteString(bold(green(fmt.Sprintf("%s Import?", arrow))))
 	return buffer.String(), nil
 }

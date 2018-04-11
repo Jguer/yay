@@ -123,7 +123,7 @@ nextPkg:
 
 // GetPkgbuild downloads pkgbuild from the AUR.
 func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
-	aq, err := aurInfo(pkgs)
+	aq, err := aurInfoPrint(pkgs)
 	if err != nil {
 		return err
 	}

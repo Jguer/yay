@@ -11,6 +11,34 @@ import (
 )
 
 const arrow = "==>"
+const smallArrow = " ->"
+
+func (warnings *aurWarnings) Print() {
+	if len(warnings.Missing) > 0 {
+		fmt.Print(bold(yellow(smallArrow)) + " Missing AUR Packages:")
+		for _, name := range warnings.Missing {
+			fmt.Print("  " + cyan(name))
+		}
+		fmt.Println()
+	}
+
+	if len(warnings.Orphans) > 0 {
+		fmt.Print(bold(yellow(smallArrow)) + " Orphaned AUR Packages:")
+		for _, name := range warnings.Orphans {
+			fmt.Print("  " + cyan(name))
+		}
+		fmt.Println()
+	}
+
+	if len(warnings.OutOfDate) > 0 {
+		fmt.Print(bold(yellow(smallArrow)) + " Out Of Date AUR Packages:")
+		for _, name := range warnings.OutOfDate {
+			fmt.Print("  " + cyan(name))
+		}
+		fmt.Println()
+	}
+
+}
 
 // human method returns results in human readable format.
 func human(size int64) string {
@@ -286,7 +314,7 @@ func localStatistics() error {
 	biggestPackages()
 	fmt.Println(bold(cyan("===========================================")))
 
-	aurInfo(remoteNames)
+	aurInfoPrint(remoteNames)
 
 	return nil
 }
@@ -294,9 +322,10 @@ func localStatistics() error {
 //TODO: Make it less hacky
 func printNumberOfUpdates() error {
 	//todo
+	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList()
+	aurUp, repoUp, err := upList(warnings)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -308,10 +337,11 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
+	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()
-	aurUp, repoUp, err := upList()
+	aurUp, repoUp, err := upList(warnings)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err

@@ -24,6 +24,8 @@ func install(parser *arguments) error {
 	var aurUp upSlice
 	var repoUp upSlice
 
+	warnings := &aurWarnings{}
+
 	removeMake := false
 	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
 	srcinfos := make(map[string]*gopkg.PKGBUILD)
@@ -41,7 +43,7 @@ func install(parser *arguments) error {
 
 	//if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upList()
+		aurUp, repoUp, err = upList(warnings)
 		if err != nil {
 			return err
 		}
@@ -59,7 +61,7 @@ func install(parser *arguments) error {
 	//if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
 	//	fmt.Println(bold(cyan("::") + " Querying AUR..."))
 	//}
-	dt, err := getDepTree(requestTargets)
+	dt, err := getDepTree(requestTargets, warnings)
 	if err != nil {
 		return err
 	}
@@ -81,7 +83,7 @@ func install(parser *arguments) error {
 		str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
 
 		for name := range dt.Missing {
-			str += "\n\t" + name
+			str += "\n    " + name
 		}
 
 		return fmt.Errorf("%s", str)
@@ -151,14 +153,15 @@ func install(parser *arguments) error {
 	}
 
 	if hasAur {
-		printDepCatagories(dc)
 		hasAur = len(dc.Aur) != 0
-		fmt.Println()
 
 		err = checkForAllConflicts(dc)
 		if err != nil {
 			return err
 		}
+
+		printDepCatagories(dc)
+		fmt.Println()
 
 		if len(dc.MakeOnly) > 0 {
 			if !continueTask("Remove make dependencies after install?", "yY") {
@@ -182,6 +185,13 @@ func install(parser *arguments) error {
 			if err != nil {
 				return err
 			}
+
+			oldValue := config.NoConfirm
+			config.NoConfirm = false
+			if !continueTask(bold(green("Proceed with install?")), "nN") {
+				return fmt.Errorf("Aborting due to user")
+			}
+			config.NoConfirm = oldValue
 		}
 
 		//inital srcinfo parse before pkgver() bump
@@ -329,7 +339,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	for n, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
 
-		toPrint += fmt.Sprintf("%s %-40s", magenta(strconv.Itoa(len(pkgs)-n)),
+		toPrint += fmt.Sprintf(magenta("%3d")+" %-40s", len(pkgs)-n,
 			bold(formatPkgbase(pkg, bases)))
 		if installed.get(pkg.Name) {
 			toPrint += bold(green(" (Installed)"))
@@ -344,6 +354,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	}
 
 	fmt.Print(toPrint)
+
 
 	if askClean {
 		fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))

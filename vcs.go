@@ -32,7 +32,7 @@ func createDevelDB() error {
 		return err
 	}
 
-	info, err := aurInfo(remoteNames)
+	info, err := aurInfoPrint(remoteNames)
 	if err != nil {
 		return err
 	}

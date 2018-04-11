@@ -320,10 +320,11 @@ func checkForAllConflicts(dc *depCatagories) error {
 	}
 
 	if len(innerConflicts) != 0 {
-		fmt.Println(
-			red("\nInner conflicts found:"))
+		fmt.Println()
+		fmt.Println(bold(red(arrow)), bold("Inner conflicts found:"))
+
 		for name, pkgs := range innerConflicts {
-			str := "\t" + name + ":"
+			str := red(bold(smallArrow)) + " " + name + ":"
 			for pkg := range pkgs {
 				str += " " + cyan(pkg)
 			}
@@ -331,14 +332,14 @@ func checkForAllConflicts(dc *depCatagories) error {
 			fmt.Println(str)
 		}
 
-		return fmt.Errorf("Aborting")
+		return fmt.Errorf("Unresolvable package conflicts, aborting")
 	}
 
 	if len(conflicts) != 0 {
-		fmt.Println(
-			red("\nPackage conflicts found:"))
+		fmt.Println()
+		fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
 		for name, pkgs := range conflicts {
-			str := "\tInstalling " + cyan(name) + " will remove:"
+			str := red(bold(smallArrow)) + " Installing " + cyan(name) + " will remove:"
 			for pkg := range pkgs {
 				str += " " + cyan(pkg)
 			}
