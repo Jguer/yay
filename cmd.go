@@ -561,3 +561,30 @@ func passToMakepkg(dir string, args ...string) (err error) {
 	}
 	return
 }
+
+func passToMakepkgCapture(dir string, args ...string) (string, string, error) {
+	var outbuf, errbuf bytes.Buffer
+
+	if config.NoConfirm {
+		args = append(args)
+	}
+
+	mflags := strings.Fields(config.MFlags)
+	args = append(args, mflags...)
+
+	cmd := exec.Command(config.MakepkgBin, args...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	cmd.Dir = dir
+	cmd.Stdout = &outbuf
+	cmd.Stderr = &errbuf
+
+	err := cmd.Run()
+	stdout := outbuf.String()
+	stderr := errbuf.String()
+
+	if err == nil {
+		_ = saveVCSInfo()
+	}
+
+	return stdout, stderr, err
+}
