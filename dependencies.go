@@ -16,6 +16,7 @@ type depTree struct {
 	Missing   stringSet
 	Groups    stringSet
 	Provides  map[string]string
+	Warnings  *aurWarnings
 }
 
 type depCatagories struct {
@@ -33,6 +34,7 @@ func makeDepTree() *depTree {
 		make(stringSet),
 		make(stringSet),
 		make(map[string]string),
+		&aurWarnings{},
 	}
 
 	return &dt
@@ -325,8 +327,9 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 // the same as the height of the tree.
 // The example does not really do this justice, In the real world where packages
 // have 10+ dependencies each this is a very nice optimization.
-func getDepTree(pkgs []string) (*depTree, error) {
+func getDepTree(pkgs []string, warnings *aurWarnings) (*depTree, error) {
 	dt := makeDepTree()
+	dt.Warnings = warnings
 
 	localDb, err := alpmHandle.LocalDb()
 	if err != nil {
@@ -382,7 +385,7 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	}
 
 	if len(dt.ToProcess) > 0 {
-		fmt.Println(bold(cyan("::") + " Querying AUR..."))
+		fmt.Println(bold(cyan("::") + bold(" Querying AUR...")))
 	}
 
 	err = depTreeRecursive(dt, localDb, syncDb, false)
@@ -393,6 +396,8 @@ func getDepTree(pkgs []string) (*depTree, error) {
 	if !cmdArgs.existsArg("d", "nodeps") {
 		err = checkVersions(dt)
 	}
+
+	dt.Warnings.Print()
 
 	return dt, err
 }
@@ -456,7 +461,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	}
 
 	// Assume toprocess only contains aur stuff we have not seen
-	info, err := aurInfo(currentProcess.toSlice())
+	info, err := aurInfo(currentProcess.toSlice(), dt.Warnings)
 
 	if err != nil {
 		return

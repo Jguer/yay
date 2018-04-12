@@ -10,6 +10,12 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+type aurWarnings struct {
+	Orphans   []string
+	OutOfDate []string
+	Missing   []string
+}
+
 // Query is a collection of Results
 type aurQuery []rpc.Pkg
 
@@ -190,7 +196,7 @@ func syncInfo(pkgS []string) (err error) {
 			noDb = append(noDb, name)
 		}
 
-		info, err = aurInfo(noDb)
+		info, err = aurInfoPrint(noDb)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -440,16 +446,12 @@ func statistics() (info struct {
 // of packages exceeds the number set in config.RequestSplitN.
 // If the number does exceed config.RequestSplitN multiple rpc requests will be
 // performed concurrently.
-func aurInfo(names []string) ([]*rpc.Pkg, error) {
+func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	info := make([]*rpc.Pkg, 0, len(names))
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 	var err error
-
-	missing := make([]string, 0, len(names))
-	orphans := make([]string, 0, len(names))
-	outOfDate := make([]string, 0, len(names))
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()
@@ -488,43 +490,33 @@ func aurInfo(names []string) ([]*rpc.Pkg, error) {
 	for _, name := range names {
 		i, ok := seen[name]
 		if !ok {
-			missing = append(missing, name)
+			warnings.Missing = append(warnings.Missing, name)
 			continue
 		}
 
 		pkg := info[i]
 
 		if pkg.Maintainer == "" {
-			orphans = append(orphans, name)
+			warnings.Orphans = append(warnings.Orphans, name)
 		}
 		if pkg.OutOfDate != 0 {
-			outOfDate = append(outOfDate, name)
+			warnings.OutOfDate = append(warnings.OutOfDate, name)
 		}
 	}
 
-	if len(missing) > 0 {
-		fmt.Print(bold(red(arrow + " Missing AUR Packages:")))
-		for _, name := range missing {
-			fmt.Print(" " + bold(magenta(name)))
-		}
-		fmt.Println()
+	return info, nil
+}
+
+func aurInfoPrint(names []string) ([]*rpc.Pkg, error) {
+	fmt.Println(bold(cyan("::") + bold(" Querying AUR...")))
+
+	warnings := &aurWarnings{}
+	info, err := aurInfo(names, warnings)
+	if err != nil {
+		return info, err
 	}
 
-	if len(orphans) > 0 {
-		fmt.Print(bold(red(arrow + " Orphaned AUR Packages:")))
-		for _, name := range orphans {
-			fmt.Print(" " + bold(magenta(name)))
-		}
-		fmt.Println()
-	}
-
-	if len(outOfDate) > 0 {
-		fmt.Print(bold(red(arrow + " Out Of Date AUR Packages:")))
-		for _, name := range outOfDate {
-			fmt.Print(" " + bold(magenta(name)))
-		}
-		fmt.Println()
-	}
+	warnings.Print()
 
 	return info, nil
 }

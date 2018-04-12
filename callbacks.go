@@ -34,7 +34,7 @@ func questionCallback(question alpm.QuestionAny) {
 
 			if db != thisDb {
 				db = thisDb
-				str += bold(cyan("\n:: ")) + bold("Repository "+db+"\n\t")
+				str += bold(cyan("\n:: ")) + bold("Repository "+db+"\n    ")
 			}
 			str += fmt.Sprintf("%d) %s ", size, pkg.Name())
 			size++

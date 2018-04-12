@@ -11,6 +11,34 @@ import (
 )
 
 const arrow = "==>"
+const smallArrow = " ->"
+
+func (warnings *aurWarnings) Print() {
+	if len(warnings.Missing) > 0 {
+		fmt.Print(bold(yellow(smallArrow)) + " Missing AUR Packages:")
+		for _, name := range warnings.Missing {
+			fmt.Print("  " + cyan(name))
+		}
+		fmt.Println()
+	}
+
+	if len(warnings.Orphans) > 0 {
+		fmt.Print(bold(yellow(smallArrow)) + " Orphaned AUR Packages:")
+		for _, name := range warnings.Orphans {
+			fmt.Print("  " + cyan(name))
+		}
+		fmt.Println()
+	}
+
+	if len(warnings.OutOfDate) > 0 {
+		fmt.Print(bold(yellow(smallArrow)) + " Out Of Date AUR Packages:")
+		for _, name := range warnings.OutOfDate {
+			fmt.Print("  " + cyan(name))
+		}
+		fmt.Println()
+	}
+
+}
 
 // human method returns results in human readable format.
 func human(size int64) string {
@@ -131,7 +159,7 @@ func (u upSlice) Print(start int) {
 		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
 
 		fmt.Print(magenta(fmt.Sprintf("%3d ", len(u)+start-k-1)))
-		fmt.Print(bold(colourHash(i.Repository)), "/", cyan(i.Name))
+		fmt.Print(bold(colourHash(i.Repository)), "/", bold(i.Name))
 
 		w := 70 - len(i.Repository) - len(i.Name)
 		padding := fmt.Sprintf("%%%ds", w)
@@ -216,7 +244,7 @@ func printDownloads(repoName string, length int, packages string) {
 
 	repoInfo := bold(blue(
 		"[" + repoName + ": " + strconv.Itoa(length) + "]"))
-	fmt.Println(repoInfo + magenta(packages))
+	fmt.Println(repoInfo + cyan(packages))
 }
 
 // PrintInfo prints package info like pacman -Si.
@@ -277,16 +305,16 @@ func localStatistics() error {
 
 	fmt.Printf(bold("Yay version v%s\n"), version)
 	fmt.Println(bold(cyan("===========================================")))
-	fmt.Println(bold(green("Total installed packages: ")) + magenta(strconv.Itoa(info.Totaln)))
-	fmt.Println(bold(green("Total foreign installed packages: ")) + magenta(strconv.Itoa(len(remoteNames))))
-	fmt.Println(bold(green("Explicitly installed packages: ")) + magenta(strconv.Itoa(info.Expln)))
-	fmt.Println(bold(green("Total Size occupied by packages: ")) + magenta(human(info.TotalSize)))
+	fmt.Println(bold(green("Total installed packages: ")) + cyan(strconv.Itoa(info.Totaln)))
+	fmt.Println(bold(green("Total foreign installed packages: ")) + cyan(strconv.Itoa(len(remoteNames))))
+	fmt.Println(bold(green("Explicitly installed packages: ")) + cyan(strconv.Itoa(info.Expln)))
+	fmt.Println(bold(green("Total Size occupied by packages: ")) + cyan(human(info.TotalSize)))
 	fmt.Println(bold(cyan("===========================================")))
 	fmt.Println(bold(green("Ten biggest packages:")))
 	biggestPackages()
 	fmt.Println(bold(cyan("===========================================")))
 
-	aurInfo(remoteNames)
+	aurInfoPrint(remoteNames)
 
 	return nil
 }
@@ -294,9 +322,10 @@ func localStatistics() error {
 //TODO: Make it less hacky
 func printNumberOfUpdates() error {
 	//todo
+	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList()
+	aurUp, repoUp, err := upList(warnings)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -308,10 +337,11 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
+	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()
-	aurUp, repoUp, err := upList()
+	aurUp, repoUp, err := upList(warnings)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err

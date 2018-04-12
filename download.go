@@ -107,10 +107,10 @@ nextPkg:
 
 				errD := downloadAndUnpack(url, path, true)
 				if errD != nil {
-					fmt.Println(bold(magenta(pkg.Name())), bold(green(errD.Error())))
+					fmt.Println(bold(red(arrow)) + " " + bold(cyan(pkg.Name())), bold(red(errD.Error())))
 				}
 
-				fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(magenta(pkg.Name())), bold(green("from ABS")))
+				fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")
 				continue nextPkg
 			}
 		}
@@ -123,14 +123,14 @@ nextPkg:
 
 // GetPkgbuild downloads pkgbuild from the AUR.
 func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
-	aq, err := aurInfo(pkgs)
+	aq, err := aurInfoPrint(pkgs)
 	if err != nil {
 		return err
 	}
 
 	for _, pkg := range aq {
 		downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
-		fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(magenta(pkg.Name)), bold(green("from AUR")))
+		fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name), "from AUR")
 	}
 
 	return
