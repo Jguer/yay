@@ -387,12 +387,14 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 					continue
 				}
 
-				if cIsInclude && cInclude.get(len(pkgs)-i) {
+				if cIsInclude && (cInclude.get(len(pkgs)-i) || cOtherInclude.get(pkg.PackageBase)) {
 					toClean = append(toClean, pkg)
+					continue
 				}
 
-				if !cIsInclude && !cExclude.get(len(pkgs)-i) {
+				if !cIsInclude && (!cExclude.get(len(pkgs)-i) && !cOtherExclude.get(pkg.PackageBase)) {
 					toClean = append(toClean, pkg)
+					continue
 				}
 			}
 		}
@@ -436,11 +438,11 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 				continue
 			}
 
-			if eIsInclude && eInclude.get(len(pkgs)-i) {
+			if eIsInclude && (eInclude.get(len(pkgs)-i) || eOtherInclude.get(pkg.PackageBase)) {
 				toEdit = append(toEdit, pkg)
 			}
 
-			if !eIsInclude && !eExclude.get(len(pkgs)-i) {
+			if !eIsInclude && (!eExclude.get(len(pkgs)-i) && !eOtherExclude.get(pkg.PackageBase)) {
 				toEdit = append(toEdit, pkg)
 			}
 		}
