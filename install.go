@@ -529,33 +529,6 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, 
 	}
 }
 
-func parseSRCINFOGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
-	for k, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-
-		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
-
-		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
-		cmd.Stderr = os.Stderr
-		cmd.Dir = dir
-		srcinfo, err := cmd.Output()
-
-		if err != nil {
-			return err
-		}
-
-		pkgbuild, err := gopkg.ParseSRCINFOContent(srcinfo)
-		if err != nil {
-			return fmt.Errorf("%s: %s", pkg.Name, err)
-		}
-
-		srcinfos[pkg.PackageBase] = pkgbuild
-	}
-
-	return nil
-}
-
 func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
