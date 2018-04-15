@@ -77,7 +77,6 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[str
 		return err
 	}
 
-
 	fmt.Println()
 	fmt.Println(str)
 

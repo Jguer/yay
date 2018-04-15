@@ -107,7 +107,7 @@ nextPkg:
 
 				errD := downloadAndUnpack(url, path, true)
 				if errD != nil {
-					fmt.Println(bold(red(arrow)) + " " + bold(cyan(pkg.Name())), bold(red(errD.Error())))
+					fmt.Println(bold(red(arrow))+" "+bold(cyan(pkg.Name())), bold(red(errD.Error())))
 				}
 
 				fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")

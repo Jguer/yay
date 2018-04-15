@@ -28,7 +28,6 @@ func install(parser *arguments) error {
 
 	removeMake := false
 	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
-	srcinfos := make(map[string]*gopkg.PKGBUILD)
 
 	//remotenames: names of all non repo packages on the system
 	_, _, localNames, remoteNames, err := filterPackages()
@@ -246,12 +245,7 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		err = parseSRCINFOGenerate(dc.Aur, srcinfos, dc.Bases)
-		if err != nil {
-			return err
-		}
-
-		err = buildInstallPkgBuilds(dc.Aur, srcinfos, parser.targets, parser, dc.Bases, incompatible)
+		err = buildInstallPkgBuilds(dc.Aur, srcinfosStale, parser.targets, parser, dc.Bases, incompatible)
 		if err != nil {
 			return err
 		}
@@ -323,6 +317,24 @@ nextpkg:
 	return incompatible, nil
 }
 
+func getVersionFromPkgbuild(dir string) (string, error) {
+	stdout, stderr, err := passToMakepkgCapture(dir, "--packagelist")
+
+	if err != nil {
+		return "", fmt.Errorf("%s%s", stderr, err)
+	}
+
+	line := strings.Split(stdout, "\n")[0]
+	split := strings.Split(line, "-")
+
+	if len(split) < 4 {
+		return "", fmt.Errorf("Can not parse version from: %s", split)
+	}
+	//pkg-name-pkgver-pkgrel-arch: extract pkgver-pkgrel
+	ver := split[len(split)-3] + "-" + split[len(split)-2]
+	return ver, nil
+}
+
 func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
 	toPrint := ""
 	askClean := false
@@ -348,7 +360,6 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	}
 
 	fmt.Print(toPrint)
-
 
 	if askClean {
 		fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
@@ -518,33 +529,6 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, 
 	}
 }
 
-func parseSRCINFOGenerate(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
-	for k, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-
-		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(pkgs), formatPkgbase(pkg, bases))
-
-		cmd := exec.Command(config.MakepkgBin, "--printsrcinfo")
-		cmd.Stderr = os.Stderr
-		cmd.Dir = dir
-		srcinfo, err := cmd.Output()
-
-		if err != nil {
-			return err
-		}
-
-		pkgbuild, err := gopkg.ParseSRCINFOContent(srcinfo)
-		if err != nil {
-			return fmt.Errorf("%s: %s", pkg.Name, err)
-		}
-
-		srcinfos[pkg.PackageBase] = pkgbuild
-	}
-
-	return nil
-}
-
 func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
@@ -579,7 +563,7 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatable stringSet) (err error) {
 	for _, pkg := range pkgs {
 		dir := config.BuildDir + pkg.PackageBase + "/"
-		args := []string{"--nobuild", "--nocheck", "--noprepare", "--nodeps"}
+		args := []string{"--verifysource", "-Ccf"}
 
 		if incompatable.get(pkg.PackageBase) {
 			args = append(args, "--ignorearch")
@@ -605,17 +589,27 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		built := true
 
 		srcinfo := srcinfos[pkg.PackageBase]
-		version := srcinfo.CompleteVersion()
+
+		//pkgver bump
+		err := passToMakepkg(dir, "--nobuild", "-fCc")
+		if err != nil {
+			return fmt.Errorf("Error making: %s", pkg.Name)
+		}
+
+		version, err := getVersionFromPkgbuild(dir)
+		if err != nil {
+			return err
+		}
 
 		if config.ReBuild == "no" || (config.ReBuild == "yes" && !targets.get(pkg.Name)) {
 			for _, split := range bases[pkg.PackageBase] {
-				file, err := completeFileName(dir, split.Name+"-"+version.String()+"-"+arch+".pkg")
+				file, err := completeFileName(dir, split.Name+"-"+version+"-"+arch+".pkg")
 				if err != nil {
 					return err
 				}
 
 				if file == "" {
-					file, err = completeFileName(dir, split.Name+"-"+version.String()+"-"+"any"+".pkg")
+					file, err = completeFileName(dir, split.Name+"-"+version+"-"+"any"+".pkg")
 					if err != nil {
 						return err
 					}
@@ -631,7 +625,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 		if built {
 			fmt.Println(bold(yellow(arrow)),
-				cyan(pkg.Name+"-"+pkg.Version) + bold(" Already made -- skipping build"))
+				cyan(pkg.Name+"-"+version)+bold(" Already made -- skipping build"))
 		} else {
 			args := []string{"-Ccf", "--noconfirm"}
 
@@ -671,20 +665,20 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		localNamesCache := sliceToStringSet(localNames)
 
 		for _, split := range bases[pkg.PackageBase] {
-			file, err := completeFileName(dir, split.Name+"-"+version.String()+"-"+arch+".pkg")
+			file, err := completeFileName(dir, split.Name+"-"+version+"-"+arch+".pkg")
 			if err != nil {
 				return err
 			}
 
 			if file == "" {
-				file, err = completeFileName(dir, split.Name+"-"+version.String()+"-"+"any"+".pkg")
+				file, err = completeFileName(dir, split.Name+"-"+version+"-"+"any"+".pkg")
 				if err != nil {
 					return err
 				}
 			}
 
 			if file == "" {
-				return fmt.Errorf("Could not find built package " + split.Name + "-" + version.String() + "-" + arch + ".pkg")
+				return fmt.Errorf("Could not find built package " + split.Name + "-" + version + "-" + arch + ".pkg")
 			}
 
 			arguments.addTarget(file)
