@@ -303,7 +303,7 @@ nextpkg:
 
 	if len(incompatible) > 0 {
 		fmt.Println()
-		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatable with your architecture:")
+		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatible with your architecture:")
 		for pkg := range incompatible {
 			fmt.Print("  " + cyan(pkg))
 		}
@@ -631,7 +631,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 		if built {
 			fmt.Println(bold(yellow(arrow)),
-				cyan(pkg.Name+"-"+version)+bold(" Already made -- skipping build"))
+				cyan(pkg.Name+"-"+pkg.Version)+bold(" Already made -- skipping build"))
 		} else {
 			args := []string{"-Ccf", "--noconfirm"}
 
