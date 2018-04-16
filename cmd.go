@@ -36,58 +36,65 @@ New operations:
     yay {-G --getpkgbuild} [package(s)]
 
 Permanent configuration options:
-    --save               Causes the following options to be saved back to the
-                         config file when used
+    --save                Causes the following options to be saved back to the
+                          config file when used
 
-    --builddir <dir>     Directory to use for building AUR Packages
-    --editor   <file>    Editor to use when editing PKGBUILDs
-    --makepkg  <file>    makepkg command to use
-    --pacman   <file>    pacman command to use
-    --tar      <file>    bsdtar command to use
-    --git      <file>    git command to use
-    --gpg      <file>    gpg command to use
-    --config   <file>    pacman.conf file to use
+    --builddir    <dir>   Directory to use for building AUR Packages
+    --editor      <file>  Editor to use when editing PKGBUILDs
+    --editorflags <flags> Pass arguments to editor
+    --makepkg     <file>  makepkg command to use
+    --mflags      <flags> Pass arguments to makepkg
+    --pacman      <file>  pacman command to use
+    --tar         <file>  bsdtar command to use
+    --git         <file>  git command to use
+    --gitflags    <flags> Pass arguments to git
+    --gpg         <file>  gpg command to use
+    --gpgflags    <flags> Pass arguments to gpg
+    --config      <file>  pacman.conf file to use
 
-    --requestsplitn <n>  Max amount of packages to query per AUR request
-    --sortby <field>     Sort AUR results by a specific field during search
-    --answerclean   <a>  Set a predetermined answer for the clean build menu
-    --answeredit    <a>  Set a predetermined answer for the edit pkgbuild menu
-    --answerupgrade <a>  Set a predetermined answer for the upgrade menu
-    --noanswerclean      Unset the answer for the clean build menu
-    --noansweredit       Unset the answer for the edit pkgbuild menu
-    --noanswerupgrade    Unset the answer for the upgrade menu
+    --requestsplitn <n>   Max amount of packages to query per AUR request
+    --sortby <field>      Sort AUR results by a specific field during search
+    --answerclean   <a>   Set a predetermined answer for the clean build menu
+    --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
+    --answerupgrade <a>   Set a predetermined answer for the upgrade menu
+    --noanswerclean       Unset the answer for the clean build menu
+    --noansweredit        Unset the answer for the edit pkgbuild menu
+    --noanswerupgrade     Unset the answer for the upgrade menu
 
-    --topdown            Shows repository's packages first and then AUR's
-    --bottomup           Shows AUR's packages first and then repository's
-    --devel              Check development packages during sysupgrade
-    --nodevel            Do not check development packages
-    --afterclean         Remove package sources after successful install
-    --noafterclean       Do not remove package sources after successful build
-    --timeupdate         Check package's AUR page for changes during sysupgrade
-    --notimeupdate       Do not checking of AUR page changes
-    --redownload         Always download pkgbuilds of targets
-    --redownloadall      Always download pkgbuilds of all AUR packages
-    --noredownload       Skip pkgbuild download if in cache and up to date
-    --rebuild            Always build target packages
-    --rebuildall         Always build all AUR packages
-    --rebuildtree        Always build all AUR packages even if installed
-    --norebuild          Skip package build if in cache and up to date
-    --mflags <flags>     Pass arguments to makepkg
-    --gpgflags <flags>   Pass arguments to gpg
-    --sudoloop           Loop sudo calls in the background to avoid timeout
-    --nosudoloop         Do not loop sudo calls in the background
+    --afterclean          Remove package sources after successful install
+    --noafterclean        Do not remove package sources after successful build
+    --bottomup            Shows AUR's packages first and then repository's
+    --topdown             Shows repository's packages first and then AUR's
+
+    --devel               Check development packages during sysupgrade
+    --nodevel             Do not check development packages
+    --gitclone            Use git clone for PKGBUILD retrieval
+    --nogitclone          Never use git clone for PKGBUILD retrieval
+    --rebuild             Always build target packages
+    --rebuildall          Always build all AUR packages
+    --norebuild           Skip package build if in cache and up to date
+    --rebuildtree         Always build all AUR packages even if installed
+    --redownload          Always download pkgbuilds of targets
+    --noredownload        Skip pkgbuild download if in cache and up to date
+    --redownloadall       Always download pkgbuilds of all AUR packages
+
+    --sudoloop            Loop sudo calls in the background to avoid timeout
+    --nosudoloop          Do not loop sudo calls in the background
+
+    --timeupdate          Check package's AUR page for changes during sysupgrade
+    --notimeupdate        Do not checking of AUR page changes
 
 Print specific options:
-    -c --complete        Used for completions
-    -d --defaultconfig   Print default yay configuration
-    -g --config          Print current yay configuration
-    -n --numberupgrades  Print number of updates
-    -s --stats           Display system package statistics
-    -u --upgrades        Print update list
+    -c --complete         Used for completions
+    -d --defaultconfig    Print default yay configuration
+    -g --config           Print current yay configuration
+    -n --numberupgrades   Print number of updates
+    -s --stats            Display system package statistics
+    -u --upgrades         Print update list
 
 Yay specific options:
-    -c --clean           Remove unneeded dependencies
-       --gendb           Generates development package DB used for updating
+    -c --clean            Remove unneeded dependencies
+       --gendb            Generates development package DB used for updating
 
 If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed`)
