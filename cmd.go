@@ -389,6 +389,8 @@ func handleSync() (err error) {
 		}
 
 		err = syncSearch(targets)
+	} else if cmdArgs.existsArg("c", "clean") {
+		err = syncClean(cmdArgs)
 	} else if cmdArgs.existsArg("l", "list") {
 		err = passToPacman(cmdArgs)
 	} else if cmdArgs.existsArg("c", "clean") {
