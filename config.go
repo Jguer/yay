@@ -56,7 +56,7 @@ type Configuration struct {
 	GitClone      bool   `json:"gitclone"`
 }
 
-var version = "3.373"
+var version = "5.688"
 
 // configFileName holds the name of the config file.
 const configFileName string = "config.json"
