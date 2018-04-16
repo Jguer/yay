@@ -217,21 +217,35 @@ func (parser *arguments) existsArg(options ...string) bool {
 }
 
 func (parser *arguments) getArg(options ...string) (arg string, double bool, exists bool) {
+	existCount := 0
+
 	for _, option := range options {
 		arg, exists = parser.options[option]
 
 		if exists {
-			_, double = parser.doubles[option]
-			return
+			existCount++
+			_, exists = parser.doubles[option]
+
+			if exists {
+				existCount++
+			}
+
 		}
 
 		arg, exists = parser.globals[option]
 
 		if exists {
-			_, double = parser.doubles[option]
-			return
+			existCount++
+			_, exists = parser.doubles[option]
+
+			if exists {
+				existCount++
+			}
+
 		}
 	}
+
+	double = existCount >= 2
 
 	return
 }
