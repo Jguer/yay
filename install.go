@@ -566,12 +566,12 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 	return nil
 }
 
-func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatable stringSet) (err error) {
+func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatible stringSet) (err error) {
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		args := []string{"--verifysource", "-Ccf"}
 
-		if incompatable.get(pkg.PackageBase) {
+		if incompatible.get(pkg.PackageBase) {
 			args = append(args, "--ignorearch")
 		}
 
@@ -584,7 +584,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 	return
 }
 
-func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg, incompatable stringSet) error {
+func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg, incompatible stringSet) error {
 	arch, err := alpmHandle.Arch()
 	if err != nil {
 		return err
@@ -635,7 +635,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		} else {
 			args := []string{"-Ccf", "--noconfirm"}
 
-			if incompatable.get(pkg.PackageBase) {
+			if incompatible.get(pkg.PackageBase) {
 				args = append(args, "--ignorearch")
 			}
 

@@ -25,7 +25,7 @@ func questionCallback(question alpm.QuestionAny) {
 		})
 
 		fmt.Print(bold(cyan(":: ")))
-		str := bold(fmt.Sprintf(bold("There are %d providers avalable for %s:"), size, qp.Dep()))
+		str := bold(fmt.Sprintf(bold("There are %d providers available for %s:"), size, qp.Dep()))
 
 		size = 1
 		var db string

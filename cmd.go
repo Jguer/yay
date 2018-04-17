@@ -206,7 +206,7 @@ func handleHelp() error {
 
 //this function should only set config options
 //but currently still uses the switch left over from old code
-//eventually this should be refactored out futher
+//eventually this should be refactored out further
 //my current plan is to have yay specific operations in its own operator
 //e.g. yay -Y --gendb
 //e.g yay -Yg

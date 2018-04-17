@@ -301,7 +301,7 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 //
 // For Aur dependencies depends, makedepends and checkdepends are resolved but
 // for repo packages only depends are resolved as they are prebuilt.
-// The return will be split into three catagories: Repo, Aur and Missing.
+// The return will be split into three categories: Repo, Aur and Missing.
 // The return is in no way ordered. This step is is just aimed at gathering the
 // packages we need.
 //

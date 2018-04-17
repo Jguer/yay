@@ -613,7 +613,7 @@ func (parser *arguments) parseCommandLine() (err error) {
 //supports negation: ^1 ^1-4
 //
 //include and excule holds numbers that should be added and should not be added
-//respectively. other holds anythign that can't be parsed as an int. This is
+//respectively. other holds anything that can't be parsed as an int. This is
 //intended to allow words inside of number menus. e.g. 'all' 'none' 'abort'
 //of course the implementation is up to the caller, this function mearley parses
 //the input and organizes it
