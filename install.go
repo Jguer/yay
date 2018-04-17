@@ -49,7 +49,7 @@ func install(parser *arguments) error {
 		}
 
 		for _, up := range aurUp {
-			requestTargets = append(requestTargets, up.Name)
+			requestTargets = append(requestTargets, "aur/" + up.Name)
 		}
 
 		for _, up := range repoUp {
