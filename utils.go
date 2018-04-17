@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 	"unicode"
 )
@@ -76,7 +77,7 @@ func completeFileName(dir, name string) (string, error) {
 		}
 
 		if strings.HasPrefix(file.Name(), name) {
-			return dir + file.Name(), nil
+			return filepath.Join(dir, file.Name()), nil
 		}
 	}
 
