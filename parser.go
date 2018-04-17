@@ -246,6 +246,7 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 	}
 
 	double = existCount >= 2
+	exists = existCount >= 1
 
 	return
 }
