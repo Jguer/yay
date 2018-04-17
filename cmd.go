@@ -199,9 +199,9 @@ func handleHelp() error {
 	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
 		usage()
 		return nil
-	} else {
-		return passToPacman(cmdArgs)
 	}
+
+	return passToPacman(cmdArgs)
 }
 
 //this function should only set config options
