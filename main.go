@@ -15,25 +15,25 @@ func initPaths() {
 		if info, err := os.Stat(configHome); err == nil && info.IsDir() {
 			configHome = configHome + "/yay"
 		} else {
-			configHome = os.Getenv("HOME") + "/.config/yay"
+			configHome = filepath.Join(os.Getenv("HOME"), ".config/yay")
 		}
 	} else {
-		configHome = os.Getenv("HOME") + "/.config/yay"
+		configHome = filepath.Join(os.Getenv("HOME"), ".config/yay")
 	}
 
 	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
 		if info, err := os.Stat(cacheHome); err == nil && info.IsDir() {
-			cacheHome = cacheHome + "/yay"
+			cacheHome = filepath.Join(cacheHome, "yay")
 		} else {
-			cacheHome = os.Getenv("HOME") + "/.cache/yay"
+			cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
 		}
 	} else {
-		cacheHome = os.Getenv("HOME") + "/.cache/yay"
+		cacheHome = filepath.Join(os.Getenv("HOME"), "/.cache/yay")
 	}
 
-	configFile = configHome + "/" + configFileName
-	vcsFile = cacheHome + "/" + vcsFileName
-	completionFile = cacheHome + "/" + completionFilePrefix
+	configFile = filepath.Join(configHome, configFileName)
+	vcsFile = filepath.Join(cacheHome, vcsFileName)
+	completionFile = filepath.Join(cacheHome, completionFilePrefix)
 }
 
 func initConfig() (err error) {

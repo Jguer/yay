@@ -344,7 +344,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 	toEdit := make([]*rpc.Pkg, 0)
 
 	for n, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		toPrint += fmt.Sprintf(magenta("%3d")+" %-40s", len(pkgs)-n,
 			bold(formatPkgbase(pkg, bases)))
@@ -380,7 +380,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 
 		if !cOtherInclude.get("n") && !cOtherInclude.get("none") {
 			for i, pkg := range pkgs {
-				dir := config.BuildDir + pkg.PackageBase + "/"
+				dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 				if _, err := os.Stat(dir); os.IsNotExist(err) {
 					continue
 				}
@@ -470,7 +470,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 
 func cleanBuilds(pkgs []*rpc.Pkg) {
 	for i, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(pkgs), cyan(dir))
 		os.RemoveAll(dir)
 	}
@@ -479,8 +479,8 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 func editPkgBuilds(pkgs []*rpc.Pkg) error {
 	pkgbuilds := make([]string, 0, len(pkgs))
 	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
-		pkgbuilds = append(pkgbuilds, dir+"PKGBUILD")
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
+		pkgbuilds = append(pkgbuilds, filepath.Join(dir, "PKGBUILD"))
 	}
 
 	editor, editorArgs := editor()
@@ -497,12 +497,12 @@ func editPkgBuilds(pkgs []*rpc.Pkg) error {
 
 func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
-		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		pkgbuild, err := gopkg.ParseSRCINFO(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			return fmt.Errorf("%s: %s", pkg.Name, err)
 		}
@@ -515,12 +515,12 @@ func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 
 func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) {
 	for k, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
-		pkgbuild, err := gopkg.ParseSRCINFO(dir + ".SRCINFO")
+		pkgbuild, err := gopkg.ParseSRCINFO(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			fmt.Printf("cannot parse %s skipping: %s\n", pkg.Name, err)
 			continue
@@ -533,7 +533,7 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, 
 func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
-			dir := config.BuildDir + pkg.PackageBase + "/.SRCINFO"
+			dir := filepath.Join(config.BuildDir, pkg.PackageBase, ".SRCINFO")
 			pkgbuild, err := gopkg.ParseSRCINFO(dir)
 
 			if err == nil {
@@ -568,7 +568,7 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatable stringSet) (err error) {
 	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		args := []string{"--verifysource", "-Ccf"}
 
 		if incompatable.get(pkg.PackageBase) {
@@ -591,7 +591,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 	}
 
 	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		built := true
 
 		srcinfo := srcinfos[pkg.PackageBase]
@@ -719,7 +719,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 func clean(pkgs []*rpc.Pkg) {
 	for _, pkg := range pkgs {
-		dir := config.BuildDir + pkg.PackageBase + "/"
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		fmt.Println(bold(green(arrow +
 			" CleanAfter enabled. Deleting " + pkg.Name + " source folder.")))

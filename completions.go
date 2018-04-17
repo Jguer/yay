@@ -68,9 +68,9 @@ func complete(shell string) error {
 	var path string
 
 	if shell == "fish" {
-		path = completionFile + "fish" + ".cache"
+		path = filepath.Join(completionFile, "fish"+".cache")
 	} else {
-		path = completionFile + "sh" + ".cache"
+		path = filepath.Join(completionFile, "sh"+".cache")
 	}
 	info, err := os.Stat(path)
 

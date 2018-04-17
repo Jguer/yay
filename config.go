@@ -132,7 +132,7 @@ func (config *Configuration) saveConfig() error {
 }
 
 func defaultSettings(config *Configuration) {
-	config.BuildDir = cacheHome + "/"
+	config.BuildDir = cacheHome
 	config.CleanAfter = false
 	config.Editor = ""
 	config.EditorFlags = ""

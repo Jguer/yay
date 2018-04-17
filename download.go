@@ -89,7 +89,7 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 	tokens := strings.Split(url, "/")
 	fileName := tokens[len(tokens)-1]
 
-	tarLocation := path + fileName
+	tarLocation := filepath.Join(path, fileName)
 	defer os.Remove(tarLocation)
 
 	err = downloadFile(tarLocation, url)
@@ -117,7 +117,6 @@ func getPkgbuilds(pkgs []string) error {
 	if err != nil {
 		return err
 	}
-	wd = wd + "/"
 
 	missing, err := getPkgbuildsfromABS(pkgs, wd)
 	if err != nil {
