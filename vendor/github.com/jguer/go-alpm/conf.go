@@ -55,7 +55,7 @@ type PacmanConfig struct {
 	XferCommand        string
 	NoUpgrade          []string
 	NoExtract          []string
-	CleanMethod        string
+	CleanMethod        []string
 	SigLevel           SigLevel
 	LocalFileSigLevel  SigLevel
 	RemoteFileSigLevel SigLevel
@@ -256,6 +256,10 @@ lineloop:
 		}
 	}
 
+	if len(conf.CleanMethod) == 0 {
+		conf.CleanMethod = []string{"KeepInstalled"}
+	}
+
 	if len(conf.CacheDir) == 0 {
 		conf.CacheDir = []string{"/var/cache/pacman/pkg/"} //should only be set if the config does not specify this
 	}
@@ -271,7 +275,6 @@ func (conf *PacmanConfig) SetDefaults() {
 	conf.GPGDir = "/etc/pacman.d/gnupg/"
 	conf.LogFile = "/var/log/pacman.log"
 	conf.UseDelta = 0.7
-	conf.CleanMethod = "KeepInstalled"
 
 	conf.SigLevel = SigPackage | SigPackageOptional | SigDatabase | SigDatabaseOptional
 	conf.LocalFileSigLevel = SigUseDefault
