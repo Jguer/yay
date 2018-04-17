@@ -152,11 +152,14 @@ func getCommit(url string, branch string, protocols []string) string {
 
 		err = cmd.Wait()
 		timer.Stop()
-
 		if err != nil {
 			continue
 		}
+
 		err = cmd.Run()
+		if err != nil {
+			continue
+		}
 
 		stdout := outbuf.String()
 		split := strings.Fields(stdout)

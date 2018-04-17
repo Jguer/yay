@@ -117,8 +117,8 @@ func getVersionDiff(oldVersion, newversion string) (left, right string) {
 
 		samePart := oldVersion[0:diffPosition]
 
-		left = samePart + red(oldVersion[diffPosition:len(oldVersion)])
-		right = samePart + green(newVersion[diffPosition:len(newVersion)])
+		left = samePart + red(oldVersion[diffPosition:])
+		right = samePart + green(newVersion[diffPosition:])
 	}
 
 	return

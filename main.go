@@ -148,7 +148,7 @@ func initAlpm() (err error) {
 		return
 	}
 
-	value, _, exists = cmdArgs.getArg("color")
+	value, _, _ = cmdArgs.getArg("color")
 	if value == "always" || value == "auto" {
 		useColor = true
 	} else if value == "never" {
