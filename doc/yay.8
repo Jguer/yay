@@ -42,14 +42,23 @@ If no arguments are provided 'yay -Syu' will be performed\&.
 If no operation is selected -Y will be assumed\&.
 .SH "EXTENDED PACMAN OPERATIONS"
 .PP
-\fB\-S, -Si, -Ss, -Su, -Qu\fR
+\fB\-S, -Si, -Ss, -Su, -Sc, -Qu\fR
 .RS 4
 These operations are extended to support both AUR and repo packages\&.
+.RE
+.PP
+\fB\-Sc\fR
+.RS 4
+Yay will also clean cached AUR package and any untracked Files in the
+cache\&. Untracked files cleaning only works for packages downloaded
+using gitclone\&. Cleaning untracked files will wipe any downloaded
+sources or built packages but will keep already downloaded vcs sources\&.
 .RE
 .PP
 \fB\-R\fR
 .RS 4
 Yay will also remove cached data about devel packages\&.
+
 .RE
 .SH "YAY OPTIONS (APPLY TO -Y AND --YAY)"
 .PP
@@ -190,14 +199,14 @@ the same when parsed\&.
 .PP
 \fB\-\-answeredit <All|None|Installed|NotInstalled|...>\fR
 .RS 4
-Set a predetermined answer for the edit pkgbuild  menu question\&. This answer
+Set a predetermined answer for the edit pkgbuild menu question\&. This answer
 will be used instead of reading from standard input but will be treaded exactly
 the same when parsed\&.
 .RE
 .PP
 \fB\-\-answerupgrade\fR <Repo|^Repo|None|...>
 .RS 4
-Set a predetermined answer for the upgrade  menu question\&. This answer
+Set a predetermined answer for the upgrade menu question\&. This answer
 will be used instead of reading from standard input but will be treaded exactly
 the same\&.
 .RE
@@ -398,7 +407,7 @@ any of these commits change the package will be upgraded during a devel update.
 .RS 4
 Unless otherwise set this should be the same as \fBCACHE DIRECTORY\fR. This
 directory is used to store downloaded AUR Packages as well as any source files
-and built packages from  those packages\&.
+and built packages from those packages\&.
 .RE
 .PP
 \fBPACMAN.CONF\fR
