@@ -68,14 +68,14 @@ func complete(shell string) error {
 	var path string
 
 	if shell == "fish" {
-		path = filepath.Join(completionFile, "fish"+".cache")
+		path = filepath.Join(cacheHome, "aur_fish"+".cache")
 	} else {
-		path = filepath.Join(completionFile, "sh"+".cache")
+		path = filepath.Join(cacheHome, "aur_sh"+".cache")
 	}
 	info, err := os.Stat(path)
 
 	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
-		os.MkdirAll(filepath.Dir(completionFile), 0755)
+		os.MkdirAll(filepath.Dir(path), 0755)
 		out, errf := os.Create(path)
 		if errf != nil {
 			return errf

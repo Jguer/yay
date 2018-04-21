@@ -33,7 +33,6 @@ func initPaths() {
 
 	configFile = filepath.Join(configHome, configFileName)
 	vcsFile = filepath.Join(cacheHome, vcsFileName)
-	completionFile = filepath.Join(cacheHome, completionFilePrefix)
 }
 
 func initConfig() (err error) {

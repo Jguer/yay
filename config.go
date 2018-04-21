@@ -64,9 +64,6 @@ const configFileName string = "config.json"
 // vcsFileName holds the name of the vcs file.
 const vcsFileName string = "vcs.json"
 
-// completionFilePrefix holds the prefix used for storing shell completion files.
-const completionFilePrefix string = "aur_"
-
 // baseURL givers the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
 
@@ -87,9 +84,6 @@ var configFile string
 
 // vcsfile holds yay vcs info file path.
 var vcsFile string
-
-// completion file
-var completionFile string
 
 // shouldSaveConfig holds whether or not the config should be saved
 var shouldSaveConfig bool
