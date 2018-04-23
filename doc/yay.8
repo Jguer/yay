@@ -142,6 +142,14 @@ environment variable will be checked, followed by \fBVISUAL\fR\&. If none of
 these are set Yay will prompt the user for an editor\&.
 .RE
 .PP
+\fB\-\-editorflags <flags>\fR
+.RS 4
+Passes arguments to the editor\&. These flags get passed to every instance where
+the editor is called by Yay. Arguments are split on whitespace before being
+passed to gpg. Multiple arguments may be passed by supplying a space
+separated list that is quoted by the shell.
+.RE
+.PP
 \fB\-\-makepkg <file>\fR
 .RS 4
 The command to use for \fBmakepkg\fR calls. This can be a command in
@@ -181,7 +189,7 @@ The pacman config file to use\&.
 .RS 4
 The maximum amount of packages to request per AUR query\&. The higher the
 number the faster AUR requests will be\&. Requesting too many packages in one
-AUR query will cause an error\%. This should only make a noticeable difference
+AUR query will cause an error\&. This should only make a noticeable difference
 with very large requests (>500) packages\&.
 .RE
 .PP
@@ -245,6 +253,20 @@ only GitHub packages are supported\&.
 \fB\-\-nodevel\fR
 .RS 4
 Do not check for development packages updates during sysupgrade\&.
+.RE
+.PP
+\fB\-\-gitclone\fR
+.RS 4
+Use git to download and update PKGBUILDs\&. PKGBUILDs previously downloaded
+using tarball will continue to use tarballs until the package is clean built\&.
+Similary, PKGBUILDs managed with git will continue to use git until the package
+is clean built.\&.
+.RE
+.PP
+\fB\-\-nogitclone\fR
+.RS 4
+Download and update PKGBUILDs using tarballs\&. The above conditions about
+previously installed packages still apply\&.
 .RE
 .PP
 \fB\-\-afterclean\fR
@@ -383,7 +405,7 @@ Shows statistics for installed packages and system health\&.
 .RS 4
 The config directory is \fI$XDG_CONFIG_HOME/yay/\fR\&. if
 \fB$XDG_CONFIG_HOME\fR is unset, the config directory will fall back to
-\fI$HOME/.config/yay\fR\%.
+\fI$HOME/.config/yay\fR\&.
 .PP
 \fIconfig.json\fR\& Is used to store all of Yay's config options\&. Editing
 this file should be done through Yay, using the options
