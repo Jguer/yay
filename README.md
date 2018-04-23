@@ -78,7 +78,7 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 * PKGBUILDs with unsupported arch can force build now
 * PGP Key automatic importing
 * GPG option passing
-* `db/name` support readded
+* `db/name` support re-added
 
 #### 4.505
 
@@ -158,7 +158,7 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 
 #### 2.200
 
-* Development github package support readded
+* Development github package support re-added
 
 #### 2.196
 

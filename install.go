@@ -195,7 +195,7 @@ func install(parser *arguments) error {
 			config.NoConfirm = oldValue
 		}
 
-		//inital srcinfo parse before pkgver() bump
+		//initial srcinfo parse before pkgver() bump
 		err = parseSRCINFOFiles(dc.Aur, srcinfosStale, dc.Bases)
 		if err != nil {
 			return err

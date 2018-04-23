@@ -324,7 +324,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	}
 
 	//upgrade menu asks you which packages to NOT upgrade so in this case
-	//include and exclude are kind of swaped
+	//include and exclude are kind of swapped
 	//include, exclude, other := parseNumberMenu(string(numberBuf))
 	include, exclude, otherInclude, otherExclude := parseNumberMenu(numbers)
 
