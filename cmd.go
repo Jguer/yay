@@ -81,8 +81,8 @@ Permanent configuration options:
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background
 
-    --timeupdate          Check package's AUR page for changes during sysupgrade
-    --notimeupdate        Do not checking of AUR page changes
+    --timeupdate          Check packages' AUR page for changes during sysupgrade
+    --notimeupdate        Do not check packages' AUR page for changes
 
 Print specific options:
     -c --complete         Used for completions
