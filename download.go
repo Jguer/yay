@@ -68,7 +68,7 @@ func gitDownload(url string, path string, name string) error {
 
 	err = passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD")
 	if err != nil {
-		return fmt.Errorf("error reseting %s", name)
+		return fmt.Errorf("error resetting %s", name)
 	}
 
 	err = passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff")

@@ -104,7 +104,7 @@ Print current yay configuration\&.
 .PP
 \fB\-n \-\-numberupgrades\fR
 .RS 4
-Print number of packages that need to be updated\&. Note this does not preform
+Print number of packages that need to be updated\&. Note this does not perform
 a database refresh\&. Run \fByay -Sy\fR Before this for an up to date result\&.
 .RE
 .PP
@@ -117,7 +117,7 @@ be displayed\&.
 .PP
 \fB\-u \-\-upgrades\fR
 .RS 4
-Print Names of packages that need to be updated\&. Note this does not preform
+Print Names of packages that need to be updated\&. Note this does not perform
 a database refresh\&. Run \fByay -Sy\fR Before this for an up to date result\&.
 .PP
 .SH "PERMANENT CONFIGURATION SETTINGS"
@@ -201,22 +201,22 @@ Sort AUR results by a specific field during search\&.
 \fB\-\-answerclean <All|None|Installed|NotInstalled|...>\fR
 .RS 4
 Set a predetermined answer for the clean build menu question\&. This answer
-will be used instead of reading from standard input but will be treaded exactly
+will be used instead of reading from standard input but will be treated exactly
 the same when parsed\&.
 .RE
 .PP
 \fB\-\-answeredit <All|None|Installed|NotInstalled|...>\fR
 .RS 4
 Set a predetermined answer for the edit pkgbuild menu question\&. This answer
-will be used instead of reading from standard input but will be treaded exactly
+will be used instead of reading from standard input but will be treated exactly
 the same when parsed\&.
 .RE
 .PP
 \fB\-\-answerupgrade\fR <Repo|^Repo|None|...>
 .RS 4
-Set a predetermined answer for the upgrade menu question\&. This answer
-will be used instead of reading from standard input but will be treaded exactly
-the same\&.
+Set a predetermined answer for the upgrade menu question\&. Selects which packages
+groups or repos to select for updades\&. This answer will be used instead of
+reading from standard input but will be treated exactly the same\&.
 .RE
 .PP
 \fB\-\-noanswerclean\fR
@@ -259,7 +259,7 @@ Do not check for development packages updates during sysupgrade\&.
 .RS 4
 Use git to download and update PKGBUILDs\&. PKGBUILDs previously downloaded
 using tarball will continue to use tarballs until the package is clean built\&.
-Similary, PKGBUILDs managed with git will continue to use git until the package
+Similarly, PKGBUILDs managed with git will continue to use git until the package
 is clean built.\&.
 .RE
 .PP

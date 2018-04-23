@@ -75,7 +75,7 @@ _pacman_opts_common=(
   '--norebuild[Skip package build if in cache and up to date]'
   '--mflags[Pass arguments to makepkg]:mflags'
   '--gpgflags[Pass arguments to gpg]:gpgflags'
-  '--sudoloop[Loop sudo calls in the backgroud to avoid timeout]'
+  '--sudoloop[Loop sudo calls in the background to avoid timeout]'
   '--nosudoloop[Do not loop sudo calls in the backgrount]'
 )
 
@@ -159,7 +159,7 @@ _pacman_opts_files=(
   {-l,--list}'[List the files owned by the queried package]:package:_pacman_completions_all_packages'
   {-o,--owns}'[Query the package that owns]:files:_files'
   {-s,--search}'[Search package file names for matching strings]:files:_files'
-  {-x,--regex}'[Enable searching using regluar expressions]:regex:'
+  {-x,--regex}'[Enable searching using regular expressions]:regex:'
   {-y,--refresh}'[Download fresh files databases from the server]'
   '--machinereadable[Produce machine-readable output]'
   {-q,--quiet}'[Show less information for query and search]'
