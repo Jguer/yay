@@ -205,10 +205,6 @@ func (infos shaInfos) needsUpdate() bool {
 	}
 }
 
-func inStore(pkgName string) shaInfos {
-	return savedInfo[pkgName]
-}
-
 func saveVCSInfo() error {
 	marshalledinfo, err := json.MarshalIndent(savedInfo, "", "\t")
 	if err != nil || string(marshalledinfo) == "null" {

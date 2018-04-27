@@ -341,6 +341,10 @@ func printUpdateList(parser *arguments) error {
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()
+	if err != nil {
+		return err
+	}
+
 	aurUp, repoUp, err := upList(warnings)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {

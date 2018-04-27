@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -34,10 +35,6 @@ func init() {
 
 func newPkg(basename string) *rpc.Pkg {
 	return &rpc.Pkg{Name: basename, PackageBase: basename}
-}
-
-func newSplitPkg(basename, name string) *rpc.Pkg {
-	return &rpc.Pkg{Name: name, PackageBase: basename}
 }
 
 func getPgpKey(key string) string {
@@ -73,7 +70,7 @@ func TestImportKeys(t *testing.T) {
 	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 
 	server := startPgpKeyServer()
-	defer server.Shutdown(nil)
+	defer server.Shutdown(context.TODO())
 
 	casetests := []struct {
 		keys      []string
@@ -138,7 +135,7 @@ func TestCheckPgpKeys(t *testing.T) {
 	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 
 	server := startPgpKeyServer()
-	defer server.Shutdown(nil)
+	defer server.Shutdown(context.TODO())
 
 	casetests := []struct {
 		pkgs      []*rpc.Pkg
