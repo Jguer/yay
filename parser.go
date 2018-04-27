@@ -220,9 +220,12 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 	existCount := 0
 
 	for _, option := range options {
-		_, exists = parser.options[option]
+		var value string
+
+		value, exists = parser.options[option]
 
 		if exists {
+			arg = value
 			existCount++
 			_, exists = parser.doubles[option]
 
@@ -232,9 +235,10 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 
 		}
 
-		arg, exists = parser.globals[option]
+		value, exists = parser.globals[option]
 
 		if exists {
+			arg = value
 			existCount++
 			_, exists = parser.doubles[option]
 
