@@ -353,7 +353,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 
 	iterateAgain := true
 	processDependencies := func(pkg alpm.Package) error {
-		if state, _ := safePackages[pkg.Name()]; state == 0 || state == 2 {
+		if state := safePackages[pkg.Name()]; state == 0 || state == 2 {
 			return nil
 		}
 

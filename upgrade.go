@@ -193,8 +193,8 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 }
 
 func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
-	toUpdate := make([]alpm.Package, 0, 0)
-	toRemove := make([]string, 0, 0)
+	toUpdate := make([]alpm.Package, 0)
+	toRemove := make([]string, 0)
 
 	var mux1 sync.Mutex
 	var mux2 sync.Mutex

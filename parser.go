@@ -220,7 +220,7 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 	existCount := 0
 
 	for _, option := range options {
-		arg, exists = parser.options[option]
+		_, exists = parser.options[option]
 
 		if exists {
 			existCount++
@@ -619,8 +619,8 @@ func (parser *arguments) parseCommandLine() (err error) {
 //of course the implementation is up to the caller, this function mearley parses
 //the input and organizes it
 func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) {
-	include := make(intRanges, 0, 0)
-	exclude := make(intRanges, 0, 0)
+	include := make(intRanges, 0)
+	exclude := make(intRanges, 0)
 	otherInclude := make(stringSet)
 	otherExclude := make(stringSet)
 

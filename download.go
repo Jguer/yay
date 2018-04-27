@@ -21,11 +21,7 @@ func shouldUseGit(path string) bool {
 	}
 
 	_, err = os.Stat(filepath.Join(path, ".git"))
-	if os.IsNotExist(err) {
-		return false
-	}
-
-	return true
+	return os.IsExist(err)
 }
 
 func downloadFile(path string, url string) (err error) {
