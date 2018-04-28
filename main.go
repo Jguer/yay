@@ -13,7 +13,7 @@ import (
 func initPaths() {
 	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
 		if info, err := os.Stat(configHome); err == nil && info.IsDir() {
-			configHome = configHome + "/yay"
+			configHome = filepath.Join(configHome, "yay")
 		} else {
 			configHome = filepath.Join(os.Getenv("HOME"), ".config/yay")
 		}
@@ -28,7 +28,7 @@ func initPaths() {
 			cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
 		}
 	} else {
-		cacheHome = filepath.Join(os.Getenv("HOME"), "/.cache/yay")
+		cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
 	}
 
 	configFile = filepath.Join(configHome, configFileName)
