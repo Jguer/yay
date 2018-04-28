@@ -60,6 +60,14 @@ func initConfig() (err error) {
 					err)
 				defaultSettings(&config)
 			}
+			if _, err = os.Stat(config.BuildDir); os.IsNotExist(err) {
+				err = os.MkdirAll(config.BuildDir, 0755)
+				if err != nil {
+					err = fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
+						"The error was:\n%s", config.BuildDir, err)
+					return
+				}
+			}
 		}
 	}
 
