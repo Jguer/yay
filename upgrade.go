@@ -305,15 +305,16 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	ignore := make(stringSet)
 	aurNames := make(stringSet)
 
-	if len(aurUp)+len(repoUp) == 0 {
+	allUpLen := len(repoUp) + len(aurUp)
+	if allUpLen == 0 {
 		return ignore, aurNames, nil
 	}
 
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
-	fmt.Printf("%s"+bold(" %d ")+"%s\n", bold(cyan("::")), len(aurUp)+len(repoUp), bold("Packages to upgrade."))
-	repoUp.Print(len(aurUp) + 1)
-	aurUp.Print(1)
+	allUp := append(repoUp, aurUp...)
+	fmt.Printf("%s"+bold(" %d ")+"%s\n", bold(cyan("::")), allUpLen, bold("Packages to upgrade."))
+	allUp.Print()
 
 	fmt.Println(bold(green(arrow + " Packages to not upgrade: (eg: 1 2 3, 1-3, ^4 or repo name)")))
 	fmt.Print(bold(green(arrow + " ")))

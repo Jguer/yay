@@ -153,18 +153,33 @@ func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
 	return str
 }
 
+func (u upgrade) StylizedNameWithRepository() string {
+	return bold(colourHash(u.Repository)) + "/" + bold(u.Name)
+}
+
 // Print prints the details of the packages to upgrade.
-func (u upSlice) Print(start int) {
+func (u upSlice) Print() {
+	longestName, longestVersion := 0, 0
+	for _, pack := range u {
+		packNameLen := len(pack.StylizedNameWithRepository())
+		version, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
+		packVersionLen := len(version)
+		longestName = max(packNameLen, longestName)
+		longestVersion = max(packVersionLen, longestVersion)
+	}
+
+	namePadding := fmt.Sprintf("%%-%ds  ", longestName)
+	versionPadding := fmt.Sprintf("%%-%ds", longestVersion)
+	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u))))
+
 	for k, i := range u {
 		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
 
-		fmt.Print(magenta(fmt.Sprintf("%3d ", len(u)+start-k-1)))
-		fmt.Print(bold(colourHash(i.Repository)), "/", bold(i.Name))
+		fmt.Print(magenta(fmt.Sprintf(numberPadding, len(u)-k)))
 
-		w := 70 - len(i.Repository) - len(i.Name)
-		padding := fmt.Sprintf("%%%ds", w)
-		fmt.Printf(padding, left)
-		fmt.Printf(" -> %s\n", right)
+		fmt.Printf(namePadding, i.StylizedNameWithRepository())
+
+		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
 	}
 }
 
