@@ -96,7 +96,7 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 	if trim {
 		err = exec.Command("/bin/sh", "-c",
 			config.TarBin+" --strip-components 2 --include='*/"+fileName[:len(fileName)-7]+"/trunk/' -xf "+tarLocation+" -C "+path).Run()
-		os.Rename(path+"trunk", path+fileName[:len(fileName)-7]) // kurwa
+		os.Rename(filepath.Join(path, "trunk"), filepath.Join(path,fileName[:len(fileName)-7]))
 	} else {
 		err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
 	}
