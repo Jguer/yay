@@ -398,10 +398,10 @@ outer:
 	return nil
 }
 
-// Formats a unix timestamp to yyyy/mm/dd
+// Formats a unix timestamp to ISO 8601 date (yyyy-mm-dd)
 func formatTime(i int) string {
 	t := time.Unix(int64(i), 0)
-	return fmt.Sprintf("%d/%02d/%02d", t.Year(), int(t.Month()), t.Day())
+	return t.Format("2006-01-02")
 }
 
 const (
