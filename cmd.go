@@ -91,6 +91,7 @@ Print specific options:
     -n --numberupgrades   Print number of updates
     -s --stats            Display system package statistics
     -u --upgrades         Print update list
+    -w --news             Print arch news
 
 Yay specific options:
     -c --clean            Remove unneeded dependencies

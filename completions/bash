@@ -65,8 +65,8 @@ _yay() {
         'c g i l p s u w y')
   upgrade=('asdeps asexplicit force needed nodeps assume-installed print recursive' 'p')
   yays=('clean gendb' 'c')
-  print=('complete defaultconfig config numberupgrades stats upgrades' 'c d g n
-  s u')
+  print=('complete defaultconfig config numberupgrades stats upgrades news' 'c d g n
+  s u w')
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
            noconfirm noprogressbar noscriptlet quiet save mflags buildir editor
            makepkg pacman tar git gpg gpgflags config requestsplitn sudoloop nosudoloop

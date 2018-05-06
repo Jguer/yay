@@ -134,6 +134,7 @@ _pacman_opts_print_modifiers=(
     {-n,--numberupgrades}'[Print number of updates]'
     {-s,--stats}'[Display system package statistics]'
     {-u,--upgrades}'[Print update list]'
+    {-w,--news}'[Print arch news]'
 )
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(
