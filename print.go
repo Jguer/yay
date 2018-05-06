@@ -402,21 +402,39 @@ outer:
 	return nil
 }
 
+type Item struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
+	Creator     string `xml:"dc:creator"`
+}
+
+func (item Item) Print() error {
+	date, err := time.Parse(time.RFC1123Z, item.PubDate)
+
+	if err != nil {
+		return err
+	}
+
+	fd := formatTime(int(date.Unix()))
+
+	fmt.Println(magenta(fd), strings.TrimSpace(item.Title))
+
+	return nil
+}
+
+type Channel struct {
+	Title         string `xml:"title"`
+	Link          string `xml:"link"`
+	Description   string `xml:"description"`
+	Language      string `xml:"language"`
+	Lastbuilddate string `xml:"lastbuilddate"`
+	Items         []Item `xml:"item"`
+}
+
 type rss struct {
-	Channel struct {
-		Title         string `xml:"title"`
-		Link          string `xml:"link"`
-		Description   string `xml:"description"`
-		Language      string `xml:"language"`
-		Lastbuilddate string `xml:"lastbuilddate"`
-		Item          []struct {
-			Title       string `xml:"title"`
-			Link        string `xml:"link"`
-			Description string `xml:"description"`
-			PubDate     string `xml:"pubDate"`
-			Creator     string `xml:"dc:creator"`
-		} `xml:"item"`
-	} `xml:"channel"`
+	Channel Channel `xml:"channel"`
 }
 
 func printNewsFeed() error {
@@ -439,16 +457,20 @@ func printNewsFeed() error {
 		return err
 	}
 
-	for _, item := range rss.Channel.Item {
-		date, err := time.Parse(time.RFC1123Z, item.PubDate)
-
-		if err != nil {
-			return err
+	if config.SortMode == BottomUp {
+		for i := len(rss.Channel.Items) - 1; i >= 0; i-- {
+			err := rss.Channel.Items[i].Print()
+			if err != nil {
+				return err
+			}
 		}
-
-		fd := formatTime(int(date.Unix()))
-
-		fmt.Println(magenta(fd), strings.TrimSpace(item.Title))
+	} else {
+		for i := 0; i < len(rss.Channel.Items); i++ {
+			err := rss.Channel.Items[i].Print()
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
