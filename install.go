@@ -154,7 +154,10 @@ func install(parser *arguments) error {
 
 	if config.SyncFeed {
 		fmt.Println(bold(cyan("::")), "Arch Linux news feed")
-		printNewsFeed(true)
+		err = printNewsFeed(true)
+		if err != nil {
+			return err
+		}
 		fmt.Println()
 	}
 
