@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -393,6 +397,55 @@ outer:
 
 	if missing {
 		return fmt.Errorf("")
+	}
+
+	return nil
+}
+
+type item struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
+	Creator     string `xml:"dc:creator"`
+}
+
+type channel struct {
+	Title         string `xml:"title"`
+	Link          string `xml:"link"`
+	Description   string `xml:"description"`
+	Language      string `xml:"language"`
+	Lastbuilddate string `xml:"lastbuilddate"`
+	Item          []item `xml:"item"`
+}
+
+type rss struct {
+	Channel channel `xml:"channel"`
+}
+
+func printNewsFeed() error {
+	resp, err := http.Get("https://archlinux.org/feeds/news")
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	rss := rss{}
+
+	p := xml.NewDecoder(bytes.NewReader(body))
+
+	err = p.Decode(&rss)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range rss.Channel.Item {
+		fmt.Println(item.PubDate, item.Title)
 	}
 
 	return nil

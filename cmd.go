@@ -318,6 +318,8 @@ func handlePrint() (err error) {
 		err = printNumberOfUpdates()
 	case cmdArgs.existsArg("u", "upgrades"):
 		err = printUpdateList(cmdArgs)
+	case cmdArgs.existsArg("w", "news"):
+		err = printNewsFeed()
 	case cmdArgs.existsArg("c", "complete"):
 		switch {
 		case cmdArgs.existsArg("f", "fish"):
