@@ -402,25 +402,21 @@ outer:
 	return nil
 }
 
-type item struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	PubDate     string `xml:"pubDate"`
-	Creator     string `xml:"dc:creator"`
-}
-
-type channel struct {
-	Title         string `xml:"title"`
-	Link          string `xml:"link"`
-	Description   string `xml:"description"`
-	Language      string `xml:"language"`
-	Lastbuilddate string `xml:"lastbuilddate"`
-	Item          []item `xml:"item"`
-}
-
 type rss struct {
-	Channel channel `xml:"channel"`
+	Channel struct {
+		Title         string `xml:"title"`
+		Link          string `xml:"link"`
+		Description   string `xml:"description"`
+		Language      string `xml:"language"`
+		Lastbuilddate string `xml:"lastbuilddate"`
+		Item          []struct {
+			Title       string `xml:"title"`
+			Link        string `xml:"link"`
+			Description string `xml:"description"`
+			PubDate     string `xml:"pubDate"`
+			Creator     string `xml:"dc:creator"`
+		} `xml:"item"`
+	} `xml:"channel"`
 }
 
 func printNewsFeed() error {
