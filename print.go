@@ -437,7 +437,7 @@ func printNewsFeed(lastMonthOnly bool) error {
 			return err
 		}
 
-		if lastMonthOnly && (now-date.Unix()) >= 2592000 {
+		if lastMonthOnly && now-date.Unix() >= int64(config.FeedLimit)*86400 {
 			continue
 		}
 

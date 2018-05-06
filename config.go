@@ -48,12 +48,14 @@ type Configuration struct {
 	RequestSplitN int    `json:"requestsplitn"`
 	SearchMode    int    `json:"-"`
 	SortMode      int    `json:"sortmode"`
+	FeedLimit     int    `json:"feedlimit"`
 	SudoLoop      bool   `json:"sudoloop"`
 	TimeUpdate    bool   `json:"timeupdate"`
 	NoConfirm     bool   `json:"-"`
 	Devel         bool   `json:"devel"`
 	CleanAfter    bool   `json:"cleanAfter"`
 	GitClone      bool   `json:"gitclone"`
+	SyncFeed      bool   `json:"syncfeed"`
 }
 
 var version = "5.688"
@@ -131,6 +133,7 @@ func defaultSettings(config *Configuration) {
 	config.Editor = ""
 	config.EditorFlags = ""
 	config.Devel = false
+	config.FeedLimit = 30
 	config.MakepkgBin = "makepkg"
 	config.NoConfirm = false
 	config.PacmanBin = "pacman"
@@ -141,6 +144,7 @@ func defaultSettings(config *Configuration) {
 	config.SortMode = BottomUp
 	config.SortBy = "votes"
 	config.SudoLoop = false
+	config.SyncFeed = true
 	config.TarBin = "bsdtar"
 	config.GitBin = "git"
 	config.GpgBin = "gpg"
