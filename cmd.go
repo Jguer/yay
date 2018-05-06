@@ -91,6 +91,7 @@ Print specific options:
     -n --numberupgrades   Print number of updates
     -s --stats            Display system package statistics
     -u --upgrades         Print update list
+    -w --news             Print arch news
 
 Yay specific options:
     -c --clean            Remove unneeded dependencies
@@ -318,6 +319,8 @@ func handlePrint() (err error) {
 		err = printNumberOfUpdates()
 	case cmdArgs.existsArg("u", "upgrades"):
 		err = printUpdateList(cmdArgs)
+	case cmdArgs.existsArg("w", "news"):
+		err = printNewsFeed()
 	case cmdArgs.existsArg("c", "complete"):
 		switch {
 		case cmdArgs.existsArg("f", "fish"):

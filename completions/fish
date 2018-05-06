@@ -108,6 +108,7 @@ complete -c $progname -n $print -s d -l defaultconfig -d 'Print current yay conf
 complete -c $progname -n $print -s n -l numberupgrades -d 'Print number of updates' -f
 complete -c $progname -n $print -s s -l stats -d 'Display system package statistics' -f
 complete -c $progname -n $print -s u -l upgrades -d 'Print update list' -f
+complete -c $progname -n $print -s w -l news -d 'Print arch news'
 
 # Transaction options (sync, remove, upgrade)
 for condition in sync remove upgrade
