@@ -152,6 +152,10 @@ func install(parser *arguments) error {
 		return nil
 	}
 
+	fmt.Println(bold(cyan("::")), "Arch Linux news feed")
+	printNewsFeed(true)
+	fmt.Println()
+
 	if hasAur {
 		hasAur = len(dc.Aur) != 0
 
