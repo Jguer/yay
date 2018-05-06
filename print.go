@@ -430,7 +430,7 @@ func printNewsFeed(lastMonthOnly bool) error {
 		return err
 	}
 	now := time.Now().In(loc).Unix()
-
+	printed := false
 	for _, item := range archrss.Channel.Item {
 		date, err := time.Parse(time.RFC1123Z, item.PubDate)
 		if err != nil {
@@ -444,6 +444,11 @@ func printNewsFeed(lastMonthOnly bool) error {
 		fd := formatTime(int(date.Unix()))
 
 		fmt.Println(magenta(fd), strings.TrimSpace(item.Title))
+		printed = true
+	}
+
+	if !printed {
+		fmt.Printf(magenta("No news in the last %v days.\n"), config.FeedLimit)
 	}
 
 	return nil
