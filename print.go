@@ -433,15 +433,22 @@ func printNewsFeed() error {
 
 	rss := rss{}
 
-	p := xml.NewDecoder(bytes.NewReader(body))
-
-	err = p.Decode(&rss)
+	d := xml.NewDecoder(bytes.NewReader(body))
+	err = d.Decode(&rss)
 	if err != nil {
 		return err
 	}
 
 	for _, item := range rss.Channel.Item {
-		fmt.Println(item.PubDate, item.Title)
+		date, err := time.Parse(time.RFC1123Z, item.PubDate)
+
+		if err != nil {
+			return err
+		}
+
+		fd := formatTime(int(date.Unix()))
+
+		fmt.Println(magenta(fd), strings.TrimSpace(item.Title))
 	}
 
 	return nil
