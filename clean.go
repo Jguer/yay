@@ -138,7 +138,11 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 	}
 
 	for _, pkg := range remotePackages {
-		installedBases.set(pkg.Base())
+		if pkg.Base() != "" {
+			installedBases.set(pkg.Base())
+		} else {
+			installedBases.set(pkg.Name())
+		}
 	}
 
 	for _, file := range files {
