@@ -332,7 +332,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	// State = 2 - Keep package and have iterated over dependencies
 	safePackages := make(map[string]uint8)
 	// provides stores a mapping from the provides name back to the original package name
-	provides := make(map[string]stringSet)
+	provides := make(mapStringSet)
 	packages := localDb.PkgCache()
 
 	// Mark explicit dependencies and enumerate the provides list
@@ -344,7 +344,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 		}
 
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
-			addMapStringSet(provides, dep.Name, pkg.Name())
+			provides.Add(dep.Name, pkg.Name())
 			return nil
 		})
 		return nil

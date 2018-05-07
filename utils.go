@@ -7,6 +7,9 @@ import (
 	"unicode"
 )
 
+type mapStringSlice map[string][]string
+type mapStringSet map[string]stringSet
+
 type intRange struct {
 	min int
 	max int
@@ -49,20 +52,20 @@ func max(a, b int) int {
 	return a
 }
 
-func addMapStringSet(h map[string]stringSet, n string, v string) {
-	_, ok := h[n]
+func (mss mapStringSet) Add(n string, v string) {
+	_, ok := mss[n]
 	if !ok {
-		h[n] = make(stringSet)
+		mss[n] = make(stringSet)
 	}
-	h[n].set(v)
+	mss[n].set(v)
 }
 
-func addMapStringSlice(h map[string][]string, n string, v string) {
-	_, ok := h[n]
+func (mss mapStringSlice) Add(n string, v string) {
+	_, ok := mss[n]
 	if !ok {
-		h[n] = make([]string, 0, 1)
+		mss[n] = make([]string, 0, 1)
 	}
-	h[n] = append(h[n], v)
+	mss[n] = append(mss[n], v)
 }
 
 func completeFileName(dir, name string) (string, error) {

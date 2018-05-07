@@ -548,7 +548,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 }
 
 func checkVersions(dt *depTree) error {
-	has := make(map[string][]string)
+	has := make(mapStringSlice)
 	allDeps := make([]*gopkg.Dependency, 0)
 
 	localDb, err := alpmHandle.LocalDb()
@@ -569,13 +569,13 @@ func checkVersions(dt *depTree) error {
 			}
 		}
 
-		addMapStringSlice(has, pkg.Name, pkg.Version)
+		has.Add(pkg.Name, pkg.Version)
 
 		if !isDevelName(pkg.Name) {
 			for _, name := range pkg.Provides {
 				_name, _ver := splitNameFromDep(name)
 				if _ver != "" {
-					addMapStringSlice(has, _name, _ver)
+					has.Add(_name, _ver)
 				} else {
 					delete(has, _name)
 				}
@@ -594,11 +594,11 @@ func checkVersions(dt *depTree) error {
 			return nil
 		})
 
-		addMapStringSlice(has, pkg.Name(), pkg.Version())
+		has.Add(pkg.Name(), pkg.Version())
 
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
 			if dep.Mod != alpm.DepModAny {
-				addMapStringSlice(has, dep.Name, dep.Version)
+				has.Add(dep.Name, dep.Version)
 			} else {
 				delete(has, dep.Name)
 			}
@@ -611,7 +611,7 @@ func checkVersions(dt *depTree) error {
 	localDb.PkgCache().ForEach(func(pkg alpm.Package) error {
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
 			if dep.Mod != alpm.DepModAny {
-				addMapStringSlice(has, dep.Name, dep.Version)
+				has.Add(dep.Name, dep.Version)
 			} else {
 				delete(has, dep.Name)
 			}
