@@ -7,16 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"html"
 )
-
-var htmlEscapeSequences = map[string]rune{
-	"quot": '"',
-	"apos": '\'',
-	"amp":  '&',
-	"lt":   '<',
-	"gt":   '>',
-	"nbsp": '\u008a',
-}
 
 // A basic set implementation for strings.
 // This is used a lot so it deserves its own type.
@@ -684,31 +676,6 @@ func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) 
 	return include, exclude, otherInclude, otherExclude
 }
 
-func unescapeHtmlChar(str string) rune {
-	var first string
-	var rest string
-	for i := range str {
-		first = str[0:i]
-		rest = str[i:]
-	}
-
-	if first == "#" {
-		num, err := strconv.Atoi(rest)
-		if err != nil {
-			return '?'
-		}
-
-		return rune(num)
-	}
-
-	char, ok := htmlEscapeSequences[str]
-	if !ok {
-		return '?'
-	}
-
-	return char
-}
-
 // Crude html parsing, good enough for the arch news
 // This is only displayed in the terminal so there should be no security
 // concerns
@@ -742,8 +709,9 @@ func parseNews(str string) string {
 		if inEscape {
 			if char == ';' {
 				inEscape = false
-				char := unescapeHtmlChar(escapeBuffer.String())
-				buffer.WriteRune(char)
+				escapeBuffer.WriteRune(char)
+				s := html.UnescapeString(escapeBuffer.String())
+				buffer.WriteString(s)
 				continue
 			}
 
@@ -760,6 +728,7 @@ func parseNews(str string) string {
 		if char == '&' {
 			inEscape = true
 			escapeBuffer.Reset()
+			escapeBuffer.WriteRune(char)
 			continue
 		}
 
