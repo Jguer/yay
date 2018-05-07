@@ -1,12 +1,22 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"strconv"
 	"strings"
 )
+
+var htmlEscapeSequences = map[string]rune{
+	"quot": '"',
+	"apos": '\'',
+	"amp":  '&',
+	"lt":   '<',
+	"gt":   '>',
+	"nbsp": '\u008a',
+}
 
 // A basic set implementation for strings.
 // This is used a lot so it deserves its own type.
@@ -672,4 +682,90 @@ func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) 
 	}
 
 	return include, exclude, otherInclude, otherExclude
+}
+
+func unescapeHtmlChar(str string) rune {
+	var first string
+	var rest string
+	for i := range str {
+		first = str[0:i]
+		rest = str[i:]
+	}
+
+	if first == "#" {
+		num, err := strconv.Atoi(rest)
+		if err != nil {
+			return '?'
+		}
+
+		return rune(num)
+	}
+
+	char, ok := htmlEscapeSequences[str]
+	if !ok {
+		return '?'
+	}
+
+	return char
+}
+
+// Crude html parsing, good enough for the arch news
+// This is only displayed in the terminal so there should be no security
+// concerns
+func parseNews(str string) string {
+	var buffer bytes.Buffer
+	var tagBuffer bytes.Buffer
+	var escapeBuffer bytes.Buffer
+	inTag := false
+	inEscape := false
+
+	for _, char := range str {
+		if inTag {
+			if char == '>' {
+				inTag = false
+				switch tagBuffer.String() {
+				case "code":
+					buffer.WriteString(cyanCode)
+				case "/code":
+					buffer.WriteString(resetCode)
+				case "/p":
+					buffer.WriteRune('\n')
+				}
+
+				continue
+			}
+
+			tagBuffer.WriteRune(char)
+			continue
+		}
+
+		if inEscape {
+			if char == ';' {
+				inEscape = false
+				char := unescapeHtmlChar(escapeBuffer.String())
+				buffer.WriteRune(char)
+				continue
+			}
+
+			escapeBuffer.WriteRune(char)
+			continue
+		}
+
+		if char == '<' {
+			inTag = true
+			tagBuffer.Reset()
+			continue
+		}
+
+		if char == '&' {
+			inEscape = true
+			escapeBuffer.Reset()
+			continue
+		}
+
+		buffer.WriteRune(char)
+	}
+
+	buffer.WriteString(resetCode)
+	return buffer.String()
 }

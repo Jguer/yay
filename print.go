@@ -419,7 +419,13 @@ func (item Item) Print() error {
 
 	fd := formatTime(int(date.Unix()))
 
-	fmt.Println(magenta(fd), strings.TrimSpace(item.Title))
+	fmt.Println(bold(magenta(fd)), bold(strings.TrimSpace(item.Title)))
+	//fmt.Println(strings.TrimSpace(item.Link))
+
+	if !cmdArgs.existsArg("q", "quiet") {
+		desc := strings.TrimSpace(parseNews(item.Description))
+		fmt.Println(desc)
+	}
 
 	return nil
 }
