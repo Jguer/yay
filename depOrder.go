@@ -14,8 +14,8 @@ import (
 type depOrder struct {
 	Aur     []*rpc.Pkg
 	Repo    []*alpm.Package
-	Missing []string
 	Runtime stringSet
+	Bases   map[string][]*rpc.Pkg
 }
 
 func (do *depOrder) String() string {
@@ -57,8 +57,8 @@ func makeDepOrder() *depOrder {
 	return &depOrder{
 		make([]*rpc.Pkg, 0),
 		make([]*alpm.Package, 0),
-		make([]string, 0),
 		make(stringSet),
+		make(map[string][]*rpc.Pkg, 0),
 	}
 }
 
@@ -77,6 +77,8 @@ func getDepOrder(dp *depPool) *depOrder {
 			do.orderPkgRepo(repoPkg, dp, true)
 		}
 	}
+
+	do.getBases()
 
 	return do
 }
@@ -122,17 +124,12 @@ func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 	})
 }
 
-func (do *depOrder) getMakeOnlyRepo() stringSet {
-	makeOnly := make(stringSet)
-
-	for _, pkg := range do.Repo {
-		if !do.Runtime.get(pkg.Name()) {
-			makeOnly.set(pkg.Name())
+func (do *depOrder) getBases() {
+	for _, pkg := range do.Aur {
+		if _, ok := do.Bases[pkg.PackageBase]; !ok {
+			do.Bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
 		}
+
+		do.Bases[pkg.PackageBase] = append(do.Bases[pkg.PackageBase], pkg)
 	}
-
-	return makeOnly
-}
-
-func (do *depOrder) checkMissing() {
 }
