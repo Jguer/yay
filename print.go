@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"fmt"
@@ -565,4 +566,62 @@ func colourHash(name string) (output string) {
 		hash = int(name[i]) + ((hash << 5) + (hash))
 	}
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
+}
+
+func providerMenu(dep string, providers []*rpc.Pkg) *rpc.Pkg {
+	size := len(providers)
+
+	fmt.Print(bold(cyan(":: ")))
+	str := bold(fmt.Sprintf(bold("There are %d providers available for %s:"), size, dep))
+
+	size = 1
+	str += bold(cyan("\n:: ")) + bold("Repository AUR\n    ")
+
+	for _, pkg := range providers {
+		str += fmt.Sprintf("%d) %s ", size, pkg.Name)
+		size++
+	}
+
+	fmt.Println(str)
+
+	for {
+		fmt.Print("\nEnter a number (default=1): ")
+
+		if config.NoConfirm {
+			fmt.Println()
+			break
+		}
+
+		reader := bufio.NewReader(os.Stdin)
+		numberBuf, overflow, err := reader.ReadLine()
+
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		if overflow {
+			fmt.Println("Input too long")
+			continue
+		}
+
+		if string(numberBuf) == "" {
+			return providers[0]
+		}
+
+		num, err := strconv.Atoi(string(numberBuf))
+		if err != nil {
+			fmt.Printf("%s invalid number: %s\n", red("error:"), string(numberBuf))
+			continue
+		}
+
+		if num < 1 || num > size {
+			fmt.Printf("%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
+			continue
+		}
+
+		return providers[num-1]
+	}
+
+	return nil
 }

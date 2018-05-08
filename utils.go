@@ -112,3 +112,25 @@ func lessRunes(iRunes, jRunes []rune) bool {
 
 	return len(iRunes) < len(jRunes)
 }
+
+func stringSliceEqual(a, b []string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}

@@ -41,6 +41,16 @@ func (set stringSet) toSlice() []string {
 	return slice
 }
 
+func (set stringSet) copy() stringSet {
+	newSet := make(stringSet)
+
+	for str := range set {
+		newSet.set(str)
+	}
+
+	return newSet
+}
+
 func sliceToStringSet(in []string) stringSet {
 	set := make(stringSet)
 
