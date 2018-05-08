@@ -183,11 +183,6 @@ type missing struct {
 }
 
 func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
-	if _, err := dp.LocalDb.PkgCache().FindSatisfier(dep); err == nil {
-		missing.Good.set(dep)
-		return
-	}
-
 	if missing.Good.get(dep) {
 		return
 	}
@@ -207,6 +202,11 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 		missing.Good.set(dep)
 		for _, deps := range [3][]string{aurPkg.Depends, aurPkg.MakeDepends, aurPkg.CheckDepends} {
 			for _, aurDep := range deps {
+				if _, err := dp.LocalDb.PkgCache().FindSatisfier(aurDep); err == nil {
+					missing.Good.set(aurDep)
+					continue
+				}
+
 				dp._checkMissing(aurDep, append(stack, aurPkg.Name), missing)
 			}
 		}
@@ -218,6 +218,11 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 	if repoPkg != nil {
 		missing.Good.set(dep)
 		repoPkg.Depends().ForEach(func(repoDep alpm.Depend) error {
+			if _, err := dp.LocalDb.PkgCache().FindSatisfier(repoDep.String()); err == nil {
+				missing.Good.set(repoDep.String())
+				return nil
+			}
+
 			dp._checkMissing(repoDep.String(), append(stack, repoPkg.Name()), missing)
 			return nil
 		})
