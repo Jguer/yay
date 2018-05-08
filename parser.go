@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"strconv"
 	"strings"
+	"html"
 )
 
 // A basic set implementation for strings.
@@ -672,4 +674,67 @@ func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) 
 	}
 
 	return include, exclude, otherInclude, otherExclude
+}
+
+// Crude html parsing, good enough for the arch news
+// This is only displayed in the terminal so there should be no security
+// concerns
+func parseNews(str string) string {
+	var buffer bytes.Buffer
+	var tagBuffer bytes.Buffer
+	var escapeBuffer bytes.Buffer
+	inTag := false
+	inEscape := false
+
+	for _, char := range str {
+		if inTag {
+			if char == '>' {
+				inTag = false
+				switch tagBuffer.String() {
+				case "code":
+					buffer.WriteString(cyanCode)
+				case "/code":
+					buffer.WriteString(resetCode)
+				case "/p":
+					buffer.WriteRune('\n')
+				}
+
+				continue
+			}
+
+			tagBuffer.WriteRune(char)
+			continue
+		}
+
+		if inEscape {
+			if char == ';' {
+				inEscape = false
+				escapeBuffer.WriteRune(char)
+				s := html.UnescapeString(escapeBuffer.String())
+				buffer.WriteString(s)
+				continue
+			}
+
+			escapeBuffer.WriteRune(char)
+			continue
+		}
+
+		if char == '<' {
+			inTag = true
+			tagBuffer.Reset()
+			continue
+		}
+
+		if char == '&' {
+			inEscape = true
+			escapeBuffer.Reset()
+			escapeBuffer.WriteRune(char)
+			continue
+		}
+
+		buffer.WriteRune(char)
+	}
+
+	buffer.WriteString(resetCode)
+	return buffer.String()
 }
