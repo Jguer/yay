@@ -249,11 +249,7 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		if do.HasMake() {
-			if !removeMake {
-				return nil
-			}
-
+		if removeMake {
 			removeArguments := makeArguments()
 			removeArguments.addArg("R", "u")
 

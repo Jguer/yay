@@ -126,4 +126,3 @@ func getBases(pkgs map[string]*rpc.Pkg) map[string][]*rpc.Pkg {
 
 	return bases
 }
-

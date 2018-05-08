@@ -78,7 +78,7 @@ func getDepOrder(dp *depPool) *depOrder {
 		}
 	}
 
-	do.getBases()
+	//do.getBases()
 
 	return do
 }
@@ -87,22 +87,25 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 	if runtime {
 		do.Runtime.set(pkg.Name)
 	}
-	do.Aur = append(do.Aur, pkg)
+	if _, ok := do.Bases[pkg.PackageBase]; !ok {
+		do.Aur = append(do.Aur, pkg)
+		do.Bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
+	}
+	do.Bases[pkg.PackageBase] = append(do.Bases[pkg.PackageBase], pkg)
+
 	delete(dp.Aur, pkg.Name)
 
-	for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+	for i, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 		for _, dep := range deps {
 			aurPkg := dp.findSatisfierAur(dep)
 			if aurPkg != nil {
-				do.orderPkgAur(aurPkg, dp, runtime)
+				do.orderPkgAur(aurPkg, dp, runtime && i == 0)
 			}
 
 			repoPkg := dp.findSatisfierRepo(dep)
 			if repoPkg != nil {
-				do.orderPkgRepo(repoPkg, dp, runtime)
+				do.orderPkgRepo(repoPkg, dp, runtime && i == 0)
 			}
-
-			runtime = false
 		}
 	}
 }
@@ -135,18 +138,29 @@ func (do *depOrder) getBases() {
 }
 
 func (do *depOrder) HasMake() bool {
-	return len(do.Runtime) != len(do.Aur)+len(do.Repo)
+	lenAur := 0
+	for _, base := range do.Bases {
+		lenAur += len(base)
+	}
+
+	return len(do.Runtime) != lenAur+len(do.Repo)
 }
 
 func (do *depOrder) getMake() []string {
 	makeOnly := make([]string, 0, len(do.Aur)+len(do.Repo)-len(do.Runtime))
 
-	for _, pkg := range do.Aur {
-		makeOnly = append(makeOnly, pkg.Name)
+	for _, base := range do.Bases {
+		for _, pkg := range base {
+			if !do.Runtime.get(pkg.Name) {
+				makeOnly = append(makeOnly, pkg.Name)
+			}
+		}
 	}
 
 	for _, pkg := range do.Repo {
-		makeOnly = append(makeOnly, pkg.Name())
+		if !do.Runtime.get(pkg.Name()) {
+			makeOnly = append(makeOnly, pkg.Name())
+		}
 	}
 
 	return makeOnly
