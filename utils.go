@@ -7,7 +7,6 @@ import (
 	"unicode"
 )
 
-type mapStringSlice map[string][]string
 type mapStringSet map[string]stringSet
 
 type intRange struct {
@@ -58,14 +57,6 @@ func (mss mapStringSet) Add(n string, v string) {
 		mss[n] = make(stringSet)
 	}
 	mss[n].set(v)
-}
-
-func (mss mapStringSlice) Add(n string, v string) {
-	_, ok := mss[n]
-	if !ok {
-		mss[n] = make([]string, 0, 1)
-	}
-	mss[n] = append(mss[n], v)
 }
 
 func completeFileName(dir, name string) (string, error) {

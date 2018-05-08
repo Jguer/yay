@@ -2,13 +2,11 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"sync"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
-	//gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 const PROVIDES = false
@@ -77,36 +75,6 @@ func makeDepPool() (*depPool, error) {
 	}
 
 	return dp, nil
-}
-
-func (dp *depPool) String() string {
-	str := ""
-	str += "\n" + red("Targets") + " (" + strconv.Itoa(len(dp.Targets)) + ") :"
-	for _, pkg := range dp.Targets {
-		str += " " + pkg.String()
-	}
-
-	str += "\n" + red("Repo") + " (" + strconv.Itoa(len(dp.Repo)) + ") :"
-	for pkg := range dp.Repo {
-		str += " " + pkg
-	}
-
-	str += "\n" + red("Aur") + " (" + strconv.Itoa(len(dp.Aur)) + ") :"
-	for pkg := range dp.Aur {
-		str += " " + pkg
-	}
-
-	str += "\n" + red("Aur Cache") + " (" + strconv.Itoa(len(dp.AurCache)) + ") :"
-	for pkg := range dp.AurCache {
-		str += " " + pkg
-	}
-
-	str += "\n" + red("Groups") + " (" + strconv.Itoa(len(dp.Groups)) + ") :"
-	for _, pkg := range dp.Groups {
-		str += " " + pkg
-	}
-
-	return str
 }
 
 // Includes db/ prefixes and group installs
@@ -185,7 +153,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		err = dp.resolveAURPackages(aurTargets)
 	}
 
-	return nil
+	return err
 }
 
 // Pseudo provides finder.
@@ -375,16 +343,6 @@ func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 
 		return nil
 	})
-
-}
-
-func (dp *depPool) queryAUR(pkgs []string) error {
-	_, err := aurInfo(pkgs, dp.Warnings)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func getDepPool(pkgs []string) (*depPool, error) {
@@ -475,3 +433,4 @@ func (dp *depPool) hasPackage(name string) bool {
 
 	return false
 }
+

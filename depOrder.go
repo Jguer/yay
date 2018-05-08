@@ -1,14 +1,8 @@
 package main
 
 import (
-	//	"fmt"
-	"strconv"
-	//	"strings"
-	//	"sync"
-
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
-	//gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 type depOrder struct {
@@ -18,47 +12,12 @@ type depOrder struct {
 	Bases   map[string][]*rpc.Pkg
 }
 
-func (do *depOrder) String() string {
-	str := ""
-	str += "\n" + red("Repo") + " (" + strconv.Itoa(len(do.Repo)) + ") :"
-	for _, pkg := range do.Repo {
-		if do.Runtime.get(pkg.Name()) {
-			str += " " + pkg.Name()
-		}
-	}
-
-	str += "\n" + red("Aur") + " (" + strconv.Itoa(len(do.Aur)) + ") :"
-	for _, pkg := range do.Aur {
-		if do.Runtime.get(pkg.Name) {
-			str += " " + pkg.Name
-		}
-
-	}
-
-	str += "\n" + red("Repo Make") + " (" + strconv.Itoa(len(do.Repo)) + ") :"
-	for _, pkg := range do.Repo {
-		if !do.Runtime.get(pkg.Name()) {
-			str += " " + pkg.Name()
-		}
-	}
-
-	str += "\n" + red("Aur Make") + " (" + strconv.Itoa(len(do.Aur)) + ") :"
-	for _, pkg := range do.Aur {
-		if !do.Runtime.get(pkg.Name) {
-			str += " " + pkg.Name
-		}
-
-	}
-
-	return str
-}
-
 func makeDepOrder() *depOrder {
 	return &depOrder{
 		make([]*rpc.Pkg, 0),
 		make([]*alpm.Package, 0),
 		make(stringSet),
-		make(map[string][]*rpc.Pkg, 0),
+		make(map[string][]*rpc.Pkg),
 	}
 }
 
@@ -77,8 +36,6 @@ func getDepOrder(dp *depPool) *depOrder {
 			do.orderPkgRepo(repoPkg, dp, true)
 		}
 	}
-
-	//do.getBases()
 
 	return do
 }
@@ -125,16 +82,6 @@ func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 
 		return nil
 	})
-}
-
-func (do *depOrder) getBases() {
-	for _, pkg := range do.Aur {
-		if _, ok := do.Bases[pkg.PackageBase]; !ok {
-			do.Bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
-		}
-
-		do.Bases[pkg.PackageBase] = append(do.Bases[pkg.PackageBase], pkg)
-	}
 }
 
 func (do *depOrder) HasMake() bool {
