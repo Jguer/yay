@@ -102,3 +102,28 @@ func satisfiesRepo(dep string, pkg *alpm.Package) bool {
 
 	return false
 }
+
+//split apart db/package to db and package
+func splitDbFromName(pkg string) (string, string) {
+	split := strings.SplitN(pkg, "/", 2)
+
+	if len(split) == 2 {
+		return split[0], split[1]
+	}
+	return "", split[0]
+}
+
+func getBases(pkgs map[string]*rpc.Pkg) map[string][]*rpc.Pkg {
+	bases := make(map[string][]*rpc.Pkg)
+
+	for _, pkg := range pkgs {
+		_, ok := bases[pkg.PackageBase]
+		if !ok {
+			bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
+		}
+		bases[pkg.PackageBase] = append(bases[pkg.PackageBase], pkg)
+	}
+
+	return bases
+}
+
