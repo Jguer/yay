@@ -189,7 +189,7 @@ func (u upSlice) print() {
 }
 
 // printDownloadsFromRepo prints repository packages to be downloaded
-func printDepCatagories(dc *depCatagories) {
+func (do *depOrder) Print() {
 	repo := ""
 	repoMake := ""
 	aur := ""
@@ -200,47 +200,47 @@ func printDepCatagories(dc *depCatagories) {
 	aurLen := 0
 	aurMakeLen := 0
 
-	for _, pkg := range dc.Repo {
-		if dc.MakeOnly.get(pkg.Name()) {
-			repoMake += "  " + pkg.Name() + "-" + pkg.Version()
-			repoMakeLen++
-		} else {
+	for _, pkg := range do.Repo {
+		if do.Runtime.get(pkg.Name()) {
 			repo += "  " + pkg.Name() + "-" + pkg.Version()
 			repoLen++
+		} else {
+			repoMake += "  " + pkg.Name() + "-" + pkg.Version()
+			repoMakeLen++
 		}
 	}
 
-	for _, pkg := range dc.Aur {
+	for _, pkg := range do.Aur {
 		pkgStr := "  " + pkg.PackageBase + "-" + pkg.Version
 		pkgStrMake := pkgStr
 
 		push := false
 		pushMake := false
 
-		if len(dc.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+		if len(do.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
 			pkgStr += " ("
 			pkgStrMake += " ("
 
-			for _, split := range dc.Bases[pkg.PackageBase] {
-				if dc.MakeOnly.get(split.Name) {
-					pkgStrMake += split.Name + " "
-					aurMakeLen++
-					pushMake = true
-				} else {
+			for _, split := range do.Bases[pkg.PackageBase] {
+				if do.Runtime.get(split.Name) {
 					pkgStr += split.Name + " "
 					aurLen++
 					push = true
+				} else {
+					pkgStrMake += split.Name + " "
+					aurMakeLen++
+					pushMake = true
 				}
 			}
 
 			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
 			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
-		} else if dc.MakeOnly.get(pkg.Name) {
-			aurMakeLen++
-			pushMake = true
-		} else {
+		} else if do.Runtime.get(pkg.Name) {
 			aurLen++
 			push = true
+		} else {
+			aurMakeLen++
+			pushMake = true
 		}
 
 		if push {

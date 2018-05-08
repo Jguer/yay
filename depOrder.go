@@ -133,3 +133,21 @@ func (do *depOrder) getBases() {
 		do.Bases[pkg.PackageBase] = append(do.Bases[pkg.PackageBase], pkg)
 	}
 }
+
+func (do *depOrder) HasMake() bool {
+	return len(do.Runtime) != len(do.Aur)+len(do.Repo)
+}
+
+func (do *depOrder) getMake() []string {
+	makeOnly := make([]string, 0, len(do.Aur)+len(do.Repo)-len(do.Runtime))
+
+	for _, pkg := range do.Aur {
+		makeOnly = append(makeOnly, pkg.Name)
+	}
+
+	for _, pkg := range do.Repo {
+		makeOnly = append(makeOnly, pkg.Name())
+	}
+
+	return makeOnly
+}
