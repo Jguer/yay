@@ -434,39 +434,61 @@ type rss struct {
 	} `xml:"channel"`
 }
 
-func printNewsFeed() error {
-	resp, err := http.Get("https://archlinux.org/feeds/news")
+func printNewsFeed(lastMonthOnly bool) error {
+	archrss, err := getNewsFeed()
 	if err != nil {
 		return err
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	loc, err := time.LoadLocation("Europe/London")
 	if err != nil {
 		return err
 	}
-
-	rss := rss{}
-
-	d := xml.NewDecoder(bytes.NewReader(body))
-	err = d.Decode(&rss)
-	if err != nil {
-		return err
-	}
-
-	for _, item := range rss.Channel.Item {
+	now := time.Now().In(loc).Unix()
+	printed := false
+	for _, item := range archrss.Channel.Item {
 		date, err := time.Parse(time.RFC1123Z, item.PubDate)
-
 		if err != nil {
 			return err
+		}
+
+		if lastMonthOnly && now-date.Unix() >= int64(config.FeedLimit)*86400 {
+			continue
 		}
 
 		fd := formatTime(int(date.Unix()))
 
 		fmt.Println(magenta(fd), strings.TrimSpace(item.Title))
+		printed = true
+	}
+
+	if !printed {
+		fmt.Printf(magenta("No news in the last %v days.\n"), config.FeedLimit)
 	}
 
 	return nil
+}
+
+func getNewsFeed() (archrss *rss, err error) {
+	resp, err := http.Get("https://archlinux.org/feeds/news")
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	archrss = &rss{}
+	d := xml.NewDecoder(bytes.NewReader(body))
+	err = d.Decode(&archrss)
+	if err != nil {
+		return nil, err
+	}
+
+	return archrss, err
 }
 
 // Formats a unix timestamp to ISO 8601 date (yyyy-mm-dd)
