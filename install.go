@@ -61,7 +61,7 @@ func install(parser *arguments) error {
 	//if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
 	//	fmt.Println(bold(cyan("::") + " Querying AUR..."))
 	//}
-	dp, err := getDepPool(cmdArgs.targets.toSlice())
+	dp, err := getDepPool(requestTargets)
 	if err != nil {
 		return err
 	}

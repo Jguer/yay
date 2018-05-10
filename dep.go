@@ -8,6 +8,38 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+type providers struct {
+	lookfor string
+	Pkgs    []*rpc.Pkg
+}
+
+func makeProviders(name string) providers {
+	return providers{
+		name,
+		make([]*rpc.Pkg, 0),
+	}
+}
+
+func (q providers) Len() int {
+	return len(q.Pkgs)
+}
+
+func (q providers) Less(i, j int) bool {
+	if q.lookfor == q.Pkgs[i].Name {
+		return true
+	}
+
+	if q.lookfor == q.Pkgs[j].Name {
+		return false
+	}
+
+	return lessRunes([]rune(q.Pkgs[i].Name), []rune(q.Pkgs[j].Name))
+}
+
+func (q providers) Swap(i, j int) {
+	q.Pkgs[i], q.Pkgs[j] = q.Pkgs[j], q.Pkgs[i]
+}
+
 func splitDep(dep string) (string, string, string) {
 	mod := ""
 

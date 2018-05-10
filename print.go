@@ -568,8 +568,8 @@ func colourHash(name string) (output string) {
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
 }
 
-func providerMenu(dep string, providers []*rpc.Pkg) *rpc.Pkg {
-	size := len(providers)
+func providerMenu(dep string, providers providers) *rpc.Pkg {
+	size := providers.Len()
 
 	fmt.Print(bold(cyan(":: ")))
 	str := bold(fmt.Sprintf(bold("There are %d providers available for %s:"), size, dep))
@@ -577,7 +577,7 @@ func providerMenu(dep string, providers []*rpc.Pkg) *rpc.Pkg {
 	size = 1
 	str += bold(cyan("\n:: ")) + bold("Repository AUR\n    ")
 
-	for _, pkg := range providers {
+	for _, pkg := range providers.Pkgs {
 		str += fmt.Sprintf("%d) %s ", size, pkg.Name)
 		size++
 	}
@@ -606,7 +606,7 @@ func providerMenu(dep string, providers []*rpc.Pkg) *rpc.Pkg {
 		}
 
 		if string(numberBuf) == "" {
-			return providers[0]
+			return providers.Pkgs[0]
 		}
 
 		num, err := strconv.Atoi(string(numberBuf))
@@ -620,7 +620,7 @@ func providerMenu(dep string, providers []*rpc.Pkg) *rpc.Pkg {
 			continue
 		}
 
-		return providers[num-1]
+		return providers.Pkgs[num-1]
 	}
 
 	return nil

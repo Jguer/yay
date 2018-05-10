@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 
@@ -9,7 +10,7 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
-const PROVIDES = false
+const PROVIDES = true
 
 type target struct {
 	Db      string
@@ -98,7 +99,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		// still get skiped even if it's from a different database to
 		// the one specified
 		// this is how pacman behaves
-		if dp.hasSatisfier(target.DepString()) {
+		if dp.hasPackage(target.DepString()) {
 			fmt.Println("Skipping target", target)
 			continue
 		}
@@ -371,27 +372,68 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 // Provide a pacman style provider menu if theres more than one candidate
 // TODO: maybe intermix repo providers in the menu
 func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
-	//try to match providers
-	providers := make([]*rpc.Pkg, 0)
-	for _, pkg := range dp.AurCache {
-		if pkgSatisfies(pkg.Name, pkg.Version, dep) {
+	depName, _, _ := splitDep(dep)
+	seen := make(stringSet)
+	providers := makeProviders(depName)
+
+	if _, err := dp.LocalDb.PkgByName(depName); err == nil {
+		if pkg, ok := dp.AurCache[dep]; ok && pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			return pkg
 		}
 	}
 
+	//this version prioratizes name over provides
+	//if theres a direct match for a package return
+	//that instead of using the menu
+	//
+	//providers := make(rpcPkgs, 0)
+	//for _, pkg := range dp.AurCache {
+	//	if pkgSatisfies(pkg.Name, pkg.Version, dep) {
+	//		return pkg
+	//	}
+	//}
+
+	//for _, pkg := range dp.AurCache {
+	//	for _, provide := range pkg.Provides {
+	//		if provideSatisfies(provide, dep) {
+	//			providers = append(providers, pkg)
+	//		}
+	//	}
+	//}
+
+	// This version acts slightly differenly from Pacman, It will give
+	// a menu even if a package with a matching name exists. I believe this
+	// method is better because most of the time you are choosing between
+	// foo and foo-git.
+	// Using Pacman's ways trying to install foo would never give you
+	// a menu.
+
 	for _, pkg := range dp.AurCache {
+		if seen.get(pkg.Name) {
+			continue
+		}
+
+		if pkgSatisfies(pkg.Name, pkg.Version, dep){
+			providers.Pkgs = append(providers.Pkgs, pkg)
+			seen.set(pkg.Name)
+			continue
+		}
+
 		for _, provide := range pkg.Provides {
 			if provideSatisfies(provide, dep) {
-				providers = append(providers, pkg)
+				providers.Pkgs = append(providers.Pkgs, pkg)
+				seen.set(pkg.Name)
+				continue
 			}
 		}
 	}
 
-	if len(providers) == 1 {
-		return providers[0]
+	if providers.Len() == 1 {
+		return providers.Pkgs[0]
 	}
 
-	if len(providers) > 1 {
+	if providers.Len() > 1 {
+		sort.Sort(providers)
 		return providerMenu(dep, providers)
 	}
 
@@ -433,4 +475,3 @@ func (dp *depPool) hasPackage(name string) bool {
 
 	return false
 }
-
