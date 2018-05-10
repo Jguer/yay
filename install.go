@@ -58,37 +58,6 @@ func install(parser *arguments) error {
 
 	}
 
-	//if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
-	//	fmt.Println(bold(cyan("::") + " Querying AUR..."))
-	//}
-	dp, err := getDepPool(requestTargets)
-	if err != nil {
-		return err
-	}
-
-	err = dp.CheckMissing()
-	if err != nil {
-		return err
-	}
-
-	err = dp.CheckConflicts()
-	if err != nil {
-		return err
-	}
-
-	// Deptree will handle db/pkg prefixes. Now they can be striped from the
-	// targets.
-	for pkg := range parser.targets {
-		_, name := splitDbFromName(pkg)
-		parser.targets.remove(pkg)
-		parser.targets.set(name)
-	}
-
-	for i, pkg := range requestTargets {
-		_, name := splitDbFromName(pkg)
-		requestTargets[i] = name
-	}
-
 	//create the arguments to pass for the repo install
 	arguments := parser.copy()
 	arguments.delArg("y", "refresh")
@@ -129,6 +98,23 @@ func install(parser *arguments) error {
 		for pkg := range aurUp {
 			parser.addTarget(pkg)
 		}
+	}
+
+	dp, err := getDepPool(requestTargets, warnings)
+	if err != nil {
+		return err
+	}
+
+	warnings.print()
+
+	err = dp.CheckMissing()
+	if err != nil {
+		return err
+	}
+
+	err = dp.CheckConflicts()
+	if err != nil {
+		return err
 	}
 
 	hasAur := len(dp.Aur) > 0

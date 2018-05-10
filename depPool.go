@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -72,7 +71,7 @@ func makeDepPool() (*depPool, error) {
 		make([]string, 0),
 		localDb,
 		syncDb,
-		&aurWarnings{},
+		nil,
 	}
 
 	return dp, nil
@@ -100,7 +99,6 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		// the one specified
 		// this is how pacman behaves
 		if dp.hasPackage(target.DepString()) {
-			fmt.Println("Skipping target", target)
 			continue
 		}
 
@@ -346,12 +344,13 @@ func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 	})
 }
 
-func getDepPool(pkgs []string) (*depPool, error) {
+func getDepPool(pkgs []string, warnings *aurWarnings) (*depPool, error) {
 	dp, err := makeDepPool()
 	if err != nil {
 		return nil, err
 	}
 
+	dp.Warnings = warnings
 	err = dp.ResolveTargets(pkgs)
 
 	return dp, err
@@ -413,7 +412,7 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 			continue
 		}
 
-		if pkgSatisfies(pkg.Name, pkg.Version, dep){
+		if pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			providers.Pkgs = append(providers.Pkgs, pkg)
 			seen.set(pkg.Name)
 			continue
