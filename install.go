@@ -596,8 +596,14 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 		srcinfo := srcinfos[pkg.PackageBase]
 
+		args := []string{"--nobuild", "-fCc"}
+
+		if incompatible.get(pkg.PackageBase) {
+			args = append(args, "--ignorearch")
+		}
+
 		//pkgver bump
-		err := passToMakepkg(dir, "--nobuild", "-fCc")
+		err := passToMakepkg(dir, args...)
 		if err != nil {
 			return fmt.Errorf("Error making: %s", pkg.Name)
 		}
