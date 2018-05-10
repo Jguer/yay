@@ -3,11 +3,11 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"html"
 	"io"
 	"os"
 	"strconv"
 	"strings"
-	"html"
 )
 
 // A basic set implementation for strings.
