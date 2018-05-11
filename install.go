@@ -115,12 +115,15 @@ func install(parser *arguments) error {
 		}
 
 		value, _, exists := cmdArgs.getArg("ignore")
-		ignoreStr := strings.Join(ignore.toSlice(), ",")
-		if exists {
-			ignoreStr += "," + value
+
+		if len(ignore) > 0 {
+			ignoreStr := strings.Join(ignore.toSlice(), ",")
+			if exists {
+				ignoreStr += "," + value
+			}
+			arguments.options["ignore"] = ignoreStr
 		}
 
-		arguments.options["ignore"] = ignoreStr
 		fmt.Println()
 
 		for pkg := range aurUp {
