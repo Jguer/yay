@@ -15,7 +15,7 @@ import (
 // Other types of sets are used throughout the code but do not have
 // their own typedef.
 // String sets and <type>sets should be used throughout the code when applicable,
-// they are a lot more flexable than slices and provide easy lookup.
+// they are a lot more flexible than slices and provide easy lookup.
 type stringSet map[string]struct{}
 
 func (set stringSet) set(v string) {
@@ -303,15 +303,15 @@ func (parser *arguments) formatArgs() (args []string) {
 			continue
 		}
 
-		formatedOption := formatArg(option)
-		args = append(args, formatedOption)
+		formattedOption := formatArg(option)
+		args = append(args, formattedOption)
 
 		if hasParam(option) {
 			args = append(args, arg)
 		}
 
 		if parser.existsDouble(option) {
-			args = append(args, formatedOption)
+			args = append(args, formattedOption)
 		}
 	}
 
@@ -320,15 +320,15 @@ func (parser *arguments) formatArgs() (args []string) {
 
 func (parser *arguments) formatGlobals() (args []string) {
 	for option, arg := range parser.globals {
-		formatedOption := formatArg(option)
-		args = append(args, formatedOption)
+		formattedOption := formatArg(option)
+		args = append(args, formattedOption)
 
 		if hasParam(option) {
 			args = append(args, arg)
 		}
 
 		if parser.existsDouble(option) {
-			args = append(args, formatedOption)
+			args = append(args, formattedOption)
 		}
 	}
 

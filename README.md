@@ -51,7 +51,7 @@ Otherwise send us a pull request and we will be happy to review it.
 
 ### Code Style
 
-All code should be formated through `go fmt`. This tool will automatically
+All code should be formatted through `go fmt`. This tool will automatically
 format code for you. Although it is recommended you write code in this style
 and just use this tool to catch mistakes.
 
@@ -66,7 +66,7 @@ directory as the Makefile.
 Run `make test` to test Yay. This will check the code is formatted correctly,
 run the code through `go vet` and run unit tests.
 
-Yay's Makefile automaticly sets the `GOPATH` to `$PWD/.go`. This makes it easy to
+Yay's Makefile automatically sets the `GOPATH` to `$PWD/.go`. This makes it easy to
 build using the dependencies in `vendor/`. Running manual go commands such as
 `go build` will require that you to either set the `GOPATH` manually or `go get`
 The dependencies into your own `GOPATH`.
@@ -74,7 +74,7 @@ The dependencies into your own `GOPATH`.
 ### Vendored Dependencies
 
 Yay depends on a couple of other projects. These are stored in `vendor/` and
-are built into Yay at build time. They do not need to be installed seperatly.
+are built into Yay at build time. They do not need to be installed separately.
 
 Currently yay Depends on:
 

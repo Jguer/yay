@@ -224,7 +224,7 @@ func checkConflict(name string, conflict string, conflicts mapStringSet) error {
 				return nil
 			}
 
-			// Provides arent version unless explicitly defined as
+			// Provides aren't version unless explicitly defined as
 			// such. If a conflict is versioned but a provide is
 			// not it can not conflict.
 			if (dep.MaxVer != nil || dep.MinVer != nil) && provide.Mod == alpm.DepModAny {

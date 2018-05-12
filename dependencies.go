@@ -311,7 +311,7 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 //
 // Here is a visual expample of the request system.
 // Remember only unsatisfied packages are requested, if a package is already
-// installed we dont bother.
+// installed we don't bother.
 //
 //      a
 //     / \
@@ -323,7 +323,7 @@ func depCatagoriesRecursive(_pkg *rpc.Pkg, dc *depCatagories, dt *depTree, isMak
 // We see a wants b and c so we send a request for b and c
 // We see d and e so we send a request for d and e
 //
-// Thats 5 packages in 3 requests. The amount of requests needed should always be
+// That's 5 packages in 3 requests. The amount of requests needed should always be
 // the same as the height of the tree.
 // The example does not really do this justice, In the real world where packages
 // have 10+ dependencies each this is a very nice optimization.
@@ -366,8 +366,8 @@ func getDepTree(pkgs []string, warnings *aurWarnings) (*depTree, error) {
 			continue
 		} else {
 			//would be better to check the groups from singleDb if
-			//the user specified a db but theres no easy way to do
-			//it without making alpm_lists so dont bother for now
+			//the user specified a db but there's no easy way to do
+			//it without making alpm_lists so don't bother for now
 			//db/group is probably a rare use case
 			_, err := syncDb.PkgCachebyGroup(name)
 
