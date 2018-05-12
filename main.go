@@ -220,7 +220,7 @@ func main() {
 
 cleanup:
 	//cleanup
-	//from here on out dont exit if an error occurs
+	//from here on out don't exit if an error occurs
 	//if we fail to save the configuration
 	//at least continue on and try clean up other parts
 

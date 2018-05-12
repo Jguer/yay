@@ -124,7 +124,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 
 	// Most people probably don't use keep current and that is the only
 	// case where this is needed.
-	// Querying the AUR is slow and needs internet so dont do it if we
+	// Querying the AUR is slow and needs internet so don't do it if we
 	// don't need to.
 	if keepCurrent {
 		info, err := aurInfo(cachedPackages, &aurWarnings{})
