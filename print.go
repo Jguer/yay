@@ -372,7 +372,7 @@ func printUpdateList(parser *arguments) error {
 
 	noTargets := len(parser.targets) == 0
 
-	if !parser.existsArg("m", "foreigne") {
+	if !parser.existsArg("m", "foreign") {
 		for _, pkg := range repoUp {
 			if noTargets || parser.targets.get(pkg.Name) {
 				fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
