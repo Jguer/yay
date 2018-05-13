@@ -616,7 +616,7 @@ func isLowerAlpha(c rune) bool {
 
 // check if c is a valid pkgname char
 func isValidPkgnameChar(c rune) bool {
-	return isLowerAlpha(c) || isDigit(c) || c == '@' || c == '.' || c == '_' || c == '+' || c == '-'
+	return isAlphaNumeric(c) || c == '@' || c == '.' || c == '_' || c == '+' || c == '-'
 }
 
 // check if c is a valid pkgver char

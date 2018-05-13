@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/mikkeloscar/gopkgbuild"
   packages = ["."]
-  revision = "32274fc52aa8f5eb28711da734179e9aea27b31f"
+  revision = "763d921490d8f4b23b1141c89ce8f9678ac025a7"
 
 [solve-meta]
   analyzer-name = "dep"
