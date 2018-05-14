@@ -138,6 +138,8 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 	var aurErr error
 	var develErr error
 
+	pkgdata := make(map[string]*rpc.Pkg)
+
 	fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 	wg.Add(1)
 	go func() {
@@ -148,7 +150,7 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 	fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
 	wg.Add(1)
 	go func() {
-		aurUp, aurErr = upAUR(remote, remoteNames, warnings)
+		aurUp, aurErr = upAUR(remote, remoteNames, pkgdata, warnings)
 		wg.Done()
 	}()
 
@@ -162,6 +164,8 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 	}
 
 	wg.Wait()
+
+	printLocalNewerThanAUR(remote, pkgdata)
 
 	errs := make([]string, 0)
 	for _, e := range []error{repoErr, aurErr, develErr} {
@@ -228,9 +232,7 @@ func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
 
 	for _, pkg := range toUpdate {
 		if pkg.ShouldIgnore() {
-			left, right := getVersionDiff(pkg.Version(), "latest-commit")
-			fmt.Print(yellow(bold(smallArrow)))
-			fmt.Printf(" Ignoring package upgrade %s (%s => %s)\n", cyan(pkg.Name()), left, right)
+			printIgnoringPackage(pkg, "latest-commit")
 		} else {
 			toUpgrade = append(toUpgrade, upgrade{pkg.Name(), "devel", pkg.Version(), "latest-commit"})
 		}
@@ -242,14 +244,16 @@ func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(remote []alpm.Package, remoteNames []string, warnings *aurWarnings) (upSlice, error) {
+func upAUR(
+	remote []alpm.Package, remoteNames []string,
+	pkgdata map[string]*rpc.Pkg, warnings *aurWarnings) (upSlice, error) {
+
 	toUpgrade := make(upSlice, 0)
 	_pkgdata, err := aurInfo(remoteNames, warnings)
 	if err != nil {
 		return nil, err
 	}
 
-	pkgdata := make(map[string]*rpc.Pkg)
 	for _, pkg := range _pkgdata {
 		pkgdata[pkg.Name] = pkg
 	}
@@ -263,9 +267,7 @@ func upAUR(remote []alpm.Package, remoteNames []string, warnings *aurWarnings) (
 		if (config.TimeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
 			(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
 			if pkg.ShouldIgnore() {
-				left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
-				fmt.Print(yellow(bold(smallArrow)))
-				fmt.Printf(" Ignoring package upgrade: %s (%s => %s)\n", cyan(pkg.Name()), left, right)
+				printIgnoringPackage(pkg, aurPkg.Version)
 			} else {
 				toUpgrade = append(toUpgrade, upgrade{aurPkg.Name, "aur", pkg.Version(), aurPkg.Version})
 			}
@@ -273,6 +275,35 @@ func upAUR(remote []alpm.Package, remoteNames []string, warnings *aurWarnings) (
 	}
 
 	return toUpgrade, nil
+}
+
+func printIgnoringPackage(pkg alpm.Package, newPkgVersion string) {
+	left, right := getVersionDiff(pkg.Version(), newPkgVersion)
+
+	fmt.Println(
+		yellow(bold(smallArrow)) + fmt.Sprintf(
+			" Ignoring package upgrade: %s (%s -> %s)",
+			cyan(pkg.Name()), left, right))
+}
+
+func printLocalNewerThanAUR(
+	remote []alpm.Package, pkgdata map[string]*rpc.Pkg) {
+	for _, pkg := range remote {
+		aurPkg, ok := pkgdata[pkg.Name()]
+		if !ok {
+			continue
+		}
+
+		left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
+
+		if !isDevelName(pkg.Name()) &&
+			alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
+			fmt.Println(
+				yellow(bold(smallArrow)) + fmt.Sprintf(
+					" Local package is newer than AUR: %s (%s -> %s)",
+					cyan(pkg.Name()), left, right))
+		}
+	}
 }
 
 // upRepo gathers local packages and checks if they have new versions.
@@ -289,9 +320,7 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		newPkg := pkg.NewVersion(dbList)
 		if newPkg != nil {
 			if pkg.ShouldIgnore() {
-				left, right := getVersionDiff(pkg.Version(), newPkg.Version())
-				fmt.Print(yellow(bold(smallArrow)))
-				fmt.Printf(" Ignoring package upgrade: %s (%s => %s)\n", cyan(pkg.Name()), left, right)
+				printIgnoringPackage(pkg, newPkg.Version())
 			} else {
 				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
 			}

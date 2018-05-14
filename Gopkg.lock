@@ -18,7 +18,7 @@
   name = "github.com/mikkeloscar/gopkgbuild"
   packages = ["."]
   revision = "7b0e7c63b22efc73e1c10e6f3117fdc03cd21816"
-
+  
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
