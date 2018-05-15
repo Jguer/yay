@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 // Decide what download method to use:
@@ -76,14 +75,13 @@ func gitDownload(url string, path string, name string) error {
 }
 
 // DownloadAndUnpack downloads url tgz and extracts to path.
-func downloadAndUnpack(url string, path string, trim bool) (err error) {
+func downloadAndUnpack(url string, path string) (err error) {
 	err = os.MkdirAll(path, 0755)
 	if err != nil {
 		return
 	}
 
-	tokens := strings.Split(url, "/")
-	fileName := tokens[len(tokens)-1]
+	fileName := filepath.Base(url)
 
 	tarLocation := filepath.Join(path, fileName)
 	defer os.Remove(tarLocation)
@@ -93,13 +91,7 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 		return
 	}
 
-	if trim {
-		err = exec.Command("/bin/sh", "-c",
-			config.TarBin+" --strip-components 2 --include='*/"+fileName[:len(fileName)-7]+"/trunk/' -xf "+tarLocation+" -C "+path).Run()
-		os.Rename(filepath.Join(path, "trunk"), filepath.Join(path, fileName[:len(fileName)-7]))
-	} else {
-		err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
-	}
+	err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
 	if err != nil {
 		return
 	}
@@ -141,26 +133,42 @@ nextPkg:
 					name = pkg.Name()
 				}
 
-				if db.Name() == "core" || db.Name() == "extra" {
-					url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
-				} else if db.Name() == "community" || db.Name() == "multilib" {
-					url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + name + ".tar.gz"
-				} else {
-					fmt.Println(pkgN + " not in standard repositories")
+				if _, err := os.Stat(filepath.Join(path, name)); err == nil {
+					fmt.Println(bold(red(arrow)), bold(cyan(name)), "directory already exists")
 					continue nextPkg
 				}
 
-				errD := downloadAndUnpack(url, path, true)
-				if errD != nil {
-					fmt.Println(bold(red(arrow))+" "+bold(cyan(pkg.Name())), bold(red(errD.Error())))
+				switch db.Name() {
+				case "core", "extra":
+					url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
+				case "community", "multilib":
+					url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
+				default:
+					fmt.Println(name + " not in standard repositories")
+					continue nextPkg
 				}
 
-				fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")
+				errD := downloadAndUnpack(url, cacheHome)
+				if errD != nil {
+					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
+				}
+
+				errD = exec.Command("mv", filepath.Join(cacheHome, "packages", name, "trunk"), filepath.Join(path, name)).Run()
+				if errD != nil {
+					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
+				} else {
+					fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")
+				}
+
 				continue nextPkg
 			}
 		}
 
 		missing = append(missing, pkgN)
+	}
+
+	if _, err := os.Stat(filepath.Join(cacheHome, "packages")); err == nil {
+		os.RemoveAll(filepath.Join(cacheHome, "packages"))
 	}
 
 	return
@@ -178,13 +186,13 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
 		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
 			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
 		} else {
-			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
+			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir)
 		}
 
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(magenta(pkg.Name)), bold(green("from AUR")))
+			fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.PackageBase), "from AUR")
 		}
 	}
 
