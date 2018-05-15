@@ -546,9 +546,10 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 			pkgbuild, err := gopkg.ParseSRCINFO(dir)
 
 			if err == nil {
-				version, err := gopkg.NewCompleteVersion(pkg.Version)
-				if err == nil {
-					if !version.Newer(pkgbuild.Version()) {
+				versionRPC, errR := gopkg.NewCompleteVersion(pkg.Version)
+				versionPKG, errP := gopkg.NewCompleteVersion(pkgbuild.Version())
+				if errP == nil && errR == nil {
+					if !versionRPC.Newer(versionPKG) {
 						str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
 						fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 						continue

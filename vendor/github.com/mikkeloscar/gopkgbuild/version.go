@@ -74,33 +74,18 @@ func NewCompleteVersion(s string) (*CompleteVersion, error) {
 	return nil, fmt.Errorf("invalid version format: %s", s)
 }
 
-// Older returns true if a is older than the argument version string
-func (a *CompleteVersion) Older(v string) bool {
-	b, err := NewCompleteVersion(v)
-	if err != nil {
-		return false
-	}
-
+// Older returns true if a is older than the argument version
+func (a *CompleteVersion) Older(b *CompleteVersion) bool {
 	return a.cmp(b) == -1
 }
 
-// Newer returns true if a is newer than the argument version string
-func (a *CompleteVersion) Newer(v string) bool {
-	b, err := NewCompleteVersion(v)
-	if err != nil {
-		return false
-	}
-
+// Newer returns true if a is newer than the argument version
+func (a *CompleteVersion) Newer(b *CompleteVersion) bool {
 	return a.cmp(b) == 1
 }
 
-// Equal returns true if a is equal to the argument version string
-func (a *CompleteVersion) Equal(v string) bool {
-	b, err := NewCompleteVersion(v)
-	if err != nil {
-		return false
-	}
-
+// Equal returns true if a is equal to the argument version
+func (a *CompleteVersion) Equal(b *CompleteVersion) bool {
 	return a.cmp(b) == 0
 }
 
