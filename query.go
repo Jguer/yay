@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -405,6 +406,26 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	})
 
 	return
+}
+
+func lastInstallTime() (time.Time, error) {
+	var time time.Time
+
+	localDb, err := alpmHandle.LocalDb()
+	if err != nil {
+		return time, err
+	}
+
+	localDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+		thisTime := pkg.InstallDate()
+		if thisTime.After(time) {
+			time = thisTime
+		}
+
+		return nil
+	})
+
+	return time, nil
 }
 
 // Statistics returns statistics about packages installed in system
