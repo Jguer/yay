@@ -425,14 +425,20 @@ type Item struct {
 	Creator     string `xml:"dc:creator"`
 }
 
-func (item Item) Print() error {
+func (item Item) Print(installTime time.Time) {
+	var fd string
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
 	if err != nil {
-		return err
+		fmt.Println(err)
+	} else {
+		fd = formatTime(int(date.Unix()))
+		if _, double, _ := cmdArgs.getArg("news", "w"); !double && !installTime.IsZero() {
+			if installTime.After(date) {
+				return
+			}
+		}
 	}
-
-	fd := formatTime(int(date.Unix()))
 
 	fmt.Println(bold(magenta(fd)), bold(strings.TrimSpace(item.Title)))
 	//fmt.Println(strings.TrimSpace(item.Link))
@@ -442,7 +448,7 @@ func (item Item) Print() error {
 		fmt.Println(desc)
 	}
 
-	return nil
+	return
 }
 
 type Channel struct {
@@ -478,19 +484,18 @@ func printNewsFeed() error {
 		return err
 	}
 
+	installTime, err := lastInstallTime()
+	if err != nil {
+		return err
+	}
+
 	if config.SortMode == BottomUp {
 		for i := len(rss.Channel.Items) - 1; i >= 0; i-- {
-			err := rss.Channel.Items[i].Print()
-			if err != nil {
-				return err
-			}
+			rss.Channel.Items[i].Print(installTime)
 		}
 	} else {
 		for i := 0; i < len(rss.Channel.Items); i++ {
-			err := rss.Channel.Items[i].Print()
-			if err != nil {
-				return err
-			}
+			rss.Channel.Items[i].Print(installTime)
 		}
 	}
 
