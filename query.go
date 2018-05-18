@@ -408,22 +408,20 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	return
 }
 
-func lastInstallTime() (time.Time, error) {
+func lastBuildTime() (time.Time, error) {
 	var time time.Time
 
-	localDb, err := alpmHandle.LocalDb()
+	pkgs, _, _, _, err := filterPackages()
 	if err != nil {
 		return time, err
 	}
 
-	localDb.PkgCache().ForEach(func(pkg alpm.Package) error {
-		thisTime := pkg.InstallDate()
+	for _, pkg := range pkgs {
+		thisTime := pkg.BuildDate()
 		if thisTime.After(time) {
 			time = thisTime
 		}
-
-		return nil
-	})
+	}
 
 	return time, nil
 }

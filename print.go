@@ -425,7 +425,7 @@ type Item struct {
 	Creator     string `xml:"dc:creator"`
 }
 
-func (item Item) Print(installTime time.Time) {
+func (item Item) Print(buildTime time.Time) {
 	var fd string
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
@@ -433,8 +433,8 @@ func (item Item) Print(installTime time.Time) {
 		fmt.Println(err)
 	} else {
 		fd = formatTime(int(date.Unix()))
-		if _, double, _ := cmdArgs.getArg("news", "w"); !double && !installTime.IsZero() {
-			if installTime.After(date) {
+		if _, double, _ := cmdArgs.getArg("news", "w"); !double && !buildTime.IsZero() {
+			if buildTime.After(date) {
 				return
 			}
 		}
@@ -484,18 +484,18 @@ func printNewsFeed() error {
 		return err
 	}
 
-	installTime, err := lastInstallTime()
+	buildTime, err := lastBuildTime()
 	if err != nil {
 		return err
 	}
 
 	if config.SortMode == BottomUp {
 		for i := len(rss.Channel.Items) - 1; i >= 0; i-- {
-			rss.Channel.Items[i].Print(installTime)
+			rss.Channel.Items[i].Print(buildTime)
 		}
 	} else {
 		for i := 0; i < len(rss.Channel.Items); i++ {
-			rss.Channel.Items[i].Print(installTime)
+			rss.Channel.Items[i].Print(buildTime)
 		}
 	}
 
