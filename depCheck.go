@@ -33,7 +33,7 @@ func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts ma
 
 func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts mapStringSet) {
 	dp.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
-		if pkg.Name() == name {
+		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
 			return nil
 		}
 
@@ -111,6 +111,10 @@ func (dp *depPool) checkForwardConflicts(conflicts mapStringSet) {
 
 func (dp *depPool) checkReverseConflicts(conflicts mapStringSet) {
 	dp.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+		if dp.hasPackage(pkg.Name()) {
+			return nil
+		}
+
 		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
 			dp.checkReverseConflict(pkg.Name(), conflict.String(), conflicts)
 			return nil
