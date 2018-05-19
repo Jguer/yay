@@ -158,3 +158,13 @@ func getBases(pkgs map[string]*rpc.Pkg) map[string][]*rpc.Pkg {
 
 	return bases
 }
+
+func isDevelName(name string) bool {
+	for _, suffix := range []string{"git", "svn", "hg", "bzr", "nightly"} {
+		if strings.HasSuffix(name, "-" + suffix) {
+			return true
+		}
+	}
+
+	return strings.Contains(name, "-always-")
+}
