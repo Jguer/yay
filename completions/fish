@@ -109,6 +109,7 @@ complete -c $progname -n $print -s n -l numberupgrades -d 'Print number of updat
 complete -c $progname -n $print -s s -l stats -d 'Display system package statistics' -f
 complete -c $progname -n $print -s u -l upgrades -d 'Print update list' -f
 complete -c $progname -n $print -s w -l news -d 'Print arch news'
+complete -c $progname -n $print -s q -l quiet -d 'Do not print news description'
 
 # Transaction options (sync, remove, upgrade)
 for condition in sync remove upgrade
