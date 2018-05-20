@@ -447,8 +447,6 @@ func (item Item) Print(buildTime time.Time) {
 		desc := strings.TrimSpace(parseNews(item.Description))
 		fmt.Println(desc)
 	}
-
-	return
 }
 
 type Channel struct {

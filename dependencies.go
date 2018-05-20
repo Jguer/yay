@@ -176,7 +176,7 @@ func repoFindProvider(name string, dt *depTree) (string, *alpm.Package) {
 //
 // There is a little more to this, handling provides, multiple packages wanting the
 // same dependencies, etc. This is just the basic premise.
-func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
+func getDepCatagories(pkgs []string, dt *depTree) *depCatagories {
 	dc := makeDependCatagories()
 	seen := make(stringSet)
 
@@ -237,7 +237,7 @@ func getDepCatagories(pkgs []string, dt *depTree) (*depCatagories, error) {
 
 	dc.Repo = filteredRepo
 
-	return dc, nil
+	return dc
 }
 
 func repoDepCatagoriesRecursive(pkg *alpm.Package, dc *depCatagories, dt *depTree, isMake bool) {
@@ -388,10 +388,7 @@ func getDepTree(pkgs []string, warnings *aurWarnings) (*depTree, error) {
 		fmt.Println(bold(cyan("::") + bold(" Querying AUR...")))
 	}
 
-	err = depTreeRecursive(dt, localDb, syncDb, false)
-	if err != nil {
-		return dt, err
-	}
+	depTreeRecursive(dt, localDb, syncDb)
 
 	if !cmdArgs.existsArg("d", "nodeps") {
 		err = checkVersions(dt)
@@ -405,7 +402,7 @@ func getDepTree(pkgs []string, warnings *aurWarnings) (*depTree, error) {
 // Takes a repo package,
 // gives all of the non installed deps,
 // repeats on each sub dep.
-func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb alpm.DbList) (err error) {
+func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb alpm.DbList) {
 	_, exists := dt.Repo[pkg.Name()]
 	if exists {
 		return
@@ -443,11 +440,9 @@ func repoTreeRecursive(pkg *alpm.Package, dt *depTree, localDb *alpm.Db, syncDb 
 
 		return
 	})
-
-	return
 }
 
-func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake bool) (err error) {
+func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList) {
 	if len(dt.ToProcess) == 0 {
 		return
 	}
@@ -542,9 +537,7 @@ func depTreeRecursive(dt *depTree, localDb *alpm.Db, syncDb alpm.DbList, isMake 
 	}
 
 	dt.ToProcess = nextProcess
-	depTreeRecursive(dt, localDb, syncDb, true)
-
-	return
+	depTreeRecursive(dt, localDb, syncDb)
 }
 
 func checkVersions(dt *depTree) error {

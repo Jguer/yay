@@ -143,11 +143,7 @@ func install(parser *arguments) error {
 		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
-	dc, err = getDepCatagories(requestTargets, dt)
-	if err != nil {
-		return err
-	}
-
+	dc = getDepCatagories(requestTargets, dt)
 	for _, pkg := range dc.Repo {
 		arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 	}
@@ -210,7 +206,7 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		incompatible, err = getIncompatible(dc.Aur, srcinfosStale, dc.Bases)
+		incompatible, err = getIncompatible(dc.Aur, srcinfosStale)
 		if err != nil {
 			return err
 		}
@@ -292,7 +288,7 @@ func install(parser *arguments) error {
 	return nil
 }
 
-func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) (stringSet, error) {
+func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) (stringSet, error) {
 	incompatible := make(stringSet)
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
