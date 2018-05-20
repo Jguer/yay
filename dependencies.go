@@ -397,7 +397,7 @@ func getDepTree(pkgs []string, warnings *aurWarnings) (*depTree, error) {
 		err = checkVersions(dt)
 	}
 
-	dt.Warnings.Print()
+	dt.Warnings.print()
 
 	return dt, err
 }

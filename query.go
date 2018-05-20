@@ -535,7 +535,7 @@ func aurInfoPrint(names []string) ([]*rpc.Pkg, error) {
 		return info, err
 	}
 
-	warnings.Print()
+	warnings.print()
 
 	return info, nil
 }

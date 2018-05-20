@@ -17,7 +17,7 @@ import (
 const arrow = "==>"
 const smallArrow = " ->"
 
-func (warnings *aurWarnings) Print() {
+func (warnings *aurWarnings) print() {
 	if len(warnings.Missing) > 0 {
 		fmt.Print(bold(yellow(smallArrow)) + " Missing AUR Packages:")
 		for _, name := range warnings.Missing {
@@ -162,7 +162,7 @@ func (u upgrade) StylizedNameWithRepository() string {
 }
 
 // Print prints the details of the packages to upgrade.
-func (u upSlice) Print() {
+func (u upSlice) print() {
 	longestName, longestVersion := 0, 0
 	for _, pack := range u {
 		packNameLen := len(pack.StylizedNameWithRepository())
@@ -417,7 +417,7 @@ outer:
 	return nil
 }
 
-type Item struct {
+type item struct {
 	Title       string `xml:"title"`
 	Link        string `xml:"link"`
 	Description string `xml:"description"`
@@ -425,7 +425,7 @@ type Item struct {
 	Creator     string `xml:"dc:creator"`
 }
 
-func (item Item) Print(buildTime time.Time) {
+func (item item) print(buildTime time.Time) {
 	var fd string
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
@@ -447,21 +447,19 @@ func (item Item) Print(buildTime time.Time) {
 		desc := strings.TrimSpace(parseNews(item.Description))
 		fmt.Println(desc)
 	}
-
-	return
 }
 
-type Channel struct {
+type channel struct {
 	Title         string `xml:"title"`
 	Link          string `xml:"link"`
 	Description   string `xml:"description"`
 	Language      string `xml:"language"`
 	Lastbuilddate string `xml:"lastbuilddate"`
-	Items         []Item `xml:"item"`
+	Items         []item `xml:"item"`
 }
 
 type rss struct {
-	Channel Channel `xml:"channel"`
+	Channel channel `xml:"channel"`
 }
 
 func printNewsFeed() error {
@@ -491,11 +489,11 @@ func printNewsFeed() error {
 
 	if config.SortMode == BottomUp {
 		for i := len(rss.Channel.Items) - 1; i >= 0; i-- {
-			rss.Channel.Items[i].Print(buildTime)
+			rss.Channel.Items[i].print(buildTime)
 		}
 	} else {
 		for i := 0; i < len(rss.Channel.Items); i++ {
-			rss.Channel.Items[i].Print(buildTime)
+			rss.Channel.Items[i].print(buildTime)
 		}
 	}
 
