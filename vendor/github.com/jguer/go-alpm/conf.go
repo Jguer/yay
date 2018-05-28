@@ -114,18 +114,14 @@ func (rdr *confReader) ParseLine() (tok iniToken, err error) {
 	rdr.Lineno++
 
 	line = bytes.TrimSpace(line)
-
-	comment := bytes.IndexByte(line, '#')
-	if comment >= 0 {
-		line = line[:comment]
-	}
-
 	if len(line) == 0 {
 		tok.Type = tokenComment
 		return
 	}
-
 	switch line[0] {
+	case '#':
+		tok.Type = tokenComment
+		return
 	case '[':
 		closing := bytes.IndexByte(line, ']')
 		if closing < 0 {
