@@ -214,10 +214,14 @@ func syncInfo(pkgS []string) (err error) {
 		}
 	}
 
-	if len(aurS) != 0 {
+	if len(info) != 0 {
 		for _, pkg := range info {
 			PrintInfo(pkg)
 		}
+	}
+
+	if len(aurS) != len(info) {
+		return fmt.Errorf("Could not find all required packages")
 	}
 
 	return
