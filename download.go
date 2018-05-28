@@ -196,5 +196,9 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
 		}
 	}
 
+	if len(aq) != len(pkgs) {
+		return fmt.Errorf("Could not find all required packages")
+	}
+
 	return
 }
