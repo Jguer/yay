@@ -181,10 +181,6 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
 		return err
 	}
 
-	if (len(aq) != len(pkgs)) {
-		return fmt.Errorf("Could not find all required packages");
-	}
-
 	for _, pkg := range aq {
 		var err error
 		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
@@ -198,6 +194,10 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
 		} else {
 			fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.PackageBase), "from AUR")
 		}
+	}
+
+	if len(aq) != len(pkgs) {
+		return fmt.Errorf("Could not find all required packages")
 	}
 
 	return
