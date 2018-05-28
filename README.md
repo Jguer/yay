@@ -2,6 +2,9 @@
 
 Yet another Yogurt - An AUR Helper written in Go
 
+`yay: error while loading shared libraries: libalpm.so.10: cannot open shared object file: No such file or directory`
+Pacman 5.1 migration explained [here](https://github.com/Jguer/yay/releases/tag/v6.784)
+
 #### Packages
 
 [![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![yay-git](https://img.shields.io/aur/version/yay-git.svg?label=yay-git)](https://aur.archlinux.org/packages/yay-git/) [![GitHub license](https://img.shields.io/github/license/jguer/yay.svg)](https://github.com/Jguer/yay/blob/master/LICENSE)  
