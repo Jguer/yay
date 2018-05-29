@@ -44,6 +44,7 @@ func (t target) String() string {
 
 type depPool struct {
 	Targets  []target
+	Explicit stringSet
 	Repo     map[string]*alpm.Package
 	Aur      map[string]*rpc.Pkg
 	AurCache map[string]*rpc.Pkg
@@ -65,6 +66,7 @@ func makeDepPool() (*depPool, error) {
 
 	dp := &depPool{
 		make([]target, 0),
+		make(stringSet),
 		make(map[string]*alpm.Package),
 		make(map[string]*rpc.Pkg),
 		make(map[string]*rpc.Pkg),
@@ -124,6 +126,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		}
 
 		if err == nil {
+			dp.Explicit.set(foundPkg.Name())
 			dp.ResolveRepoDependency(foundPkg)
 			continue
 		} else {
@@ -149,7 +152,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 	}
 
 	if len(aurTargets) > 0 {
-		err = dp.resolveAURPackages(aurTargets)
+		err = dp.resolveAURPackages(aurTargets, true)
 	}
 
 	return err
@@ -255,7 +258,7 @@ func (dp *depPool) cacheAURPackages(_pkgs stringSet) error {
 	return nil
 }
 
-func (dp *depPool) resolveAURPackages(pkgs stringSet) error {
+func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 	newPackages := make(stringSet)
 	newAURPackages := make(stringSet)
 
@@ -279,6 +282,9 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet) error {
 			continue
 		}
 
+		if explicit {
+			dp.Explicit.set(pkg.Name)
+		}
 		dp.Aur[pkg.Name] = pkg
 
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
@@ -312,7 +318,7 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet) error {
 
 	}
 
-	err = dp.resolveAURPackages(newAURPackages)
+	err = dp.resolveAURPackages(newAURPackages, false)
 
 	return err
 }

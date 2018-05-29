@@ -206,7 +206,7 @@ func install(parser *arguments) error {
 		depArguments.addArg("D", "asdeps")
 
 		for _, pkg := range do.Repo {
-			if !parser.targets.get(pkg.Name()) && !localNamesCache.get(pkg.Name()) && !remoteNamesCache.get(pkg.Name()) {
+			if !dp.Explicit.get(pkg.Name()) && !localNamesCache.get(pkg.Name()) && !remoteNamesCache.get(pkg.Name()) {
 				depArguments.addTarget(pkg.Name())
 			}
 		}
@@ -230,7 +230,7 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		err = buildInstallPkgBuilds(do.Aur, srcinfosStale, parser.targets, parser, do.Bases, incompatible)
+		err = buildInstallPkgBuilds(do.Aur, srcinfosStale, dp.Explicit, parser, do.Bases, incompatible)
 		if err != nil {
 			return err
 		}
