@@ -9,8 +9,6 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
-const PROVIDES = true
-
 type target struct {
 	Db      string
 	Name    string
@@ -228,10 +226,7 @@ func (dp *depPool) cacheAURPackages(_pkgs stringSet) error {
 		return nil
 	}
 
-	//TODO: config option, maybe --deepsearh but aurman uses that flag for
-	//something else already which might be confusing
-	//maybe --provides
-	if PROVIDES {
+	if config.Provides {
 		err := dp.findProvides(pkgs)
 		if err != nil {
 			return err
