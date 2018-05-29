@@ -47,6 +47,8 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
+
+		warnings.print()
 	}
 
 	//create the arguments to pass for the repo install
@@ -97,8 +99,6 @@ func install(parser *arguments) error {
 	if err != nil {
 		return err
 	}
-
-	warnings.print()
 
 	err = dp.CheckMissing()
 	if err != nil {
