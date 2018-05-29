@@ -76,7 +76,7 @@ const (
 	SigDatabaseMarginalOk
 	SigDatabaseUnknownOk
 )
-const SigUseDefault SigLevel = 1 << 31
+const SigUseDefault SigLevel = 1 << 30
 
 // Signature status
 type SigStatus int
