@@ -255,14 +255,16 @@ func (dp *depPool) CheckMissing() error {
 	for dep, trees := range missing.Missing {
 		for _, tree := range trees {
 
-			fmt.Print("    "+cyan(dep), " (Tree: ")
+			fmt.Print("    ", cyan(dep))
 
 			if len(tree) == 0 {
-				fmt.Print(cyan("Target "))
+				fmt.Print(" (Target")
 			} else {
-				for _, pkg := range tree {
-					fmt.Print(cyan(pkg), " -> ")
+				fmt.Print(" (Wanted by: ")
+				for n := 0; n < len(tree)-1; n++ {
+					fmt.Print(cyan(tree[n]), " -> ")
 				}
+				fmt.Print(cyan(tree[len(tree)-1]))
 			}
 
 			fmt.Println(")")
