@@ -203,6 +203,9 @@ func (dp *depPool) findProvides(pkgs stringSet) error {
 	}
 
 	for pkg := range pkgs {
+		if _, err := dp.LocalDb.PkgByName(pkg); err == nil {
+			continue
+		}
 		wg.Add(1)
 		go doSearch(pkg)
 	}
