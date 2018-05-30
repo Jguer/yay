@@ -79,19 +79,14 @@ func makeDepPool() (*depPool, error) {
 
 // Includes db/ prefixes and group installs
 func (dp *depPool) ResolveTargets(pkgs []string) error {
-	for _, pkg := range pkgs {
-		target := toTarget(pkg)
-		dp.Targets = append(dp.Targets, target)
-	}
-
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
 	aurTargets := make(stringSet)
-	var err error
-	//repo := make([]*alpm.Package, 0)
 
-	for _, target := range dp.Targets {
+	for _, pkg := range pkgs {
+		var err error
+		target := toTarget(pkg)
 
 		// skip targets already satisfied
 		// even if the user enters db/pkg and aur/pkg the latter will
@@ -107,6 +102,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 
 		// aur/ prefix means we only check the aur
 		if target.Db == "aur" {
+			dp.Targets = append(dp.Targets, target)
 			aurTargets.set(target.DepString())
 			continue
 		}
@@ -124,6 +120,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		}
 
 		if err == nil {
+			dp.Targets = append(dp.Targets, target)
 			dp.Explicit.set(foundPkg.Name())
 			dp.ResolveRepoDependency(foundPkg)
 			continue
@@ -135,10 +132,13 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			//the user specified a db but theres no easy way to do
 			//it without making alpm_lists so dont bother for now
 			//db/group is probably a rare use case
-			_, err := dp.SyncDb.PkgCachebyGroup(target.Name)
-
+			group, err := dp.SyncDb.PkgCachebyGroup(target.Name)
 			if err == nil {
 				dp.Groups = append(dp.Groups, target.String())
+				group.ForEach(func(pkg alpm.Package) error {
+					dp.Explicit.set(pkg.Name())
+					return nil
+				})
 				continue
 			}
 		}
@@ -147,13 +147,15 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		if target.Db == "" {
 			aurTargets.set(target.DepString())
 		}
+
+		dp.Targets = append(dp.Targets, target)
 	}
 
 	if len(aurTargets) > 0 {
-		err = dp.resolveAURPackages(aurTargets, true)
+		return dp.resolveAURPackages(aurTargets, true)
 	}
 
-	return err
+	return nil
 }
 
 // Pseudo provides finder.
