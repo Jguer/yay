@@ -266,25 +266,31 @@ func printDownloads(repoName string, length int, packages string) {
 	fmt.Println(repoInfo + cyan(packages))
 }
 
+func printInfoValue(str, value string) {
+	fmt.Printf(bold("%-16s%s")+" %s\n", str, ":", value)
+}
+
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *rpc.Pkg) {
-	fmt.Println(bold("Repository      :"), "aur")
-	fmt.Println(bold("Name            :"), a.Name)
-	fmt.Println(bold("Version         :"), a.Version)
-	fmt.Println(bold("Description     :"), a.Description)
-	fmt.Println(bold("URL             :"), a.URL)
-	fmt.Println(bold("Licenses        :"), strings.Join(a.License, "  "))
-	fmt.Println(bold("Provides        :"), strings.Join(a.Provides, "  "))
-	fmt.Println(bold("Depends On      :"), strings.Join(a.Depends, "  "))
-	fmt.Println(bold("Make Deps       :"), strings.Join(a.MakeDepends, "  "))
-	fmt.Println(bold("Check Deps      :"), strings.Join(a.CheckDepends, "  "))
-	fmt.Println(bold("Optional Deps   :"), strings.Join(a.OptDepends, "  "))
-	fmt.Println(bold("Conflicts With  :"), strings.Join(a.Conflicts, "  "))
-	fmt.Println(bold("Maintainer      :"), a.Maintainer)
-	fmt.Println(bold("Votes           :"), a.NumVotes)
-	fmt.Println(bold("Popularity      :"), a.Popularity)
+	printInfoValue("Repository", "aur")
+	printInfoValue("Name", a.Name)
+	printInfoValue("Version", a.Version)
+	printInfoValue("Description", a.Description)
+	printInfoValue("URL", a.URL)
+	printInfoValue("Licenses", strings.Join(a.License, "  "))
+	printInfoValue("Provides", strings.Join(a.Provides, "  "))
+	printInfoValue("Depends On", strings.Join(a.Depends, "  "))
+	printInfoValue("Make Deps", strings.Join(a.MakeDepends, "  "))
+	printInfoValue("Check Deps", strings.Join(a.CheckDepends, "  "))
+	printInfoValue("Optional Deps", strings.Join(a.OptDepends, "  "))
+	printInfoValue("Conflicts With", strings.Join(a.Conflicts, "  "))
+	printInfoValue("Maintainer", a.Maintainer)
+	printInfoValue("Votes", fmt.Sprintf("%d", a.NumVotes))
+	printInfoValue("Popularity", fmt.Sprintf("%f", a.Popularity))
 	if a.OutOfDate != 0 {
-		fmt.Println(bold("Out-of-date     :"), "Yes", "["+formatTime(a.OutOfDate)+"]")
+		printInfoValue("Out-of-date", "Yes ["+formatTime(a.OutOfDate)+"]")
+	} else {
+		printInfoValue("Out-of-date", "No")
 	}
 
 	fmt.Println()
