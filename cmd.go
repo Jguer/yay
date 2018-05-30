@@ -296,6 +296,10 @@ func handleConfig(option, value string) bool {
 		config.SudoLoop = true
 	case "nosudoloop":
 		config.SudoLoop = false
+	case "provides":
+		config.Provides = true
+	case "noprovides":
+		config.Provides = false
 	default:
 		return false
 	}

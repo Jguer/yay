@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"fmt"
@@ -188,7 +189,7 @@ func (u upSlice) print() {
 }
 
 // printDownloadsFromRepo prints repository packages to be downloaded
-func printDepCatagories(dc *depCatagories) {
+func (do *depOrder) Print() {
 	repo := ""
 	repoMake := ""
 	aur := ""
@@ -199,47 +200,47 @@ func printDepCatagories(dc *depCatagories) {
 	aurLen := 0
 	aurMakeLen := 0
 
-	for _, pkg := range dc.Repo {
-		if dc.MakeOnly.get(pkg.Name()) {
-			repoMake += "  " + pkg.Name() + "-" + pkg.Version()
-			repoMakeLen++
-		} else {
+	for _, pkg := range do.Repo {
+		if do.Runtime.get(pkg.Name()) {
 			repo += "  " + pkg.Name() + "-" + pkg.Version()
 			repoLen++
+		} else {
+			repoMake += "  " + pkg.Name() + "-" + pkg.Version()
+			repoMakeLen++
 		}
 	}
 
-	for _, pkg := range dc.Aur {
+	for _, pkg := range do.Aur {
 		pkgStr := "  " + pkg.PackageBase + "-" + pkg.Version
 		pkgStrMake := pkgStr
 
 		push := false
 		pushMake := false
 
-		if len(dc.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+		if len(do.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
 			pkgStr += " ("
 			pkgStrMake += " ("
 
-			for _, split := range dc.Bases[pkg.PackageBase] {
-				if dc.MakeOnly.get(split.Name) {
-					pkgStrMake += split.Name + " "
-					aurMakeLen++
-					pushMake = true
-				} else {
+			for _, split := range do.Bases[pkg.PackageBase] {
+				if do.Runtime.get(split.Name) {
 					pkgStr += split.Name + " "
 					aurLen++
 					push = true
+				} else {
+					pkgStrMake += split.Name + " "
+					aurMakeLen++
+					pushMake = true
 				}
 			}
 
 			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
 			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
-		} else if dc.MakeOnly.get(pkg.Name) {
-			aurMakeLen++
-			pushMake = true
-		} else {
+		} else if do.Runtime.get(pkg.Name) {
 			aurLen++
 			push = true
+		} else {
+			aurMakeLen++
+			pushMake = true
 		}
 
 		if push {
@@ -571,4 +572,62 @@ func colourHash(name string) (output string) {
 		hash = int(name[i]) + ((hash << 5) + (hash))
 	}
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
+}
+
+func providerMenu(dep string, providers providers) *rpc.Pkg {
+	size := providers.Len()
+
+	fmt.Print(bold(cyan(":: ")))
+	str := bold(fmt.Sprintf(bold("There are %d providers available for %s:"), size, dep))
+
+	size = 1
+	str += bold(cyan("\n:: ")) + bold("Repository AUR\n    ")
+
+	for _, pkg := range providers.Pkgs {
+		str += fmt.Sprintf("%d) %s ", size, pkg.Name)
+		size++
+	}
+
+	fmt.Println(str)
+
+	for {
+		fmt.Print("\nEnter a number (default=1): ")
+
+		if config.NoConfirm {
+			fmt.Println()
+			break
+		}
+
+		reader := bufio.NewReader(os.Stdin)
+		numberBuf, overflow, err := reader.ReadLine()
+
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		if overflow {
+			fmt.Println("Input too long")
+			continue
+		}
+
+		if string(numberBuf) == "" {
+			return providers.Pkgs[0]
+		}
+
+		num, err := strconv.Atoi(string(numberBuf))
+		if err != nil {
+			fmt.Printf("%s invalid number: %s\n", red("error:"), string(numberBuf))
+			continue
+		}
+
+		if num < 1 || num > size {
+			fmt.Printf("%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
+			continue
+		}
+
+		return providers.Pkgs[num-1]
+	}
+
+	return nil
 }

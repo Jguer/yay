@@ -7,7 +7,6 @@ import (
 	"unicode"
 )
 
-type mapStringSlice map[string][]string
 type mapStringSet map[string]stringSet
 
 type intRange struct {
@@ -60,14 +59,6 @@ func (mss mapStringSet) Add(n string, v string) {
 	mss[n].set(v)
 }
 
-func (mss mapStringSlice) Add(n string, v string) {
-	_, ok := mss[n]
-	if !ok {
-		mss[n] = make([]string, 0, 1)
-	}
-	mss[n] = append(mss[n], v)
-}
-
 func completeFileName(dir, name string) (string, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -111,4 +102,26 @@ func lessRunes(iRunes, jRunes []rune) bool {
 	}
 
 	return len(iRunes) < len(jRunes)
+}
+
+func stringSliceEqual(a, b []string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }

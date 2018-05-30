@@ -54,6 +54,7 @@ type Configuration struct {
 	Devel         bool   `json:"devel"`
 	CleanAfter    bool   `json:"cleanAfter"`
 	GitClone      bool   `json:"gitclone"`
+	Provides      bool   `json:"provides"`
 }
 
 var version = "5.688"
@@ -152,6 +153,7 @@ func defaultSettings(config *Configuration) {
 	config.AnswerEdit = ""
 	config.AnswerUpgrade = ""
 	config.GitClone = true
+	config.Provides = true
 }
 
 // Editor returns the preferred system editor.

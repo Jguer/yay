@@ -18,7 +18,7 @@ func install(parser *arguments) error {
 	requestTargets := parser.targets.toSlice()
 	var err error
 	var incompatible stringSet
-	var dc *depCatagories
+	var do *depOrder
 	var toClean []*rpc.Pkg
 	var toEdit []*rpc.Pkg
 
@@ -41,6 +41,14 @@ func install(parser *arguments) error {
 	remoteNamesCache := sliceToStringSet(remoteNames)
 	localNamesCache := sliceToStringSet(localNames)
 
+	//create the arguments to pass for the repo install
+	arguments := parser.copy()
+	arguments.delArg("y", "refresh")
+	arguments.delArg("asdeps", "asdep")
+	arguments.delArg("asexplicit", "asexp")
+	arguments.op = "S"
+	arguments.targets = make(stringSet)
+
 	//if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
 		aurUp, repoUp, err = upList(warnings)
@@ -48,60 +56,12 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		for _, up := range aurUp {
-			requestTargets = append(requestTargets, "aur/"+up.Name)
-		}
+		warnings.print()
 
-		for _, up := range repoUp {
-			requestTargets = append(requestTargets, up.Name)
-		}
-
-	}
-
-	//if len(aurTargets) > 0 || parser.existsArg("u", "sysupgrade") && len(remoteNames) > 0 {
-	//	fmt.Println(bold(cyan("::") + " Querying AUR..."))
-	//}
-	dt, err := getDepTree(requestTargets, warnings)
-	if err != nil {
-		return err
-	}
-
-	// Deptree will handle db/pkg prefixes. Now they can be striped from the
-	// targets.
-	for pkg := range parser.targets {
-		_, name := splitDbFromName(pkg)
-		parser.targets.remove(pkg)
-		parser.targets.set(name)
-	}
-
-	for i, pkg := range requestTargets {
-		_, name := splitDbFromName(pkg)
-		requestTargets[i] = name
-	}
-
-	if len(dt.Missing) > 0 {
-		str := bold(red(arrow+" Error: ")) + "Could not find all required packages:"
-
-		for name := range dt.Missing {
-			str += "\n    " + name
-		}
-
-		return fmt.Errorf("%s", str)
-	}
-
-	//create the arguments to pass for the repo install
-	arguments := parser.copy()
-	arguments.delArg("y", "refresh")
-	arguments.op = "S"
-	arguments.targets = make(stringSet)
-
-	if parser.existsArg("u", "sysupgrade") {
 		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
 		if err != nil {
 			return err
 		}
-
-		requestTargets = parser.targets.toSlice()
 
 		for _, up := range repoUp {
 			if !ignore.get(up.Name) {
@@ -131,61 +91,65 @@ func install(parser *arguments) error {
 		}
 	}
 
-	hasAur := false
-	for pkg := range parser.targets {
-		_, ok := dt.Aur[pkg]
-		if ok {
-			hasAur = true
-		}
+	dp, err := getDepPool(requestTargets, warnings)
+	if err != nil {
+		return err
 	}
+
+	err = dp.CheckMissing()
+	if err != nil {
+		return err
+	}
+
+	err = dp.CheckConflicts()
+	if err != nil {
+		return err
+	}
+
+	hasAur := len(dp.Aur) > 0
 
 	if hasAur && 0 == os.Geteuid() {
 		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
-	dc, err = getDepCatagories(requestTargets, dt)
+	do = getDepOrder(dp)
 	if err != nil {
 		return err
 	}
 
-	for _, pkg := range dc.Repo {
+	for _, pkg := range do.Repo {
 		arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 	}
 
-	for pkg := range dt.Groups {
+	for _, pkg := range dp.Groups {
 		arguments.addTarget(pkg)
 	}
 
-	if len(dc.Aur) == 0 && len(arguments.targets) == 0 && !parser.existsArg("u", "sysupgrade") {
+	if len(do.Aur) == 0 && len(arguments.targets) == 0 && !parser.existsArg("u", "sysupgrade") {
 		fmt.Println("There is nothing to do")
 		return nil
 	}
 
 	if hasAur {
-		hasAur = len(dc.Aur) != 0
+		hasAur = len(do.Aur) != 0
 
-		err = checkForAllConflicts(dc)
-		if err != nil {
-			return err
-		}
-
-		printDepCatagories(dc)
+		do.Print()
 		fmt.Println()
 
-		if len(dc.MakeOnly) > 0 {
+		if do.HasMake() {
 			if !continueTask("Remove make dependencies after install?", "yY") {
 				removeMake = true
 			}
 		}
 
-		toClean, toEdit, err = cleanEditNumberMenu(dc.Aur, dc.Bases, remoteNamesCache)
+		toClean, toEdit, err = cleanEditNumberMenu(do.Aur, do.Bases, remoteNamesCache)
 		if err != nil {
 			return err
 		}
 
 		cleanBuilds(toClean)
 
-		err = downloadPkgBuilds(dc.Aur, parser.targets, dc.Bases)
+		err = downloadPkgBuilds(do.Aur, parser.targets, do.Bases)
 		if err != nil {
 			return err
 		}
@@ -205,17 +169,17 @@ func install(parser *arguments) error {
 		}
 
 		//initial srcinfo parse before pkgver() bump
-		err = parseSRCINFOFiles(dc.Aur, srcinfosStale, dc.Bases)
+		err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
 		if err != nil {
 			return err
 		}
 
-		incompatible, err = getIncompatible(dc.Aur, srcinfosStale, dc.Bases)
+		incompatible, err = getIncompatible(do.Aur, srcinfosStale, do.Bases)
 		if err != nil {
 			return err
 		}
 
-		err = checkPgpKeys(dc.Aur, dc.Bases, srcinfosStale)
+		err = checkPgpKeys(do.Aur, do.Bases, srcinfosStale)
 		if err != nil {
 			return err
 		}
@@ -229,15 +193,31 @@ func install(parser *arguments) error {
 
 		depArguments := makeArguments()
 		depArguments.addArg("D", "asdeps")
+		expArguments := makeArguments()
+		expArguments.addArg("D", "asexplicit")
 
-		for _, pkg := range dc.Repo {
-			if !parser.targets.get(pkg.Name()) && !localNamesCache.get(pkg.Name()) && !remoteNamesCache.get(pkg.Name()) {
+		for _, pkg := range do.Repo {
+			if !dp.Explicit.get(pkg.Name()) && !localNamesCache.get(pkg.Name()) && !remoteNamesCache.get(pkg.Name()) {
 				depArguments.addTarget(pkg.Name())
+				continue
+			}
+
+			if parser.existsArg("asdeps", "asdep") && dp.Explicit.get(pkg.Name()) {
+				depArguments.addTarget(pkg.Name())
+			} else if parser.existsArg("asexp", "asexplicit") && dp.Explicit.get(pkg.Name()) {
+				expArguments.addTarget(pkg.Name())
 			}
 		}
 
 		if len(depArguments.targets) > 0 {
 			_, stderr, err := passToPacmanCapture(depArguments)
+			if err != nil {
+				return fmt.Errorf("%s%s", stderr, err)
+			}
+		}
+
+		if len(expArguments.targets) > 0 {
+			_, stderr, err := passToPacmanCapture(expArguments)
 			if err != nil {
 				return fmt.Errorf("%s%s", stderr, err)
 			}
@@ -250,25 +230,21 @@ func install(parser *arguments) error {
 		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 		cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
-		err = downloadPkgBuildsSources(dc.Aur, dc.Bases, incompatible)
+		err = downloadPkgBuildsSources(do.Aur, do.Bases, incompatible)
 		if err != nil {
 			return err
 		}
 
-		err = buildInstallPkgBuilds(dc.Aur, srcinfosStale, parser.targets, parser, dc.Bases, incompatible)
+		err = buildInstallPkgBuilds(dp, do, srcinfosStale, parser, incompatible)
 		if err != nil {
 			return err
 		}
 
-		if len(dc.MakeOnly) > 0 {
-			if !removeMake {
-				return nil
-			}
-
+		if removeMake {
 			removeArguments := makeArguments()
 			removeArguments.addArg("R", "u")
 
-			for pkg := range dc.MakeOnly {
+			for _, pkg := range do.getMake() {
 				removeArguments.addTarget(pkg)
 			}
 
@@ -283,7 +259,7 @@ func install(parser *arguments) error {
 		}
 
 		if config.CleanAfter {
-			clean(dc.Aur)
+			clean(do.Aur)
 		}
 
 		return nil
@@ -594,13 +570,13 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 	return
 }
 
-func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, targets stringSet, parser *arguments, bases map[string][]*rpc.Pkg, incompatible stringSet) error {
+func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg.PKGBUILD, parser *arguments, incompatible stringSet) error {
 	arch, err := alpmHandle.Arch()
 	if err != nil {
 		return err
 	}
 
-	for _, pkg := range pkgs {
+	for _, pkg := range do.Aur {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		built := true
 
@@ -623,8 +599,8 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			return err
 		}
 
-		if config.ReBuild == "no" || (config.ReBuild == "yes" && !targets.get(pkg.Name)) {
-			for _, split := range bases[pkg.PackageBase] {
+		if config.ReBuild == "no" || (config.ReBuild == "yes" && !dp.Explicit.get(pkg.Name)) {
+			for _, split := range do.Bases[pkg.PackageBase] {
 				file, err := completeFileName(dir, split.Name+"-"+version+"-"+arch+".pkg")
 				if err != nil {
 					return err
@@ -674,6 +650,8 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 
 		depArguments := makeArguments()
 		depArguments.addArg("D", "asdeps")
+		expArguments := makeArguments()
+		expArguments.addArg("D", "asexplicit")
 
 		//remotenames: names of all non repo packages on the system
 		_, _, localNames, remoteNames, err := filterPackages()
@@ -686,7 +664,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 		remoteNamesCache := sliceToStringSet(remoteNames)
 		localNamesCache := sliceToStringSet(localNames)
 
-		for _, split := range bases[pkg.PackageBase] {
+		for _, split := range do.Bases[pkg.PackageBase] {
 			file, err := completeFileName(dir, split.Name+"-"+version+"-"+arch+".pkg")
 			if err != nil {
 				return err
@@ -704,9 +682,16 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			}
 
 			arguments.addTarget(file)
-			//if !targets.get(split.Name) {
-			if !targets.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
+			if !dp.Explicit.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
 				depArguments.addTarget(split.Name)
+			}
+
+			if dp.Explicit.get(split.Name) {
+				if parser.existsArg("asdeps", "asdep") {
+					depArguments.addTarget(split.Name)
+				} else if parser.existsArg("asexplicit", "asexp") {
+					expArguments.addTarget(split.Name)
+				}
 			}
 		}
 
@@ -717,7 +702,7 @@ func buildInstallPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD,
 			return err
 		}
 
-		for _, pkg := range bases[pkg.PackageBase] {
+		for _, pkg := range do.Bases[pkg.PackageBase] {
 			updateVCSData(pkg.Name, srcinfo.Source)
 		}
 
