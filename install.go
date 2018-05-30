@@ -41,16 +41,6 @@ func install(parser *arguments) error {
 	remoteNamesCache := sliceToStringSet(remoteNames)
 	localNamesCache := sliceToStringSet(localNames)
 
-	//if we are doing -u also request all packages needing update
-	if parser.existsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upList(warnings)
-		if err != nil {
-			return err
-		}
-
-		warnings.print()
-	}
-
 	//create the arguments to pass for the repo install
 	arguments := parser.copy()
 	arguments.delArg("y", "refresh")
@@ -59,13 +49,19 @@ func install(parser *arguments) error {
 	arguments.op = "S"
 	arguments.targets = make(stringSet)
 
+	//if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
-		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
+		aurUp, repoUp, err = upList(warnings)
 		if err != nil {
 			return err
 		}
 
-		requestTargets = parser.targets.toSlice()
+		warnings.print()
+
+		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
+		if err != nil {
+			return err
+		}
 
 		for _, up := range repoUp {
 			if !ignore.get(up.Name) {
