@@ -49,6 +49,10 @@ func install(parser *arguments) error {
 	arguments.op = "S"
 	arguments.targets = make(stringSet)
 
+	if mode == ModeAUR {
+		arguments.delArg("u", "sysupgrade")
+	}
+
 	//if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
 		aurUp, repoUp, err = upList(warnings)
@@ -125,7 +129,7 @@ func install(parser *arguments) error {
 		arguments.addTarget(pkg)
 	}
 
-	if len(do.Aur) == 0 && len(arguments.targets) == 0 && !parser.existsArg("u", "sysupgrade") {
+	if len(do.Aur) == 0 && len(arguments.targets) == 0 && (!parser.existsArg("u", "sysupgrade") || mode == ModeAUR) {
 		fmt.Println("There is nothing to do")
 		return nil
 	}

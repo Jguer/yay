@@ -25,6 +25,14 @@ const (
 	TopDown
 )
 
+type targetMode int
+
+const (
+	ModeAUR targetMode = iota
+	ModeRepo
+	ModeAny
+)
+
 // Configuration stores yay's config.
 type Configuration struct {
 	BuildDir      string `json:"buildDir"`
@@ -97,6 +105,9 @@ var alpmConf alpm.PacmanConfig
 
 // AlpmHandle is the alpm handle used by yay.
 var alpmHandle *alpm.Handle
+
+// Mode is used to restrict yay to AUR or repo only modes
+var mode targetMode = ModeAny
 
 func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	file, err := os.Open(pacmanconf)

@@ -300,6 +300,10 @@ func handleConfig(option, value string) bool {
 		config.Provides = true
 	case "noprovides":
 		config.Provides = false
+	case "a", "aur":
+		mode = ModeAUR
+	case "repo":
+		mode = ModeRepo
 	default:
 		return false
 	}

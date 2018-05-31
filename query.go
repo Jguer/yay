@@ -220,8 +220,8 @@ func syncInfo(pkgS []string) (err error) {
 		}
 	}
 
-	if len(aurS) != len(info) {
-		return fmt.Errorf("Could not find all required packages")
+	if len(repoS)+len(aurS) != len(pkgS) {
+		return fmt.Errorf("Could not find all packages")
 	}
 
 	return
@@ -288,10 +288,14 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		db, name := splitDbFromName(_pkg)
 		found := false
 
-		if db == "aur" {
+		if db == "aur" || (mode == ModeAUR && db != "") {
+			continue
+		}
+
+		if db == "aur" || (mode == ModeAUR && db == "") {
 			aur = append(aur, _pkg)
 			continue
-		} else if db != "" {
+		} else if db != "" || mode == ModeRepo {
 			repo = append(repo, _pkg)
 			continue
 		}
