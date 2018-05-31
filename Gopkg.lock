@@ -5,13 +5,13 @@
   branch = "master"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
-  revision = "525cfc02951f197145144587c42d51baac160eb7"
+  revision = "f09b14fad0ccb0df7e5b699da8bcf3b45db4d0ab"
 
 [[projects]]
   branch = "master"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
-  revision = "9050804dc7d471393053322aaaa40428fbd32de3"
+  revision = "837b260b8e90895c45737e2e72313fe5bce6f2c4"
 
 [[projects]]
   branch = "master"
