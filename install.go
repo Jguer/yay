@@ -303,22 +303,36 @@ nextpkg:
 	return incompatible, nil
 }
 
-func getVersionFromPkgbuild(dir string) (string, error) {
+func parsePackageList(dir string) (map[string]string, error) {
 	stdout, stderr, err := passToMakepkgCapture(dir, "--packagelist")
 
 	if err != nil {
-		return "", fmt.Errorf("%s%s", stderr, err)
+		return nil, fmt.Errorf("%s%s", stderr, err)
 	}
 
-	line := strings.Split(stdout, "\n")[0]
-	split := strings.Split(line, "-")
+	lines := strings.Split(stdout, "\n")
+	pkgdests := make(map[string]string)
 
-	if len(split) < 4 {
-		return "", fmt.Errorf("Can not parse version from: %s", split)
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+
+		fileName := filepath.Base(line)
+		split := strings.Split(fileName, "-")
+
+		if len(split) < 4 {
+			return nil, fmt.Errorf("Can not find package name : %s", split)
+		}
+
+		// pkgname-pkgver-pkgrel-arch.pkgext
+		// This assumes 3 dashes after the pkgname, Will cause an error
+		// if the PKGEXT contains a dash. Please no one do that.
+		pkgname := strings.Join(split[:len(split)-3], "-")
+		pkgdests[pkgname] = line
 	}
-	//pkg-name-pkgver-pkgrel-arch: extract pkgver-pkgrel
-	ver := split[len(split)-3] + "-" + split[len(split)-2]
-	return ver, nil
+
+	return pkgdests, nil
 }
 
 func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
@@ -571,11 +585,6 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 }
 
 func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg.PKGBUILD, parser *arguments, incompatible stringSet) error {
-	arch, err := alpmHandle.Arch()
-	if err != nil {
-		return err
-	}
-
 	for _, pkg := range do.Aur {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		built := true
@@ -594,27 +603,23 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 			return fmt.Errorf("Error making: %s", pkg.Name)
 		}
 
-		version, err := getVersionFromPkgbuild(dir)
+		pkgdests, err := parsePackageList(dir)
 		if err != nil {
 			return err
 		}
 
 		if config.ReBuild == "no" || (config.ReBuild == "yes" && !dp.Explicit.get(pkg.Name)) {
 			for _, split := range do.Bases[pkg.PackageBase] {
-				file, err := completeFileName(dir, split.Name+"-"+version+"-"+arch+".pkg")
-				if err != nil {
-					return err
+				pkgdest, ok := pkgdests[split.Name]
+				if !ok {
+					return fmt.Errorf("Could not find PKGDEST for: %s", split.Name)
 				}
 
-				if file == "" {
-					file, err = completeFileName(dir, split.Name+"-"+version+"-"+"any"+".pkg")
-					if err != nil {
-						return err
-					}
-				}
-
-				if file == "" {
+				_, err := os.Stat(pkgdest)
+				if os.IsNotExist(err) {
 					built = false
+				} else if err != nil {
+					return err
 				}
 			}
 		} else {
@@ -665,23 +670,12 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 		localNamesCache := sliceToStringSet(localNames)
 
 		for _, split := range do.Bases[pkg.PackageBase] {
-			file, err := completeFileName(dir, split.Name+"-"+version+"-"+arch+".pkg")
-			if err != nil {
-				return err
+			pkgdest, ok := pkgdests[split.Name]
+			if !ok {
+				return fmt.Errorf("Could not find PKGDEST for: %s", split.Name)
 			}
 
-			if file == "" {
-				file, err = completeFileName(dir, split.Name+"-"+version+"-"+"any"+".pkg")
-				if err != nil {
-					return err
-				}
-			}
-
-			if file == "" {
-				return fmt.Errorf("Could not find built package " + split.Name + "-" + version + "-" + arch + ".pkg")
-			}
-
-			arguments.addTarget(file)
+			arguments.addTarget(pkgdest)
 			if !dp.Explicit.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
 				depArguments.addTarget(split.Name)
 			}

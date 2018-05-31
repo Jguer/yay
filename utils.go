@@ -1,9 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
-	"path/filepath"
-	"strings"
 	"unicode"
 )
 
@@ -57,25 +54,6 @@ func (mss mapStringSet) Add(n string, v string) {
 		mss[n] = make(stringSet)
 	}
 	mss[n].set(v)
-}
-
-func completeFileName(dir, name string) (string, error) {
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return "", err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-
-		if strings.HasPrefix(file.Name(), name) {
-			return filepath.Join(dir, file.Name()), nil
-		}
-	}
-
-	return "", nil
 }
 
 func lessRunes(iRunes, jRunes []rune) bool {
