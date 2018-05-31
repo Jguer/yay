@@ -101,9 +101,14 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		var singleDb *alpm.Db
 
 		// aur/ prefix means we only check the aur
-		if target.Db == "aur" {
+		if target.Db == "aur" || (target.Db == "" && mode == ModeAUR) {
 			dp.Targets = append(dp.Targets, target)
 			aurTargets.set(target.DepString())
+			continue
+		}
+
+		if mode == ModeAUR {
+			dp.Targets = append(dp.Targets, target)
 			continue
 		}
 
@@ -151,7 +156,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		dp.Targets = append(dp.Targets, target)
 	}
 
-	if len(aurTargets) > 0 {
+	if len(aurTargets) > 0 && (mode == ModeAny || mode == ModeAUR) {
 		return dp.resolveAURPackages(aurTargets, true)
 	}
 

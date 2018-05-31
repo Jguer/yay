@@ -140,27 +140,31 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 
 	pkgdata := make(map[string]*rpc.Pkg)
 
-	fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
-	wg.Add(1)
-	go func() {
-		repoUp, repoErr = upRepo(local)
-		wg.Done()
-	}()
-
-	fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
-	wg.Add(1)
-	go func() {
-		aurUp, aurErr = upAUR(remote, remoteNames, pkgdata, warnings)
-		wg.Done()
-	}()
-
-	if config.Devel {
-		fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
+	if mode == ModeAny || mode == ModeRepo {
+		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 		wg.Add(1)
 		go func() {
-			develUp, develErr = upDevel(remote)
+			repoUp, repoErr = upRepo(local)
 			wg.Done()
 		}()
+	}
+
+	if mode == ModeAny || mode == ModeAUR {
+		fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
+		wg.Add(1)
+		go func() {
+			aurUp, aurErr = upAUR(remote, remoteNames, pkgdata, warnings)
+			wg.Done()
+		}()
+
+		if config.Devel {
+			fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
+			wg.Add(1)
+			go func() {
+				develUp, develErr = upDevel(remote)
+				wg.Done()
+			}()
+		}
 	}
 
 	wg.Wait()
