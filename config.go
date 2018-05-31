@@ -63,6 +63,7 @@ type Configuration struct {
 	CleanAfter    bool   `json:"cleanAfter"`
 	GitClone      bool   `json:"gitclone"`
 	Provides      bool   `json:"provides"`
+	PGPFetch      bool   `json:"pgpfetch"`
 }
 
 var version = "5.688"
@@ -146,6 +147,7 @@ func defaultSettings(config *Configuration) {
 	config.MakepkgBin = "makepkg"
 	config.NoConfirm = false
 	config.PacmanBin = "pacman"
+	config.PGPFetch = true
 	config.PacmanConf = "/etc/pacman.conf"
 	config.GpgFlags = ""
 	config.MFlags = ""
