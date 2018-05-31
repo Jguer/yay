@@ -64,6 +64,7 @@ type Configuration struct {
 	GitClone      bool   `json:"gitclone"`
 	Provides      bool   `json:"provides"`
 	PGPFetch      bool   `json:"pgpfetch"`
+	ShowDiffs     bool   `json:"showdifs"`
 }
 
 var version = "5.688"
@@ -167,6 +168,7 @@ func defaultSettings(config *Configuration) {
 	config.AnswerUpgrade = ""
 	config.GitClone = true
 	config.Provides = true
+	config.ShowDiffs = true
 }
 
 // Editor returns the preferred system editor.
