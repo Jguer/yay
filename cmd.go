@@ -300,6 +300,10 @@ func handleConfig(option, value string) bool {
 		config.Provides = true
 	case "noprovides":
 		config.Provides = false
+	case "pgpfetch":
+		config.PGPFetch = true
+	case "nopgpfetch":
+		config.PGPFetch = false
 	case "a", "aur":
 		mode = ModeAUR
 	case "repo":

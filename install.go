@@ -183,9 +183,11 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		err = checkPgpKeys(do.Aur, do.Bases, srcinfosStale)
-		if err != nil {
-			return err
+		if config.PGPFetch {
+			err = checkPgpKeys(do.Aur, do.Bases, srcinfosStale)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
