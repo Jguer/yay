@@ -288,11 +288,15 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		db, name := splitDbFromName(_pkg)
 		found := false
 
-		if db == "aur" || (mode == ModeAUR && db != "") {
+		if db == "aur" && mode == ModeRepo {
 			continue
 		}
 
-		if db == "aur" || (mode == ModeAUR && db == "") {
+		if db != "aur" && db != "" && mode == ModeAUR {
+			continue
+		}
+
+		if db == "aur" || mode == ModeAUR {
 			aur = append(aur, _pkg)
 			continue
 		} else if db != "" || mode == ModeRepo {
