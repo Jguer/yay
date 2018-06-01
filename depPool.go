@@ -84,6 +84,8 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 	// call
 	aurTargets := make(stringSet)
 
+	pkgs = removeInvalidTargets(pkgs)
+
 	for _, pkg := range pkgs {
 		var err error
 		target := toTarget(pkg)
@@ -101,14 +103,9 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		var singleDb *alpm.Db
 
 		// aur/ prefix means we only check the aur
-		if target.Db == "aur" || (target.Db == "" && mode == ModeAUR) {
+		if target.Db == "aur" || mode == ModeAUR {
 			dp.Targets = append(dp.Targets, target)
 			aurTargets.set(target.DepString())
-			continue
-		}
-
-		if mode == ModeAUR {
-			dp.Targets = append(dp.Targets, target)
 			continue
 		}
 

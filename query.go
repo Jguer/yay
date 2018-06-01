@@ -184,6 +184,8 @@ func syncSearch(pkgS []string) (err error) {
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string) (err error) {
 	var info []*rpc.Pkg
+	missing := false
+	pkgS = removeInvalidTargets(pkgS)
 	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
@@ -199,6 +201,7 @@ func syncInfo(pkgS []string) (err error) {
 
 		info, err = aurInfoPrint(noDb)
 		if err != nil {
+			missing = true
 			fmt.Println(err)
 		}
 	}
@@ -214,14 +217,18 @@ func syncInfo(pkgS []string) (err error) {
 		}
 	}
 
+	if len(aurS) != len(info) {
+		missing = true
+	}
+
 	if len(info) != 0 {
 		for _, pkg := range info {
 			PrintInfo(pkg)
 		}
 	}
 
-	if len(repoS)+len(aurS) != len(pkgS) {
-		return fmt.Errorf("Could not find all packages")
+	if missing {
+		err = fmt.Errorf("")
 	}
 
 	return
@@ -288,11 +295,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		db, name := splitDbFromName(_pkg)
 		found := false
 
-		if db == "aur" || (mode == ModeAUR && db != "") {
-			continue
-		}
-
-		if db == "aur" || (mode == ModeAUR && db == "") {
+		if db == "aur" || mode == ModeAUR {
 			aur = append(aur, _pkg)
 			continue
 		} else if db != "" || mode == ModeRepo {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"unicode"
 )
 
@@ -102,4 +103,26 @@ func stringSliceEqual(a, b []string) bool {
 	}
 
 	return true
+}
+
+func removeInvalidTargets(targets []string) []string {
+	filteredTargets := make([]string, 0)
+
+	for _, target := range targets {
+		db, _ := splitDbFromName(target)
+
+		if db == "aur" && mode == ModeRepo {
+			fmt.Printf("%s %s %s\n", bold(yellow(arrow)), cyan(target), bold("Can't use target with option --repo -- skipping"))
+			continue
+		}
+
+		if db != "aur" && db != "" && mode == ModeAUR {
+			fmt.Printf("%s %s %s\n", bold(yellow(arrow)), cyan(target), bold("Can't use target with option --aur -- skipping"))
+			continue
+		}
+
+		filteredTargets = append(filteredTargets, target)
+	}
+
+	return filteredTargets
 }
