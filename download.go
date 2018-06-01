@@ -100,23 +100,40 @@ func downloadAndUnpack(url string, path string) (err error) {
 }
 
 func getPkgbuilds(pkgs []string) error {
-	//possibleAurs := make([]string, 0, 0)
+	missing := false
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	missing, err := getPkgbuildsfromABS(pkgs, wd)
-	if err != nil {
-		return err
+	pkgs = removeInvalidTargets(pkgs)
+
+	aur, repo, err := packageSlices(pkgs)
+
+	if len(repo) > 0 {
+		missing, err = getPkgbuildsfromABS(repo, wd)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = getPkgbuildsfromAUR(missing, wd)
+	if len(aur) > 0 {
+		_missing, err := getPkgbuildsfromAUR(aur, wd)
+		if err != nil {
+			return err
+		}
+		missing = missing || _missing
+	}
+
+	if missing {
+		err = fmt.Errorf("")
+	}
+
 	return err
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string) (missing []string, err error) {
+func getPkgbuildsfromABS(pkgs []string, path string) (missing bool,err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
@@ -124,8 +141,14 @@ func getPkgbuildsfromABS(pkgs []string, path string) (missing []string, err erro
 
 nextPkg:
 	for _, pkgN := range pkgs {
+		pkgDb, name := splitDbFromName(pkgN)
+
 		for _, db := range dbList.Slice() {
-			pkg, err := db.PkgByName(pkgN)
+			if pkgDb != "" && db.Name() != pkgDb {
+				continue
+			}
+
+			pkg, err := db.PkgByName(name)
 			if err == nil {
 				var url string
 				name := pkg.Base()
@@ -144,7 +167,7 @@ nextPkg:
 				case "community", "multilib":
 					url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
 				default:
-					fmt.Println(name + " not in standard repositories")
+					fmt.Println(pkgN, "not in standard repositories")
 					continue nextPkg
 				}
 
@@ -164,7 +187,8 @@ nextPkg:
 			}
 		}
 
-		missing = append(missing, pkgN)
+		fmt.Println(pkgN, "could not find package in database")
+		missing = true
 	}
 
 	if _, err := os.Stat(filepath.Join(cacheHome, "packages")); err == nil {
@@ -175,14 +199,25 @@ nextPkg:
 }
 
 // GetPkgbuild downloads pkgbuild from the AUR.
-func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
-	aq, err := aurInfoPrint(pkgs)
+func getPkgbuildsfromAUR(pkgs []string, dir string) (bool, error) {
+	missing := false
+	strippedPkgs := make([]string, 0)
+	for _, pkg := range pkgs {
+		_, name := splitDbFromName(pkg)
+		strippedPkgs = append(strippedPkgs, name)
+	}
+
+	aq, err := aurInfoPrint(strippedPkgs)
 	if err != nil {
-		return err
+		return missing, err
 	}
 
 	for _, pkg := range aq {
-		var err error
+		if _, err := os.Stat(filepath.Join(dir, pkg.PackageBase)); err == nil {
+			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name)), "directory already exists")
+			continue
+		}
+
 		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
 			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
 		} else {
@@ -197,8 +232,8 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
 	}
 
 	if len(aq) != len(pkgs) {
-		return fmt.Errorf("Could not find all required packages")
+		missing = true
 	}
 
-	return
+	return missing, err
 }
