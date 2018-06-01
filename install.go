@@ -153,13 +153,17 @@ func install(parser *arguments) error {
 
 		cleanBuilds(toClean)
 
-		err = downloadPkgBuilds(do.Aur, parser.targets, do.Bases)
+		oldHashes, err := downloadPkgBuilds(do.Aur, parser.targets, do.Bases)
 		if err != nil {
 			return err
 		}
 
 		if len(toEdit) > 0 {
-			err = editPkgBuilds(toEdit)
+			if config.ShowDiffs {
+				err = showPkgBuildDiffs(toEdit, do.Bases, oldHashes)
+			} else {
+				err = editPkgBuilds(toEdit, do.Bases, oldHashes)
+			}
 			if err != nil {
 				return err
 			}
@@ -422,7 +426,11 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 		}
 	}
 
-	fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
+	if config.ShowDiffs {
+		fmt.Println(bold(green(arrow + " Diffs to show?")))
+	} else {
+		fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
+	}
 	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
 
 	fmt.Print(bold(green(arrow + " ")))
@@ -481,20 +489,66 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 	}
 }
 
-func editPkgBuilds(pkgs []*rpc.Pkg) error {
+func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[string]string) error {
+	for _, pkg := range pkgs {
+		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
+		if shouldUseGit(dir) {
+			hash, _ := hashes[pkg.PackageBase]
+			if hash == "" {
+				hash = gitEmptyTree
+			}
+
+			head, err := gitGetHash(config.BuildDir, pkg.PackageBase)
+			if err != nil {
+				return err
+			}
+
+			if head == hash {
+				fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(pkg, bases)), bold("No changes -- skipping"))
+				continue
+			}
+
+			args := []string{"diff", hash + "..HEAD", "--src-prefix", dir + "/", "--dst-prefix", dir + "/"}
+			if useColor {
+				args = append(args, "--color=always")
+			} else {
+				args = append(args, "--color=never")
+			}
+			err = passToGit(dir, args...)
+			if err != nil {
+				return err
+			}
+		} else {
+			editor, editorArgs := editor()
+			editorArgs = append(editorArgs, filepath.Join(dir, "PKGBUILD"))
+			editcmd := exec.Command(editor, editorArgs...)
+			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+			err := editcmd.Run()
+			if err != nil {
+				return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func editPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[string]string) error {
 	pkgbuilds := make([]string, 0, len(pkgs))
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		pkgbuilds = append(pkgbuilds, filepath.Join(dir, "PKGBUILD"))
 	}
 
-	editor, editorArgs := editor()
-	editorArgs = append(editorArgs, pkgbuilds...)
-	editcmd := exec.Command(editor, editorArgs...)
-	editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err := editcmd.Run()
-	if err != nil {
-		return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
+	if len(pkgbuilds) > 0 {
+		editor, editorArgs := editor()
+		editorArgs = append(editorArgs, pkgbuilds...)
+		editcmd := exec.Command(editor, editorArgs...)
+		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+		err := editcmd.Run()
+		if err != nil {
+			return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
+		}
 	}
 
 	return nil
@@ -535,8 +589,11 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, 
 	}
 }
 
-func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) error {
-	for k, pkg := range pkgs {
+func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) (map[string]string, error) {
+	toSkip := make(stringSet)
+	hashes := make(map[string]string)
+
+	for _, pkg := range pkgs {
 		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
 			dir := filepath.Join(config.BuildDir, pkg.PackageBase, ".SRCINFO")
 			pkgbuild, err := gopkg.ParseSRCINFO(dir)
@@ -546,12 +603,27 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 				versionPKG, errP := gopkg.NewCompleteVersion(pkgbuild.Version())
 				if errP == nil && errR == nil {
 					if !versionRPC.Newer(versionPKG) {
-						str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
-						fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
-						continue
+						toSkip.set(pkg.PackageBase)
 					}
 				}
 			}
+		}
+	}
+
+	for k, pkg := range pkgs {
+		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
+			hash, err := gitGetHash(config.BuildDir, pkg.PackageBase)
+			if err == nil {
+				hashes[pkg.PackageBase] = hash
+			} else {
+				hashes[pkg.PackageBase] = ""
+			}
+		}
+
+		if toSkip.get(pkg.PackageBase) {
+			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
+			fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
+			continue
 		}
 
 		str := bold(cyan("::") + " Downloading PKGBUILD (%d/%d): %s\n")
@@ -561,15 +633,18 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 		var err error
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
 			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
+			if err != nil {
+				return hashes, err
+			}
 		} else {
 			err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
 		}
 		if err != nil {
-			return err
+			return hashes, err
 		}
 	}
 
-	return nil
+	return hashes, nil
 }
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatible stringSet) (err error) {

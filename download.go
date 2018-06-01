@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 // Decide what download method to use:
@@ -20,7 +21,7 @@ func shouldUseGit(path string) bool {
 	}
 
 	_, err = os.Stat(filepath.Join(path, ".git"))
-	return os.IsExist(err)
+	return err == nil || os.IsExist(err)
 }
 
 func downloadFile(path string, url string) (err error) {
@@ -41,6 +42,15 @@ func downloadFile(path string, url string) (err error) {
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+func gitGetHash(path string, name string) (string, error) {
+	stdout, stderr, err := passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD")
+	if err != nil {
+		return "", fmt.Errorf("%s%s", stderr, err)
+	}
+
+	return strings.TrimSpace(stdout), nil
 }
 
 func gitDownload(url string, path string, name string) error {
@@ -72,6 +82,12 @@ func gitDownload(url string, path string, name string) error {
 	}
 
 	return nil
+}
+
+func gitDiff(path string, name string) error {
+	err := passToGit(filepath.Join(path, name), "diff", "HEAD..HEAD@{upstream}")
+
+	return err
 }
 
 // DownloadAndUnpack downloads url tgz and extracts to path.

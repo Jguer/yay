@@ -304,6 +304,10 @@ func handleConfig(option, value string) bool {
 		config.PGPFetch = true
 	case "nopgpfetch":
 		config.PGPFetch = false
+	case "showdiffs":
+		config.ShowDiffs = true
+	case "noshowdiffs":
+		config.ShowDiffs = false
 	case "a", "aur":
 		mode = ModeAUR
 	case "repo":
@@ -603,7 +607,6 @@ func passToMakepkgCapture(dir string, args ...string) (string, string, error) {
 	args = append(args, mflags...)
 
 	cmd := exec.Command(config.MakepkgBin, args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Dir = dir
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
@@ -629,4 +632,23 @@ func passToGit(dir string, _args ...string) (err error) {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = cmd.Run()
 	return
+}
+
+func passToGitCapture(dir string, _args ...string) (string, string, error) {
+	var outbuf, errbuf bytes.Buffer
+	gitflags := strings.Fields(config.GitFlags)
+	args := []string{"-C", dir}
+	args = append(args, gitflags...)
+	args = append(args, _args...)
+
+	cmd := exec.Command(config.GitBin, args...)
+	cmd.Dir = dir
+	cmd.Stdout = &outbuf
+	cmd.Stderr = &errbuf
+
+	err := cmd.Run()
+	stdout := outbuf.String()
+	stderr := errbuf.String()
+
+	return stdout, stderr, err
 }
