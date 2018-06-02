@@ -136,6 +136,7 @@ func getCommit(url string, branch string, protocols []string) string {
 
 		cmd := exec.Command(config.GitBin, "ls-remote", protocol+"://"+url, branch)
 		cmd.Stdout = &outbuf
+		cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0")
 
 		err := cmd.Start()
 		if err != nil {
