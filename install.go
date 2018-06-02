@@ -15,7 +15,6 @@ import (
 
 // Install handles package installs
 func install(parser *arguments) error {
-	requestTargets := parser.targets.toSlice()
 	var err error
 	var incompatible stringSet
 	var do *depOrder
@@ -25,6 +24,7 @@ func install(parser *arguments) error {
 	var aurUp upSlice
 	var repoUp upSlice
 
+	requestTargets := parser.copy().targets
 	warnings := &aurWarnings{}
 
 	removeMake := false
@@ -47,7 +47,7 @@ func install(parser *arguments) error {
 	arguments.delArg("asdeps", "asdep")
 	arguments.delArg("asexplicit", "asexp")
 	arguments.op = "S"
-	arguments.targets = make(stringSet)
+	arguments.clearTargets()
 
 	if mode == ModeAUR {
 		arguments.delArg("u", "sysupgrade")
@@ -94,6 +94,8 @@ func install(parser *arguments) error {
 			parser.addTarget(pkg)
 		}
 	}
+
+	targets := sliceToStringSet(parser.targets)
 
 	dp, err := getDepPool(requestTargets, warnings)
 	if err != nil {
@@ -153,7 +155,7 @@ func install(parser *arguments) error {
 
 		cleanBuilds(toClean)
 
-		oldHashes, err := downloadPkgBuilds(do.Aur, parser.targets, do.Bases)
+		oldHashes, err := downloadPkgBuilds(do.Aur, targets, do.Bases)
 		if err != nil {
 			return err
 		}
@@ -724,7 +726,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 		}
 
 		arguments := parser.copy()
-		arguments.targets = make(stringSet)
+		arguments.clearTargets()
 		arguments.op = "U"
 		arguments.delArg("confirm")
 		arguments.delArg("c", "clean")
