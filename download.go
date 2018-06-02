@@ -149,7 +149,7 @@ func getPkgbuilds(pkgs []string) error {
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string) (missing bool,err error) {
+func getPkgbuildsfromABS(pkgs []string, path string) (missing bool, err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
