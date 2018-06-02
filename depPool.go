@@ -377,6 +377,12 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 // This is mostly used to promote packages from the cache
 // to the Install list
 // Provide a pacman style provider menu if theres more than one candidate
+// This acts slightly differenly from Pacman, It will give
+// a menu even if a package with a matching name exists. I believe this
+// method is better because most of the time you are choosing between
+// foo and foo-git.
+// Using Pacman's ways trying to install foo would never give you
+// a menu.
 // TODO: maybe intermix repo providers in the menu
 func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 	depName, _, _ := splitDep(dep)
@@ -387,33 +393,20 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 		if pkg, ok := dp.AurCache[dep]; ok && pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			return pkg
 		}
+
 	}
 
-	//this version prioratizes name over provides
-	//if theres a direct match for a package return
-	//that instead of using the menu
-	//
-	//providers := make(rpcPkgs, 0)
-	//for _, pkg := range dp.AurCache {
-	//	if pkgSatisfies(pkg.Name, pkg.Version, dep) {
-	//		return pkg
-	//	}
-	//}
-
-	//for _, pkg := range dp.AurCache {
-	//	for _, provide := range pkg.Provides {
-	//		if provideSatisfies(provide, dep) {
-	//			providers = append(providers, pkg)
-	//		}
-	//	}
-	//}
-
-	// This version acts slightly differenly from Pacman, It will give
-	// a menu even if a package with a matching name exists. I believe this
-	// method is better because most of the time you are choosing between
-	// foo and foo-git.
-	// Using Pacman's ways trying to install foo would never give you
-	// a menu.
+	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
+		for _, pkg := range dp.AurCache {
+			if pkgSatisfies(pkg.Name, pkg.Version, dep) {
+				for _, target := range dp.Targets {
+					if target.Name == pkg.Name {
+						return pkg
+					}
+				}
+			}
+		}
+	}
 
 	for _, pkg := range dp.AurCache {
 		if seen.get(pkg.Name) {
