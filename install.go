@@ -597,7 +597,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 
 		srcinfo := srcinfos[pkg.PackageBase]
 
-		args := []string{"--nobuild", "-fCc"}
+		args := []string{"--nobuild", "-fC"}
 
 		if incompatible.get(pkg.PackageBase) {
 			args = append(args, "--ignorearch")
@@ -636,7 +636,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 			fmt.Println(bold(yellow(arrow)),
 				cyan(pkg.Name+"-"+pkg.Version)+bold(" Already made -- skipping build"))
 		} else {
-			args := []string{"-Ccf", "--noconfirm"}
+			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 
 			if incompatible.get(pkg.PackageBase) {
 				args = append(args, "--ignorearch")
