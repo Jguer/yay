@@ -72,7 +72,7 @@ type arguments struct {
 	options map[string]string
 	globals map[string]string
 	doubles stringSet // Tracks args passed twice such as -yy and -dd
-	targets stringSet
+	targets []string
 }
 
 func makeArguments() *arguments {
@@ -81,7 +81,7 @@ func makeArguments() *arguments {
 		make(map[string]string),
 		make(map[string]string),
 		make(stringSet),
-		make(stringSet),
+		make([]string, 0),
 	}
 }
 
@@ -98,9 +98,8 @@ func (parser *arguments) copy() (cp *arguments) {
 		cp.globals[k] = v
 	}
 
-	for k, v := range parser.targets {
-		cp.targets[k] = v
-	}
+	cp.targets = make([]string, len(parser.targets))
+	copy(cp.targets, parser.targets)
 
 	for k, v := range parser.doubles {
 		cp.doubles[k] = v
@@ -268,15 +267,11 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 }
 
 func (parser *arguments) addTarget(targets ...string) {
-	for _, target := range targets {
-		parser.targets[target] = struct{}{}
-	}
+	parser.targets = append(parser.targets, targets...)
 }
 
-func (parser *arguments) delTarget(targets ...string) {
-	for _, target := range targets {
-		delete(parser.targets, target)
-	}
+func (parser *arguments) clearTargets() {
+	parser.targets = make([]string, 0)
 }
 
 // Multiple args acts as an OR operator
@@ -289,14 +284,6 @@ func (parser *arguments) existsDouble(options ...string) bool {
 	}
 
 	return false
-}
-
-func (parser *arguments) formatTargets() (args []string) {
-	for target := range parser.targets {
-		args = append(args, target)
-	}
-
-	return
 }
 
 func (parser *arguments) formatArgs() (args []string) {

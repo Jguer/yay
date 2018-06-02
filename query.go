@@ -209,7 +209,8 @@ func syncInfo(pkgS []string) (err error) {
 	// Repo always goes first
 	if len(repoS) != 0 {
 		arguments := cmdArgs.copy()
-		arguments.delTarget(aurS...)
+		arguments.clearTargets()
+		arguments.addTarget(repoS...)
 		err = passToPacman(arguments)
 
 		if err != nil {

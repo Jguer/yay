@@ -369,22 +369,21 @@ func handleYay() (err error) {
 }
 
 func handleGetpkgbuild() (err error) {
-	err = getPkgbuilds(cmdArgs.formatTargets())
+	err = getPkgbuilds(cmdArgs.targets)
 	return
 }
 
 func handleYogurt() (err error) {
 	options := cmdArgs.formatArgs()
-	targets := cmdArgs.formatTargets()
 
 	config.SearchMode = NumberMenu
-	err = numberMenu(targets, options)
+	err = numberMenu(cmdArgs.targets, options)
 
 	return
 }
 
 func handleSync() (err error) {
-	targets := cmdArgs.formatTargets()
+	targets := cmdArgs.targets
 
 	if cmdArgs.existsArg("y", "refresh") {
 		arguments := cmdArgs.copy()
@@ -393,7 +392,7 @@ func handleSync() (err error) {
 		arguments.delArg("s", "search")
 		arguments.delArg("i", "info")
 		arguments.delArg("l", "list")
-		arguments.targets = make(stringSet)
+		arguments.clearTargets()
 		err = passToPacman(arguments)
 		if err != nil {
 			return
@@ -426,7 +425,7 @@ func handleSync() (err error) {
 }
 
 func handleRemove() (err error) {
-	removeVCSPackage(cmdArgs.formatTargets())
+	removeVCSPackage(cmdArgs.targets)
 	err = passToPacman(cmdArgs)
 	return
 }
@@ -531,7 +530,7 @@ func passToPacman(args *arguments) error {
 
 	argArr = append(argArr, "--")
 
-	argArr = append(argArr, args.formatTargets()...)
+	argArr = append(argArr, args.targets...)
 
 	cmd = exec.Command(argArr[0], argArr[1:]...)
 
@@ -563,7 +562,7 @@ func passToPacmanCapture(args *arguments) (string, string, error) {
 
 	argArr = append(argArr, "--")
 
-	argArr = append(argArr, args.formatTargets()...)
+	argArr = append(argArr, args.targets...)
 
 	cmd = exec.Command(argArr[0], argArr[1:]...)
 	cmd.Stdout = &outbuf

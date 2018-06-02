@@ -363,6 +363,7 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
+	targets := sliceToStringSet(parser.targets)
 	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
@@ -377,22 +378,22 @@ func printUpdateList(parser *arguments) error {
 		return err
 	}
 
-	noTargets := len(parser.targets) == 0
+	noTargets := len(targets) == 0
 
 	if !parser.existsArg("m", "foreign") {
 		for _, pkg := range repoUp {
-			if noTargets || parser.targets.get(pkg.Name) {
+			if noTargets || targets.get(pkg.Name) {
 				fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
-				delete(parser.targets, pkg.Name)
+				delete(targets, pkg.Name)
 			}
 		}
 	}
 
 	if !parser.existsArg("n", "native") {
 		for _, pkg := range aurUp {
-			if noTargets || parser.targets.get(pkg.Name) {
+			if noTargets || targets.get(pkg.Name) {
 				fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
-				delete(parser.targets, pkg.Name)
+				delete(targets, pkg.Name)
 			}
 		}
 	}
@@ -400,7 +401,7 @@ func printUpdateList(parser *arguments) error {
 	missing := false
 
 outer:
-	for pkg := range parser.targets {
+	for pkg := range targets {
 		for _, name := range localNames {
 			if name == pkg {
 				continue outer
