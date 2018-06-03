@@ -471,7 +471,7 @@ type rss struct {
 }
 
 func printNewsFeed() error {
-	resp, err := http.Get("https://archlinux.org/feeds/news")
+	resp, err := http.Get(newsURL)
 	if err != nil {
 		return err
 	}

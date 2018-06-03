@@ -77,8 +77,11 @@ const configFileName string = "config.json"
 // vcsFileName holds the name of the vcs file.
 const vcsFileName string = "vcs.json"
 
-// baseURL givers the AUR default address.
+// baseURL gives the AUR default address.
 const baseURL string = "https://aur.archlinux.org"
+
+// news URL gives the Arch news RSS feed.
+const newsURL string = "https://archlinux.org/feeds/news"
 
 // useColor enables/disables colored printing
 var useColor bool
