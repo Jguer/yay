@@ -441,23 +441,43 @@ func handleRemove() (err error) {
 
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
-	aurQ, aurErr := narrowSearch(pkgS, true)
-	numaq := len(aurQ)
-	repoQ, numpq, err := queryRepo(pkgS)
-	if err != nil {
-		return
+	pkgS = removeInvalidTargets(pkgS)
+	var aurErr error
+	var repoErr error
+	var aq aurQuery
+	var pq repoQuery
+	var lenaq int
+	var lenpq int
+
+	if mode == ModeAUR || mode == ModeAny {
+		aq, aurErr = narrowSearch(pkgS, true)
+		lenaq = len(aq)
+	}
+	if mode == ModeRepo || mode == ModeAny {
+		pq, lenpq, repoErr = queryRepo(pkgS)
+		if repoErr != nil {
+			return err
+		}
 	}
 
-	if numpq == 0 && numaq == 0 {
-		return fmt.Errorf("no packages match search")
+	if lenpq == 0 && lenaq == 0 {
+		return fmt.Errorf("No packages match search")
 	}
 
 	if config.SortMode == BottomUp {
-		aurQ.printSearch(numpq + 1)
-		repoQ.printSearch()
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(lenpq + 1)
+		}
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
 	} else {
-		repoQ.printSearch()
-		aurQ.printSearch(numpq + 1)
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(lenpq + 1)
+		}
 	}
 
 	if aurErr != nil {
@@ -484,8 +504,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
-	for i, pkg := range repoQ {
-		target := len(repoQ) - i
+	for i, pkg := range pq {
+		target := len(pq) - i
 		if config.SortMode == TopDown {
 			target = i + 1
 		}
@@ -498,10 +518,10 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		}
 	}
 
-	for i, pkg := range aurQ {
-		target := len(aurQ) - i + len(repoQ)
+	for i, pkg := range aq {
+		target := len(aq) - i + len(pq)
 		if config.SortMode == TopDown {
-			target = i + 1 + len(repoQ)
+			target = i + 1 + len(pq)
 		}
 
 		if isInclude && include.get(target) {
