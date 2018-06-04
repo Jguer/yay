@@ -159,18 +159,36 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string) (err error) {
-	aq, aurErr := narrowSearch(pkgS, true)
-	pq, _, err := queryRepo(pkgS)
-	if err != nil {
-		return err
+	pkgS = removeInvalidTargets(pkgS)
+	var aurErr error
+	var repoErr error
+	var aq aurQuery
+	var pq repoQuery
+
+	if mode == ModeAUR || mode == ModeAny {
+		aq, aurErr = narrowSearch(pkgS, true)
+	}
+	if mode == ModeRepo || mode == ModeAny {
+		pq, _, repoErr = queryRepo(pkgS)
+		if repoErr != nil {
+			return err
+		}
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printSearch(1)
-		pq.printSearch()
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(1)
+		}
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
 	} else {
-		pq.printSearch()
-		aq.printSearch(1)
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(1)
+		}
 	}
 
 	if aurErr != nil {

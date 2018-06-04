@@ -18,7 +18,7 @@ type vcsInfo map[string]shaInfos
 type shaInfos map[string]shaInfo
 type shaInfo struct {
 	Protocols []string `json:"protocols"`
-	Branch     string   `json:"branch"`
+	Branch    string   `json:"branch"`
 	SHA       string   `json:"sha"`
 }
 
