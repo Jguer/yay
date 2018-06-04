@@ -18,7 +18,7 @@ type vcsInfo map[string]shaInfos
 type shaInfos map[string]shaInfo
 type shaInfo struct {
 	Protocols []string `json:"protocols"`
-	Brach     string   `json:"branch"`
+	Branch     string   `json:"branch"`
 	SHA       string   `json:"sha"`
 }
 
@@ -180,7 +180,7 @@ func (infos shaInfos) needsUpdate() bool {
 	hasUpdate := make(chan struct{})
 
 	checkHash := func(url string, info shaInfo) {
-		hash := getCommit(url, info.Brach, info.Protocols)
+		hash := getCommit(url, info.Branch, info.Protocols)
 		if hash != "" && hash != info.SHA {
 			hasUpdate <- struct{}{}
 		} else {

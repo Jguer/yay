@@ -35,6 +35,9 @@ New operations:
     yay {-P --print}       [options]
     yay {-G --getpkgbuild} [package(s)]
 
+New options:
+       --repo             Assume targets are from the repositories
+    -a --aur              Assume targets are from the AUR
 Permanent configuration options:
     --save                Causes the following options to be saved back to the
                           config file when used
@@ -53,7 +56,7 @@ Permanent configuration options:
     --config      <file>  pacman.conf file to use
 
     --requestsplitn <n>   Max amount of packages to query per AUR request
-    --sortby <field>      Sort AUR results by a specific field during search
+    --sortby    <field>   Sort AUR results by a specific field during search
     --answerclean   <a>   Set a predetermined answer for the clean build menu
     --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
     --answerupgrade <a>   Set a predetermined answer for the upgrade menu
@@ -70,6 +73,8 @@ Permanent configuration options:
     --nodevel             Do not check development packages
     --gitclone            Use git clone for PKGBUILD retrieval
     --nogitclone          Never use git clone for PKGBUILD retrieval
+    --showdiffs           Show diffs for build files
+    --noshowdiffs         Always show the entire PKGBUILD
     --rebuild             Always build target packages
     --rebuildall          Always build all AUR packages
     --norebuild           Skip package build if in cache and up to date
@@ -77,6 +82,10 @@ Permanent configuration options:
     --redownload          Always download pkgbuilds of targets
     --noredownload        Skip pkgbuild download if in cache and up to date
     --redownloadall       Always download pkgbuilds of all AUR packages
+    --provides            Look for matching provders when searching for packages
+    --noprovides          Just look for packages by pkgname
+    --pgpfetch            Prompt to import PGP keys from PKGBUILDs
+    --nopgpfetch          Don't prompt to import PGP keys
 
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background
