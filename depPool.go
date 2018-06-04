@@ -92,7 +92,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 
 		// skip targets already satisfied
 		// even if the user enters db/pkg and aur/pkg the latter will
-		// still get skiped even if it's from a different database to
+		// still get skipped even if it's from a different database to
 		// the one specified
 		// this is how pacman behaves
 		if dp.hasPackage(target.DepString()) {
@@ -109,7 +109,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			continue
 		}
 
-		// if theres a different priefix only look in that repo
+		// If there'ss a different priefix only look in that repo
 		if target.Db != "" {
 			singleDb, err = alpmHandle.SyncDbByName(target.Db)
 			if err != nil {
@@ -128,11 +128,11 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			continue
 		} else {
 			//check for groups
-			//currently we dont resolve the packages in a group
+			//currently we don't resolve the packages in a group
 			//only check if the group exists
 			//would be better to check the groups from singleDb if
-			//the user specified a db but theres no easy way to do
-			//it without making alpm_lists so dont bother for now
+			//the user specified a db but there's no easy way to do
+			//it without making alpm_lists so don't bother for now
 			//db/group is probably a rare use case
 			group, err := dp.SyncDb.PkgCachebyGroup(target.Name)
 			if err == nil {
@@ -167,7 +167,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 //
 // For example if you were to -S yay then yay -Ss would give:
 // yay-git yay-bin yay realyog pacui pacui-git ruby-yard
-// These packages will all be added to the cache incase they are needed later
+// These packages will all be added to the cache in case they are needed later
 // Ofcouse only the first three packages provide yay, the rest are just false
 // positives.
 //
@@ -315,7 +315,7 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 		}
 
 		//assume it's in the aur
-		//ditch the versioning because the RPC cant handle it
+		//ditch the versioning because the RPC can't handle it
 		newAURPackages.set(dep)
 
 	}
@@ -376,8 +376,8 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 
 // This is mostly used to promote packages from the cache
 // to the Install list
-// Provide a pacman style provider menu if theres more than one candidate
-// This acts slightly differenly from Pacman, It will give
+// Provide a pacman style provider menu if there's more than one candidate
+// This acts slightly differently from Pacman, It will give
 // a menu even if a package with a matching name exists. I believe this
 // method is better because most of the time you are choosing between
 // foo and foo-git.
