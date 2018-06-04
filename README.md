@@ -93,6 +93,12 @@ Currently yay Depends on:
 * Yay does not display colored output. How do I fix it?
   Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
 
+* Sometimes diffs are printed to the terminal and other times they are pages
+  via less. How do I fix this?
+   Yay uses `git diff` to display diffs, by default git tells less to not page
+   if the output can fit one terminal length. This can be overridden by
+   exporting your own flags `export LESS=SRX`.
+
 ## Examples of Custom Operations
 
 * `yay <Search Term>` presents package selection menu
