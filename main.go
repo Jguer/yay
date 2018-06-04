@@ -10,29 +10,27 @@ import (
 	alpm "github.com/jguer/go-alpm"
 )
 
-func initPaths() {
-	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
-		if info, err := os.Stat(configHome); err == nil && info.IsDir() {
-			configHome = filepath.Join(configHome, "yay")
-		} else {
-			configHome = filepath.Join(os.Getenv("HOME"), ".config/yay")
-		}
+func setPaths() error {
+	if _configHome, set := os.LookupEnv("XDG_CONFIG_HOME"); set {
+		cacheHome = filepath.Join(_configHome, "yay")
+	} else if _configHome, set := os.LookupEnv("HOME"); set {
+		cacheHome = filepath.Join(_configHome, ".config/yay")
 	} else {
-		configHome = filepath.Join(os.Getenv("HOME"), ".config/yay")
+		fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
 	}
 
-	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
-		if info, err := os.Stat(cacheHome); err == nil && info.IsDir() {
-			cacheHome = filepath.Join(cacheHome, "yay")
-		} else {
-			cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
-		}
+	if _cacheHome, set := os.LookupEnv("XDG_CACHE_HOME"); set {
+		cacheHome = filepath.Join(_cacheHome, "yay")
+	} else if _cacheHome, set := os.LookupEnv("HOME"); set {
+		cacheHome = filepath.Join(_cacheHome, ".cache/yay")
 	} else {
-		cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
+		fmt.Errorf("XDG_CACHE_HOME and HOME unset")
 	}
 
 	configFile = filepath.Join(configHome, configFileName)
 	vcsFile = filepath.Join(cacheHome, vcsFileName)
+
+	return nil
 }
 
 func initConfig() (err error) {
@@ -184,7 +182,12 @@ func main() {
 		goto cleanup
 	}
 
-	initPaths()
+	err = setPaths()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+	}
 
 	err = initConfig()
 	if err != nil {
