@@ -12,9 +12,9 @@ import (
 
 func setPaths() error {
 	if _configHome, set := os.LookupEnv("XDG_CONFIG_HOME"); set {
-		cacheHome = filepath.Join(_configHome, "yay")
+		configHome = filepath.Join(_configHome, "yay")
 	} else if _configHome, set := os.LookupEnv("HOME"); set {
-		cacheHome = filepath.Join(_configHome, ".config/yay")
+		configHome = filepath.Join(_configHome, ".config/yay")
 	} else {
 		fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
 	}
