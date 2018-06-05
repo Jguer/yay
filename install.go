@@ -315,13 +315,14 @@ nextpkg:
 	return incompatible, nil
 }
 
-func parsePackageList(dir string) (map[string]string, error) {
+func parsePackageList(dir string) (map[string]string, string, error) {
 	stdout, stderr, err := passToMakepkgCapture(dir, "--packagelist")
 
 	if err != nil {
-		return nil, fmt.Errorf("%s%s", stderr, err)
+		return nil, "", fmt.Errorf("%s%s", stderr, err)
 	}
 
+	var version string
 	lines := strings.Split(stdout, "\n")
 	pkgdests := make(map[string]string)
 
@@ -334,17 +335,18 @@ func parsePackageList(dir string) (map[string]string, error) {
 		split := strings.Split(fileName, "-")
 
 		if len(split) < 4 {
-			return nil, fmt.Errorf("Can not find package name : %s", split)
+			return nil, "", fmt.Errorf("Can not find package name : %s", split)
 		}
 
 		// pkgname-pkgver-pkgrel-arch.pkgext
 		// This assumes 3 dashes after the pkgname, Will cause an error
 		// if the PKGEXT contains a dash. Please no one do that.
 		pkgname := strings.Join(split[:len(split)-3], "-")
+		version = strings.Join(split[len(split)-3:len(split)-2], "-")
 		pkgdests[pkgname] = line
 	}
 
-	return pkgdests, nil
+	return pkgdests, version, nil
 }
 
 func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
@@ -686,7 +688,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 			return fmt.Errorf("Error making: %s", pkg.Name)
 		}
 
-		pkgdests, err := parsePackageList(dir)
+		pkgdests, version, err := parsePackageList(dir)
 		if err != nil {
 			return err
 		}
@@ -711,7 +713,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 
 		if built {
 			fmt.Println(bold(yellow(arrow)),
-				cyan(pkg.Name+"-"+pkg.Version)+bold(" Already made -- skipping build"))
+				cyan(pkg.Name+"-"+version)+bold(" Already made -- skipping build"))
 		} else {
 			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 
