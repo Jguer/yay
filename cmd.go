@@ -4,10 +4,16 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
+	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -604,8 +610,62 @@ func passToPacmanCapture(args *arguments) (string, string, error) {
 	return stdout, stderr, err
 }
 
+// copies the contents of one directory to another
+func copyDirContentsRecursive(srcDir string, destDir string, destOwnerUid int, destOwnerGid int) error {
+	err := filepath.Walk(srcDir, func(myPath string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", srcDir, err)
+			return err
+		}
+
+		if info.IsDir() {
+			dirPath := strings.Replace(myPath, srcDir+"/", "", 1)
+			destDirPath := path.Join(destDir, dirPath)
+			os.Mkdir(destDirPath, 0755)
+			os.Chown(destDirPath, destOwnerUid, destOwnerGid)
+		} else {
+			filePath := strings.Replace(myPath, srcDir+"/", "", 1)
+			destFilePath := path.Join(destDir, filePath)
+
+			srcFile, err := os.Open(myPath)
+			if err != nil {
+				return fmt.Errorf("Error when opening file %v: %v", myPath, err)
+			}
+			defer srcFile.Close()
+
+			destFile, err := os.Create(destFilePath) // creates if file doesn't exist
+			if err != nil {
+				return fmt.Errorf("Error when creating file: %v", myPath, err)
+			}
+			defer destFile.Close()
+
+			_, err = io.Copy(destFile, srcFile) // check first var for number of bytes copied
+			if err != nil {
+				return fmt.Errorf("Error when copying file data from %v to %v: %v", myPath, destFilePath, err)
+			}
+
+			err = destFile.Sync()
+			if err != nil {
+				return fmt.Errorf("Error when syncing file data to %v: %v", destFilePath, err)
+			}
+
+			fmt.Printf("visited file: %q\n", strings.Replace(myPath, srcDir+"/", "", 1))
+
+			os.Chown(destFilePath, destOwnerUid, destOwnerGid)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("Error when copying files from %v: %v", srcDir, err)
+	}
+
+	return nil
+}
+
 // passToMakepkg outsources execution to makepkg binary without modifications.
 func passToMakepkg(dir string, args ...string) (err error) {
+	var tempDir string
 
 	if config.NoConfirm {
 		args = append(args)
@@ -616,11 +676,63 @@ func passToMakepkg(dir string, args ...string) (err error) {
 
 	cmd := exec.Command(config.MakepkgBin, args...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	cmd.Dir = dir
+
+	// Run makepkg as nobody if running yay as root
+	if 0 == os.Geteuid() {
+		nobodyUser, err := user.Lookup("nobody")
+		if err != nil {
+			return fmt.Errorf("Unable to find the UID / GID of user \"nobody\" to execute makepkg: %v", err)
+		}
+
+		nobodyUid, err := strconv.Atoi(nobodyUser.Uid)
+		if err != nil {
+			return fmt.Errorf("Unable to convert the UID of user \"nobody\" to a string: %v", err)
+		}
+
+		nobodyGid, err := strconv.Atoi(nobodyUser.Gid)
+		if err != nil {
+			return fmt.Errorf("Unable to find the GID of user \"nobody\" to a string: %v", err)
+		}
+
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(nobodyUid), Gid: uint32(nobodyGid)}
+
+		// create temporary directory for nobody to build in
+		tempDir, err := ioutil.TempDir("", "yay")
+		if err != nil {
+			return fmt.Errorf("Unable to create temporary directory for \"nobody\" to build package in: %v", err)
+		}
+		defer os.RemoveAll(tempDir)
+
+		// make the temporary directory be owned by nobody
+		err = os.Chown(tempDir, nobodyUid, nobodyGid)
+		if err != nil {
+			return fmt.Errorf("Unable to chown temporary directory to \"nobody\": %v", err)
+		}
+
+		// copy package's files to the tempdir and chown them all to nobody
+		fmt.Println(dir)
+		fmt.Println(tempDir)
+		copyDirContentsRecursive(dir, tempDir, nobodyUid, nobodyGid)
+
+		cmd.Dir = tempDir
+	} else {
+		cmd.Dir = dir
+	}
+
 	err = cmd.Run()
+
+	// move contents of temp dir to roots dir
+	if 0 == os.Geteuid() {
+		copyDirContentsRecursive(tempDir, dir, 0, 0)
+	}
+
 	if err == nil {
 		_ = saveVCSInfo()
 	}
+
+	_ = tempDir
+
 	return
 }
 
