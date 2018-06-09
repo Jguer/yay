@@ -636,10 +636,16 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 
 		var err error
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
+			err = gitDownload(baseURL + "/" + pkg.PackageBase + ".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
 				return hashes, err
 			}
+
+			err = gitMerge(baseURL + "/" + pkg.PackageBase + ".git", config.BuildDir, pkg.PackageBase)
+			if err != nil {
+				return hashes, err
+			}
+
 		} else {
 			err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
 		}
