@@ -155,8 +155,13 @@ func install(parser *arguments) error {
 
 		cleanBuilds(toClean)
 
+		oldHashes, err := getHashes(do.Aur)
+		if err != nil {
+			return err
+		}
+		
 		toSkip := pkgBuildsToSkip(do.Aur, targets)
-		oldHashes, err := downloadPkgBuilds(do.Aur, do.Bases, toSkip)
+		err = downloadPkgBuilds(do.Aur, do.Bases, toSkip)
 		if err != nil {
 			return err
 		}
@@ -617,19 +622,25 @@ func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 	return toSkip
 }
 
-func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) (map[string]string, error) {
+func getHashes(pkgs []*rpc.Pkg) (map[string]string, error) {
 	hashes := make(map[string]string)
 
-	for k, pkg := range pkgs {
+	for _, pkg := range pkgs {
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
 			hash, err := gitGetHash(config.BuildDir, pkg.PackageBase)
-			if err == nil {
-				hashes[pkg.PackageBase] = hash
-			} else {
-				hashes[pkg.PackageBase] = ""
+			if err != nil {
+				return hashes, err
 			}
-		}
 
+			hashes[pkg.PackageBase] = hash
+		}
+	}
+	
+	return hashes, nil
+}
+
+func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) error {
+	for k, pkg := range pkgs {
 		if toSkip.get(pkg.PackageBase) {
 			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
 			fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
@@ -640,27 +651,26 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stri
 
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
-		var err error
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			err = gitDownload(baseURL + "/" + pkg.PackageBase + ".git", config.BuildDir, pkg.PackageBase)
+			err := gitDownload(baseURL + "/" + pkg.PackageBase + ".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
-				return hashes, err
+				return err
 			}
 
 			err = gitMerge(baseURL + "/" + pkg.PackageBase + ".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
-				return hashes, err
+				return err
 			}
 
 		} else {
-			err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
-		}
-		if err != nil {
-			return hashes, err
+			err := downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
-	return hashes, nil
+	return nil
 }
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatible stringSet) (err error) {
