@@ -160,7 +160,7 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
-	
+
 		if len(toEdit) > 0 {
 			if config.ShowDiffs {
 				err = showPkgBuildDiffs(toEdit, do.Bases)
@@ -183,7 +183,6 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
-
 
 		//initial srcinfo parse before pkgver() bump
 		err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
@@ -621,7 +620,7 @@ func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 func mergePkgBuilds(pkgs []*rpc.Pkg) error {
 	for _, pkg := range pkgs {
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			err := gitMerge(baseURL + "/" + pkg.PackageBase + ".git", config.BuildDir, pkg.PackageBase)
+			err := gitMerge(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
 				return err
 			}
@@ -630,7 +629,6 @@ func mergePkgBuilds(pkgs []*rpc.Pkg) error {
 
 	return nil
 }
-
 
 func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) error {
 	for k, pkg := range pkgs {
@@ -645,7 +643,7 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stri
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			err := gitDownload(baseURL + "/" + pkg.PackageBase + ".git", config.BuildDir, pkg.PackageBase)
+			err := gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
 				return err
 			}
