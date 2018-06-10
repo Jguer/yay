@@ -155,7 +155,8 @@ func install(parser *arguments) error {
 
 		cleanBuilds(toClean)
 
-		oldHashes, err := downloadPkgBuilds(do.Aur, targets, do.Bases)
+		toSkip := pkgBuildsToSkip(do.Aur, targets)
+		oldHashes, err := downloadPkgBuilds(do.Aur, do.Bases, toSkip)
 		if err != nil {
 			return err
 		}
@@ -593,9 +594,8 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, 
 	}
 }
 
-func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) (map[string]string, error) {
+func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 	toSkip := make(stringSet)
-	hashes := make(map[string]string)
 
 	for _, pkg := range pkgs {
 		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
@@ -613,6 +613,12 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 			}
 		}
 	}
+
+	return toSkip
+}
+
+func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) (map[string]string, error) {
+	hashes := make(map[string]string)
 
 	for k, pkg := range pkgs {
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
