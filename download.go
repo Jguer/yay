@@ -44,13 +44,22 @@ func downloadFile(path string, url string) (err error) {
 	return err
 }
 
-func gitGetHash(path string, name string) (string, error) {
+func gitHasDiff(path string, name string) (bool, error) {
 	stdout, stderr, err := passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD")
 	if err != nil {
-		return "", fmt.Errorf("%s%s", stderr, err)
+		return false, fmt.Errorf("%s%s", stderr, err)
 	}
 
-	return strings.TrimSpace(stdout), nil
+	head := strings.TrimSpace(stdout)
+
+	stdout, stderr, err = passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD@{upstream}")
+	if err != nil {
+		return false, fmt.Errorf("%s%s", stderr, err)
+	}
+
+	upstream := strings.TrimSpace(stdout)
+
+	return head != upstream, nil
 }
 
 func gitDownload(url string, path string, name string) error {

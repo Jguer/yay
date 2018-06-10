@@ -155,27 +155,17 @@ func install(parser *arguments) error {
 
 		cleanBuilds(toClean)
 
-		oldHashes, err := getHashes(do.Aur)
-		if err != nil {
-			return err
-		}
-		
 		toSkip := pkgBuildsToSkip(do.Aur, targets)
 		err = downloadPkgBuilds(do.Aur, do.Bases, toSkip)
 		if err != nil {
 			return err
 		}
-
-		err = mergePkgBuilds(do.Aur)
-		if err != nil {
-			return err
-		}
-
+	
 		if len(toEdit) > 0 {
 			if config.ShowDiffs {
-				err = showPkgBuildDiffs(toEdit, do.Bases, oldHashes)
+				err = showPkgBuildDiffs(toEdit, do.Bases)
 			} else {
-				err = editPkgBuilds(toEdit, do.Bases, oldHashes)
+				err = editPkgBuilds(toEdit, do.Bases)
 			}
 			if err != nil {
 				return err
@@ -188,6 +178,12 @@ func install(parser *arguments) error {
 			}
 			config.NoConfirm = oldValue
 		}
+
+		err = mergePkgBuilds(do.Aur)
+		if err != nil {
+			return err
+		}
+
 
 		//initial srcinfo parse before pkgver() bump
 		err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
@@ -504,26 +500,21 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 	}
 }
 
-func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[string]string) error {
+func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		if shouldUseGit(dir) {
-			hash, _ := hashes[pkg.PackageBase]
-			if hash == "" {
-				hash = gitEmptyTree
-			}
-
-			head, err := gitGetHash(config.BuildDir, pkg.PackageBase)
+			hasDiff, err := gitHasDiff(config.BuildDir, pkg.PackageBase)
 			if err != nil {
 				return err
 			}
 
-			if head == hash {
+			if !hasDiff {
 				fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(pkg, bases)), bold("No changes -- skipping"))
 				continue
 			}
 
-			args := []string{"diff", hash + "..HEAD", "--src-prefix", dir + "/", "--dst-prefix", dir + "/"}
+			args := []string{"diff", "HEAD..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/"}
 			if useColor {
 				args = append(args, "--color=always")
 			} else {
@@ -548,7 +539,7 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[
 	return nil
 }
 
-func editPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[string]string) error {
+func editPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	pkgbuilds := make([]string, 0, len(pkgs))
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
@@ -625,23 +616,6 @@ func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 	}
 
 	return toSkip
-}
-
-func getHashes(pkgs []*rpc.Pkg) (map[string]string, error) {
-	hashes := make(map[string]string)
-
-	for _, pkg := range pkgs {
-		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			hash, err := gitGetHash(config.BuildDir, pkg.PackageBase)
-			if err != nil {
-				return hashes, err
-			}
-
-			hashes[pkg.PackageBase] = hash
-		}
-	}
-	
-	return hashes, nil
 }
 
 func mergePkgBuilds(pkgs []*rpc.Pkg) error {
