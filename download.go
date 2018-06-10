@@ -62,25 +62,25 @@ func gitHasDiff(path string, name string) (bool, error) {
 	return head != upstream, nil
 }
 
-func gitDownload(url string, path string, name string) error {
+func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
 		err = passToGit(path, "clone", url, name)
 		if err != nil {
-			return fmt.Errorf("error cloning %s", name)
+			return false, fmt.Errorf("error cloning %s", name)
 		}
 
-		return nil
+		return true, nil
 	} else if err != nil {
-		return fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
 	err = passToGit(filepath.Join(path, name), "fetch")
 	if err != nil {
-		return fmt.Errorf("error fetching %s", name)
+		return false, fmt.Errorf("error fetching %s", name)
 	}
 
-	return nil
+	return false, nil
 }
 
 func gitMerge(url string, path string, name string) error {
@@ -248,7 +248,7 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (bool, error) {
 		}
 
 		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
-			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
+			_, err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
 		} else {
 			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir)
 		}

@@ -156,14 +156,14 @@ func install(parser *arguments) error {
 		cleanBuilds(toClean)
 
 		toSkip := pkgBuildsToSkip(do.Aur, targets)
-		err = downloadPkgBuilds(do.Aur, do.Bases, toSkip)
+		cloned, err := downloadPkgBuilds(do.Aur, do.Bases, toSkip)
 		if err != nil {
 			return err
 		}
 
 		if len(toEdit) > 0 {
 			if config.ShowDiffs {
-				err = showPkgBuildDiffs(toEdit, do.Bases)
+				err = showPkgBuildDiffs(toEdit, do.Bases, cloned)
 			} else {
 				err = editPkgBuilds(toEdit, do.Bases)
 			}
@@ -499,27 +499,33 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 	}
 }
 
-func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
+func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stringSet) error {
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		if shouldUseGit(dir) {
-			hasDiff, err := gitHasDiff(config.BuildDir, pkg.PackageBase)
-			if err != nil {
-				return err
+			start := "HEAD"
+
+			if cloned.get(pkg.PackageBase) {
+				start = gitEmptyTree
+			} else {
+				hasDiff, err := gitHasDiff(config.BuildDir, pkg.PackageBase)
+				if err != nil {
+					return err
+				}
+
+				if !hasDiff {
+					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(pkg, bases)), bold("No changes -- skipping"))
+					continue
+				}
 			}
 
-			if !hasDiff {
-				fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(pkg, bases)), bold("No changes -- skipping"))
-				continue
-			}
-
-			args := []string{"diff", "HEAD..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/"}
+			args := []string{"diff", start + "..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/"}
 			if useColor {
 				args = append(args, "--color=always")
 			} else {
 				args = append(args, "--color=never")
 			}
-			err = passToGit(dir, args...)
+			err := passToGit(dir, args...)
 			if err != nil {
 				return err
 			}
@@ -630,7 +636,9 @@ func mergePkgBuilds(pkgs []*rpc.Pkg) error {
 	return nil
 }
 
-func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) error {
+func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) (stringSet, error) {
+	cloned := make(stringSet)
+
 	for k, pkg := range pkgs {
 		if toSkip.get(pkg.PackageBase) {
 			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
@@ -643,19 +651,22 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stri
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			err := gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
+			clone, err := gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
-				return err
+				return nil, err
+			}
+			if clone {
+				cloned.set(pkg.PackageBase)
 			}
 		} else {
 			err := downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 
-	return nil
+	return cloned, nil
 }
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatible stringSet) (err error) {
