@@ -104,16 +104,19 @@ func install(parser *arguments) error {
 	if err != nil {
 		return err
 	}
+	
+	if len(dp.Aur) == 0 {
+		parser.delArg("y", "refresh")
+		return passToPacman(parser)
+	}
+
+	if len(dp.Aur) > 0 && 0 == os.Geteuid() {
+		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
+	}
 
 	err = dp.CheckConflicts()
 	if err != nil {
 		return err
-	}
-
-	hasAur := len(dp.Aur) > 0
-
-	if hasAur && 0 == os.Geteuid() {
-		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
 	do = getDepOrder(dp)
@@ -134,98 +137,94 @@ func install(parser *arguments) error {
 		return nil
 	}
 
-	if hasAur {
-		hasAur = len(do.Aur) != 0
+	do.Print()
+	fmt.Println()
 
-		do.Print()
+	if do.HasMake() {
+		if !continueTask("Remove make dependencies after install?", "yY") {
+			removeMake = true
+		}
+	}
+
+	if config.CleanMenu {
+		askClean := pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+		toClean, err := cleanNumberMenu(do.Aur, do.Bases, remoteNamesCache, askClean)
+		if err != nil {
+			return err
+		}
+
+		cleanBuilds(toClean)
+	}
+
+	toSkip := pkgBuildsToSkip(do.Aur, targets)
+	cloned, err := downloadPkgBuilds(do.Aur, do.Bases, toSkip)
+	if err != nil {
+		return err
+	}
+
+	var toDiff []*rpc.Pkg
+	var toEdit []*rpc.Pkg
+
+	if config.DiffMenu {
+		pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+		toDiff, err = diffNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+		if err != nil {
+			return err
+		}
+
+		if len(toDiff) > 0 {
+			err = showPkgBuildDiffs(toDiff, do.Bases, cloned)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if config.EditMenu {
+		pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+		toEdit, err = editNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+		if err != nil {
+			return err
+		}
+
+		if len(toEdit) > 0 {
+			err = editPkgBuilds(toEdit, do.Bases)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(toDiff) > 0 || len(toEdit) > 0 {
+		oldValue := config.NoConfirm
+		config.NoConfirm = false
 		fmt.Println()
-
-		if do.HasMake() {
-			if !continueTask("Remove make dependencies after install?", "yY") {
-				removeMake = true
-			}
+		if !continueTask(bold(green("Proceed with install?")), "nN") {
+			return fmt.Errorf("Aborting due to user")
 		}
+		config.NoConfirm = oldValue
+	}
 
-		if config.CleanMenu {
-			askClean := pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-			toClean, err := cleanNumberMenu(do.Aur, do.Bases, remoteNamesCache, askClean)
-			if err != nil {
-				return err
-			}
+	err = mergePkgBuilds(do.Aur)
+	if err != nil {
+		return err
+	}
 
-			cleanBuilds(toClean)
-		}
+	//initial srcinfo parse before pkgver() bump
+	err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
+	if err != nil {
+		return err
+	}
 
-		toSkip := pkgBuildsToSkip(do.Aur, targets)
-		cloned, err := downloadPkgBuilds(do.Aur, do.Bases, toSkip)
+	incompatible, err = getIncompatible(do.Aur, srcinfosStale, do.Bases)
+	if err != nil {
+		return err
+	}
+
+	if config.PGPFetch {
+		err = checkPgpKeys(do.Aur, do.Bases, srcinfosStale)
 		if err != nil {
 			return err
-		}
-
-		var toDiff []*rpc.Pkg
-		var toEdit []*rpc.Pkg
-
-		if config.DiffMenu {
-			pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-			toDiff, err = diffNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-			if err != nil {
-				return err
-			}
-
-			if len(toDiff) > 0 {
-				err = showPkgBuildDiffs(toDiff, do.Bases, cloned)
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		if config.EditMenu {
-			pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-			toEdit, err = editNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-			if err != nil {
-				return err
-			}
-
-			if len(toEdit) > 0 {
-				err = editPkgBuilds(toEdit, do.Bases)
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		if len(toDiff) > 0 || len(toEdit) > 0 {
-			oldValue := config.NoConfirm
-			config.NoConfirm = false
-			fmt.Println()
-			if !continueTask(bold(green("Proceed with install?")), "nN") {
-				return fmt.Errorf("Aborting due to user")
-			}
-			config.NoConfirm = oldValue
-		}
-
-		err = mergePkgBuilds(do.Aur)
-		if err != nil {
-			return err
-		}
-
-		//initial srcinfo parse before pkgver() bump
-		err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
-		if err != nil {
-			return err
-		}
-
-		incompatible, err = getIncompatible(do.Aur, srcinfosStale, do.Bases)
-		if err != nil {
-			return err
-		}
-
-		if config.PGPFetch {
-			err = checkPgpKeys(do.Aur, do.Bases, srcinfosStale)
-			if err != nil {
-				return err
-			}
 		}
 	}
 
@@ -268,45 +267,41 @@ func install(parser *arguments) error {
 		}
 	}
 
-	if hasAur {
-		//conflicts have been checked so answer y for them
-		ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
-		uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
-		cmdArgs.globals["ask"] = fmt.Sprint(uask)
+	//conflicts have been checked so answer y for them
+	ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+	uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
+	cmdArgs.globals["ask"] = fmt.Sprint(uask)
 
-		err = downloadPkgBuildsSources(do.Aur, do.Bases, incompatible)
+	err = downloadPkgBuildsSources(do.Aur, do.Bases, incompatible)
+	if err != nil {
+		return err
+	}
+
+	err = buildInstallPkgBuilds(dp, do, srcinfosStale, parser, incompatible)
+	if err != nil {
+		return err
+	}
+
+	if removeMake {
+		removeArguments := makeArguments()
+		removeArguments.addArg("R", "u")
+
+		for _, pkg := range do.getMake() {
+			removeArguments.addTarget(pkg)
+		}
+
+		oldValue := config.NoConfirm
+		config.NoConfirm = true
+		err = passToPacman(removeArguments)
+		config.NoConfirm = oldValue
+
 		if err != nil {
 			return err
 		}
+	}
 
-		err = buildInstallPkgBuilds(dp, do, srcinfosStale, parser, incompatible)
-		if err != nil {
-			return err
-		}
-
-		if removeMake {
-			removeArguments := makeArguments()
-			removeArguments.addArg("R", "u")
-
-			for _, pkg := range do.getMake() {
-				removeArguments.addTarget(pkg)
-			}
-
-			oldValue := config.NoConfirm
-			config.NoConfirm = true
-			err = passToPacman(removeArguments)
-			config.NoConfirm = oldValue
-
-			if err != nil {
-				return err
-			}
-		}
-
-		if config.CleanAfter {
-			clean(do.Aur)
-		}
-
-		return nil
+	if config.CleanAfter {
+		clean(do.Aur)
 	}
 
 	return nil
