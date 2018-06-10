@@ -18,8 +18,6 @@ func install(parser *arguments) error {
 	var err error
 	var incompatible stringSet
 	var do *depOrder
-	var toClean []*rpc.Pkg
-	var toEdit []*rpc.Pkg
 
 	var aurUp upSlice
 	var repoUp upSlice
@@ -148,12 +146,15 @@ func install(parser *arguments) error {
 			}
 		}
 
-		toClean, toEdit, err = cleanEditNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-		if err != nil {
-			return err
-		}
+		if config.CleanMenu {
+			askClean := pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+			toClean, err := cleanNumberMenu(do.Aur, do.Bases, remoteNamesCache, askClean)
+			if err != nil {
+				return err
+			}
 
-		cleanBuilds(toClean)
+			cleanBuilds(toClean)
+		}
 
 		toSkip := pkgBuildsToSkip(do.Aur, targets)
 		cloned, err := downloadPkgBuilds(do.Aur, do.Bases, toSkip)
@@ -161,18 +162,43 @@ func install(parser *arguments) error {
 			return err
 		}
 
-		if len(toEdit) > 0 {
-			if config.ShowDiffs {
-				err = showPkgBuildDiffs(toEdit, do.Bases, cloned)
-			} else {
-				err = editPkgBuilds(toEdit, do.Bases)
-			}
+		var toDiff []*rpc.Pkg
+		var toEdit []*rpc.Pkg
+
+		if config.DiffMenu {
+			pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+			toDiff, err = diffNumberMenu(do.Aur, do.Bases, remoteNamesCache)
 			if err != nil {
 				return err
 			}
 
+			if len(toDiff) > 0 {
+				err = showPkgBuildDiffs(toDiff, do.Bases, cloned)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if config.EditMenu {
+			pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+			toEdit, err = editNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+			if err != nil {
+				return err
+			}
+
+			if len(toEdit) > 0 {
+				err = editPkgBuilds(toEdit, do.Bases)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if len(toDiff) > 0 || len(toEdit) > 0 {
 			oldValue := config.NoConfirm
 			config.NoConfirm = false
+			fmt.Println()
 			if !continueTask(bold(green("Proceed with install?")), "nN") {
 				return fmt.Errorf("Aborting due to user")
 			}
@@ -355,12 +381,9 @@ func parsePackageList(dir string) (map[string]string, string, error) {
 	return pkgdests, version, nil
 }
 
-func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, []*rpc.Pkg, error) {
+func pkgbuildNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) bool {
 	toPrint := ""
 	askClean := false
-
-	toClean := make([]*rpc.Pkg, 0)
-	toEdit := make([]*rpc.Pkg, 0)
 
 	for n, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
@@ -381,62 +404,84 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 
 	fmt.Print(toPrint)
 
-	if askClean {
-		fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
-		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-		fmt.Print(bold(green(arrow + " ")))
-		cleanInput, err := getInput(config.AnswerClean)
-		if err != nil {
-			return nil, nil, err
-		}
+	return askClean
+}
 
-		cInclude, cExclude, cOtherInclude, cOtherExclude := parseNumberMenu(cleanInput)
-		cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
+func cleanNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet, hasClean bool) ([]*rpc.Pkg, error) {
+	toClean := make([]*rpc.Pkg, 0)
 
-		if cOtherInclude.get("abort") || cOtherInclude.get("ab") {
-			return nil, nil, fmt.Errorf("Aborting due to user")
-		}
+	if !hasClean {
+		return toClean, nil
+	}
 
-		if !cOtherInclude.get("n") && !cOtherInclude.get("none") {
-			for i, pkg := range pkgs {
-				dir := filepath.Join(config.BuildDir, pkg.PackageBase)
-				if _, err := os.Stat(dir); os.IsNotExist(err) {
-					continue
-				}
+	fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
+	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
+	fmt.Print(bold(green(arrow + " ")))
+	cleanInput, err := getInput(config.AnswerClean)
+	if err != nil {
+		return nil, err
+	}
 
-				if !cIsInclude && cExclude.get(len(pkgs)-i) {
-					continue
-				}
+	cInclude, cExclude, cOtherInclude, cOtherExclude := parseNumberMenu(cleanInput)
+	cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
 
-				if installed.get(pkg.Name) && (cOtherInclude.get("i") || cOtherInclude.get("installed")) {
-					toClean = append(toClean, pkg)
-					continue
-				}
+	if cOtherInclude.get("abort") || cOtherInclude.get("ab") {
+		return nil, fmt.Errorf("Aborting due to user")
+	}
 
-				if !installed.get(pkg.Name) && (cOtherInclude.get("no") || cOtherInclude.get("notinstalled")) {
-					toClean = append(toClean, pkg)
-					continue
-				}
+	if !cOtherInclude.get("n") && !cOtherInclude.get("none") {
+		for i, pkg := range pkgs {
+			dir := filepath.Join(config.BuildDir, pkg.PackageBase)
+			if _, err := os.Stat(dir); os.IsNotExist(err) {
+				continue
+			}
 
-				if cOtherInclude.get("a") || cOtherInclude.get("all") {
-					toClean = append(toClean, pkg)
-					continue
-				}
+			if !cIsInclude && cExclude.get(len(pkgs)-i) {
+				continue
+			}
 
-				if cIsInclude && (cInclude.get(len(pkgs)-i) || cOtherInclude.get(pkg.PackageBase)) {
-					toClean = append(toClean, pkg)
-					continue
-				}
+			if installed.get(pkg.Name) && (cOtherInclude.get("i") || cOtherInclude.get("installed")) {
+				toClean = append(toClean, pkg)
+				continue
+			}
 
-				if !cIsInclude && (!cExclude.get(len(pkgs)-i) && !cOtherExclude.get(pkg.PackageBase)) {
-					toClean = append(toClean, pkg)
-					continue
-				}
+			if !installed.get(pkg.Name) && (cOtherInclude.get("no") || cOtherInclude.get("notinstalled")) {
+				toClean = append(toClean, pkg)
+				continue
+			}
+
+			if cOtherInclude.get("a") || cOtherInclude.get("all") {
+				toClean = append(toClean, pkg)
+				continue
+			}
+
+			if cIsInclude && (cInclude.get(len(pkgs)-i) || cOtherInclude.get(pkg.PackageBase)) {
+				toClean = append(toClean, pkg)
+				continue
+			}
+
+			if !cIsInclude && (!cExclude.get(len(pkgs)-i) && !cOtherExclude.get(pkg.PackageBase)) {
+				toClean = append(toClean, pkg)
+				continue
 			}
 		}
 	}
 
-	if config.ShowDiffs {
+	return toClean, nil
+}
+
+func editNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, error) {
+	return editDiffNumberMenu(pkgs, bases, installed, false)
+}
+
+func diffNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, error) {
+	return editDiffNumberMenu(pkgs, bases, installed, true)
+}
+
+func editDiffNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet, diff bool) ([]*rpc.Pkg, error) {
+	toEdit := make([]*rpc.Pkg, 0)
+
+	if diff {
 		fmt.Println(bold(green(arrow + " Diffs to show?")))
 	} else {
 		fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
@@ -447,14 +492,14 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 
 	editInput, err := getInput(config.AnswerEdit)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	eInclude, eExclude, eOtherInclude, eOtherExclude := parseNumberMenu(editInput)
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
 
 	if eOtherInclude.get("abort") || eOtherInclude.get("ab") {
-		return nil, nil, fmt.Errorf("Aborting due to user")
+		return nil, fmt.Errorf("Aborting due to user")
 	}
 
 	if !eOtherInclude.get("n") && !eOtherInclude.get("none") {
@@ -488,7 +533,7 @@ func cleanEditNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed
 		}
 	}
 
-	return toClean, toEdit, nil
+	return toEdit, nil
 }
 
 func cleanBuilds(pkgs []*rpc.Pkg) {

@@ -313,10 +313,18 @@ func handleConfig(option, value string) bool {
 		config.PGPFetch = true
 	case "nopgpfetch":
 		config.PGPFetch = false
-	case "showdiffs":
-		config.ShowDiffs = true
-	case "noshowdiffs":
-		config.ShowDiffs = false
+	case "cleanmenu":
+		config.CleanMenu = true
+	case "nocleanmenu":
+		config.CleanMenu = false
+	case "diffmenu":
+		config.DiffMenu = true
+	case "nodiffmenu":
+		config.DiffMenu = false
+	case "editmenu":
+		config.EditMenu = true
+	case "noeditmenu":
+		config.EditMenu = false
 	case "a", "aur":
 		mode = ModeAUR
 	case "repo":
