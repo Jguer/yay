@@ -193,7 +193,7 @@ func syncSearch(pkgS []string) (err error) {
 
 	if aurErr != nil {
 		fmt.Printf("Error during AUR search: %s\n", aurErr)
-		fmt.Println("Showing Repo packags only")
+		fmt.Println("Showing Repo packages only")
 	}
 
 	return nil
