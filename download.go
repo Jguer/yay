@@ -44,34 +44,47 @@ func downloadFile(path string, url string) (err error) {
 	return err
 }
 
-func gitGetHash(path string, name string) (string, error) {
+func gitHasDiff(path string, name string) (bool, error) {
 	stdout, stderr, err := passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD")
 	if err != nil {
-		return "", fmt.Errorf("%s%s", stderr, err)
+		return false, fmt.Errorf("%s%s", stderr, err)
 	}
 
-	return strings.TrimSpace(stdout), nil
+	head := strings.TrimSpace(stdout)
+
+	stdout, stderr, err = passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD@{upstream}")
+	if err != nil {
+		return false, fmt.Errorf("%s%s", stderr, err)
+	}
+
+	upstream := strings.TrimSpace(stdout)
+
+	return head != upstream, nil
 }
 
-func gitDownload(url string, path string, name string) error {
+func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
 		err = passToGit(path, "clone", url, name)
 		if err != nil {
-			return fmt.Errorf("error cloning %s", name)
+			return false, fmt.Errorf("error cloning %s", name)
 		}
 
-		return nil
+		return true, nil
 	} else if err != nil {
-		return fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
 	err = passToGit(filepath.Join(path, name), "fetch")
 	if err != nil {
-		return fmt.Errorf("error fetching %s", name)
+		return false, fmt.Errorf("error fetching %s", name)
 	}
 
-	err = passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD")
+	return false, nil
+}
+
+func gitMerge(url string, path string, name string) error {
+	err := passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD")
 	if err != nil {
 		return fmt.Errorf("error resetting %s", name)
 	}
@@ -235,7 +248,7 @@ func getPkgbuildsfromAUR(pkgs []string, dir string) (bool, error) {
 		}
 
 		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
-			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
+			_, err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
 		} else {
 			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir)
 		}

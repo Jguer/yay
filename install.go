@@ -155,16 +155,17 @@ func install(parser *arguments) error {
 
 		cleanBuilds(toClean)
 
-		oldHashes, err := downloadPkgBuilds(do.Aur, targets, do.Bases)
+		toSkip := pkgBuildsToSkip(do.Aur, targets)
+		cloned, err := downloadPkgBuilds(do.Aur, do.Bases, toSkip)
 		if err != nil {
 			return err
 		}
 
 		if len(toEdit) > 0 {
 			if config.ShowDiffs {
-				err = showPkgBuildDiffs(toEdit, do.Bases, oldHashes)
+				err = showPkgBuildDiffs(toEdit, do.Bases, cloned)
 			} else {
-				err = editPkgBuilds(toEdit, do.Bases, oldHashes)
+				err = editPkgBuilds(toEdit, do.Bases)
 			}
 			if err != nil {
 				return err
@@ -176,6 +177,11 @@ func install(parser *arguments) error {
 				return fmt.Errorf("Aborting due to user")
 			}
 			config.NoConfirm = oldValue
+		}
+
+		err = mergePkgBuilds(do.Aur)
+		if err != nil {
+			return err
 		}
 
 		//initial srcinfo parse before pkgver() bump
@@ -493,32 +499,33 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 	}
 }
 
-func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[string]string) error {
+func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stringSet) error {
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		if shouldUseGit(dir) {
-			hash, _ := hashes[pkg.PackageBase]
-			if hash == "" {
-				hash = gitEmptyTree
+			start := "HEAD"
+
+			if cloned.get(pkg.PackageBase) {
+				start = gitEmptyTree
+			} else {
+				hasDiff, err := gitHasDiff(config.BuildDir, pkg.PackageBase)
+				if err != nil {
+					return err
+				}
+
+				if !hasDiff {
+					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(pkg, bases)), bold("No changes -- skipping"))
+					continue
+				}
 			}
 
-			head, err := gitGetHash(config.BuildDir, pkg.PackageBase)
-			if err != nil {
-				return err
-			}
-
-			if head == hash {
-				fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(pkg, bases)), bold("No changes -- skipping"))
-				continue
-			}
-
-			args := []string{"diff", hash + "..HEAD", "--src-prefix", dir + "/", "--dst-prefix", dir + "/"}
+			args := []string{"diff", start + "..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/"}
 			if useColor {
 				args = append(args, "--color=always")
 			} else {
 				args = append(args, "--color=never")
 			}
-			err = passToGit(dir, args...)
+			err := passToGit(dir, args...)
 			if err != nil {
 				return err
 			}
@@ -537,7 +544,7 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[
 	return nil
 }
 
-func editPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, hashes map[string]string) error {
+func editPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	pkgbuilds := make([]string, 0, len(pkgs))
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
@@ -593,9 +600,8 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, 
 	}
 }
 
-func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*rpc.Pkg) (map[string]string, error) {
+func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 	toSkip := make(stringSet)
-	hashes := make(map[string]string)
 
 	for _, pkg := range pkgs {
 		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
@@ -614,16 +620,26 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 		}
 	}
 
-	for k, pkg := range pkgs {
+	return toSkip
+}
+
+func mergePkgBuilds(pkgs []*rpc.Pkg) error {
+	for _, pkg := range pkgs {
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			hash, err := gitGetHash(config.BuildDir, pkg.PackageBase)
-			if err == nil {
-				hashes[pkg.PackageBase] = hash
-			} else {
-				hashes[pkg.PackageBase] = ""
+			err := gitMerge(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
+			if err != nil {
+				return err
 			}
 		}
+	}
 
+	return nil
+}
+
+func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) (stringSet, error) {
+	cloned := make(stringSet)
+
+	for k, pkg := range pkgs {
 		if toSkip.get(pkg.PackageBase) {
 			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
 			fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
@@ -634,21 +650,23 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, targets stringSet, bases map[string][]*r
 
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
-		var err error
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
+			clone, err := gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
-				return hashes, err
+				return nil, err
+			}
+			if clone {
+				cloned.set(pkg.PackageBase)
 			}
 		} else {
-			err = downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
-		}
-		if err != nil {
-			return hashes, err
+			err := downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	return hashes, nil
+	return cloned, nil
 }
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatible stringSet) (err error) {
