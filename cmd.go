@@ -262,6 +262,10 @@ func handleConfig(option, value string) bool {
 		config.AnswerClean = value
 	case "noanswerclean":
 		config.AnswerClean = ""
+	case "answerdiff":
+		config.AnswerDiff = value
+	case "noanswerdiff":
+		config.AnswerDiff = ""
 	case "answeredit":
 		config.AnswerEdit = value
 	case "noansweredit":

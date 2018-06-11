@@ -45,6 +45,7 @@ type Configuration struct {
 	ReDownload    string `json:"redownload"`
 	ReBuild       string `json:"rebuild"`
 	AnswerClean   string `json:"answerclean"`
+	AnswerDiff    string `json:"answerdiff"`
 	AnswerEdit    string `json:"answeredit"`
 	AnswerUpgrade string `json:"answerupgrade"`
 	GitBin        string `json:"gitbin"`
@@ -167,6 +168,7 @@ func defaultSettings(config *Configuration) {
 	config.ReDownload = "no"
 	config.ReBuild = "no"
 	config.AnswerClean = ""
+	config.AnswerDiff = ""
 	config.AnswerEdit = ""
 	config.AnswerUpgrade = ""
 	config.GitClone = true
