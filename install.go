@@ -106,7 +106,9 @@ func install(parser *arguments) error {
 	}
 	
 	if len(dp.Aur) == 0 {
+		parser.op = "S"
 		parser.delArg("y", "refresh")
+		parser.options["ignore"] = arguments.options["ignore"]
 		return passToPacman(parser)
 	}
 
