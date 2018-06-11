@@ -171,7 +171,7 @@ func defaultSettings(config *Configuration) {
 	config.AnswerUpgrade = ""
 	config.GitClone = true
 	config.Provides = true
-	config.CleanMenu = false
+	config.CleanMenu = true
 	config.DiffMenu = true
 	config.EditMenu = false
 }
