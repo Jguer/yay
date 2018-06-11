@@ -104,7 +104,7 @@ func install(parser *arguments) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if len(dp.Aur) == 0 {
 		parser.op = "S"
 		parser.delArg("y", "refresh")

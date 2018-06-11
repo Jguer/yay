@@ -323,6 +323,10 @@ func handleConfig(option, value string) bool {
 		config.PGPFetch = true
 	case "nopgpfetch":
 		config.PGPFetch = false
+	case "upgrademenu":
+		config.UpgradeMenu = true
+	case "noupgrademenu":
+		config.UpgradeMenu = false
 	case "cleanmenu":
 		config.CleanMenu = true
 	case "nocleanmenu":

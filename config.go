@@ -66,6 +66,7 @@ type Configuration struct {
 	Provides      bool   `json:"provides"`
 	PGPFetch      bool   `json:"pgpfetch"`
 	ShowDiffs     bool   `json:"showdifs"`
+	UpgradeMenu   bool   `json:"upgrademenu"`
 	CleanMenu     bool   `json:"cleanmenu"`
 	DiffMenu      bool   `json:"diffmenu"`
 	EditMenu      bool   `json:"editmenu"`
@@ -173,6 +174,7 @@ func defaultSettings(config *Configuration) {
 	config.AnswerUpgrade = ""
 	config.GitClone = true
 	config.Provides = true
+	config.UpgradeMenu = true
 	config.CleanMenu = true
 	config.DiffMenu = true
 	config.EditMenu = false
