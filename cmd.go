@@ -58,11 +58,21 @@ Permanent configuration options:
     --requestsplitn <n>   Max amount of packages to query per AUR request
     --sortby    <field>   Sort AUR results by a specific field during search
     --answerclean   <a>   Set a predetermined answer for the clean build menu
+    --answerdiff    <a>   Set a predetermined answer for the diff  menu
     --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
     --answerupgrade <a>   Set a predetermined answer for the upgrade menu
     --noanswerclean       Unset the answer for the clean build menu
+    --noanswerdiff        Unset the answer for the edit diff menu
     --noansweredit        Unset the answer for the edit pkgbuild menu
     --noanswerupgrade     Unset the answer for the upgrade menu
+    --cleanmenu           Give the option to clean build PKGBUILDS
+    --diffmenu            Give the option to show diffs for build files
+    --editmenu            Give the option to edit/view PKGBUILDS
+    --upgrademenu         Show a detailed list of updates with the option to skip any
+    --nocleanmenu         Don't clean build PKGBUILDS
+    --nodiffmenu          Don't show diffs for build files
+    --noeditmenu          Don't edit/view PKGBUILDS
+    --noupgrademenu       Don't show the upgrade menu
 
     --afterclean          Remove package sources after successful install
     --noafterclean        Do not remove package sources after successful build
@@ -73,8 +83,6 @@ Permanent configuration options:
     --nodevel             Do not check development packages
     --gitclone            Use git clone for PKGBUILD retrieval
     --nogitclone          Never use git clone for PKGBUILD retrieval
-    --showdiffs           Show diffs for build files
-    --noshowdiffs         Always show the entire PKGBUILD
     --rebuild             Always build target packages
     --rebuildall          Always build all AUR packages
     --norebuild           Skip package build if in cache and up to date
@@ -262,6 +270,10 @@ func handleConfig(option, value string) bool {
 		config.AnswerClean = value
 	case "noanswerclean":
 		config.AnswerClean = ""
+	case "answerdiff":
+		config.AnswerDiff = value
+	case "noanswerdiff":
+		config.AnswerDiff = ""
 	case "answeredit":
 		config.AnswerEdit = value
 	case "noansweredit":
@@ -313,6 +325,10 @@ func handleConfig(option, value string) bool {
 		config.PGPFetch = true
 	case "nopgpfetch":
 		config.PGPFetch = false
+	case "upgrademenu":
+		config.UpgradeMenu = true
+	case "noupgrademenu":
+		config.UpgradeMenu = false
 	case "cleanmenu":
 		config.CleanMenu = true
 	case "nocleanmenu":

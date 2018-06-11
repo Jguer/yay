@@ -104,7 +104,7 @@ func install(parser *arguments) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if len(dp.Aur) == 0 {
 		parser.op = "S"
 		parser.delArg("y", "refresh")
@@ -477,19 +477,25 @@ func diffNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stri
 
 func editDiffNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet, diff bool) ([]*rpc.Pkg, error) {
 	toEdit := make([]*rpc.Pkg, 0)
+	var editInput string
+	var err error
+
+	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
 
 	if diff {
 		fmt.Println(bold(green(arrow + " Diffs to show?")))
+		fmt.Print(bold(green(arrow + " ")))
+		editInput, err = getInput(config.AnswerDiff)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
-	}
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-
-	fmt.Print(bold(green(arrow + " ")))
-
-	editInput, err := getInput(config.AnswerEdit)
-	if err != nil {
-		return nil, err
+		fmt.Print(bold(green(arrow + " ")))
+		editInput, err = getInput(config.AnswerEdit)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	eInclude, eExclude, eOtherInclude, eOtherExclude := parseNumberMenu(editInput)

@@ -469,6 +469,8 @@ func hasParam(arg string) bool {
 		return true
 	case "answerclean":
 		return true
+	case "answerdiff":
+		return true
 	case "answeredit":
 		return true
 	case "answerupgrade":

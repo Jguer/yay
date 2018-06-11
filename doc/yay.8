@@ -232,6 +232,13 @@ will be used instead of reading from standard input but will be treated exactly
 the same when parsed\&.
 .RE
 .PP
+\fB\-\-answerdiff <All|None|Installed|NotInstalled|...>\fR
+.RS 4
+Set a predetermined answer for the edit diff  menu question\&. This answer
+will be used instead of reading from standard input but will be treated exactly
+the same when parsed\&.
+.RE
+.PP
 \fB\-\-answeredit <All|None|Installed|NotInstalled|...>\fR
 .RS 4
 Set a predetermined answer for the edit pkgbuild menu question\&. This answer
@@ -251,6 +258,11 @@ reading from standard input but will be treated exactly the same\&.
 Unset the answer for the clean build menu\&.
 .RE
 .PP
+\fB\-\-noanswerdiff\fR
+.RS 4
+Unset the answer for the diff menu\&.
+.RE
+.PP
 \fB\-\-noansweredit\fR
 .RS 4
 Unset the answer for the edit pkgbuild menu\&.
@@ -259,6 +271,59 @@ Unset the answer for the edit pkgbuild menu\&.
 \fB\-\-noanswerupgrade\fR
 .RS 4
 Unset the answer for the upgrade menu\&.
+.RE
+.PP
+\fB\-\-cleanmenu\fR
+.RS 4
+Show the clean menu\&. This menu gives you the chance to fully delete the
+downloaded build files from Yay's cache before redownloing a fresh copy\&.
+.RE
+.PP
+\fB\-\-diffmenu\fR
+.RS 4
+Show the diff menu\&. This menu gives you the option to view diffs from
+build files before building\&.
+.RE
+.PP
+\fB\-\-editmenu\fR
+.RS 4
+Show the edit menu\&. This menu gives you the option to edit or view PKGBUILDs
+before building\&.
+
+\fBWarning\fR: Yay resolves dependencies ahead of time via the RPC\&. It is not
+recommended to edit pkgbuild variables unless you know what you are doing\&.
+.RE
+.PP
+\fB\-\-upgrademenu\fR
+.RS 4
+Show a detailed list of updates in a similar format to VerbosePkgLists\&.
+Upgrades can also be skipped using numbers, number ranges or repo names\&.
+Adidionally ^ can be used to invert the selection\&.
+
+\fBWarning\fR: It is not recommended to skip updates from the repositores as
+this can lead to partial upgrades\&. This feature is intended to easily skip AUR
+updates on the fly that may be broken or have a long compile time\&. Ultimately
+it is up to the user what upgrades they skip\&.
+.RE
+.PP
+\fB\-\-nocleanmenu\fR
+.RS 4
+Do not show the clean menu\&.
+.RE
+.PP
+\fB\-\-nodiffmenu\fR
+.RS 4
+Do not show the diff menu\&.
+.RE
+.PP
+\fB\-\-noeditmenu\fR
+.RS 4
+Do not show the edit menu\&.
+.RE
+.PP
+\fB\-\-noupgrademenu\fR
+.RS 4
+Do not show the upgrade menu\&.
 .RE
 .PP
 \fB\-\-topdown\fR

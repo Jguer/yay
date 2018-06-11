@@ -343,6 +343,14 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 		return ignore, aurNames, nil
 	}
 
+	if !config.UpgradeMenu {
+		for _, pkg := range aurUp {
+			aurNames.set(pkg.Name)
+		}
+
+		return ignore, aurNames, nil
+	}
+
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
 	allUp := append(repoUp, aurUp...)
