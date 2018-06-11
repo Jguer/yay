@@ -68,9 +68,11 @@ Permanent configuration options:
     --cleanmenu           Give the option to clean build PKGBUILDS
     --diffmenu            Give the option to show diffs for build files
     --editmenu            Give the option to edit/view PKGBUILDS
+    --upgrademenu         Show a detailed list of updates with the option to skip any
     --nocleanmenu         Don't clean build PKGBUILDS
     --nodiffmenu          Don't show diffs for build files
     --noeditmenu          Don't edit/view PKGBUILDS
+    --noupgrademenu       Don't show the upgrade menu
 
     --afterclean          Remove package sources after successful install
     --noafterclean        Do not remove package sources after successful build

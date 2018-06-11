@@ -294,6 +294,18 @@ before building\&.
 recommended to edit pkgbuild variables unless you know what you are doing\&.
 .RE
 .PP
+\fB\-\-upgrademenu\fR
+.RS 4
+Show a detailed list of updates in a similar format to VerbosePkgLists\&.
+Upgrades can also be skipped using numbers, number ranges or repo names\&.
+Adidionally ^ can be used to invert the selection\&.
+
+\fBWarning\fR: It is not recommended to skip updates from the repositores as
+this can lead to partial upgrades\&. This feature is intended to easily skip AUR
+updates on the fly that may be broken or have a long compile time\&. Ultimately
+it is up to the user what upgrades they skip\&.
+.RE
+.PP
 \fB\-\-nocleanmenu\fR
 .RS 4
 Do not show the clean menu\&.
@@ -307,6 +319,11 @@ Do not show the diff menu\&.
 \fB\-\-noeditmenu\fR
 .RS 4
 Do not show the edit menu\&.
+.RE
+.PP
+\fB\-\-noupgrademenu\fR
+.RS 4
+Do not show the upgrade menu\&.
 .RE
 .PP
 \fB\-\-topdown\fR
