@@ -65,7 +65,6 @@ type Configuration struct {
 	GitClone      bool   `json:"gitclone"`
 	Provides      bool   `json:"provides"`
 	PGPFetch      bool   `json:"pgpfetch"`
-	ShowDiffs     bool   `json:"showdifs"`
 	UpgradeMenu   bool   `json:"upgrademenu"`
 	CleanMenu     bool   `json:"cleanmenu"`
 	DiffMenu      bool   `json:"diffmenu"`
