@@ -182,6 +182,21 @@ func install(parser *arguments) error {
 		}
 	}
 
+	if len(toDiff) > 0 {
+		oldValue := config.NoConfirm
+		config.NoConfirm = false
+		fmt.Println()
+		if !continueTask(bold(green("Proceed with install?")), "nN") {
+			return fmt.Errorf("Aborting due to user")
+		}
+		config.NoConfirm = oldValue
+	}
+
+	err = mergePkgBuilds(do.Aur)
+	if err != nil {
+		return err
+	}
+
 	if config.EditMenu {
 		pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
 		toEdit, err = editNumberMenu(do.Aur, do.Bases, remoteNamesCache)
@@ -197,7 +212,7 @@ func install(parser *arguments) error {
 		}
 	}
 
-	if len(toDiff) > 0 || len(toEdit) > 0 {
+	if len(toEdit) > 0 {
 		oldValue := config.NoConfirm
 		config.NoConfirm = false
 		fmt.Println()
@@ -205,11 +220,6 @@ func install(parser *arguments) error {
 			return fmt.Errorf("Aborting due to user")
 		}
 		config.NoConfirm = oldValue
-	}
-
-	err = mergePkgBuilds(do.Aur)
-	if err != nil {
-		return err
 	}
 
 	//initial srcinfo parse before pkgver() bump
