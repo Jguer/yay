@@ -22,6 +22,9 @@ _pacman_opts_commands=(
 
 # options for passing to _arguments: options common to all commands
 _pacman_opts_common=(
+  '--repo[Assume targets are from the repositories]'
+  {-a,--aur}'[Assume targets are from the AUR]'
+
   '--arch[Set an alternate architecture]'
   {-b,--dbpath}'[Alternate database location]:database_location:_files -/'
   '--color[colorize the output]:color options:(always never auto)'
@@ -52,11 +55,18 @@ _pacman_opts_common=(
   '--sortby[Sort AUR results by a specific field during search]:sortby options:(votes popularity id baseid name base submitted modified)'
   '--answerclean[Set a predetermined answer for the clean build menu]:answer'
   '--answeredit[Set a predetermined answer for the edit pkgbuild menu]:answer'
-  '--answerupgrade[Set a predetermined answer for the upgrade menu]:answe'
+  '--answerupgrade[Set a predetermined answer for the upgrade menu]:answer'
   '--noanswerclean[Unset the answer for the clean build menu]'
   '--noansweredit[Unset the answer for the edit pkgbuild menu]'
   '--noanswerupgrade[Unset the answer for the upgrade menu]'
-
+  '--cleanmenu[Give the option to clean build PKGBUILDS]'
+  '--diffmenu[Give the option to show diffs for build files]'
+  '--editmenu[Give the option to edit/view PKGBUILDS]'
+  '--upgrademenu[Show a detailed list of updates with the option to skip any]'
+  "--nocleanmenu[Don't clean build PKGBUILDS]"
+  "--nodiffmenu[Don't show diffs for build files]"
+  "--noeditmenu[Don't edit/view PKGBUILDS]"
+  "--noupgrademenu[Don't show the upgrade menu]"
 
   '--bottomup[Show AUR packages first]'
   '--topdown[Show repository packages first]'
@@ -71,6 +81,10 @@ _pacman_opts_common=(
   '--noredownload[Skip pkgbuild download if in cache and up to date]'
   '--rebuild[Always build target packages]'
   '--rebuildall[Always build all AUR packages]'
+  '--provides[Look for matching provders when searching for packages]'
+  '--noprovides[Just look for packages by pkgname]'
+  '--pgpfetch[Prompt to import PGP keys from PKGBUILDs]'
+  "--nopgpfetch[Don't prompt to import PGP keys]"
   '--rebuildtree[Always build all AUR packages even if installed]'
   '--norebuild[Skip package build if in cache and up to date]'
   '--mflags[Pass arguments to makepkg]:mflags'
