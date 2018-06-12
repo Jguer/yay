@@ -58,7 +58,7 @@ Permanent configuration options:
     --requestsplitn <n>   Max amount of packages to query per AUR request
     --sortby    <field>   Sort AUR results by a specific field during search
     --answerclean   <a>   Set a predetermined answer for the clean build menu
-    --answerdiff    <a>   Set a predetermined answer for the diff  menu
+    --answerdiff    <a>   Set a predetermined answer for the diff menu
     --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
     --answerupgrade <a>   Set a predetermined answer for the upgrade menu
     --noanswerclean       Unset the answer for the clean build menu
