@@ -12,7 +12,7 @@ set -l listall "(yay -Pcf)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 set -l listpacman "(__fish_print_packages)"
-set -l noopt 'not __fish_contains_opt -s Y -s G -s V -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
+set -l noopt 'not __fish_contains_opt -s Y -s G -s V -s P -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
 set -l database '__fish_contains_opt -s D database'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
 set -l print '__fish_contains_opt -s P print'
