@@ -3,6 +3,8 @@
 # Updated for yay by jguer
 
 set -l progname yay
+complete -e -c $progname
+complete -c $progname -f
 
 set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 # This might be an issue if another package manager is also installed (e.g. for containers)
@@ -10,7 +12,7 @@ set -l listall "(yay -Pcf)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 set -l listpacman "(__fish_print_packages)"
-set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
+set -l noopt 'not __fish_contains_opt -s Y -s G -s V -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
 set -l database '__fish_contains_opt -s D database'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
 set -l print '__fish_contains_opt -s P print'
@@ -21,30 +23,29 @@ set -l upgrade '__fish_contains_opt -s U upgrade'
 set -l files '__fish_contains_opt -s F files'
 set -l yayspecific '__fish_contains_opt -s Y yay'
 
-complete -c pacman -e
-complete -c pacman -f
-
 # HACK: We only need these two to coerce fish to stop file completion and complete options
-complete -c $progname -n $noopt -a "-D" -d "Modify the package database"
-complete -c $progname -n $noopt -a "-Q" -d "Query the package database"
+# complete -c $progname -n $noopt -a "-D" -d "Modify the package database"
+# complete -c $progname -n $noopt -a "-Q" -d "Query the package database"
+
 # Primary operations
 complete -c $progname -s D -f -l database -n $noopt -d 'Modify the package database'
-complete -c $progname -s Q -f -l query -n $noopt -d 'Query the package database'
+complete -c $progname -s F -f -l files -n $noopt -d 'Query the files database'
 complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
+complete -c $progname -s P -f -l print -n $noopt -d 'Print information'
+complete -c $progname -s Q -f -l query -n $noopt -d 'Query the package database'
 complete -c $progname -s R -f -l remove -n $noopt -d 'Remove packages from the system'
 complete -c $progname -s S -f -l sync -n $noopt -d 'Synchronize packages'
 complete -c $progname -s T -f -l deptest -n $noopt -d 'Check if dependencies are installed'
 complete -c $progname -s U -f -l upgrade -n $noopt -d 'Upgrade or add a local package'
-complete -c $progname -s F -f -l files -n $noopt -d 'Query the files database'
-complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
-complete -c $progname -s P -f -l print -n $noopt -d 'Print information'
 complete -c $progname -s Y -f -l yay -n $noopt -d 'Yay specific operations'
-
-complete -c $progname -s V -f -l version -d 'Display version and exit'
-complete -c $progname -s h -f -l help -d 'Display help'
+complete -c $progname -s V -f -l version -n $noopt -d 'Display version and exit'
+complete -c $progname -s h -f -l help -n $noopt -d 'Display help'
 
 # General options
 # Only offer these once a command has been given so they get prominent display
+complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the repositories'
+complete -c $progname -n "not $noopt" -l repo -d 'Assume targets are from the AUR'
+
 complete -c $progname -n "not $noopt" -s b -l dbpath -d 'Alternative database location' -xa '(__fish_complete_directories)'
 complete -c $progname -n "not $noopt" -s r -l root -d 'Alternative installation root'
 complete -c $progname -n "not $noopt" -s v -l verbose -d 'Output more status messages'
@@ -73,6 +74,7 @@ complete -c $progname -n "not $noopt" -l mflags -d 'Pass the following options t
 complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options to gpg' -f
 complete -c $progname -n "not $noopt" -l buildir -d 'Specify the build directory' -f
 complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -f
+complete -c $progname -n "not $noopt" -l editorflags -d 'Editor flags to use' -f
 complete -c $progname -n "not $noopt" -l makepkg -d 'Makepkg command to use' -f
 complete -c $progname -n "not $noopt" -l pacman -d 'Pacman command to use' -f
 complete -c $progname -n "not $noopt" -l tar -d 'Tar command to use' -f
@@ -98,10 +100,24 @@ complete -c $progname -n "not $noopt" -l noanswerclean -d 'Unset the answer for 
 complete -c $progname -n "not $noopt" -l noansweredit -d 'Unset the answer for the edit pkgbuild menu' -f
 complete -c $progname -n "not $noopt" -l noanswerupgrade -d 'Unset the answer for the upgrade menu' -f
 
+complete -c $progname -n "not $noopt" -l cleanmenu -d 'Give the option to clean build PKGBUILDS' -f
+complete -c $progname -n "not $noopt" -l diffmenu -d 'Give the option to show diffs for build files' -f
+complete -c $progname -n "not $noopt" -l editmenu -d 'Give the option to edit/view PKGBUILDS' -f
+complete -c $progname -n "not $noopt" -l upgrademenu -d 'Show a detailed list of updates with the option to skip any' -f
+complete -c $progname -n "not $noopt" -l nocleanmenu -d 'Do not clean build PKGBUILDS' -f
+complete -c $progname -n "not $noopt" -l nodiffmenu -d 'Do not show diffs for build files' -f
+complete -c $progname -n "not $noopt" -l noeditmenu -d 'Do not edit/view PKGBUILDS' -f
+complete -c $progname -n "not $noopt" -l noupgrademenu -d 'Do not show the upgrade menu' -f
+
+
+complete -c $progname -n "not $noopt" -l provides -d 'Look for matching provders when searching for packages'
+complete -c $progname -n "not $noopt" -l noprovides -d 'Just look for packages by pkgname'
+complete -c $progname -n "not $noopt" -l pgpfetch -d 'Prompt to import PGP keys from PKGBUILDs'
+complete -c $progname -n "not $noopt" -l nopgpfetch -d 'Do not prompt to import PGP keys'
+
 # Yay options
 complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
-complete -c $progname -n $yayspecific -s g -l getpkgbuild -d 'Download PKGBUILD from ABS or AUR' -xa "$listall" -f
-complete -c $progname -n $yayspecific -l gendb -d 'Display system package statistics' -f
+complete -c $progname -n $yayspecific -l gendb -d 'Generate development package DB' -f
 
 # Print options
 complete -c $progname -n $print -s d -l defaultconfig -d 'Print current yay configuration' -f
@@ -197,8 +213,7 @@ complete -c $progname -n "$files" -s q -l quiet -d 'Show less information' -f
 complete -c $progname -n "$files" -l machinereadable -d 'Show in machine readable format: repo\0pkgname\0pkgver\0path\n' -f
 
 # Upgrade options
-# Theoretically, pacman reads packages in all formats that libarchive supports
-# In practice, it's going to be tar.xz or tar.gz
-# Using "pkg.tar.*" here would change __fish_complete_suffix's descriptions to "unknown"
 complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.xz)' -d 'Package file'
 complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.gz)' -d 'Package file'
+complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.lzo)' -d 'Package file'
+complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar)' -d 'Package file'
