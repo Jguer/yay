@@ -71,7 +71,7 @@ type Configuration struct {
 	EditMenu      bool   `json:"editmenu"`
 }
 
-var version = "5.688"
+var version = "7.885"
 
 // configFileName holds the name of the config file.
 const configFileName string = "config.json"
