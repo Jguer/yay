@@ -201,6 +201,7 @@ lineloop:
 				curRepo.Servers = append(curRepo.Servers, line.Values...)
 				continue lineloop
 			case "Include":
+				conf.Include = append(conf.Include, line.Values[0])
 				f, err := os.Open(line.Values[0])
 				if err != nil {
 					err = fmt.Errorf("error while processing Include directive at line %d: %s",
