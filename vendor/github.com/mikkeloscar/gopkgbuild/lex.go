@@ -211,6 +211,8 @@ func lexEnv(l *lexer) stateFn {
 			}
 		case r == '\t':
 			l.ignore()
+		case r == ' ':
+			l.ignore()
 		case r == '#':
 			return lexComment
 		default:

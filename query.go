@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
@@ -158,23 +159,41 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string) (err error) {
-	aq, aurErr := narrowSearch(pkgS, true)
-	pq, _, err := queryRepo(pkgS)
-	if err != nil {
-		return err
+	pkgS = removeInvalidTargets(pkgS)
+	var aurErr error
+	var repoErr error
+	var aq aurQuery
+	var pq repoQuery
+
+	if mode == ModeAUR || mode == ModeAny {
+		aq, aurErr = narrowSearch(pkgS, true)
+	}
+	if mode == ModeRepo || mode == ModeAny {
+		pq, _, repoErr = queryRepo(pkgS)
+		if repoErr != nil {
+			return err
+		}
 	}
 
 	if config.SortMode == BottomUp {
-		aq.printSearch(1)
-		pq.printSearch()
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(1)
+		}
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
 	} else {
-		pq.printSearch()
-		aq.printSearch(1)
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(1)
+		}
 	}
 
 	if aurErr != nil {
 		fmt.Printf("Error during AUR search: %s\n", aurErr)
-		fmt.Println("Showing Repo packags only")
+		fmt.Println("Showing Repo packages only")
 	}
 
 	return nil
@@ -183,6 +202,8 @@ func syncSearch(pkgS []string) (err error) {
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(pkgS []string) (err error) {
 	var info []*rpc.Pkg
+	missing := false
+	pkgS = removeInvalidTargets(pkgS)
 	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
 		return
@@ -198,6 +219,7 @@ func syncInfo(pkgS []string) (err error) {
 
 		info, err = aurInfoPrint(noDb)
 		if err != nil {
+			missing = true
 			fmt.Println(err)
 		}
 	}
@@ -205,7 +227,8 @@ func syncInfo(pkgS []string) (err error) {
 	// Repo always goes first
 	if len(repoS) != 0 {
 		arguments := cmdArgs.copy()
-		arguments.delTarget(aurS...)
+		arguments.clearTargets()
+		arguments.addTarget(repoS...)
 		err = passToPacman(arguments)
 
 		if err != nil {
@@ -213,10 +236,18 @@ func syncInfo(pkgS []string) (err error) {
 		}
 	}
 
-	if len(aurS) != 0 {
+	if len(aurS) != len(info) {
+		missing = true
+	}
+
+	if len(info) != 0 {
 		for _, pkg := range info {
 			PrintInfo(pkg)
 		}
+	}
+
+	if missing {
+		err = fmt.Errorf("")
 	}
 
 	return
@@ -283,10 +314,10 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		db, name := splitDbFromName(_pkg)
 		found := false
 
-		if db == "aur" {
+		if db == "aur" || mode == ModeAUR {
 			aur = append(aur, _pkg)
 			continue
-		} else if db != "" {
+		} else if db != "" || mode == ModeRepo {
 			repo = append(repo, _pkg)
 			continue
 		}
@@ -332,7 +363,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	// State = 2 - Keep package and have iterated over dependencies
 	safePackages := make(map[string]uint8)
 	// provides stores a mapping from the provides name back to the original package name
-	provides := make(map[string]stringSet)
+	provides := make(mapStringSet)
 	packages := localDb.PkgCache()
 
 	// Mark explicit dependencies and enumerate the provides list
@@ -344,7 +375,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 		}
 
 		pkg.Provides().ForEach(func(dep alpm.Depend) error {
-			addMapStringSet(provides, dep.Name, pkg.Name())
+			provides.Add(dep.Name, pkg.Name())
 			return nil
 		})
 		return nil
@@ -353,7 +384,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 
 	iterateAgain := true
 	processDependencies := func(pkg alpm.Package) error {
-		if state, _ := safePackages[pkg.Name()]; state == 0 || state == 2 {
+		if state := safePackages[pkg.Name()]; state == 0 || state == 2 {
 			return nil
 		}
 
@@ -405,6 +436,24 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	})
 
 	return
+}
+
+func lastBuildTime() (time.Time, error) {
+	var time time.Time
+
+	pkgs, _, _, _, err := filterPackages()
+	if err != nil {
+		return time, err
+	}
+
+	for _, pkg := range pkgs {
+		thisTime := pkg.BuildDate()
+		if thisTime.After(time) {
+			time = thisTime
+		}
+	}
+
+	return time, nil
 }
 
 // Statistics returns statistics about packages installed in system
@@ -516,7 +565,7 @@ func aurInfoPrint(names []string) ([]*rpc.Pkg, error) {
 		return info, err
 	}
 
-	warnings.Print()
+	warnings.print()
 
 	return info, nil
 }

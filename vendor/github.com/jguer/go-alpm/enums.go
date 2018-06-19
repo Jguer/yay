@@ -62,7 +62,7 @@ func (mod DepMod) String() string {
 }
 
 // Signature checking level.
-type SigLevel uint
+type SigLevel int
 
 const (
 	SigPackage SigLevel = 1 << iota
@@ -76,10 +76,10 @@ const (
 	SigDatabaseMarginalOk
 	SigDatabaseUnknownOk
 )
-const SigUseDefault SigLevel = 1 << 31
+const SigUseDefault SigLevel = 1 << 30
 
 // Signature status
-type SigStatus uint
+type SigStatus int
 
 const (
 	SigStatusValid SigStatus = iota

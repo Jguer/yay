@@ -5,19 +5,19 @@
   branch = "master"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
-  revision = "11d6aadda57c8fb4f93969333cb990677d28d4f9"
+  revision = "1114f773cdfb05f577438f7a0538eccabc9cf012"
 
 [[projects]]
   branch = "master"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
-  revision = "9050804dc7d471393053322aaaa40428fbd32de3"
+  revision = "837b260b8e90895c45737e2e72313fe5bce6f2c4"
 
 [[projects]]
   branch = "master"
   name = "github.com/mikkeloscar/gopkgbuild"
   packages = ["."]
-  revision = "32274fc52aa8f5eb28711da734179e9aea27b31f"
+  revision = "2bb4f1f1db67f81fe50f9c1c4ad9db4f20fd6b22"
 
 [solve-meta]
   analyzer-name = "dep"

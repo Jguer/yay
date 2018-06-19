@@ -35,6 +35,9 @@ New operations:
     yay {-P --print}       [options]
     yay {-G --getpkgbuild} [package(s)]
 
+New options:
+       --repo             Assume targets are from the repositories
+    -a --aur              Assume targets are from the AUR
 Permanent configuration options:
     --save                Causes the following options to be saved back to the
                           config file when used
@@ -53,13 +56,23 @@ Permanent configuration options:
     --config      <file>  pacman.conf file to use
 
     --requestsplitn <n>   Max amount of packages to query per AUR request
-    --sortby <field>      Sort AUR results by a specific field during search
+    --sortby    <field>   Sort AUR results by a specific field during search
     --answerclean   <a>   Set a predetermined answer for the clean build menu
+    --answerdiff    <a>   Set a predetermined answer for the diff menu
     --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
     --answerupgrade <a>   Set a predetermined answer for the upgrade menu
     --noanswerclean       Unset the answer for the clean build menu
+    --noanswerdiff        Unset the answer for the edit diff menu
     --noansweredit        Unset the answer for the edit pkgbuild menu
     --noanswerupgrade     Unset the answer for the upgrade menu
+    --cleanmenu           Give the option to clean build PKGBUILDS
+    --diffmenu            Give the option to show diffs for build files
+    --editmenu            Give the option to edit/view PKGBUILDS
+    --upgrademenu         Show a detailed list of updates with the option to skip any
+    --nocleanmenu         Don't clean build PKGBUILDS
+    --nodiffmenu          Don't show diffs for build files
+    --noeditmenu          Don't edit/view PKGBUILDS
+    --noupgrademenu       Don't show the upgrade menu
 
     --afterclean          Remove package sources after successful install
     --noafterclean        Do not remove package sources after successful build
@@ -77,6 +90,10 @@ Permanent configuration options:
     --redownload          Always download pkgbuilds of targets
     --noredownload        Skip pkgbuild download if in cache and up to date
     --redownloadall       Always download pkgbuilds of all AUR packages
+    --provides            Look for matching provders when searching for packages
+    --noprovides          Just look for packages by pkgname
+    --pgpfetch            Prompt to import PGP keys from PKGBUILDs
+    --nopgpfetch          Don't prompt to import PGP keys
 
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background
@@ -91,6 +108,7 @@ Print specific options:
     -n --numberupgrades   Print number of updates
     -s --stats            Display system package statistics
     -u --upgrades         Print update list
+    -w --news             Print arch news
 
 Yay specific options:
     -c --clean            Remove unneeded dependencies
@@ -252,6 +270,10 @@ func handleConfig(option, value string) bool {
 		config.AnswerClean = value
 	case "noanswerclean":
 		config.AnswerClean = ""
+	case "answerdiff":
+		config.AnswerDiff = value
+	case "noanswerdiff":
+		config.AnswerDiff = ""
 	case "answeredit":
 		config.AnswerEdit = value
 	case "noansweredit":
@@ -295,6 +317,34 @@ func handleConfig(option, value string) bool {
 		config.SudoLoop = true
 	case "nosudoloop":
 		config.SudoLoop = false
+	case "provides":
+		config.Provides = true
+	case "noprovides":
+		config.Provides = false
+	case "pgpfetch":
+		config.PGPFetch = true
+	case "nopgpfetch":
+		config.PGPFetch = false
+	case "upgrademenu":
+		config.UpgradeMenu = true
+	case "noupgrademenu":
+		config.UpgradeMenu = false
+	case "cleanmenu":
+		config.CleanMenu = true
+	case "nocleanmenu":
+		config.CleanMenu = false
+	case "diffmenu":
+		config.DiffMenu = true
+	case "nodiffmenu":
+		config.DiffMenu = false
+	case "editmenu":
+		config.EditMenu = true
+	case "noeditmenu":
+		config.EditMenu = false
+	case "a", "aur":
+		mode = ModeAUR
+	case "repo":
+		mode = ModeRepo
 	default:
 		return false
 	}
@@ -318,6 +368,8 @@ func handlePrint() (err error) {
 		err = printNumberOfUpdates()
 	case cmdArgs.existsArg("u", "upgrades"):
 		err = printUpdateList(cmdArgs)
+	case cmdArgs.existsArg("w", "news"):
+		err = printNewsFeed()
 	case cmdArgs.existsArg("c", "complete"):
 		switch {
 		case cmdArgs.existsArg("f", "fish"):
@@ -350,22 +402,21 @@ func handleYay() (err error) {
 }
 
 func handleGetpkgbuild() (err error) {
-	err = getPkgbuilds(cmdArgs.formatTargets())
+	err = getPkgbuilds(cmdArgs.targets)
 	return
 }
 
 func handleYogurt() (err error) {
 	options := cmdArgs.formatArgs()
-	targets := cmdArgs.formatTargets()
 
 	config.SearchMode = NumberMenu
-	err = numberMenu(targets, options)
+	err = numberMenu(cmdArgs.targets, options)
 
 	return
 }
 
 func handleSync() (err error) {
-	targets := cmdArgs.formatTargets()
+	targets := cmdArgs.targets
 
 	if cmdArgs.existsArg("y", "refresh") {
 		arguments := cmdArgs.copy()
@@ -374,7 +425,7 @@ func handleSync() (err error) {
 		arguments.delArg("s", "search")
 		arguments.delArg("i", "info")
 		arguments.delArg("l", "list")
-		arguments.targets = make(stringSet)
+		arguments.clearTargets()
 		err = passToPacman(arguments)
 		if err != nil {
 			return
@@ -407,30 +458,50 @@ func handleSync() (err error) {
 }
 
 func handleRemove() (err error) {
-	removeVCSPackage(cmdArgs.formatTargets())
+	removeVCSPackage(cmdArgs.targets)
 	err = passToPacman(cmdArgs)
 	return
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string, flags []string) (err error) {
-	aurQ, aurErr := narrowSearch(pkgS, true)
-	numaq := len(aurQ)
-	repoQ, numpq, err := queryRepo(pkgS)
-	if err != nil {
-		return
+	pkgS = removeInvalidTargets(pkgS)
+	var aurErr error
+	var repoErr error
+	var aq aurQuery
+	var pq repoQuery
+	var lenaq int
+	var lenpq int
+
+	if mode == ModeAUR || mode == ModeAny {
+		aq, aurErr = narrowSearch(pkgS, true)
+		lenaq = len(aq)
+	}
+	if mode == ModeRepo || mode == ModeAny {
+		pq, lenpq, repoErr = queryRepo(pkgS)
+		if repoErr != nil {
+			return err
+		}
 	}
 
-	if numpq == 0 && numaq == 0 {
-		return fmt.Errorf("no packages match search")
+	if lenpq == 0 && lenaq == 0 {
+		return fmt.Errorf("No packages match search")
 	}
 
 	if config.SortMode == BottomUp {
-		aurQ.printSearch(numpq + 1)
-		repoQ.printSearch()
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(lenpq + 1)
+		}
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
 	} else {
-		repoQ.printSearch()
-		aurQ.printSearch(numpq + 1)
+		if mode == ModeRepo || mode == ModeAny {
+			pq.printSearch()
+		}
+		if mode == ModeAUR || mode == ModeAny {
+			aq.printSearch(lenpq + 1)
+		}
 	}
 
 	if aurErr != nil {
@@ -457,8 +528,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
-	for i, pkg := range repoQ {
-		target := len(repoQ) - i
+	for i, pkg := range pq {
+		target := len(pq) - i
 		if config.SortMode == TopDown {
 			target = i + 1
 		}
@@ -471,10 +542,10 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		}
 	}
 
-	for i, pkg := range aurQ {
-		target := len(aurQ) - i + len(repoQ)
+	for i, pkg := range aq {
+		target := len(aq) - i + len(pq)
 		if config.SortMode == TopDown {
-			target = i + 1 + len(repoQ)
+			target = i + 1 + len(pq)
 		}
 
 		if isInclude && include.get(target) {
@@ -512,7 +583,7 @@ func passToPacman(args *arguments) error {
 
 	argArr = append(argArr, "--")
 
-	argArr = append(argArr, args.formatTargets()...)
+	argArr = append(argArr, args.targets...)
 
 	cmd = exec.Command(argArr[0], argArr[1:]...)
 
@@ -544,7 +615,7 @@ func passToPacmanCapture(args *arguments) (string, string, error) {
 
 	argArr = append(argArr, "--")
 
-	argArr = append(argArr, args.formatTargets()...)
+	argArr = append(argArr, args.targets...)
 
 	cmd = exec.Command(argArr[0], argArr[1:]...)
 	cmd.Stdout = &outbuf
@@ -588,7 +659,6 @@ func passToMakepkgCapture(dir string, args ...string) (string, string, error) {
 	args = append(args, mflags...)
 
 	cmd := exec.Command(config.MakepkgBin, args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Dir = dir
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
@@ -614,4 +684,23 @@ func passToGit(dir string, _args ...string) (err error) {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	err = cmd.Run()
 	return
+}
+
+func passToGitCapture(dir string, _args ...string) (string, string, error) {
+	var outbuf, errbuf bytes.Buffer
+	gitflags := strings.Fields(config.GitFlags)
+	args := []string{"-C", dir}
+	args = append(args, gitflags...)
+	args = append(args, _args...)
+
+	cmd := exec.Command(config.GitBin, args...)
+	cmd.Dir = dir
+	cmd.Stdout = &outbuf
+	cmd.Stderr = &errbuf
+
+	err := cmd.Run()
+	stdout := outbuf.String()
+	stderr := errbuf.String()
+
+	return stdout, stderr, err
 }

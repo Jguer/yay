@@ -18,7 +18,7 @@ type vcsInfo map[string]shaInfos
 type shaInfos map[string]shaInfo
 type shaInfo struct {
 	Protocols []string `json:"protocols"`
-	Brach     string   `json:"branch"`
+	Branch    string   `json:"branch"`
 	SHA       string   `json:"sha"`
 }
 
@@ -43,7 +43,8 @@ func createDevelDB() error {
 
 	bases := getBases(infoMap)
 
-	downloadPkgBuilds(info, sliceToStringSet(remoteNames), bases)
+	toSkip := pkgBuildsToSkip(info, sliceToStringSet(remoteNames))
+	downloadPkgBuilds(info, bases, toSkip)
 	tryParsesrcinfosFile(info, srcinfosStale, bases)
 
 	for _, pkg := range info {
@@ -136,6 +137,7 @@ func getCommit(url string, branch string, protocols []string) string {
 
 		cmd := exec.Command(config.GitBin, "ls-remote", protocol+"://"+url, branch)
 		cmd.Stdout = &outbuf
+		cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0")
 
 		err := cmd.Start()
 		if err != nil {
@@ -179,7 +181,7 @@ func (infos shaInfos) needsUpdate() bool {
 	hasUpdate := make(chan struct{})
 
 	checkHash := func(url string, info shaInfo) {
-		hash := getCommit(url, info.Brach, info.Protocols)
+		hash := getCommit(url, info.Branch, info.Protocols)
 		if hash != "" && hash != info.SHA {
 			hasUpdate <- struct{}{}
 		} else {
@@ -203,10 +205,6 @@ func (infos shaInfos) needsUpdate() bool {
 			}
 		}
 	}
-}
-
-func inStore(pkgName string) shaInfos {
-	return savedInfo[pkgName]
 }
 
 func saveVCSInfo() error {

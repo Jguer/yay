@@ -10,29 +10,39 @@ import (
 	alpm "github.com/jguer/go-alpm"
 )
 
-func initPaths() {
-	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
-		if info, err := os.Stat(configHome); err == nil && info.IsDir() {
-			configHome = configHome + "/yay"
-		} else {
-			configHome = filepath.Join(os.Getenv("HOME"), ".config/yay")
+func setPaths() error {
+	if _configHome, set := os.LookupEnv("XDG_CONFIG_HOME"); set {
+		if _configHome == "" {
+			return fmt.Errorf("XDG_CONFIG_HOME set but empty")
 		}
+		configHome = filepath.Join(_configHome, "yay")
+	} else if _configHome, set := os.LookupEnv("HOME"); set {
+		if _configHome == "" {
+			return fmt.Errorf("HOME set but empty")
+		}
+		configHome = filepath.Join(_configHome, ".config/yay")
 	} else {
-		configHome = filepath.Join(os.Getenv("HOME"), ".config/yay")
+		return fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
 	}
 
-	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
-		if info, err := os.Stat(cacheHome); err == nil && info.IsDir() {
-			cacheHome = filepath.Join(cacheHome, "yay")
-		} else {
-			cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
+	if _cacheHome, set := os.LookupEnv("XDG_CACHE_HOME"); set {
+		if _cacheHome == "" {
+			return fmt.Errorf("XDG_CACHE_HOME set but empty")
 		}
+		cacheHome = filepath.Join(_cacheHome, "yay")
+	} else if _cacheHome, set := os.LookupEnv("HOME"); set {
+		if _cacheHome == "" {
+			return fmt.Errorf("XDG_CACHE_HOME set but empty")
+		}
+		cacheHome = filepath.Join(_cacheHome, ".cache/yay")
 	} else {
-		cacheHome = filepath.Join(os.Getenv("HOME"), "/.cache/yay")
+		return fmt.Errorf("XDG_CACHE_HOME and HOME unset")
 	}
 
 	configFile = filepath.Join(configHome, configFileName)
 	vcsFile = filepath.Join(cacheHome, vcsFileName)
+
+	return nil
 }
 
 func initConfig() (err error) {
@@ -59,6 +69,14 @@ func initConfig() (err error) {
 				fmt.Println("Loading default Settings.\nError reading config:",
 					err)
 				defaultSettings(&config)
+			}
+			if _, err = os.Stat(config.BuildDir); os.IsNotExist(err) {
+				err = os.MkdirAll(config.BuildDir, 0755)
+				if err != nil {
+					err = fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
+						"The error was:\n%s", config.BuildDir, err)
+					return
+				}
 			}
 		}
 	}
@@ -176,7 +194,12 @@ func main() {
 		goto cleanup
 	}
 
-	initPaths()
+	err = setPaths()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+	}
 
 	err = initConfig()
 	if err != nil {
@@ -212,7 +235,7 @@ func main() {
 
 cleanup:
 	//cleanup
-	//from here on out dont exit if an error occurs
+	//from here on out don't exit if an error occurs
 	//if we fail to save the configuration
 	//at least continue on and try clean up other parts
 

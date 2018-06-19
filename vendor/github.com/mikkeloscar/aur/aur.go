@@ -7,7 +7,8 @@ import (
 	"net/url"
 )
 
-const aurURL = "https://aur.archlinux.org/rpc.php?"
+//AURURL is the base string from which the query is built
+var AURURL = "https://aur.archlinux.org/rpc.php?"
 
 type response struct {
 	Error       string `json:"error"`
@@ -46,7 +47,7 @@ type Pkg struct {
 
 func get(values url.Values) ([]Pkg, error) {
 	values.Set("v", "5")
-	resp, err := http.Get(aurURL + values.Encode())
+	resp, err := http.Get(AURURL + values.Encode())
 	if err != nil {
 		return nil, err
 	}

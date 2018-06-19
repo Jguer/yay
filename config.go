@@ -25,6 +25,14 @@ const (
 	TopDown
 )
 
+type targetMode int
+
+const (
+	ModeAUR targetMode = iota
+	ModeRepo
+	ModeAny
+)
+
 // Configuration stores yay's config.
 type Configuration struct {
 	BuildDir      string `json:"buildDir"`
@@ -37,6 +45,7 @@ type Configuration struct {
 	ReDownload    string `json:"redownload"`
 	ReBuild       string `json:"rebuild"`
 	AnswerClean   string `json:"answerclean"`
+	AnswerDiff    string `json:"answerdiff"`
 	AnswerEdit    string `json:"answeredit"`
 	AnswerUpgrade string `json:"answerupgrade"`
 	GitBin        string `json:"gitbin"`
@@ -54,6 +63,12 @@ type Configuration struct {
 	Devel         bool   `json:"devel"`
 	CleanAfter    bool   `json:"cleanAfter"`
 	GitClone      bool   `json:"gitclone"`
+	Provides      bool   `json:"provides"`
+	PGPFetch      bool   `json:"pgpfetch"`
+	UpgradeMenu   bool   `json:"upgrademenu"`
+	CleanMenu     bool   `json:"cleanmenu"`
+	DiffMenu      bool   `json:"diffmenu"`
+	EditMenu      bool   `json:"editmenu"`
 }
 
 var version = "5.688"
@@ -97,6 +112,9 @@ var alpmConf alpm.PacmanConfig
 // AlpmHandle is the alpm handle used by yay.
 var alpmHandle *alpm.Handle
 
+// Mode is used to restrict yay to AUR or repo only modes
+var mode targetMode = ModeAny
+
 func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	file, err := os.Open(pacmanconf)
 	if err != nil {
@@ -134,6 +152,7 @@ func defaultSettings(config *Configuration) {
 	config.MakepkgBin = "makepkg"
 	config.NoConfirm = false
 	config.PacmanBin = "pacman"
+	config.PGPFetch = true
 	config.PacmanConf = "/etc/pacman.conf"
 	config.GpgFlags = ""
 	config.MFlags = ""
@@ -149,9 +168,15 @@ func defaultSettings(config *Configuration) {
 	config.ReDownload = "no"
 	config.ReBuild = "no"
 	config.AnswerClean = ""
+	config.AnswerDiff = ""
 	config.AnswerEdit = ""
 	config.AnswerUpgrade = ""
 	config.GitClone = true
+	config.Provides = true
+	config.UpgradeMenu = true
+	config.CleanMenu = true
+	config.DiffMenu = true
+	config.EditMenu = false
 }
 
 // Editor returns the preferred system editor.

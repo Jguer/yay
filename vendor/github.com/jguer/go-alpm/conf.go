@@ -114,18 +114,14 @@ func (rdr *confReader) ParseLine() (tok iniToken, err error) {
 	rdr.Lineno++
 
 	line = bytes.TrimSpace(line)
-
-	comment := bytes.IndexByte(line, '#')
-	if comment >= 0 {
-		line = line[:comment]
-	}
-
 	if len(line) == 0 {
 		tok.Type = tokenComment
 		return
 	}
-
 	switch line[0] {
+	case '#':
+		tok.Type = tokenComment
+		return
 	case '[':
 		closing := bytes.IndexByte(line, ']')
 		if closing < 0 {
@@ -205,6 +201,7 @@ lineloop:
 				curRepo.Servers = append(curRepo.Servers, line.Values...)
 				continue lineloop
 			case "Include":
+				conf.Include = append(conf.Include, line.Values[0])
 				f, err := os.Open(line.Values[0])
 				if err != nil {
 					err = fmt.Errorf("error while processing Include directive at line %d: %s",

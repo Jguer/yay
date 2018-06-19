@@ -4,12 +4,11 @@ Yet another Yogurt - An AUR Helper written in Go
 
 #### Packages
 
-[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![yay-git](https://img.shields.io/aur/version/yay-git.svg?label=yay-git)](https://aur.archlinux.org/packages/yay-git/) [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/Jguer/yay/master/LICENSE)
-
+[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![yay-git](https://img.shields.io/aur/version/yay-git.svg?label=yay-git)](https://aur.archlinux.org/packages/yay-git/) [![GitHub license](https://img.shields.io/github/license/jguer/yay.svg)](https://github.com/Jguer/yay/blob/master/LICENSE)  
 There's a point in everyone's life when you feel the need to write an AUR helper because there are only about 20 of them.
 So say hi to 20+1.
 
-Yay was created with a few objectives in mind and based on the design of [yaourt](https://github.com/archlinuxfr/yaourt) and [apacman](https://github.com/oshazard/apacman):
+Yay was created with a few objectives in mind and based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [apacman](https://github.com/oshazard/apacman) and [pacaur](https://github.com/rmarquis/pacaur):
 
 * Have almost no dependencies.
 * Provide an interface for pacman.
@@ -25,15 +24,83 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 * Search narrowing (`yay linux header` will first search linux and then narrow on header)
 * No sourcing of PKGBUILD is done
 * The binary has no dependencies that pacman doesn't already have.
-* Sources build dependencies
-* Removes make dependencies at the end of build process
+* Advanced dependency solving
+* Remove make dependencies at the end of the build process
 
-#### Frequently Asked Questions
+## Installation
 
-* Yay does not display colored output. How do I fix it?  
+If you are migrating from another AUR helper you can simply install Yay from
+the AUR like any other package.
+
+The initial installation of Yay can be done by cloning the PKGBUILD and
+building with makepkg.
+```sh
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+```
+
+## Contributing
+
+Contributors are always welcome!
+
+If you plan to make any large changes or changes that may not be 100% agreed
+on, we suggest opening an issue detailing your ideas first.
+
+Otherwise send us a pull request and we will be happy to review it.
+
+### Code Style
+
+All code should be formatted through `go fmt`. This tool will automatically
+format code for you. Although it is recommended you write code in this style
+and just use this tool to catch mistakes.
+
+### Building
+
+Yay is easy to build with its only build dependency being `go` and the
+assumption of `base-devel` being installed.
+
+Run `make` to build Yay. This will generate a binary called `yay` in the same
+directory as the Makefile.
+
+Run `make test` to test Yay. This will check the code is formatted correctly,
+run the code through `go vet` and run unit tests.
+
+Yay's Makefile automatically sets the `GOPATH` to `$PWD/.go`. This makes it easy to
+build using the dependencies in `vendor/`. Running manual go commands such as
+`go build` will require that you to either set the `GOPATH` manually or `go get`
+The dependencies into your own `GOPATH`.
+
+### Vendored Dependencies
+
+Yay depends on a couple of other projects. These are stored in `vendor/` and
+are built into Yay at build time. They do not need to be installed separately.
+
+Currently yay Depends on:
+
+* https://github.com/Jguer/go-alpm
+* https://github.com/mikkeloscar/gopkgbuild
+* https://github.com/mikkeloscar/aur
+
+## Frequently Asked Questions
+
+* Yay does not display colored output. How do I fix it?
   Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
 
-#### Example of Custom Operations
+* Sometimes diffs are printed to the terminal and other times they are pages
+  via less. How do I fix this?
+   Yay uses `git diff` to display diffs, by default git tells less to not page
+   if the output can fit one terminal length. This can be overridden by
+   exporting your own flags `export LESS=SRX`.
+
+* Yay is not asking me to edit PKGBUILDS and I don't like diff menu! What do?  
+  `yay --editmenu --nodiffmenu --save`
+
+* Only act on AUR packages or only on repo packages?  
+  `yay -{OPERATION} --aur`  
+  `yay -{OPERATION} --repo`  
+
+## Examples of Custom Operations
 
 * `yay <Search Term>` presents package selection menu
 * `yay -Ps` prints system statistics
@@ -41,197 +108,12 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 * `yay -Yc` cleans unneeded dependencies
 * `yay -G` downloads PKGBUILD from ABS or AUR
 * `yay -Y --gendb` generates development package DB used for devel updates.
+* `yay -Syu --devel --timeupdate` Normal update but also check for development
+  package updates and uses PKGBUILD modification time and not version to
+  determine update
 
-<img src="http://jguer.github.io/yay/yayupgrade.png" width="450">
-<img src="http://jguer.github.io/yay/yay2.png" width="450">
-<img src="http://jguer.github.io/yay/yay4.png" width="450">
+## Images
 
-### Changelog
-
-#### v5.675
-
-* Recursively remove dependencies when using yay -Yc
-* Highlight diff between old and new versions better
-* Fix regression where repo upgrades were marked as deps during sysupgrades
-* Added `--editorflags` to add flags to editor execution
-
-#### v5.657
-
-* By default running `yay` will trigger `yay -Syu`
-* Updated Shell completions
-* `-Ss` shows difference between installed and in-repo versions
-* Allow sorting AUR results by fields other than votes
-  * votes|popularity|id|baseid|name|base|submitted|modified
-* Added flags for automatic menu input
-  * --answerclean --answeredit --answerupgrade
-  * --noanswerclean --noansweredit --noanswerupgrade
-* Fixed versioned dep checking
-* Usual fixes to parsing, dependency sourcing and other PKGBUILD atrocities
-
-#### v5.608
-
-* Updated Shell completions
-* Added `-Qu` to extended pacman options
-* Provides now supported in `-Si`
-* Improved build method
-* Improved conflict checking
-* PKGBUILDs with unsupported arch can force build now
-* PGP Key automatic importing
-* GPG option passing
-* `db/name` support re-added
-
-#### 4.505
-
-* `yay` used to auto save permanent configuration options, now `--save` must be passed to save permanent configuration options
-* Competions updated
-* Number menu is now used to edit PKGBuilds and Clean Builds
-* Devel updates of `-git` packages now uses `git ls-remote` which makes it compatible with other platforms besides github.
-* Devel update checking is faster as well
-* Updated man page
-
-#### 3.440
-
-* Closed a lot of issues
-* Updated bash and zsh completions
-* New colour scheme
-* Small parsing fixes
-* Automatically delete package from transaction if $EDITOR exits with non-zero #140
-* Added check depends support
-
-#### 3.373
-
-* Version bump to V3 to reflect all of the changes to syntax
-* `yay -Pd` prints default config
-* `yay -Pg` prints current config
-* Fixes #174
-* Fixes #176
-* Fixes -G being unable to download split packages
-* Fixes #171
-* Fixes -Si failing when given a non existing package on https://github.com/Jguer/yay/pull/155
-* Fixes other small bugs on 2.350 without adding new features
-
-#### 2.350
-
-* Adds sudo loop (off by default, enable only by editing config file) #147
-* Adds replace package support #154 #134
-* Minor display improvements #150 for example
-* Fixes GenDB
-* Fixes Double options passing to pacman
-* Noconfirm works more as expected
-* Minor fixes and refactoring
-* Yay filters out the repository name if it's included.
-* Fixes #122
-
-#### 2.298
-
-* Adds #115
-
-#### 2.296
-
-* New argument parsing @Morganamilo (check manpage or --help for new
-  information)
-* yay -Qstats changed to yay -Ps or yay -P --stats
-* yay -Cd changed to yay -Yc or yay -Y --clean
-* yay -Pu (--upgrades) prints update list
-* yay -Pn (--numberupgrades) prints number of updates
-* yay -G also possible through -Yg or -Y --getpkgbuild (yay -G will be
-  discontinued once it's possible to add options to the getpkgbuild operation)
-* yay now counts from 1 instead of 0 @Morganamilo
-* Support for ranges when selecting packages @samosaara
-* Pacaur style ask all questions first and download first @Morganamilo
-* Updated vendor dependencies (Fixes pacman.conf parsing errors and PKGBUILD
-  parsing errors)
-* Updated completions
-
-#### 2.219
-
-* Updated manpage
-* Updated --help
-* Fixed AUR update fails with large number of packages #59
-* Check if package is already in upgrade list and skip it. #60
-* Add -V and -h for flag parsing @AnthonyLam
-* Prevent file corruption by truncating the files @maximbaz
-* Print VCS error details @maximbaz
-* Using '-' doesn't raise an error @PietroCarrara
-* use Command.Dir in aur.PkgInstall; Fixes #32 #47 @afg984
-* Suffix YayConf.BuildDir with uid to avoid permission issues @afg984 (Not included in last changelog)
-
-#### 2.200
-
-* Development github package support re-added
-
-#### 2.196
-
-* XDG_CONFIG_HOME support
-* XDG_CACHE_HOME support
-
-#### 2.165
-
-* Upgrade list now allows skipping upgrade install
-
-#### 2.159
-
-* Qstats now warns about packages not available in AUR
-
-#### 2.152
-
-* Fetching backend changed to Mikkel Oscar's [Aur](https://github.com/mikkeloscar/aur)
-* Added support for development packages from github.
-* Pacman backend rewritten and simplified
-* Added config framework.
-
-#### 1.115
-
-* Added AUR completions (updates on first completion every 48h)
-
-#### 1.101
-
-* Search speed and quality improved [#3](https://github.com/Jguer/yay/issues/3)
-
-#### 1.100
-
-* Added manpage
-* Improved search [#3](https://github.com/Jguer/yay/issues/3)
-* Added -G to get pkgbuild from the AUR or ABS. [#6](https://github.com/Jguer/yay/issues/6)
-* Fixed [#8](https://github.com/Jguer/yay/issues/8)
-* Completed and decluttered zsh completions
-* If `$EDITOR` or `$VISUAL` is not set yay will prompt you for an editor [#7](https://github.com/Jguer/yay/issues/7)
-
-#### 1.91
-
-* `--downtop` has been replaced with `--bottomup` (as is logical)
-* `yay -Ssq` and `yay -Sqs` now displays AUR packages with less information
-* Repository search now uses the same criteria as pacman
-
-#### 1.85
-
-* yay now does -Si for AUR packages
-* Fixed package install bugs
-
-#### 1.83
-
-* Added new dependency resolver for future features
-* Sort package statistics
-
-#### 1.80
-
-* yay now warns when installing orphan packages
-* Added orphan status to number menu
-* Qstats now checks if system has orphan packages installed
-
-#### 1.78
-
-* Added foreign package statistics to Qstats
-* Group installing is now possible
-* Better handling of package dependency installing
-
-#### 1.76
-
-* Fixed critical bug that prevented AUR dependencies from being installed.
-
-#### 1.70
-
-* Stable for everyday use
-* Bottom up package display
-* Number menu like yaourt/apacman
-* System package statistics
+<img src="https://cdn.rawgit.com/Jguer/jguer.github.io/5412b8d6/yay/yay-ps.png" width="450">
+<img src="https://cdn.rawgit.com/Jguer/jguer.github.io/5412b8d6/yay/yayupgrade.png" width="450">
+<img src="https://cdn.rawgit.com/Jguer/jguer.github.io/5412b8d6/yay/yaysearch.png" width="450">

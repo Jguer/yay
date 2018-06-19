@@ -19,7 +19,7 @@ func intRangesEqual(a, b intRanges) bool {
 		r1 := a[n]
 		r2 := b[n]
 
-		if r1.min != r1.min || r1.max != r2.max {
+		if r1.min != r2.min || r1.max != r2.max {
 			return false
 		}
 	}

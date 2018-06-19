@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"html"
 	"io"
 	"os"
 	"strconv"
@@ -13,7 +15,7 @@ import (
 // Other types of sets are used throughout the code but do not have
 // their own typedef.
 // String sets and <type>sets should be used throughout the code when applicable,
-// they are a lot more flexable than slices and provide easy lookup.
+// they are a lot more flexible than slices and provide easy lookup.
 type stringSet map[string]struct{}
 
 func (set stringSet) set(v string) {
@@ -39,6 +41,16 @@ func (set stringSet) toSlice() []string {
 	return slice
 }
 
+func (set stringSet) copy() stringSet {
+	newSet := make(stringSet)
+
+	for str := range set {
+		newSet.set(str)
+	}
+
+	return newSet
+}
+
 func sliceToStringSet(in []string) stringSet {
 	set := make(stringSet)
 
@@ -60,7 +72,7 @@ type arguments struct {
 	options map[string]string
 	globals map[string]string
 	doubles stringSet // Tracks args passed twice such as -yy and -dd
-	targets stringSet
+	targets []string
 }
 
 func makeArguments() *arguments {
@@ -69,7 +81,7 @@ func makeArguments() *arguments {
 		make(map[string]string),
 		make(map[string]string),
 		make(stringSet),
-		make(stringSet),
+		make([]string, 0),
 	}
 }
 
@@ -86,9 +98,8 @@ func (parser *arguments) copy() (cp *arguments) {
 		cp.globals[k] = v
 	}
 
-	for k, v := range parser.targets {
-		cp.targets[k] = v
-	}
+	cp.targets = make([]string, len(parser.targets))
+	copy(cp.targets, parser.targets)
 
 	for k, v := range parser.doubles {
 		cp.doubles[k] = v
@@ -220,9 +231,12 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 	existCount := 0
 
 	for _, option := range options {
-		arg, exists = parser.options[option]
+		var value string
+
+		value, exists = parser.options[option]
 
 		if exists {
+			arg = value
 			existCount++
 			_, exists = parser.doubles[option]
 
@@ -232,9 +246,10 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 
 		}
 
-		arg, exists = parser.globals[option]
+		value, exists = parser.globals[option]
 
 		if exists {
+			arg = value
 			existCount++
 			_, exists = parser.doubles[option]
 
@@ -252,15 +267,11 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 }
 
 func (parser *arguments) addTarget(targets ...string) {
-	for _, target := range targets {
-		parser.targets[target] = struct{}{}
-	}
+	parser.targets = append(parser.targets, targets...)
 }
 
-func (parser *arguments) delTarget(targets ...string) {
-	for _, target := range targets {
-		delete(parser.targets, target)
-	}
+func (parser *arguments) clearTargets() {
+	parser.targets = make([]string, 0)
 }
 
 // Multiple args acts as an OR operator
@@ -273,14 +284,6 @@ func (parser *arguments) existsDouble(options ...string) bool {
 	}
 
 	return false
-}
-
-func (parser *arguments) formatTargets() (args []string) {
-	for target := range parser.targets {
-		args = append(args, target)
-	}
-
-	return
 }
 
 func (parser *arguments) formatArgs() (args []string) {
@@ -297,15 +300,15 @@ func (parser *arguments) formatArgs() (args []string) {
 			continue
 		}
 
-		formatedOption := formatArg(option)
-		args = append(args, formatedOption)
+		formattedOption := formatArg(option)
+		args = append(args, formattedOption)
 
 		if hasParam(option) {
 			args = append(args, arg)
 		}
 
 		if parser.existsDouble(option) {
-			args = append(args, formatedOption)
+			args = append(args, formattedOption)
 		}
 	}
 
@@ -314,15 +317,15 @@ func (parser *arguments) formatArgs() (args []string) {
 
 func (parser *arguments) formatGlobals() (args []string) {
 	for option, arg := range parser.globals {
-		formatedOption := formatArg(option)
-		args = append(args, formatedOption)
+		formattedOption := formatArg(option)
+		args = append(args, formattedOption)
 
 		if hasParam(option) {
 			args = append(args, arg)
 		}
 
 		if parser.existsDouble(option) {
-			args = append(args, formatedOption)
+			args = append(args, formattedOption)
 		}
 	}
 
@@ -465,6 +468,8 @@ func hasParam(arg string) bool {
 	case "requestsplitn":
 		return true
 	case "answerclean":
+		return true
+	case "answerdiff":
 		return true
 	case "answeredit":
 		return true
@@ -619,8 +624,8 @@ func (parser *arguments) parseCommandLine() (err error) {
 //of course the implementation is up to the caller, this function mearley parses
 //the input and organizes it
 func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) {
-	include := make(intRanges, 0, 0)
-	exclude := make(intRanges, 0, 0)
+	include := make(intRanges, 0)
+	exclude := make(intRanges, 0)
 	otherInclude := make(stringSet)
 	otherExclude := make(stringSet)
 
@@ -668,4 +673,67 @@ func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) 
 	}
 
 	return include, exclude, otherInclude, otherExclude
+}
+
+// Crude html parsing, good enough for the arch news
+// This is only displayed in the terminal so there should be no security
+// concerns
+func parseNews(str string) string {
+	var buffer bytes.Buffer
+	var tagBuffer bytes.Buffer
+	var escapeBuffer bytes.Buffer
+	inTag := false
+	inEscape := false
+
+	for _, char := range str {
+		if inTag {
+			if char == '>' {
+				inTag = false
+				switch tagBuffer.String() {
+				case "code":
+					buffer.WriteString(cyanCode)
+				case "/code":
+					buffer.WriteString(resetCode)
+				case "/p":
+					buffer.WriteRune('\n')
+				}
+
+				continue
+			}
+
+			tagBuffer.WriteRune(char)
+			continue
+		}
+
+		if inEscape {
+			if char == ';' {
+				inEscape = false
+				escapeBuffer.WriteRune(char)
+				s := html.UnescapeString(escapeBuffer.String())
+				buffer.WriteString(s)
+				continue
+			}
+
+			escapeBuffer.WriteRune(char)
+			continue
+		}
+
+		if char == '<' {
+			inTag = true
+			tagBuffer.Reset()
+			continue
+		}
+
+		if char == '&' {
+			inEscape = true
+			escapeBuffer.Reset()
+			escapeBuffer.WriteRune(char)
+			continue
+		}
+
+		buffer.WriteRune(char)
+	}
+
+	buffer.WriteString(resetCode)
+	return buffer.String()
 }

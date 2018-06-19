@@ -159,18 +159,16 @@ func (pkg Package) OptionalDepends() DependList {
 }
 
 // Depends returns the package's check dependency list.
-//Exists in futre alpm
-/*func (pkg Package) CheckDepends() DependList {
+func (pkg Package) CheckDepends() DependList {
 	ptr := unsafe.Pointer(C.alpm_pkg_get_checkdepends(pkg.pmpkg))
 	return DependList{(*list)(ptr)}
-}*/
+}
 
 // Depends returns the package's make dependency list.
-//Exists in futre alpm
-/*func (pkg Package) MakeDepends() DependList {
+func (pkg Package) MakeDepends() DependList {
 	ptr := unsafe.Pointer(C.alpm_pkg_get_makedepends(pkg.pmpkg))
 	return DependList{(*list)(ptr)}
-}*/
+}
 
 // Description returns the package's description.
 func (pkg Package) Description() string {

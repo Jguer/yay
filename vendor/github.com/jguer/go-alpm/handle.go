@@ -534,7 +534,7 @@ func (h Handle) GetDefaultSigLevel() (SigLevel, error) {
 }
 
 func (h Handle) SetDefaultSigLevel(siglevel SigLevel) error {
-	ok := C.alpm_option_set_default_siglevel(h.ptr, C.alpm_siglevel_t(siglevel))
+	ok := C.alpm_option_set_default_siglevel(h.ptr, C.int(siglevel))
 
 	if ok < 0 {
 		return h.LastError()
@@ -552,7 +552,7 @@ func (h Handle) GetLocalFileSigLevel() (SigLevel, error) {
 }
 
 func (h Handle) SetLocalFileSigLevel(siglevel SigLevel) error {
-	ok := C.alpm_option_set_local_file_siglevel(h.ptr, C.alpm_siglevel_t(siglevel))
+	ok := C.alpm_option_set_local_file_siglevel(h.ptr, C.int(siglevel))
 
 	if ok < 0 {
 		return h.LastError()
@@ -570,7 +570,7 @@ func (h Handle) GetRemoteFileSigLevel() (SigLevel, error) {
 }
 
 func (h Handle) SetRemoteFileSigLevel(siglevel SigLevel) error {
-	ok := C.alpm_option_set_remote_file_siglevel(h.ptr, C.alpm_siglevel_t(siglevel))
+	ok := C.alpm_option_set_remote_file_siglevel(h.ptr, C.int(siglevel))
 
 	if ok < 0 {
 		return h.LastError()

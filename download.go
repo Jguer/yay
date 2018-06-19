@@ -21,11 +21,7 @@ func shouldUseGit(path string) bool {
 	}
 
 	_, err = os.Stat(filepath.Join(path, ".git"))
-	if os.IsNotExist(err) {
-		return false
-	}
-
-	return true
+	return err == nil || os.IsExist(err)
 }
 
 func downloadFile(path string, url string) (err error) {
@@ -48,25 +44,47 @@ func downloadFile(path string, url string) (err error) {
 	return err
 }
 
-func gitDownload(url string, path string, name string) error {
+func gitHasDiff(path string, name string) (bool, error) {
+	stdout, stderr, err := passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD")
+	if err != nil {
+		return false, fmt.Errorf("%s%s", stderr, err)
+	}
+
+	head := strings.TrimSpace(stdout)
+
+	stdout, stderr, err = passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD@{upstream}")
+	if err != nil {
+		return false, fmt.Errorf("%s%s", stderr, err)
+	}
+
+	upstream := strings.TrimSpace(stdout)
+
+	return head != upstream, nil
+}
+
+func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
 		err = passToGit(path, "clone", url, name)
 		if err != nil {
-			return fmt.Errorf("error cloning %s", name)
+			return false, fmt.Errorf("error cloning %s", name)
 		}
 
-		return nil
+		return true, nil
 	} else if err != nil {
-		return fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
 	err = passToGit(filepath.Join(path, name), "fetch")
 	if err != nil {
-		return fmt.Errorf("error fetching %s", name)
+		return false, fmt.Errorf("error fetching %s", name)
 	}
 
-	err = passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD")
+	return false, nil
+}
+
+func gitMerge(url string, path string, name string) error {
+	err := passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD")
 	if err != nil {
 		return fmt.Errorf("error resetting %s", name)
 	}
@@ -79,15 +97,20 @@ func gitDownload(url string, path string, name string) error {
 	return nil
 }
 
+func gitDiff(path string, name string) error {
+	err := passToGit(filepath.Join(path, name), "diff", "HEAD..HEAD@{upstream}")
+
+	return err
+}
+
 // DownloadAndUnpack downloads url tgz and extracts to path.
-func downloadAndUnpack(url string, path string, trim bool) (err error) {
+func downloadAndUnpack(url string, path string) (err error) {
 	err = os.MkdirAll(path, 0755)
 	if err != nil {
 		return
 	}
 
-	tokens := strings.Split(url, "/")
-	fileName := tokens[len(tokens)-1]
+	fileName := filepath.Base(url)
 
 	tarLocation := filepath.Join(path, fileName)
 	defer os.Remove(tarLocation)
@@ -97,13 +120,7 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 		return
 	}
 
-	if trim {
-		err = exec.Command("/bin/sh", "-c",
-			config.TarBin+" --strip-components 2 --include='*/"+fileName[:len(fileName)-7]+"/trunk/' -xf "+tarLocation+" -C "+path).Run()
-		os.Rename(path+"trunk", path+fileName[:len(fileName)-7]) // kurwa
-	} else {
-		err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
-	}
+	err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
 	if err != nil {
 		return
 	}
@@ -112,23 +129,40 @@ func downloadAndUnpack(url string, path string, trim bool) (err error) {
 }
 
 func getPkgbuilds(pkgs []string) error {
-	//possibleAurs := make([]string, 0, 0)
+	missing := false
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	missing, err := getPkgbuildsfromABS(pkgs, wd)
-	if err != nil {
-		return err
+	pkgs = removeInvalidTargets(pkgs)
+
+	aur, repo, err := packageSlices(pkgs)
+
+	if len(repo) > 0 {
+		missing, err = getPkgbuildsfromABS(repo, wd)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = getPkgbuildsfromAUR(missing, wd)
+	if len(aur) > 0 {
+		_missing, err := getPkgbuildsfromAUR(aur, wd)
+		if err != nil {
+			return err
+		}
+		missing = missing || _missing
+	}
+
+	if missing {
+		err = fmt.Errorf("")
+	}
+
 	return err
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string) (missing []string, err error) {
+func getPkgbuildsfromABS(pkgs []string, path string) (missing bool, err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
@@ -136,8 +170,14 @@ func getPkgbuildsfromABS(pkgs []string, path string) (missing []string, err erro
 
 nextPkg:
 	for _, pkgN := range pkgs {
+		pkgDb, name := splitDbFromName(pkgN)
+
 		for _, db := range dbList.Slice() {
-			pkg, err := db.PkgByName(pkgN)
+			if pkgDb != "" && db.Name() != pkgDb {
+				continue
+			}
+
+			pkg, err := db.PkgByName(name)
 			if err == nil {
 				var url string
 				name := pkg.Base()
@@ -145,52 +185,84 @@ nextPkg:
 					name = pkg.Name()
 				}
 
-				if db.Name() == "core" || db.Name() == "extra" {
-					url = "https://projects.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
-				} else if db.Name() == "community" || db.Name() == "multilib" {
-					url = "https://projects.archlinux.org/svntogit/community.git/snapshot/community-packages/" + name + ".tar.gz"
-				} else {
-					fmt.Println(pkgN + " not in standard repositories")
+				if _, err := os.Stat(filepath.Join(path, name)); err == nil {
+					fmt.Println(bold(red(arrow)), bold(cyan(name)), "directory already exists")
 					continue nextPkg
 				}
 
-				errD := downloadAndUnpack(url, path, true)
-				if errD != nil {
-					fmt.Println(bold(red(arrow))+" "+bold(cyan(pkg.Name())), bold(red(errD.Error())))
+				switch db.Name() {
+				case "core", "extra":
+					url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
+				case "community", "multilib":
+					url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
+				default:
+					fmt.Println(pkgN, "not in standard repositories")
+					continue nextPkg
 				}
 
-				fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")
+				errD := downloadAndUnpack(url, cacheHome)
+				if errD != nil {
+					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
+				}
+
+				errD = exec.Command("mv", filepath.Join(cacheHome, "packages", name, "trunk"), filepath.Join(path, name)).Run()
+				if errD != nil {
+					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
+				} else {
+					fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")
+				}
+
 				continue nextPkg
 			}
 		}
 
-		missing = append(missing, pkgN)
+		fmt.Println(pkgN, "could not find package in database")
+		missing = true
+	}
+
+	if _, err := os.Stat(filepath.Join(cacheHome, "packages")); err == nil {
+		os.RemoveAll(filepath.Join(cacheHome, "packages"))
 	}
 
 	return
 }
 
 // GetPkgbuild downloads pkgbuild from the AUR.
-func getPkgbuildsfromAUR(pkgs []string, dir string) (err error) {
-	aq, err := aurInfoPrint(pkgs)
+func getPkgbuildsfromAUR(pkgs []string, dir string) (bool, error) {
+	missing := false
+	strippedPkgs := make([]string, 0)
+	for _, pkg := range pkgs {
+		_, name := splitDbFromName(pkg)
+		strippedPkgs = append(strippedPkgs, name)
+	}
+
+	aq, err := aurInfoPrint(strippedPkgs)
 	if err != nil {
-		return err
+		return missing, err
 	}
 
 	for _, pkg := range aq {
-		var err error
+		if _, err := os.Stat(filepath.Join(dir, pkg.PackageBase)); err == nil {
+			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name)), "directory already exists")
+			continue
+		}
+
 		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
-			err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
+			_, err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
 		} else {
-			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir, false)
+			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir)
 		}
 
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Println(bold(green(arrow)), bold(green("Downloaded")), bold(magenta(pkg.Name)), bold(green("from AUR")))
+			fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.PackageBase), "from AUR")
 		}
 	}
 
-	return
+	if len(aq) != len(pkgs) {
+		missing = true
+	}
+
+	return missing, err
 }

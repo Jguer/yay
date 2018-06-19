@@ -89,7 +89,7 @@ func (h Handle) RegisterSyncDb(dbname string, siglevel SigLevel) (*Db, error) {
 	cName := C.CString(dbname)
 	defer C.free(unsafe.Pointer(cName))
 
-	db := C.alpm_register_syncdb(h.ptr, cName, C.alpm_siglevel_t(siglevel))
+	db := C.alpm_register_syncdb(h.ptr, cName, C.int(siglevel))
 	if db == nil {
 		return nil, h.LastError()
 	}

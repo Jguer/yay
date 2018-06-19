@@ -1,5 +1,5 @@
 '\" t
-.TH "YAY" "8" "2018-02-29" "Yay v3\&.460+" "Yay Manual"
+.TH "YAY" "8" "2018\-06\-04" "Yay v6\&.784+" "Yay Manual"
 .nh
 .ad l
 .SH "NAME"
@@ -20,29 +20,29 @@ This manpage only covers options unique to Yay\&. For other options see
 \fBpacman(8)\fR\&.
 .SH "YAY OPERATIONS"
 .PP
-\fB\-Y, --yay\fR
+\fB\-Y, \-\-yay\fR
 .RS 4
 Perform yay specific operations\&. This is the default if no other operation is
 selected\&.
 .RE
 .PP
-\fB\-P, --print\fR
+\fB\-P, \-\-print\fR
 .RS 4
 Perform yay specific print operations\&.
 .RE
 .PP
-\fB\-G, --getpkgbuild\fR
+\fB\-G, \-\-getpkgbuild\fR
 .RS 4
 Downloads PKGBUILD from ABS or AUR\&.
 .RE
 .PP
-If no arguments are provided 'yay -Syu' will be performed\&.
+If no arguments are provided 'yay \-Syu' will be performed\&.
 .RE
 .PP
-If no operation is selected -Y will be assumed\&.
+If no operation is selected \-Y will be assumed\&.
 .SH "EXTENDED PACMAN OPERATIONS"
 .PP
-\fB\-S, -Si, -Ss, -Su, -Sc, -Qu\fR
+\fB\-S, \-Si, \-Ss, \-Su, \-Sc, \-Qu\fR
 .RS 4
 These operations are extended to support both AUR and repo packages\&.
 .RE
@@ -58,9 +58,23 @@ sources or built packages but will keep already downloaded vcs sources\&.
 \fB\-R\fR
 .RS 4
 Yay will also remove cached data about devel packages\&.
-
 .RE
-.SH "YAY OPTIONS (APPLY TO -Y AND --YAY)"
+.SH "NEW OPTIONS"
+.PP
+\fB   \-\-repo\fR
+.RS 4
+Assume all targets are from the repositories\&. Additionally Actions such as
+sysupgrade will only act on repository packages\&.
+.RE
+\fB\-a \-\-aur\fR
+.RS 4
+Assume all targets are from the AUR\&. Additionally Actions such as
+sysupgrade will only act on AUR packages\&.
+
+Note that dependency resolving will still act as normal and include repository
+packages\&.
+.RE
+.SH "YAY OPTIONS (APPLY TO \-Y AND \-\-YAY)"
 .PP
 \fB<NO OPTION>\fR
 .RS 4
@@ -80,7 +94,7 @@ used when migrating to Yay from another AUR helper.
 .RS 4
 Remove unneeded dependencies\&.
 .RE
-.SH "PRINT OPTIONS (APPLY TO -P AND --PRINT)"
+.SH "PRINT OPTIONS (APPLY TO \-P AND \-\-PRINT)"
 \fB\-c \-\-complete\fR
 .RS 4
 Print a list of all AUR and repo packages\&. This is to allow shell completion
@@ -105,20 +119,33 @@ Print current yay configuration\&.
 \fB\-n \-\-numberupgrades\fR
 .RS 4
 Print number of packages that need to be updated\&. Note this does not perform
-a database refresh\&. Run \fByay -Sy\fR Before this for an up to date result\&.
+a database refresh\&. Run \fByay \-Sy\fR Before this for an up to date result\&.
 .RE
 .PP
 \fB\-s \-\-stats\fR
 .RS 4
 Displays information about installed packages and system health\&. If there are
-orphaned, out-of-date or packages that no longer exist on the AUR warnings will
+orphaned, out\-of\-date or packages that no longer exist on the AUR warnings will
 be displayed\&.
 .RE
 .PP
 \fB\-u \-\-upgrades\fR
 .RS 4
 Print Names of packages that need to be updated\&. Note this does not perform
-a database refresh\&. Run \fByay -Sy\fR Before this for an up to date result\&.
+a database refresh\&. Run \fByay \-Sy\fR Before this for an up to date result\&.
+.RE
+.PP
+\fB\-w \-\-news\fR
+.RS 4
+Print new news from the Archlinux homepage\&. News is considered new if it is
+newer than the build date of all native packages\&. Pass this twice to show all
+available news\&.
+.RE
+.PP
+\fB\-q \-\-quiet\fR
+.RS 4
+Only show titles when printing news\&.
+.RE
 .PP
 .SH "PERMANENT CONFIGURATION SETTINGS"
 .PP
@@ -205,6 +232,13 @@ will be used instead of reading from standard input but will be treated exactly
 the same when parsed\&.
 .RE
 .PP
+\fB\-\-answerdiff <All|None|Installed|NotInstalled|...>\fR
+.RS 4
+Set a predetermined answer for the edit diff  menu question\&. This answer
+will be used instead of reading from standard input but will be treated exactly
+the same when parsed\&.
+.RE
+.PP
 \fB\-\-answeredit <All|None|Installed|NotInstalled|...>\fR
 .RS 4
 Set a predetermined answer for the edit pkgbuild menu question\&. This answer
@@ -224,6 +258,11 @@ reading from standard input but will be treated exactly the same\&.
 Unset the answer for the clean build menu\&.
 .RE
 .PP
+\fB\-\-noanswerdiff\fR
+.RS 4
+Unset the answer for the diff menu\&.
+.RE
+.PP
 \fB\-\-noansweredit\fR
 .RS 4
 Unset the answer for the edit pkgbuild menu\&.
@@ -232,6 +271,59 @@ Unset the answer for the edit pkgbuild menu\&.
 \fB\-\-noanswerupgrade\fR
 .RS 4
 Unset the answer for the upgrade menu\&.
+.RE
+.PP
+\fB\-\-cleanmenu\fR
+.RS 4
+Show the clean menu\&. This menu gives you the chance to fully delete the
+downloaded build files from Yay's cache before redownloing a fresh copy\&.
+.RE
+.PP
+\fB\-\-diffmenu\fR
+.RS 4
+Show the diff menu\&. This menu gives you the option to view diffs from
+build files before building\&.
+.RE
+.PP
+\fB\-\-editmenu\fR
+.RS 4
+Show the edit menu\&. This menu gives you the option to edit or view PKGBUILDs
+before building\&.
+
+\fBWarning\fR: Yay resolves dependencies ahead of time via the RPC\&. It is not
+recommended to edit pkgbuild variables unless you know what you are doing\&.
+.RE
+.PP
+\fB\-\-upgrademenu\fR
+.RS 4
+Show a detailed list of updates in a similar format to VerbosePkgLists\&.
+Upgrades can also be skipped using numbers, number ranges or repo names\&.
+Adidionally ^ can be used to invert the selection\&.
+
+\fBWarning\fR: It is not recommended to skip updates from the repositores as
+this can lead to partial upgrades\&. This feature is intended to easily skip AUR
+updates on the fly that may be broken or have a long compile time\&. Ultimately
+it is up to the user what upgrades they skip\&.
+.RE
+.PP
+\fB\-\-nocleanmenu\fR
+.RS 4
+Do not show the clean menu\&.
+.RE
+.PP
+\fB\-\-nodiffmenu\fR
+.RS 4
+Do not show the diff menu\&.
+.RE
+.PP
+\fB\-\-noeditmenu\fR
+.RS 4
+Do not show the edit menu\&.
+.RE
+.PP
+\fB\-\-noupgrademenu\fR
+.RS 4
+Do not show the upgrade menu\&.
 .RE
 .PP
 \fB\-\-topdown\fR
@@ -258,15 +350,27 @@ Do not check for development packages updates during sysupgrade\&.
 \fB\-\-gitclone\fR
 .RS 4
 Use git to download and update PKGBUILDs\&. PKGBUILDs previously downloaded
-using tarball will continue to use tarballs until the package is clean built\&.
-Similarly, PKGBUILDs managed with git will continue to use git until the package
-is clean built.\&.
+using tarball will continue to use tarballs until the package is clean
+built\&. Similarly, PKGBUILDs managed with git will continue to use git until
+the package is clean built.\&.
 .RE
 .PP
 \fB\-\-nogitclone\fR
 .RS 4
 Download and update PKGBUILDs using tarballs\&. The above conditions about
 previously installed packages still apply\&.
+.RE
+.PP
+\fB\-\-showdiffs\fR
+.RS 4
+Show diffs for build files\&. Diffs are shown via \fBgit diff\fR which uses
+less by default\&. This behaviour can be changed via git's config, the
+\fB$GIT_PAGER\fR or \fB$PAGER\fR environment variables\&. 
+.RE
+.PP
+\fB\-\-noshowdiffs\fR
+.RS 4
+Show diffs for build files\&. Files will be opened by the editor\%.
 .RE
 .PP
 \fB\-\-afterclean\fR
@@ -305,6 +409,32 @@ in cache\&.
 .RS 4
 When downloading pkgbuilds if the pkgbuild is found in cache and is equal or
 newer than the AUR's version use that instead of downloading a new one\&.
+.RE
+.PP
+\fB\-\-provides\fR
+.RS 4
+Look for matching providers when searching for AUR packages\&. When multiple
+providers are found a menu will appear prompting you to pick one\&. This
+increases dependency resolve time although this should not be noticeable\&.
+.RE
+.PP
+\fB\-\-noprovides\fR
+.RS 4
+Do not look for matching providers when searching for AUR packages\&. If
+multiple providers happen to be found the menu will still appear\&.
+.RE
+.PP
+\fB\-\-pgpfetch\fR
+.RS 4
+Prompt to import unknown PGP keys from the \fBvalidpgpkeys\fR field of each
+PKGBUILD.
+.RE
+.PP
+\fB\-\-pgpfetch\fR
+.RS 4
+Do not prompt to import unknown PGP keys\&. This is likley to cause a build
+failiure unless using options such as \fB\-\-skippgpcheck\fR or a customized
+gpg config\%.
 .RE
 .PP
 \fB\-\-rebuild\fR
@@ -365,37 +495,37 @@ yay \fIfoo\fR
 Search and install from the repos and the \fBAUR\fR\ using yogurt mode\&.
 .RE
 .PP
-yay -Syu
+yay \-Syu
 .RS 4
 Update package list and upgrade all currently installed repo and \fBAUR\fR\&.
 .RE
 .PP
-yay -S \fIfoo\fR
+yay \-S \fIfoo\fR
 .RS 4
 Installs package \fIfoo\fR from the repos or the \fBAUR\fR\&.
 .RE
 .PP
-yay -Ss \fIfoo\fR
+yay \-Ss \fIfoo\fR
 .RS 4
 Searches for package \fIfoo\fR on the repos or the \fBAUR\fR\&.
 .RE
 .PP
-yay -Si \fIfoo\fR
+yay \-Si \fIfoo\fR
 .RS 4
 Gets information about package \fIfoo\fR from the repos or the \fBAUR\fR\&.
 .RE
 .PP
-yay -S \fIfoo\fR --mflags "--skipchecksums --skippgpcheck"
+yay \-S \fIfoo\fR \-\-mflags "\-\-skipchecksums \-\-skippgpcheck"
 .RS 4
 Installs \fIfoo\fR while skipping checksums and pgp checks\&.
 .RE
 .PP
-yay --devel --save
+yay \-\-devel \-\-save
 .RS 4
 Sets devel to true in the config\&.
 .RE
 .PP
-yay -P --stats
+yay \-P \-\-stats
 .RS 4
 Shows statistics for installed packages and system health\&.
 .RE
@@ -435,7 +565,7 @@ and built packages from those packages\&.
 \fBPACMAN.CONF\fR
 .RS 4
 Yay uses Pacman's config file to set certain pacman options either through
-go-alpm or Yay itself. Options inherited include most libalpm options and
+go\-alpm or Yay itself. Options inherited include most libalpm options and
 pacman options\&.
 .PP
 Notably \fBDatabases\fR, \fBColor\fR and \fB*Path/*Dir\fR options are used\&.
