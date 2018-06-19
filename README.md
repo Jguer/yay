@@ -2,9 +2,6 @@
 
 Yet another Yogurt - An AUR Helper written in Go
 
-`yay: error while loading shared libraries: libalpm.so.10: cannot open shared object file: No such file or directory`
-Pacman 5.1 migration explained [here](https://github.com/Jguer/yay/releases/tag/v6.784)
-
 #### Packages
 
 [![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![yay-git](https://img.shields.io/aur/version/yay-git.svg?label=yay-git)](https://aur.archlinux.org/packages/yay-git/) [![GitHub license](https://img.shields.io/github/license/jguer/yay.svg)](https://github.com/Jguer/yay/blob/master/LICENSE)  
@@ -85,9 +82,6 @@ Currently yay Depends on:
 * https://github.com/mikkeloscar/gopkgbuild
 * https://github.com/mikkeloscar/aur
 
-
-
-
 ## Frequently Asked Questions
 
 * Yay does not display colored output. How do I fix it?
@@ -98,6 +92,13 @@ Currently yay Depends on:
    Yay uses `git diff` to display diffs, by default git tells less to not page
    if the output can fit one terminal length. This can be overridden by
    exporting your own flags `export LESS=SRX`.
+
+* Yay is not asking me to edit PKGBUILDS and I don't like diff menu! What do?  
+  `yay --editmenu --nodiffmenu --save`
+
+* Only act on AUR packages or only on repo packages?  
+  `yay -{OPERATION} --aur`  
+  `yay -{OPERATION} --repo`  
 
 ## Examples of Custom Operations
 
