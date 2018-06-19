@@ -46,6 +46,7 @@ _pacman_opts_common=(
 
   '--builddir[Directory to use for building AUR Packages]:build dir:_files -/'
   '--editor[Editor to use when editing PKGBUILDs]:editor:_files'
+  '--editorflags[Flags to pass to editor]'
   '--makepkg[makepkg command to use]:makepkg:_files'
   '--pacman[pacman command to use]:pacman:_files'
   '--tar[bsdtar command to use]:tar:_files'
