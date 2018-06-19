@@ -595,8 +595,8 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 		fmt.Print("\nEnter a number (default=1): ")
 
 		if config.NoConfirm {
-			fmt.Println()
-			break
+			fmt.Println("1")
+			return providers.Pkgs[0]
 		}
 
 		reader := bufio.NewReader(os.Stdin)
