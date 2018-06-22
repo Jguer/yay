@@ -116,7 +116,7 @@ func install(parser *arguments) error {
 		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
-	err = dp.CheckConflicts()
+	conflicts, err := dp.CheckConflicts()
 	if err != nil {
 		return err
 	}
@@ -279,17 +279,12 @@ func install(parser *arguments) error {
 		}
 	}
 
-	//conflicts have been checked so answer y for them
-	ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
-	uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
-	cmdArgs.globals["ask"] = fmt.Sprint(uask)
-
 	err = downloadPkgBuildsSources(do.Aur, do.Bases, incompatible)
 	if err != nil {
 		return err
 	}
 
-	err = buildInstallPkgBuilds(dp, do, srcinfosStale, parser, incompatible)
+	err = buildInstallPkgBuilds(dp, do, srcinfosStale, parser, incompatible, conflicts)
 	if err != nil {
 		return err
 	}
@@ -745,7 +740,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 	return
 }
 
-func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg.PKGBUILD, parser *arguments, incompatible stringSet) error {
+func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg.PKGBUILD, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
 	for _, pkg := range do.Aur {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		built := true
@@ -807,12 +802,33 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 		arguments.clearTargets()
 		arguments.op = "U"
 		arguments.delArg("confirm")
+		arguments.delArg("noconfirm")
 		arguments.delArg("c", "clean")
 		arguments.delArg("q", "quiet")
 		arguments.delArg("q", "quiet")
 		arguments.delArg("y", "refresh")
 		arguments.delArg("u", "sysupgrade")
 		arguments.delArg("w", "downloadonly")
+
+		oldConfirm := config.NoConfirm
+
+		//conflicts have been checked so answer y for them
+		if config.UseAsk {
+			ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
+			cmdArgs.globals["ask"] = fmt.Sprint(uask)
+		} else {
+			conflict := false
+			for _, split := range do.Bases[pkg.PackageBase] {
+				if _, ok := conflicts[split.Name]; ok {
+					conflict = true
+				}
+			}
+
+			if !conflict {
+				config.NoConfirm = true
+			}
+		}
 
 		depArguments := makeArguments()
 		depArguments.addArg("D", "asdeps")
@@ -850,8 +866,6 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg
 			}
 		}
 
-		oldConfirm := config.NoConfirm
-		config.NoConfirm = true
 		err = passToPacman(arguments)
 		if err != nil {
 			return err
