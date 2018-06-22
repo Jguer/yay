@@ -22,7 +22,6 @@ func install(parser *arguments) error {
 	var aurUp upSlice
 	var repoUp upSlice
 
-	requestTargets := parser.copy().targets
 	warnings := &aurWarnings{}
 
 	removeMake := false
@@ -39,9 +38,64 @@ func install(parser *arguments) error {
 	remoteNamesCache := sliceToStringSet(remoteNames)
 	localNamesCache := sliceToStringSet(localNames)
 
+	if mode == ModeAny || mode == ModeRepo {
+		if config.CombinedUpgrade {
+			if parser.existsArg("y", "refresh") {
+				arguments := parser.copy()
+				parser.delArg("y", "refresh")
+				arguments.delArg("u", "sysupgrade")
+				arguments.delArg("s", "search")
+				arguments.delArg("i", "info")
+				arguments.delArg("l", "list")
+				arguments.clearTargets()
+				err = passToPacman(arguments)
+				if err != nil {
+					return fmt.Errorf("Error installing repo packages")
+				}
+			}
+		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
+			arguments := parser.copy()
+			targets := parser.targets
+			parser.clearTargets()
+			arguments.clearTargets()
+
+			//seperate aur and repo targets
+			for _, target := range targets {
+				if localNamesCache.get(target) {
+					arguments.addTarget(target)
+				} else {
+					parser.addTarget(target)
+				}
+			}
+
+			if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
+				err = passToPacman(arguments)
+				if err != nil {
+					return fmt.Errorf("Error installing repo packages")
+				}
+			}
+
+			//we may have done -Sy, our handle now has an old
+			//database.
+			err = initAlpmHandle()
+			if err != nil {
+				return err
+			}
+
+			_, _, localNames, remoteNames, err = filterPackages()
+			if err != nil {
+				return err
+			}
+
+			remoteNamesCache = sliceToStringSet(remoteNames)
+			localNamesCache = sliceToStringSet(localNames)
+		}
+	}
+
+	requestTargets := parser.copy().targets
+
 	//create the arguments to pass for the repo install
 	arguments := parser.copy()
-	arguments.delArg("y", "refresh")
 	arguments.delArg("asdeps", "asdep")
 	arguments.delArg("asexplicit", "asexp")
 	arguments.op = "S"
