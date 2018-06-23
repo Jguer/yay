@@ -556,6 +556,10 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 		}
 	}
 
+	if len(arguments.targets) == 0 {
+		return fmt.Errorf("There is nothing to do")
+	}
+
 	if config.SudoLoop {
 		sudoLoopBackground()
 	}
