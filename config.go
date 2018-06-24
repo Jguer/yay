@@ -69,6 +69,7 @@ type Configuration struct {
 	CleanMenu     bool   `json:"cleanmenu"`
 	DiffMenu      bool   `json:"diffmenu"`
 	EditMenu      bool   `json:"editmenu"`
+	UseAsk      bool   `json:"useask"`
 }
 
 var version = "7.885"
@@ -177,6 +178,7 @@ func defaultSettings(config *Configuration) {
 	config.CleanMenu = true
 	config.DiffMenu = true
 	config.EditMenu = false
+	config.UseAsk = false
 }
 
 // Editor returns the preferred system editor.

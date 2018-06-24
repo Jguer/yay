@@ -341,6 +341,10 @@ func handleConfig(option, value string) bool {
 		config.EditMenu = true
 	case "noeditmenu":
 		config.EditMenu = false
+	case "useask":
+		config.UseAsk = true
+	case "nouseask":
+		config.UseAsk = false
 	case "a", "aur":
 		mode = ModeAUR
 	case "repo":
