@@ -159,9 +159,8 @@ func initAlpm() (err error) {
 		alpmConf.GPGDir = value
 	}
 
-	alpmHandle, err = alpmConf.CreateHandle()
+	err = initAlpmHandle()
 	if err != nil {
-		err = fmt.Errorf("Unable to CreateHandle: %s", err)
 		return
 	}
 
@@ -174,8 +173,24 @@ func initAlpm() (err error) {
 		useColor = alpmConf.Options&alpm.ConfColor > 0
 	}
 
-	alpmHandle.SetQuestionCallback(questionCallback)
+	return
+}
 
+func initAlpmHandle() (err error) {
+	if alpmHandle != nil {
+		err = alpmHandle.Release()
+		if err != nil {
+			return err
+		}
+	}
+
+	alpmHandle, err = alpmConf.CreateHandle()
+	if err != nil {
+		err = fmt.Errorf("Unable to CreateHandle: %s", err)
+		return
+	}
+
+	alpmHandle.SetQuestionCallback(questionCallback)
 	return
 }
 

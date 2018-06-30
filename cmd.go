@@ -345,6 +345,10 @@ func handleConfig(option, value string) bool {
 		config.UseAsk = true
 	case "nouseask":
 		config.UseAsk = false
+	case "combinedupgrade":
+		config.CombinedUpgrade = true
+	case "nocombinedupgrade":
+		config.CombinedUpgrade = false
 	case "a", "aur":
 		mode = ModeAUR
 	case "repo":

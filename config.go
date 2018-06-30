@@ -35,41 +35,42 @@ const (
 
 // Configuration stores yay's config.
 type Configuration struct {
-	BuildDir      string `json:"buildDir"`
-	Editor        string `json:"editor"`
-	EditorFlags   string `json:"editorflags"`
-	MakepkgBin    string `json:"makepkgbin"`
-	PacmanBin     string `json:"pacmanbin"`
-	PacmanConf    string `json:"pacmanconf"`
-	TarBin        string `json:"tarbin"`
-	ReDownload    string `json:"redownload"`
-	ReBuild       string `json:"rebuild"`
-	AnswerClean   string `json:"answerclean"`
-	AnswerDiff    string `json:"answerdiff"`
-	AnswerEdit    string `json:"answeredit"`
-	AnswerUpgrade string `json:"answerupgrade"`
-	GitBin        string `json:"gitbin"`
-	GpgBin        string `json:"gpgbin"`
-	GpgFlags      string `json:"gpgflags"`
-	MFlags        string `json:"mflags"`
-	SortBy        string `json:"sortby"`
-	GitFlags      string `json:"gitflags"`
-	RequestSplitN int    `json:"requestsplitn"`
-	SearchMode    int    `json:"-"`
-	SortMode      int    `json:"sortmode"`
-	SudoLoop      bool   `json:"sudoloop"`
-	TimeUpdate    bool   `json:"timeupdate"`
-	NoConfirm     bool   `json:"-"`
-	Devel         bool   `json:"devel"`
-	CleanAfter    bool   `json:"cleanAfter"`
-	GitClone      bool   `json:"gitclone"`
-	Provides      bool   `json:"provides"`
-	PGPFetch      bool   `json:"pgpfetch"`
-	UpgradeMenu   bool   `json:"upgrademenu"`
-	CleanMenu     bool   `json:"cleanmenu"`
-	DiffMenu      bool   `json:"diffmenu"`
-	EditMenu      bool   `json:"editmenu"`
-	UseAsk      bool   `json:"useask"`
+	BuildDir        string `json:"buildDir"`
+	Editor          string `json:"editor"`
+	EditorFlags     string `json:"editorflags"`
+	MakepkgBin      string `json:"makepkgbin"`
+	PacmanBin       string `json:"pacmanbin"`
+	PacmanConf      string `json:"pacmanconf"`
+	TarBin          string `json:"tarbin"`
+	ReDownload      string `json:"redownload"`
+	ReBuild         string `json:"rebuild"`
+	AnswerClean     string `json:"answerclean"`
+	AnswerDiff      string `json:"answerdiff"`
+	AnswerEdit      string `json:"answeredit"`
+	AnswerUpgrade   string `json:"answerupgrade"`
+	GitBin          string `json:"gitbin"`
+	GpgBin          string `json:"gpgbin"`
+	GpgFlags        string `json:"gpgflags"`
+	MFlags          string `json:"mflags"`
+	SortBy          string `json:"sortby"`
+	GitFlags        string `json:"gitflags"`
+	RequestSplitN   int    `json:"requestsplitn"`
+	SearchMode      int    `json:"-"`
+	SortMode        int    `json:"sortmode"`
+	SudoLoop        bool   `json:"sudoloop"`
+	TimeUpdate      bool   `json:"timeupdate"`
+	NoConfirm       bool   `json:"-"`
+	Devel           bool   `json:"devel"`
+	CleanAfter      bool   `json:"cleanAfter"`
+	GitClone        bool   `json:"gitclone"`
+	Provides        bool   `json:"provides"`
+	PGPFetch        bool   `json:"pgpfetch"`
+	UpgradeMenu     bool   `json:"upgrademenu"`
+	CleanMenu       bool   `json:"cleanmenu"`
+	DiffMenu        bool   `json:"diffmenu"`
+	EditMenu        bool   `json:"editmenu"`
+	CombinedUpgrade bool   `json:"combinedupgrade"`
+	UseAsk          bool   `json:"useask"`
 }
 
 var version = "7.885"
@@ -179,6 +180,7 @@ func defaultSettings(config *Configuration) {
 	config.DiffMenu = true
 	config.EditMenu = false
 	config.UseAsk = false
+	config.CombinedUpgrade = false
 }
 
 // Editor returns the preferred system editor.
