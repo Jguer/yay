@@ -1,5 +1,5 @@
 '\" t
-.TH "YAY" "8" "2018\-06\-04" "Yay v7\&.885+" "Yay Manual"
+.TH "YAY" "8" "2018\-07\-01" "Yay v7\&.887+" "Yay Manual"
 .nh
 .ad l
 .SH "NAME"
@@ -435,6 +435,39 @@ PKGBUILD.
 Do not prompt to import unknown PGP keys\&. This is likley to cause a build
 failiure unless using options such as \fB\-\-skippgpcheck\fR or a customized
 gpg config\%.
+.RE
+.PP
+\fB\-\-useask\fR
+.RS 4
+Use pacman's --ask flag to automatically confirm package conflicts\&. Yay lists
+conflicts ahead of time\&. It is possible thay Yay does not detect
+a conflict\&. Causing a package to be removed without the user's confimation\&.
+Although this is very unlikley\&.
+.RE
+.PP
+\fB\-\-nouseask\fR
+.RS 4
+Manually resolve package conflicts during the install. Packages which do not
+conflict will not need to be confimed manually\&.
+.RE
+.PP
+\fB\-\-combinedupgrade\fR
+.RS 4
+During sysupgrade, Yay will first perform a refresh, then show
+its combined menu of repo and AUR packages that will be upgraded\&. Then after
+reviewing the pkgbuilds, the repo and AUR upgrade will start with no need
+for manual intervention\&.
+
+If Yay exits for any reason After the refresh without upgrading\&. It is then
+the user's responsibility to either resolve the reason Yay exited or run
+a sysupgrade through pacman directly\&.
+.RE
+.PP
+\fB\-\-nocombinedupgrade\fR
+.RS 4
+During sysupgrade, Pacman \-Syu will be called, then the AUR upgrade will
+start\&. This means the upgrade menu and pkgbuild review will be performed
+after the sysupgrade has finished\&.
 .RE
 .PP
 \fB\-\-rebuild\fR
