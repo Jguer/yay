@@ -115,6 +115,12 @@ complete -c $progname -n "not $noopt" -l noprovides -d 'Just look for packages b
 complete -c $progname -n "not $noopt" -l pgpfetch -d 'Prompt to import PGP keys from PKGBUILDs'
 complete -c $progname -n "not $noopt" -l nopgpfetch -d 'Do not prompt to import PGP keys'
 
+# Post V7.887
+complete -c $progname -n "not $noopt" -l useask -d 'Automatically resolce conflicts using pacmans ask flag'
+complete -c $progname -n "not $noopt" -l nouseask -d 'Confirm conflicts manually during the install'
+complete -c $progname -n "not $noopt" -l combinedUpgrade -d 'Refresh then perform the repo and AUR upgrade together'
+complete -c $progname -n "not $noopt" -l nocombinedUpgrade -d 'Perform the repo upgrade and AUR upgrade separately'
+
 # Yay options
 complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
 complete -c $progname -n $yayspecific -l gendb -d 'Generate development package DB' -f
