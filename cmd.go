@@ -96,8 +96,8 @@ Permanent configuration options:
     --nopgpfetch          Don't prompt to import PGP keys
     --useask              Automatically resolce conflicts using pacman's ask flag
     --nouseask            Confirm conflicts manually during the install
-    --combinedUpgrade     Refresh then perform the repo and AUR upgrade together
-    --nocombinedUpgrade   Perform the repo upgrade and AUR upgrade separately
+    --combinedupgrade     Refresh then perform the repo and AUR upgrade together
+    --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
 
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background
