@@ -94,7 +94,7 @@ Permanent configuration options:
     --noprovides          Just look for packages by pkgname
     --pgpfetch            Prompt to import PGP keys from PKGBUILDs
     --nopgpfetch          Don't prompt to import PGP keys
-    --useask              Automatically resolce conflicts using pacman's ask flag
+    --useask              Automatically resolve conflicts using pacman's ask flag
     --nouseask            Confirm conflicts manually during the install
     --combinedupgrade     Refresh then perform the repo and AUR upgrade together
     --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately

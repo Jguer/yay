@@ -77,7 +77,8 @@ _yay() {
            sortby answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
            noansweredit noanswerupgrade cleanmenu diffmenu editmenu upgrademenu
            nocleanmenu nodiffmenu noupgrademenu provides noprovides pgpfetch nopgpfetch
-           root verbose aur repo' 'a b d h q r v')
+           useask nouseask combinedupgrade nocombinedupgrade root verbose aur repo'
+           'a b d h q r v')
   core=('database files help query remove sync upgrade version' 'D F Q R S U V h')
 
   for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P print'; do
