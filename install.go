@@ -716,12 +716,8 @@ func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 			pkgbuild, err := gopkg.ParseSRCINFO(dir)
 
 			if err == nil {
-				versionRPC, errR := gopkg.NewCompleteVersion(pkg.Version)
-				versionPKG, errP := gopkg.NewCompleteVersion(pkgbuild.Version())
-				if errP == nil && errR == nil {
-					if !versionRPC.Newer(versionPKG) {
-						toSkip.set(pkg.PackageBase)
-					}
+				if alpm.VerCmp(pkgbuild.Version(), pkg.Version) > 0 {
+					toSkip.set(pkg.PackageBase)
 				}
 			}
 		}
