@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // A basic set implementation for strings.
@@ -613,7 +614,7 @@ func (parser *arguments) parseCommandLine() (err error) {
 	return
 }
 
-//parses input for number menus
+//parses input for number menus splitted by spaces or commas
 //supports individual selection: 1 2 3 4
 //supports range selections: 1-4 10-20
 //supports negation: ^1 ^1-4
@@ -629,7 +630,9 @@ func parseNumberMenu(input string) (intRanges, intRanges, stringSet, stringSet) 
 	otherInclude := make(stringSet)
 	otherExclude := make(stringSet)
 
-	words := strings.Fields(input)
+	words := strings.FieldsFunc(input, func(c rune) bool {
+		return unicode.IsSpace(c) || c == ','
+	})
 
 	for _, word := range words {
 		var num1 int
