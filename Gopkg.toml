@@ -13,4 +13,4 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/mikkeloscar/gopkgbuild"
+  name = "github.com/Morganamilo/go-srcinfo"

@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"strings"
 
+	gosrc "github.com/Morganamilo/go-srcinfo"
 	rpc "github.com/mikkeloscar/aur"
-	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 // pgpKeySet maps a PGP key with a list of PKGBUILDs that require it.
@@ -41,7 +41,7 @@ func (set pgpKeySet) get(key string) bool {
 
 // checkPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD) error {
+func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
@@ -51,7 +51,7 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[str
 	for _, pkg := range pkgs {
 		srcinfo := srcinfos[pkg.PackageBase]
 
-		for _, key := range srcinfo.Validpgpkeys {
+		for _, key := range srcinfo.ValidPGPKeys {
 			// If key already marked as problematic, indicate the current
 			// PKGBUILD requires it.
 			if problematic.get(key) {

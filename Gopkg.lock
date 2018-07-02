@@ -3,6 +3,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/Morganamilo/go-srcinfo"
+  packages = ["."]
+  revision = "368edc79b2c53cd9c065818fd4e65843ef3e9e11"
+
+[[projects]]
+  branch = "master"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
   revision = "1114f773cdfb05f577438f7a0538eccabc9cf012"
@@ -13,15 +19,9 @@
   packages = ["."]
   revision = "837b260b8e90895c45737e2e72313fe5bce6f2c4"
 
-[[projects]]
-  branch = "master"
-  name = "github.com/mikkeloscar/gopkgbuild"
-  packages = ["."]
-  revision = "2bb4f1f1db67f81fe50f9c1c4ad9db4f20fd6b22"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "456465ee334310996a51a2282bf4cfe9f6269db508479c962474d61a4ce0a08c"
+  inputs-digest = "2a7c6ddb680b62cd3f3cf47a0dfdad617e4a42e29204c75ecf5be3271feda5e1"
   solver-name = "gps-cdcl"
   solver-version = 1

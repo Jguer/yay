@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	gosrc "github.com/Morganamilo/go-srcinfo"
 	rpc "github.com/mikkeloscar/aur"
-	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 // Info contains the last commit sha of a repo
@@ -25,7 +25,7 @@ type shaInfo struct {
 // createDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
 	infoMap := make(map[string]*rpc.Pkg)
-	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
+	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -100,7 +100,7 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	return
 }
 
-func updateVCSData(pkgName string, sources []string) {
+func updateVCSData(pkgName string, sources []gosrc.ArchString) {
 	if savedInfo == nil {
 		savedInfo = make(vcsInfo)
 	}
@@ -108,7 +108,7 @@ func updateVCSData(pkgName string, sources []string) {
 	info := make(shaInfos)
 
 	for _, source := range sources {
-		url, branch, protocols := parseSource(source)
+		url, branch, protocols := parseSource(source.Value)
 		if url == "" || branch == "" {
 			continue
 		}
