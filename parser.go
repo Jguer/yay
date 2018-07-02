@@ -136,6 +136,9 @@ func (parser *arguments) needRoot() bool {
 		}
 		return false
 	case "Q", "query":
+		if parser.existsArg("k", "check") {
+			return true
+		}
 		return false
 	case "R", "remove":
 		return true
