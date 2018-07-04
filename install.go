@@ -160,6 +160,10 @@ func install(parser *arguments) error {
 	}
 
 	if len(dp.Aur) == 0 {
+		if !config.CombinedUpgrade {
+			return nil
+		}
+
 		parser.op = "S"
 		parser.delArg("y", "refresh")
 		parser.options["ignore"] = arguments.options["ignore"]
@@ -292,6 +296,10 @@ func install(parser *arguments) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if !config.CombinedUpgrade {
+		arguments.delArg("u", "sysupgrade")
 	}
 
 	if len(arguments.targets) > 0 || arguments.existsArg("u") {
