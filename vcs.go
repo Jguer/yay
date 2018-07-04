@@ -97,6 +97,8 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 		branch = "HEAD"
 	}
 
+	url = strings.Split(url, "?")[0]
+
 	return
 }
 
