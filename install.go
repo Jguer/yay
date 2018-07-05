@@ -59,12 +59,44 @@ func install(parser *arguments) error {
 			parser.clearTargets()
 			arguments.clearTargets()
 
-			//seperate aur and repo targets
-			for _, target := range targets {
-				if localNamesCache.get(target) {
-					arguments.addTarget(target)
-				} else {
-					parser.addTarget(target)
+			syncDb, err := alpmHandle.SyncDbs()
+			if err != nil {
+				return err
+			}
+
+			if mode == ModeRepo {
+				arguments.targets = targets
+			} else {
+				alpmHandle.SetQuestionCallback(func(alpm.QuestionAny) {})
+				//seperate aur and repo targets
+				for _, _target := range targets {
+					target := toTarget(_target)
+
+					if target.Db == "aur" {
+						parser.addTarget(_target)
+						continue
+					}
+
+					var singleDb *alpm.Db
+
+					if target.Db != "" {
+						singleDb, err = alpmHandle.SyncDbByName(target.Db)
+						if err != nil {
+							return err
+						}
+						fmt.Println(singleDb)
+						fmt.Println(target.DepString())
+						_, err = singleDb.PkgCache().FindSatisfier(target.DepString())
+						fmt.Println("herererrrrrr", err)
+					} else {
+						_, err = syncDb.FindSatisfier(target.DepString())
+					}
+
+					if err == nil {
+						arguments.addTarget(_target)
+					} else {
+						parser.addTarget(_target)
+					}
 				}
 			}
 
