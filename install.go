@@ -55,6 +55,7 @@ func install(parser *arguments) error {
 			}
 		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
 			arguments := parser.copy()
+			arguments.op = "S"
 			targets := parser.targets
 			parser.clearTargets()
 			arguments.clearTargets()
@@ -84,10 +85,7 @@ func install(parser *arguments) error {
 						if err != nil {
 							return err
 						}
-						fmt.Println(singleDb)
-						fmt.Println(target.DepString())
 						_, err = singleDb.PkgCache().FindSatisfier(target.DepString())
-						fmt.Println("herererrrrrr", err)
 					} else {
 						_, err = syncDb.FindSatisfier(target.DepString())
 					}
