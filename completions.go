@@ -120,9 +120,11 @@ func complete(shell string) error {
 	}
 
 	// AUR
-	err = completePart(shell, path_aur, true)
-	if err != nil {
-		return err
+	if config.CompleteAUR {
+		err = completePart(shell, path_aur, true)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

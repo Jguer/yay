@@ -105,6 +105,9 @@ Permanent configuration options:
     --timeupdate          Check packages' AUR page for changes during sysupgrade
     --notimeupdate        Do not check packages' AUR page for changes
 
+    --completeaur         Include AUR packages in completions
+    --nocompleteaur       Do not include AUR packages in completions
+
 Print specific options:
     -c --complete         Used for completions
     -d --defaultconfig    Print default yay configuration
@@ -353,6 +356,10 @@ func handleConfig(option, value string) bool {
 		config.CombinedUpgrade = true
 	case "nocombinedupgrade":
 		config.CombinedUpgrade = false
+	case "completeaur":
+		config.CompleteAUR = true
+	case "nocompleteaur":
+		config.CompleteAUR = false
 	case "a", "aur":
 		mode = ModeAUR
 	case "repo":
