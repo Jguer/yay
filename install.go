@@ -191,6 +191,7 @@ func install(parser *arguments) error {
 
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
+			fmt.Println("There is nothing to do")
 			return nil
 		}
 
