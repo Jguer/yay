@@ -100,6 +100,8 @@ Currently yay Depends on:
   `yay -{OPERATION} --aur`  
   `yay -{OPERATION} --repo`  
 
+* `Out Of Date AUR Packages`message is displayed, why doesn't `yay` update them?  
+This means the package has been flagged out of date on the AUR but author has not updated the `PKGBUILD` yet.
 ## Examples of Custom Operations
 
 * `yay <Search Term>` presents package selection menu
