@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	gosrc "github.com/Morganamilo/go-srcinfo"
 	alpm "github.com/jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
-	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 // Install handles package installs
@@ -25,7 +25,7 @@ func install(parser *arguments) error {
 	warnings := &aurWarnings{}
 
 	removeMake := false
-	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
+	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
 	//remotenames: names of all non repo packages on the system
 	_, _, localNames, remoteNames, err := filterPackages()
@@ -407,7 +407,7 @@ func install(parser *arguments) error {
 	return nil
 }
 
-func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) (stringSet, error) {
+func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) (stringSet, error) {
 	incompatible := make(stringSet)
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
@@ -711,14 +711,14 @@ func editPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
 	return nil
 }
 
-func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) error {
+func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) error {
 	for k, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
-		pkgbuild, err := gopkg.ParseSRCINFO(filepath.Join(dir, ".SRCINFO"))
+		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			return fmt.Errorf("%s: %s", pkg.Name, err)
 		}
@@ -729,14 +729,14 @@ func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bas
 	return nil
 }
 
-func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gopkg.PKGBUILD, bases map[string][]*rpc.Pkg) {
+func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) {
 	for k, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
 		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
-		pkgbuild, err := gopkg.ParseSRCINFO(filepath.Join(dir, ".SRCINFO"))
+		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			fmt.Printf("cannot parse %s skipping: %s\n", pkg.Name, err)
 			continue
@@ -752,15 +752,11 @@ func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 	for _, pkg := range pkgs {
 		if config.ReDownload == "no" || (config.ReDownload == "yes" && !targets.get(pkg.Name)) {
 			dir := filepath.Join(config.BuildDir, pkg.PackageBase, ".SRCINFO")
-			pkgbuild, err := gopkg.ParseSRCINFO(dir)
+			pkgbuild, err := gosrc.ParseFile(dir)
 
 			if err == nil {
-				versionRPC, errR := gopkg.NewCompleteVersion(pkg.Version)
-				versionPKG, errP := gopkg.NewCompleteVersion(pkgbuild.Version())
-				if errP == nil && errR == nil {
-					if !versionRPC.Newer(versionPKG) {
-						toSkip.set(pkg.PackageBase)
-					}
+				if alpm.VerCmp(pkgbuild.Version(), pkg.Version) > 0 {
+					toSkip.set(pkg.PackageBase)
 				}
 			}
 		}
@@ -833,7 +829,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 	return
 }
 
-func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gopkg.PKGBUILD, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
+func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
 	for _, pkg := range do.Aur {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		built := true
