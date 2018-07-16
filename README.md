@@ -79,7 +79,7 @@ are built into Yay at build time. They do not need to be installed separately.
 Currently yay Depends on:
 
 * https://github.com/Jguer/go-alpm
-* https://github.com/mikkeloscar/gopkgbuild
+* https://github.com/Morganamilo/go-srcinfo
 * https://github.com/mikkeloscar/aur
 
 ## Frequently Asked Questions
