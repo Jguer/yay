@@ -93,6 +93,12 @@ func install(parser *arguments) error {
 					if err == nil {
 						arguments.addTarget(_target)
 					} else {
+						_, err := syncDb.PkgCachebyGroup(target.Name)
+						if err == nil {
+							arguments.addTarget(_target)
+							continue
+						}
+
 						parser.addTarget(_target)
 					}
 				}
