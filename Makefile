@@ -4,7 +4,7 @@ PREFIX := /usr
 DESTDIR :=
 
 ifndef VERSION
-MAJORVERSION := 7
+MAJORVERSION := 8
 MINORVERSION ?= $(shell git rev-list --count master)
 endif
 VERSION := ${MAJORVERSION}.${MINORVERSION}
