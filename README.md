@@ -86,6 +86,11 @@ Currently yay Depends on:
 
 * Yay does not display colored output. How do I fix it?
   Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
+  
+* Yay is not asking to select packages to install (issue [#554](https://github.com/Jguer/yay/issues/554))
+
+  The default behavior was changed from [v8.918](https://github.com/Jguer/yay/releases/tag/v8.918) (see: [3bdb534](https://github.com/Jguer/yay/commit/3bdb5343218d99d40f8a449b887348611f6bdbfc)).
+  To restore such behavior use the `--combinedupgrade` option, example `yay -Suy --combinedupgrade`.
 
 * Sometimes diffs are printed to the terminal and other times they are pages
   via less. How do I fix this?
@@ -102,6 +107,7 @@ Currently yay Depends on:
 
 * `Out Of Date AUR Packages`message is displayed, why doesn't `yay` update them?  
 This means the package has been flagged out of date on the AUR but author has not updated the `PKGBUILD` yet.
+
 ## Examples of Custom Operations
 
 * `yay <Search Term>` presents package selection menu
