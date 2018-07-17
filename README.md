@@ -91,7 +91,7 @@ Currently yay Depends on:
 
   The default behavior was changed from [v8.918](https://github.com/Jguer/yay/releases/tag/v8.918) (see: [3bdb534](https://github.com/Jguer/yay/commit/3bdb5343218d99d40f8a449b887348611f6bdbfc)).
   To restore such behavior use the `--combinedupgrade` option, example `yay -Suy --combinedupgrade`.
-  Note: this causes the [native pacman](https://wiki.archlinux.org/index.php/AUR_helpers) to become partial.
+  Note: this causes the [native pacman](https://wiki.archlinux.org/index.php/AUR_helpers) to become partial
 
 * Sometimes diffs are printed to the terminal and other times they are pages
   via less. How do I fix this?
