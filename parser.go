@@ -461,6 +461,8 @@ func hasParam(arg string) bool {
 		return true
 	case "makepkg":
 		return true
+	case "makepkgconf":
+		return true
 	case "pacman":
 		return true
 	case "tar":

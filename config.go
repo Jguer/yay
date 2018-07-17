@@ -39,6 +39,7 @@ type Configuration struct {
 	Editor          string `json:"editor"`
 	EditorFlags     string `json:"editorflags"`
 	MakepkgBin      string `json:"makepkgbin"`
+	MakepkgConf     string `json:"makepkgconf"`
 	PacmanBin       string `json:"pacmanbin"`
 	PacmanConf      string `json:"pacmanconf"`
 	TarBin          string `json:"tarbin"`
@@ -152,6 +153,7 @@ func defaultSettings(config *Configuration) {
 	config.EditorFlags = ""
 	config.Devel = false
 	config.MakepkgBin = "makepkg"
+	config.MakepkgConf = ""
 	config.NoConfirm = false
 	config.PacmanBin = "pacman"
 	config.PGPFetch = true

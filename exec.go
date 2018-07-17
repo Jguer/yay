@@ -82,6 +82,10 @@ func passToMakepkg(dir string, args ...string) *exec.Cmd {
 	mflags := strings.Fields(config.MFlags)
 	args = append(args, mflags...)
 
+	if config.MakepkgConf != "" {
+		args = append(args, "--config", config.MakepkgConf)
+	}
+
 	cmd := exec.Command(config.MakepkgBin, args...)
 	cmd.Dir = dir
 	return cmd
