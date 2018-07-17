@@ -87,10 +87,11 @@ Currently yay Depends on:
 * Yay does not display colored output. How do I fix it?
   Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
   
-* Yay is not asking to select packages to install (issue [#554](https://github.com/Jguer/yay/issues/554))
+* Yay is not asking to select packages during install (issue [#554](https://github.com/Jguer/yay/issues/554))
 
   The default behavior was changed from [v8.918](https://github.com/Jguer/yay/releases/tag/v8.918) (see: [3bdb534](https://github.com/Jguer/yay/commit/3bdb5343218d99d40f8a449b887348611f6bdbfc)).
-  To restore such behavior use the `--combinedupgrade` option, example `yay -Suy --combinedupgrade`, note that in this case the usege of the native `pacman` is partial.
+  To restore such behavior use the `--combinedupgrade` option, example `yay -Suy --combinedupgrade`.
+  Note: this causes the [native pacman](https://wiki.archlinux.org/index.php/AUR_helpers) to become partial.
 
 * Sometimes diffs are printed to the terminal and other times they are pages
   via less. How do I fix this?
