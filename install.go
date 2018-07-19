@@ -189,12 +189,6 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	//initial srcinfo parse before pkgver() bump
-	err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
-	if err != nil {
-		return err
-	}
-
 	var toDiff []*rpc.Pkg
 	var toEdit []*rpc.Pkg
 
@@ -206,7 +200,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(toDiff) > 0 {
-			err = showPkgBuildDiffs(toDiff, srcinfosStale, do.Bases, cloned)
+			err = showPkgBuildDiffs(toDiff, do.Bases, cloned)
 			if err != nil {
 				return err
 			}
@@ -224,6 +218,12 @@ func install(parser *arguments) error {
 	}
 
 	err = mergePkgBuilds(do.Aur)
+	if err != nil {
+		return err
+	}
+
+	//initial srcinfo parse before pkgver() bump
+	err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
 	if err != nil {
 		return err
 	}
@@ -650,7 +650,7 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 	}
 }
 
-func showPkgBuildDiffs(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg, cloned stringSet) error {
+func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stringSet) error {
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		if shouldUseGit(dir) {
@@ -681,20 +681,15 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, base
 				return err
 			}
 		} else {
-			editor, editorArgs := editor()
-			editorArgs = append(editorArgs, filepath.Join(dir, "PKGBUILD"))
-			for _, splitPkg := range srcinfos[pkg.PackageBase].SplitPackages() {
-				if splitPkg.Install != "" {
-					editorArgs = append(editorArgs, filepath.Join(dir, splitPkg.Install))
-				}
+			args := []string{"diff"}
+			if useColor {
+				args = append(args, "--color=always")
+			} else {
+				args = append(args, "--color=never")
 			}
-
-			editcmd := exec.Command(editor, editorArgs...)
-			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-			err := editcmd.Run()
-			if err != nil {
-				return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
-			}
+			args = append(args, "--no-index", "/var/empty", dir)
+			// git always returns 1. why? I have no idea
+			show(passToGit(dir, args...))
 		}
 	}
 
