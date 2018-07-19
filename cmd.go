@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
-	"time"
 )
 
 var cmdArgs = makeArguments()
@@ -116,31 +114,6 @@ Yay specific options:
 
 If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed`)
-}
-
-func sudoLoopBackground() {
-	updateSudo()
-	go sudoLoop()
-}
-
-func sudoLoop() {
-	for {
-		updateSudo()
-		time.Sleep(298 * time.Second)
-	}
-}
-
-func updateSudo() {
-	for {
-		cmd := exec.Command("sudo", "-v")
-		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			break
-		}
-	}
 }
 
 func handleCmd() (err error) {

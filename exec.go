@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 func show(cmd *exec.Cmd) error {
@@ -27,6 +28,29 @@ func capture(cmd *exec.Cmd) (string, string, error) {
 	stderr := errbuf.String()
 
 	return stdout, stderr, err
+}
+
+func sudoLoopBackground() {
+	updateSudo()
+	go sudoLoop()
+}
+
+func sudoLoop() {
+	for {
+		updateSudo()
+		time.Sleep(298 * time.Second)
+	}
+}
+
+func updateSudo() {
+	for {
+		err := show(exec.Command("sudo", "-v"))
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			break
+		}
+	}
 }
 
 func passToPacman(args *arguments) *exec.Cmd {
