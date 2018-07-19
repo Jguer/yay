@@ -259,6 +259,12 @@ func install(parser *arguments) error {
 		return err
 	}
 
+	//initial srcinfo parse before pkgver() bump
+	err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
+	if err != nil {
+		return err
+	}
+
 	var toDiff []*rpc.Pkg
 	var toEdit []*rpc.Pkg
 
@@ -270,7 +276,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(toDiff) > 0 {
-			err = showPkgBuildDiffs(toDiff, do.Bases, cloned)
+			err = showPkgBuildDiffs(toDiff, srcinfosStale, do.Bases, cloned)
 			if err != nil {
 				return err
 			}
@@ -300,7 +306,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(toEdit) > 0 {
-			err = editPkgBuilds(toEdit, do.Bases)
+			err = editPkgBuilds(toEdit, srcinfosStale, do.Bases)
 			if err != nil {
 				return err
 			}
@@ -315,12 +321,6 @@ func install(parser *arguments) error {
 			return fmt.Errorf("Aborting due to user")
 		}
 		config.NoConfirm = oldValue
-	}
-
-	//initial srcinfo parse before pkgver() bump
-	err = parseSRCINFOFiles(do.Aur, srcinfosStale, do.Bases)
-	if err != nil {
-		return err
 	}
 
 	incompatible, err = getIncompatible(do.Aur, srcinfosStale, do.Bases)
@@ -651,7 +651,7 @@ func cleanBuilds(pkgs []*rpc.Pkg) {
 	}
 }
 
-func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stringSet) error {
+func showPkgBuildDiffs(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg, cloned stringSet) error {
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		if shouldUseGit(dir) {
@@ -684,6 +684,12 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stri
 		} else {
 			editor, editorArgs := editor()
 			editorArgs = append(editorArgs, filepath.Join(dir, "PKGBUILD"))
+			for _, splitPkg := range srcinfos[pkg.PackageBase].SplitPackages() {
+				if splitPkg.Install != "" {
+					editorArgs = append(editorArgs, filepath.Join(dir, splitPkg.Install))
+				}
+			}
+
 			editcmd := exec.Command(editor, editorArgs...)
 			editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 			err := editcmd.Run()
@@ -696,11 +702,17 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stri
 	return nil
 }
 
-func editPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg) error {
+func editPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) error {
 	pkgbuilds := make([]string, 0, len(pkgs))
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 		pkgbuilds = append(pkgbuilds, filepath.Join(dir, "PKGBUILD"))
+
+		for _, splitPkg := range srcinfos[pkg.PackageBase].SplitPackages() {
+			if splitPkg.Install != "" {
+				pkgbuilds = append(pkgbuilds, filepath.Join(dir, splitPkg.Install))
+			}
+		}
 	}
 
 	if len(pkgbuilds) > 0 {
