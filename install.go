@@ -27,106 +27,36 @@ func install(parser *arguments) error {
 	removeMake := false
 	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
-	//remotenames: names of all non repo packages on the system
+	if mode == ModeAny || mode == ModeRepo {
+		if config.CombinedUpgrade {
+			if parser.existsArg("y", "refresh") {
+				err = earlyRefresh(parser)
+				if err != nil {
+					return fmt.Errorf("Error refreshing databases")
+				}
+			}
+		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
+			err = earlyPacmanCall(parser)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	//we may have done -Sy, our handle now has an old
+	//database.
+	err = initAlpmHandle()
+	if err != nil {
+		return err
+	}
+
 	_, _, localNames, remoteNames, err := filterPackages()
 	if err != nil {
 		return err
 	}
 
-	//cache as a stringset. maybe make it return a string set in the first
-	//place
 	remoteNamesCache := sliceToStringSet(remoteNames)
 	localNamesCache := sliceToStringSet(localNames)
-
-	if mode == ModeAny || mode == ModeRepo {
-		if config.CombinedUpgrade {
-			if parser.existsArg("y", "refresh") {
-				arguments := parser.copy()
-				parser.delArg("y", "refresh")
-				arguments.delArg("u", "sysupgrade")
-				arguments.delArg("s", "search")
-				arguments.delArg("i", "info")
-				arguments.delArg("l", "list")
-				arguments.clearTargets()
-				err = passToPacman(arguments)
-				if err != nil {
-					return fmt.Errorf("Error installing repo packages")
-				}
-			}
-		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
-			arguments := parser.copy()
-			arguments.op = "S"
-			targets := parser.targets
-			parser.clearTargets()
-			arguments.clearTargets()
-
-			syncDb, err := alpmHandle.SyncDbs()
-			if err != nil {
-				return err
-			}
-
-			if mode == ModeRepo {
-				arguments.targets = targets
-			} else {
-				alpmHandle.SetQuestionCallback(func(alpm.QuestionAny) {})
-				//seperate aur and repo targets
-				for _, _target := range targets {
-					target := toTarget(_target)
-
-					if target.Db == "aur" {
-						parser.addTarget(_target)
-						continue
-					}
-
-					var singleDb *alpm.Db
-
-					if target.Db != "" {
-						singleDb, err = alpmHandle.SyncDbByName(target.Db)
-						if err != nil {
-							return err
-						}
-						_, err = singleDb.PkgCache().FindSatisfier(target.DepString())
-					} else {
-						_, err = syncDb.FindSatisfier(target.DepString())
-					}
-
-					if err == nil {
-						arguments.addTarget(_target)
-					} else {
-						_, err := syncDb.PkgCachebyGroup(target.Name)
-						if err == nil {
-							arguments.addTarget(_target)
-							continue
-						}
-
-						parser.addTarget(_target)
-					}
-				}
-			}
-
-			if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
-				err = passToPacman(arguments)
-				if err != nil {
-					return fmt.Errorf("Error installing repo packages")
-				}
-			}
-
-			//we may have done -Sy, our handle now has an old
-			//database.
-			err = initAlpmHandle()
-			if err != nil {
-				return err
-			}
-
-			_, _, localNames, remoteNames, err = filterPackages()
-			if err != nil {
-				return err
-			}
-
-			remoteNamesCache = sliceToStringSet(remoteNames)
-			localNamesCache = sliceToStringSet(localNames)
-		}
-	}
 
 	requestTargets := parser.copy().targets
 
@@ -204,7 +134,7 @@ func install(parser *arguments) error {
 		parser.op = "S"
 		parser.delArg("y", "refresh")
 		parser.options["ignore"] = arguments.options["ignore"]
-		return passToPacman(parser)
+		return show(passToPacman(parser))
 	}
 
 	if len(dp.Aur) > 0 && 0 == os.Geteuid() {
@@ -340,7 +270,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(arguments.targets) > 0 || arguments.existsArg("u") {
-		err := passToPacman(arguments)
+		err := show(passToPacman(arguments))
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages")
 		}
@@ -364,14 +294,14 @@ func install(parser *arguments) error {
 		}
 
 		if len(depArguments.targets) > 0 {
-			_, stderr, err := passToPacmanCapture(depArguments)
+			_, stderr, err := capture(passToPacman(depArguments))
 			if err != nil {
 				return fmt.Errorf("%s%s", stderr, err)
 			}
 		}
 
 		if len(expArguments.targets) > 0 {
-			_, stderr, err := passToPacmanCapture(expArguments)
+			_, stderr, err := capture(passToPacman(expArguments))
 			if err != nil {
 				return fmt.Errorf("%s%s", stderr, err)
 			}
@@ -398,7 +328,7 @@ func install(parser *arguments) error {
 
 		oldValue := config.NoConfirm
 		config.NoConfirm = true
-		err = passToPacman(removeArguments)
+		err = show(passToPacman(removeArguments))
 		config.NoConfirm = oldValue
 
 		if err != nil {
@@ -411,6 +341,75 @@ func install(parser *arguments) error {
 	}
 
 	return nil
+}
+
+func inRepos(syncDb alpm.DbList, pkg string) bool {
+	target := toTarget(pkg)
+
+	if target.Db == "aur" {
+		return false
+	} else if target.Db != "" {
+		return true
+	}
+
+	_, err := syncDb.FindSatisfier(target.DepString())
+	if err == nil {
+		return true
+	}
+
+	_, err = syncDb.PkgCachebyGroup(target.Name)
+	if err == nil {
+		return true
+	}
+
+	return false
+}
+
+func earlyPacmanCall(parser *arguments) error {
+	arguments := parser.copy()
+	arguments.op = "S"
+	targets := parser.targets
+	parser.clearTargets()
+	arguments.clearTargets()
+
+	syncDb, err := alpmHandle.SyncDbs()
+	if err != nil {
+		return err
+	}
+
+	if mode == ModeRepo {
+		arguments.targets = targets
+	} else {
+		alpmHandle.SetQuestionCallback(func(alpm.QuestionAny) {})
+		//seperate aur and repo targets
+		for _, target := range targets {
+			if inRepos(syncDb, target) {
+				arguments.addTarget(target)
+			} else {
+				parser.addTarget(target)
+			}
+		}
+	}
+
+	if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
+		err = show(passToPacman(arguments))
+		if err != nil {
+			return fmt.Errorf("Error installing repo packages")
+		}
+	}
+
+	return nil
+}
+
+func earlyRefresh(parser *arguments) error {
+	arguments := parser.copy()
+	parser.delArg("y", "refresh")
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("s", "search")
+	arguments.delArg("i", "info")
+	arguments.delArg("l", "list")
+	arguments.clearTargets()
+	return show(passToPacman(arguments))
 }
 
 func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) (stringSet, error) {
@@ -449,7 +448,7 @@ nextpkg:
 }
 
 func parsePackageList(dir string) (map[string]string, string, error) {
-	stdout, stderr, err := passToMakepkgCapture(dir, "--packagelist")
+	stdout, stderr, err := capture(passToMakepkg(dir, "--packagelist"))
 
 	if err != nil {
 		return nil, "", fmt.Errorf("%s%s", stderr, err)
@@ -677,7 +676,7 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, base
 			} else {
 				args = append(args, "--color=never")
 			}
-			err := passToGit(dir, args...)
+			err := show(passToGit(dir, args...))
 			if err != nil {
 				return err
 			}
@@ -838,7 +837,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 			args = append(args, "--ignorearch")
 		}
 
-		err = passToMakepkg(dir, args...)
+		err = show(passToMakepkg(dir, args...))
 		if err != nil {
 			return fmt.Errorf("Error downloading sources: %s", cyan(formatPkgbase(pkg, bases)))
 		}
@@ -861,7 +860,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		//pkgver bump
-		err := passToMakepkg(dir, args...)
+		err := show(passToMakepkg(dir, args...))
 		if err != nil {
 			return fmt.Errorf("Error making: %s", pkg.Name)
 		}
@@ -899,7 +898,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 				args = append(args, "--ignorearch")
 			}
 
-			err := passToMakepkg(dir, args...)
+			err := show(passToMakepkg(dir, args...))
 			if err != nil {
 				return fmt.Errorf("Error making: %s", pkg.Name)
 			}
@@ -973,7 +972,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		err = passToPacman(arguments)
+		err = show(passToPacman(arguments))
 		if err != nil {
 			return err
 		}
@@ -982,8 +981,13 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			updateVCSData(pkg.Name, srcinfo.Source)
 		}
 
+		err = saveVCSInfo()
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		if len(depArguments.targets) > 0 {
-			_, stderr, err := passToPacmanCapture(depArguments)
+			_, stderr, err := capture(passToPacman(depArguments))
 			if err != nil {
 				return fmt.Errorf("%s%s", stderr, err)
 			}

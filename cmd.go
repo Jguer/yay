@@ -2,13 +2,9 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
-	"strings"
-	"time"
 )
 
 var cmdArgs = makeArguments()
@@ -120,31 +116,6 @@ If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed`)
 }
 
-func sudoLoopBackground() {
-	updateSudo()
-	go sudoLoop()
-}
-
-func sudoLoop() {
-	for {
-		updateSudo()
-		time.Sleep(298 * time.Second)
-	}
-}
-
-func updateSudo() {
-	for {
-		cmd := exec.Command("sudo", "-v")
-		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			break
-		}
-	}
-}
-
 func handleCmd() (err error) {
 	for option, value := range cmdArgs.options {
 		if handleConfig(option, value) {
@@ -175,9 +146,9 @@ func handleCmd() (err error) {
 	case "V", "version":
 		handleVersion()
 	case "D", "database":
-		err = passToPacman(cmdArgs)
+		err = show(passToPacman(cmdArgs))
 	case "F", "files":
-		err = passToPacman(cmdArgs)
+		err = show(passToPacman(cmdArgs))
 	case "Q", "query":
 		err = handleQuery()
 	case "R", "remove":
@@ -185,9 +156,9 @@ func handleCmd() (err error) {
 	case "S", "sync":
 		err = handleSync()
 	case "T", "deptest":
-		err = passToPacman(cmdArgs)
+		err = show(passToPacman(cmdArgs))
 	case "U", "upgrade":
-		err = passToPacman(cmdArgs)
+		err = show(passToPacman(cmdArgs))
 	case "G", "getpkgbuild":
 		err = handleGetpkgbuild()
 	case "P", "print":
@@ -209,7 +180,7 @@ func handleQuery() error {
 	if cmdArgs.existsArg("u", "upgrades") {
 		err = printUpdateList(cmdArgs)
 	} else {
-		err = passToPacman(cmdArgs)
+		err = show(passToPacman(cmdArgs))
 	}
 
 	return err
@@ -221,7 +192,7 @@ func handleHelp() error {
 		return nil
 	}
 
-	return passToPacman(cmdArgs)
+	return show(passToPacman(cmdArgs))
 }
 
 //this function should only set config options
@@ -436,7 +407,7 @@ func handleSync() (err error) {
 		arguments.delArg("i", "info")
 		arguments.delArg("l", "list")
 		arguments.clearTargets()
-		err = passToPacman(arguments)
+		err = show(passToPacman(arguments))
 		if err != nil {
 			return
 		}
@@ -453,9 +424,9 @@ func handleSync() (err error) {
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = syncClean(cmdArgs)
 	} else if cmdArgs.existsArg("l", "list") {
-		err = passToPacman(cmdArgs)
+		err = show(passToPacman(cmdArgs))
 	} else if cmdArgs.existsArg("c", "clean") {
-		err = passToPacman(cmdArgs)
+		err = show(passToPacman(cmdArgs))
 	} else if cmdArgs.existsArg("i", "info") {
 		err = syncInfo(targets)
 	} else if cmdArgs.existsArg("u", "sysupgrade") {
@@ -469,7 +440,7 @@ func handleSync() (err error) {
 
 func handleRemove() (err error) {
 	removeVCSPackage(cmdArgs.targets)
-	err = passToPacman(cmdArgs)
+	err = show(passToPacman(cmdArgs))
 	return
 }
 
@@ -577,144 +548,4 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	err = install(arguments)
 
 	return err
-}
-
-// passToPacman outsources execution to pacman binary without modifications.
-func passToPacman(args *arguments) error {
-	var cmd *exec.Cmd
-	argArr := make([]string, 0)
-
-	if args.needRoot() {
-		argArr = append(argArr, "sudo")
-	}
-
-	argArr = append(argArr, config.PacmanBin)
-	argArr = append(argArr, cmdArgs.formatGlobals()...)
-	argArr = append(argArr, args.formatArgs()...)
-	if config.NoConfirm {
-		argArr = append(argArr, "--noconfirm")
-	}
-
-	argArr = append(argArr, "--")
-
-	argArr = append(argArr, args.targets...)
-
-	cmd = exec.Command(argArr[0], argArr[1:]...)
-
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err := cmd.Run()
-
-	if err != nil {
-		return fmt.Errorf("")
-	}
-	return nil
-}
-
-//passToPacman but return the output instead of showing the user
-func passToPacmanCapture(args *arguments) (string, string, error) {
-	var outbuf, errbuf bytes.Buffer
-	var cmd *exec.Cmd
-	argArr := make([]string, 0)
-
-	if args.needRoot() {
-		argArr = append(argArr, "sudo")
-	}
-
-	argArr = append(argArr, config.PacmanBin)
-	argArr = append(argArr, cmdArgs.formatGlobals()...)
-	argArr = append(argArr, args.formatArgs()...)
-	if config.NoConfirm {
-		argArr = append(argArr, "--noconfirm")
-	}
-
-	argArr = append(argArr, "--")
-
-	argArr = append(argArr, args.targets...)
-
-	cmd = exec.Command(argArr[0], argArr[1:]...)
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-
-	err := cmd.Run()
-	stdout := outbuf.String()
-	stderr := errbuf.String()
-
-	return stdout, stderr, err
-}
-
-// passToMakepkg outsources execution to makepkg binary without modifications.
-func passToMakepkg(dir string, args ...string) (err error) {
-
-	if config.NoConfirm {
-		args = append(args)
-	}
-
-	mflags := strings.Fields(config.MFlags)
-	args = append(args, mflags...)
-
-	cmd := exec.Command(config.MakepkgBin, args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	cmd.Dir = dir
-	err = cmd.Run()
-	if err == nil {
-		_ = saveVCSInfo()
-	}
-	return
-}
-
-func passToMakepkgCapture(dir string, args ...string) (string, string, error) {
-	var outbuf, errbuf bytes.Buffer
-
-	if config.NoConfirm {
-		args = append(args)
-	}
-
-	mflags := strings.Fields(config.MFlags)
-	args = append(args, mflags...)
-
-	cmd := exec.Command(config.MakepkgBin, args...)
-	cmd.Dir = dir
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-
-	err := cmd.Run()
-	stdout := outbuf.String()
-	stderr := errbuf.String()
-
-	if err == nil {
-		_ = saveVCSInfo()
-	}
-
-	return stdout, stderr, err
-}
-
-func passToGit(dir string, _args ...string) (err error) {
-	gitflags := strings.Fields(config.GitFlags)
-	args := []string{"-C", dir}
-	args = append(args, gitflags...)
-	args = append(args, _args...)
-
-	cmd := exec.Command(config.GitBin, args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err = cmd.Run()
-	return
-}
-
-func passToGitCapture(dir string, _args ...string) (string, string, error) {
-	var outbuf, errbuf bytes.Buffer
-	gitflags := strings.Fields(config.GitFlags)
-	args := []string{"-C", dir}
-	args = append(args, gitflags...)
-	args = append(args, _args...)
-
-	cmd := exec.Command(config.GitBin, args...)
-	cmd.Dir = dir
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-
-	err := cmd.Run()
-	stdout := outbuf.String()
-	stderr := errbuf.String()
-
-	return stdout, stderr, err
 }
