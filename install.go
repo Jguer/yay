@@ -48,7 +48,7 @@ func install(parser *arguments) error {
 				arguments.delArg("i", "info")
 				arguments.delArg("l", "list")
 				arguments.clearTargets()
-				err = passToPacman(arguments)
+				err = show(passToPacman(arguments))
 				if err != nil {
 					return fmt.Errorf("Error installing repo packages")
 				}
@@ -105,7 +105,7 @@ func install(parser *arguments) error {
 			}
 
 			if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
-				err = passToPacman(arguments)
+				err = show(passToPacman(arguments))
 				if err != nil {
 					return fmt.Errorf("Error installing repo packages")
 				}
@@ -204,7 +204,7 @@ func install(parser *arguments) error {
 		parser.op = "S"
 		parser.delArg("y", "refresh")
 		parser.options["ignore"] = arguments.options["ignore"]
-		return passToPacman(parser)
+		return show(passToPacman(parser))
 	}
 
 	if len(dp.Aur) > 0 && 0 == os.Geteuid() {
@@ -340,7 +340,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(arguments.targets) > 0 || arguments.existsArg("u") {
-		err := passToPacman(arguments)
+		err := show(passToPacman(arguments))
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages")
 		}
@@ -364,14 +364,14 @@ func install(parser *arguments) error {
 		}
 
 		if len(depArguments.targets) > 0 {
-			_, stderr, err := passToPacmanCapture(depArguments)
+			_, stderr, err := capture(passToPacman(depArguments))
 			if err != nil {
 				return fmt.Errorf("%s%s", stderr, err)
 			}
 		}
 
 		if len(expArguments.targets) > 0 {
-			_, stderr, err := passToPacmanCapture(expArguments)
+			_, stderr, err := capture(passToPacman(expArguments))
 			if err != nil {
 				return fmt.Errorf("%s%s", stderr, err)
 			}
@@ -398,7 +398,7 @@ func install(parser *arguments) error {
 
 		oldValue := config.NoConfirm
 		config.NoConfirm = true
-		err = passToPacman(removeArguments)
+		err = show(passToPacman(removeArguments))
 		config.NoConfirm = oldValue
 
 		if err != nil {
@@ -449,7 +449,7 @@ nextpkg:
 }
 
 func parsePackageList(dir string) (map[string]string, string, error) {
-	stdout, stderr, err := passToMakepkgCapture(dir, "--packagelist")
+	stdout, stderr, err := capture(passToMakepkg(dir, "--packagelist"))
 
 	if err != nil {
 		return nil, "", fmt.Errorf("%s%s", stderr, err)
@@ -677,7 +677,7 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, base
 			} else {
 				args = append(args, "--color=never")
 			}
-			err := passToGit(dir, args...)
+			err := show(passToGit(dir, args...))
 			if err != nil {
 				return err
 			}
@@ -838,7 +838,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 			args = append(args, "--ignorearch")
 		}
 
-		err = passToMakepkg(dir, args...)
+		err = show(passToMakepkg(dir, args...))
 		if err != nil {
 			return fmt.Errorf("Error downloading sources: %s", cyan(formatPkgbase(pkg, bases)))
 		}
@@ -861,7 +861,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		//pkgver bump
-		err := passToMakepkg(dir, args...)
+		err := show(passToMakepkg(dir, args...))
 		if err != nil {
 			return fmt.Errorf("Error making: %s", pkg.Name)
 		}
@@ -899,7 +899,7 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 				args = append(args, "--ignorearch")
 			}
 
-			err := passToMakepkg(dir, args...)
+			err := show(passToMakepkg(dir, args...))
 			if err != nil {
 				return fmt.Errorf("Error making: %s", pkg.Name)
 			}
@@ -973,17 +973,23 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		err = passToPacman(arguments)
+		err = show(passToPacman(arguments))
 		if err != nil {
 			return err
 		}
+
 
 		for _, pkg := range do.Bases[pkg.PackageBase] {
 			updateVCSData(pkg.Name, srcinfo.Source)
 		}
 
+		err = saveVCSInfo()
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		if len(depArguments.targets) > 0 {
-			_, stderr, err := passToPacmanCapture(depArguments)
+			_, stderr, err := capture(passToPacman(depArguments))
 			if err != nil {
 				return fmt.Errorf("%s%s", stderr, err)
 			}

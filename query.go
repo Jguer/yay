@@ -229,7 +229,7 @@ func syncInfo(pkgS []string) (err error) {
 		arguments := cmdArgs.copy()
 		arguments.clearTargets()
 		arguments.addTarget(repoS...)
-		err = passToPacman(arguments)
+		err = show(passToPacman(arguments))
 
 		if err != nil {
 			return

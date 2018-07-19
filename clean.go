@@ -49,7 +49,7 @@ func cleanRemove(pkgNames []string) (err error) {
 	arguments := makeArguments()
 	arguments.addArg("R")
 	arguments.addTarget(pkgNames...)
-	err = passToPacman(arguments)
+	err = show(passToPacman(arguments))
 	return err
 }
 
@@ -67,7 +67,7 @@ func syncClean(parser *arguments) error {
 		}
 	}
 
-	err := passToPacman(parser)
+	err := show(passToPacman(parser))
 	if err != nil {
 		return err
 	}
@@ -185,7 +185,7 @@ func cleanUntracked() error {
 		dir := filepath.Join(config.BuildDir, file.Name())
 
 		if shouldUseGit(dir) {
-			err = passToGit(dir, "clean", "-fx")
+			err = show(passToGit(dir, "clean", "-fx"))
 			if err != nil {
 				return err
 			}
