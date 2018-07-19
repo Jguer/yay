@@ -978,7 +978,6 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			return err
 		}
 
-
 		for _, pkg := range do.Bases[pkg.PackageBase] {
 			updateVCSData(pkg.Name, srcinfo.Source)
 		}
