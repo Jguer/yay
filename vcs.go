@@ -135,7 +135,7 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString) {
 func getCommit(url string, branch string, protocols []string) string {
 	for _, protocol := range protocols {
 		cmd := passToGit("ls-remote", protocol+"://"+url, branch)
-		cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0")
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 		stdout, _, err := capture(cmd)
 		if err != nil {
 			continue
