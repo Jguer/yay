@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -136,13 +134,9 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString) {
 
 func getCommit(url string, branch string, protocols []string) string {
 	for _, protocol := range protocols {
-		var outbuf bytes.Buffer
-
-		cmd := exec.Command(config.GitBin, "ls-remote", protocol+"://"+url, branch)
-		cmd.Stdout = &outbuf
+		cmd := passToGit("ls-remote", protocol+"://"+url, branch)
 		cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0")
-
-		err := cmd.Start()
+		stdout, _, err := capture(cmd)
 		if err != nil {
 			continue
 		}
@@ -161,7 +155,6 @@ func getCommit(url string, branch string, protocols []string) string {
 			continue
 		}
 
-		stdout := outbuf.String()
 		split := strings.Fields(stdout)
 
 		if len(split) < 2 {
