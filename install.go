@@ -106,8 +106,6 @@ func install(parser *arguments) error {
 			arguments.options["ignore"] = ignoreStr
 		}
 
-		fmt.Println()
-
 		for pkg := range aurUp {
 			parser.addTarget(pkg)
 		}
@@ -127,7 +125,7 @@ func install(parser *arguments) error {
 
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
-			fmt.Println("There is nothing to do")
+			fmt.Println(" there is nothing to do")
 			return nil
 		}
 
@@ -160,7 +158,7 @@ func install(parser *arguments) error {
 	}
 
 	if len(do.Aur) == 0 && len(arguments.targets) == 0 && (!parser.existsArg("u", "sysupgrade") || mode == ModeAUR) {
-		fmt.Println("There is nothing to do")
+		fmt.Println(" there is nothing to do")
 		return nil
 	}
 
