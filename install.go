@@ -27,106 +27,36 @@ func install(parser *arguments) error {
 	removeMake := false
 	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
-	//remotenames: names of all non repo packages on the system
+	if mode == ModeAny || mode == ModeRepo {
+		if config.CombinedUpgrade {
+			if parser.existsArg("y", "refresh") {
+				err = earlyRefresh(parser)
+				if err != nil {
+					return fmt.Errorf("Error refreshing databases")
+				}
+			}
+		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
+			err = earlyPacmanCall(parser)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	//we may have done -Sy, our handle now has an old
+	//database.
+	err = initAlpmHandle()
+	if err != nil {
+		return err
+	}
+
 	_, _, localNames, remoteNames, err := filterPackages()
 	if err != nil {
 		return err
 	}
 
-	//cache as a stringset. maybe make it return a string set in the first
-	//place
 	remoteNamesCache := sliceToStringSet(remoteNames)
 	localNamesCache := sliceToStringSet(localNames)
-
-	if mode == ModeAny || mode == ModeRepo {
-		if config.CombinedUpgrade {
-			if parser.existsArg("y", "refresh") {
-				arguments := parser.copy()
-				parser.delArg("y", "refresh")
-				arguments.delArg("u", "sysupgrade")
-				arguments.delArg("s", "search")
-				arguments.delArg("i", "info")
-				arguments.delArg("l", "list")
-				arguments.clearTargets()
-				err = show(passToPacman(arguments))
-				if err != nil {
-					return fmt.Errorf("Error installing repo packages")
-				}
-			}
-		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
-			arguments := parser.copy()
-			arguments.op = "S"
-			targets := parser.targets
-			parser.clearTargets()
-			arguments.clearTargets()
-
-			syncDb, err := alpmHandle.SyncDbs()
-			if err != nil {
-				return err
-			}
-
-			if mode == ModeRepo {
-				arguments.targets = targets
-			} else {
-				alpmHandle.SetQuestionCallback(func(alpm.QuestionAny) {})
-				//seperate aur and repo targets
-				for _, _target := range targets {
-					target := toTarget(_target)
-
-					if target.Db == "aur" {
-						parser.addTarget(_target)
-						continue
-					}
-
-					var singleDb *alpm.Db
-
-					if target.Db != "" {
-						singleDb, err = alpmHandle.SyncDbByName(target.Db)
-						if err != nil {
-							return err
-						}
-						_, err = singleDb.PkgCache().FindSatisfier(target.DepString())
-					} else {
-						_, err = syncDb.FindSatisfier(target.DepString())
-					}
-
-					if err == nil {
-						arguments.addTarget(_target)
-					} else {
-						_, err := syncDb.PkgCachebyGroup(target.Name)
-						if err == nil {
-							arguments.addTarget(_target)
-							continue
-						}
-
-						parser.addTarget(_target)
-					}
-				}
-			}
-
-			if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
-				err = show(passToPacman(arguments))
-				if err != nil {
-					return fmt.Errorf("Error installing repo packages")
-				}
-			}
-
-			//we may have done -Sy, our handle now has an old
-			//database.
-			err = initAlpmHandle()
-			if err != nil {
-				return err
-			}
-
-			_, _, localNames, remoteNames, err = filterPackages()
-			if err != nil {
-				return err
-			}
-
-			remoteNamesCache = sliceToStringSet(remoteNames)
-			localNamesCache = sliceToStringSet(localNames)
-		}
-	}
 
 	requestTargets := parser.copy().targets
 
@@ -411,6 +341,75 @@ func install(parser *arguments) error {
 	}
 
 	return nil
+}
+
+func inRepos(syncDb alpm.DbList, pkg string) bool {
+	target := toTarget(pkg)
+
+	if target.Db == "aur" {
+		return false
+	} else if target.Db != "" {
+		return true
+	}
+
+	_, err := syncDb.FindSatisfier(target.DepString())
+	if err == nil {
+		return true
+	}
+
+	_, err = syncDb.PkgCachebyGroup(target.Name)
+	if err == nil {
+		return true
+	}
+
+	return false
+}
+
+func earlyPacmanCall(parser *arguments) error {
+	arguments := parser.copy()
+	arguments.op = "S"
+	targets := parser.targets
+	parser.clearTargets()
+	arguments.clearTargets()
+
+	syncDb, err := alpmHandle.SyncDbs()
+	if err != nil {
+		return err
+	}
+
+	if mode == ModeRepo {
+		arguments.targets = targets
+	} else {
+		alpmHandle.SetQuestionCallback(func(alpm.QuestionAny) {})
+		//seperate aur and repo targets
+		for _, target := range targets {
+			if inRepos(syncDb, target) {
+				arguments.addTarget(target)
+			} else {
+				parser.addTarget(target)
+			}
+		}
+	}
+
+	if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
+		err = show(passToPacman(arguments))
+		if err != nil {
+			return fmt.Errorf("Error installing repo packages")
+		}
+	}
+
+	return nil
+}
+
+func earlyRefresh(parser *arguments) error {
+	arguments := parser.copy()
+	parser.delArg("y", "refresh")
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("s", "search")
+	arguments.delArg("i", "info")
+	arguments.delArg("l", "list")
+	arguments.clearTargets()
+	return show(passToPacman(arguments))
 }
 
 func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) (stringSet, error) {
