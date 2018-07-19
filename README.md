@@ -109,6 +109,11 @@ Currently yay Depends on:
 ### `Out Of Date AUR Packages` message is displayed, why doesn't `yay` update them?
   This means the package has been flagged out of date on the AUR but maintainer has not updated the `PKGBUILD` yet.
 
+### Yay doesn't install dependencies added to PKGBUILD during installation.
+  Yay resolves all dependencies ahead of time. You are free to edit the
+  PKGBUILD in anyway but any problems you cause are your own and should not be
+  reported unless they can be reproduced with the original PKGBUILD.
+
 ## Examples of Custom Operations
 
 * `yay <Search Term>` presents package selection menu
