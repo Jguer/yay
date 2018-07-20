@@ -180,6 +180,10 @@ func (dp *depPool) CheckConflicts() (mapStringSet, error) {
 		}
 
 		fmt.Println()
+
+		if config.NoConfirm && !config.UseAsk {
+			return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
+		}
 	}
 
 	return conflicts, nil
