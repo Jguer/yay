@@ -80,7 +80,7 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[str
 	fmt.Println()
 	fmt.Println(str)
 
-	if continueTask(bold(green("Import?")), "nN") {
+	if continueTask(bold(green("Import?")), true) {
 		return importKeys(problematic.toSlice())
 	}
 
