@@ -144,12 +144,6 @@ func (parser *arguments) needRoot() bool {
 	case "R", "remove":
 		return true
 	case "S", "sync":
-		if parser.existsArg("y", "refresh") {
-			return true
-		}
-		if parser.existsArg("u", "sysupgrade") {
-			return true
-		}
 		if parser.existsArg("s", "search") {
 			return false
 		}
