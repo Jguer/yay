@@ -54,6 +54,7 @@ type Configuration struct {
 	MFlags          string `json:"mflags"`
 	SortBy          string `json:"sortby"`
 	GitFlags        string `json:"gitflags"`
+	RemoveMake      string `json:"removemake"`
 	RequestSplitN   int    `json:"requestsplitn"`
 	SearchMode      int    `json:"-"`
 	SortMode        int    `json:"sortmode"`
@@ -173,6 +174,7 @@ func defaultSettings(config *Configuration) {
 	config.AnswerDiff = ""
 	config.AnswerEdit = ""
 	config.AnswerUpgrade = ""
+	config.RemoveMake = "ask"
 	config.GitClone = true
 	config.Provides = true
 	config.UpgradeMenu = true

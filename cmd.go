@@ -326,6 +326,12 @@ func handleConfig(option, value string) bool {
 		mode = ModeAUR
 	case "repo":
 		mode = ModeRepo
+	case "removemake":
+		config.RemoveMake = "yes"
+	case "noremovemake":
+		config.RemoveMake = "no"
+	case "askremovemake":
+		config.RemoveMake = "ask"
 	default:
 		return false
 	}
