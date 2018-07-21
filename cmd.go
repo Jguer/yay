@@ -405,20 +405,6 @@ func handleYogurt() (err error) {
 func handleSync() (err error) {
 	targets := cmdArgs.targets
 
-	if cmdArgs.existsArg("y", "refresh") {
-		arguments := cmdArgs.copy()
-		cmdArgs.delArg("y", "refresh")
-		arguments.delArg("u", "sysupgrade")
-		arguments.delArg("s", "search")
-		arguments.delArg("i", "info")
-		arguments.delArg("l", "list")
-		arguments.clearTargets()
-		err = show(passToPacman(arguments))
-		if err != nil {
-			return
-		}
-	}
-
 	if cmdArgs.existsArg("s", "search") {
 		if cmdArgs.existsArg("q", "quiet") {
 			config.SearchMode = Minimal
@@ -431,7 +417,7 @@ func handleSync() (err error) {
 		err = syncClean(cmdArgs)
 	} else if cmdArgs.existsArg("l", "list") {
 		err = show(passToPacman(cmdArgs))
-	} else if cmdArgs.existsArg("c", "clean") {
+	} else if cmdArgs.existsArg("g", "groups") {
 		err = show(passToPacman(cmdArgs))
 	} else if cmdArgs.existsArg("i", "info") {
 		err = syncInfo(targets)
@@ -439,6 +425,8 @@ func handleSync() (err error) {
 		err = install(cmdArgs)
 	} else if len(cmdArgs.targets) > 0 {
 		err = install(cmdArgs)
+	} else if cmdArgs.existsArg("y", "refresh") {
+		err = show(passToPacman(cmdArgs))
 	}
 
 	return

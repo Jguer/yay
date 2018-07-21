@@ -60,11 +60,12 @@ func waitLock() {
 		return
 	}
 
-	fmt.Println(bold(yellow(smallArrow)), "db.lck is present. Waiting... ")
+	fmt.Print(bold(yellow(smallArrow)), " db.lck is present. Waiting...")
 
 	for {
 		time.Sleep(3 * time.Second)
 		if _, err := os.Stat(filepath.Join(alpmConf.DBPath, "db.lck")); err != nil {
+			fmt.Println()
 			return
 		}
 	}
@@ -88,7 +89,7 @@ func passToPacman(args *arguments) *exec.Cmd {
 
 	argArr = append(argArr, args.targets...)
 
-	if args.needWait() {
+	if args.needRoot() {
 		waitLock()
 	}
 	return exec.Command(argArr[0], argArr[1:]...)
