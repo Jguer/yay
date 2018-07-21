@@ -166,7 +166,11 @@ func install(parser *arguments) error {
 	fmt.Println()
 
 	if do.HasMake() {
-		if !continueTask("Remove make dependencies after install?", "yY") {
+		if config.RemoveMake == "yes" {
+			removeMake = true
+		} else if config.RemoveMake == "no" {
+			removeMake = false
+		} else if !continueTask("Remove make dependencies after install?", "yY") {
 			removeMake = true
 		}
 	}
