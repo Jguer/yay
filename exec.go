@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -53,6 +54,22 @@ func updateSudo() {
 	}
 }
 
+// waitLock will lock yay checking the status of db.lck until it does not exist
+func waitLock() {
+	if _, err := os.Stat(filepath.Join(alpmConf.DBPath, "db.lck")); err != nil {
+		return
+	}
+
+	fmt.Println(bold(yellow(smallArrow)), "db.lck is present. Waiting... ")
+
+	for {
+		time.Sleep(3 * time.Second)
+		if _, err := os.Stat(filepath.Join(alpmConf.DBPath, "db.lck")); err != nil {
+			return
+		}
+	}
+}
+
 func passToPacman(args *arguments) *exec.Cmd {
 	argArr := make([]string, 0)
 
@@ -71,6 +88,9 @@ func passToPacman(args *arguments) *exec.Cmd {
 
 	argArr = append(argArr, args.targets...)
 
+	if args.needWait() {
+		waitLock()
+	}
 	return exec.Command(argArr[0], argArr[1:]...)
 }
 
