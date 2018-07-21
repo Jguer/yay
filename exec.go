@@ -55,12 +55,17 @@ func updateSudo() {
 
 // waitLock will lock yay checking the status of db.lck until it does not exist
 func waitLock() (err error) {
+	if _, err := os.Stat(alpmConf.DBPath + "db.lck"); err != nil {
+		return nil
+	}
+
+	fmt.Println(bold(yellow(smallArrow)), "db.lck is present. Waiting... ")
+
 	for {
-		if _, err := os.Stat("/var/lib/pacman/db.lck"); os.IsNotExist(err) {
+		time.Sleep(3 * time.Second)
+		if _, err := os.Stat(alpmConf.DBPath + "db.lck"); err != nil {
 			return nil
 		}
-		fmt.Println(bold(yellow(smallArrow)), "db.lck is present. Waiting 3 seconds and trying again")
-		time.Sleep(3 * time.Second)
 	}
 }
 
