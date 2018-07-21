@@ -177,6 +177,50 @@ func (parser *arguments) needRoot() bool {
 	}
 }
 
+//needWait checks if waitLock() should be called before calling pacman
+func (parser *arguments) needWait() bool {
+	if parser.existsArg("h", "help") {
+		return false
+	}
+
+	if parser.existsArg("p", "print") {
+		return false
+	}
+
+	switch parser.op {
+	case "D", "database":
+		return true
+	case "F", "files":
+		if parser.existsArg("y", "refresh") {
+			return true
+		}
+		return false
+	case "R", "remove":
+		return true
+	case "S", "sync":
+		if parser.existsArg("y", "refresh") {
+			return true
+		}
+		if parser.existsArg("u", "sysupgrade") {
+			return true
+		}
+		if parser.existsArg("s", "search") {
+			return false
+		}
+		if parser.existsArg("l", "list") {
+			return false
+		}
+		if parser.existsArg("i", "info") {
+			return false
+		}
+		return true
+	case "U", "upgrade":
+		return true
+	default:
+		return false
+	}
+}
+
 func (parser *arguments) addOP(op string) (err error) {
 	if parser.op != "" {
 		err = fmt.Errorf("only one operation may be used at a time")

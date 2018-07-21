@@ -53,6 +53,17 @@ func updateSudo() {
 	}
 }
 
+// waitLock will lock yay checking the status of db.lck until it does not exist
+func waitLock() (err error) {
+	for {
+		if _, err := os.Stat("/var/lib/pacman/db.lck"); os.IsNotExist(err) {
+			return nil
+		}
+		fmt.Println(bold(yellow(smallArrow)), "db.lck is present. Waiting 3 seconds and trying again")
+		time.Sleep(3 * time.Second)
+	}
+}
+
 func passToPacman(args *arguments) *exec.Cmd {
 	argArr := make([]string, 0)
 
@@ -71,6 +82,9 @@ func passToPacman(args *arguments) *exec.Cmd {
 
 	argArr = append(argArr, args.targets...)
 
+	if args.needWait() {
+		waitLock()
+	}
 	return exec.Command(argArr[0], argArr[1:]...)
 }
 
