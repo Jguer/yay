@@ -170,7 +170,7 @@ func install(parser *arguments) error {
 			removeMake = true
 		} else if config.RemoveMake == "no" {
 			removeMake = false
-		} else if !continueTask("Remove make dependencies after install?", "yY") {
+		} else if continueTask("Remove make dependencies after install?", false) {
 			removeMake = true
 		}
 	}
@@ -213,7 +213,7 @@ func install(parser *arguments) error {
 		oldValue := config.NoConfirm
 		config.NoConfirm = false
 		fmt.Println()
-		if !continueTask(bold(green("Proceed with install?")), "nN") {
+		if !continueTask(bold(green("Proceed with install?")), true) {
 			return fmt.Errorf("Aborting due to user")
 		}
 		config.NoConfirm = oldValue
@@ -249,7 +249,7 @@ func install(parser *arguments) error {
 		oldValue := config.NoConfirm
 		config.NoConfirm = false
 		fmt.Println()
-		if !continueTask(bold(green("Proceed with install?")), "nN") {
+		if !continueTask(bold(green("Proceed with install?")), true) {
 			return fmt.Errorf("Aborting due to user")
 		}
 		config.NoConfirm = oldValue
@@ -441,7 +441,7 @@ nextpkg:
 
 		fmt.Println()
 
-		if !continueTask("Try to build them anyway?", "nN") {
+		if !continueTask("Try to build them anyway?", true) {
 			return nil, fmt.Errorf("Aborting due to user")
 		}
 	}

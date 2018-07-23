@@ -82,7 +82,7 @@ func syncClean(parser *arguments) error {
 	fmt.Println()
 	fmt.Printf("Build directory: %s\n", config.BuildDir)
 
-	if continueTask(question, "nN") {
+	if continueTask(question, true) {
 		err = cleanAUR(keepInstalled, keepCurrent, removeAll)
 	}
 
@@ -90,7 +90,7 @@ func syncClean(parser *arguments) error {
 		return err
 	}
 
-	if continueTask("Do you want to remove ALL untracked AUR files?", "nN") {
+	if continueTask("Do you want to remove ALL untracked AUR files?", true) {
 		err = cleanUntracked()
 	}
 
