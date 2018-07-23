@@ -125,7 +125,9 @@ func install(parser *arguments) error {
 
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
-			fmt.Println(" there is nothing to do")
+			if parser.existsArg("u", "sysupgrade") {
+				fmt.Println(" there is nothing to do")
+			}
 			return nil
 		}
 
