@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
-  revision = "837b260b8e90895c45737e2e72313fe5bce6f2c4"
+  revision = "2980c04ca5c926b2cb7c4ac3ac8dc0b7f70d29ba"
 
 [solve-meta]
   analyzer-name = "dep"
