@@ -268,6 +268,10 @@ func printDownloads(repoName string, length int, packages string) {
 }
 
 func printInfoValue(str, value string) {
+	if value == "" {
+		value = "None"
+	}
+
 	fmt.Printf(bold("%-16s%s")+" %s\n", str, ":", value)
 }
 
