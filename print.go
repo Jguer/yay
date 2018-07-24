@@ -268,6 +268,10 @@ func printDownloads(repoName string, length int, packages string) {
 }
 
 func printInfoValue(str, value string) {
+	if value == "" {
+		value = "None"
+	}
+
 	fmt.Printf(bold("%-16s%s")+" %s\n", str, ":", value)
 }
 
@@ -275,9 +279,12 @@ func printInfoValue(str, value string) {
 func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Repository", "aur")
 	printInfoValue("Name", a.Name)
+	printInfoValue("Keywords", strings.Join(a.Keywords, "  "))
 	printInfoValue("Version", a.Version)
 	printInfoValue("Description", a.Description)
 	printInfoValue("URL", a.URL)
+	printInfoValue("AUR URL", baseURL+"/packages/"+a.Name)
+	printInfoValue("Groups", strings.Join(a.Groups, "  "))
 	printInfoValue("Licenses", strings.Join(a.License, "  "))
 	printInfoValue("Provides", strings.Join(a.Provides, "  "))
 	printInfoValue("Depends On", strings.Join(a.Depends, "  "))
@@ -288,10 +295,20 @@ func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Maintainer", a.Maintainer)
 	printInfoValue("Votes", fmt.Sprintf("%d", a.NumVotes))
 	printInfoValue("Popularity", fmt.Sprintf("%f", a.Popularity))
+	printInfoValue("First Submitted", formatTime(a.FirstSubmitted))
+	printInfoValue("Last Modified", formatTime(a.LastModified))
+
 	if a.OutOfDate != 0 {
 		printInfoValue("Out-of-date", "Yes ["+formatTime(a.OutOfDate)+"]")
 	} else {
 		printInfoValue("Out-of-date", "No")
+	}
+
+	if cmdArgs.existsDouble("i") {
+		printInfoValue("ID", fmt.Sprintf("%d", a.ID))
+		printInfoValue("Package Base ID", fmt.Sprintf("%d", a.PackageBaseID))
+		printInfoValue("Package Base", a.PackageBase)
+		printInfoValue("Snapshot URL", baseURL+a.URLPath)
 	}
 
 	fmt.Println()
