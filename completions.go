@@ -63,17 +63,11 @@ func createRepoList(out *os.File, shell string) (err error) {
 	return nil
 }
 
-// Complete provides completion info for shells
-func complete(shell string) error {
-	var path string
-
-	if shell == "fish" {
-		path = filepath.Join(cacheHome, "aur_fish"+".cache")
-	} else {
-		path = filepath.Join(cacheHome, "aur_sh"+".cache")
-	}
+// Generates aur or repo completion cache file
+func completePart(shell string, path string, aur bool) error {
 	info, err := os.Stat(path)
 
+	// Cache is old or missing. Generate and print
 	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
 		os.MkdirAll(filepath.Dir(path), 0755)
 		out, errf := os.Create(path)
@@ -81,15 +75,19 @@ func complete(shell string) error {
 			return errf
 		}
 
-		if createAURList(out, shell) != nil {
+		var erra error
+		if aur {
+			erra = createAURList(out, shell)
+		} else {
+			erra = createRepoList(out, shell)
+		}
+		out.Close()
+		if erra != nil {
 			defer os.Remove(path)
 		}
-		erra := createRepoList(out, shell)
-
-		out.Close()
 		return erra
 	}
-
+	// Cache is good. Open and print
 	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
@@ -98,4 +96,36 @@ func complete(shell string) error {
 
 	_, err = io.Copy(os.Stdout, in)
 	return err
+}
+
+// Complete provides completion info for shells
+func complete(shell string) error {
+	var path_aur string
+	var path_repo string
+
+	var err error
+
+	if shell == "fish" {
+		path_aur = filepath.Join(cacheHome, "aur_fish"+".cache")
+		path_repo = filepath.Join(cacheHome, "repo_fish"+".cache")
+	} else {
+		path_aur = filepath.Join(cacheHome, "aur_sh"+".cache")
+		path_repo = filepath.Join(cacheHome, "repo_sh"+".cache")
+	}
+
+	// Repo
+	err = completePart(shell, path_repo, false)
+	if err != nil {
+		return err
+	}
+
+	// AUR
+	if config.CompleteAUR {
+		err = completePart(shell, path_aur, true)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

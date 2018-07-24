@@ -73,6 +73,7 @@ type Configuration struct {
 	EditMenu        bool   `json:"editmenu"`
 	CombinedUpgrade bool   `json:"combinedupgrade"`
 	UseAsk          bool   `json:"useask"`
+	CompleteAUR     bool   `json:"completeaur"`
 }
 
 var version = "7.885"
@@ -185,6 +186,7 @@ func defaultSettings(config *Configuration) {
 	config.EditMenu = false
 	config.UseAsk = false
 	config.CombinedUpgrade = false
+	config.CompleteAUR = true
 }
 
 // Editor returns the preferred system editor.
