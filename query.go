@@ -260,46 +260,23 @@ func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
 		return
 	}
 
-	// BottomUp functions
-	initL := func(len int) int {
-		if config.SortMode == TopDown {
-			return 0
+	dbList.ForEach(func(db alpm.Db) error {
+		if len(pkgInputN) == 0 {
+			pkgs := db.PkgCache()
+			s = append(s, pkgs.Slice()...)
+		} else {
+			pkgs := db.Search(pkgInputN)
+			s = append(s, pkgs.Slice()...)
 		}
-		return len - 1
-	}
-	compL := func(len int, i int) bool {
-		if config.SortMode == TopDown {
-			return i < len
+		return nil
+	})
+
+	if config.SortMode == BottomUp {
+		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+			s[i], s[j] = s[j], s[i]
 		}
-		return i > -1
-	}
-	finalL := func(i int) int {
-		if config.SortMode == TopDown {
-			return i + 1
-		}
-		return i - 1
 	}
 
-	dbS := dbList.Slice()
-	lenDbs := len(dbS)
-	for f := initL(lenDbs); compL(lenDbs, f); f = finalL(f) {
-		pkgS := dbS[f].PkgCache().Slice()
-		lenPkgs := len(pkgS)
-		for i := initL(lenPkgs); compL(lenPkgs, i); i = finalL(i) {
-			match := true
-			for _, pkgN := range pkgInputN {
-				if !(strings.Contains(pkgS[i].Name(), pkgN) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgN)) {
-					match = false
-					break
-				}
-			}
-
-			if match {
-				n++
-				s = append(s, pkgS[i])
-			}
-		}
-	}
 	return
 }
 
