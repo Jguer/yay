@@ -273,6 +273,10 @@ func handleConfig(option, value string) bool {
 		config.EditorFlags = value
 	case "makepkg":
 		config.MakepkgBin = value
+	case "makepkgconf":
+		config.MakepkgConf = value
+	case "nomakepkgconf":
+		config.MakepkgConf = ""
 	case "pacman":
 		config.PacmanBin = value
 	case "tar":
