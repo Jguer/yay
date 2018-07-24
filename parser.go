@@ -157,6 +157,9 @@ func (parser *arguments) needRoot() bool {
 		if parser.existsArg("i", "info") {
 			return false
 		}
+		if parser.existsArg("c", "clean") && mode == ModeAUR {
+			return false
+		}
 		return true
 	case "U", "upgrade":
 		return true

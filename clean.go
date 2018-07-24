@@ -54,6 +54,7 @@ func cleanRemove(pkgNames []string) (err error) {
 }
 
 func syncClean(parser *arguments) error {
+	var err error
 	keepInstalled := false
 	keepCurrent := false
 
@@ -67,9 +68,15 @@ func syncClean(parser *arguments) error {
 		}
 	}
 
-	err := show(passToPacman(parser))
-	if err != nil {
-		return err
+	if mode == ModeRepo || mode == ModeAny {
+		err = show(passToPacman(parser))
+		if err != nil {
+			return err
+		}
+	}
+
+	if !(mode == ModeAUR || mode == ModeAny) {
+		return nil
 	}
 
 	var question string
