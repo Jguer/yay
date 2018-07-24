@@ -52,7 +52,7 @@ func updateCompletion(force bool) error {
 	path := filepath.Join(cacheHome, "completion.cache")
 	info, err := os.Stat(path)
 
-	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() >= 7*24 || force {
+	if os.IsNotExist(err) || (config.CompletionInterval != -1 && time.Since(info.ModTime()).Hours() >= float64(config.CompletionInterval*24)) || force {
 		os.MkdirAll(filepath.Dir(path), 0755)
 		out, errf := os.Create(path)
 		if errf != nil {

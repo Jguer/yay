@@ -221,6 +221,11 @@ func handleConfig(option, value string) bool {
 		config.SortMode = TopDown
 	case "bottomup":
 		config.SortMode = BottomUp
+	case "completioninterval":
+		n, err := strconv.Atoi(value)
+		if err == nil {
+			config.CompletionInterval = n
+		}
 	case "sortby":
 		config.SortBy = value
 	case "noconfirm":
