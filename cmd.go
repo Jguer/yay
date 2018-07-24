@@ -361,13 +361,10 @@ func handlePrint() (err error) {
 		err = printUpdateList(cmdArgs)
 	case cmdArgs.existsArg("w", "news"):
 		err = printNewsFeed()
+	case cmdArgs.existsDouble("c", "complete"):
+		complete(true)
 	case cmdArgs.existsArg("c", "complete"):
-		switch {
-		case cmdArgs.existsArg("f", "fish"):
-			complete("fish")
-		default:
-			complete("sh")
-		}
+		complete(false)
 	case cmdArgs.existsArg("s", "stats"):
 		err = localStatistics()
 	default:

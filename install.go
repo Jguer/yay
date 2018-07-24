@@ -312,6 +312,8 @@ func install(parser *arguments) error {
 		}
 	}
 
+	go updateCompletion(false)
+
 	err = downloadPkgBuildsSources(do.Aur, do.Bases, incompatible)
 	if err != nil {
 		return err

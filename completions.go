@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -13,7 +12,7 @@ import (
 )
 
 //CreateAURList creates a new completion file
-func createAURList(out *os.File, shell string) (err error) {
+func createAURList(out *os.File) (err error) {
 	resp, err := http.Get("https://aur.archlinux.org/packages.gz")
 	if err != nil {
 		return err
@@ -24,22 +23,15 @@ func createAURList(out *os.File, shell string) (err error) {
 
 	scanner.Scan()
 	for scanner.Scan() {
-		fmt.Print(scanner.Text())
 		out.WriteString(scanner.Text())
-		if shell == "fish" {
-			fmt.Print("\tAUR\n")
-			out.WriteString("\tAUR\n")
-		} else {
-			fmt.Print("\n")
-			out.WriteString("\n")
-		}
+		out.WriteString("\tAUR\n")
 	}
 
 	return nil
 }
 
 //CreatePackageList appends Repo packages to completion cache
-func createRepoList(out *os.File, shell string) (err error) {
+func createRepoList(out *os.File) (err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
@@ -47,15 +39,8 @@ func createRepoList(out *os.File, shell string) (err error) {
 
 	_ = dbList.ForEach(func(db alpm.Db) error {
 		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
-			fmt.Print(pkg.Name())
 			out.WriteString(pkg.Name())
-			if shell == "fish" {
-				fmt.Print("\t" + pkg.DB().Name() + "\n")
-				out.WriteString("\t" + pkg.DB().Name() + "\n")
-			} else {
-				fmt.Print("\n")
-				out.WriteString("\n")
-			}
+			out.WriteString("\t" + pkg.DB().Name() + "\n")
 			return nil
 		})
 		return nil
@@ -63,31 +48,36 @@ func createRepoList(out *os.File, shell string) (err error) {
 	return nil
 }
 
-// Complete provides completion info for shells
-func complete(shell string) error {
-	var path string
-
-	if shell == "fish" {
-		path = filepath.Join(cacheHome, "aur_fish"+".cache")
-	} else {
-		path = filepath.Join(cacheHome, "aur_sh"+".cache")
-	}
+func updateCompletion(force bool) error {
+	path := filepath.Join(cacheHome, "completion.cache")
 	info, err := os.Stat(path)
 
-	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() > 48 {
+	if os.IsNotExist(err) || time.Since(info.ModTime()).Hours() >= 7*24 || force {
 		os.MkdirAll(filepath.Dir(path), 0755)
 		out, errf := os.Create(path)
 		if errf != nil {
 			return errf
 		}
 
-		if createAURList(out, shell) != nil {
+		if createAURList(out) != nil {
 			defer os.Remove(path)
 		}
-		erra := createRepoList(out, shell)
+		erra := createRepoList(out)
 
 		out.Close()
 		return erra
+	}
+
+	return nil
+}
+
+// Complete provides completion info for shells
+func complete(force bool) error {
+	path := filepath.Join(cacheHome, "completion.cache")
+
+	err := updateCompletion(force)
+	if err != nil {
+		return err
 	}
 
 	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
