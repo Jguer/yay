@@ -10,11 +10,11 @@ So say hi to 20+1.
 
 Yay was created with a few objectives in mind and based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [apacman](https://github.com/oshazard/apacman) and [pacaur](https://github.com/rmarquis/pacaur):
 
-* Have almost no dependencies.
-* Provide an interface for pacman.
-* Have yaourt like search.
+* Have almost no dependencies
+* Provide an interface for pacman
+* Have yaourt-like search
 * Minimize user input
-* Know when git packages are due for an upgrade.
+* Know when git packages are due for an upgrade
 
 ## Features
 
@@ -23,7 +23,7 @@ Yay was created with a few objectives in mind and based on the design of [yaourt
 * Ask all questions first and then start building
 * Search narrowing (`yay linux header` will first search linux and then narrow on header)
 * No sourcing of PKGBUILD is done
-* The binary has no dependencies that pacman doesn't already have.
+* The binary has no dependencies that pacman doesn't already have
 * Advanced dependency solving
 * Remove make dependencies at the end of the build process
 
@@ -107,11 +107,12 @@ Currently yay Depends on:
   `yay -{OPERATION} --repo`
 
 ### `Out Of Date AUR Packages` message is displayed, why doesn't `yay` update them?
-  This means the package has been flagged out of date on the AUR but maintainer has not updated the `PKGBUILD` yet.
+  This means the package has been flagged out of date on the AUR, but its
+  maintainer has not yet updated the `PKGBUILD`.
 
 ### Yay doesn't install dependencies added to PKGBUILD during installation.
   Yay resolves all dependencies ahead of time. You are free to edit the
-  PKGBUILD in anyway but any problems you cause are your own and should not be
+  PKGBUILD in any way, but any problems you cause are your own and should not be
   reported unless they can be reproduced with the original PKGBUILD.
 
 ## Examples of Custom Operations
