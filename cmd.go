@@ -417,6 +417,8 @@ func handleSync() (err error) {
 		}
 
 		err = syncSearch(targets)
+	} else if cmdArgs.existsArg("p", "print", "print-format") {
+		err = show(passToPacman(cmdArgs))
 	} else if cmdArgs.existsArg("c", "clean") {
 		err = syncClean(cmdArgs)
 	} else if cmdArgs.existsArg("l", "list") {

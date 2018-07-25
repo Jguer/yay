@@ -122,10 +122,6 @@ func (parser *arguments) needRoot() bool {
 		return false
 	}
 
-	if parser.existsArg("p", "print") {
-		return false
-	}
-
 	switch parser.op {
 	case "D", "database":
 		if parser.existsArg("k", "check") {
@@ -145,6 +141,12 @@ func (parser *arguments) needRoot() bool {
 	case "R", "remove":
 		return true
 	case "S", "sync":
+		if parser.existsArg("y", "refresh") {
+			return true
+		}
+		if parser.existsArg("p", "print", "print-format") {
+			return false
+		}
 		if parser.existsArg("s", "search") {
 			return false
 		}
