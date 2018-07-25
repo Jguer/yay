@@ -297,23 +297,38 @@ func printLocalNewerThanAUR(
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upRepo(local []alpm.Package) (upSlice, error) {
-	dbList, err := alpmHandle.SyncDbs()
-	if err != nil {
-		return nil, err
-	}
-
 	slice := upSlice{}
 
-	for _, pkg := range local {
-		newPkg := pkg.NewVersion(dbList)
-		if newPkg != nil {
-			if pkg.ShouldIgnore() {
-				printIgnoringPackage(pkg, newPkg.Version())
-			} else {
-				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
-			}
-		}
+	localDB, err := alpmHandle.LocalDb()
+	if err != nil {
+		return slice, err
 	}
+
+	err = alpmHandle.TransInit(alpm.TransFlagNoLock)
+	if err != nil {
+		return slice, err
+	}
+
+	defer alpmHandle.TransRelease()
+
+	alpmHandle.SyncSysupgrade(cmdArgs.existsDouble("u", "sysupgrade"))
+	alpmHandle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
+		localPkg, err := localDB.PkgByName(pkg.Name())
+		localVer := "-"
+
+		if err == nil {
+			localVer = localPkg.Version()
+		}
+
+		slice = append(slice, upgrade{
+			pkg.Name(),
+			pkg.DB().Name(),
+			localVer,
+			pkg.Version(),
+		})
+		return nil
+	})
+
 	return slice, nil
 }
 
