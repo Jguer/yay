@@ -84,33 +84,33 @@ Currently yay Depends on:
 
 ## Frequently Asked Questions
 
-### Yay does not display colored output. How do I fix it?
+#### Yay does not display colored output. How do I fix it?
   Make sure you have the `Color` option in your `/etc/pacman.conf` [#123](https://github.com/Jguer/yay/issues/123)
 
-### Yay is not prompting to skip packages during sysupgrade (issue [#554](https://github.com/Jguer/yay/issues/554))
+#### Yay is not prompting to skip packages during sysupgrade (issue [#554](https://github.com/Jguer/yay/issues/554))
   The default behavior was changed after [v8.918](https://github.com/Jguer/yay/releases/tag/v8.918)
   (see: [3bdb534](https://github.com/Jguer/yay/commit/3bdb5343218d99d40f8a449b887348611f6bdbfc)).
   To restore such behavior use `--combinedupgrade`. This can also be
   permanently enabled by appending `--save`.
   Note: this causes [native pacman](https://wiki.archlinux.org/index.php/AUR_helpers) to become partial.
 
-### Sometimes diffs are printed to the terminal and other times they are paged via less. How do I fix this?
+#### Sometimes diffs are printed to the terminal and other times they are paged via less. How do I fix this?
   Yay uses `git diff` to display diffs, by default git tells less to not page
   if the output can fit one terminal length. This can be overridden by
   exporting your own flags `export LESS=SRX`.
 
-### Yay is not asking me to edit PKGBUILDS and I don't like diff menu! What do?
+#### Yay is not asking me to edit PKGBUILDS and I don't like diff menu! What do?
   `yay --editmenu --nodiffmenu --save`
 
-### Only act on AUR packages or only on repo packages?
+#### Only act on AUR packages or only on repo packages?
   `yay -{OPERATION} --aur`
   `yay -{OPERATION} --repo`
 
-### `Out Of Date AUR Packages` message is displayed, why doesn't `yay` update them?
+#### `Out Of Date AUR Packages` message is displayed, why doesn't `yay` update them?
   This means the package has been flagged out of date on the AUR, but its
   maintainer has not yet updated the `PKGBUILD`.
 
-### Yay doesn't install dependencies added to PKGBUILD during installation.
+#### Yay doesn't install dependencies added to PKGBUILD during installation.
   Yay resolves all dependencies ahead of time. You are free to edit the
   PKGBUILD in any way, but any problems you cause are your own and should not be
   reported unless they can be reproduced with the original PKGBUILD.
