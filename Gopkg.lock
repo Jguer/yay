@@ -11,13 +11,13 @@
   branch = "master"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
-  revision = "1114f773cdfb05f577438f7a0538eccabc9cf012"
+  revision = "c3ee958efac942186012cc67de8fe5e7a5b3685d"
 
 [[projects]]
   branch = "master"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
-  revision = "2980c04ca5c926b2cb7c4ac3ac8dc0b7f70d29ba"
+  revision = "f998dbf94dc47ef839c76740efeb673d3459be1f"
 
 [solve-meta]
   analyzer-name = "dep"

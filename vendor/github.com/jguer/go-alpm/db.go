@@ -117,6 +117,11 @@ func (db Db) SetServers(servers []string) {
 	}
 }
 
+// SetUsage sets the Usage of the database
+func (db Db) SetUsage(usage Usage) {
+	C.alpm_db_set_usage(db.ptr, C.int(usage))
+}
+
 // PkgByName searches a package in db.
 func (db Db) PkgByName(name string) (*Package, error) {
 	cName := C.CString(name)
@@ -150,4 +155,24 @@ func (l DbList) PkgCachebyGroup(name string) (PackageList, error) {
 func (db Db) PkgCache() PackageList {
 	pkgcache := (*list)(unsafe.Pointer(C.alpm_db_get_pkgcache(db.ptr)))
 	return PackageList{pkgcache, db.handle}
+}
+
+func (db Db) Search(targets []string) PackageList {
+	needles := &C.alpm_list_t{}
+	head := needles
+	needles.data = unsafe.Pointer(C.CString(targets[0]))
+
+	for _, str := range targets[1:] {
+		needles.next = &C.alpm_list_t{}
+		needles = needles.next
+		needles.data = unsafe.Pointer(C.CString(str))
+	}
+
+	pkglist := (*list)(unsafe.Pointer(C.alpm_db_search(db.ptr, needles)))
+
+	for needles = head; needles != nil; needles = needles.next {
+		C.free(needles.data)
+	}
+
+	return PackageList{pkglist, db.handle}
 }

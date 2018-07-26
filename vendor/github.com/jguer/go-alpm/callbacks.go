@@ -9,7 +9,7 @@ package alpm
 /*
 #include <stdint.h>
 #include <alpm.h>
-void logCallback(uint16_t level, char *cstring);
+void logCallback(alpm_loglevel_t level, char *cstring);
 void go_alpm_log_cb(alpm_loglevel_t level, const char *fmt, va_list arg);
 void go_alpm_set_logging(alpm_handle_t *handle);
 void go_alpm_set_question(alpm_handle_t *handle);
@@ -20,12 +20,12 @@ import (
 	"unsafe"
 )
 
-type logCallbackSig func(uint16, string)
+type logCallbackSig func(LogLevel, string)
 type questionCallbackSig func(QuestionAny)
 
 var DefaultLogLevel = LogWarning
 
-func DefaultLogCallback(lvl uint16, s string) {
+func DefaultLogCallback(lvl LogLevel, s string) {
 	if lvl <= DefaultLogLevel {
 		print("go-alpm: ", s)
 	}
@@ -35,8 +35,8 @@ var log_callback logCallbackSig
 var question_callback questionCallbackSig
 
 //export logCallback
-func logCallback(level uint16, cstring *C.char) {
-	log_callback(level, C.GoString(cstring))
+func logCallback(level C.alpm_loglevel_t, cstring *C.char) {
+	log_callback(LogLevel(level), C.GoString(cstring))
 }
 
 //export questionCallback
