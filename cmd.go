@@ -221,6 +221,11 @@ func handleConfig(option, value string) bool {
 		config.SortMode = TopDown
 	case "bottomup":
 		config.SortMode = BottomUp
+	case "completioninterval":
+		n, err := strconv.Atoi(value)
+		if err == nil {
+			config.CompletionInterval = n
+		}
 	case "sortby":
 		config.SortBy = value
 	case "noconfirm":
@@ -361,13 +366,10 @@ func handlePrint() (err error) {
 		err = printUpdateList(cmdArgs)
 	case cmdArgs.existsArg("w", "news"):
 		err = printNewsFeed()
+	case cmdArgs.existsDouble("c", "complete"):
+		complete(true)
 	case cmdArgs.existsArg("c", "complete"):
-		switch {
-		case cmdArgs.existsArg("f", "fish"):
-			complete("fish")
-		default:
-			complete("sh")
-		}
+		complete(false)
 	case cmdArgs.existsArg("s", "stats"):
 		err = localStatistics()
 	default:

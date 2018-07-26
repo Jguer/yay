@@ -474,6 +474,8 @@ func hasParam(arg string) bool {
 		return true
 	case "answerupgrade":
 		return true
+	case "completioninterval":
+		return true
 	case "sortby":
 		return true
 	default:
