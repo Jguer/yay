@@ -85,8 +85,8 @@ func passToPacman(args *arguments) *exec.Cmd {
 		argArr = append(argArr, "--noconfirm")
 	}
 
+	argArr = append(argArr, "--config", config.PacmanConf)
 	argArr = append(argArr, "--")
-
 	argArr = append(argArr, args.targets...)
 
 	if args.needRoot() {
