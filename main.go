@@ -109,11 +109,6 @@ func initAlpm() (err error) {
 	var exists bool
 	//var double bool
 
-	value, _, exists = cmdArgs.getArg("config")
-	if exists {
-		config.PacmanConf = value
-	}
-
 	alpmConf, err = readAlpmConfig(config.PacmanConf)
 	if err != nil {
 		err = fmt.Errorf("Unable to read Pacman conf: %s", err)
@@ -222,6 +217,8 @@ func main() {
 		status = 1
 		goto cleanup
 	}
+
+	cmdArgs.extractYayOptions()
 
 	err = initVCS()
 	if err != nil {

@@ -593,10 +593,10 @@ func (parser *arguments) parseCommandLine() (err error) {
 		parser.op = "Y"
 	}
 
-	if cmdArgs.existsArg("-") {
+	if parser.existsArg("-") {
 		var file *os.File
-		err = cmdArgs.parseStdin()
-		cmdArgs.delArg("-")
+		err = parser.parseStdin()
+		parser.delArg("-")
 
 		if err != nil {
 			return
@@ -612,6 +612,20 @@ func (parser *arguments) parseCommandLine() (err error) {
 	}
 
 	return
+}
+
+func (parser *arguments) extractYayOptions() {
+	for option, value := range parser.options {
+		if handleConfig(option, value) {
+			parser.delArg(option)
+		}
+	}
+
+	for option, value := range parser.globals {
+		if handleConfig(option, value) {
+			parser.delArg(option)
+		}
+	}
 }
 
 //parses input for number menus splitted by spaces or commas

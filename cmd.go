@@ -119,18 +119,6 @@ If no operation is provided -Y will be assumed`)
 }
 
 func handleCmd() (err error) {
-	for option, value := range cmdArgs.options {
-		if handleConfig(option, value) {
-			cmdArgs.delArg(option)
-		}
-	}
-
-	for option, value := range cmdArgs.globals {
-		if handleConfig(option, value) {
-			cmdArgs.delArg(option)
-		}
-	}
-
 	if shouldSaveConfig {
 		config.saveConfig()
 	}
@@ -232,6 +220,8 @@ func handleConfig(option, value string) bool {
 		config.SortBy = value
 	case "noconfirm":
 		config.NoConfirm = true
+	case "config":
+		config.PacmanConf = value
 	case "redownload":
 		config.ReDownload = "yes"
 	case "redownloadall":
