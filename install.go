@@ -521,7 +521,7 @@ func cleanNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed str
 	}
 
 	fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
+	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [Not]Installed or (1 2 3, 1-3, ^4)"))
 	fmt.Print(bold(green(arrow + " ")))
 	cleanInput, err := getInput(config.AnswerClean)
 	if err != nil {
@@ -589,7 +589,7 @@ func editDiffNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed 
 	var editInput string
 	var err error
 
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
+	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [Not]Installed or (1 2 3, 1-3, ^4)"))
 
 	if diff {
 		fmt.Println(bold(green(arrow + " Diffs to show?")))
