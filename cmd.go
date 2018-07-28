@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	alpm "github.com/jguer/go-alpm"
 )
 
 var cmdArgs = makeArguments()
@@ -349,7 +351,7 @@ func handleConfig(option, value string) bool {
 }
 
 func handleVersion() {
-	fmt.Printf("yay v%s\n", version)
+	fmt.Printf("yay v%s - libalpm v%s\n", version, alpm.Version())
 }
 
 func handlePrint() (err error) {
