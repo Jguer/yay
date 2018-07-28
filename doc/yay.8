@@ -210,12 +210,30 @@ The command to use for \fBgpg\fR calls. This can be a command in
 The pacman config file to use\&.
 .RE
 .PP
+\fB\-\-makepkgconf <file>\fR
+.RS 4
+The config file for makepkg to use\%. If this is not set then the default
+config file will be used\&.
+.RE
+.PP
+\fB\-\-nomakepkgconf\fR
+.RS 4
+Reset the makepkg config file back to its default\&.
+.RE
+.PP
 \fB\-\-requestsplitn <n>\fR
 .RS 4
 The maximum amount of packages to request per AUR query\&. The higher the
 number the faster AUR requests will be\&. Requesting too many packages in one
 AUR query will cause an error\&. This should only make a noticeable difference
 with very large requests (>500) packages\&.
+.RE
+.PP
+\fB\-\-completioninterval <days>\fR
+.RS 4
+Time in days to refresh the completion cache\&. Setting this to 0 will cause
+the cache to be refreshed every time, while setting this to -1 will cause the
+cache to never be refreshed\&.
 .RE
 .PP
 \fB\-\-sortby <votes|popularity|id|baseid|name|base|submitted|modified>\fR
@@ -322,6 +340,21 @@ Do not show the edit menu\&.
 \fB\-\-noupgrademenu\fR
 .RS 4
 Do not show the upgrade menu\&.
+.RE
+.PP
+\fB\-\-askremovemake\fR
+.RS 4
+Ask to remove makedepends after installing packages\&.
+.RE
+.PP
+\fB\-\-removemake\fR
+.RS 4
+Remove makedepends after installing packages\&.
+.RE
+.PP
+\fB\-\-noremovemake\fR
+.RS 4
+Do not remove makedepends after installing packages\&.
 .RE
 .PP
 \fB\-\-topdown\fR
@@ -579,8 +612,9 @@ The cache directory is \fI$XDG_CACHE_HOME/yay/\fR\&. if
 \fB$XDG_CACHE_HOME\fR is unset, the cache directory will fall back to
 \fI$HOME/.cache/yay\fR\&.
 .PP
-\fIaur_<shellname>\fR holds a list of of all packages, including the AUR,
-for shell completion\&. The completion files are refreshed every 48 hours\&.
+\fIcompletion.cache\fR holds a list of of all packages, including the AUR,
+for shell completion\&. By default the completion files are refreshed every
+7 days\&.
 .PP
 \fIvcs.json\fR tracks VCS packages and the latest commit of each source. If
 any of these commits change the package will be upgraded during a devel update.
