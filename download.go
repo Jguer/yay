@@ -60,7 +60,7 @@ func gitHasDiff(path string, name string) (bool, error) {
 func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
-		err = show(passToGit(path, "clone", url, name))
+		err = show(passToGit(path, "clone", "--no-progress", url, name))
 		if err != nil {
 			return false, fmt.Errorf("error cloning %s", name)
 		}
