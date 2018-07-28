@@ -40,7 +40,7 @@ Permanent configuration options:
     --save                Causes the following options to be saved back to the
                           config file when used
 
-    --builddir    <dir>   Directory to use for building AUR Packages
+    --builddir    <dir>   Directory used to download and run PKBUILDS
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor
     --makepkg     <file>  makepkg command to use
@@ -52,8 +52,11 @@ Permanent configuration options:
     --gpg         <file>  gpg command to use
     --gpgflags    <flags> Pass arguments to gpg
     --config      <file>  pacman.conf file to use
+    --makepkgconf <file>  makepkg.conf file to use
+    --nomakepkgconf       Use the default makepkg.conf
 
     --requestsplitn <n>   Max amount of packages to query per AUR request
+    --completioninterval  <n> Time in days to to refresh completion cache
     --sortby    <field>   Sort AUR results by a specific field during search
     --answerclean   <a>   Set a predetermined answer for the clean build menu
     --answerdiff    <a>   Set a predetermined answer for the diff menu
@@ -71,6 +74,9 @@ Permanent configuration options:
     --nodiffmenu          Don't show diffs for build files
     --noeditmenu          Don't edit/view PKGBUILDS
     --noupgrademenu       Don't show the upgrade menu
+    --askremovemake       Ask to remove makedepends after install
+    --removemake          Remove makedepends after install
+    --noremovemake        Don't remove makedepends after install
 
     --afterclean          Remove package sources after successful install
     --noafterclean        Do not remove package sources after successful build
