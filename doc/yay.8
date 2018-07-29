@@ -258,6 +258,10 @@ downloaded build files from Yay's cache before redownloing a fresh copy.
 Show the diff menu. This menu gives you the option to view diffs from
 build files before building.
 
+Diffs are shown via \fBgit diff\fR which uses
+less by default. This behaviour can be changed via git's config, the
+\fB$GIT_PAGER\fR or \fB$PAGER\fR environment variables.
+
 .TP
 .B \-\-editmenu
 Show the edit menu. This menu gives you the option to edit or view PKGBUILDs
@@ -333,16 +337,6 @@ the package is clean built..
 .B \-\-nogitclone
 Download and update PKGBUILDs using tarballs. The above conditions about
 previously installed packages still apply.
-
-.TP
-.B \-\-showdiffs
-Show diffs for build files. Diffs are shown via \fBgit diff\fR which uses
-less by default. This behaviour can be changed via git's config, the
-\fB$GIT_PAGER\fR or \fB$PAGER\fR environment variables.
-
-.TP
-.B \-\-noshowdiffs
-Show diffs for build files. Files will be opened by the editor\%.
 
 .TP
 .B \-\-afterclean
