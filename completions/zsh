@@ -33,6 +33,10 @@ _pacman_opts_common=(
   {-v,--verbose}'[Be more verbose]'
   '--cachedir[Alternate package cache location]:cache_location:_files -/'
   '--config[An alternate configuration file]:config file:_files'
+  '--makepkgconf[makepkg.conf file to use]:config file:_files'
+  '--nomakepkgconf[Use the default makepkg.conf]'
+  '--requestsplitn[Max amount of packages to query per AUR request]:number'
+  '--completioninterval[Time in days to to refresh completion cache]:number'
   '--confirm[Always ask for confirmation]'
   '--debug[Display debug messages]'
   '--gpgdir[Set an alternate directory for GnuPG (instead of /etc/pacman.d/gnupg)]: :_files -/'
@@ -68,6 +72,9 @@ _pacman_opts_common=(
   "--nodiffmenu[Don't show diffs for build files]"
   "--noeditmenu[Don't edit/view PKGBUILDS]"
   "--noupgrademenu[Don't show the upgrade menu]"
+  "--askremovemake[Ask to remove makedepends after install]"
+  "--removemake[Remove makedepends after install]"
+  "--noremovemake[Don't remove makedepends after install]"
 
   '--bottomup[Show AUR packages first]'
   '--topdown[Show repository packages first]'
