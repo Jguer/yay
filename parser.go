@@ -181,6 +181,10 @@ func (parser *arguments) addOP(op string) (err error) {
 }
 
 func (parser *arguments) addParam(option string, arg string) (err error) {
+	if !isArg(option) {
+		return fmt.Errorf("invalid option '%s'", option)
+	}
+
 	if isOp(option) {
 		err = parser.addOP(option)
 		return
@@ -338,6 +342,277 @@ func formatArg(arg string) string {
 	}
 
 	return arg
+}
+
+func isArg(arg string) bool {
+	switch arg {
+	case "D", "database":
+		return true
+	case "Q", "query":
+		return true
+	case "R", "remove":
+		return true
+	case "S", "sync":
+		return true
+	case "T", "deptest":
+		return true
+	case "U", "upgrade":
+		return true
+	case "F", "files":
+		return true
+	case "V", "version":
+		return true
+	case "h", "help":
+		return true
+	case "Y", "yay":
+		return true
+	case "P", "print":
+		return true
+	case "G", "getpkgbuild":
+		return true
+	case "b", "dbpath":
+		return true
+	case "r", "root":
+		return true
+	case "v", "verbose":
+		return true
+	case "arch":
+		return true
+	case "cachedir":
+		return true
+	case "color":
+		return true
+	case "config":
+		return true
+	case "debug":
+		return true
+	case "gpgdir":
+		return true
+	case "hookdir":
+		return true
+	case "logfile":
+		return true
+	case "noconfirm":
+		return true
+	case "confirm":
+		return true
+	case "disabledownloadtimeout":
+		return true
+	case "sysroot":
+		return true
+	case "d", "nodeps":
+		return true
+	case "assumeinstalled":
+		return true
+	case "dbonly":
+		return true
+	case "noprogressbar":
+		return true
+	case "noscriptlet":
+		return true
+	case "p":
+		return true
+	case "printformat":
+		return true
+	case "asdeps":
+		return true
+	case "asexplicit":
+		return true
+	case "ignore":
+		return true
+	case "ignoregroup":
+		return true
+	case "needed":
+		return true
+	case "overwrite":
+		return true
+	case "force":
+		return true
+	case "c", "changelog":
+		return true
+	case "deps":
+		return true
+	case "e", "explicit":
+		return true
+	case "g", "groups":
+		return true
+	case "i", "info":
+		return true
+	case "k", "check":
+		return true
+	case "l", "list":
+		return true
+	case "m", "foreign":
+		return true
+	case "n", "native":
+		return true
+	case "o", "owns":
+		return true
+	case "file":
+		return true
+	case "q", "quiet":
+		return true
+	case "s", "search":
+		return true
+	case "t", "unrequired":
+		return true
+	case "u", "upgrades":
+		return true
+	case "cascade":
+		return true
+	case "nosave":
+		return true
+	case "recursive":
+		return true
+	case "unneeded":
+		return true
+	case "clean":
+		return true
+	case "sysupgrade":
+		return true
+	case "w", "downloadonly":
+		return true
+	case "y", "refresh":
+		return true
+	case "x", "regex":
+		return true
+	case "machinereadable":
+		return true
+
+	//yay options
+	case "save":
+		return true
+	case "afterclean":
+		return true
+	case "noafterclean":
+		return true
+	case "devel":
+		return true
+	case "nodevel":
+		return true
+	case "timeupdate":
+		return true
+	case "notimeupdate":
+		return true
+	case "topdown":
+		return true
+	case "bottomup":
+		return true
+	case "completioninterval":
+		return true
+	case "sortby":
+		return true
+	case "redownload":
+		return true
+	case "redownloadall":
+		return true
+	case "noredownload":
+		return true
+	case "rebuild":
+		return true
+	case "rebuildall":
+		return true
+	case "rebuildtree":
+		return true
+	case "norebuild":
+		return true
+	case "answerclean":
+		return true
+	case "noanswerclean":
+		return true
+	case "answerdiff":
+		return true
+	case "noanswerdiff":
+		return true
+	case "answeredit":
+		return true
+	case "noansweredit":
+		return true
+	case "answerupgrade":
+		return true
+	case "noanswerupgrade":
+		return true
+	case "gitclone":
+		return true
+	case "nogitclone":
+		return true
+	case "gpgflags":
+		return true
+	case "mflags":
+		return true
+	case "gitflags":
+		return true
+	case "builddir":
+		return true
+	case "editor":
+		return true
+	case "editorflags":
+		return true
+	case "makepkg":
+		return true
+	case "makepkgconf":
+		return true
+	case "nomakepkgconf":
+		return true
+	case "pacman":
+		return true
+	case "tar":
+		return true
+	case "git":
+		return true
+	case "gpg":
+		return true
+	case "requestsplitn":
+		return true
+	case "sudoloop":
+		return true
+	case "nosudoloop":
+		return true
+	case "provides":
+		return true
+	case "noprovides":
+		return true
+	case "pgpfetch":
+		return true
+	case "nopgpfetch":
+		return true
+	case "upgrademenu":
+		return true
+	case "noupgrademenu":
+		return true
+	case "cleanmenu":
+		return true
+	case "nocleanmenu":
+		return true
+	case "diffmenu":
+		return true
+	case "nodiffmenu":
+		return true
+	case "editmenu":
+		return true
+	case "noeditmenu":
+		return true
+	case "useask":
+		return true
+	case "nouseask":
+		return true
+	case "combinedupgrade":
+		return true
+	case "nocombinedupgrade":
+		return true
+	case "a", "aur":
+		return true
+	case "repo":
+		return true
+	case "removemake":
+		return true
+	case "noremovemake":
+		return true
+	case "askremovemake":
+		return true
+	default:
+		return false
+	}
 }
 
 func isOp(op string) bool {
