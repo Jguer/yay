@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"html"
-	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -537,21 +537,15 @@ func (parser *arguments) parseLongOption(arg string, param string) (usedNext boo
 	return
 }
 
-func (parser *arguments) parseStdin() (err error) {
-	for {
-		var target string
-		_, err = fmt.Scan(&target)
+func (parser *arguments) parseStdin() error {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Split(bufio.ScanLines)
 
-		if err != nil {
-			if err == io.EOF {
-				err = nil
-			}
-
-			return
-		}
-
-		parser.addTarget(target)
+	for scanner.Scan() {
+		parser.addTarget(scanner.Text())
 	}
+
+	return os.Stdin.Close()
 }
 
 func (parser *arguments) parseCommandLine() (err error) {
