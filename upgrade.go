@@ -120,7 +120,6 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 
 	var repoErr error
 	var aurErr error
-	var develErr error
 
 	pkgdata := make(map[string]*rpc.Pkg)
 
@@ -145,7 +144,7 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 			fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
 			wg.Add(1)
 			go func() {
-				develUp, develErr = upDevel(remote)
+				develUp = upDevel(remote)
 				wg.Done()
 			}()
 		}
@@ -156,7 +155,7 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 	printLocalNewerThanAUR(remote, pkgdata)
 
 	errs := make([]string, 0)
-	for _, e := range []error{repoErr, aurErr, develErr} {
+	for _, e := range []error{repoErr, aurErr} {
 		if e != nil {
 			errs = append(errs, e.Error())
 		}
@@ -184,7 +183,7 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 	return aurUp, repoUp, err
 }
 
-func upDevel(remote []alpm.Package) (toUpgrade upSlice, err error) {
+func upDevel(remote []alpm.Package) (toUpgrade upSlice) {
 	toUpdate := make([]alpm.Package, 0)
 	toRemove := make([]string, 0)
 

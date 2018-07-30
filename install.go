@@ -179,7 +179,7 @@ func install(parser *arguments) error {
 
 	if config.CleanMenu {
 		askClean := pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-		toClean, err := cleanNumberMenu(do.Aur, do.Bases, remoteNamesCache, askClean)
+		toClean, err := cleanNumberMenu(do.Aur, remoteNamesCache, askClean)
 		if err != nil {
 			return err
 		}
@@ -198,7 +198,7 @@ func install(parser *arguments) error {
 
 	if config.DiffMenu {
 		pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-		toDiff, err = diffNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+		toDiff, err = diffNumberMenu(do.Aur, remoteNamesCache)
 		if err != nil {
 			return err
 		}
@@ -234,13 +234,13 @@ func install(parser *arguments) error {
 
 	if config.EditMenu {
 		pkgbuildNumberMenu(do.Aur, do.Bases, remoteNamesCache)
-		toEdit, err = editNumberMenu(do.Aur, do.Bases, remoteNamesCache)
+		toEdit, err = editNumberMenu(do.Aur, remoteNamesCache)
 		if err != nil {
 			return err
 		}
 
 		if len(toEdit) > 0 {
-			err = editPkgBuilds(toEdit, srcinfosStale, do.Bases)
+			err = editPkgBuilds(toEdit, srcinfosStale)
 			if err != nil {
 				return err
 			}
@@ -257,7 +257,7 @@ func install(parser *arguments) error {
 		config.NoConfirm = oldValue
 	}
 
-	incompatible, err = getIncompatible(do.Aur, srcinfosStale, do.Bases)
+	incompatible, err = getIncompatible(do.Aur, srcinfosStale)
 	if err != nil {
 		return err
 	}
@@ -418,7 +418,7 @@ func earlyRefresh(parser *arguments) error {
 	return show(passToPacman(arguments))
 }
 
-func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) (stringSet, error) {
+func getIncompatible(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo) (stringSet, error) {
 	incompatible := make(stringSet)
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
@@ -513,7 +513,7 @@ func pkgbuildNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed 
 	return askClean
 }
 
-func cleanNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet, hasClean bool) ([]*rpc.Pkg, error) {
+func cleanNumberMenu(pkgs []*rpc.Pkg, installed stringSet, hasClean bool) ([]*rpc.Pkg, error) {
 	toClean := make([]*rpc.Pkg, 0)
 
 	if !hasClean {
@@ -576,15 +576,15 @@ func cleanNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed str
 	return toClean, nil
 }
 
-func editNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, error) {
-	return editDiffNumberMenu(pkgs, bases, installed, false)
+func editNumberMenu(pkgs []*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, error) {
+	return editDiffNumberMenu(pkgs, installed, false)
 }
 
-func diffNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, error) {
-	return editDiffNumberMenu(pkgs, bases, installed, true)
+func diffNumberMenu(pkgs []*rpc.Pkg, installed stringSet) ([]*rpc.Pkg, error) {
+	return editDiffNumberMenu(pkgs, installed, true)
 }
 
-func editDiffNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed stringSet, diff bool) ([]*rpc.Pkg, error) {
+func editDiffNumberMenu(pkgs []*rpc.Pkg, installed stringSet, diff bool) ([]*rpc.Pkg, error) {
 	toEdit := make([]*rpc.Pkg, 0)
 	var editInput string
 	var err error
@@ -702,7 +702,7 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stri
 	return nil
 }
 
-func editPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, bases map[string][]*rpc.Pkg) error {
+func editPkgBuilds(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo) error {
 	pkgbuilds := make([]string, 0, len(pkgs))
 	for _, pkg := range pkgs {
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
@@ -786,7 +786,7 @@ func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 func mergePkgBuilds(pkgs []*rpc.Pkg) error {
 	for _, pkg := range pkgs {
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
-			err := gitMerge(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
+			err := gitMerge(config.BuildDir, pkg.PackageBase)
 			if err != nil {
 				return err
 			}

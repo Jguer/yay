@@ -78,7 +78,7 @@ func gitDownload(url string, path string, name string) (bool, error) {
 	return false, nil
 }
 
-func gitMerge(url string, path string, name string) error {
+func gitMerge(path string, name string) error {
 	err := show(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
 	if err != nil {
 		return fmt.Errorf("error resetting %s", name)

@@ -392,10 +392,8 @@ func handleGetpkgbuild() (err error) {
 }
 
 func handleYogurt() (err error) {
-	options := cmdArgs.formatArgs()
-
 	config.SearchMode = NumberMenu
-	err = numberMenu(cmdArgs.targets, options)
+	err = numberMenu(cmdArgs.targets)
 
 	return
 }
@@ -439,7 +437,7 @@ func handleRemove() (err error) {
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func numberMenu(pkgS []string, flags []string) (err error) {
+func numberMenu(pkgS []string) (err error) {
 	pkgS = removeInvalidTargets(pkgS)
 	var aurErr error
 	var repoErr error
@@ -532,7 +530,8 @@ func numberMenu(pkgS []string, flags []string) (err error) {
 	}
 
 	if len(arguments.targets) == 0 {
-		return fmt.Errorf("There is nothing to do")
+		fmt.Println("There is nothing to do")
+		return nil
 	}
 
 	if config.SudoLoop {
