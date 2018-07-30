@@ -268,10 +268,11 @@ func upAUR(
 func printIgnoringPackage(pkg alpm.Package, newPkgVersion string) {
 	left, right := getVersionDiff(pkg.Version(), newPkgVersion)
 
-	fmt.Println(
-		yellow(bold(smallArrow)) + fmt.Sprintf(
-			" Ignoring package upgrade: %s (%s -> %s)",
-			cyan(pkg.Name()), left, right))
+	fmt.Printf("%s %s: ignoring package upgrade (%s => %s)\n",
+		yellow(bold(smallArrow)),
+		cyan(pkg.Name()),
+		left, right,
+	)
 }
 
 func printLocalNewerThanAUR(
@@ -284,12 +285,12 @@ func printLocalNewerThanAUR(
 
 		left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
 
-		if !isDevelName(pkg.Name()) &&
-			alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
-			fmt.Println(
-				yellow(bold(smallArrow)) + fmt.Sprintf(
-					" Local package is newer than AUR: %s (%s -> %s)",
-					cyan(pkg.Name()), left, right))
+		if !isDevelName(pkg.Name()) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
+			fmt.Printf("%s %s: local (%s) is newer than AUR (%s)\n",
+					yellow(bold(smallArrow)),
+					cyan(pkg.Name()),
+					left, right,
+				)
 		}
 	}
 }
