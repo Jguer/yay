@@ -210,7 +210,7 @@ func main() {
 		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	// Ensure release of alpmHandle
+	// Ensure release of alpmHandle, if os.Exit is not called
 	defer cleanup()
 
 	must(cmdArgs.parseCommandLine())
