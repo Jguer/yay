@@ -396,7 +396,7 @@ func handleYogurt() error {
 	return numberMenu(cmdArgs.targets)
 }
 
-func handleSync() (err error) {
+func handleSync() error {
 	targets := cmdArgs.targets
 
 	if cmdArgs.existsArg("s", "search") {
