@@ -45,43 +45,43 @@ func setPaths() error {
 	return nil
 }
 
-func initConfig() error {
+func initConfig() (err error) {
 	defaultSettings(&config)
 
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+	if _, err = os.Stat(configFile); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
 			err = fmt.Errorf("Unable to create config directory:\n%s\n"+
 				"The error was:\n%s", filepath.Dir(configFile), err)
-			return err
+			return
 		}
 		// Save the default config if nothing is found
 		config.saveConfig()
-		return err
-	}
-
-	cfile, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		fmt.Printf("Error reading config: %s\n", err)
-		return err
-	}
-	defer cfile.Close()
-
-	decoder := json.NewDecoder(cfile)
-	if err := decoder.Decode(&config); err != nil {
-		fmt.Println("Loading default Settings.\nError reading config:", err)
-		defaultSettings(&config)
-		return err
-	}
-
-	if _, err := os.Stat(config.BuildDir); os.IsNotExist(err) {
-		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
-			return fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
-				"The error was:\n%s", config.BuildDir, err)
+	} else {
+		cfile, errf := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
+		if errf != nil {
+			fmt.Printf("Error reading config: %s\n", err)
+		} else {
+			defer cfile.Close()
+			decoder := json.NewDecoder(cfile)
+			err = decoder.Decode(&config)
+			if err != nil {
+				fmt.Println("Loading default Settings.\nError reading config:",
+					err)
+				defaultSettings(&config)
+			}
+			if _, err = os.Stat(config.BuildDir); os.IsNotExist(err) {
+				err = os.MkdirAll(config.BuildDir, 0755)
+				if err != nil {
+					err = fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
+						"The error was:\n%s", config.BuildDir, err)
+					return
+				}
+			}
 		}
 	}
 
-	return nil
+	return
 }
 
 func initVCS() (err error) {
@@ -92,20 +92,22 @@ func initVCS() (err error) {
 				"The error was:\n%s", filepath.Dir(configFile), err)
 			return
 		}
-		return
+	} else {
+		vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
+		if err == nil {
+			defer vfile.Close()
+			decoder := json.NewDecoder(vfile)
+			_ = decoder.Decode(&savedInfo)
+		}
 	}
-	vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
-	if err == nil {
-		defer vfile.Close()
-		decoder := json.NewDecoder(vfile)
-		_ = decoder.Decode(&savedInfo)
-	}
-	return err
+
+	return
 }
 
 func initAlpm() (err error) {
 	var value string
 	var exists bool
+	//var double bool
 
 	alpmConf, err = readAlpmConfig(config.PacmanConf)
 	if err != nil {
@@ -169,57 +171,93 @@ func initAlpm() (err error) {
 	return
 }
 
-func initAlpmHandle() error {
+func initAlpmHandle() (err error) {
 	if alpmHandle != nil {
-		if err := alpmHandle.Release(); err != nil {
+		err = alpmHandle.Release()
+		if err != nil {
 			return err
 		}
 	}
-	var err error
-	if alpmHandle, err = alpmConf.CreateHandle(); err != nil {
-		return fmt.Errorf("Unable to CreateHandle: %s", err)
+
+	alpmHandle, err = alpmConf.CreateHandle()
+	if err != nil {
+		err = fmt.Errorf("Unable to CreateHandle: %s", err)
+		return
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)
-	return nil
-}
-
-func cleanup() {
-	if alpmHandle != nil {
-		temp := alpmHandle
-		// set alpmHandle to nil to avoid entering this
-		// branch of code again, at cleanup time.
-		alpmHandle = nil
-		must(temp.Release())
-	}
-}
-
-// must outputs the error if there is one,
-// then calls cleanup() and ends the program with exit code 1.
-// If err == nil, no action is taken.
-func must(err error) {
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		cleanup()
-		os.Exit(1)
-	}
+	return
 }
 
 func main() {
-	if os.Geteuid() == 0 {
+	var status int
+	var err error
+
+	if 0 == os.Geteuid() {
 		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	// Ensure release of alpmHandle
-	defer cleanup()
+	err = cmdArgs.parseCommandLine()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+	}
 
-	must(cmdArgs.parseCommandLine())
-	must(setPaths())
-	must(initConfig())
+	err = setPaths()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+	}
+
+	err = initConfig()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+	}
 
 	cmdArgs.extractYayOptions()
 
-	must(initVCS())
-	must(initAlpm())
-	must(handleCmd())
+	err = initVCS()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+
+	}
+
+	err = initAlpm()
+	if err != nil {
+		fmt.Println(err)
+		status = 1
+		goto cleanup
+	}
+
+	err = handleCmd()
+	if err != nil {
+		if err.Error() != "" {
+			fmt.Println(err)
+		}
+
+		status = 1
+		goto cleanup
+	}
+
+cleanup:
+	//cleanup
+	//from here on out don't exit if an error occurs
+	//if we fail to save the configuration
+	//at least continue on and try clean up other parts
+
+	if alpmHandle != nil {
+		err = alpmHandle.Release()
+		if err != nil {
+			fmt.Println(err)
+			status = 1
+		}
+	}
+
+	os.Exit(status)
 }
