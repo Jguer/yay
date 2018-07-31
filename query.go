@@ -169,7 +169,7 @@ func syncSearch(pkgS []string) (err error) {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
 	if mode == ModeRepo || mode == ModeAny {
-		pq, _, repoErr = queryRepo(pkgS)
+		pq, repoErr = queryRepo(pkgS)
 		if repoErr != nil {
 			return err
 		}
@@ -254,7 +254,7 @@ func syncInfo(pkgS []string) (err error) {
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
+func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
