@@ -4,7 +4,7 @@ Yet another Yogurt - An AUR Helper written in Go
 
 #### Packages
 
-[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![yay-git](https://img.shields.io/aur/version/yay-git.svg?label=yay-git)](https://aur.archlinux.org/packages/yay-git/) [![GitHub license](https://img.shields.io/github/license/jguer/yay.svg)](https://github.com/Jguer/yay/blob/master/LICENSE) [![Report Card](https://img.shields.io/badge/go_report-A+-brightgreen.svg?style=flat)](http://goreportcard.com/report/Jguer/yay)
+[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![yay-git](https://img.shields.io/aur/version/yay-git.svg?label=yay-git)](https://aur.archlinux.org/packages/yay-git/) [![GitHub license](https://img.shields.io/github/license/jguer/yay.svg)](https://github.com/Jguer/yay/blob/master/LICENSE) [![Report Card](https://goreportcard.com/badge/github.com/Jguer/yay)](http://goreportcard.com/report/Jguer/yay)
 
 There's a point in everyone's life when you feel the need to write an AUR helper because there are only about 20 of them.
 So say hi to 20+1.
