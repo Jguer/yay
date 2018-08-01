@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
@@ -184,24 +185,32 @@ func initAlpmHandle() error {
 	return nil
 }
 
-func cleanup() {
+// cleanupAndExit is responsible for cleaning up any handlers and also for
+// ending the program with os.Exit, using given exit code.
+func cleanupAndExit(exitCode *int) {
 	if alpmHandle != nil {
 		temp := alpmHandle
 		// set alpmHandle to nil to avoid entering this
 		// branch of code again, at cleanup time.
 		alpmHandle = nil
-		must(temp.Release())
+		must(temp.Release(), exitCode)
 	}
+	// exit ends the program
+	os.Exit(*exitCode)
 }
 
-// must outputs the error if there is one,
-// then calls cleanup() and ends the program with exit code 1.
-// If err == nil, no action is taken.
-func must(err error) {
+// must takes no action if the given error is nil. If there is an error, the
+// error message is printed, the execution is stopped with runtime.Goexit and
+// exitCode is set to 1, so that it can be used by os.Exit in the deferred
+// cleanupAndExit function.
+func must(err error, exitCode *int) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		cleanup()
-		os.Exit(1)
+		// runtime.Goexit runs any deferred functions
+		// and stops the execution, but does not exit the program
+		runtime.Goexit()
+		// exit code 1
+		*exitCode = 1
 	}
 }
 
@@ -210,16 +219,19 @@ func main() {
 		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	// Ensure release of alpmHandle, if os.Exit is not called
-	defer cleanup()
+	// exit code, used by os.Exit
+	exitCode := 0
 
-	must(cmdArgs.parseCommandLine())
-	must(setPaths())
-	must(initConfig())
+	// Ensure release of alpmHandle and exiting with os.Exit
+	defer cleanupAndExit(&exitCode)
+
+	must(cmdArgs.parseCommandLine(), &exitCode)
+	must(setPaths(), &exitCode)
+	must(initConfig(), &exitCode)
 
 	cmdArgs.extractYayOptions()
 
-	must(initVCS())
-	must(initAlpm())
-	must(handleCmd())
+	must(initVCS(), &exitCode)
+	must(initAlpm(), &exitCode)
+	must(handleCmd(), &exitCode)
 }
