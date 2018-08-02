@@ -60,7 +60,9 @@ func gitHasDiff(path string, name string) (bool, error) {
 func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
-		_, stderr, err := capture(passToGit(path, "clone", "--no-progress", url, name))
+		cmd := passToGit(path, "clone", "--no-progress", url, name)
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+		_, stderr, err := capture(cmd)
 		if err != nil {
 			return false, fmt.Errorf("error cloning %s: stderr", name, stderr)
 		}
@@ -70,7 +72,9 @@ func gitDownload(url string, path string, name string) (bool, error) {
 		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
-	_, stderr, err := capture(passToGit(filepath.Join(path, name), "fetch"))
+	cmd := passToGit(filepath.Join(path, name), "fetch")
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	_, stderr, err := capture(cmd)
 	if err != nil {
 		return false, fmt.Errorf("error fetching %s: %s", name, stderr)
 	}
