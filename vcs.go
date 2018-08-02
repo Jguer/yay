@@ -173,6 +173,7 @@ func getCommit(url string, branch string, protocols []string) string {
 		//Introduce a time out so this can not hang
 		timer := time.AfterFunc(5*time.Second, func() {
 			cmd.Process.Kill()
+			fmt.Println(bold(yellow(arrow)), "Timeout:", cyan(url))
 		})
 
 		err = cmd.Wait()
