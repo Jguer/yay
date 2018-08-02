@@ -181,6 +181,10 @@ func (parser *arguments) addOP(op string) (err error) {
 }
 
 func (parser *arguments) addParam(option string, arg string) (err error) {
+	if !isArg(option) {
+		return fmt.Errorf("invalid option '%s'", option)
+	}
+
 	if isOp(option) {
 		err = parser.addOP(option)
 		return
@@ -340,147 +344,382 @@ func formatArg(arg string) string {
 	return arg
 }
 
-func isOp(op string) bool {
-	switch op {
-	case "V", "version":
-		return true
+func isArg(arg string) bool {
+	switch arg {
 	case "D", "database":
-		return true
-	case "F", "files":
-		return true
 	case "Q", "query":
-		return true
 	case "R", "remove":
-		return true
 	case "S", "sync":
-		return true
 	case "T", "deptest":
-		return true
 	case "U", "upgrade":
-		return true
-
-		// yay specific
+	case "F", "files":
+	case "V", "version":
+	case "h", "help":
 	case "Y", "yay":
-		return true
 	case "P", "print":
-		return true
 	case "G", "getpkgbuild":
-		return true
+	case "b", "dbpath":
+	case "r", "root":
+	case "v", "verbose":
+	case "arch":
+	case "cachedir":
+	case "color":
+	case "config":
+	case "debug":
+	case "gpgdir":
+	case "hookdir":
+	case "logfile":
+	case "noconfirm":
+	case "confirm":
+	case "disabledownloadtimeout":
+	case "sysroot":
+	case "d", "nodeps":
+	case "assumeinstalled":
+	case "dbonly":
+	case "noprogressbar":
+	case "noscriptlet":
+	case "p":
+	case "printformat":
+	case "asdeps":
+	case "asexplicit":
+	case "ignore":
+	case "ignoregroup":
+	case "needed":
+	case "overwrite":
+	case "force":
+	case "c", "changelog":
+	case "deps":
+	case "e", "explicit":
+	case "g", "groups":
+	case "i", "info":
+	case "k", "check":
+	case "l", "list":
+	case "m", "foreign":
+	case "n", "native":
+	case "o", "owns":
+	case "file":
+	case "q", "quiet":
+	case "s", "search":
+	case "t", "unrequired":
+	case "u", "upgrades":
+	case "cascade":
+	case "nosave":
+	case "recursive":
+	case "unneeded":
+	case "clean":
+	case "sysupgrade":
+	case "w", "downloadonly":
+	case "y", "refresh":
+	case "x", "regex":
+	case "machinereadable":
+	//yay options
+	case "save":
+	case "afterclean":
+	case "noafterclean":
+	case "devel":
+	case "nodevel":
+	case "timeupdate":
+	case "notimeupdate":
+	case "topdown":
+	case "bottomup":
+	case "completioninterval":
+	case "sortby":
+	case "redownload":
+	case "redownloadall":
+	case "noredownload":
+	case "rebuild":
+	case "rebuildall":
+	case "rebuildtree":
+	case "norebuild":
+	case "answerclean":
+	case "noanswerclean":
+	case "answerdiff":
+	case "noanswerdiff":
+	case "answeredit":
+	case "noansweredit":
+	case "answerupgrade":
+	case "noanswerupgrade":
+	case "gitclone":
+	case "nogitclone":
+	case "gpgflags":
+	case "mflags":
+	case "gitflags":
+	case "builddir":
+	case "editor":
+	case "editorflags":
+	case "makepkg":
+	case "makepkgconf":
+	case "nomakepkgconf":
+	case "pacman":
+	case "tar":
+	case "git":
+	case "gpg":
+	case "requestsplitn":
+	case "sudoloop":
+	case "nosudoloop":
+	case "provides":
+	case "noprovides":
+	case "pgpfetch":
+	case "nopgpfetch":
+	case "upgrademenu":
+	case "noupgrademenu":
+	case "cleanmenu":
+	case "nocleanmenu":
+	case "diffmenu":
+	case "nodiffmenu":
+	case "editmenu":
+	case "noeditmenu":
+	case "useask":
+	case "nouseask":
+	case "combinedupgrade":
+	case "nocombinedupgrade":
+	case "a", "aur":
+	case "repo":
+	case "removemake":
+	case "noremovemake":
+	case "askremovemake":
 	default:
 		return false
 	}
+
+	return true
+}
+
+func handleConfig(option, value string) bool {
+	switch option {
+	case "save":
+		shouldSaveConfig = true
+	case "afterclean":
+		config.CleanAfter = true
+	case "noafterclean":
+		config.CleanAfter = false
+	case "devel":
+		config.Devel = true
+	case "nodevel":
+		config.Devel = false
+	case "timeupdate":
+		config.TimeUpdate = true
+	case "notimeupdate":
+		config.TimeUpdate = false
+	case "topdown":
+		config.SortMode = TopDown
+	case "bottomup":
+		config.SortMode = BottomUp
+	case "completioninterval":
+		n, err := strconv.Atoi(value)
+		if err == nil {
+			config.CompletionInterval = n
+		}
+	case "sortby":
+		config.SortBy = value
+	case "noconfirm":
+		config.NoConfirm = true
+	case "config":
+		config.PacmanConf = value
+	case "redownload":
+		config.ReDownload = "yes"
+	case "redownloadall":
+		config.ReDownload = "all"
+	case "noredownload":
+		config.ReDownload = "no"
+	case "rebuild":
+		config.ReBuild = "yes"
+	case "rebuildall":
+		config.ReBuild = "all"
+	case "rebuildtree":
+		config.ReBuild = "tree"
+	case "norebuild":
+		config.ReBuild = "no"
+	case "answerclean":
+		config.AnswerClean = value
+	case "noanswerclean":
+		config.AnswerClean = ""
+	case "answerdiff":
+		config.AnswerDiff = value
+	case "noanswerdiff":
+		config.AnswerDiff = ""
+	case "answeredit":
+		config.AnswerEdit = value
+	case "noansweredit":
+		config.AnswerEdit = ""
+	case "answerupgrade":
+		config.AnswerUpgrade = value
+	case "noanswerupgrade":
+		config.AnswerUpgrade = ""
+	case "gitclone":
+		config.GitClone = true
+	case "nogitclone":
+		config.GitClone = false
+	case "gpgflags":
+		config.GpgFlags = value
+	case "mflags":
+		config.MFlags = value
+	case "gitflags":
+		config.GitFlags = value
+	case "builddir":
+		config.BuildDir = value
+	case "editor":
+		config.Editor = value
+	case "editorflags":
+		config.EditorFlags = value
+	case "makepkg":
+		config.MakepkgBin = value
+	case "makepkgconf":
+		config.MakepkgConf = value
+	case "nomakepkgconf":
+		config.MakepkgConf = ""
+	case "pacman":
+		config.PacmanBin = value
+	case "tar":
+		config.TarBin = value
+	case "git":
+		config.GitBin = value
+	case "gpg":
+		config.GpgBin = value
+	case "requestsplitn":
+		n, err := strconv.Atoi(value)
+		if err == nil && n > 0 {
+			config.RequestSplitN = n
+		}
+	case "sudoloop":
+		config.SudoLoop = true
+	case "nosudoloop":
+		config.SudoLoop = false
+	case "provides":
+		config.Provides = true
+	case "noprovides":
+		config.Provides = false
+	case "pgpfetch":
+		config.PGPFetch = true
+	case "nopgpfetch":
+		config.PGPFetch = false
+	case "upgrademenu":
+		config.UpgradeMenu = true
+	case "noupgrademenu":
+		config.UpgradeMenu = false
+	case "cleanmenu":
+		config.CleanMenu = true
+	case "nocleanmenu":
+		config.CleanMenu = false
+	case "diffmenu":
+		config.DiffMenu = true
+	case "nodiffmenu":
+		config.DiffMenu = false
+	case "editmenu":
+		config.EditMenu = true
+	case "noeditmenu":
+		config.EditMenu = false
+	case "useask":
+		config.UseAsk = true
+	case "nouseask":
+		config.UseAsk = false
+	case "combinedupgrade":
+		config.CombinedUpgrade = true
+	case "nocombinedupgrade":
+		config.CombinedUpgrade = false
+	case "a", "aur":
+		mode = ModeAUR
+	case "repo":
+		mode = ModeRepo
+	case "removemake":
+		config.RemoveMake = "yes"
+	case "noremovemake":
+		config.RemoveMake = "no"
+	case "askremovemake":
+		config.RemoveMake = "ask"
+	default:
+		return false
+	}
+
+	return true
+}
+
+func isOp(op string) bool {
+	switch op {
+	case "V", "version":
+	case "D", "database":
+	case "F", "files":
+	case "Q", "query":
+	case "R", "remove":
+	case "S", "sync":
+	case "T", "deptest":
+	case "U", "upgrade":
+	// yay specific
+	case "Y", "yay":
+	case "P", "print":
+	case "G", "getpkgbuild":
+	default:
+		return false
+	}
+
+	return true
 }
 
 func isGlobal(op string) bool {
 	switch op {
 	case "b", "dbpath":
-		return true
 	case "r", "root":
-		return true
 	case "v", "verbose":
-		return true
 	case "arch":
-		return true
 	case "cachedir":
-		return true
 	case "color":
-		return true
 	case "config":
-		return true
 	case "debug":
-		return true
 	case "gpgdir":
-		return true
 	case "hookdir":
-		return true
 	case "logfile":
-		return true
 	case "noconfirm":
-		return true
 	case "confirm":
-		return true
 	default:
 		return false
 	}
+
+	return true
 }
 
 func hasParam(arg string) bool {
 	switch arg {
 	case "dbpath", "b":
-		return true
 	case "root", "r":
-		return true
 	case "sysroot":
-		return true
 	case "config":
-		return true
 	case "ignore":
-		return true
 	case "assume-installed":
-		return true
 	case "overwrite":
-		return true
 	case "ask":
-		return true
 	case "cachedir":
-		return true
 	case "hookdir":
-		return true
 	case "logfile":
-		return true
 	case "ignoregroup":
-		return true
 	case "arch":
-		return true
 	case "print-format":
-		return true
 	case "gpgdir":
-		return true
 	case "color":
-		return true
-
 	//yay params
 	case "mflags":
-		return true
 	case "gpgflags":
-		return true
 	case "gitflags":
-		return true
 	case "builddir":
-		return true
 	case "editor":
-		return true
 	case "editorflags":
-		return true
 	case "makepkg":
-		return true
 	case "makepkgconf":
-		return true
 	case "pacman":
-		return true
 	case "tar":
-		return true
 	case "git":
-		return true
 	case "gpg":
-		return true
 	case "requestsplitn":
-		return true
 	case "answerclean":
-		return true
 	case "answerdiff":
-		return true
 	case "answeredit":
-		return true
 	case "answerupgrade":
-		return true
 	case "completioninterval":
-		return true
 	case "sortby":
-		return true
 	default:
 		return false
 	}
+
+	return true
 }
 
 // Parses short hand options such as:
@@ -496,9 +735,16 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 	for k, _char := range arg {
 		char := string(_char)
 
-		if hasParam(char) {
-			if k < len(arg)-2 {
+		if k < len(arg)-1 {
+			if arg[k+1] == '=' {
 				err = parser.addParam(char, arg[k+2:])
+				break
+			}
+		}
+
+		if hasParam(char) {
+			if k < len(arg)-1 {
+				err = parser.addParam(char, arg[k+1:])
 			} else {
 				usedNext = true
 				err = parser.addParam(char, param)
