@@ -186,6 +186,7 @@ func initAlpmHandle() (err error) {
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)
+	alpmHandle.SetLogCallback(logCallback)
 	return
 }
 

@@ -2,7 +2,7 @@ package aur
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 	"net/url"
 )
@@ -62,7 +62,7 @@ func get(values url.Values) ([]Pkg, error) {
 	}
 
 	if len(result.Error) > 0 {
-		return nil, fmt.Errorf(result.Error)
+		return nil, errors.New(result.Error)
 	}
 
 	return result.Results, nil

@@ -89,9 +89,11 @@ const (
 	SigStatusKeyDisabled
 )
 
+type LogLevel uint16
+
 // Logging levels.
 const (
-	LogError uint16 = 1 << iota
+	LogError LogLevel = 1 << iota
 	LogWarning
 	LogDebug
 	LogFunction
@@ -117,4 +119,39 @@ const (
 	ValidationSHA256Sum
 	ValidationSignature
 	ValidationUnkown Validation = 0
+)
+
+type Usage int
+
+const (
+	UsageSync Usage = 1 << iota
+	UsageSearch
+	UsageInstall
+	UsageUpgrade
+	UsageAll = (1 << 4) - 1
+)
+
+type TransFlag int
+
+const (
+	TransFlagNoDeps TransFlag = 1 << iota
+	TransFlagForce
+	TransFlagNoSave
+	TransFlagNoDepVersion
+	TransFlagCascade
+	TransFlagRecurse
+	// 7 is missing
+	_
+	TransFlagDbOnly
+	TransFlagAllDeps
+	TransFlagDownloadOnly
+	TransFlagNoScriptlets
+	// 12 is missing
+	_
+	TransFlagNoConflicts
+	TransFlagNeeded
+	TransFlagAllExplicit
+	TransFlagUnneeded
+	TransFlagRecurseAll
+	TransFlagNoLock
 )

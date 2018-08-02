@@ -69,6 +69,7 @@ type PacmanConfig struct {
 type RepoConfig struct {
 	Name     string
 	SigLevel SigLevel
+	Usage    Usage
 	Servers  []string
 }
 
@@ -197,6 +198,24 @@ lineloop:
 			case "SigLevel":
 				// TODO: implement SigLevel parsing.
 				continue lineloop
+			case "Usage":
+				for _, usage := range line.Values {
+					switch usage {
+					case "Sync":
+						curRepo.Usage |= UsageSync
+					case "Search":
+						curRepo.Usage |= UsageSearch
+					case "Install":
+						curRepo.Usage |= UsageInstall
+					case "Upgrade":
+						curRepo.Usage |= UsageUpgrade
+					case "All":
+						curRepo.Usage |= UsageAll
+					default:
+						err = fmt.Errorf("unknown option at line %d: %s", rdr.Lineno, line.Name)
+						break lineloop
+					}
+				}
 			case "Server":
 				curRepo.Servers = append(curRepo.Servers, line.Values...)
 				continue lineloop
@@ -261,6 +280,13 @@ lineloop:
 		conf.CacheDir = []string{"/var/cache/pacman/pkg/"} //should only be set if the config does not specify this
 	}
 
+	for n, _ := range conf.Repos {
+		repo := &conf.Repos[n]
+		if repo.Usage == 0 {
+			repo.Usage = UsageAll
+		}
+	}
+
 	return conf, err
 }
 
@@ -316,6 +342,7 @@ func (conf *PacmanConfig) CreateHandle() (*Handle, error) {
 				repoconf.Servers[i] = addr
 			}
 			db.SetServers(repoconf.Servers)
+			db.SetUsage(repoconf.Usage)
 		}
 	}
 

@@ -457,7 +457,8 @@ func numberMenu(pkgS []string) (err error) {
 		lenaq = len(aq)
 	}
 	if mode == ModeRepo || mode == ModeAny {
-		pq, lenpq, repoErr = queryRepo(pkgS)
+		pq, repoErr = queryRepo(pkgS)
+		lenpq = len(pq)
 		if repoErr != nil {
 			return err
 		}

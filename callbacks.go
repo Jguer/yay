@@ -85,3 +85,12 @@ func questionCallback(question alpm.QuestionAny) {
 		}
 	}
 }
+
+func logCallback(level alpm.LogLevel, str string) {
+	switch level {
+	case alpm.LogWarning:
+		fmt.Print(bold(yellow(smallArrow)), " ", str)
+	case alpm.LogError:
+		fmt.Print(bold(red(smallArrow)), " ", str)
+	}
+}
