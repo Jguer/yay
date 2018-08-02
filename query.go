@@ -477,16 +477,13 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-	var err error
+	var errs MultiError
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()
 		tempInfo, requestErr := rpc.Info(names[n:max])
-		if err != nil {
-			return
-		}
+		errs.Add(requestErr)
 		if requestErr != nil {
-			err = requestErr
 			return
 		}
 		mux.Lock()
@@ -505,7 +502,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 
 	wg.Wait()
 
-	if err != nil {
+	if err := errs.Return(); err != nil {
 		return info, err
 	}
 
