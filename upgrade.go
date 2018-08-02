@@ -121,7 +121,7 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 	var repoErr error
 	var aurErr error
 
-	pkgdata := make(map[string]*rpc.Pkg)
+	aurdata := make(map[string]*rpc.Pkg)
 
 	if mode == ModeAny || mode == ModeRepo {
 		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
@@ -134,25 +134,34 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 
 	if mode == ModeAny || mode == ModeAUR {
 		fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
-		wg.Add(1)
-		go func() {
-			aurUp, aurErr = upAUR(remote, remoteNames, pkgdata, warnings)
-			wg.Done()
-		}()
 
-		if config.Devel {
-			fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
+		var _aurdata []*rpc.Pkg
+		_aurdata, aurErr = aurInfo(remoteNames, warnings)
+		if aurErr == nil {
+			for _, pkg := range _aurdata {
+				aurdata[pkg.Name] = pkg
+			}
+
 			wg.Add(1)
 			go func() {
-				develUp = upDevel(remote)
+				aurUp, aurErr = upAUR(remote, aurdata)
 				wg.Done()
 			}()
+
+			if config.Devel {
+				fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
+				wg.Add(1)
+				go func() {
+					develUp = upDevel(remote, aurdata)
+					wg.Done()
+				}()
+			}
 		}
 	}
 
 	wg.Wait()
 
-	printLocalNewerThanAUR(remote, pkgdata)
+	printLocalNewerThanAUR(remote, aurdata)
 
 	errs := make([]string, 0)
 	for _, e := range []error{repoErr, aurErr} {
@@ -183,7 +192,7 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 	return aurUp, repoUp, err
 }
 
-func upDevel(remote []alpm.Package) (toUpgrade upSlice) {
+func upDevel(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (toUpgrade upSlice) {
 	toUpdate := make([]alpm.Package, 0)
 	toRemove := make([]string, 0)
 
@@ -195,12 +204,14 @@ func upDevel(remote []alpm.Package) (toUpgrade upSlice) {
 		defer wg.Done()
 
 		if e.needsUpdate() {
-			for _, pkg := range remote {
-				if pkg.Name() == vcsName {
-					mux1.Lock()
-					toUpdate = append(toUpdate, pkg)
-					mux1.Unlock()
-					return
+			if _, ok := aurdata[vcsName]; ok {
+				for _, pkg := range remote {
+					if pkg.Name() == vcsName {
+						mux1.Lock()
+						toUpdate = append(toUpdate, pkg)
+						mux1.Unlock()
+						return
+					}
 				}
 			}
 
@@ -231,22 +242,11 @@ func upDevel(remote []alpm.Package) (toUpgrade upSlice) {
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(
-	remote []alpm.Package, remoteNames []string,
-	pkgdata map[string]*rpc.Pkg, warnings *aurWarnings) (upSlice, error) {
-
+func upAUR(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (upSlice, error) {
 	toUpgrade := make(upSlice, 0)
-	_pkgdata, err := aurInfo(remoteNames, warnings)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, pkg := range _pkgdata {
-		pkgdata[pkg.Name] = pkg
-	}
 
 	for _, pkg := range remote {
-		aurPkg, ok := pkgdata[pkg.Name()]
+		aurPkg, ok := aurdata[pkg.Name()]
 		if !ok {
 			continue
 		}
@@ -267,28 +267,29 @@ func upAUR(
 func printIgnoringPackage(pkg alpm.Package, newPkgVersion string) {
 	left, right := getVersionDiff(pkg.Version(), newPkgVersion)
 
-	fmt.Println(
-		yellow(bold(smallArrow)) + fmt.Sprintf(
-			" Ignoring package upgrade: %s (%s -> %s)",
-			cyan(pkg.Name()), left, right))
+	fmt.Printf("%s %s: ignoring package upgrade (%s => %s)\n",
+		yellow(bold(smallArrow)),
+		cyan(pkg.Name()),
+		left, right,
+	)
 }
 
 func printLocalNewerThanAUR(
-	remote []alpm.Package, pkgdata map[string]*rpc.Pkg) {
+	remote []alpm.Package, aurdata map[string]*rpc.Pkg) {
 	for _, pkg := range remote {
-		aurPkg, ok := pkgdata[pkg.Name()]
+		aurPkg, ok := aurdata[pkg.Name()]
 		if !ok {
 			continue
 		}
 
 		left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
 
-		if !isDevelName(pkg.Name()) &&
-			alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
-			fmt.Println(
-				yellow(bold(smallArrow)) + fmt.Sprintf(
-					" Local package is newer than AUR: %s (%s -> %s)",
-					cyan(pkg.Name()), left, right))
+		if !isDevelName(pkg.Name()) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
+			fmt.Printf("%s %s: local (%s) is newer than AUR (%s)\n",
+					yellow(bold(smallArrow)),
+					cyan(pkg.Name()),
+					left, right,
+				)
 		}
 	}
 }
@@ -296,23 +297,38 @@ func printLocalNewerThanAUR(
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func upRepo(local []alpm.Package) (upSlice, error) {
-	dbList, err := alpmHandle.SyncDbs()
-	if err != nil {
-		return nil, err
-	}
-
 	slice := upSlice{}
 
-	for _, pkg := range local {
-		newPkg := pkg.NewVersion(dbList)
-		if newPkg != nil {
-			if pkg.ShouldIgnore() {
-				printIgnoringPackage(pkg, newPkg.Version())
-			} else {
-				slice = append(slice, upgrade{pkg.Name(), newPkg.DB().Name(), pkg.Version(), newPkg.Version()})
-			}
-		}
+	localDB, err := alpmHandle.LocalDb()
+	if err != nil {
+		return slice, err
 	}
+
+	err = alpmHandle.TransInit(alpm.TransFlagNoLock)
+	if err != nil {
+		return slice, err
+	}
+
+	defer alpmHandle.TransRelease()
+
+	alpmHandle.SyncSysupgrade(cmdArgs.existsDouble("u", "sysupgrade"))
+	alpmHandle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
+		localPkg, err := localDB.PkgByName(pkg.Name())
+		localVer := "-"
+
+		if err == nil {
+			localVer = localPkg.Version()
+		}
+
+		slice = append(slice, upgrade{
+			pkg.Name(),
+			pkg.DB().Name(),
+			localVer,
+			pkg.Version(),
+		})
+		return nil
+	})
+
 	return slice, nil
 }
 

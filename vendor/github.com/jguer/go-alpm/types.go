@@ -192,6 +192,14 @@ func (question QuestionAny) QuestionSelectProvider() (QuestionSelectProvider, er
 	return QuestionSelectProvider{}, fmt.Errorf("Can not convert to QuestionInstallIgnorepkg")
 }
 
+func (question QuestionAny) QuestionReplace() (QuestionReplace, error) {
+	if question.Type() == QuestionTypeReplacePkg {
+		return *(*QuestionReplace)(unsafe.Pointer(&question)), nil
+	}
+
+	return QuestionReplace{}, fmt.Errorf("Can not convert to QuestionReplace")
+}
+
 func (question QuestionInstallIgnorepkg) SetInstall(install bool) {
 	if install {
 		question.ptr.install = 1

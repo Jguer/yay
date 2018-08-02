@@ -182,7 +182,8 @@ func initAlpmHandle() error {
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)
-	return nil
+  alpmHandle.SetLogCallback(logCallback)
+	return
 }
 
 // cleanupAndExit is responsible for cleaning up any handlers and also for
