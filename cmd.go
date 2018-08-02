@@ -29,7 +29,7 @@ operations:
 
 New operations:
     yay {-Y --yay}         [options] [package(s)]
-    yay {-P --print}       [options]
+    yay {-P --show}        [options]
     yay {-G --getpkgbuild} [package(s)]
 
 New options:
@@ -111,7 +111,7 @@ Permanent configuration options:
 Print specific options:
     -c --complete         Used for completions
     -d --defaultconfig    Print default yay configuration
-    -g --config           Print current yay configuration
+    -g --currentconfig    Print current yay configuration
     -s --stats            Display system package statistics
     -w --news             Print arch news
 
