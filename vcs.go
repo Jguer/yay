@@ -64,11 +64,6 @@ func createDevelDB() error {
 
 // parseSource returns the git url, default branch and protocols it supports
 func parseSource(source string) (url string, branch string, protocols []string) {
-	if !(strings.Contains(source, "git://") ||
-		strings.Contains(source, ".git") ||
-		strings.Contains(source, "git+https://")) {
-		return "", "", nil
-	}
 	split := strings.Split(source, "::")
 	source = split[len(split)-1]
 	split = strings.SplitN(source, "://", 2)
@@ -76,8 +71,20 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	if len(split) != 2 {
 		return "", "", nil
 	}
-
 	protocols = strings.Split(split[0], "+")
+
+	git := false
+	for _, protocol := range protocols {
+		if protocol == "git" {
+			git = true
+			break
+		}
+	}
+
+	if !git {
+		return "", "", nil
+	}
+
 	split = strings.SplitN(split[1], "#", 2)
 	if len(split) == 2 {
 		secondSplit := strings.SplitN(split[1], "=", 2)
