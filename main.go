@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	alpm "github.com/jguer/go-alpm"
@@ -45,43 +46,43 @@ func setPaths() error {
 	return nil
 }
 
-func initConfig() (err error) {
+func initConfig() error {
 	defaultSettings(&config)
 
-	if _, err = os.Stat(configFile); os.IsNotExist(err) {
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Dir(configFile), 0755)
 		if err != nil {
 			err = fmt.Errorf("Unable to create config directory:\n%s\n"+
 				"The error was:\n%s", filepath.Dir(configFile), err)
-			return
+			return err
 		}
 		// Save the default config if nothing is found
 		config.saveConfig()
-	} else {
-		cfile, errf := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
-		if errf != nil {
-			fmt.Printf("Error reading config: %s\n", err)
-		} else {
-			defer cfile.Close()
-			decoder := json.NewDecoder(cfile)
-			err = decoder.Decode(&config)
-			if err != nil {
-				fmt.Println("Loading default Settings.\nError reading config:",
-					err)
-				defaultSettings(&config)
-			}
-			if _, err = os.Stat(config.BuildDir); os.IsNotExist(err) {
-				err = os.MkdirAll(config.BuildDir, 0755)
-				if err != nil {
-					err = fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
-						"The error was:\n%s", config.BuildDir, err)
-					return
-				}
-			}
+		return err
+	}
+
+	cfile, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Printf("Error reading config: %s\n", err)
+		return err
+	}
+	defer cfile.Close()
+
+	decoder := json.NewDecoder(cfile)
+	if err := decoder.Decode(&config); err != nil {
+		fmt.Println("Loading default Settings.\nError reading config:", err)
+		defaultSettings(&config)
+		return err
+	}
+
+	if _, err := os.Stat(config.BuildDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
+			return fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
+				"The error was:\n%s", config.BuildDir, err)
 		}
 	}
 
-	return
+	return nil
 }
 
 func initVCS() (err error) {
@@ -92,22 +93,20 @@ func initVCS() (err error) {
 				"The error was:\n%s", filepath.Dir(configFile), err)
 			return
 		}
-	} else {
-		vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
-		if err == nil {
-			defer vfile.Close()
-			decoder := json.NewDecoder(vfile)
-			_ = decoder.Decode(&savedInfo)
-		}
+		return
 	}
-
-	return
+	vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
+	if err == nil {
+		defer vfile.Close()
+		decoder := json.NewDecoder(vfile)
+		_ = decoder.Decode(&savedInfo)
+	}
+	return err
 }
 
 func initAlpm() (err error) {
 	var value string
 	var exists bool
-	//var double bool
 
 	alpmConf, err = readAlpmConfig(config.PacmanConf)
 	if err != nil {
@@ -171,94 +170,69 @@ func initAlpm() (err error) {
 	return
 }
 
-func initAlpmHandle() (err error) {
+func initAlpmHandle() error {
 	if alpmHandle != nil {
-		err = alpmHandle.Release()
-		if err != nil {
+		if err := alpmHandle.Release(); err != nil {
 			return err
 		}
 	}
-
-	alpmHandle, err = alpmConf.CreateHandle()
-	if err != nil {
-		err = fmt.Errorf("Unable to CreateHandle: %s", err)
-		return
+	var err error
+	if alpmHandle, err = alpmConf.CreateHandle(); err != nil {
+		return fmt.Errorf("Unable to CreateHandle: %s", err)
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)
-	alpmHandle.SetLogCallback(logCallback)
+  alpmHandle.SetLogCallback(logCallback)
 	return
 }
 
-func main() {
-	var status int
-	var err error
+// cleanupAndExit is responsible for cleaning up any handlers and also for
+// ending the program with os.Exit, using given exit code.
+func cleanupAndExit(exitCode *int) {
+	if alpmHandle != nil {
+		temp := alpmHandle
+		// set alpmHandle to nil to avoid entering this
+		// branch of code again, at cleanup time.
+		alpmHandle = nil
+		must(temp.Release(), exitCode)
+	}
+	// exit ends the program
+	os.Exit(*exitCode)
+}
 
-	if 0 == os.Geteuid() {
+// must takes no action if the given error is nil. If there is an error, the
+// error message is printed, the execution is stopped with runtime.Goexit and
+// exitCode is set to 1, so that it can be used by os.Exit in the deferred
+// cleanupAndExit function.
+func must(err error, exitCode *int) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		// runtime.Goexit runs any deferred functions
+		// and stops the execution, but does not exit the program
+		runtime.Goexit()
+		// exit code 1
+		*exitCode = 1
+	}
+}
+
+func main() {
+	if os.Geteuid() == 0 {
 		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	err = cmdArgs.parseCommandLine()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
+	// exit code, used by os.Exit
+	exitCode := 0
 
-	err = setPaths()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
+	// Ensure release of alpmHandle and exiting with os.Exit
+	defer cleanupAndExit(&exitCode)
 
-	err = initConfig()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
+	must(cmdArgs.parseCommandLine(), &exitCode)
+	must(setPaths(), &exitCode)
+	must(initConfig(), &exitCode)
 
 	cmdArgs.extractYayOptions()
 
-	err = initVCS()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-
-	}
-
-	err = initAlpm()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
-
-	err = handleCmd()
-	if err != nil {
-		if err.Error() != "" {
-			fmt.Println(err)
-		}
-
-		status = 1
-		goto cleanup
-	}
-
-cleanup:
-	//cleanup
-	//from here on out don't exit if an error occurs
-	//if we fail to save the configuration
-	//at least continue on and try clean up other parts
-
-	if alpmHandle != nil {
-		err = alpmHandle.Release()
-		if err != nil {
-			fmt.Println(err)
-			status = 1
-		}
-	}
-
-	os.Exit(status)
+	must(initVCS(), &exitCode)
+	must(initAlpm(), &exitCode)
+	must(handleCmd(), &exitCode)
 }
