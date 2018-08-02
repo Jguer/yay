@@ -346,6 +346,7 @@ func formatArg(arg string) string {
 
 func isArg(arg string) bool {
 	switch arg {
+	case "-", "--":
 	case "D", "database":
 	case "Q", "query":
 	case "R", "remove":
