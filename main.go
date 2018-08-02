@@ -190,75 +190,38 @@ func initAlpmHandle() (err error) {
 	return
 }
 
-func main() {
-	var status int
-	var err error
+func exitOnError(err error) {
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Println(str)
+		}
+		cleanup()
+		os.Exit(1)
+	}
+}
 
+func cleanup() int {
+	if alpmHandle != nil {
+		if err := alpmHandle.Release(); err != nil {
+			fmt.Println(err)
+			return 1
+		}
+	}
+
+	return 0
+}
+
+func main() {
 	if 0 == os.Geteuid() {
 		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	err = cmdArgs.parseCommandLine()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
-
-	err = setPaths()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
-
-	err = initConfig()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
-
+	exitOnError(cmdArgs.parseCommandLine())
+	exitOnError(setPaths())
+	exitOnError(initConfig())
 	cmdArgs.extractYayOptions()
-
-	err = initVCS()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-
-	}
-
-	err = initAlpm()
-	if err != nil {
-		fmt.Println(err)
-		status = 1
-		goto cleanup
-	}
-
-	err = handleCmd()
-	if err != nil {
-		if err.Error() != "" {
-			fmt.Println(err)
-		}
-
-		status = 1
-		goto cleanup
-	}
-
-cleanup:
-	//cleanup
-	//from here on out don't exit if an error occurs
-	//if we fail to save the configuration
-	//at least continue on and try clean up other parts
-
-	if alpmHandle != nil {
-		err = alpmHandle.Release()
-		if err != nil {
-			fmt.Println(err)
-			status = 1
-		}
-	}
-
-	os.Exit(status)
+	exitOnError(initVCS())
+	exitOnError(initAlpm())
+	exitOnError(handleCmd())
+	os.Exit(cleanup())
 }
