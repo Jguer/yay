@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -23,6 +24,8 @@ type shaInfo struct {
 
 // createDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
+	var mux sync.Mutex
+	var wg sync.WaitGroup
 	infoMap := make(map[string]*rpc.Pkg)
 	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
@@ -53,12 +56,13 @@ func createDevelDB() error {
 		}
 
 		for _, pkg := range bases[pkg.PackageBase] {
-			updateVCSData(pkg.Name, pkgbuild.Source)
+			wg.Add(1)
+			go updateVCSData(pkg.Name, pkgbuild.Source, &mux, &wg)
 		}
 	}
 
+	wg.Wait()
 	fmt.Println(bold(yellow(arrow) + bold(" GenDB finished. No packages were installed")))
-
 	return err
 }
 
@@ -109,22 +113,26 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	return
 }
 
-func updateVCSData(pkgName string, sources []gosrc.ArchString) {
+func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	if savedInfo == nil {
+		mux.Lock()
 		savedInfo = make(vcsInfo)
+		mux.Unlock()
 	}
 
 	info := make(shaInfos)
-
-	for _, source := range sources {
+	checkSource := func(source gosrc.ArchString) {
+		defer wg.Done()
 		url, branch, protocols := parseSource(source.Value)
 		if url == "" || branch == "" {
-			continue
+			return
 		}
 
 		commit := getCommit(url, branch, protocols)
 		if commit == "" {
-			continue
+			return
 		}
 
 		info[url] = shaInfo{
@@ -133,10 +141,16 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString) {
 			commit,
 		}
 
+		mux.Lock()
 		savedInfo[pkgName] = info
-
 		fmt.Println(bold(yellow(arrow)) + " Found git repo: " + cyan(url))
 		saveVCSInfo()
+		mux.Unlock()
+	}
+
+	for _, source := range sources {
+		wg.Add(1)
+		go checkSource(source)
 	}
 }
 

@@ -998,9 +998,14 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			return err
 		}
 
+		var mux sync.Mutex
+		var wg sync.WaitGroup
 		for _, pkg := range do.Bases[pkg.PackageBase] {
-			updateVCSData(pkg.Name, srcinfo.Source)
+			wg.Add(1)
+			go updateVCSData(pkg.Name, srcinfo.Source, &mux, &wg)
 		}
+
+		wg.Wait()
 
 		err = saveVCSInfo()
 		if err != nil {
