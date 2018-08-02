@@ -171,15 +171,10 @@ func handleCmd() (err error) {
 }
 
 func handleQuery() error {
-	var err error
-
 	if cmdArgs.existsArg("u", "upgrades") {
-		err = printUpdateList(cmdArgs)
-	} else {
-		err = show(passToPacman(cmdArgs))
+		return printUpdateList(cmdArgs)
 	}
-
-	return err
+	return show(passToPacman(cmdArgs))
 }
 
 func handleHelp() error {
@@ -187,7 +182,6 @@ func handleHelp() error {
 		usage()
 		return nil
 	}
-
 	return show(passToPacman(cmdArgs))
 }
 
@@ -289,8 +283,7 @@ func handleConfig(option, value string) bool {
 	case "gpg":
 		config.GpgBin = value
 	case "requestsplitn":
-		n, err := strconv.Atoi(value)
-		if err == nil && n > 0 {
+		if n, err := strconv.Atoi(value); err == nil && n > 0 {
 			config.RequestSplitN = n
 		}
 	case "sudoloop":
@@ -340,9 +333,10 @@ func handleConfig(option, value string) bool {
 	case "askremovemake":
 		config.RemoveMake = "ask"
 	default:
+		// the option was not handled by the switch
 		return false
 	}
-
+	// the option was successfully handled by the switch
 	return true
 }
 
@@ -373,38 +367,36 @@ func handlePrint() (err error) {
 	default:
 		err = nil
 	}
-
 	return err
 }
 
-func handleYay() (err error) {
+func handleYay() error {
 	//_, options, targets := cmdArgs.formatArgs()
 	if cmdArgs.existsArg("gendb") {
-		err = createDevelDB()
-	} else if cmdArgs.existsDouble("c") {
-		err = cleanDependencies(true)
-	} else if cmdArgs.existsArg("c", "clean") {
-		err = cleanDependencies(false)
-	} else if len(cmdArgs.targets) > 0 {
-		err = handleYogurt()
+		return createDevelDB()
 	}
-
-	return
+	if cmdArgs.existsDouble("c") {
+		return cleanDependencies(true)
+	}
+	if cmdArgs.existsArg("c", "clean") {
+		return cleanDependencies(false)
+	}
+	if len(cmdArgs.targets) > 0 {
+		return handleYogurt()
+	}
+	return nil
 }
 
-func handleGetpkgbuild() (err error) {
-	err = getPkgbuilds(cmdArgs.targets)
-	return
+func handleGetpkgbuild() error {
+	return getPkgbuilds(cmdArgs.targets)
 }
 
-func handleYogurt() (err error) {
+func handleYogurt() error {
 	config.SearchMode = NumberMenu
-	err = numberMenu(cmdArgs.targets)
-
-	return
+	return numberMenu(cmdArgs.targets)
 }
 
-func handleSync() (err error) {
+func handleSync() error {
 	targets := cmdArgs.targets
 
 	if cmdArgs.existsArg("s", "search") {
@@ -413,44 +405,50 @@ func handleSync() (err error) {
 		} else {
 			config.SearchMode = Detailed
 		}
-
-		err = syncSearch(targets)
-	} else if cmdArgs.existsArg("p", "print", "print-format") {
-		err = show(passToPacman(cmdArgs))
-	} else if cmdArgs.existsArg("c", "clean") {
-		err = syncClean(cmdArgs)
-	} else if cmdArgs.existsArg("l", "list") {
-		err = show(passToPacman(cmdArgs))
-	} else if cmdArgs.existsArg("g", "groups") {
-		err = show(passToPacman(cmdArgs))
-	} else if cmdArgs.existsArg("i", "info") {
-		err = syncInfo(targets)
-	} else if cmdArgs.existsArg("u", "sysupgrade") {
-		err = install(cmdArgs)
-	} else if len(cmdArgs.targets) > 0 {
-		err = install(cmdArgs)
-	} else if cmdArgs.existsArg("y", "refresh") {
-		err = show(passToPacman(cmdArgs))
+		return syncSearch(targets)
 	}
-
-	return
+	if cmdArgs.existsArg("p", "print", "print-format") {
+		return show(passToPacman(cmdArgs))
+	}
+	if cmdArgs.existsArg("c", "clean") {
+		return syncClean(cmdArgs)
+	}
+	if cmdArgs.existsArg("l", "list") {
+		return show(passToPacman(cmdArgs))
+	}
+	if cmdArgs.existsArg("g", "groups") {
+		return show(passToPacman(cmdArgs))
+	}
+	if cmdArgs.existsArg("i", "info") {
+		return syncInfo(targets)
+	}
+	if cmdArgs.existsArg("u", "sysupgrade") {
+		return install(cmdArgs)
+	}
+	if len(cmdArgs.targets) > 0 {
+		return install(cmdArgs)
+	}
+	if cmdArgs.existsArg("y", "refresh") {
+		return show(passToPacman(cmdArgs))
+	}
+	return nil
 }
 
-func handleRemove() (err error) {
+func handleRemove() error {
 	removeVCSPackage(cmdArgs.targets)
-	err = show(passToPacman(cmdArgs))
-	return
+	return show(passToPacman(cmdArgs))
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
 func numberMenu(pkgS []string) (err error) {
+	var (
+		aurErr, repoErr error
+		aq              aurQuery
+		pq              repoQuery
+		lenaq, lenpq    int
+	)
+
 	pkgS = removeInvalidTargets(pkgS)
-	var aurErr error
-	var repoErr error
-	var aq aurQuery
-	var pq repoQuery
-	var lenaq int
-	var lenpq int
 
 	if mode == ModeAUR || mode == ModeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
@@ -493,12 +491,11 @@ func numberMenu(pkgS []string) (err error) {
 	fmt.Print(bold(green(arrow + " ")))
 
 	reader := bufio.NewReader(os.Stdin)
-	numberBuf, overflow, err := reader.ReadLine()
 
+	numberBuf, overflow, err := reader.ReadLine()
 	if err != nil {
 		return err
 	}
-
 	if overflow {
 		return fmt.Errorf("Input too long")
 	}
@@ -514,10 +511,7 @@ func numberMenu(pkgS []string) (err error) {
 			target = i + 1
 		}
 
-		if isInclude && include.get(target) {
-			arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
-		}
-		if !isInclude && !exclude.get(target) {
+		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {
 			arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 		}
 	}
@@ -528,10 +522,7 @@ func numberMenu(pkgS []string) (err error) {
 			target = i + 1 + len(pq)
 		}
 
-		if isInclude && include.get(target) {
-			arguments.addTarget("aur/" + pkg.Name)
-		}
-		if !isInclude && !exclude.get(target) {
+		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {
 			arguments.addTarget("aur/" + pkg.Name)
 		}
 	}

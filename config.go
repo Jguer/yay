@@ -118,7 +118,7 @@ var alpmConf alpm.PacmanConfig
 var alpmHandle *alpm.Handle
 
 // Mode is used to restrict yay to AUR or repo only modes
-var mode targetMode = ModeAny
+var mode = ModeAny
 
 func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
 	file, err := os.Open(pacmanconf)
