@@ -45,98 +45,88 @@ func setPaths() error {
 	return nil
 }
 
-func initConfig() (err error) {
+func initConfig() error {
 	defaultSettings(&config)
 
-	if _, err = os.Stat(configFile); os.IsNotExist(err) {
-		err = os.MkdirAll(filepath.Dir(configFile), 0755)
-		if err != nil {
-			err = fmt.Errorf("Unable to create config directory:\n%s\n"+
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		if err = os.MkdirAll(filepath.Dir(configFile), 0755); err != nil {
+			return fmt.Errorf("Unable to create config directory:\n%s\n"+
 				"The error was:\n%s", filepath.Dir(configFile), err)
-			return
 		}
 		// Save the default config if nothing is found
-		config.saveConfig()
-	} else {
-		cfile, errf := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
-		if errf != nil {
-			fmt.Printf("Error reading config: %s\n", err)
-		} else {
-			defer cfile.Close()
-			decoder := json.NewDecoder(cfile)
-			err = decoder.Decode(&config)
-			if err != nil {
-				fmt.Println("Loading default Settings.\nError reading config:",
-					err)
-				defaultSettings(&config)
-			}
-			if _, err = os.Stat(config.BuildDir); os.IsNotExist(err) {
-				err = os.MkdirAll(config.BuildDir, 0755)
-				if err != nil {
-					err = fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
-						"The error was:\n%s", config.BuildDir, err)
-					return
-				}
-			}
-		}
+		return config.saveConfig()
+	} else if err != nil {
+		return err
 	}
 
-	return
-}
-
-func initVCS() (err error) {
-	if _, err = os.Stat(vcsFile); os.IsNotExist(err) {
-		err = os.MkdirAll(filepath.Dir(vcsFile), 0755)
-		if err != nil {
-			err = fmt.Errorf("Unable to create vcs directory:\n%s\n"+
-				"The error was:\n%s", filepath.Dir(configFile), err)
-			return
-		}
-	} else {
-		vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
-		if err == nil {
-			defer vfile.Close()
-			decoder := json.NewDecoder(vfile)
-			_ = decoder.Decode(&savedInfo)
-		}
-	}
-
-	return
-}
-
-func initAlpm() (err error) {
-	var value string
-	var exists bool
-	//var double bool
-
-	alpmConf, err = readAlpmConfig(config.PacmanConf)
+	cfile, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		err = fmt.Errorf("Unable to read Pacman conf: %s", err)
-		return
+		return fmt.Errorf("Error reading config: %s\n", err)
 	}
 
-	value, _, exists = cmdArgs.getArg("dbpath", "b")
-	if exists {
+	defer cfile.Close()
+	decoder := json.NewDecoder(cfile)
+	if err = decoder.Decode(&config); err != nil {
+		return fmt.Errorf("Error reading config: %s",
+			err)
+	}
+
+	if _, err = os.Stat(config.BuildDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
+			return fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
+				"The error was:\n%s", config.BuildDir, err)
+		}
+	}
+
+	return err
+}
+
+func initVCS() error {
+	if _, err := os.Stat(vcsFile); os.IsNotExist(err) {
+		if err = os.MkdirAll(filepath.Dir(vcsFile), 0755); err != nil {
+			return fmt.Errorf("Unable to create vcs directory:\n%s\n"+
+				"The error was:\n%s", filepath.Dir(configFile), err)
+		}
+	} else if err != nil {
+		return err
+	}
+
+	vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+
+	defer vfile.Close()
+	decoder := json.NewDecoder(vfile)
+	_ = decoder.Decode(&savedInfo)
+
+	return nil
+}
+
+func initAlpm() error {
+	var err error
+
+	if alpmConf, err = readAlpmConfig(config.PacmanConf); err != nil {
+		return fmt.Errorf("Unable to read Pacman conf: %s", err)
+	}
+
+	if value, _, exists := cmdArgs.getArg("dbpath", "b"); exists {
 		alpmConf.DBPath = value
 	}
 
-	value, _, exists = cmdArgs.getArg("root", "r")
-	if exists {
+	if value, _, exists := cmdArgs.getArg("root", "r"); exists {
 		alpmConf.RootDir = value
 	}
 
-	value, _, exists = cmdArgs.getArg("arch")
-	if exists {
+	if value, _, exists := cmdArgs.getArg("arch"); exists {
 		alpmConf.Architecture = value
 	}
 
-	value, _, exists = cmdArgs.getArg("ignore")
-	if exists {
+	if value, _, exists := cmdArgs.getArg("ignore"); exists {
 		alpmConf.IgnorePkg = append(alpmConf.IgnorePkg, strings.Split(value, ",")...)
 	}
 
-	value, _, exists = cmdArgs.getArg("ignoregroup")
-	if exists {
+	if value, _, exists := cmdArgs.getArg("ignoregroup"); exists {
 		alpmConf.IgnoreGroup = append(alpmConf.IgnoreGroup, strings.Split(value, ",")...)
 	}
 
@@ -144,23 +134,19 @@ func initAlpm() (err error) {
 	//current system does not allow duplicate arguments
 	//but pacman allows multiple cachdirs to be passed
 	//for now only handle one cache dir
-	value, _, exists = cmdArgs.getArg("cachdir")
-	if exists {
+	if value, _, exists := cmdArgs.getArg("cachdir"); exists {
 		alpmConf.CacheDir = []string{value}
 	}
 
-	value, _, exists = cmdArgs.getArg("gpgdir")
-	if exists {
+	if value, _, exists := cmdArgs.getArg("gpgdir"); exists {
 		alpmConf.GPGDir = value
 	}
 
-	err = initAlpmHandle()
-	if err != nil {
-		return
+	if err = initAlpmHandle(); err != nil {
+		return err
 	}
 
-	value, _, _ = cmdArgs.getArg("color")
-	if value == "always" || value == "auto" {
+	if value, _, _ := cmdArgs.getArg("color"); value == "always" || value == "auto" {
 		useColor = true
 	} else if value == "never" {
 		useColor = false
@@ -168,26 +154,25 @@ func initAlpm() (err error) {
 		useColor = alpmConf.Options&alpm.ConfColor > 0
 	}
 
-	return
+	return nil
 }
 
-func initAlpmHandle() (err error) {
+func initAlpmHandle() error {
+	var err error
+
 	if alpmHandle != nil {
-		err = alpmHandle.Release()
-		if err != nil {
+		if err := alpmHandle.Release(); err != nil {
 			return err
 		}
 	}
 
-	alpmHandle, err = alpmConf.CreateHandle()
-	if err != nil {
-		err = fmt.Errorf("Unable to CreateHandle: %s", err)
-		return
+	if alpmHandle, err = alpmConf.CreateHandle(); err != nil {
+		return fmt.Errorf("Unable to CreateHandle: %s", err)
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)
 	alpmHandle.SetLogCallback(logCallback)
-	return
+	return nil
 }
 
 func exitOnError(err error) {
