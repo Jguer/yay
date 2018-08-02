@@ -357,7 +357,7 @@ func isArg(arg string) bool {
 	case "V", "version":
 	case "h", "help":
 	case "Y", "yay":
-	case "P", "print":
+	case "P", "show":
 	case "G", "getpkgbuild":
 	case "b", "dbpath":
 	case "r", "root":
@@ -479,6 +479,11 @@ func isArg(arg string) bool {
 	case "removemake":
 	case "noremovemake":
 	case "askremovemake":
+	case "complete":
+	case "stats":
+	case "news":
+	case "gendb":
+	case "currentconfig":
 	default:
 		return false
 	}
@@ -647,7 +652,7 @@ func isOp(op string) bool {
 	case "U", "upgrade":
 	// yay specific
 	case "Y", "yay":
-	case "P", "print":
+	case "P", "show":
 	case "G", "getpkgbuild":
 	default:
 		return false

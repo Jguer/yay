@@ -156,7 +156,7 @@ func handleCmd() (err error) {
 		err = show(passToPacman(cmdArgs))
 	case "G", "getpkgbuild":
 		err = handleGetpkgbuild()
-	case "P", "print":
+	case "P", "show":
 		err = handlePrint()
 	case "Y", "--yay":
 		err = handleYay()
@@ -194,7 +194,7 @@ func handlePrint() (err error) {
 		var tmpConfig Configuration
 		defaultSettings(&tmpConfig)
 		fmt.Printf("%v", tmpConfig)
-	case cmdArgs.existsArg("g", "config"):
+	case cmdArgs.existsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
 	case cmdArgs.existsArg("n", "numberupgrades"):
 		err = printNumberOfUpdates()
