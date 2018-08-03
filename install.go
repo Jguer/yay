@@ -93,7 +93,8 @@ func install(parser *arguments) error {
 		}
 
 		for up := range aurUp {
-			requestTargets = append(requestTargets, up)
+			requestTargets = append(requestTargets, "aur/" + up)
+			parser.addTarget("aur/" + up)
 		}
 
 		value, _, exists := cmdArgs.getArg("ignore")
@@ -104,10 +105,6 @@ func install(parser *arguments) error {
 				ignoreStr += "," + value
 			}
 			arguments.options["ignore"] = ignoreStr
-		}
-
-		for pkg := range aurUp {
-			parser.addTarget(pkg)
 		}
 	}
 
