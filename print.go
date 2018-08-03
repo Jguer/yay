@@ -174,7 +174,7 @@ func (u upSlice) print() {
 	}
 
 	namePadding := fmt.Sprintf("%%-%ds  ", longestName)
-	versionPadding := fmt.Sprintf("%%-%ds", longestVersion)
+	versionPadding := fmt.Sprintf("%%%ds", longestVersion)
 	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u))))
 
 	for k, i := range u {
@@ -184,7 +184,7 @@ func (u upSlice) print() {
 
 		fmt.Printf(namePadding, i.StylizedNameWithRepository())
 
-		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
+		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), fmt.Sprintf(versionPadding, right))
 	}
 }
 
