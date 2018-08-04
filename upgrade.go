@@ -64,7 +64,7 @@ func (u upSlice) Less(i, j int) bool {
 
 func getVersionDiff(oldVersion, newVersion string) (left, right string) {
 	if oldVersion == newVersion {
-		return oldVersion, newVersion
+		return oldVersion + red(""), newVersion + green("")
 	}
 
 	diffPosition := 0
@@ -286,10 +286,10 @@ func printLocalNewerThanAUR(
 
 		if !isDevelName(pkg.Name()) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
 			fmt.Printf("%s %s: local (%s) is newer than AUR (%s)\n",
-					yellow(bold(smallArrow)),
-					cyan(pkg.Name()),
-					left, right,
-				)
+				yellow(bold(smallArrow)),
+				cyan(pkg.Name()),
+				left, right,
+			)
 		}
 	}
 }
