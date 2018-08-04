@@ -164,17 +164,18 @@ func (u upgrade) StylizedNameWithRepository() string {
 
 // Print prints the details of the packages to upgrade.
 func (u upSlice) print() {
-	longestName, longestVersion := 0, 0
+	longestName, longestVersionLeft, longestVersionRight := 0, 0, 0
 	for _, pack := range u {
 		packNameLen := len(pack.StylizedNameWithRepository())
-		version, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
-		packVersionLen := len(version)
+		versionLeft, versionRight := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
 		longestName = max(packNameLen, longestName)
-		longestVersion = max(packVersionLen, longestVersion)
+		longestVersionLeft = max(len(versionLeft), longestVersionLeft)
+		longestVersionRight = max(len(versionRight), longestVersionRight)
 	}
 
 	namePadding := fmt.Sprintf("%%-%ds  ", longestName)
-	versionPadding := fmt.Sprintf("%%%ds", longestVersion)
+	versionPaddingLeft := fmt.Sprintf("%%%ds", longestVersionLeft)
+	versionPaddingRight := fmt.Sprintf("%%%ds", longestVersionRight)
 	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u))))
 
 	for k, i := range u {
@@ -184,7 +185,7 @@ func (u upSlice) print() {
 
 		fmt.Printf(namePadding, i.StylizedNameWithRepository())
 
-		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), fmt.Sprintf(versionPadding, right))
+		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPaddingLeft, left), fmt.Sprintf(versionPaddingRight, right))
 	}
 }
 
