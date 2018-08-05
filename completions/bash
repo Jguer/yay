@@ -1,4 +1,3 @@
-# vim:fdm=marker foldlevel=0 tabstop=2 shiftwidth=2 filetype=bash
 # This file is in the public domain.
 
 _arch_compgen() {
@@ -28,19 +27,6 @@ _arch_incomp() {
   local r="\s-(-${1#* }\s|\w*${1% *})"; [[ $COMP_LINE =~ $r ]]
 }
 
-_pacman_keyids() {
-  \pacman-key --list-keys 2>/dev/null | awk '
-    $1 == "pub" {
-      # key id
-      split($2, a, "/"); print a[2]
-    }
-    $1 == "uid" {
-      # email
-      if (match($NF, /<[^>]+>/))
-        print substr($NF, RSTART + 1, RLENGTH - 2)
-    }'
-}
-
 _pacman_pkg() {
   _arch_compgen "$(
     if [[ $2 ]]; then
@@ -51,38 +37,46 @@ _pacman_pkg() {
   )"
 }
 
+_yay_pkg() {
+  _arch_compgen "$(yay -Pc)"
+}
 
-
+_pacman_repo_list() {
+  _arch_compgen "$(pacman-conf --repo-list)"
+}
 
 _yay() {
-  local common core cur database prev query remove sync upgrade yays print o
+  local common core cur database files prev query remove sync upgrade o
+  local yays show
   COMPREPLY=()
   _get_comp_words_by_ref cur prev
   database=('asdeps asexplicit')
   files=('list machinereadable owns search refresh regex' 'l o s x y')
-  query=('changelog check deps explicit file foreign groups info list owns
-          search unrequired upgrades' 'c e g i k l m o p s t u')
+  query=('changelog check deps explicit file foreign groups info list native owns
+          search unrequired upgrades' 'c e g i k l m n o p s t u')
   remove=('cascade dbonly nodeps assume-installed nosave print recursive unneeded' 'c n p s u')
   sync=('asdeps asexplicit clean dbonly downloadonly force groups ignore ignoregroup
          info list needed nodeps assume-installed print refresh recursive search sysupgrade'
         'c g i l p s u w y')
   upgrade=('asdeps asexplicit force needed nodeps assume-installed print recursive' 'p')
-  yays=('clean gendb' 'c')
-  print=('complete defaultconfig config numberupgrades stats upgrades news' 'c d g n
-  s u w')
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
-           noconfirm noprogressbar noscriptlet quiet save mflags buildir editor
+           noconfirm noprogressbar noscriptlet quiet root verbose
+           #yay stuff
            makepkg pacman tar git gpg gpgflags config requestsplitn sudoloop nosudoloop
            redownload noredownload redownloadall rebuild rebuildall rebuildtree norebuild
            sortby answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
            noansweredit noanswerupgrade cleanmenu diffmenu editmenu upgrademenu
            nocleanmenu nodiffmenu noupgrademenu provides noprovides pgpfetch nopgpfetch
-           useask nouseask combinedupgrade nocombinedupgrade root verbose aur repo makepkgconf
-	   nomakepkgconf askremovemake removemake noremovemake completioninterval'
-           'a b d h q r v')
+           useask nouseask combinedupgrade nocombinedupgrade aur repo makepkgconf
+           nomakepkgconf askremovemake removemake noremovemake completioninterval'
+           'b d h q r v')
   core=('database files help query remove sync upgrade version' 'D F Q R S U V h')
 
-  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P print'; do
+  ##yay stuff
+  yays=('clean gendb' 'c')
+  print=('complete defaultconfig currentconfig stats  news' 'c d g s w')
+
+  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P show'; do
     _arch_incomp "$o" && break
   done
 
@@ -105,8 +99,8 @@ _yay() {
           _pacman_pkg Qq;;
       S)
         { _arch_incomp 'g groups' && _pacman_pkg Sg; }      ||
-          { _arch_incomp 'l list'   && _arch_compgen "$(yay -Pc | \sort -u)"; } ||
-          _arch_compgen "$(yay -Pc )";;
+        { _arch_incomp 'l list'   && _pacman_repo_list; } ||
+          _yay_pkg;;
       U)
           _pacman_file;;
       esac
