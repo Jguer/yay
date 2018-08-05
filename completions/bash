@@ -38,6 +38,7 @@ _pacman_pkg() {
 }
 
 _yay_pkg() {
+  [ -z "$cur" ] && return
   _arch_compgen "$(yay -Pc)"
 }
 
