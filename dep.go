@@ -53,6 +53,10 @@ func splitDep(dep string) (string, string, string) {
 		return match
 	})
 
+	if len(split) == 0 {
+		return "", "", ""
+	}
+
 	if len(split) == 1 {
 		return split[0], "", ""
 	}
