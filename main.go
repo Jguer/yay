@@ -162,7 +162,7 @@ func initAlpm() (err error) {
 	value, _, _ = cmdArgs.getArg("color")
 	if value == "always" || value == "auto" {
 		useColor = true
-	} else if value == "never" {
+	} else if value == "never" || os.Getenv("NO_COLOR") != "" {
 		useColor = false
 	} else {
 		useColor = alpmConf.Options&alpm.ConfColor > 0
