@@ -772,7 +772,10 @@ func (parser *arguments) parseLongOption(arg string, param string) (usedNext boo
 
 	arg = arg[2:]
 
-	if hasParam(arg) {
+	split := strings.SplitN(arg, "=", 2)
+	if len(split) == 2 {
+		err = parser.addParam(split[0], split[1])
+	} else if hasParam(arg) {
 		err = parser.addParam(arg, param)
 		usedNext = true
 	} else {
