@@ -741,13 +741,6 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 	for k, _char := range arg {
 		char := string(_char)
 
-		if k < len(arg)-1 {
-			if arg[k+1] == '=' {
-				err = parser.addParam(char, arg[k+2:])
-				break
-			}
-		}
-
 		if hasParam(char) {
 			if k < len(arg)-1 {
 				err = parser.addParam(char, arg[k+1:])
