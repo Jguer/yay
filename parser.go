@@ -741,13 +741,6 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 	for k, _char := range arg {
 		char := string(_char)
 
-		if k < len(arg)-1 {
-			if arg[k+1] == '=' {
-				err = parser.addParam(char, arg[k+2:])
-				break
-			}
-		}
-
 		if hasParam(char) {
 			if k < len(arg)-1 {
 				err = parser.addParam(char, arg[k+1:])
@@ -779,7 +772,10 @@ func (parser *arguments) parseLongOption(arg string, param string) (usedNext boo
 
 	arg = arg[2:]
 
-	if hasParam(arg) {
+	split := strings.SplitN(arg, "=", 2)
+	if len(split) == 2 {
+		err = parser.addParam(split[0], split[1])
+	} else if hasParam(arg) {
 		err = parser.addParam(arg, param)
 		usedNext = true
 	} else {
