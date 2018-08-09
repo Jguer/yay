@@ -130,13 +130,13 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, 
 			return
 		}
 
+		mux.Lock()
 		info[url] = shaInfo{
 			protocols,
 			branch,
 			commit,
 		}
 
-		mux.Lock()
 		savedInfo[pkgName] = info
 		fmt.Println(bold(yellow(arrow)) + " Found git repo: " + cyan(url))
 		saveVCSInfo()
