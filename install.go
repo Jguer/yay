@@ -94,7 +94,7 @@ func install(parser *arguments) error {
 		}
 
 		for up := range aurUp {
-			requestTargets = append(requestTargets, "aur/" + up)
+			requestTargets = append(requestTargets, "aur/"+up)
 			parser.addTarget("aur/" + up)
 		}
 
@@ -493,7 +493,7 @@ func pkgbuildNumberMenu(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, installed 
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		toPrint += fmt.Sprintf(magenta("%3d")+" %-40s", len(pkgs)-n,
-			bold(formatPkgbase(pkg, bases)))
+			bold(formatPkgbase(bases[pkg.PackageBase])))
 		if installed.get(pkg.Name) {
 			toPrint += bold(green(" (Installed)"))
 		}
@@ -669,7 +669,7 @@ func showPkgBuildDiffs(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, cloned stri
 				}
 
 				if !hasDiff {
-					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(pkg, bases)), bold("No changes -- skipping"))
+					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(bases[pkg.PackageBase])), bold("No changes -- skipping"))
 					continue
 				}
 			}
@@ -732,7 +732,7 @@ func parseSRCINFOFiles(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, base
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
+		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(bases[pkg.PackageBase])))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
@@ -750,7 +750,7 @@ func tryParsesrcinfosFile(pkgs []*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo, b
 		dir := filepath.Join(config.BuildDir, pkg.PackageBase)
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
+		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(bases[pkg.PackageBase])))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
@@ -808,7 +808,7 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stri
 			mux.Lock()
 			downloaded++
 			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
-			fmt.Printf(str, downloaded, len(pkgs), cyan(formatPkgbase(pkg, bases)))
+			fmt.Printf(str, downloaded, len(pkgs), cyan(formatPkgbase(bases[pkg.PackageBase])))
 			mux.Unlock()
 			return
 		}
@@ -835,7 +835,7 @@ func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stri
 		mux.Lock()
 		downloaded++
 		str := bold(cyan("::") + " Downloaded PKGBUILD (%d/%d): %s\n")
-		fmt.Printf(str, downloaded, len(pkgs), cyan(formatPkgbase(pkg, bases)))
+		fmt.Printf(str, downloaded, len(pkgs), cyan(formatPkgbase(bases[pkg.PackageBase])))
 		mux.Unlock()
 	}
 
@@ -860,7 +860,7 @@ func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, inco
 
 		err = show(passToMakepkg(dir, args...))
 		if err != nil {
-			return fmt.Errorf("Error downloading sources: %s", cyan(formatPkgbase(pkg, bases)))
+			return fmt.Errorf("Error downloading sources: %s", cyan(formatPkgbase(bases[pkg.PackageBase])))
 		}
 	}
 
