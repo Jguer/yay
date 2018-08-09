@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"sync"
 	"unicode"
 
@@ -109,7 +108,7 @@ func getVersionDiff(oldVersion, newVersion string) (left, right string) {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
+func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	local, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return nil, nil, err
@@ -117,9 +116,10 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 
 	var wg sync.WaitGroup
 	var develUp upSlice
+	var repoUp upSlice
+	var aurUp upSlice
 
-	var repoErr error
-	var aurErr error
+	var errs MultiError
 
 	aurdata := make(map[string]*rpc.Pkg)
 
@@ -127,7 +127,8 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 		wg.Add(1)
 		go func() {
-			repoUp, repoErr = upRepo(local)
+			repoUp, err = upRepo(local)
+			errs.Add(err)
 			wg.Done()
 		}()
 	}
@@ -136,15 +137,17 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 		fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
 
 		var _aurdata []*rpc.Pkg
-		_aurdata, aurErr = aurInfo(remoteNames, warnings)
-		if aurErr == nil {
+		_aurdata, err = aurInfo(remoteNames, warnings)
+		errs.Add(err)
+		if err == nil {
 			for _, pkg := range _aurdata {
 				aurdata[pkg.Name] = pkg
 			}
 
 			wg.Add(1)
 			go func() {
-				aurUp, aurErr = upAUR(remote, aurdata)
+				aurUp, err = upAUR(remote, aurdata)
+				errs.Add(err)
 				wg.Done()
 			}()
 
@@ -163,18 +166,6 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 
 	printLocalNewerThanAUR(remote, aurdata)
 
-	errs := make([]string, 0)
-	for _, e := range []error{repoErr, aurErr} {
-		if e != nil {
-			errs = append(errs, e.Error())
-		}
-	}
-
-	if len(errs) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errs, "\n"))
-		return nil, nil, err
-	}
-
 	if develUp != nil {
 		names := make(stringSet)
 		for _, up := range develUp {
@@ -189,7 +180,7 @@ func upList(warnings *aurWarnings) (aurUp upSlice, repoUp upSlice, err error) {
 		aurUp = develUp
 	}
 
-	return aurUp, repoUp, err
+	return aurUp, repoUp, errs.Return()
 }
 
 func upDevel(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (toUpgrade upSlice) {

@@ -60,9 +60,11 @@ func gitHasDiff(path string, name string) (bool, error) {
 func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
-		err = show(passToGit(path, "clone", "--no-progress", url, name))
+		cmd := passToGit(path, "clone", "--no-progress", url, name)
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+		_, stderr, err := capture(cmd)
 		if err != nil {
-			return false, fmt.Errorf("error cloning %s", name)
+			return false, fmt.Errorf("error cloning %s: stderr", name, stderr)
 		}
 
 		return true, nil
@@ -70,23 +72,25 @@ func gitDownload(url string, path string, name string) (bool, error) {
 		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
-	err = show(passToGit(filepath.Join(path, name), "fetch"))
+	cmd := passToGit(filepath.Join(path, name), "fetch")
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	_, stderr, err := capture(cmd)
 	if err != nil {
-		return false, fmt.Errorf("error fetching %s", name)
+		return false, fmt.Errorf("error fetching %s: %s", name, stderr)
 	}
 
 	return false, nil
 }
 
 func gitMerge(path string, name string) error {
-	err := show(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
+	_, stderr, err := capture(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
 	if err != nil {
-		return fmt.Errorf("error resetting %s", name)
+		return fmt.Errorf("error resetting %s: %s", name, stderr)
 	}
 
-	err = show(passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff"))
+	_, stderr, err = capture(passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff"))
 	if err != nil {
-		return fmt.Errorf("error merging %s", name)
+		return fmt.Errorf("error merging %s: %s", name, stderr)
 	}
 
 	return nil

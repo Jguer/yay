@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	alpm "github.com/jguer/go-alpm"
@@ -770,7 +771,7 @@ func pkgBuildsToSkip(pkgs []*rpc.Pkg, targets stringSet) stringSet {
 			pkgbuild, err := gosrc.ParseFile(dir)
 
 			if err == nil {
-				if alpm.VerCmp(pkgbuild.Version(), pkg.Version) > 0 {
+				if alpm.VerCmp(pkgbuild.Version(), pkg.Version) >= 0 {
 					toSkip.set(pkg.PackageBase)
 				}
 			}
@@ -795,35 +796,57 @@ func mergePkgBuilds(pkgs []*rpc.Pkg) error {
 
 func downloadPkgBuilds(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, toSkip stringSet) (stringSet, error) {
 	cloned := make(stringSet)
+	downloaded := 0
+	var wg sync.WaitGroup
+	var mux sync.Mutex
+	var errs MultiError
 
-	for k, pkg := range pkgs {
+	download := func(k int, pkg *rpc.Pkg) {
+		defer wg.Done()
+
 		if toSkip.get(pkg.PackageBase) {
+			mux.Lock()
+			downloaded++
 			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
-			fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
-			continue
+			fmt.Printf(str, downloaded, len(pkgs), cyan(formatPkgbase(pkg, bases)))
+			mux.Unlock()
+			return
 		}
-
-		str := bold(cyan("::") + " Downloading PKGBUILD (%d/%d): %s\n")
-
-		fmt.Printf(str, k+1, len(pkgs), cyan(formatPkgbase(pkg, bases)))
 
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg.PackageBase)) {
 			clone, err := gitDownload(baseURL+"/"+pkg.PackageBase+".git", config.BuildDir, pkg.PackageBase)
 			if err != nil {
-				return nil, err
+				errs.Add(err)
+				return
 			}
 			if clone {
+				mux.Lock()
 				cloned.set(pkg.PackageBase)
+				mux.Unlock()
 			}
 		} else {
 			err := downloadAndUnpack(baseURL+pkg.URLPath, config.BuildDir)
 			if err != nil {
-				return nil, err
+				errs.Add(err)
+				return
 			}
 		}
+
+		mux.Lock()
+		downloaded++
+		str := bold(cyan("::") + " Downloaded PKGBUILD (%d/%d): %s\n")
+		fmt.Printf(str, downloaded, len(pkgs), cyan(formatPkgbase(pkg, bases)))
+		mux.Unlock()
 	}
 
-	return cloned, nil
+	for k, pkg := range pkgs {
+		wg.Add(1)
+		go download(k, pkg)
+	}
+
+	wg.Wait()
+
+	return cloned, errs.Return()
 }
 
 func downloadPkgBuildsSources(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, incompatible stringSet) (err error) {
@@ -975,9 +998,14 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			return err
 		}
 
+		var mux sync.Mutex
+		var wg sync.WaitGroup
 		for _, pkg := range do.Bases[pkg.PackageBase] {
-			updateVCSData(pkg.Name, srcinfo.Source)
+			wg.Add(1)
+			go updateVCSData(pkg.Name, srcinfo.Source, &mux, &wg)
 		}
+
+		wg.Wait()
 
 		err = saveVCSInfo()
 		if err != nil {

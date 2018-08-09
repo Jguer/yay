@@ -119,6 +119,5 @@ func passToGit(dir string, _args ...string) *exec.Cmd {
 	args = append(args, _args...)
 
 	cmd := exec.Command(config.GitBin, args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd
 }
