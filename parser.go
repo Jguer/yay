@@ -503,6 +503,10 @@ func handleConfig(option, value string) bool {
 		config.Devel = true
 	case "nodevel":
 		config.Devel = false
+	case "needed":
+		config.Needed = true
+	case "noneeded":
+		config.Needed = false
 	case "timeupdate":
 		config.TimeUpdate = true
 	case "notimeupdate":

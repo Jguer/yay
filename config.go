@@ -64,6 +64,7 @@ type Configuration struct {
 	TimeUpdate         bool   `json:"timeupdate"`
 	NoConfirm          bool   `json:"-"`
 	Devel              bool   `json:"devel"`
+	Needed             bool   `json:"needed"`
 	CleanAfter         bool   `json:"cleanAfter"`
 	GitClone           bool   `json:"gitclone"`
 	Provides           bool   `json:"provides"`
@@ -154,6 +155,7 @@ func defaultSettings(config *Configuration) {
 	config.Editor = ""
 	config.EditorFlags = ""
 	config.Devel = false
+	config.Needed = false
 	config.MakepkgBin = "makepkg"
 	config.MakepkgConf = ""
 	config.NoConfirm = false
