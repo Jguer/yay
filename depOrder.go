@@ -5,35 +5,48 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+type Base []*rpc.Pkg
+
+func (b Base) Pkgbase() string {
+	return b[0].PackageBase
+}
+
+func (b Base) Version() string {
+	return b[0].Version
+}
+
+func (b Base) URLPath() string {
+	return b[0].URLPath
+}
+
 type depOrder struct {
-	Aur     []*rpc.Pkg
+	Aur     []Base
 	Repo    []*alpm.Package
 	Runtime stringSet
-	Bases   map[string][]*rpc.Pkg
 }
 
 func makeDepOrder() *depOrder {
 	return &depOrder{
-		make([]*rpc.Pkg, 0),
+		make([]Base, 0),
 		make([]*alpm.Package, 0),
 		make(stringSet),
-		make(map[string][]*rpc.Pkg),
 	}
 }
 
 func getDepOrder(dp *depPool) *depOrder {
 	do := makeDepOrder()
+	basesMap := make(map[string]Base)
 
 	for _, target := range dp.Targets {
 		dep := target.DepString()
 		aurPkg := dp.Aur[dep]
 		if aurPkg != nil && pkgSatisfies(aurPkg.Name, aurPkg.Version, dep) {
-			do.orderPkgAur(aurPkg, dp, true)
+			do.orderPkgAur(aurPkg, dp, basesMap, true)
 		}
 
 		aurPkg = dp.findSatisfierAur(dep)
 		if aurPkg != nil {
-			do.orderPkgAur(aurPkg, dp, true)
+			do.orderPkgAur(aurPkg, dp, basesMap, true)
 		}
 
 		repoPkg := dp.findSatisfierRepo(dep)
@@ -42,10 +55,14 @@ func getDepOrder(dp *depPool) *depOrder {
 		}
 	}
 
+	for _, base := range basesMap {
+		do.Aur = append(do.Aur, base)
+	}
+
 	return do
 }
 
-func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
+func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, basesMap map[string]Base, runtime bool) {
 	if runtime {
 		do.Runtime.set(pkg.Name)
 	}
@@ -55,7 +72,7 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 		for _, dep := range deps {
 			aurPkg := dp.findSatisfierAur(dep)
 			if aurPkg != nil {
-				do.orderPkgAur(aurPkg, dp, runtime && i == 0)
+				do.orderPkgAur(aurPkg, dp, basesMap, runtime && i == 0)
 			}
 
 			repoPkg := dp.findSatisfierRepo(dep)
@@ -65,11 +82,7 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 		}
 	}
 
-	if _, ok := do.Bases[pkg.PackageBase]; !ok {
-		do.Aur = append(do.Aur, pkg)
-		do.Bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
-	}
-	do.Bases[pkg.PackageBase] = append(do.Bases[pkg.PackageBase], pkg)
+	basesMap[pkg.PackageBase] = append(basesMap[pkg.PackageBase], pkg)
 }
 
 func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
@@ -92,7 +105,7 @@ func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 
 func (do *depOrder) HasMake() bool {
 	lenAur := 0
-	for _, base := range do.Bases {
+	for _, base := range do.Aur {
 		lenAur += len(base)
 	}
 
@@ -102,7 +115,7 @@ func (do *depOrder) HasMake() bool {
 func (do *depOrder) getMake() []string {
 	makeOnly := make([]string, 0, len(do.Aur)+len(do.Repo)-len(do.Runtime))
 
-	for _, base := range do.Bases {
+	for _, base := range do.Aur {
 		for _, pkg := range base {
 			if !do.Runtime.get(pkg.Name) {
 				makeOnly = append(makeOnly, pkg.Name)

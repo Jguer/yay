@@ -211,18 +211,19 @@ func (do *depOrder) Print() {
 		}
 	}
 
-	for _, pkg := range do.Aur {
-		pkgStr := "  " + pkg.PackageBase + "-" + pkg.Version
+	for _, base := range do.Aur {
+		pkg := base.Pkgbase()
+		pkgStr := "  " + pkg + "-" + base[0].Version
 		pkgStrMake := pkgStr
 
 		push := false
 		pushMake := false
 
-		if len(do.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+		if len(base) > 1 || pkg != base[0].Name {
 			pkgStr += " ("
 			pkgStrMake += " ("
 
-			for _, split := range do.Bases[pkg.PackageBase] {
+			for _, split := range base {
 				if do.Runtime.get(split.Name) {
 					pkgStr += split.Name + " "
 					aurLen++
@@ -236,7 +237,7 @@ func (do *depOrder) Print() {
 
 			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
 			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
-		} else if do.Runtime.get(pkg.Name) {
+		} else if do.Runtime.get(base[0].Name) {
 			aurLen++
 			push = true
 		} else {
