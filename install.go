@@ -22,10 +22,10 @@ func install(parser *arguments) error {
 	var aurUp upSlice
 	var repoUp upSlice
 
-	warnings := &aurWarnings{}
+	var srcinfos map[string]*gosrc.Srcinfo
 
+	warnings := &aurWarnings{}
 	removeMake := false
-	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
 	if mode == ModeAny || mode == ModeRepo {
 		if config.CombinedUpgrade {
@@ -223,8 +223,7 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	//initial srcinfo parse before pkgver() bump
-	err = parseSrcinfoFiles(do.Aur, srcinfosStale, true)
+	srcinfos, err = parseSrcinfoFiles(do.Aur, true)
 	if err != nil {
 		return err
 	}
@@ -237,7 +236,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(toEdit) > 0 {
-			err = editPkgbuilds(toEdit, srcinfosStale)
+			err = editPkgbuilds(toEdit, srcinfos)
 			if err != nil {
 				return err
 			}
@@ -255,13 +254,13 @@ func install(parser *arguments) error {
 	}
 
 	//TODO: fix for split packages maybe?
-	incompatible, err = getIncompatible(do.Aur, srcinfosStale)
+	incompatible, err = getIncompatible(do.Aur, srcinfos)
 	if err != nil {
 		return err
 	}
 
 	if config.PGPFetch {
-		err = checkPgpKeys(do.Aur, srcinfosStale)
+		err = checkPgpKeys(do.Aur, srcinfos)
 		if err != nil {
 			return err
 		}
@@ -317,7 +316,7 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	err = buildInstallPkgbuilds(dp, do, srcinfosStale, parser, incompatible, conflicts)
+	err = buildInstallPkgbuilds(dp, do, srcinfos, parser, incompatible, conflicts)
 	if err != nil {
 		return err
 	}
@@ -748,7 +747,8 @@ func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	return nil
 }
 
-func parseSrcinfoFiles(bases []Base, srcinfos map[string]*gosrc.Srcinfo, errIsFatal bool) error {
+func parseSrcinfoFiles(bases []Base, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
+	srcinfos := make(map[string]*gosrc.Srcinfo)
 	for k, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -762,13 +762,13 @@ func parseSrcinfoFiles(bases []Base, srcinfos map[string]*gosrc.Srcinfo, errIsFa
 				fmt.Printf("failed to parse %s -- skipping: %s\n", formatPkgbase(base), err)
 				continue
 			}
-			return fmt.Errorf("failed to parse %s: %s", formatPkgbase(base), err)
+			return nil, fmt.Errorf("failed to parse %s: %s", formatPkgbase(base), err)
 		}
 
 		srcinfos[pkg] = pkgbuild
 	}
 
-	return nil
+	return srcinfos, nil
 }
 
 func pkgbuildsToSkip(bases []Base, targets stringSet) stringSet {

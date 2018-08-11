@@ -27,7 +27,6 @@ func createDevelDB() error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 	infoMap := make(map[string]*rpc.Pkg)
-	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -46,9 +45,9 @@ func createDevelDB() error {
 	bases := getBases(infoMap)
 	toSkip := pkgbuildsToSkip(bases, sliceToStringSet(remoteNames))
 	downloadPkgbuilds(bases, toSkip)
-	parseSrcinfoFiles(bases, srcinfosStale, false)
+	srcinfos, _ := parseSrcinfoFiles(bases, false)
 
-	for _, pkgbuild := range srcinfosStale {
+	for _, pkgbuild := range srcinfos {
 		for _, pkg := range pkgbuild.Packages {
 			wg.Add(1)
 			go updateVCSData(pkg.Pkgname, pkgbuild.Source, &mux, &wg)
