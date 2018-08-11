@@ -10,7 +10,6 @@ endif
 VERSION := ${MAJORVERSION}.${MINORVERSION}
 
 LDFLAGS := -ldflags '-s -w -X main.version=${VERSION}'
-GOFILES := $(shell ls *.go | grep -v /vendor/)
 ARCH := $(shell uname -m)
 PKGNAME := yay
 BINNAME := yay
