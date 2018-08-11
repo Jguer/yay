@@ -112,7 +112,7 @@ func formatKeysToImport(keys pgpKeySet) (string, error) {
 	for key, bases := range keys {
 		pkglist := ""
 		for _, base := range bases {
-			pkglist += formatPkgbase(base) + "  "
+			pkglist += base.String() + "  "
 		}
 		pkglist = strings.TrimRight(pkglist, "  ")
 		buffer.WriteString(fmt.Sprintf("\n%s %s, required by: %s", yellow(bold(smallArrow)), cyan(key), cyan(pkglist)))

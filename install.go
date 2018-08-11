@@ -438,7 +438,7 @@ nextpkg:
 		fmt.Println()
 		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatible with your architecture:")
 		for pkg := range incompatible {
-			fmt.Print("  " + cyan(formatPkgbase(basesMap[pkg])))
+			fmt.Print("  " + cyan((basesMap[pkg].String())))
 		}
 
 		fmt.Println()
@@ -494,7 +494,7 @@ func pkgbuildNumberMenu(bases []Base, installed stringSet) bool {
 		dir := filepath.Join(config.BuildDir, pkg)
 
 		toPrint += fmt.Sprintf(magenta("%3d")+" %-40s", len(bases)-n,
-			bold(formatPkgbase(base)))
+			bold(base.String()))
 
 		anyInstalled := false
 		for _, b := range base {
@@ -689,7 +689,7 @@ func showPkgbuildDiffs(bases []Base, cloned stringSet) error {
 				}
 
 				if !hasDiff {
-					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(formatPkgbase(base)), bold("No changes -- skipping"))
+					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(base.String()), bold("No changes -- skipping"))
 					continue
 				}
 			}
@@ -755,15 +755,15 @@ func parseSrcinfoFiles(bases []Base, errIsFatal bool) (map[string]*gosrc.Srcinfo
 		dir := filepath.Join(config.BuildDir, pkg)
 
 		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(bases), cyan(formatPkgbase(base)))
+		fmt.Printf(str, k+1, len(bases), cyan(base.String()))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			if !errIsFatal {
-				fmt.Printf("failed to parse %s -- skipping: %s\n", formatPkgbase(base), err)
+				fmt.Printf("failed to parse %s -- skipping: %s\n", base.String(), err)
 				continue
 			}
-			return nil, fmt.Errorf("failed to parse %s: %s", formatPkgbase(base), err)
+			return nil, fmt.Errorf("failed to parse %s: %s", base.String(), err)
 		}
 
 		srcinfos[pkg] = pkgbuild
@@ -824,7 +824,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet) (stringSet, error) {
 			mux.Lock()
 			downloaded++
 			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
-			fmt.Printf(str, downloaded, len(bases), cyan(formatPkgbase(base)))
+			fmt.Printf(str, downloaded, len(bases), cyan(base.String()))
 			mux.Unlock()
 			return
 		}
@@ -851,7 +851,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet) (stringSet, error) {
 		mux.Lock()
 		downloaded++
 		str := bold(cyan("::") + " Downloaded PKGBUILD (%d/%d): %s\n")
-		fmt.Printf(str, downloaded, len(bases), cyan(formatPkgbase(base)))
+		fmt.Printf(str, downloaded, len(bases), cyan(base.String()))
 		mux.Unlock()
 	}
 
@@ -877,7 +877,7 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringSet) (err error) 
 
 		err = show(passToMakepkg(dir, args...))
 		if err != nil {
-			return fmt.Errorf("Error downloading sources: %s", cyan(formatPkgbase(base)))
+			return fmt.Errorf("Error downloading sources: %s", cyan(base.String()))
 		}
 	}
 
@@ -901,7 +901,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		//pkgver bump
 		err := show(passToMakepkg(dir, args...))
 		if err != nil {
-			return fmt.Errorf("Error making: %s", formatPkgbase(base))
+			return fmt.Errorf("Error making: %s", base.String())
 		}
 
 		pkgdests, version, err := parsePackageList(dir)
@@ -943,7 +943,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 
 			err := show(passToMakepkg(dir, args...))
 			if err != nil {
-				return fmt.Errorf("Error making: %s", formatPkgbase(base))
+				return fmt.Errorf("Error making: %s", base.String())
 			}
 		}
 

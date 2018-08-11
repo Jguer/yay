@@ -143,7 +143,7 @@ func (s repoQuery) printSearch() {
 // Pretty print a set of packages from the same package base.
 // Packages foo and bar from a pkgbase named base would print like so:
 // base (foo bar)
-func formatPkgbase(base []*rpc.Pkg) string {
+func (base Base) String() string {
 	pkg := base[0]
 	str := pkg.PackageBase
 	if len(base) > 1 || pkg.PackageBase != pkg.Name {
