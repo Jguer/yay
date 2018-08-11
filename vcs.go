@@ -10,7 +10,6 @@ import (
 	"time"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
-	rpc "github.com/mikkeloscar/aur"
 )
 
 // Info contains the last commit sha of a repo
@@ -26,7 +25,6 @@ type shaInfo struct {
 func createDevelDB() error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-	infoMap := make(map[string]*rpc.Pkg)
 
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -38,11 +36,7 @@ func createDevelDB() error {
 		return err
 	}
 
-	for _, pkg := range info {
-		infoMap[pkg.Name] = pkg
-	}
-
-	bases := getBases(infoMap)
+	bases := getBases(info)
 	toSkip := pkgbuildsToSkip(bases, sliceToStringSet(remoteNames))
 	downloadPkgbuilds(bases, toSkip)
 	srcinfos, _ := parseSrcinfoFiles(bases, false)

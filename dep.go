@@ -149,7 +149,7 @@ func splitDbFromName(pkg string) (string, string) {
 	return "", split[0]
 }
 
-func getBases(pkgs map[string]*rpc.Pkg) []Base {
+func getBases(pkgs []*rpc.Pkg) []Base {
 	basesMap := make(map[string]Base)
 	for _, pkg := range pkgs {
 		basesMap[pkg.PackageBase] = append(basesMap[pkg.PackageBase], pkg)
