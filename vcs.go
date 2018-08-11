@@ -26,7 +26,6 @@ type shaInfo struct {
 func createDevelDB() error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-	baseNames := make([]string, 0)
 	infoMap := make(map[string]*rpc.Pkg)
 	srcinfosStale := make(map[string]*gosrc.Srcinfo)
 
@@ -41,15 +40,13 @@ func createDevelDB() error {
 	}
 
 	for _, pkg := range info {
-		baseNames = append(baseNames, pkg.PackageBase)
 		infoMap[pkg.Name] = pkg
 	}
 
 	bases := getBases(infoMap)
-
-	toSkip := pkgBuildsToSkip(bases, sliceToStringSet(remoteNames))
-	downloadPkgBuilds(bases, toSkip)
-	tryParsesrcinfosFile(bases, srcinfosStale)
+	toSkip := pkgbuildsToSkip(bases, sliceToStringSet(remoteNames))
+	downloadPkgbuilds(bases, toSkip)
+	parseSrcinfoFiles(bases, srcinfosStale, false)
 
 	for _, pkgbuild := range srcinfosStale {
 		for _, pkg := range pkgbuild.Packages {

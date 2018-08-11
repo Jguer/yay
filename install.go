@@ -184,8 +184,8 @@ func install(parser *arguments) error {
 		cleanBuilds(toClean)
 	}
 
-	toSkip := pkgBuildsToSkip(do.Aur, targets)
-	cloned, err := downloadPkgBuilds(do.Aur, toSkip)
+	toSkip := pkgbuildsToSkip(do.Aur, targets)
+	cloned, err := downloadPkgbuilds(do.Aur, toSkip)
 	if err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(toDiff) > 0 {
-			err = showPkgBuildDiffs(toDiff, cloned)
+			err = showPkgbuildDiffs(toDiff, cloned)
 			if err != nil {
 				return err
 			}
@@ -218,13 +218,13 @@ func install(parser *arguments) error {
 		config.NoConfirm = oldValue
 	}
 
-	err = mergePkgBuilds(do.Aur)
+	err = mergePkgbuilds(do.Aur)
 	if err != nil {
 		return err
 	}
 
 	//initial srcinfo parse before pkgver() bump
-	err = parseSRCINFOFiles(do.Aur, srcinfosStale)
+	err = parseSrcinfoFiles(do.Aur, srcinfosStale, true)
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func install(parser *arguments) error {
 		}
 
 		if len(toEdit) > 0 {
-			err = editPkgBuilds(toEdit, srcinfosStale)
+			err = editPkgbuilds(toEdit, srcinfosStale)
 			if err != nil {
 				return err
 			}
@@ -312,12 +312,12 @@ func install(parser *arguments) error {
 
 	go updateCompletion(false)
 
-	err = downloadPkgBuildsSources(do.Aur, incompatible)
+	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {
 		return err
 	}
 
-	err = buildInstallPkgBuilds(dp, do, srcinfosStale, parser, incompatible, conflicts)
+	err = buildInstallPkgbuilds(dp, do, srcinfosStale, parser, incompatible, conflicts)
 	if err != nil {
 		return err
 	}
@@ -341,7 +341,7 @@ func install(parser *arguments) error {
 	}
 
 	if config.CleanAfter {
-		clean(do.Aur)
+		cleanBuilds(do.Aur)
 	}
 
 	return nil
@@ -673,7 +673,7 @@ func cleanBuilds(bases []Base) {
 	}
 }
 
-func showPkgBuildDiffs(bases []Base, cloned stringSet) error {
+func showPkgbuildDiffs(bases []Base, cloned stringSet) error {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -720,7 +720,7 @@ func showPkgBuildDiffs(bases []Base, cloned stringSet) error {
 	return nil
 }
 
-func editPkgBuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
+func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	pkgbuilds := make([]string, 0, len(bases))
 	for _, base := range bases {
 		pkg := base.Pkgbase()
@@ -748,7 +748,7 @@ func editPkgBuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	return nil
 }
 
-func parseSRCINFOFiles(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
+func parseSrcinfoFiles(bases []Base, srcinfos map[string]*gosrc.Srcinfo, errIsFatal bool) error {
 	for k, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -758,7 +758,11 @@ func parseSRCINFOFiles(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
-			return fmt.Errorf("%s: %s", formatPkgbase(base), err)
+			if !errIsFatal {
+				fmt.Printf("failed to parse %s -- skipping: %s\n", formatPkgbase(base), err)
+				continue
+			}
+			return fmt.Errorf("failed to parse %s: %s", formatPkgbase(base), err)
 		}
 
 		srcinfos[pkg] = pkgbuild
@@ -767,25 +771,7 @@ func parseSRCINFOFiles(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	return nil
 }
 
-func tryParsesrcinfosFile(bases []Base, srcinfos map[string]*gosrc.Srcinfo) {
-	for k, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-
-		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(bases), cyan(formatPkgbase(base)))
-
-		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
-		if err != nil {
-			fmt.Printf("cannot parse %s skipping: %s\n", formatPkgbase(base), err)
-			continue
-		}
-
-		srcinfos[pkg] = pkgbuild
-	}
-}
-
-func pkgBuildsToSkip(bases []Base, targets stringSet) stringSet {
+func pkgbuildsToSkip(bases []Base, targets stringSet) stringSet {
 	toSkip := make(stringSet)
 
 	for _, base := range bases {
@@ -809,7 +795,7 @@ func pkgBuildsToSkip(bases []Base, targets stringSet) stringSet {
 	return toSkip
 }
 
-func mergePkgBuilds(bases []Base) error {
+func mergePkgbuilds(bases []Base) error {
 	for _, base := range bases {
 		if shouldUseGit(filepath.Join(config.BuildDir, base.Pkgbase())) {
 			err := gitMerge(config.BuildDir, base.Pkgbase())
@@ -822,7 +808,7 @@ func mergePkgBuilds(bases []Base) error {
 	return nil
 }
 
-func downloadPkgBuilds(bases []Base, toSkip stringSet) (stringSet, error) {
+func downloadPkgbuilds(bases []Base, toSkip stringSet) (stringSet, error) {
 	cloned := make(stringSet)
 	downloaded := 0
 	var wg sync.WaitGroup
@@ -878,7 +864,7 @@ func downloadPkgBuilds(bases []Base, toSkip stringSet) (stringSet, error) {
 	return cloned, errs.Return()
 }
 
-func downloadPkgBuildsSources(bases []Base, incompatible stringSet) (err error) {
+func downloadPkgbuildsSources(bases []Base, incompatible stringSet) (err error) {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -897,7 +883,7 @@ func downloadPkgBuildsSources(bases []Base, incompatible stringSet) (err error) 
 	return
 }
 
-func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
+func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
 	for _, base := range do.Aur {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -1057,14 +1043,4 @@ func buildInstallPkgBuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 	}
 
 	return nil
-}
-
-func clean(bases []Base) {
-	for _, base := range bases {
-		dir := filepath.Join(config.BuildDir, base.Pkgbase())
-
-		fmt.Println(bold(green(arrow +
-			" CleanAfter enabled. Deleting " + base.Pkgbase() + " source folder.")))
-		os.RemoveAll(dir)
-	}
 }
