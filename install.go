@@ -253,7 +253,6 @@ func install(parser *arguments) error {
 		config.NoConfirm = oldValue
 	}
 
-	//TODO: fix for split packages maybe?
 	incompatible, err = getIncompatible(do.Aur, srcinfos)
 	if err != nil {
 		return err
@@ -417,6 +416,7 @@ func earlyRefresh(parser *arguments) error {
 
 func getIncompatible(bases []Base, srcinfos map[string]*gosrc.Srcinfo) (stringSet, error) {
 	incompatible := make(stringSet)
+	basesMap := make(map[string]Base)
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
 		return nil, err
@@ -431,13 +431,14 @@ nextpkg:
 		}
 
 		incompatible.set(base.Pkgbase())
+		basesMap[base.Pkgbase()] = base
 	}
 
 	if len(incompatible) > 0 {
 		fmt.Println()
 		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatible with your architecture:")
 		for pkg := range incompatible {
-			fmt.Print("  " + cyan(pkg))
+			fmt.Print("  " + cyan(formatPkgbase(basesMap[pkg])))
 		}
 
 		fmt.Println()
