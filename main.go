@@ -11,30 +11,18 @@ import (
 )
 
 func setPaths() error {
-	if _configHome, set := os.LookupEnv("XDG_CONFIG_HOME"); set {
-		if _configHome == "" {
-			return fmt.Errorf("XDG_CONFIG_HOME set but empty")
-		}
-		configHome = filepath.Join(_configHome, "yay")
-	} else if _configHome, set := os.LookupEnv("HOME"); set {
-		if _configHome == "" {
-			return fmt.Errorf("HOME set but empty")
-		}
-		configHome = filepath.Join(_configHome, ".config/yay")
+	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
+		configHome = filepath.Join(configHome, "yay")
+	} else if configHome = os.Getenv("HOME"); configHome != "" {
+		configHome = filepath.Join(configHome, ".config/yay")
 	} else {
 		return fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
 	}
 
-	if _cacheHome, set := os.LookupEnv("XDG_CACHE_HOME"); set {
-		if _cacheHome == "" {
-			return fmt.Errorf("XDG_CACHE_HOME set but empty")
-		}
-		cacheHome = filepath.Join(_cacheHome, "yay")
-	} else if _cacheHome, set := os.LookupEnv("HOME"); set {
-		if _cacheHome == "" {
-			return fmt.Errorf("XDG_CACHE_HOME set but empty")
-		}
-		cacheHome = filepath.Join(_cacheHome, ".cache/yay")
+	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
+		cacheHome = filepath.Join(cacheHome, "yay")
+	} else if cacheHome = os.Getenv("HOME"); cacheHome != "" {
+		cacheHome = filepath.Join(cacheHome, ".cache/yay")
 	} else {
 		return fmt.Errorf("XDG_CACHE_HOME and HOME unset")
 	}
