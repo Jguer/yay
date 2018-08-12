@@ -46,59 +46,67 @@ func setPaths() error {
 }
 
 func initConfig() error {
-	defaultSettings(&config)
-
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		if err = os.MkdirAll(filepath.Dir(configFile), 0755); err != nil {
-			return fmt.Errorf("Unable to create config directory:\n%s\n"+
-				"The error was:\n%s", filepath.Dir(configFile), err)
-		}
-		// Save the default config if nothing is found
-		return config.saveConfig()
-	} else if err != nil {
-		return err
-	}
-
-	cfile, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return fmt.Errorf("Error reading config: %s\n", err)
+	cfile, err := os.Open(configFile)
+	if !os.IsNotExist(err) && err != nil {
+		return fmt.Errorf("Failed to open config file '%s': %s", configFile, err)
 	}
 
 	defer cfile.Close()
-	decoder := json.NewDecoder(cfile)
-	if err = decoder.Decode(&config); err != nil {
-		return fmt.Errorf("Error reading config: %s",
-			err)
-	}
-
-	if _, err = os.Stat(config.BuildDir); os.IsNotExist(err) {
-		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
-			return fmt.Errorf("Unable to create BuildDir directory:\n%s\n"+
-				"The error was:\n%s", config.BuildDir, err)
+	if !os.IsNotExist(err) {
+		decoder := json.NewDecoder(cfile)
+		if err = decoder.Decode(&config); err != nil {
+			return fmt.Errorf("Failed to read config '%s': %s", configFile, err)
 		}
 	}
 
-	return err
+	return nil
 }
 
 func initVCS() error {
-	if _, err := os.Stat(vcsFile); os.IsNotExist(err) {
-		if err = os.MkdirAll(filepath.Dir(vcsFile), 0755); err != nil {
-			return fmt.Errorf("Unable to create vcs directory:\n%s\n"+
-				"The error was:\n%s", filepath.Dir(configFile), err)
+	vfile, err := os.Open(vcsFile)
+	if !os.IsNotExist(err) && err != nil {
+		return fmt.Errorf("Failed to open vcs file '%s': %s", vcsFile, err)
+	}
+
+	defer vfile.Close()
+	if !os.IsNotExist(err) {
+		decoder := json.NewDecoder(vfile)
+		if err = decoder.Decode(&savedInfo); err != nil {
+			return fmt.Errorf("Failed to read vcs '%s': %s", vcsFile, err)
+		}
+	}
+
+	return nil
+}
+
+func initHomeDirs() error {
+	if _, err := os.Stat(configHome); os.IsNotExist(err) {
+		if err = os.MkdirAll(configHome, 0755); err != nil {
+			return fmt.Errorf("Failed to create config directory '%s': %s", configHome, err)
 		}
 	} else if err != nil {
 		return err
 	}
 
-	vfile, err := os.OpenFile(vcsFile, os.O_RDONLY|os.O_CREATE, 0644)
-	if err != nil {
+	if _, err := os.Stat(cacheHome); os.IsNotExist(err) {
+		if err = os.MkdirAll(cacheHome, 0755); err != nil {
+			return fmt.Errorf("Failed to create cache directory '%s': %s", cacheHome, err)
+		}
+	} else if err != nil {
 		return err
 	}
 
-	defer vfile.Close()
-	decoder := json.NewDecoder(vfile)
-	_ = decoder.Decode(&savedInfo)
+	return nil
+}
+
+func initBuildDir() error {
+	if _, err := os.Stat(config.BuildDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
+			return fmt.Errorf("Failed to create BuildDir directory '%s': %s", config.BuildDir, err)
+		}
+	} else if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -201,10 +209,12 @@ func main() {
 		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	exitOnError(cmdArgs.parseCommandLine())
 	exitOnError(setPaths())
+	defaultSettings(&config)
+	exitOnError(initHomeDirs())
 	exitOnError(initConfig())
-	cmdArgs.extractYayOptions()
+	exitOnError(cmdArgs.parseCommandLine())
+	exitOnError(initBuildDir())
 	exitOnError(initVCS())
 	exitOnError(initAlpm())
 	exitOnError(handleCmd())

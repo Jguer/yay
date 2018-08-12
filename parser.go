@@ -853,6 +853,7 @@ func (parser *arguments) parseCommandLine() (err error) {
 		os.Stdin = file
 	}
 
+	cmdArgs.extractYayOptions()
 	return
 }
 
