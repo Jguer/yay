@@ -135,8 +135,11 @@ func getPkgbuilds(pkgs []string) error {
 	}
 
 	pkgs = removeInvalidTargets(pkgs)
-
 	aur, repo, err := packageSlices(pkgs)
+	info, err := aurInfoPrint(aur)
+	if err != nil {
+		return err
+	}
 
 	if len(repo) > 0 {
 		missing, err = getPkgbuildsfromABS(repo, wd)
@@ -146,11 +149,13 @@ func getPkgbuilds(pkgs []string) error {
 	}
 
 	if len(aur) > 0 {
-		_missing, err := getPkgbuildsfromAUR(aur, wd)
-		if err != nil {
+		bases := getBases(info)
+		toSkip := pkgbuildsToSkip(bases, nil)
+		if _, err = downloadPkgbuilds(bases, toSkip, wd); err != nil {
 			return err
 		}
-		missing = missing || _missing
+
+		missing = missing || len(aur) != len(info)
 	}
 
 	if missing {
@@ -224,44 +229,4 @@ nextPkg:
 	}
 
 	return
-}
-
-// GetPkgbuild downloads pkgbuild from the AUR.
-func getPkgbuildsfromAUR(pkgs []string, dir string) (bool, error) {
-	missing := false
-	strippedPkgs := make([]string, 0)
-	for _, pkg := range pkgs {
-		_, name := splitDbFromName(pkg)
-		strippedPkgs = append(strippedPkgs, name)
-	}
-
-	aq, err := aurInfoPrint(strippedPkgs)
-	if err != nil {
-		return missing, err
-	}
-
-	for _, pkg := range aq {
-		if _, err := os.Stat(filepath.Join(dir, pkg.PackageBase)); err == nil {
-			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name)), "directory already exists")
-			continue
-		}
-
-		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
-			_, err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
-		} else {
-			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir)
-		}
-
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.PackageBase), "from AUR")
-		}
-	}
-
-	if len(aq) != len(pkgs) {
-		missing = true
-	}
-
-	return missing, err
 }
