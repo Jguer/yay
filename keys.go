@@ -8,12 +8,11 @@ import (
 	"strings"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
-	rpc "github.com/mikkeloscar/aur"
 )
 
 // pgpKeySet maps a PGP key with a list of PKGBUILDs that require it.
 // This is similar to stringSet, used throughout the code.
-type pgpKeySet map[string][]*rpc.Pkg
+type pgpKeySet map[string][]Base
 
 func (set pgpKeySet) toSlice() []string {
 	slice := make([]string, 0, len(set))
@@ -23,14 +22,11 @@ func (set pgpKeySet) toSlice() []string {
 	return slice
 }
 
-func (set pgpKeySet) set(key string, p *rpc.Pkg) {
+func (set pgpKeySet) set(key string, p Base) {
 	// Using ToUpper to make sure keys with a different case will be
 	// considered the same.
 	upperKey := strings.ToUpper(key)
-	if _, exists := set[upperKey]; !exists {
-		set[upperKey] = []*rpc.Pkg{}
-	}
-	set[key] = append(set[key], p)
+	set[key] = append(set[upperKey], p)
 }
 
 func (set pgpKeySet) get(key string) bool {
@@ -41,28 +37,29 @@ func (set pgpKeySet) get(key string) bool {
 
 // checkPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[string]*gosrc.Srcinfo) error {
+func checkPgpKeys(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
 	args := append(strings.Fields(config.GpgFlags), "--list-keys")
 
 	// Mapping all the keys.
-	for _, pkg := range pkgs {
-		srcinfo := srcinfos[pkg.PackageBase]
+	for _, base := range bases {
+		pkg := base.Pkgbase()
+		srcinfo := srcinfos[pkg]
 
 		for _, key := range srcinfo.ValidPGPKeys {
 			// If key already marked as problematic, indicate the current
 			// PKGBUILD requires it.
 			if problematic.get(key) {
-				problematic.set(key, pkg)
+				problematic.set(key, base)
 				continue
 			}
 
 			cmd := exec.Command(config.GpgBin, append(args, key)...)
 			err := cmd.Run()
 			if err != nil {
-				problematic.set(key, pkg)
+				problematic.set(key, base)
 			}
 		}
 	}
@@ -72,7 +69,7 @@ func checkPgpKeys(pkgs []*rpc.Pkg, bases map[string][]*rpc.Pkg, srcinfos map[str
 		return nil
 	}
 
-	str, err := formatKeysToImport(problematic, bases)
+	str, err := formatKeysToImport(problematic)
 	if err != nil {
 		return err
 	}
@@ -104,7 +101,7 @@ func importKeys(keys []string) error {
 
 // formatKeysToImport receives a set of keys and returns a string containing the
 // question asking the user wants to import the problematic keys.
-func formatKeysToImport(keys pgpKeySet, bases map[string][]*rpc.Pkg) (string, error) {
+func formatKeysToImport(keys pgpKeySet) (string, error) {
 	if len(keys) == 0 {
 		return "", fmt.Errorf("%s No keys to import", bold(red(arrow+" Error:")))
 	}
@@ -112,12 +109,12 @@ func formatKeysToImport(keys pgpKeySet, bases map[string][]*rpc.Pkg) (string, er
 	var buffer bytes.Buffer
 	buffer.WriteString(bold(green(arrow)))
 	buffer.WriteString(bold(green(" PGP keys need importing:")))
-	for key, pkgs := range keys {
+	for key, bases := range keys {
 		pkglist := ""
-		for _, pkg := range pkgs {
-			pkglist += formatPkgbase(pkg, bases) + " "
+		for _, base := range bases {
+			pkglist += base.String() + "  "
 		}
-		pkglist = strings.TrimRight(pkglist, " ")
+		pkglist = strings.TrimRight(pkglist, "  ")
 		buffer.WriteString(fmt.Sprintf("\n%s %s, required by: %s", yellow(bold(smallArrow)), cyan(key), cyan(pkglist)))
 	}
 	return buffer.String(), nil

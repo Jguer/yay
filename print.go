@@ -143,11 +143,12 @@ func (s repoQuery) printSearch() {
 // Pretty print a set of packages from the same package base.
 // Packages foo and bar from a pkgbase named base would print like so:
 // base (foo bar)
-func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
+func (base Base) String() string {
+	pkg := base[0]
 	str := pkg.PackageBase
-	if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+	if len(base) > 1 || pkg.PackageBase != pkg.Name {
 		str2 := " ("
-		for _, split := range bases[pkg.PackageBase] {
+		for _, split := range base {
 			str2 += split.Name + " "
 		}
 		str2 = str2[:len(str2)-1] + ")"
@@ -210,18 +211,19 @@ func (do *depOrder) Print() {
 		}
 	}
 
-	for _, pkg := range do.Aur {
-		pkgStr := "  " + pkg.PackageBase + "-" + pkg.Version
+	for _, base := range do.Aur {
+		pkg := base.Pkgbase()
+		pkgStr := "  " + pkg + "-" + base[0].Version
 		pkgStrMake := pkgStr
 
 		push := false
 		pushMake := false
 
-		if len(do.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+		if len(base) > 1 || pkg != base[0].Name {
 			pkgStr += " ("
 			pkgStrMake += " ("
 
-			for _, split := range do.Bases[pkg.PackageBase] {
+			for _, split := range base {
 				if do.Runtime.get(split.Name) {
 					pkgStr += split.Name + " "
 					aurLen++
@@ -235,7 +237,7 @@ func (do *depOrder) Print() {
 
 			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
 			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
-		} else if do.Runtime.get(pkg.Name) {
+		} else if do.Runtime.get(base[0].Name) {
 			aurLen++
 			push = true
 		} else {
