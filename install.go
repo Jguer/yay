@@ -175,13 +175,15 @@ func install(parser *arguments) error {
 	}
 
 	if config.CleanMenu {
-		askClean := pkgbuildNumberMenu(do.Aur, remoteNamesCache)
-		toClean, err := cleanNumberMenu(do.Aur, remoteNamesCache, askClean)
-		if err != nil {
-			return err
-		}
+		if anyExistInCache(do.Aur) {
+			askClean := pkgbuildNumberMenu(do.Aur, remoteNamesCache)
+			toClean, err := cleanNumberMenu(do.Aur, remoteNamesCache, askClean)
+			if err != nil {
+				return err
+			}
 
-		cleanBuilds(toClean)
+			cleanBuilds(toClean)
+		}
 	}
 
 	toSkip := pkgbuildsToSkip(do.Aur, targets)
@@ -483,6 +485,19 @@ func parsePackageList(dir string) (map[string]string, string, error) {
 	}
 
 	return pkgdests, version, nil
+}
+
+func anyExistInCache(bases []Base) bool {
+	for _, base := range bases {
+		pkg := base.Pkgbase()
+		dir := filepath.Join(config.BuildDir, pkg)
+
+		if _, err := os.Stat(dir); !os.IsNotExist(err) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func pkgbuildNumberMenu(bases []Base, installed stringSet) bool {
