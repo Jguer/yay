@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	alpm "github.com/jguer/go-alpm"
 )
@@ -105,10 +106,10 @@ func gitDiff(path string, name string) error {
 }
 
 // DownloadAndUnpack downloads url tgz and extracts to path.
-func downloadAndUnpack(url string, path string) (err error) {
-	err = os.MkdirAll(path, 0755)
+func downloadAndUnpack(url string, path string) error {
+	err := os.MkdirAll(path, 0755)
 	if err != nil {
-		return
+		return err
 	}
 
 	fileName := filepath.Base(url)
@@ -118,15 +119,15 @@ func downloadAndUnpack(url string, path string) (err error) {
 
 	err = downloadFile(tarLocation, url)
 	if err != nil {
-		return
+		return err
 	}
 
-	err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
+	_, stderr, err := capture(exec.Command(config.TarBin, "-xf", tarLocation, "-C", path))
 	if err != nil {
-		return
+		return fmt.Errorf("%s", stderr)
 	}
 
-	return
+	return nil
 }
 
 func getPkgbuilds(pkgs []string) error {
@@ -175,17 +176,23 @@ func getPkgbuilds(pkgs []string) error {
 
 // GetPkgbuild downloads pkgbuild from the ABS.
 func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
-	missing := false
+	var wg sync.WaitGroup
+	var mux sync.Mutex
+	var errs MultiError
+	names := make(map[string]string)
+	missing := make([]string, 0)
+	downloaded := 0
+
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
-		return missing, err
+		return false, err
 	}
 
-	for n, pkgN := range pkgs {
-		pkgDb, name := splitDbFromName(pkgN)
+	for _, pkgN := range pkgs {
 		var pkg *alpm.Package
 		var err error
 		var url string
+		pkgDb, name := splitDbFromName(pkgN)
 
 		if pkgDb != "" {
 			if db, err := alpmHandle.SyncDbByName(pkgDb); err == nil {
@@ -201,8 +208,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		}
 
 		if pkg == nil {
-			fmt.Println(name, "could not find package in database")
-			missing = true
+			missing = append(missing, name)
 			continue
 		}
 
@@ -211,33 +217,52 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 			name = pkg.Name()
 		}
 
-		if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
-			fmt.Println(err)
-			continue
-		}
-
 		switch pkg.DB().Name() {
 		case "core", "extra", "testing":
 			url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
 		case "community", "multilib", "community-testing", "multilib-testing":
 			url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
 		default:
-			fmt.Println(name, "not in standard repositories")
+			missing = append(missing, name)
 			continue
 		}
 
-		if err = downloadAndUnpack(url, cacheHome); err != nil {
-			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(err.Error())))
+		if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
+			fmt.Println(bold(red(smallArrow)), err)
+			continue
 		}
 
-		err = exec.Command("mv", filepath.Join(cacheHome, "packages", name, "trunk"), filepath.Join(path, name)).Run()
-		if err != nil {
-			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(err.Error())))
-		} else {
-			fmt.Printf(bold(cyan("::"))+" Downloaded PKGBUILD from ABS (%d/%d): %s\n", n+1, len(pkgs), cyan(pkg.Name()))
-		}
+		names[name] = url
 	}
 
-	err = os.RemoveAll(filepath.Join(cacheHome, "packages"))
-	return missing, err
+	if len(missing) != 0 {
+		fmt.Println(yellow(bold(smallArrow)), "Missing ABS packages: ", cyan(strings.Join(missing, "  ")))
+	}
+
+	download := func(pkg string, url string) {
+		defer wg.Done()
+		if err := downloadAndUnpack(url, cacheHome); err != nil {
+			errs.Add(fmt.Errorf("%s Failed to get pkgbuild: %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(err.Error()))))
+			return
+		}
+
+		_, stderr, err := capture(exec.Command("mv", filepath.Join(cacheHome, "packages", pkg, "trunk"), filepath.Join(path, pkg)))
+		mux.Lock()
+		downloaded++
+		if err != nil {
+			errs.Add(fmt.Errorf("%s Failed to move %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(string(stderr)))))
+		} else {
+			fmt.Printf(bold(cyan("::"))+" Downloaded PKGBUILD from ABS (%d/%d): %s\n", downloaded, len(names), cyan(pkg))
+		}
+		mux.Unlock()
+	}
+
+	for name, url := range names {
+		wg.Add(1)
+		go download(name, url)
+	}
+
+	wg.Wait()
+	errs.Add(os.RemoveAll(filepath.Join(cacheHome, "packages")))
+	return len(missing) != 0, errs.Return()
 }
