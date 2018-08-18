@@ -478,7 +478,7 @@ func parsePackageList(dir string) (map[string]string, string, error) {
 		// This assumes 3 dashes after the pkgname, Will cause an error
 		// if the PKGEXT contains a dash. Please no one do that.
 		pkgname := strings.Join(split[:len(split)-3], "-")
-		version = strings.Join(split[len(split)-3:len(split)-2], "-")
+		version = strings.Join(split[len(split)-3:len(split)-1], "-")
 		pkgdests[pkgname] = line
 	}
 
