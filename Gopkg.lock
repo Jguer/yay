@@ -3,25 +3,35 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:5f709618dc8a0ff9221d3685c95d69ed7d80ca94e58f3483f5d9bdefb4e6bb25"
   name = "github.com/Morganamilo/go-srcinfo"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "368edc79b2c53cd9c065818fd4e65843ef3e9e11"
 
 [[projects]]
   branch = "master"
+  digest = "1:7681cb2a269451c1a0f781e1241ce0bd8e515d5e9a3b12f67fd768bafe08e682"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
-  revision = "c3ee958efac942186012cc67de8fe5e7a5b3685d"
+  pruneopts = "NUT"
+  revision = "39edc7671fa431a0d14ba6e023f5f2290a86333b"
 
 [[projects]]
   branch = "master"
+  digest = "1:07c508c49b9c13cf582c2b986635d0acd11e113e0535fa4b147026e15bc64185"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "f998dbf94dc47ef839c76740efeb673d3459be1f"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2a7c6ddb680b62cd3f3cf47a0dfdad617e4a42e29204c75ecf5be3271feda5e1"
+  input-imports = [
+    "github.com/Morganamilo/go-srcinfo",
+    "github.com/jguer/go-alpm",
+    "github.com/mikkeloscar/aur",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
