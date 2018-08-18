@@ -25,8 +25,8 @@ func capture(cmd *exec.Cmd) (string, string, error) {
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
 	err := cmd.Run()
-	stdout := outbuf.String()
-	stderr := errbuf.String()
+	stdout := strings.TrimSpace(outbuf.String())
+	stderr := strings.TrimSpace(errbuf.String())
 
 	return stdout, stderr, err
 }
