@@ -31,7 +31,8 @@ Perform yay specific print operations.
 
 .TP
 .B \-G, \-\-getpkgbuild
-Downloads PKGBUILD from ABS or AUR.
+Downloads PKGBUILD from ABS or AUR. ABS pkgbuilds are always downloaded using
+tarballs and taken from trunk. The ABS can only be used for Arch Linux repositories
 
 .RE
 If no arguments are provided 'yay \-Syu' will be performed.
@@ -276,7 +277,7 @@ Show a detailed list of updates in a similar format to VerbosePkgLists.
 Upgrades can also be skipped using numbers, number ranges or repo names.
 Adidionally ^ can be used to invert the selection.
 
-\fBWarning\fR: It is not recommended to skip updates from the repositores as
+\fBWarning\fR: It is not recommended to skip updates from the repositories as
 this can lead to partial upgrades. This feature is intended to easily skip AUR
 updates on the fly that may be broken or have a long compile time. Ultimately
 it is up to the user what upgrades they skip.
