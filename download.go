@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	alpm "github.com/jguer/go-alpm"
 )
 
 // Decide what download method to use:
@@ -136,6 +138,12 @@ func getPkgbuilds(pkgs []string) error {
 
 	pkgs = removeInvalidTargets(pkgs)
 	aur, repo, err := packageSlices(pkgs)
+
+	for n := range aur {
+		_, pkg := splitDbFromName(aur[n])
+		aur[n] = pkg
+	}
+
 	info, err := aurInfoPrint(aur)
 	if err != nil {
 		return err
@@ -166,67 +174,70 @@ func getPkgbuilds(pkgs []string) error {
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string) (missing bool, err error) {
+func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
+	missing := false
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
-		return
+		return missing, err
 	}
 
-nextPkg:
-	for _, pkgN := range pkgs {
+	for n, pkgN := range pkgs {
 		pkgDb, name := splitDbFromName(pkgN)
+		var pkg *alpm.Package
+		var err error
+		var url string
 
-		for _, db := range dbList.Slice() {
-			if pkgDb != "" && db.Name() != pkgDb {
-				continue
+		if pkgDb != "" {
+			if db, err := alpmHandle.SyncDbByName(pkgDb); err == nil {
+				pkg, err = db.PkgByName(name)
 			}
-
-			pkg, err := db.PkgByName(name)
-			if err == nil {
-				var url string
-				name := pkg.Base()
-				if name == "" {
-					name = pkg.Name()
+		} else {
+			dbList.ForEach(func(db alpm.Db) error {
+				if pkg, err = db.PkgByName(name); err == nil {
+					return fmt.Errorf("")
 				}
-
-				if _, err := os.Stat(filepath.Join(path, name)); err == nil {
-					fmt.Println(bold(red(arrow)), bold(cyan(name)), "directory already exists")
-					continue nextPkg
-				}
-
-				switch db.Name() {
-				case "core", "extra":
-					url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
-				case "community", "multilib":
-					url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
-				default:
-					fmt.Println(pkgN, "not in standard repositories")
-					continue nextPkg
-				}
-
-				errD := downloadAndUnpack(url, cacheHome)
-				if errD != nil {
-					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
-				}
-
-				errD = exec.Command("mv", filepath.Join(cacheHome, "packages", name, "trunk"), filepath.Join(path, name)).Run()
-				if errD != nil {
-					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
-				} else {
-					fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")
-				}
-
-				continue nextPkg
-			}
+				return nil
+			})
 		}
 
-		fmt.Println(pkgN, "could not find package in database")
-		missing = true
+		if pkg == nil {
+			fmt.Println(name, "could not find package in database")
+			missing = true
+			continue
+		}
+
+		name = pkg.Base()
+		if name == "" {
+			name = pkg.Name()
+		}
+
+		if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		switch pkg.DB().Name() {
+		case "core", "extra", "testing":
+			url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
+		case "community", "multilib", "community-testing", "multilib-testing":
+			url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
+		default:
+			fmt.Println(name, "not in standard repositories")
+			continue
+		}
+
+		if err = downloadAndUnpack(url, cacheHome); err != nil {
+			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(err.Error())))
+		}
+
+		err = exec.Command("mv", filepath.Join(cacheHome, "packages", name, "trunk"), filepath.Join(path, name)).Run()
+		if err != nil {
+			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(err.Error())))
+		} else {
+			fmt.Printf(bold(cyan("::"))+" Downloaded PKGBUILD from ABS (%d/%d): %s\n", n+1, len(pkgs), cyan(pkg.Name()))
+		}
 	}
 
-	if _, err := os.Stat(filepath.Join(cacheHome, "packages")); err == nil {
-		os.RemoveAll(filepath.Join(cacheHome, "packages"))
-	}
-
-	return
+	err = os.RemoveAll(filepath.Join(cacheHome, "packages"))
+	return missing, err
 }
