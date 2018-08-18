@@ -139,10 +139,10 @@ func (err *MultiError) Error() string {
 	str := ""
 
 	for _, e := range err.Errors {
-		str += e.Error()
+		str += e.Error() + "\n"
 	}
 
-	return str
+	return str[:len(str)-1]
 }
 
 func (err *MultiError) Add(e error) {
