@@ -185,7 +185,7 @@ func install(parser *arguments) error {
 	}
 
 	toSkip := pkgbuildsToSkip(do.Aur, targets)
-	cloned, err := downloadPkgbuilds(do.Aur, toSkip)
+	cloned, err := downloadPkgbuilds(do.Aur, toSkip, config.BuildDir)
 	if err != nil {
 		return err
 	}
@@ -809,7 +809,7 @@ func mergePkgbuilds(bases []Base) error {
 	return nil
 }
 
-func downloadPkgbuilds(bases []Base, toSkip stringSet) (stringSet, error) {
+func downloadPkgbuilds(bases []Base, toSkip stringSet, buildDir string) (stringSet, error) {
 	cloned := make(stringSet)
 	downloaded := 0
 	var wg sync.WaitGroup
@@ -830,7 +830,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet) (stringSet, error) {
 		}
 
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg)) {
-			clone, err := gitDownload(baseURL+"/"+pkg+".git", config.BuildDir, pkg)
+			clone, err := gitDownload(baseURL+"/"+pkg+".git", buildDir, pkg)
 			if err != nil {
 				errs.Add(err)
 				return
@@ -841,7 +841,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet) (stringSet, error) {
 				mux.Unlock()
 			}
 		} else {
-			err := downloadAndUnpack(baseURL+base.URLPath(), config.BuildDir)
+			err := downloadAndUnpack(baseURL+base.URLPath(), buildDir)
 			if err != nil {
 				errs.Add(err)
 				return

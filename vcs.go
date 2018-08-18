@@ -38,7 +38,7 @@ func createDevelDB() error {
 
 	bases := getBases(info)
 	toSkip := pkgbuildsToSkip(bases, sliceToStringSet(remoteNames))
-	downloadPkgbuilds(bases, toSkip)
+	downloadPkgbuilds(bases, toSkip, config.BuildDir)
 	srcinfos, _ := parseSrcinfoFiles(bases, false)
 
 	for _, pkgbuild := range srcinfos {
