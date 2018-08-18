@@ -931,9 +931,23 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			built = false
 		}
 
+		if cmdArgs.existsArg("needed") {
+			installed := true
+			for _, split := range base {
+				if alpmpkg, err := dp.LocalDb.PkgByName(split.Name); err != nil || alpmpkg.Version() != version {
+					installed = false
+				}
+			}
+
+			if installed {
+				fmt.Println(cyan(pkg+"-"+version) + bold(" is up to date -- skipping"))
+				continue
+			}
+		}
+
 		if built {
 			fmt.Println(bold(yellow(arrow)),
-				cyan(pkg+"-"+version)+bold(" Already made -- skipping build"))
+				cyan(pkg+"-"+version)+bold(" already made -- skipping build"))
 		} else {
 			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 
