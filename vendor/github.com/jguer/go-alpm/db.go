@@ -8,6 +8,7 @@ package alpm
 
 /*
 #include <alpm.h>
+#include <alpm_list.h>
 */
 import "C"
 
@@ -158,21 +159,13 @@ func (db Db) PkgCache() PackageList {
 }
 
 func (db Db) Search(targets []string) PackageList {
-	needles := &C.alpm_list_t{}
-	head := needles
-	needles.data = unsafe.Pointer(C.CString(targets[0]))
+	var needles *C.alpm_list_t
 
-	for _, str := range targets[1:] {
-		needles.next = &C.alpm_list_t{}
-		needles = needles.next
-		needles.data = unsafe.Pointer(C.CString(str))
+	for _, str := range targets {
+		needles = C.alpm_list_add(needles, unsafe.Pointer(C.CString(str)))
 	}
 
 	pkglist := (*list)(unsafe.Pointer(C.alpm_db_search(db.ptr, needles)))
-
-	for needles = head; needles != nil; needles = needles.next {
-		C.free(needles.data)
-	}
-
+	C.alpm_list_free(needles)
 	return PackageList{pkglist, db.handle}
 }
