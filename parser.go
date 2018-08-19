@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	rpc "github.com/mikkeloscar/aur"
 )
 
 // A basic set implementation for strings.
@@ -873,6 +875,9 @@ func (parser *arguments) extractYayOptions() {
 			parser.delArg(option)
 		}
 	}
+
+	rpc.AURURL = strings.TrimRight(config.AURURL, "/") + "/rpc.php?"
+	config.AURURL = strings.TrimRight(config.AURURL, "/")
 }
 
 //parses input for number menus splitted by spaces or commas
