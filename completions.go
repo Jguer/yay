@@ -13,7 +13,7 @@ import (
 
 //CreateAURList creates a new completion file
 func createAURList(out *os.File) (err error) {
-	resp, err := http.Get("https://aur.archlinux.org/packages.gz")
+	resp, err := http.Get(config.AURURL + "/packages.gz")
 	if err != nil {
 		return err
 	}
