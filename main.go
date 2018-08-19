@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
+	"net/url"
 
 	alpm "github.com/jguer/go-alpm"
+	rpc "github.com/mikkeloscar/aur"
 )
 
 func setPaths() error {
@@ -46,6 +49,13 @@ func initConfig() error {
 			return fmt.Errorf("Failed to read config '%s': %s", configFile, err)
 		}
 	}
+
+	url, err := url.Parse(config.AURURL)
+	if err != nil {
+		return err
+	}
+	url.Path = path.Join(url.Path, "")
+	rpc.AURURL = url.String() + "/rpc.php?"
 
 	return nil
 }
