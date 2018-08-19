@@ -285,7 +285,7 @@ func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Version", a.Version)
 	printInfoValue("Description", a.Description)
 	printInfoValue("URL", a.URL)
-	printInfoValue("AUR URL", baseURL+"/packages/"+a.Name)
+	printInfoValue("AUR URL", config.AURURL+"/packages/"+a.Name)
 	printInfoValue("Groups", strings.Join(a.Groups, "  "))
 	printInfoValue("Licenses", strings.Join(a.License, "  "))
 	printInfoValue("Provides", strings.Join(a.Provides, "  "))
@@ -310,7 +310,7 @@ func PrintInfo(a *rpc.Pkg) {
 		printInfoValue("ID", fmt.Sprintf("%d", a.ID))
 		printInfoValue("Package Base ID", fmt.Sprintf("%d", a.PackageBaseID))
 		printInfoValue("Package Base", a.PackageBase)
-		printInfoValue("Snapshot URL", baseURL+a.URLPath)
+		printInfoValue("Snapshot URL", config.AURURL+a.URLPath)
 	}
 
 	fmt.Println()

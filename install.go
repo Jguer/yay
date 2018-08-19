@@ -845,7 +845,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet, buildDir string) (stringS
 		}
 
 		if shouldUseGit(filepath.Join(config.BuildDir, pkg)) {
-			clone, err := gitDownload(baseURL+"/"+pkg+".git", buildDir, pkg)
+			clone, err := gitDownload(config.AURURL+"/"+pkg+".git", buildDir, pkg)
 			if err != nil {
 				errs.Add(err)
 				return
@@ -856,7 +856,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet, buildDir string) (stringS
 				mux.Unlock()
 			}
 		} else {
-			err := downloadAndUnpack(baseURL+base.URLPath(), buildDir)
+			err := downloadAndUnpack(config.AURURL+base.URLPath(), buildDir)
 			if err != nil {
 				errs.Add(err)
 				return

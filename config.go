@@ -35,6 +35,7 @@ const (
 
 // Configuration stores yay's config.
 type Configuration struct {
+	AURURL             string `json:"aururl"`
 	BuildDir           string `json:"buildDir"`
 	Editor             string `json:"editor"`
 	EditorFlags        string `json:"editorflags"`
@@ -83,9 +84,6 @@ const configFileName string = "config.json"
 
 // vcsFileName holds the name of the vcs file.
 const vcsFileName string = "vcs.json"
-
-// baseURL givers the AUR default address.
-const baseURL string = "https://aur.archlinux.org"
 
 // useColor enables/disables colored printing
 var useColor bool
@@ -149,6 +147,7 @@ func (config *Configuration) saveConfig() error {
 }
 
 func defaultSettings(config *Configuration) {
+	config.AURURL = "https://aur.archlinux.org"
 	config.BuildDir = cacheHome
 	config.CleanAfter = false
 	config.Editor = ""

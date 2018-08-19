@@ -414,6 +414,7 @@ func isArg(arg string) bool {
 	case "x", "regex":
 	case "machinereadable":
 	//yay options
+	case "aururl":
 	case "save":
 	case "afterclean":
 	case "noafterclean":
@@ -493,6 +494,8 @@ func isArg(arg string) bool {
 
 func handleConfig(option, value string) bool {
 	switch option {
+	case "aururl":
+		config.AURURL = value
 	case "save":
 		shouldSaveConfig = true
 	case "afterclean":
@@ -702,6 +705,7 @@ func hasParam(arg string) bool {
 	case "gpgdir":
 	case "color":
 	//yay params
+	case "aururl":
 	case "mflags":
 	case "gpgflags":
 	case "gitflags":
