@@ -230,7 +230,7 @@ the same when parsed.
 .TP
 .B \-\-answerupgrade <Repo|^Repo|None|...>
 Set a predetermined answer for the upgrade menu question. Selects which package
-ranges or repos to omit for updades. This answer will be used instead of
+ranges or repos to omit for updates. This answer will be used instead of
 reading from standard input but will be treated exactly the same.
 
 .TP
@@ -252,7 +252,7 @@ Unset the answer for the upgrade menu.
 .TP
 .B \-\-cleanmenu
 Show the clean menu. This menu gives you the chance to fully delete the
-downloaded build files from Yay's cache before redownloing a fresh copy.
+downloaded build files from Yay's cache before redownloading a fresh copy.
 
 .TP
 .B \-\-diffmenu
@@ -275,7 +275,7 @@ recommended to edit pkgbuild variables unless you know what you are doing.
 .B \-\-upgrademenu
 Show a detailed list of updates in a similar format to VerbosePkgLists.
 Upgrades can also be skipped using numbers, number ranges or repo names.
-Adidionally ^ can be used to invert the selection.
+Additionally ^ can be used to invert the selection.
 
 \fBWarning\fR: It is not recommended to skip updates from the repositories as
 this can lead to partial upgrades. This feature is intended to easily skip AUR
@@ -388,21 +388,21 @@ PKGBUILD.
 
 .TP
 .B \-\-nopgpfetch
-Do not prompt to import unknown PGP keys. This is likley to cause a build
-failiure unless using options such as \fB\-\-skippgpcheck\fR or a customized
+Do not prompt to import unknown PGP keys. This is likely to cause a build
+failure unless using options such as \fB\-\-skippgpcheck\fR or a customized
 gpg config\%.
 
 .TP
 .B \-\-useask
 Use pacman's --ask flag to automatically confirm package conflicts. Yay lists
-conflicts ahead of time. It is possible thay Yay does not detect
-a conflict. Causing a package to be removed without the user's confimation.
-Although this is very unlikley.
+conflicts ahead of time. It is possible that Yay does not detect
+a conflict, causing a package to be removed without the user's confirmation.
+However, this is very unlikely.
 
 .TP
 .B \-\-nouseask
 Manually resolve package conflicts during the install. Packages which do not
-conflict will not need to be confimed manually.
+conflict will not need to be confined manually.
 
 .TP
 .B \-\-combinedupgrade
@@ -433,7 +433,7 @@ in cache.
 .TP
 .B \-\-rebuildtree
 When installing an AUR package rebuild and reinstall all of its AUR
-dependencies recursivley, even the ones already installed. This flag allows
+dependencies recursively, even the ones already installed. This flag allows
 you to easily rebuild packages against your current system's libraries if they
 have become incompatible.
 
