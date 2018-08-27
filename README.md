@@ -26,6 +26,7 @@ Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [
 * Tab-complete the AUR
 * Query user up-front for all input (prior to starting builds)
 * Narrow search terms (`yay linux header` will first search `linux` and then narrow on `header`)
+* Find matching package providers during search and allow selection
 * Remove make dependencies at the end of the build process
 * Run without sourcing PKGBUILD
 
