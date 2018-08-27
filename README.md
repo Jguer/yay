@@ -57,7 +57,8 @@ Install `go` and `base-devel` with _pacman_.
 
 Note that _yay_ requires a few other projects (as vendored dependencies). These
 projects are stored in `vendor/`, are built into _yay_ at build time, and do not
-need to be installed separately:
+need to be installed separately. Do not edit files in `vendor/`. Here are yay's
+current vendored dependencies:
 
 * https://github.com/Jguer/go-alpm
 * https://github.com/Morganamilo/go-srcinfo
