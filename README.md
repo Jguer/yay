@@ -13,7 +13,7 @@ So say hi to 20+1.
 
 Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [apacman](https://github.com/oshazard/apacman) and [pacaur](https://github.com/rmarquis/pacaur). It is developed with these objectives in mind:
 
-* Wrap the pacman interface
+* Provide an interface for pacman
 * Yaourt-style interactive search/install
 * Minimal dependencies
 * Minimize user input
