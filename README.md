@@ -112,7 +112,7 @@ formatted correctly, run the code through `go vet`, and run unit tests.
   `yay --editmenu --nodiffmenu --save`
 
 #### How can I tell yay to act only on AUR packages, or only on repo packages?
-  `yay -{OPERATION} --aur`  
+  `yay -{OPERATION} --aur`
   `yay -{OPERATION} --repo`
 
 #### An `Out Of Date AUR Packages` message is displayed. Why doesn't yay update them?
