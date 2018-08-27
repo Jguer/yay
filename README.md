@@ -128,19 +128,24 @@ formatted correctly, run the code through `go vet`, and run unit tests.
 
 ## Examples of Custom Operations
 
-* present package-installation selection menu  
-  `yay <Search Term>`
-* print system statistics  
-  `yay -Ps`
-* clean unneeded dependencies  
-  `yay -Yc`
-* download PKGBUILD from ABS or AUR  
-  `yay -G <AUR Package>`
-* generate development package database used for devel updates  
-  `yay -Y --gendb`
-* perform system upgrade, but also check for development package updates and use
-  PKGBUILD modification time (not version number) to determine updates  
-  `yay -Syu --devel --timeupdate`
+`yay <Search Term>`  
+&nbsp; &nbsp; &nbsp; &nbsp; Present package-installation selection menu.
+
+`yay -Ps`  
+&nbsp; &nbsp; &nbsp; &nbsp; Print system statistics.
+
+`yay -Yc`  
+&nbsp; &nbsp; &nbsp; &nbsp; Clean unneeded dependencies.
+
+`yay -G <AUR Package>`  
+&nbsp; &nbsp; &nbsp; &nbsp; Download PKGBUILD from ABS or AUR.
+
+`yay -Y --gendb`  
+&nbsp; &nbsp; &nbsp; &nbsp; Generate development package database used for devel update.
+
+`yay -Syu --devel --timeupdate`  
+&nbsp; &nbsp; &nbsp; &nbsp; Perform system upgrade, but also check for development package updates and use  
+&nbsp; &nbsp; &nbsp; &nbsp; PKGBUILD modification time (not version number) to determine update.
 
 ## Images
 
