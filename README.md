@@ -15,7 +15,7 @@ Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [
 
 * Wrap the pacman interface
 * Yaourt-style interactive search/install
-* Minimize dependencies
+* Minimal dependencies
 * Minimize user input
 * Know when git packages are due for upgrades
 
