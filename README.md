@@ -28,7 +28,6 @@ Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [
 * Narrow search terms (`yay linux header` will first search `linux` and then narrow on `header`)
 * Remove make dependencies at the end of the build process
 * Run without sourcing PKGBUILD
-* Limit runtime dependencies to subset of pacman dependencies
 
 ## Installation
 
