@@ -33,8 +33,8 @@ Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [
 
 If you are migrating from another AUR helper, you can simply install yay with that helper.
 
-If you are starting from scratch, you can install yay by cloning the PKGBUILD and
-then building with makepkg:
+Alternatively, the initial installation of yay can be done by cloning the PKGBUILD and
+building with makepkg:
 ```sh
 git clone https://aur.archlinux.org/yay.git
 cd yay
