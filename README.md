@@ -66,25 +66,23 @@ Following are the dependencies managed under dep:
 * https://github.com/Morganamilo/go-srcinfo
 * https://github.com/mikkeloscar/aur
 
-#### 2. Set GOPATH (As Needed)
-
-Yay's Makefile automatically sets the `GOPATH` to `$PWD/.go`. This path will
-ensure dependencies in `vendor/` are built. Running manual go commands such as
-`go build` will require that you either set the `GOPATH` manually or `go get`
-the vendored dependencies into your own `GOPATH`.
-
-#### 3. Build
+#### 2. Build
 
 Run `make` to build yay. This command will generate a binary called `yay` in
 the same directory as the Makefile.
 
-#### 4. Check Style
+Note: Yay's Makefile automatically sets the `GOPATH` to `$PWD/.go`. This path will
+ensure dependencies in `vendor/` are built. Running manual go commands such as
+`go build` will require that you either set the `GOPATH` manually or `go get`
+the vendored dependencies into your own `GOPATH`.
+
+#### 3. Check Style
 
 All code should be formatted through `go fmt`. This tool will automatically
 format code for you. We recommend, however, that you write code in the proper
 style and use `go fmt` only to catch mistakes.
 
-#### 5. Test
+#### 4. Test
 
 Run `make test` to test yay. This command will verify that the code is
 formatted correctly, run the code through `go vet`, and run unit tests.
