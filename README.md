@@ -51,11 +51,15 @@ on, we suggest opening an issue detailing your ideas first.
 
 Otherwise send us a pull request and we will be happy to review it.
 
-#### 1. Install Dependencies
+#### 1. Dependencies
 
-Install `go` and `base-devel` with pacman.
+Yay depends on:
 
-Note: Yay depends on a few other projects (as vendored dependencies). These
+* go (make only)
+* git
+* base-devel
+
+Note: Yay also depends on a few other projects (as vendored dependencies). These
 projects are stored in `vendor/`, are built into yay at build time, and do not
 need to be installed separately. These files are managed by
 [dep](https://github.com/golang/dep) and should not be modified manually.
