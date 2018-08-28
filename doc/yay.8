@@ -321,7 +321,14 @@ Show AUR packages first and then repository packages.
 .TP
 .B \-\-devel
 During sysupgrade also check AUR development packages for updates. Currently
-only GitHub packages are supported.
+only Git packages are supported.
+
+Devel checking is done using \fBgit ls-remote\fR. The newest commit hash is
+compared against the hash at install time. This allows devel updates to be
+checked almost instantly and not require the original pkgbuild to be downloaded.
+
+The slower pacaur-like devel checks can be implemented manually by piping
+a list of packages into yay (see \fBexamples\fR).
 
 .TP
 .B \-\-nodevel
@@ -501,6 +508,10 @@ Sets devel to true in the config.
 .TP
 yay \-P \-\-stats
 Shows statistics for installed packages and system health.
+
+.TP
+pacman -Qmq | grep -Ee '-(cvs|svn|git|hg|bzr|darcs)$' | yay -S --needed -
+pacaur-like devel check.
 
 .SH FILES
 .TP
