@@ -51,7 +51,7 @@ on, we suggest opening an issue detailing your ideas first.
 
 Otherwise send us a pull request and we will be happy to review it.
 
-#### 1. Dependencies
+#### Dependencies
 
 Yay depends on:
 
@@ -70,7 +70,7 @@ Following are the dependencies managed under dep:
 * https://github.com/Morganamilo/go-srcinfo
 * https://github.com/mikkeloscar/aur
 
-#### 2. Build
+#### Building
 
 Run `make` to build yay. This command will generate a binary called `yay` in
 the same directory as the Makefile.
@@ -80,13 +80,13 @@ ensure dependencies in `vendor/` are built. Running manual go commands such as
 `go build` will require that you either set the `GOPATH` manually or `go get`
 the vendored dependencies into your own `GOPATH`.
 
-#### 3. Check Style
+#### Code Style
 
 All code should be formatted through `go fmt`. This tool will automatically
 format code for you. We recommend, however, that you write code in the proper
 style and use `go fmt` only to catch mistakes.
 
-#### 4. Test
+#### Testing
 
 Run `make test` to test yay. This command will verify that the code is
 formatted correctly, run the code through `go vet`, and run unit tests.
