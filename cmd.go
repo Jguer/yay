@@ -39,6 +39,7 @@ Permanent configuration options:
     --save                Causes the following options to be saved back to the
                           config file when used
 
+    --aururl      <url>   Set an alternative AUR URL
     --builddir    <dir>   Directory used to download and run PKBUILDS
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor

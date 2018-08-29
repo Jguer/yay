@@ -146,34 +146,30 @@ func TestCheckPgpKeys(t *testing.T) {
 	defer server.Shutdown(context.TODO())
 
 	casetests := []struct {
-		pkgs      []*rpc.Pkg
+		pkgs      Base
 		srcinfos  map[string]*gosrc.Srcinfo
-		bases     map[string][]*rpc.Pkg
 		wantError bool
 	}{
 		// cower: single package, one valid key not yet in the keyring.
 		// 487EACC08557AD082088DABA1EB2638FF56C0C53: Dave Reisner.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("cower")},
+			pkgs:      Base{newPkg("cower")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"cower": makeSrcinfo("cower", "487EACC08557AD082088DABA1EB2638FF56C0C53")},
-			bases:     map[string][]*rpc.Pkg{"cower": {newPkg("cower")}},
 			wantError: false,
 		},
 		// libc++: single package, two valid keys not yet in the keyring.
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// B6C8F98282B944E3B0D5C2530FC3042E345AD05D: Hans Wennborg.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("libc++")},
+			pkgs:      Base{newPkg("libc++")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"libc++": makeSrcinfo("libc++", "11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D")},
-			bases:     map[string][]*rpc.Pkg{"libc++": {newPkg("libc++")}},
 			wantError: false,
 		},
 		// Two dummy packages requiring the same key.
 		// ABAF11C65A2970B130ABE3C479BE3E4300411886: Linus Torvalds.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("dummy-1"), newPkg("dummy-2")},
+			pkgs:      Base{newPkg("dummy-1"), newPkg("dummy-2")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-1": makeSrcinfo("dummy-1", "ABAF11C65A2970B130ABE3C479BE3E4300411886"), "dummy-2": makeSrcinfo("dummy-2", "ABAF11C65A2970B130ABE3C479BE3E4300411886")},
-			bases:     map[string][]*rpc.Pkg{"dummy-1": {newPkg("dummy-1")}, "dummy-2": {newPkg("dummy-2")}},
 			wantError: false,
 		},
 		// dummy package: single package, two valid keys, one of them already
@@ -181,37 +177,33 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// C52048C0C0748FEE227D47A2702353E0F7E48EDB: Thomas Dickey.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("dummy-3")},
+			pkgs:      Base{newPkg("dummy-3")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-3": makeSrcinfo("dummy-3", "11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
-			bases:     map[string][]*rpc.Pkg{"dummy-3": {newPkg("dummy-3")}},
 			wantError: false,
 		},
 		// Two dummy packages with existing keys.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("dummy-4"), newPkg("dummy-5")},
+			pkgs:      Base{newPkg("dummy-4"), newPkg("dummy-5")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-4": makeSrcinfo("dummy-4", "11E521D646982372EB577A1F8F0871F202119294"), "dummy-5": makeSrcinfo("dummy-5", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
-			bases:     map[string][]*rpc.Pkg{"dummy-4": {newPkg("dummy-4")}, "dummy-5": {newPkg("dummy-5")}},
 			wantError: false,
 		},
 		// Dummy package with invalid key, should fail.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("dummy-7")},
+			pkgs:      Base{newPkg("dummy-7")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-7": makeSrcinfo("dummy-7", "THIS-SHOULD-FAIL")},
-			bases:     map[string][]*rpc.Pkg{"dummy-7": {newPkg("dummy-7")}},
 			wantError: true,
 		},
 		// Dummy package with both an invalid an another valid key, should fail.
 		// A314827C4E4250A204CE6E13284FC34C8E4B1A25: Thomas Bächler.
 		{
-			pkgs:      []*rpc.Pkg{newPkg("dummy-8")},
+			pkgs:      Base{newPkg("dummy-8")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-8": makeSrcinfo("dummy-8", "A314827C4E4250A204CE6E13284FC34C8E4B1A25", "THIS-SHOULD-FAIL")},
-			bases:     map[string][]*rpc.Pkg{"dummy-8": {newPkg("dummy-8")}},
 			wantError: true,
 		},
 	}
 
 	for _, tt := range casetests {
-		err := checkPgpKeys(tt.pkgs, tt.bases, tt.srcinfos)
+		err := checkPgpKeys([]Base{tt.pkgs}, tt.srcinfos)
 		if !tt.wantError {
 			if err != nil {
 				t.Fatalf("Got error %q, want no error", err)
