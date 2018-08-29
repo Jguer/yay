@@ -1,4 +1,4 @@
-# yay
+# Yay
 
 Yet Another Yogurt - An AUR Helper Written in Go
 
@@ -32,9 +32,9 @@ Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [
 
 ## Installation
 
-If you are migrating from another AUR helper, you can simply install yay with that helper.
+If you are migrating from another AUR helper, you can simply install Yay with that helper.
 
-Alternatively, the initial installation of yay can be done by cloning the PKGBUILD and
+Alternatively, the initial installation of Yay can be done by cloning the PKGBUILD and
 building with makepkg:
 ```sh
 git clone https://aur.archlinux.org/yay.git
@@ -72,7 +72,7 @@ Following are the dependencies managed under dep:
 
 #### Building
 
-Run `make` to build yay. This command will generate a binary called `yay` in
+Run `make` to build Yay. This command will generate a binary called `yay` in
 the same directory as the Makefile.
 
 Note: Yay's Makefile automatically sets the `GOPATH` to `$PWD/.go`. This path will
@@ -88,7 +88,7 @@ style and use `go fmt` only to catch mistakes.
 
 #### Testing
 
-Run `make test` to test yay. This command will verify that the code is
+Run `make test` to test Yay. This command will verify that the code is
 formatted correctly, run the code through `go vet`, and run unit tests.
 
 ## Frequently Asked Questions
@@ -115,11 +115,11 @@ formatted correctly, run the code through `go vet`, and run unit tests.
 #### Yay is not asking me to edit PKGBUILDS, and I don't like the diff menu! What can I do?
   `yay --editmenu --nodiffmenu --save`
 
-#### How can I tell yay to act only on AUR packages, or only on repo packages?
+#### How can I tell Yay to act only on AUR packages, or only on repo packages?
   `yay -{OPERATION} --aur`
   `yay -{OPERATION} --repo`
 
-#### An `Out Of Date AUR Packages` message is displayed. Why doesn't yay update them?
+#### An `Out Of Date AUR Packages` message is displayed. Why doesn't Yay update them?
   This message does not mean that updated AUR packages are available. It means
   means the packages have been flagged out of date on the AUR, but
   their maintainers have not yet updated the `PKGBUILD`s
