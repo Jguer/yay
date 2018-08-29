@@ -587,9 +587,9 @@ func colourHash(name string) (output string) {
 	if !useColor {
 		return name
 	}
-	var hash = 5381
+	var hash uint = 5381
 	for i := 0; i < len(name); i++ {
-		hash = int(name[i]) + ((hash << 5) + (hash))
+		hash = uint(name[i]) + ((hash << 5) + (hash))
 	}
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
 }
