@@ -67,7 +67,7 @@ func gitDownload(url string, path string, name string) (bool, error) {
 		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 		_, stderr, err := capture(cmd)
 		if err != nil {
-			return false, fmt.Errorf("error cloning %s: stderr", name, stderr)
+			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
 		}
 
 		return true, nil

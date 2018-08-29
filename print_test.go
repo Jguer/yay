@@ -11,7 +11,7 @@ func benchmarkPrintSearch(search string, b *testing.B) {
 	os.Stdout = w
 
 	for n := 0; n < b.N; n++ {
-		res, _, _ := queryRepo(append([]string{}, search))
+		res, _ := queryRepo(append([]string{}, search))
 		res.printSearch()
 	}
 	os.Stdout = old
