@@ -46,6 +46,7 @@ complete -c $progname -s h -f -l help -n $noopt -d 'Display help'
 complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the repositories'
 complete -c $progname -n "not $noopt" -l repo -d 'Assume targets are from the AUR'
 
+complete -c $progname -n "not $noopt" -s b -l aururl -d 'Set an alternative AUR URL' -f
 complete -c $progname -n "not $noopt" -s b -l dbpath -d 'Alternative database location' -xa '(__fish_complete_directories)'
 complete -c $progname -n "not $noopt" -s r -l root -d 'Alternative installation root'
 complete -c $progname -n "not $noopt" -s v -l verbose -d 'Output more status messages'
