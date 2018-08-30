@@ -133,7 +133,7 @@ formatted correctly, run the code through `go vet`, and run unit tests.
 
 #### An `Out Of Date AUR Packages` message is displayed. Why doesn't Yay update them?
   This message does not mean that updated AUR packages are available. It means
-  means the packages have been flagged out of date on the AUR, but
+  the packages have been flagged out of date on the AUR, but
   their maintainers have not yet updated the `PKGBUILD`s
   (see [outdated AUR packages](https://wiki.archlinux.org/index.php/Arch_User_Repository#Foo_in_the_AUR_is_outdated.3B_what_should_I_do.3F)).
 
