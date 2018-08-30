@@ -109,16 +109,19 @@ Permanent configuration options:
     --timeupdate          Check packages' AUR page for changes during sysupgrade
     --notimeupdate        Do not check packages' AUR page for changes
 
-Print specific options:
+show specific options:
     -c --complete         Used for completions
     -d --defaultconfig    Print default yay configuration
     -g --currentconfig    Print current yay configuration
     -s --stats            Display system package statistics
     -w --news             Print arch news
 
-Yay specific options:
+yay specific options:
     -c --clean            Remove unneeded dependencies
        --gendb            Generates development package DB used for updating
+
+getpkgbuild specific options:
+    -f --force            Force download for existing tar packages
 
 If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed`)

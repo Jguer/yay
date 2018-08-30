@@ -11,7 +11,7 @@ _pacman_opts_commands=(
 	{-G,--getpkgbuild}'[Get PKGBUILD from ABS or AUR]'
 	{-Q,--query}'[Query the package database]'
 	{-R,--remove}'[Remove a package from the system]'
-	{-P,--print}'[Print yay information]'
+	{-P,--show}'[Print yay information]'
 	{-S,--sync}'[Synchronize packages]'
 	{-T,--deptest}'[Check if dependencies are installed]'
 	{-U,--upgrade}'[Upgrade a package]'
@@ -150,6 +150,11 @@ _pacman_opts_query_modifiers=(
 _pacman_opts_yay_modifiers=(
 	{-c,--clean}'[Remove unneeded dependencies]'
 	'--gendb[Generates development package DB used for updating]'
+)
+
+# -G
+_pacman_opts_getpkgbuild_modifiers=(
+	{-f,--force}'[Force download for existing tar packages]'
 )
 
 # -P
@@ -548,6 +553,11 @@ _pacman_zsh_comp() {
 			_arguments -s : \
 				"$_pacman_opts_yay_modifiers[@]"
 			;;
+		G*)
+			_arguments -s : \
+				"$_pacman_opts_getpkgbuild_modifiers[@]"
+			;;
+
 		*)
 
 			case ${(M)words:#--*} in

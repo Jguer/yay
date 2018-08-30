@@ -158,9 +158,29 @@ func getPkgbuilds(pkgs []string) error {
 	}
 
 	if len(aur) > 0 {
-		bases := getBases(info)
-		toSkip := pkgbuildsToSkip(bases, nil)
-		if _, err = downloadPkgbuilds(bases, toSkip, wd); err != nil {
+		allBases := getBases(info)
+		bases := make([]Base, 0)
+
+		for _, base := range allBases {
+			name := base.Pkgbase()
+			_, err = os.Stat(filepath.Join(wd, name))
+			if err != nil && !os.IsNotExist(err) {
+				fmt.Println(bold(red(smallArrow)), err)
+				continue
+			} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") || shouldUseGit(filepath.Join(wd, name)) {
+				if err = os.RemoveAll(filepath.Join(wd, name)); err != nil {
+					fmt.Println(bold(red(smallArrow)), err)
+					continue
+				}
+			} else {
+				fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
+				continue
+			}
+
+			bases = append(bases, base)
+		}
+
+		if _, err = downloadPkgbuilds(bases, nil, wd); err != nil {
 			return err
 		}
 
@@ -227,8 +247,17 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 			continue
 		}
 
-		if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
+		_, err = os.Stat(filepath.Join(path, name))
+		if err != nil && !os.IsNotExist(err) {
 			fmt.Println(bold(red(smallArrow)), err)
+			continue
+		} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") {
+			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
+				fmt.Println(bold(red(smallArrow)), err)
+				continue
+			}
+		} else {
+			fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
 			continue
 		}
 

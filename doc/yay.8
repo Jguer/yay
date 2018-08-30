@@ -87,7 +87,7 @@ used when migrating to Yay from another AUR helper.
 .B \-c, \-\-clean
 Remove unneeded dependencies.
 
-.SH PRINT OPTIONS (APPLY TO \-P AND \-\-PRINT)
+.SH SHOW OPTIONS (APPLY TO \-P AND \-\-SHOW)
 .TP
 .B \-c, \-\-complete
 Print a list of all AUR and repo packages. This is to allow shell completion
@@ -128,6 +128,13 @@ available news.
 .TP
 .B \-q, \-\-quiet
 Only show titles when printing news.
+
+.SH GETPKGBUILD OPTIONS (APPLY TO \-G AND \-\-GETPKGBUILD)
+.TP
+.B \-f, \-\-force
+Force download for packages that already exist in the current directory. This
+is to ensure directories are not accidentally overwritten. This option is not
+needed for git based downloads as \fBgit pull\fR already has saftey mechanisms.
 
 .SH PERMANENT CONFIGURATION SETTINGS
 .TP
