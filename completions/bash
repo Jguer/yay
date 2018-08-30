@@ -69,7 +69,7 @@ _yay() {
            noansweredit noanswerupgrade cleanmenu diffmenu editmenu upgrademenu
            nocleanmenu nodiffmenu noupgrademenu provides noprovides pgpfetch nopgpfetch
            useask nouseask combinedupgrade nocombinedupgrade aur repo makepkgconf
-           nomakepkgconf askremovemake removemake noremovemake completioninterval'
+           nomakepkgconf askremovemake removemake noremovemake completioninterval aururl'
            'b d h q r v')
   core=('database files help query remove sync upgrade version' 'D F Q R S U V h')
 
