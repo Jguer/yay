@@ -48,7 +48,7 @@ _pacman_repo_list() {
 
 _yay() {
   local common core cur database files prev query remove sync upgrade o
-  local yays show
+  local yays show getpkgbuild
   COMPREPLY=()
   _get_comp_words_by_ref cur prev
   database=('asdeps asexplicit')
@@ -75,9 +75,10 @@ _yay() {
 
   ##yay stuff
   yays=('clean gendb' 'c')
-  print=('complete defaultconfig currentconfig stats  news' 'c d g s w')
+  show=('complete defaultconfig currentconfig stats  news' 'c d g s w')
+  getpkgbuild=('force' 'f')
 
-  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P show'; do
+  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P show' 'G getpkgbuild'; do
     _arch_incomp "$o" && break
   done
 
