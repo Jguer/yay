@@ -389,7 +389,7 @@ func isArg(arg string) bool {
 	case "ignoregroup":
 	case "needed":
 	case "overwrite":
-	case "force":
+	case "f", "force":
 	case "c", "changelog":
 	case "deps":
 	case "e", "explicit":
