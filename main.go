@@ -198,7 +198,7 @@ func main() {
 	}
 
 	exitOnError(setPaths())
-	defaultSettings(&config)
+	config.defaultSettings()
 	exitOnError(initHomeDirs())
 	exitOnError(initConfig())
 	exitOnError(cmdArgs.parseCommandLine())

@@ -132,6 +132,8 @@ func handleCmd() (err error) {
 		config.saveConfig()
 	}
 
+	config.expandEnv()
+
 	if cmdArgs.existsArg("h", "help") {
 		err = handleHelp()
 		return
@@ -196,7 +198,8 @@ func handlePrint() (err error) {
 	switch {
 	case cmdArgs.existsArg("d", "defaultconfig"):
 		var tmpConfig Configuration
-		defaultSettings(&tmpConfig)
+		tmpConfig.defaultSettings()
+		tmpConfig.expandEnv()
 		fmt.Printf("%v", tmpConfig)
 	case cmdArgs.existsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
