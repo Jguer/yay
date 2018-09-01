@@ -146,9 +146,14 @@ func (config *Configuration) saveConfig() error {
 	return err
 }
 
-func defaultSettings(config *Configuration) {
+func (config *Configuration) defaultSettings() {
+	buildDir := "$HOME/.config/yay"
+	if os.Getenv("XDG_CONFIG_HOME") != "" {
+		buildDir = "$XDG_CONFIG_HOME/yay"
+	}
+
 	config.AURURL = "https://aur.archlinux.org"
-	config.BuildDir = cacheHome
+	config.BuildDir = buildDir
 	config.CleanAfter = false
 	config.Editor = ""
 	config.EditorFlags = ""
@@ -186,6 +191,32 @@ func defaultSettings(config *Configuration) {
 	config.EditMenu = false
 	config.UseAsk = false
 	config.CombinedUpgrade = false
+}
+
+
+func (config *Configuration) expandEnv() {
+	config.AURURL = os.ExpandEnv(config.AURURL)
+	config.BuildDir = os.ExpandEnv(config.BuildDir)
+	config.Editor = os.ExpandEnv(config.Editor)
+	config.EditorFlags = os.ExpandEnv(config.EditorFlags)
+	config.MakepkgBin = os.ExpandEnv(config.MakepkgBin)
+	config.MakepkgConf = os.ExpandEnv(config.MakepkgConf)
+	config.PacmanBin = os.ExpandEnv(config.PacmanBin)
+	config.PacmanConf = os.ExpandEnv(config.PacmanConf)
+	config.GpgFlags = os.ExpandEnv(config.GpgFlags)
+	config.MFlags = os.ExpandEnv(config.MFlags)
+	config.GitFlags = os.ExpandEnv(config.GitFlags)
+	config.SortBy = os.ExpandEnv(config.SortBy)
+	config.TarBin = os.ExpandEnv(config.TarBin)
+	config.GitBin = os.ExpandEnv(config.GitBin)
+	config.GpgBin = os.ExpandEnv(config.GpgBin)
+	config.ReDownload = os.ExpandEnv(config.ReDownload)
+	config.ReBuild = os.ExpandEnv(config.ReBuild)
+	config.AnswerClean = os.ExpandEnv(config.AnswerClean)
+	config.AnswerDiff = os.ExpandEnv(config.AnswerDiff)
+	config.AnswerEdit = os.ExpandEnv(config.AnswerEdit)
+	config.AnswerUpgrade = os.ExpandEnv(config.AnswerUpgrade)
+	config.RemoveMake = os.ExpandEnv(config.RemoveMake)
 }
 
 // Editor returns the preferred system editor.
