@@ -193,7 +193,6 @@ func (config *Configuration) defaultSettings() {
 	config.CombinedUpgrade = false
 }
 
-
 func (config *Configuration) expandEnv() {
 	config.AURURL = os.ExpandEnv(config.AURURL)
 	config.BuildDir = os.ExpandEnv(config.BuildDir)
