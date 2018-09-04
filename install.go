@@ -872,9 +872,14 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet, buildDir string) (stringS
 		mux.Unlock()
 	}
 
+	count := 0
 	for k, base := range bases {
 		wg.Add(1)
 		go download(k, base)
+		count++
+		if count%25 == 0 {
+			wg.Wait()
+		}
 	}
 
 	wg.Wait()
