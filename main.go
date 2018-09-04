@@ -202,6 +202,10 @@ func main() {
 	exitOnError(initHomeDirs())
 	exitOnError(initConfig())
 	exitOnError(cmdArgs.parseCommandLine())
+	if shouldSaveConfig {
+		config.saveConfig()
+	}
+	config.expandEnv()
 	exitOnError(initBuildDir())
 	exitOnError(initVCS())
 	exitOnError(initAlpm())
