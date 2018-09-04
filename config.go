@@ -147,9 +147,9 @@ func (config *Configuration) saveConfig() error {
 }
 
 func (config *Configuration) defaultSettings() {
-	buildDir := "$HOME/.config/yay"
-	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		buildDir = "$XDG_CONFIG_HOME/yay"
+	buildDir := "$HOME/.cache/yay"
+	if os.Getenv("XDG_CACHE_HOME") != "" {
+		buildDir = "$XDG_CACHE_HOME/yay"
 	}
 
 	config.AURURL = "https://aur.archlinux.org"
