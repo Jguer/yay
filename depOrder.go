@@ -35,18 +35,17 @@ func makeDepOrder() *depOrder {
 
 func getDepOrder(dp *depPool) *depOrder {
 	do := makeDepOrder()
-	basesMap := make(map[string]Base)
 
 	for _, target := range dp.Targets {
 		dep := target.DepString()
 		aurPkg := dp.Aur[dep]
 		if aurPkg != nil && pkgSatisfies(aurPkg.Name, aurPkg.Version, dep) {
-			do.orderPkgAur(aurPkg, dp, basesMap, true)
+			do.orderPkgAur(aurPkg, dp, true)
 		}
 
 		aurPkg = dp.findSatisfierAur(dep)
 		if aurPkg != nil {
-			do.orderPkgAur(aurPkg, dp, basesMap, true)
+			do.orderPkgAur(aurPkg, dp, true)
 		}
 
 		repoPkg := dp.findSatisfierRepo(dep)
@@ -55,14 +54,10 @@ func getDepOrder(dp *depPool) *depOrder {
 		}
 	}
 
-	for _, base := range basesMap {
-		do.Aur = append(do.Aur, base)
-	}
-
 	return do
 }
 
-func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, basesMap map[string]Base, runtime bool) {
+func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 	if runtime {
 		do.Runtime.set(pkg.Name)
 	}
@@ -72,7 +67,7 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, basesMap map[string]B
 		for _, dep := range deps {
 			aurPkg := dp.findSatisfierAur(dep)
 			if aurPkg != nil {
-				do.orderPkgAur(aurPkg, dp, basesMap, runtime && i == 0)
+				do.orderPkgAur(aurPkg, dp, runtime && i == 0)
 			}
 
 			repoPkg := dp.findSatisfierRepo(dep)
@@ -82,7 +77,14 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, basesMap map[string]B
 		}
 	}
 
-	basesMap[pkg.PackageBase] = append(basesMap[pkg.PackageBase], pkg)
+	for i, base := range do.Aur {
+		if base.Pkgbase() == pkg.PackageBase {
+			do.Aur[i] = append(base, pkg)
+			return
+		}
+	}
+
+	do.Aur = append(do.Aur, Base{pkg})
 }
 
 func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
