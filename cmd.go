@@ -128,12 +128,6 @@ If no operation is provided -Y will be assumed`)
 }
 
 func handleCmd() (err error) {
-	if shouldSaveConfig {
-		config.saveConfig()
-	}
-
-	config.expandEnv()
-
 	if cmdArgs.existsArg("h", "help") {
 		err = handleHelp()
 		return
