@@ -796,14 +796,16 @@ func pkgbuildsToSkip(bases []Base, targets stringSet) stringSet {
 			isTarget = isTarget || targets.get(pkg.Name)
 		}
 
-		if config.ReDownload == "no" || (config.ReDownload == "yes" && isTarget) {
-			dir := filepath.Join(config.BuildDir, base.Pkgbase(), ".SRCINFO")
-			pkgbuild, err := gosrc.ParseFile(dir)
+		if (config.ReDownload == "yes" && isTarget) || config.ReDownload == "all" {
+			continue
+		}
 
-			if err == nil {
-				if alpm.VerCmp(pkgbuild.Version(), base.Version()) >= 0 {
-					toSkip.set(base.Pkgbase())
-				}
+		dir := filepath.Join(config.BuildDir, base.Pkgbase(), ".SRCINFO")
+		pkgbuild, err := gosrc.ParseFile(dir)
+
+		if err == nil {
+			if alpm.VerCmp(pkgbuild.Version(), base.Version()) >= 0 {
+				toSkip.set(base.Pkgbase())
 			}
 		}
 	}
@@ -870,9 +872,14 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet, buildDir string) (stringS
 		mux.Unlock()
 	}
 
+	count := 0
 	for k, base := range bases {
 		wg.Add(1)
 		go download(k, base)
+		count++
+		if count%25 == 0 {
+			wg.Wait()
+		}
 	}
 
 	wg.Wait()
@@ -928,7 +935,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		for _, b := range base {
 			isExplicit = isExplicit || dp.Explicit.get(b.Name)
 		}
-		if config.ReBuild == "no" || (config.ReBuild == "yes" && isExplicit) {
+		if config.ReBuild == "no" || (config.ReBuild == "yes" && !isExplicit) {
 			for _, split := range base {
 				pkgdest, ok := pkgdests[split.Name]
 				if !ok {

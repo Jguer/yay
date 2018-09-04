@@ -301,14 +301,12 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 			continue
 		}
 
-		//has satisfier installed: skip
-		_, isInstalled := dp.LocalDb.PkgCache().FindSatisfier(dep)
-		if isInstalled == nil {
+		_, isInstalled := dp.LocalDb.PkgCache().FindSatisfier(dep) //has satisfier installed: skip
+		repoPkg, inRepos := dp.SyncDb.FindSatisfier(dep)           //has satisfier in repo: fetch it
+		if isInstalled == nil && (config.ReBuild != "tree" || inRepos == nil) {
 			continue
 		}
 
-		//has satisfier in repo: fetch it
-		repoPkg, inRepos := dp.SyncDb.FindSatisfier(dep)
 		if inRepos == nil {
 			dp.ResolveRepoDependency(repoPkg)
 			continue
@@ -321,7 +319,6 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 	}
 
 	err = dp.resolveAURPackages(newAURPackages, false)
-
 	return err
 }
 

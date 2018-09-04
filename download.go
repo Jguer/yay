@@ -286,9 +286,14 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		mux.Unlock()
 	}
 
+	count := 0
 	for name, url := range names {
 		wg.Add(1)
 		go download(name, url)
+		count++
+		if count%25 == 0 {
+			wg.Wait()
+		}
 	}
 
 	wg.Wait()
