@@ -935,7 +935,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		for _, b := range base {
 			isExplicit = isExplicit || dp.Explicit.get(b.Name)
 		}
-		if config.ReBuild == "no" || (config.ReBuild == "yes" && isExplicit) {
+		if config.ReBuild == "no" || (config.ReBuild == "yes" && !isExplicit) {
 			for _, split := range base {
 				pkgdest, ok := pkgdests[split.Name]
 				if !ok {
