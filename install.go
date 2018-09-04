@@ -796,14 +796,16 @@ func pkgbuildsToSkip(bases []Base, targets stringSet) stringSet {
 			isTarget = isTarget || targets.get(pkg.Name)
 		}
 
-		if config.ReDownload == "no" || (config.ReDownload == "yes" && isTarget) {
-			dir := filepath.Join(config.BuildDir, base.Pkgbase(), ".SRCINFO")
-			pkgbuild, err := gosrc.ParseFile(dir)
+		if (config.ReDownload == "yes" && isTarget) || config.ReDownload == "all" {
+			continue
+		}
 
-			if err == nil {
-				if alpm.VerCmp(pkgbuild.Version(), base.Version()) >= 0 {
-					toSkip.set(base.Pkgbase())
-				}
+		dir := filepath.Join(config.BuildDir, base.Pkgbase(), ".SRCINFO")
+		pkgbuild, err := gosrc.ParseFile(dir)
+
+		if err == nil {
+			if alpm.VerCmp(pkgbuild.Version(), base.Version()) >= 0 {
+				toSkip.set(base.Pkgbase())
 			}
 		}
 	}
