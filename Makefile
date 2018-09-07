@@ -16,7 +16,6 @@ BINNAME := yay
 PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
 
 export GOPATH=$(shell pwd)/.go
-export GOROOT=/usr/lib/go
 
 default: build
 
