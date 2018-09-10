@@ -56,7 +56,7 @@ func updateSudo() {
 
 // waitLock will lock yay checking the status of db.lck until it does not exist
 func waitLock() {
-	if _, err := os.Stat(filepath.Join(alpmConf.DBPath, "db.lck")); err != nil {
+	if _, err := os.Stat(filepath.Join(pacmanConf.DBPath, "db.lck")); err != nil {
 		return
 	}
 
@@ -64,7 +64,7 @@ func waitLock() {
 
 	for {
 		time.Sleep(3 * time.Second)
-		if _, err := os.Stat(filepath.Join(alpmConf.DBPath, "db.lck")); err != nil {
+		if _, err := os.Stat(filepath.Join(pacmanConf.DBPath, "db.lck")); err != nil {
 			fmt.Println()
 			return
 		}

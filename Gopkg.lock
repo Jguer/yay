@@ -3,6 +3,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:4e8f84eb856dd3ed05982f065caf7866a4995be9cc3718614dcecbd57e26c260"
+  name = "github.com/Morganamilo/go-pacmanconf"
+  packages = [
+    ".",
+    "ini",
+  ]
+  pruneopts = "NUT"
+  revision = "9c5265e1b14f7e21dafabbad9ccf801d3815d707"
+
+[[projects]]
+  branch = "master"
   digest = "1:5f709618dc8a0ff9221d3685c95d69ed7d80ca94e58f3483f5d9bdefb4e6bb25"
   name = "github.com/Morganamilo/go-srcinfo"
   packages = ["."]
@@ -29,6 +40,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Morganamilo/go-pacmanconf",
     "github.com/Morganamilo/go-srcinfo",
     "github.com/jguer/go-alpm",
     "github.com/mikkeloscar/aur",

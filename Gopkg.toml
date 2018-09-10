@@ -14,3 +14,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/Morganamilo/go-srcinfo"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/Morganamilo/go-pacmanconf"

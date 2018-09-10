@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	alpm "github.com/jguer/go-alpm"
 )
 
@@ -101,29 +102,32 @@ func initBuildDir() error {
 
 func initAlpm() error {
 	var err error
+	var stderr string
 
-	if alpmConf, err = readAlpmConfig(config.PacmanConf); err != nil {
-		return fmt.Errorf("Unable to read Pacman conf: %s", err)
+	root := "/"
+	if value, _, exists := cmdArgs.getArg("root", "r"); exists {
+		root = value
+	}
+
+	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", config.PacmanConf, "--root", root)
+	if err != nil {
+		return fmt.Errorf("%s", stderr)
 	}
 
 	if value, _, exists := cmdArgs.getArg("dbpath", "b"); exists {
-		alpmConf.DBPath = value
-	}
-
-	if value, _, exists := cmdArgs.getArg("root", "r"); exists {
-		alpmConf.RootDir = value
+		pacmanConf.DBPath = value
 	}
 
 	if value, _, exists := cmdArgs.getArg("arch"); exists {
-		alpmConf.Architecture = value
+		pacmanConf.Architecture = value
 	}
 
 	if value, _, exists := cmdArgs.getArg("ignore"); exists {
-		alpmConf.IgnorePkg = append(alpmConf.IgnorePkg, strings.Split(value, ",")...)
+		pacmanConf.IgnorePkg = append(pacmanConf.IgnorePkg, strings.Split(value, ",")...)
 	}
 
 	if value, _, exists := cmdArgs.getArg("ignoregroup"); exists {
-		alpmConf.IgnoreGroup = append(alpmConf.IgnoreGroup, strings.Split(value, ",")...)
+		pacmanConf.IgnoreGroup = append(pacmanConf.IgnoreGroup, strings.Split(value, ",")...)
 	}
 
 	//TODO
@@ -131,11 +135,11 @@ func initAlpm() error {
 	//but pacman allows multiple cachdirs to be passed
 	//for now only handle one cache dir
 	if value, _, exists := cmdArgs.getArg("cachdir"); exists {
-		alpmConf.CacheDir = []string{value}
+		pacmanConf.CacheDir = []string{value}
 	}
 
 	if value, _, exists := cmdArgs.getArg("gpgdir"); exists {
-		alpmConf.GPGDir = value
+		pacmanConf.GPGDir = value
 	}
 
 	if err = initAlpmHandle(); err != nil {
@@ -147,7 +151,7 @@ func initAlpm() error {
 	} else if value == "never" {
 		useColor = false
 	} else {
-		useColor = alpmConf.Options&alpm.ConfColor > 0
+		useColor = pacmanConf.Color
 	}
 
 	return nil
@@ -162,8 +166,12 @@ func initAlpmHandle() error {
 		}
 	}
 
-	if alpmHandle, err = alpmConf.CreateHandle(); err != nil {
+	if alpmHandle, err = alpm.Init(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
 		return fmt.Errorf("Unable to CreateHandle: %s", err)
+	}
+
+	if err = configureAlpm(pacmanConf); err != nil {
+		return err
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)

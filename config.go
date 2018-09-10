@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strings"
 
+	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	alpm "github.com/jguer/go-alpm"
 )
 
@@ -110,25 +111,13 @@ var shouldSaveConfig bool
 var config Configuration
 
 // AlpmConf holds the current config values for pacman.
-var alpmConf alpm.PacmanConfig
+var pacmanConf *pacmanconf.Config
 
 // AlpmHandle is the alpm handle used by yay.
 var alpmHandle *alpm.Handle
 
 // Mode is used to restrict yay to AUR or repo only modes
 var mode = ModeAny
-
-func readAlpmConfig(pacmanconf string) (conf alpm.PacmanConfig, err error) {
-	file, err := os.Open(pacmanconf)
-	if err != nil {
-		return
-	}
-	conf, err = alpm.ParseConfig(file)
-	if err != nil {
-		return
-	}
-	return
-}
 
 // SaveConfig writes yay config to file.
 func (config *Configuration) saveConfig() error {
@@ -331,4 +320,113 @@ func (config Configuration) String() string {
 		fmt.Println(err)
 	}
 	return buf.String()
+}
+
+func toUsage(usages []string) alpm.Usage {
+	if len(usages) == 0 {
+		return alpm.UsageAll
+	}
+
+	var ret alpm.Usage = 0
+	for _, usage := range usages {
+		switch usage {
+		case "Sync":
+			ret |= alpm.UsageSync
+		case "Search":
+			ret |= alpm.UsageSearch
+		case "Install":
+			ret |= alpm.UsageInstall
+		case "Upgrade":
+			ret |= alpm.UsageUpgrade
+		case "All":
+			ret |= alpm.UsageAll
+		}
+	}
+
+	return ret
+}
+
+func configureAlpm(conf *pacmanconf.Config) error {
+	var err error
+
+	// TODO: set SigLevel
+	sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
+	localFileSigLevel := alpm.SigUseDefault
+	remoteFileSigLevel := alpm.SigUseDefault
+
+	for _, repo := range pacmanConf.Repos {
+		// TODO: set SigLevel
+		db, err := alpmHandle.RegisterSyncDb(repo.Name, sigLevel)
+		if err != nil {
+			return err
+		}
+
+		db.SetServers(repo.Servers)
+		db.SetUsage(toUsage(repo.Usage))
+	}
+
+	if err = alpmHandle.SetCacheDirs(pacmanConf.CacheDir...); err != nil {
+		return err
+	}
+
+	// add hook directories 1-by-1 to avoid overwriting the system directory
+	for _, dir := range pacmanConf.HookDir {
+		if err = alpmHandle.AddHookDir(dir); err != nil {
+			return err
+		}
+	}
+
+	if err = alpmHandle.SetGPGDir(pacmanConf.GPGDir); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetLogFile(pacmanConf.LogFile); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetIgnorePkgs(pacmanConf.IgnorePkg...); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetIgnoreGroups(pacmanConf.IgnoreGroup...); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetArch(pacmanConf.Architecture); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetNoUpgrades(pacmanConf.NoUpgrade...); err != nil {
+		return err
+	}
+
+	if alpmHandle.SetNoExtracts(pacmanConf.NoExtract...); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetLocalFileSigLevel(localFileSigLevel); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetRemoteFileSigLevel(remoteFileSigLevel); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetDeltaRatio(pacmanConf.UseDelta); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetUseSyslog(pacmanConf.UseSyslog); err != nil {
+		return err
+	}
+
+	if err = alpmHandle.SetCheckSpace(pacmanConf.CheckSpace); err != nil {
+		return err
+	}
+
+	return nil
 }

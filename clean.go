@@ -59,7 +59,7 @@ func syncClean(parser *arguments) error {
 
 	_, removeAll, _ := parser.getArg("c", "clean")
 
-	for _, v := range alpmConf.CleanMethod {
+	for _, v := range pacmanConf.CleanMethod {
 		if v == "KeepInstalled" {
 			keepInstalled = true
 		} else if v == "KeepCurrent" {
