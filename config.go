@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
@@ -184,6 +185,9 @@ func (config *Configuration) defaultSettings() {
 
 func (config *Configuration) expandEnv() {
 	config.AURURL = os.ExpandEnv(config.AURURL)
+	if strings.HasPrefix(config.BuildDir, "~"+string(os.PathSeparator)) {
+		config.BuildDir = filepath.Join("$HOME", config.BuildDir[2:])
+	}
 	config.BuildDir = os.ExpandEnv(config.BuildDir)
 	config.Editor = os.ExpandEnv(config.Editor)
 	config.EditorFlags = os.ExpandEnv(config.EditorFlags)
