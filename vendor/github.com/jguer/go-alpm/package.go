@@ -272,8 +272,8 @@ func (pkg Package) ComputeRequiredBy() []string {
 	for i := (*list)(unsafe.Pointer(result)); i != nil; i = i.Next {
 		defer C.free(unsafe.Pointer(i))
 		if i.Data != nil {
-			defer C.free(unsafe.Pointer(i.Data))
-			name := C.GoString((*C.char)(unsafe.Pointer(i.Data)))
+			defer C.free(i.Data)
+			name := C.GoString((*C.char)(i.Data))
 			requiredby = append(requiredby, name)
 		}
 	}
@@ -287,8 +287,8 @@ func (pkg Package) ComputeOptionalFor() []string {
 	for i := (*list)(unsafe.Pointer(result)); i != nil; i = i.Next {
 		defer C.free(unsafe.Pointer(i))
 		if i.Data != nil {
-			defer C.free(unsafe.Pointer(i.Data))
-			name := C.GoString((*C.char)(unsafe.Pointer(i.Data)))
+			defer C.free(i.Data)
+			name := C.GoString((*C.char)(i.Data))
 			optionalfor = append(optionalfor, name)
 		}
 	}

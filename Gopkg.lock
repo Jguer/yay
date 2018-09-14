@@ -22,11 +22,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7681cb2a269451c1a0f781e1241ce0bd8e515d5e9a3b12f67fd768bafe08e682"
+  digest = "1:6eef31522b3a2349e9399c903ffa76c084c7fb9ef9d17a4e3da420649b0f5d17"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "39edc7671fa431a0d14ba6e023f5f2290a86333b"
+  revision = "643c287316a5456348cc689e1f2c980410e17d47"
 
 [[projects]]
   branch = "master"

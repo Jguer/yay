@@ -31,26 +31,26 @@ func DefaultLogCallback(lvl LogLevel, s string) {
 	}
 }
 
-var log_callback logCallbackSig
-var question_callback questionCallbackSig
+var globalLogCallback logCallbackSig
+var globalQuestionCallback questionCallbackSig
 
 //export logCallback
 func logCallback(level C.alpm_loglevel_t, cstring *C.char) {
-	log_callback(LogLevel(level), C.GoString(cstring))
+	globalLogCallback(LogLevel(level), C.GoString(cstring))
 }
 
 //export questionCallback
 func questionCallback(question *C.alpm_question_t) {
 	q := (*C.alpm_question_any_t)(unsafe.Pointer(question))
-	question_callback(QuestionAny{q})
+	globalQuestionCallback(QuestionAny{q})
 }
 
 func (h *Handle) SetLogCallback(cb logCallbackSig) {
-	log_callback = cb
+	globalLogCallback = cb
 	C.go_alpm_set_logging(h.ptr)
 }
 
 func (h *Handle) SetQuestionCallback(cb questionCallbackSig) {
-	question_callback = cb
+	globalQuestionCallback = cb
 	C.go_alpm_set_question(h.ptr)
 }
