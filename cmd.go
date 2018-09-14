@@ -192,8 +192,7 @@ func handleVersion() {
 func handlePrint() (err error) {
 	switch {
 	case cmdArgs.existsArg("d", "defaultconfig"):
-		var tmpConfig Configuration
-		tmpConfig.defaultSettings()
+		tmpConfig := defaultSettings()
 		tmpConfig.expandEnv()
 		fmt.Printf("%v", tmpConfig)
 	case cmdArgs.existsArg("g", "currentconfig"):
@@ -238,8 +237,8 @@ func handleGetpkgbuild() error {
 }
 
 func handleYogurt() error {
-	config.SearchMode = NumberMenu
-	return numberMenu(cmdArgs.targets)
+	config.SearchMode = numberMenu
+	return displayNumberMenu(cmdArgs.targets)
 }
 
 func handleSync() error {
@@ -247,9 +246,9 @@ func handleSync() error {
 
 	if cmdArgs.existsArg("s", "search") {
 		if cmdArgs.existsArg("q", "quiet") {
-			config.SearchMode = Minimal
+			config.SearchMode = minimal
 		} else {
-			config.SearchMode = Detailed
+			config.SearchMode = detailed
 		}
 		return syncSearch(targets)
 	}
@@ -286,7 +285,7 @@ func handleRemove() error {
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func numberMenu(pkgS []string) (err error) {
+func displayNumberMenu(pkgS []string) (err error) {
 	var (
 		aurErr, repoErr error
 		aq              aurQuery
@@ -296,11 +295,11 @@ func numberMenu(pkgS []string) (err error) {
 
 	pkgS = removeInvalidTargets(pkgS)
 
-	if mode == ModeAUR || mode == ModeAny {
+	if mode == modeAUR || mode == modeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
 		lenaq = len(aq)
 	}
-	if mode == ModeRepo || mode == ModeAny {
+	if mode == modeRepo || mode == modeAny {
 		pq, repoErr = queryRepo(pkgS)
 		lenpq = len(pq)
 		if repoErr != nil {
@@ -312,18 +311,18 @@ func numberMenu(pkgS []string) (err error) {
 		return fmt.Errorf("No packages match search")
 	}
 
-	if config.SortMode == BottomUp {
-		if mode == ModeAUR || mode == ModeAny {
+	if config.SortMode == bottomUp {
+		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(lenpq + 1)
 		}
-		if mode == ModeRepo || mode == ModeAny {
+		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
 	} else {
-		if mode == ModeRepo || mode == ModeAny {
+		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
-		if mode == ModeAUR || mode == ModeAny {
+		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(lenpq + 1)
 		}
 	}
@@ -353,7 +352,7 @@ func numberMenu(pkgS []string) (err error) {
 
 	for i, pkg := range pq {
 		target := len(pq) - i
-		if config.SortMode == TopDown {
+		if config.SortMode == topDown {
 			target = i + 1
 		}
 
@@ -364,7 +363,7 @@ func numberMenu(pkgS []string) (err error) {
 
 	for i, pkg := range aq {
 		target := len(aq) - i + len(pq)
-		if config.SortMode == TopDown {
+		if config.SortMode == topDown {
 			target = i + 1 + len(pq)
 		}
 

@@ -123,7 +123,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 
 	aurdata := make(map[string]*rpc.Pkg)
 
-	if mode == ModeAny || mode == ModeRepo {
+	if mode == modeAny || mode == modeRepo {
 		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 		wg.Add(1)
 		go func() {
@@ -133,7 +133,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 		}()
 	}
 
-	if mode == ModeAny || mode == ModeAUR {
+	if mode == modeAny || mode == modeAUR {
 		fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
 
 		var _aurdata []*rpc.Pkg

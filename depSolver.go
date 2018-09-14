@@ -89,7 +89,7 @@ func (ds *depSolver) resolveTargets(pkgs []string) error {
 		var singleDb *alpm.Db
 
 		// aur/ prefix means we only check the aur
-		if target.Db == "aur" || mode == ModeAUR {
+		if target.Db == "aur" || mode == modeAUR {
 			ds.Targets = append(ds.Targets, target)
 			aurTargets = append(aurTargets, target.DepString())
 			continue
@@ -139,7 +139,7 @@ func (ds *depSolver) resolveTargets(pkgs []string) error {
 		ds.Targets = append(ds.Targets, target)
 	}
 
-	if len(aurTargets) > 0 && (mode == ModeAny || mode == ModeAUR) {
+	if len(aurTargets) > 0 && (mode == modeAny || mode == modeAUR) {
 		return ds.resolveAURPackages(aurTargets, true)
 	}
 

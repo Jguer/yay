@@ -64,13 +64,13 @@ func (q aurQuery) printSearch(start int) {
 
 	for i, res := range q {
 		var toprint string
-		if config.SearchMode == NumberMenu {
-			if config.SortMode == BottomUp {
+		if config.SearchMode == numberMenu {
+			if config.SortMode == bottomUp {
 				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			} else {
 				toprint += magenta(strconv.Itoa(start+i) + " ")
 			}
-		} else if config.SearchMode == Minimal {
+		} else if config.SearchMode == minimal {
 			fmt.Println(res.Name)
 			continue
 		}
@@ -104,13 +104,13 @@ func (q aurQuery) printSearch(start int) {
 func (s repoQuery) printSearch() {
 	for i, res := range s {
 		var toprint string
-		if config.SearchMode == NumberMenu {
-			if config.SortMode == BottomUp {
+		if config.SearchMode == numberMenu {
+			if config.SortMode == bottomUp {
 				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
 			} else {
 				toprint += magenta(strconv.Itoa(i+1) + " ")
 			}
-		} else if config.SearchMode == Minimal {
+		} else if config.SearchMode == minimal {
 			fmt.Println(res.Name())
 			continue
 		}
@@ -452,7 +452,7 @@ func printNewsFeed() error {
 		return err
 	}
 
-	if config.SortMode == BottomUp {
+	if config.SortMode == bottomUp {
 		for i := len(rss.Channel.Items) - 1; i >= 0; i-- {
 			rss.Channel.Items[i].print(buildTime)
 		}
