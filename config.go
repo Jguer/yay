@@ -19,92 +19,40 @@ const (
 	detailed
 	minimal
 
-	// Describes Sorting method for numberdisplay
-	bottomUp = iota
-	topDown
-
 	modeAUR targetMode = iota
 	modeRepo
 	modeAny
 )
 
+const (
+	configFileName string = "yay.conf" // configFileName holds the name of the config file.
+	vcsFileName    string = "vcs.json" // vcsFileName holds the name of the vcs file.
+)
+
 type targetMode int
 
-// Configuration stores yay's config.
-type Configuration struct {
-	AURURL             string `json:"aururl"`
-	BuildDir           string `json:"buildDir"`
-	Editor             string `json:"editor"`
-	EditorFlags        string `json:"editorflags"`
-	MakepkgBin         string `json:"makepkgbin"`
-	MakepkgConf        string `json:"makepkgconf"`
-	PacmanBin          string `json:"pacmanbin"`
-	PacmanConf         string `json:"pacmanconf"`
-	TarBin             string `json:"tarbin"`
-	ReDownload         string `json:"redownload"`
-	ReBuild            string `json:"rebuild"`
-	AnswerClean        string `json:"answerclean"`
-	AnswerDiff         string `json:"answerdiff"`
-	AnswerEdit         string `json:"answeredit"`
-	AnswerUpgrade      string `json:"answerupgrade"`
-	GitBin             string `json:"gitbin"`
-	GpgBin             string `json:"gpgbin"`
-	GpgFlags           string `json:"gpgflags"`
-	MFlags             string `json:"mflags"`
-	SortBy             string `json:"sortby"`
-	GitFlags           string `json:"gitflags"`
-	RemoveMake         string `json:"removemake"`
-	RequestSplitN      int    `json:"requestsplitn"`
-	SearchMode         int    `json:"-"`
-	SortMode           int    `json:"sortmode"`
-	CompletionInterval int    `json:"completionrefreshtime"`
-	SudoLoop           bool   `json:"sudoloop"`
-	TimeUpdate         bool   `json:"timeupdate"`
-	NoConfirm          bool   `json:"-"`
-	Devel              bool   `json:"devel"`
-	CleanAfter         bool   `json:"cleanAfter"`
-	GitClone           bool   `json:"gitclone"`
-	Provides           bool   `json:"provides"`
-	PGPFetch           bool   `json:"pgpfetch"`
-	UpgradeMenu        bool   `json:"upgrademenu"`
-	CleanMenu          bool   `json:"cleanmenu"`
-	DiffMenu           bool   `json:"diffmenu"`
-	EditMenu           bool   `json:"editmenu"`
-	CombinedUpgrade    bool   `json:"combinedupgrade"`
-	UseAsk             bool   `json:"useask"`
+type yayConfig struct {
+	// Loaded from Config
+	num     map[string]int
+	value   map[string]string
+	boolean map[string]bool
+	// Loaded in Runtime
+	home             string  // home handles config directory home
+	file             string  // file holds yay config file path.
+	useColor         bool    // useColor enables/disables colored printing
+	cacheHome        string  // cacheHome handles cache home
+	savedInfo        vcsInfo // savedInfo holds the current vcs info
+	vcsFile          string  // vcsfile holds yay vcs info file path.
+	shouldSaveConfig bool    // shouldSaveConfig holds whether or not the config should be saved
+	searchMode       int     // searchMode controls the print method of the query
+	noConfirm        bool
+	mode             targetMode // Mode is used to restrict yay to AUR or repo only modes
+	hideMenus        bool
 }
 
-var version = "8.1173"
+var config yayConfig
 
-// configFileName holds the name of the config file.
-const configFileName string = "config.json"
-
-// vcsFileName holds the name of the vcs file.
-const vcsFileName string = "vcs.json"
-
-// useColor enables/disables colored printing
-var useColor bool
-
-// configHome handles config directory home
-var configHome string
-
-// cacheHome handles cache home
-var cacheHome string
-
-// savedInfo holds the current vcs info
-var savedInfo vcsInfo
-
-// configfile holds yay config file path.
-var configFile string
-
-// vcsfile holds yay vcs info file path.
-var vcsFile string
-
-// shouldSaveConfig holds whether or not the config should be saved
-var shouldSaveConfig bool
-
-// YayConf holds the current config values for yay.
-var config *Configuration
+var version = "8.1115"
 
 // AlpmConf holds the current config values for pacman.
 var pacmanConf *pacmanconf.Config
@@ -112,111 +60,78 @@ var pacmanConf *pacmanconf.Config
 // AlpmHandle is the alpm handle used by yay.
 var alpmHandle *alpm.Handle
 
-// Mode is used to restrict yay to AUR or repo only modes
-var mode = modeAny
+func (y *yayConfig) defaultSettings() {
+	y.noConfirm = false
+	y.mode = modeAny
+	y.hideMenus = false
 
-var hideMenus = false
-
-// SaveConfig writes yay config to file.
-func (config *Configuration) saveConfig() error {
-	marshalledinfo, _ := json.MarshalIndent(config, "", "\t")
-	in, err := os.OpenFile(configFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
+	y.boolean = map[string]bool{
+		"CleanAfter":      false,
+		"CleanMenu":       true,
+		"CombinedUpgrade": false,
+		"Devel":           false,
+		"DiffMenu":        true,
+		"EditMenu":        false,
+		"GitClone":        true,
+		"PGPFetch":        true,
+		"Provides":        true,
+		"SudoLoop":        false,
+		"TimeUpdate":      false,
+		"UpgradeMenu":     true,
+		"UseAsk":          false,
 	}
-	defer in.Close()
-	_, err = in.Write(marshalledinfo)
-	if err != nil {
-		return err
-	}
-	err = in.Sync()
-	return err
-}
 
-func defaultSettings() *Configuration {
-	config := &Configuration{
-		AURURL:             "https://aur.archlinux.org",
-		BuildDir:           "$HOME/.cache/yay",
-		CleanAfter:         false,
-		Editor:             "",
-		EditorFlags:        "",
-		Devel:              false,
-		MakepkgBin:         "makepkg",
-		MakepkgConf:        "",
-		NoConfirm:          false,
-		PacmanBin:          "pacman",
-		PGPFetch:           true,
-		PacmanConf:         "/etc/pacman.conf",
-		GpgFlags:           "",
-		MFlags:             "",
-		GitFlags:           "",
-		SortMode:           bottomUp,
-		CompletionInterval: 7,
-		SortBy:             "votes",
-		SudoLoop:           false,
-		TarBin:             "bsdtar",
-		GitBin:             "git",
-		GpgBin:             "gpg",
-		TimeUpdate:         false,
-		RequestSplitN:      150,
-		ReDownload:         "no",
-		ReBuild:            "no",
-		AnswerClean:        "",
-		AnswerDiff:         "",
-		AnswerEdit:         "",
-		AnswerUpgrade:      "",
-		RemoveMake:         "ask",
-		GitClone:           true,
-		Provides:           true,
-		UpgradeMenu:        true,
-		CleanMenu:          true,
-		DiffMenu:           true,
-		EditMenu:           false,
-		UseAsk:             false,
-		CombinedUpgrade:    false,
+	y.num = map[string]int{
+		"CompletionInterval": 7,
+		"RequestSplitN":      150,
+	}
+
+	y.value = map[string]string{
+		"AURURL":         "https://aur.archlinux.org",
+		"AnswerClean":    "",
+		"AnswerDiff":     "",
+		"AnswerEdit":     "",
+		"AnswerUpgrade":  "",
+		"BuildDir":       "$HOME/.cache/yay",
+		"Editor":         "",
+		"EditorFlags":    "",
+		"GPGCommand":     "gpg",
+		"GPGFlags":       "",
+		"GitCommand":     "git",
+		"GitFlags":       "",
+		"MakepkgCommand": "makepkg",
+		"MakepkgConf":    "",
+		"MakepkgFlags":   "",
+		"PacmanCommand":  "pacman",
+		"PacmanConf":     "/etc/pacman.conf",
+		"Redownload":     "no",
+		"Rebuild":        "no",
+		"RemoveMake":     "ask",
+		"SortBy":         "votes",
+		"SortMode":       "bottomup",
+		"TarCommand":     "bsdtar",
 	}
 
 	if os.Getenv("XDG_CACHE_HOME") != "" {
-		config.BuildDir = "$XDG_CACHE_HOME/yay"
+		y.value["BuildDir"] = "$XDG_CACHE_HOME/yay"
 	}
-
-	return config
 }
 
-func (config *Configuration) expandEnv() {
-	config.AURURL = os.ExpandEnv(config.AURURL)
-	config.BuildDir = os.ExpandEnv(config.BuildDir)
-	config.Editor = os.ExpandEnv(config.Editor)
-	config.EditorFlags = os.ExpandEnv(config.EditorFlags)
-	config.MakepkgBin = os.ExpandEnv(config.MakepkgBin)
-	config.MakepkgConf = os.ExpandEnv(config.MakepkgConf)
-	config.PacmanBin = os.ExpandEnv(config.PacmanBin)
-	config.PacmanConf = os.ExpandEnv(config.PacmanConf)
-	config.GpgFlags = os.ExpandEnv(config.GpgFlags)
-	config.MFlags = os.ExpandEnv(config.MFlags)
-	config.GitFlags = os.ExpandEnv(config.GitFlags)
-	config.SortBy = os.ExpandEnv(config.SortBy)
-	config.TarBin = os.ExpandEnv(config.TarBin)
-	config.GitBin = os.ExpandEnv(config.GitBin)
-	config.GpgBin = os.ExpandEnv(config.GpgBin)
-	config.ReDownload = os.ExpandEnv(config.ReDownload)
-	config.ReBuild = os.ExpandEnv(config.ReBuild)
-	config.AnswerClean = os.ExpandEnv(config.AnswerClean)
-	config.AnswerDiff = os.ExpandEnv(config.AnswerDiff)
-	config.AnswerEdit = os.ExpandEnv(config.AnswerEdit)
-	config.AnswerUpgrade = os.ExpandEnv(config.AnswerUpgrade)
-	config.RemoveMake = os.ExpandEnv(config.RemoveMake)
+func (y *yayConfig) expandEnv() {
+	for k, v := range y.value {
+		y.value[k] = os.ExpandEnv(v)
+	}
 }
 
 // Editor returns the preferred system editor.
 func editor() (string, []string) {
 	switch {
-	case config.Editor != "":
-		editor, err := exec.LookPath(config.Editor)
+	case config.value["Editor"] != "":
+		editor, err := exec.LookPath(config.value["Editor"])
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			return editor, strings.Fields(config.EditorFlags)
+			return editor, strings.Fields(config.value["EditorFlags"])
 		}
 		fallthrough
 	case os.Getenv("EDITOR") != "":
@@ -265,7 +180,7 @@ func editor() (string, []string) {
 // ContinueTask prompts if user wants to continue task.
 //If NoConfirm is set the action will continue without user input.
 func continueTask(s string, cont bool) bool {
-	if config.NoConfirm {
+	if config.noConfirm {
 		return cont
 	}
 
@@ -294,7 +209,7 @@ func continueTask(s string, cont bool) bool {
 }
 
 func getInput(defaultValue string) (string, error) {
-	if defaultValue != "" || config.NoConfirm {
+	if defaultValue != "" || config.noConfirm {
 		fmt.Println(defaultValue)
 		return defaultValue, nil
 	}
@@ -313,11 +228,11 @@ func getInput(defaultValue string) (string, error) {
 	return string(buf), nil
 }
 
-func (config Configuration) String() string {
+func (y yayConfig) String() string {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "\t")
-	if err := enc.Encode(config); err != nil {
+	if err := enc.Encode(y); err != nil {
 		fmt.Println(err)
 	}
 	return buf.String()

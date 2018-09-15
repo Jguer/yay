@@ -19,7 +19,7 @@ func questionCallback(question alpm.QuestionAny) {
 		return
 	}
 
-	if hideMenus {
+	if config.hideMenus {
 		return
 	}
 
@@ -53,7 +53,7 @@ func questionCallback(question alpm.QuestionAny) {
 	for {
 		fmt.Print("\nEnter a number (default=1): ")
 
-		if config.NoConfirm {
+		if config.noConfirm {
 			fmt.Println()
 			break
 		}

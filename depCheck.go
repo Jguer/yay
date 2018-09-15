@@ -313,8 +313,8 @@ func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
 	}
 
 	if len(conflicts) > 0 {
-		if !config.UseAsk {
-			if config.NoConfirm {
+		if !config.boolean["UseAsk"] {
+			if config.noConfirm {
 				return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
 			}
 

@@ -12,56 +12,39 @@ import (
 )
 
 func setPaths() error {
-	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
-		configHome = filepath.Join(configHome, "yay")
-	} else if configHome = os.Getenv("HOME"); configHome != "" {
-		configHome = filepath.Join(configHome, ".config/yay")
+	if config.home = os.Getenv("XDG_CONFIG_HOME"); config.home != "" {
+		config.home = filepath.Join(config.home, "yay")
+	} else if config.home = os.Getenv("HOME"); config.home != "" {
+		config.home = filepath.Join(config.home, ".config/yay")
 	} else {
 		return fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
 	}
 
-	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
-		cacheHome = filepath.Join(cacheHome, "yay")
-	} else if cacheHome = os.Getenv("HOME"); cacheHome != "" {
-		cacheHome = filepath.Join(cacheHome, ".cache/yay")
+	if config.cacheHome = os.Getenv("XDG_CACHE_HOME"); config.cacheHome != "" {
+		config.cacheHome = filepath.Join(config.cacheHome, "yay")
+	} else if config.cacheHome = os.Getenv("HOME"); config.cacheHome != "" {
+		config.cacheHome = filepath.Join(config.cacheHome, ".cache/yay")
 	} else {
 		return fmt.Errorf("XDG_CACHE_HOME and HOME unset")
 	}
 
-	configFile = filepath.Join(configHome, configFileName)
-	vcsFile = filepath.Join(cacheHome, vcsFileName)
-
-	return nil
-}
-
-func initConfig() error {
-	cfile, err := os.Open(configFile)
-	if !os.IsNotExist(err) && err != nil {
-		return fmt.Errorf("Failed to open config file '%s': %s", configFile, err)
-	}
-
-	defer cfile.Close()
-	if !os.IsNotExist(err) {
-		decoder := json.NewDecoder(cfile)
-		if err = decoder.Decode(&config); err != nil {
-			return fmt.Errorf("Failed to read config '%s': %s", configFile, err)
-		}
-	}
+	config.file = filepath.Join(config.home, configFileName)
+	config.vcsFile = filepath.Join(config.cacheHome, vcsFileName)
 
 	return nil
 }
 
 func initVCS() error {
-	vfile, err := os.Open(vcsFile)
+	vfile, err := os.Open(config.vcsFile)
 	if !os.IsNotExist(err) && err != nil {
-		return fmt.Errorf("Failed to open vcs file '%s': %s", vcsFile, err)
+		return fmt.Errorf("Failed to open vcs file '%s': %s", config.vcsFile, err)
 	}
 
 	defer vfile.Close()
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(vfile)
-		if err = decoder.Decode(&savedInfo); err != nil {
-			return fmt.Errorf("Failed to read vcs '%s': %s", vcsFile, err)
+		if err = decoder.Decode(&config.savedInfo); err != nil {
+			return fmt.Errorf("Failed to read vcs '%s': %s", config.vcsFile, err)
 		}
 	}
 
@@ -69,17 +52,17 @@ func initVCS() error {
 }
 
 func initHomeDirs() error {
-	if _, err := os.Stat(configHome); os.IsNotExist(err) {
-		if err = os.MkdirAll(configHome, 0755); err != nil {
-			return fmt.Errorf("Failed to create config directory '%s': %s", configHome, err)
+	if _, err := os.Stat(config.home); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.home, 0755); err != nil {
+			return fmt.Errorf("Failed to create config directory '%s': %s", config.home, err)
 		}
 	} else if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(cacheHome); os.IsNotExist(err) {
-		if err = os.MkdirAll(cacheHome, 0755); err != nil {
-			return fmt.Errorf("Failed to create cache directory '%s': %s", cacheHome, err)
+	if _, err := os.Stat(config.cacheHome); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.cacheHome, 0755); err != nil {
+			return fmt.Errorf("Failed to create cache directory '%s': %s", config.cacheHome, err)
 		}
 	} else if err != nil {
 		return err
@@ -89,9 +72,9 @@ func initHomeDirs() error {
 }
 
 func initBuildDir() error {
-	if _, err := os.Stat(config.BuildDir); os.IsNotExist(err) {
-		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
-			return fmt.Errorf("Failed to create BuildDir directory '%s': %s", config.BuildDir, err)
+	if _, err := os.Stat(config.value["BuildDir"]); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.value["BuildDir"], 0755); err != nil {
+			return fmt.Errorf("Failed to create BuildDir directory '%s': %s", config.value["BuildDir"], err)
 		}
 	} else if err != nil {
 		return err
@@ -109,7 +92,7 @@ func initAlpm() error {
 		root = value
 	}
 
-	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", config.PacmanConf, "--root", root)
+	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", config.value["PacmanConf"], "--root", root)
 	if err != nil {
 		return fmt.Errorf("%s", stderr)
 	}
@@ -147,13 +130,13 @@ func initAlpm() error {
 	}
 
 	if value, _, _ := cmdArgs.getArg("color"); value == "always" {
-		useColor = true
+		config.useColor = true
 	} else if value == "auto" {
-		useColor = isTty()
+		config.useColor = isTty()
 	} else if value == "never" {
-		useColor = false
+		config.useColor = false
 	} else {
-		useColor = pacmanConf.Color && isTty()
+		config.useColor = pacmanConf.Color && isTty()
 	}
 
 	return nil
@@ -208,13 +191,13 @@ func main() {
 	}
 
 	exitOnError(setPaths())
-	config = defaultSettings()
+	config.defaultSettings()
 	exitOnError(initHomeDirs())
 	exitOnError(initConfig())
 	exitOnError(cmdArgs.parseCommandLine())
-	if shouldSaveConfig {
-		config.saveConfig()
-	}
+	// if config.shouldSaveConfig {
+	// 	config.saveConfig()
+	// }
 	config.expandEnv()
 	exitOnError(initBuildDir())
 	exitOnError(initVCS())

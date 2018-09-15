@@ -20,7 +20,7 @@ import (
 func shouldUseGit(path string) bool {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		return config.GitClone
+		return config.boolean["GitClone"]
 	}
 
 	_, err = os.Stat(filepath.Join(path, ".git"))
@@ -122,7 +122,7 @@ func downloadAndUnpack(url string, path string) error {
 		return err
 	}
 
-	_, stderr, err := capture(exec.Command(config.TarBin, "-xf", tarLocation, "-C", path))
+	_, stderr, err := capture(exec.Command(config.value["TarCommand"], "-xf", tarLocation, "-C", path))
 	if err != nil {
 		return fmt.Errorf("%s", stderr)
 	}
@@ -270,12 +270,12 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 
 	download := func(pkg string, url string) {
 		defer wg.Done()
-		if err := downloadAndUnpack(url, cacheHome); err != nil {
+		if err := downloadAndUnpack(url, config.cacheHome); err != nil {
 			errs.Add(fmt.Errorf("%s Failed to get pkgbuild: %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(err.Error()))))
 			return
 		}
 
-		_, stderr, err := capture(exec.Command("mv", filepath.Join(cacheHome, "packages", pkg, "trunk"), filepath.Join(path, pkg)))
+		_, stderr, err := capture(exec.Command("mv", filepath.Join(config.cacheHome, "packages", pkg, "trunk"), filepath.Join(path, pkg)))
 		mux.Lock()
 		downloaded++
 		if err != nil {
@@ -297,6 +297,6 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 	}
 
 	wg.Wait()
-	errs.Add(os.RemoveAll(filepath.Join(cacheHome, "packages")))
+	errs.Add(os.RemoveAll(filepath.Join(config.cacheHome, "packages")))
 	return len(missing) != 0, errs.Return()
 }

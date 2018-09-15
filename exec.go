@@ -80,14 +80,14 @@ func passToPacman(args *arguments) *exec.Cmd {
 		argArr = append(argArr, "sudo")
 	}
 
-	argArr = append(argArr, config.PacmanBin)
+	argArr = append(argArr, config.value["PacmanCommand"])
 	argArr = append(argArr, cmdArgs.formatGlobals()...)
 	argArr = append(argArr, args.formatArgs()...)
-	if config.NoConfirm {
+	if config.noConfirm {
 		argArr = append(argArr, "--noconfirm")
 	}
 
-	argArr = append(argArr, "--config", config.PacmanConf)
+	argArr = append(argArr, "--config", config.value["PacmanConf"])
 	argArr = append(argArr, "--")
 	argArr = append(argArr, args.targets...)
 
@@ -98,29 +98,29 @@ func passToPacman(args *arguments) *exec.Cmd {
 }
 
 func passToMakepkg(dir string, args ...string) *exec.Cmd {
-	if config.NoConfirm {
+	if config.noConfirm {
 		args = append(args)
 	}
 
-	mflags := strings.Fields(config.MFlags)
+	mflags := strings.Fields(config.value["MakepkgFlags"])
 	args = append(args, mflags...)
 
-	if config.MakepkgConf != "" {
-		args = append(args, "--config", config.MakepkgConf)
+	if config.value["MakepkgConf"] != "" {
+		args = append(args, "--config", config.value["MakepkgConf"])
 	}
 
-	cmd := exec.Command(config.MakepkgBin, args...)
+	cmd := exec.Command(config.value["MakepkgCommand"], args...)
 	cmd.Dir = dir
 	return cmd
 }
 
 func passToGit(dir string, _args ...string) *exec.Cmd {
-	gitflags := strings.Fields(config.GitFlags)
+	gitflags := strings.Fields(config.value["GitFlags"])
 	args := []string{"-C", dir}
 	args = append(args, gitflags...)
 	args = append(args, _args...)
 
-	cmd := exec.Command(config.GitBin, args...)
+	cmd := exec.Command(config.value["GitCommand"], args...)
 	return cmd
 }
 

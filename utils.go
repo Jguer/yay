@@ -114,12 +114,12 @@ func removeInvalidTargets(targets []string) []string {
 	for _, target := range targets {
 		db, _ := splitDbFromName(target)
 
-		if db == "aur" && mode == modeRepo {
+		if db == "aur" && config.mode == modeRepo {
 			fmt.Printf("%s %s %s\n", bold(yellow(arrow)), cyan(target), bold("Can't use target with option --repo -- skipping"))
 			continue
 		}
 
-		if db != "aur" && db != "" && mode == modeAUR {
+		if db != "aur" && db != "" && config.mode == modeAUR {
 			fmt.Printf("%s %s %s\n", bold(yellow(arrow)), cyan(target), bold("Can't use target with option --aur -- skipping"))
 			continue
 		}

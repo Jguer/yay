@@ -89,7 +89,7 @@ func (ds *depSolver) resolveTargets(pkgs []string) error {
 		var singleDb *alpm.Db
 
 		// aur/ prefix means we only check the aur
-		if target.Db == "aur" || mode == modeAUR {
+		if target.Db == "aur" || config.mode == modeAUR {
 			ds.Targets = append(ds.Targets, target)
 			aurTargets = append(aurTargets, target.DepString())
 			continue
@@ -139,7 +139,7 @@ func (ds *depSolver) resolveTargets(pkgs []string) error {
 		ds.Targets = append(ds.Targets, target)
 	}
 
-	if len(aurTargets) > 0 && (mode == modeAny || mode == modeAUR) {
+	if len(aurTargets) > 0 && (config.mode == modeAny || config.mode == modeAUR) {
 		return ds.resolveAURPackages(aurTargets, true)
 	}
 
@@ -280,7 +280,7 @@ func (ds *depSolver) findSatisfierAurCache(dep string) *rpc.Pkg {
 		}
 	}
 
-	if !config.Provides && providers.Len() >= 1 {
+	if !config.boolean["Provides"] && providers.Len() >= 1 {
 		return providers.Pkgs[0]
 	}
 
@@ -310,7 +310,7 @@ func (ds *depSolver) cacheAURPackages(_pkgs []string) error {
 		return nil
 	}
 
-	if config.Provides {
+	if config.boolean["Provides"] {
 		err := ds.findProvides(pkgs)
 		if err != nil {
 			return err
@@ -440,11 +440,11 @@ func (ds *depSolver) resolveAURPackages(pkgs []string, explicit bool) error {
 		}
 
 		_, isInstalled := ds.LocalDb.PkgCache().FindSatisfier(dep) //has satisfier installed: skip
-		hm := hideMenus
-		hideMenus = isInstalled == nil
+		hm := config.hideMenus
+		config.hideMenus = isInstalled == nil
 		repoPkg, inRepos := ds.SyncDb.FindSatisfier(dep) //has satisfier in repo: fetch it
-		hideMenus = hm
-		if isInstalled == nil && (config.ReBuild != "tree" || inRepos == nil) {
+		config.hideMenus = hm
+		if isInstalled == nil && (config.value["ReBuild"] != "tree" || inRepos == nil) {
 			continue
 		}
 

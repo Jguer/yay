@@ -123,7 +123,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 
 	aurdata := make(map[string]*rpc.Pkg)
 
-	if mode == modeAny || mode == modeRepo {
+	if config.mode == modeAny || config.mode == modeRepo {
 		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 		wg.Add(1)
 		go func() {
@@ -133,7 +133,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 		}()
 	}
 
-	if mode == modeAny || mode == modeAUR {
+	if config.mode == modeAny || config.mode == modeAUR {
 		fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
 
 		var _aurdata []*rpc.Pkg
@@ -151,7 +151,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 				wg.Done()
 			}()
 
-			if config.Devel {
+			if config.boolean["Devel"] {
 				fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
 				wg.Add(1)
 				go func() {
@@ -212,7 +212,7 @@ func upDevel(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (toUpgrade upSl
 		}
 	}
 
-	for vcsName, e := range savedInfo {
+	for vcsName, e := range config.savedInfo {
 		wg.Add(1)
 		go checkUpdate(vcsName, e)
 	}
@@ -242,7 +242,7 @@ func upAUR(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (upSlice, error) 
 			continue
 		}
 
-		if (config.TimeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
+		if (config.boolean["TimeUpdate"] && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
 			(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
 			if pkg.ShouldIgnore() {
 				printIgnoringPackage(pkg, aurPkg.Version)
@@ -333,7 +333,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 		return ignore, aurNames, nil
 	}
 
-	if !config.UpgradeMenu {
+	if !config.boolean["UpgradeMenu"] {
 		for _, pkg := range aurUp {
 			aurNames.set(pkg.Name)
 		}
@@ -350,7 +350,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	fmt.Println(bold(green(arrow + " Packages to not upgrade: (eg: 1 2 3, 1-3, ^4 or repo name)")))
 	fmt.Print(bold(green(arrow + " ")))
 
-	numbers, err := getInput(config.AnswerUpgrade)
+	numbers, err := getInput(config.value["AnswerUpgrade"])
 	if err != nil {
 		return nil, nil, err
 	}

@@ -38,7 +38,7 @@ func createDevelDB() error {
 
 	bases := getBases(info)
 	toSkip := pkgbuildsToSkip(bases, sliceToStringSet(remoteNames))
-	downloadPkgbuilds(bases, toSkip, config.BuildDir)
+	downloadPkgbuilds(bases, toSkip, config.value["BuildDir"])
 	srcinfos, _ := parseSrcinfoFiles(bases, false)
 
 	for _, pkgbuild := range srcinfos {
@@ -105,9 +105,9 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	if savedInfo == nil {
+	if config.savedInfo == nil {
 		mux.Lock()
-		savedInfo = make(vcsInfo)
+		config.savedInfo = make(vcsInfo)
 		mux.Unlock()
 	}
 
@@ -131,7 +131,7 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, 
 			commit,
 		}
 
-		savedInfo[pkgName] = info
+		config.savedInfo[pkgName] = info
 		fmt.Println(bold(yellow(arrow)) + " Found git repo: " + cyan(url))
 		saveVCSInfo()
 		mux.Unlock()
@@ -221,11 +221,11 @@ func (infos shaInfos) needsUpdate() bool {
 }
 
 func saveVCSInfo() error {
-	marshalledinfo, err := json.MarshalIndent(savedInfo, "", "\t")
+	marshalledinfo, err := json.MarshalIndent(config.savedInfo, "", "\t")
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}
-	in, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	in, err := os.OpenFile(config.vcsFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}

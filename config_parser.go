@@ -3,133 +3,86 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strconv"
 
 	"github.com/Morganamilo/go-pacmanconf/ini"
 )
 
-type callbackData struct {
-	conf *Configuration
-	repo *Repository
-}
-
 func parseCallback(fileName string, line int, section string,
-	key string, value string, data interface{}) error {
+	key string, value string, data interface{}) (err error) {
 	if line < 0 {
 		return fmt.Errorf("unable to read file: %s: %s", fileName, section)
 	}
 
-	d, ok := data.(*callbackData)
-	if !ok {
-		return fmt.Errorf("type assert failed when parsing: %s", fileName)
-	}
-
 	if key == "" && value == "" {
-		if section == "options" {
-			d.repo = nil
-		} else {
-			d.conf.Repos = append(d.conf.Repos, Repository{})
-			d.repo = &d.conf.Repos[len(d.conf.Repos)-1]
-			d.repo.Name = section
-		}
-
 		return nil
 	}
 
-	if section == "" {
-		return fmt.Errorf("line %d is not in a section: %s", line, fileName)
-	}
-
-	if d.repo == nil {
-		setOption(d.conf, key, value)
+	if section == "options" {
+		err = config.setOption(key, value)
+	} else if section == "intoptions" {
+		err = config.setIntOption(key, value)
+	} else if section == "menus" {
+		err = config.setMenus(key, value)
+	} else if section == "answer" {
+		err = config.setAnswer(key, value)
 	} else {
-		setRepo(d.repo, key, value)
+		err = fmt.Errorf("line %d is not in a section: %s", line, fileName)
 	}
 
+	return
+}
+
+func (y *yayConfig) setMenus(key string, value string) error {
+	switch key {
+	case "Clean", "Diff", "Edit", "Upgrade":
+		y.boolean[key+"Menu"] = true
+		return nil
+	}
+	return fmt.Errorf("%d does not belong in the answer section", key)
+}
+
+func (y *yayConfig) setAnswer(key string, value string) error {
+	switch key {
+	case "Clean", "Diff", "Edit", "Upgrade":
+		y.value[key] = value
+		return nil
+	}
+
+	return fmt.Errorf("%d does not belong in the answer section", key)
+
+}
+
+func (y *yayConfig) setOption(key string, value string) error {
+	if _, ok := y.boolean[key]; ok {
+		y.boolean[key] = true
+	}
+
+	y.value[key] = value
 	return nil
 }
 
-func setRepo(repo *Repository, key string, value string) {
-	switch key {
-	case "Server":
-		repo.Servers = append(repo.Servers, value)
-	case "SigLevel":
-		repo.SigLevel = append(repo.SigLevel, value)
-	case "Usage":
-		repo.Usage = append(repo.Usage, value)
+func (y *yayConfig) setIntOption(key string, value string) error {
+	tmp, err := strconv.Atoi(value)
+	if err == nil {
+		y.num[key] = tmp
 	}
+	return nil
 }
 
-func setOption(conf *Config, key string, value string) {
-	switch key {
-	case "RootDir":
-		conf.RootDir = value
-	case "DBPath":
-		conf.DBPath = value
-	case "CacheDir":
-		conf.CacheDir = append(conf.CacheDir, value)
-	case "HookDir":
-		conf.HookDir = append(conf.HookDir, value)
-	case "GPGDir":
-		conf.GPGDir = value
-	case "LogFile":
-		conf.LogFile = value
-	case "HoldPkg":
-		conf.HoldPkg = append(conf.HoldPkg, value)
-	case "IgnorePkg":
-		conf.IgnorePkg = append(conf.IgnorePkg, value)
-	case "IgnoreGroup":
-		conf.IgnoreGroup = append(conf.IgnoreGroup, value)
-	case "Architecture":
-		conf.Architecture = value
-	case "XferCommand":
-		conf.XferCommand = value
-	case "NoUpgrade":
-		conf.NoUpgrade = append(conf.NoUpgrade, value)
-	case "NoExtract":
-		conf.NoExtract = append(conf.NoExtract, value)
-	case "CleanMethod":
-		conf.CleanMethod = append(conf.CleanMethod, value)
-	case "SigLevel":
-		conf.SigLevel = append(conf.SigLevel, value)
-	case "LocalFileSigLevel":
-		conf.LocalFileSigLevel = append(conf.LocalFileSigLevel, value)
-	case "RemoteFileSigLevel":
-		conf.RemoteFileSigLevel = append(conf.RemoteFileSigLevel, value)
-	case "UseSyslog":
-		conf.UseSyslog = true
-	case "Color":
-		conf.Color = true
-	case "UseDelta":
-		f, err := strconv.ParseFloat(value, 64)
-		if err == nil {
-			conf.UseDelta = f
-		}
-	case "TotalDownload":
-		conf.TotalDownload = true
-	case "CheckSpace":
-		conf.CheckSpace = true
-	case "VerbosePkgLists":
-		conf.VerbosePkgLists = true
-	case "DisableDownloadTimeout":
-		conf.DisableDownloadTimeout = true
-	}
-}
+func initConfig() error {
+	iniBytes, err := ioutil.ReadFile(config.file)
 
-func parse(iniData string) (*Configuration, error) {
-	data := &Configuration{}
-	err := ini.Parse(iniData, parseCallback, &data)
-	return data, err
-}
-
-func initConfigv2() error {
-	configBytes, err := ioutil.ReadFile(configFile)
-	if !os.IsNotExist(err) || err != nil {
-		return fmt.Errorf("Failed to open config file '%s': %s", configFile, err)
+	if err != nil {
+		return fmt.Errorf("Failed to open config file '%s': %v", config.file, err)
 	}
 
-	config, err = Parse(configBytes)
+	// Toggle all switches false
+	for k := range config.boolean {
+		config.boolean[k] = false
+	}
+
+	err = ini.Parse(string(iniBytes), parseCallback, nil)
 
 	return err
 }

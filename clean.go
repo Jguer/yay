@@ -14,8 +14,8 @@ func removeVCSPackage(pkgs []string) {
 	updated := false
 
 	for _, pkgName := range pkgs {
-		if _, ok := savedInfo[pkgName]; ok {
-			delete(savedInfo, pkgName)
+		if _, ok := config.savedInfo[pkgName]; ok {
+			delete(config.savedInfo, pkgName)
 			updated = true
 		}
 	}
@@ -67,13 +67,13 @@ func syncClean(parser *arguments) error {
 		}
 	}
 
-	if mode == modeRepo || mode == modeAny {
+	if config.mode == modeRepo || config.mode == modeAny {
 		if err = show(passToPacman(parser)); err != nil {
 			return err
 		}
 	}
 
-	if !(mode == modeAUR || mode == modeAny) {
+	if !(config.mode == modeAUR || config.mode == modeAny) {
 		return nil
 	}
 
@@ -84,7 +84,7 @@ func syncClean(parser *arguments) error {
 		question = "Do you want to remove all other AUR packages from cache?"
 	}
 
-	fmt.Printf("\nBuild directory: %s\n", config.BuildDir)
+	fmt.Printf("\nBuild directory: %s\n", config.value["BuildDir"])
 
 	if continueTask(question, true) {
 		err = cleanAUR(keepInstalled, keepCurrent, removeAll)
@@ -112,7 +112,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 		return err
 	}
 
-	files, err := ioutil.ReadDir(config.BuildDir)
+	files, err := ioutil.ReadDir(config.value["BuildDir"])
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 			}
 		}
 
-		err = os.RemoveAll(filepath.Join(config.BuildDir, file.Name()))
+		err = os.RemoveAll(filepath.Join(config.value["BuildDir"], file.Name()))
 		if err != nil {
 			return nil
 		}
@@ -176,7 +176,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 func cleanUntracked() error {
 	fmt.Println("removing Untracked AUR files from cache...")
 
-	files, err := ioutil.ReadDir(config.BuildDir)
+	files, err := ioutil.ReadDir(config.value["BuildDir"])
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,8 @@ func cleanUntracked() error {
 			continue
 		}
 
-		dir := filepath.Join(config.BuildDir, file.Name())
+		dir := filepath.Join(config.value["BuildDir"], file.Name())
+
 		if shouldUseGit(dir) {
 			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
 				return err
@@ -201,7 +202,7 @@ func cleanAfter(bases []Base) {
 	fmt.Println("removing Untracked AUR files from cache...")
 
 	for i, base := range bases {
-		dir := filepath.Join(config.BuildDir, base.Pkgbase())
+		dir := filepath.Join(config.value["BuildDir"], base.Pkgbase())
 
 		if shouldUseGit(dir) {
 			fmt.Printf(bold(cyan("::")+" Cleaning (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
@@ -222,7 +223,7 @@ func cleanAfter(bases []Base) {
 
 func cleanBuilds(bases []Base) {
 	for i, base := range bases {
-		dir := filepath.Join(config.BuildDir, base.Pkgbase())
+		dir := filepath.Join(config.value["BuildDir"], base.Pkgbase())
 		fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
 		if err := os.RemoveAll(dir); err != nil {
 			fmt.Println(err)

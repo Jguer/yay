@@ -30,7 +30,7 @@ func (q aurQuery) Len() int {
 func (q aurQuery) Less(i, j int) bool {
 	var result bool
 
-	switch config.SortBy {
+	switch config.value["SortBy"] {
 	case "votes":
 		result = q[i].NumVotes > q[j].NumVotes
 	case "popularity":
@@ -49,7 +49,7 @@ func (q aurQuery) Less(i, j int) bool {
 		result = q[i].PackageBaseID < q[j].PackageBaseID
 	}
 
-	if config.SortMode == bottomUp {
+	if config.value["SortMode"] == "bottomup" {
 		return !result
 	}
 
@@ -165,28 +165,28 @@ func syncSearch(pkgS []string) (err error) {
 	var aq aurQuery
 	var pq repoQuery
 
-	if mode == modeAUR || mode == modeAny {
+	if config.mode == modeAUR || config.mode == modeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
-	if mode == modeRepo || mode == modeAny {
+	if config.mode == modeRepo || config.mode == modeAny {
 		pq, repoErr = queryRepo(pkgS)
 		if repoErr != nil {
 			return err
 		}
 	}
 
-	if config.SortMode == bottomUp {
-		if mode == modeAUR || mode == modeAny {
+	if config.value["SortMode"] == "bottomup" {
+		if config.mode == modeAUR || config.mode == modeAny {
 			aq.printSearch(1)
 		}
-		if mode == modeRepo || mode == modeAny {
+		if config.mode == modeRepo || config.mode == modeAny {
 			pq.printSearch()
 		}
 	} else {
-		if mode == modeRepo || mode == modeAny {
+		if config.mode == modeRepo || config.mode == modeAny {
 			pq.printSearch()
 		}
-		if mode == modeAUR || mode == modeAny {
+		if config.mode == modeAUR || config.mode == modeAny {
 			aq.printSearch(1)
 		}
 	}
@@ -271,7 +271,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 		return nil
 	})
 
-	if config.SortMode == bottomUp {
+	if config.value["SortMode"] == "bottomup" {
 		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 			s[i], s[j] = s[j], s[i]
 		}
@@ -291,10 +291,10 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		db, name := splitDbFromName(_pkg)
 		found := false
 
-		if db == "aur" || mode == modeAUR {
+		if db == "aur" || config.mode == modeAUR {
 			aur = append(aur, _pkg)
 			continue
-		} else if db != "" || mode == modeRepo {
+		} else if db != "" || config.mode == modeRepo {
 			repo = append(repo, _pkg)
 			continue
 		}
@@ -494,8 +494,8 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 		mux.Unlock()
 	}
 
-	for n := 0; n < len(names); n += config.RequestSplitN {
-		max := min(len(names), n+config.RequestSplitN)
+	for n := 0; n < len(names); n += config.num["RequestSplitN"] {
+		max := min(len(names), n+config.num["RequestSplitN"])
 		wg.Add(1)
 		go makeRequest(n, max)
 	}
