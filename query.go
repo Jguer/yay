@@ -169,7 +169,7 @@ func syncSearch(pkgS []string) (err error) {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
 	if mode == ModeRepo || mode == ModeAny {
-		pq, _, repoErr = queryRepo(pkgS)
+		pq, repoErr = queryRepo(pkgS)
 		if repoErr != nil {
 			return err
 		}
@@ -229,7 +229,7 @@ func syncInfo(pkgS []string) (err error) {
 		arguments := cmdArgs.copy()
 		arguments.clearTargets()
 		arguments.addTarget(repoS...)
-		err = passToPacman(arguments)
+		err = show(passToPacman(arguments))
 
 		if err != nil {
 			return
@@ -254,52 +254,29 @@ func syncInfo(pkgS []string) (err error) {
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string) (s repoQuery, n int, err error) {
+func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
 		return
 	}
 
-	// BottomUp functions
-	initL := func(len int) int {
-		if config.SortMode == TopDown {
-			return 0
+	dbList.ForEach(func(db alpm.Db) error {
+		if len(pkgInputN) == 0 {
+			pkgs := db.PkgCache()
+			s = append(s, pkgs.Slice()...)
+		} else {
+			pkgs := db.Search(pkgInputN)
+			s = append(s, pkgs.Slice()...)
 		}
-		return len - 1
-	}
-	compL := func(len int, i int) bool {
-		if config.SortMode == TopDown {
-			return i < len
+		return nil
+	})
+
+	if config.SortMode == BottomUp {
+		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+			s[i], s[j] = s[j], s[i]
 		}
-		return i > -1
-	}
-	finalL := func(i int) int {
-		if config.SortMode == TopDown {
-			return i + 1
-		}
-		return i - 1
 	}
 
-	dbS := dbList.Slice()
-	lenDbs := len(dbS)
-	for f := initL(lenDbs); compL(lenDbs, f); f = finalL(f) {
-		pkgS := dbS[f].PkgCache().Slice()
-		lenPkgs := len(pkgS)
-		for i := initL(lenPkgs); compL(lenPkgs, i); i = finalL(i) {
-			match := true
-			for _, pkgN := range pkgInputN {
-				if !(strings.Contains(pkgS[i].Name(), pkgN) || strings.Contains(strings.ToLower(pkgS[i].Description()), pkgN)) {
-					match = false
-					break
-				}
-			}
-
-			if match {
-				n++
-				s = append(s, pkgS[i])
-			}
-		}
-	}
 	return
 }
 
@@ -500,16 +477,13 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-	var err error
+	var errs MultiError
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()
 		tempInfo, requestErr := rpc.Info(names[n:max])
-		if err != nil {
-			return
-		}
+		errs.Add(requestErr)
 		if requestErr != nil {
-			err = requestErr
 			return
 		}
 		mux.Lock()
@@ -528,7 +502,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 
 	wg.Wait()
 
-	if err != nil {
+	if err := errs.Return(); err != nil {
 		return info, err
 	}
 

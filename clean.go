@@ -14,8 +14,7 @@ func removeVCSPackage(pkgs []string) {
 	updated := false
 
 	for _, pkgName := range pkgs {
-		_, ok := savedInfo[pkgName]
-		if ok {
+		if _, ok := savedInfo[pkgName]; ok {
 			delete(savedInfo, pkgName)
 			updated = true
 		}
@@ -34,10 +33,10 @@ func cleanDependencies(removeOptional bool) error {
 	}
 
 	if len(hanging) != 0 {
-		err = cleanRemove(hanging)
+		return cleanRemove(hanging)
 	}
 
-	return err
+	return nil
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice
@@ -49,17 +48,18 @@ func cleanRemove(pkgNames []string) (err error) {
 	arguments := makeArguments()
 	arguments.addArg("R")
 	arguments.addTarget(pkgNames...)
-	err = passToPacman(arguments)
-	return err
+
+	return show(passToPacman(arguments))
 }
 
 func syncClean(parser *arguments) error {
+	var err error
 	keepInstalled := false
 	keepCurrent := false
 
 	_, removeAll, _ := parser.getArg("c", "clean")
 
-	for _, v := range alpmConf.CleanMethod {
+	for _, v := range pacmanConf.CleanMethod {
 		if v == "KeepInstalled" {
 			keepInstalled = true
 		} else if v == "KeepCurrent" {
@@ -67,9 +67,14 @@ func syncClean(parser *arguments) error {
 		}
 	}
 
-	err := passToPacman(parser)
-	if err != nil {
-		return err
+	if mode == ModeRepo || mode == ModeAny {
+		if err = show(passToPacman(parser)); err != nil {
+			return err
+		}
+	}
+
+	if !(mode == ModeAUR || mode == ModeAny) {
+		return nil
 	}
 
 	var question string
@@ -79,10 +84,9 @@ func syncClean(parser *arguments) error {
 		question = "Do you want to remove all other AUR packages from cache?"
 	}
 
-	fmt.Println()
-	fmt.Printf("Build directory: %s\n", config.BuildDir)
+	fmt.Printf("\nBuild directory: %s\n", config.BuildDir)
 
-	if continueTask(question, "nN") {
+	if continueTask(question, true) {
 		err = cleanAUR(keepInstalled, keepCurrent, removeAll)
 	}
 
@@ -90,11 +94,11 @@ func syncClean(parser *arguments) error {
 		return err
 	}
 
-	if continueTask("Do you want to remove ALL untracked AUR files?", "nN") {
-		err = cleanUntracked()
+	if continueTask("Do you want to remove ALL untracked AUR files?", true) {
+		return cleanUntracked()
 	}
 
-	return err
+	return nil
 }
 
 func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
@@ -185,8 +189,7 @@ func cleanUntracked() error {
 		dir := filepath.Join(config.BuildDir, file.Name())
 
 		if shouldUseGit(dir) {
-			err = passToGit(dir, "clean", "-fx")
-			if err != nil {
+			if err = show(passToGit(dir, "clean", "-fx")); err != nil {
 				return err
 			}
 		}

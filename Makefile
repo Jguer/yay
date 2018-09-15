@@ -4,20 +4,18 @@ PREFIX := /usr
 DESTDIR :=
 
 ifndef VERSION
-MAJORVERSION := 6
+MAJORVERSION := 8
 MINORVERSION ?= $(shell git rev-list --count master)
 endif
 VERSION := ${MAJORVERSION}.${MINORVERSION}
 
 LDFLAGS := -ldflags '-s -w -X main.version=${VERSION}'
-GOFILES := $(shell ls *.go | grep -v /vendor/)
 ARCH := $(shell uname -m)
 PKGNAME := yay
 BINNAME := yay
 PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
 
 export GOPATH=$(shell pwd)/.go
-export GOROOT=/usr/lib/go
 
 default: build
 

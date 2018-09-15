@@ -3,25 +3,47 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:4e8f84eb856dd3ed05982f065caf7866a4995be9cc3718614dcecbd57e26c260"
+  name = "github.com/Morganamilo/go-pacmanconf"
+  packages = [
+    ".",
+    "ini",
+  ]
+  pruneopts = "NUT"
+  revision = "9c5265e1b14f7e21dafabbad9ccf801d3815d707"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5f709618dc8a0ff9221d3685c95d69ed7d80ca94e58f3483f5d9bdefb4e6bb25"
+  name = "github.com/Morganamilo/go-srcinfo"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "368edc79b2c53cd9c065818fd4e65843ef3e9e11"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6eef31522b3a2349e9399c903ffa76c084c7fb9ef9d17a4e3da420649b0f5d17"
   name = "github.com/jguer/go-alpm"
   packages = ["."]
-  revision = "1114f773cdfb05f577438f7a0538eccabc9cf012"
+  pruneopts = "NUT"
+  revision = "643c287316a5456348cc689e1f2c980410e17d47"
 
 [[projects]]
   branch = "master"
+  digest = "1:07c508c49b9c13cf582c2b986635d0acd11e113e0535fa4b147026e15bc64185"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
-  revision = "837b260b8e90895c45737e2e72313fe5bce6f2c4"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/mikkeloscar/gopkgbuild"
-  packages = ["."]
-  revision = "2bb4f1f1db67f81fe50f9c1c4ad9db4f20fd6b22"
+  pruneopts = "NUT"
+  revision = "f998dbf94dc47ef839c76740efeb673d3459be1f"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "456465ee334310996a51a2282bf4cfe9f6269db508479c962474d61a4ce0a08c"
+  input-imports = [
+    "github.com/Morganamilo/go-pacmanconf",
+    "github.com/Morganamilo/go-srcinfo",
+    "github.com/jguer/go-alpm",
+    "github.com/mikkeloscar/aur",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

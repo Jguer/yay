@@ -2,7 +2,7 @@ package aur
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 	"net/url"
 )
@@ -41,6 +41,7 @@ type Pkg struct {
 	Provides       []string `json:"Provides"`
 	Replaces       []string `json:"Replaces"`
 	OptDepends     []string `json:"OptDepends"`
+	Groups         []string `json:"Groups"`
 	License        []string `json:"License"`
 	Keywords       []string `json:"Keywords"`
 }
@@ -61,7 +62,7 @@ func get(values url.Values) ([]Pkg, error) {
 	}
 
 	if len(result.Error) > 0 {
-		return nil, fmt.Errorf(result.Error)
+		return nil, errors.New(result.Error)
 	}
 
 	return result.Results, nil

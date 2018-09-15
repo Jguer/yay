@@ -5,19 +5,31 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+type Base []*rpc.Pkg
+
+func (b Base) Pkgbase() string {
+	return b[0].PackageBase
+}
+
+func (b Base) Version() string {
+	return b[0].Version
+}
+
+func (b Base) URLPath() string {
+	return b[0].URLPath
+}
+
 type depOrder struct {
-	Aur     []*rpc.Pkg
+	Aur     []Base
 	Repo    []*alpm.Package
 	Runtime stringSet
-	Bases   map[string][]*rpc.Pkg
 }
 
 func makeDepOrder() *depOrder {
 	return &depOrder{
-		make([]*rpc.Pkg, 0),
+		make([]Base, 0),
 		make([]*alpm.Package, 0),
 		make(stringSet),
-		make(map[string][]*rpc.Pkg),
 	}
 }
 
@@ -65,11 +77,14 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 		}
 	}
 
-	if _, ok := do.Bases[pkg.PackageBase]; !ok {
-		do.Aur = append(do.Aur, pkg)
-		do.Bases[pkg.PackageBase] = make([]*rpc.Pkg, 0)
+	for i, base := range do.Aur {
+		if base.Pkgbase() == pkg.PackageBase {
+			do.Aur[i] = append(base, pkg)
+			return
+		}
 	}
-	do.Bases[pkg.PackageBase] = append(do.Bases[pkg.PackageBase], pkg)
+
+	do.Aur = append(do.Aur, Base{pkg})
 }
 
 func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
@@ -92,7 +107,7 @@ func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 
 func (do *depOrder) HasMake() bool {
 	lenAur := 0
-	for _, base := range do.Bases {
+	for _, base := range do.Aur {
 		lenAur += len(base)
 	}
 
@@ -102,7 +117,7 @@ func (do *depOrder) HasMake() bool {
 func (do *depOrder) getMake() []string {
 	makeOnly := make([]string, 0, len(do.Aur)+len(do.Repo)-len(do.Runtime))
 
-	for _, base := range do.Bases {
+	for _, base := range do.Aur {
 		for _, pkg := range base {
 			if !do.Runtime.get(pkg.Name) {
 				makeOnly = append(makeOnly, pkg.Name)

@@ -20,27 +20,29 @@ import (
 	"unsafe"
 )
 
+// Handle contains the pointer to the alpm handle
 type Handle struct {
 	ptr *C.alpm_handle_t
 }
 
-// Initialize
+// Init initializes alpm handle
 func Init(root, dbpath string) (*Handle, error) {
-	c_root := C.CString(root)
-	c_dbpath := C.CString(dbpath)
-	var c_err C.alpm_errno_t
-	h := C.alpm_initialize(c_root, c_dbpath, &c_err)
+	cRoot := C.CString(root)
+	cDBPath := C.CString(dbpath)
+	var cErr C.alpm_errno_t
+	h := C.alpm_initialize(cRoot, cDBPath, &cErr)
 
-	defer C.free(unsafe.Pointer(c_root))
-	defer C.free(unsafe.Pointer(c_dbpath))
+	defer C.free(unsafe.Pointer(cRoot))
+	defer C.free(unsafe.Pointer(cDBPath))
 
-	if c_err != 0 {
-		return nil, Error(c_err)
+	if cErr != 0 {
+		return nil, Error(cErr)
 	}
 
 	return &Handle{h}, nil
 }
 
+// Release releases the alpm handle
 func (h *Handle) Release() error {
 	if er := C.alpm_release(h.ptr); er != 0 {
 		return Error(er)
@@ -52,9 +54,9 @@ func (h *Handle) Release() error {
 // LastError gets the last pm_error
 func (h Handle) LastError() error {
 	if h.ptr != nil {
-		c_err := C.alpm_errno(h.ptr)
-		if c_err != 0 {
-			return Error(c_err)
+		cErr := C.alpm_errno(h.ptr)
+		if cErr != 0 {
+			return Error(cErr)
 		}
 	}
 	return nil
@@ -76,12 +78,12 @@ func (h Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringLi
 }
 
 func (h Handle) optionSetList(hookDirs []string, f func(*C.alpm_handle_t, *C.alpm_list_t) C.int) error {
-	var list *C.alpm_list_t = nil
+	var list *C.alpm_list_t
 
 	for _, dir := range hookDirs {
-		c_dir := C.CString(dir)
-		list = C.alpm_list_add(list, unsafe.Pointer(c_dir))
-		defer C.free(unsafe.Pointer(c_dir))
+		cDir := C.CString(dir)
+		list = C.alpm_list_add(list, unsafe.Pointer(cDir))
+		defer C.free(unsafe.Pointer(cDir))
 	}
 
 	ok := f(h.ptr, list)
@@ -92,9 +94,9 @@ func (h Handle) optionSetList(hookDirs []string, f func(*C.alpm_handle_t, *C.alp
 }
 
 func (h Handle) optionAddList(hookDir string, f func(*C.alpm_handle_t, *C.char) C.int) error {
-	c_hookdir := C.CString(hookDir)
-	defer C.free(unsafe.Pointer(c_hookdir))
-	ok := f(h.ptr, c_hookdir)
+	cHookDir := C.CString(hookDir)
+	defer C.free(unsafe.Pointer(cHookDir))
+	ok := f(h.ptr, cHookDir)
 	if ok < 0 {
 		return h.LastError()
 	}
@@ -102,9 +104,9 @@ func (h Handle) optionAddList(hookDir string, f func(*C.alpm_handle_t, *C.char) 
 }
 
 func (h Handle) optionRemoveList(dir string, f func(*C.alpm_handle_t, *C.char) C.int) (bool, error) {
-	c_dir := C.CString(dir)
-	ok := f(h.ptr, c_dir)
-	defer C.free(unsafe.Pointer(c_dir))
+	cDir := C.CString(dir)
+	ok := f(h.ptr, cDir)
+	defer C.free(unsafe.Pointer(cDir))
 	if ok < 0 {
 		return ok == 1, h.LastError()
 	}
@@ -112,9 +114,9 @@ func (h Handle) optionRemoveList(dir string, f func(*C.alpm_handle_t, *C.char) C
 }
 
 func (h Handle) optionMatchList(dir string, f func(*C.alpm_handle_t, *C.char) C.int) (bool, error) {
-	c_dir := C.CString(dir)
-	ok := f(h.ptr, c_dir)
-	defer C.free(unsafe.Pointer(c_dir))
+	cDir := C.CString(dir)
+	ok := f(h.ptr, cDir)
+	defer C.free(unsafe.Pointer(cDir))
 	if ok == 0 {
 		return true, nil
 	} else if ok == C.FNM_NOMATCH {
@@ -125,9 +127,9 @@ func (h Handle) optionMatchList(dir string, f func(*C.alpm_handle_t, *C.char) C.
 
 //helper functions for *char based getters and setters
 func (h Handle) optionGetStr(f func(*C.alpm_handle_t) *C.char) (string, error) {
-	c_str := f(h.ptr)
-	str := C.GoString(c_str)
-	if c_str == nil {
+	cStr := f(h.ptr)
+	str := C.GoString(cStr)
+	if cStr == nil {
 		return str, h.LastError()
 	}
 
@@ -135,9 +137,9 @@ func (h Handle) optionGetStr(f func(*C.alpm_handle_t) *C.char) (string, error) {
 }
 
 func (h Handle) optionSetStr(str string, f func(*C.alpm_handle_t, *C.char) C.int) error {
-	c_str := C.CString(str)
-	defer C.free(unsafe.Pointer(c_str))
-	ok := f(h.ptr, c_str)
+	cStr := C.CString(str)
+	defer C.free(unsafe.Pointer(cStr))
+	ok := f(h.ptr, cStr)
 
 	if ok < 0 {
 		h.LastError()
@@ -253,12 +255,12 @@ func (h Handle) UseSyslog() (bool, error) {
 }
 
 func (h Handle) SetUseSyslog(value bool) error {
-	var int_value C.int = 0
+	var intValue C.int
 	if value {
-		int_value = 1
+		intValue = 1
 	}
 
-	ok := C.alpm_option_set_usesyslog(h.ptr, int_value)
+	ok := C.alpm_option_set_usesyslog(h.ptr, intValue)
 	if ok < 0 {
 		return h.LastError()
 	}
@@ -395,10 +397,10 @@ func (h Handle) AssumeInstalled() (DependList, error) {
 }
 
 func (h Handle) AddAssumeInstalled(dep Depend) error {
-	c_dep := convertCDepend(dep)
-	defer freeCDepend(c_dep)
+	cDep := convertCDepend(dep)
+	defer freeCDepend(cDep)
 
-	ok := C.alpm_option_add_assumeinstalled(h.ptr, c_dep)
+	ok := C.alpm_option_add_assumeinstalled(h.ptr, cDep)
 	if ok < 0 {
 		return h.LastError()
 	}
@@ -417,12 +419,12 @@ func (h Handle) SetAssumeInstalled(deps ...Depend) error {
 	//although for the sake of completeness it would be nice to have this
 	//working
 	panic("This function (SetAssumeInstalled) does not work properly, please do not use. See source code for more details")
-	var list *C.alpm_list_t = nil
+	var list *C.alpm_list_t
 
 	for _, dep := range deps {
-		c_dep := convertCDepend(dep)
-		defer freeCDepend(c_dep)
-		list = C.alpm_list_add(list, unsafe.Pointer(c_dep))
+		cDep := convertCDepend(dep)
+		defer freeCDepend(cDep)
+		list = C.alpm_list_add(list, unsafe.Pointer(cDep))
 	}
 
 	ok := C.alpm_option_set_assumeinstalled(h.ptr, list)
@@ -448,10 +450,10 @@ func (h Handle) RemoveAssumeInstalled(dep Depend) (bool, error) {
 	//although for the sake of completeness it would be nice to have this
 	//working
 	panic("This function (RemoveAssumeInstalled) does not work properly, please do not use. See source code for more details")
-	c_dep := convertCDepend(dep)
-	defer freeCDepend(c_dep)
+	cDep := convertCDepend(dep)
+	defer freeCDepend(cDep)
 
-	ok := C.alpm_option_remove_assumeinstalled(h.ptr, c_dep)
+	ok := C.alpm_option_remove_assumeinstalled(h.ptr, cDep)
 	if ok < 0 {
 		return ok == 1, h.LastError()
 	}
@@ -465,8 +467,8 @@ func (h Handle) Arch() (string, error) {
 }
 
 func (h Handle) SetArch(str string) error {
-	return h.optionSetStr(str, func(handle *C.alpm_handle_t, c_str *C.char) C.int {
-		return C.alpm_option_set_arch(handle, c_str)
+	return h.optionSetStr(str, func(handle *C.alpm_handle_t, cStr *C.char) C.int {
+		return C.alpm_option_set_arch(handle, cStr)
 	})
 }
 
@@ -500,12 +502,12 @@ func (h Handle) CheckSpace() (bool, error) {
 }
 
 func (h Handle) SetCheckSpace(value bool) error {
-	var int_value C.int = 0
+	var cValue C.int
 	if value {
-		int_value = 1
+		cValue = 1
 	}
 
-	ok := C.alpm_option_set_checkspace(h.ptr, int_value)
+	ok := C.alpm_option_set_checkspace(h.ptr, cValue)
 	if ok < 0 {
 		return h.LastError()
 	}
@@ -519,8 +521,8 @@ func (h Handle) DBExt() (string, error) {
 }
 
 func (h Handle) SetDBExt(str string) error {
-	return h.optionSetStr(str, func(handle *C.alpm_handle_t, c_str *C.char) C.int {
-		return C.alpm_option_set_dbext(handle, c_str)
+	return h.optionSetStr(str, func(handle *C.alpm_handle_t, cStr *C.char) C.int {
+		return C.alpm_option_set_dbext(handle, cStr)
 	})
 }
 

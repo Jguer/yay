@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
-	rpc "github.com/mikkeloscar/aur"
-	gopkg "github.com/mikkeloscar/gopkgbuild"
+	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
 // Info contains the last commit sha of a repo
@@ -24,8 +23,8 @@ type shaInfo struct {
 
 // createDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB() error {
-	infoMap := make(map[string]*rpc.Pkg)
-	srcinfosStale := make(map[string]*gopkg.PKGBUILD)
+	var mux sync.Mutex
+	var wg sync.WaitGroup
 
 	_, _, _, remoteNames, err := filterPackages()
 	if err != nil {
@@ -37,39 +36,25 @@ func createDevelDB() error {
 		return err
 	}
 
-	for _, pkg := range info {
-		infoMap[pkg.Name] = pkg
-	}
+	bases := getBases(info)
+	toSkip := pkgbuildsToSkip(bases, sliceToStringSet(remoteNames))
+	downloadPkgbuilds(bases, toSkip, config.BuildDir)
+	srcinfos, _ := parseSrcinfoFiles(bases, false)
 
-	bases := getBases(infoMap)
-
-	toSkip := pkgBuildsToSkip(info, sliceToStringSet(remoteNames))
-	downloadPkgBuilds(info, bases, toSkip)
-	tryParsesrcinfosFile(info, srcinfosStale, bases)
-
-	for _, pkg := range info {
-		pkgbuild, ok := srcinfosStale[pkg.PackageBase]
-		if !ok {
-			continue
-		}
-
-		for _, pkg := range bases[pkg.PackageBase] {
-			updateVCSData(pkg.Name, pkgbuild.Source)
+	for _, pkgbuild := range srcinfos {
+		for _, pkg := range pkgbuild.Packages {
+			wg.Add(1)
+			go updateVCSData(pkg.Pkgname, pkgbuild.Source, &mux, &wg)
 		}
 	}
 
+	wg.Wait()
 	fmt.Println(bold(yellow(arrow) + bold(" GenDB finished. No packages were installed")))
-
 	return err
 }
 
 // parseSource returns the git url, default branch and protocols it supports
 func parseSource(source string) (url string, branch string, protocols []string) {
-	if !(strings.Contains(source, "git://") ||
-		strings.Contains(source, ".git") ||
-		strings.Contains(source, "git+https://")) {
-		return "", "", nil
-	}
 	split := strings.Split(source, "::")
 	source = split[len(split)-1]
 	split = strings.SplitN(source, "://", 2)
@@ -77,8 +62,20 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	if len(split) != 2 {
 		return "", "", nil
 	}
-
 	protocols = strings.Split(split[0], "+")
+
+	git := false
+	for _, protocol := range protocols {
+		if protocol == "git" {
+			git = true
+			break
+		}
+	}
+
+	if !git {
+		return "", "", nil
+	}
+
 	split = strings.SplitN(split[1], "#", 2)
 	if len(split) == 2 {
 		secondSplit := strings.SplitN(split[1], "=", 2)
@@ -97,27 +94,35 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 		branch = "HEAD"
 	}
 
+	url = strings.Split(url, "?")[0]
+	branch = strings.Split(branch, "?")[0]
+
 	return
 }
 
-func updateVCSData(pkgName string, sources []string) {
+func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	if savedInfo == nil {
+		mux.Lock()
 		savedInfo = make(vcsInfo)
+		mux.Unlock()
 	}
 
 	info := make(shaInfos)
-
-	for _, source := range sources {
-		url, branch, protocols := parseSource(source)
+	checkSource := func(source gosrc.ArchString) {
+		defer wg.Done()
+		url, branch, protocols := parseSource(source.Value)
 		if url == "" || branch == "" {
-			continue
+			return
 		}
 
 		commit := getCommit(url, branch, protocols)
 		if commit == "" {
-			continue
+			return
 		}
 
+		mux.Lock()
 		info[url] = shaInfo{
 			protocols,
 			branch,
@@ -125,9 +130,14 @@ func updateVCSData(pkgName string, sources []string) {
 		}
 
 		savedInfo[pkgName] = info
-
 		fmt.Println(bold(yellow(arrow)) + " Found git repo: " + cyan(url))
 		saveVCSInfo()
+		mux.Unlock()
+	}
+
+	for _, source := range sources {
+		wg.Add(1)
+		go checkSource(source)
 	}
 }
 
@@ -135,9 +145,9 @@ func getCommit(url string, branch string, protocols []string) string {
 	for _, protocol := range protocols {
 		var outbuf bytes.Buffer
 
-		cmd := exec.Command(config.GitBin, "ls-remote", protocol+"://"+url, branch)
+		cmd := passToGit("", "ls-remote", protocol+"://"+url, branch)
 		cmd.Stdout = &outbuf
-		cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0")
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 
 		err := cmd.Start()
 		if err != nil {

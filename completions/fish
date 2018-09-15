@@ -8,14 +8,14 @@ complete -c $progname -f
 
 set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 # This might be an issue if another package manager is also installed (e.g. for containers)
-set -l listall "(yay -Pcf)"
+set -l listall "(yay -Pc)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 set -l listpacman "(__fish_print_packages)"
 set -l noopt 'not __fish_contains_opt -s Y -s G -s V -s P -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
 set -l database '__fish_contains_opt -s D database'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
-set -l print '__fish_contains_opt -s P print'
+set -l show '__fish_contains_opt -s P show'
 set -l query '__fish_contains_opt -s Q query'
 set -l remove '__fish_contains_opt -s R remove'
 set -l sync '__fish_contains_opt -s S sync'
@@ -31,7 +31,7 @@ set -l yayspecific '__fish_contains_opt -s Y yay'
 complete -c $progname -s D -f -l database -n $noopt -d 'Modify the package database'
 complete -c $progname -s F -f -l files -n $noopt -d 'Query the files database'
 complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
-complete -c $progname -s P -f -l print -n $noopt -d 'Print information'
+complete -c $progname -s P -f -l show -n $noopt -d 'Print information'
 complete -c $progname -s Q -f -l query -n $noopt -d 'Query the package database'
 complete -c $progname -s R -f -l remove -n $noopt -d 'Remove packages from the system'
 complete -c $progname -s S -f -l sync -n $noopt -d 'Synchronize packages'
@@ -46,6 +46,7 @@ complete -c $progname -s h -f -l help -n $noopt -d 'Display help'
 complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the repositories'
 complete -c $progname -n "not $noopt" -l repo -d 'Assume targets are from the AUR'
 
+complete -c $progname -n "not $noopt" -s b -l aururl -d 'Set an alternative AUR URL' -f
 complete -c $progname -n "not $noopt" -s b -l dbpath -d 'Alternative database location' -xa '(__fish_complete_directories)'
 complete -c $progname -n "not $noopt" -s r -l root -d 'Alternative installation root'
 complete -c $progname -n "not $noopt" -s v -l verbose -d 'Output more status messages'
@@ -110,22 +111,39 @@ complete -c $progname -n "not $noopt" -l noeditmenu -d 'Do not edit/view PKGBUIL
 complete -c $progname -n "not $noopt" -l noupgrademenu -d 'Do not show the upgrade menu' -f
 
 
-complete -c $progname -n "not $noopt" -l provides -d 'Look for matching provders when searching for packages'
+complete -c $progname -n "not $noopt" -l provides -d 'Look for matching providers when searching for packages'
 complete -c $progname -n "not $noopt" -l noprovides -d 'Just look for packages by pkgname'
 complete -c $progname -n "not $noopt" -l pgpfetch -d 'Prompt to import PGP keys from PKGBUILDs'
 complete -c $progname -n "not $noopt" -l nopgpfetch -d 'Do not prompt to import PGP keys'
+
+# Post V7.887
+complete -c $progname -n "not $noopt" -l useask -d 'Automatically resolve conflicts using pacmans ask flag'
+complete -c $progname -n "not $noopt" -l nouseask -d 'Confirm conflicts manually during the install'
+complete -c $progname -n "not $noopt" -l combinedupgrade -d 'Refresh then perform the repo and AUR upgrade together'
+complete -c $progname -n "not $noopt" -l nocombinedupgrade -d 'Perform the repo upgrade and AUR upgrade separately'
+
+#Post V8.976
+complete -c $progname -n "not $noopt" -l nomakepkgconf -d 'Use default makepkg.conf'
+complete -c $progname -n "not $noopt" -l makepkgconf -d 'Use custom makepkg.conf location'
+complete -c $progname -n "not $noopt" -l removemake -d 'Remove make deps after install'
+complete -c $progname -n "not $noopt" -l askremovemake -d 'Ask to remove make deps after install'
+complete -c $progname -n "not $noopt" -l noremovemake -d 'Do not remove make deps after install'
+complete -c $progname -n "not $noopt" -l completioninterval -d 'Refresh interval for completion cache'
 
 # Yay options
 complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
 complete -c $progname -n $yayspecific -l gendb -d 'Generate development package DB' -f
 
-# Print options
-complete -c $progname -n $print -s d -l defaultconfig -d 'Print current yay configuration' -f
-complete -c $progname -n $print -s n -l numberupgrades -d 'Print number of updates' -f
-complete -c $progname -n $print -s s -l stats -d 'Display system package statistics' -f
-complete -c $progname -n $print -s u -l upgrades -d 'Print update list' -f
-complete -c $progname -n $print -s w -l news -d 'Print arch news'
-complete -c $progname -n $print -s q -l quiet -d 'Do not print news description'
+# Show options
+complete -c $progname -n $show -s d -l defaultconfig -d 'Print current yay configuration' -f
+complete -c $progname -n $show -s n -l numberupgrades -d 'Print number of updates' -f
+complete -c $progname -n $show -s s -l stats -d 'Display system package statistics' -f
+complete -c $progname -n $show -s u -l upgrades -d 'Print update list' -f
+complete -c $progname -n $show -s w -l news -d 'Print arch news'
+complete -c $progname -n $show -s q -l quiet -d 'Do not print news description'
+
+# Getpkgbuild options
+complete -c $progname -n $getpkgbuild -s f -l force -d 'Force download for existing tar packages' -f
 
 # Transaction options (sync, remove, upgrade)
 for condition in sync remove upgrade

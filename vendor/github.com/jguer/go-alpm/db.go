@@ -8,6 +8,7 @@ package alpm
 
 /*
 #include <alpm.h>
+#include <alpm_list.h>
 */
 import "C"
 
@@ -117,6 +118,11 @@ func (db Db) SetServers(servers []string) {
 	}
 }
 
+// SetUsage sets the Usage of the database
+func (db Db) SetUsage(usage Usage) {
+	C.alpm_db_set_usage(db.ptr, C.int(usage))
+}
+
 // PkgByName searches a package in db.
 func (db Db) PkgByName(name string) (*Package, error) {
 	cName := C.CString(name)
@@ -150,4 +156,16 @@ func (l DbList) PkgCachebyGroup(name string) (PackageList, error) {
 func (db Db) PkgCache() PackageList {
 	pkgcache := (*list)(unsafe.Pointer(C.alpm_db_get_pkgcache(db.ptr)))
 	return PackageList{pkgcache, db.handle}
+}
+
+func (db Db) Search(targets []string) PackageList {
+	var needles *C.alpm_list_t
+
+	for _, str := range targets {
+		needles = C.alpm_list_add(needles, unsafe.Pointer(C.CString(str)))
+	}
+
+	pkglist := (*list)(unsafe.Pointer(C.alpm_db_search(db.ptr, needles)))
+	C.alpm_list_free(needles)
+	return PackageList{pkglist, db.handle}
 }

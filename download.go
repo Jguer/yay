@@ -8,6 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
+
+	alpm "github.com/jguer/go-alpm"
 )
 
 // Decide what download method to use:
@@ -45,19 +48,14 @@ func downloadFile(path string, url string) (err error) {
 }
 
 func gitHasDiff(path string, name string) (bool, error) {
-	stdout, stderr, err := passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD")
+	stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "HEAD", "HEAD@{upstream}"))
 	if err != nil {
 		return false, fmt.Errorf("%s%s", stderr, err)
 	}
 
-	head := strings.TrimSpace(stdout)
-
-	stdout, stderr, err = passToGitCapture(filepath.Join(path, name), "rev-parse", "HEAD@{upstream}")
-	if err != nil {
-		return false, fmt.Errorf("%s%s", stderr, err)
-	}
-
-	upstream := strings.TrimSpace(stdout)
+	lines := strings.Split(stdout, "\n")
+	head := lines[0]
+	upstream := lines[1]
 
 	return head != upstream, nil
 }
@@ -65,9 +63,11 @@ func gitHasDiff(path string, name string) (bool, error) {
 func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
-		err = passToGit(path, "clone", url, name)
+		cmd := passToGit(path, "clone", "--no-progress", url, name)
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+		_, stderr, err := capture(cmd)
 		if err != nil {
-			return false, fmt.Errorf("error cloning %s", name)
+			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
 		}
 
 		return true, nil
@@ -75,39 +75,41 @@ func gitDownload(url string, path string, name string) (bool, error) {
 		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
-	err = passToGit(filepath.Join(path, name), "fetch")
+	cmd := passToGit(filepath.Join(path, name), "fetch")
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	_, stderr, err := capture(cmd)
 	if err != nil {
-		return false, fmt.Errorf("error fetching %s", name)
+		return false, fmt.Errorf("error fetching %s: %s", name, stderr)
 	}
 
 	return false, nil
 }
 
-func gitMerge(url string, path string, name string) error {
-	err := passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD")
+func gitMerge(path string, name string) error {
+	_, stderr, err := capture(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
 	if err != nil {
-		return fmt.Errorf("error resetting %s", name)
+		return fmt.Errorf("error resetting %s: %s", name, stderr)
 	}
 
-	err = passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff")
+	_, stderr, err = capture(passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff"))
 	if err != nil {
-		return fmt.Errorf("error merging %s", name)
+		return fmt.Errorf("error merging %s: %s", name, stderr)
 	}
 
 	return nil
 }
 
 func gitDiff(path string, name string) error {
-	err := passToGit(filepath.Join(path, name), "diff", "HEAD..HEAD@{upstream}")
+	err := show(passToGit(filepath.Join(path, name), "diff", "HEAD..HEAD@{upstream}"))
 
 	return err
 }
 
 // DownloadAndUnpack downloads url tgz and extracts to path.
-func downloadAndUnpack(url string, path string) (err error) {
-	err = os.MkdirAll(path, 0755)
+func downloadAndUnpack(url string, path string) error {
+	err := os.MkdirAll(path, 0755)
 	if err != nil {
-		return
+		return err
 	}
 
 	fileName := filepath.Base(url)
@@ -117,15 +119,15 @@ func downloadAndUnpack(url string, path string) (err error) {
 
 	err = downloadFile(tarLocation, url)
 	if err != nil {
-		return
+		return err
 	}
 
-	err = exec.Command(config.TarBin, "-xf", tarLocation, "-C", path).Run()
+	_, stderr, err := capture(exec.Command(config.TarBin, "-xf", tarLocation, "-C", path))
 	if err != nil {
-		return
+		return fmt.Errorf("%s", stderr)
 	}
 
-	return
+	return nil
 }
 
 func getPkgbuilds(pkgs []string) error {
@@ -136,8 +138,17 @@ func getPkgbuilds(pkgs []string) error {
 	}
 
 	pkgs = removeInvalidTargets(pkgs)
-
 	aur, repo, err := packageSlices(pkgs)
+
+	for n := range aur {
+		_, pkg := splitDbFromName(aur[n])
+		aur[n] = pkg
+	}
+
+	info, err := aurInfoPrint(aur)
+	if err != nil {
+		return err
+	}
 
 	if len(repo) > 0 {
 		missing, err = getPkgbuildsfromABS(repo, wd)
@@ -147,11 +158,33 @@ func getPkgbuilds(pkgs []string) error {
 	}
 
 	if len(aur) > 0 {
-		_missing, err := getPkgbuildsfromAUR(aur, wd)
-		if err != nil {
+		allBases := getBases(info)
+		bases := make([]Base, 0)
+
+		for _, base := range allBases {
+			name := base.Pkgbase()
+			_, err = os.Stat(filepath.Join(wd, name))
+			if err != nil && !os.IsNotExist(err) {
+				fmt.Println(bold(red(smallArrow)), err)
+				continue
+			} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") || shouldUseGit(filepath.Join(wd, name)) {
+				if err = os.RemoveAll(filepath.Join(wd, name)); err != nil {
+					fmt.Println(bold(red(smallArrow)), err)
+					continue
+				}
+			} else {
+				fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
+				continue
+			}
+
+			bases = append(bases, base)
+		}
+
+		if _, err = downloadPkgbuilds(bases, nil, wd); err != nil {
 			return err
 		}
-		missing = missing || _missing
+
+		missing = missing || len(aur) != len(info)
 	}
 
 	if missing {
@@ -162,107 +195,108 @@ func getPkgbuilds(pkgs []string) error {
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string) (missing bool, err error) {
+func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
+	var wg sync.WaitGroup
+	var mux sync.Mutex
+	var errs MultiError
+	names := make(map[string]string)
+	missing := make([]string, 0)
+	downloaded := 0
+
 	dbList, err := alpmHandle.SyncDbs()
 	if err != nil {
-		return
+		return false, err
 	}
 
-nextPkg:
 	for _, pkgN := range pkgs {
+		var pkg *alpm.Package
+		var err error
+		var url string
 		pkgDb, name := splitDbFromName(pkgN)
 
-		for _, db := range dbList.Slice() {
-			if pkgDb != "" && db.Name() != pkgDb {
-				continue
+		if pkgDb != "" {
+			if db, err := alpmHandle.SyncDbByName(pkgDb); err == nil {
+				pkg, err = db.PkgByName(name)
 			}
-
-			pkg, err := db.PkgByName(name)
-			if err == nil {
-				var url string
-				name := pkg.Base()
-				if name == "" {
-					name = pkg.Name()
+		} else {
+			dbList.ForEach(func(db alpm.Db) error {
+				if pkg, err = db.PkgByName(name); err == nil {
+					return fmt.Errorf("")
 				}
-
-				if _, err := os.Stat(filepath.Join(path, name)); err == nil {
-					fmt.Println(bold(red(arrow)), bold(cyan(name)), "directory already exists")
-					continue nextPkg
-				}
-
-				switch db.Name() {
-				case "core", "extra":
-					url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
-				case "community", "multilib":
-					url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
-				default:
-					fmt.Println(pkgN, "not in standard repositories")
-					continue nextPkg
-				}
-
-				errD := downloadAndUnpack(url, cacheHome)
-				if errD != nil {
-					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
-				}
-
-				errD = exec.Command("mv", filepath.Join(cacheHome, "packages", name, "trunk"), filepath.Join(path, name)).Run()
-				if errD != nil {
-					fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name())), bold(red(errD.Error())))
-				} else {
-					fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.Name()), "from ABS")
-				}
-
-				continue nextPkg
-			}
+				return nil
+			})
 		}
 
-		fmt.Println(pkgN, "could not find package in database")
-		missing = true
-	}
-
-	if _, err := os.Stat(filepath.Join(cacheHome, "packages")); err == nil {
-		os.RemoveAll(filepath.Join(cacheHome, "packages"))
-	}
-
-	return
-}
-
-// GetPkgbuild downloads pkgbuild from the AUR.
-func getPkgbuildsfromAUR(pkgs []string, dir string) (bool, error) {
-	missing := false
-	strippedPkgs := make([]string, 0)
-	for _, pkg := range pkgs {
-		_, name := splitDbFromName(pkg)
-		strippedPkgs = append(strippedPkgs, name)
-	}
-
-	aq, err := aurInfoPrint(strippedPkgs)
-	if err != nil {
-		return missing, err
-	}
-
-	for _, pkg := range aq {
-		if _, err := os.Stat(filepath.Join(dir, pkg.PackageBase)); err == nil {
-			fmt.Println(bold(red(arrow)), bold(cyan(pkg.Name)), "directory already exists")
+		if pkg == nil {
+			missing = append(missing, name)
 			continue
 		}
 
-		if shouldUseGit(filepath.Join(dir, pkg.PackageBase)) {
-			_, err = gitDownload(baseURL+"/"+pkg.PackageBase+".git", dir, pkg.PackageBase)
-		} else {
-			err = downloadAndUnpack(baseURL+aq[0].URLPath, dir)
+		name = pkg.Base()
+		if name == "" {
+			name = pkg.Name()
 		}
 
+		switch pkg.DB().Name() {
+		case "core", "extra", "testing":
+			url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
+		case "community", "multilib", "community-testing", "multilib-testing":
+			url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
+		default:
+			missing = append(missing, name)
+			continue
+		}
+
+		_, err = os.Stat(filepath.Join(path, name))
+		if err != nil && !os.IsNotExist(err) {
+			fmt.Println(bold(red(smallArrow)), err)
+			continue
+		} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") {
+			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
+				fmt.Println(bold(red(smallArrow)), err)
+				continue
+			}
+		} else {
+			fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
+			continue
+		}
+
+		names[name] = url
+	}
+
+	if len(missing) != 0 {
+		fmt.Println(yellow(bold(smallArrow)), "Missing ABS packages: ", cyan(strings.Join(missing, "  ")))
+	}
+
+	download := func(pkg string, url string) {
+		defer wg.Done()
+		if err := downloadAndUnpack(url, cacheHome); err != nil {
+			errs.Add(fmt.Errorf("%s Failed to get pkgbuild: %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(err.Error()))))
+			return
+		}
+
+		_, stderr, err := capture(exec.Command("mv", filepath.Join(cacheHome, "packages", pkg, "trunk"), filepath.Join(path, pkg)))
+		mux.Lock()
+		downloaded++
 		if err != nil {
-			fmt.Println(err)
+			errs.Add(fmt.Errorf("%s Failed to move %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(string(stderr)))))
 		} else {
-			fmt.Println(bold(yellow(arrow)), "Downloaded", cyan(pkg.PackageBase), "from AUR")
+			fmt.Printf(bold(cyan("::"))+" Downloaded PKGBUILD from ABS (%d/%d): %s\n", downloaded, len(names), cyan(pkg))
+		}
+		mux.Unlock()
+	}
+
+	count := 0
+	for name, url := range names {
+		wg.Add(1)
+		go download(name, url)
+		count++
+		if count%25 == 0 {
+			wg.Wait()
 		}
 	}
 
-	if len(aq) != len(pkgs) {
-		missing = true
-	}
-
-	return missing, err
+	wg.Wait()
+	errs.Add(os.RemoveAll(filepath.Join(cacheHome, "packages")))
+	return len(missing) != 0, errs.Return()
 }

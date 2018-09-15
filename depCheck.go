@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	alpm "github.com/jguer/go-alpm"
-	//	gopkg "github.com/mikkeloscar/gopkgbuild"
 )
 
 func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts mapStringSet) {
@@ -124,7 +123,7 @@ func (dp *depPool) checkReverseConflicts(conflicts mapStringSet) {
 	})
 }
 
-func (dp *depPool) CheckConflicts() error {
+func (dp *depPool) CheckConflicts() (mapStringSet, error) {
 	var wg sync.WaitGroup
 	innerConflicts := make(mapStringSet)
 	conflicts := make(mapStringSet)
@@ -159,12 +158,17 @@ func (dp *depPool) CheckConflicts() error {
 			fmt.Println(str)
 		}
 
-		return fmt.Errorf("Unresolvable package conflicts, aborting")
+		return nil, fmt.Errorf("Unresolvable package conflicts, aborting")
 	}
 
 	if len(conflicts) != 0 {
 		fmt.Println()
 		fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
+
+		if !config.UseAsk {
+			fmt.Println(bold(red(arrow)), bold("You will have to confirm these when installing"))
+		}
+
 		for name, pkgs := range conflicts {
 			str := red(bold(smallArrow)) + " Installing " + cyan(name) + " will remove:"
 			for pkg := range pkgs {
@@ -176,9 +180,13 @@ func (dp *depPool) CheckConflicts() error {
 		}
 
 		fmt.Println()
+
+		if config.NoConfirm && !config.UseAsk {
+			return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
+		}
 	}
 
-	return nil
+	return conflicts, nil
 }
 
 type missing struct {

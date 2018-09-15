@@ -143,11 +143,12 @@ func (s repoQuery) printSearch() {
 // Pretty print a set of packages from the same package base.
 // Packages foo and bar from a pkgbase named base would print like so:
 // base (foo bar)
-func formatPkgbase(pkg *rpc.Pkg, bases map[string][]*rpc.Pkg) string {
+func (base Base) String() string {
+	pkg := base[0]
 	str := pkg.PackageBase
-	if len(bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+	if len(base) > 1 || pkg.PackageBase != pkg.Name {
 		str2 := " ("
-		for _, split := range bases[pkg.PackageBase] {
+		for _, split := range base {
 			str2 += split.Name + " "
 		}
 		str2 = str2[:len(str2)-1] + ")"
@@ -210,18 +211,19 @@ func (do *depOrder) Print() {
 		}
 	}
 
-	for _, pkg := range do.Aur {
-		pkgStr := "  " + pkg.PackageBase + "-" + pkg.Version
+	for _, base := range do.Aur {
+		pkg := base.Pkgbase()
+		pkgStr := "  " + pkg + "-" + base[0].Version
 		pkgStrMake := pkgStr
 
 		push := false
 		pushMake := false
 
-		if len(do.Bases[pkg.PackageBase]) > 1 || pkg.PackageBase != pkg.Name {
+		if len(base) > 1 || pkg != base[0].Name {
 			pkgStr += " ("
 			pkgStrMake += " ("
 
-			for _, split := range do.Bases[pkg.PackageBase] {
+			for _, split := range base {
 				if do.Runtime.get(split.Name) {
 					pkgStr += split.Name + " "
 					aurLen++
@@ -235,7 +237,7 @@ func (do *depOrder) Print() {
 
 			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
 			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
-		} else if do.Runtime.get(pkg.Name) {
+		} else if do.Runtime.get(base[0].Name) {
 			aurLen++
 			push = true
 		} else {
@@ -268,6 +270,10 @@ func printDownloads(repoName string, length int, packages string) {
 }
 
 func printInfoValue(str, value string) {
+	if value == "" {
+		value = "None"
+	}
+
 	fmt.Printf(bold("%-16s%s")+" %s\n", str, ":", value)
 }
 
@@ -275,9 +281,12 @@ func printInfoValue(str, value string) {
 func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Repository", "aur")
 	printInfoValue("Name", a.Name)
+	printInfoValue("Keywords", strings.Join(a.Keywords, "  "))
 	printInfoValue("Version", a.Version)
 	printInfoValue("Description", a.Description)
 	printInfoValue("URL", a.URL)
+	printInfoValue("AUR URL", config.AURURL+"/packages/"+a.Name)
+	printInfoValue("Groups", strings.Join(a.Groups, "  "))
 	printInfoValue("Licenses", strings.Join(a.License, "  "))
 	printInfoValue("Provides", strings.Join(a.Provides, "  "))
 	printInfoValue("Depends On", strings.Join(a.Depends, "  "))
@@ -288,10 +297,20 @@ func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Maintainer", a.Maintainer)
 	printInfoValue("Votes", fmt.Sprintf("%d", a.NumVotes))
 	printInfoValue("Popularity", fmt.Sprintf("%f", a.Popularity))
+	printInfoValue("First Submitted", formatTime(a.FirstSubmitted))
+	printInfoValue("Last Modified", formatTime(a.LastModified))
+
 	if a.OutOfDate != 0 {
 		printInfoValue("Out-of-date", "Yes ["+formatTime(a.OutOfDate)+"]")
 	} else {
 		printInfoValue("Out-of-date", "No")
+	}
+
+	if cmdArgs.existsDouble("i") {
+		printInfoValue("ID", fmt.Sprintf("%d", a.ID))
+		printInfoValue("Package Base ID", fmt.Sprintf("%d", a.PackageBaseID))
+		printInfoValue("Package Base", a.PackageBase)
+		printInfoValue("Snapshot URL", config.AURURL+a.URLPath)
 	}
 
 	fmt.Println()
@@ -568,9 +587,9 @@ func colourHash(name string) (output string) {
 	if !useColor {
 		return name
 	}
-	var hash = 5381
+	var hash uint = 5381
 	for i := 0; i < len(name); i++ {
-		hash = int(name[i]) + ((hash << 5) + (hash))
+		hash = uint(name[i]) + ((hash << 5) + (hash))
 	}
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
 }
@@ -595,8 +614,8 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 		fmt.Print("\nEnter a number (default=1): ")
 
 		if config.NoConfirm {
-			fmt.Println()
-			break
+			fmt.Println("1")
+			return providers.Pkgs[0]
 		}
 
 		reader := bufio.NewReader(os.Stdin)
