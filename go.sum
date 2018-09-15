@@ -1,0 +1,8 @@
+github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f h1:ptFKynTV1p8JCzqk81NcMj0DV0Xle+PdKxfHjPbdIOU=
+github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f/go.mod h1:Hk55m330jNiwxRodIlMCvw5iEyoRUCIY64W1p9D+tHc=
+github.com/Morganamilo/go-srcinfo v0.0.0-20180702014333-368edc79b2c5 h1:0mWTtDLD9MmZO8Qk21aRFfsQpGU3uS7mSLbSzDTuguY=
+github.com/Morganamilo/go-srcinfo v0.0.0-20180702014333-368edc79b2c5/go.mod h1:MP6VGY1NNpVUmYIEgoM9acix95KQqIRyqQ0hCLsyYUY=
+github.com/jguer/go-alpm v0.0.0-20180914002751-643c287316a5 h1:JPIXUHXLZYwYUTlGpCCRMNFt8IRAyLPUsnXYqOJ6U/w=
+github.com/jguer/go-alpm v0.0.0-20180914002751-643c287316a5/go.mod h1:1F60/e8oQFVJrZRH0TBqwtiB5ajJ5avOc4MoGRY9CFU=
+github.com/mikkeloscar/aur v0.0.0-20180725140122-f998dbf94dc4 h1:qgHSZbD0g3W7KAkZFzXlSqgriYnzEUFS1gkgEiv2GrE=
+github.com/mikkeloscar/aur v0.0.0-20180725140122-f998dbf94dc4/go.mod h1:n1NKHoldRNhIEufSx1PiDYcd2W+wpbz5/5K+p2eNDVk=

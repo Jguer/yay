@@ -1,6 +1,6 @@
 .PHONY: all default install uninstall test build release clean
 
-PREFIX := /usr
+PREFIX := /usr/local
 DESTDIR :=
 
 ifndef VERSION
@@ -14,8 +14,6 @@ ARCH := $(shell uname -m)
 PKGNAME := yay
 BINNAME := yay
 PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
-
-export GOPATH=$(shell pwd)/.go
 
 default: build
 
@@ -42,7 +40,7 @@ test:
 	go test -v
 
 build:
-	go build -v ${LDFLAGS} -o ${BINNAME}
+	go build -mod=vendor -v ${LDFLAGS} -o ${BINNAME}
 
 release: | test build
 	mkdir ${PACKAGE}
