@@ -350,19 +350,20 @@ func configureAlpm(conf *pacmanconf.Config) error {
 	var err error
 
 	// TODO: set SigLevel
-	sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
-	localFileSigLevel := alpm.SigUseDefault
-	remoteFileSigLevel := alpm.SigUseDefault
+	//sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
+	//localFileSigLevel := alpm.SigUseDefault
+	//remoteFileSigLevel := alpm.SigUseDefault
 
 	for _, repo := range pacmanConf.Repos {
 		// TODO: set SigLevel
-		db, err := alpmHandle.RegisterSyncDb(repo.Name, sigLevel)
+		db, err := alpmHandle.RegisterSyncDb(repo.Name, 0)
 		if err != nil {
 			return err
 		}
 
 		db.SetServers(repo.Servers)
 		db.SetUsage(toUsage(repo.Usage))
+
 	}
 
 	if err = alpmHandle.SetCacheDirs(pacmanConf.CacheDir...); err != nil {
@@ -404,7 +405,7 @@ func configureAlpm(conf *pacmanconf.Config) error {
 		return err
 	}
 
-	if err = alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
+	/*if err = alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
 		return err
 	}
 
@@ -414,7 +415,7 @@ func configureAlpm(conf *pacmanconf.Config) error {
 
 	if err = alpmHandle.SetRemoteFileSigLevel(remoteFileSigLevel); err != nil {
 		return err
-	}
+	}*/
 
 	if err = alpmHandle.SetDeltaRatio(pacmanConf.UseDelta); err != nil {
 		return err
