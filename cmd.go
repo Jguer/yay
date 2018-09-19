@@ -35,6 +35,7 @@ New operations:
 New options:
        --repo             Assume targets are from the repositories
     -a --aur              Assume targets are from the AUR
+
 Permanent configuration options:
     --save                Causes the following options to be saved back to the
                           config file when used
