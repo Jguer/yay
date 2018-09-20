@@ -1,21 +1,22 @@
-.PHONY: all default install uninstall test build release clean
+.PHONY: all default install uninstall test build release clean package
 
 PREFIX := /usr
 DESTDIR :=
 
-ifndef VERSION
-MAJORVERSION := 8
-MINORVERSION ?= $(shell git rev-list --count master)
-endif
-VERSION := ${MAJORVERSION}.${MINORVERSION}
+
+MAJORVERSION$(VERSION) := 8
+MINORVERSION$(VERSION) != git rev-list --count master
+VERSION ?= ${MAJORVERSION}.${MINORVERSION}
 
 LDFLAGS := -ldflags '-s -w -X main.version=${VERSION}'
 ARCH := $(shell uname -m)
 PKGNAME := yay
 BINNAME := yay
 PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
+GOFILES != find . -name '*.go'
 
-export GOPATH=$(shell pwd)/.go
+CURDIR?=${.CURDIR}
+export GOPATH=$(CURDIR)/.go
 
 default: build
 
@@ -41,7 +42,9 @@ test:
 	go vet
 	go test -v
 
-build:
+build: ${BINNAME}
+
+${BINNAME}: $(GOFILES) Gopkg.toml Gopkg.lock
 	go build -v ${LDFLAGS} -o ${BINNAME}
 
 release: | test build
@@ -54,6 +57,7 @@ release: | test build
 
 package: release
 	tar -czvf ${PACKAGE}.tar.gz ${PACKAGE}
+
 clean:
 	rm -rf ${PKGNAME}_*
 	rm -f ${BINNAME}
