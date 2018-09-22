@@ -66,54 +66,54 @@ func (y *yayConfig) defaultSettings() {
 	y.hideMenus = false
 
 	y.boolean = map[string]bool{
-		"CleanAfter":      false,
-		"CleanMenu":       true,
-		"CombinedUpgrade": false,
-		"Devel":           false,
-		"DiffMenu":        true,
-		"EditMenu":        false,
-		"GitClone":        true,
-		"PGPFetch":        true,
-		"Provides":        true,
-		"SudoLoop":        false,
-		"TimeUpdate":      false,
-		"UpgradeMenu":     true,
-		"UseAsk":          false,
+		"cleanafter":      false,
+		"cleanmenu":       true,
+		"combinedupgrade": false,
+		"devel":           false,
+		"diffmenu":        true,
+		"editmenu":        false,
+		"gitclone":        true,
+		"pgpfetch":        true,
+		"provides":        true,
+		"sudoloop":        false,
+		"timeupdate":      false,
+		"upgrademenu":     true,
+		"useask":          false,
 	}
 
 	y.num = map[string]int{
-		"CompletionInterval": 7,
-		"RequestSplitN":      150,
+		"completioninterval": 7,
+		"requestsplitn":      150,
 	}
 
 	y.value = map[string]string{
-		"AURURL":         "https://aur.archlinux.org",
-		"AnswerClean":    "",
-		"AnswerDiff":     "",
-		"AnswerEdit":     "",
-		"AnswerUpgrade":  "",
-		"BuildDir":       "$HOME/.cache/yay",
-		"Editor":         "",
-		"EditorFlags":    "",
-		"GPGCommand":     "gpg",
-		"GPGFlags":       "",
-		"GitCommand":     "git",
-		"GitFlags":       "",
-		"MakepkgCommand": "makepkg",
-		"MakepkgConf":    "",
-		"MakepkgFlags":   "",
-		"PacmanCommand":  "pacman",
-		"PacmanConf":     "/etc/pacman.conf",
-		"Redownload":     "no",
-		"Rebuild":        "no",
-		"RemoveMake":     "ask",
-		"SortBy":         "votes",
-		"SortMode":       "bottomup",
-		"TarCommand":     "bsdtar",
+		"aururl":         "https://aur.archlinux.org",
+		"answerclean":    "",
+		"answerdiff":     "",
+		"answeredit":     "",
+		"answerupgrade":  "",
+		"builddir":       "$HOME/.cache/yay",
+		"editor":         "",
+		"editorflags":    "",
+		"gpgcommand":     "gpg",
+		"gpgflags":       "",
+		"gitcommand":     "git",
+		"gitflags":       "",
+		"makepkgcommand": "makepkg",
+		"makepkgconf":    "",
+		"makepkgflags":   "",
+		"pacmancommand":  "pacman",
+		"pacmanconf":     "/etc/pacman.conf",
+		"redownload":     "no",
+		"rebuild":        "no",
+		"removemake":     "ask",
+		"sortby":         "votes",
+		"sortmode":       "bottomup",
+		"tarcommand":     "bsdtar",
 	}
 
 	if os.Getenv("XDG_CACHE_HOME") != "" {
-		y.value["BuildDir"] = "$XDG_CACHE_HOME/yay"
+		y.value["builddir"] = "$XDG_CACHE_HOME/yay"
 	}
 }
 
@@ -123,15 +123,15 @@ func (y *yayConfig) expandEnv() {
 	}
 }
 
-// Editor returns the preferred system editor.
+// editor returns the preferred system editor.
 func editor() (string, []string) {
 	switch {
-	case config.value["Editor"] != "":
-		editor, err := exec.LookPath(config.value["Editor"])
+	case config.value["editor"] != "":
+		editor, err := exec.LookPath(config.value["editor"])
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			return editor, strings.Fields(config.value["EditorFlags"])
+			return editor, strings.Fields(config.value["editorflags"])
 		}
 		fallthrough
 	case os.Getenv("EDITOR") != "":

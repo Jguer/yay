@@ -30,7 +30,7 @@ func (q aurQuery) Len() int {
 func (q aurQuery) Less(i, j int) bool {
 	var result bool
 
-	switch config.value["SortBy"] {
+	switch config.value["sortby"] {
 	case "votes":
 		result = q[i].NumVotes > q[j].NumVotes
 	case "popularity":
@@ -49,7 +49,7 @@ func (q aurQuery) Less(i, j int) bool {
 		result = q[i].PackageBaseID < q[j].PackageBaseID
 	}
 
-	if config.value["SortMode"] == "bottomup" {
+	if config.value["sortmode"] == "bottomup" {
 		return !result
 	}
 
@@ -175,7 +175,7 @@ func syncSearch(pkgS []string) (err error) {
 		}
 	}
 
-	if config.value["SortMode"] == "bottomup" {
+	if config.value["sortmode"] == "bottomup" {
 		if config.mode == modeAUR || config.mode == modeAny {
 			aq.printSearch(1)
 		}
@@ -271,7 +271,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 		return nil
 	})
 
-	if config.value["SortMode"] == "bottomup" {
+	if config.value["sortmode"] == "bottomup" {
 		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 			s[i], s[j] = s[j], s[i]
 		}
@@ -469,8 +469,8 @@ func statistics() (info struct {
 
 // Queries the aur for information about specified packages.
 // All packages should be queried in a single rpc request except when the number
-// of packages exceeds the number set in config.RequestSplitN.
-// If the number does exceed config.RequestSplitN multiple rpc requests will be
+// of packages exceeds the number set in config.requestsplitn.
+// If the number does exceed config.requestsplitn multiple rpc requests will be
 // performed concurrently.
 func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	info := make([]*rpc.Pkg, 0, len(names))
@@ -494,8 +494,8 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 		mux.Unlock()
 	}
 
-	for n := 0; n < len(names); n += config.num["RequestSplitN"] {
-		max := min(len(names), n+config.num["RequestSplitN"])
+	for n := 0; n < len(names); n += config.num["requestsplitn"] {
+		max := min(len(names), n+config.num["requestsplitn"])
 		wg.Add(1)
 		go makeRequest(n, max)
 	}

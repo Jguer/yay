@@ -134,7 +134,7 @@ func handleCmd() (err error) {
 		return
 	}
 
-	if config.boolean["SudoLoop"] && cmdArgs.needRoot() {
+	if config.boolean["sudoloop"] && cmdArgs.needRoot() {
 		sudoLoopBackground()
 	}
 
@@ -312,7 +312,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		return fmt.Errorf("No packages match search")
 	}
 
-	if config.value["SortMode"] == "bottomup" {
+	if config.value["sortmode"] == "bottomup" {
 		if config.mode == modeAUR || config.mode == modeAny {
 			aq.printSearch(lenpq + 1)
 		}
@@ -353,7 +353,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 
 	for i, pkg := range pq {
 		target := len(pq) - i
-		if config.value["SortMode"] == "topdown" {
+		if config.value["sortmode"] == "topdown" {
 			target = i + 1
 		}
 
@@ -364,7 +364,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 
 	for i, pkg := range aq {
 		target := len(aq) - i + len(pq)
-		if config.value["SortMode"] == "topdown" {
+		if config.value["sortmode"] == "topdown" {
 			target = i + 1 + len(pq)
 		}
 
@@ -378,7 +378,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		return nil
 	}
 
-	if config.boolean["SudoLoop"] {
+	if config.boolean["sudoloop"] {
 		sudoLoopBackground()
 	}
 

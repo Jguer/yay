@@ -280,7 +280,7 @@ func (ds *depSolver) findSatisfierAurCache(dep string) *rpc.Pkg {
 		}
 	}
 
-	if !config.boolean["Provides"] && providers.Len() >= 1 {
+	if !config.boolean["provides"] && providers.Len() >= 1 {
 		return providers.Pkgs[0]
 	}
 
@@ -310,7 +310,7 @@ func (ds *depSolver) cacheAURPackages(_pkgs []string) error {
 		return nil
 	}
 
-	if config.boolean["Provides"] {
+	if config.boolean["provides"] {
 		err := ds.findProvides(pkgs)
 		if err != nil {
 			return err
@@ -444,7 +444,7 @@ func (ds *depSolver) resolveAURPackages(pkgs []string, explicit bool) error {
 		config.hideMenus = isInstalled == nil
 		repoPkg, inRepos := ds.SyncDb.FindSatisfier(dep) //has satisfier in repo: fetch it
 		config.hideMenus = hm
-		if isInstalled == nil && (config.value["ReBuild"] != "tree" || inRepos == nil) {
+		if isInstalled == nil && (config.value["rebuild"] != "tree" || inRepos == nil) {
 			continue
 		}
 

@@ -13,7 +13,7 @@ import (
 
 //CreateAURList creates a new completion file
 func createAURList(out *os.File) (err error) {
-	resp, err := http.Get(config.value["AURURL"] + "/packages.gz")
+	resp, err := http.Get(config.value["aururl"] + "/packages.gz")
 	if err != nil {
 		return err
 	}
@@ -52,8 +52,8 @@ func updateCompletion(force bool) error {
 	path := filepath.Join(config.cacheHome, "completion.cache")
 	info, err := os.Stat(path)
 
-	if os.IsNotExist(err) || (config.num["CompletionInterval"] != -1 &&
-		time.Since(info.ModTime()).Hours() >= float64(config.num["CompletionInterval"]*24)) ||
+	if os.IsNotExist(err) || (config.num["completioninterval"] != -1 &&
+		time.Since(info.ModTime()).Hours() >= float64(config.num["completioninterval"]*24)) ||
 		force {
 		os.MkdirAll(filepath.Dir(path), 0755)
 		out, errf := os.Create(path)

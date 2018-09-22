@@ -41,7 +41,7 @@ func checkPgpKeys(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
-	args := append(strings.Fields(config.value["GPGFlags"]), "--list-keys")
+	args := append(strings.Fields(config.value["gpgflags"]), "--list-keys")
 
 	// Mapping all the keys.
 	for _, base := range bases {
@@ -56,7 +56,7 @@ func checkPgpKeys(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 				continue
 			}
 
-			cmd := exec.Command(config.value["GPGCommand"], append(args, key)...)
+			cmd := exec.Command(config.value["gpgcommand"], append(args, key)...)
 			err := cmd.Run()
 			if err != nil {
 				problematic.set(key, base)
@@ -86,8 +86,8 @@ func checkPgpKeys(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 
 // importKeys tries to import the list of keys specified in its argument.
 func importKeys(keys []string) error {
-	args := append(strings.Fields(config.value["GPGFlags"]), "--recv-keys")
-	cmd := exec.Command(config.value["GPGCommand"], append(args, keys...)...)
+	args := append(strings.Fields(config.value["gpgflags"]), "--recv-keys")
+	cmd := exec.Command(config.value["gpgcommand"], append(args, keys...)...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
 	fmt.Printf("%s %s...\n", bold(cyan("::")), bold("Importing keys with gpg..."))

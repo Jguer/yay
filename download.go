@@ -20,7 +20,7 @@ import (
 func shouldUseGit(path string) bool {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		return config.boolean["GitClone"]
+		return config.boolean["gitclone"]
 	}
 
 	_, err = os.Stat(filepath.Join(path, ".git"))
@@ -122,7 +122,7 @@ func downloadAndUnpack(url string, path string) error {
 		return err
 	}
 
-	_, stderr, err := capture(exec.Command(config.value["TarCommand"], "-xf", tarLocation, "-C", path))
+	_, stderr, err := capture(exec.Command(config.value["tarcommand"], "-xf", tarLocation, "-C", path))
 	if err != nil {
 		return fmt.Errorf("%s", stderr)
 	}

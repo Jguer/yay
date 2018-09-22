@@ -71,10 +71,10 @@ func initHomeDirs() error {
 	return nil
 }
 
-func initBuildDir() error {
-	if _, err := os.Stat(config.value["BuildDir"]); os.IsNotExist(err) {
-		if err = os.MkdirAll(config.value["BuildDir"], 0755); err != nil {
-			return fmt.Errorf("Failed to create BuildDir directory '%s': %s", config.value["BuildDir"], err)
+func initbuilddir() error {
+	if _, err := os.Stat(config.value["builddir"]); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.value["builddir"], 0755); err != nil {
+			return fmt.Errorf("Failed to create builddir directory '%s': %s", config.value["builddir"], err)
 		}
 	} else if err != nil {
 		return err
@@ -92,7 +92,7 @@ func initAlpm() error {
 		root = value
 	}
 
-	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", config.value["PacmanConf"], "--root", root)
+	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", config.value["pacmanconf"], "--root", root)
 	if err != nil {
 		return fmt.Errorf("%s", stderr)
 	}
@@ -199,7 +199,7 @@ func main() {
 	// 	config.saveConfig()
 	// }
 	config.expandEnv()
-	exitOnError(initBuildDir())
+	exitOnError(initbuilddir())
 	exitOnError(initVCS())
 	exitOnError(initAlpm())
 	exitOnError(handleCmd())

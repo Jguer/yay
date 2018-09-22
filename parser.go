@@ -498,147 +498,147 @@ func isArg(arg string) bool {
 func handleConfig(option, value string) bool {
 	switch option {
 	case "aururl":
-		config.value["AURURL"] = value
+		config.value["aururl"] = value
 	case "save":
 		config.shouldSaveConfig = true
 	case "afterclean", "cleanafter":
-		config.boolean["CleanAfter"] = true
+		config.boolean["cleanafter"] = true
 	case "noafterclean", "nocleanafter":
-		config.boolean["CleanAfter"] = false
+		config.boolean["cleanafter"] = false
 	case "devel":
-		config.boolean["Devel"] = true
+		config.boolean["devel"] = true
 	case "nodevel":
-		config.boolean["Devel"] = false
+		config.boolean["devel"] = false
 	case "timeupdate":
-		config.boolean["TimeUpdate"] = true
+		config.boolean["timeupdate"] = true
 	case "notimeupdate":
-		config.boolean["TimeUpdate"] = false
+		config.boolean["timeupdate"] = false
 	case "topdown":
-		config.value["SortMode"] = "topdown"
+		config.value["sortmode"] = "topdown"
 	case "bottomup":
-		config.value["SortMode"] = "bottomup"
+		config.value["sortmode"] = "bottomup"
 	case "completioninterval":
 		n, err := strconv.Atoi(value)
 		if err == nil {
-			config.num["CompletionInterval"] = n
+			config.num["completioninterval"] = n
 		}
 	case "sortby":
-		config.value["SortBy"] = value
+		config.value["sortby"] = value
 	case "noconfirm":
 		config.noConfirm = true
 	case "config":
-		config.value["PacmanConf"] = value
+		config.value["pacmanconf"] = value
 	case "redownload":
-		config.value["Redownload"] = "yes"
+		config.value["redownload"] = "yes"
 	case "redownloadall":
-		config.value["Redownload"] = "all"
+		config.value["redownload"] = "all"
 	case "noredownload":
-		config.value["Redownload"] = "no"
+		config.value["redownload"] = "no"
 	case "rebuild":
-		config.value["Rebuild"] = "yes"
+		config.value["rebuild"] = "yes"
 	case "rebuildall":
-		config.value["Rebuild"] = "all"
+		config.value["rebuild"] = "all"
 	case "rebuildtree":
-		config.value["Rebuild"] = "tree"
+		config.value["rebuild"] = "tree"
 	case "norebuild":
-		config.value["Rebuild"] = "no"
+		config.value["rebuild"] = "no"
 	case "answerclean":
-		config.value["AnswerClean"] = value
+		config.value["answerclean"] = value
 	case "noanswerclean":
-		config.value["AnswerClean"] = ""
+		config.value["answerclean"] = ""
 	case "answerdiff":
-		config.value["AnswerDiff"] = value
+		config.value["answerdiff"] = value
 	case "noanswerdiff":
-		config.value["AnswerDiff"] = ""
+		config.value["answerdiff"] = ""
 	case "answeredit":
-		config.value["AnswerEdit"] = value
+		config.value["answeredit"] = value
 	case "noansweredit":
-		config.value["AnswerEdit"] = ""
+		config.value["answeredit"] = ""
 	case "answerupgrade":
-		config.value["AnswerUpgrade"] = value
+		config.value["answerupgrade"] = value
 	case "noanswerupgrade":
-		config.value["AnswerUpgrade"] = ""
+		config.value["answerupgrade"] = ""
 	case "gitclone":
-		config.boolean["GitClone"] = true
+		config.boolean["gitclone"] = true
 	case "nogitclone":
-		config.boolean["GitClone"] = false
+		config.boolean["gitclone"] = false
 	case "gpgflags":
-		config.value["GPGFlags"] = value
+		config.value["gpgflags"] = value
 	case "mflags":
-		config.value["MakepkgFlags"] = value
+		config.value["makepkgflags"] = value
 	case "gitflags":
-		config.value["GitFlags"] = value
+		config.value["gitflags"] = value
 	case "builddir":
-		config.value["BuildDir"] = value
+		config.value["builddir"] = value
 	case "editor":
-		config.value["Editor"] = value
+		config.value["editor"] = value
 	case "editorflags":
-		config.value["EditorFlags"] = value
+		config.value["editorflags"] = value
 	case "makepkg":
-		config.value["MakepkgCommand"] = value
+		config.value["makepkgcommand"] = value
 	case "makepkgconf":
-		config.value["MakepkgConf"] = value
+		config.value["makepkgconf"] = value
 	case "nomakepkgconf":
-		config.value["MakepkgConf"] = ""
+		config.value["makepkgconf"] = ""
 	case "pacman":
-		config.value["PacmanCommand"] = value
+		config.value["pacmancommand"] = value
 	case "tar":
-		config.value["TarCommand"] = value
+		config.value["tarcommand"] = value
 	case "git":
-		config.value["GitCommand"] = value
+		config.value["gitcommand"] = value
 	case "gpg":
-		config.value["GPGCommand"] = value
+		config.value["gpgcommand"] = value
 	case "requestsplitn":
 		n, err := strconv.Atoi(value)
 		if err == nil && n > 0 {
-			config.num["RequestSplitN"] = n
+			config.num["requestsplitn"] = n
 		}
 	case "sudoloop":
-		config.boolean["SudoLoop"] = true
+		config.boolean["sudoloop"] = true
 	case "nosudoloop":
-		config.boolean["SudoLoop"] = false
+		config.boolean["sudoloop"] = false
 	case "provides":
-		config.boolean["Provides"] = true
+		config.boolean["provides"] = true
 	case "noprovides":
-		config.boolean["Provides"] = false
+		config.boolean["provides"] = false
 	case "pgpfetch":
-		config.boolean["PGPFetch"] = true
+		config.boolean["pgpfetch"] = true
 	case "nopgpfetch":
-		config.boolean["PGPFetch"] = false
+		config.boolean["pgpfetch"] = false
 	case "upgrademenu":
-		config.boolean["UpgradeMenu"] = true
+		config.boolean["upgrademenu"] = true
 	case "noupgrademenu":
-		config.boolean["UpgradeMenu"] = false
+		config.boolean["upgrademenu"] = false
 	case "cleanmenu":
-		config.boolean["CleanMenu"] = true
+		config.boolean["cleanmenu"] = true
 	case "nocleanmenu":
-		config.boolean["CleanMenu"] = false
+		config.boolean["cleanmenu"] = false
 	case "diffmenu":
-		config.boolean["DiffMenu"] = true
+		config.boolean["diffmenu"] = true
 	case "nodiffmenu":
-		config.boolean["DiffMenu"] = false
+		config.boolean["diffmenu"] = false
 	case "editmenu":
-		config.boolean["EditMenu"] = true
+		config.boolean["editmenu"] = true
 	case "noeditmenu":
-		config.boolean["EditMenu"] = false
+		config.boolean["editmenu"] = false
 	case "useask":
-		config.boolean["UseAsk"] = true
+		config.boolean["useask"] = true
 	case "nouseask":
-		config.boolean["UseAsk"] = false
+		config.boolean["useask"] = false
 	case "combinedupgrade":
-		config.boolean["CombinedUpgrade"] = true
+		config.boolean["combinedupgrade"] = true
 	case "nocombinedupgrade":
-		config.boolean["CombinedUpgrade"] = false
+		config.boolean["combinedupgrade"] = false
 	case "a", "aur":
 		config.mode = modeAUR
 	case "repo":
 		config.mode = modeRepo
 	case "removemake":
-		config.value["RemoveMake"] = "yes"
+		config.value["removemake"] = "yes"
 	case "noremovemake":
-		config.value["RemoveMake"] = "no"
+		config.value["removemake"] = "no"
 	case "askremovemake":
-		config.value["RemoveMake"] = "ask"
+		config.value["removemake"] = "ask"
 	default:
 		return false
 	}
@@ -878,8 +878,8 @@ func (parser *arguments) extractYayOptions() {
 		}
 	}
 
-	rpc.AURURL = strings.TrimRight(config.value["AURURL"], "/") + "/rpc.php?"
-	config.value["AURURL"] = strings.TrimRight(config.value["AURURL"], "/")
+	rpc.AURURL = strings.TrimRight(config.value["aururl"], "/") + "/rpc.php?"
+	config.value["aururl"] = strings.TrimRight(config.value["aururl"], "/")
 }
 
 //parses input for number menus split by spaces or commas

@@ -18,19 +18,19 @@ func benchmarkPrintSearch(search string, b *testing.B) {
 }
 
 func BenchmarkPrintSearchSimpleTopDown(b *testing.B) {
-	config.SortMode = TopDown
+	config.sortmode = TopDown
 	benchmarkPrintSearch("chromium", b)
 }
 func BenchmarkPrintSearchComplexTopDown(b *testing.B) {
-	config.SortMode = TopDown
+	config.sortmode = TopDown
 	benchmarkPrintSearch("linux", b)
 }
 
 func BenchmarkPrintSearchSimpleBottomUp(b *testing.B) {
-	config.SortMode = BottomUp
+	config.sortmode = BottomUp
 	benchmarkPrintSearch("chromium", b)
 }
 func BenchmarkPrintSearchComplexBottomUp(b *testing.B) {
-	config.SortMode = BottomUp
+	config.sortmode = BottomUp
 	benchmarkPrintSearch("linux", b)
 }

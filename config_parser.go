@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"strings"
 
 	"github.com/Morganamilo/go-pacmanconf/ini"
 )
@@ -13,10 +14,11 @@ func parseCallback(fileName string, line int, section string,
 	if line < 0 {
 		return fmt.Errorf("unable to read file: %s: %s", fileName, section)
 	}
-
 	if key == "" && value == "" {
 		return nil
 	}
+
+	key = strings.ToLower(key)
 
 	if section == "options" {
 		err = config.setOption(key, value)
@@ -35,7 +37,7 @@ func parseCallback(fileName string, line int, section string,
 
 func (y *yayConfig) setMenus(key string, value string) error {
 	switch key {
-	case "Clean", "Diff", "Edit", "Upgrade":
+	case "clean", "diff", "edit", "upgrade":
 		y.boolean[key+"Menu"] = true
 		return nil
 	}
@@ -44,7 +46,7 @@ func (y *yayConfig) setMenus(key string, value string) error {
 
 func (y *yayConfig) setAnswer(key string, value string) error {
 	switch key {
-	case "Clean", "Diff", "Edit", "Upgrade":
+	case "clean", "diff", "edit", "upgrade":
 		y.value[key] = value
 		return nil
 	}

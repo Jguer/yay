@@ -14,7 +14,7 @@ func expect(t *testing.T, field string, a interface{}, b interface{}, err error)
 }
 
 func TestConfig(t *testing.T) {
-	config.PacmanConf = "testdata/pacman.conf"
+	config.pacmanconf = "testdata/pacman.conf"
 
 	err := initAlpm()
 	if err != nil {

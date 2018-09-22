@@ -151,7 +151,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 				wg.Done()
 			}()
 
-			if config.boolean["Devel"] {
+			if config.boolean["devel"] {
 				fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
 				wg.Add(1)
 				go func() {
@@ -242,7 +242,7 @@ func upAUR(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (upSlice, error) 
 			continue
 		}
 
-		if (config.boolean["TimeUpdate"] && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
+		if (config.boolean["timeupdate"] && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
 			(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
 			if pkg.ShouldIgnore() {
 				printIgnoringPackage(pkg, aurPkg.Version)
@@ -333,7 +333,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 		return ignore, aurNames, nil
 	}
 
-	if !config.boolean["UpgradeMenu"] {
+	if !config.boolean["upgrademenu"] {
 		for _, pkg := range aurUp {
 			aurNames.set(pkg.Name)
 		}
@@ -350,7 +350,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	fmt.Println(bold(green(arrow + " Packages to not upgrade: (eg: 1 2 3, 1-3, ^4 or repo name)")))
 	fmt.Print(bold(green(arrow + " ")))
 
-	numbers, err := getInput(config.value["AnswerUpgrade"])
+	numbers, err := getInput(config.value["answerupgrade"])
 	if err != nil {
 		return nil, nil, err
 	}

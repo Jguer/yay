@@ -8,20 +8,20 @@ func benchmarkSearch(search string, b *testing.B) {
 	}
 }
 func BenchmarkSearchSimpleTopDown(b *testing.B) {
-	config.SortMode = TopDown
+	config.sortmode = TopDown
 	benchmarkSearch("chromium", b)
 }
 
 func BenchmarkSearchSimpleBottomUp(b *testing.B) {
-	config.SortMode = BottomUp
+	config.sortmode = BottomUp
 	benchmarkSearch("chromium", b)
 }
 
 func BenchmarkSearchComplexTopDown(b *testing.B) {
-	config.SortMode = TopDown
+	config.sortmode = TopDown
 	benchmarkSearch("linux", b)
 }
 func BenchmarkSearchComplexBottomUp(b *testing.B) {
-	config.SortMode = BottomUp
+	config.sortmode = BottomUp
 	benchmarkSearch("linux", b)
 }

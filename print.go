@@ -65,7 +65,7 @@ func (q aurQuery) printSearch(start int) {
 	for i, res := range q {
 		var toprint string
 		if config.searchMode == numberMenu {
-			if config.value["SortMode"] == "bottomup" {
+			if config.value["sortmode"] == "bottomup" {
 				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			} else {
 				toprint += magenta(strconv.Itoa(start+i) + " ")
@@ -105,7 +105,7 @@ func (s repoQuery) printSearch() {
 	for i, res := range s {
 		var toprint string
 		if config.searchMode == numberMenu {
-			if config.value["SortMode"] == "bottomup" {
+			if config.value["sortmode"] == "bottomup" {
 				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
 			} else {
 				toprint += magenta(strconv.Itoa(i+1) + " ")
@@ -215,7 +215,7 @@ func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Version", a.Version)
 	printInfoValue("Description", a.Description)
 	printInfoValue("URL", a.URL)
-	printInfoValue("AUR URL", config.value["AURURL"]+"/packages/"+a.Name)
+	printInfoValue("AUR URL", config.value["aururl"]+"/packages/"+a.Name)
 	printInfoValue("Groups", strings.Join(a.Groups, "  "))
 	printInfoValue("Licenses", strings.Join(a.License, "  "))
 	printInfoValue("Provides", strings.Join(a.Provides, "  "))
@@ -240,7 +240,7 @@ func PrintInfo(a *rpc.Pkg) {
 		printInfoValue("ID", fmt.Sprintf("%d", a.ID))
 		printInfoValue("Package Base ID", fmt.Sprintf("%d", a.PackageBaseID))
 		printInfoValue("Package Base", a.PackageBase)
-		printInfoValue("Snapshot URL", config.value["AURURL"]+a.URLPath)
+		printInfoValue("Snapshot URL", config.value["aururl"]+a.URLPath)
 	}
 
 	fmt.Println()
@@ -452,7 +452,7 @@ func printNewsFeed() error {
 		return err
 	}
 
-	if config.value["SortMode"] == "bottomup" {
+	if config.value["sortmode"] == "bottomup" {
 		for i := len(rss.Channel.Items) - 1; i >= 0; i-- {
 			rss.Channel.Items[i].print(buildTime)
 		}
