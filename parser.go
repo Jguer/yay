@@ -377,6 +377,7 @@ func isArg(arg string) bool {
 	case "disabledownloadtimeout":
 	case "sysroot":
 	case "d", "nodeps":
+	case "assume-installed":
 	case "assumeinstalled":
 	case "dbonly":
 	case "noprogressbar":
