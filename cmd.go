@@ -195,9 +195,9 @@ func handlePrint() (err error) {
 		var tmpConfig yayConfig
 		tmpConfig.defaultSettings()
 		tmpConfig.expandEnv()
-		fmt.Printf("%v", tmpConfig)
+		tmpConfig.print()
 	case cmdArgs.existsArg("g", "currentconfig"):
-		fmt.Printf("%v", config)
+		config.print()
 	case cmdArgs.existsArg("n", "numberupgrades"):
 		err = printNumberOfUpdates()
 	case cmdArgs.existsArg("u", "upgrades"):

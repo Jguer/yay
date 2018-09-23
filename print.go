@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -588,4 +589,28 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 	}
 
 	return nil
+}
+
+func (y *yayConfig) print() {
+	printArray := make([]string, len(y.value)+len(y.num)+len(y.boolean))
+	i := 0
+
+	for k, v := range y.value {
+		printArray[i] = fmt.Sprintf("%s:%v\n", blue(k), v)
+		i++
+	}
+
+	for k, v := range y.num {
+		printArray[i] = fmt.Sprintf("%s:%v\n", blue(k), v)
+		i++
+	}
+
+	for k, v := range y.boolean {
+		printArray[i] = fmt.Sprintf("%s:%v\n", blue(k), v)
+		i++
+	}
+	sort.Strings(printArray)
+	for _, v := range printArray {
+		fmt.Print(v)
+	}
 }

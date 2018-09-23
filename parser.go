@@ -496,150 +496,22 @@ func isArg(arg string) bool {
 }
 
 func handleConfig(option, value string) bool {
-	switch option {
-	case "aururl":
-		config.value["aururl"] = value
-	case "save":
-		config.shouldSaveConfig = true
-	case "afterclean", "cleanafter":
-		config.boolean["cleanafter"] = true
-	case "noafterclean", "nocleanafter":
-		config.boolean["cleanafter"] = false
-	case "devel":
-		config.boolean["devel"] = true
-	case "nodevel":
-		config.boolean["devel"] = false
-	case "timeupdate":
-		config.boolean["timeupdate"] = true
-	case "notimeupdate":
-		config.boolean["timeupdate"] = false
-	case "topdown":
-		config.value["sortmode"] = "topdown"
-	case "bottomup":
-		config.value["sortmode"] = "bottomup"
-	case "completioninterval":
-		n, err := strconv.Atoi(value)
+	if _, ok := config.value[option]; ok {
+		if value == "" {
+			config.value[option] = "yes"
+		} else {
+			config.value[option] = value
+		}
+	} else if _, ok := config.num[option]; ok {
+		tmp, err := strconv.Atoi(value)
 		if err == nil {
-			config.num["completioninterval"] = n
+			config.num[option] = tmp
 		}
-	case "sortby":
-		config.value["sortby"] = value
-	case "noconfirm":
-		config.noConfirm = true
-	case "config":
-		config.value["pacmanconf"] = value
-	case "redownload":
-		config.value["redownload"] = "yes"
-	case "redownloadall":
-		config.value["redownload"] = "all"
-	case "noredownload":
-		config.value["redownload"] = "no"
-	case "rebuild":
-		config.value["rebuild"] = "yes"
-	case "rebuildall":
-		config.value["rebuild"] = "all"
-	case "rebuildtree":
-		config.value["rebuild"] = "tree"
-	case "norebuild":
-		config.value["rebuild"] = "no"
-	case "answerclean":
-		config.value["answerclean"] = value
-	case "noanswerclean":
-		config.value["answerclean"] = ""
-	case "answerdiff":
-		config.value["answerdiff"] = value
-	case "noanswerdiff":
-		config.value["answerdiff"] = ""
-	case "answeredit":
-		config.value["answeredit"] = value
-	case "noansweredit":
-		config.value["answeredit"] = ""
-	case "answerupgrade":
-		config.value["answerupgrade"] = value
-	case "noanswerupgrade":
-		config.value["answerupgrade"] = ""
-	case "gitclone":
-		config.boolean["gitclone"] = true
-	case "nogitclone":
-		config.boolean["gitclone"] = false
-	case "gpgflags":
-		config.value["gpgflags"] = value
-	case "mflags":
-		config.value["makepkgflags"] = value
-	case "gitflags":
-		config.value["gitflags"] = value
-	case "builddir":
-		config.value["builddir"] = value
-	case "editor":
-		config.value["editor"] = value
-	case "editorflags":
-		config.value["editorflags"] = value
-	case "makepkg":
-		config.value["makepkgcommand"] = value
-	case "makepkgconf":
-		config.value["makepkgconf"] = value
-	case "nomakepkgconf":
-		config.value["makepkgconf"] = ""
-	case "pacman":
-		config.value["pacmancommand"] = value
-	case "tar":
-		config.value["tarcommand"] = value
-	case "git":
-		config.value["gitcommand"] = value
-	case "gpg":
-		config.value["gpgcommand"] = value
-	case "requestsplitn":
-		n, err := strconv.Atoi(value)
-		if err == nil && n > 0 {
-			config.num["requestsplitn"] = n
-		}
-	case "sudoloop":
-		config.boolean["sudoloop"] = true
-	case "nosudoloop":
-		config.boolean["sudoloop"] = false
-	case "provides":
-		config.boolean["provides"] = true
-	case "noprovides":
-		config.boolean["provides"] = false
-	case "pgpfetch":
-		config.boolean["pgpfetch"] = true
-	case "nopgpfetch":
-		config.boolean["pgpfetch"] = false
-	case "upgrademenu":
-		config.boolean["upgrademenu"] = true
-	case "noupgrademenu":
-		config.boolean["upgrademenu"] = false
-	case "cleanmenu":
-		config.boolean["cleanmenu"] = true
-	case "nocleanmenu":
-		config.boolean["cleanmenu"] = false
-	case "diffmenu":
-		config.boolean["diffmenu"] = true
-	case "nodiffmenu":
-		config.boolean["diffmenu"] = false
-	case "editmenu":
-		config.boolean["editmenu"] = true
-	case "noeditmenu":
-		config.boolean["editmenu"] = false
-	case "useask":
-		config.boolean["useask"] = true
-	case "nouseask":
-		config.boolean["useask"] = false
-	case "combinedupgrade":
-		config.boolean["combinedupgrade"] = true
-	case "nocombinedupgrade":
-		config.boolean["combinedupgrade"] = false
-	case "a", "aur":
-		config.mode = modeAUR
-	case "repo":
-		config.mode = modeRepo
-	case "removemake":
-		config.value["removemake"] = "yes"
-	case "noremovemake":
-		config.value["removemake"] = "no"
-	case "askremovemake":
-		config.value["removemake"] = "ask"
-	default:
+	} else if _, ok := config.boolean[option]; ok {
+		config.boolean[option] = true
+	} else if _, ok := config.boolean[strings.TrimPrefix(option, "no")]; ok {
+		config.boolean[option] = false
+	} else {
 		return false
 	}
 
