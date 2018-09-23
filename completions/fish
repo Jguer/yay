@@ -135,10 +135,9 @@ complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependen
 complete -c $progname -n $yayspecific -l gendb -d 'Generate development package DB' -f
 
 # Show options
-complete -c $progname -n $show -s d -l defaultconfig -d 'Print current yay configuration' -f
-complete -c $progname -n $show -s n -l numberupgrades -d 'Print number of updates' -f
+complete -c $progname -n $show -s d -l defaultconfig -d 'Print default yay configuration' -f
+complete -c $progname -n $show -s g -l currentconfig -d 'Print current yay configuration' -f
 complete -c $progname -n $show -s s -l stats -d 'Display system package statistics' -f
-complete -c $progname -n $show -s u -l upgrades -d 'Print update list' -f
 complete -c $progname -n $show -s w -l news -d 'Print arch news'
 complete -c $progname -n $show -s q -l quiet -d 'Do not print news description'
 
