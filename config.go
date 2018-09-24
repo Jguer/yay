@@ -78,7 +78,7 @@ type Configuration struct {
 	UseAsk             bool   `json:"useask"`
 }
 
-var version = "8.1115"
+var version = "8.1139"
 
 // configFileName holds the name of the config file.
 const configFileName string = "config.json"
