@@ -402,7 +402,11 @@ func printUpdateList(parser *arguments) error {
 	if !parser.existsArg("m", "foreign") {
 		for _, pkg := range repoUp {
 			if noTargets || targets.get(pkg.Name) {
-				fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+				if parser.existsArg("q", "quiet") {
+					fmt.Printf("%s\n", pkg.Name)
+				} else {
+					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+				}
 				delete(targets, pkg.Name)
 			}
 		}
@@ -411,7 +415,11 @@ func printUpdateList(parser *arguments) error {
 	if !parser.existsArg("n", "native") {
 		for _, pkg := range aurUp {
 			if noTargets || targets.get(pkg.Name) {
-				fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+				if parser.existsArg("q", "quiet") {
+					fmt.Printf("%s\n", pkg.Name)
+				} else {
+					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+				}
 				delete(targets, pkg.Name)
 			}
 		}
