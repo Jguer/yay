@@ -272,7 +272,8 @@ func configureAlpm(conf *pacmanconf.Config) error {
 
 	for _, repo := range pacmanConf.Repos {
 		// TODO: set SigLevel
-		db, err := alpmHandle.RegisterSyncDb(repo.Name, 0)
+		var db *alpm.Db
+		db, err = alpmHandle.RegisterSyncDb(repo.Name, 0)
 		if err != nil {
 			return err
 		}
