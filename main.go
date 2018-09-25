@@ -4,35 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	alpm "github.com/jguer/go-alpm"
 )
-
-func setPaths() error {
-	if config.home = os.Getenv("XDG_CONFIG_HOME"); config.home != "" {
-		config.home = filepath.Join(config.home, "yay")
-	} else if config.home = os.Getenv("HOME"); config.home != "" {
-		config.home = filepath.Join(config.home, ".config/yay")
-	} else {
-		return fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
-	}
-
-	if config.cacheHome = os.Getenv("XDG_CACHE_HOME"); config.cacheHome != "" {
-		config.cacheHome = filepath.Join(config.cacheHome, "yay")
-	} else if config.cacheHome = os.Getenv("HOME"); config.cacheHome != "" {
-		config.cacheHome = filepath.Join(config.cacheHome, ".cache/yay")
-	} else {
-		return fmt.Errorf("XDG_CACHE_HOME and HOME unset")
-	}
-
-	config.file = filepath.Join(config.home, configFileName)
-	config.vcsFile = filepath.Join(config.cacheHome, vcsFileName)
-
-	return nil
-}
 
 func initVCS() error {
 	vfile, err := os.Open(config.vcsFile)
@@ -190,10 +166,9 @@ func main() {
 		fmt.Println("Please avoid running yay as root/sudo.")
 	}
 
-	exitOnError(setPaths())
 	config.defaultSettings()
-	exitOnError(initHomeDirs())
 	exitOnError(initConfig())
+	exitOnError(initHomeDirs())
 	exitOnError(cmdArgs.parseCommandLine())
 	// if config.shouldSaveConfig {
 	// 	config.saveConfig()

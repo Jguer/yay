@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -38,7 +40,7 @@ func parseCallback(fileName string, line int, section string,
 func (y *yayConfig) setMenus(key string, value string) error {
 	switch key {
 	case "clean", "diff", "edit", "upgrade":
-		y.boolean[key+"Menu"] = true
+		y.boolean[key+"menu"] = true
 		return nil
 	}
 	return fmt.Errorf("%s does not belong in the answer section", key)
@@ -73,10 +75,29 @@ func (y *yayConfig) setIntOption(key string, value string) error {
 }
 
 func initConfig() error {
-	iniBytes, err := ioutil.ReadFile(config.file)
+	if config.home = os.Getenv("XDG_CONFIG_HOME"); config.home != "" {
+		config.home = filepath.Join(config.home, "yay")
+	} else if config.home = os.Getenv("HOME"); config.home != "" {
+		config.home = filepath.Join(config.home, ".config/yay")
+	} else {
+		return fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
+	}
+
+	if config.cacheHome = os.Getenv("XDG_CACHE_HOME"); config.cacheHome != "" {
+		config.cacheHome = filepath.Join(config.cacheHome, "yay")
+	} else if config.cacheHome = os.Getenv("HOME"); config.cacheHome != "" {
+		config.cacheHome = filepath.Join(config.cacheHome, ".cache/yay")
+	} else {
+		return fmt.Errorf("XDG_CACHE_HOME and HOME unset")
+	}
+
+	file := filepath.Join(config.home, configFileName)
+	config.vcsFile = filepath.Join(config.cacheHome, vcsFileName)
+
+	iniBytes, err := ioutil.ReadFile(file)
 
 	if err != nil {
-		return fmt.Errorf("Failed to open config file '%s': %v", config.file, err)
+		return fmt.Errorf("Failed to open config file '%s': %v", file, err)
 	}
 
 	// Toggle all switches false

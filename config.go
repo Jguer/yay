@@ -38,7 +38,6 @@ type yayConfig struct {
 	boolean map[string]bool
 	// Loaded in Runtime
 	home             string  // home handles config directory home
-	file             string  // file holds yay config file path.
 	useColor         bool    // useColor enables/disables colored printing
 	cacheHome        string  // cacheHome handles cache home
 	savedInfo        vcsInfo // savedInfo holds the current vcs info
