@@ -3,7 +3,7 @@ package main
 import "testing"
 
 func TestGetVersionDiff(t *testing.T) {
-	useColor = true
+	config.useColor = true
 
 	type versionPair struct {
 		Old string

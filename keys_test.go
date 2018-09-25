@@ -66,8 +66,8 @@ func TestImportKeys(t *testing.T) {
 	}
 	defer os.RemoveAll(keyringDir)
 
-	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
+	config.value["gpgcommand"] = "gpg"
+	config.value["gpgflags"] = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 
 	server := startPgpKeyServer()
 	defer server.Shutdown(context.TODO())
@@ -139,8 +139,8 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 	defer os.RemoveAll(keyringDir)
 
-	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
+	config.value["gpgcommand"] = "gpg"
+	config.value["gpgflags"] = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 
 	server := startPgpKeyServer()
 	defer server.Shutdown(context.TODO())

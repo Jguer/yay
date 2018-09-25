@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func init() {
+	config.value = make(map[string]string)
+	config.boolean = make(map[string]bool)
+	config.num = make(map[string]int)
+
+}
+
 func expect(t *testing.T, field string, a interface{}, b interface{}, err error) {
 	if err != nil {
 		t.Error(err)
@@ -14,7 +21,7 @@ func expect(t *testing.T, field string, a interface{}, b interface{}, err error)
 }
 
 func TestConfig(t *testing.T) {
-	config.pacmanconf = "testdata/pacman.conf"
+	config.value["pacmanconf"] = "testdata/pacman.conf"
 
 	err := initAlpm()
 	if err != nil {

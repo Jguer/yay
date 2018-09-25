@@ -41,7 +41,7 @@ func (y *yayConfig) setMenus(key string, value string) error {
 		y.boolean[key+"Menu"] = true
 		return nil
 	}
-	return fmt.Errorf("%d does not belong in the answer section", key)
+	return fmt.Errorf("%s does not belong in the answer section", key)
 }
 
 func (y *yayConfig) setAnswer(key string, value string) error {
@@ -51,7 +51,7 @@ func (y *yayConfig) setAnswer(key string, value string) error {
 		return nil
 	}
 
-	return fmt.Errorf("%d does not belong in the answer section", key)
+	return fmt.Errorf("%s does not belong in the answer section", key)
 
 }
 
