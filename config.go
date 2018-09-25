@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
@@ -114,6 +115,24 @@ func (y *yayConfig) defaultSettings() {
 	if os.Getenv("XDG_CACHE_HOME") != "" {
 		y.value["builddir"] = "$XDG_CACHE_HOME/yay"
 	}
+
+	if os.Getenv("XDG_CONFIG_HOME") != "" {
+		config.home = filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "yay")
+	} else if os.Getenv("HOME") != "" {
+		config.home = filepath.Join(os.Getenv("HOME"), ".config/yay")
+	} else {
+		config.home = "/tmp"
+	}
+
+	if os.Getenv("XDG_CACHE_HOME") != "" {
+		config.cacheHome = filepath.Join(os.Getenv("XDG_CACHE_HOME"), "yay")
+	} else if os.Getenv("HOME") != "" {
+		config.cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
+	} else {
+		config.cacheHome = "/tmp"
+	}
+
+	config.vcsFile = filepath.Join(config.cacheHome, vcsFileName)
 }
 
 func (y *yayConfig) expandEnv() {

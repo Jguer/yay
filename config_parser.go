@@ -60,42 +60,41 @@ func (y *yayConfig) setAnswer(key string, value string) error {
 func (y *yayConfig) setOption(key string, value string) error {
 	if _, ok := y.boolean[key]; ok {
 		y.boolean[key] = true
+		return nil
+	} else if _, ok := y.value[key]; ok {
+		y.value[key] = value
+		return nil
 	}
 
-	y.value[key] = value
-	return nil
+	return fmt.Errorf("%s does not belong in the option section", key)
+
 }
 
 func (y *yayConfig) setIntOption(key string, value string) error {
-	tmp, err := strconv.Atoi(value)
-	if err == nil {
-		y.num[key] = tmp
+	if _, ok := y.num[key]; ok {
+		tmp, err := strconv.Atoi(value)
+		if err == nil {
+			y.num[key] = tmp
+			return nil
+		}
+		return err
 	}
-	return nil
+
+	return fmt.Errorf("%s does not belong in the intoption section", key)
 }
 
 func initConfig() error {
-	if config.home = os.Getenv("XDG_CONFIG_HOME"); config.home != "" {
-		config.home = filepath.Join(config.home, "yay")
-	} else if config.home = os.Getenv("HOME"); config.home != "" {
-		config.home = filepath.Join(config.home, ".config/yay")
-	} else {
-		return fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
-	}
-
-	if config.cacheHome = os.Getenv("XDG_CACHE_HOME"); config.cacheHome != "" {
-		config.cacheHome = filepath.Join(config.cacheHome, "yay")
-	} else if config.cacheHome = os.Getenv("HOME"); config.cacheHome != "" {
-		config.cacheHome = filepath.Join(config.cacheHome, ".cache/yay")
-	} else {
-		return fmt.Errorf("XDG_CACHE_HOME and HOME unset")
-	}
-
 	file := filepath.Join(config.home, configFileName)
-	config.vcsFile = filepath.Join(config.cacheHome, vcsFileName)
+
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		if _, err := os.Stat("/etc/yay.conf"); !os.IsNotExist(err) {
+			file = "/etc/yay.conf"
+		} else {
+			return nil
+		}
+	}
 
 	iniBytes, err := ioutil.ReadFile(file)
-
 	if err != nil {
 		return fmt.Errorf("Failed to open config file '%s': %v", file, err)
 	}

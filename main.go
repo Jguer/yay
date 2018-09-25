@@ -170,9 +170,6 @@ func main() {
 	exitOnError(initConfig())
 	exitOnError(initHomeDirs())
 	exitOnError(cmdArgs.parseCommandLine())
-	// if config.shouldSaveConfig {
-	// 	config.saveConfig()
-	// }
 	config.expandEnv()
 	exitOnError(initbuilddir())
 	exitOnError(initVCS())

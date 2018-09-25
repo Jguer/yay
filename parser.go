@@ -348,151 +348,47 @@ func formatArg(arg string) string {
 
 func isArg(arg string) bool {
 	switch arg {
-	case "-", "--":
-	case "ask":
-	case "D", "database":
-	case "Q", "query":
-	case "R", "remove":
-	case "S", "sync":
-	case "T", "deptest":
-	case "U", "upgrade":
-	case "F", "files":
-	case "V", "version":
-	case "h", "help":
-	case "Y", "yay":
-	case "P", "show":
-	case "G", "getpkgbuild":
-	case "b", "dbpath":
-	case "r", "root":
-	case "v", "verbose":
-	case "arch":
-	case "cachedir":
-	case "color":
-	case "config":
-	case "debug":
-	case "gpgdir":
-	case "hookdir":
-	case "logfile":
-	case "noconfirm":
-	case "confirm":
-	case "disable-download-timeout":
-	case "sysroot":
-	case "d", "nodeps":
-	case "assume-installed":
-	case "dbonly":
-	case "noprogressbar":
-	case "noscriptlet":
-	case "p", "print":
-	case "print-format":
-	case "asdeps":
-	case "asexplicit":
-	case "ignore":
-	case "ignoregroup":
-	case "needed":
-	case "overwrite":
-	case "f", "force":
-	case "c", "changelog":
-	case "deps":
-	case "e", "explicit":
-	case "g", "groups":
-	case "i", "info":
-	case "k", "check":
-	case "l", "list":
-	case "m", "foreign":
-	case "n", "native":
-	case "o", "owns":
-	case "file":
-	case "q", "quiet":
-	case "s", "search":
-	case "t", "unrequired":
-	case "u", "upgrades":
-	case "cascade":
-	case "nosave":
-	case "recursive":
-	case "unneeded":
-	case "clean":
-	case "sysupgrade":
-	case "w", "downloadonly":
-	case "y", "refresh":
-	case "x", "regex":
-	case "machinereadable":
-	//yay options
-	case "aururl":
-	case "save":
-	case "afterclean", "cleanafter":
-	case "noafterclean", "nocleanafter":
-	case "devel":
-	case "nodevel":
-	case "timeupdate":
-	case "notimeupdate":
-	case "topdown":
-	case "bottomup":
-	case "completioninterval":
-	case "sortby":
-	case "redownload":
-	case "redownloadall":
-	case "noredownload":
-	case "rebuild":
-	case "rebuildall":
-	case "rebuildtree":
-	case "norebuild":
-	case "answerclean":
-	case "noanswerclean":
-	case "answerdiff":
-	case "noanswerdiff":
-	case "answeredit":
-	case "noansweredit":
-	case "answerupgrade":
-	case "noanswerupgrade":
-	case "gitclone":
-	case "nogitclone":
-	case "gpgflags":
-	case "mflags":
-	case "gitflags":
-	case "builddir":
-	case "editor":
-	case "editorflags":
-	case "makepkg":
-	case "makepkgconf":
-	case "nomakepkgconf":
-	case "pacman":
-	case "tar":
-	case "git":
-	case "gpg":
-	case "requestsplitn":
-	case "sudoloop":
-	case "nosudoloop":
-	case "provides":
-	case "noprovides":
-	case "pgpfetch":
-	case "nopgpfetch":
-	case "upgrademenu":
-	case "noupgrademenu":
-	case "cleanmenu":
-	case "nocleanmenu":
-	case "diffmenu":
-	case "nodiffmenu":
-	case "editmenu":
-	case "noeditmenu":
-	case "useask":
-	case "nouseask":
-	case "combinedupgrade":
-	case "nocombinedupgrade":
-	case "a", "aur":
-	case "repo":
-	case "removemake":
-	case "noremovemake":
-	case "askremovemake":
-	case "complete":
-	case "stats":
-	case "news":
-	case "gendb":
-	case "currentconfig":
-	default:
-		return false
+	case "-", "--",
+		//ops
+		"D", "database", "F", "files", "G", "getpkgbuild",
+		"P", "show", "Q", "query", "R", "remove", "S", "sync",
+		"T", "deptest", "U", "upgrade", "V", "version", "Y", "yay",
+		//short options
+		"b", "dbpath", "c", "changelog", "d", "nodeps", "deps",
+		"e", "explicit", "f", "force", "g", "groups", "h", "help",
+		"i", "info", "k", "check", "l", "list", "m", "foreign",
+		"n", "native", "o", "owns", "p", "print", "print-format", "q", "quiet",
+		"r", "root", "s", "search", "t", "unrequired", "u", "upgrades",
+		"v", "verbose", "w", "downloadonly", "x", "regex", "y", "refresh",
+		//long options
+		"arch", "asdeps", "asexplicit", "assume-installed", "assumeinstalled",
+		"cachedir", "cascade", "clean", "color", "config", "confirm",
+		"dbonly", "debug", "disable-download-timeout", "file", "gpgdir",
+		"hookdir", "ignore", "ignoregroup", "logfile", "machinereadable",
+		"needed", "noconfirm", "noprogressbar", "noscriptlet",
+		"overwrite", "recursive", "sysroot", "sysupgrade", "unneeded", "ask",
+		//yay options
+		"a", "aur",
+		"repo",
+		"complete",
+		"stats",
+		"news",
+		"gendb",
+		"currentconfig":
+		return true
 	}
 
-	return true
+	if _, ok := config.value[arg]; ok {
+		return true
+	} else if _, ok := config.num[arg]; ok {
+		return true
+	} else if _, ok := config.boolean[arg]; ok {
+		return true
+	} else if _, ok := config.boolean[strings.TrimPrefix(arg, "no")]; ok {
+		return true
+	}
+
+	return false
 }
 
 func handleConfig(option, value string) bool {
@@ -510,7 +406,7 @@ func handleConfig(option, value string) bool {
 	} else if _, ok := config.boolean[option]; ok {
 		config.boolean[option] = true
 	} else if _, ok := config.boolean[strings.TrimPrefix(option, "no")]; ok {
-		config.boolean[option] = false
+		config.boolean[strings.TrimPrefix(option, "no")] = false
 	} else {
 		return false
 	}
