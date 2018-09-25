@@ -302,7 +302,10 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 		}
 
 		_, isInstalled := dp.LocalDb.PkgCache().FindSatisfier(dep) //has satisfier installed: skip
-		repoPkg, inRepos := dp.SyncDb.FindSatisfier(dep)           //has satisfier in repo: fetch it
+		hm := hideMenus
+		hideMenus = isInstalled == nil
+		repoPkg, inRepos := dp.SyncDb.FindSatisfier(dep) //has satisfier in repo: fetch it
+		hideMenus = hm
 		if isInstalled == nil && (config.ReBuild != "tree" || inRepos == nil) {
 			continue
 		}

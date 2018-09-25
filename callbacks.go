@@ -19,6 +19,10 @@ func questionCallback(question alpm.QuestionAny) {
 		return
 	}
 
+	if hideMenus {
+		return
+	}
+
 	size := 0
 
 	qp.Providers(alpmHandle).ForEach(func(pkg alpm.Package) error {
