@@ -119,6 +119,8 @@ var alpmHandle *alpm.Handle
 // Mode is used to restrict yay to AUR or repo only modes
 var mode = ModeAny
 
+var hideMenus = false
+
 // SaveConfig writes yay config to file.
 func (config *Configuration) saveConfig() error {
 	marshalledinfo, _ := json.MarshalIndent(config, "", "\t")
