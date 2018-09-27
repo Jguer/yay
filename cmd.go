@@ -79,8 +79,8 @@ Permanent configuration options:
     --removemake          Remove makedepends after install
     --noremovemake        Don't remove makedepends after install
 
-    --afterclean          Remove package sources after successful install
-    --noafterclean        Do not remove package sources after successful build
+    --cleanafter          Remove package sources after successful install
+    --nocleanafter        Do not remove package sources after successful build
     --bottomup            Shows AUR's packages first and then repository's
     --topdown             Shows repository's packages first and then AUR's
 
