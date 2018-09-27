@@ -954,12 +954,14 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 
 			if installed {
+				show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				fmt.Println(cyan(pkg+"-"+version) + bold(" is up to date -- skipping"))
 				continue
 			}
 		}
 
 		if built {
+			show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			fmt.Println(bold(yellow(arrow)),
 				cyan(pkg+"-"+version)+bold(" already made -- skipping build"))
 		} else {
