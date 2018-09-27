@@ -121,3 +121,10 @@ func passToGit(dir string, _args ...string) *exec.Cmd {
 	cmd := exec.Command(config.GitBin, args...)
 	return cmd
 }
+
+func isTty() bool {
+	cmd := exec.Command("test", "-t", "1")
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	return err == nil
+}

@@ -146,12 +146,14 @@ func initAlpm() error {
 		return err
 	}
 
-	if value, _, _ := cmdArgs.getArg("color"); value == "always" || value == "auto" {
+	if value, _, _ := cmdArgs.getArg("color"); value == "always" {
 		useColor = true
+	} else if value == "auto" {
+		useColor = isTty()
 	} else if value == "never" {
 		useColor = false
 	} else {
-		useColor = pacmanConf.Color
+		useColor = pacmanConf.Color && isTty()
 	}
 
 	return nil
