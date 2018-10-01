@@ -194,7 +194,6 @@ func handlePrint() (err error) {
 	case cmdArgs.existsArg("d", "defaultconfig"):
 		var tmpConfig yayConfig
 		tmpConfig.defaultSettings()
-		tmpConfig.expandEnv()
 		tmpConfig.print()
 	case cmdArgs.existsArg("g", "currentconfig"):
 		config.print()

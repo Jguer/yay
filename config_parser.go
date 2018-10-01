@@ -21,6 +21,7 @@ func parseCallback(fileName string, line int, section string,
 	}
 
 	key = strings.ToLower(key)
+	value = os.ExpandEnv(value)
 
 	if section == "options" {
 		err = config.setOption(key, value)

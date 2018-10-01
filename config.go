@@ -135,12 +135,6 @@ func (y *yayConfig) defaultSettings() {
 	config.vcsFile = filepath.Join(config.cacheHome, vcsFileName)
 }
 
-func (y *yayConfig) expandEnv() {
-	for k, v := range y.value {
-		y.value[k] = os.ExpandEnv(v)
-	}
-}
-
 // editor returns the preferred system editor.
 func editor() (string, []string) {
 	switch {
