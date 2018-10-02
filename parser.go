@@ -881,7 +881,7 @@ func (parser *arguments) extractYayOptions() {
 	config.AURURL = strings.TrimRight(config.AURURL, "/")
 }
 
-//parses input for number menus splitted by spaces or commas
+//parses input for number menus split by spaces or commas
 //supports individual selection: 1 2 3 4
 //supports range selections: 1-4 10-20
 //supports negation: ^1 ^1-4

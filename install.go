@@ -385,7 +385,7 @@ func earlyPacmanCall(parser *arguments) error {
 		arguments.targets = targets
 	} else {
 		alpmHandle.SetQuestionCallback(func(alpm.QuestionAny) {})
-		//seperate aur and repo targets
+		//separate aur and repo targets
 		for _, target := range targets {
 			if inRepos(syncDb, target) {
 				arguments.addTarget(target)
