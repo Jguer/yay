@@ -35,9 +35,11 @@ func install(parser *arguments) error {
 				}
 			}
 		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
-			err = earlyPacmanCall(parser)
-			if err != nil {
-				return err
+			if !parser.existsArg("build") {
+				err = earlyPacmanCall(parser)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -119,7 +121,7 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	if len(ds.Aur) == 0 {
+	if len(ds.Aur) == 0 && !parser.existsArg("build") {
 		if !config.CombinedUpgrade {
 			if parser.existsArg("u", "sysupgrade") {
 				fmt.Println(" there is nothing to do")
@@ -140,6 +142,10 @@ func install(parser *arguments) error {
 	conflicts, err := ds.CheckConflicts()
 	if err != nil {
 		return err
+	}
+
+	if parser.existsArg("build") {
+		downloadABS(ds.Repo, config.BuildDir)
 	}
 
 	for _, pkg := range ds.Repo {
@@ -265,7 +271,7 @@ func install(parser *arguments) error {
 		arguments.delArg("u", "sysupgrade")
 	}
 
-	if len(arguments.targets) > 0 || arguments.existsArg("u") {
+	if !parser.existsArg("build") && len(arguments.targets) > 0 || arguments.existsArg("u") {
 		err := show(passToPacman(arguments))
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages")
@@ -307,6 +313,11 @@ func install(parser *arguments) error {
 	go updateCompletion(false)
 
 	err = downloadPkgbuildsSources(ds.Aur, incompatible)
+	if err != nil {
+		return err
+	}
+
+	err = buildInstallABS(dp, do, parser, incompatible, conflicts)
 	if err != nil {
 		return err
 	}
@@ -814,6 +825,56 @@ func mergePkgbuilds(bases []Base) error {
 	return nil
 }
 
+func downloadABS(packages []*alpm.Package, buildDir string) (stringSet, error) {
+	cloned := make(stringSet)
+	downloaded := 0
+	var wg sync.WaitGroup
+	var mux sync.Mutex
+	var errs MultiError
+
+	download := func(k int, base *alpm.Package) {
+		defer wg.Done()
+		pkg := base.Name()
+
+		var url string
+
+		switch base.DB().Name() {
+		case "core", "extra", "testing":
+			url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg + ".tar.gz"
+		case "community", "multilib", "community-testing", "multilib-testing":
+			url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + pkg + ".tar.gz"
+		default:
+			return
+		}
+
+		err := downloadAndUnpack(url, buildDir)
+		if err != nil {
+			errs.Add(err)
+			return
+		}
+
+		mux.Lock()
+		downloaded++
+		str := bold(cyan("::") + "Downloaded PKGBUILD (%d/%d): %s\n")
+		fmt.Printf(str, downloaded, len(packages), cyan(base.Name()))
+		mux.Unlock()
+	}
+
+	count := 0
+	for k, base := range packages {
+		wg.Add(1)
+		go download(k, base)
+		count++
+		if count%25 == 0 {
+			wg.Wait()
+		}
+	}
+
+	wg.Wait()
+
+	return cloned, errs.Return()
+}
+
 func downloadPkgbuilds(bases []Base, toSkip stringSet, buildDir string) (stringSet, error) {
 	cloned := make(stringSet)
 	downloaded := 0
@@ -892,6 +953,169 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringSet) (err error) 
 	}
 
 	return
+}
+
+func buildInstallABS(dp *depPool, do *depOrder, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
+	for _, base := range do.Repo {
+		pkg := base.Name()
+		dir := filepath.Join(config.BuildDir, "packages", pkg, "trunk")
+		built := true
+
+		args := []string{"--nobuild", "-fC", "-s"}
+
+		if incompatible.get(pkg) {
+			args = append(args, "--ignorearch")
+		}
+
+		//pkgver bump
+		err := show(passToMakepkg(dir, args...))
+		if err != nil {
+			return fmt.Errorf("Error making: %s", base.Name())
+		}
+
+		pkgdests, _, err := parsePackageList(dir)
+		if err != nil {
+			return err
+		}
+
+		isExplicit := dp.Explicit.get(pkg)
+		if config.ReBuild == "no" || (config.ReBuild == "yes" && !isExplicit) {
+			pkgdest, ok := pkgdests[pkg]
+			if !ok {
+				return fmt.Errorf("Could not find PKGDEST for: %s", pkg)
+			}
+
+			_, err := os.Stat(pkgdest)
+			if os.IsNotExist(err) {
+				built = false
+			} else if err != nil {
+				return err
+			}
+		} else {
+			built = false
+		}
+
+		if cmdArgs.existsArg("needed") {
+			installed := true
+			if alpmpkg, err := dp.LocalDb.PkgByName(pkg); err != nil || alpmpkg.Version() != version {
+				installed = false
+			}
+
+			if installed {
+				fmt.Println(cyan(pkg+"-"+version) + bold(" is up to date -- skipping"))
+				continue
+			}
+		}
+
+		if built {
+			fmt.Println(bold(yellow(arrow)),
+				cyan(pkg+"-"+version)+bold(" already made -- skipping build"))
+		} else {
+			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
+
+			if incompatible.get(pkg) {
+				args = append(args, "--ignorearch")
+			}
+
+			err := show(passToMakepkg(dir, args...))
+			if err != nil {
+				return fmt.Errorf("Error making: %s", base.Name())
+			}
+		}
+
+		arguments := parser.copy()
+		arguments.clearTargets()
+		arguments.op = "U"
+		arguments.delArg("confirm")
+		arguments.delArg("noconfirm")
+		arguments.delArg("build")
+		arguments.delArg("c", "clean")
+		arguments.delArg("q", "quiet")
+		arguments.delArg("q", "quiet")
+		arguments.delArg("y", "refresh")
+		arguments.delArg("u", "sysupgrade")
+		arguments.delArg("w", "downloadonly")
+
+		oldConfirm := config.NoConfirm
+
+		//conflicts have been checked so answer y for them
+		if config.UseAsk {
+			ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
+			cmdArgs.globals["ask"] = fmt.Sprint(uask)
+		} else {
+			conflict := false
+			if _, ok := conflicts[pkg]; ok {
+				conflict = true
+			}
+
+			if !conflict {
+				config.NoConfirm = true
+			}
+		}
+
+		depArguments := makeArguments()
+		depArguments.addArg("D", "asdeps")
+		expArguments := makeArguments()
+		expArguments.addArg("D", "asexplicit")
+
+		//remotenames: names of all non repo packages on the system
+		_, _, localNames, remoteNames, err := filterPackages()
+		if err != nil {
+			return err
+		}
+
+		//cache as a stringset. maybe make it return a string set in the first
+		//place
+		remoteNamesCache := sliceToStringSet(remoteNames)
+		localNamesCache := sliceToStringSet(localNames)
+
+		pkgdest, ok := pkgdests[pkg]
+		if !ok {
+			return fmt.Errorf("Could not find PKGDEST for: %s", pkg)
+		}
+
+		arguments.addTarget(pkgdest)
+		if !dp.Explicit.get(pkg) && !localNamesCache.get(pkg) && !remoteNamesCache.get(pkg) {
+			depArguments.addTarget(pkg)
+		}
+
+		if dp.Explicit.get(pkg) {
+			if parser.existsArg("asdeps", "asdep") {
+				depArguments.addTarget(pkg)
+			} else if parser.existsArg("asexplicit", "asexp") {
+				expArguments.addTarget(pkg)
+			}
+		}
+
+		err = show(passToPacman(arguments))
+		if err != nil {
+			return err
+		}
+
+		var mux sync.Mutex
+		var wg sync.WaitGroup
+		var src []gosrc.ArchString
+		wg.Add(1)
+		go updateVCSData(pkg, src, &mux, &wg)
+
+		wg.Wait()
+
+		err = saveVCSInfo()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if len(depArguments.targets) > 0 {
+			_, stderr, err := capture(passToPacman(depArguments))
+			if err != nil {
+				return fmt.Errorf("%s%s", stderr, err)
+			}
+		}
+		config.NoConfirm = oldConfirm
+	}
+
+	return nil
 }
 
 func buildInstallPkgbuilds(ds *depSolver, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
@@ -978,6 +1202,7 @@ func buildInstallPkgbuilds(ds *depSolver, srcinfos map[string]*gosrc.Srcinfo, pa
 		arguments.op = "U"
 		arguments.delArg("confirm")
 		arguments.delArg("noconfirm")
+		arguments.delArg("build")
 		arguments.delArg("c", "clean")
 		arguments.delArg("q", "quiet")
 		arguments.delArg("q", "quiet")

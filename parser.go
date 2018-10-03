@@ -366,6 +366,7 @@ func isArg(arg string) bool {
 	case "r", "root":
 	case "v", "verbose":
 	case "arch":
+	case "build":
 	case "cachedir":
 	case "color":
 	case "config":
