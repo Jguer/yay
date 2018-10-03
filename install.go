@@ -35,7 +35,16 @@ func install(parser *arguments) error {
 				}
 			}
 		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
-			if !parser.existsArg("build") {
+			if parser.existsArg("build") {
+				arguments := parser.copy()
+				arguments.delArg("build")
+				arguments.delArg("u", "sysupgrade")
+				arguments.clearTargets()
+				err = earlyPacmanCall(arguments)
+				if err != nil {
+					return err
+				}
+			} else {
 				err = earlyPacmanCall(parser)
 				if err != nil {
 					return err
