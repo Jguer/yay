@@ -65,6 +65,7 @@ type Configuration struct {
 	SudoLoop           bool   `json:"sudoloop"`
 	TimeUpdate         bool   `json:"timeupdate"`
 	NoConfirm          bool   `json:"-"`
+	Build              bool   `json:"-"`
 	Devel              bool   `json:"devel"`
 	CleanAfter         bool   `json:"cleanAfter"`
 	GitClone           bool   `json:"gitclone"`

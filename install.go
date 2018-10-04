@@ -35,9 +35,9 @@ func install(parser *arguments) error {
 				}
 			}
 		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
-			if parser.existsArg("build") {
+			// If --build, don’t install nore update anything at this stage
+			if config.Build {
 				arguments := parser.copy()
-				arguments.delArg("build")
 				arguments.delArg("u", "sysupgrade")
 				arguments.clearTargets()
 				err = earlyPacmanCall(arguments)
@@ -130,7 +130,7 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	if len(ds.Aur) == 0 && !parser.existsArg("build") {
+	if len(ds.Aur) == 0 && !config.Build {
 		if !config.CombinedUpgrade {
 			if parser.existsArg("u", "sysupgrade") {
 				fmt.Println(" there is nothing to do")
@@ -153,7 +153,7 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	if parser.existsArg("build") {
+	if config.Build {
 		downloadABS(ds.Repo, config.BuildDir)
 	}
 
@@ -280,7 +280,7 @@ func install(parser *arguments) error {
 		arguments.delArg("u", "sysupgrade")
 	}
 
-	if !parser.existsArg("build") && len(arguments.targets) > 0 || arguments.existsArg("u") {
+	if !config.Build && len(arguments.targets) > 0 || arguments.existsArg("u") {
 		err := show(passToPacman(arguments))
 		if err != nil {
 			return fmt.Errorf("Error installing repo packages")

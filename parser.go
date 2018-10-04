@@ -527,6 +527,8 @@ func handleConfig(option, value string) bool {
 		config.SortBy = value
 	case "noconfirm":
 		config.NoConfirm = true
+	case "build":
+		config.Build = true
 	case "config":
 		config.PacmanConf = value
 	case "redownload":
