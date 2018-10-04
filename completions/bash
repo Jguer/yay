@@ -66,7 +66,7 @@ _yay() {
            makepkg pacman tar git gpg gpgflags config requestsplitn sudoloop nosudoloop
            redownload noredownload redownloadall rebuild rebuildall rebuildtree norebuild
            sortby answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
-           noansweredit noanswerupgrade cleanmenu diffmenu editmenu upgrademenu
+           noansweredit noanswerupgrade cleanmenu diffmenu editmenu upgrademenu cleanafter nocleanafter
            nocleanmenu nodiffmenu noupgrademenu provides noprovides pgpfetch nopgpfetch
            useask nouseask combinedupgrade nocombinedupgrade aur repo makepkgconf
            nomakepkgconf askremovemake removemake noremovemake completioninterval aururl'

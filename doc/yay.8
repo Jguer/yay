@@ -359,11 +359,17 @@ Download and update PKGBUILDs using tarballs. The above conditions about
 previously installed packages still apply.
 
 .TP
-.B \-\-afterclean
+.B \-\-cleanafter
 Remove package sources after successful Install.
 
+For packages downloaded through git, untracked files are removed with the
+exception of directories. This allows VCS packages to ealily pull an update
+instead of having to re clone the entire repo.
+
+For packages downloaded via tarball, The entire directory is deleted.
+
 .TP
-.B \-\-noafterclean
+.B \-\-nocleanafter
 Do not remove package sources after successful Install.
 
 .TP

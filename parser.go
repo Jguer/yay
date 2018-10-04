@@ -419,8 +419,8 @@ func isArg(arg string) bool {
 	//yay options
 	case "aururl":
 	case "save":
-	case "afterclean":
-	case "noafterclean":
+	case "afterclean", "cleanafter":
+	case "noafterclean", "nocleanafter":
 	case "devel":
 	case "nodevel":
 	case "timeupdate":
@@ -501,9 +501,9 @@ func handleConfig(option, value string) bool {
 		config.AURURL = value
 	case "save":
 		shouldSaveConfig = true
-	case "afterclean":
+	case "afterclean", "cleanafter":
 		config.CleanAfter = true
-	case "noafterclean":
+	case "noafterclean", "nocleanafter":
 		config.CleanAfter = false
 	case "devel":
 		config.Devel = true
