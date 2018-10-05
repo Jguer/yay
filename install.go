@@ -970,7 +970,7 @@ func buildInstallABS(dp *depPool, do *depOrder, parser *arguments, incompatible 
 		dir := filepath.Join(config.BuildDir, "packages", pkg, "trunk")
 		built := true
 
-		args := []string{"--nobuild", "-fC", "-s"}
+		args := []string{"--nobuild", "-fC"}
 
 		if incompatible.get(pkg) {
 			args = append(args, "--ignorearch")
