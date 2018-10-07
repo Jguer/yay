@@ -19,6 +19,15 @@ const arrow = "==>"
 const smallArrow = " ->"
 
 func (warnings *aurWarnings) print() {
+	for _, ignored := range pacmanConf.IgnorePkg {
+		for i, name := range warnings.Missing {
+			if ignored == name {
+				warnings.Missing[i] = warnings.Missing[len(warnings.Missing)-1]
+				warnings.Missing = warnings.Missing[:len(warnings.Missing)-1]
+			}
+		}
+	}
+
 	if len(warnings.Missing) > 0 {
 		fmt.Print(bold(yellow(smallArrow)) + " Missing AUR Packages:")
 		for _, name := range warnings.Missing {
