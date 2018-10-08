@@ -847,19 +847,33 @@ func downloadABS(packages []*alpm.Package, buildDir string) (stringSet, error) {
 
 		var url string
 
-		switch base.DB().Name() {
-		case "core", "extra", "testing":
-			url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg + ".tar.gz"
-		case "community", "multilib", "community-testing", "multilib-testing":
-			url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + pkg + ".tar.gz"
-		default:
-			return
-		}
+		if shouldUseGit(filepath.Join(config.BuildDir, "packages", pkg)) {
+			clone, err := aspDownload(filepath.Join(config.BuildDir, "packages"), pkg)
+			if err != nil {
+				errs.Add(err)
+				return
+			}
+			if clone {
+				mux.Lock()
+				cloned.set(pkg)
+				mux.Unlock()
+			}
+		} else {
 
-		err := downloadAndUnpack(url, buildDir)
-		if err != nil {
-			errs.Add(err)
-			return
+			switch base.DB().Name() {
+			case "core", "extra", "testing":
+				url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + pkg + ".tar.gz"
+			case "community", "multilib", "community-testing", "multilib-testing":
+				url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + pkg + ".tar.gz"
+			default:
+				return
+			}
+
+			err := downloadAndUnpack(url, buildDir)
+			if err != nil {
+				errs.Add(err)
+				return
+			}
 		}
 
 		mux.Lock()

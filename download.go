@@ -60,6 +60,40 @@ func gitHasDiff(path string, name string) (bool, error) {
 	return head != upstream, nil
 }
 
+func aspDownload(path string, name string) (bool, error) {
+	_, err := os.Stat(filepath.Join(path, name, ".git"))
+	if os.IsNotExist(err) {
+		os.MkdirAll(path, os.ModePerm)
+		cmd := exec.Command("asp", "checkout", name)
+		cmd.Dir = path
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0") // useful with asp? :/
+		_, stderr, err := capture(cmd)
+		if err != nil {
+			os.Exit(1)
+			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
+		}
+
+		return true, nil
+	} else if err != nil {
+		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+	}
+
+	cmd := exec.Command("asp", "update")
+	cmd.Dir = filepath.Join(path, name)
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	_, stderr, err := capture(cmd)
+	if err != nil {
+		return false, fmt.Errorf("error updating %s: %s", name, stderr)
+	}
+	cmd = passToGit(filepath.Join(path, name), "pull")
+	_, stderr, err = capture(cmd)
+	if err != nil {
+		return false, fmt.Errorf("error pulling %s: %s", name, stderr)
+	}
+
+	return false, nil
+}
+
 func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
