@@ -5,7 +5,8 @@ DESTDIR :=
 
 MAJORVERSION := 8
 MINORVERSION ?= $(shell git rev-list --count master)
-VERSION ?= ${MAJORVERSION}.${MINORVERSION}
+PATCHVERSION := 0
+VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
 LDFLAGS := -ldflags '-s -w -X main.version=${VERSION}'
 ARCH := $(shell uname -m)
