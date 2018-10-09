@@ -381,7 +381,7 @@ func isArg(arg string) bool {
 	case "dbonly":
 	case "noprogressbar":
 	case "noscriptlet":
-	case "p":
+	case "p", "print":
 	case "print-format":
 	case "asdeps":
 	case "asexplicit":
