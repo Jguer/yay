@@ -44,7 +44,7 @@ func TestParsing(t *testing.T) {
 	}
 
 	sources := []source{
-		{"github.com/neovim/neovim.git", "HEAD", []string{"git", "https"}},
+		{"github.com/neovim/neovim.git", "HEAD", []string{"https"}},
 		{"github.com/jguer/yay.git", "master", []string{"git"}},
 		{"github.com/davidgiven/ack", "HEAD", []string{"git"}},
 		{"", "", nil},
