@@ -374,16 +374,15 @@ func isArg(arg string) bool {
 	case "logfile":
 	case "noconfirm":
 	case "confirm":
-	case "disabledownloadtimeout":
+	case "disable-download-timeout":
 	case "sysroot":
 	case "d", "nodeps":
 	case "assume-installed":
-	case "assumeinstalled":
 	case "dbonly":
 	case "noprogressbar":
 	case "noscriptlet":
 	case "p":
-	case "printformat":
+	case "print-format":
 	case "asdeps":
 	case "asexplicit":
 	case "ignore":
