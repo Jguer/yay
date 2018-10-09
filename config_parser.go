@@ -25,14 +25,16 @@ func parseCallback(fileName string, line int, section string,
 
 	if section == "options" {
 		err = config.setOption(key, value)
-	} else if section == "intoptions" {
-		err = config.setIntOption(key, value)
 	} else if section == "menus" {
 		err = config.setMenus(key, value)
 	} else if section == "answer" {
 		err = config.setAnswer(key, value)
 	} else {
-		err = fmt.Errorf("line %d is not in a section: %s", line, fileName)
+		err = fmt.Errorf("%s is an invalid section header", section)
+	}
+
+	if err != nil {
+		err = fmt.Errorf(red("error l%d: ")+err.Error(), line)
 	}
 
 	return
@@ -65,14 +67,7 @@ func (y *yayConfig) setOption(key string, value string) error {
 	} else if _, ok := y.value[key]; ok {
 		y.value[key] = value
 		return nil
-	}
-
-	return fmt.Errorf("%s does not belong in the option section", key)
-
-}
-
-func (y *yayConfig) setIntOption(key string, value string) error {
-	if _, ok := y.num[key]; ok {
+	} else if _, ok := y.num[key]; ok {
 		tmp, err := strconv.Atoi(value)
 		if err == nil {
 			y.num[key] = tmp
@@ -81,7 +76,8 @@ func (y *yayConfig) setIntOption(key string, value string) error {
 		return err
 	}
 
-	return fmt.Errorf("%s does not belong in the intoption section", key)
+	return fmt.Errorf("%s does not belong in the option section", key)
+
 }
 
 func initConfig() error {
