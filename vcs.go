@@ -62,7 +62,7 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	if len(split) != 2 {
 		return "", "", nil
 	}
-	protocols = strings.Split(split[0], "+")
+	protocols = strings.SplitN(split[0], "+", 2)
 
 	git := false
 	for _, protocol := range protocols {
@@ -71,6 +71,8 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 			break
 		}
 	}
+
+	protocols = protocols[len(protocols)-1:]
 
 	if !git {
 		return "", "", nil
@@ -142,7 +144,8 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, 
 }
 
 func getCommit(url string, branch string, protocols []string) string {
-	for _, protocol := range protocols {
+	if len(protocols) > 0 {
+		protocol := protocols[len(protocols)-1]
 		var outbuf bytes.Buffer
 
 		cmd := passToGit("", "ls-remote", protocol+"://"+url, branch)
@@ -151,7 +154,7 @@ func getCommit(url string, branch string, protocols []string) string {
 
 		err := cmd.Start()
 		if err != nil {
-			continue
+			return ""
 		}
 
 		//for some reason
@@ -165,14 +168,14 @@ func getCommit(url string, branch string, protocols []string) string {
 		err = cmd.Wait()
 		timer.Stop()
 		if err != nil {
-			continue
+			return ""
 		}
 
 		stdout := outbuf.String()
 		split := strings.Fields(stdout)
 
 		if len(split) < 2 {
-			continue
+			return ""
 		}
 
 		commit := split[0]
