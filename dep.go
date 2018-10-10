@@ -40,6 +40,37 @@ func (q providers) Swap(i, j int) {
 	q.Pkgs[i], q.Pkgs[j] = q.Pkgs[j], q.Pkgs[i]
 }
 
+type target struct {
+	Db      string
+	Name    string
+	Mod     string
+	Version string
+}
+
+func toTarget(pkg string) target {
+	db, dep := splitDbFromName(pkg)
+	name, mod, version := splitDep(dep)
+
+	return target{
+		db,
+		name,
+		mod,
+		version,
+	}
+}
+
+func (t target) DepString() string {
+	return t.Name + t.Mod + t.Version
+}
+
+func (t target) String() string {
+	if t.Db != "" {
+		return t.Db + "/" + t.DepString()
+	}
+
+	return t.DepString()
+}
+
 func splitDep(dep string) (string, string, string) {
 	mod := ""
 

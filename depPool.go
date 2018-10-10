@@ -9,37 +9,6 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
-type target struct {
-	Db      string
-	Name    string
-	Mod     string
-	Version string
-}
-
-func toTarget(pkg string) target {
-	db, dep := splitDbFromName(pkg)
-	name, mod, version := splitDep(dep)
-
-	return target{
-		db,
-		name,
-		mod,
-		version,
-	}
-}
-
-func (t target) DepString() string {
-	return t.Name + t.Mod + t.Version
-}
-
-func (t target) String() string {
-	if t.Db != "" {
-		return t.Db + "/" + t.DepString()
-	}
-
-	return t.DepString()
-}
-
 type depPool struct {
 	Targets  []target
 	Explicit stringSet
