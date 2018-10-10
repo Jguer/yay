@@ -158,16 +158,11 @@ func (dp *depPool) CheckConflicts() (mapStringSet, error) {
 			fmt.Println(str)
 		}
 
-		return nil, fmt.Errorf("Unresolvable package conflicts, aborting")
 	}
 
 	if len(conflicts) != 0 {
 		fmt.Println()
 		fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
-
-		if !config.UseAsk {
-			fmt.Println(bold(red(arrow)), bold("You will have to confirm these when installing"))
-		}
 
 		for name, pkgs := range conflicts {
 			str := red(bold(smallArrow)) + " Installing " + cyan(name) + " will remove:"
@@ -179,10 +174,27 @@ func (dp *depPool) CheckConflicts() (mapStringSet, error) {
 			fmt.Println(str)
 		}
 
-		fmt.Println()
+	}
 
-		if config.NoConfirm && !config.UseAsk {
-			return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
+	// Add the inner conflicts to the conflicts
+	// These are used to decide what to pass --ask to (if set) or don't pass --noconfirm to
+	// As we have no idea what the order is yet we add every inner conflict to the slice
+	for name, pkgs := range innerConflicts {
+		conflicts[name] = make(stringSet)
+		for pkg := range pkgs {
+			conflicts[pkg] = make(stringSet)
+		}
+	}
+
+	if len(conflicts) > 0 {
+		if !config.UseAsk {
+			if config.NoConfirm {
+				return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
+			}
+
+			fmt.Println()
+			fmt.Println(bold(red(arrow)), bold("Conflicting packages will have to be confirmed manually"))
+			fmt.Println()
 		}
 	}
 
