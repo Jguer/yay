@@ -54,6 +54,29 @@ func (b Base) URLPath() string {
 	return b[0].URLPath
 }
 
+func baseAppend(bases []Base, pkg *rpc.Pkg) []Base {
+	for i, base := range bases {
+		if base.Pkgbase() == pkg.PackageBase {
+			bases[i] = append(bases[i], pkg)
+			return bases
+		}
+	}
+
+	return append(bases, Base{pkg})
+}
+
+func baseFind(bases []Base, name string) *rpc.Pkg {
+	for _, base := range bases {
+		for _, pkg := range base {
+			if pkg.Name == name {
+				return pkg
+			}
+		}
+	}
+
+	return nil
+}
+
 type target struct {
 	Db      string
 	Name    string
