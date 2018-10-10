@@ -115,6 +115,14 @@ func install(parser *arguments) error {
 		return err
 	}
 
+	ds, err := getDepSolver(requestTargets, warnings)
+	if err != nil {
+		return err
+	}
+
+	ds.Print()
+	fmt.Println(ds.Runtime)
+
 	err = dp.CheckMissing()
 	if err != nil {
 		return err
