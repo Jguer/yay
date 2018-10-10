@@ -5,20 +5,6 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
-type Base []*rpc.Pkg
-
-func (b Base) Pkgbase() string {
-	return b[0].PackageBase
-}
-
-func (b Base) Version() string {
-	return b[0].Version
-}
-
-func (b Base) URLPath() string {
-	return b[0].URLPath
-}
-
 type depOrder struct {
 	Aur     []Base
 	Repo    []*alpm.Package

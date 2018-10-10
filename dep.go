@@ -40,6 +40,20 @@ func (q providers) Swap(i, j int) {
 	q.Pkgs[i], q.Pkgs[j] = q.Pkgs[j], q.Pkgs[i]
 }
 
+type Base []*rpc.Pkg
+
+func (b Base) Pkgbase() string {
+	return b[0].PackageBase
+}
+
+func (b Base) Version() string {
+	return b[0].Version
+}
+
+func (b Base) URLPath() string {
+	return b[0].URLPath
+}
+
 type target struct {
 	Db      string
 	Name    string
