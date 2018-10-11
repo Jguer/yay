@@ -8,6 +8,11 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+type missing struct {
+	Good    stringSet
+	Missing map[string][][]string
+}
+
 type providers struct {
 	lookfor string
 	Pkgs    []*rpc.Pkg
