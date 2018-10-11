@@ -714,3 +714,204 @@ func (ds *depSolver) getMake() []string {
 
 	return makeOnly
 }
+
+func (ds *depSolver) checkInnerConflict(name string, conflict string, conflicts mapStringSet) {
+	for _, base := range ds.Aur {
+		for _, pkg := range base {
+			if pkg.Name == name {
+				continue
+			}
+
+			if satisfiesAur(conflict, pkg) {
+				conflicts.Add(name, pkg.Name)
+			}
+		}
+	}
+
+	for _, pkg := range ds.Repo {
+		if pkg.Name() == name {
+			continue
+		}
+
+		if satisfiesRepo(conflict, pkg) {
+			conflicts.Add(name, pkg.Name())
+		}
+	}
+}
+
+func (ds *depSolver) checkForwardConflict(name string, conflict string, conflicts mapStringSet) {
+	ds.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+		if pkg.Name() == name || ds.hasPackage(pkg.Name()) {
+			return nil
+		}
+
+		if satisfiesRepo(conflict, &pkg) {
+			n := pkg.Name()
+			if n != conflict {
+				n += " (" + conflict + ")"
+			}
+			conflicts.Add(name, n)
+		}
+
+		return nil
+	})
+}
+
+func (ds *depSolver) checkReverseConflict(name string, conflict string, conflicts mapStringSet) {
+	for _, base := range ds.Aur {
+		for _, pkg := range base {
+			if pkg.Name == name {
+				continue
+			}
+
+			if satisfiesAur(conflict, pkg) {
+				if name != conflict {
+					name += " (" + conflict + ")"
+				}
+
+				conflicts.Add(pkg.Name, name)
+			}
+		}
+	}
+
+	for _, pkg := range ds.Repo {
+		if pkg.Name() == name {
+			continue
+		}
+
+		if satisfiesRepo(conflict, pkg) {
+			if name != conflict {
+				name += " (" + conflict + ")"
+			}
+
+			conflicts.Add(pkg.Name(), name)
+		}
+	}
+}
+
+func (ds *depSolver) checkInnerConflicts(conflicts mapStringSet) {
+	for _, base := range ds.Aur {
+		for _, pkg := range base {
+			for _, conflict := range pkg.Conflicts {
+				ds.checkInnerConflict(pkg.Name, conflict, conflicts)
+			}
+		}
+	}
+
+	for _, pkg := range ds.Repo {
+		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+			ds.checkInnerConflict(pkg.Name(), conflict.String(), conflicts)
+			return nil
+		})
+	}
+}
+
+func (ds *depSolver) checkForwardConflicts(conflicts mapStringSet) {
+	for _, base := range ds.Aur {
+		for _, pkg := range base {
+			for _, conflict := range pkg.Conflicts {
+				ds.checkForwardConflict(pkg.Name, conflict, conflicts)
+			}
+		}
+	}
+
+	for _, pkg := range ds.Repo {
+		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+			ds.checkForwardConflict(pkg.Name(), conflict.String(), conflicts)
+			return nil
+		})
+	}
+}
+
+func (ds *depSolver) checkReverseConflicts(conflicts mapStringSet) {
+	ds.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+		if ds.hasPackage(pkg.Name()) {
+			return nil
+		}
+
+		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+			ds.checkReverseConflict(pkg.Name(), conflict.String(), conflicts)
+			return nil
+		})
+
+		return nil
+	})
+}
+
+func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
+	var wg sync.WaitGroup
+	innerConflicts := make(mapStringSet)
+	conflicts := make(mapStringSet)
+	wg.Add(2)
+
+	fmt.Println(bold(cyan("::") + bold(" Checking for conflicts...")))
+	go func() {
+		ds.checkForwardConflicts(conflicts)
+		ds.checkReverseConflicts(conflicts)
+		wg.Done()
+	}()
+
+	fmt.Println(bold(cyan("::") + bold(" Checking for inner conflicts...")))
+	go func() {
+		ds.checkInnerConflicts(innerConflicts)
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	if len(innerConflicts) != 0 {
+		fmt.Println()
+		fmt.Println(bold(red(arrow)), bold("Inner conflicts found:"))
+
+		for name, pkgs := range innerConflicts {
+			str := red(bold(smallArrow)) + " " + name + ":"
+			for pkg := range pkgs {
+				str += " " + cyan(pkg) + ","
+			}
+			str = strings.TrimSuffix(str, ",")
+
+			fmt.Println(str)
+		}
+
+	}
+
+	if len(conflicts) != 0 {
+		fmt.Println()
+		fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
+
+		for name, pkgs := range conflicts {
+			str := red(bold(smallArrow)) + " Installing " + cyan(name) + " will remove:"
+			for pkg := range pkgs {
+				str += " " + cyan(pkg) + ","
+			}
+			str = strings.TrimSuffix(str, ",")
+
+			fmt.Println(str)
+		}
+
+	}
+
+	// Add the inner conflicts to the conflicts
+	// These are used to decide what to pass --ask to (if set) or don't pass --noconfirm to
+	// As we have no idea what the order is yet we add every inner conflict to the slice
+	for name, pkgs := range innerConflicts {
+		conflicts[name] = make(stringSet)
+		for pkg := range pkgs {
+			conflicts[pkg] = make(stringSet)
+		}
+	}
+
+	if len(conflicts) > 0 {
+		if !config.UseAsk {
+			if config.NoConfirm {
+				return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
+			}
+
+			fmt.Println()
+			fmt.Println(bold(red(arrow)), bold("Conflicting packages will have to be confirmed manually"))
+			fmt.Println()
+		}
+	}
+
+	return conflicts, nil
+}
