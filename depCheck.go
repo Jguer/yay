@@ -128,9 +128,6 @@ func (ds *depSolver) checkForwardConflict(name string, conflict string, conflict
 
 		if satisfiesRepo(conflict, &pkg) {
 			n := pkg.Name()
-			if n != conflict {
-				n += " (" + conflict + ")"
-			}
 			conflicts.Add(name, n)
 		}
 
@@ -146,10 +143,6 @@ func (ds *depSolver) checkReverseConflict(name string, conflict string, conflict
 			}
 
 			if satisfiesAur(conflict, pkg) {
-				if name != conflict {
-					name += " (" + conflict + ")"
-				}
-
 				conflicts.Add(pkg.Name, name)
 			}
 		}
@@ -161,10 +154,6 @@ func (ds *depSolver) checkReverseConflict(name string, conflict string, conflict
 		}
 
 		if satisfiesRepo(conflict, pkg) {
-			if name != conflict {
-				name += " (" + conflict + ")"
-			}
-
 			conflicts.Add(pkg.Name(), name)
 		}
 	}
