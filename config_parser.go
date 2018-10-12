@@ -81,7 +81,7 @@ func (y *yayConfig) setOption(key string, value string) error {
 }
 
 func initConfig() error {
-	file := filepath.Join(config.home, configFileName)
+	file := filepath.Join(config.configDir, configFileName)
 
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		if _, err := os.Stat("/etc/yay.conf"); !os.IsNotExist(err) {

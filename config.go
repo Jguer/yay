@@ -38,9 +38,9 @@ type yayConfig struct {
 	value   map[string]string
 	boolean map[string]bool
 	// Loaded in Runtime
-	home             string  // home handles config directory home
+	configDir        string  // config directory
+	cacheDir         string  // cache directory
 	useColor         bool    // useColor enables/disables colored printing
-	cacheHome        string  // cacheHome handles cache home
 	savedInfo        vcsInfo // savedInfo holds the current vcs info
 	vcsFile          string  // vcsfile holds yay vcs info file path.
 	shouldSaveConfig bool    // shouldSaveConfig holds whether or not the config should be saved
@@ -92,7 +92,7 @@ func (y *yayConfig) defaultSettings() {
 		"answerdiff":     "",
 		"answeredit":     "",
 		"answerupgrade":  "",
-		"builddir":       "$HOME/.cache/yay",
+		"builddir":       "",
 		"editor":         "",
 		"editorflags":    "",
 		"gpgcommand":     "gpg",
@@ -112,27 +112,26 @@ func (y *yayConfig) defaultSettings() {
 		"tarcommand":     "bsdtar",
 	}
 
-	if os.Getenv("XDG_CACHE_HOME") != "" {
-		y.value["builddir"] = "$XDG_CACHE_HOME/yay"
-	}
-
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		config.home = filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "yay")
+		y.configDir = filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "yay")
 	} else if os.Getenv("HOME") != "" {
-		config.home = filepath.Join(os.Getenv("HOME"), ".config/yay")
+		y.configDir = filepath.Join(os.Getenv("HOME"), ".config/yay")
 	} else {
-		config.home = "/tmp"
+		uid, _ := exec.Command("id", "-u").Output()
+		y.configDir = filepath.Join("/tmp", "yay-"+(string)(uid), "config")
 	}
 
 	if os.Getenv("XDG_CACHE_HOME") != "" {
-		config.cacheHome = filepath.Join(os.Getenv("XDG_CACHE_HOME"), "yay")
+		y.cacheDir = filepath.Join(os.Getenv("XDG_CACHE_HOME"), "yay")
 	} else if os.Getenv("HOME") != "" {
-		config.cacheHome = filepath.Join(os.Getenv("HOME"), ".cache/yay")
+		y.cacheDir = filepath.Join(os.Getenv("HOME"), ".cache/yay")
 	} else {
-		config.cacheHome = "/tmp"
+		uid, _ := exec.Command("id", "-u").Output()
+		y.configDir = filepath.Join("/tmp", "yay-"+(string)(uid), "cache")
 	}
 
-	config.vcsFile = filepath.Join(config.cacheHome, vcsFileName)
+	y.value["builddir"] = y.cacheDir
+	y.vcsFile = filepath.Join(y.cacheDir, vcsFileName)
 }
 
 // editor returns the preferred system editor.

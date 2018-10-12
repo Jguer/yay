@@ -28,17 +28,17 @@ func initVCS() error {
 }
 
 func initHomeDirs() error {
-	if _, err := os.Stat(config.home); os.IsNotExist(err) {
-		if err = os.MkdirAll(config.home, 0755); err != nil {
-			return fmt.Errorf("Failed to create config directory '%s': %s", config.home, err)
+	if _, err := os.Stat(config.configDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.configDir, 0755); err != nil {
+			return fmt.Errorf("Failed to create config directory '%s': %s", config.configDir, err)
 		}
 	} else if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(config.cacheHome); os.IsNotExist(err) {
-		if err = os.MkdirAll(config.cacheHome, 0755); err != nil {
-			return fmt.Errorf("Failed to create cache directory '%s': %s", config.cacheHome, err)
+	if _, err := os.Stat(config.cacheDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(config.cacheDir, 0755); err != nil {
+			return fmt.Errorf("Failed to create cache directory '%s': %s", config.cacheDir, err)
 		}
 	} else if err != nil {
 		return err

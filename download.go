@@ -270,12 +270,12 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 
 	download := func(pkg string, url string) {
 		defer wg.Done()
-		if err := downloadAndUnpack(url, config.cacheHome); err != nil {
+		if err := downloadAndUnpack(url, config.cacheDir); err != nil {
 			errs.Add(fmt.Errorf("%s Failed to get pkgbuild: %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(err.Error()))))
 			return
 		}
 
-		_, stderr, err := capture(exec.Command("mv", filepath.Join(config.cacheHome, "packages", pkg, "trunk"), filepath.Join(path, pkg)))
+		_, stderr, err := capture(exec.Command("mv", filepath.Join(config.cacheDir, "packages", pkg, "trunk"), filepath.Join(path, pkg)))
 		mux.Lock()
 		downloaded++
 		if err != nil {
@@ -297,6 +297,6 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 	}
 
 	wg.Wait()
-	errs.Add(os.RemoveAll(filepath.Join(config.cacheHome, "packages")))
+	errs.Add(os.RemoveAll(filepath.Join(config.cacheDir, "packages")))
 	return len(missing) != 0, errs.Return()
 }

@@ -49,7 +49,7 @@ func createRepoList(out *os.File) (err error) {
 }
 
 func updateCompletion(force bool) error {
-	path := filepath.Join(config.cacheHome, "completion.cache")
+	path := filepath.Join(config.cacheDir, "completion.cache")
 	info, err := os.Stat(path)
 
 	if os.IsNotExist(err) || (config.num["completioninterval"] != -1 &&
@@ -75,7 +75,7 @@ func updateCompletion(force bool) error {
 
 // Complete provides completion info for shells
 func complete(force bool) error {
-	path := filepath.Join(config.cacheHome, "completion.cache")
+	path := filepath.Join(config.cacheDir, "completion.cache")
 
 	err := updateCompletion(force)
 	if err != nil {
