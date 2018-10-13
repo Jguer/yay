@@ -69,7 +69,7 @@ func (ds *depSolver) resolveTargets(pkgs []string) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
-	aurTargets := make(stringSet)
+	aurTargets := make([]string, 0)
 	pkgs = removeInvalidTargets(pkgs)
 
 	for _, pkg := range pkgs {
@@ -91,7 +91,7 @@ func (ds *depSolver) resolveTargets(pkgs []string) error {
 		// aur/ prefix means we only check the aur
 		if target.Db == "aur" || mode == ModeAUR {
 			ds.Targets = append(ds.Targets, target)
-			aurTargets.set(target.DepString())
+			aurTargets = append(aurTargets, target.DepString())
 			continue
 		}
 
@@ -133,7 +133,7 @@ func (ds *depSolver) resolveTargets(pkgs []string) error {
 
 		//if there was no db prefix check the aur
 		if target.Db == "" {
-			aurTargets.set(target.DepString())
+			aurTargets = append(aurTargets, target.DepString())
 		}
 
 		ds.Targets = append(ds.Targets, target)
@@ -292,8 +292,8 @@ func (ds *depSolver) findSatisfierAurCache(dep string) *rpc.Pkg {
 	return nil
 }
 
-func (ds *depSolver) cacheAURPackages(_pkgs stringSet) error {
-	pkgs := _pkgs.copy()
+func (ds *depSolver) cacheAURPackages(_pkgs []string) error {
+	pkgs := sliceToStringSet(_pkgs)
 	query := make([]string, 0)
 
 	for pkg := range pkgs {
@@ -392,9 +392,9 @@ func (ds *depSolver) findProvides(pkgs stringSet) error {
 	return nil
 }
 
-func (ds *depSolver) resolveAURPackages(pkgs stringSet, explicit bool) error {
+func (ds *depSolver) resolveAURPackages(pkgs []string, explicit bool) error {
 	newPackages := make(stringSet)
-	newAURPackages := make(stringSet)
+	newAURPackages := make([]string, 0)
 	toAdd := make([]*rpc.Pkg, 0)
 
 	if len(pkgs) == 0 {
@@ -406,7 +406,7 @@ func (ds *depSolver) resolveAURPackages(pkgs stringSet, explicit bool) error {
 		return err
 	}
 
-	for name := range pkgs {
+	for _, name := range pkgs {
 		if ds.Seen.get(name) {
 			continue
 		}
@@ -451,7 +451,7 @@ func (ds *depSolver) resolveAURPackages(pkgs stringSet, explicit bool) error {
 
 		//assume it's in the aur
 		//ditch the versioning because the RPC can't handle it
-		newAURPackages.set(dep)
+		newAURPackages = append(newAURPackages, dep)
 
 	}
 
