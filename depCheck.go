@@ -270,7 +270,7 @@ func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
 				fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
 			}
 
-			for name, pkgs := range conflicts {
+			printConflict := func(name string, pkgs stringSet) {
 				str := fmt.Sprintf(s, cyan(name))
 				for pkg := range pkgs {
 					str += " " + cyan(pkg) + ","
@@ -278,6 +278,19 @@ func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
 				str = strings.TrimSuffix(str, ",")
 
 				fmt.Println(str)
+			}
+
+			for _, pkg := range ds.Repo {
+				if pkgs, ok := conflicts[pkg.Name()]; ok {
+					printConflict(pkg.Name(), pkgs)
+				}
+			}
+			for _, base := range ds.Aur {
+				for _, pkg := range base {
+					if pkgs, ok := conflicts[pkg.Name]; ok {
+						printConflict(pkg.Name, pkgs)
+					}
+				}
 			}
 		}
 	}
