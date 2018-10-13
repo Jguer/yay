@@ -60,7 +60,9 @@ func waitLock() {
 		return
 	}
 
-	fmt.Print(bold(yellow(smallArrow)), " db.lck is present. Waiting...")
+	fmt.Println(bold(yellow(smallArrow)), filepath.Join(pacmanConf.DBPath, "db.lck"), "is present.")
+
+	fmt.Print(bold(yellow(smallArrow)), " There may be another Pacman instance running. Waiting...")
 
 	for {
 		time.Sleep(3 * time.Second)
