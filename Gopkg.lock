@@ -29,12 +29,28 @@
   revision = "643c287316a5456348cc689e1f2c980410e17d47"
 
 [[projects]]
+  digest = "1:bffa444ca07c69c599ae5876bc18b25bfd5fa85b297ca10a25594d284a7e9c5d"
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
+  version = "v0.0.4"
+
+[[projects]]
   branch = "master"
   digest = "1:07c508c49b9c13cf582c2b986635d0acd11e113e0535fa4b147026e15bc64185"
   name = "github.com/mikkeloscar/aur"
   packages = ["."]
   pruneopts = "NUT"
   revision = "f998dbf94dc47ef839c76740efeb673d3459be1f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e1e75018db0765a0ac54aa7f9473417a7db770c75c9527b4bfff03d2e55f0a0a"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "NUT"
+  revision = "fa43e7bc11baaae89f3f902b2b4d832b68234844"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -43,6 +59,7 @@
     "github.com/Morganamilo/go-pacmanconf",
     "github.com/Morganamilo/go-srcinfo",
     "github.com/jguer/go-alpm",
+    "github.com/mattn/go-isatty",
     "github.com/mikkeloscar/aur",
   ]
   solver-name = "gps-cdcl"

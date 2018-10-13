@@ -35,10 +35,9 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
 
 test:
-	gofmt -l *.go
-	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted" && false)
-	go vet
-	go test -v
+	go fmt $$(go list ./... | grep -v /vendor/)
+	go vet $$(go list ./... | grep -v /vendor/)
+	go test -v $$(go list ./... | grep -v /vendor/)
 
 build:
 	go build -v ${LDFLAGS} -o ${BINNAME}

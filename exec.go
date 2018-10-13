@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	isatty "github.com/mattn/go-isatty"
 )
 
 func show(cmd *exec.Cmd) error {
@@ -123,8 +125,5 @@ func passToGit(dir string, _args ...string) *exec.Cmd {
 }
 
 func isTty() bool {
-	cmd := exec.Command("test", "-t", "1")
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	return err == nil
+	return isatty.IsTerminal(os.Stdout.Fd())
 }
