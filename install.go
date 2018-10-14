@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -533,6 +534,33 @@ func pkgbuildNumberMenu(bases []Base, installed stringSet) bool {
 	return askClean
 }
 
+func buildAnswerMenu(defaultAnswer string) string {
+	answers := map[string][2]string{
+		"[N]one":         {"N", "None"},
+		"[A]ll":          {"A", "All"},
+		"[Ab]ort":        {"Ab", "Abort"},
+		"[I]nstalled":    {"I", "Installed"},
+		"[No]tInstalled": {"No", "Not Installed"},
+	}
+
+	var menu bytes.Buffer
+
+	for text, keys := range answers {
+		for _, key := range keys {
+			if defaultAnswer == key {
+				text = cyan(text)
+				break
+			}
+		}
+		menu.WriteString(text)
+		menu.WriteString(" ")
+	}
+
+	menu.WriteString("or (1 2 3, 1-3, ^4)")
+
+	return menu.String()
+}
+
 func cleanNumberMenu(bases []Base, installed stringSet, hasClean bool) ([]Base, error) {
 	toClean := make([]Base, 0)
 
@@ -540,10 +568,13 @@ func cleanNumberMenu(bases []Base, installed stringSet, hasClean bool) ([]Base, 
 		return toClean, nil
 	}
 
+	defaultAnswer := config.AnswerClean
+
 	fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
+	fmt.Println(bold(green(arrow) + buildAnswerMenu(defaultAnswer)))
 	fmt.Print(bold(green(arrow + " ")))
-	cleanInput, err := getInput(config.AnswerClean)
+
+	cleanInput, err := getInput(defaultAnswer)
 	if err != nil {
 		return nil, err
 	}
