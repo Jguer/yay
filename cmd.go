@@ -64,7 +64,7 @@ Permanent configuration options:
     --answerdiff    <a>   Set a predetermined answer for the diff menu
     --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
     --answerupgrade <a>   Set a predetermined answer for the upgrade menu
-    --askwithdefault      Don't skip the menu when any of the above is set
+    --askwithdefault      Don't skip the menu when --answerclean, --answerdiff or --answeredit are set
     --noanswerclean       Unset the answer for the clean build menu
     --noanswerdiff        Unset the answer for the edit diff menu
     --noansweredit        Unset the answer for the edit pkgbuild menu

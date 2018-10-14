@@ -97,7 +97,7 @@ complete -c $progname -n "not $noopt" -l sortby -d 'Sort AUR results by a specif
 complete -c $progname -n "not $noopt" -l answerclean -d 'Set a predetermined answer for the clean build menu' -f
 complete -c $progname -n "not $noopt" -l answeredit -d 'Set a predetermined answer for the edit pkgbuild menu' -f
 complete -c $progname -n "not $noopt" -l answerupgrade -d 'Set a predetermined answer for the upgrade menu' -f
-complete -c $progname -n "not $noopt" -l askwithdefault -d 'Do not skip the menu when any of --answerclean, --answeredit or --answerupgrade are set' -f
+complete -c $progname -n "not $noopt" -l askwithdefault -d 'Do not skip the menu when --answerclean, --answerdiff or --answeredit are set' -f
 complete -c $progname -n "not $noopt" -l noanswerclean -d 'Unset the answer for the clean build menu' -f
 complete -c $progname -n "not $noopt" -l noansweredit -d 'Unset the answer for the edit pkgbuild menu' -f
 complete -c $progname -n "not $noopt" -l noanswerupgrade -d 'Unset the answer for the upgrade menu' -f
