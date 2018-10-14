@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -534,33 +535,6 @@ func pkgbuildNumberMenu(bases []Base, installed stringSet) bool {
 	return askClean
 }
 
-func buildAnswerMenu(defaultAnswer string) string {
-	answers := map[string][2]string{
-		"[N]one":         {"N", "None"},
-		"[A]ll":          {"A", "All"},
-		"[Ab]ort":        {"Ab", "Abort"},
-		"[I]nstalled":    {"I", "Installed"},
-		"[No]tInstalled": {"No", "Not Installed"},
-	}
-
-	var menu bytes.Buffer
-
-	for text, keys := range answers {
-		for _, key := range keys {
-			if defaultAnswer == key {
-				text = cyan(text)
-				break
-			}
-		}
-		menu.WriteString(text)
-		menu.WriteString(" ")
-	}
-
-	menu.WriteString("or (1 2 3, 1-3, ^4)")
-
-	return menu.String()
-}
-
 func cleanNumberMenu(bases []Base, installed stringSet, hasClean bool) ([]Base, error) {
 	toClean := make([]Base, 0)
 
@@ -569,7 +543,7 @@ func cleanNumberMenu(bases []Base, installed stringSet, hasClean bool) ([]Base, 
 	}
 
 	fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
-	fmt.Println(bold(green(arrow) + buildAnswerMenu(config.AnswerClean)))
+	fmt.Println(bold(green(arrow) + generateMenuText(config.AnswerClean)))
 	fmt.Print(bold(green(arrow + " ")))
 
 	cleanInput, err := getInput(config.AnswerClean)
@@ -654,7 +628,7 @@ func editDiffNumberMenu(bases []Base, installed stringSet, diff bool) ([]Base, e
 		question = "PKGBUILDs to edit?"
 	}
 
-	fmt.Println(bold(green(arrow) + buildAnswerMenu(defaultAnswer)))
+	fmt.Println(bold(green(arrow) + generateMenuText(defaultAnswer)))
 	fmt.Println(bold(green(arrow + " " + question)))
 	fmt.Print(bold(green(arrow + " ")))
 
@@ -708,6 +682,37 @@ func editDiffNumberMenu(bases []Base, installed stringSet, diff bool) ([]Base, e
 	}
 
 	return toEdit, nil
+}
+
+func generateMenuText(defaultAnswer string) string {
+	answers := map[string][2]string{
+		"[N]one":         {"n", "none"},
+		"[A]ll":          {"a", "all"},
+		"[Ab]ort":        {"ab", "abort"},
+		"[I]nstalled":    {"i", "installed"},
+		"[No]tInstalled": {"no", "not installed"},
+	}
+	defaultAnswer = strings.ToLower(defaultAnswer)
+
+	var answerKeys []string
+	for k := range answers {
+		answerKeys = append(answerKeys, k)
+	}
+	sort.Strings(answerKeys)
+
+	var menu bytes.Buffer
+
+	for _, key := range answerKeys {
+		if defaultAnswer == answers[key][0] || defaultAnswer == answers[key][1] {
+			key = cyan(key)
+		}
+		menu.WriteString(" ")
+		menu.WriteString(key)
+	}
+
+	menu.WriteString(" or (1 2 3, 1-3, ^4)")
+
+	return menu.String()
 }
 
 func showPkgbuildDiffs(bases []Base, cloned stringSet) error {
