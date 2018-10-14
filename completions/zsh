@@ -61,6 +61,7 @@ _pacman_opts_common=(
 	'--answerclean[Set a predetermined answer for the clean build menu]:answer'
 	'--answeredit[Set a predetermined answer for the edit pkgbuild menu]:answer'
 	'--answerupgrade[Set a predetermined answer for the upgrade menu]:answer'
+	'--askwithdefault[Do not skip the menu when any of --answerclean, --answeredit or --answerupgrade are set]:answer'
 	'--noanswerclean[Unset the answer for the clean build menu]'
 	'--noansweredit[Unset the answer for the edit pkgbuild menu]'
 	'--noanswerupgrade[Unset the answer for the upgrade menu]'
