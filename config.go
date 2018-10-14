@@ -297,7 +297,7 @@ func continueTask(s string, cont bool) bool {
 }
 
 func getInput(defaultValue string) (string, error) {
-	if (defaultValue != "" || config.NoConfirm) && config.AskWithDefault == false {
+	if (defaultValue != "" || config.NoConfirm) && !config.AskWithDefault {
 		fmt.Println(defaultValue)
 		return defaultValue, nil
 	}
@@ -313,7 +313,13 @@ func getInput(defaultValue string) (string, error) {
 		return "", fmt.Errorf("Input too long")
 	}
 
-	return string(buf), nil
+	input := string(buf)
+
+	if input == "" && config.AskWithDefault && defaultValue != "" {
+		input = defaultValue
+	}
+
+	return input, nil
 }
 
 func (config Configuration) String() string {

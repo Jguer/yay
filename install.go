@@ -568,13 +568,11 @@ func cleanNumberMenu(bases []Base, installed stringSet, hasClean bool) ([]Base, 
 		return toClean, nil
 	}
 
-	defaultAnswer := config.AnswerClean
-
 	fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
-	fmt.Println(bold(green(arrow) + buildAnswerMenu(defaultAnswer)))
+	fmt.Println(bold(green(arrow) + buildAnswerMenu(config.AnswerClean)))
 	fmt.Print(bold(green(arrow + " ")))
 
-	cleanInput, err := getInput(defaultAnswer)
+	cleanInput, err := getInput(config.AnswerClean)
 	if err != nil {
 		return nil, err
 	}
@@ -645,23 +643,24 @@ func editDiffNumberMenu(bases []Base, installed stringSet, diff bool) ([]Base, e
 	toEdit := make([]Base, 0)
 	var editInput string
 	var err error
-
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
+	var defaultAnswer string
+	var question string
 
 	if diff {
-		fmt.Println(bold(green(arrow + " Diffs to show?")))
-		fmt.Print(bold(green(arrow + " ")))
-		editInput, err = getInput(config.AnswerDiff)
-		if err != nil {
-			return nil, err
-		}
+		defaultAnswer = config.AnswerDiff
+		question = "Diffs to show?"
 	} else {
-		fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
-		fmt.Print(bold(green(arrow + " ")))
-		editInput, err = getInput(config.AnswerEdit)
-		if err != nil {
-			return nil, err
-		}
+		defaultAnswer = config.AnswerEdit
+		question = "PKGBUILDs to edit?"
+	}
+
+	fmt.Println(bold(green(arrow) + buildAnswerMenu(defaultAnswer)))
+	fmt.Println(bold(green(arrow + " " + question)))
+	fmt.Print(bold(green(arrow + " ")))
+
+	editInput, err = getInput(defaultAnswer)
+	if err != nil {
+		return nil, err
 	}
 
 	eInclude, eExclude, eOtherInclude, eOtherExclude := parseNumberMenu(editInput)
