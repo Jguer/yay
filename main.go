@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -205,6 +206,13 @@ func cleanup() int {
 func main() {
 	if 0 == os.Geteuid() {
 		fmt.Println("Please avoid running yay as root/sudo.")
+	}
+
+	if 0 == os.Geteuid() && os.Getenv("SUDO_UID") != "" && os.Getenv("SUDO_GID") != "" {
+		args := []string{"-g", "#" + os.Getenv("SUDO_GID"), "-u", "#" + os.Getenv("SUDO_UID")}
+		args = append(args, os.Args...)
+		exitOnError(show(exec.Command("sudo", args...)))
+		os.Exit(cleanup())
 	}
 
 	exitOnError(setPaths())
