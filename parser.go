@@ -441,6 +441,7 @@ func isArg(arg string) bool {
 	case "answerdiff":
 	case "noanswerdiff":
 	case "answeredit":
+	case "askwithdefault":
 	case "noansweredit":
 	case "answerupgrade":
 	case "noanswerupgrade":
@@ -558,6 +559,8 @@ func handleConfig(option, value string) bool {
 		config.AnswerUpgrade = value
 	case "noanswerupgrade":
 		config.AnswerUpgrade = ""
+	case "askwithdefault":
+		config.AskWithDefault = true
 	case "gitclone":
 		config.GitClone = true
 	case "nogitclone":

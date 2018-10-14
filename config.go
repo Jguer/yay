@@ -51,6 +51,7 @@ type Configuration struct {
 	AnswerDiff         string `json:"answerdiff"`
 	AnswerEdit         string `json:"answeredit"`
 	AnswerUpgrade      string `json:"answerupgrade"`
+	AskWithDefault     bool   `json:"askwithdefault"`
 	GitBin             string `json:"gitbin"`
 	GpgBin             string `json:"gpgbin"`
 	GpgFlags           string `json:"gpgflags"`
@@ -173,6 +174,7 @@ func (config *Configuration) defaultSettings() {
 	config.AnswerDiff = ""
 	config.AnswerEdit = ""
 	config.AnswerUpgrade = ""
+	config.AskWithDefault = false
 	config.RemoveMake = "ask"
 	config.GitClone = true
 	config.Provides = true
@@ -295,7 +297,7 @@ func continueTask(s string, cont bool) bool {
 }
 
 func getInput(defaultValue string) (string, error) {
-	if defaultValue != "" || config.NoConfirm {
+	if (defaultValue != "" || config.NoConfirm) && config.AskWithDefault == false {
 		fmt.Println(defaultValue)
 		return defaultValue, nil
 	}

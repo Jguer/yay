@@ -59,10 +59,12 @@ Permanent configuration options:
     --requestsplitn <n>   Max amount of packages to query per AUR request
     --completioninterval  <n> Time in days to to refresh completion cache
     --sortby    <field>   Sort AUR results by a specific field during search
+
     --answerclean   <a>   Set a predetermined answer for the clean build menu
     --answerdiff    <a>   Set a predetermined answer for the diff menu
     --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
     --answerupgrade <a>   Set a predetermined answer for the upgrade menu
+    --askwithdefault      Don't skip the menu when any of the above is set
     --noanswerclean       Unset the answer for the clean build menu
     --noanswerdiff        Unset the answer for the edit diff menu
     --noansweredit        Unset the answer for the edit pkgbuild menu
