@@ -1047,17 +1047,12 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 
 			arguments.addTarget(pkgdest)
-			if !dp.Explicit.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
+			if parser.existsArg("asdeps", "asdep") {
 				deps = append(deps, split.Name)
-			}
-
-			if dp.Explicit.get(split.Name) {
-				if parser.existsArg("asdeps", "asdep") {
-					deps = append(deps, split.Name)
-				} else if parser.existsArg("asexplicit", "asexp") {
-					exp = append(exp, split.Name)
-
-				}
+			} else if parser.existsArg("asexplicit", "asexp") {
+				exp = append(exp, split.Name)
+			} else if !dp.Explicit.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
+				deps = append(deps, split.Name)
 			}
 		}
 
