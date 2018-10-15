@@ -282,9 +282,9 @@ func install(parser *arguments) (err error) {
 			return fmt.Errorf("Error installing repo packages")
 		}
 
-		depArguments := makeArguments()
+		depArguments := parser.copyGlobal()
 		depArguments.addArg("D", "asdeps")
-		expArguments := makeArguments()
+		expArguments := parser.copyGlobal()
 		expArguments.addArg("D", "asexplicit")
 
 		for _, pkg := range do.Repo {
@@ -1003,9 +1003,9 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		depArguments := makeArguments()
+		depArguments := parser.copyGlobal()
 		depArguments.addArg("D", "asdeps")
-		expArguments := makeArguments()
+		expArguments := parser.copyGlobal()
 		expArguments.addArg("D", "asexplicit")
 
 		//remotenames: names of all non repo packages on the system

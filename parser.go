@@ -88,6 +88,15 @@ func makeArguments() *arguments {
 	}
 }
 
+func (parser *arguments) copyGlobal() (cp *arguments) {
+	cp = makeArguments()
+	for k, v := range parser.globals {
+		cp.globals[k] = v
+	}
+
+	return
+}
+
 func (parser *arguments) copy() (cp *arguments) {
 	cp = makeArguments()
 
