@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
@@ -42,6 +43,16 @@ func initHomeDirs() error {
 		}
 	} else if err != nil {
 		return err
+	}
+
+	if _, err := os.Stat(filepath.Join(config.configDir, "config.json")); !os.IsNotExist(err) {
+		fmt.Println(red(arrow), yellow("Yay has transitioned to a pacman style configuration system."))
+		fmt.Println(red(arrow), yellow("If you have configured yay in any way, you should edit the new config file to reflect the changes you have made."))
+		fmt.Println(red(arrow), yellow("Until then yay will be functioning under the default settings."))
+		fmt.Println(red(arrow), yellow("Configure yay using /etc/yay.conf or"), yellow(filepath.Join(config.configDir, configFileName)))
+		fmt.Println(red(arrow), yellow("Your old configuration file is still present."))
+		fmt.Println(red(arrow), yellow("To remove this warning remove your old file "), "'rm", filepath.Join(config.configDir, "config.json'"))
+
 	}
 
 	return nil
