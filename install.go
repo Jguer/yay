@@ -13,6 +13,38 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
+func asdeps(parser *arguments, pkgs []string) error {
+	if len(pkgs) == 0 {
+		return nil
+	}
+
+	parser = parser.copyGlobal()
+	parser.addArg("D", "asdeps")
+	parser.addTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(parser))
+	if err != nil {
+		return fmt.Errorf("%s%s", stderr, err)
+	}
+
+	return nil
+}
+
+func asexp(parser *arguments, pkgs []string) error {
+	if len(pkgs) == 0 {
+		return nil
+	}
+
+	parser = parser.copyGlobal()
+	parser.addArg("D", "asexplicit")
+	parser.addTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(parser))
+	if err != nil {
+		return fmt.Errorf("%s%s", stderr, err)
+	}
+
+	return nil
+}
+
 // Install handles package installs
 func install(parser *arguments) (err error) {
 	var incompatible stringSet
@@ -282,36 +314,27 @@ func install(parser *arguments) (err error) {
 			return fmt.Errorf("Error installing repo packages")
 		}
 
-		depArguments := parser.copyGlobal()
-		depArguments.addArg("D", "asdeps")
-		expArguments := parser.copyGlobal()
-		expArguments.addArg("D", "asexplicit")
+		deps := make([]string, 0)
+		exp := make([]string, 0)
 
-		for _, pkg := range do.Repo {
+		for _, pkg := range dp.Repo {
 			if !dp.Explicit.get(pkg.Name()) && !localNamesCache.get(pkg.Name()) && !remoteNamesCache.get(pkg.Name()) {
-				depArguments.addTarget(pkg.Name())
+				deps = append(deps, pkg.Name())
 				continue
 			}
 
 			if parser.existsArg("asdeps", "asdep") && dp.Explicit.get(pkg.Name()) {
-				depArguments.addTarget(pkg.Name())
+				deps = append(deps, pkg.Name())
 			} else if parser.existsArg("asexp", "asexplicit") && dp.Explicit.get(pkg.Name()) {
-				expArguments.addTarget(pkg.Name())
+				exp = append(exp, pkg.Name())
 			}
 		}
 
-		if len(depArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(depArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
+		if err = asdeps(parser, deps); err != nil {
+			return err
 		}
-
-		if len(expArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(expArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
+		if err = asexp(parser, exp); err != nil {
+			return err
 		}
 	}
 
@@ -1003,10 +1026,8 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		depArguments := parser.copyGlobal()
-		depArguments.addArg("D", "asdeps")
-		expArguments := parser.copyGlobal()
-		expArguments.addArg("D", "asexplicit")
+		deps := make([]string, 0)
+		exp := make([]string, 0)
 
 		//remotenames: names of all non repo packages on the system
 		_, _, localNames, remoteNames, err := filterPackages()
@@ -1027,14 +1048,15 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 
 			arguments.addTarget(pkgdest)
 			if !dp.Explicit.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
-				depArguments.addTarget(split.Name)
+				deps = append(deps, split.Name)
 			}
 
 			if dp.Explicit.get(split.Name) {
 				if parser.existsArg("asdeps", "asdep") {
-					depArguments.addTarget(split.Name)
+					deps = append(deps, split.Name)
 				} else if parser.existsArg("asexplicit", "asexp") {
-					expArguments.addTarget(split.Name)
+					exp = append(exp, split.Name)
+
 				}
 			}
 		}
@@ -1058,12 +1080,13 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			fmt.Fprintln(os.Stderr, err)
 		}
 
-		if len(depArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(depArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
+		if err = asdeps(parser, deps); err != nil {
+			return err
 		}
+		if err = asexp(parser, exp); err != nil {
+			return err
+		}
+
 		config.NoConfirm = oldConfirm
 	}
 
