@@ -916,10 +916,80 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringSet) (err error) 
 }
 
 func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
+	arguments := parser.copy()
+	arguments.clearTargets()
+	arguments.op = "U"
+	arguments.delArg("confirm")
+	arguments.delArg("noconfirm")
+	arguments.delArg("c", "clean")
+	arguments.delArg("q", "quiet")
+	arguments.delArg("q", "quiet")
+	arguments.delArg("y", "refresh")
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("w", "downloadonly")
+
+	deps := make([]string, 0)
+	exp := make([]string, 0)
+	oldConfirm := config.NoConfirm
+	config.NoConfirm = true
+
+	doInstall := func() error {
+		if len(arguments.targets) == 0 {
+			return nil
+		}
+
+		err := show(passToPacman(arguments))
+		if err != nil {
+			return err
+		}
+
+		err = saveVCSInfo()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+
+		if err = asdeps(parser, deps); err != nil {
+			return err
+		}
+		if err = asexp(parser, exp); err != nil {
+			return err
+		}
+
+		config.NoConfirm = oldConfirm
+
+		arguments.clearTargets()
+		deps = make([]string, 0)
+		exp = make([]string, 0)
+		config.NoConfirm = true
+		return nil
+	}
+
 	for _, base := range do.Aur {
+		var err error
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		built := true
+
+		satisfied := true
+	all:
+		for _, pkg := range base {
+			for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+				for _, dep := range deps {
+					if _, err := dp.LocalDB.PkgCache().FindSatisfier(dep); err != nil {
+						satisfied = false
+						fmt.Printf("%s not satisfied, flushing install queue", dep)
+						break all
+					}
+				}
+			}
+		}
+
+		if !satisfied || !config.BatchInstall {
+			err = doInstall()
+			if err != nil {
+				return err
+			}
+		}
 
 		srcinfo := srcinfos[pkg]
 
@@ -930,7 +1000,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		//pkgver bump
-		err := show(passToMakepkg(dir, args...))
+		err = show(passToMakepkg(dir, args...))
 		if err != nil {
 			return fmt.Errorf("Error making: %s", base.String())
 		}
@@ -994,40 +1064,19 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		arguments := parser.copy()
-		arguments.clearTargets()
-		arguments.op = "U"
-		arguments.delArg("confirm")
-		arguments.delArg("noconfirm")
-		arguments.delArg("c", "clean")
-		arguments.delArg("q", "quiet")
-		arguments.delArg("q", "quiet")
-		arguments.delArg("y", "refresh")
-		arguments.delArg("u", "sysupgrade")
-		arguments.delArg("w", "downloadonly")
-
-		oldConfirm := config.NoConfirm
-
 		//conflicts have been checked so answer y for them
 		if config.UseAsk {
 			ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
 			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 			cmdArgs.globals["ask"] = fmt.Sprint(uask)
 		} else {
-			conflict := false
 			for _, split := range base {
 				if _, ok := conflicts[split.Name]; ok {
-					conflict = true
+					config.NoConfirm = false
+					break
 				}
 			}
-
-			if !conflict {
-				config.NoConfirm = true
-			}
 		}
-
-		deps := make([]string, 0)
-		exp := make([]string, 0)
 
 		//remotenames: names of all non repo packages on the system
 		_, _, localNames, remoteNames, err := filterPackages()
@@ -1056,11 +1105,6 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		err = show(passToPacman(arguments))
-		if err != nil {
-			return err
-		}
-
 		var mux sync.Mutex
 		var wg sync.WaitGroup
 		for _, pkg := range base {
@@ -1069,21 +1113,9 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		wg.Wait()
-
-		err = saveVCSInfo()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-
-		if err = asdeps(parser, deps); err != nil {
-			return err
-		}
-		if err = asexp(parser, exp); err != nil {
-			return err
-		}
-
-		config.NoConfirm = oldConfirm
 	}
 
-	return nil
+	err := doInstall()
+	config.NoConfirm = oldConfirm
+	return err
 }

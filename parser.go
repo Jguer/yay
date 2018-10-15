@@ -449,6 +449,8 @@ func isArg(arg string) bool {
 	case "rebuildall":
 	case "rebuildtree":
 	case "norebuild":
+	case "batchinstall":
+	case "nobatchinstall":
 	case "answerclean":
 	case "noanswerclean":
 	case "answerdiff":
@@ -555,6 +557,10 @@ func handleConfig(option, value string) bool {
 		config.ReBuild = "tree"
 	case "norebuild":
 		config.ReBuild = "no"
+	case "batchinstall":
+		config.BatchInstall = true
+	case "nobatchinstall":
+		config.BatchInstall = false
 	case "answerclean":
 		config.AnswerClean = value
 	case "noanswerclean":

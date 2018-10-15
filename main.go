@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	alpm "github.com/Jguer/go-alpm"
+	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 )
 
 func setPaths() error {
