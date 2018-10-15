@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -685,29 +684,36 @@ func editDiffNumberMenu(bases []Base, installed stringSet, diff bool) ([]Base, e
 }
 
 func generateMenuText(defaultAnswer string) string {
-	answers := map[string][2]string{
-		"[N]one":         {"n", "none"},
-		"[A]ll":          {"a", "all"},
-		"[Ab]ort":        {"ab", "abort"},
-		"[I]nstalled":    {"i", "installed"},
-		"[No]tInstalled": {"no", "not installed"},
-	}
 	defaultAnswer = strings.ToLower(defaultAnswer)
 
-	var answerKeys []string
-	for k := range answers {
-		answerKeys = append(answerKeys, k)
+	items := []string{
+		"[N]one",
+		"[A]ll",
+		"[Ab]ort",
+		"[I]nstalled",
+		"[No]tInstalled",
 	}
-	sort.Strings(answerKeys)
-
+	var highlight int
 	var menu bytes.Buffer
 
-	for _, key := range answerKeys {
-		if defaultAnswer == answers[key][0] || defaultAnswer == answers[key][1] {
-			key = cyan(key)
+	switch defaultAnswer {
+	case "a", "all":
+		highlight = 1
+	case "ab", "abort":
+		highlight = 2
+	case "i", "installed":
+		highlight = 3
+	case "no", "not installed":
+		highlight = 4
+	default:
+		highlight = 0
+	}
+
+	for key, item := range items {
+		if key == highlight {
+			item = cyan(item)
 		}
-		menu.WriteString(" ")
-		menu.WriteString(key)
+		menu.WriteString(" " + item)
 	}
 
 	menu.WriteString(" or (1 2 3, 1-3, ^4)")
