@@ -356,7 +356,10 @@ func inRepos(syncDb alpm.DbList, pkg string) bool {
 		return true
 	}
 
+	previousHideMenus := hideMenus
+	hideMenus = false
 	_, err := syncDb.FindSatisfier(target.DepString())
+	hideMenus = previousHideMenus
 	if err == nil {
 		return true
 	}
@@ -384,7 +387,6 @@ func earlyPacmanCall(parser *arguments) error {
 	if mode == ModeRepo {
 		arguments.targets = targets
 	} else {
-		alpmHandle.SetQuestionCallback(func(alpm.QuestionAny) {})
 		//separate aur and repo targets
 		for _, target := range targets {
 			if inRepos(syncDb, target) {
