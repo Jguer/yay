@@ -280,6 +280,10 @@ func (ds *depSolver) findSatisfierAurCache(dep string) *rpc.Pkg {
 		}
 	}
 
+	if !config.Provides && providers.Len() >= 1 {
+		return providers.Pkgs[0]
+	}
+
 	if providers.Len() == 1 {
 		return providers.Pkgs[0]
 	}
