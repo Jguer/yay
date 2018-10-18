@@ -6,207 +6,10 @@ import (
 	"sync"
 
 	alpm "github.com/jguer/go-alpm"
+	rpc "github.com/mikkeloscar/aur"
 )
 
-func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts mapStringSet) {
-	for _, pkg := range dp.Aur {
-		if pkg.Name == name {
-			continue
-		}
-
-		if satisfiesAur(conflict, pkg) {
-			conflicts.Add(name, pkg.Name)
-		}
-	}
-
-	for _, pkg := range dp.Repo {
-		if pkg.Name() == name {
-			continue
-		}
-
-		if satisfiesRepo(conflict, pkg) {
-			conflicts.Add(name, pkg.Name())
-		}
-	}
-}
-
-func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts mapStringSet) {
-	dp.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
-		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
-			return nil
-		}
-
-		if satisfiesRepo(conflict, &pkg) {
-			n := pkg.Name()
-			if n != conflict {
-				n += " (" + conflict + ")"
-			}
-			conflicts.Add(name, n)
-		}
-
-		return nil
-	})
-}
-
-func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts mapStringSet) {
-	for _, pkg := range dp.Aur {
-		if pkg.Name == name {
-			continue
-		}
-
-		if satisfiesAur(conflict, pkg) {
-			if name != conflict {
-				name += " (" + conflict + ")"
-			}
-
-			conflicts.Add(pkg.Name, name)
-		}
-	}
-
-	for _, pkg := range dp.Repo {
-		if pkg.Name() == name {
-			continue
-		}
-
-		if satisfiesRepo(conflict, pkg) {
-			if name != conflict {
-				name += " (" + conflict + ")"
-			}
-
-			conflicts.Add(pkg.Name(), name)
-		}
-	}
-}
-
-func (dp *depPool) checkInnerConflicts(conflicts mapStringSet) {
-	for _, pkg := range dp.Aur {
-		for _, conflict := range pkg.Conflicts {
-			dp.checkInnerConflict(pkg.Name, conflict, conflicts)
-		}
-	}
-
-	for _, pkg := range dp.Repo {
-		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
-			dp.checkInnerConflict(pkg.Name(), conflict.String(), conflicts)
-			return nil
-		})
-	}
-}
-
-func (dp *depPool) checkForwardConflicts(conflicts mapStringSet) {
-	for _, pkg := range dp.Aur {
-		for _, conflict := range pkg.Conflicts {
-			dp.checkForwardConflict(pkg.Name, conflict, conflicts)
-		}
-	}
-
-	for _, pkg := range dp.Repo {
-		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
-			dp.checkForwardConflict(pkg.Name(), conflict.String(), conflicts)
-			return nil
-		})
-	}
-}
-
-func (dp *depPool) checkReverseConflicts(conflicts mapStringSet) {
-	dp.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
-		if dp.hasPackage(pkg.Name()) {
-			return nil
-		}
-
-		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
-			dp.checkReverseConflict(pkg.Name(), conflict.String(), conflicts)
-			return nil
-		})
-
-		return nil
-	})
-}
-
-func (dp *depPool) CheckConflicts() (mapStringSet, error) {
-	var wg sync.WaitGroup
-	innerConflicts := make(mapStringSet)
-	conflicts := make(mapStringSet)
-	wg.Add(2)
-
-	fmt.Println(bold(cyan("::") + bold(" Checking for conflicts...")))
-	go func() {
-		dp.checkForwardConflicts(conflicts)
-		dp.checkReverseConflicts(conflicts)
-		wg.Done()
-	}()
-
-	fmt.Println(bold(cyan("::") + bold(" Checking for inner conflicts...")))
-	go func() {
-		dp.checkInnerConflicts(innerConflicts)
-		wg.Done()
-	}()
-
-	wg.Wait()
-
-	if len(innerConflicts) != 0 {
-		fmt.Println()
-		fmt.Println(bold(red(arrow)), bold("Inner conflicts found:"))
-
-		for name, pkgs := range innerConflicts {
-			str := red(bold(smallArrow)) + " " + name + ":"
-			for pkg := range pkgs {
-				str += " " + cyan(pkg) + ","
-			}
-			str = strings.TrimSuffix(str, ",")
-
-			fmt.Println(str)
-		}
-
-	}
-
-	if len(conflicts) != 0 {
-		fmt.Println()
-		fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
-
-		for name, pkgs := range conflicts {
-			str := red(bold(smallArrow)) + " Installing " + cyan(name) + " will remove:"
-			for pkg := range pkgs {
-				str += " " + cyan(pkg) + ","
-			}
-			str = strings.TrimSuffix(str, ",")
-
-			fmt.Println(str)
-		}
-
-	}
-
-	// Add the inner conflicts to the conflicts
-	// These are used to decide what to pass --ask to (if set) or don't pass --noconfirm to
-	// As we have no idea what the order is yet we add every inner conflict to the slice
-	for name, pkgs := range innerConflicts {
-		conflicts[name] = make(stringSet)
-		for pkg := range pkgs {
-			conflicts[pkg] = make(stringSet)
-		}
-	}
-
-	if len(conflicts) > 0 {
-		if !config.UseAsk {
-			if config.NoConfirm {
-				return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
-			}
-
-			fmt.Println()
-			fmt.Println(bold(red(arrow)), bold("Conflicting packages will have to be confirmed manually"))
-			fmt.Println()
-		}
-	}
-
-	return conflicts, nil
-}
-
-type missing struct {
-	Good    stringSet
-	Missing map[string][][]string
-}
-
-func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
+func (ds *depSolver) _checkMissing(dep string, stack []string, missing *missing) {
 	if missing.Good.get(dep) {
 		return
 	}
@@ -221,33 +24,33 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 		return
 	}
 
-	aurPkg := dp.findSatisfierAur(dep)
+	aurPkg := ds.findSatisfierAur(dep)
 	if aurPkg != nil {
 		missing.Good.set(dep)
 		for _, deps := range [3][]string{aurPkg.Depends, aurPkg.MakeDepends, aurPkg.CheckDepends} {
 			for _, aurDep := range deps {
-				if _, err := dp.LocalDb.PkgCache().FindSatisfier(aurDep); err == nil {
+				if _, err := ds.LocalDb.PkgCache().FindSatisfier(aurDep); err == nil {
 					missing.Good.set(aurDep)
 					continue
 				}
 
-				dp._checkMissing(aurDep, append(stack, aurPkg.Name), missing)
+				ds._checkMissing(aurDep, append(stack, aurPkg.Name), missing)
 			}
 		}
 
 		return
 	}
 
-	repoPkg := dp.findSatisfierRepo(dep)
+	repoPkg := ds.findSatisfierRepo(dep)
 	if repoPkg != nil {
 		missing.Good.set(dep)
 		repoPkg.Depends().ForEach(func(repoDep alpm.Depend) error {
-			if _, err := dp.LocalDb.PkgCache().FindSatisfier(repoDep.String()); err == nil {
+			if _, err := ds.LocalDb.PkgCache().FindSatisfier(repoDep.String()); err == nil {
 				missing.Good.set(repoDep.String())
 				return nil
 			}
 
-			dp._checkMissing(repoDep.String(), append(stack, repoPkg.Name()), missing)
+			ds._checkMissing(repoDep.String(), append(stack, repoPkg.Name()), missing)
 			return nil
 		})
 
@@ -257,14 +60,14 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 	missing.Missing[dep] = [][]string{stack}
 }
 
-func (dp *depPool) CheckMissing() error {
+func (ds *depSolver) CheckMissing() error {
 	missing := &missing{
 		make(stringSet),
 		make(map[string][][]string),
 	}
 
-	for _, target := range dp.Targets {
-		dp._checkMissing(target.DepString(), make([]string, 0), missing)
+	for _, target := range ds.Targets {
+		ds._checkMissing(target.DepString(), make([]string, 0), missing)
 	}
 
 	if len(missing.Missing) == 0 {
@@ -292,4 +95,234 @@ func (dp *depPool) CheckMissing() error {
 	}
 
 	return fmt.Errorf("")
+}
+
+func (ds *depSolver) checkForwardConflict(name string, conflict string, conflicts mapStringSet) {
+	ds.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+		if pkg.Name() == name || ds.hasPackage(pkg.Name()) {
+			return nil
+		}
+
+		if satisfiesRepo(conflict, &pkg) {
+			n := pkg.Name()
+			conflicts.Add(name, n)
+		}
+
+		return nil
+	})
+}
+
+func (ds *depSolver) checkReverseConflict(name string, conflict string, conflicts mapStringSet) {
+	for _, base := range ds.Aur {
+		for _, pkg := range base {
+			if pkg.Name == name {
+				continue
+			}
+
+			if satisfiesAur(conflict, pkg) {
+				conflicts.Add(pkg.Name, name)
+			}
+		}
+	}
+
+	for _, pkg := range ds.Repo {
+		if pkg.Name() == name {
+			continue
+		}
+
+		if satisfiesRepo(conflict, pkg) {
+			conflicts.Add(pkg.Name(), name)
+		}
+	}
+}
+
+func (ds *depSolver) checkForwardConflicts(conflicts mapStringSet) {
+	for _, base := range ds.Aur {
+		for _, pkg := range base {
+			for _, conflict := range pkg.Conflicts {
+				ds.checkForwardConflict(pkg.Name, conflict, conflicts)
+			}
+		}
+	}
+
+	for _, pkg := range ds.Repo {
+		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+			ds.checkForwardConflict(pkg.Name(), conflict.String(), conflicts)
+			return nil
+		})
+	}
+}
+
+func (ds *depSolver) checkReverseConflicts(conflicts mapStringSet) {
+	ds.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+		if ds.hasPackage(pkg.Name()) {
+			return nil
+		}
+
+		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+			ds.checkReverseConflict(pkg.Name(), conflict.String(), conflicts)
+			return nil
+		})
+
+		return nil
+	})
+}
+
+func (ds *depSolver) checkInnerRepoConflicts(conflicts mapStringSet) {
+	for _, pkg := range ds.Repo {
+		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+			for _, innerpkg := range ds.Repo {
+				if pkg.Name() != innerpkg.Name() && satisfiesRepo(conflict.String(), innerpkg) {
+					conflicts.Add(pkg.Name(), innerpkg.Name())
+				}
+			}
+
+			return nil
+		})
+	}
+}
+
+func (ds *depSolver) checkInnerConflicts(conflicts mapStringSet) {
+	removed := make(stringSet)
+	//ds.checkInnerConflictRepoAur(conflicts)
+
+	for current, currbase := range ds.Aur {
+		for _, pkg := range currbase {
+			ds.checkInnerConflict(pkg, ds.Aur[:current], removed, conflicts)
+		}
+	}
+}
+
+// Check if anything conflicts with currpkg
+// If so add the conflict with currpkg being removed by the conflicting pkg
+func (ds *depSolver) checkInnerConflict(currpkg *rpc.Pkg, aur []Base, removed stringSet, conflicts mapStringSet) {
+	for _, base := range aur {
+		for _, pkg := range base {
+			for _, conflict := range pkg.Conflicts {
+				if !removed.get(pkg.Name) && satisfiesAur(conflict, currpkg) {
+					addInnerConflict(pkg.Name, currpkg.Name, removed, conflicts)
+				}
+			}
+		}
+	}
+	for _, pkg := range ds.Repo {
+		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+			if !removed.get(pkg.Name()) && satisfiesAur(conflict.String(), currpkg) {
+				addInnerConflict(pkg.Name(), currpkg.Name, removed, conflicts)
+			}
+			return nil
+		})
+	}
+
+	for _, conflict := range currpkg.Conflicts {
+		for _, base := range aur {
+			for _, pkg := range base {
+				if !removed.get(pkg.Name) && satisfiesAur(conflict, pkg) {
+					addInnerConflict(pkg.Name, currpkg.Name, removed, conflicts)
+				}
+			}
+		}
+		for _, pkg := range ds.Repo {
+			if !removed.get(pkg.Name()) && satisfiesRepo(conflict, pkg) {
+				addInnerConflict(pkg.Name(), currpkg.Name, removed, conflicts)
+			}
+		}
+	}
+}
+
+func addInnerConflict(toRemove string, removedBy string, removed stringSet, conflicts mapStringSet) {
+	conflicts.Add(removedBy, toRemove)
+	removed.set(toRemove)
+}
+
+func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
+	var wg sync.WaitGroup
+	innerConflicts := make(mapStringSet)
+	conflicts := make(mapStringSet)
+	repoConflicts := make(mapStringSet)
+	wg.Add(3)
+
+	fmt.Println(bold(cyan("::") + bold(" Checking for conflicts...")))
+	go func() {
+		ds.checkForwardConflicts(conflicts)
+		ds.checkReverseConflicts(conflicts)
+		wg.Done()
+	}()
+
+	fmt.Println(bold(cyan("::") + bold(" Checking for inner conflicts...")))
+	go func() {
+		ds.checkInnerConflicts(innerConflicts)
+		wg.Done()
+	}()
+	go func() {
+		ds.checkInnerRepoConflicts(repoConflicts)
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	formatConflicts := func(conflicts mapStringSet, inner bool, s string) {
+		if len(conflicts) != 0 {
+			fmt.Println()
+			if inner {
+				fmt.Println(bold(red(arrow)), bold("Inner conflicts found:"))
+			} else {
+				fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
+			}
+
+			printConflict := func(name string, pkgs stringSet) {
+				str := fmt.Sprintf(s, cyan(name))
+				for pkg := range pkgs {
+					str += " " + cyan(pkg) + ","
+				}
+				str = strings.TrimSuffix(str, ",")
+
+				fmt.Println(str)
+			}
+
+			for _, pkg := range ds.Repo {
+				if pkgs, ok := conflicts[pkg.Name()]; ok {
+					printConflict(pkg.Name(), pkgs)
+				}
+			}
+			for _, base := range ds.Aur {
+				for _, pkg := range base {
+					if pkgs, ok := conflicts[pkg.Name]; ok {
+						printConflict(pkg.Name, pkgs)
+					}
+				}
+			}
+		}
+	}
+
+	repoStr := red(bold(smallArrow)) + " %s Conflicts with:"
+	formatConflicts(repoConflicts, true, repoStr)
+
+	if len(repoConflicts) > 0 {
+		return nil, fmt.Errorf("Unavoidable conflicts, aborting")
+	}
+
+	str := red(bold(smallArrow)) + " Installing %s will remove:"
+	formatConflicts(conflicts, false, str)
+	formatConflicts(innerConflicts, true, str)
+
+	for name, c := range innerConflicts {
+		for cs, _ := range c {
+			conflicts.Add(name, cs)
+		}
+	}
+
+	if len(conflicts) > 0 {
+		if !config.UseAsk {
+			if config.NoConfirm {
+				return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
+			}
+
+			fmt.Println()
+			fmt.Println(bold(red(arrow)), bold("Conflicting packages will have to be confirmed manually"))
+			fmt.Println()
+		}
+	}
+
+	return conflicts, nil
 }
