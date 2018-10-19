@@ -326,7 +326,7 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	err = buildInstallABS(dp, do, parser, incompatible, conflicts)
+	err = buildInstallABS(ds, parser, incompatible, conflicts)
 	if err != nil {
 		return err
 	}
@@ -978,8 +978,8 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringSet) (err error) 
 	return
 }
 
-func buildInstallABS(dp *depPool, do *depOrder, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
-	for _, base := range do.Repo {
+func buildInstallABS(ds *depSolver, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
+	for _, base := range ds.Repo {
 		pkg := base.Name()
 		dir := filepath.Join(config.BuildDir, "packages", pkg, "trunk")
 		built := true
@@ -991,7 +991,7 @@ func buildInstallABS(dp *depPool, do *depOrder, parser *arguments, incompatible 
 		}
 
 		//pkgver bump
-		err := show(passToMakepkg(dir, args...))
+		err := show(passToMakepkg(dir, args...)) // TODO: THIS FAILS
 		if err != nil {
 			return fmt.Errorf("Error making: %s", base.Name())
 		}
@@ -1001,7 +1001,7 @@ func buildInstallABS(dp *depPool, do *depOrder, parser *arguments, incompatible 
 			return err
 		}
 
-		isExplicit := dp.Explicit.get(pkg)
+		isExplicit := ds.Explicit.get(pkg)
 		if config.ReBuild == "no" || (config.ReBuild == "yes" && !isExplicit) {
 			pkgdest, ok := pkgdests[pkg]
 			if !ok {
@@ -1020,7 +1020,7 @@ func buildInstallABS(dp *depPool, do *depOrder, parser *arguments, incompatible 
 
 		if cmdArgs.existsArg("needed") {
 			installed := true
-			if alpmpkg, err := dp.LocalDb.PkgByName(pkg); err != nil || alpmpkg.Version() != version {
+			if alpmpkg, err := ds.LocalDb.PkgByName(pkg); err != nil || alpmpkg.Version() != version {
 				installed = false
 			}
 
@@ -1099,11 +1099,11 @@ func buildInstallABS(dp *depPool, do *depOrder, parser *arguments, incompatible 
 		}
 
 		arguments.addTarget(pkgdest)
-		if !dp.Explicit.get(pkg) && !localNamesCache.get(pkg) && !remoteNamesCache.get(pkg) {
+		if !ds.Explicit.get(pkg) && !localNamesCache.get(pkg) && !remoteNamesCache.get(pkg) {
 			depArguments.addTarget(pkg)
 		}
 
-		if dp.Explicit.get(pkg) {
+		if ds.Explicit.get(pkg) {
 			if parser.existsArg("asdeps", "asdep") {
 				depArguments.addTarget(pkg)
 			} else if parser.existsArg("asexplicit", "asexp") {

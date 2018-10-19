@@ -200,10 +200,8 @@ func (ds *depSolver) ResolveRepoDependency(pkg *alpm.Package) {
 	if ds.Seen.get(pkg.Name()) {
 		return
 	}
-	ds.Repo = append(ds.Repo, pkg)
-	ds.Seen.set(pkg.Name())
 
-	pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
+	doResolve := func(dep alpm.Depend) (err error) {
 		//have satisfier in dep tree: skip
 		if ds.hasSatisfier(dep.String()) {
 			return
@@ -223,7 +221,18 @@ func (ds *depSolver) ResolveRepoDependency(pkg *alpm.Package) {
 
 		ds.ResolveRepoDependency(repoPkg)
 		return nil
-	})
+	}
+
+	// Manage check & make dependencies before package itself to ensure they are built or installed beforehand.
+	if config.Build {
+		pkg.CheckDepends().ForEach(doResolve)
+		pkg.MakeDepends().ForEach(doResolve)
+	}
+
+	ds.Repo = append(ds.Repo, pkg)
+	ds.Seen.set(pkg.Name())
+
+	pkg.Depends().ForEach(doResolve)
 }
 
 // This is mostly used to promote packages from the cache
@@ -278,10 +287,6 @@ func (ds *depSolver) findSatisfierAurCache(dep string) *rpc.Pkg {
 				continue
 			}
 		}
-	}
-
-	if !config.Provides && providers.Len() >= 1 {
-		return providers.Pkgs[0]
 	}
 
 	if providers.Len() == 1 {
