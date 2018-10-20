@@ -20,6 +20,10 @@ func parseCallback(fileName string, line int, section string,
 		return nil
 	}
 
+	if key == "Include" {
+		return parseConfig(value)
+	}
+
 	key = strings.ToLower(key)
 	value = os.ExpandEnv(value)
 
@@ -80,6 +84,15 @@ func (y *yayConfig) setOption(key string, value string) error {
 
 }
 
+func parseConfig(file string) error {
+	iniBytes, err := ioutil.ReadFile(file)
+	if err != nil {
+		return fmt.Errorf("Failed to open config file '%s': %v", file, err)
+	}
+
+	return ini.Parse(string(iniBytes), parseCallback, nil)
+}
+
 func initConfig() error {
 	file := filepath.Join(config.configDir, configFileName)
 
@@ -91,17 +104,13 @@ func initConfig() error {
 		}
 	}
 
-	iniBytes, err := ioutil.ReadFile(file)
-	if err != nil {
-		return fmt.Errorf("Failed to open config file '%s': %v", file, err)
-	}
-
-	// Toggle all switches false
+	// Toggle all switches false. This allows for yay to have it's default
+	// settings but then use the present to toggle in the config
 	for k := range config.boolean {
 		config.boolean[k] = false
 	}
 
-	err = ini.Parse(string(iniBytes), parseCallback, nil)
+	err := parseConfig(file)
 
 	return err
 }
