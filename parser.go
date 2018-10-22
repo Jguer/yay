@@ -161,7 +161,7 @@ func (parser *arguments) needRoot() bool {
 		if parser.existsArg("i", "info") {
 			return false
 		}
-		if parser.existsArg("c", "clean") && mode == ModeAUR {
+		if parser.existsArg("c", "clean") && mode == modeAUR {
 			return false
 		}
 		return true
@@ -514,9 +514,9 @@ func handleConfig(option, value string) bool {
 	case "notimeupdate":
 		config.TimeUpdate = false
 	case "topdown":
-		config.SortMode = TopDown
+		config.SortMode = topDown
 	case "bottomup":
-		config.SortMode = BottomUp
+		config.SortMode = bottomUp
 	case "completioninterval":
 		n, err := strconv.Atoi(value)
 		if err == nil {
@@ -630,9 +630,9 @@ func handleConfig(option, value string) bool {
 	case "nocombinedupgrade":
 		config.CombinedUpgrade = false
 	case "a", "aur":
-		mode = ModeAUR
+		mode = modeAUR
 	case "repo":
-		mode = ModeRepo
+		mode = modeRepo
 	case "removemake":
 		config.RemoveMake = "yes"
 	case "noremovemake":

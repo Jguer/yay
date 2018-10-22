@@ -15,24 +15,20 @@ import (
 
 // Verbosity settings for search
 const (
-	NumberMenu = iota
-	Detailed
-	Minimal
-)
+	numberMenu = iota
+	detailed
+	minimal
 
-// Describes Sorting method for numberdisplay
-const (
-	BottomUp = iota
-	TopDown
+	// Describes Sorting method for numberdisplay
+	bottomUp = iota
+	topDown
+
+	modeAUR targetMode = iota
+	modeRepo
+	modeAny
 )
 
 type targetMode int
-
-const (
-	ModeAUR targetMode = iota
-	ModeRepo
-	ModeAny
-)
 
 // Configuration stores yay's config.
 type Configuration struct {
@@ -108,7 +104,7 @@ var vcsFile string
 var shouldSaveConfig bool
 
 // YayConf holds the current config values for yay.
-var config Configuration
+var config *Configuration
 
 // AlpmConf holds the current config values for pacman.
 var pacmanConf *pacmanconf.Config
@@ -117,7 +113,7 @@ var pacmanConf *pacmanconf.Config
 var alpmHandle *alpm.Handle
 
 // Mode is used to restrict yay to AUR or repo only modes
-var mode = ModeAny
+var mode = modeAny
 
 var hideMenus = false
 
@@ -137,51 +133,54 @@ func (config *Configuration) saveConfig() error {
 	return err
 }
 
-func (config *Configuration) defaultSettings() {
-	buildDir := "$HOME/.cache/yay"
-	if os.Getenv("XDG_CACHE_HOME") != "" {
-		buildDir = "$XDG_CACHE_HOME/yay"
+func defaultSettings() *Configuration {
+	config := &Configuration{
+		AURURL:             "https://aur.archlinux.org",
+		BuildDir:           "$HOME/.cache/yay",
+		CleanAfter:         false,
+		Editor:             "",
+		EditorFlags:        "",
+		Devel:              false,
+		MakepkgBin:         "makepkg",
+		MakepkgConf:        "",
+		NoConfirm:          false,
+		PacmanBin:          "pacman",
+		PGPFetch:           true,
+		PacmanConf:         "/etc/pacman.conf",
+		GpgFlags:           "",
+		MFlags:             "",
+		GitFlags:           "",
+		SortMode:           bottomUp,
+		CompletionInterval: 7,
+		SortBy:             "votes",
+		SudoLoop:           false,
+		TarBin:             "bsdtar",
+		GitBin:             "git",
+		GpgBin:             "gpg",
+		TimeUpdate:         false,
+		RequestSplitN:      150,
+		ReDownload:         "no",
+		ReBuild:            "no",
+		AnswerClean:        "",
+		AnswerDiff:         "",
+		AnswerEdit:         "",
+		AnswerUpgrade:      "",
+		RemoveMake:         "ask",
+		GitClone:           true,
+		Provides:           true,
+		UpgradeMenu:        true,
+		CleanMenu:          true,
+		DiffMenu:           true,
+		EditMenu:           false,
+		UseAsk:             false,
+		CombinedUpgrade:    false,
 	}
 
-	config.AURURL = "https://aur.archlinux.org"
-	config.BuildDir = buildDir
-	config.CleanAfter = false
-	config.Editor = ""
-	config.EditorFlags = ""
-	config.Devel = false
-	config.MakepkgBin = "makepkg"
-	config.MakepkgConf = ""
-	config.NoConfirm = false
-	config.PacmanBin = "pacman"
-	config.PGPFetch = true
-	config.PacmanConf = "/etc/pacman.conf"
-	config.GpgFlags = ""
-	config.MFlags = ""
-	config.GitFlags = ""
-	config.SortMode = BottomUp
-	config.CompletionInterval = 7
-	config.SortBy = "votes"
-	config.SudoLoop = false
-	config.TarBin = "bsdtar"
-	config.GitBin = "git"
-	config.GpgBin = "gpg"
-	config.TimeUpdate = false
-	config.RequestSplitN = 150
-	config.ReDownload = "no"
-	config.ReBuild = "no"
-	config.AnswerClean = ""
-	config.AnswerDiff = ""
-	config.AnswerEdit = ""
-	config.AnswerUpgrade = ""
-	config.RemoveMake = "ask"
-	config.GitClone = true
-	config.Provides = true
-	config.UpgradeMenu = true
-	config.CleanMenu = true
-	config.DiffMenu = true
-	config.EditMenu = false
-	config.UseAsk = false
-	config.CombinedUpgrade = false
+	if os.Getenv("XDG_CACHE_HOME") != "" {
+		config.BuildDir = "$XDG_CACHE_HOME/yay"
+	}
+
+	return config
 }
 
 func (config *Configuration) expandEnv() {
@@ -329,7 +328,7 @@ func toUsage(usages []string) alpm.Usage {
 		return alpm.UsageAll
 	}
 
-	var ret alpm.Usage = 0
+	var ret alpm.Usage
 	for _, usage := range usages {
 		switch usage {
 		case "Sync":

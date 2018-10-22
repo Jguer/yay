@@ -49,7 +49,7 @@ func (q aurQuery) Less(i, j int) bool {
 		result = q[i].PackageBaseID < q[j].PackageBaseID
 	}
 
-	if config.SortMode == BottomUp {
+	if config.SortMode == bottomUp {
 		return !result
 	}
 
@@ -165,28 +165,28 @@ func syncSearch(pkgS []string) (err error) {
 	var aq aurQuery
 	var pq repoQuery
 
-	if mode == ModeAUR || mode == ModeAny {
+	if mode == modeAUR || mode == modeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
-	if mode == ModeRepo || mode == ModeAny {
+	if mode == modeRepo || mode == modeAny {
 		pq, repoErr = queryRepo(pkgS)
 		if repoErr != nil {
 			return err
 		}
 	}
 
-	if config.SortMode == BottomUp {
-		if mode == ModeAUR || mode == ModeAny {
+	if config.SortMode == bottomUp {
+		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(1)
 		}
-		if mode == ModeRepo || mode == ModeAny {
+		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
 	} else {
-		if mode == ModeRepo || mode == ModeAny {
+		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
-		if mode == ModeAUR || mode == ModeAny {
+		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(1)
 		}
 	}
@@ -271,7 +271,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 		return nil
 	})
 
-	if config.SortMode == BottomUp {
+	if config.SortMode == bottomUp {
 		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 			s[i], s[j] = s[j], s[i]
 		}
@@ -291,10 +291,10 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		db, name := splitDbFromName(_pkg)
 		found := false
 
-		if db == "aur" || mode == ModeAUR {
+		if db == "aur" || mode == modeAUR {
 			aur = append(aur, _pkg)
 			continue
-		} else if db != "" || mode == ModeRepo {
+		} else if db != "" || mode == modeRepo {
 			repo = append(repo, _pkg)
 			continue
 		}
