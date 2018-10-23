@@ -9,7 +9,6 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -23,13 +22,13 @@ func questionCallback(question alpm.QuestionAny) {
 		return
 	}
 
-	if settings.HideMenus {
+	if config.HideMenus {
 		return
 	}
 
 	size := 0
 
-	_ = qp.Providers(config.Runtime.AlpmHandle).ForEach(func(pkg alpm.Package) error {
+	_ = qp.Providers(config.Alpm).ForEach(func(pkg alpm.Package) error {
 		size++
 		return nil
 	})
@@ -39,7 +38,7 @@ func questionCallback(question alpm.QuestionAny) {
 	size = 1
 	var db string
 
-	_ = qp.Providers(config.Runtime.AlpmHandle).ForEach(func(pkg alpm.Package) error {
+	_ = qp.Providers(config.Alpm).ForEach(func(pkg alpm.Package) error {
 		thisDB := pkg.DB().Name()
 
 		if db != thisDB {

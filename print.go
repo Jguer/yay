@@ -26,9 +26,9 @@ func (q aurQuery) printSearch(start int, alpmHandle *alpm.Handle) {
 		var toprint string
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
-			case settings.TopDown:
+			case "topdown":
 				toprint += magenta(strconv.Itoa(start+i) + " ")
-			case settings.BottomUp:
+			case "bottomup":
 				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			default:
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -69,9 +69,9 @@ func (s repoQuery) printSearch(alpmHandle *alpm.Handle) {
 		var toprint string
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
-			case settings.TopDown:
+			case "topdown":
 				toprint += magenta(strconv.Itoa(i+1) + " ")
-			case settings.BottomUp:
+			case "bottomup":
 				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
 			default:
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -241,8 +241,8 @@ func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
 }
 
 // TODO: Make it less hacky
-func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enableDowngrade bool) error {
-	targets := stringset.FromSlice(cmdArgs.Targets)
+func printUpdateList(args *settings.Args, alpmHandle *alpm.Handle, enableDowngrade bool) error {
+	targets := stringset.FromSlice(config.Targets)
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
@@ -259,10 +259,10 @@ func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enabl
 
 	noTargets := len(targets) == 0
 
-	if !cmdArgs.ExistsArg("m", "foreign") {
+	if !config.Foreign {
 		for _, pkg := range repoUp {
 			if noTargets || targets.Get(pkg.Name) {
-				if cmdArgs.ExistsArg("q", "quiet") {
+				if config.Quiet {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
 					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
@@ -272,10 +272,10 @@ func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enabl
 		}
 	}
 
-	if !cmdArgs.ExistsArg("n", "native") {
+	if !config.Native {
 		for _, pkg := range aurUp {
 			if noTargets || targets.Get(pkg.Name) {
-				if cmdArgs.ExistsArg("q", "quiet") {
+				if config.Quiet {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
 					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))

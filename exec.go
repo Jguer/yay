@@ -51,7 +51,7 @@ func sudoLoop() {
 
 func updateSudo() {
 	for {
-		mSudoFlags := strings.Fields(config.SudoFlags)
+		mSudoFlags := config.SudoFlags
 		mSudoFlags = append([]string{"-v"}, mSudoFlags...)
 		err := show(exec.Command(config.SudoBin, mSudoFlags...))
 		if err != nil {
@@ -81,35 +81,32 @@ func waitLock(dbPath string) {
 	}
 }
 
-func passToPacman(args *settings.Arguments) *exec.Cmd {
+func passToPacman(args *settings.Args) *exec.Cmd {
 	argArr := make([]string, 0)
 
-	mSudoFlags := strings.Fields(config.SudoFlags)
+	mSudoFlags := config.SudoFlags
 
-	if args.NeedRoot(config.Runtime) {
+	if config.NeedRoot() {
 		argArr = append(argArr, config.SudoBin)
 		argArr = append(argArr, mSudoFlags...)
 	}
 
 	argArr = append(argArr, config.PacmanBin)
-	argArr = append(argArr, args.FormatGlobals()...)
-	argArr = append(argArr, args.FormatArgs()...)
 	if config.NoConfirm {
 		argArr = append(argArr, "--noconfirm")
 	}
+	argArr = append(argArr, args.Format()...)
 
-	argArr = append(argArr, "--config", config.PacmanConf, "--")
-	argArr = append(argArr, args.Targets...)
-
-	if args.NeedRoot(config.Runtime) {
-		waitLock(config.Runtime.PacmanConf.DBPath)
+	if config.NeedRoot() {
+		waitLock(config.Pacman.DBPath)
 	}
+
+	//fmt.Println(argArr)
 	return exec.Command(argArr[0], argArr[1:]...)
 }
 
 func passToMakepkg(dir string, args ...string) *exec.Cmd {
-	mflags := strings.Fields(config.MFlags)
-	args = append(args, mflags...)
+	args = append(args, config.MFlags...)
 
 	if config.MakepkgConf != "" {
 		args = append(args, "--config", config.MakepkgConf)
@@ -121,9 +118,8 @@ func passToMakepkg(dir string, args ...string) *exec.Cmd {
 }
 
 func passToGit(dir string, _args ...string) *exec.Cmd {
-	gitflags := strings.Fields(config.GitFlags)
 	args := []string{"-C", dir}
-	args = append(args, gitflags...)
+	args = append(args, config.GitFlags...)
 	args = append(args, _args...)
 
 	cmd := exec.Command(config.GitBin, args...)

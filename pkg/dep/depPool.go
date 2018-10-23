@@ -88,8 +88,8 @@ func makePool(alpmHandle *alpm.Handle) (*Pool, error) {
 }
 
 // Includes db/ prefixes and group installs
-func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
-	mode settings.TargetMode,
+func (dp *Pool) ResolveTargets(config *settings.YayConfig, pkgs []string, alpmHandle *alpm.Handle,
+	mode string,
 	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
@@ -166,7 +166,7 @@ func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
 	}
 
 	if len(aurTargets) > 0 && (mode == settings.ModeAny || mode == settings.ModeAUR) {
-		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN)
+		return dp.resolveAURPackages(config, aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN)
 	}
 
 	return nil
@@ -276,7 +276,7 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 	return nil
 }
 
-func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
+func (dp *Pool) resolveAURPackages(config *settings.YayConfig, pkgs stringset.StringSet,
 	explicit, ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int) error {
 	newPackages := make(stringset.StringSet)
@@ -319,12 +319,12 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 			continue
 		}
 
-		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep) // has satisfier installed: skip
-		hm := settings.HideMenus
-		settings.HideMenus = isInstalled == nil
-		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep) // has satisfier in repo: fetch it
-		settings.HideMenus = hm
-		if isInstalled == nil && (rebuild != "tree" || inRepos == nil) {
+		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep) //has satisfier installed: skip
+		hm := config.HideMenus
+		config.HideMenus = isInstalled == nil
+		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep) //has satisfier in repo: fetch it
+		config.HideMenus = hm
+		if isInstalled == nil && (config.Rebuild != "tree" || inRepos == nil) {
 			continue
 		}
 
@@ -338,7 +338,7 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		newAURPackages.Set(dep)
 	}
 
-	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN)
+	err = dp.resolveAURPackages(config, newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN)
 	return err
 }
 
@@ -369,10 +369,12 @@ func (dp *Pool) ResolveRepoDependency(pkg *alpm.Package) {
 	})
 }
 
-func GetPool(pkgs []string,
+func GetPool(
+	config *settings.YayConfig,
+	pkgs []string,
 	warnings *query.AURWarnings,
 	alpmHandle *alpm.Handle,
-	mode settings.TargetMode,
+	mode string,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int) (*Pool, error) {
 	dp, err := makePool(alpmHandle)
@@ -381,7 +383,7 @@ func GetPool(pkgs []string,
 	}
 
 	dp.Warnings = warnings
-	err = dp.ResolveTargets(pkgs, alpmHandle, mode, ignoreProviders, noConfirm, provides, rebuild, splitN)
+	err = dp.ResolveTargets(config, pkgs, alpmHandle, mode, ignoreProviders, noConfirm, provides, rebuild, splitN)
 
 	return dp, err
 }

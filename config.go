@@ -11,7 +11,6 @@ import (
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -29,9 +28,6 @@ var localePath = "/usr/share/locale"
 // savedInfo holds the current vcs info
 var savedInfo vcsInfo
 
-// YayConf holds the current config values for yay.
-var config *settings.Configuration
-
 // Editor returns the preferred system editor.
 func editor() (editor string, args []string) {
 	switch {
@@ -40,7 +36,7 @@ func editor() (editor string, args []string) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		} else {
-			return editor, strings.Fields(config.EditorFlags)
+			return editor, config.EditorFlags
 		}
 		fallthrough
 	case os.Getenv("EDITOR") != "":
@@ -137,13 +133,7 @@ func toUsage(usages []string) alpm.Usage {
 }
 
 func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error {
-	// TODO: set SigLevel
-	// sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
-	// localFileSigLevel := alpm.SigUseDefault
-	// remoteFileSigLevel := alpm.SigUseDefault
-
 	for _, repo := range pacmanConf.Repos {
-		// TODO: set SigLevel
 		db, err := alpmHandle.RegisterSyncDB(repo.Name, 0)
 		if err != nil {
 			return err
@@ -154,17 +144,6 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error
 	}
 
 	if err := alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {
-		return err
-	}
-
-	// add hook directories 1-by-1 to avoid overwriting the system directory
-	for _, dir := range pacmanConf.HookDir {
-		if err := alpmHandle.AddHookDir(dir); err != nil {
-			return err
-		}
-	}
-
-	if err := alpmHandle.SetGPGDir(pacmanConf.GPGDir); err != nil {
 		return err
 	}
 
@@ -187,22 +166,6 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error
 	if err := alpmHandle.SetNoUpgrades(pacmanConf.NoUpgrade); err != nil {
 		return err
 	}
-
-	if err := alpmHandle.SetNoExtracts(pacmanConf.NoExtract); err != nil {
-		return err
-	}
-
-	/*if err := alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
-		return err
-	}
-
-	if err := alpmHandle.SetLocalFileSigLevel(localFileSigLevel); err != nil {
-		return err
-	}
-
-	if err := alpmHandle.SetRemoteFileSigLevel(remoteFileSigLevel); err != nil {
-		return err
-	}*/
 
 	if err := alpmHandle.SetUseSyslog(pacmanConf.UseSyslog); err != nil {
 		return err

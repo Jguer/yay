@@ -62,7 +62,7 @@ type rss struct {
 	Channel channel `xml:"channel"`
 }
 
-func PrintNewsFeed(alpmHandle *alpm.Handle, sortMode int, double, quiet bool) error {
+func PrintNewsFeed(alpmHandle *alpm.Handle, sortMode string, double, quiet bool) error {
 	resp, err := http.Get("https://archlinux.org/feeds/news")
 	if err != nil {
 		return err

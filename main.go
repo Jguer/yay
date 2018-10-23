@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
@@ -15,34 +14,14 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
+var config *settings.YayConfig
+
 func initGotext() {
 	if envLocalePath := os.Getenv("LOCALE_PATH"); envLocalePath != "" {
 		localePath = envLocalePath
 	}
 
 	gotext.Configure(localePath, os.Getenv("LANG"), "yay")
-}
-
-func initConfig(configPath string) error {
-	cfile, err := os.Open(configPath)
-	if !os.IsNotExist(err) && err != nil {
-		return errors.New(gotext.Get("failed to open config file '%s': %s", configPath, err))
-	}
-
-	defer cfile.Close()
-	if !os.IsNotExist(err) {
-		decoder := json.NewDecoder(cfile)
-		if err = decoder.Decode(&config); err != nil {
-			return errors.New(gotext.Get("failed to read config file '%s': %s", configPath, err))
-		}
-	}
-
-	aurdest := os.Getenv("AURDEST")
-	if aurdest != "" {
-		config.BuildDir = aurdest
-	}
-
-	return nil
 }
 
 func initVCS(vcsFilePath string) error {
@@ -74,10 +53,10 @@ func initBuildDir() error {
 	return nil
 }
 
-func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handle, *pacmanconf.Config, error) {
+func initAlpm(pacmanConfigPath string) (*alpm.Handle, *pacmanconf.Config, error) {
 	root := "/"
-	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
-		root = value
+	if config.Root != "" {
+		root = config.Root
 	}
 
 	pacmanConf, stderr, err := pacmanconf.PacmanConf("--config", pacmanConfigPath, "--root", root)
@@ -85,40 +64,28 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handl
 		return nil, nil, fmt.Errorf("%s", stderr)
 	}
 
-	if value, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {
-		pacmanConf.DBPath = value
+	if config.DbPath != "" {
+		pacmanConf.DBPath = config.DbPath
 	}
 
-	if value, _, exists := cmdArgs.GetArg("arch"); exists {
-		pacmanConf.Architecture = value
+	if config.Arch != "" {
+		pacmanConf.Architecture = config.Arch
 	}
 
-	if value, _, exists := cmdArgs.GetArg("ignore"); exists {
-		pacmanConf.IgnorePkg = append(pacmanConf.IgnorePkg, strings.Split(value, ",")...)
+	if config.GpgDir != "" {
+		pacmanConf.GPGDir = config.GpgDir
 	}
 
-	if value, _, exists := cmdArgs.GetArg("ignoregroup"); exists {
-		pacmanConf.IgnoreGroup = append(pacmanConf.IgnoreGroup, strings.Split(value, ",")...)
-	}
-
-	// TODO
-	// current system does not allow duplicate arguments
-	// but pacman allows multiple cachedirs to be passed
-	// for now only handle one cache dir
-	if value, _, exists := cmdArgs.GetArg("cachedir"); exists {
-		pacmanConf.CacheDir = []string{value}
-	}
-
-	if value, _, exists := cmdArgs.GetArg("gpgdir"); exists {
-		pacmanConf.GPGDir = value
-	}
+	pacmanConf.IgnorePkg = append(pacmanConf.IgnorePkg, config.Ignore...)
+	pacmanConf.IgnoreGroup = append(pacmanConf.IgnoreGroup, config.IgnoreGroup...)
+	pacmanConf.CacheDir = append(pacmanConf.IgnoreGroup, config.CacheDir...)
 
 	alpmHandle, err := initAlpmHandle(pacmanConf, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	switch value, _, _ := cmdArgs.GetArg("color"); value {
+	switch config.Color {
 	case "always":
 		text.UseColor = true
 	case "auto":
@@ -158,7 +125,7 @@ func exitOnError(err error) {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
 		}
-		cleanup(config.Runtime.AlpmHandle)
+		cleanup(config.Alpm)
 		os.Exit(1)
 	}
 }
@@ -180,24 +147,19 @@ func main() {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
-	cmdArgs := settings.MakeArguments()
-	runtime, err := settings.MakeRuntime()
+	config = settings.DefaultConfig()
+	loaded, err := config.LoadFile(config.ConfigPath)
 	exitOnError(err)
-	config = settings.MakeConfig()
-	config.Runtime = runtime
-	exitOnError(initConfig(runtime.ConfigPath))
-	exitOnError(cmdArgs.ParseCommandLine(config))
-	if config.Runtime.SaveConfig {
-		errS := config.SaveConfig(runtime.ConfigPath)
-		if errS != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
+	if !loaded {
+		_, err = config.LoadFile(settings.SystemConfigFile)
+		exitOnError(err)
 	}
-	config.ExpandEnv()
+	exitOnError(settings.ParseCommandLine(config))
 	exitOnError(initBuildDir())
-	exitOnError(initVCS(runtime.VCSPath))
-	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(cmdArgs, config.PacmanConf)
+	exitOnError(initVCS(config.VCSPath))
+	config.Alpm, config.Pacman, err = initAlpm(config.PacmanConf)
 	exitOnError(err)
-	exitOnError(handleCmd(cmdArgs, config.Runtime.AlpmHandle))
-	os.Exit(cleanup(config.Runtime.AlpmHandle))
+
+	exitOnError(handleCmd(config.Flags(), config.Alpm))
+	os.Exit(cleanup(config.Alpm))
 }

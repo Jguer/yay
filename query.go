@@ -49,7 +49,7 @@ func (q aurQuery) Less(i, j int) bool {
 		result = q[i].PackageBaseID < q[j].PackageBaseID
 	}
 
-	if config.SortMode == settings.BottomUp {
+	if config.SortMode == "bottomup" {
 		return !result
 	}
 
@@ -141,16 +141,16 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
-	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
+	pkgS = query.RemoveInvalidTargets(pkgS, config.Mode)
 	var aurErr error
 	var repoErr error
 	var aq aurQuery
 	var pq repoQuery
 
-	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
+	if config.Mode == settings.ModeAUR || config.Mode == settings.ModeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
-	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+	if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
 		pq, repoErr = queryRepo(pkgS, alpmHandle)
 		if repoErr != nil {
 			return err
@@ -158,19 +158,19 @@ func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
 	}
 
 	switch config.SortMode {
-	case settings.TopDown:
-		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(alpmHandle)
+	case "topdown":
+		if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
+			pq.printSearch(config.Alpm)
 		}
-		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1, alpmHandle)
+		if config.Mode == settings.ModeAUR || config.Mode == settings.ModeAny {
+			aq.printSearch(1, config.Alpm)
 		}
-	case settings.BottomUp:
-		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1, alpmHandle)
+	case "bottomup":
+		if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
+			aq.printSearch(1, config.Alpm)
 		}
-		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(alpmHandle)
+		if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
+			pq.printSearch(config.Alpm)
 		}
 	default:
 		return errors.New(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -185,10 +185,10 @@ func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handle) error {
+func syncInfo(pkgS []string, alpmHandle *alpm.Handle) error {
 	var info []*rpc.Pkg
 	missing := false
-	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
+	pkgS = query.RemoveInvalidTargets(pkgS, config.Mode)
 	aurS, repoS, err := packageSlices(pkgS, alpmHandle)
 	if err != nil {
 		return err
@@ -211,8 +211,8 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handl
 
 	// Repo always goes first
 	if len(repoS) != 0 {
-		arguments := cmdArgs.Copy()
-		arguments.ClearTargets()
+		arguments := config.Flags()
+		arguments.Targets = nil
 		arguments.AddTarget(repoS...)
 		err = show(passToPacman(arguments))
 
@@ -227,7 +227,7 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handl
 
 	if len(info) != 0 {
 		for _, pkg := range info {
-			PrintInfo(pkg, cmdArgs.ExistsDouble("i"))
+			PrintInfo(pkg, config.Info > 1)
 		}
 	}
 
@@ -256,7 +256,7 @@ func queryRepo(pkgInputN []string, alpmHandle *alpm.Handle) (s repoQuery, err er
 		return nil
 	})
 
-	if config.SortMode == settings.BottomUp {
+	if config.SortMode == "bottomup" {
 		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 			s[i], s[j] = s[j], s[i]
 		}
@@ -276,10 +276,10 @@ func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []strin
 		db, name := text.SplitDBFromName(_pkg)
 		found := false
 
-		if db == "aur" || config.Runtime.Mode == settings.ModeAUR {
+		if db == "aur" || config.Mode == settings.ModeAUR {
 			aur = append(aur, _pkg)
 			continue
-		} else if db != "" || config.Runtime.Mode == settings.ModeRepo {
+		} else if db != "" || config.Mode == settings.ModeRepo {
 			repo = append(repo, _pkg)
 			continue
 		}

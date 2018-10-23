@@ -43,11 +43,11 @@ func (set pgpKeySet) get(key string) bool {
 // CheckPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
 func CheckPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo,
-	gpgBin, gpgFlags string, noConfirm bool) error {
+	gpgBin string, gpgFlags []string, noConfirm bool) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
-	args := append(strings.Fields(gpgFlags), "--list-keys")
+	args := append(gpgFlags, "--list-keys")
 
 	// Mapping all the keys.
 	for _, base := range bases {
@@ -91,8 +91,8 @@ func CheckPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo,
 }
 
 // importKeys tries to import the list of keys specified in its argument.
-func importKeys(keys []string, gpgBin, gpgFlags string) error {
-	args := append(strings.Fields(gpgFlags), "--recv-keys")
+func importKeys(keys []string, gpgBin string, gpgFlags []string) error {
+	args := append(gpgFlags, "--recv-keys")
 	cmd := exec.Command(gpgBin, append(args, keys...)...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 

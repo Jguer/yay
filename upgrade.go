@@ -42,7 +42,7 @@ func (u upSlice) Less(i, j int) bool {
 		return text.LessRunes(iRunes, jRunes)
 	}
 
-	syncDB, err := config.Runtime.AlpmHandle.SyncDBs()
+	syncDB, err := config.Alpm.SyncDBs()
 	if err != nil {
 		iRunes := []rune(u[i].Repository)
 		jRunes := []rune(u[j].Repository)
@@ -137,7 +137,7 @@ func upList(warnings *query.AURWarnings, alpmHandle *alpm.Handle, enableDowngrad
 		}
 	}
 
-	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
+	if config.Mode == settings.ModeAny || config.Mode == settings.ModeRepo {
 		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 		go func() {
@@ -147,7 +147,7 @@ func upList(warnings *query.AURWarnings, alpmHandle *alpm.Handle, enableDowngrad
 		}()
 	}
 
-	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR {
+	if config.Mode == settings.ModeAny || config.Mode == settings.ModeAUR {
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []*rpc.Pkg

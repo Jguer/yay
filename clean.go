@@ -31,7 +31,7 @@ func removeVCSPackage(pkgs []string) {
 	}
 
 	if updated {
-		err := saveVCSInfo(config.Runtime.VCSPath)
+		err := saveVCSInfo(config.VCSPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
@@ -39,39 +39,39 @@ func removeVCSPackage(pkgs []string) {
 }
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, removeOptional bool) error {
+func cleanDependencies(alpmHandle *alpm.Handle, removeOptional bool) error {
 	hanging, err := hangingPackages(removeOptional, alpmHandle)
 	if err != nil {
 		return err
 	}
 
 	if len(hanging) != 0 {
-		return cleanRemove(cmdArgs, hanging)
+		return cleanRemove(hanging)
 	}
 
 	return nil
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice
-func cleanRemove(cmdArgs *settings.Arguments, pkgNames []string) error {
+func cleanRemove(pkgNames []string) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}
 
-	arguments := cmdArgs.CopyGlobal()
-	_ = arguments.AddArg("R")
-	arguments.AddTarget(pkgNames...)
+	args := config.Globals()
+	args.Add("-R")
+	args.Add(pkgNames...)
 
-	return show(passToPacman(arguments))
+	return show(passToPacman(args))
 }
 
-func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func syncClean(args *settings.Args, alpmHandle *alpm.Handle) error {
 	keepInstalled := false
 	keepCurrent := false
 
-	_, removeAll, _ := cmdArgs.GetArg("c", "clean")
+	removeAll := config.Clean > 1
 
-	for _, v := range config.Runtime.PacmanConf.CleanMethod {
+	for _, v := range config.Pacman.CleanMethod {
 		if v == "KeepInstalled" {
 			keepInstalled = true
 		} else if v == "KeepCurrent" {
@@ -79,13 +79,13 @@ func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		}
 	}
 
-	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		if err := show(passToPacman(cmdArgs)); err != nil {
+	if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
+		if err := show(passToPacman(args)); err != nil {
 			return err
 		}
 	}
 
-	if !(config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny) {
+	if !(config.Mode == settings.ModeAUR || config.Mode == settings.ModeAny) {
 		return nil
 	}
 

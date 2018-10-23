@@ -17,7 +17,7 @@ type IntRange struct {
 // IntRanges is a slice of IntRange
 type IntRanges []IntRange
 
-func makeIntRange(min, max int) IntRange {
+func MakeIntRange(min, max int) IntRange {
 	return IntRange{
 		min,
 		max,
@@ -114,9 +114,9 @@ func ParseNumberMenu(input string) (include, exclude IntRanges,
 		ma := Max(num1, num2)
 
 		if !invert {
-			include = append(include, makeIntRange(mi, ma))
+			include = append(include, MakeIntRange(mi, ma))
 		} else {
-			exclude = append(exclude, makeIntRange(mi, ma))
+			exclude = append(exclude, MakeIntRange(mi, ma))
 		}
 	}
 

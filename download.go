@@ -147,7 +147,7 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 		return err
 	}
 
-	pkgs = query.RemoveInvalidTargets(pkgs, config.Runtime.Mode)
+	pkgs = query.RemoveInvalidTargets(pkgs, config.Mode)
 	aur, repo, err := packageSlices(pkgs, alpmHandle)
 	if err != nil {
 		return err

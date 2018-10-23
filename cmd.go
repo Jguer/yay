@@ -138,82 +138,76 @@ getpkgbuild specific options:
     -f --force            Force download for existing ABS packages`)
 }
 
-func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
-	if cmdArgs.ExistsArg("h", "help") {
-		return handleHelp(cmdArgs)
+func handleCmd(args *settings.Args, alpmHandle *alpm.Handle) error {
+	if config.Help {
+		return handleHelp(args)
 	}
 
-	if config.SudoLoop && cmdArgs.NeedRoot(config.Runtime) {
+	if config.SudoLoop && config.NeedRoot() {
 		sudoLoopBackground()
 	}
 
-	switch cmdArgs.Op {
-	case "V", "version":
+	switch config.Op {
+	case settings.Version:
 		handleVersion()
 		return nil
-	case "D", "database":
-		return show(passToPacman(cmdArgs))
-	case "F", "files":
-		return show(passToPacman(cmdArgs))
-	case "Q", "query":
-		return handleQuery(cmdArgs, alpmHandle)
-	case "R", "remove":
-		return handleRemove(cmdArgs)
-	case "S", "sync":
-		return handleSync(cmdArgs, alpmHandle)
-	case "T", "deptest":
-		return show(passToPacman(cmdArgs))
-	case "U", "upgrade":
-		return show(passToPacman(cmdArgs))
-	case "G", "getpkgbuild":
-		return handleGetpkgbuild(cmdArgs, alpmHandle)
-	case "P", "show":
-		return handlePrint(cmdArgs, alpmHandle)
-	case "Y", "--yay":
-		return handleYay(cmdArgs, alpmHandle)
+	case settings.Database:
+		return show(passToPacman(args))
+	case settings.Files:
+		return show(passToPacman(args))
+	case settings.Query:
+		return handleQuery(args, alpmHandle)
+	case settings.Remove:
+		return handleRemove(args)
+	case settings.Sync:
+		return handleSync(args, alpmHandle)
+	case settings.DepTest:
+		return show(passToPacman(args))
+	case settings.Upgrade:
+		return show(passToPacman(args))
+	case settings.GetPkgbuild:
+		return handleGetpkgbuild(args, alpmHandle)
+	case settings.Show:
+		return handlePrint(args, alpmHandle)
+	case settings.Yay:
+		return handleYay(args, alpmHandle)
 	}
 
 	return fmt.Errorf(gotext.Get("unhandled operation"))
 }
 
-func handleQuery(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
-	if cmdArgs.ExistsArg("u", "upgrades") {
-		return printUpdateList(cmdArgs, alpmHandle, cmdArgs.ExistsDouble("u", "sysupgrade"))
+func handleQuery(args *settings.Args, alpmHandle *alpm.Handle) error {
+	if config.Upgrades {
+		return printUpdateList(args, alpmHandle, config.SysUpgrade > 1)
 	}
-	return show(passToPacman(cmdArgs))
+	return show(passToPacman(args))
 }
 
-func handleHelp(cmdArgs *settings.Arguments) error {
-	if cmdArgs.Op == "Y" || cmdArgs.Op == "yay" {
+func handleHelp(args *settings.Args) error {
+	if config.Op == settings.Yay {
 		usage()
 		return nil
 	}
-	return show(passToPacman(cmdArgs))
+	return show(passToPacman(args))
 }
 
 func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
-func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
+func handlePrint(args *settings.Args, alpmHandle *alpm.Handle) (err error) {
 	switch {
-	case cmdArgs.ExistsArg("d", "defaultconfig"):
-		tmpConfig := settings.MakeConfig()
-		tmpConfig.ExpandEnv()
-		fmt.Printf("%v", tmpConfig)
-	case cmdArgs.ExistsArg("g", "currentconfig"):
-		fmt.Printf("%v", config)
-	case cmdArgs.ExistsArg("n", "numberupgrades"):
-		err = printNumberOfUpdates(alpmHandle, cmdArgs.ExistsDouble("u", "sysupgrade"))
-	case cmdArgs.ExistsArg("w", "news"):
-		double := cmdArgs.ExistsDouble("w", "news")
-		quiet := cmdArgs.ExistsArg("q", "quiet")
+	case config.NumUpgrades:
+		err = printNumberOfUpdates(alpmHandle, config.SysUpgrade > 1)
+	case config.News > 0:
+		double := config.News > 1
+		quiet := config.Quiet
 		err = news.PrintNewsFeed(alpmHandle, config.SortMode, double, quiet)
-	case cmdArgs.ExistsDouble("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
-	case cmdArgs.ExistsArg("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
-	case cmdArgs.ExistsArg("s", "stats"):
+	case config.Complete > 1:
+		err = completion.Show(alpmHandle, config.AURURL, config.CompletionPath, config.CompletionInterval, true)
+	case config.Complete == 1:
+		err = completion.Show(alpmHandle, config.AURURL, config.CompletionPath, config.CompletionInterval, false)
+	case config.Stats:
 		err = localStatistics(alpmHandle)
 	default:
 		err = nil
@@ -221,80 +215,80 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) (err erro
 	return err
 }
 
-func handleYay(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
-	if cmdArgs.ExistsArg("gendb") {
-		return createDevelDB(config.Runtime.VCSPath, alpmHandle)
+func handleYay(args *settings.Args, alpmHandle *alpm.Handle) error {
+	if config.Gendb {
+		return createDevelDB(config.VCSPath, alpmHandle)
 	}
-	if cmdArgs.ExistsDouble("c") {
-		return cleanDependencies(cmdArgs, alpmHandle, true)
+	if config.Clean > 1 {
+		return cleanDependencies(alpmHandle, true)
 	}
-	if cmdArgs.ExistsArg("c", "clean") {
-		return cleanDependencies(cmdArgs, alpmHandle, false)
+	if config.Clean == 1 {
+		return cleanDependencies(alpmHandle, false)
 	}
-	if len(cmdArgs.Targets) > 0 {
-		return handleYogurt(cmdArgs, alpmHandle)
+	if len(config.Targets) > 0 {
+		return handleYogurt(args, alpmHandle)
 	}
 	return nil
 }
 
-func handleGetpkgbuild(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
-	return getPkgbuilds(cmdArgs.Targets, alpmHandle, cmdArgs.ExistsArg("f", "force"))
+func handleGetpkgbuild(args *settings.Args, alpmHandle *alpm.Handle) error {
+	return getPkgbuilds(config.Targets, alpmHandle, config.Force)
 }
 
-func handleYogurt(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func handleYogurt(args *settings.Args, alpmHandle *alpm.Handle) error {
 	config.SearchMode = numberMenu
-	return displayNumberMenu(cmdArgs.Targets, alpmHandle, cmdArgs)
+	return displayNumberMenu(config.Targets, alpmHandle, args)
 }
 
-func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
-	targets := cmdArgs.Targets
+func handleSync(args *settings.Args, alpmHandle *alpm.Handle) error {
+	targets := config.Targets
 
-	if cmdArgs.ExistsArg("s", "search") {
-		if cmdArgs.ExistsArg("q", "quiet") {
+	if config.Search {
+		if config.Quiet {
 			config.SearchMode = minimal
 		} else {
 			config.SearchMode = detailed
 		}
 		return syncSearch(targets, alpmHandle)
 	}
-	if cmdArgs.ExistsArg("p", "print", "print-format") {
-		return show(passToPacman(cmdArgs))
+	if config.Print || config.PrintFormat != "" {
+		return show(passToPacman(args))
 	}
-	if cmdArgs.ExistsArg("c", "clean") {
-		return syncClean(cmdArgs, alpmHandle)
+	if config.Clean > 0 {
+		return syncClean(args, alpmHandle)
 	}
-	if cmdArgs.ExistsArg("l", "list") {
-		return syncList(cmdArgs, alpmHandle)
+	if config.List {
+		return syncList(args, alpmHandle)
 	}
-	if cmdArgs.ExistsArg("g", "groups") {
-		return show(passToPacman(cmdArgs))
+	if config.Groups {
+		return show(passToPacman(args))
 	}
-	if cmdArgs.ExistsArg("i", "info") {
-		return syncInfo(cmdArgs, targets, alpmHandle)
+	if config.Info > 0 {
+		return syncInfo(targets, alpmHandle)
 	}
-	if cmdArgs.ExistsArg("u", "sysupgrade") {
-		return install(cmdArgs, alpmHandle, false)
+	if config.SysUpgrade > 0 {
+		return install(args, alpmHandle, false)
 	}
-	if len(cmdArgs.Targets) > 0 {
-		return install(cmdArgs, alpmHandle, false)
+	if len(config.Targets) > 0 {
+		return install(args, alpmHandle, false)
 	}
-	if cmdArgs.ExistsArg("y", "refresh") {
-		return show(passToPacman(cmdArgs))
+	if config.Refresh > 0 {
+		return show(passToPacman(args))
 	}
 	return nil
 }
 
-func handleRemove(cmdArgs *settings.Arguments) error {
-	err := show(passToPacman(cmdArgs))
+func handleRemove(args *settings.Args) error {
+	err := show(passToPacman(args))
 	if err == nil {
-		removeVCSPackage(cmdArgs.Targets)
+		removeVCSPackage(config.Targets)
 	}
 
 	return err
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, args *settings.Args) error {
 	var (
 		aurErr, repoErr error
 		aq              aurQuery
@@ -302,13 +296,13 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 		lenaq, lenpq    int
 	)
 
-	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
+	pkgS = query.RemoveInvalidTargets(pkgS, config.Mode)
 
-	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
+	if config.Mode == settings.ModeAUR || config.Mode == settings.ModeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
 		lenaq = len(aq)
 	}
-	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+	if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
 		pq, repoErr = queryRepo(pkgS, alpmHandle)
 		lenpq = len(pq)
 		if repoErr != nil {
@@ -321,18 +315,18 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 	}
 
 	switch config.SortMode {
-	case settings.TopDown:
-		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+	case "topdown":
+		if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
 			pq.printSearch(alpmHandle)
 		}
-		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
+		if config.Mode == settings.ModeAUR || config.Mode == settings.ModeAny {
 			aq.printSearch(lenpq+1, alpmHandle)
 		}
-	case settings.BottomUp:
-		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
+	case "bottomup":
+		if config.Mode == settings.ModeAUR || config.Mode == settings.ModeAny {
 			aq.printSearch(lenpq+1, alpmHandle)
 		}
-		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+		if config.Mode == settings.ModeRepo || config.Mode == settings.ModeAny {
 			pq.printSearch(alpmHandle)
 		}
 	default:
@@ -358,23 +352,23 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 	}
 
 	include, exclude, _, otherExclude := intrange.ParseNumberMenu(string(numberBuf))
-	arguments := cmdArgs.CopyGlobal()
+	arguments := config.Globals()
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
 	for i, pkg := range pq {
 		var target int
 		switch config.SortMode {
-		case settings.TopDown:
+		case "topdown":
 			target = i + 1
-		case settings.BottomUp:
+		case "bottomup":
 			target = len(pq) - i
 		default:
 			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
-			arguments.AddTarget(pkg.DB().Name() + "/" + pkg.Name())
+			arguments.Add(pkg.DB().Name() + "/" + pkg.Name())
 		}
 	}
 
@@ -382,20 +376,20 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 		var target int
 
 		switch config.SortMode {
-		case settings.TopDown:
+		case "topdown":
 			target = i + 1 + len(pq)
-		case settings.BottomUp:
+		case "bottomup":
 			target = len(aq) - i + len(pq)
 		default:
 			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
-			arguments.AddTarget("aur/" + aq[i].Name)
+			arguments.Add("aur/" + aq[i].Name)
 		}
 	}
 
-	if len(arguments.Targets) == 0 {
+	if len(config.Targets) == 0 {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
@@ -407,17 +401,17 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 	return install(arguments, alpmHandle, true)
 }
 
-func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func syncList(args *settings.Args, alpmHandle *alpm.Handle) error {
 	aur := false
 
-	for i := len(cmdArgs.Targets) - 1; i >= 0; i-- {
-		if cmdArgs.Targets[i] == "aur" && (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) {
-			cmdArgs.Targets = append(cmdArgs.Targets[:i], cmdArgs.Targets[i+1:]...)
+	for i := len(config.Targets) - 1; i >= 0; i-- {
+		if config.Targets[i] == "aur" && (config.Mode == settings.ModeAny || config.Mode == settings.ModeAUR) {
+			config.Targets = append(config.Targets[:i], config.Targets[i+1:]...)
 			aur = true
 		}
 	}
 
-	if (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) && (len(cmdArgs.Targets) == 0 || aur) {
+	if (config.Mode == settings.ModeAny || config.Mode == settings.ModeAUR) && (len(config.Targets) == 0 || aur) {
 		localDB, err := alpmHandle.LocalDB()
 		if err != nil {
 			return err
@@ -434,7 +428,7 @@ func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		scanner.Scan()
 		for scanner.Scan() {
 			name := scanner.Text()
-			if cmdArgs.ExistsArg("q", "quiet") {
+			if config.Quiet {
 				fmt.Println(name)
 			} else {
 				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green(gotext.Get("unknown-version"))))
@@ -448,8 +442,8 @@ func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		}
 	}
 
-	if (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo) && (len(cmdArgs.Targets) != 0 || !aur) {
-		return show(passToPacman(cmdArgs))
+	if (config.Mode == settings.ModeAny || config.Mode == settings.ModeRepo) && (len(config.Targets) != 0 || !aur) {
+		return show(passToPacman(args))
 	}
 
 	return nil

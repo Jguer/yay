@@ -49,7 +49,7 @@ func FilterPackages(alpmHandle *alpm.Handle) (
 	return local, remote, localNames, remoteNames, err
 }
 
-func RemoveInvalidTargets(targets []string, mode settings.TargetMode) []string {
+func RemoveInvalidTargets(targets []string, mode string) []string {
 	filteredTargets := make([]string, 0)
 
 	for _, target := range targets {
