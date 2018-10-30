@@ -80,6 +80,7 @@ Following are the dependencies managed under dep:
 
 * https://github.com/Jguer/go-alpm
 * https://github.com/Morganamilo/go-srcinfo
+* https://github.com/Morganamilo/go-pacmanconf
 * https://github.com/mikkeloscar/aur
 
 ### Building
