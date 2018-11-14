@@ -184,7 +184,7 @@ func initAlpmHandle() error {
 func exitOnError(err error) {
 	if err != nil {
 		if str := err.Error(); str != "" {
-			fmt.Println(str)
+			fmt.Fprintln(os.Stderr, str)
 		}
 		cleanup()
 		os.Exit(1)
@@ -194,7 +194,7 @@ func exitOnError(err error) {
 func cleanup() int {
 	if alpmHandle != nil {
 		if err := alpmHandle.Release(); err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			return 1
 		}
 	}
@@ -204,7 +204,7 @@ func cleanup() int {
 
 func main() {
 	if 0 == os.Geteuid() {
-		fmt.Println("Please avoid running yay as root/sudo.")
+		fmt.Fprintln(os.Stderr, "Please avoid running yay as root/sudo.")
 	}
 
 	exitOnError(setPaths())

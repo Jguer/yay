@@ -165,11 +165,11 @@ func getPkgbuilds(pkgs []string) error {
 			name := base.Pkgbase()
 			_, err = os.Stat(filepath.Join(wd, name))
 			if err != nil && !os.IsNotExist(err) {
-				fmt.Println(bold(red(smallArrow)), err)
+				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 				continue
 			} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") || shouldUseGit(filepath.Join(wd, name)) {
 				if err = os.RemoveAll(filepath.Join(wd, name)); err != nil {
-					fmt.Println(bold(red(smallArrow)), err)
+					fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 					continue
 				}
 			} else {
@@ -249,11 +249,11 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 
 		_, err = os.Stat(filepath.Join(path, name))
 		if err != nil && !os.IsNotExist(err) {
-			fmt.Println(bold(red(smallArrow)), err)
+			fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 			continue
 		} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") {
 			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
-				fmt.Println(bold(red(smallArrow)), err)
+				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 				continue
 			}
 		} else {

@@ -62,12 +62,12 @@ func questionCallback(question alpm.QuestionAny) {
 		numberBuf, overflow, err := reader.ReadLine()
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			break
 		}
 
 		if overflow {
-			fmt.Println("Input too long")
+			fmt.Fprintln(os.Stderr, "Input too long")
 			continue
 		}
 
@@ -77,12 +77,12 @@ func questionCallback(question alpm.QuestionAny) {
 
 		num, err := strconv.Atoi(string(numberBuf))
 		if err != nil {
-			fmt.Printf("%s invalid number: %s\n", red("error:"), string(numberBuf))
+			fmt.Fprintf(os.Stderr, "%s invalid number: %s\n", red("error:"), string(numberBuf))
 			continue
 		}
 
 		if num < 1 || num > size {
-			fmt.Printf("%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
+			fmt.Fprintf(os.Stderr, "%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
 			continue
 		}
 

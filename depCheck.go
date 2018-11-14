@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 
@@ -74,23 +75,23 @@ func (ds *depSolver) CheckMissing() error {
 		return nil
 	}
 
-	fmt.Println(bold(red(arrow+" Error: ")) + "Could not find all required packages:")
+	fmt.Fprintln(os.Stderr, bold(red(arrow+" Error: "))+"Could not find all required packages:")
 	for dep, trees := range missing.Missing {
 		for _, tree := range trees {
 
-			fmt.Print("    ", cyan(dep))
+			fmt.Fprint(os.Stderr, "    ", cyan(dep))
 
 			if len(tree) == 0 {
-				fmt.Print(" (Target")
+				fmt.Fprint(os.Stderr, " (Target")
 			} else {
-				fmt.Print(" (Wanted by: ")
+				fmt.Fprint(os.Stderr, " (Wanted by: ")
 				for n := 0; n < len(tree)-1; n++ {
-					fmt.Print(cyan(tree[n]), " -> ")
+					fmt.Fprint(os.Stderr, cyan(tree[n]), " -> ")
 				}
-				fmt.Print(cyan(tree[len(tree)-1]))
+				fmt.Fprint(os.Stderr, cyan(tree[len(tree)-1]))
 			}
 
-			fmt.Println(")")
+			fmt.Fprintln(os.Stderr, ")")
 		}
 	}
 
@@ -263,11 +264,11 @@ func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
 
 	formatConflicts := func(conflicts mapStringSet, inner bool, s string) {
 		if len(conflicts) != 0 {
-			fmt.Println()
+			fmt.Fprintln(os.Stderr)
 			if inner {
-				fmt.Println(bold(red(arrow)), bold("Inner conflicts found:"))
+				fmt.Fprintln(os.Stderr, bold(red(arrow)), bold("Inner conflicts found:"))
 			} else {
-				fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
+				fmt.Fprintln(os.Stderr, bold(red(arrow)), bold("Package conflicts found:"))
 			}
 
 			printConflict := func(name string, pkgs stringSet) {
@@ -277,7 +278,7 @@ func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
 				}
 				str = strings.TrimSuffix(str, ",")
 
-				fmt.Println(str)
+				fmt.Fprintln(os.Stderr, str)
 			}
 
 			for _, pkg := range ds.Repo {
@@ -318,9 +319,9 @@ func (ds *depSolver) CheckConflicts() (mapStringSet, error) {
 				return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
 			}
 
-			fmt.Println()
-			fmt.Println(bold(red(arrow)), bold("Conflicting packages will have to be confirmed manually"))
-			fmt.Println()
+			fmt.Fprintln(os.Stderr)
+			fmt.Fprintln(os.Stderr, bold(red(arrow)), bold("Conflicting packages will have to be confirmed manually"))
+			fmt.Fprintln(os.Stderr)
 		}
 	}
 

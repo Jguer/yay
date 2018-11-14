@@ -214,7 +214,7 @@ func editor() (string, []string) {
 	case config.Editor != "":
 		editor, err := exec.LookPath(config.Editor)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		} else {
 			return editor, strings.Fields(config.EditorFlags)
 		}
@@ -223,7 +223,7 @@ func editor() (string, []string) {
 		editorArgs := strings.Fields(os.Getenv("EDITOR"))
 		editor, err := exec.LookPath(editorArgs[0])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		} else {
 			return editor, editorArgs[1:]
 		}
@@ -232,21 +232,21 @@ func editor() (string, []string) {
 		editorArgs := strings.Fields(os.Getenv("VISUAL"))
 		editor, err := exec.LookPath(editorArgs[0])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		} else {
 			return editor, editorArgs[1:]
 		}
 		fallthrough
 	default:
-		fmt.Println()
-		fmt.Println(bold(red(arrow)), bold(cyan("$EDITOR")), bold("is not set"))
-		fmt.Println(bold(red(arrow)) + bold(" Please add ") + bold(cyan("$EDITOR")) + bold(" or ") + bold(cyan("$VISUAL")) + bold(" to your environment variables."))
+		fmt.Fprintln(os.Stderr)
+		fmt.Fprintln(os.Stderr, bold(red(arrow)), bold(cyan("$EDITOR")), bold("is not set"))
+		fmt.Fprintln(os.Stderr, bold(red(arrow))+bold(" Please add ")+bold(cyan("$EDITOR"))+bold(" or ")+bold(cyan("$VISUAL"))+bold(" to your environment variables."))
 
 		for {
 			fmt.Print(green(bold(arrow + " Edit PKGBUILD with: ")))
 			editorInput, err := getInput("")
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
 
@@ -254,7 +254,7 @@ func editor() (string, []string) {
 
 			editor, err := exec.LookPath(editorArgs[0])
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
 			return editor, editorArgs[1:]
@@ -318,7 +318,7 @@ func (config Configuration) String() string {
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "\t")
 	if err := enc.Encode(config); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 	}
 	return buf.String()
 }

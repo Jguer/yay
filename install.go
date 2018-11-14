@@ -434,9 +434,9 @@ nextpkg:
 
 	if len(incompatible) > 0 {
 		fmt.Println()
-		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatible with your architecture:")
+		fmt.Print(bold(yellow(arrow))+" The following packages are not compatible with your architecture:")
 		for pkg := range incompatible {
-			fmt.Print("  " + cyan((basesMap[pkg].String())))
+			fmt.Print("  "+cyan(basesMap[pkg].String()))
 		}
 
 		fmt.Println()
@@ -763,7 +763,7 @@ func parseSrcinfoFiles(bases []Base, errIsFatal bool) (map[string]*gosrc.Srcinfo
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			if !errIsFatal {
-				fmt.Printf("failed to parse %s -- skipping: %s\n", base.String(), err)
+				fmt.Fprintf(os.Stderr, "failed to parse %s -- skipping: %s\n", base.String(), err)
 				continue
 			}
 			return nil, fmt.Errorf("failed to parse %s: %s", base.String(), err)
@@ -1057,7 +1057,7 @@ func buildInstallPkgbuilds(ds *depSolver, srcinfos map[string]*gosrc.Srcinfo, pa
 
 		err = saveVCSInfo()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		}
 
 		if len(depArguments.targets) > 0 {
