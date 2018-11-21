@@ -371,7 +371,7 @@ outer:
 			}
 		}
 
-		fmt.Println(red(bold("error:")), "package '"+pkg+"' was not found")
+		fmt.Fprintln(os.Stderr, red(bold("error:")), "package '"+pkg+"' was not found")
 		missing = true
 	}
 
@@ -395,7 +395,7 @@ func (item item) print(buildTime time.Time) {
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 	} else {
 		fd = formatTime(int(date.Unix()))
 		if _, double, _ := cmdArgs.getArg("news", "w"); !double && !buildTime.IsZero() {
@@ -546,7 +546,7 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 		size++
 	}
 
-	fmt.Println(str)
+	fmt.Fprintln(os.Stderr, str)
 
 	for {
 		fmt.Print("\nEnter a number (default=1): ")
@@ -560,12 +560,12 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 		numberBuf, overflow, err := reader.ReadLine()
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			break
 		}
 
 		if overflow {
-			fmt.Println("Input too long")
+			fmt.Fprintln(os.Stderr, "Input too long")
 			continue
 		}
 
@@ -575,12 +575,12 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 
 		num, err := strconv.Atoi(string(numberBuf))
 		if err != nil {
-			fmt.Printf("%s invalid number: %s\n", red("error:"), string(numberBuf))
+			fmt.Fprintf(os.Stderr, "%s invalid number: %s\n", red("error:"), string(numberBuf))
 			continue
 		}
 
 		if num < 1 || num > size {
-			fmt.Printf("%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
+			fmt.Fprintf(os.Stderr, "%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
 			continue
 		}
 

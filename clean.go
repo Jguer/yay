@@ -207,14 +207,14 @@ func cleanAfter(bases []Base) {
 			fmt.Printf(bold(cyan("::")+" Cleaning (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
 			_, stderr, err := capture(passToGit(dir, "reset", "--hard", "HEAD"))
 			if err != nil {
-				fmt.Printf("error resetting %s: %s", base.String(), stderr)
+				fmt.Fprintf(os.Stderr, "error resetting %s: %s", base.String(), stderr)
 			}
 
 			show(passToGit(dir, "clean", "-fx"))
 		} else {
 			fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
 			if err := os.RemoveAll(dir); err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 			}
 		}
 	}
@@ -225,7 +225,7 @@ func cleanBuilds(bases []Base) {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
 		fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
 		if err := os.RemoveAll(dir); err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		}
 	}
 }

@@ -328,8 +328,8 @@ func displayNumberMenu(pkgS []string) (err error) {
 	}
 
 	if aurErr != nil {
-		fmt.Printf("Error during AUR search: %s\n", aurErr)
-		fmt.Println("Showing repo packages only")
+		fmt.Fprintf(os.Stderr, "Error during AUR search: %s\n", aurErr)
+		fmt.Fprintln(os.Stderr, "Showing repo packages only")
 	}
 
 	fmt.Println(bold(green(arrow + " Packages to install (eg: 1 2 3, 1-3 or ^4)")))

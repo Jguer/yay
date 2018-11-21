@@ -47,7 +47,7 @@ func updateSudo() {
 	for {
 		err := show(exec.Command("sudo", "-v"))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		} else {
 			break
 		}

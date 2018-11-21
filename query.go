@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -192,8 +193,8 @@ func syncSearch(pkgS []string) (err error) {
 	}
 
 	if aurErr != nil {
-		fmt.Printf("Error during AUR search: %s\n", aurErr)
-		fmt.Println("Showing Repo packages only")
+		fmt.Fprintf(os.Stderr, "Error during AUR search: %s\n", aurErr)
+		fmt.Fprintln(os.Stderr, "Showing Repo packages only")
 	}
 
 	return nil
@@ -220,7 +221,7 @@ func syncInfo(pkgS []string) (err error) {
 		info, err = aurInfoPrint(noDb)
 		if err != nil {
 			missing = true
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		}
 	}
 
