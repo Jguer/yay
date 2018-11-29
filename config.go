@@ -18,11 +18,15 @@ const (
 	numberMenu = iota
 	detailed
 	minimal
+)
 
+const (
 	// Describes Sorting method for numberdisplay
 	bottomUp = iota
 	topDown
+)
 
+const (
 	modeAUR targetMode = iota
 	modeRepo
 	modeAny
