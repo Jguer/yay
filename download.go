@@ -15,7 +15,7 @@ import (
 
 // Decide what download method to use:
 // Use the config option when the destination does not already exits
-// If .git exists in the destination uer git
+// If .git exists in the destination use git
 // Otherwise use a tarrball
 func shouldUseGit(path string) bool {
 	_, err := os.Stat(path)
