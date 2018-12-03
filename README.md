@@ -88,10 +88,9 @@ Following are the dependencies managed under dep:
 Run `make` to build Yay. This command will generate a binary called `yay` in
 the same directory as the Makefile.
 
-Note: Yay's Makefile automatically sets the `GOPATH` to `$PWD/.go`. This path will
-ensure dependencies in `vendor/` are built. Running manual go commands such as
-`go build` will require that you either set the `GOPATH` manually or `go get`
-the vendored dependencies into your own `GOPATH`.
+Note: Yay's Makefile sources its dependencies from `vendor/`. When
+building manually, dependencies will instead be sourced from `GOPATH`. To
+build against `vendor/` you must specify `-mod=vendor` in the build command.
 
 ### Code Style
 
