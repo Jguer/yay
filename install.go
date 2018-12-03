@@ -434,9 +434,9 @@ nextpkg:
 
 	if len(incompatible) > 0 {
 		fmt.Println()
-		fmt.Print(bold(yellow(arrow))+" The following packages are not compatible with your architecture:")
+		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatible with your architecture:")
 		for pkg := range incompatible {
-			fmt.Print("  "+cyan(basesMap[pkg].String()))
+			fmt.Print("  " + cyan(basesMap[pkg].String()))
 		}
 
 		fmt.Println()
