@@ -6,3 +6,5 @@ github.com/jguer/go-alpm v0.0.0-20180914002751-643c287316a5 h1:JPIXUHXLZYwYUTlGp
 github.com/jguer/go-alpm v0.0.0-20180914002751-643c287316a5/go.mod h1:1F60/e8oQFVJrZRH0TBqwtiB5ajJ5avOc4MoGRY9CFU=
 github.com/mikkeloscar/aur v0.0.0-20180725140122-f998dbf94dc4 h1:qgHSZbD0g3W7KAkZFzXlSqgriYnzEUFS1gkgEiv2GrE=
 github.com/mikkeloscar/aur v0.0.0-20180725140122-f998dbf94dc4/go.mod h1:n1NKHoldRNhIEufSx1PiDYcd2W+wpbz5/5K+p2eNDVk=
+github.com/mikkeloscar/aur v0.0.0-20181111113612-b71516da3ae9 h1:g4TBYa1sjv/TZfU9t82oYlRneu8cCVr3dnazE7os5vw=
+github.com/mikkeloscar/aur v0.0.0-20181111113612-b71516da3ae9/go.mod h1:n1NKHoldRNhIEufSx1PiDYcd2W+wpbz5/5K+p2eNDVk=

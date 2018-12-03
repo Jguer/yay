@@ -1,5 +1,6 @@
 .PHONY: all default install uninstall test build release clean package
 
+export GO111MODULE=on
 PREFIX := /usr/local
 DESTDIR :=
 
