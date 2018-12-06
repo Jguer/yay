@@ -142,6 +142,10 @@ formatted correctly, run the code through `go vet`, and run unit tests.
   PKGBUILD in any way, but any problems you cause are your own and should not be
   reported unless they can be reproduced with the original PKGBUILD.
 
+#### I know my `-git` package has updates but yay doesn't offer to update it
+Yay uses an hash cache for development packages. Normally it is updated at the end of the package install with the message `Found git repo`.
+If you transition between aur helpers and did not install the devel package using yay at some point, it is possible it never got added to the cache. `yay -Y --gendb` will fix the current version of every devel package and start checking from there.
+
 ## Examples of Custom Operations
 
 `yay <Search Term>`  
