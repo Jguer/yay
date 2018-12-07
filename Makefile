@@ -18,6 +18,7 @@ BINNAME := yay
 PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
 
 ifneq (,$(findstring gccgo,$(GOCC)))
+	export GOPATH=$(shell pwd)/.go
 	LDFLAGS := -gccgoflags '-s -w'
 	MOD :=
 endif
