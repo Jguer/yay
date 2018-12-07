@@ -1,6 +1,5 @@
 .PHONY: all default install uninstall test build release clean package
 
-export GO111MODULE=on
 PREFIX := /usr/local
 DESTDIR :=
 
@@ -10,10 +9,18 @@ PATCHVERSION := 0
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
 LDFLAGS := -ldflags '-s -w -X main.version=${VERSION}'
+MOD := -mod=vendor
+export GO111MODULE=on
 ARCH := $(shell uname -m)
+GOCC := $(shell go version)
 PKGNAME := yay
 BINNAME := yay
 PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
+
+ifneq (,$(findstring gccgo,$(GOCC)))
+	LDFLAGS := -gccgoflags '-s -w'
+	MOD :=
+endif
 
 default: build
 
@@ -40,7 +47,7 @@ test:
 	go test -v
 
 build:
-	go build -mod=vendor -v ${LDFLAGS} -o ${BINNAME}
+	go build -v ${LDFLAGS} -o ${BINNAME} ${MOD}
 
 release: | test build
 	mkdir ${PACKAGE}
