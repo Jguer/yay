@@ -227,8 +227,8 @@ func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Maintainer", a.Maintainer)
 	printInfoValue("Votes", fmt.Sprintf("%d", a.NumVotes))
 	printInfoValue("Popularity", fmt.Sprintf("%f", a.Popularity))
-	printInfoValue("First Submitted", formatTime(a.FirstSubmitted))
-	printInfoValue("Last Modified", formatTime(a.LastModified))
+	printInfoValue("First Submitted", formatTimeQuery(a.FirstSubmitted))
+	printInfoValue("Last Modified", formatTimeQuery(a.LastModified))
 
 	if a.OutOfDate != 0 {
 		printInfoValue("Out-of-date", "Yes ["+formatTime(a.OutOfDate)+"]")
@@ -469,6 +469,12 @@ func printNewsFeed() error {
 func formatTime(i int) string {
 	t := time.Unix(int64(i), 0)
 	return t.Format("2006-01-02")
+}
+
+// Formats a unix timestamp to ISO 8601 date (Mon 02 Jan 2006 03:04:05 PM MST)
+func formatTimeQuery(i int) string {
+	t := time.Unix(int64(i), 0)
+	return t.Format("Mon 02 Jan 2006 03:04:05 PM MST")
 }
 
 const (
