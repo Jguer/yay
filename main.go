@@ -132,9 +132,9 @@ func initAlpm() error {
 
 	//TODO
 	//current system does not allow duplicate arguments
-	//but pacman allows multiple cachdirs to be passed
+	//but pacman allows multiple cachedirs to be passed
 	//for now only handle one cache dir
-	if value, _, exists := cmdArgs.getArg("cachdir"); exists {
+	if value, _, exists := cmdArgs.getArg("cachedir"); exists {
 		pacmanConf.CacheDir = []string{value}
 	}
 
