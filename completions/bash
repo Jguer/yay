@@ -103,6 +103,8 @@ _yay() {
         { _arch_incomp 'g groups' && _pacman_pkg Sg; }      ||
         { _arch_incomp 'l list'   && _pacman_repo_list; } ||
           _yay_pkg;;
+      G)
+          _yay_pkg;;
       U)
           _pacman_file;;
       esac
