@@ -169,6 +169,6 @@ If you transition between aur helpers and did not install the devel package usin
 
 ## Images
 
-<img src="https://cdn.rawgit.com/Jguer/jguer.github.io/5412b8d6/yay/yay-ps.png" width="450">
-<img src="https://cdn.rawgit.com/Jguer/jguer.github.io/5412b8d6/yay/yayupgrade.png" width="450">
-<img src="https://cdn.rawgit.com/Jguer/jguer.github.io/5412b8d6/yay/yaysearch.png" width="450">
+<img src="https://cdn.jsdelivr.net/gh/Jguer/jguer.github.io@5412b8d6/yay/yay-ps.png" width="450">
+<img src="https://cdn.jsdelivr.net/gh/Jguer/jguer.github.io@5412b8d6/yay/yayupgrade.png" width="450">
+<img src="https://cdn.jsdelivr.net/gh/Jguer/jguer.github.io@5412b8d6/yay/yaysearch.png" width="450">
