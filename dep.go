@@ -8,11 +8,6 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
-type missing struct {
-	Good    stringSet
-	Missing map[string][][]string
-}
-
 type providers struct {
 	lookfor string
 	Pkgs    []*rpc.Pkg
@@ -43,74 +38,6 @@ func (q providers) Less(i, j int) bool {
 
 func (q providers) Swap(i, j int) {
 	q.Pkgs[i], q.Pkgs[j] = q.Pkgs[j], q.Pkgs[i]
-}
-
-type Base []*rpc.Pkg
-
-func (b Base) Pkgbase() string {
-	return b[0].PackageBase
-}
-
-func (b Base) Version() string {
-	return b[0].Version
-}
-
-func (b Base) URLPath() string {
-	return b[0].URLPath
-}
-
-func baseAppend(bases []Base, pkg *rpc.Pkg) []Base {
-	for i, base := range bases {
-		if base.Pkgbase() == pkg.PackageBase {
-			bases[i] = append(bases[i], pkg)
-			return bases
-		}
-	}
-
-	return append(bases, Base{pkg})
-}
-
-func baseFind(bases []Base, name string) *rpc.Pkg {
-	for _, base := range bases {
-		for _, pkg := range base {
-			if pkg.Name == name {
-				return pkg
-			}
-		}
-	}
-
-	return nil
-}
-
-type target struct {
-	Db      string
-	Name    string
-	Mod     string
-	Version string
-}
-
-func toTarget(pkg string) target {
-	db, dep := splitDbFromName(pkg)
-	name, mod, version := splitDep(dep)
-
-	return target{
-		db,
-		name,
-		mod,
-		version,
-	}
-}
-
-func (t target) DepString() string {
-	return t.Name + t.Mod + t.Version
-}
-
-func (t target) String() string {
-	if t.Db != "" {
-		return t.Db + "/" + t.DepString()
-	}
-
-	return t.DepString()
 }
 
 func splitDep(dep string) (string, string, string) {
