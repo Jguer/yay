@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net/http"
 	"os"
 
 	alpm "github.com/jguer/go-alpm"
@@ -259,7 +260,7 @@ func handleSync() error {
 		return syncClean(cmdArgs)
 	}
 	if cmdArgs.existsArg("l", "list") {
-		return show(passToPacman(cmdArgs))
+		return syncList(cmdArgs)
 	}
 	if cmdArgs.existsArg("g", "groups") {
 		return show(passToPacman(cmdArgs))
@@ -384,4 +385,52 @@ func displayNumberMenu(pkgS []string) (err error) {
 	err = install(arguments)
 
 	return err
+}
+
+func syncList(parser *arguments) error {
+	aur := false
+
+	for i := len(parser.targets) - 1; i >= 0; i-- {
+		if parser.targets[i] == "aur" && (mode == modeAny || mode == modeAUR) {
+			parser.targets = append(parser.targets[:i], parser.targets[i+1:]...)
+			aur = true
+		}
+	}
+
+	if (mode == modeAny || mode == modeAUR) && (len(parser.targets) == 0 || aur) {
+		localDb, err := alpmHandle.LocalDb()
+		if err != nil {
+			return err
+		}
+
+		resp, err := http.Get(config.AURURL + "/packages.gz")
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		scanner := bufio.NewScanner(resp.Body)
+
+		scanner.Scan()
+		for scanner.Scan() {
+			name := scanner.Text()
+			if cmdArgs.existsArg("q", "quiet") {
+				fmt.Println(name)
+			} else {
+				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green("unknown-version")))
+
+				if _, err := localDb.PkgByName(name); err == nil {
+					fmt.Print(bold(blue(" [Installed]")))
+				}
+
+				fmt.Println()
+			}
+		}
+	}
+
+	if (mode == modeAny || mode == modeRepo) && (len(parser.targets) != 0 || !aur) {
+		return show(passToPacman(parser))
+	}
+
+	return nil
 }
