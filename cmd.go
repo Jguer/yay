@@ -42,7 +42,7 @@ Permanent configuration options:
                           config file when used
 
     --aururl      <url>   Set an alternative AUR URL
-    --builddir    <dir>   Directory used to download and run PKBUILDS
+    --builddir    <dir>   Directory used to download and run PKGBUILDS
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor
     --makepkg     <file>  makepkg command to use
@@ -96,7 +96,7 @@ Permanent configuration options:
     --redownload          Always download pkgbuilds of targets
     --noredownload        Skip pkgbuild download if in cache and up to date
     --redownloadall       Always download pkgbuilds of all AUR packages
-    --provides            Look for matching provders when searching for packages
+    --provides            Look for matching providers when searching for packages
     --noprovides          Just look for packages by pkgname
     --pgpfetch            Prompt to import PGP keys from PKGBUILDs
     --nopgpfetch          Don't prompt to import PGP keys
