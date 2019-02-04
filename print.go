@@ -60,7 +60,7 @@ func human(size int64) string {
 
 // PrintSearch handles printing search results in a given format
 func (q aurQuery) printSearch(start int) {
-	localDb, _ := alpmHandle.LocalDb()
+	localDB, _ := alpmHandle.LocalDB()
 
 	for i, res := range q {
 		var toprint string
@@ -88,7 +88,7 @@ func (q aurQuery) printSearch(start int) {
 			toprint += bold(red("(Out-of-date "+formatTime(res.OutOfDate)+")")) + " "
 		}
 
-		if pkg, err := localDb.PkgByName(res.Name); err == nil {
+		if pkg, err := localDB.Pkg(res.Name); err == nil {
 			if pkg.Version() != res.Version {
 				toprint += bold(green("(Installed: " + pkg.Version() + ")"))
 			} else {
@@ -124,9 +124,9 @@ func (s repoQuery) printSearch() {
 			toprint += fmt.Sprint(res.Groups().Slice(), " ")
 		}
 
-		localDb, err := alpmHandle.LocalDb()
+		localDB, err := alpmHandle.LocalDB()
 		if err == nil {
-			if pkg, err := localDb.PkgByName(res.Name()); err == nil {
+			if pkg, err := localDB.Pkg(res.Name()); err == nil {
 				if pkg.Version() != res.Version() {
 					toprint += bold(green("(Installed: " + pkg.Version() + ")"))
 				} else {
@@ -318,12 +318,12 @@ func PrintInfo(a *rpc.Pkg) {
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
 func biggestPackages() {
-	localDb, err := alpmHandle.LocalDb()
+	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return
 	}
 
-	pkgCache := localDb.PkgCache()
+	pkgCache := localDB.PkgCache()
 	pkgS := pkgCache.SortBySize().Slice()
 
 	if len(pkgS) < 10 {

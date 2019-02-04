@@ -142,7 +142,7 @@ const (
 	TransFlagRecurse
 	// 7 is missing
 	_
-	TransFlagDbOnly
+	TransFlagDBOnly
 	TransFlagAllDeps
 	TransFlagDownloadOnly
 	TransFlagNoScriptlets

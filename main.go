@@ -168,7 +168,7 @@ func initAlpmHandle() error {
 		}
 	}
 
-	if alpmHandle, err = alpm.Init(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
+	if alpmHandle, err = alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
 		return fmt.Errorf("Unable to CreateHandle: %s", err)
 	}
 

@@ -398,7 +398,7 @@ func syncList(parser *arguments) error {
 	}
 
 	if (mode == modeAny || mode == modeAUR) && (len(parser.targets) == 0 || aur) {
-		localDb, err := alpmHandle.LocalDb()
+		localDB, err := alpmHandle.LocalDB()
 		if err != nil {
 			return err
 		}
@@ -419,7 +419,7 @@ func syncList(parser *arguments) error {
 			} else {
 				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green("unknown-version")))
 
-				if _, err := localDb.PkgByName(name); err == nil {
+				if _, err := localDB.Pkg(name); err == nil {
 					fmt.Print(bold(blue(" [Installed]")))
 				}
 

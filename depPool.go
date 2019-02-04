@@ -10,14 +10,14 @@ import (
 )
 
 type target struct {
-	Db      string
+	DB      string
 	Name    string
 	Mod     string
 	Version string
 }
 
 func toTarget(pkg string) target {
-	db, dep := splitDbFromName(pkg)
+	db, dep := splitDBFromName(pkg)
 	name, mod, version := splitDep(dep)
 
 	return target{
@@ -33,8 +33,8 @@ func (t target) DepString() string {
 }
 
 func (t target) String() string {
-	if t.Db != "" {
-		return t.Db + "/" + t.DepString()
+	if t.DB != "" {
+		return t.DB + "/" + t.DepString()
 	}
 
 	return t.DepString()
@@ -47,17 +47,17 @@ type depPool struct {
 	Aur      map[string]*rpc.Pkg
 	AurCache map[string]*rpc.Pkg
 	Groups   []string
-	LocalDb  *alpm.Db
-	SyncDb   alpm.DbList
+	LocalDB  *alpm.DB
+	SyncDB   alpm.DBList
 	Warnings *aurWarnings
 }
 
 func makeDepPool() (*depPool, error) {
-	localDb, err := alpmHandle.LocalDb()
+	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return nil, err
 	}
-	syncDb, err := alpmHandle.SyncDbs()
+	syncDB, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +69,8 @@ func makeDepPool() (*depPool, error) {
 		make(map[string]*rpc.Pkg),
 		make(map[string]*rpc.Pkg),
 		make([]string, 0),
-		localDb,
-		syncDb,
+		localDB,
+		syncDB,
 		nil,
 	}
 
@@ -100,25 +100,25 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		}
 
 		var foundPkg *alpm.Package
-		var singleDb *alpm.Db
+		var singleDB *alpm.DB
 
 		// aur/ prefix means we only check the aur
-		if target.Db == "aur" || mode == modeAUR {
+		if target.DB == "aur" || mode == modeAUR {
 			dp.Targets = append(dp.Targets, target)
 			aurTargets.set(target.DepString())
 			continue
 		}
 
 		// If there'ss a different priefix only look in that repo
-		if target.Db != "" {
-			singleDb, err = alpmHandle.SyncDbByName(target.Db)
+		if target.DB != "" {
+			singleDB, err = alpmHandle.SyncDBByName(target.DB)
 			if err != nil {
 				return err
 			}
-			foundPkg, err = singleDb.PkgCache().FindSatisfier(target.DepString())
+			foundPkg, err = singleDB.PkgCache().FindSatisfier(target.DepString())
 			//otherwise find it in any repo
 		} else {
-			foundPkg, err = dp.SyncDb.FindSatisfier(target.DepString())
+			foundPkg, err = dp.SyncDB.FindSatisfier(target.DepString())
 		}
 
 		if err == nil {
@@ -130,11 +130,11 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			//check for groups
 			//currently we don't resolve the packages in a group
 			//only check if the group exists
-			//would be better to check the groups from singleDb if
+			//would be better to check the groups from singleDB if
 			//the user specified a db but there's no easy way to do
 			//it without making alpm_lists so don't bother for now
 			//db/group is probably a rare use case
-			group, err := dp.SyncDb.PkgCachebyGroup(target.Name)
+			group, err := dp.SyncDB.FindGroupPkgs(target.Name)
 			if err == nil {
 				dp.Groups = append(dp.Groups, target.String())
 				group.ForEach(func(pkg alpm.Package) error {
@@ -146,7 +146,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		}
 
 		//if there was no db prefix check the aur
-		if target.Db == "" {
+		if target.DB == "" {
 			aurTargets.set(target.DepString())
 		}
 
@@ -207,7 +207,7 @@ func (dp *depPool) findProvides(pkgs stringSet) error {
 	}
 
 	for pkg := range pkgs {
-		if _, err := dp.LocalDb.PkgByName(pkg); err == nil {
+		if _, err := dp.LocalDB.Pkg(pkg); err == nil {
 			continue
 		}
 		wg.Add(1)
@@ -301,10 +301,10 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 			continue
 		}
 
-		_, isInstalled := dp.LocalDb.PkgCache().FindSatisfier(dep) //has satisfier installed: skip
+		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep) //has satisfier installed: skip
 		hm := hideMenus
 		hideMenus = isInstalled == nil
-		repoPkg, inRepos := dp.SyncDb.FindSatisfier(dep) //has satisfier in repo: fetch it
+		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep) //has satisfier in repo: fetch it
 		hideMenus = hm
 		if isInstalled == nil && (config.ReBuild != "tree" || inRepos == nil) {
 			continue
@@ -335,13 +335,13 @@ func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 		}
 
 		//has satisfier installed: skip
-		_, isInstalled := dp.LocalDb.PkgCache().FindSatisfier(dep.String())
+		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep.String())
 		if isInstalled == nil {
 			return
 		}
 
 		//has satisfier in repo: fetch it
-		repoPkg, inRepos := dp.SyncDb.FindSatisfier(dep.String())
+		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep.String())
 		if inRepos != nil {
 			return
 		}
@@ -389,7 +389,7 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 	seen := make(stringSet)
 	providers := makeProviders(depName)
 
-	if _, err := dp.LocalDb.PkgByName(depName); err == nil {
+	if _, err := dp.LocalDB.Pkg(depName); err == nil {
 		if pkg, ok := dp.AurCache[dep]; ok && pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			return pkg
 		}

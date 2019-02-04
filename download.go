@@ -141,7 +141,7 @@ func getPkgbuilds(pkgs []string) error {
 	aur, repo, err := packageSlices(pkgs)
 
 	for n := range aur {
-		_, pkg := splitDbFromName(aur[n])
+		_, pkg := splitDBFromName(aur[n])
 		aur[n] = pkg
 	}
 
@@ -203,7 +203,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 	missing := make([]string, 0)
 	downloaded := 0
 
-	dbList, err := alpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return false, err
 	}
@@ -212,15 +212,15 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		var pkg *alpm.Package
 		var err error
 		var url string
-		pkgDb, name := splitDbFromName(pkgN)
+		pkgDB, name := splitDBFromName(pkgN)
 
-		if pkgDb != "" {
-			if db, err := alpmHandle.SyncDbByName(pkgDb); err == nil {
-				pkg, err = db.PkgByName(name)
+		if pkgDB != "" {
+			if db, err := alpmHandle.SyncDBByName(pkgDB); err == nil {
+				pkg, err = db.Pkg(name)
 			}
 		} else {
-			dbList.ForEach(func(db alpm.Db) error {
-				if pkg, err = db.PkgByName(name); err == nil {
+			dbList.ForEach(func(db alpm.DB) error {
+				if pkg, err = db.Pkg(name); err == nil {
 					return fmt.Errorf("")
 				}
 				return nil

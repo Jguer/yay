@@ -64,11 +64,11 @@ func (q aurQuery) Swap(i, j int) {
 // FilterPackages filters packages based on source and type from local repository.
 func filterPackages() (local []alpm.Package, remote []alpm.Package,
 	localNames []string, remoteNames []string, err error) {
-	localDb, err := alpmHandle.LocalDb()
+	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return
 	}
-	dbList, err := alpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return
 	}
@@ -76,11 +76,11 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 	f := func(k alpm.Package) error {
 		found := false
 		// For each DB search for our secret package.
-		_ = dbList.ForEach(func(d alpm.Db) error {
+		_ = dbList.ForEach(func(d alpm.DB) error {
 			if found {
 				return nil
 			}
-			_, err := d.PkgByName(k.Name())
+			_, err := d.Pkg(k.Name())
 			if err == nil {
 				found = true
 				local = append(local, k)
@@ -96,7 +96,7 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 		return nil
 	}
 
-	err = localDb.PkgCache().ForEach(f)
+	err = localDB.PkgCache().ForEach(f)
 	return
 }
 
@@ -211,14 +211,14 @@ func syncInfo(pkgS []string) (err error) {
 	}
 
 	if len(aurS) != 0 {
-		noDb := make([]string, 0, len(aurS))
+		noDB := make([]string, 0, len(aurS))
 
 		for _, pkg := range aurS {
-			_, name := splitDbFromName(pkg)
-			noDb = append(noDb, name)
+			_, name := splitDBFromName(pkg)
+			noDB = append(noDB, name)
 		}
 
-		info, err = aurInfoPrint(noDb)
+		info, err = aurInfoPrint(noDB)
 		if err != nil {
 			missing = true
 			fmt.Fprintln(os.Stderr, err)
@@ -256,12 +256,12 @@ func syncInfo(pkgS []string) (err error) {
 
 // Search handles repo searches. Creates a RepoSearch struct.
 func queryRepo(pkgInputN []string) (s repoQuery, err error) {
-	dbList, err := alpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return
 	}
 
-	dbList.ForEach(func(db alpm.Db) error {
+	dbList.ForEach(func(db alpm.DB) error {
 		if len(pkgInputN) == 0 {
 			pkgs := db.PkgCache()
 			s = append(s, pkgs.Slice()...)
@@ -283,13 +283,13 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 
 // PackageSlices separates an input slice into aur and repo slices
 func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
-	dbList, err := alpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return
 	}
 
 	for _, _pkg := range toCheck {
-		db, name := splitDbFromName(_pkg)
+		db, name := splitDBFromName(_pkg)
 		found := false
 
 		if db == "aur" || mode == modeAUR {
@@ -300,8 +300,8 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 			continue
 		}
 
-		_ = dbList.ForEach(func(db alpm.Db) error {
-			_, err := db.PkgByName(name)
+		_ = dbList.ForEach(func(db alpm.DB) error {
+			_, err := db.Pkg(name)
 
 			if err == nil {
 				found = true
@@ -312,7 +312,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		})
 
 		if !found {
-			_, errdb := dbList.PkgCachebyGroup(name)
+			_, errdb := dbList.FindGroupPkgs(name)
 			found = errdb == nil
 		}
 
@@ -330,7 +330,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 // and unneeded by the system
 // removeOptional decides whether optional dependencies are counted or not
 func hangingPackages(removeOptional bool) (hanging []string, err error) {
-	localDb, err := alpmHandle.LocalDb()
+	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return
 	}
@@ -342,7 +342,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	safePackages := make(map[string]uint8)
 	// provides stores a mapping from the provides name back to the original package name
 	provides := make(mapStringSet)
-	packages := localDb.PkgCache()
+	packages := localDB.PkgCache()
 
 	// Mark explicit dependencies and enumerate the provides list
 	setupResources := func(pkg alpm.Package) error {
@@ -444,12 +444,12 @@ func statistics() (info struct {
 	var nPkg int
 	var ePkg int
 
-	localDb, err := alpmHandle.LocalDb()
+	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return
 	}
 
-	for _, pkg := range localDb.PkgCache().Slice() {
+	for _, pkg := range localDB.PkgCache().Slice() {
 		tS += pkg.ISize()
 		nPkg++
 		if pkg.Reason() == 0 {
