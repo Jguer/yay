@@ -31,7 +31,7 @@ func (u upSlice) Less(i, j int) bool {
 		return lessRunes(iRunes, jRunes)
 	}
 
-	syncDb, err := alpmHandle.SyncDbs()
+	syncDB, err := alpmHandle.SyncDBs()
 	if err != nil {
 		iRunes := []rune(u[i].Repository)
 		jRunes := []rune(u[j].Repository)
@@ -39,7 +39,7 @@ func (u upSlice) Less(i, j int) bool {
 	}
 
 	less := false
-	found := syncDb.ForEach(func(db alpm.Db) error {
+	found := syncDB.ForEach(func(db alpm.DB) error {
 		if db.Name() == u[i].Repository {
 			less = true
 		} else if db.Name() == u[j].Repository {
@@ -290,7 +290,7 @@ func printLocalNewerThanAUR(
 func upRepo(local []alpm.Package) (upSlice, error) {
 	slice := upSlice{}
 
-	localDB, err := alpmHandle.LocalDb()
+	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return slice, err
 	}
@@ -304,7 +304,7 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 
 	alpmHandle.SyncSysupgrade(cmdArgs.existsDouble("u", "sysupgrade"))
 	alpmHandle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
-		localPkg, err := localDB.PkgByName(pkg.Name())
+		localPkg, err := localDB.Pkg(pkg.Name())
 		localVer := "-"
 
 		if err == nil {

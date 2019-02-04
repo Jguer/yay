@@ -43,7 +43,7 @@ func (h *Handle) TransGetRemove() PackageList {
 	return PackageList{(*list)(unsafe.Pointer(pkgs)), *h}
 }
 
-func (h *Handle) TransGetFalgs() (TransFlag, error) {
+func (h *Handle) TransGetFlags() (TransFlag, error) {
 	flags := C.alpm_trans_get_flags(h.ptr)
 
 	if flags == -1 {

@@ -32,7 +32,7 @@ func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts ma
 }
 
 func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts mapStringSet) {
-	dp.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+	dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
 			return nil
 		}
@@ -110,7 +110,7 @@ func (dp *depPool) checkForwardConflicts(conflicts mapStringSet) {
 }
 
 func (dp *depPool) checkReverseConflicts(conflicts mapStringSet) {
-	dp.LocalDb.PkgCache().ForEach(func(pkg alpm.Package) error {
+	dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if dp.hasPackage(pkg.Name()) {
 			return nil
 		}
@@ -227,7 +227,7 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 		missing.Good.set(dep)
 		for _, deps := range [3][]string{aurPkg.Depends, aurPkg.MakeDepends, aurPkg.CheckDepends} {
 			for _, aurDep := range deps {
-				if _, err := dp.LocalDb.PkgCache().FindSatisfier(aurDep); err == nil {
+				if _, err := dp.LocalDB.PkgCache().FindSatisfier(aurDep); err == nil {
 					missing.Good.set(aurDep)
 					continue
 				}
@@ -243,7 +243,7 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 	if repoPkg != nil {
 		missing.Good.set(dep)
 		repoPkg.Depends().ForEach(func(repoDep alpm.Depend) error {
-			if _, err := dp.LocalDb.PkgCache().FindSatisfier(repoDep.String()); err == nil {
+			if _, err := dp.LocalDB.PkgCache().FindSatisfier(repoDep.String()); err == nil {
 				missing.Good.set(repoDep.String())
 				return nil
 			}

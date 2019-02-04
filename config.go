@@ -361,7 +361,7 @@ func configureAlpm(conf *pacmanconf.Config) error {
 
 	for _, repo := range pacmanConf.Repos {
 		// TODO: set SigLevel
-		db, err := alpmHandle.RegisterSyncDb(repo.Name, 0)
+		db, err := alpmHandle.RegisterSyncDB(repo.Name, 0)
 		if err != nil {
 			return err
 		}
@@ -371,7 +371,7 @@ func configureAlpm(conf *pacmanconf.Config) error {
 
 	}
 
-	if err = alpmHandle.SetCacheDirs(pacmanConf.CacheDir...); err != nil {
+	if err = alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {
 		return err
 	}
 
@@ -390,11 +390,11 @@ func configureAlpm(conf *pacmanconf.Config) error {
 		return err
 	}
 
-	if err = alpmHandle.SetIgnorePkgs(pacmanConf.IgnorePkg...); err != nil {
+	if err = alpmHandle.SetIgnorePkgs(pacmanConf.IgnorePkg); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetIgnoreGroups(pacmanConf.IgnoreGroup...); err != nil {
+	if err = alpmHandle.SetIgnoreGroups(pacmanConf.IgnoreGroup); err != nil {
 		return err
 	}
 
@@ -402,11 +402,11 @@ func configureAlpm(conf *pacmanconf.Config) error {
 		return err
 	}
 
-	if err = alpmHandle.SetNoUpgrades(pacmanConf.NoUpgrade...); err != nil {
+	if err = alpmHandle.SetNoUpgrades(pacmanConf.NoUpgrade); err != nil {
 		return err
 	}
 
-	if alpmHandle.SetNoExtracts(pacmanConf.NoExtract...); err != nil {
+	if alpmHandle.SetNoExtracts(pacmanConf.NoExtract); err != nil {
 		return err
 	}
 

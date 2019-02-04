@@ -25,49 +25,12 @@ type Handle struct {
 	ptr *C.alpm_handle_t
 }
 
-// Init initializes alpm handle
-func Init(root, dbpath string) (*Handle, error) {
-	cRoot := C.CString(root)
-	cDBPath := C.CString(dbpath)
-	var cErr C.alpm_errno_t
-	h := C.alpm_initialize(cRoot, cDBPath, &cErr)
-
-	defer C.free(unsafe.Pointer(cRoot))
-	defer C.free(unsafe.Pointer(cDBPath))
-
-	if cErr != 0 {
-		return nil, Error(cErr)
-	}
-
-	return &Handle{h}, nil
-}
-
-// Release releases the alpm handle
-func (h *Handle) Release() error {
-	if er := C.alpm_release(h.ptr); er != 0 {
-		return Error(er)
-	}
-	h.ptr = nil
-	return nil
-}
-
-// LastError gets the last pm_error
-func (h Handle) LastError() error {
-	if h.ptr != nil {
-		cErr := C.alpm_errno(h.ptr)
-		if cErr != 0 {
-			return Error(cErr)
-		}
-	}
-	return nil
-}
-
 //
 //alpm options getters and setters
 //
 
 //helper functions for wrapping list_t getters and setters
-func (h Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringList, error) {
+func (h *Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringList, error) {
 	alpmList := f(h.ptr)
 	goList := StringList{(*list)(unsafe.Pointer(alpmList))}
 
@@ -77,7 +40,7 @@ func (h Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringLi
 	return goList, nil
 }
 
-func (h Handle) optionSetList(hookDirs []string, f func(*C.alpm_handle_t, *C.alpm_list_t) C.int) error {
+func (h *Handle) optionSetList(hookDirs []string, f func(*C.alpm_handle_t, *C.alpm_list_t) C.int) error {
 	var list *C.alpm_list_t
 
 	for _, dir := range hookDirs {
@@ -93,7 +56,7 @@ func (h Handle) optionSetList(hookDirs []string, f func(*C.alpm_handle_t, *C.alp
 	return nil
 }
 
-func (h Handle) optionAddList(hookDir string, f func(*C.alpm_handle_t, *C.char) C.int) error {
+func (h *Handle) optionAddList(hookDir string, f func(*C.alpm_handle_t, *C.char) C.int) error {
 	cHookDir := C.CString(hookDir)
 	defer C.free(unsafe.Pointer(cHookDir))
 	ok := f(h.ptr, cHookDir)
@@ -103,7 +66,7 @@ func (h Handle) optionAddList(hookDir string, f func(*C.alpm_handle_t, *C.char) 
 	return nil
 }
 
-func (h Handle) optionRemoveList(dir string, f func(*C.alpm_handle_t, *C.char) C.int) (bool, error) {
+func (h *Handle) optionRemoveList(dir string, f func(*C.alpm_handle_t, *C.char) C.int) (bool, error) {
 	cDir := C.CString(dir)
 	ok := f(h.ptr, cDir)
 	defer C.free(unsafe.Pointer(cDir))
@@ -113,7 +76,7 @@ func (h Handle) optionRemoveList(dir string, f func(*C.alpm_handle_t, *C.char) C
 	return ok == 1, nil
 }
 
-func (h Handle) optionMatchList(dir string, f func(*C.alpm_handle_t, *C.char) C.int) (bool, error) {
+func (h *Handle) optionMatchList(dir string, f func(*C.alpm_handle_t, *C.char) C.int) (bool, error) {
 	cDir := C.CString(dir)
 	ok := f(h.ptr, cDir)
 	defer C.free(unsafe.Pointer(cDir))
@@ -126,7 +89,7 @@ func (h Handle) optionMatchList(dir string, f func(*C.alpm_handle_t, *C.char) C.
 }
 
 //helper functions for *char based getters and setters
-func (h Handle) optionGetStr(f func(*C.alpm_handle_t) *C.char) (string, error) {
+func (h *Handle) optionGetStr(f func(*C.alpm_handle_t) *C.char) (string, error) {
 	cStr := f(h.ptr)
 	str := C.GoString(cStr)
 	if cStr == nil {
@@ -136,7 +99,7 @@ func (h Handle) optionGetStr(f func(*C.alpm_handle_t) *C.char) (string, error) {
 	return str, nil
 }
 
-func (h Handle) optionSetStr(str string, f func(*C.alpm_handle_t, *C.char) C.int) error {
+func (h *Handle) optionSetStr(str string, f func(*C.alpm_handle_t, *C.char) C.int) error {
 	cStr := C.CString(str)
 	defer C.free(unsafe.Pointer(cStr))
 	ok := f(h.ptr, cStr)
@@ -151,97 +114,97 @@ func (h Handle) optionSetStr(str string, f func(*C.alpm_handle_t, *C.char) C.int
 //end of helpers
 //
 
-func (h Handle) Root() (string, error) {
+func (h *Handle) Root() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
 		return C.alpm_option_get_root(handle)
 	})
 }
 
-func (h Handle) DBPath() (string, error) {
+func (h *Handle) DBPath() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
 		return C.alpm_option_get_dbpath(handle)
 	})
 }
 
-func (h Handle) Lockfile() (string, error) {
+func (h *Handle) Lockfile() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
 		return C.alpm_option_get_lockfile(handle)
 	})
 }
 
-func (h Handle) CacheDirs() (StringList, error) {
+func (h *Handle) CacheDirs() (StringList, error) {
 	return h.optionGetList(func(handle *C.alpm_handle_t) *C.alpm_list_t {
 		return C.alpm_option_get_cachedirs(handle)
 	})
 }
 
-func (h Handle) AddCacheDir(hookDir string) error {
+func (h *Handle) AddCacheDir(hookDir string) error {
 	return h.optionAddList(hookDir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_add_cachedir(handle, str)
 	})
 }
 
-func (h Handle) SetCacheDirs(hookDirs ...string) error {
+func (h *Handle) SetCacheDirs(hookDirs []string) error {
 	return h.optionSetList(hookDirs, func(handle *C.alpm_handle_t, l *C.alpm_list_t) C.int {
 		return C.alpm_option_set_cachedirs(handle, l)
 	})
 }
 
-func (h Handle) RemoveCacheDir(dir string) (bool, error) {
+func (h *Handle) RemoveCacheDir(dir string) (bool, error) {
 	return h.optionRemoveList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_remove_cachedir(handle, str)
 	})
 }
 
-func (h Handle) HookDirs() (StringList, error) {
+func (h *Handle) HookDirs() (StringList, error) {
 	return h.optionGetList(func(handle *C.alpm_handle_t) *C.alpm_list_t {
 		return C.alpm_option_get_hookdirs(handle)
 	})
 }
 
-func (h Handle) AddHookDir(hookDir string) error {
+func (h *Handle) AddHookDir(hookDir string) error {
 	return h.optionAddList(hookDir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_add_hookdir(handle, str)
 	})
 }
 
-func (h Handle) SetHookDirs(hookDirs ...string) error {
+func (h *Handle) SetHookDirs(hookDirs []string) error {
 	return h.optionSetList(hookDirs, func(handle *C.alpm_handle_t, l *C.alpm_list_t) C.int {
 		return C.alpm_option_set_hookdirs(handle, l)
 	})
 }
 
-func (h Handle) RemoveHookDir(dir string) (bool, error) {
+func (h *Handle) RemoveHookDir(dir string) (bool, error) {
 	return h.optionRemoveList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_remove_hookdir(handle, str)
 	})
 }
 
-func (h Handle) LogFile() (string, error) {
+func (h *Handle) LogFile() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
 		return C.alpm_option_get_logfile(handle)
 	})
 }
 
-func (h Handle) SetLogFile(str string) error {
+func (h *Handle) SetLogFile(str string) error {
 	return h.optionSetStr(str, func(handle *C.alpm_handle_t, c_str *C.char) C.int {
 		return C.alpm_option_set_logfile(handle, c_str)
 	})
 }
 
-func (h Handle) GPGDir() (string, error) {
+func (h *Handle) GPGDir() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
 		return C.alpm_option_get_gpgdir(handle)
 	})
 }
 
-func (h Handle) SetGPGDir(str string) error {
+func (h *Handle) SetGPGDir(str string) error {
 	return h.optionSetStr(str, func(handle *C.alpm_handle_t, c_str *C.char) C.int {
 		return C.alpm_option_set_gpgdir(handle, c_str)
 	})
 }
 
-func (h Handle) UseSyslog() (bool, error) {
+func (h *Handle) UseSyslog() (bool, error) {
 	ok := C.alpm_option_get_usesyslog(h.ptr)
 	b := false
 
@@ -254,7 +217,7 @@ func (h Handle) UseSyslog() (bool, error) {
 	return b, nil
 }
 
-func (h Handle) SetUseSyslog(value bool) error {
+func (h *Handle) SetUseSyslog(value bool) error {
 	var intValue C.int
 	if value {
 		intValue = 1
@@ -267,115 +230,115 @@ func (h Handle) SetUseSyslog(value bool) error {
 	return nil
 }
 
-func (h Handle) NoUpgrades() (StringList, error) {
+func (h *Handle) NoUpgrades() (StringList, error) {
 	return h.optionGetList(func(handle *C.alpm_handle_t) *C.alpm_list_t {
 		return C.alpm_option_get_noupgrades(handle)
 	})
 }
 
-func (h Handle) AddNoUpgrade(hookDir string) error {
+func (h *Handle) AddNoUpgrade(hookDir string) error {
 	return h.optionAddList(hookDir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_add_noupgrade(handle, str)
 	})
 }
 
-func (h Handle) SetNoUpgrades(hookDirs ...string) error {
+func (h *Handle) SetNoUpgrades(hookDirs []string) error {
 	return h.optionSetList(hookDirs, func(handle *C.alpm_handle_t, l *C.alpm_list_t) C.int {
 		return C.alpm_option_set_noupgrades(handle, l)
 	})
 }
 
-func (h Handle) RemoveNoUpgrade(dir string) (bool, error) {
+func (h *Handle) RemoveNoUpgrade(dir string) (bool, error) {
 	return h.optionRemoveList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_remove_noupgrade(handle, str)
 	})
 }
 
-func (h Handle) MatchNoUpgrade(dir string) (bool, error) {
+func (h *Handle) MatchNoUpgrade(dir string) (bool, error) {
 	return h.optionMatchList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_match_noupgrade(handle, str)
 	})
 }
 
-func (h Handle) NoExtracts() (StringList, error) {
+func (h *Handle) NoExtracts() (StringList, error) {
 	return h.optionGetList(func(handle *C.alpm_handle_t) *C.alpm_list_t {
 		return C.alpm_option_get_noextracts(handle)
 	})
 }
 
-func (h Handle) AddNoExtract(hookDir string) error {
+func (h *Handle) AddNoExtract(hookDir string) error {
 	return h.optionAddList(hookDir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_add_noextract(handle, str)
 	})
 }
 
-func (h Handle) SetNoExtracts(hookDirs ...string) error {
+func (h *Handle) SetNoExtracts(hookDirs []string) error {
 	return h.optionSetList(hookDirs, func(handle *C.alpm_handle_t, l *C.alpm_list_t) C.int {
 		return C.alpm_option_set_noextracts(handle, l)
 	})
 }
 
-func (h Handle) RemoveNoExtract(dir string) (bool, error) {
+func (h *Handle) RemoveNoExtract(dir string) (bool, error) {
 	return h.optionRemoveList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_remove_noextract(handle, str)
 	})
 }
 
-func (h Handle) MatchNoExtract(dir string) (bool, error) {
+func (h *Handle) MatchNoExtract(dir string) (bool, error) {
 	return h.optionMatchList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_match_noextract(handle, str)
 	})
 }
 
-func (h Handle) IgnorePkgs() (StringList, error) {
+func (h *Handle) IgnorePkgs() (StringList, error) {
 	return h.optionGetList(func(handle *C.alpm_handle_t) *C.alpm_list_t {
 		return C.alpm_option_get_ignorepkgs(handle)
 	})
 }
 
-func (h Handle) AddIgnorePkg(hookDir string) error {
+func (h *Handle) AddIgnorePkg(hookDir string) error {
 	return h.optionAddList(hookDir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_add_ignorepkg(handle, str)
 	})
 }
 
-func (h Handle) SetIgnorePkgs(hookDirs ...string) error {
+func (h *Handle) SetIgnorePkgs(hookDirs []string) error {
 	return h.optionSetList(hookDirs, func(handle *C.alpm_handle_t, l *C.alpm_list_t) C.int {
 		return C.alpm_option_set_ignorepkgs(handle, l)
 	})
 }
 
-func (h Handle) RemoveIgnorePkg(dir string) (bool, error) {
+func (h *Handle) RemoveIgnorePkg(dir string) (bool, error) {
 	return h.optionRemoveList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_remove_ignorepkg(handle, str)
 	})
 }
 
-func (h Handle) IgnoreGroups() (StringList, error) {
+func (h *Handle) IgnoreGroups() (StringList, error) {
 	return h.optionGetList(func(handle *C.alpm_handle_t) *C.alpm_list_t {
 		return C.alpm_option_get_ignoregroups(handle)
 	})
 }
 
-func (h Handle) AddIgnoreGroup(hookDir string) error {
+func (h *Handle) AddIgnoreGroup(hookDir string) error {
 	return h.optionAddList(hookDir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_add_ignoregroup(handle, str)
 	})
 }
 
-func (h Handle) SetIgnoreGroups(hookDirs ...string) error {
+func (h *Handle) SetIgnoreGroups(hookDirs []string) error {
 	return h.optionSetList(hookDirs, func(handle *C.alpm_handle_t, l *C.alpm_list_t) C.int {
 		return C.alpm_option_set_ignoregroups(handle, l)
 	})
 }
 
-func (h Handle) RemoveIgnoreGroup(dir string) (bool, error) {
+func (h *Handle) RemoveIgnoreGroup(dir string) (bool, error) {
 	return h.optionRemoveList(dir, func(handle *C.alpm_handle_t, str *C.char) C.int {
 		return C.alpm_option_remove_ignoregroup(handle, str)
 	})
 }
 
-/*func (h Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringList, error){
+/*func (h *Handle) optionGetList(f func(*C.alpm_handle_t) *C.alpm_list_t) (StringList, error){
 	alpmList := f(h.ptr)
 	goList := StringList{(*list)(unsafe.Pointer(alpmList))}
 
@@ -386,7 +349,7 @@ func (h Handle) RemoveIgnoreGroup(dir string) (bool, error) {
 }*/
 
 //use alpm_depend_t
-func (h Handle) AssumeInstalled() (DependList, error) {
+func (h *Handle) AssumeInstalled() (DependList, error) {
 	alpmList := C.alpm_option_get_assumeinstalled(h.ptr)
 	depList := DependList{(*list)(unsafe.Pointer(alpmList))}
 
@@ -396,7 +359,7 @@ func (h Handle) AssumeInstalled() (DependList, error) {
 	return depList, nil
 }
 
-func (h Handle) AddAssumeInstalled(dep Depend) error {
+func (h *Handle) AddAssumeInstalled(dep Depend) error {
 	cDep := convertCDepend(dep)
 	defer freeCDepend(cDep)
 
@@ -407,7 +370,7 @@ func (h Handle) AddAssumeInstalled(dep Depend) error {
 	return nil
 }
 
-func (h Handle) SetAssumeInstalled(deps ...Depend) error {
+func (h *Handle) SetAssumeInstalled(deps []Depend) error {
 	//calling this function the first time causes alpm to set the
 	//assumeinstalled list to a list containing go allocated alpm_depend_t's
 	//this is bad because alpm might at some point tree to free them
@@ -435,7 +398,7 @@ func (h Handle) SetAssumeInstalled(deps ...Depend) error {
 
 }
 
-func (h Handle) RemoveAssumeInstalled(dep Depend) (bool, error) {
+func (h *Handle) RemoveAssumeInstalled(dep Depend) (bool, error) {
 	//internally alpm uses alpm_list_remove to remove a alpm_depend_t from
 	//the list
 	//i believe this function considers items equal if they are the same
@@ -460,19 +423,19 @@ func (h Handle) RemoveAssumeInstalled(dep Depend) (bool, error) {
 	return ok == 1, nil
 }
 
-func (h Handle) Arch() (string, error) {
+func (h *Handle) Arch() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
 		return C.alpm_option_get_arch(handle)
 	})
 }
 
-func (h Handle) SetArch(str string) error {
+func (h *Handle) SetArch(str string) error {
 	return h.optionSetStr(str, func(handle *C.alpm_handle_t, cStr *C.char) C.int {
 		return C.alpm_option_set_arch(handle, cStr)
 	})
 }
 
-func (h Handle) DeltaRatio() (float64, error) {
+func (h *Handle) DeltaRatio() (float64, error) {
 	ok := C.alpm_option_get_deltaratio(h.ptr)
 	if ok < 0 {
 		return float64(ok), h.LastError()
@@ -480,7 +443,7 @@ func (h Handle) DeltaRatio() (float64, error) {
 	return float64(ok), nil
 }
 
-func (h Handle) SetDeltaRatio(ratio float64) error {
+func (h *Handle) SetDeltaRatio(ratio float64) error {
 	ok := C.alpm_option_set_deltaratio(h.ptr, C.double(ratio))
 	if ok < 0 {
 		return h.LastError()
@@ -488,7 +451,26 @@ func (h Handle) SetDeltaRatio(ratio float64) error {
 	return nil
 }
 
-func (h Handle) CheckSpace() (bool, error) {
+// LocalDB returns the local database relative to the given handle.
+func (h *Handle) LocalDB() (*DB, error) {
+	db := C.alpm_get_localdb(h.ptr)
+	if db == nil {
+		return nil, h.LastError()
+	}
+	return &DB{db, *h}, nil
+}
+
+// SyncDBs returns list of Synced DBs.
+func (h *Handle) SyncDBs() (DBList, error) {
+	dblist := C.alpm_get_syncdbs(h.ptr)
+	if dblist == nil {
+		return DBList{nil, *h}, h.LastError()
+	}
+	dblistPtr := unsafe.Pointer(dblist)
+	return DBList{(*list)(dblistPtr), *h}, nil
+}
+
+func (h *Handle) CheckSpace() (bool, error) {
 	ok := C.alpm_option_get_checkspace(h.ptr)
 	b := false
 
@@ -501,7 +483,7 @@ func (h Handle) CheckSpace() (bool, error) {
 	return b, nil
 }
 
-func (h Handle) SetCheckSpace(value bool) error {
+func (h *Handle) SetCheckSpace(value bool) error {
 	var cValue C.int
 	if value {
 		cValue = 1
@@ -514,19 +496,19 @@ func (h Handle) SetCheckSpace(value bool) error {
 	return nil
 }
 
-func (h Handle) DBExt() (string, error) {
+func (h *Handle) DBExt() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
 		return C.alpm_option_get_dbext(handle)
 	})
 }
 
-func (h Handle) SetDBExt(str string) error {
+func (h *Handle) SetDBExt(str string) error {
 	return h.optionSetStr(str, func(handle *C.alpm_handle_t, cStr *C.char) C.int {
 		return C.alpm_option_set_dbext(handle, cStr)
 	})
 }
 
-func (h Handle) GetDefaultSigLevel() (SigLevel, error) {
+func (h *Handle) GetDefaultSigLevel() (SigLevel, error) {
 	sigLevel := C.alpm_option_get_default_siglevel(h.ptr)
 
 	if sigLevel < 0 {
@@ -535,7 +517,7 @@ func (h Handle) GetDefaultSigLevel() (SigLevel, error) {
 	return SigLevel(sigLevel), nil
 }
 
-func (h Handle) SetDefaultSigLevel(siglevel SigLevel) error {
+func (h *Handle) SetDefaultSigLevel(siglevel SigLevel) error {
 	ok := C.alpm_option_set_default_siglevel(h.ptr, C.int(siglevel))
 
 	if ok < 0 {
@@ -544,7 +526,7 @@ func (h Handle) SetDefaultSigLevel(siglevel SigLevel) error {
 	return nil
 }
 
-func (h Handle) GetLocalFileSigLevel() (SigLevel, error) {
+func (h *Handle) GetLocalFileSigLevel() (SigLevel, error) {
 	sigLevel := C.alpm_option_get_local_file_siglevel(h.ptr)
 
 	if sigLevel < 0 {
@@ -553,7 +535,7 @@ func (h Handle) GetLocalFileSigLevel() (SigLevel, error) {
 	return SigLevel(sigLevel), nil
 }
 
-func (h Handle) SetLocalFileSigLevel(siglevel SigLevel) error {
+func (h *Handle) SetLocalFileSigLevel(siglevel SigLevel) error {
 	ok := C.alpm_option_set_local_file_siglevel(h.ptr, C.int(siglevel))
 
 	if ok < 0 {
@@ -562,7 +544,7 @@ func (h Handle) SetLocalFileSigLevel(siglevel SigLevel) error {
 	return nil
 }
 
-func (h Handle) GetRemoteFileSigLevel() (SigLevel, error) {
+func (h *Handle) GetRemoteFileSigLevel() (SigLevel, error) {
 	sigLevel := C.alpm_option_get_remote_file_siglevel(h.ptr)
 
 	if sigLevel < 0 {
@@ -571,7 +553,7 @@ func (h Handle) GetRemoteFileSigLevel() (SigLevel, error) {
 	return SigLevel(sigLevel), nil
 }
 
-func (h Handle) SetRemoteFileSigLevel(siglevel SigLevel) error {
+func (h *Handle) SetRemoteFileSigLevel(siglevel SigLevel) error {
 	ok := C.alpm_option_set_remote_file_siglevel(h.ptr, C.int(siglevel))
 
 	if ok < 0 {

@@ -347,24 +347,24 @@ func install(parser *arguments) error {
 	return nil
 }
 
-func inRepos(syncDb alpm.DbList, pkg string) bool {
+func inRepos(syncDB alpm.DBList, pkg string) bool {
 	target := toTarget(pkg)
 
-	if target.Db == "aur" {
+	if target.DB == "aur" {
 		return false
-	} else if target.Db != "" {
+	} else if target.DB != "" {
 		return true
 	}
 
 	previousHideMenus := hideMenus
 	hideMenus = false
-	_, err := syncDb.FindSatisfier(target.DepString())
+	_, err := syncDB.FindSatisfier(target.DepString())
 	hideMenus = previousHideMenus
 	if err == nil {
 		return true
 	}
 
-	_, err = syncDb.PkgCachebyGroup(target.Name)
+	_, err = syncDB.FindGroupPkgs(target.Name)
 	if err == nil {
 		return true
 	}
@@ -379,7 +379,7 @@ func earlyPacmanCall(parser *arguments) error {
 	parser.clearTargets()
 	arguments.clearTargets()
 
-	syncDb, err := alpmHandle.SyncDbs()
+	syncDB, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return err
 	}
@@ -389,7 +389,7 @@ func earlyPacmanCall(parser *arguments) error {
 	} else {
 		//separate aur and repo targets
 		for _, target := range targets {
-			if inRepos(syncDb, target) {
+			if inRepos(syncDB, target) {
 				arguments.addTarget(target)
 			} else {
 				parser.addTarget(target)
@@ -950,7 +950,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		if cmdArgs.existsArg("needed") {
 			installed := true
 			for _, split := range base {
-				if alpmpkg, err := dp.LocalDb.PkgByName(split.Name); err != nil || alpmpkg.Version() != version {
+				if alpmpkg, err := dp.LocalDB.Pkg(split.Name); err != nil || alpmpkg.Version() != version {
 					installed = false
 				}
 			}

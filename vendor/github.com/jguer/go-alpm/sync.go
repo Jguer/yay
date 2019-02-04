@@ -11,6 +11,18 @@ package alpm
 */
 import "C"
 
+import "unsafe"
+
+// NewVersion checks if there is a new version of the package in a given DBlist.
+func (pkg *Package) SyncNewVersion(l DBList) *Package {
+	ptr := C.alpm_sync_newversion(pkg.pmpkg,
+		(*C.alpm_list_t)(unsafe.Pointer(l.list)))
+	if ptr == nil {
+		return nil
+	}
+	return &Package{ptr, l.handle}
+}
+
 func (h *Handle) SyncSysupgrade(enableDowngrade bool) error {
 	intEnableDowngrade := C.int(0)
 

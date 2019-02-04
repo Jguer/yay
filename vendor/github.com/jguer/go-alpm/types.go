@@ -243,22 +243,22 @@ func (question QuestionReplace) Replace() bool {
 	return question.ptr.replace == 1
 }
 
-func (question QuestionReplace) NewPkg(h *Handle) Package {
-	return Package{
+func (question QuestionReplace) NewPkg(h *Handle) *Package {
+	return &Package{
 		question.ptr.newpkg,
 		*h,
 	}
 }
 
-func (question QuestionReplace) OldPkg(h *Handle) Package {
-	return Package{
+func (question QuestionReplace) OldPkg(h *Handle) *Package {
+	return &Package{
 		question.ptr.oldpkg,
 		*h,
 	}
 }
 
-func (question QuestionReplace) newDb(h *Handle) Db {
-	return Db{
+func (question QuestionReplace) newDB(h *Handle) *DB {
+	return &DB{
 		question.ptr.newdb,
 		*h,
 	}

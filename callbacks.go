@@ -37,10 +37,10 @@ func questionCallback(question alpm.QuestionAny) {
 	var db string
 
 	qp.Providers(alpmHandle).ForEach(func(pkg alpm.Package) error {
-		thisDb := pkg.DB().Name()
+		thisDB := pkg.DB().Name()
 
-		if db != thisDb {
-			db = thisDb
+		if db != thisDB {
+			db = thisDB
 			str += bold(cyan("\n:: ")) + bold("Repository "+db+"\n    ")
 		}
 		str += fmt.Sprintf("%d) %s ", size, pkg.Name())

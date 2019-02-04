@@ -18,61 +18,42 @@ import (
 	"unsafe"
 )
 
-// Db structure representing a alpm database.
-type Db struct {
+// DB structure representing a alpm database.
+type DB struct {
 	ptr    *C.alpm_db_t
 	handle Handle
 }
 
-// DbList structure representing a alpm database list.
-type DbList struct {
+// DBList structure representing a alpm database list.
+type DBList struct {
 	*list
 	handle Handle
 }
 
-// ForEach executes an action on each Db.
-func (l DbList) ForEach(f func(Db) error) error {
+// ForEach executes an action on each DB.
+func (l DBList) ForEach(f func(DB) error) error {
 	return l.forEach(func(p unsafe.Pointer) error {
-		return f(Db{(*C.alpm_db_t)(p), l.handle})
+		return f(DB{(*C.alpm_db_t)(p), l.handle})
 	})
 }
 
-// Slice converst Db list to Db slice.
-func (l DbList) Slice() []Db {
-	slice := []Db{}
-	l.ForEach(func(db Db) error {
+// Slice converst DB list to DB slice.
+func (l DBList) Slice() []DB {
+	slice := []DB{}
+	l.ForEach(func(db DB) error {
 		slice = append(slice, db)
 		return nil
 	})
 	return slice
 }
 
-// LocalDb returns the local database relative to the given handle.
-func (h Handle) LocalDb() (*Db, error) {
-	db := C.alpm_get_localdb(h.ptr)
-	if db == nil {
-		return nil, h.LastError()
-	}
-	return &Db{db, h}, nil
-}
-
-// SyncDbs returns list of Synced DBs.
-func (h Handle) SyncDbs() (DbList, error) {
-	dblist := C.alpm_get_syncdbs(h.ptr)
-	if dblist == nil {
-		return DbList{nil, h}, h.LastError()
-	}
-	dblistPtr := unsafe.Pointer(dblist)
-	return DbList{(*list)(dblistPtr), h}, nil
-}
-
-// SyncDbByName finds a registered database by name.
-func (h Handle) SyncDbByName(name string) (db *Db, err error) {
-	dblist, err := h.SyncDbs()
+// SyncDBByName finds a registered database by name.
+func (h *Handle) SyncDBByName(name string) (db *DB, err error) {
+	dblist, err := h.SyncDBs()
 	if err != nil {
 		return nil, err
 	}
-	dblist.ForEach(func(b Db) error {
+	dblist.ForEach(func(b DB) error {
 		if b.Name() == name {
 			db = &b
 			return io.EOF
@@ -85,8 +66,8 @@ func (h Handle) SyncDbByName(name string) (db *Db, err error) {
 	return nil, fmt.Errorf("database %s not found", name)
 }
 
-// RegisterSyncDb Loads a sync database with given name and signature check level.
-func (h Handle) RegisterSyncDb(dbname string, siglevel SigLevel) (*Db, error) {
+// RegisterSyncDB Loads a sync database with given name and signature check level.
+func (h *Handle) RegisterSyncDB(dbname string, siglevel SigLevel) (*DB, error) {
 	cName := C.CString(dbname)
 	defer C.free(unsafe.Pointer(cName))
 
@@ -94,22 +75,40 @@ func (h Handle) RegisterSyncDb(dbname string, siglevel SigLevel) (*Db, error) {
 	if db == nil {
 		return nil, h.LastError()
 	}
-	return &Db{db, h}, nil
+	return &DB{db, *h}, nil
+}
+
+func (db *DB) Unregister() error {
+	ok := C.alpm_db_unregister(db.ptr)
+	if ok != 0 {
+		return db.handle.LastError()
+	}
+
+	return nil
+}
+
+func (h *Handle) UnregisterAllSyncDBs() error {
+	ok := C.alpm_unregister_all_syncdbs(h.ptr)
+	if ok != 0 {
+		return h.LastError()
+	}
+
+	return nil
 }
 
 // Name returns name of the db
-func (db Db) Name() string {
+func (db *DB) Name() string {
 	return C.GoString(C.alpm_db_get_name(db.ptr))
 }
 
 // Servers returns host server URL.
-func (db Db) Servers() []string {
+func (db *DB) Servers() []string {
 	ptr := unsafe.Pointer(C.alpm_db_get_servers(db.ptr))
 	return StringList{(*list)(ptr)}.Slice()
 }
 
 // SetServers sets server list to use.
-func (db Db) SetServers(servers []string) {
+func (db *DB) SetServers(servers []string) {
 	C.alpm_db_set_servers(db.ptr, nil)
 	for _, srv := range servers {
 		Csrv := C.CString(srv)
@@ -118,47 +117,50 @@ func (db Db) SetServers(servers []string) {
 	}
 }
 
+// AddServers adds a string to the server list.
+func (db *DB) AddServer(server string) {
+	Csrv := C.CString(server)
+	defer C.free(unsafe.Pointer(Csrv))
+	C.alpm_db_add_server(db.ptr, Csrv)
+}
+
 // SetUsage sets the Usage of the database
-func (db Db) SetUsage(usage Usage) {
+func (db *DB) SetUsage(usage Usage) {
 	C.alpm_db_set_usage(db.ptr, C.int(usage))
 }
 
-// PkgByName searches a package in db.
-func (db Db) PkgByName(name string) (*Package, error) {
+// Name searches a package in db.
+func (db *DB) Pkg(name string) (*Package, error) {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
 	ptr := C.alpm_db_get_pkg(db.ptr, cName)
 	if ptr == nil {
-		return nil,
-			fmt.Errorf("Error when retrieving %s from database %s: %s",
-				name, db.Name(), db.handle.LastError())
+		return nil, db.handle.LastError()
 	}
 	return &Package{ptr, db.handle}, nil
 }
 
 // PkgCachebyGroup returns a PackageList of packages belonging to a group
-func (l DbList) PkgCachebyGroup(name string) (PackageList, error) {
+func (l DBList) FindGroupPkgs(name string) (PackageList, error) {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
 	pkglist := (*C.struct___alpm_list_t)(unsafe.Pointer(l.list))
 
 	pkgcache := (*list)(unsafe.Pointer(C.alpm_find_group_pkgs(pkglist, cName)))
 	if pkgcache == nil {
-		return PackageList{pkgcache, l.handle},
-			fmt.Errorf("Error when retrieving group %s from database list: %s",
-				name, l.handle.LastError())
+		return PackageList{pkgcache, l.handle}, l.handle.LastError()
 	}
 
 	return PackageList{pkgcache, l.handle}, nil
 }
 
 // PkgCache returns the list of packages of the database
-func (db Db) PkgCache() PackageList {
+func (db *DB) PkgCache() PackageList {
 	pkgcache := (*list)(unsafe.Pointer(C.alpm_db_get_pkgcache(db.ptr)))
 	return PackageList{pkgcache, db.handle}
 }
 
-func (db Db) Search(targets []string) PackageList {
+func (db *DB) Search(targets []string) PackageList {
 	var needles *C.alpm_list_t
 
 	for _, str := range targets {

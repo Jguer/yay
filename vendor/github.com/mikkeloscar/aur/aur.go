@@ -68,33 +68,62 @@ func get(values url.Values) ([]Pkg, error) {
 	return result.Results, nil
 }
 
-// Search searches for packages by package name.
-func Search(query string) ([]Pkg, error) {
+func searchBy(query, by string) ([]Pkg, error) {
 	v := url.Values{}
 	v.Set("type", "search")
 	v.Set("arg", query)
 
+	if by != "" {
+		v.Set("by", by)
+	}
+
 	return get(v)
+}
+
+// Search searches for packages by the RPC's default defautl field.
+// This is the same as SearchByNameDesc
+func Search(query string) ([]Pkg, error) {
+	return searchBy(query, "")
+}
+
+// Search searches for packages by package name.
+func SearchByName(query string) ([]Pkg, error) {
+	return searchBy(query, "name")
 }
 
 // SearchByNameDesc searches for package by package name and description.
 func SearchByNameDesc(query string) ([]Pkg, error) {
-	v := url.Values{}
-	v.Set("type", "search")
-	v.Set("by", "name-desc")
-	v.Set("arg", query)
-
-	return get(v)
+	return searchBy(query, "name-desc")
 }
 
 // SearchByMaintainer searches for package by maintainer.
 func SearchByMaintainer(query string) ([]Pkg, error) {
-	v := url.Values{}
-	v.Set("type", "search")
-	v.Set("by", "maintainer")
-	v.Set("arg", query)
+	return searchBy(query, "maintainer")
+}
 
-	return get(v)
+// SearchByDepends searches for packages that depend on query
+func SearchByDepends(query string) ([]Pkg, error) {
+	return searchBy(query, "depends")
+}
+
+// SearchByMakeDepends searches for packages that makedepend on query
+func SearchByMakeDepends(query string) ([]Pkg, error) {
+	return searchBy(query, "makedepends")
+}
+
+// SearchByOptDepends searches for packages that optdepend on query
+func SearchByOptDepends(query string) ([]Pkg, error) {
+	return searchBy(query, "optdepends")
+}
+
+// SearchByCheckDepends searches for packages that checkdepend on query
+func SearchByCheckDepends(query string) ([]Pkg, error) {
+	return searchBy(query, "checkdepends")
+}
+
+// Orphans returns all orphan packages in the AUR.
+func Orphans() ([]Pkg, error) {
+	return SearchByMaintainer("")
 }
 
 // Info shows info for one or multiple packages.

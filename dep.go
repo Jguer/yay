@@ -140,7 +140,7 @@ func satisfiesRepo(dep string, pkg *alpm.Package) bool {
 }
 
 //split apart db/package to db and package
-func splitDbFromName(pkg string) (string, string) {
+func splitDBFromName(pkg string) (string, string) {
 	split := strings.SplitN(pkg, "/", 2)
 
 	if len(split) == 2 {

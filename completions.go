@@ -32,12 +32,12 @@ func createAURList(out *os.File) (err error) {
 
 //CreatePackageList appends Repo packages to completion cache
 func createRepoList(out *os.File) (err error) {
-	dbList, err := alpmHandle.SyncDbs()
+	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return
 	}
 
-	_ = dbList.ForEach(func(db alpm.Db) error {
+	_ = dbList.ForEach(func(db alpm.DB) error {
 		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
 			out.WriteString(pkg.Name())
 			out.WriteString("\t" + pkg.DB().Name() + "\n")
