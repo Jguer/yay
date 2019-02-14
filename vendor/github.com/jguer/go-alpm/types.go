@@ -106,6 +106,18 @@ func (l *list) forEach(f func(unsafe.Pointer) error) error {
 	return nil
 }
 
+func (l *list) Len() int {
+	count := 0
+	for ; l != nil; l = l.Next {
+		count++
+	}
+	return count
+}
+
+func (l *list) Empty() bool {
+	return l == nil
+}
+
 type StringList struct {
 	*list
 }

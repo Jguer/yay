@@ -134,8 +134,8 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			//the user specified a db but there's no easy way to do
 			//it without making alpm_lists so don't bother for now
 			//db/group is probably a rare use case
-			group, err := dp.SyncDB.FindGroupPkgs(target.Name)
-			if err == nil {
+			group := dp.SyncDB.FindGroupPkgs(target.Name)
+			if !group.Empty() {
 				dp.Groups = append(dp.Groups, target.String())
 				group.ForEach(func(pkg alpm.Package) error {
 					dp.Explicit.set(pkg.Name())
@@ -207,7 +207,7 @@ func (dp *depPool) findProvides(pkgs stringSet) error {
 	}
 
 	for pkg := range pkgs {
-		if _, err := dp.LocalDB.Pkg(pkg); err == nil {
+		if dp.LocalDB.Pkg(pkg) != nil {
 			continue
 		}
 		wg.Add(1)
@@ -389,7 +389,7 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 	seen := make(stringSet)
 	providers := makeProviders(depName)
 
-	if _, err := dp.LocalDB.Pkg(depName); err == nil {
+	if dp.LocalDB.Pkg(depName) != nil {
 		if pkg, ok := dp.AurCache[dep]; ok && pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			return pkg
 		}

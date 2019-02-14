@@ -80,8 +80,8 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 			if found {
 				return nil
 			}
-			_, err := d.Pkg(k.Name())
-			if err == nil {
+
+			if d.Pkg(k.Name()) != nil {
 				found = true
 				local = append(local, k)
 				localNames = append(localNames, k.Name())
@@ -301,9 +301,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		}
 
 		_ = dbList.ForEach(func(db alpm.DB) error {
-			_, err := db.Pkg(name)
-
-			if err == nil {
+			if db.Pkg(name) != nil {
 				found = true
 				return fmt.Errorf("")
 
@@ -312,8 +310,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		})
 
 		if !found {
-			_, errdb := dbList.FindGroupPkgs(name)
-			found = errdb == nil
+			found = !dbList.FindGroupPkgs(name).Empty()
 		}
 
 		if found {

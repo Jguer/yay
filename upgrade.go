@@ -304,10 +304,9 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 
 	alpmHandle.SyncSysupgrade(cmdArgs.existsDouble("u", "sysupgrade"))
 	alpmHandle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
-		localPkg, err := localDB.Pkg(pkg.Name())
 		localVer := "-"
 
-		if err == nil {
+		if localPkg := localDB.Pkg(pkg.Name()); localPkg != nil {
 			localVer = localPkg.Version()
 		}
 

@@ -130,28 +130,20 @@ func (db *DB) SetUsage(usage Usage) {
 }
 
 // Name searches a package in db.
-func (db *DB) Pkg(name string) (*Package, error) {
+func (db *DB) Pkg(name string) *Package {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
 	ptr := C.alpm_db_get_pkg(db.ptr, cName)
-	if ptr == nil {
-		return nil, db.handle.LastError()
-	}
-	return &Package{ptr, db.handle}, nil
+	return &Package{ptr, db.handle}
 }
 
 // PkgCachebyGroup returns a PackageList of packages belonging to a group
-func (l DBList) FindGroupPkgs(name string) (PackageList, error) {
+func (l DBList) FindGroupPkgs(name string) PackageList {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
 	pkglist := (*C.struct___alpm_list_t)(unsafe.Pointer(l.list))
-
 	pkgcache := (*list)(unsafe.Pointer(C.alpm_find_group_pkgs(pkglist, cName)))
-	if pkgcache == nil {
-		return PackageList{pkgcache, l.handle}, l.handle.LastError()
-	}
-
-	return PackageList{pkgcache, l.handle}, nil
+	return PackageList{pkgcache, l.handle}
 }
 
 // PkgCache returns the list of packages of the database
