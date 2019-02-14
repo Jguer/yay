@@ -216,11 +216,11 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 
 		if pkgDB != "" {
 			if db, err := alpmHandle.SyncDBByName(pkgDB); err == nil {
-				pkg, err = db.Pkg(name)
+				pkg  = db.Pkg(name)
 			}
 		} else {
 			dbList.ForEach(func(db alpm.DB) error {
-				if pkg, err = db.Pkg(name); err == nil {
+				if pkg = db.Pkg(name); pkg != nil {
 					return fmt.Errorf("")
 				}
 				return nil

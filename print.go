@@ -88,7 +88,7 @@ func (q aurQuery) printSearch(start int) {
 			toprint += bold(red("(Out-of-date "+formatTime(res.OutOfDate)+")")) + " "
 		}
 
-		if pkg, err := localDB.Pkg(res.Name); err == nil {
+		if pkg := localDB.Pkg(res.Name); pkg != nil {
 			if pkg.Version() != res.Version {
 				toprint += bold(green("(Installed: " + pkg.Version() + ")"))
 			} else {
@@ -126,7 +126,7 @@ func (s repoQuery) printSearch() {
 
 		localDB, err := alpmHandle.LocalDB()
 		if err == nil {
-			if pkg, err := localDB.Pkg(res.Name()); err == nil {
+			if pkg := localDB.Pkg(res.Name()); pkg != nil {
 				if pkg.Version() != res.Version() {
 					toprint += bold(green("(Installed: " + pkg.Version() + ")"))
 				} else {

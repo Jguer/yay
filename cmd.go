@@ -419,7 +419,7 @@ func syncList(parser *arguments) error {
 			} else {
 				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green("unknown-version")))
 
-				if _, err := localDB.Pkg(name); err == nil {
+				if localDB.Pkg(name) != nil {
 					fmt.Print(bold(blue(" [Installed]")))
 				}
 

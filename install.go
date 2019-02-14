@@ -364,12 +364,7 @@ func inRepos(syncDB alpm.DBList, pkg string) bool {
 		return true
 	}
 
-	_, err = syncDB.FindGroupPkgs(target.Name)
-	if err == nil {
-		return true
-	}
-
-	return false
+	return !syncDB.FindGroupPkgs(target.Name).Empty()
 }
 
 func earlyPacmanCall(parser *arguments) error {
@@ -950,7 +945,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		if cmdArgs.existsArg("needed") {
 			installed := true
 			for _, split := range base {
-				if alpmpkg, err := dp.LocalDB.Pkg(split.Name); err != nil || alpmpkg.Version() != version {
+				if alpmpkg := dp.LocalDB.Pkg(split.Name); alpmpkg == nil || alpmpkg.Version() != version {
 					installed = false
 				}
 			}
