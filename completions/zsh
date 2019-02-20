@@ -89,7 +89,7 @@ _pacman_opts_common=(
 	'--noredownload[Skip pkgbuild download if in cache and up to date]'
 	'--rebuild[Always build target packages]'
 	'--rebuildall[Always build all AUR packages]'
-	'--provides[Look for matching provders when searching for packages]'
+	'--provides[Look for matching providers when searching for packages]'
 	'--noprovides[Just look for packages by pkgname]'
 	'--pgpfetch[Prompt to import PGP keys from PKGBUILDs]'
 	"--nopgpfetch[Don't prompt to import PGP keys]"
