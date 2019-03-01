@@ -486,8 +486,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 		}
 		mux.Lock()
 		for _, _i := range tempInfo {
-			i := _i
-			info = append(info, &i)
+			info = append(info, &_i)
 		}
 		mux.Unlock()
 	}
