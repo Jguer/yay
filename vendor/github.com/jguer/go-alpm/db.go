@@ -134,6 +134,9 @@ func (db *DB) Pkg(name string) *Package {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
 	ptr := C.alpm_db_get_pkg(db.ptr, cName)
+	if ptr == nil {
+		return nil
+	}
 	return &Package{ptr, db.handle}
 }
 

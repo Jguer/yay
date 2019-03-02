@@ -8,6 +8,8 @@ github.com/jguer/go-alpm v0.0.0-20181021002825-676ad6bbf3c0 h1:MtH4SM1pw+23QhMER
 github.com/jguer/go-alpm v0.0.0-20181021002825-676ad6bbf3c0/go.mod h1:1F60/e8oQFVJrZRH0TBqwtiB5ajJ5avOc4MoGRY9CFU=
 github.com/jguer/go-alpm v0.0.0-20190214204021-327c7630865b h1:lQICb6Gw0HDAZlAGdveIp/zww2TVBwQvOM5VtAMpulc=
 github.com/jguer/go-alpm v0.0.0-20190214204021-327c7630865b/go.mod h1:1F60/e8oQFVJrZRH0TBqwtiB5ajJ5avOc4MoGRY9CFU=
+github.com/jguer/go-alpm v0.0.0-20190302211415-9c82d5170ce0 h1:wZzXS9/D7IIySAdxND1YkS2Gn4UVG5xEwHYehJ4ltNs=
+github.com/jguer/go-alpm v0.0.0-20190302211415-9c82d5170ce0/go.mod h1:1F60/e8oQFVJrZRH0TBqwtiB5ajJ5avOc4MoGRY9CFU=
 github.com/mikkeloscar/aur v0.0.0-20180725140122-f998dbf94dc4 h1:qgHSZbD0g3W7KAkZFzXlSqgriYnzEUFS1gkgEiv2GrE=
 github.com/mikkeloscar/aur v0.0.0-20180725140122-f998dbf94dc4/go.mod h1:n1NKHoldRNhIEufSx1PiDYcd2W+wpbz5/5K+p2eNDVk=
 github.com/mikkeloscar/aur v0.0.0-20181111113612-b71516da3ae9 h1:g4TBYa1sjv/TZfU9t82oYlRneu8cCVr3dnazE7os5vw=
