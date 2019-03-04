@@ -40,11 +40,12 @@ func (u upSlice) Less(i, j int) bool {
 
 	less := false
 	found := syncDB.ForEach(func(db alpm.DB) error {
-		if db.Name() == u[i].Repository {
+		switch db.Name() {
+		case u[i].Repository:
 			less = true
-		} else if db.Name() == u[j].Repository {
+		case u[j].Repository:
 			less = false
-		} else {
+		default:
 			return nil
 		}
 
