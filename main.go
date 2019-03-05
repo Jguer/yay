@@ -142,7 +142,7 @@ func initAlpm() error {
 		pacmanConf.GPGDir = value
 	}
 
-	if err = initAlpmHandle(); err != nil {
+	if err := initAlpmHandle(); err != nil {
 		return err
 	}
 
@@ -173,7 +173,7 @@ func initAlpmHandle() error {
 		return fmt.Errorf("Unable to CreateHandle: %s", err)
 	}
 
-	if err = configureAlpm(pacmanConf); err != nil {
+	if err := configureAlpm(pacmanConf); err != nil {
 		return err
 	}
 
@@ -204,7 +204,7 @@ func cleanup() int {
 }
 
 func main() {
-	if 0 == os.Geteuid() {
+	if os.Geteuid() == 0 {
 		fmt.Fprintln(os.Stderr, "Please avoid running yay as root/sudo.")
 	}
 

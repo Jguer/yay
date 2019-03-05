@@ -68,7 +68,7 @@ func syncClean(parser *arguments) error {
 	}
 
 	if mode == modeRepo || mode == modeAny {
-		if err = show(passToPacman(parser)); err != nil {
+		if err := show(passToPacman(parser)); err != nil {
 			return err
 		}
 	}

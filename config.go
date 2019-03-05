@@ -352,7 +352,6 @@ func toUsage(usages []string) alpm.Usage {
 }
 
 func configureAlpm(conf *pacmanconf.Config) error {
-	var err error
 
 	// TODO: set SigLevel
 	//sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
@@ -371,68 +370,64 @@ func configureAlpm(conf *pacmanconf.Config) error {
 
 	}
 
-	if err = alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {
+	if err := alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {
 		return err
 	}
 
 	// add hook directories 1-by-1 to avoid overwriting the system directory
 	for _, dir := range pacmanConf.HookDir {
-		if err = alpmHandle.AddHookDir(dir); err != nil {
+		if err := alpmHandle.AddHookDir(dir); err != nil {
 			return err
 		}
 	}
 
-	if err = alpmHandle.SetGPGDir(pacmanConf.GPGDir); err != nil {
+	if err := alpmHandle.SetGPGDir(pacmanConf.GPGDir); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetLogFile(pacmanConf.LogFile); err != nil {
+	if err := alpmHandle.SetLogFile(pacmanConf.LogFile); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetIgnorePkgs(pacmanConf.IgnorePkg); err != nil {
+	if err := alpmHandle.SetIgnorePkgs(pacmanConf.IgnorePkg); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetIgnoreGroups(pacmanConf.IgnoreGroup); err != nil {
+	if err := alpmHandle.SetIgnoreGroups(pacmanConf.IgnoreGroup); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetArch(pacmanConf.Architecture); err != nil {
+	if err := alpmHandle.SetArch(pacmanConf.Architecture); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetNoUpgrades(pacmanConf.NoUpgrade); err != nil {
+	if err := alpmHandle.SetNoUpgrades(pacmanConf.NoUpgrade); err != nil {
 		return err
 	}
 
-	if alpmHandle.SetNoExtracts(pacmanConf.NoExtract); err != nil {
+	if err := alpmHandle.SetNoExtracts(pacmanConf.NoExtract); err != nil {
 		return err
 	}
 
-	/*if err = alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
+	/*if err := alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetLocalFileSigLevel(localFileSigLevel); err != nil {
+	if err := alpmHandle.SetLocalFileSigLevel(localFileSigLevel); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetRemoteFileSigLevel(remoteFileSigLevel); err != nil {
+	if err := alpmHandle.SetRemoteFileSigLevel(remoteFileSigLevel); err != nil {
 		return err
 	}*/
 
-	if err = alpmHandle.SetDeltaRatio(pacmanConf.UseDelta); err != nil {
+	if err := alpmHandle.SetDeltaRatio(pacmanConf.UseDelta); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetUseSyslog(pacmanConf.UseSyslog); err != nil {
+	if err := alpmHandle.SetUseSyslog(pacmanConf.UseSyslog); err != nil {
 		return err
 	}
 
-	if err = alpmHandle.SetCheckSpace(pacmanConf.CheckSpace); err != nil {
-		return err
-	}
-
-	return nil
+	return alpmHandle.SetCheckSpace(pacmanConf.CheckSpace)
 }
