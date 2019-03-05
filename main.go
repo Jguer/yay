@@ -204,7 +204,7 @@ func cleanup() int {
 }
 
 func main() {
-	if 0 == os.Geteuid() {
+	if os.Geteuid() == 0 {
 		fmt.Fprintln(os.Stderr, "Please avoid running yay as root/sudo.")
 	}
 
