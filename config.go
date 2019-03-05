@@ -406,7 +406,7 @@ func configureAlpm(conf *pacmanconf.Config) error {
 		return err
 	}
 
-	if alpmHandle.SetNoExtracts(pacmanConf.NoExtract); err != nil {
+	if err = alpmHandle.SetNoExtracts(pacmanConf.NoExtract); err != nil {
 		return err
 	}
 
