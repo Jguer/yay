@@ -66,7 +66,7 @@ sysupgrade will only act on repository packages.
 Assume all targets are from the AUR. Additionally Actions such as
 sysupgrade will only act on AUR packages.
 
-Note that dependency resolving will still act as normal and include repository
+Note that dependency resolving will still act normally and include repository
 packages.
 
 .SH YAY OPTIONS (APPLY TO \-Y AND \-\-YAY)
@@ -90,7 +90,7 @@ Remove unneeded dependencies.
 .SH SHOW OPTIONS (APPLY TO \-P AND \-\-SHOW)
 .TP
 .B \-c, \-\-complete
-Print a list of all AUR and repo packages. This is to allow shell completion
+Print a list of all AUR and repo packages. This allows shell completion
 and is not intended to be used directly by the user.
 
 .TP
@@ -112,8 +112,8 @@ Deprecated, use \fByay -Qu\fR and \fBwc -l\fR instead\%.
 .TP
 .B \-s, \-\-stats
 Displays information about installed packages and system health. If there are
-orphaned, out\-of\-date or packages that no longer exist on the AUR warnings will
-be displayed.
+orphaned, or out\-of\-date packages, or packages that no longer exist on the
+AUR; warnings will be displayed.
 
 .TP
 .B \-u, \-\-upgrades
@@ -133,8 +133,8 @@ Only show titles when printing news.
 .TP
 .B \-f, \-\-force
 Force download for packages that already exist in the current directory. This
-is to ensure directories are not accidentally overwritten. This option is not
-needed for git based downloads as \fBgit pull\fR already has safety mechanisms.
+ensures directories are not accidentally overwritten. This option is not needed
+for git based downloads as \fBgit pull\fR already has safety mechanisms.
 
 .SH PERMANENT CONFIGURATION SETTINGS
 .TP
@@ -224,20 +224,20 @@ Sort AUR results by a specific field during search.
 .TP
 .B \-\-answerclean <All|None|Installed|NotInstalled|...>
 Set a predetermined answer for the clean build menu question. This answer
-will be used instead of reading from standard input but will be treated exactly
-the same when parsed.
+will be used instead of reading from standard input but will be parsed exactly
+the same.
 
 .TP
 .B \-\-answerdiff <All|None|Installed|NotInstalled|...>
-Set a predetermined answer for the edit diff  menu question. This answer
-will be used instead of reading from standard input but will be treated exactly
-the same when parsed.
+Set a predetermined answer for the edit diff menu question. This answer
+will be used instead of reading from standard input but will be parsed exactly
+the same.
 
 .TP
 .B \-\-answeredit <All|None|Installed|NotInstalled|...>
 Set a predetermined answer for the edit pkgbuild menu question. This answer
-will be used instead of reading from standard input but will be treated exactly
-the same when parsed.
+will be used instead of reading from standard input but will be parsed exactly
+the same.
 
 .TP
 .B \-\-answerupgrade <Repo|^Repo|None|...>
@@ -535,7 +535,7 @@ pacaur-like devel check.
 .SH FILES
 .TP
 .B CONFIG DIRECTORY
-The config directory is \fI$XDG_CONFIG_HOME/yay/\fR. if
+The config directory is \fI$XDG_CONFIG_HOME/yay/\fR. If
 \fB$XDG_CONFIG_HOME\fR is unset, the config directory will fall back to
 \fI$HOME/.config/yay\fR.
 
@@ -545,7 +545,7 @@ mentioned in \fBPERMANENT CONFIGURATION SETTINGS\fR.
 
 .TP
 .B CACHE DIRECTORY
-The cache directory is \fI$XDG_CACHE_HOME/yay/\fR. if
+The cache directory is \fI$XDG_CACHE_HOME/yay/\fR. If
 \fB$XDG_CACHE_HOME\fR is unset, the cache directory will fall back to
 \fI$HOME/.cache/yay\fR.
 
