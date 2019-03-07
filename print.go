@@ -189,7 +189,7 @@ func (u upSlice) print() {
 	}
 }
 
-// printDownloadsFromRepo prints repository packages to be downloaded
+// Print prints repository packages to be downloaded
 func (do *depOrder) Print() {
 	repo := ""
 	repoMake := ""
