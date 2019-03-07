@@ -134,7 +134,7 @@ func install(parser *arguments) error {
 		return show(passToPacman(parser))
 	}
 
-	if len(dp.Aur) > 0 && 0 == os.Geteuid() {
+	if len(dp.Aur) > 0 && os.Geteuid() == 0 {
 		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
@@ -165,12 +165,13 @@ func install(parser *arguments) error {
 	fmt.Println()
 
 	if do.HasMake() {
-		if config.RemoveMake == "yes" {
+		switch config.RemoveMake {
+		case "yes":
 			removeMake = true
-		} else if config.RemoveMake == "no" {
+		case "no":
 			removeMake = false
-		} else if continueTask("Remove make dependencies after install?", false) {
-			removeMake = true
+		default:
+			removeMake = continueTask("Remove make dependencies after install?", false)
 		}
 	}
 

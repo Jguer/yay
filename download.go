@@ -164,15 +164,16 @@ func getPkgbuilds(pkgs []string) error {
 		for _, base := range allBases {
 			name := base.Pkgbase()
 			_, err = os.Stat(filepath.Join(wd, name))
-			if err != nil && !os.IsNotExist(err) {
+			switch {
+			case err != nil && !os.IsNotExist(err):
 				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 				continue
-			} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") || shouldUseGit(filepath.Join(wd, name)) {
+			case os.IsNotExist(err), cmdArgs.existsArg("f", "force"), shouldUseGit(filepath.Join(wd, name)):
 				if err = os.RemoveAll(filepath.Join(wd, name)); err != nil {
 					fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 					continue
 				}
-			} else {
+			default:
 				fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
 				continue
 			}
@@ -248,15 +249,16 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		}
 
 		_, err = os.Stat(filepath.Join(path, name))
-		if err != nil && !os.IsNotExist(err) {
+		switch {
+		case err != nil && !os.IsNotExist(err):
 			fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 			continue
-		} else if os.IsNotExist(err) || cmdArgs.existsArg("f", "force") {
+		case os.IsNotExist(err), cmdArgs.existsArg("f", "force"):
 			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
 				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 				continue
 			}
-		} else {
+		default:
 			fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
 			continue
 		}

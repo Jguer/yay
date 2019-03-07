@@ -219,7 +219,8 @@ func (do *depOrder) Print() {
 		push := false
 		pushMake := false
 
-		if len(base) > 1 || pkg != base[0].Name {
+		switch {
+		case len(base) > 1, pkg != base[0].Name:
 			pkgStr += " ("
 			pkgStrMake += " ("
 
@@ -237,10 +238,10 @@ func (do *depOrder) Print() {
 
 			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
 			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
-		} else if do.Runtime.get(base[0].Name) {
+		case do.Runtime.get(base[0].Name):
 			aurLen++
 			push = true
-		} else {
+		default:
 			aurMakeLen++
 			pushMake = true
 		}
