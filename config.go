@@ -288,8 +288,7 @@ func continueTask(s string, cont bool) bool {
 
 	fmt.Print(bold(green(arrow)+" "+s), bold(postFix))
 
-	len, err := fmt.Scanln(&response)
-	if err != nil || len == 0 {
+	if _, err := fmt.Scanln(&response); err != nil {
 		return cont
 	}
 

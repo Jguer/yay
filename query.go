@@ -414,21 +414,21 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 }
 
 func lastBuildTime() (time.Time, error) {
-	var time time.Time
+	var lastTime time.Time
 
 	pkgs, _, _, _, err := filterPackages()
 	if err != nil {
-		return time, err
+		return lastTime, err
 	}
 
 	for _, pkg := range pkgs {
 		thisTime := pkg.BuildDate()
-		if thisTime.After(time) {
-			time = thisTime
+		if thisTime.After(lastTime) {
+			lastTime = thisTime
 		}
 	}
 
-	return time, nil
+	return lastTime, nil
 }
 
 // Statistics returns statistics about packages installed in system

@@ -192,11 +192,12 @@ func (parser *arguments) addParam(option string, arg string) (err error) {
 		return
 	}
 
-	if parser.existsArg(option) {
+	switch {
+	case parser.existsArg(option):
 		parser.doubles[option] = struct{}{}
-	} else if isGlobal(option) {
+	case isGlobal(option):
 		parser.globals[option] = arg
-	} else {
+	default:
 		parser.options[option] = arg
 	}
 
@@ -779,13 +780,13 @@ func (parser *arguments) parseLongOption(arg string, param string) (usedNext boo
 
 	arg = arg[2:]
 
-	split := strings.SplitN(arg, "=", 2)
-	if len(split) == 2 {
+	switch split := strings.SplitN(arg, "=", 2); {
+	case len(split) == 2:
 		err = parser.addParam(split[0], split[1])
-	} else if hasParam(arg) {
+	case hasParam(arg):
 		err = parser.addParam(arg, param)
 		usedNext = true
-	} else {
+	default:
 		err = parser.addArg(arg)
 	}
 
@@ -822,13 +823,14 @@ func (parser *arguments) parseCommandLine() (err error) {
 				nextArg = args[k+1]
 			}
 
-			if parser.existsArg("--") {
+			switch {
+			case parser.existsArg("--"):
 				parser.addTarget(arg)
-			} else if strings.HasPrefix(arg, "--") {
+			case strings.HasPrefix(arg, "--"):
 				usedNext, err = parser.parseLongOption(arg, nextArg)
-			} else if strings.HasPrefix(arg, "-") {
+			case strings.HasPrefix(arg, "-"):
 				usedNext, err = parser.parseShortOption(arg, nextArg)
-			} else {
+			default:
 				parser.addTarget(arg)
 			}
 
