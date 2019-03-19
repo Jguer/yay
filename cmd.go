@@ -105,6 +105,8 @@ Permanent configuration options:
     --combinedupgrade     Refresh then perform the repo and AUR upgrade together
     --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
 
+    --sudo                <file>  sudo command to use
+    --sudoflags           <flags> Pass arguments to sudo
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background
 
