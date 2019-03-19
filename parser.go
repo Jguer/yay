@@ -421,6 +421,8 @@ func isArg(arg string) bool {
 	case "tar":
 	case "git":
 	case "gpg":
+	case "sudo":
+	case "sudoflags":
 	case "requestsplitn":
 	case "sudoloop":
 	case "nosudoloop":
@@ -558,6 +560,10 @@ func handleConfig(option, value string) bool {
 		config.GitBin = value
 	case "gpg":
 		config.GpgBin = value
+	case "sudo":
+		config.SudoBin = value
+	case "sudoflags":
+		config.SudoFlags = value
 	case "requestsplitn":
 		n, err := strconv.Atoi(value)
 		if err == nil && n > 0 {
@@ -692,6 +698,8 @@ func hasParam(arg string) bool {
 	case "tar":
 	case "git":
 	case "gpg":
+	case "sudo":
+	case "sudoflags":
 	case "requestsplitn":
 	case "answerclean":
 	case "answerdiff":
