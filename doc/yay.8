@@ -483,6 +483,19 @@ passed to gpg. Multiple arguments may be passed by supplying a space
 separated list that is quoted by the shell.
 
 .TP
+.B \-\-sudo <command>
+The command to use for \fBsudo\fR calls. This can be a command in
+\fBPATH\fR or an absolute path to the file.
+The sudoloop is not guarantee to work with a custom \fBsudo\fR command.
+
+.TP
+.B \-\-sudoflags <flags>
+Passes arguments to sudo. These flags get passed to every instance where
+sudo is called by Yay. Arguments are split on whitespace before being
+passed to sudo. Multiple arguments may be passed by supplying a space
+separated list that is quoted by the shell.
+
+.TP
 .B \-\-sudoloop
 Loop sudo calls in the background to prevent sudo from timing out during long
 builds.
