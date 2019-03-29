@@ -613,10 +613,9 @@ func editDiffNumberMenu(bases []Base, installed stringSet, diff bool) ([]Base, e
 	var editInput string
 	var err error
 
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-
 	if diff {
 		fmt.Println(bold(green(arrow + " Diffs to show?")))
+		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
 		fmt.Print(bold(green(arrow + " ")))
 		editInput, err = getInput(config.AnswerDiff)
 		if err != nil {
@@ -624,6 +623,7 @@ func editDiffNumberMenu(bases []Base, installed stringSet, diff bool) ([]Base, e
 		}
 	} else {
 		fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
+		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
 		fmt.Print(bold(green(arrow + " ")))
 		editInput, err = getInput(config.AnswerEdit)
 		if err != nil {
