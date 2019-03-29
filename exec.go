@@ -45,7 +45,7 @@ func sudoLoop() {
 
 func updateSudo() {
 	for {
-		err := show(exec.Command(config.SudoBin, "-v"))
+		err := show(exec.Command("sudo", "-v"))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		} else {
@@ -77,7 +77,7 @@ func passToPacman(args *arguments) *exec.Cmd {
 	argArr := make([]string, 0)
 
 	if args.needRoot() {
-		argArr = append(argArr, config.SudoBin, config.SudoFlags)
+		argArr = append(argArr, "sudo")
 	}
 
 	argArr = append(argArr, config.PacmanBin)
