@@ -63,7 +63,7 @@ on, we suggest opening an issue detailing your ideas first.
 
 Otherwise send us a pull request and we will be happy to review it.
 
-### Dependencies
+### .endencies
 
 Yay depends on:
 
@@ -73,10 +73,9 @@ Yay depends on:
 
 Note: Yay also depends on a few other projects (as vendored dependencies). These
 projects are stored in `vendor/`, are built into yay at build time, and do not
-need to be installed separately. These files are managed by
-[dep](https://github.com/golang/dep) and should not be modified manually.
+need to be installed separately. These files are managed as go modules and should not be modified manually.
 
-Following are the dependencies managed under dep:
+Following are the dependencies managed as go modules:
 
 * https://github.com/Jguer/go-alpm
 * https://github.com/Morganamilo/go-srcinfo
