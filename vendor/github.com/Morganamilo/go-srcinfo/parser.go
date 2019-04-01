@@ -21,7 +21,7 @@ func (psr *parser) currentPackage() (*Package, error) {
 	} else if len(psr.srcinfo.Packages) == 0 {
 		return &psr.srcinfo.Package, nil
 	} else {
-		return &psr.srcinfo.Packages[len(psr.srcinfo.Packages) - 1], nil
+		return &psr.srcinfo.Packages[len(psr.srcinfo.Packages)-1], nil
 	}
 }
 
@@ -115,6 +115,8 @@ func (psr *parser) setField(archKey, value string) error {
 		pkgbase.SHA384Sums = append(pkgbase.SHA384Sums, ArchString{arch, value})
 	case "sha512sums":
 		pkgbase.SHA512Sums = append(pkgbase.SHA512Sums, ArchString{arch, value})
+	case "b2sums":
+		pkgbase.B2Sums = append(pkgbase.B2Sums, ArchString{arch, value})
 	case "makedepends":
 		pkgbase.MakeDepends = append(pkgbase.MakeDepends, ArchString{arch, value})
 	case "checkdepends":
@@ -172,8 +174,6 @@ func (psr *parser) setField(archKey, value string) error {
 		pkg.Provides = append(pkg.Provides, ArchString{arch, value})
 	case "replaces":
 		pkg.Replaces = append(pkg.Replaces, ArchString{arch, value})
-	default:
-		return fmt.Errorf("Unknown key: \"%s\"", archKey)
 	}
 
 	return nil

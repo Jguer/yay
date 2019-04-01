@@ -2,6 +2,8 @@ github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f h1:ptFKy
 github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f/go.mod h1:Hk55m330jNiwxRodIlMCvw5iEyoRUCIY64W1p9D+tHc=
 github.com/Morganamilo/go-srcinfo v0.0.0-20180702014333-368edc79b2c5 h1:0mWTtDLD9MmZO8Qk21aRFfsQpGU3uS7mSLbSzDTuguY=
 github.com/Morganamilo/go-srcinfo v0.0.0-20180702014333-368edc79b2c5/go.mod h1:MP6VGY1NNpVUmYIEgoM9acix95KQqIRyqQ0hCLsyYUY=
+github.com/Morganamilo/go-srcinfo v1.0.0 h1:Wh4nEF+HJWo+29hnxM18Q2hi+DUf0GejS13+Wg+dzmI=
+github.com/Morganamilo/go-srcinfo v1.0.0/go.mod h1:MP6VGY1NNpVUmYIEgoM9acix95KQqIRyqQ0hCLsyYUY=
 github.com/jguer/go-alpm v0.0.0-20180914002751-643c287316a5 h1:JPIXUHXLZYwYUTlGpCCRMNFt8IRAyLPUsnXYqOJ6U/w=
 github.com/jguer/go-alpm v0.0.0-20180914002751-643c287316a5/go.mod h1:1F60/e8oQFVJrZRH0TBqwtiB5ajJ5avOc4MoGRY9CFU=
 github.com/jguer/go-alpm v0.0.0-20181021002825-676ad6bbf3c0 h1:MtH4SM1pw+23QhMERYK38DyGNqf6F3zUhxeKmQhuHC0=
