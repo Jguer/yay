@@ -56,6 +56,7 @@ type PackageBase struct {
 	SHA256Sums   []ArchString
 	SHA384Sums   []ArchString
 	SHA512Sums   []ArchString
+	B2Sums       []ArchString
 	MakeDepends  []ArchString
 	CheckDepends []ArchString
 }
