@@ -58,6 +58,20 @@ release: | test build
 	cp ./completions/fish ${PACKAGE}/
 	cp ./completions/bash ${PACKAGE}/
 
+docker-release-aarch64:
+	docker build -f build/aarch64.Dockerfile -t yay-aarch64:${VERSION} .
+	docker run --name yay-aarch64 yay-aarch64:${VERSION}
+	docker cp yay-aarch64:${PKGNAME}_${VERSION}_aarch64.tar.gz ${PKGNAME}_${VERSION}_aarch64.tar.gz
+	docker container rm yay-aarch64
+
+docker-release-x86_64:
+	docker build -f build/x86_64.Dockerfile -t yay-x86_64:${VERSION} .
+	docker create --name yay-x86_64 yay-x86_64:${VERSION}
+	docker cp yay-x86_64:${PKGNAME}_${VERSION}_x86_64.tar.gz ${PKGNAME}_${VERSION}_x86_64.tar.gz
+	docker container rm yay-x86_64
+
+docker-release: | docker-release-x86_64 docker-release-aarch64
+
 package: release
 	tar -czvf ${PACKAGE}.tar.gz ${PACKAGE}
 clean:

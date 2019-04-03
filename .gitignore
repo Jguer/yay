@@ -23,3 +23,4 @@ _cgo_export.*
 yay
 yay_*/
 *.tar.gz
+qemu-*
