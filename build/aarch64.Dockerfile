@@ -9,5 +9,5 @@ RUN pacman -Sy; pacman --noconfirm -S gcc go git tar make
 
 ADD . .
 
-ARG MAKE_ARG=package
+ARG MAKE_ARG="package"
 RUN make ${MAKE_ARG}
