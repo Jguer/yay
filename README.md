@@ -63,7 +63,7 @@ on, we suggest opening an issue detailing your ideas first.
 
 Otherwise send us a pull request and we will be happy to review it.
 
-### .endencies
+### Dependencies
 
 Yay depends on:
 
