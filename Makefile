@@ -72,6 +72,12 @@ docker-release-x86_64:
 
 docker-release: | docker-release-x86_64 docker-release-aarch64
 
+docker-build:
+	docker build -f build/${ARCH}.Dockerfile --build-arg MAKE_ARG=build -t yay-build-${ARCH}:${VERSION} .
+	docker create --name yay-build-${ARCH} yay-build-${ARCH}:${VERSION}
+	docker cp yay-build-${ARCH}:${BINNAME} ${BINNAME}
+	docker container rm yay-build-${ARCH}
+
 package: release
 	tar -czvf ${PACKAGE}.tar.gz ${PACKAGE}
 clean:
