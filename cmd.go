@@ -312,20 +312,23 @@ func displayNumberMenu(pkgS []string) (err error) {
 		return fmt.Errorf("No packages match search")
 	}
 
-	if config.SortMode == bottomUp {
-		if mode == modeAUR || mode == modeAny {
-			aq.printSearch(lenpq + 1)
-		}
-		if mode == modeRepo || mode == modeAny {
-			pq.printSearch()
-		}
-	} else {
+	switch config.SortMode {
+	case topDown:
 		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
 		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(lenpq + 1)
 		}
+	case bottomUp:
+		if mode == modeAUR || mode == modeAny {
+			aq.printSearch(lenpq + 1)
+		}
+		if mode == modeRepo || mode == modeAny {
+			pq.printSearch()
+		}
+	default:
+		return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 	}
 
 	if aurErr != nil {
@@ -352,9 +355,14 @@ func displayNumberMenu(pkgS []string) (err error) {
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
 	for i, pkg := range pq {
-		target := len(pq) - i
-		if config.SortMode == topDown {
+		var target int
+		switch config.SortMode {
+		case topDown:
 			target = i + 1
+		case bottomUp:
+			target = len(pq) - i
+		default:
+			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 		}
 
 		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {
@@ -363,9 +371,15 @@ func displayNumberMenu(pkgS []string) (err error) {
 	}
 
 	for i, pkg := range aq {
-		target := len(aq) - i + len(pq)
-		if config.SortMode == topDown {
+		var target int
+
+		switch config.SortMode {
+		case topDown:
 			target = i + 1 + len(pq)
+		case bottomUp:
+			target = len(aq) - i + len(pq)
+		default:
+			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 		}
 
 		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {

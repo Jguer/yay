@@ -176,20 +176,23 @@ func syncSearch(pkgS []string) (err error) {
 		}
 	}
 
-	if config.SortMode == bottomUp {
-		if mode == modeAUR || mode == modeAny {
-			aq.printSearch(1)
-		}
-		if mode == modeRepo || mode == modeAny {
-			pq.printSearch()
-		}
-	} else {
+	switch config.SortMode {
+	case topDown:
 		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
 		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(1)
 		}
+	case bottomUp:
+		if mode == modeAUR || mode == modeAny {
+			aq.printSearch(1)
+		}
+		if mode == modeRepo || mode == modeAny {
+			pq.printSearch()
+		}
+	default:
+		return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 	}
 
 	if aurErr != nil {
