@@ -65,10 +65,13 @@ func (q aurQuery) printSearch(start int) {
 	for i, res := range q {
 		var toprint string
 		if config.SearchMode == numberMenu {
-			if config.SortMode == bottomUp {
-				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
-			} else {
+			switch config.SortMode {
+			case topDown:
 				toprint += magenta(strconv.Itoa(start+i) + " ")
+			case bottomUp:
+				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
+			default:
+				fmt.Println("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 			}
 		} else if config.SearchMode == minimal {
 			fmt.Println(res.Name)
@@ -105,10 +108,13 @@ func (s repoQuery) printSearch() {
 	for i, res := range s {
 		var toprint string
 		if config.SearchMode == numberMenu {
-			if config.SortMode == bottomUp {
-				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
-			} else {
+			switch config.SortMode {
+			case topDown:
 				toprint += magenta(strconv.Itoa(i+1) + " ")
+			case bottomUp:
+				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
+			default:
+				fmt.Println("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 			}
 		} else if config.SearchMode == minimal {
 			fmt.Println(res.Name())
