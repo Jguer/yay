@@ -133,6 +133,13 @@ Check `CONTRIBUTING.md` for more information.
 
 ## Images
 
-<img src="https://cdn.jsdelivr.net/gh/Jguer/jguer.github.io@5412b8d6/yay/yay-ps.png" width="450">
-<img src="https://cdn.jsdelivr.net/gh/Jguer/jguer.github.io@5412b8d6/yay/yayupgrade.png" width="450">
-<img src="https://cdn.jsdelivr.net/gh/Jguer/jguer.github.io@5412b8d6/yay/yaysearch.png" width="450">
+<p float="left">
+<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay.png" width="42%"/>
+<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-s.png" width="42%"/>
+</p>
+
+<p float="left">
+<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-y.png" width="42%"/> 
+<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-ps.png" width="42%"/> 
+</p>
+
