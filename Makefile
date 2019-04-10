@@ -64,13 +64,19 @@ docker-release-aarch64:
 	docker cp yay-aarch64:${PKGNAME}_${VERSION}_aarch64.tar.gz ${PKGNAME}_${VERSION}_aarch64.tar.gz
 	docker container rm yay-aarch64
 
+docker-release-armv7h:
+	docker build -f build/armv7h.Dockerfile -t yay-armv7h:${VERSION} .
+	docker create --name yay-armv7h yay-armv7h:${VERSION}
+	docker cp yay-armv7h:${PKGNAME}_${VERSION}_armv7l.tar.gz ${PKGNAME}_${VERSION}_armv7h.tar.gz
+	docker container rm yay-armv7h
+
 docker-release-x86_64:
 	docker build -f build/x86_64.Dockerfile -t yay-x86_64:${VERSION} .
 	docker create --name yay-x86_64 yay-x86_64:${VERSION}
 	docker cp yay-x86_64:${PKGNAME}_${VERSION}_x86_64.tar.gz ${PKGNAME}_${VERSION}_x86_64.tar.gz
 	docker container rm yay-x86_64
 
-docker-release: | docker-release-x86_64 docker-release-aarch64
+docker-release: | docker-release-x86_64 docker-release-aarch64 docker-release-armv7h
 
 docker-build:
 	docker build -f build/${ARCH}.Dockerfile --build-arg MAKE_ARG=build -t yay-build-${ARCH}:${VERSION} .
