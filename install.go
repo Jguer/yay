@@ -138,6 +138,21 @@ func install(parser *arguments) error {
 		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
+	if parser.existsArg("copyleft-only") {
+		switch dp.CheckIsLibre() {
+			case 0:
+				return fmt.Errorf(bold(red(arrow)) + " This software is not under a non-copyleft license, Aborting.")
+			case -1:
+				continueUnkown := continueTask("Do you want to install this package anyway ?", false)
+				if !continueUnkown {
+					return fmt.Errorf(bold(red(arrow)) + " Task cancelled by the user ")
+				}
+		}
+
+		arguments.delArg("copyleft-only")
+	}
+
+
 	conflicts, err := dp.CheckConflicts()
 	if err != nil {
 		return err

@@ -36,6 +36,7 @@ New operations:
 New options:
        --repo             Assume targets are from the repositories
     -a --aur              Assume targets are from the AUR
+       --copyleft-only    Will just allow copylefted software
 
 Permanent configuration options:
     --save                Causes the following options to be saved back to the

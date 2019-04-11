@@ -9,6 +9,44 @@ import (
 	alpm "github.com/jguer/go-alpm"
 )
 
+func (dp *depPool) CheckIsLibre() int{
+	var isFree bool
+
+	licenses := []string{"gpl", "cpl", "lgpl", "agpl", "apache", "mpl"}
+	freeSoftware := 1
+
+	for _, pkg := range dp.Aur {
+		for _, Softwarelicense := range pkg.License {
+			Softwarelicense = strings.ToLower(Softwarelicense)
+			if Softwarelicense == "custom" {
+				fmt.Println("\n/!\\ This software is under undefined custom license /!\\\n")
+				freeSoftware = -1
+			} else if strings.Contains(Softwarelicense, "custom:") {
+				customLicense := strings.Split(Softwarelicense, ":")
+				fmt.Printf("\n/!\\ This software is under custom license: %s /!\\\n", customLicense[1])
+				fmt.Println("Keep in mind that most of the custom license are non-free\n")
+				freeSoftware = -1
+			} else {
+				for _, license := range licenses {
+					isFree = false
+					if(strings.Contains(Softwarelicense,license)) {
+						isFree = true
+						break
+					} else {
+						return 0
+					}
+				}
+
+				if !isFree {
+					freeSoftware = 0
+				}
+			}
+		}
+
+	}
+	return freeSoftware
+}
+
 func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts mapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
