@@ -63,7 +63,7 @@ func gitHasDiff(path string, name string) (bool, error) {
 func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
-		cmd := passToGit(path, "clone", "--no-progress", url, name)
+		cmd := passToGit(path, "clone", "--depth=1 --no-progress", url, name)
 		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 		_, stderr, err := capture(cmd)
 		if err != nil {
