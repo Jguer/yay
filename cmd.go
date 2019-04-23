@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 )
 
 var cmdArgs = makeArguments()

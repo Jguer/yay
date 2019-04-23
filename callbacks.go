@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 )
 
 func questionCallback(question alpm.QuestionAny) {

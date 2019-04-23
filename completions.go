@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 )
 
 //CreateAURList creates a new completion file

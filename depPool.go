@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 )
 

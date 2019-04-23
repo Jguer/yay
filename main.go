@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 )
 
 func setPaths() error {
