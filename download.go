@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 )
 
 // Decide what download method to use:
@@ -99,12 +99,6 @@ func gitMerge(path string, name string) error {
 	return nil
 }
 
-func gitDiff(path string, name string) error {
-	err := show(passToGit(filepath.Join(path, name), "diff", "HEAD..HEAD@{upstream}"))
-
-	return err
-}
-
 // DownloadAndUnpack downloads url tgz and extracts to path.
 func downloadAndUnpack(url string, path string) error {
 	err := os.MkdirAll(path, 0755)
@@ -139,6 +133,10 @@ func getPkgbuilds(pkgs []string) error {
 
 	pkgs = removeInvalidTargets(pkgs)
 	aur, repo, err := packageSlices(pkgs)
+
+	if err != nil {
+		return err
+	}
 
 	for n := range aur {
 		_, pkg := splitDBFromName(aur[n])

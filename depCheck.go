@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 )
 
 func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts mapStringSet) {

@@ -98,10 +98,6 @@ func passToPacman(args *arguments) *exec.Cmd {
 }
 
 func passToMakepkg(dir string, args ...string) *exec.Cmd {
-	if config.NoConfirm {
-		args = append(args)
-	}
-
 	mflags := strings.Fields(config.MFlags)
 	args = append(args, mflags...)
 

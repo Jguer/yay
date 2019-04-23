@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
-	alpm "github.com/jguer/go-alpm"
+	alpm "github.com/Jguer/go-alpm"
 )
 
 // Install handles package installs
