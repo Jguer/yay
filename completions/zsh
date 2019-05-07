@@ -225,6 +225,8 @@ _pacman_opts_sync_modifiers=(
 	'--asexplicit[Install packages as explicitly installed]'
 	'--force[Overwrite conflicting files]'
 	'--print-format[Specify how the targets should be printed]'
+	'--searchby[Filter search results by specific field (currently only 'name' is supported)]'
+	'--nosearchby[Clear search field filter, search in all package fields]'
 )
 
 # handles --help subcommand

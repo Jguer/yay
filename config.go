@@ -9,8 +9,8 @@ import (
 	"os/exec"
 	"strings"
 
-	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	alpm "github.com/Jguer/go-alpm"
+	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 )
 
 // Verbosity settings for search
@@ -58,6 +58,7 @@ type Configuration struct {
 	SortBy             string `json:"sortby"`
 	GitFlags           string `json:"gitflags"`
 	RemoveMake         string `json:"removemake"`
+	SearchBy           string `json:"searchby"`
 	RequestSplitN      int    `json:"requestsplitn"`
 	SearchMode         int    `json:"-"`
 	SortMode           int    `json:"sortmode"`
@@ -170,6 +171,7 @@ func defaultSettings() *Configuration {
 		AnswerEdit:         "",
 		AnswerUpgrade:      "",
 		RemoveMake:         "ask",
+		SearchBy:           "",
 		GitClone:           true,
 		Provides:           true,
 		UpgradeMenu:        true,

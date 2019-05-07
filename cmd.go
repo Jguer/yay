@@ -104,6 +104,8 @@ Permanent configuration options:
     --nouseask            Confirm conflicts manually during the install
     --combinedupgrade     Refresh then perform the repo and AUR upgrade together
     --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
+    --searchby	<field>	  Filter search results by specific field (currently only 'name' is supported)
+    --nosearchby		  Clear search field filter, search in all package fields
 
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background

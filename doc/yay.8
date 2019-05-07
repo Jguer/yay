@@ -483,6 +483,14 @@ passed to gpg. Multiple arguments may be passed by supplying a space
 separated list that is quoted by the shell.
 
 .TP
+.B \-\-searchby <Name|...>
+Filter search results by specific field (currently only 'name' is supported)
+
+.TP
+.B \-\-nosearchby
+Clear search field filter, search in all package fields
+
+.TP
 .B \-\-sudoloop
 Loop sudo calls in the background to prevent sudo from timing out during long
 builds.

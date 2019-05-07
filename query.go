@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -111,7 +112,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 	}
 
 	for i, word := range pkgS {
-		r, err = rpc.Search(word)
+		r, err = remoteAurSearch(word)
 		if err == nil {
 			usedIndex = i
 			break
@@ -139,7 +140,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 				continue
 			}
 
-			if !(strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)) {
+			if !validAurSearchResult(res, pkgN) {
 				match = false
 				break
 			}
@@ -158,8 +159,43 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 	return aq, err
 }
 
+func remoteAurSearch(word string) ([]rpc.Pkg, error) {
+	if !cmdArgs.existsArg("s", "search") {
+		return rpc.Search(word)
+	}
+
+	switch strings.ToLower(config.SearchBy) {
+	case "":
+		return rpc.Search(word)
+	case "name":
+		return rpc.SearchByName(word)
+	default:
+		return nil, errors.New(fmt.Sprintf("Unknown --searchby option %s", config.SearchBy))
+	}
+}
+
+func validAurSearchResult(res rpc.Pkg, pkgN string) bool {
+	if !cmdArgs.existsArg("s", "search") {
+		return strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)
+	}
+
+	switch strings.ToLower(config.SearchBy) {
+	case "":
+		return strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)
+	case "name":
+		return strings.Contains(strings.ToLower(res.Name), strings.ToLower(pkgN))
+	default:
+		return false
+	}
+}
+
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string) (err error) {
+	err = checkSearchByValidity()
+	if err != nil {
+		return err
+	}
+
 	pkgS = removeInvalidTargets(pkgS)
 	var aurErr error
 	var repoErr error
@@ -168,12 +204,15 @@ func syncSearch(pkgS []string) (err error) {
 
 	if mode == modeAUR || mode == modeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
+		err = handleSearchError(true, aurErr)
 	}
 	if mode == modeRepo || mode == modeAny {
 		pq, repoErr = queryRepo(pkgS)
-		if repoErr != nil {
-			return err
-		}
+		err = handleSearchError(false, repoErr)
+	}
+
+	if err != nil {
+		return err
 	}
 
 	switch config.SortMode {
@@ -195,12 +234,36 @@ func syncSearch(pkgS []string) (err error) {
 		return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 	}
 
-	if aurErr != nil {
-		fmt.Fprintf(os.Stderr, "Error during AUR search: %s\n", aurErr)
-		fmt.Fprintln(os.Stderr, "Showing Repo packages only")
+	return nil
+}
+
+func checkSearchByValidity() error {
+	switch strings.ToLower(config.SearchBy) {
+	case "":
+		return nil
+	case "name":
+		return nil
+	default:
+		return errors.New(fmt.Sprintf("Unknown --searchby option %s", config.SearchBy))
+	}
+}
+
+func handleSearchError(aurSearch bool, err error) error {
+	if err == nil {
+		return nil
 	}
 
-	return nil
+	switch mode {
+	case modeAUR:
+		return err
+	case modeRepo:
+		return err
+	default:
+		if aurSearch {
+			_, err = fmt.Fprintf(os.Stderr, "Error during AUR search.\nShowing Repo packages only.\n")
+		}
+		return err
+	}
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
@@ -281,7 +344,40 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 		}
 	}
 
-	return
+	if !cmdArgs.existsArg("s", "search") {
+		return
+	}
+
+	switch strings.ToLower(config.SearchBy) {
+	case "":
+		return
+	case "name":
+		return filterInRepoPackageNames(pkgInputN, s), nil
+	default:
+		return nil, errors.New(fmt.Sprintf("Unknown --searchby option %s", config.SearchBy))
+	}
+}
+
+func filterInRepoPackageNames(pkgS []string, s repoQuery) repoQuery {
+
+	filteredRes := make(repoQuery, 0)
+	for _, res := range s {
+		if validPkgName(pkgS, res.Name()) {
+			filteredRes = append(filteredRes, res)
+		}
+	}
+	return filteredRes
+}
+
+func validPkgName(pkgS []string, resPkgName string) bool {
+	var pass int
+	for i, searchedPkgName := range pkgS {
+		if !strings.Contains(strings.ToLower(resPkgName), strings.ToLower(searchedPkgName)) {
+			break
+		}
+		pass = i + 1
+	}
+	return pass == len(pkgS)
 }
 
 // PackageSlices separates an input slice into aur and repo slices

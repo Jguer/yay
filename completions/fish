@@ -208,6 +208,8 @@ complete -c $progname -n "$sync; and __fish_contains_opt -s u sysupgrade" -s u -
 complete -c $progname -n $sync -s w -l downloadonly -d 'Only download the target packages'
 complete -c $progname -n $sync -s y -l refresh -d 'Download fresh copy of the package list'
 complete -c $progname -n "$sync" -xa "$listall $listgroups"
+complete -c $progname -n $sync -s w -l searchby -d 'Filter search results by specific field (currently only 'name' is supported)'
+complete -c $progname -n $sync -s w -l nosearchby -d 'Clear search field filter, search in all package fields'
 
 # Database options
 set -l has_db_opt '__fish_contains_opt asdeps asexplicit'

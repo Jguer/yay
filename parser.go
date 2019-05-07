@@ -489,6 +489,8 @@ func isArg(arg string) bool {
 	case "news":
 	case "gendb":
 	case "currentconfig":
+	case "searchby":
+	case "nosearchby":
 	default:
 		return false
 	}
@@ -640,6 +642,10 @@ func handleConfig(option, value string) bool {
 		config.RemoveMake = "no"
 	case "askremovemake":
 		config.RemoveMake = "ask"
+	case "searchby":
+		config.SearchBy = value
+	case "nosearchby":
+		config.SearchBy = ""
 	default:
 		return false
 	}
@@ -729,6 +735,7 @@ func hasParam(arg string) bool {
 	case "answerupgrade":
 	case "completioninterval":
 	case "sortby":
+	case "searchby":
 	default:
 		return false
 	}

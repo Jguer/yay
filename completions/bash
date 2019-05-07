@@ -57,7 +57,8 @@ _yay() {
           search unrequired upgrades' 'c e g i k l m n o p s t u')
   remove=('cascade dbonly nodeps assume-installed nosave print recursive unneeded' 'c n p s u')
   sync=('asdeps asexplicit clean dbonly downloadonly force groups ignore ignoregroup
-         info list needed nodeps assume-installed print refresh recursive search sysupgrade'
+         info list needed nodeps assume-installed print refresh recursive search sysupgrade
+         searchby nosearchby'
         'c g i l p s u w y')
   upgrade=('asdeps asexplicit force needed nodeps assume-installed print recursive' 'p')
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
