@@ -188,8 +188,9 @@ func cleanUntracked() error {
 
 		dir := filepath.Join(config.BuildDir, file.Name())
 		if shouldUseGit(dir) {
-			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
-				return err
+			_, stderr, err := capture(passToGit(dir, "clean", "-fx"))
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error cleaning %s: %s", dir, stderr)
 			}
 		}
 	}
