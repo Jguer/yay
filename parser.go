@@ -141,6 +141,9 @@ func (parser *arguments) needRoot() bool {
 		}
 		return false
 	case "R", "remove":
+		if parser.existsArg("p", "print", "print-format") {
+			return false
+		}
 		return true
 	case "S", "sync":
 		if parser.existsArg("y", "refresh") {
