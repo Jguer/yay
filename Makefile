@@ -5,10 +5,10 @@ DESTDIR :=
 
 MAJORVERSION := 9
 MINORVERSION ?= 2
-PATCHVERSION := 0
+PATCHVERSION := 1
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
-LDFLAGS := -ldflags '-s -w -X main.version=${VERSION}'
+LDFLAGS := -gcflags=all=-trimpath=${PWD} -asmflags=all=-trimpath=${PWD} -ldflags=-extldflags=-zrelro -ldflags=-extldflags=-znow -ldflags '-s -w -X main.version=${VERSION}'
 MOD := -mod=vendor
 export GO111MODULE=on
 ARCH := $(shell uname -m)
