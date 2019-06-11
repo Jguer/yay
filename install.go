@@ -9,13 +9,12 @@ import (
 	"strings"
 	"sync"
 
-	gosrc "github.com/Morganamilo/go-srcinfo"
 	alpm "github.com/Jguer/go-alpm"
+	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
 // Install handles package installs
-func install(parser *arguments) error {
-	var err error
+func install(parser *arguments) (err error) {
 	var incompatible stringSet
 	var do *depOrder
 
@@ -25,7 +24,6 @@ func install(parser *arguments) error {
 	var srcinfos map[string]*gosrc.Srcinfo
 
 	warnings := &aurWarnings{}
-	removeMake := false
 
 	if mode == modeAny || mode == modeRepo {
 		if config.CombinedUpgrade {
@@ -164,14 +162,20 @@ func install(parser *arguments) error {
 	do.Print()
 	fmt.Println()
 
+	if config.CleanAfter {
+		defer cleanAfter(do.Aur)
+	}
+
 	if do.HasMake() {
 		switch config.RemoveMake {
 		case "yes":
-			removeMake = true
+			defer removeMake(do, &err)
 		case "no":
-			removeMake = false
+			break
 		default:
-			removeMake = continueTask("Remove make dependencies after install?", false)
+			if continueTask("Remove make dependencies after install?", false) {
+				defer removeMake(do, &err)
+			}
 		}
 	}
 
@@ -323,29 +327,21 @@ func install(parser *arguments) error {
 		return err
 	}
 
-	if removeMake {
-		removeArguments := makeArguments()
-		removeArguments.addArg("R", "u")
-
-		for _, pkg := range do.getMake() {
-			removeArguments.addTarget(pkg)
-		}
-
-		oldValue := config.NoConfirm
-		config.NoConfirm = true
-		err = show(passToPacman(removeArguments))
-		config.NoConfirm = oldValue
-
-		if err != nil {
-			return err
-		}
-	}
-
-	if config.CleanAfter {
-		cleanAfter(do.Aur)
-	}
-
 	return nil
+}
+
+func removeMake(do *depOrder, err *error) {
+	removeArguments := makeArguments()
+	removeArguments.addArg("R", "u")
+
+	for _, pkg := range do.getMake() {
+		removeArguments.addTarget(pkg)
+	}
+
+	oldValue := config.NoConfirm
+	config.NoConfirm = true
+	*err = show(passToPacman(removeArguments))
+	config.NoConfirm = oldValue
 }
 
 func inRepos(syncDB alpm.DBList, pkg string) bool {
