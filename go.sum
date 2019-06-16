@@ -1,9 +1,8 @@
 github.com/Jguer/go-alpm v0.0.0-20190302211415-9c82d5170ce0 h1:jkaSC1289bzjkoc1qRMDrl4Oad2uoERHHqpptYsGIJY=
 github.com/Jguer/go-alpm v0.0.0-20190302211415-9c82d5170ce0/go.mod h1:FyxWWXMCnKWSU8prNG5ryzjilFJVj6PUr6yMR36rALA=
+github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f h1:ptFKynTV1p8JCzqk81NcMj0DV0Xle+PdKxfHjPbdIOU=
 github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f/go.mod h1:Hk55m330jNiwxRodIlMCvw5iEyoRUCIY64W1p9D+tHc=
 github.com/Morganamilo/go-srcinfo v1.0.0 h1:Wh4nEF+HJWo+29hnxM18Q2hi+DUf0GejS13+Wg+dzmI=
 github.com/Morganamilo/go-srcinfo v1.0.0/go.mod h1:MP6VGY1NNpVUmYIEgoM9acix95KQqIRyqQ0hCLsyYUY=
-github.com/jguer/go-alpm v0.0.0-20190302211415-9c82d5170ce0 h1:wZzXS9/D7IIySAdxND1YkS2Gn4UVG5xEwHYehJ4ltNs=
-github.com/jguer/go-alpm v0.0.0-20190302211415-9c82d5170ce0/go.mod h1:1F60/e8oQFVJrZRH0TBqwtiB5ajJ5avOc4MoGRY9CFU=
 github.com/mikkeloscar/aur v0.0.0-20181111113612-b71516da3ae9 h1:g4TBYa1sjv/TZfU9t82oYlRneu8cCVr3dnazE7os5vw=
 github.com/mikkeloscar/aur v0.0.0-20181111113612-b71516da3ae9/go.mod h1:n1NKHoldRNhIEufSx1PiDYcd2W+wpbz5/5K+p2eNDVk=
