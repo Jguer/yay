@@ -9,8 +9,8 @@ import (
 	"os/exec"
 	"strings"
 
-	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	alpm "github.com/Jguer/go-alpm"
+	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 )
 
 // Verbosity settings for search
