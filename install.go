@@ -13,6 +13,38 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
+func asdeps(parser *arguments, pkgs []string) error {
+	if len(pkgs) == 0 {
+		return nil
+	}
+
+	parser = parser.copyGlobal()
+	parser.addArg("D", "asdeps")
+	parser.addTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(parser))
+	if err != nil {
+		return fmt.Errorf("%s%s", stderr, err)
+	}
+
+	return nil
+}
+
+func asexp(parser *arguments, pkgs []string) error {
+	if len(pkgs) == 0 {
+		return nil
+	}
+
+	parser = parser.copyGlobal()
+	parser.addArg("D", "asexplicit")
+	parser.addTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(parser))
+	if err != nil {
+		return fmt.Errorf("%s%s", stderr, err)
+	}
+
+	return nil
+}
+
 // Install handles package installs
 func install(parser *arguments) (err error) {
 	var incompatible stringSet
@@ -282,36 +314,27 @@ func install(parser *arguments) (err error) {
 			return fmt.Errorf("Error installing repo packages")
 		}
 
-		depArguments := makeArguments()
-		depArguments.addArg("D", "asdeps")
-		expArguments := makeArguments()
-		expArguments.addArg("D", "asexplicit")
+		deps := make([]string, 0)
+		exp := make([]string, 0)
 
-		for _, pkg := range do.Repo {
+		for _, pkg := range dp.Repo {
 			if !dp.Explicit.get(pkg.Name()) && !localNamesCache.get(pkg.Name()) && !remoteNamesCache.get(pkg.Name()) {
-				depArguments.addTarget(pkg.Name())
+				deps = append(deps, pkg.Name())
 				continue
 			}
 
 			if parser.existsArg("asdeps", "asdep") && dp.Explicit.get(pkg.Name()) {
-				depArguments.addTarget(pkg.Name())
+				deps = append(deps, pkg.Name())
 			} else if parser.existsArg("asexp", "asexplicit") && dp.Explicit.get(pkg.Name()) {
-				expArguments.addTarget(pkg.Name())
+				exp = append(exp, pkg.Name())
 			}
 		}
 
-		if len(depArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(depArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
+		if err = asdeps(parser, deps); err != nil {
+			return err
 		}
-
-		if len(expArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(expArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
+		if err = asexp(parser, exp); err != nil {
+			return err
 		}
 	}
 
@@ -893,10 +916,80 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringSet) (err error) 
 }
 
 func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible stringSet, conflicts mapStringSet) error {
+	arguments := parser.copy()
+	arguments.clearTargets()
+	arguments.op = "U"
+	arguments.delArg("confirm")
+	arguments.delArg("noconfirm")
+	arguments.delArg("c", "clean")
+	arguments.delArg("q", "quiet")
+	arguments.delArg("q", "quiet")
+	arguments.delArg("y", "refresh")
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("w", "downloadonly")
+
+	deps := make([]string, 0)
+	exp := make([]string, 0)
+	oldConfirm := config.NoConfirm
+	config.NoConfirm = true
+
+	doInstall := func() error {
+		if len(arguments.targets) == 0 {
+			return nil
+		}
+
+		err := show(passToPacman(arguments))
+		if err != nil {
+			return err
+		}
+
+		err = saveVCSInfo()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+
+		if err = asdeps(parser, deps); err != nil {
+			return err
+		}
+		if err = asexp(parser, exp); err != nil {
+			return err
+		}
+
+		config.NoConfirm = oldConfirm
+
+		arguments.clearTargets()
+		deps = make([]string, 0)
+		exp = make([]string, 0)
+		config.NoConfirm = true
+		return nil
+	}
+
 	for _, base := range do.Aur {
+		var err error
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		built := true
+
+		satisfied := true
+	all:
+		for _, pkg := range base {
+			for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+				for _, dep := range deps {
+					if _, err := dp.LocalDB.PkgCache().FindSatisfier(dep); err != nil {
+						satisfied = false
+						fmt.Printf("%s not satisfied, flushing install queue", dep)
+						break all
+					}
+				}
+			}
+		}
+
+		if !satisfied || !config.BatchInstall {
+			err = doInstall()
+			if err != nil {
+				return err
+			}
+		}
 
 		srcinfo := srcinfos[pkg]
 
@@ -907,7 +1000,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		//pkgver bump
-		err := show(passToMakepkg(dir, args...))
+		err = show(passToMakepkg(dir, args...))
 		if err != nil {
 			return fmt.Errorf("Error making: %s", base.String())
 		}
@@ -971,42 +1064,19 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		arguments := parser.copy()
-		arguments.clearTargets()
-		arguments.op = "U"
-		arguments.delArg("confirm")
-		arguments.delArg("noconfirm")
-		arguments.delArg("c", "clean")
-		arguments.delArg("q", "quiet")
-		arguments.delArg("q", "quiet")
-		arguments.delArg("y", "refresh")
-		arguments.delArg("u", "sysupgrade")
-		arguments.delArg("w", "downloadonly")
-
-		oldConfirm := config.NoConfirm
-
 		//conflicts have been checked so answer y for them
 		if config.UseAsk {
 			ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
 			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 			cmdArgs.globals["ask"] = fmt.Sprint(uask)
 		} else {
-			conflict := false
 			for _, split := range base {
 				if _, ok := conflicts[split.Name]; ok {
-					conflict = true
+					config.NoConfirm = false
+					break
 				}
 			}
-
-			if !conflict {
-				config.NoConfirm = true
-			}
 		}
-
-		depArguments := makeArguments()
-		depArguments.addArg("D", "asdeps")
-		expArguments := makeArguments()
-		expArguments.addArg("D", "asexplicit")
 
 		//remotenames: names of all non repo packages on the system
 		_, _, localNames, remoteNames, err := filterPackages()
@@ -1026,22 +1096,13 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 
 			arguments.addTarget(pkgdest)
-			if !dp.Explicit.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
-				depArguments.addTarget(split.Name)
+			if parser.existsArg("asdeps", "asdep") {
+				deps = append(deps, split.Name)
+			} else if parser.existsArg("asexplicit", "asexp") {
+				exp = append(exp, split.Name)
+			} else if !dp.Explicit.get(split.Name) && !localNamesCache.get(split.Name) && !remoteNamesCache.get(split.Name) {
+				deps = append(deps, split.Name)
 			}
-
-			if dp.Explicit.get(split.Name) {
-				if parser.existsArg("asdeps", "asdep") {
-					depArguments.addTarget(split.Name)
-				} else if parser.existsArg("asexplicit", "asexp") {
-					expArguments.addTarget(split.Name)
-				}
-			}
-		}
-
-		err = show(passToPacman(arguments))
-		if err != nil {
-			return err
 		}
 
 		var mux sync.Mutex
@@ -1052,20 +1113,9 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		wg.Wait()
-
-		err = saveVCSInfo()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-
-		if len(depArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(depArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
-		}
-		config.NoConfirm = oldConfirm
 	}
 
-	return nil
+	err := doInstall()
+	config.NoConfirm = oldConfirm
+	return err
 }

@@ -45,7 +45,7 @@ func cleanRemove(pkgNames []string) (err error) {
 		return nil
 	}
 
-	arguments := makeArguments()
+	arguments := cmdArgs.copyGlobal()
 	arguments.addArg("R")
 	arguments.addTarget(pkgNames...)
 
