@@ -308,7 +308,7 @@ func PrintInfo(a *rpc.Pkg) {
 	printInfoValue("Last Modified", formatTimeQuery(a.LastModified))
 
 	if a.OutOfDate != 0 {
-		printInfoValue("Out-of-date", "Yes ["+formatTime(a.OutOfDate)+"]")
+		printInfoValue("Out-of-date", formatTimeQuery(a.OutOfDate))
 	} else {
 		printInfoValue("Out-of-date", "No")
 	}
