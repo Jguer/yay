@@ -279,7 +279,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		mux.Lock()
 		downloaded++
 		if err != nil {
-			errs.Add(fmt.Errorf("%s Failed to move %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(string(stderr)))))
+			errs.Add(fmt.Errorf("%s Failed to move %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(stderr))))
 		} else {
 			fmt.Printf(bold(cyan("::"))+" Downloaded PKGBUILD from ABS (%d/%d): %s\n", downloaded, len(names), cyan(pkg))
 		}
