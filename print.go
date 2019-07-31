@@ -663,7 +663,7 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 		}
 
 		if num < 1 || num >= size {
-			fmt.Fprintf(os.Stderr, "%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
+			fmt.Fprintf(os.Stderr, "%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size - 1)
 			continue
 		}
 
