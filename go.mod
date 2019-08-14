@@ -1,4 +1,4 @@
-module github.com/Jguer/yay/v9
+module github.com/Jguer/yay/v10
 
 require (
 	github.com/Jguer/go-alpm v0.0.0-20190302211415-9c82d5170ce0

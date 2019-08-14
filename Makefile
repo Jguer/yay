@@ -45,7 +45,7 @@ test:
 	gofmt -l *.go
 	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted" && false)
 	go vet
-	go test -v
+	go test -v . ./pkg/...
 
 build:
 	go build -v ${LDFLAGS} -o ${BINNAME} ${MOD}

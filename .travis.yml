@@ -11,7 +11,7 @@ arch:
     - go
   script:
     - go vet .
-    - diff -u <(echo -n) <(gofmt -d ./)
+    - diff -u <(echo -n) <(gofmt -d ./*.go ./pkg/)
     - make
     - make test
     - ./testdata/install_test.sh

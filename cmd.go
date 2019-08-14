@@ -1,15 +1,176 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"net/http"
-	"os"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v10/pkg/download"
+	"github.com/Jguer/yay/v10/pkg/exec"
+	"github.com/Jguer/yay/v10/pkg/install"
+	"github.com/Jguer/yay/v10/pkg/lookup"
+	"github.com/Jguer/yay/v10/pkg/lookup/news"
+	"github.com/Jguer/yay/v10/pkg/runtime"
+	"github.com/Jguer/yay/v10/pkg/runtime/completion"
+	"github.com/Jguer/yay/v10/pkg/types"
+	"github.com/Jguer/yay/v10/pkg/vcs"
+	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 )
 
-var cmdArgs = makeArguments()
+func handleCmd(config *runtime.Configuration, pacmanConf *pacmanconf.Config, cmdArgs *types.Arguments, alpmHandle *alpm.Handle, savedInfo vcs.InfoStore) (err error) {
+	if cmdArgs.ExistsArg("h", "help") {
+		err = handleHelp(config, cmdArgs, pacmanConf)
+		return
+	}
+
+	if config.SudoLoop && cmdArgs.NeedRoot(config.Mode) {
+		exec.SudoLoopBackground()
+	}
+
+	switch cmdArgs.Op {
+	case "V", "version":
+		handleVersion()
+	case "D", "database":
+		err = exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+	case "F", "files":
+		err = exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+	case "Q", "query":
+		err = handleQuery(config, cmdArgs, pacmanConf, alpmHandle, savedInfo)
+	case "R", "remove":
+		err = handleRemove(config, cmdArgs, pacmanConf, savedInfo)
+	case "S", "sync":
+		err = handleSync(config, cmdArgs, pacmanConf, alpmHandle, savedInfo)
+	case "T", "deptest":
+		err = exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+	case "U", "upgrade":
+		err = exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+	case "G", "getpkgbuild":
+		err = handleGetpkgbuild(config, cmdArgs, pacmanConf, alpmHandle)
+	case "P", "show":
+		err = handlePrint(config, cmdArgs, alpmHandle, savedInfo)
+	case "Y", "--yay":
+		err = handleYay(config, pacmanConf, cmdArgs, alpmHandle, savedInfo)
+	default:
+		//this means we allowed an op but not implement it
+		//if this happens it an error in the code and not the usage
+		err = fmt.Errorf("unhandled operation")
+	}
+
+	return
+}
+
+func handleGetpkgbuild(config *runtime.Configuration, cmdArgs *types.Arguments, pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error {
+	return download.GetPkgbuilds(config, cmdArgs, alpmHandle, cmdArgs.Targets)
+}
+
+func handleHelp(config *runtime.Configuration, cmdArgs *types.Arguments, pacmanConf *pacmanconf.Config) error {
+	if cmdArgs.Op == "Y" || cmdArgs.Op == "yay" {
+		usage()
+		return nil
+	}
+	return exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+}
+
+func handlePrint(config *runtime.Configuration, cmdArgs *types.Arguments, alpmHandle *alpm.Handle, savedInfo vcs.InfoStore) (err error) {
+	switch {
+	case cmdArgs.ExistsArg("d", "defaultconfig"):
+		tmpConfig := runtime.DefaultSettings()
+		tmpConfig.ExpandEnv()
+		fmt.Printf("%v", tmpConfig)
+	case cmdArgs.ExistsArg("g", "currentconfig"):
+		fmt.Printf("%v", config)
+	case cmdArgs.ExistsArg("n", "numberupgrades"):
+		err = lookup.PrintNumberOfUpdates(cmdArgs, alpmHandle, config, savedInfo)
+	case cmdArgs.ExistsArg("u", "upgrades"):
+		err = lookup.PrintUpdateList(cmdArgs, alpmHandle, config, savedInfo)
+	case cmdArgs.ExistsArg("w", "news"):
+		err = news.PrintFeed(cmdArgs, alpmHandle, config.SortMode)
+	case cmdArgs.ExistsDouble("c", "complete"):
+		err = completion.Show(alpmHandle, config.AURURL, config.BuildDir, config.CompletionInterval, true)
+	case cmdArgs.ExistsArg("c", "complete"):
+		err = completion.Show(alpmHandle, config.AURURL, config.BuildDir, config.CompletionInterval, false)
+	case cmdArgs.ExistsArg("s", "stats"):
+		err = lookup.LocalStatistics(config, alpmHandle)
+	default:
+		err = nil
+	}
+	return err
+}
+
+func handleQuery(config *runtime.Configuration, cmdArgs *types.Arguments, pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle, savedInfo vcs.InfoStore) error {
+	if cmdArgs.ExistsArg("u", "upgrades") {
+		return lookup.PrintUpdateList(cmdArgs, alpmHandle, config, savedInfo)
+	}
+	return exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+}
+
+func handleRemove(config *runtime.Configuration, cmdArgs *types.Arguments, pacmanConf *pacmanconf.Config, savedInfo vcs.InfoStore) error {
+	savedInfo.RemovePackage(cmdArgs.Targets)
+	return exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+}
+
+func handleSync(config *runtime.Configuration, cmdArgs *types.Arguments, pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle, savedInfo vcs.InfoStore) error {
+	targets := cmdArgs.Targets
+
+	if cmdArgs.ExistsArg("s", "search") {
+		if cmdArgs.ExistsArg("q", "quiet") {
+			config.SearchMode = runtime.Minimal
+		} else {
+			config.SearchMode = runtime.Detailed
+		}
+		return lookup.PrintSearch(config, alpmHandle, targets)
+	}
+	if cmdArgs.ExistsArg("p", "print", "print-format") {
+		return exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+	}
+	if cmdArgs.ExistsArg("c", "clean") {
+		return lookup.SyncClean(config, pacmanConf, alpmHandle, cmdArgs)
+	}
+	if cmdArgs.ExistsArg("l", "list") {
+		return lookup.SyncList(config, pacmanConf, alpmHandle, cmdArgs)
+	}
+	if cmdArgs.ExistsArg("g", "groups") {
+		return exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+	}
+	if cmdArgs.ExistsArg("i", "info") {
+		return lookup.SyncInfo(config, pacmanConf, cmdArgs, alpmHandle, targets)
+	}
+	if cmdArgs.ExistsArg("u", "sysupgrade") {
+		return install.Install(config, pacmanConf, alpmHandle, cmdArgs, savedInfo)
+	}
+	if len(cmdArgs.Targets) > 0 {
+		return install.Install(config, pacmanConf, alpmHandle, cmdArgs, savedInfo)
+	}
+	if cmdArgs.ExistsArg("y", "refresh") {
+		return exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
+	}
+	return nil
+}
+
+func handleVersion() {
+	fmt.Printf("yay v%s - libalpm v%s\n", runtime.Version, alpm.Version())
+}
+
+func handleYay(config *runtime.Configuration, pacmanConf *pacmanconf.Config, cmdArgs *types.Arguments, alpmHandle *alpm.Handle, savedInfo vcs.InfoStore) error {
+	//_, options, targets := cmdArgs.formatArgs()
+	if cmdArgs.ExistsArg("gendb") {
+		return install.CreateDevelDB(alpmHandle, config, savedInfo)
+	}
+	if cmdArgs.ExistsDouble("c") {
+		return lookup.CleanDependencies(config, alpmHandle, pacmanConf, cmdArgs, true)
+	}
+	if cmdArgs.ExistsArg("c", "clean") {
+		return lookup.CleanDependencies(config, alpmHandle, pacmanConf, cmdArgs, false)
+	}
+	if len(cmdArgs.Targets) > 0 {
+		return handleYogurt(config, cmdArgs, pacmanConf, alpmHandle, savedInfo)
+	}
+	return nil
+}
+
+func handleYogurt(config *runtime.Configuration, cmdArgs *types.Arguments, pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle, savedInfo vcs.InfoStore) error {
+	config.SearchMode = runtime.NumberMenu
+	return install.DisplayNumberMenu(config, pacmanConf, alpmHandle, savedInfo, cmdArgs, cmdArgs.Targets)
+}
 
 func usage() {
 	fmt.Println(`Usage:
@@ -127,324 +288,4 @@ getpkgbuild specific options:
 
 If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed`)
-}
-
-func handleCmd() (err error) {
-	if cmdArgs.existsArg("h", "help") {
-		err = handleHelp()
-		return
-	}
-
-	if config.SudoLoop && cmdArgs.needRoot() {
-		sudoLoopBackground()
-	}
-
-	switch cmdArgs.op {
-	case "V", "version":
-		handleVersion()
-	case "D", "database":
-		err = show(passToPacman(cmdArgs))
-	case "F", "files":
-		err = show(passToPacman(cmdArgs))
-	case "Q", "query":
-		err = handleQuery()
-	case "R", "remove":
-		err = handleRemove()
-	case "S", "sync":
-		err = handleSync()
-	case "T", "deptest":
-		err = show(passToPacman(cmdArgs))
-	case "U", "upgrade":
-		err = show(passToPacman(cmdArgs))
-	case "G", "getpkgbuild":
-		err = handleGetpkgbuild()
-	case "P", "show":
-		err = handlePrint()
-	case "Y", "--yay":
-		err = handleYay()
-	default:
-		//this means we allowed an op but not implement it
-		//if this happens it an error in the code and not the usage
-		err = fmt.Errorf("unhandled operation")
-	}
-
-	return
-}
-
-func handleQuery() error {
-	if cmdArgs.existsArg("u", "upgrades") {
-		return printUpdateList(cmdArgs)
-	}
-	return show(passToPacman(cmdArgs))
-}
-
-func handleHelp() error {
-	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
-		usage()
-		return nil
-	}
-	return show(passToPacman(cmdArgs))
-}
-
-func handleVersion() {
-	fmt.Printf("yay v%s - libalpm v%s\n", version, alpm.Version())
-}
-
-func handlePrint() (err error) {
-	switch {
-	case cmdArgs.existsArg("d", "defaultconfig"):
-		tmpConfig := defaultSettings()
-		tmpConfig.expandEnv()
-		fmt.Printf("%v", tmpConfig)
-	case cmdArgs.existsArg("g", "currentconfig"):
-		fmt.Printf("%v", config)
-	case cmdArgs.existsArg("n", "numberupgrades"):
-		err = printNumberOfUpdates()
-	case cmdArgs.existsArg("u", "upgrades"):
-		err = printUpdateList(cmdArgs)
-	case cmdArgs.existsArg("w", "news"):
-		err = printNewsFeed()
-	case cmdArgs.existsDouble("c", "complete"):
-		complete(true)
-	case cmdArgs.existsArg("c", "complete"):
-		complete(false)
-	case cmdArgs.existsArg("s", "stats"):
-		err = localStatistics()
-	default:
-		err = nil
-	}
-	return err
-}
-
-func handleYay() error {
-	//_, options, targets := cmdArgs.formatArgs()
-	if cmdArgs.existsArg("gendb") {
-		return createDevelDB()
-	}
-	if cmdArgs.existsDouble("c") {
-		return cleanDependencies(true)
-	}
-	if cmdArgs.existsArg("c", "clean") {
-		return cleanDependencies(false)
-	}
-	if len(cmdArgs.targets) > 0 {
-		return handleYogurt()
-	}
-	return nil
-}
-
-func handleGetpkgbuild() error {
-	return getPkgbuilds(cmdArgs.targets)
-}
-
-func handleYogurt() error {
-	config.SearchMode = numberMenu
-	return displayNumberMenu(cmdArgs.targets)
-}
-
-func handleSync() error {
-	targets := cmdArgs.targets
-
-	if cmdArgs.existsArg("s", "search") {
-		if cmdArgs.existsArg("q", "quiet") {
-			config.SearchMode = minimal
-		} else {
-			config.SearchMode = detailed
-		}
-		return syncSearch(targets)
-	}
-	if cmdArgs.existsArg("p", "print", "print-format") {
-		return show(passToPacman(cmdArgs))
-	}
-	if cmdArgs.existsArg("c", "clean") {
-		return syncClean(cmdArgs)
-	}
-	if cmdArgs.existsArg("l", "list") {
-		return syncList(cmdArgs)
-	}
-	if cmdArgs.existsArg("g", "groups") {
-		return show(passToPacman(cmdArgs))
-	}
-	if cmdArgs.existsArg("i", "info") {
-		return syncInfo(targets)
-	}
-	if cmdArgs.existsArg("u", "sysupgrade") {
-		return install(cmdArgs)
-	}
-	if len(cmdArgs.targets) > 0 {
-		return install(cmdArgs)
-	}
-	if cmdArgs.existsArg("y", "refresh") {
-		return show(passToPacman(cmdArgs))
-	}
-	return nil
-}
-
-func handleRemove() error {
-	removeVCSPackage(cmdArgs.targets)
-	return show(passToPacman(cmdArgs))
-}
-
-// NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(pkgS []string) (err error) {
-	var (
-		aurErr, repoErr error
-		aq              aurQuery
-		pq              repoQuery
-		lenaq, lenpq    int
-	)
-
-	pkgS = removeInvalidTargets(pkgS)
-
-	if mode == modeAUR || mode == modeAny {
-		aq, aurErr = narrowSearch(pkgS, true)
-		lenaq = len(aq)
-	}
-	if mode == modeRepo || mode == modeAny {
-		pq, repoErr = queryRepo(pkgS)
-		lenpq = len(pq)
-		if repoErr != nil {
-			return err
-		}
-	}
-
-	if lenpq == 0 && lenaq == 0 {
-		return fmt.Errorf("No packages match search")
-	}
-
-	switch config.SortMode {
-	case topDown:
-		if mode == modeRepo || mode == modeAny {
-			pq.printSearch()
-		}
-		if mode == modeAUR || mode == modeAny {
-			aq.printSearch(lenpq + 1)
-		}
-	case bottomUp:
-		if mode == modeAUR || mode == modeAny {
-			aq.printSearch(lenpq + 1)
-		}
-		if mode == modeRepo || mode == modeAny {
-			pq.printSearch()
-		}
-	default:
-		return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
-	}
-
-	if aurErr != nil {
-		fmt.Fprintf(os.Stderr, "Error during AUR search: %s\n", aurErr)
-		fmt.Fprintln(os.Stderr, "Showing repo packages only")
-	}
-
-	fmt.Println(bold(green(arrow + " Packages to install (eg: 1 2 3, 1-3 or ^4)")))
-	fmt.Print(bold(green(arrow + " ")))
-
-	reader := bufio.NewReader(os.Stdin)
-
-	numberBuf, overflow, err := reader.ReadLine()
-	if err != nil {
-		return err
-	}
-	if overflow {
-		return fmt.Errorf("Input too long")
-	}
-
-	include, exclude, _, otherExclude := parseNumberMenu(string(numberBuf))
-	arguments := cmdArgs.copyGlobal()
-
-	isInclude := len(exclude) == 0 && len(otherExclude) == 0
-
-	for i, pkg := range pq {
-		var target int
-		switch config.SortMode {
-		case topDown:
-			target = i + 1
-		case bottomUp:
-			target = len(pq) - i
-		default:
-			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
-		}
-
-		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {
-			arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
-		}
-	}
-
-	for i, pkg := range aq {
-		var target int
-
-		switch config.SortMode {
-		case topDown:
-			target = i + 1 + len(pq)
-		case bottomUp:
-			target = len(aq) - i + len(pq)
-		default:
-			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
-		}
-
-		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {
-			arguments.addTarget("aur/" + pkg.Name)
-		}
-	}
-
-	if len(arguments.targets) == 0 {
-		fmt.Println("There is nothing to do")
-		return nil
-	}
-
-	if config.SudoLoop {
-		sudoLoopBackground()
-	}
-
-	err = install(arguments)
-
-	return err
-}
-
-func syncList(parser *arguments) error {
-	aur := false
-
-	for i := len(parser.targets) - 1; i >= 0; i-- {
-		if parser.targets[i] == "aur" && (mode == modeAny || mode == modeAUR) {
-			parser.targets = append(parser.targets[:i], parser.targets[i+1:]...)
-			aur = true
-		}
-	}
-
-	if (mode == modeAny || mode == modeAUR) && (len(parser.targets) == 0 || aur) {
-		localDB, err := alpmHandle.LocalDB()
-		if err != nil {
-			return err
-		}
-
-		resp, err := http.Get(config.AURURL + "/packages.gz")
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		scanner := bufio.NewScanner(resp.Body)
-
-		scanner.Scan()
-		for scanner.Scan() {
-			name := scanner.Text()
-			if cmdArgs.existsArg("q", "quiet") {
-				fmt.Println(name)
-			} else {
-				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green("unknown-version")))
-
-				if localDB.Pkg(name) != nil {
-					fmt.Print(bold(blue(" [Installed]")))
-				}
-
-				fmt.Println()
-			}
-		}
-	}
-
-	if (mode == modeAny || mode == modeRepo) && (len(parser.targets) != 0 || !aur) {
-		return show(passToPacman(parser))
-	}
-
-	return nil
 }
