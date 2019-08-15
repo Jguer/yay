@@ -43,6 +43,14 @@ cd yay
 makepkg -si
 ```
 
+### sudo
+
+the `-si` flag on makepkg will try to use sudo to install the package. If your user can't use sudo, ommit the flag, and install the package that is generated on the source directory with `pacman -U <file>`
+
+### dependencies
+
+yay makepkg depends on `base-devel` and `go`, which can be installed via pacman.
+
 ## Support
 
 All support related to Yay should be requested via GitHub issues. Since Yay is not
