@@ -10,7 +10,7 @@ arch:
     - git
     - go
   script:
-    - go tool vet .
+    - go vet .
     - diff -u <(echo -n) <(gofmt -d ./)
     - make
     - make test
