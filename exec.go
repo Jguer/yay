@@ -105,6 +105,8 @@ func passToMakepkg(dir string, args ...string) *exec.Cmd {
 		args = append(args, "--config", config.MakepkgConf)
 	}
 
+	args = append(args, "YAY=1")
+	
 	cmd := exec.Command(config.MakepkgBin, args...)
 	cmd.Dir = dir
 	return cmd
