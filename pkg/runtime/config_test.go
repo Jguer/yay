@@ -3,26 +3,23 @@ package runtime
 import (
 	"reflect"
 	"testing"
-)
 
-func expect(t *testing.T, field string, a interface{}, b interface{}, err error) {
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(a, b) {
-		t.Errorf("%s expected: %s got %s", field, a, b)
-	}
-}
+	"github.com/Jguer/yay/v10/pkg/types"
+)
 
 func TestConfig(t *testing.T) {
 	config := &Configuration{}
-	config.PacmanConf = "./testdata/pacman.conf"
+	cmdArgs := types.MakeArguments()
 
-	err := initAlpm()
+	pacmanConf, err := InitPacmanConf(cmdArgs, "../../testdata/pacman.conf")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	h := alpmHandle
+	h, err := InitAlpmHandle(config, pacmanConf, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	root, err := h.Root()
 	expect(t, "RootDir", "/", root, err)
@@ -36,6 +33,7 @@ func TestConfig(t *testing.T) {
 	gpg, err := h.GPGDir()
 	expect(t, "GPGDir", "/gpgdir/", gpg, err)
 
+	// Test doesn't work if alpm lib is installed in a non-standard location. Check only for /hookdir/
 	hook, err := h.HookDirs()
 	expect(t, "HookDir", []string{"/usr/share/libalpm/hooks/", "/hookdir/"}, hook.Slice(), err)
 
@@ -59,4 +57,12 @@ func TestConfig(t *testing.T) {
 
 	check, err := h.CheckSpace()
 	expect(t, "CheckSpace", true, check, err)
+}
+
+func expect(t *testing.T, field string, a interface{}, b interface{}, err error) {
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(a, b) {
+		t.Errorf("%s expected: %s got %s", field, a, b)
+	}
 }

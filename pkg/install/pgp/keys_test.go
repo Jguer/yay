@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/types"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	rpc "github.com/mikkeloscar/aur"
 )
@@ -33,32 +35,6 @@ func init() {
 	})
 }
 
-func newPkg(basename string) *rpc.Pkg {
-	return &rpc.Pkg{Name: basename, PackageBase: basename}
-}
-
-func getPgpKey(key string) string {
-	var buffer bytes.Buffer
-
-	if contents, err := ioutil.ReadFile(path.Join("testdata", "keys", key)); err == nil {
-		buffer.WriteString("-----BEGIN PGP PUBLIC KEY BLOCK-----\n")
-		buffer.WriteString("Version: SKS 1.1.6\n")
-		buffer.WriteString("Comment: Hostname: yay\n\n")
-		buffer.Write(contents)
-		buffer.WriteString("\n-----END PGP PUBLIC KEY BLOCK-----\n")
-	}
-	return buffer.String()
-}
-
-func startPgpKeyServer() *http.Server {
-	srv := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", gpgServerPort)}
-
-	go func() {
-		srv.ListenAndServe()
-	}()
-	return srv
-}
-
 func TestImportKeys(t *testing.T) {
 	keyringDir, err := ioutil.TempDir("/tmp", "yay-test-keyring")
 	if err != nil {
@@ -66,8 +42,7 @@ func TestImportKeys(t *testing.T) {
 	}
 	defer os.RemoveAll(keyringDir)
 
-	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
+	text.UseColor = false
 
 	server := startPgpKeyServer()
 	defer server.Shutdown(context.TODO())
@@ -109,8 +84,11 @@ func TestImportKeys(t *testing.T) {
 		},
 	}
 
+	gpgBin := "gpg"
+	gpgFlags := fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 	for _, tt := range casetests {
-		err := importKeys(tt.keys)
+
+		err := importKeys(gpgBin, gpgFlags, tt.keys)
 		if !tt.wantError {
 			if err != nil {
 				t.Fatalf("Got error %q, want no error", err)
@@ -122,14 +100,6 @@ func TestImportKeys(t *testing.T) {
 			t.Fatalf("Got no error; want error")
 		}
 	}
-}
-
-func makeSrcinfo(pkgbase string, pgpkeys ...string) *gosrc.Srcinfo {
-	srcinfo := gosrc.Srcinfo{}
-	srcinfo.Pkgbase = pkgbase
-	srcinfo.ValidPGPKeys = pgpkeys
-
-	return &srcinfo
 }
 
 func TestCheckPgpKeys(t *testing.T) {
@@ -139,21 +109,22 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 	defer os.RemoveAll(keyringDir)
 
-	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
+	gpgBin := "gpg"
+	gpgFlags := fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
+	text.UseColor = false
 
 	server := startPgpKeyServer()
 	defer server.Shutdown(context.TODO())
 
 	casetests := []struct {
-		pkgs      Base
+		pkgs      types.Base
 		srcinfos  map[string]*gosrc.Srcinfo
 		wantError bool
 	}{
 		// cower: single package, one valid key not yet in the keyring.
 		// 487EACC08557AD082088DABA1EB2638FF56C0C53: Dave Reisner.
 		{
-			pkgs:      Base{newPkg("cower")},
+			pkgs:      types.Base{newPkg("cower")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"cower": makeSrcinfo("cower", "487EACC08557AD082088DABA1EB2638FF56C0C53")},
 			wantError: false,
 		},
@@ -161,14 +132,14 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// B6C8F98282B944E3B0D5C2530FC3042E345AD05D: Hans Wennborg.
 		{
-			pkgs:      Base{newPkg("libc++")},
+			pkgs:      types.Base{newPkg("libc++")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"libc++": makeSrcinfo("libc++", "11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D")},
 			wantError: false,
 		},
 		// Two dummy packages requiring the same key.
 		// ABAF11C65A2970B130ABE3C479BE3E4300411886: Linus Torvalds.
 		{
-			pkgs:      Base{newPkg("dummy-1"), newPkg("dummy-2")},
+			pkgs:      types.Base{newPkg("dummy-1"), newPkg("dummy-2")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-1": makeSrcinfo("dummy-1", "ABAF11C65A2970B130ABE3C479BE3E4300411886"), "dummy-2": makeSrcinfo("dummy-2", "ABAF11C65A2970B130ABE3C479BE3E4300411886")},
 			wantError: false,
 		},
@@ -177,33 +148,33 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// C52048C0C0748FEE227D47A2702353E0F7E48EDB: Thomas Dickey.
 		{
-			pkgs:      Base{newPkg("dummy-3")},
+			pkgs:      types.Base{newPkg("dummy-3")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-3": makeSrcinfo("dummy-3", "11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
 			wantError: false,
 		},
 		// Two dummy packages with existing keys.
 		{
-			pkgs:      Base{newPkg("dummy-4"), newPkg("dummy-5")},
+			pkgs:      types.Base{newPkg("dummy-4"), newPkg("dummy-5")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-4": makeSrcinfo("dummy-4", "11E521D646982372EB577A1F8F0871F202119294"), "dummy-5": makeSrcinfo("dummy-5", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
 			wantError: false,
 		},
 		// Dummy package with invalid key, should fail.
 		{
-			pkgs:      Base{newPkg("dummy-7")},
+			pkgs:      types.Base{newPkg("dummy-7")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-7": makeSrcinfo("dummy-7", "THIS-SHOULD-FAIL")},
 			wantError: true,
 		},
 		// Dummy package with both an invalid an another valid key, should fail.
 		// A314827C4E4250A204CE6E13284FC34C8E4B1A25: Thomas Bächler.
 		{
-			pkgs:      Base{newPkg("dummy-8")},
+			pkgs:      types.Base{newPkg("dummy-8")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-8": makeSrcinfo("dummy-8", "A314827C4E4250A204CE6E13284FC34C8E4B1A25", "THIS-SHOULD-FAIL")},
 			wantError: true,
 		},
 	}
 
 	for _, tt := range casetests {
-		err := checkPgpKeys([]Base{tt.pkgs}, tt.srcinfos)
+		err := CheckKeys(gpgBin, gpgFlags, []types.Base{tt.pkgs}, tt.srcinfos, true)
 		if !tt.wantError {
 			if err != nil {
 				t.Fatalf("Got error %q, want no error", err)
@@ -215,4 +186,38 @@ func TestCheckPgpKeys(t *testing.T) {
 			t.Fatalf("Got no error; want error")
 		}
 	}
+}
+
+func newPkg(basename string) *rpc.Pkg {
+	return &rpc.Pkg{Name: basename, PackageBase: basename}
+}
+
+func getPgpKey(key string) string {
+	var buffer bytes.Buffer
+
+	if contents, err := ioutil.ReadFile(path.Join("testdata", "keys", key)); err == nil {
+		buffer.WriteString("-----BEGIN PGP PUBLIC KEY BLOCK-----\n")
+		buffer.WriteString("Version: SKS 1.1.6\n")
+		buffer.WriteString("Comment: Hostname: yay\n\n")
+		buffer.Write(contents)
+		buffer.WriteString("\n-----END PGP PUBLIC KEY BLOCK-----\n")
+	}
+	return buffer.String()
+}
+
+func startPgpKeyServer() *http.Server {
+	srv := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", gpgServerPort)}
+
+	go func() {
+		srv.ListenAndServe()
+	}()
+	return srv
+}
+
+func makeSrcinfo(pkgbase string, pgpkeys ...string) *gosrc.Srcinfo {
+	srcinfo := gosrc.Srcinfo{}
+	srcinfo.Pkgbase = pkgbase
+	srcinfo.ValidPGPKeys = pgpkeys
+
+	return &srcinfo
 }
