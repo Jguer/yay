@@ -2,7 +2,7 @@ package types
 
 import "unicode"
 
-// LessRunes compares two rune values
+// LessRunes compares two rune values, and returns true if the first argument is lexicographicaly smaller.
 func LessRunes(iRunes, jRunes []rune) bool {
 	max := len(iRunes)
 	if max > len(jRunes) {

@@ -20,7 +20,7 @@ func (b Base) URLPath() string {
 	return b[0].URLPath
 }
 
-// Pretty print a set of packages from the same package base.
+// String pretty prints a set of packages from the same package base.
 // Packages foo and bar from a pkgbase named base would print like so:
 // base (foo bar)
 func (b Base) String() string {
@@ -39,6 +39,7 @@ func (b Base) String() string {
 	return str
 }
 
+// GetBases turns rpc.Pkgs into easier to use Bases
 func GetBases(pkgs []*rpc.Pkg) []Base {
 	basesMap := make(map[string]Base)
 	for _, pkg := range pkgs {

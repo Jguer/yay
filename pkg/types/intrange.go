@@ -22,10 +22,14 @@ func makeIntRange(min, max int) IntRange {
 	}
 }
 
+// Get returns true if the argument n is included in the closed range
+// between min and max
 func (r IntRange) Get(n int) bool {
 	return n >= r.min && n <= r.max
 }
 
+// Get returns true if the argument n is included in the closed range
+// between min and max of any of the provided IntRanges
 func (rs IntRanges) Get(n int) bool {
 	for _, r := range rs {
 		if r.Get(n) {
