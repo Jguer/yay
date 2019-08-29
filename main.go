@@ -159,8 +159,6 @@ func main() {
 	err = handleCmd(config, pacmanConf, cmdArgs, alpmHandle, savedInfo)
 	exitOnError(alpmHandle, err)
 
-	exitOnError(alpmHandle, err)
-
 	os.Exit(cleanup(alpmHandle))
 }
 

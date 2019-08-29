@@ -11,16 +11,21 @@ import (
 
 func InitAlpmHandle(config *Configuration, pacmanConf *pacmanconf.Config, oldHandle *alpm.Handle) (*alpm.Handle, error) {
 	var err error
-	alpmHandle := new(alpm.Handle)
 
-	if oldHandle != nil {
-		if err := oldHandle.Release(); err != nil {
+	var alpmHandle *alpm.Handle
+
+	if oldHandle == nil {
+		// There's no old handle so return a new one
+		alpmHandle = new(alpm.Handle)
+		if alpmHandle, err = alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
+			return nil, fmt.Errorf("Unable to CreateHandle: %s", err)
+		}
+	} else {
+		// There's an old handle so just reopen the pointer inside
+		if err := oldHandle.Reopen(); err != nil {
 			return nil, err
 		}
-	}
-
-	if alpmHandle, err = alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
-		return nil, fmt.Errorf("Unable to CreateHandle: %s", err)
+		alpmHandle = oldHandle
 	}
 
 	if err := configureAlpm(pacmanConf, alpmHandle); err != nil {
