@@ -33,7 +33,7 @@ func upgradePkgs(config *runtime.Configuration, alpmHandle *alpm.Handle, aurUp, 
 		return repoUp.Less(i, j, alpmHandle)
 	})
 
-	sort.Slice(repoUp, func(i, j int) bool {
+	sort.Slice(aurUp, func(i, j int) bool {
 		return aurUp.Less(i, j, alpmHandle)
 	})
 
