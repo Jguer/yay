@@ -3,24 +3,25 @@
 PREFIX := /usr/local
 DESTDIR :=
 
-MAJORVERSION := 9
-MINORVERSION ?= 2
+MAJORVERSION := 10
+MINORVERSION ?= 0
 PATCHVERSION := 1
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
-LDFLAGS := -gcflags=all=-trimpath=${PWD} -asmflags=all=-trimpath=${PWD} -ldflags=-extldflags=-zrelro -ldflags=-extldflags=-znow -ldflags '-s -w -X main.version=${VERSION}'
-MOD := -mod=vendor
-export GO111MODULE=on
+LDFLAGS := -gcflags=all=-trimpath=${PWD} \
+	-asmflags=all=-trimpath=${PWD} -ldflags=-extldflags=-zrelro \
+	-ldflags=-extldflags=-znow -ldflags '-s -w -X runtime.version=${VERSION}'
+
 ARCH := $(shell uname -m)
 GOCC := $(shell go version)
 PKGNAME := yay
 BINNAME := yay
 PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
 
+export GO111MODULE=on
+
 ifneq (,$(findstring gccgo,$(GOCC)))
-	export GOPATH=$(shell pwd)/.go
 	LDFLAGS := -gccgoflags '-s -w'
-	MOD :=
 endif
 
 default: build
