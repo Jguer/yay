@@ -195,7 +195,7 @@ func newPkg(basename string) *rpc.Pkg {
 func getPgpKey(key string) string {
 	var buffer bytes.Buffer
 
-	if contents, err := ioutil.ReadFile(path.Join("testdata", "keys", key)); err == nil {
+	if contents, err := ioutil.ReadFile(path.Join("../../../testdata", "keys", key)); err == nil {
 		buffer.WriteString("-----BEGIN PGP PUBLIC KEY BLOCK-----\n")
 		buffer.WriteString("Version: SKS 1.1.6\n")
 		buffer.WriteString("Comment: Hostname: yay\n\n")
