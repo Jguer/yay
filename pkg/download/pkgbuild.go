@@ -23,7 +23,7 @@ const arrow = "==>"
 func gitDownload(bin string, flags string, url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
-		cmd := exec.PassToGit(path, "clone", "--no-progress", url, name)
+		cmd := exec.PassToGit(bin, flags, path, "clone", "--no-progress", url, name)
 		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 		_, stderr, err := exec.Capture(cmd)
 		if err != nil {

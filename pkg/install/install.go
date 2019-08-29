@@ -357,7 +357,6 @@ func buildInstallPkgbuilds(config *runtime.Configuration,
 	args *types.Arguments,
 	incompatible types.StringSet, conflicts types.MapStringSet,
 	savedInfo vcs.InfoStore) error {
-
 	arguments := args.Copy()
 	arguments.ClearTargets()
 	arguments.Op = "U"
@@ -591,7 +590,7 @@ func parsePackageList(config *runtime.Configuration, dir string) (map[string]str
 	return pkgdests, version, nil
 }
 
-func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle, args *types.Arguments, savedInfo vcs.InfoStore) (err error) {
+func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle, cmdArgs *types.Arguments, savedInfo vcs.InfoStore) (err error) {
 	var incompatible types.StringSet
 	var do *dep.Order
 
@@ -604,14 +603,14 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 
 	if config.Mode.IsAnyOrRepo() {
 		if config.CombinedUpgrade {
-			if args.ExistsArg("y", "refresh") {
-				err = earlyRefresh(config, pacmanConf, args)
+			if cmdArgs.ExistsArg("y", "refresh") {
+				err = earlyRefresh(config, pacmanConf, cmdArgs)
 				if err != nil {
 					return fmt.Errorf("Error refreshing databases")
 				}
 			}
-		} else if args.ExistsArg("y", "refresh") || args.ExistsArg("u", "sysupgrade") || len(args.Targets) > 0 {
-			err = earlyPacmanCall(config, pacmanConf, alpmHandle, args)
+		} else if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0 {
+			err = earlyPacmanCall(config, pacmanConf, alpmHandle, cmdArgs)
 			if err != nil {
 				return err
 			}
@@ -633,10 +632,10 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 	remoteNamesCache := types.SliceToStringSet(remoteNames)
 	localNamesCache := types.SliceToStringSet(localNames)
 
-	requestTargets := args.Copy().Targets
+	requestTargets := cmdArgs.Copy().Targets
 
 	//create the arguments to pass for the repo install
-	arguments := args.Copy()
+	arguments := cmdArgs.Copy()
 	arguments.DelArg("asdeps", "asdep")
 	arguments.DelArg("asexplicit", "asexp")
 	arguments.Op = "S"
@@ -647,8 +646,8 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 	}
 
 	//if we are doing -u also request all packages needing update
-	if args.ExistsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upgrade.UpList(config, alpmHandle, args, savedInfo, warnings)
+	if cmdArgs.ExistsArg("u", "sysupgrade") {
+		aurUp, repoUp, err = upgrade.UpList(config, alpmHandle, cmdArgs, savedInfo, warnings)
 		if err != nil {
 			return err
 		}
@@ -663,16 +662,16 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 		for _, up := range repoUp {
 			if !ignore.Get(up.Name) {
 				requestTargets = append(requestTargets, up.Name)
-				args.AddTarget(up.Name)
+				cmdArgs.AddTarget(up.Name)
 			}
 		}
 
 		for up := range aurUp {
 			requestTargets = append(requestTargets, "aur/"+up)
-			args.AddTarget("aur/" + up)
+			cmdArgs.AddTarget("aur/" + up)
 		}
 
-		value, _, exists := args.GetArg("ignore")
+		value, _, exists := cmdArgs.GetArg("ignore")
 
 		if len(ignore) > 0 {
 			ignoreStr := strings.Join(ignore.ToSlice(), ",")
@@ -683,9 +682,9 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 		}
 	}
 
-	targets := types.SliceToStringSet(args.Targets)
+	targets := types.SliceToStringSet(cmdArgs.Targets)
 
-	dp, err := dep.GetPool(config, args, alpmHandle, requestTargets, warnings)
+	dp, err := dep.GetPool(config, cmdArgs, alpmHandle, requestTargets, warnings)
 	if err != nil {
 		return err
 	}
@@ -697,16 +696,16 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
-			if args.ExistsArg("u", "sysupgrade") {
+			if cmdArgs.ExistsArg("u", "sysupgrade") {
 				fmt.Println(" there is nothing to do")
 			}
 			return nil
 		}
 
-		args.Op = "S"
-		args.DelArg("y", "refresh")
-		args.Options["ignore"] = arguments.Options["ignore"]
-		return exec.Show(exec.PassToPacman(config, pacmanConf, args, config.NoConfirm))
+		cmdArgs.Op = "S"
+		cmdArgs.DelArg("y", "refresh")
+		cmdArgs.Options["ignore"] = arguments.Options["ignore"]
+		return exec.Show(exec.PassToPacman(config, pacmanConf, cmdArgs, config.NoConfirm))
 	}
 
 	if len(dp.Aur) > 0 && os.Geteuid() == 0 {
@@ -731,7 +730,7 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 		arguments.AddTarget(pkg)
 	}
 
-	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!args.ExistsArg("u", "sysupgrade") || config.Mode.IsAUR()) {
+	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!cmdArgs.ExistsArg("u", "sysupgrade") || config.Mode.IsAUR()) {
 		fmt.Println(" there is nothing to do")
 		return nil
 	}
@@ -868,17 +867,17 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 				continue
 			}
 
-			if args.ExistsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
+			if cmdArgs.ExistsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
 				deps = append(deps, pkg.Name())
-			} else if args.ExistsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
+			} else if cmdArgs.ExistsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
 				exp = append(exp, pkg.Name())
 			}
 		}
 
-		if err = asdeps(config, pacmanConf, args, deps, config.NoConfirm); err != nil {
+		if err = asdeps(config, pacmanConf, cmdArgs, deps, config.NoConfirm); err != nil {
 			return err
 		}
-		if err = asexp(config, pacmanConf, args, exp, config.NoConfirm); err != nil {
+		if err = asexp(config, pacmanConf, cmdArgs, exp, config.NoConfirm); err != nil {
 			return err
 		}
 	}
@@ -890,7 +889,7 @@ func Install(config *runtime.Configuration, pacmanConf *pacmanconf.Config, alpmH
 		return err
 	}
 
-	err = buildInstallPkgbuilds(config, pacmanConf, alpmHandle, dp, do, srcinfos, args, incompatible, conflicts, savedInfo)
+	err = buildInstallPkgbuilds(config, pacmanConf, alpmHandle, dp, do, srcinfos, cmdArgs, incompatible, conflicts, savedInfo)
 	if err != nil {
 		return err
 	}
