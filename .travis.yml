@@ -1,20 +1,16 @@
 sudo: required
+
 notifications:
   email: false
-language: generic
+
+addons:
+  apt:
+    packages:
+      # Install the latest version of Docker.
+      - docker-ce
+
 services:
   - docker
 
-arch:
-  packages:
-    - git
-    - go
-  script:
-    - go vet .
-    - diff -u <(echo -n) <(gofmt -d ./*.go ./pkg/)
-    - make
-    - make test
-    - ./testdata/install_test.sh
-
 script:
-  - "curl -s https://raw.githubusercontent.com/mikkeloscar/arch-travis/master/arch-travis.sh | bash"
+  - ./testdata/travis.sh

@@ -8,9 +8,9 @@ MINORVERSION ?= 0
 PATCHVERSION := 1
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
-LDFLAGS := -gcflags=all=-trimpath=${PWD} \
-	-asmflags=all=-trimpath=${PWD} -ldflags=-extldflags=-zrelro \
-	-ldflags=-extldflags=-znow -ldflags '-s -w -X runtime.version=${VERSION}'
+GOFLAGS := -v
+EXTRA_GOFLAGS ?=
+LDFLAGS := $(LDFLAGS) -X "runtime.version=${VERSION}"
 
 ARCH := $(shell uname -m)
 GOCC := $(shell go version)
@@ -20,13 +20,11 @@ PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
 
 export GO111MODULE=on
 
-ifneq (,$(findstring gccgo,$(GOCC)))
-	LDFLAGS := -gccgoflags '-s -w'
-endif
+SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 default: build
 
-all: | clean package
+all: | clean build package
 
 install:
 	install -Dm755 ${BINNAME} $(DESTDIR)$(PREFIX)/bin/${BINNAME}
@@ -42,16 +40,21 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
 	rm -f $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
 
+lint:
+	golint -set_exit_status ./...
+
+fmt:
+	@gofmt -s -l -w $(SRC)
+
 test:
-	gofmt -l *.go
-	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted" && false)
-	go vet
-	go test --race -v . ./pkg/...
+	go vet ./...
+	@test -z "$$(gofmt -l $(SRC))" || (echo "Files need to be linted. Use make fmt" && false)
+	go test --race -covermode=atomic -v . ./pkg/...
 
 build:
-	go build -v ${LDFLAGS} -o ${BINNAME} ${MOD}
+	go build $(GOFLAGS) $(EXTRA_GOFLAGS) -ldflags '-s -w $(LDFLAGS)' -o ${BINNAME}
 
-release: | test build
+release:
 	mkdir ${PACKAGE}
 	cp ./${BINNAME} ${PACKAGE}/
 	cp ./doc/${PKGNAME}.8 ${PACKAGE}/
@@ -90,4 +93,3 @@ package: release
 clean:
 	rm -rf ${PKGNAME}_*
 	rm -f ${BINNAME}
-
