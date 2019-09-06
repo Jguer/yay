@@ -61,9 +61,9 @@ _yay() {
         'c g i l p s u w y')
   upgrade=('asdeps asexplicit force needed nodeps assume-installed print recursive' 'p')
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
-           noconfirm noprogressbar noscriptlet quiet root verbose
+           noconfirm noprogressbar noscriptlet quiet root verbose')
            #yay stuff
-           makepkg pacman tar git gpg gpgflags config requestsplitn sudoloop nosudoloop
+  common+=('makepkg pacman tar git gpg gpgflags config requestsplitn sudoloop nosudoloop
            redownload noredownload redownloadall rebuild rebuildall rebuildtree norebuild
            sortby answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
            noansweredit noanswerupgrade cleanmenu diffmenu editmenu upgrademenu cleanafter nocleanafter
