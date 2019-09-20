@@ -6,3 +6,5 @@ require (
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/mikkeloscar/aur v0.0.0-20181111113612-b71516da3ae9
 )
+
+go 1.13
