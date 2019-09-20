@@ -60,6 +60,33 @@ func gitHasDiff(path string, name string) (bool, error) {
 	return head != upstream, nil
 }
 
+// TODO: yay-next passes args through the header, use that to unify ABS and AUR
+func gitDownloadABS(url string, path string, name string) (bool, error) {
+	_, err := os.Stat(filepath.Join(path, name))
+	if os.IsNotExist(err) {
+		cmd := passToGit(path, "clone", "--no-progress", "--single-branch",
+			"-b", "packages/"+name, url, name)
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+		_, stderr, err := capture(cmd)
+		if err != nil {
+			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
+		}
+
+		return true, nil
+	} else if err != nil {
+		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+	}
+
+	cmd := passToGit(filepath.Join(path, name), "fetch")
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	_, stderr, err := capture(cmd)
+	if err != nil {
+		return false, fmt.Errorf("error fetching %s: %s", name, stderr)
+	}
+
+	return true, nil
+}
+
 func gitDownload(url string, path string, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
@@ -236,11 +263,13 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 			name = pkg.Name()
 		}
 
+		// TODO: Check existence with ls-remote
+		// https://git.archlinux.org/svntogit/packages.git
 		switch pkg.DB().Name() {
 		case "core", "extra", "testing":
-			url = "https://git.archlinux.org/svntogit/packages.git/snapshot/packages/" + name + ".tar.gz"
+			url = "https://git.archlinux.org/svntogit/packages.git"
 		case "community", "multilib", "community-testing", "multilib-testing":
-			url = "https://git.archlinux.org/svntogit/community.git/snapshot/packages/" + name + ".tar.gz"
+			url = "https://git.archlinux.org/svntogit/community.git"
 		default:
 			missing = append(missing, name)
 			continue
@@ -270,16 +299,16 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 
 	download := func(pkg string, url string) {
 		defer wg.Done()
-		if err := downloadAndUnpack(url, cacheHome); err != nil {
+		if _, err := gitDownloadABS(url, cacheHome, pkg); err != nil {
 			errs.Add(fmt.Errorf("%s Failed to get pkgbuild: %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(err.Error()))))
 			return
 		}
 
-		_, stderr, err := capture(exec.Command("mv", filepath.Join(cacheHome, "packages", pkg, "trunk"), filepath.Join(path, pkg)))
+		_, stderr, err := capture(exec.Command("ln", "-s", filepath.Join(cacheHome, pkg, "trunk"), filepath.Join(path, pkg)))
 		mux.Lock()
 		downloaded++
 		if err != nil {
-			errs.Add(fmt.Errorf("%s Failed to move %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(stderr))))
+			errs.Add(fmt.Errorf("%s Failed to link %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(stderr))))
 		} else {
 			fmt.Printf(bold(cyan("::"))+" Downloaded PKGBUILD from ABS (%d/%d): %s\n", downloaded, len(names), cyan(pkg))
 		}
