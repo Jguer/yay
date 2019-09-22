@@ -115,7 +115,7 @@ func (do *depOrder) HasMake() bool {
 }
 
 func (do *depOrder) getMake() []string {
-	makeOnly := make([]string, 0, len(do.Aur)+len(do.Repo)-len(do.Runtime))
+	makeOnly := []string{}
 
 	for _, base := range do.Aur {
 		for _, pkg := range base {
