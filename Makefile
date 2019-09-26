@@ -1,92 +1,104 @@
-.PHONY: all default install uninstall test build release clean package
+export GO111MODULE=on
 
+PKGNAME := yay
+BIN := yay
 PREFIX := /usr/local
 DESTDIR :=
+GO ?= go
+GOFLAGS := -v
+EXTRA_GOFLAGS ?=
+LDFLAGS := $(LDFLAGS) -X "main.version=${VERSION}"
 
 MAJORVERSION := 9
-MINORVERSION ?= 3
-PATCHVERSION := 1
+MINORVERSION := 3
+PATCHVERSION := 2
+
+ARCH ?= $(shell uname -m)
+
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
-LDFLAGS := -gcflags=all=-trimpath=${PWD} -asmflags=all=-trimpath=${PWD} -ldflags=-extldflags=-zrelro -ldflags=-extldflags=-znow -ldflags '-s -w -X main.version=${VERSION}'
-MOD := -mod=vendor
-export GO111MODULE=on
-ARCH := $(shell uname -m)
-GOCC := $(shell go version)
-PKGNAME := yay
-BINNAME := yay
-PACKAGE := ${PKGNAME}_${VERSION}_${ARCH}
+RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
+PACKAGE := $(RELEASE_DIR).tar.gz
+SOURCES ?= $(shell find . -name "*.go" -type f)
 
-ifneq (,$(findstring gccgo,$(GOCC)))
-	export GOPATH=$(shell pwd)/.go
-	LDFLAGS := -gccgoflags '-s -w'
-	MOD :=
-endif
-
-default: build
-
+.PHONY: all
 all: | clean package
 
+.PHONY: default
+default: build
+
+.PHONY: clean
+clean:
+	$(GO) clean -i ./...
+	rm -rf $(BIN) $(PKGNAME)_$(VERSION)_*
+
+.PHONY: test
+test: test-vendor
+	$(GO) vet .
+	@test -z "$$(gofmt -l $(SRC))" || (echo "Files need to be linted. Use make fmt" && false)
+	$(GO) test -mod=vendor --race -covermode=atomic -v . ./pkg/...
+
+.PHONY: build
+build: $(BIN)
+
+.PHONY: release
+release: $(PACKAGE)
+
+$(BIN): $(SOURCES)
+	$(GO) build -mod=vendor -ldflags '-s -w $(LDFLAGS)' $(GOFLAGS) $(EXTRA_GOFLAGS) -o $@
+
+$(RELEASE_DIR):
+	mkdir $(RELEASE_DIR)
+
+$(PACKAGE): $(BIN) $(RELEASE_DIR)
+	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/*
+	tar -czvf $(PACKAGE) $(RELEASE_DIR)
+
+.PHONY: docker-release-all
+docker-release-all:
+	make docker-release ARCH=x86_64
+	make docker-release ARCH=armv7h
+	make docker-release ARCH=aarch64
+
+.PHONY: docker-release
+docker-release:
+	docker build --target builder_env --build-arg BUILD_ARCH="$(ARCH)" -t yay-$(ARCH):${VERSION} .
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release
+	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
+	docker container rm yay-$(ARCH)
+
+.PHONY: docker-build
+docker-build:
+	docker build --target builder --build-arg BUILD_ARCH="$(ARCH)" -t yay-$(ARCH):${VERSION} .
+	docker create --name yay-build-${ARCH} yay-build-${ARCH}:${VERSION}
+	docker cp yay-build-${ARCH}:/app/${BIN} ${BIN}
+	docker container rm yay-build-${ARCH}
+
+.PHONY: test-vendor
+test-vendor: vendor
+	@diff=$$(git diff vendor/); \
+	if [ -n "$$diff" ]; then \
+		echo "Please run 'make vendor' and commit the result:"; \
+		echo "$${diff}"; \
+		exit 1; \
+	fi;
+
+.PHONY: vendor
+vendor:
+	$(GO) mod tidy && $(GO) mod vendor
+
+.PHONY: install
 install:
-	install -Dm755 ${BINNAME} $(DESTDIR)$(PREFIX)/bin/${BINNAME}
+	install -Dm755 ${BIN} $(DESTDIR)$(PREFIX)/bin/${BIN}
 	install -Dm644 doc/${PKGNAME}.8 $(DESTDIR)$(PREFIX)/share/man/man8/${PKGNAME}.8
 	install -Dm644 completions/bash $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
 	install -Dm644 completions/zsh $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
 	install -Dm644 completions/fish $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
 
+.PHONY: uninstall
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/${BINNAME}
+	rm -f $(DESTDIR)$(PREFIX)/bin/${BIN}
 	rm -f $(DESTDIR)$(PREFIX)/share/man/man8/${PKGNAME}.8
 	rm -f $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
 	rm -f $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
 	rm -f $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
-
-test:
-	gofmt -l *.go
-	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted" && false)
-	go vet
-	go test -v
-
-build:
-	go build -v ${LDFLAGS} -o ${BINNAME} ${MOD}
-
-release: | test build
-	mkdir ${PACKAGE}
-	cp ./${BINNAME} ${PACKAGE}/
-	cp ./doc/${PKGNAME}.8 ${PACKAGE}/
-	cp ./completions/zsh ${PACKAGE}/
-	cp ./completions/fish ${PACKAGE}/
-	cp ./completions/bash ${PACKAGE}/
-
-docker-release-aarch64:
-	docker build -f build/aarch64.Dockerfile -t yay-aarch64:${VERSION} .
-	docker run --name yay-aarch64 yay-aarch64:${VERSION}
-	docker cp yay-aarch64:${PKGNAME}_${VERSION}_aarch64.tar.gz ${PKGNAME}_${VERSION}_aarch64.tar.gz
-	docker container rm yay-aarch64
-
-docker-release-armv7h:
-	docker build -f build/armv7h.Dockerfile -t yay-armv7h:${VERSION} .
-	docker create --name yay-armv7h yay-armv7h:${VERSION}
-	docker cp yay-armv7h:${PKGNAME}_${VERSION}_armv7l.tar.gz ${PKGNAME}_${VERSION}_armv7h.tar.gz
-	docker container rm yay-armv7h
-
-docker-release-x86_64:
-	docker build -f build/x86_64.Dockerfile -t yay-x86_64:${VERSION} .
-	docker create --name yay-x86_64 yay-x86_64:${VERSION}
-	docker cp yay-x86_64:${PKGNAME}_${VERSION}_x86_64.tar.gz ${PKGNAME}_${VERSION}_x86_64.tar.gz
-	docker container rm yay-x86_64
-
-docker-release: | docker-release-x86_64 docker-release-aarch64 docker-release-armv7h
-
-docker-build:
-	docker build -f build/${ARCH}.Dockerfile --build-arg MAKE_ARG=build -t yay-build-${ARCH}:${VERSION} .
-	docker create --name yay-build-${ARCH} yay-build-${ARCH}:${VERSION}
-	docker cp yay-build-${ARCH}:${BINNAME} ${BINNAME}
-	docker container rm yay-build-${ARCH}
-
-package: release
-	tar -czvf ${PACKAGE}.tar.gz ${PACKAGE}
-clean:
-	rm -rf ${PKGNAME}_*
-	rm -f ${BINNAME}
-
