@@ -1,8 +1,8 @@
 package ini
 
 import (
-	"io/ioutil"
 	"strings"
+	"io/ioutil"
 )
 
 type Callback func(fileName string, line int, section string,
@@ -35,7 +35,7 @@ func parse(fileName string, ini string, cb Callback, data interface{}) error {
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
 			runes := []rune(line)
 			header = string(runes[1 : len(runes)-1])
-
+			
 			if err := cb(fileName, n, header, "", "", data); err != nil {
 				return err
 			}
