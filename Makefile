@@ -22,7 +22,7 @@ PACKAGE := $(RELEASE_DIR).tar.gz
 SOURCES ?= $(shell find . -name "*.go" -type f)
 
 .PHONY: all
-all: | clean package
+all: | clean release
 
 .PHONY: default
 default: build
