@@ -281,8 +281,12 @@ func handleSync() error {
 }
 
 func handleRemove() error {
-	removeVCSPackage(cmdArgs.targets)
-	return show(passToPacman(cmdArgs))
+	var err = show(passToPacman(cmdArgs))
+	if err == nil {
+		removeVCSPackage(cmdArgs.targets)
+	}
+
+	return err
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
