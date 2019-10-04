@@ -4,7 +4,6 @@ on: [push, pull_request]
 
 jobs:
   build:
-    # Job name is Greeting
     name: Build and test yay
     # This job runs on Linux
     runs-on: ubuntu-latest
