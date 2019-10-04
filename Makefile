@@ -1,25 +1,24 @@
 export GO111MODULE=on
 
-PKGNAME := yay
+ARCH ?= $(shell uname -m)
 BIN := yay
-PREFIX := /usr/local
 DESTDIR :=
 GO ?= go
-GOFLAGS := -v
-EXTRA_GOFLAGS ?=
-LDFLAGS := $(LDFLAGS) -X "main.version=${VERSION}"
+PKGNAME := yay
+PREFIX := /usr/local
 
 MAJORVERSION := 9
 MINORVERSION := 3
 PATCHVERSION := 2
-
-ARCH ?= $(shell uname -m)
-
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
+
+GOFLAGS := -v
+EXTRA_GOFLAGS ?=
+LDFLAGS := $(LDFLAGS) -X "main.version=${VERSION}"
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
-SOURCES ?= $(shell find . -name "*.go" -type f)
+SOURCES ?= $(shell find . -path ./vendor -prune -o -name "*.go" -type f)
 
 .PHONY: all
 all: | clean release
@@ -35,7 +34,7 @@ clean:
 .PHONY: test
 test: test-vendor
 	$(GO) vet .
-	@test -z "$$(gofmt -l $(SRC))" || (echo "Files need to be linted. Use make fmt" && false)
+	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted. Use make fmt" && false)
 	$(GO) test -mod=vendor --race -covermode=atomic -v . ./pkg/...
 
 .PHONY: build
