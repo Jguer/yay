@@ -281,7 +281,7 @@ func handleSync() error {
 }
 
 func handleRemove() error {
-	var err = show(passToPacman(cmdArgs))
+    err := show(passToPacman(cmdArgs))
 	if err == nil {
 		removeVCSPackage(cmdArgs.targets)
 	}
