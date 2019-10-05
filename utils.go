@@ -6,48 +6,6 @@ import (
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
-type intRange struct {
-	min int
-	max int
-}
-
-func makeIntRange(min, max int) intRange {
-	return intRange{
-		min,
-		max,
-	}
-}
-
-func (r intRange) get(n int) bool {
-	return n >= r.min && n <= r.max
-}
-
-type intRanges []intRange
-
-func (rs intRanges) get(n int) bool {
-	for _, r := range rs {
-		if r.get(n) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a < b {
-		return b
-	}
-	return a
-}
-
 func stringSliceEqual(a, b []string) bool {
 	if a == nil && b == nil {
 		return true

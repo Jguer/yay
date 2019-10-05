@@ -544,7 +544,7 @@ func cleanNumberMenu(bases []Base, installed types.StringSet, hasClean bool) ([]
 		return nil, err
 	}
 
-	cInclude, cExclude, cOtherInclude, cOtherExclude := parseNumberMenu(cleanInput)
+	cInclude, cExclude, cOtherInclude, cOtherExclude := types.ParseNumberMenu(cleanInput)
 	cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
 
 	if cOtherInclude.Get("abort") || cOtherInclude.Get("ab") {
@@ -564,7 +564,7 @@ func cleanNumberMenu(bases []Base, installed types.StringSet, hasClean bool) ([]
 				continue
 			}
 
-			if !cIsInclude && cExclude.get(len(bases)-i) {
+			if !cIsInclude && cExclude.Get(len(bases)-i) {
 				continue
 			}
 
@@ -583,12 +583,12 @@ func cleanNumberMenu(bases []Base, installed types.StringSet, hasClean bool) ([]
 				continue
 			}
 
-			if cIsInclude && (cInclude.get(len(bases)-i) || cOtherInclude.Get(pkg)) {
+			if cIsInclude && (cInclude.Get(len(bases)-i) || cOtherInclude.Get(pkg)) {
 				toClean = append(toClean, base)
 				continue
 			}
 
-			if !cIsInclude && (!cExclude.get(len(bases)-i) && !cOtherExclude.Get(pkg)) {
+			if !cIsInclude && (!cExclude.Get(len(bases)-i) && !cOtherExclude.Get(pkg)) {
 				toClean = append(toClean, base)
 				continue
 			}
@@ -629,7 +629,7 @@ func editDiffNumberMenu(bases []Base, installed types.StringSet, diff bool) ([]B
 		}
 	}
 
-	eInclude, eExclude, eOtherInclude, eOtherExclude := parseNumberMenu(editInput)
+	eInclude, eExclude, eOtherInclude, eOtherExclude := types.ParseNumberMenu(editInput)
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
 
 	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
@@ -644,7 +644,7 @@ func editDiffNumberMenu(bases []Base, installed types.StringSet, diff bool) ([]B
 				anyInstalled = anyInstalled || installed.Get(b.Name)
 			}
 
-			if !eIsInclude && eExclude.get(len(bases)-i) {
+			if !eIsInclude && eExclude.Get(len(bases)-i) {
 				continue
 			}
 
@@ -663,11 +663,11 @@ func editDiffNumberMenu(bases []Base, installed types.StringSet, diff bool) ([]B
 				continue
 			}
 
-			if eIsInclude && (eInclude.get(len(bases)-i) || eOtherInclude.Get(pkg)) {
+			if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkg)) {
 				toEdit = append(toEdit, base)
 			}
 
-			if !eIsInclude && (!eExclude.get(len(bases)-i) && !eOtherExclude.Get(pkg)) {
+			if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkg)) {
 				toEdit = append(toEdit, base)
 			}
 		}

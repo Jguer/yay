@@ -497,7 +497,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	}
 
 	for n := 0; n < len(names); n += config.RequestSplitN {
-		max := min(len(names), n+config.RequestSplitN)
+		max := types.Min(len(names), n+config.RequestSplitN)
 		wg.Add(1)
 		go makeRequest(n, max)
 	}

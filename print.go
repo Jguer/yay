@@ -177,8 +177,8 @@ func (u upSlice) print() {
 		packNameLen := len(pack.StylizedNameWithRepository())
 		version, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
 		packVersionLen := len(version)
-		longestName = max(packNameLen, longestName)
-		longestVersion = max(packVersionLen, longestVersion)
+		longestName = types.Max(packNameLen, longestName)
+		longestVersion = types.Max(packVersionLen, longestVersion)
 	}
 
 	namePadding := fmt.Sprintf("%%-%ds  ", longestName)

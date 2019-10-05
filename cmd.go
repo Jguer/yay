@@ -8,6 +8,7 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/completion"
+	"github.com/Jguer/yay/v9/pkg/types"
 )
 
 var cmdArgs = makeArguments()
@@ -350,7 +351,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		return fmt.Errorf("Input too long")
 	}
 
-	include, exclude, _, otherExclude := parseNumberMenu(string(numberBuf))
+	include, exclude, _, otherExclude := types.ParseNumberMenu(string(numberBuf))
 	arguments := makeArguments()
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
@@ -366,7 +367,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 		}
 
-		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {
+		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
 			arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
 		}
 	}
@@ -383,7 +384,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 		}
 
-		if (isInclude && include.get(target)) || (!isInclude && !exclude.get(target)) {
+		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
 			arguments.addTarget("aur/" + pkg.Name)
 		}
 	}

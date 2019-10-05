@@ -359,7 +359,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (types.StringSet, types.StringSet, error
 	//upgrade menu asks you which packages to NOT upgrade so in this case
 	//include and exclude are kind of swapped
 	//include, exclude, other := parseNumberMenu(string(numberBuf))
-	include, exclude, otherInclude, otherExclude := parseNumberMenu(numbers)
+	include, exclude, otherInclude, otherExclude := types.ParseNumberMenu(numbers)
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
@@ -368,11 +368,11 @@ func upgradePkgs(aurUp, repoUp upSlice) (types.StringSet, types.StringSet, error
 			ignore.Set(pkg.Name)
 		}
 
-		if isInclude && !include.get(len(repoUp)-i+len(aurUp)) {
+		if isInclude && !include.Get(len(repoUp)-i+len(aurUp)) {
 			continue
 		}
 
-		if !isInclude && (exclude.get(len(repoUp)-i+len(aurUp)) || otherExclude.Get(pkg.Repository)) {
+		if !isInclude && (exclude.Get(len(repoUp)-i+len(aurUp)) || otherExclude.Get(pkg.Repository)) {
 			continue
 		}
 
@@ -384,11 +384,11 @@ func upgradePkgs(aurUp, repoUp upSlice) (types.StringSet, types.StringSet, error
 			continue
 		}
 
-		if isInclude && !include.get(len(aurUp)-i) {
+		if isInclude && !include.Get(len(aurUp)-i) {
 			aurNames.Set(pkg.Name)
 		}
 
-		if !isInclude && (exclude.get(len(aurUp)-i) || otherExclude.Get(pkg.Repository)) {
+		if !isInclude && (exclude.Get(len(aurUp)-i) || otherExclude.Get(pkg.Repository)) {
 			aurNames.Set(pkg.Name)
 		}
 	}
