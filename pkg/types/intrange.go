@@ -56,31 +56,6 @@ func Max(a, b int) int {
 	return a
 }
 
-func intRangesEqual(a, b IntRanges) bool {
-	if a == nil && b == nil {
-		return true
-	}
-
-	if a == nil || b == nil {
-		return false
-	}
-
-	if len(a) != len(b) {
-		return false
-	}
-
-	for n := range a {
-		r1 := a[n]
-		r2 := b[n]
-
-		if r1.min != r2.min || r1.max != r2.max {
-			return false
-		}
-	}
-
-	return true
-}
-
 // ParseNumberMenu parses input for number menus split by spaces or commas
 //supports individual selection: 1 2 3 4
 //supports range selections: 1-4 10-20
