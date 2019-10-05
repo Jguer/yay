@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -120,7 +121,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	var repoUp upSlice
 	var aurUp upSlice
 
-	var errs MultiError
+	var errs types.MultiError
 
 	aurdata := make(map[string]*rpc.Pkg)
 

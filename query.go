@@ -9,6 +9,7 @@ import (
 	"time"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -478,7 +479,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-	var errs MultiError
+	var errs types.MultiError
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()

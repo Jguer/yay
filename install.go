@@ -11,6 +11,7 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/completion"
+	"github.com/Jguer/yay/v9/pkg/types"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -818,7 +819,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringSet, buildDir string) (stringS
 	downloaded := 0
 	var wg sync.WaitGroup
 	var mux sync.Mutex
-	var errs MultiError
+	var errs types.MultiError
 
 	download := func(k int, base Base) {
 		defer wg.Done()
