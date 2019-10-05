@@ -342,7 +342,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	// State = 2 - Keep package and have iterated over dependencies
 	safePackages := make(map[string]uint8)
 	// provides stores a mapping from the provides name back to the original package name
-	provides := make(mapStringSet)
+	provides := make(types.MapStringSet)
 	packages := localDB.PkgCache()
 
 	// Mark explicit dependencies and enumerate the provides list

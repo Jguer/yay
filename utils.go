@@ -6,8 +6,6 @@ import (
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
-type mapStringSet map[string]stringSet
-
 type intRange struct {
 	min int
 	max int
@@ -48,14 +46,6 @@ func max(a, b int) int {
 		return b
 	}
 	return a
-}
-
-func (mss mapStringSet) Add(n string, v string) {
-	_, ok := mss[n]
-	if !ok {
-		mss[n] = make(stringSet)
-	}
-	mss[n].set(v)
 }
 
 func stringSliceEqual(a, b []string) bool {

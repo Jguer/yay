@@ -169,12 +169,12 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	printLocalNewerThanAUR(remote, aurdata)
 
 	if develUp != nil {
-		names := make(stringSet)
+		names := make(types.StringSet)
 		for _, up := range develUp {
-			names.set(up.Name)
+			names.Set(up.Name)
 		}
 		for _, up := range aurUp {
-			if !names.get(up.Name) {
+			if !names.Get(up.Name) {
 				develUp = append(develUp, up)
 			}
 		}
@@ -325,9 +325,9 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 }
 
 // upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
-	ignore := make(stringSet)
-	aurNames := make(stringSet)
+func upgradePkgs(aurUp, repoUp upSlice) (types.StringSet, types.StringSet, error) {
+	ignore := make(types.StringSet)
+	aurNames := make(types.StringSet)
 
 	allUpLen := len(repoUp) + len(aurUp)
 	if allUpLen == 0 {
@@ -336,7 +336,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 
 	if !config.UpgradeMenu {
 		for _, pkg := range aurUp {
-			aurNames.set(pkg.Name)
+			aurNames.Set(pkg.Name)
 		}
 
 		return ignore, aurNames, nil
@@ -364,32 +364,32 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringSet, stringSet, error) {
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
 	for i, pkg := range repoUp {
-		if isInclude && otherInclude.get(pkg.Repository) {
-			ignore.set(pkg.Name)
+		if isInclude && otherInclude.Get(pkg.Repository) {
+			ignore.Set(pkg.Name)
 		}
 
 		if isInclude && !include.get(len(repoUp)-i+len(aurUp)) {
 			continue
 		}
 
-		if !isInclude && (exclude.get(len(repoUp)-i+len(aurUp)) || otherExclude.get(pkg.Repository)) {
+		if !isInclude && (exclude.get(len(repoUp)-i+len(aurUp)) || otherExclude.Get(pkg.Repository)) {
 			continue
 		}
 
-		ignore.set(pkg.Name)
+		ignore.Set(pkg.Name)
 	}
 
 	for i, pkg := range aurUp {
-		if isInclude && otherInclude.get(pkg.Repository) {
+		if isInclude && otherInclude.Get(pkg.Repository) {
 			continue
 		}
 
 		if isInclude && !include.get(len(aurUp)-i) {
-			aurNames.set(pkg.Name)
+			aurNames.Set(pkg.Name)
 		}
 
-		if !isInclude && (exclude.get(len(aurUp)-i) || otherExclude.get(pkg.Repository)) {
-			aurNames.set(pkg.Name)
+		if !isInclude && (exclude.get(len(aurUp)-i) || otherExclude.Get(pkg.Repository)) {
+			aurNames.Set(pkg.Name)
 		}
 	}
 
