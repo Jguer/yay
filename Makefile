@@ -9,16 +9,16 @@ PREFIX := /usr/local
 
 MAJORVERSION := 9
 MINORVERSION := 3
-PATCHVERSION := 2
+PATCHVERSION := 3
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
-GOFLAGS := -v
+GOFLAGS := -v -mod=vendor
 EXTRA_GOFLAGS ?=
 LDFLAGS := $(LDFLAGS) -X "main.version=${VERSION}"
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
-SOURCES ?= $(shell find . -path ./vendor -prune -o -name "*.go" -type f)
+SOURCES ?= $(shell find . -name "*.go" -type f ! -path "./vendor/*")
 
 .PHONY: all
 all: | clean release
@@ -28,14 +28,14 @@ default: build
 
 .PHONY: clean
 clean:
-	$(GO) clean -i ./...
+	$(GO) clean $(GOFLAGS) -i ./...
 	rm -rf $(BIN) $(PKGNAME)_$(VERSION)_*
 
 .PHONY: test
-test: test-vendor
-	$(GO) vet ./...
+test:
+	$(GO) vet $(GOFLAGS) ./...
 	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted. Use make fmt" && false)
-	$(GO) test -mod=vendor --race -covermode=atomic -v . ./pkg/...
+	$(GO) test $(GOFLAGS) --race -covermode=atomic . ./pkg/...
 
 .PHONY: build
 build: $(BIN)
@@ -44,7 +44,7 @@ build: $(BIN)
 release: $(PACKAGE)
 
 $(BIN): $(SOURCES)
-	$(GO) build -mod=vendor -ldflags '-s -w $(LDFLAGS)' $(GOFLAGS) $(EXTRA_GOFLAGS) -o $@
+	$(GO) build $(GOFLAGS) -ldflags '-s -w $(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@
 
 $(RELEASE_DIR):
 	mkdir $(RELEASE_DIR)
@@ -81,6 +81,11 @@ test-vendor: vendor
 		echo "$${diff}"; \
 		exit 1; \
 	fi;
+
+.PHONY: fmt
+fmt:
+	#go fmt -mod=vendor $(GOFILES) ./... Doesn't work yet but will be supported soon
+	gofmt -s -w $(SOURCES)
 
 .PHONY: vendor
 vendor:
