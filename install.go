@@ -316,7 +316,7 @@ func install(parser *arguments) (err error) {
 		}
 	}
 
-	go completion.Update(alpmHandle, config.AURURL, config.BuildDir, config.CompletionInterval, false)
+	go completion.Update(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
 
 	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {

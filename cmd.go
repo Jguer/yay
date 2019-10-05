@@ -206,9 +206,9 @@ func handlePrint() (err error) {
 	case cmdArgs.existsArg("w", "news"):
 		err = printNewsFeed()
 	case cmdArgs.existsDouble("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, config.BuildDir, config.CompletionInterval, true)
+		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, true)
 	case cmdArgs.existsArg("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, config.BuildDir, config.CompletionInterval, false)
+		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
 	case cmdArgs.existsArg("s", "stats"):
 		err = localStatistics()
 	default:
