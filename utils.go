@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"unicode"
 )
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
@@ -57,32 +56,6 @@ func (mss mapStringSet) Add(n string, v string) {
 		mss[n] = make(stringSet)
 	}
 	mss[n].set(v)
-}
-
-func lessRunes(iRunes, jRunes []rune) bool {
-	max := len(iRunes)
-	if max > len(jRunes) {
-		max = len(jRunes)
-	}
-
-	for idx := 0; idx < max; idx++ {
-		ir := iRunes[idx]
-		jr := jRunes[idx]
-
-		lir := unicode.ToLower(ir)
-		ljr := unicode.ToLower(jr)
-
-		if lir != ljr {
-			return lir < ljr
-		}
-
-		// the lowercase runes are the same, so compare the original
-		if ir != jr {
-			return ir < jr
-		}
-	}
-
-	return len(iRunes) < len(jRunes)
 }
 
 func stringSliceEqual(a, b []string) bool {
