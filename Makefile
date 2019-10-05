@@ -33,7 +33,7 @@ clean:
 
 .PHONY: test
 test: test-vendor
-	$(GO) vet .
+	$(GO) vet ./...
 	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted. Use make fmt" && false)
 	$(GO) test -mod=vendor --race -covermode=atomic -v . ./pkg/...
 
