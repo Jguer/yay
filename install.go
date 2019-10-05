@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/completion"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -315,7 +316,7 @@ func install(parser *arguments) (err error) {
 		}
 	}
 
-	go updateCompletion(false)
+	go completion.Update(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
 
 	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {

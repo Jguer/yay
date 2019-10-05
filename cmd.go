@@ -7,6 +7,7 @@ import (
 	"os"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/completion"
 )
 
 var cmdArgs = makeArguments()
@@ -205,9 +206,9 @@ func handlePrint() (err error) {
 	case cmdArgs.existsArg("w", "news"):
 		err = printNewsFeed()
 	case cmdArgs.existsDouble("c", "complete"):
-		complete(true)
+		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, true)
 	case cmdArgs.existsArg("c", "complete"):
-		complete(false)
+		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
 	case cmdArgs.existsArg("s", "stats"):
 		err = localStatistics()
 	default:
