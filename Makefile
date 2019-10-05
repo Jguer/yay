@@ -68,8 +68,8 @@ docker-release:
 
 .PHONY: docker-build
 docker-build:
-	docker build --target builder --build-arg BUILD_ARCH="$(ARCH)" -t yay-$(ARCH):${VERSION} .
-	docker create --name yay-build-${ARCH} yay-build-${ARCH}:${VERSION}
+	docker build --target builder --build-arg BUILD_ARCH="$(ARCH)" -t yay-build-$(ARCH):${VERSION} .
+	docker run -e="ARCH=$(ARCH)" --name yay-build-${ARCH} yay-build-${ARCH}:${VERSION} /bin/sh
 	docker cp yay-build-${ARCH}:/app/${BIN} ${BIN}
 	docker container rm yay-build-${ARCH}
 
