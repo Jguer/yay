@@ -224,6 +224,7 @@ func install(parser *arguments) (err error) {
 		if !continueTask(bold(green("Proceed with install?")), true) {
 			return fmt.Errorf("Aborting due to user")
 		}
+		updatePkgbuildSeenRef(toDiff, cloned)
 		config.NoConfirm = oldValue
 	}
 
@@ -676,12 +677,26 @@ func editDiffNumberMenu(bases []Base, installed types.StringSet, diff bool) ([]B
 	return toEdit, nil
 }
 
+func updatePkgbuildSeenRef(bases []Base, cloned types.StringSet) error {
+	for _, base := range bases {
+		pkg := base.Pkgbase()
+		dir := filepath.Join(config.BuildDir, pkg)
+		if shouldUseGit(dir) {
+			gitUpdateSeenRef(config.BuildDir, pkg)
+		}
+	}
+	return nil
+}
+
 func showPkgbuildDiffs(bases []Base, cloned types.StringSet) error {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		if shouldUseGit(dir) {
-			start := "HEAD"
+			start, err := getLastSeenHash(config.BuildDir, pkg)
+			if err != nil {
+				return err
+			}
 
 			if cloned.Get(pkg) {
 				start = gitEmptyTree
@@ -703,7 +718,7 @@ func showPkgbuildDiffs(bases []Base, cloned types.StringSet) error {
 			} else {
 				args = append(args, "--color=never")
 			}
-			err := show(passToGit(dir, args...))
+			err = show(passToGit(dir, args...))
 			if err != nil {
 				return err
 			}
