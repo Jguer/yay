@@ -9,6 +9,7 @@ import (
 	"time"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -37,9 +38,9 @@ func (q aurQuery) Less(i, j int) bool {
 	case "popularity":
 		result = q[i].Popularity > q[j].Popularity
 	case "name":
-		result = lessRunes([]rune(q[i].Name), []rune(q[j].Name))
+		result = types.LessRunes([]rune(q[i].Name), []rune(q[j].Name))
 	case "base":
-		result = lessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
+		result = types.LessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
 	case "submitted":
 		result = q[i].FirstSubmitted < q[j].FirstSubmitted
 	case "modified":
@@ -341,7 +342,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	// State = 2 - Keep package and have iterated over dependencies
 	safePackages := make(map[string]uint8)
 	// provides stores a mapping from the provides name back to the original package name
-	provides := make(mapStringSet)
+	provides := make(types.MapStringSet)
 	packages := localDB.PkgCache()
 
 	// Mark explicit dependencies and enumerate the provides list
@@ -478,7 +479,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-	var errs MultiError
+	var errs types.MultiError
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()
@@ -496,7 +497,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	}
 
 	for n := 0; n < len(names); n += config.RequestSplitN {
-		max := min(len(names), n+config.RequestSplitN)
+		max := types.Min(len(names), n+config.RequestSplitN)
 		wg.Add(1)
 		go makeRequest(n, max)
 	}

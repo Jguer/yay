@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/Jguer/yay/v9/pkg/types"
 )
 
 // GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
@@ -104,8 +106,8 @@ func syncClean(parser *arguments) error {
 func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 	fmt.Println("removing AUR packages from cache...")
 
-	installedBases := make(stringSet)
-	inAURBases := make(stringSet)
+	installedBases := make(types.StringSet)
+	inAURBases := make(types.StringSet)
 
 	_, remotePackages, _, _, err := filterPackages()
 	if err != nil {
@@ -137,15 +139,15 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 		}
 
 		for _, pkg := range info {
-			inAURBases.set(pkg.PackageBase)
+			inAURBases.Set(pkg.PackageBase)
 		}
 	}
 
 	for _, pkg := range remotePackages {
 		if pkg.Base() != "" {
-			installedBases.set(pkg.Base())
+			installedBases.Set(pkg.Base())
 		} else {
-			installedBases.set(pkg.Name())
+			installedBases.Set(pkg.Name())
 		}
 	}
 
@@ -155,11 +157,11 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 		}
 
 		if !removeAll {
-			if keepInstalled && installedBases.get(file.Name()) {
+			if keepInstalled && installedBases.Get(file.Name()) {
 				continue
 			}
 
-			if keepCurrent && inAURBases.get(file.Name()) {
+			if keepCurrent && inAURBases.Get(file.Name()) {
 				continue
 			}
 		}

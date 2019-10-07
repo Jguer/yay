@@ -7,9 +7,10 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/types"
 )
 
-func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts mapStringSet) {
+func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts types.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -31,7 +32,7 @@ func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts ma
 	}
 }
 
-func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts mapStringSet) {
+func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts types.MapStringSet) {
 	dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
 			return nil
@@ -49,7 +50,7 @@ func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts 
 	})
 }
 
-func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts mapStringSet) {
+func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts types.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -79,7 +80,7 @@ func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts 
 	}
 }
 
-func (dp *depPool) checkInnerConflicts(conflicts mapStringSet) {
+func (dp *depPool) checkInnerConflicts(conflicts types.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		for _, conflict := range pkg.Conflicts {
 			dp.checkInnerConflict(pkg.Name, conflict, conflicts)
@@ -94,7 +95,7 @@ func (dp *depPool) checkInnerConflicts(conflicts mapStringSet) {
 	}
 }
 
-func (dp *depPool) checkForwardConflicts(conflicts mapStringSet) {
+func (dp *depPool) checkForwardConflicts(conflicts types.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		for _, conflict := range pkg.Conflicts {
 			dp.checkForwardConflict(pkg.Name, conflict, conflicts)
@@ -109,7 +110,7 @@ func (dp *depPool) checkForwardConflicts(conflicts mapStringSet) {
 	}
 }
 
-func (dp *depPool) checkReverseConflicts(conflicts mapStringSet) {
+func (dp *depPool) checkReverseConflicts(conflicts types.MapStringSet) {
 	dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if dp.hasPackage(pkg.Name()) {
 			return nil
@@ -124,10 +125,10 @@ func (dp *depPool) checkReverseConflicts(conflicts mapStringSet) {
 	})
 }
 
-func (dp *depPool) CheckConflicts() (mapStringSet, error) {
+func (dp *depPool) CheckConflicts() (types.MapStringSet, error) {
 	var wg sync.WaitGroup
-	innerConflicts := make(mapStringSet)
-	conflicts := make(mapStringSet)
+	innerConflicts := make(types.MapStringSet)
+	conflicts := make(types.MapStringSet)
 	wg.Add(2)
 
 	fmt.Println(bold(cyan("::") + bold(" Checking for conflicts...")))
@@ -181,9 +182,9 @@ func (dp *depPool) CheckConflicts() (mapStringSet, error) {
 	// These are used to decide what to pass --ask to (if set) or don't pass --noconfirm to
 	// As we have no idea what the order is yet we add every inner conflict to the slice
 	for name, pkgs := range innerConflicts {
-		conflicts[name] = make(stringSet)
+		conflicts[name] = make(types.StringSet)
 		for pkg := range pkgs {
-			conflicts[pkg] = make(stringSet)
+			conflicts[pkg] = make(types.StringSet)
 		}
 	}
 
@@ -203,12 +204,12 @@ func (dp *depPool) CheckConflicts() (mapStringSet, error) {
 }
 
 type missing struct {
-	Good    stringSet
+	Good    types.StringSet
 	Missing map[string][][]string
 }
 
 func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
-	if missing.Good.get(dep) {
+	if missing.Good.Get(dep) {
 		return
 	}
 
@@ -224,11 +225,11 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 
 	aurPkg := dp.findSatisfierAur(dep)
 	if aurPkg != nil {
-		missing.Good.set(dep)
+		missing.Good.Set(dep)
 		for _, deps := range [3][]string{aurPkg.Depends, aurPkg.MakeDepends, aurPkg.CheckDepends} {
 			for _, aurDep := range deps {
 				if _, err := dp.LocalDB.PkgCache().FindSatisfier(aurDep); err == nil {
-					missing.Good.set(aurDep)
+					missing.Good.Set(aurDep)
 					continue
 				}
 
@@ -241,10 +242,10 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 
 	repoPkg := dp.findSatisfierRepo(dep)
 	if repoPkg != nil {
-		missing.Good.set(dep)
+		missing.Good.Set(dep)
 		repoPkg.Depends().ForEach(func(repoDep alpm.Depend) error {
 			if _, err := dp.LocalDB.PkgCache().FindSatisfier(repoDep.String()); err == nil {
-				missing.Good.set(repoDep.String())
+				missing.Good.Set(repoDep.String())
 				return nil
 			}
 
@@ -260,7 +261,7 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 
 func (dp *depPool) CheckMissing() error {
 	missing := &missing{
-		make(stringSet),
+		make(types.StringSet),
 		make(map[string][][]string),
 	}
 

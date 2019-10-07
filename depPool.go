@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -42,7 +43,7 @@ func (t target) String() string {
 
 type depPool struct {
 	Targets  []target
-	Explicit stringSet
+	Explicit types.StringSet
 	Repo     map[string]*alpm.Package
 	Aur      map[string]*rpc.Pkg
 	AurCache map[string]*rpc.Pkg
@@ -64,7 +65,7 @@ func makeDepPool() (*depPool, error) {
 
 	dp := &depPool{
 		make([]target, 0),
-		make(stringSet),
+		make(types.StringSet),
 		make(map[string]*alpm.Package),
 		make(map[string]*rpc.Pkg),
 		make(map[string]*rpc.Pkg),
@@ -82,7 +83,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
-	aurTargets := make(stringSet)
+	aurTargets := make(types.StringSet)
 
 	pkgs = removeInvalidTargets(pkgs)
 
@@ -105,7 +106,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		// aur/ prefix means we only check the aur
 		if target.DB == "aur" || mode == modeAUR {
 			dp.Targets = append(dp.Targets, target)
-			aurTargets.set(target.DepString())
+			aurTargets.Set(target.DepString())
 			continue
 		}
 
@@ -123,7 +124,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 
 		if err == nil {
 			dp.Targets = append(dp.Targets, target)
-			dp.Explicit.set(foundPkg.Name())
+			dp.Explicit.Set(foundPkg.Name())
 			dp.ResolveRepoDependency(foundPkg)
 			continue
 		} else {
@@ -138,7 +139,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			if !group.Empty() {
 				dp.Groups = append(dp.Groups, target.String())
 				group.ForEach(func(pkg alpm.Package) error {
-					dp.Explicit.set(pkg.Name())
+					dp.Explicit.Set(pkg.Name())
 					return nil
 				})
 				continue
@@ -147,7 +148,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 
 		//if there was no db prefix check the aur
 		if target.DB == "" {
-			aurTargets.set(target.DepString())
+			aurTargets.Set(target.DepString())
 		}
 
 		dp.Targets = append(dp.Targets, target)
@@ -172,7 +173,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 // positives.
 //
 // This method increases dependency resolve time
-func (dp *depPool) findProvides(pkgs stringSet) error {
+func (dp *depPool) findProvides(pkgs types.StringSet) error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 
@@ -200,7 +201,7 @@ func (dp *depPool) findProvides(pkgs stringSet) error {
 		for _, result := range results {
 			mux.Lock()
 			if _, ok := dp.AurCache[result.Name]; !ok {
-				pkgs.set(result.Name)
+				pkgs.Set(result.Name)
 			}
 			mux.Unlock()
 		}
@@ -219,13 +220,13 @@ func (dp *depPool) findProvides(pkgs stringSet) error {
 	return nil
 }
 
-func (dp *depPool) cacheAURPackages(_pkgs stringSet) error {
-	pkgs := _pkgs.copy()
+func (dp *depPool) cacheAURPackages(_pkgs types.StringSet) error {
+	pkgs := _pkgs.Copy()
 	query := make([]string, 0)
 
 	for pkg := range pkgs {
 		if _, ok := dp.AurCache[pkg]; ok {
-			pkgs.remove(pkg)
+			pkgs.Remove(pkg)
 		}
 	}
 
@@ -260,9 +261,9 @@ func (dp *depPool) cacheAURPackages(_pkgs stringSet) error {
 	return nil
 }
 
-func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
-	newPackages := make(stringSet)
-	newAURPackages := make(stringSet)
+func (dp *depPool) resolveAURPackages(pkgs types.StringSet, explicit bool) error {
+	newPackages := make(types.StringSet)
+	newAURPackages := make(types.StringSet)
 
 	err := dp.cacheAURPackages(pkgs)
 	if err != nil {
@@ -285,13 +286,13 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 		}
 
 		if explicit {
-			dp.Explicit.set(pkg.Name)
+			dp.Explicit.Set(pkg.Name)
 		}
 		dp.Aur[pkg.Name] = pkg
 
 		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 			for _, dep := range deps {
-				newPackages.set(dep)
+				newPackages.Set(dep)
 			}
 		}
 	}
@@ -317,7 +318,7 @@ func (dp *depPool) resolveAURPackages(pkgs stringSet, explicit bool) error {
 
 		//assume it's in the aur
 		//ditch the versioning because the RPC can't handle it
-		newAURPackages.set(dep)
+		newAURPackages.Set(dep)
 
 	}
 
@@ -386,7 +387,7 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 // TODO: maybe intermix repo providers in the menu
 func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 	depName, _, _ := splitDep(dep)
-	seen := make(stringSet)
+	seen := make(types.StringSet)
 	providers := makeProviders(depName)
 
 	if dp.LocalDB.Pkg(depName) != nil {
@@ -409,20 +410,20 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 	}
 
 	for _, pkg := range dp.AurCache {
-		if seen.get(pkg.Name) {
+		if seen.Get(pkg.Name) {
 			continue
 		}
 
 		if pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			providers.Pkgs = append(providers.Pkgs, pkg)
-			seen.set(pkg.Name)
+			seen.Set(pkg.Name)
 			continue
 		}
 
 		for _, provide := range pkg.Provides {
 			if provideSatisfies(provide, dep) {
 				providers.Pkgs = append(providers.Pkgs, pkg)
-				seen.set(pkg.Name)
+				seen.Set(pkg.Name)
 				continue
 			}
 		}

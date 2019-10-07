@@ -2,6 +2,7 @@ package main
 
 import (
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -22,14 +23,14 @@ func (b Base) URLPath() string {
 type depOrder struct {
 	Aur     []Base
 	Repo    []*alpm.Package
-	Runtime stringSet
+	Runtime types.StringSet
 }
 
 func makeDepOrder() *depOrder {
 	return &depOrder{
 		make([]Base, 0),
 		make([]*alpm.Package, 0),
-		make(stringSet),
+		make(types.StringSet),
 	}
 }
 
@@ -59,7 +60,7 @@ func getDepOrder(dp *depPool) *depOrder {
 
 func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 	if runtime {
-		do.Runtime.set(pkg.Name)
+		do.Runtime.Set(pkg.Name)
 	}
 	delete(dp.Aur, pkg.Name)
 
@@ -89,7 +90,7 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 
 func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 	if runtime {
-		do.Runtime.set(pkg.Name())
+		do.Runtime.Set(pkg.Name())
 	}
 	delete(dp.Repo, pkg.Name())
 
@@ -119,14 +120,14 @@ func (do *depOrder) getMake() []string {
 
 	for _, base := range do.Aur {
 		for _, pkg := range base {
-			if !do.Runtime.get(pkg.Name) {
+			if !do.Runtime.Get(pkg.Name) {
 				makeOnly = append(makeOnly, pkg.Name)
 			}
 		}
 	}
 
 	for _, pkg := range do.Repo {
-		if !do.Runtime.get(pkg.Name()) {
+		if !do.Runtime.Get(pkg.Name()) {
 			makeOnly = append(makeOnly, pkg.Name())
 		}
 	}

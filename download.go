@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/types"
 )
 
 // Decide what download method to use:
@@ -224,7 +225,7 @@ func getPkgbuilds(pkgs []string) error {
 func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 	var wg sync.WaitGroup
 	var mux sync.Mutex
-	var errs MultiError
+	var errs types.MultiError
 	names := make(map[string]string)
 	missing := make([]string, 0)
 	downloaded := 0
