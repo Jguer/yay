@@ -30,7 +30,7 @@ func (err *MultiError) Add(e error) {
 	err.mux.Unlock()
 }
 
-// Return is used as a wrapper on return on wether to return the
+// Return is used as a wrapper on return on whether to return the
 // MultiError Structure if errors exist or nil instead of delivering an empty structure
 func (err *MultiError) Return() error {
 	if len(err.Errors) > 0 {
