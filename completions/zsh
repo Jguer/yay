@@ -102,7 +102,7 @@ _pacman_opts_common=(
 	'--mflags[Pass arguments to makepkg]:mflags'
 	'--gpgflags[Pass arguments to gpg]:gpgflags'
 	'--sudoloop[Loop sudo calls in the background to avoid timeout]'
-	'--nosudoloop[Do not loop sudo calls in the backgrount]'
+	'--nosudoloop[Do not loop sudo calls in the background]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
