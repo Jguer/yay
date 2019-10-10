@@ -101,18 +101,39 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 	return
 }
 
+func getSearchBy(value string) rpc.By {
+	switch value {
+	case "name":
+		return rpc.Name
+	case "maintainer":
+		return rpc.Maintainer
+	case "depends":
+		return rpc.Depends
+	case "makedepends":
+		return rpc.MakeDepends
+	case "optdepends":
+		return rpc.OptDepends
+	case "checkdepends":
+		return rpc.CheckDepends
+	default:
+		return rpc.NameDesc
+	}
+}
+
 // NarrowSearch searches AUR and narrows based on subarguments
 func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 	var r []rpc.Pkg
 	var err error
 	var usedIndex int
 
+	by := getSearchBy(config.SearchBy)
+
 	if len(pkgS) == 0 {
 		return nil, nil
 	}
 
 	for i, word := range pkgS {
-		r, err = rpc.Search(word)
+		r, err = rpc.SearchBy(word, by)
 		if err == nil {
 			usedIndex = i
 			break

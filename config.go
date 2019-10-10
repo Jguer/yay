@@ -56,6 +56,7 @@ type Configuration struct {
 	GpgFlags           string `json:"gpgflags"`
 	MFlags             string `json:"mflags"`
 	SortBy             string `json:"sortby"`
+	SearchBy           string `json:"searchby"`
 	GitFlags           string `json:"gitflags"`
 	RemoveMake         string `json:"removemake"`
 	RequestSplitN      int    `json:"requestsplitn"`
@@ -157,6 +158,7 @@ func defaultSettings() *Configuration {
 		SortMode:           bottomUp,
 		CompletionInterval: 7,
 		SortBy:             "votes",
+		SearchBy:           "name-desc",
 		SudoLoop:           false,
 		TarBin:             "bsdtar",
 		GitBin:             "git",
@@ -200,6 +202,7 @@ func (config *Configuration) expandEnv() {
 	config.MFlags = os.ExpandEnv(config.MFlags)
 	config.GitFlags = os.ExpandEnv(config.GitFlags)
 	config.SortBy = os.ExpandEnv(config.SortBy)
+	config.SearchBy = os.ExpandEnv(config.SearchBy)
 	config.TarBin = os.ExpandEnv(config.TarBin)
 	config.GitBin = os.ExpandEnv(config.GitBin)
 	config.GpgBin = os.ExpandEnv(config.GpgBin)

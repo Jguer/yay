@@ -378,6 +378,7 @@ func isArg(arg string) bool {
 	case "bottomup":
 	case "completioninterval":
 	case "sortby":
+	case "searchby":
 	case "redownload":
 	case "redownloadall":
 	case "noredownload":
@@ -473,6 +474,8 @@ func handleConfig(option, value string) bool {
 		}
 	case "sortby":
 		config.SortBy = value
+	case "searchby":
+		config.SearchBy = value
 	case "noconfirm":
 		config.NoConfirm = true
 	case "config":
@@ -677,6 +680,7 @@ func hasParam(arg string) bool {
 	case "answerupgrade":
 	case "completioninterval":
 	case "sortby":
+	case "searchby":
 	default:
 		return false
 	}

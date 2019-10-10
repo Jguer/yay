@@ -11,6 +11,7 @@ package alpm
 import "C"
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"unsafe"
@@ -68,6 +69,16 @@ type File struct {
 	Mode uint32
 }
 
+func convertFile(file *C.alpm_file_t) (File, error) {
+	if file == nil {
+		return File{}, errors.New("No file")
+	}
+	return File{
+		Name: C.GoString(file.name),
+		Size: int64(file.size),
+		Mode: uint32(file.mode)}, nil
+}
+
 func convertFilelist(files *C.alpm_filelist_t) []File {
 	size := int(files.count)
 	items := make([]File, size)
@@ -80,10 +91,9 @@ func convertFilelist(files *C.alpm_filelist_t) []File {
 	cFiles := *(*[]C.alpm_file_t)(unsafe.Pointer(&rawItems))
 
 	for i := 0; i < size; i++ {
-		items[i] = File{
-			Name: C.GoString(cFiles[i].name),
-			Size: int64(cFiles[i].size),
-			Mode: uint32(cFiles[i].mode)}
+		if file, err := convertFile(&cFiles[i]); err == nil {
+			items[i] = file
+		}
 	}
 	return items
 }

@@ -181,6 +181,11 @@ func (pkg *Package) Files() []File {
 	return convertFilelist(cFiles)
 }
 
+// ContainsFile checks if the path is in the package filelist
+func (pkg *Package) ContainsFile(path string) (File, error) {
+	return convertFile(C.alpm_filelist_contains(C.alpm_pkg_get_files(pkg.pmpkg), C.CString(path)))
+}
+
 // Groups returns the groups the package belongs to.
 func (pkg *Package) Groups() StringList {
 	ptr := unsafe.Pointer(C.alpm_pkg_get_groups(pkg.pmpkg))
