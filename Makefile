@@ -20,11 +20,11 @@ RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
 SOURCES ?= $(shell find . -name "*.go" -type f ! -path "./vendor/*")
 
-.PHONY: all
-all: | clean release
-
 .PHONY: default
 default: build
+
+.PHONY: all
+all: | clean release
 
 .PHONY: clean
 clean:
