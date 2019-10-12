@@ -255,6 +255,9 @@ func editor() (string, []string) {
 			}
 
 			editorArgs := strings.Fields(editorInput)
+			if len(editorArgs) == 0 {
+				continue
+			}
 
 			editor, err := exec.LookPath(editorArgs[0])
 			if err != nil {
