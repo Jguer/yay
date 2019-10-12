@@ -48,17 +48,55 @@ func downloadFile(path string, url string) (err error) {
 	return err
 }
 
-func gitHasDiff(path string, name string) (bool, error) {
-	stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "HEAD", "HEAD@{upstream}"))
+// Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
+// reviewed by the user
+func gitUpdateSeenRef(path string, name string) error {
+	_, stderr, err := capture(passToGit(filepath.Join(path, name), "update-ref", "YAY_DIFF_REVIEW", "HEAD"))
 	if err != nil {
-		return false, fmt.Errorf("%s%s", stderr, err)
+		return fmt.Errorf("%s%s", stderr, err)
 	}
+	return nil
+}
 
-	lines := strings.Split(stdout, "\n")
-	head := lines[0]
-	upstream := lines[1]
+// Return wether or not we have reviewed a diff yet. It checks for the existence of
+// YAY_DIFF_REVIEW in the git ref-list
+func gitHasLastSeenRef(path string, name string) bool {
+	_, _, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "--quiet", "--verify", "YAY_DIFF_REVIEW"))
+	return err == nil
+}
 
-	return head != upstream, nil
+// Returns the last reviewed hash. If YAY_DIFF_REVIEW exists it will return this hash.
+// If it does not it will return empty tree as no diff have been reviewed yet.
+func getLastSeenHash(path string, name string) (string, error) {
+	if gitHasLastSeenRef(path, name) {
+		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "YAY_DIFF_REVIEW"))
+		if err != nil {
+			return "", fmt.Errorf("%s%s", stderr, err)
+		}
+
+		lines := strings.Split(stdout, "\n")
+		return lines[0], nil
+	}
+	return gitEmptyTree, nil
+}
+
+// Check whether or not a diff exists between the last reviewed diff and
+// HEAD@{upstream}
+func gitHasDiff(path string, name string) (bool, error) {
+	if gitHasLastSeenRef(path, name) {
+		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "YAY_DIFF_REVIEW", "HEAD@{upstream}"))
+		if err != nil {
+			return false, fmt.Errorf("%s%s", stderr, err)
+		}
+
+		lines := strings.Split(stdout, "\n")
+		lastseen := lines[0]
+		upstream := lines[1]
+		return lastseen != upstream, nil
+	}
+	// If YAY_DIFF_REVIEW does not exists, we have never reviewed a diff for this package
+	// and should display it.
+	return true, nil
 }
 
 // TODO: yay-next passes args through the header, use that to unify ABS and AUR
