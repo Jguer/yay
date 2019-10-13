@@ -25,7 +25,7 @@ func questionCallback(question alpm.QuestionAny) {
 
 	size := 0
 
-	qp.Providers(alpmHandle).ForEach(func(pkg alpm.Package) error {
+	_ = qp.Providers(alpmHandle).ForEach(func(pkg alpm.Package) error {
 		size++
 		return nil
 	})
@@ -36,7 +36,7 @@ func questionCallback(question alpm.QuestionAny) {
 	size = 1
 	var db string
 
-	qp.Providers(alpmHandle).ForEach(func(pkg alpm.Package) error {
+	_ = qp.Providers(alpmHandle).ForEach(func(pkg alpm.Package) error {
 		thisDB := pkg.DB().Name()
 
 		if db != thisDB {

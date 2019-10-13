@@ -138,7 +138,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			group := dp.SyncDB.FindGroupPkgs(target.Name)
 			if !group.Empty() {
 				dp.Groups = append(dp.Groups, target.String())
-				group.ForEach(func(pkg alpm.Package) error {
+				_ = group.ForEach(func(pkg alpm.Package) error {
 					dp.Explicit.Set(pkg.Name())
 					return nil
 				})
@@ -329,7 +329,7 @@ func (dp *depPool) resolveAURPackages(pkgs types.StringSet, explicit bool) error
 func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 	dp.Repo[pkg.Name()] = pkg
 
-	pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
+	_ = pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
 		//have satisfier in dep tree: skip
 		if dp.hasSatisfier(dep.String()) {
 			return

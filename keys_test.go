@@ -29,7 +29,10 @@ func init() {
 			data = getPgpKey(matches[1])
 		}
 		w.Header().Set("Content-Type", "application/pgp-keys")
-		w.Write([]byte(data))
+		_, err := w.Write([]byte(data))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	})
 }
 
@@ -54,7 +57,10 @@ func startPgpKeyServer() *http.Server {
 	srv := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", gpgServerPort)}
 
 	go func() {
-		srv.ListenAndServe()
+		err := srv.ListenAndServe()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	}()
 	return srv
 }
@@ -70,7 +76,12 @@ func TestImportKeys(t *testing.T) {
 	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 
 	server := startPgpKeyServer()
-	defer server.Shutdown(context.TODO())
+	defer func() {
+		err := server.Shutdown(context.TODO())
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}()
 
 	casetests := []struct {
 		keys      []string
@@ -143,7 +154,12 @@ func TestCheckPgpKeys(t *testing.T) {
 	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 
 	server := startPgpKeyServer()
-	defer server.Shutdown(context.TODO())
+	defer func() {
+		err := server.Shutdown(context.TODO())
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}()
 
 	casetests := []struct {
 		pkgs      Base

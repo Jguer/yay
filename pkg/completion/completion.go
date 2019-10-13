@@ -36,7 +36,10 @@ func Update(alpmHandle *alpm.Handle, aurURL string, cacheDir string, interval in
 	info, err := os.Stat(path)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
-		os.MkdirAll(filepath.Dir(path), 0755)
+		errd := os.MkdirAll(filepath.Dir(path), 0755)
+		if errd != nil {
+			return errd
+		}
 		out, errf := os.Create(path)
 		if errf != nil {
 			return errf

@@ -214,7 +214,10 @@ func main() {
 	exitOnError(initConfig())
 	exitOnError(cmdArgs.parseCommandLine())
 	if shouldSaveConfig {
-		config.saveConfig()
+		err := config.saveConfig()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	}
 	config.expandEnv()
 	exitOnError(initBuildDir())

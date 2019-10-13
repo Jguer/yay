@@ -757,7 +757,11 @@ func (parser *arguments) parseCommandLine() (err error) {
 	usedNext := false
 
 	if len(args) < 1 {
-		parser.parseShortOption("-Syu", "")
+		_, err = parser.parseShortOption("-Syu", "")
+		if err != nil {
+			return
+		}
+
 	} else {
 		for k, arg := range args {
 			var nextArg string

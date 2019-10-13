@@ -171,12 +171,17 @@ func install(parser *arguments) (err error) {
 	if do.HasMake() {
 		switch config.RemoveMake {
 		case "yes":
-			defer removeMake(do, &err)
+			defer func() {
+				err = removeMake(do)
+			}()
+
 		case "no":
 			break
 		default:
 			if continueTask("Remove make dependencies after install?", false) {
-				defer removeMake(do, &err)
+				defer func() {
+					err = removeMake(do)
+				}()
 			}
 		}
 	}
@@ -224,7 +229,11 @@ func install(parser *arguments) (err error) {
 		if !continueTask(bold(green("Proceed with install?")), true) {
 			return fmt.Errorf("Aborting due to user")
 		}
-		updatePkgbuildSeenRef(toDiff, cloned)
+		err = updatePkgbuildSeenRef(toDiff, cloned)
+		if err != nil {
+			return err
+		}
+
 		config.NoConfirm = oldValue
 	}
 
@@ -286,9 +295,15 @@ func install(parser *arguments) (err error) {
 		}
 
 		depArguments := makeArguments()
-		depArguments.addArg("D", "asdeps")
+		err = depArguments.addArg("D", "asdeps")
+		if err != nil {
+			return err
+		}
 		expArguments := makeArguments()
-		expArguments.addArg("D", "asexplicit")
+		err = expArguments.addArg("D", "asexplicit")
+		if err != nil {
+			return err
+		}
 
 		for _, pkg := range do.Repo {
 			if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Get(pkg.Name()) {
@@ -318,7 +333,7 @@ func install(parser *arguments) (err error) {
 		}
 	}
 
-	go completion.Update(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
+	go exitOnError(completion.Update(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false))
 
 	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {
@@ -333,9 +348,12 @@ func install(parser *arguments) (err error) {
 	return nil
 }
 
-func removeMake(do *depOrder, err *error) {
+func removeMake(do *depOrder) error {
 	removeArguments := makeArguments()
-	removeArguments.addArg("R", "u")
+	err := removeArguments.addArg("R", "u")
+	if err != nil {
+		return err
+	}
 
 	for _, pkg := range do.getMake() {
 		removeArguments.addTarget(pkg)
@@ -343,8 +361,10 @@ func removeMake(do *depOrder, err *error) {
 
 	oldValue := config.NoConfirm
 	config.NoConfirm = true
-	*err = show(passToPacman(removeArguments))
+	err = show(passToPacman(removeArguments))
 	config.NoConfirm = oldValue
+
+	return err
 }
 
 func inRepos(syncDB alpm.DBList, pkg string) bool {
@@ -682,7 +702,10 @@ func updatePkgbuildSeenRef(bases []Base, cloned types.StringSet) error {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		if shouldUseGit(dir) {
-			gitUpdateSeenRef(config.BuildDir, pkg)
+			err := gitUpdateSeenRef(config.BuildDir, pkg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -731,7 +754,10 @@ func showPkgbuildDiffs(bases []Base, cloned types.StringSet) error {
 			}
 			args = append(args, "--no-index", "/var/empty", dir)
 			// git always returns 1. why? I have no idea
-			show(passToGit(dir, args...))
+			err := show(passToGit(dir, args...))
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -965,14 +991,22 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 
 			if installed {
-				show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+				err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+				if err != nil {
+					return fmt.Errorf("Error making: %s", err)
+				}
+
 				fmt.Println(cyan(pkg+"-"+version) + bold(" is up to date -- skipping"))
 				continue
 			}
 		}
 
 		if built {
-			show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+			err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+			if err != nil {
+				return fmt.Errorf("Error making: %s", err)
+			}
+
 			fmt.Println(bold(yellow(arrow)),
 				cyan(pkg+"-"+version)+bold(" already made -- skipping build"))
 		} else {
@@ -1021,9 +1055,15 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		depArguments := makeArguments()
-		depArguments.addArg("D", "asdeps")
+		err = depArguments.addArg("D", "asdeps")
+		if err != nil {
+			return err
+		}
 		expArguments := makeArguments()
-		expArguments.addArg("D", "asexplicit")
+		err = expArguments.addArg("D", "asexplicit")
+		if err != nil {
+			return err
+		}
 
 		//remotenames: names of all non repo packages on the system
 		_, _, localNames, remoteNames, err := filterPackages()

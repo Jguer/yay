@@ -13,7 +13,7 @@ docker build --build-arg BUILD_ARCH=${ARCH} --target builder_env -t yay-builder_
 docker build --build-arg BUILD_ARCH=${ARCH} --target builder -t yay-builder .
 
 # Our unit test and packaging container
-docker run --name yay-go-tests yay-builder_env:latest make test
+docker run --name yay-go-tests yay-builder_env:latest make test && golint && golangci-lint run
 docker rm yay-go-tests
 
 # docker run yay-builder make lint

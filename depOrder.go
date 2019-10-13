@@ -94,7 +94,7 @@ func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 	}
 	delete(dp.Repo, pkg.Name())
 
-	pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
+	_ = pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
 		repoPkg := dp.findSatisfierRepo(dep.String())
 		if repoPkg != nil {
 			do.orderPkgRepo(repoPkg, dp, runtime)
