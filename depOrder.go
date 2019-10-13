@@ -6,16 +6,20 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+// Base is an AUR base package
 type Base []*rpc.Pkg
 
+// Pkgbase returns the first base package.
 func (b Base) Pkgbase() string {
 	return b[0].PackageBase
 }
 
+// Version returns the first base package version.
 func (b Base) Version() string {
 	return b[0].Version
 }
 
+// URLPath returns the first base package URL.
 func (b Base) URLPath() string {
 	return b[0].URLPath
 }
