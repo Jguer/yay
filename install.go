@@ -215,6 +215,7 @@ func install(parser *arguments) (err error) {
 		}
 
 		if len(toDiff) > 0 {
+			// TODO: PKGBUILD diffs should not return in case of err. Just print and continue
 			err = showPkgbuildDiffs(toDiff, cloned)
 			if err != nil {
 				return err
@@ -231,7 +232,7 @@ func install(parser *arguments) (err error) {
 		}
 		err = updatePkgbuildSeenRef(toDiff, cloned)
 		if err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, err.Error())
 		}
 
 		config.NoConfirm = oldValue
@@ -698,27 +699,30 @@ func editDiffNumberMenu(bases []Base, installed types.StringSet, diff bool) ([]B
 }
 
 func updatePkgbuildSeenRef(bases []Base, cloned types.StringSet) error {
+	var errMulti types.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		if shouldUseGit(dir) {
 			err := gitUpdateSeenRef(config.BuildDir, pkg)
 			if err != nil {
-				return err
+				errMulti.Add(err)
 			}
 		}
 	}
-	return nil
+	return errMulti.Return()
 }
 
 func showPkgbuildDiffs(bases []Base, cloned types.StringSet) error {
+	var errMulti types.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		if shouldUseGit(dir) {
 			start, err := getLastSeenHash(config.BuildDir, pkg)
 			if err != nil {
-				return err
+				errMulti.Add(err)
+				continue
 			}
 
 			if cloned.Get(pkg) {
@@ -726,7 +730,8 @@ func showPkgbuildDiffs(bases []Base, cloned types.StringSet) error {
 			} else {
 				hasDiff, err := gitHasDiff(config.BuildDir, pkg)
 				if err != nil {
-					return err
+					errMulti.Add(err)
+					continue
 				}
 
 				if !hasDiff {
@@ -743,7 +748,8 @@ func showPkgbuildDiffs(bases []Base, cloned types.StringSet) error {
 			}
 			err = show(passToGit(dir, args...))
 			if err != nil {
-				return err
+				errMulti.Add(err)
+				continue
 			}
 		} else {
 			args := []string{"diff"}
@@ -756,12 +762,13 @@ func showPkgbuildDiffs(bases []Base, cloned types.StringSet) error {
 			// git always returns 1. why? I have no idea
 			err := show(passToGit(dir, args...))
 			if err != nil {
-				return err
+				errMulti.Add(err)
+				continue
 			}
 		}
 	}
 
-	return nil
+	return errMulti.Return()
 }
 
 func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
