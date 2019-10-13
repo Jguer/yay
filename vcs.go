@@ -39,8 +39,15 @@ func createDevelDB() error {
 
 	bases := getBases(info)
 	toSkip := pkgbuildsToSkip(bases, types.SliceToStringSet(remoteNames))
-	downloadPkgbuilds(bases, toSkip, config.BuildDir)
-	srcinfos, _ := parseSrcinfoFiles(bases, false)
+	_, err = downloadPkgbuilds(bases, toSkip, config.BuildDir)
+	if err != nil {
+		return err
+	}
+
+	srcinfos, err := parseSrcinfoFiles(bases, false)
+	if err != nil {
+		return err
+	}
 
 	for _, pkgbuild := range srcinfos {
 		for _, pkg := range pkgbuild.Packages {
@@ -134,7 +141,10 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, 
 
 		savedInfo[pkgName] = info
 		fmt.Println(bold(yellow(arrow)) + " Found git repo: " + cyan(url))
-		saveVCSInfo()
+		err := saveVCSInfo()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 		mux.Unlock()
 	}
 
@@ -163,7 +173,10 @@ func getCommit(url string, branch string, protocols []string) string {
 		//machine but using http:// instead of git does not hang.
 		//Introduce a time out so this can not hang
 		timer := time.AfterFunc(5*time.Second, func() {
-			cmd.Process.Kill()
+			err = cmd.Process.Kill()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			}
 		})
 
 		err = cmd.Wait()

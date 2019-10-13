@@ -265,7 +265,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 		return
 	}
 
-	dbList.ForEach(func(db alpm.DB) error {
+	_ = dbList.ForEach(func(db alpm.DB) error {
 		if len(pkgInputN) == 0 {
 			pkgs := db.PkgCache()
 			s = append(s, pkgs.Slice()...)
@@ -353,13 +353,13 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 			safePackages[pkg.Name()] = 0
 		}
 
-		pkg.Provides().ForEach(func(dep alpm.Depend) error {
+		_ = pkg.Provides().ForEach(func(dep alpm.Depend) error {
 			provides.Add(dep.Name, pkg.Name())
 			return nil
 		})
 		return nil
 	}
-	packages.ForEach(setupResources)
+	_ = packages.ForEach(setupResources)
 
 	iterateAgain := true
 	processDependencies := func(pkg alpm.Package) error {
@@ -394,20 +394,20 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 			return nil
 		}
 
-		pkg.Depends().ForEach(markDependencies)
+		_ = pkg.Depends().ForEach(markDependencies)
 		if !removeOptional {
-			pkg.OptionalDepends().ForEach(markDependencies)
+			_ = pkg.OptionalDepends().ForEach(markDependencies)
 		}
 		return nil
 	}
 
 	for iterateAgain {
 		iterateAgain = false
-		packages.ForEach(processDependencies)
+		_ = packages.ForEach(processDependencies)
 	}
 
 	// Build list of packages to be removed
-	packages.ForEach(func(pkg alpm.Package) error {
+	_ = packages.ForEach(func(pkg alpm.Package) error {
 		if safePackages[pkg.Name()] == 0 {
 			hanging = append(hanging, pkg.Name())
 		}

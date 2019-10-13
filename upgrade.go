@@ -302,10 +302,15 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 		return slice, err
 	}
 
-	defer alpmHandle.TransRelease()
+	defer func() {
+		err = alpmHandle.TransRelease()
+	}()
 
-	alpmHandle.SyncSysupgrade(cmdArgs.existsDouble("u", "sysupgrade"))
-	alpmHandle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
+	err = alpmHandle.SyncSysupgrade(cmdArgs.existsDouble("u", "sysupgrade"))
+	if err != nil {
+		return slice, err
+	}
+	_ = alpmHandle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
 		localVer := "-"
 
 		if localPkg := localDB.Pkg(pkg.Name()); localPkg != nil {

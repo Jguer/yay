@@ -23,7 +23,10 @@ func removeVCSPackage(pkgs []string) {
 	}
 
 	if updated {
-		saveVCSInfo()
+		err := saveVCSInfo()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	}
 }
 
@@ -42,13 +45,16 @@ func cleanDependencies(removeOptional bool) error {
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice
-func cleanRemove(pkgNames []string) (err error) {
+func cleanRemove(pkgNames []string) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}
 
 	arguments := makeArguments()
-	arguments.addArg("R")
+	err := arguments.addArg("R")
+	if err != nil {
+		return err
+	}
 	arguments.addTarget(pkgNames...)
 
 	return show(passToPacman(arguments))
@@ -212,7 +218,9 @@ func cleanAfter(bases []Base) {
 				fmt.Fprintf(os.Stderr, "error resetting %s: %s", base.String(), stderr)
 			}
 
-			show(passToGit(dir, "clean", "-fx"))
+			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			}
 		} else {
 			fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
 			if err := os.RemoveAll(dir); err != nil {

@@ -6,16 +6,20 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 )
 
+// Base is an AUR base package
 type Base []*rpc.Pkg
 
+// Pkgbase returns the first base package.
 func (b Base) Pkgbase() string {
 	return b[0].PackageBase
 }
 
+// Version returns the first base package version.
 func (b Base) Version() string {
 	return b[0].Version
 }
 
+// URLPath returns the first base package URL.
 func (b Base) URLPath() string {
 	return b[0].URLPath
 }
@@ -94,7 +98,7 @@ func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 	}
 	delete(dp.Repo, pkg.Name())
 
-	pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
+	_ = pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
 		repoPkg := dp.findSatisfierRepo(dep.String())
 		if repoPkg != nil {
 			do.orderPkgRepo(repoPkg, dp, runtime)

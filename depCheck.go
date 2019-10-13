@@ -33,7 +33,7 @@ func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts ty
 }
 
 func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts types.MapStringSet) {
-	dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
+	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
 			return nil
 		}
@@ -88,7 +88,7 @@ func (dp *depPool) checkInnerConflicts(conflicts types.MapStringSet) {
 	}
 
 	for _, pkg := range dp.Repo {
-		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+		_ = pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
 			dp.checkInnerConflict(pkg.Name(), conflict.String(), conflicts)
 			return nil
 		})
@@ -103,7 +103,7 @@ func (dp *depPool) checkForwardConflicts(conflicts types.MapStringSet) {
 	}
 
 	for _, pkg := range dp.Repo {
-		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+		_ = pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
 			dp.checkForwardConflict(pkg.Name(), conflict.String(), conflicts)
 			return nil
 		})
@@ -111,12 +111,12 @@ func (dp *depPool) checkForwardConflicts(conflicts types.MapStringSet) {
 }
 
 func (dp *depPool) checkReverseConflicts(conflicts types.MapStringSet) {
-	dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
+	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if dp.hasPackage(pkg.Name()) {
 			return nil
 		}
 
-		pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+		_ = pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
 			dp.checkReverseConflict(pkg.Name(), conflict.String(), conflicts)
 			return nil
 		})
@@ -243,7 +243,7 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 	repoPkg := dp.findSatisfierRepo(dep)
 	if repoPkg != nil {
 		missing.Good.Set(dep)
-		repoPkg.Depends().ForEach(func(repoDep alpm.Depend) error {
+		_ = repoPkg.Depends().ForEach(func(repoDep alpm.Depend) error {
 			if _, err := dp.LocalDB.PkgCache().FindSatisfier(repoDep.String()); err == nil {
 				missing.Good.Set(repoDep.String())
 				return nil

@@ -284,7 +284,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 				pkg = db.Pkg(name)
 			}
 		} else {
-			dbList.ForEach(func(db alpm.DB) error {
+			_ = dbList.ForEach(func(db alpm.DB) error {
 				if pkg = db.Pkg(name); pkg != nil {
 					return fmt.Errorf("")
 				}

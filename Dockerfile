@@ -9,6 +9,7 @@ RUN pacman -Syu --overwrite=* --needed --noconfirm \
     gcc gnupg libldap go git tar make awk linux-api-headers pacman-contrib && paccache -rfk0
 
 # Dependency for linting
+RUN curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b /bin v1.20.0
 RUN go get golang.org/x/lint/golint && mv /root/go/bin/golint /bin/
 
 ENV ARCH=$BUILD_ARCH
