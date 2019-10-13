@@ -1,35 +1,50 @@
 #!/bin/bash
-set -evx
+#set -evx
 
 # Objective of this script is to be the most vendor agnostic possible
 # It builds and tests yay independently of hardware
 
-export VERSION=$(git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')
+VERSION="$(git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')"
+export VERSION
 export ARCH="x86_64"
-echo '::set-env name=VERSION::$VERSION'
-echo '::set-env name=ARCH::$ARCH'
 
-docker build --build-arg BUILD_ARCH=${ARCH} --target builder_env -t yay-builder_env .
-docker build --build-arg BUILD_ARCH=${ARCH} --target builder -t yay-builder .
+docker build --build-arg BUILD_ARCH=${ARCH} --target builder_env -t yay-builder_env . || exit $?
+docker build --build-arg BUILD_ARCH=${ARCH} --target builder -t yay-builder . || exit $?
 
 # Our unit test and packaging container
-docker run --name yay-go-tests yay-builder_env:latest make test && golint && golangci-lint run
+docker run --name yay-go-tests yay-builder_env:latest make test
+rc=$?
 docker rm yay-go-tests
 
-# docker run yay-builder make lint
+if [[ $rc != 0 ]]; then
+  exit $rc
+fi
+
+# Lint project
+docker run --name yay-go-lint yay-builder_env:latest make lint
+rc=$?
+docker rm yay-go-lint
+
+if [[ $rc != 0 ]]; then
+  exit $rc
+fi
 
 # Build image for integration testing
-docker build -t yay .
-
+# docker build -t yay . || exit $?
 # Do integration testing
 # TODO
 
 # Create a release asset
-docker run --name artifact_factory yay-builder make release ARCH=${ARCH} VERSION=${VERSION}
+docker run --name artifact_factory yay-builder make release ARCH=${ARCH} VERSION="${VERSION}"
+rc=$?
+if [[ $rc != 0 ]]; then
+  docker rm artifact_factory
+  exit $rc
+fi
 
 # Copy bin and release to artifacts folder
 mkdir artifacts
-docker cp artifact_factory:/app/yay_${VERSION}_${ARCH}.tar.gz ./artifacts/
+docker cp artifact_factory:/app/yay_"${VERSION}"_${ARCH}.tar.gz ./artifacts/
 
 # Cleanup docker
 docker rm artifact_factory

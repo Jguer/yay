@@ -82,6 +82,11 @@ test-vendor: vendor
 		exit 1; \
 	fi;
 
+.PHONY: lint
+lint: 
+	golangci-lint run
+	golint -set_exit_status . ./pkg/...
+
 .PHONY: fmt
 fmt:
 	#go fmt -mod=vendor $(GOFILES) ./... Doesn't work yet but will be supported soon
