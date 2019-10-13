@@ -188,7 +188,7 @@ func (dp *depPool) findProvides(pkgs types.StringSet) error {
 		words := strings.Split(pkg, "-")
 
 		for i := range words {
-			results, err = rpc.SearchByNameDesc(strings.Join(words[:i+1], "-"))
+			results, err = rpc.Search(strings.Join(words[:i+1], "-"))
 			if err == nil {
 				break
 			}

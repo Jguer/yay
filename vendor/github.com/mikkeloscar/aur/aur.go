@@ -18,6 +18,40 @@ type response struct {
 	Results     []Pkg  `json:"results"`
 }
 
+//By specifies what to seach by in RPC searches
+type By int
+
+const (
+	Name By = iota
+	NameDesc
+	Maintainer
+	Depends
+	MakeDepends
+	OptDepends
+	CheckDepends
+)
+
+func (by By) String() string {
+	switch by {
+	case Name:
+		return "name"
+	case NameDesc:
+		return "name-desc"
+	case Maintainer:
+		return "maintainer"
+	case Depends:
+		return "depends"
+	case MakeDepends:
+		return "makedepends"
+	case OptDepends:
+		return "optdepends"
+	case CheckDepends:
+		return "checkdepends"
+	default:
+		panic("invalid By")
+	}
+}
+
 // Pkg holds package information
 type Pkg struct {
 	ID             int      `json:"ID"`
@@ -52,6 +86,11 @@ func get(values url.Values) ([]Pkg, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if resp.StatusCode == http.StatusServiceUnavailable {
+		return nil, errors.New("AUR is unavailable at this moment")
+	}
+
 	defer resp.Body.Close()
 
 	dec := json.NewDecoder(resp.Body)
@@ -80,50 +119,19 @@ func searchBy(query, by string) ([]Pkg, error) {
 	return get(v)
 }
 
-// Search searches for packages by the RPC's default defautl field.
-// This is the same as SearchByNameDesc
+// Search searches for packages using the RPC's default search by.
+// This is the same as using SearchBy With NameDesc
 func Search(query string) ([]Pkg, error) {
 	return searchBy(query, "")
 }
 
-// Search searches for packages by package name.
-func SearchByName(query string) ([]Pkg, error) {
-	return searchBy(query, "name")
+// SearchBy searches for packages with a specified  search by
+func SearchBy(query string, by By) ([]Pkg, error) {
+	return searchBy(query, by.String())
 }
 
-// SearchByNameDesc searches for package by package name and description.
-func SearchByNameDesc(query string) ([]Pkg, error) {
-	return searchBy(query, "name-desc")
-}
-
-// SearchByMaintainer searches for package by maintainer.
-func SearchByMaintainer(query string) ([]Pkg, error) {
-	return searchBy(query, "maintainer")
-}
-
-// SearchByDepends searches for packages that depend on query
-func SearchByDepends(query string) ([]Pkg, error) {
-	return searchBy(query, "depends")
-}
-
-// SearchByMakeDepends searches for packages that makedepend on query
-func SearchByMakeDepends(query string) ([]Pkg, error) {
-	return searchBy(query, "makedepends")
-}
-
-// SearchByOptDepends searches for packages that optdepend on query
-func SearchByOptDepends(query string) ([]Pkg, error) {
-	return searchBy(query, "optdepends")
-}
-
-// SearchByCheckDepends searches for packages that checkdepend on query
-func SearchByCheckDepends(query string) ([]Pkg, error) {
-	return searchBy(query, "checkdepends")
-}
-
-// Orphans returns all orphan packages in the AUR.
 func Orphans() ([]Pkg, error) {
-	return SearchByMaintainer("")
+	return SearchBy("", Maintainer)
 }
 
 // Info shows info for one or multiple packages.
