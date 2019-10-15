@@ -58,7 +58,7 @@ func Update(alpmHandle *alpm.Handle, aurURL string, cacheDir string, interval in
 }
 
 //CreateAURList creates a new completion file
-func createAURList(aurURL string, out io.ReadWriteSeeker) error {
+func createAURList(aurURL string, out io.Writer) error {
 	resp, err := http.Get(aurURL + "/packages.gz")
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func createAURList(aurURL string, out io.ReadWriteSeeker) error {
 }
 
 //CreatePackageList appends Repo packages to completion cache
-func createRepoList(alpmHandle *alpm.Handle, out io.ReadWriteSeeker) error {
+func createRepoList(alpmHandle *alpm.Handle, out io.Writer) error {
 	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return err
