@@ -14,9 +14,7 @@ import (
 	"github.com/Jguer/yay/v9/pkg/types"
 )
 
-const (
-	gitDiffRefName = "AURUTILS_SEEN"
-)
+const gitDiffRefName = "AUR_SEEN"
 
 // Decide what download method to use:
 // Use the config option when the destination does not already exits
