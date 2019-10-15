@@ -14,6 +14,8 @@ import (
 	"github.com/Jguer/yay/v9/pkg/types"
 )
 
+const gitDiffRefName = "AUR_SEEN"
+
 // Decide what download method to use:
 // Use the config option when the destination does not already exits
 // If .git exists in the destination use git
@@ -51,7 +53,7 @@ func downloadFile(path string, url string) (err error) {
 // Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
 // reviewed by the user
 func gitUpdateSeenRef(path string, name string) error {
-	_, stderr, err := capture(passToGit(filepath.Join(path, name), "update-ref", "YAY_DIFF_REVIEW", "HEAD"))
+	_, stderr, err := capture(passToGit(filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"))
 	if err != nil {
 		return fmt.Errorf("%s%s", stderr, err)
 	}
@@ -61,7 +63,7 @@ func gitUpdateSeenRef(path string, name string) error {
 // Return wether or not we have reviewed a diff yet. It checks for the existence of
 // YAY_DIFF_REVIEW in the git ref-list
 func gitHasLastSeenRef(path string, name string) bool {
-	_, _, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "--quiet", "--verify", "YAY_DIFF_REVIEW"))
+	_, _, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName))
 	return err == nil
 }
 
@@ -69,7 +71,7 @@ func gitHasLastSeenRef(path string, name string) bool {
 // If it does not it will return empty tree as no diff have been reviewed yet.
 func getLastSeenHash(path string, name string) (string, error) {
 	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "YAY_DIFF_REVIEW"))
+		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName))
 		if err != nil {
 			return "", fmt.Errorf("%s%s", stderr, err)
 		}
@@ -84,7 +86,7 @@ func getLastSeenHash(path string, name string) (string, error) {
 // HEAD@{upstream}
 func gitHasDiff(path string, name string) (bool, error) {
 	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "YAY_DIFF_REVIEW", "HEAD@{upstream}"))
+		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
 		if err != nil {
 			return false, fmt.Errorf("%s%s", stderr, err)
 		}
