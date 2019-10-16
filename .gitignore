@@ -24,3 +24,4 @@ yay
 yay_*/
 *.tar.gz
 qemu-*
+.go
