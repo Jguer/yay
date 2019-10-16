@@ -12,10 +12,10 @@ docker build --build-arg BUILD_ARCH=${ARCH} --target builder_env -t yay-builder_
 docker build --build-arg BUILD_ARCH=${ARCH} --target builder -t yay-builder . || exit $?
 
 # Our unit test and packaging container
-docker run --rm --name yay-go-tests yay-builder_env:latest make test
+docker run --rm --name yay-go-tests yay-builder_env:latest make test || exit $?
 
 # Lint project
-docker run --rm --name yay-go-lint yay-builder_env:latest make lint
+docker run --rm --name yay-go-lint yay-builder_env:latest make lint || exit $?
 
 # Build image for integration testing
 # docker build -t yay . || exit $?
