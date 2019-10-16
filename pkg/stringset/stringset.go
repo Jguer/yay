@@ -60,8 +60,8 @@ func (set StringSet) Copy() StringSet {
 	return newSet
 }
 
-// SliceToStringSet creates a new StringSet from an input slice
-func SliceToStringSet(in []string) StringSet {
+// FromSlice creates a new StringSet from an input slice
+func FromSlice(in []string) StringSet {
 	set := make(StringSet)
 
 	for _, v := range in {
@@ -71,13 +71,13 @@ func SliceToStringSet(in []string) StringSet {
 	return set
 }
 
-// MakeStringSet creates a new StringSet from a set of arguments
-func MakeStringSet(in ...string) StringSet {
-	return SliceToStringSet(in)
+// Make creates a new StringSet from a set of arguments
+func Make(in ...string) StringSet {
+	return FromSlice(in)
 }
 
-// StringSetEqual compares if two StringSets have the same values
-func StringSetEqual(a, b StringSet) bool {
+// Equal compares if two StringSets have the same values
+func Equal(a, b StringSet) bool {
 	if a == nil && b == nil {
 		return true
 	}

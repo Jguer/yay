@@ -392,7 +392,7 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
-	targets := stringset.SliceToStringSet(parser.targets)
+	targets := stringset.FromSlice(parser.targets)
 	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil

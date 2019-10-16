@@ -89,8 +89,8 @@ func install(parser *arguments) (err error) {
 		return err
 	}
 
-	remoteNamesCache := stringset.SliceToStringSet(remoteNames)
-	localNamesCache := stringset.SliceToStringSet(localNames)
+	remoteNamesCache := stringset.FromSlice(remoteNames)
+	localNamesCache := stringset.FromSlice(localNames)
 
 	requestTargets := parser.copy().targets
 
@@ -142,7 +142,7 @@ func install(parser *arguments) (err error) {
 		}
 	}
 
-	targets := stringset.SliceToStringSet(parser.targets)
+	targets := stringset.FromSlice(parser.targets)
 
 	dp, err := getDepPool(requestTargets, warnings)
 	if err != nil {
@@ -987,8 +987,8 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 
 	//cache as a stringset. maybe make it return a string set in the first
 	//place
-	remoteNamesCache := stringset.SliceToStringSet(remoteNames)
-	localNamesCache := stringset.SliceToStringSet(localNames)
+	remoteNamesCache := stringset.FromSlice(remoteNames)
+	localNamesCache := stringset.FromSlice(localNames)
 
 	doInstall := func() error {
 		if len(arguments.targets) == 0 {
