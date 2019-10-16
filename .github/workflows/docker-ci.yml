@@ -1,6 +1,11 @@
 name: Docker CI build
 # This workflow is triggered on pushes to the repository.
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+    - 'doc/**'
+    - 'completions/**'
+  pull_request:
 
 jobs:
   build:

@@ -1,5 +1,8 @@
 name: Multiarch build and release
-on: [push] # To change to tag in merge
+on:
+  push:
+    tags:
+      - v**
 
 jobs:
   build-releases:
