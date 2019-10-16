@@ -9,7 +9,9 @@ import (
 	"time"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/types"
+
 	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
@@ -519,7 +521,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	}
 
 	for n := 0; n < len(names); n += config.RequestSplitN {
-		max := types.Min(len(names), n+config.RequestSplitN)
+		max := intrange.Min(len(names), n+config.RequestSplitN)
 		wg.Add(1)
 		go makeRequest(n, max)
 	}

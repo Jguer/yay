@@ -7,8 +7,10 @@ import (
 	"unicode"
 
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/intrange"
+
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -365,7 +367,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringset.StringSet, stringset.StringSe
 	//upgrade menu asks you which packages to NOT upgrade so in this case
 	//include and exclude are kind of swapped
 	//include, exclude, other := parseNumberMenu(string(numberBuf))
-	include, exclude, otherInclude, otherExclude := types.ParseNumberMenu(numbers)
+	include, exclude, otherInclude, otherExclude := intrange.ParseNumberMenu(numbers)
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 

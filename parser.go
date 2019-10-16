@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-		"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 

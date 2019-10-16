@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
-		"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts stringset.MapStringSet) {

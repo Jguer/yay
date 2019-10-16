@@ -1,4 +1,4 @@
-package types
+package intrange
 
 import (
 		"github.com/Jguer/yay/v9/pkg/stringset"

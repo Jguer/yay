@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
-		"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 

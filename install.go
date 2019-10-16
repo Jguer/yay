@@ -11,8 +11,9 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/completion"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/types"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -584,7 +585,7 @@ func cleanNumberMenu(bases []Base, installed stringset.StringSet, hasClean bool)
 		return nil, err
 	}
 
-	cInclude, cExclude, cOtherInclude, cOtherExclude := types.ParseNumberMenu(cleanInput)
+	cInclude, cExclude, cOtherInclude, cOtherExclude := intrange.ParseNumberMenu(cleanInput)
 	cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
 
 	if cOtherInclude.Get("abort") || cOtherInclude.Get("ab") {
@@ -669,7 +670,7 @@ func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) 
 		}
 	}
 
-	eInclude, eExclude, eOtherInclude, eOtherExclude := types.ParseNumberMenu(editInput)
+	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(editInput)
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
 
 	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {

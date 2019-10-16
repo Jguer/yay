@@ -12,7 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/intrange"
+
 	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
@@ -178,8 +179,8 @@ func (u upSlice) print() {
 		packNameLen := len(pack.StylizedNameWithRepository())
 		version, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
 		packVersionLen := len(version)
-		longestName = types.Max(packNameLen, longestName)
-		longestVersion = types.Max(packVersionLen, longestVersion)
+		longestName = intrange.Max(packNameLen, longestName)
+		longestVersion = intrange.Max(packVersionLen, longestVersion)
 	}
 
 	namePadding := fmt.Sprintf("%%-%ds  ", longestName)

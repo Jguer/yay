@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-		"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 // GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
