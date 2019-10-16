@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -38,7 +38,7 @@ func createDevelDB() error {
 	}
 
 	bases := getBases(info)
-	toSkip := pkgbuildsToSkip(bases, types.SliceToStringSet(remoteNames))
+	toSkip := pkgbuildsToSkip(bases, stringset.SliceToStringSet(remoteNames))
 	_, err = downloadPkgbuilds(bases, toSkip, config.BuildDir)
 	if err != nil {
 		return err

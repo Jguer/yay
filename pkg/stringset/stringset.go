@@ -1,4 +1,4 @@
-package types
+package stringset
 
 // StringSet is a basic set implementation for strings.
 // This is used a lot so it deserves its own type.
@@ -12,6 +12,8 @@ type StringSet map[string]struct{}
 type MapStringSet map[string]StringSet
 
 // Add adds a new value to the Map.
+// If n is already in the map, then v is appended to the StringSet under that key.
+// Otherwise a new StringSet is creayed containing v
 func (mss MapStringSet) Add(n string, v string) {
 	_, ok := mss[n]
 	if !ok {

@@ -1,15 +1,16 @@
 package types
 
 import (
-	"testing"
+		"github.com/Jguer/yay/v9/pkg/stringset"
+"testing"
 )
 
 func TestParseNumberMenu(t *testing.T) {
 	type result struct {
 		Include      IntRanges
 		Exclude      IntRanges
-		OtherInclude StringSet
-		OtherExclude StringSet
+		OtherInclude stringset.StringSet
+		OtherExclude stringset.StringSet
 	}
 
 	inputs := []string{
@@ -28,18 +29,18 @@ func TestParseNumberMenu(t *testing.T) {
 	}
 
 	expected := []result{
-		{IntRanges{makeIntRange(1, 1), makeIntRange(2, 2), makeIntRange(3, 3), makeIntRange(4, 4), makeIntRange(5, 5)}, IntRanges{}, make(StringSet), make(StringSet)},
-		{IntRanges{makeIntRange(1, 10), makeIntRange(5, 15)}, IntRanges{}, make(StringSet), make(StringSet)},
-		{IntRanges{makeIntRange(5, 10), makeIntRange(85, 90)}, IntRanges{}, make(StringSet), make(StringSet)},
-		{IntRanges{makeIntRange(1, 1), makeIntRange(99, 99), makeIntRange(60, 62)}, IntRanges{makeIntRange(2, 2), makeIntRange(5, 10), makeIntRange(38, 40), makeIntRange(123, 123)}, make(StringSet), make(StringSet)},
-		{IntRanges{}, IntRanges{}, MakeStringSet("abort", "all", "none"), make(StringSet)},
-		{IntRanges{}, IntRanges{}, MakeStringSet("a-b"), MakeStringSet("abort", "a-b")},
-		{IntRanges{}, IntRanges{}, MakeStringSet("-9223372036854775809-9223372036854775809"), make(StringSet)},
-		{IntRanges{makeIntRange(1, 1), makeIntRange(2, 2), makeIntRange(3, 3), makeIntRange(4, 4), makeIntRange(5, 5)}, IntRanges{}, make(StringSet), make(StringSet)},
-		{IntRanges{makeIntRange(1, 1), makeIntRange(2, 2), makeIntRange(3, 3), makeIntRange(4, 4), makeIntRange(5, 5), makeIntRange(6, 6), makeIntRange(7, 7), makeIntRange(8, 8)}, IntRanges{}, make(StringSet), make(StringSet)},
-		{IntRanges{}, IntRanges{}, make(StringSet), make(StringSet)},
-		{IntRanges{}, IntRanges{}, make(StringSet), make(StringSet)},
-		{IntRanges{}, IntRanges{}, MakeStringSet("a", "b", "c", "d", "e"), make(StringSet)},
+		{IntRanges{makeIntRange(1, 1), makeIntRange(2, 2), makeIntRange(3, 3), makeIntRange(4, 4), makeIntRange(5, 5)}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{makeIntRange(1, 10), makeIntRange(5, 15)}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{makeIntRange(5, 10), makeIntRange(85, 90)}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{makeIntRange(1, 1), makeIntRange(99, 99), makeIntRange(60, 62)}, IntRanges{makeIntRange(2, 2), makeIntRange(5, 10), makeIntRange(38, 40), makeIntRange(123, 123)}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{}, IntRanges{}, stringset.Make("abort", "all", "none"), make(stringset.StringSet)},
+		{IntRanges{}, IntRanges{}, stringset.Make("a-b"), stringset.Make("abort", "a-b")},
+		{IntRanges{}, IntRanges{}, stringset.Make("-9223372036854775809-9223372036854775809"), make(stringset.StringSet)},
+		{IntRanges{makeIntRange(1, 1), makeIntRange(2, 2), makeIntRange(3, 3), makeIntRange(4, 4), makeIntRange(5, 5)}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{makeIntRange(1, 1), makeIntRange(2, 2), makeIntRange(3, 3), makeIntRange(4, 4), makeIntRange(5, 5), makeIntRange(6, 6), makeIntRange(7, 7), makeIntRange(8, 8)}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		{IntRanges{}, IntRanges{}, stringset.Make("a", "b", "c", "d", "e"), make(stringset.StringSet)},
 	}
 
 	for n, in := range inputs {
@@ -48,8 +49,8 @@ func TestParseNumberMenu(t *testing.T) {
 
 		if !intRangesEqual(include, res.Include) ||
 			!intRangesEqual(exclude, res.Exclude) ||
-			!StringSetEqual(otherInclude, res.OtherInclude) ||
-			!StringSetEqual(otherExclude, res.OtherExclude) {
+			!stringset.Equal(otherInclude, res.OtherInclude) ||
+			!stringset.Equal(otherExclude, res.OtherExclude) {
 
 			t.Fatalf("Test %d Failed: Expected: include=%+v exclude=%+v otherInclude=%+v otherExclude=%+v got include=%+v excluive=%+v otherInclude=%+v otherExclude=%+v",
 				n+1, res.Include, res.Exclude, res.OtherInclude, res.OtherExclude, include, exclude, otherInclude, otherExclude)

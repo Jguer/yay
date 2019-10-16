@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -390,7 +391,7 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
-	targets := types.SliceToStringSet(parser.targets)
+	targets := stringset.SliceToStringSet(parser.targets)
 	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil

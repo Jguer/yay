@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Jguer/yay/v9/pkg/types"
+		"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 // GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
@@ -109,8 +109,8 @@ func syncClean(parser *arguments) error {
 func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 	fmt.Println("removing AUR packages from cache...")
 
-	installedBases := make(types.StringSet)
-	inAURBases := make(types.StringSet)
+	installedBases := make(stringset.StringSet)
+	inAURBases := make(stringset.StringSet)
 
 	_, remotePackages, _, _, err := filterPackages()
 	if err != nil {

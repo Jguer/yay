@@ -8,6 +8,7 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -169,7 +170,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	printLocalNewerThanAUR(remote, aurdata)
 
 	if develUp != nil {
-		names := make(types.StringSet)
+		names := make(stringset.StringSet)
 		for _, up := range develUp {
 			names.Set(up.Name)
 		}
@@ -330,9 +331,9 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 }
 
 // upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(aurUp, repoUp upSlice) (types.StringSet, types.StringSet, error) {
-	ignore := make(types.StringSet)
-	aurNames := make(types.StringSet)
+func upgradePkgs(aurUp, repoUp upSlice) (stringset.StringSet, stringset.StringSet, error) {
+	ignore := make(stringset.StringSet)
+	aurNames := make(stringset.StringSet)
 
 	allUpLen := len(repoUp) + len(aurUp)
 	if allUpLen == 0 {
