@@ -62,7 +62,7 @@ docker-release-all:
 .PHONY: docker-release
 docker-release:
 	docker build --target builder_env --build-arg BUILD_ARCH="$(ARCH)" -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
@@ -83,7 +83,7 @@ test-vendor: vendor
 	fi;
 
 .PHONY: lint
-lint: 
+lint:
 	golangci-lint run
 	golint -set_exit_status . ./pkg/...
 

@@ -1,0 +1,89 @@
+name: Multiarch build and release
+on: [push] # To change to tag in merge
+
+jobs:
+  build-releases:
+    strategy:
+      matrix:
+        arch: ['x86_64', 'armv7h', 'aarch64']
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Set version
+        id: set_version
+        run: ./testdata/ci/version.sh
+      - name: Install dependencies
+        run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
+      - name: Setup qemu-user-static
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - name: Build ${{ matrix.arch }} release
+        run: |
+          mkdir artifacts
+          make docker-release ARCH=${{ matrix.arch }} VERSION=${{ steps.set_version.outputs.version }}
+          mv *.tar.gz artifacts
+      - uses: actions/upload-artifact@master
+        with:
+          name: yay_${{ matrix.arch }}
+          path: artifacts
+  create_release:
+    name: Create release from this build
+    needs: [build-releases]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Set version
+        id: set_version
+        run: ./testdata/ci/version.sh
+      - uses: actions/download-artifact@master
+        with:
+          name: yay_x86_64
+      - uses: actions/download-artifact@master
+        with:
+          name: yay_armv7h
+      - uses: actions/download-artifact@master
+        with:
+          name: yay_aarch64
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.set_version.outputs.version }}
+          release_name: ${{ steps.set_version.outputs.version }}
+          body: "## Changelog"
+          draft: true
+          prerelease: false
+      - name: Upload x86_64 asset
+        id: upload-release-asset-x86_64
+        uses: actions/upload-release-asset@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./yay_x86_64/yay_${{ steps.set_version.outputs.version }}_x86_64.tar.gz
+          asset_name: yay_${{ steps.set_version.outputs.version }}_x86_64.tar.gz
+          asset_content_type: application/tar+gzip
+      - name: Upload armv7h asset
+        id: upload-release-asset-armv7h
+        uses: actions/upload-release-asset@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./yay_armv7h/yay_${{ steps.set_version.outputs.version }}_armv7h.tar.gz
+          asset_name: yay_${{ steps.set_version.outputs.version }}_armv7h.tar.gz
+          asset_content_type: application/tar+gzip
+      - name: Upload aarch64 asset
+        id: upload-release-asset-aarch64
+        uses: actions/upload-release-asset@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./yay_aarch64/yay_${{ steps.set_version.outputs.version }}_aarch64.tar.gz
+          asset_name: yay_${{ steps.set_version.outputs.version }}_aarch64.tar.gz
+          asset_content_type: application/tar+gzip

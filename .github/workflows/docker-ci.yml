@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1#
       - name: Run Build and tests
-        run: ./testdata/travis.sh
+        run: ./testdata/ci/full.sh
       - uses: actions/upload-artifact@master
         with:
           name: yay_release
