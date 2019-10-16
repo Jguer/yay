@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -34,7 +33,7 @@ func (q providers) Less(i, j int) bool {
 		return false
 	}
 
-	return types.LessRunes([]rune(q.Pkgs[i].Name), []rune(q.Pkgs[j].Name))
+	return LessRunes([]rune(q.Pkgs[i].Name), []rune(q.Pkgs[j].Name))
 }
 
 func (q providers) Swap(i, j int) {

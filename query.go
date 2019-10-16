@@ -38,9 +38,9 @@ func (q aurQuery) Less(i, j int) bool {
 	case "popularity":
 		result = q[i].Popularity > q[j].Popularity
 	case "name":
-		result = types.LessRunes([]rune(q[i].Name), []rune(q[j].Name))
+		result = LessRunes([]rune(q[i].Name), []rune(q[j].Name))
 	case "base":
-		result = types.LessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
+		result = LessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
 	case "submitted":
 		result = q[i].FirstSubmitted < q[j].FirstSubmitted
 	case "modified":

@@ -29,14 +29,14 @@ func (u upSlice) Less(i, j int) bool {
 	if u[i].Repository == u[j].Repository {
 		iRunes := []rune(u[i].Name)
 		jRunes := []rune(u[j].Name)
-		return types.LessRunes(iRunes, jRunes)
+		return LessRunes(iRunes, jRunes)
 	}
 
 	syncDB, err := alpmHandle.SyncDBs()
 	if err != nil {
 		iRunes := []rune(u[i].Repository)
 		jRunes := []rune(u[j].Repository)
-		return types.LessRunes(iRunes, jRunes)
+		return LessRunes(iRunes, jRunes)
 	}
 
 	less := false
@@ -59,7 +59,7 @@ func (u upSlice) Less(i, j int) bool {
 
 	iRunes := []rune(u[i].Repository)
 	jRunes := []rune(u[j].Repository)
-	return types.LessRunes(iRunes, jRunes)
+	return LessRunes(iRunes, jRunes)
 
 }
 
