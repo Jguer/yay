@@ -47,6 +47,7 @@ type Configuration struct {
 	TarBin             string `json:"tarbin"`
 	ReDownload         string `json:"redownload"`
 	ReBuild            string `json:"rebuild"`
+	BatchInstall       bool   `json:"batchinstall"`
 	AnswerClean        string `json:"answerclean"`
 	AnswerDiff         string `json:"answerdiff"`
 	AnswerEdit         string `json:"answeredit"`
@@ -167,6 +168,7 @@ func defaultSettings() *Configuration {
 		RequestSplitN:      150,
 		ReDownload:         "no",
 		ReBuild:            "no",
+		BatchInstall:       false,
 		AnswerClean:        "",
 		AnswerDiff:         "",
 		AnswerEdit:         "",

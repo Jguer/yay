@@ -356,7 +356,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 	}
 
 	include, exclude, _, otherExclude := types.ParseNumberMenu(string(numberBuf))
-	arguments := makeArguments()
+	arguments := cmdArgs.copyGlobal()
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 

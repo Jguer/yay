@@ -15,6 +15,38 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
+func asdeps(parser *arguments, pkgs []string) error {
+	if len(pkgs) == 0 {
+		return nil
+	}
+
+	parser = parser.copyGlobal()
+	_ = parser.addArg("D", "asdeps")
+	parser.addTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(parser))
+	if err != nil {
+		return fmt.Errorf("%s%s", stderr, err)
+	}
+
+	return nil
+}
+
+func asexp(parser *arguments, pkgs []string) error {
+	if len(pkgs) == 0 {
+		return nil
+	}
+
+	parser = parser.copyGlobal()
+	_ = parser.addArg("D", "asexplicit")
+	parser.addTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(parser))
+	if err != nil {
+		return fmt.Errorf("%s%s", stderr, err)
+	}
+
+	return nil
+}
+
 // Install handles package installs
 func install(parser *arguments) (err error) {
 	var incompatible types.StringSet
@@ -295,42 +327,27 @@ func install(parser *arguments) (err error) {
 			return fmt.Errorf("Error installing repo packages")
 		}
 
-		depArguments := makeArguments()
-		err = depArguments.addArg("D", "asdeps")
-		if err != nil {
-			return err
-		}
-		expArguments := makeArguments()
-		err = expArguments.addArg("D", "asexplicit")
-		if err != nil {
-			return err
-		}
+		deps := make([]string, 0)
+		exp := make([]string, 0)
 
 		for _, pkg := range do.Repo {
 			if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Get(pkg.Name()) {
-				depArguments.addTarget(pkg.Name())
+				deps = append(deps, pkg.Name())
 				continue
 			}
 
 			if parser.existsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
-				depArguments.addTarget(pkg.Name())
+				deps = append(deps, pkg.Name())
 			} else if parser.existsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
-				expArguments.addTarget(pkg.Name())
+				exp = append(exp, pkg.Name())
 			}
 		}
 
-		if len(depArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(depArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
+		if err = asdeps(parser, deps); err != nil {
+			return err
 		}
-
-		if len(expArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(expArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
+		if err = asexp(parser, exp); err != nil {
+			return err
 		}
 	}
 
@@ -943,10 +960,91 @@ func downloadPkgbuildsSources(bases []Base, incompatible types.StringSet) (err e
 }
 
 func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible types.StringSet, conflicts types.MapStringSet) error {
+	arguments := parser.copy()
+	arguments.clearTargets()
+	arguments.op = "U"
+	arguments.delArg("confirm")
+	arguments.delArg("noconfirm")
+	arguments.delArg("c", "clean")
+	arguments.delArg("q", "quiet")
+	arguments.delArg("q", "quiet")
+	arguments.delArg("y", "refresh")
+	arguments.delArg("u", "sysupgrade")
+	arguments.delArg("w", "downloadonly")
+
+	deps := make([]string, 0)
+	exp := make([]string, 0)
+	oldConfirm := config.NoConfirm
+	config.NoConfirm = true
+
+	//remotenames: names of all non repo packages on the system
+	_, _, localNames, remoteNames, err := filterPackages()
+	if err != nil {
+		return err
+	}
+
+	//cache as a stringset. maybe make it return a string set in the first
+	//place
+	remoteNamesCache := types.SliceToStringSet(remoteNames)
+	localNamesCache := types.SliceToStringSet(localNames)
+
+	doInstall := func() error {
+		if len(arguments.targets) == 0 {
+			return nil
+		}
+
+		err := show(passToPacman(arguments))
+		if err != nil {
+			return err
+		}
+
+		err = saveVCSInfo()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+
+		if err = asdeps(parser, deps); err != nil {
+			return err
+		}
+		if err = asexp(parser, exp); err != nil {
+			return err
+		}
+
+		config.NoConfirm = oldConfirm
+
+		arguments.clearTargets()
+		deps = make([]string, 0)
+		exp = make([]string, 0)
+		config.NoConfirm = true
+		return nil
+	}
+
 	for _, base := range do.Aur {
+		var err error
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		built := true
+
+		satisfied := true
+	all:
+		for _, pkg := range base {
+			for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+				for _, dep := range deps {
+					if _, err := dp.LocalDB.PkgCache().FindSatisfier(dep); err != nil {
+						satisfied = false
+						fmt.Printf("%s not satisfied, flushing install queue\n", dep)
+						break all
+					}
+				}
+			}
+		}
+
+		if !satisfied || !config.BatchInstall {
+			err = doInstall()
+			if err != nil {
+				return err
+			}
+		}
 
 		srcinfo := srcinfos[pkg]
 
@@ -957,7 +1055,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		//pkgver bump
-		err := show(passToMakepkg(dir, args...))
+		err = show(passToMakepkg(dir, args...))
 		if err != nil {
 			return fmt.Errorf("Error making: %s", base.String())
 		}
@@ -1029,59 +1127,19 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		arguments := parser.copy()
-		arguments.clearTargets()
-		arguments.op = "U"
-		arguments.delArg("confirm")
-		arguments.delArg("noconfirm")
-		arguments.delArg("c", "clean")
-		arguments.delArg("q", "quiet")
-		arguments.delArg("q", "quiet")
-		arguments.delArg("y", "refresh")
-		arguments.delArg("u", "sysupgrade")
-		arguments.delArg("w", "downloadonly")
-
-		oldConfirm := config.NoConfirm
-
 		//conflicts have been checked so answer y for them
 		if config.UseAsk {
 			ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
 			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 			cmdArgs.globals["ask"] = fmt.Sprint(uask)
 		} else {
-			conflict := false
 			for _, split := range base {
 				if _, ok := conflicts[split.Name]; ok {
-					conflict = true
+					config.NoConfirm = false
+					break
 				}
 			}
-
-			if !conflict {
-				config.NoConfirm = true
-			}
 		}
-
-		depArguments := makeArguments()
-		err = depArguments.addArg("D", "asdeps")
-		if err != nil {
-			return err
-		}
-		expArguments := makeArguments()
-		err = expArguments.addArg("D", "asexplicit")
-		if err != nil {
-			return err
-		}
-
-		//remotenames: names of all non repo packages on the system
-		_, _, localNames, remoteNames, err := filterPackages()
-		if err != nil {
-			return err
-		}
-
-		//cache as a stringset. maybe make it return a string set in the first
-		//place
-		remoteNamesCache := types.SliceToStringSet(remoteNames)
-		localNamesCache := types.SliceToStringSet(localNames)
 
 		for _, split := range base {
 			pkgdest, ok := pkgdests[split.Name]
@@ -1090,22 +1148,13 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 
 			arguments.addTarget(pkgdest)
-			if !dp.Explicit.Get(split.Name) && !localNamesCache.Get(split.Name) && !remoteNamesCache.Get(split.Name) {
-				depArguments.addTarget(split.Name)
+			if parser.existsArg("asdeps", "asdep") {
+				deps = append(deps, split.Name)
+			} else if parser.existsArg("asexplicit", "asexp") {
+				exp = append(exp, split.Name)
+			} else if !dp.Explicit.Get(split.Name) && !localNamesCache.Get(split.Name) && !remoteNamesCache.Get(split.Name) {
+				deps = append(deps, split.Name)
 			}
-
-			if dp.Explicit.Get(split.Name) {
-				if parser.existsArg("asdeps", "asdep") {
-					depArguments.addTarget(split.Name)
-				} else if parser.existsArg("asexplicit", "asexp") {
-					expArguments.addTarget(split.Name)
-				}
-			}
-		}
-
-		err = show(passToPacman(arguments))
-		if err != nil {
-			return err
 		}
 
 		var mux sync.Mutex
@@ -1116,20 +1165,9 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		wg.Wait()
-
-		err = saveVCSInfo()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-
-		if len(depArguments.targets) > 0 {
-			_, stderr, err := capture(passToPacman(depArguments))
-			if err != nil {
-				return fmt.Errorf("%s%s", stderr, err)
-			}
-		}
-		config.NoConfirm = oldConfirm
 	}
 
-	return nil
+	err = doInstall()
+	config.NoConfirm = oldConfirm
+	return err
 }

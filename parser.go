@@ -33,6 +33,15 @@ func makeArguments() *arguments {
 	}
 }
 
+func (parser *arguments) copyGlobal() (cp *arguments) {
+	cp = makeArguments()
+	for k, v := range parser.globals {
+		cp.globals[k] = v
+	}
+
+	return
+}
+
 func (parser *arguments) copy() (cp *arguments) {
 	cp = makeArguments()
 
@@ -386,6 +395,8 @@ func isArg(arg string) bool {
 	case "rebuildall":
 	case "rebuildtree":
 	case "norebuild":
+	case "batchinstall":
+	case "nobatchinstall":
 	case "answerclean":
 	case "noanswerclean":
 	case "answerdiff":
@@ -494,6 +505,10 @@ func handleConfig(option, value string) bool {
 		config.ReBuild = "tree"
 	case "norebuild":
 		config.ReBuild = "no"
+	case "batchinstall":
+		config.BatchInstall = true
+	case "nobatchinstall":
+		config.BatchInstall = false
 	case "answerclean":
 		config.AnswerClean = value
 	case "noanswerclean":
