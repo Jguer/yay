@@ -2,7 +2,7 @@ package main
 
 import (
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -27,14 +27,14 @@ func (b Base) URLPath() string {
 type depOrder struct {
 	Aur     []Base
 	Repo    []*alpm.Package
-	Runtime types.StringSet
+	Runtime stringset.StringSet
 }
 
 func makeDepOrder() *depOrder {
 	return &depOrder{
 		make([]Base, 0),
 		make([]*alpm.Package, 0),
-		make(types.StringSet),
+		make(stringset.StringSet),
 	}
 }
 

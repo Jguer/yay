@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -43,7 +43,7 @@ func (t target) String() string {
 
 type depPool struct {
 	Targets  []target
-	Explicit types.StringSet
+	Explicit stringset.StringSet
 	Repo     map[string]*alpm.Package
 	Aur      map[string]*rpc.Pkg
 	AurCache map[string]*rpc.Pkg
@@ -65,7 +65,7 @@ func makeDepPool() (*depPool, error) {
 
 	dp := &depPool{
 		make([]target, 0),
-		make(types.StringSet),
+		make(stringset.StringSet),
 		make(map[string]*alpm.Package),
 		make(map[string]*rpc.Pkg),
 		make(map[string]*rpc.Pkg),
@@ -83,7 +83,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
-	aurTargets := make(types.StringSet)
+	aurTargets := make(stringset.StringSet)
 
 	pkgs = removeInvalidTargets(pkgs)
 
@@ -173,7 +173,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 // positives.
 //
 // This method increases dependency resolve time
-func (dp *depPool) findProvides(pkgs types.StringSet) error {
+func (dp *depPool) findProvides(pkgs stringset.StringSet) error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 
@@ -220,7 +220,7 @@ func (dp *depPool) findProvides(pkgs types.StringSet) error {
 	return nil
 }
 
-func (dp *depPool) cacheAURPackages(_pkgs types.StringSet) error {
+func (dp *depPool) cacheAURPackages(_pkgs stringset.StringSet) error {
 	pkgs := _pkgs.Copy()
 	query := make([]string, 0)
 
@@ -261,9 +261,9 @@ func (dp *depPool) cacheAURPackages(_pkgs types.StringSet) error {
 	return nil
 }
 
-func (dp *depPool) resolveAURPackages(pkgs types.StringSet, explicit bool) error {
-	newPackages := make(types.StringSet)
-	newAURPackages := make(types.StringSet)
+func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit bool) error {
+	newPackages := make(stringset.StringSet)
+	newAURPackages := make(stringset.StringSet)
 
 	err := dp.cacheAURPackages(pkgs)
 	if err != nil {
@@ -387,7 +387,7 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 // TODO: maybe intermix repo providers in the menu
 func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 	depName, _, _ := splitDep(dep)
-	seen := make(types.StringSet)
+	seen := make(stringset.StringSet)
 	providers := makeProviders(depName)
 
 	if dp.LocalDB.Pkg(depName) != nil {

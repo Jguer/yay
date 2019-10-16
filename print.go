@@ -12,7 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/intrange"
+
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -177,8 +179,8 @@ func (u upSlice) print() {
 		packNameLen := len(pack.StylizedNameWithRepository())
 		version, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
 		packVersionLen := len(version)
-		longestName = types.Max(packNameLen, longestName)
-		longestVersion = types.Max(packVersionLen, longestVersion)
+		longestName = intrange.Max(packNameLen, longestName)
+		longestVersion = intrange.Max(packVersionLen, longestVersion)
 	}
 
 	namePadding := fmt.Sprintf("%%-%ds  ", longestName)
@@ -390,7 +392,7 @@ func printNumberOfUpdates() error {
 
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
-	targets := types.SliceToStringSet(parser.targets)
+	targets := stringset.FromSlice(parser.targets)
 	warnings := &aurWarnings{}
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil

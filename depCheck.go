@@ -7,10 +7,10 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
-func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts types.MapStringSet) {
+func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -32,7 +32,7 @@ func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts ty
 	}
 }
 
-func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts types.MapStringSet) {
+func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts stringset.MapStringSet) {
 	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
 			return nil
@@ -50,7 +50,7 @@ func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts 
 	})
 }
 
-func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts types.MapStringSet) {
+func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -80,7 +80,7 @@ func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts 
 	}
 }
 
-func (dp *depPool) checkInnerConflicts(conflicts types.MapStringSet) {
+func (dp *depPool) checkInnerConflicts(conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		for _, conflict := range pkg.Conflicts {
 			dp.checkInnerConflict(pkg.Name, conflict, conflicts)
@@ -95,7 +95,7 @@ func (dp *depPool) checkInnerConflicts(conflicts types.MapStringSet) {
 	}
 }
 
-func (dp *depPool) checkForwardConflicts(conflicts types.MapStringSet) {
+func (dp *depPool) checkForwardConflicts(conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		for _, conflict := range pkg.Conflicts {
 			dp.checkForwardConflict(pkg.Name, conflict, conflicts)
@@ -110,7 +110,7 @@ func (dp *depPool) checkForwardConflicts(conflicts types.MapStringSet) {
 	}
 }
 
-func (dp *depPool) checkReverseConflicts(conflicts types.MapStringSet) {
+func (dp *depPool) checkReverseConflicts(conflicts stringset.MapStringSet) {
 	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if dp.hasPackage(pkg.Name()) {
 			return nil
@@ -125,10 +125,10 @@ func (dp *depPool) checkReverseConflicts(conflicts types.MapStringSet) {
 	})
 }
 
-func (dp *depPool) CheckConflicts() (types.MapStringSet, error) {
+func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 	var wg sync.WaitGroup
-	innerConflicts := make(types.MapStringSet)
-	conflicts := make(types.MapStringSet)
+	innerConflicts := make(stringset.MapStringSet)
+	conflicts := make(stringset.MapStringSet)
 	wg.Add(2)
 
 	fmt.Println(bold(cyan("::") + bold(" Checking for conflicts...")))
@@ -182,9 +182,9 @@ func (dp *depPool) CheckConflicts() (types.MapStringSet, error) {
 	// These are used to decide what to pass --ask to (if set) or don't pass --noconfirm to
 	// As we have no idea what the order is yet we add every inner conflict to the slice
 	for name, pkgs := range innerConflicts {
-		conflicts[name] = make(types.StringSet)
+		conflicts[name] = make(stringset.StringSet)
 		for pkg := range pkgs {
-			conflicts[pkg] = make(types.StringSet)
+			conflicts[pkg] = make(stringset.StringSet)
 		}
 	}
 
@@ -204,7 +204,7 @@ func (dp *depPool) CheckConflicts() (types.MapStringSet, error) {
 }
 
 type missing struct {
-	Good    types.StringSet
+	Good    stringset.StringSet
 	Missing map[string][][]string
 }
 
@@ -261,7 +261,7 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 
 func (dp *depPool) CheckMissing() error {
 	missing := &missing{
-		make(types.StringSet),
+		make(stringset.StringSet),
 		make(map[string][][]string),
 	}
 

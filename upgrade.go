@@ -7,7 +7,10 @@ import (
 	"unicode"
 
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/intrange"
+
+	"github.com/Jguer/yay/v9/pkg/multierror"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -29,14 +32,14 @@ func (u upSlice) Less(i, j int) bool {
 	if u[i].Repository == u[j].Repository {
 		iRunes := []rune(u[i].Name)
 		jRunes := []rune(u[j].Name)
-		return types.LessRunes(iRunes, jRunes)
+		return LessRunes(iRunes, jRunes)
 	}
 
 	syncDB, err := alpmHandle.SyncDBs()
 	if err != nil {
 		iRunes := []rune(u[i].Repository)
 		jRunes := []rune(u[j].Repository)
-		return types.LessRunes(iRunes, jRunes)
+		return LessRunes(iRunes, jRunes)
 	}
 
 	less := false
@@ -59,7 +62,7 @@ func (u upSlice) Less(i, j int) bool {
 
 	iRunes := []rune(u[i].Repository)
 	jRunes := []rune(u[j].Repository)
-	return types.LessRunes(iRunes, jRunes)
+	return LessRunes(iRunes, jRunes)
 
 }
 
@@ -121,7 +124,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	var repoUp upSlice
 	var aurUp upSlice
 
-	var errs types.MultiError
+	var errs multierror.MultiError
 
 	aurdata := make(map[string]*rpc.Pkg)
 
@@ -169,7 +172,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	printLocalNewerThanAUR(remote, aurdata)
 
 	if develUp != nil {
-		names := make(types.StringSet)
+		names := make(stringset.StringSet)
 		for _, up := range develUp {
 			names.Set(up.Name)
 		}
@@ -330,9 +333,9 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 }
 
 // upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(aurUp, repoUp upSlice) (types.StringSet, types.StringSet, error) {
-	ignore := make(types.StringSet)
-	aurNames := make(types.StringSet)
+func upgradePkgs(aurUp, repoUp upSlice) (stringset.StringSet, stringset.StringSet, error) {
+	ignore := make(stringset.StringSet)
+	aurNames := make(stringset.StringSet)
 
 	allUpLen := len(repoUp) + len(aurUp)
 	if allUpLen == 0 {
@@ -364,7 +367,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (types.StringSet, types.StringSet, error
 	//upgrade menu asks you which packages to NOT upgrade so in this case
 	//include and exclude are kind of swapped
 	//include, exclude, other := parseNumberMenu(string(numberBuf))
-	include, exclude, otherInclude, otherExclude := types.ParseNumberMenu(numbers)
+	include, exclude, otherInclude, otherExclude := intrange.ParseNumberMenu(numbers)
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -19,7 +19,7 @@ type arguments struct {
 	op      string
 	options map[string]string
 	globals map[string]string
-	doubles types.StringSet // Tracks args passed twice such as -yy and -dd
+	doubles stringset.StringSet // Tracks args passed twice such as -yy and -dd
 	targets []string
 }
 
@@ -28,7 +28,7 @@ func makeArguments() *arguments {
 		"",
 		make(map[string]string),
 		make(map[string]string),
-		make(types.StringSet),
+		make(stringset.StringSet),
 		make([]string, 0),
 	}
 }

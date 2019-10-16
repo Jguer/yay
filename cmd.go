@@ -8,7 +8,7 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/completion"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/intrange"
 )
 
 var cmdArgs = makeArguments()
@@ -355,7 +355,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		return fmt.Errorf("Input too long")
 	}
 
-	include, exclude, _, otherExclude := types.ParseNumberMenu(string(numberBuf))
+	include, exclude, _, otherExclude := intrange.ParseNumberMenu(string(numberBuf))
 	arguments := cmdArgs.copyGlobal()
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
