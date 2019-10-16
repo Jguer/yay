@@ -9,8 +9,8 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/intrange"
 
+	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
-	"github.com/Jguer/yay/v9/pkg/types"
 	rpc "github.com/mikkeloscar/aur"
 )
 
@@ -124,7 +124,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	var repoUp upSlice
 	var aurUp upSlice
 
-	var errs types.MultiError
+	var errs multierror.MultiError
 
 	aurdata := make(map[string]*rpc.Pkg)
 

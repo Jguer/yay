@@ -12,8 +12,8 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/completion"
 	"github.com/Jguer/yay/v9/pkg/intrange"
+	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
-	"github.com/Jguer/yay/v9/pkg/types"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -718,7 +718,7 @@ func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) 
 }
 
 func updatePkgbuildSeenRef(bases []Base, cloned stringset.StringSet) error {
-	var errMulti types.MultiError
+	var errMulti multierror.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -733,7 +733,7 @@ func updatePkgbuildSeenRef(bases []Base, cloned stringset.StringSet) error {
 }
 
 func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
-	var errMulti types.MultiError
+	var errMulti multierror.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -886,7 +886,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string
 	downloaded := 0
 	var wg sync.WaitGroup
 	var mux sync.Mutex
-	var errs types.MultiError
+	var errs multierror.MultiError
 
 	download := func(k int, base Base) {
 		defer wg.Done()

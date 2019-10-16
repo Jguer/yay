@@ -10,7 +10,7 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/intrange"
-	"github.com/Jguer/yay/v9/pkg/types"
+	"github.com/Jguer/yay/v9/pkg/multierror"
 
 	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
@@ -503,7 +503,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-	var errs types.MultiError
+	var errs multierror.MultiError
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()
