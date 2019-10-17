@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
@@ -224,63 +223,6 @@ func (config *Configuration) expandEnv() {
 	config.AnswerEdit = os.ExpandEnv(config.AnswerEdit)
 	config.AnswerUpgrade = os.ExpandEnv(config.AnswerUpgrade)
 	config.RemoveMake = os.ExpandEnv(config.RemoveMake)
-}
-
-// Editor returns the preferred system editor.
-func editor() (string, []string) {
-	switch {
-	case config.Editor != "":
-		editor, err := exec.LookPath(config.Editor)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		} else {
-			return editor, strings.Fields(config.EditorFlags)
-		}
-		fallthrough
-	case os.Getenv("EDITOR") != "":
-		editorArgs := strings.Fields(os.Getenv("EDITOR"))
-		editor, err := exec.LookPath(editorArgs[0])
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		} else {
-			return editor, editorArgs[1:]
-		}
-		fallthrough
-	case os.Getenv("VISUAL") != "":
-		editorArgs := strings.Fields(os.Getenv("VISUAL"))
-		editor, err := exec.LookPath(editorArgs[0])
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		} else {
-			return editor, editorArgs[1:]
-		}
-		fallthrough
-	default:
-		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, bold(red(arrow)), bold(cyan("$EDITOR")), bold("is not set"))
-		fmt.Fprintln(os.Stderr, bold(red(arrow))+bold(" Please add ")+bold(cyan("$EDITOR"))+bold(" or ")+bold(cyan("$VISUAL"))+bold(" to your environment variables."))
-
-		for {
-			fmt.Print(green(bold(arrow + " Edit PKGBUILD with: ")))
-			editorInput, err := getInput("")
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-
-			editorArgs := strings.Fields(editorInput)
-			if len(editorArgs) == 0 {
-				continue
-			}
-
-			editor, err := exec.LookPath(editorArgs[0])
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-			return editor, editorArgs[1:]
-		}
-	}
 }
 
 // ContinueTask prompts if user wants to continue task.

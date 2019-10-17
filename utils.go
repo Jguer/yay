@@ -5,8 +5,6 @@ import (
 	"unicode"
 )
 
-const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
-
 func stringSliceEqual(a, b []string) bool {
 	if a == nil && b == nil {
 		return true

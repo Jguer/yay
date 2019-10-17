@@ -192,10 +192,8 @@ func cleanUntracked() error {
 		}
 
 		dir := filepath.Join(config.BuildDir, file.Name())
-		if shouldUseGit(dir) {
-			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
-				return err
-			}
+		if err := show(passToGit(dir, "clean", "-fx")); err != nil {
+			return err
 		}
 	}
 
@@ -208,21 +206,14 @@ func cleanAfter(bases []Base) {
 	for i, base := range bases {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
 
-		if shouldUseGit(dir) {
-			fmt.Printf(bold(cyan("::")+" Cleaning (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
-			_, stderr, err := capture(passToGit(dir, "reset", "--hard", "HEAD"))
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error resetting %s: %s", base.String(), stderr)
-			}
+		fmt.Printf(bold(cyan("::")+" Cleaning (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
+		_, stderr, err := capture(passToGit(dir, "reset", "--hard", "HEAD"))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error resetting %s: %s", base.String(), stderr)
+		}
 
-			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		} else {
-			fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
-			if err := os.RemoveAll(dir); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
+		if err := show(passToGit(dir, "clean", "-fx")); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
 	}
 }

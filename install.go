@@ -12,8 +12,8 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/completion"
 	"github.com/Jguer/yay/v9/pkg/intrange"
-	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Morganamilo/go-aurfetch"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -233,45 +233,7 @@ func install(parser *arguments) (err error) {
 	}
 
 	toSkip := pkgbuildsToSkip(do.Aur, targets)
-	cloned, err := downloadPkgbuilds(do.Aur, toSkip, config.BuildDir)
-	if err != nil {
-		return err
-	}
-
-	var toDiff []Base
-	var toEdit []Base
-
-	if config.DiffMenu {
-		pkgbuildNumberMenu(do.Aur, remoteNamesCache)
-		toDiff, err = diffNumberMenu(do.Aur, remoteNamesCache)
-		if err != nil {
-			return err
-		}
-
-		if len(toDiff) > 0 {
-			err = showPkgbuildDiffs(toDiff, cloned)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(toDiff) > 0 {
-		oldValue := config.NoConfirm
-		config.NoConfirm = false
-		fmt.Println()
-		if !continueTask(bold(green("Proceed with install?")), true) {
-			return fmt.Errorf("Aborting due to user")
-		}
-		err = updatePkgbuildSeenRef(toDiff, cloned)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-		}
-
-		config.NoConfirm = oldValue
-	}
-
-	err = mergePkgbuilds(do.Aur)
+	err = downloadPkgbuilds(do.Aur, toSkip, config.BuildDir, true)
 	if err != nil {
 		return err
 	}
@@ -279,31 +241,6 @@ func install(parser *arguments) (err error) {
 	srcinfos, err = parseSrcinfoFiles(do.Aur, true)
 	if err != nil {
 		return err
-	}
-
-	if config.EditMenu {
-		pkgbuildNumberMenu(do.Aur, remoteNamesCache)
-		toEdit, err = editNumberMenu(do.Aur, remoteNamesCache)
-		if err != nil {
-			return err
-		}
-
-		if len(toEdit) > 0 {
-			err = editPkgbuilds(toEdit, srcinfos)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(toEdit) > 0 {
-		oldValue := config.NoConfirm
-		config.NoConfirm = false
-		fmt.Println()
-		if !continueTask(bold(green("Proceed with install?")), true) {
-			return fmt.Errorf("Aborting due to user")
-		}
-		config.NoConfirm = oldValue
 	}
 
 	incompatible, err = getIncompatible(do.Aur, srcinfos)
@@ -638,177 +575,6 @@ func cleanNumberMenu(bases []Base, installed stringset.StringSet, hasClean bool)
 	return toClean, nil
 }
 
-func editNumberMenu(bases []Base, installed stringset.StringSet) ([]Base, error) {
-	return editDiffNumberMenu(bases, installed, false)
-}
-
-func diffNumberMenu(bases []Base, installed stringset.StringSet) ([]Base, error) {
-	return editDiffNumberMenu(bases, installed, true)
-}
-
-func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) ([]Base, error) {
-	toEdit := make([]Base, 0)
-	var editInput string
-	var err error
-
-	if diff {
-		fmt.Println(bold(green(arrow + " Diffs to show?")))
-		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-		fmt.Print(bold(green(arrow + " ")))
-		editInput, err = getInput(config.AnswerDiff)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
-		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-		fmt.Print(bold(green(arrow + " ")))
-		editInput, err = getInput(config.AnswerEdit)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(editInput)
-	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
-
-	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
-		return nil, fmt.Errorf("Aborting due to user")
-	}
-
-	if !eOtherInclude.Get("n") && !eOtherInclude.Get("none") {
-		for i, base := range bases {
-			pkg := base.Pkgbase()
-			anyInstalled := false
-			for _, b := range base {
-				anyInstalled = anyInstalled || installed.Get(b.Name)
-			}
-
-			if !eIsInclude && eExclude.Get(len(bases)-i) {
-				continue
-			}
-
-			if anyInstalled && (eOtherInclude.Get("i") || eOtherInclude.Get("installed")) {
-				toEdit = append(toEdit, base)
-				continue
-			}
-
-			if !anyInstalled && (eOtherInclude.Get("no") || eOtherInclude.Get("notinstalled")) {
-				toEdit = append(toEdit, base)
-				continue
-			}
-
-			if eOtherInclude.Get("a") || eOtherInclude.Get("all") {
-				toEdit = append(toEdit, base)
-				continue
-			}
-
-			if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkg)) {
-				toEdit = append(toEdit, base)
-			}
-
-			if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkg)) {
-				toEdit = append(toEdit, base)
-			}
-		}
-	}
-
-	return toEdit, nil
-}
-
-func updatePkgbuildSeenRef(bases []Base, cloned stringset.StringSet) error {
-	var errMulti multierror.MultiError
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-		if shouldUseGit(dir) {
-			err := gitUpdateSeenRef(config.BuildDir, pkg)
-			if err != nil {
-				errMulti.Add(err)
-			}
-		}
-	}
-	return errMulti.Return()
-}
-
-func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
-	var errMulti multierror.MultiError
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-		if shouldUseGit(dir) {
-			start, err := getLastSeenHash(config.BuildDir, pkg)
-			if err != nil {
-				errMulti.Add(err)
-				continue
-			}
-
-			if cloned.Get(pkg) {
-				start = gitEmptyTree
-			} else {
-				hasDiff, err := gitHasDiff(config.BuildDir, pkg)
-				if err != nil {
-					errMulti.Add(err)
-					continue
-				}
-
-				if !hasDiff {
-					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(base.String()), bold("No changes -- skipping"))
-					continue
-				}
-			}
-
-			args := []string{"diff", start + "..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO"}
-			if useColor {
-				args = append(args, "--color=always")
-			} else {
-				args = append(args, "--color=never")
-			}
-			_ = show(passToGit(dir, args...))
-		} else {
-			args := []string{"diff"}
-			if useColor {
-				args = append(args, "--color=always")
-			} else {
-				args = append(args, "--color=never")
-			}
-			args = append(args, "--no-index", "/var/empty", dir)
-			// git always returns 1. why? I have no idea
-			_ = show(passToGit(dir, args...))
-		}
-	}
-
-	return errMulti.Return()
-}
-
-func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
-	pkgbuilds := make([]string, 0, len(bases))
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-		pkgbuilds = append(pkgbuilds, filepath.Join(dir, "PKGBUILD"))
-
-		for _, splitPkg := range srcinfos[pkg].SplitPackages() {
-			if splitPkg.Install != "" {
-				pkgbuilds = append(pkgbuilds, filepath.Join(dir, splitPkg.Install))
-			}
-		}
-	}
-
-	if len(pkgbuilds) > 0 {
-		editor, editorArgs := editor()
-		editorArgs = append(editorArgs, pkgbuilds...)
-		editcmd := exec.Command(editor, editorArgs...)
-		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-		err := editcmd.Run()
-		if err != nil {
-			return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
-		}
-	}
-
-	return nil
-}
-
 func parseSrcinfoFiles(bases []Base, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
 	srcinfos := make(map[string]*gosrc.Srcinfo)
 	for k, base := range bases {
@@ -859,78 +625,109 @@ func pkgbuildsToSkip(bases []Base, targets stringset.StringSet) stringset.String
 	return toSkip
 }
 
-func mergePkgbuilds(bases []Base) error {
-	for _, base := range bases {
-		if shouldUseGit(filepath.Join(config.BuildDir, base.Pkgbase())) {
-			err := gitMerge(config.BuildDir, base.Pkgbase())
+func downloadPkgbuilds(b []Base, toSkip stringset.StringSet, buildDir string, view bool) error {
+	fetch := aurfetch.MakeHandle(buildDir, filepath.Join(cacheHome, "diff"))
+	fetch.GitEnvironment = append(fetch.GitEnvironment, "GIT_TERMINAL_PROMPT=0")
+	oodBases := []string{}
+	bases := []string{}
+	baseMap := map[string]Base{}
+	skipped := 0
+	wasErr := false
+
+	for _, base := range b {
+		bases = append(bases, base.Pkgbase())
+		baseMap[base.Pkgbase()] = base
+
+		if toSkip.Get(base.Pkgbase()) {
+			skipped++
+			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
+			fmt.Printf(str, skipped, len(bases), cyan(base.String()))
+			continue
+		}
+
+		oodBases = append(oodBases, base.Pkgbase())
+	}
+
+	DownloadCB := func(pkg string, n int, out string, err error) {
+		if err != nil {
+			str := bold(red("error: ") + "Downloaded failed (%d/%d): %s\n")
+			fmt.Printf(str, skipped+n, len(bases), red(baseMap[pkg].String()))
+			wasErr = true
+		}
+
+		str := bold(cyan("::") + " Downloaded PKGBUILD (%d/%d): %s\n")
+		fmt.Printf(str, skipped+n, len(bases), baseMap[pkg].String())
+	}
+
+	MergeCB := func(pkg string, n int, out string) {
+		str := bold(cyan("::") + " Merging (%d/%d): %s\n")
+		fmt.Printf(str, n, len(bases), baseMap[pkg].String())
+	}
+
+	fetched := fetch.DownloadCB(oodBases, DownloadCB)
+	if wasErr {
+		return fmt.Errorf("")
+	}
+
+	for base := range toSkip {
+		fetched = append(fetched, base)
+	}
+
+	toMerge, err := fetch.NeedsMerge(fetched)
+	if err != nil {
+		return err
+	}
+
+	err = fetch.DiffsToFile(toMerge, false)
+	if err != nil {
+		return err
+	}
+
+	if view {
+		// TODO:  config option for switching between fancy vifm interface and a simple diff printer
+		// or perhaps the old menu system
+		if true {
+			view, err := fetch.MakeView(bases, toMerge)
 			if err != nil {
 				return err
 			}
+
+			cmd := exec.Command("vifm", view)
+			cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+			cmdErr := cmd.Run()
+
+			err = os.RemoveAll(view)
+			if err != nil {
+				fmt.Printf("failed to remove tmpdirr: %s: %s", view, err)
+			}
+
+			if cmdErr != nil {
+				return fmt.Errorf("vifm did not exit successfully, Aborting: %s", cmdErr)
+			}
+		} else {
+			err = fetch.PrintDiffs(bases)
+			if err != nil {
+				return err
+			}
+			if !continueTask(bold(green("Proceed with install?")), true) {
+				return fmt.Errorf("Aborting due to user")
+			}
+		}
+	}
+
+	err = fetch.MergeCB(toMerge, MergeCB)
+	if err != nil {
+		return err
+	}
+
+	if view {
+		err = fetch.MarkSeen(bases)
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
-}
-
-func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string) (stringset.StringSet, error) {
-	cloned := make(stringset.StringSet)
-	downloaded := 0
-	var wg sync.WaitGroup
-	var mux sync.Mutex
-	var errs multierror.MultiError
-
-	download := func(k int, base Base) {
-		defer wg.Done()
-		pkg := base.Pkgbase()
-
-		if toSkip.Get(pkg) {
-			mux.Lock()
-			downloaded++
-			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
-			fmt.Printf(str, downloaded, len(bases), cyan(base.String()))
-			mux.Unlock()
-			return
-		}
-
-		if shouldUseGit(filepath.Join(config.BuildDir, pkg)) {
-			clone, err := gitDownload(config.AURURL+"/"+pkg+".git", buildDir, pkg)
-			if err != nil {
-				errs.Add(err)
-				return
-			}
-			if clone {
-				mux.Lock()
-				cloned.Set(pkg)
-				mux.Unlock()
-			}
-		} else {
-			err := downloadAndUnpack(config.AURURL+base.URLPath(), buildDir)
-			if err != nil {
-				errs.Add(err)
-				return
-			}
-		}
-
-		mux.Lock()
-		downloaded++
-		str := bold(cyan("::") + " Downloaded PKGBUILD (%d/%d): %s\n")
-		fmt.Printf(str, downloaded, len(bases), cyan(base.String()))
-		mux.Unlock()
-	}
-
-	count := 0
-	for k, base := range bases {
-		wg.Add(1)
-		go download(k, base)
-		count++
-		if count%25 == 0 {
-			wg.Wait()
-		}
-	}
-
-	wg.Wait()
-
-	return cloned, errs.Return()
 }
 
 func downloadPkgbuildsSources(bases []Base, incompatible stringset.StringSet) (err error) {

@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,93 +11,6 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/Jguer/yay/v9/pkg/multierror"
 )
-
-const gitDiffRefName = "AUR_SEEN"
-
-// Decide what download method to use:
-// Use the config option when the destination does not already exits
-// If .git exists in the destination use git
-// Otherwise use a tarrball
-func shouldUseGit(path string) bool {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return config.GitClone
-	}
-
-	_, err = os.Stat(filepath.Join(path, ".git"))
-	return err == nil || os.IsExist(err)
-}
-
-func downloadFile(path string, url string) (err error) {
-	// Create the file
-	out, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
-	return err
-}
-
-// Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
-// reviewed by the user
-func gitUpdateSeenRef(path string, name string) error {
-	_, stderr, err := capture(passToGit(filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"))
-	if err != nil {
-		return fmt.Errorf("%s%s", stderr, err)
-	}
-	return nil
-}
-
-// Return wether or not we have reviewed a diff yet. It checks for the existence of
-// YAY_DIFF_REVIEW in the git ref-list
-func gitHasLastSeenRef(path string, name string) bool {
-	_, _, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName))
-	return err == nil
-}
-
-// Returns the last reviewed hash. If YAY_DIFF_REVIEW exists it will return this hash.
-// If it does not it will return empty tree as no diff have been reviewed yet.
-func getLastSeenHash(path string, name string) (string, error) {
-	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName))
-		if err != nil {
-			return "", fmt.Errorf("%s%s", stderr, err)
-		}
-
-		lines := strings.Split(stdout, "\n")
-		return lines[0], nil
-	}
-	return gitEmptyTree, nil
-}
-
-// Check whether or not a diff exists between the last reviewed diff and
-// HEAD@{upstream}
-func gitHasDiff(path string, name string) (bool, error) {
-	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
-		if err != nil {
-			return false, fmt.Errorf("%s%s", stderr, err)
-		}
-
-		lines := strings.Split(stdout, "\n")
-		lastseen := lines[0]
-		upstream := lines[1]
-		return lastseen != upstream, nil
-	}
-	// If YAY_DIFF_REVIEW does not exists, we have never reviewed a diff for this package
-	// and should display it.
-	return true, nil
-}
 
 // TODO: yay-next passes args through the header, use that to unify ABS and AUR
 func gitDownloadABS(url string, path string, name string) (bool, error) {
@@ -131,70 +42,6 @@ func gitDownloadABS(url string, path string, name string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func gitDownload(url string, path string, name string) (bool, error) {
-	_, err := os.Stat(filepath.Join(path, name, ".git"))
-	if os.IsNotExist(err) {
-		cmd := passToGit(path, "clone", "--no-progress", url, name)
-		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-		_, stderr, err := capture(cmd)
-		if err != nil {
-			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
-		}
-
-		return true, nil
-	} else if err != nil {
-		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
-	}
-
-	cmd := passToGit(filepath.Join(path, name), "fetch")
-	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-	_, stderr, err := capture(cmd)
-	if err != nil {
-		return false, fmt.Errorf("error fetching %s: %s", name, stderr)
-	}
-
-	return false, nil
-}
-
-func gitMerge(path string, name string) error {
-	_, stderr, err := capture(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
-	if err != nil {
-		return fmt.Errorf("error resetting %s: %s", name, stderr)
-	}
-
-	_, stderr, err = capture(passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff"))
-	if err != nil {
-		return fmt.Errorf("error merging %s: %s", name, stderr)
-	}
-
-	return nil
-}
-
-// DownloadAndUnpack downloads url tgz and extracts to path.
-func downloadAndUnpack(url string, path string) error {
-	err := os.MkdirAll(path, 0755)
-	if err != nil {
-		return err
-	}
-
-	fileName := filepath.Base(url)
-
-	tarLocation := filepath.Join(path, fileName)
-	defer os.Remove(tarLocation)
-
-	err = downloadFile(tarLocation, url)
-	if err != nil {
-		return err
-	}
-
-	_, stderr, err := capture(exec.Command(config.TarBin, "-xf", tarLocation, "-C", path))
-	if err != nil {
-		return fmt.Errorf("%s", stderr)
-	}
-
-	return nil
 }
 
 func getPkgbuilds(pkgs []string) error {
@@ -239,20 +86,17 @@ func getPkgbuilds(pkgs []string) error {
 			case err != nil && !os.IsNotExist(err):
 				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 				continue
-			case os.IsNotExist(err), cmdArgs.existsArg("f", "force"), shouldUseGit(filepath.Join(wd, name)):
+			case os.IsNotExist(err), cmdArgs.existsArg("f", "force"):
 				if err = os.RemoveAll(filepath.Join(wd, name)); err != nil {
 					fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 					continue
 				}
-			default:
-				fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
-				continue
 			}
 
 			bases = append(bases, base)
 		}
 
-		if _, err = downloadPkgbuilds(bases, nil, wd); err != nil {
+		if err = downloadPkgbuilds(bases, nil, wd, false); err != nil {
 			return err
 		}
 

@@ -39,7 +39,7 @@ func createDevelDB() error {
 
 	bases := getBases(info)
 	toSkip := pkgbuildsToSkip(bases, stringset.FromSlice(remoteNames))
-	_, err = downloadPkgbuilds(bases, toSkip, config.BuildDir)
+	err = downloadPkgbuilds(bases, toSkip, config.BuildDir, false)
 	if err != nil {
 		return err
 	}
