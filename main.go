@@ -48,6 +48,11 @@ func initConfig() error {
 		}
 	}
 
+	aurdest := os.Getenv("AURDEST")
+	if aurdest != "" {
+		config.BuildDir = aurdest
+	}
+
 	return nil
 }
 
