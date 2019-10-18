@@ -38,6 +38,7 @@ type targetMode int
 type Configuration struct {
 	AURURL             string `json:"aururl"`
 	BuildDir           string `json:"buildDir"`
+	ABSDir             string `json:"absdir"`
 	Editor             string `json:"editor"`
 	EditorFlags        string `json:"editorflags"`
 	MakepkgBin         string `json:"makepkgbin"`
@@ -143,6 +144,7 @@ func defaultSettings() *Configuration {
 	config := &Configuration{
 		AURURL:             "https://aur.archlinux.org",
 		BuildDir:           "$HOME/.cache/yay",
+		ABSDir:             "$HOME/.cache/yay/abs",
 		CleanAfter:         false,
 		Editor:             "",
 		EditorFlags:        "",
