@@ -1,11 +1,10 @@
 package intrange
 
 import (
+	"github.com/Jguer/yay/v9/pkg/stringset"
 	"strconv"
 	"strings"
 	"unicode"
-	"github.com/Jguer/yay/v9/pkg/stringset"
-
 )
 
 // IntRange stores a max and min amount for range

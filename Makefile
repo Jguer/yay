@@ -29,13 +29,13 @@ all: | clean release
 .PHONY: clean
 clean:
 	$(GO) clean $(GOFLAGS) -i ./...
-	rm -rf $(BIN) $(PKGNAME)_$(VERSION)_*
+	rm -f $(BIN) $(PKGNAME)_$(VERSION)_*
 
 .PHONY: test
 test:
 	$(GO) vet $(GOFLAGS) ./...
-	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted. Use make fmt" && false)
-	$(GO) test $(GOFLAGS) --race -covermode=atomic . ./pkg/...
+	@test -z "$$(gofmt -l cmd/*.go pkg/*/*.go)" || (echo "Files need to be linted. Use make fmt" && false)
+	$(GO) test $(GOFLAGS) --race -covermode=atomic ./...
 
 .PHONY: build
 build: $(BIN)
@@ -44,7 +44,7 @@ build: $(BIN)
 release: $(PACKAGE)
 
 $(BIN): $(SOURCES)
-	$(GO) build $(GOFLAGS) -ldflags '-s -w $(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@
+	$(GO) build $(GOFLAGS) -ldflags '-s -w $(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@ ./cmd
 
 $(RELEASE_DIR):
 	mkdir $(RELEASE_DIR)
