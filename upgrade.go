@@ -356,7 +356,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringset.StringSet, stringset.StringSe
 	fmt.Printf("%s"+bold(" %d ")+"%s\n", bold(cyan("::")), allUpLen, bold("Packages to upgrade."))
 	allUp.print()
 
-	fmt.Println(bold(green(arrow + " Packages to exclude: (eg: "1 2 3", "1-3", "^4" or repo name), press enter to upgrade all listed packages")))
+	fmt.Println(bold(green(arrow + " Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name), press enter to upgrade all listed packages")))
 	fmt.Print(bold(green(arrow + " ")))
 
 	numbers, err := getInput(config.AnswerUpgrade)
