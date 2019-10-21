@@ -428,10 +428,6 @@ func configureAlpm(conf *pacmanconf.Config) error {
 		return err
 	}*/
 
-	if err := alpmHandle.SetDeltaRatio(pacmanConf.UseDelta); err != nil {
-		return err
-	}
-
 	if err := alpmHandle.SetUseSyslog(pacmanConf.UseSyslog); err != nil {
 		return err
 	}
