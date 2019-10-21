@@ -537,6 +537,8 @@ func handleConfig(option, value string) bool {
 		config.GitFlags = value
 	case "builddir":
 		config.BuildDir = value
+	case "absdir":
+		config.ABSDir = value
 	case "editor":
 		config.Editor = value
 	case "editorflags":
@@ -680,6 +682,7 @@ func hasParam(arg string) bool {
 	case "gpgflags":
 	case "gitflags":
 	case "builddir":
+	case "absdir":
 	case "editor":
 	case "editorflags":
 	case "makepkg":

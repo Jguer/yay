@@ -103,7 +103,12 @@ func gitHasDiff(path string, name string) (bool, error) {
 
 // TODO: yay-next passes args through the header, use that to unify ABS and AUR
 func gitDownloadABS(url string, path string, name string) (bool, error) {
-	_, err := os.Stat(filepath.Join(path, name))
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = os.Stat(filepath.Join(path, name))
 	if os.IsNotExist(err) {
 		cmd := passToGit(path, "clone", "--no-progress", "--single-branch",
 			"-b", "packages/"+name, url, name)
@@ -340,7 +345,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 
 	download := func(pkg string, url string) {
 		defer wg.Done()
-		if _, err := gitDownloadABS(url, config.BuildDir, pkg); err != nil {
+		if _, err := gitDownloadABS(url, config.ABSDir, pkg); err != nil {
 			errs.Add(fmt.Errorf("%s Failed to get pkgbuild: %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(err.Error()))))
 			return
 		}
