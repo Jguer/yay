@@ -154,6 +154,11 @@ Directory to use for Building AUR Packages. This directory is also used as
 the AUR cache when deciding if Yay should skip builds.
 
 .TP
+.B \-\-absdir <dir>
+Directory used to store downloads from the ABS. During \-G, the PKGBUILD
+placed in the current dir symlinks to absdir.
+
+.TP
 .B \-\-editor <command>
 Editor to use when editing PKGBUILDs. If this is not set the \fBEDITOR\fR
 environment variable will be checked, followed by \fBVISUAL\fR. If none of
@@ -220,6 +225,10 @@ cache to never be refreshed.
 .TP
 .B \-\-sortby <votes|popularity|id|baseid|name|base|submitted|modified>
 Sort AUR results by a specific field during search.
+
+.TP
+.B \-\-searchby <name|name-desc|maintainer|depends|checkdepends|makedepends|optdepends>
+Search for AUR packages by querying the specified field.
 
 .TP
 .B \-\-answerclean <All|None|Installed|NotInstalled|...>
@@ -448,6 +457,17 @@ start. This means the upgrade menu and pkgbuild review will be performed
 after the sysupgrade has finished.
 
 .TP
+.B \-\-batchinstall
+When building and installing AUR packages instead of installing each package
+after building, queue each package for install. Then once either all packages
+are built or a package in the build queue is needed as a dependnecy to build
+another package, install all the packages in the install queue.
+
+.TP
+.B \-\-nobatchinstall
+Always install AUR packages immediately after building them.
+
+.TP
 .B \-\-rebuild
 Always build target packages even when a copy is available in cache.
 
@@ -531,6 +551,18 @@ Shows statistics for installed packages and system health.
 .TP
 pacman -Qmq | grep -Ee '-(cvs|svn|git|hg|bzr|darcs)$' | yay -S --needed -
 pacaur-like devel check.
+
+.SH ENVIRONMENT VARIABLES
+.TP
+.B AURDEST
+Can be set to configure the build directory.
+
+Overridden by \-\-builddir.
+
+.TP
+.B VISUAL, EDITOR
+When editor is not configured, use these variables to pick what editor
+to use when editing PKGBUILDS.
 
 .SH FILES
 .TP

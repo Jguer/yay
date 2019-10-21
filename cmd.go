@@ -45,6 +45,7 @@ Permanent configuration options:
 
     --aururl      <url>   Set an alternative AUR URL
     --builddir    <dir>   Directory used to download and run PKGBUILDS
+    --absdir      <dir>   Directory used to store downloads from the ABS
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor
     --makepkg     <file>  makepkg command to use
@@ -62,6 +63,7 @@ Permanent configuration options:
     --requestsplitn <n>   Max amount of packages to query per AUR request
     --completioninterval  <n> Time in days to to refresh completion cache
     --sortby    <field>   Sort AUR results by a specific field during search
+    --searchby  <field>   Search for packages using a specified field
     --answerclean   <a>   Set a predetermined answer for the clean build menu
     --answerdiff    <a>   Set a predetermined answer for the diff menu
     --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
@@ -106,6 +108,8 @@ Permanent configuration options:
     --nouseask            Confirm conflicts manually during the install
     --combinedupgrade     Refresh then perform the repo and AUR upgrade together
     --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
+    --batchinstall        Build multiple AUR packages then install them together
+    --nobatchinstall      Build and install each AUR package one by one
 
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background
