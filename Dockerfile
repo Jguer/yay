@@ -5,8 +5,6 @@ LABEL maintainer="Jguer,joaogg3 at google mail"
 ENV GO111MODULE=on
 WORKDIR /app
 
-ADD ./testdata/ci/pacman.conf /etc/pacman.conf
-
 RUN pacman -Syu --overwrite=* --needed --noconfirm \
     gcc gnupg libldap go git tar make awk linux-api-headers pacman pacman-contrib && paccache -rfk0
 
