@@ -370,58 +370,60 @@ func (h *Handle) AddAssumeInstalled(dep Depend) error {
 	return nil
 }
 
-func (h *Handle) SetAssumeInstalled(deps []Depend) error {
-	//calling this function the first time causes alpm to set the
-	//assumeinstalled list to a list containing go allocated alpm_depend_t's
-	//this is bad because alpm might at some point tree to free them
-	//i believe this is whats causing this function to misbhave
-	//although i am not 100% sure
-	//maybe using C.malloc to make the struct could fix the problem
-	//pacamn does not use alpm_option_set_assumeinstalled in its source
-	//code so anybody using this should beable to do file without it
-	//although for the sake of completeness it would be nice to have this
-	//working
-	panic("This function (SetAssumeInstalled) does not work properly, please do not use. See source code for more details")
-	var list *C.alpm_list_t
+// TODO: Fix
+// func (h *Handle) SetAssumeInstalled(deps []Depend) error {
+// 	//calling this function the first time causes alpm to set the
+// 	//assumeinstalled list to a list containing go allocated alpm_depend_t's
+// 	//this is bad because alpm might at some point tree to free them
+// 	//i believe this is whats causing this function to misbhave
+// 	//although i am not 100% sure
+// 	//maybe using C.malloc to make the struct could fix the problem
+// 	//pacamn does not use alpm_option_set_assumeinstalled in its source
+// 	//code so anybody using this should beable to do file without it
+// 	//although for the sake of completeness it would be nice to have this
+// 	//working
+// 	panic("This function (SetAssumeInstalled) does not work properly, please do not use. See source code for more details")
+// 	var list *C.alpm_list_t
 
-	for _, dep := range deps {
-		cDep := convertCDepend(dep)
-		defer freeCDepend(cDep)
-		list = C.alpm_list_add(list, unsafe.Pointer(cDep))
-	}
+// 	for _, dep := range deps {
+// 		cDep := convertCDepend(dep)
+// 		defer freeCDepend(cDep)
+// 		list = C.alpm_list_add(list, unsafe.Pointer(cDep))
+// 	}
 
-	ok := C.alpm_option_set_assumeinstalled(h.ptr, list)
-	if ok < 0 {
-		return h.LastError()
-	}
-	return nil
+// 	ok := C.alpm_option_set_assumeinstalled(h.ptr, list)
+// 	if ok < 0 {
+// 		return h.LastError()
+// 	}
+// 	return nil
 
-}
+// }
 
-func (h *Handle) RemoveAssumeInstalled(dep Depend) (bool, error) {
-	//internally alpm uses alpm_list_remove to remove a alpm_depend_t from
-	//the list
-	//i believe this function considers items equal if they are the same
-	//item in memeory, not just the same data
-	//every time we convert a go Depend to a alpm_depend_c we create a new
-	//instance of a alpm_depend_c
-	//this means that if you add a Depend using AddAssumeInstalled then try
-	//to remove it using the same Depend c will consider them different
-	//items and not remove them
-	//pacamn does not use alpm_option_set_assumeinstalled in its source
-	//code so anybody using this should beable to do file without it
-	//although for the sake of completeness it would be nice to have this
-	//working
-	panic("This function (RemoveAssumeInstalled) does not work properly, please do not use. See source code for more details")
-	cDep := convertCDepend(dep)
-	defer freeCDepend(cDep)
+// TODO: Fix
+//  func (h *Handle) RemoveAssumeInstalled(dep Depend) (bool, error) {
+//internally alpm uses alpm_list_remove to remove a alpm_depend_t from
+//the list
+//i believe this function considers items equal if they are the same
+//item in memeory, not just the same data
+//every time we convert a go Depend to a alpm_depend_c we create a new
+//instance of a alpm_depend_c
+//this means that if you add a Depend using AddAssumeInstalled then try
+//to remove it using the same Depend c will consider them different
+//items and not remove them
+//pacamn does not use alpm_option_set_assumeinstalled in its source
+//code so anybody using this should beable to do file without it
+//although for the sake of completeness it would be nice to have this
+//working
+// 	panic("This function (RemoveAssumeInstalled) does not work properly, please do not use. See source code for more details")
+// 	cDep := convertCDepend(dep)
+// 	defer freeCDepend(cDep)
 
-	ok := C.alpm_option_remove_assumeinstalled(h.ptr, cDep)
-	if ok < 0 {
-		return ok == 1, h.LastError()
-	}
-	return ok == 1, nil
-}
+// 	ok := C.alpm_option_remove_assumeinstalled(h.ptr, cDep)
+// 	if ok < 0 {
+// 		return ok == 1, h.LastError()
+// 	}
+// 	return ok == 1, nil
+// }
 
 func (h *Handle) Arch() (string, error) {
 	return h.optionGetStr(func(handle *C.alpm_handle_t) *C.char {
@@ -433,22 +435,6 @@ func (h *Handle) SetArch(str string) error {
 	return h.optionSetStr(str, func(handle *C.alpm_handle_t, cStr *C.char) C.int {
 		return C.alpm_option_set_arch(handle, cStr)
 	})
-}
-
-func (h *Handle) DeltaRatio() (float64, error) {
-	ok := C.alpm_option_get_deltaratio(h.ptr)
-	if ok < 0 {
-		return float64(ok), h.LastError()
-	}
-	return float64(ok), nil
-}
-
-func (h *Handle) SetDeltaRatio(ratio float64) error {
-	ok := C.alpm_option_set_deltaratio(h.ptr, C.double(ratio))
-	if ok < 0 {
-		return h.LastError()
-	}
-	return nil
 }
 
 // LocalDB returns the local database relative to the given handle.

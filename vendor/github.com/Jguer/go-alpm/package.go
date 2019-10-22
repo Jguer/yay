@@ -114,11 +114,6 @@ func (pkg *Package) Architecture() string {
 	return C.GoString(C.alpm_pkg_get_arch(pkg.pmpkg))
 }
 
-func (pkg *Package) Deltas() StringList {
-	ptr := unsafe.Pointer(C.alpm_pkg_get_deltas(pkg.pmpkg))
-	return StringList{(*list)(ptr)}
-}
-
 // Backup returns a list of package backups.
 func (pkg *Package) Backup() BackupList {
 	ptr := unsafe.Pointer(C.alpm_pkg_get_backup(pkg.pmpkg))

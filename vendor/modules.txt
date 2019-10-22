@@ -1,4 +1,4 @@
-# github.com/Jguer/go-alpm v0.0.0-20190627095237-ec8523c9bb21
+# github.com/Jguer/go-alpm v0.0.0-20191021114528-e11e8a60f385
 github.com/Jguer/go-alpm
 # github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f
 github.com/Morganamilo/go-pacmanconf
