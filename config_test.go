@@ -39,9 +39,6 @@ func TestConfig(t *testing.T) {
 	hook, err := h.HookDirs()
 	expect(t, "HookDir", []string{"/usr/share/libalpm/hooks/", "/hookdir/"}, hook.Slice(), err)
 
-	delta, err := h.DeltaRatio()
-	expect(t, "UseDelta", 0.5, delta, err)
-
 	arch, err := h.Arch()
 	expect(t, "Architecture", "8086", arch, err)
 
