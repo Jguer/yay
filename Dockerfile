@@ -5,15 +5,17 @@ LABEL maintainer="Jguer,joaogg3 at google mail"
 ENV GO111MODULE=on
 WORKDIR /app
 
+ADD ./testdata/ci/pacman.conf /etc/pacman.conf
+
 RUN pacman -Syu --overwrite=* --needed --noconfirm \
-    gcc gnupg libldap go git tar make awk linux-api-headers pacman-contrib && paccache -rfk0
+    gcc gnupg libldap go git tar make awk linux-api-headers pacman pacman-contrib && paccache -rfk0
 
 # Dependency for linting
-RUN curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b /bin v1.20.0
+RUN curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /bin v1.20.0
 RUN go get golang.org/x/lint/golint && mv /root/go/bin/golint /bin/
 
 ENV ARCH=$BUILD_ARCH
-ADD . .
+COPY . .
 
 FROM builder_env AS builder
 
@@ -26,15 +28,15 @@ RUN pacman -Syu --overwrite=* --needed --noconfirm \
     git base-devel awk pacman-contrib && paccache -rfk0
 
 # Gracefully removed from https://github.com/Cognexa/dockerfiles/blob/master/dockerfiles/archlinux
-RUN useradd -m -s /bin/bash aur \
-    && passwd -d aur \
-    && echo 'aur ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/aur \
-    && echo 'Defaults env_keep += "EDITOR"' >> /etc/sudoers.d/aur
+RUN useradd -m -s /bin/bash aur && \
+    passwd -d aur && \
+    echo 'aur ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/aur && \
+    echo 'Defaults env_keep += "EDITOR"' >>/etc/sudoers.d/aur
 
 ENV EDITOR vim
 
 # set UTF-8 locale
-RUN echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen && locale-gen
+RUN echo 'en_US.UTF-8 UTF-8' >/etc/locale.gen && locale-gen
 ENV LANG en_US.UTF-8
 
 WORKDIR /work/
