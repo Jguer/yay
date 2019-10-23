@@ -338,6 +338,7 @@ func isArg(arg string) bool {
 	case "d", "nodeps":
 	case "assume-installed":
 	case "dbonly":
+	case "absdir":
 	case "noprogressbar":
 	case "noscriptlet":
 	case "p", "print":

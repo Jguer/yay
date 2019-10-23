@@ -350,7 +350,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 			return
 		}
 
-		_, stderr, err := capture(exec.Command("ln", "-s", filepath.Join(config.BuildDir, pkg, "trunk"), filepath.Join(path, pkg)))
+		_, stderr, err := capture(exec.Command("cp", "-r", filepath.Join(config.ABSDir, pkg, "trunk"), filepath.Join(path, pkg)))
 		mux.Lock()
 		downloaded++
 		if err != nil {
@@ -372,6 +372,5 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 	}
 
 	wg.Wait()
-	errs.Add(os.RemoveAll(filepath.Join(config.BuildDir, "packages")))
 	return len(missing) != 0, errs.Return()
 }
