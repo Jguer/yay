@@ -39,7 +39,7 @@ func (warnings *aurWarnings) print() {
 	}
 
 	if len(warnings.OutOfDate) > 0 {
-		fmt.Print(bold(yellow(smallArrow)) + " Out Of Date AUR Packages:")
+		fmt.Print(bold(yellow(smallArrow)) + " Flagged Out Of Date AUR Packages:")
 		for _, name := range warnings.OutOfDate {
 			fmt.Print("  " + cyan(name))
 		}
