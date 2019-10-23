@@ -195,6 +195,7 @@ func defaultSettings() *Configuration {
 
 func (config *Configuration) expandEnv() {
 	config.AURURL = os.ExpandEnv(config.AURURL)
+	config.ABSDir = os.ExpandEnv(config.ABSDir)
 	config.BuildDir = os.ExpandEnv(config.BuildDir)
 	config.Editor = os.ExpandEnv(config.Editor)
 	config.EditorFlags = os.ExpandEnv(config.EditorFlags)
