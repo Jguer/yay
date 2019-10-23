@@ -162,7 +162,7 @@ end
 
 # Upgrade options (sync, upgrade)
 for condition in sync upgrade
-    complete -c $progname -n $$condition -l force -d 'Bypass file conflict checks' -f
+    complete -c $progname -n $$condition -l overwrite -d 'overwrite conflicting files (can be used more than once)'
     complete -c $progname -n $$condition -l ignore -d 'Ignore upgrade of PACKAGE' -xa "$listinstalled" -f
     complete -c $progname -n $$condition -l ignoregroup -d 'Ignore upgrade of GROUP' -xa "$listgroups" -f
     complete -c $progname -n $$condition -l needed -d 'Do not reinstall up-to-date targets' -f
@@ -187,7 +187,7 @@ complete -c $progname -n $query -s e -l explicit -d 'List only explicitly instal
 complete -c $progname -n $query -s k -l check -d 'Check if all files owned by PACKAGE are present' -f
 complete -c $progname -n $query -s l -l list -d 'List all files owned by PACKAGE' -f
 complete -c $progname -n $query -s m -l foreign -d 'List all packages not in the database' -f
-complete -c $progname -n $query -s o -l owns -r -d 'Search for the package that owns FILE' -xa '' -f
+complete -c $progname -n $query -s o -l owns -r -d 'Search for the package that owns FILE'
 complete -c $progname -n $query -s p -l file -d 'Apply the query to a package file, not package' -xa '' -f
 complete -c $progname -n $query -s t -l unrequired -d 'List only unrequired packages' -f
 complete -c $progname -n $query -s u -l upgrades -d 'List only out-of-date packages' -f
@@ -220,17 +220,14 @@ complete -c $progname -n "$has_db_opt; and $database" -xa "$listinstalled"
 set -l has_file_opt '__fish_contains_opt list search -s l -s s'
 complete -c $progname -n "$files; and not $has_file_opt" -xa --list -d 'List files owned by given packages'
 complete -c $progname -n "$files; and not $has_file_opt" -xa -l -d 'List files owned by given packages'
-complete -c $progname -n "$files; and not $has_file_opt" -xa --search -d 'Search packages for matching files'
-complete -c $progname -n "$files; and not $has_file_opt" -xa -s -d 'Search packages for matching files'
 complete -c $progname -n "$files" -s y -l refresh -d 'Refresh the files database' -f
 complete -c $progname -n "$files" -s l -l list -d 'List files owned by given packages' -xa $listpacman
-complete -c $progname -n "$files" -s s -l search -d 'Search packages for matching files'
-complete -c $progname -n "$files" -s o -l owns -d 'Search for packages that include the given files'
+complete -c $progname -n "$files" -s x -l regex -d 'Interpret each query as a regular expression' -f
 complete -c $progname -n "$files" -s q -l quiet -d 'Show less information' -f
-complete -c $progname -n "$files" -l machinereadable -d 'Show in machine readable format: repo\0pkgname\0pkgver\0path\n' -f
+complete -c $progname -n "$files" -l machinereadable -d 'Print each match in a machine readable output format' -f
 
 # Upgrade options
-complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.xz)' -d 'Package file'
-complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.gz)' -d 'Package file'
-complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.lzo)' -d 'Package file'
-complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar)' -d 'Package file'
+# Theoretically, pacman reads packages in all formats that libarchive supports
+# In practice, it's going to be tar.xz, tar.gz or tar.zst
+# Using "pkg.tar.*" here would change __fish_complete_suffix's descriptions to "unknown"
+complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix .pkg.tar\{,.xz,.gz,.zst\})' -d 'Package file'
