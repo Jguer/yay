@@ -42,6 +42,7 @@ complete -c $progname -n "$show" -s q -l quiet -d 'Do not print news description
 
 # Getpkgbuild options
 complete -c $progname -n "$getpkgbuild" -s f -l force -d 'Force download for existing tar packages' -f
+complete -c $progname -n "$getpkgbuild" -xa "$listall"
 
 # Premenent configuration settings
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
@@ -137,5 +138,6 @@ complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options
 complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the background to avoid timeout' -f
 complete -c $progname -n "not $noopt" -l nosudoloop -d 'Do not loop sudo calls in the background' -f
 
-# Fix pacman -F --list
-complete -c $progname -n "$files" -s l -l list -d 'List files owned by given packages' -xa "$listpacman"
+# Fix pacman -S --sync not have AUR package
+set -l sync '__fish_contains_opt -s S sync'
+complete -c $progname -n "$sync" -xa "$listall $listgroups"
