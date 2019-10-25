@@ -3,45 +3,45 @@
 # Updated for yay by jguer
 
 set -l progname yay
-complete -e -c $progname
-complete -c $progname -f
-
-# Inherit completions from pacman
-complete -c $progname -w pacman
 
 set -l listall "(yay -Pc)"
 set -l listpacman "(__fish_print_packages)"
-set -l noopt 'not __fish_contains_opt -s Y -s G -s V -s P -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
+set -l noopt 'not __fish_contains_opt -s Y -s G -s V -s P -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files version'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
 set -l show '__fish_contains_opt -s P show'
 set -l yayspecific '__fish_contains_opt -s Y yay'
 
+# Inherit completions from pacman
+complete -c $progname -w pacman
+
+complete -c $progname -e
+
 # Yay operations
-complete -c $progname -s Y -f -l yay -n $noopt -d 'Yay specific operations'
-complete -c $progname -s P -f -l show -n $noopt -d 'Print information'
-complete -c $progname -s G -f -l getpkgbuild -n $noopt -d 'Get PKGBUILD from ABS or AUR'
+complete -c $progname -s Y -f -l yay -n "$noopt" -d 'Yay specific operations'
+complete -c $progname -s P -f -l show -n "$noopt" -d 'Print information'
+complete -c $progname -s G -f -l getpkgbuild -n "$noopt" -d 'Get PKGBUILD from ABS or AUR'
 
 # New options
-complete -c $progname -n "not $noopt" -l repo -d 'Assume targets are from the AUR'
-complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the repositories'
+complete -c $progname -n "not $noopt" -l repo -d 'Assume targets are from the AUR' -f
+complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the repositories' -f
 
 # Yay options
-complete -c $progname -n $yayspecific -s c -l clean -d 'Remove unneeded dependencies' -f
-complete -c $progname -n $yayspecific -l gendb -d 'Generate development package DB' -f
+complete -c $progname -n "$yayspecific" -s c -l clean -d 'Remove unneeded dependencies' -f
+complete -c $progname -n "$yayspecific" -l gendb -d 'Generate development package DB' -f
 
 # Show options
-complete -c $progname -n $show -s c -l complete -d 'Print a list of all AUR and repo packages' -f
-#complete -c $progname -n $show -s f -l fish -d 'During complete adjust the output for the fish shell' -f
-complete -c $progname -n $show -s d -l defaultconfig -d 'Print default yay configuration' -f
-complete -c $progname -n $show -s g -l currentconfig -d 'Print current yay configuration' -f
-#complete -c $progname -n $show -s n -l numberupgrades -d 'Deprecated, use yay -Qu and wc -l instead' -f
-complete -c $progname -n $show -s s -l stats -d 'Display system package statistics' -f
-#complete -c $progname -n $show -s u -l upgrades -d 'Deprecated, use yay -Qu instead' -f
-complete -c $progname -n $show -s w -l news -d 'Print arch news'
-complete -c $progname -n $show -s q -l quiet -d 'Do not print news description'
+complete -c $progname -n "$show" -s c -l complete -d 'Print a list of all AUR and repo packages' -f
+#complete -c $progname -n "$show" -s f -l fish -d 'During complete adjust the output for the fish shell' -f
+complete -c $progname -n "$show" -s d -l defaultconfig -d 'Print default yay configuration' -f
+complete -c $progname -n "$show" -s g -l currentconfig -d 'Print current yay configuration' -f
+#complete -c $progname -n "$show" -s n -l numberupgrades -d 'Deprecated, use yay -Qu and wc -l instead' -f
+complete -c $progname -n "$show" -s s -l stats -d 'Display system package statistics' -f
+#complete -c $progname -n "$show" -s u -l upgrades -d 'Deprecated, use yay -Qu instead' -f
+complete -c $progname -n "$show" -s w -l news -d 'Print arch news' -f
+complete -c $progname -n "$show" -s q -l quiet -d 'Do not print news description' -f
 
 # Getpkgbuild options
-complete -c $progname -n $getpkgbuild -s f -l force -d 'Force download for existing tar packages' -f
+complete -c $progname -n "$getpkgbuild" -s f -l force -d 'Force download for existing tar packages' -f
 
 # Premenent configuration settings
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
@@ -61,8 +61,8 @@ complete -c $progname -n "not $noopt" -l tar -d 'Tar command to use' -f
 complete -c $progname -n "not $noopt" -l git -d 'Git command to use' -f
 complete -c $progname -n "not $noopt" -l gpg -d 'Gpg command to use' -f
 
-complete -c $progname -n "not $noopt" -l config -d 'The pacman config file to use' -F
-complete -c $progname -n "not $noopt" -l makepkgconf -d 'Use custom makepkg.conf location' -F
+complete -c $progname -n "not $noopt" -l config -d 'The pacman config file to use' -rF
+complete -c $progname -n "not $noopt" -l makepkgconf -d 'Use custom makepkg.conf location' -rF
 complete -c $progname -n "not $noopt" -l nomakepkgconf -d 'Use default makepkg.conf' -f
 
 complete -c $progname -n "not $noopt" -l requestsplitn -d 'Max amount of packages to query per AUR request' -f
@@ -138,4 +138,4 @@ complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the bac
 complete -c $progname -n "not $noopt" -l nosudoloop -d 'Do not loop sudo calls in the background' -f
 
 # Fix pacman -F --list
-complete -c $progname -n "$files" -s l -l list -d 'List files owned by given packages' -xa $listpacman
+complete -c $progname -n "$files" -s l -l list -d 'List files owned by given packages' -xa "$listpacman"
