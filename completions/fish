@@ -138,6 +138,10 @@ complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options
 complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the background to avoid timeout' -f
 complete -c $progname -n "not $noopt" -l nosudoloop -d 'Do not loop sudo calls in the background' -f
 
-# Fix pacman -S --sync not have AUR package
+# Fix pacman -S (--sync) not have AUR packages
 set -l sync '__fish_contains_opt -s S sync'
 complete -c $progname -n "$sync" -xa "$listall $listgroups"
+
+# Fix pacman -S --overwrite, mistake completion to "package"
+# `complete -c $progname -n "$sync" -xa "$listall $listgroups"` is overwrite pacman.fish completions.
+complete -c $progname -n "$sync" -l overwrite -d 'Overwrite conflicting files (can be used more than once)' -rF
