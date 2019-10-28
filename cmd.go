@@ -111,6 +111,8 @@ Permanent configuration options:
     --batchinstall        Build multiple AUR packages then install them together
     --nobatchinstall      Build and install each AUR package one by one
 
+    --sudo                <file>  sudo command to use
+    --sudoflags           <flags> Pass arguments to sudo
     --sudoloop            Loop sudo calls in the background to avoid timeout
     --nosudoloop          Do not loop sudo calls in the background
 

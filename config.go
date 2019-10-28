@@ -61,6 +61,8 @@ type Configuration struct {
 	SearchBy           string `json:"searchby"`
 	GitFlags           string `json:"gitflags"`
 	RemoveMake         string `json:"removemake"`
+	SudoBin            string `json:"sudobin"`
+	SudoFlags          string `json:"sudoflags"`
 	RequestSplitN      int    `json:"requestsplitn"`
 	SearchMode         int    `json:"-"`
 	SortMode           int    `json:"sortmode"`
@@ -166,6 +168,8 @@ func defaultSettings() *Configuration {
 		TarBin:             "bsdtar",
 		GitBin:             "git",
 		GpgBin:             "gpg",
+		SudoBin:            "sudo",
+		SudoFlags:          "",
 		TimeUpdate:         false,
 		RequestSplitN:      150,
 		ReDownload:         "no",
@@ -211,6 +215,8 @@ func (config *Configuration) expandEnv() {
 	config.TarBin = os.ExpandEnv(config.TarBin)
 	config.GitBin = os.ExpandEnv(config.GitBin)
 	config.GpgBin = os.ExpandEnv(config.GpgBin)
+	config.SudoBin = os.ExpandEnv(config.SudoBin)
+	config.SudoFlags = os.ExpandEnv(config.SudoFlags)
 	config.ReDownload = os.ExpandEnv(config.ReDownload)
 	config.ReBuild = os.ExpandEnv(config.ReBuild)
 	config.AnswerClean = os.ExpandEnv(config.AnswerClean)
