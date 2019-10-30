@@ -249,7 +249,6 @@ func install(parser *arguments) (err error) {
 		}
 
 		if len(toDiff) > 0 {
-			// TODO: PKGBUILD diffs should not return in case of err. Just print and continue
 			err = showPkgbuildDiffs(toDiff, cloned)
 			if err != nil {
 				return err
@@ -765,11 +764,7 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 			} else {
 				args = append(args, "--color=never")
 			}
-			err = show(passToGit(dir, args...))
-			if err != nil {
-				errMulti.Add(err)
-				continue
-			}
+			_ = show(passToGit(dir, args...))
 		} else {
 			args := []string{"diff"}
 			if useColor {
@@ -779,11 +774,7 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 			}
 			args = append(args, "--no-index", "/var/empty", dir)
 			// git always returns 1. why? I have no idea
-			err := show(passToGit(dir, args...))
-			if err != nil {
-				errMulti.Add(err)
-				continue
-			}
+			_ = show(passToGit(dir, args...))
 		}
 	}
 
