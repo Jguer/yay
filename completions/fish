@@ -48,7 +48,7 @@ complete -c $progname -n "not $noopt" -s v -l verbose -d 'Output more status mes
 complete -c $progname -n "not $noopt" -l arch -d 'Alternate architecture' -f
 complete -c $progname -n "not $noopt" -l cachedir -d 'Alternate package cache location' -xa "(__fish_complete_directories)"
 complete -c $progname -n "not $noopt" -l color -d 'Colorize the output' -fa '{auto,always,never}'
-complete -c $progname -n "not $noopt" -l config -d 'Alternate config file' -rF
+complete -c $progname -n "not $noopt" -l config -d 'Alternate config file' -r
 complete -c $progname -n "not $noopt" -l confirm -d 'Always ask for confirmation' -f
 complete -c $progname -n "not $noopt" -l debug -d 'Display debug messages' -f
 complete -c $progname -n "not $noopt" -l disable-download-timeout -d 'Use relaxed timeouts for download' -f
@@ -96,7 +96,7 @@ for condition in sync upgrade
     complete -c $progname -n "$$condition" -l ignore -d 'Ignore a package upgrade (can be used more than once)' -xa "$listall"
     complete -c $progname -n "$$condition" -l ignoregroup -d 'Ignore a group upgrade (can be used more than once)' -xa "$listgroups"
     complete -c $progname -n "$$condition" -l needed -d 'Do not reinstall up to date packages' -f
-    complete -c $progname -n "$$condition" -l overwrite -d 'Overwrite conflicting files (can be used more than once)' -rF
+    complete -c $progname -n "$$condition" -l overwrite -d 'Overwrite conflicting files (can be used more than once)' -r
 end
 
 # Database options
@@ -120,8 +120,8 @@ complete -c $progname -n "$query" -s i -l info -d 'View PACKAGE [backup files] i
 complete -c $progname -n "$query" -s k -l check -d 'Check that PACKAGE files exist' -f
 complete -c $progname -n "$query" -s m -l foreign -d 'List installed packages not found in sync database' -f
 complete -c $progname -n "$query" -s n -l native -d 'list installed packages only found in sync database' -f
-complete -c $progname -n "$query" -s o -l owns -d 'Query the package that owns FILE' -rF
-complete -c $progname -n "$query" -s p -l file -d 'Query a package file instead of the database' -rF
+complete -c $progname -n "$query" -s o -l owns -d 'Query the package that owns FILE' -r
+complete -c $progname -n "$query" -s p -l file -d 'Query a package file instead of the database' -r
 complete -c $progname -n "$query" -s s -l search -d 'Search locally-installed packages for regexp' -f
 complete -c $progname -n "$query" -s t -l unrequired -d 'List only unrequired packages [and optdepends]' -f
 complete -c $progname -n "$query" -s u -l upgrades -d 'List only out-of-date packages' -f
@@ -178,8 +178,8 @@ complete -c $progname -n "$getpkgbuild" -xa "$listall"
 # Premenent configuration settings
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
 complete -c $progname -n "not $noopt" -l aururl -d 'Set an alternative AUR URL' -f
-complete -c $progname -n "not $noopt" -l builddir -d 'Directory to use for Building AUR Packages' -rF
-complete -c $progname -n "not $noopt" -l absdir -d 'Directory used to store downloads from the ABS' -rF
+complete -c $progname -n "not $noopt" -l builddir -d 'Directory to use for Building AUR Packages' -r
+complete -c $progname -n "not $noopt" -l absdir -d 'Directory used to store downloads from the ABS' -r
 complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -f
 complete -c $progname -n "not $noopt" -l editorflags -d 'Editor flags to use' -f
 complete -c $progname -n "not $noopt" -l makepkg -d 'Makepkg command to use' -f
@@ -187,8 +187,8 @@ complete -c $progname -n "not $noopt" -l pacman -d 'Pacman command to use' -f
 complete -c $progname -n "not $noopt" -l tar -d 'Tar command to use' -f
 complete -c $progname -n "not $noopt" -l git -d 'Git command to use' -f
 complete -c $progname -n "not $noopt" -l gpg -d 'Gpg command to use' -f
-complete -c $progname -n "not $noopt" -l config -d 'The pacman config file to use' -rF
-complete -c $progname -n "not $noopt" -l makepkgconf -d 'Use custom makepkg.conf location' -rF
+complete -c $progname -n "not $noopt" -l config -d 'The pacman config file to use' -r
+complete -c $progname -n "not $noopt" -l makepkgconf -d 'Use custom makepkg.conf location' -r
 complete -c $progname -n "not $noopt" -l nomakepkgconf -d 'Use default makepkg.conf' -f
 complete -c $progname -n "not $noopt" -l requestsplitn -d 'Max amount of packages to query per AUR request' -f
 complete -c $progname -n "not $noopt" -l completioninterval -d 'Refresh interval for completion cache' -f
