@@ -31,8 +31,8 @@ Perform yay specific print operations.
 
 .TP
 .B \-G, \-\-getpkgbuild
-Downloads PKGBUILD from ABS or AUR. ABS pkgbuilds are always downloaded using
-tarballs and taken from trunk. The ABS can only be used for Arch Linux repositories
+Downloads PKGBUILD from ABS or AUR. The ABS can only be used for Arch Linux
+repositories
 
 .RE
 If no arguments are provided 'yay \-Syu' will be performed.
@@ -47,9 +47,8 @@ These operations are extended to support both AUR and repo packages.
 .TP
 .B \-Sc
 Yay will also clean cached AUR package and any untracked Files in the
-cache. Untracked files cleaning only works for packages downloaded
-using gitclone. Cleaning untracked files will wipe any downloaded
-sources or built packages but will keep already downloaded vcs sources.
+cache. Cleaning untracked files will wipe any downloaded sources or
+built packages but will keep already downloaded vcs sources.
 
 .TP
 .B \-R
@@ -132,9 +131,8 @@ Only show titles when printing news.
 .SH GETPKGBUILD OPTIONS (APPLY TO \-G AND \-\-GETPKGBUILD)
 .TP
 .B \-f, \-\-force
-Force download for packages that already exist in the current directory. This
-ensures directories are not accidentally overwritten. This option is not needed
-for git based downloads as \fBgit pull\fR already has safety mechanisms.
+Force download for ABS packages that already exist in the current directory. This
+ensures directories are not accidentally overwritten.
 
 .SH PERMANENT CONFIGURATION SETTINGS
 .TP
@@ -356,26 +354,12 @@ a list of packages into yay (see \fBexamples\fR).
 Do not check for development packages updates during sysupgrade.
 
 .TP
-.B \-\-gitclone
-Use git to download and update PKGBUILDs. PKGBUILDs previously downloaded
-using tarball will continue to use tarballs until the package is clean
-built. Similarly, PKGBUILDs managed with git will continue to use git until
-the package is clean built..
-
-.TP
-.B \-\-nogitclone
-Download and update PKGBUILDs using tarballs. The above conditions about
-previously installed packages still apply.
-
-.TP
 .B \-\-cleanafter
-Remove package sources after successful Install.
+Remove untracked files after installation.
 
-For packages downloaded through git, untracked files are removed with the
-exception of directories. This allows VCS packages to easily pull an update
+Untracked files are removed with the exception of directories.
+This allows VCS packages to easily pull an update
 instead of having to re clone the entire repo.
-
-For packages downloaded via tarball, the entire directory is deleted.
 
 .TP
 .B \-\-nocleanafter

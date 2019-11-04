@@ -720,12 +720,9 @@ func updatePkgbuildSeenRef(bases []Base, cloned stringset.StringSet) error {
 	var errMulti multierror.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-		if shouldUseGit(dir) {
-			err := gitUpdateSeenRef(config.BuildDir, pkg)
-			if err != nil {
-				errMulti.Add(err)
-			}
+		err := gitUpdateSeenRef(config.BuildDir, pkg)
+		if err != nil {
+			errMulti.Add(err)
 		}
 	}
 	return errMulti.Return()
@@ -736,46 +733,34 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
-		if shouldUseGit(dir) {
-			start, err := getLastSeenHash(config.BuildDir, pkg)
+		start, err := getLastSeenHash(config.BuildDir, pkg)
+		if err != nil {
+			errMulti.Add(err)
+			continue
+		}
+
+		if cloned.Get(pkg) {
+			start = gitEmptyTree
+		} else {
+			hasDiff, err := gitHasDiff(config.BuildDir, pkg)
 			if err != nil {
 				errMulti.Add(err)
 				continue
 			}
 
-			if cloned.Get(pkg) {
-				start = gitEmptyTree
-			} else {
-				hasDiff, err := gitHasDiff(config.BuildDir, pkg)
-				if err != nil {
-					errMulti.Add(err)
-					continue
-				}
-
-				if !hasDiff {
-					fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(base.String()), bold("No changes -- skipping"))
-					continue
-				}
+			if !hasDiff {
+				fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(base.String()), bold("No changes -- skipping"))
+				continue
 			}
-
-			args := []string{"diff", start + "..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO"}
-			if useColor {
-				args = append(args, "--color=always")
-			} else {
-				args = append(args, "--color=never")
-			}
-			_ = show(passToGit(dir, args...))
-		} else {
-			args := []string{"diff"}
-			if useColor {
-				args = append(args, "--color=always")
-			} else {
-				args = append(args, "--color=never")
-			}
-			args = append(args, "--no-index", "/var/empty", dir)
-			// git always returns 1. why? I have no idea
-			_ = show(passToGit(dir, args...))
 		}
+
+		args := []string{"diff", start + "..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO"}
+		if useColor {
+			args = append(args, "--color=always")
+		} else {
+			args = append(args, "--color=never")
+		}
+		_ = show(passToGit(dir, args...))
 	}
 
 	return errMulti.Return()
@@ -861,11 +846,9 @@ func pkgbuildsToSkip(bases []Base, targets stringset.StringSet) stringset.String
 
 func mergePkgbuilds(bases []Base) error {
 	for _, base := range bases {
-		if shouldUseGit(filepath.Join(config.BuildDir, base.Pkgbase())) {
-			err := gitMerge(config.BuildDir, base.Pkgbase())
-			if err != nil {
-				return err
-			}
+		err := gitMerge(config.BuildDir, base.Pkgbase())
+		if err != nil {
+			return err
 		}
 	}
 
@@ -892,23 +875,15 @@ func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string
 			return
 		}
 
-		if shouldUseGit(filepath.Join(config.BuildDir, pkg)) {
-			clone, err := gitDownload(config.AURURL+"/"+pkg+".git", buildDir, pkg)
-			if err != nil {
-				errs.Add(err)
-				return
-			}
-			if clone {
-				mux.Lock()
-				cloned.Set(pkg)
-				mux.Unlock()
-			}
-		} else {
-			err := downloadAndUnpack(config.AURURL+base.URLPath(), buildDir)
-			if err != nil {
-				errs.Add(err)
-				return
-			}
+		clone, err := gitDownload(config.AURURL+"/"+pkg+".git", buildDir, pkg)
+		if err != nil {
+			errs.Add(err)
+			return
+		}
+		if clone {
+			mux.Lock()
+			cloned.Set(pkg)
+			mux.Unlock()
 		}
 
 		mux.Lock()

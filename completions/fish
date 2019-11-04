@@ -172,7 +172,7 @@ complete -c $progname -n "$show" -s w -l news -d 'Print arch news' -f
 complete -c $progname -n "$show" -s q -l quiet -d 'Do not print news description' -f
 
 # Getpkgbuild options
-complete -c $progname -n "$getpkgbuild" -s f -l force -d 'Force download for existing tar packages' -f
+complete -c $progname -n "$getpkgbuild" -s f -l force -d 'Force download for existing ABS packages' -f
 complete -c $progname -n "$getpkgbuild" -xa "$listall"
 
 # Premenent configuration settings
@@ -217,8 +217,6 @@ complete -c $progname -n "not $noopt" -l topdown -d 'Shows repository packages f
 complete -c $progname -n "not $noopt" -l bottomup -d 'Shows aur packages first and then repository' -f
 complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg development version' -f
 complete -c $progname -n "not $noopt" -l nodevel -d 'Disable development version checking' -f
-complete -c $progname -n "not $noopt" -l gitclone -d 'Use git to download and update PKGBUILDs' -f
-complete -c $progname -n "not $noopt" -l nogitclone -d 'Download and update PKGBUILDs using tarballs' -f
 complete -c $progname -n "not $noopt" -l cleanafter -d 'Clean package sources after successful build' -f
 complete -c $progname -n "not $noopt" -l nocleanafter -d 'Disable package sources cleaning' -f
 complete -c $progname -n "not $noopt" -l timeupdate -d 'Check package modification date and version' -f
