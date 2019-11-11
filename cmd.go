@@ -51,7 +51,6 @@ Permanent configuration options:
     --makepkg     <file>  makepkg command to use
     --mflags      <flags> Pass arguments to makepkg
     --pacman      <file>  pacman command to use
-    --tar         <file>  bsdtar command to use
     --git         <file>  git command to use
     --gitflags    <flags> Pass arguments to git
     --gpg         <file>  gpg command to use
@@ -91,8 +90,6 @@ Permanent configuration options:
 
     --devel               Check development packages during sysupgrade
     --nodevel             Do not check development packages
-    --gitclone            Use git clone for PKGBUILD retrieval
-    --nogitclone          Never use git clone for PKGBUILD retrieval
     --rebuild             Always build target packages
     --rebuildall          Always build all AUR packages
     --norebuild           Skip package build if in cache and up to date
@@ -131,7 +128,7 @@ yay specific options:
        --gendb            Generates development package DB used for updating
 
 getpkgbuild specific options:
-    -f --force            Force download for existing tar packages
+    -f --force            Force download for existing ABS packages
 
 If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed`)

@@ -45,7 +45,6 @@ type Configuration struct {
 	MakepkgConf        string `json:"makepkgconf"`
 	PacmanBin          string `json:"pacmanbin"`
 	PacmanConf         string `json:"pacmanconf"`
-	TarBin             string `json:"tarbin"`
 	ReDownload         string `json:"redownload"`
 	ReBuild            string `json:"rebuild"`
 	BatchInstall       bool   `json:"batchinstall"`
@@ -72,7 +71,6 @@ type Configuration struct {
 	NoConfirm          bool   `json:"-"`
 	Devel              bool   `json:"devel"`
 	CleanAfter         bool   `json:"cleanAfter"`
-	GitClone           bool   `json:"gitclone"`
 	Provides           bool   `json:"provides"`
 	PGPFetch           bool   `json:"pgpfetch"`
 	UpgradeMenu        bool   `json:"upgrademenu"`
@@ -165,7 +163,6 @@ func defaultSettings() *Configuration {
 		SortBy:             "votes",
 		SearchBy:           "name-desc",
 		SudoLoop:           false,
-		TarBin:             "bsdtar",
 		GitBin:             "git",
 		GpgBin:             "gpg",
 		SudoBin:            "sudo",
@@ -180,7 +177,6 @@ func defaultSettings() *Configuration {
 		AnswerEdit:         "",
 		AnswerUpgrade:      "",
 		RemoveMake:         "ask",
-		GitClone:           true,
 		Provides:           true,
 		UpgradeMenu:        true,
 		CleanMenu:          true,
@@ -212,7 +208,6 @@ func (config *Configuration) expandEnv() {
 	config.GitFlags = os.ExpandEnv(config.GitFlags)
 	config.SortBy = os.ExpandEnv(config.SortBy)
 	config.SearchBy = os.ExpandEnv(config.SearchBy)
-	config.TarBin = os.ExpandEnv(config.TarBin)
 	config.GitBin = os.ExpandEnv(config.GitBin)
 	config.GpgBin = os.ExpandEnv(config.GpgBin)
 	config.SudoBin = os.ExpandEnv(config.SudoBin)

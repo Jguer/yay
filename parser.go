@@ -406,8 +406,6 @@ func isArg(arg string) bool {
 	case "noansweredit":
 	case "answerupgrade":
 	case "noanswerupgrade":
-	case "gitclone":
-	case "nogitclone":
 	case "gpgflags":
 	case "mflags":
 	case "gitflags":
@@ -418,7 +416,6 @@ func isArg(arg string) bool {
 	case "makepkgconf":
 	case "nomakepkgconf":
 	case "pacman":
-	case "tar":
 	case "git":
 	case "gpg":
 	case "sudo":
@@ -528,10 +525,6 @@ func handleConfig(option, value string) bool {
 		config.AnswerUpgrade = value
 	case "noanswerupgrade":
 		config.AnswerUpgrade = ""
-	case "gitclone":
-		config.GitClone = true
-	case "nogitclone":
-		config.GitClone = false
 	case "gpgflags":
 		config.GpgFlags = value
 	case "mflags":
@@ -554,8 +547,6 @@ func handleConfig(option, value string) bool {
 		config.MakepkgConf = ""
 	case "pacman":
 		config.PacmanBin = value
-	case "tar":
-		config.TarBin = value
 	case "git":
 		config.GitBin = value
 	case "gpg":
@@ -695,7 +686,6 @@ func hasParam(arg string) bool {
 	case "makepkg":
 	case "makepkgconf":
 	case "pacman":
-	case "tar":
 	case "git":
 	case "gpg":
 	case "sudo":
