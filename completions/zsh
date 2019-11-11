@@ -53,7 +53,6 @@ _pacman_opts_common=(
 	'--editorflags[Flags to pass to editor]'
 	'--makepkg[makepkg command to use]:makepkg:_files'
 	'--pacman[pacman command to use]:pacman:_files'
-	'--tar[bsdtar command to use]:tar:_files'
 	'--git[git command to use]:git:_files'
 	'--gpg[gpg command to use]:gpg:_files'
 
@@ -103,6 +102,10 @@ _pacman_opts_common=(
 	'--gpgflags[Pass arguments to gpg]:gpgflags'
 	'--sudoloop[Loop sudo calls in the background to avoid timeout]'
 	'--nosudoloop[Do not loop sudo calls in the background]'
+	'--searchby[Search for packages using a specified field]'
+	'--sortby[Sort AUR results by a specific field during search]'
+	'--batchinstall[Build multiple AUR packages then install them together]'
+	'--nobatchinstall[Build and install each AUR package one by one]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
@@ -111,7 +114,7 @@ _pacman_opts_pkgfile=(
 	'*--nodeps[Skip dependency checks]'
 	'*--assume-installed[Add virtual package to satisfy dependencies]'
 	'--dbonly[Only remove database entry, do not remove files]'
-	'--force[Overwrite conflicting files]'
+	'--overwrite[Overwrite conflicting files]:file:_files -g "*"'
 	'--needed[Do not reinstall up to date packages]'
 	'--asdeps[mark packages as non-explicitly installed]'
 	'--asexplicit[mark packages as explicitly installed]'
@@ -154,7 +157,7 @@ _pacman_opts_yay_modifiers=(
 
 # -G
 _pacman_opts_getpkgbuild_modifiers=(
-	{-f,--force}'[Force download for existing tar packages]'
+	{-f,--force}'[Force download for existing ABS packages]'
 )
 
 # -P
@@ -189,8 +192,6 @@ _pacman_opts_database=(
 
 _pacman_opts_files=(
 	{-l,--list}'[List the files owned by the queried package]:package:_pacman_completions_all_packages'
-	{-o,--owns}'[Query the package that owns]:files:_files'
-	{-s,--search}'[Search package file names for matching strings]:files:_files'
 	{-x,--regex}'[Enable searching using regular expressions]:regex:'
 	{-y,--refresh}'[Download fresh files databases from the server]'
 	'--machinereadable[Produce machine-readable output]'
@@ -223,7 +224,7 @@ _pacman_opts_sync_modifiers=(
 	'*--ignoregroup[Ignore a group upgrade]:package group:_pacman_completions_all_groups'
 	'--asdeps[Install packages as non-explicitly installed]'
 	'--asexplicit[Install packages as explicitly installed]'
-	'--force[Overwrite conflicting files]'
+	'--overwrite[Overwrite conflicting files]:files:_files'
 	'--print-format[Specify how the targets should be printed]'
 )
 
