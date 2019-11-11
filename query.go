@@ -20,6 +20,11 @@ type aurWarnings struct {
 	Orphans   []string
 	OutOfDate []string
 	Missing   []string
+	Ignore    stringset.StringSet
+}
+
+func makeWarnings() *aurWarnings {
+	return &aurWarnings{Ignore: make(stringset.StringSet)}
 }
 
 // Query is a collection of Results
@@ -538,17 +543,17 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 
 	for _, name := range names {
 		i, ok := seen[name]
-		if !ok {
+		if !ok && !warnings.Ignore.Get(name) {
 			warnings.Missing = append(warnings.Missing, name)
 			continue
 		}
 
 		pkg := info[i]
 
-		if pkg.Maintainer == "" {
+		if pkg.Maintainer == "" && !warnings.Ignore.Get(name) {
 			warnings.Orphans = append(warnings.Orphans, name)
 		}
-		if pkg.OutOfDate != 0 {
+		if pkg.OutOfDate != 0 && !warnings.Ignore.Get(name) {
 			warnings.OutOfDate = append(warnings.OutOfDate, name)
 		}
 	}

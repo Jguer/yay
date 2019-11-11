@@ -27,6 +27,13 @@ func (set StringSet) Set(v string) {
 	set[v] = struct{}{}
 }
 
+// Extend sets multiple keys in StringSet.
+func (set StringSet) Extend(s ...string) {
+	for _, v := range s {
+		set[v] = struct{}{}
+	}
+}
+
 // Get returns true if the key exists in the set.
 func (set StringSet) Get(v string) bool {
 	_, exists := set[v]

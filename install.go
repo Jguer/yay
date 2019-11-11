@@ -59,7 +59,7 @@ func install(parser *arguments) (err error) {
 
 	var srcinfos map[string]*gosrc.Srcinfo
 
-	warnings := &aurWarnings{}
+	warnings := makeWarnings()
 
 	if mode == modeAny || mode == modeRepo {
 		if config.CombinedUpgrade {

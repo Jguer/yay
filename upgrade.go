@@ -128,6 +128,12 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 
 	aurdata := make(map[string]*rpc.Pkg)
 
+	for _, pkg := range remote {
+		if pkg.ShouldIgnore() {
+			warnings.Ignore.Set(pkg.Name())
+		}
+	}
+
 	if mode == modeAny || mode == modeRepo {
 		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 		wg.Add(1)
