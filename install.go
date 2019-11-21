@@ -61,6 +61,18 @@ func install(parser *arguments) (err error) {
 
 	warnings := makeWarnings()
 
+	if config.LowPriority {
+		ecode := setPriority(PRIO_PROCESS, 0, 19)
+		if ecode != 0 {
+			return fmt.Errorf("Error unable to set CPU priority")
+		}
+
+		ecode = ioPrioSet(IOPRIO_WHO_PROCESS, 0, IOPRIO_PRIO_VALUE(IOPRIO_CLASS_IDLE, 7))
+		if ecode != 0 {
+			return fmt.Errorf("Error unable to set IO priority")
+		}
+	}
+
 	if mode == modeAny || mode == modeRepo {
 		if config.CombinedUpgrade {
 			if parser.existsArg("y", "refresh") {

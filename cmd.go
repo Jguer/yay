@@ -116,6 +116,9 @@ Permanent configuration options:
     --timeupdate          Check packages' AUR page for changes during sysupgrade
     --notimeupdate        Do not check packages' AUR page for changes
 
+    --lowpriority         Use lowest CPU and IO priorities
+    --nolowpriority       Do not use lowest CPU and IO priorities
+
 show specific options:
     -c --complete         Used for completions
     -d --defaultconfig    Print default yay configuration

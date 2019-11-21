@@ -242,3 +242,5 @@ complete -c $progname -n "not $noopt" -l mflags -d 'Pass the following options t
 complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options to gpg' -f
 complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the background to avoid timeout' -f
 complete -c $progname -n "not $noopt" -l nosudoloop -d 'Do not loop sudo calls in the background' -f
+complete -c $progname -n "not $noopt" -l lowpriority -d 'Use lowest CPU and IO priorities' -f
+complete -c $progname -n "not $noopt" -l nolowpriority -d 'Do not use lowest CPU and IO priorities' -f
