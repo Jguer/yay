@@ -106,6 +106,8 @@ _pacman_opts_common=(
 	'--sortby[Sort AUR results by a specific field during search]'
 	'--batchinstall[Build multiple AUR packages then install them together]'
 	'--nobatchinstall[Build and install each AUR package one by one]'
+	'--lowpriority[Use lowest CPU and IO priorities]'
+	'--nolowpriority[Do not use lowest CPU and IO priorities]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
