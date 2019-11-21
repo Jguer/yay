@@ -449,6 +449,7 @@ func isArg(arg string) bool {
 	case "news":
 	case "gendb":
 	case "currentconfig":
+	case "lowpriority":
 	default:
 		return false
 	}
@@ -606,6 +607,10 @@ func handleConfig(option, value string) bool {
 		config.RemoveMake = "no"
 	case "askremovemake":
 		config.RemoveMake = "ask"
+	case "lowpriority":
+		config.LowPriority = true
+	case "nolowpriority":
+		config.LowPriority = false
 	default:
 		return false
 	}

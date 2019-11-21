@@ -79,6 +79,7 @@ type Configuration struct {
 	EditMenu           bool   `json:"editmenu"`
 	CombinedUpgrade    bool   `json:"combinedupgrade"`
 	UseAsk             bool   `json:"useask"`
+	LowPriority        bool   `json:"lowpriority"`
 }
 
 var version = "9.4.2"
@@ -184,6 +185,7 @@ func defaultSettings() *Configuration {
 		EditMenu:           false,
 		UseAsk:             false,
 		CombinedUpgrade:    false,
+		LowPriority:        false,
 	}
 
 	if os.Getenv("XDG_CACHE_HOME") != "" {

@@ -452,6 +452,15 @@ another package, install all the packages in the install queue.
 Always install AUR packages immediately after building them.
 
 .TP
+.B \-\-lowpriority
+Use lowest CPU and IO priorities. Set process nice to +19 and ionice class to
+idle. Useful for background updates.
+
+.TP
+.B \-\-nolowpriority
+Do not use lowest CPU and IO priorities. Use process default priorities.
+
+.TP
 .B \-\-rebuild
 Always build target packages even when a copy is available in cache.
 

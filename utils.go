@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"syscall"
 	"unicode"
 )
 
@@ -76,4 +77,22 @@ func LessRunes(iRunes, jRunes []rune) bool {
 	}
 
 	return len(iRunes) < len(jRunes)
+}
+
+const ioprioClassIdle = 3
+const ioprioWhoProcess = 1
+const ioprioClassShift = 13
+
+func ioprioPrioValue(class, data int) int { return ((class) << ioprioClassShift) | data }
+
+func ioPrioSet(which, who, ioprio int) int {
+	ecode, _, _ := syscall.Syscall(syscall.SYS_IOPRIO_SET, uintptr(which), uintptr(who), uintptr(ioprio))
+	return int(ecode)
+}
+
+const prioProcess = 0
+
+func setPriority(which, who, prio int) int {
+	ecode, _, _ := syscall.Syscall(syscall.SYS_SETPRIORITY, uintptr(which), uintptr(who), uintptr(prio))
+	return int(ecode)
 }
