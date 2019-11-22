@@ -450,6 +450,7 @@ func isArg(arg string) bool {
 	case "gendb":
 	case "currentconfig":
 	case "lowpriority":
+	case "nolowpriority":
 	default:
 		return false
 	}
