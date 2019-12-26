@@ -87,7 +87,7 @@ func gitDownloadABS(url string, path string, name string) (bool, error) {
 		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
-	cmd := passToGit(filepath.Join(path, name), "fetch")
+	cmd := passToGit(filepath.Join(path, name), "pull", "--ff-only")
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 	_, stderr, err := capture(cmd)
 	if err != nil {
