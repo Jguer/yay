@@ -52,6 +52,7 @@ func cleanRemove(pkgNames []string) error {
 
 	arguments := cmdArgs.copyGlobal()
 	_ = arguments.addArg("R")
+	_ = arguments.addArg("n")
 	arguments.addTarget(pkgNames...)
 
 	return show(passToPacman(arguments))

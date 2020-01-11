@@ -322,6 +322,8 @@ func install(parser *arguments) (err error) {
 		arguments.delArg("u", "sysupgrade")
 	}
 
+	makeDeps := stringset.FromSlice(do.getMake())
+
 	if len(arguments.targets) > 0 || arguments.existsArg("u") {
 		err := show(passToPacman(arguments))
 		if err != nil {
@@ -334,10 +336,10 @@ func install(parser *arguments) (err error) {
 		for _, pkg := range do.Repo {
 			if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Get(pkg.Name()) {
 				deps = append(deps, pkg.Name())
-				continue
-			}
-
-			if parser.existsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
+			} else if makeDeps.Get(pkg.Name()) {
+				deps = append(deps, pkg.Name())
+				makeDeps.Remove(pkg.Name())
+			} else if parser.existsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
 				deps = append(deps, pkg.Name())
 			} else if parser.existsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
 				exp = append(exp, pkg.Name())
@@ -364,12 +366,14 @@ func install(parser *arguments) (err error) {
 		return err
 	}
 
+	asdeps(parser, makeDeps.ToSlice())
+
 	return nil
 }
 
 func removeMake(do *depOrder) error {
 	removeArguments := makeArguments()
-	err := removeArguments.addArg("R", "u")
+	err := removeArguments.addArg("R", "n", "u")
 	if err != nil {
 		return err
 	}
