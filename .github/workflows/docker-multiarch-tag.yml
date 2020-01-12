@@ -6,24 +6,52 @@ on:
 
 
 jobs:
+  tag:
+    name: Tag release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: mathieudutour/github-tag-action@v3
+      id: tag_version
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        tag_prefix: 'v'
+    - shell: bash
+      run: ${{ steps.tag_version.outputs.new_version }} > new_version.
+    - shell: bash
+      run: ${{ steps.tag_version.outputs.new_tag }} > new_tag.
+    - shell: bash
+      run: ${{ steps.tag_version.outputs.previous_tag }} > previous_tag.
+    - uses: actions/upload-artifact@v1
+      with:
+        name: new_version
+        path: new_version
+    - uses: actions/upload-artifact@v1
+      with:
+        name: new_tag
+        path: new_tag
+    - uses: actions/upload-artifact@v1
+      with:
+        name: previous_tag
+        path: previous_tag
   build-releases:
     strategy:
       matrix:
         arch: ['x86_64', 'armv7h', 'aarch64']
     name: Build ${{ matrix.arch }}
     runs-on: ubuntu-latest
+    needs: [tag]
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-      - name: Tag version
-        uses: mathieudutour/github-tag-action@v3
-        id: tag_version
+      - uses: actions/download-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_prefix: 'v'
-      - name: Set version
-        id: set_version
-        run: ./testdata/ci/version.sh ${{ steps.tag_version.outputs.previous_tag }} ${{ steps.tag_version.outputs.new_tag }}
+          name: new_version
+      - name: Read info
+        id: tags
+        shell: bash
+        run: |
+          `:set-output name=VERSION::$(cat new_version/new_version)`
       - name: Install dependencies
         run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
       - name: Setup qemu-user-static
@@ -31,17 +59,38 @@ jobs:
       - name: Build ${{ matrix.arch }} release
         run: |
           mkdir artifacts
-          make docker-release ARCH=${{ matrix.arch }} VERSION=${{ steps.set_version.outputs.version }}
+          make docker-release ARCH=${{ matrix.arch }} VERSION=${{ steps.tags.outputs.version }}
           mv *.tar.gz artifacts
       - uses: actions/upload-artifact@master
         with:
           name: yay_${{ matrix.arch }}
           path: artifacts
+  create_release:
+    name: Create release from this build
+    needs: [build-releases]
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout code
         uses: actions/checkout@master
+      - uses: actions/download-artifact@v1
+        with:
+          name: new_version
+      - uses: actions/download-artifact@v1
+        with:
+          name: new_tag
+      - uses: actions/download-artifact@v1
+        with:
+          name: previous_tag
+      - name: Read info
+        id: tags
+        shell: bash
+        run: |
+          `:set-output name=VERSION::$(cat new_version/new_version)`
+          `:set-output name=TAG::$(cat new_tag/new_tag)`
+          `:set-output name=PREV_TAG::$(cat previous_tag/previous_tag)`
       - name: Set version
-        id: set_version
-        run: ./testdata/ci/version.sh ${{ steps.tag_version.outputs.previous_tag }} ${{ steps.tag_version.outputs.new_tag }}
+        id: changelog
+        run: ./testdata/ci/changelog.sh ${{ steps.tags.outputs.previous_tag }} ${{ steps.tags.outputs.new_tag }}
       - uses: actions/download-artifact@master
         with:
           name: yay_x86_64
@@ -57,11 +106,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.set_version.outputs.version }}
-          release_name: ${{ steps.set_version.outputs.version }}
+          tag_name: ${{ steps.tags.outputs.version }}
+          release_name: ${{ steps.tags.outputs.version }}
           body: |
             ## Changelog
-            ${{ steps.set_version.outputs.changelog }}
+            ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: false
       - name: Upload x86_64 asset
@@ -71,8 +120,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./yay_x86_64/yay_${{ steps.set_version.outputs.version }}_x86_64.tar.gz
-          asset_name: yay_${{ steps.set_version.outputs.version }}_x86_64.tar.gz
+          asset_path: ./yay_x86_64/yay_${{ steps.tags.outputs.version }}_x86_64.tar.gz
+          asset_name: yay_${{ steps.tags.outputs.version }}_x86_64.tar.gz
           asset_content_type: application/tar+gzip
       - name: Upload armv7h asset
         id: upload-release-asset-armv7h
@@ -81,8 +130,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./yay_armv7h/yay_${{ steps.set_version.outputs.version }}_armv7h.tar.gz
-          asset_name: yay_${{ steps.set_version.outputs.version }}_armv7h.tar.gz
+          asset_path: ./yay_armv7h/yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
+          asset_name: yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
           asset_content_type: application/tar+gzip
       - name: Upload aarch64 asset
         id: upload-release-asset-aarch64
@@ -91,6 +140,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./yay_aarch64/yay_${{ steps.set_version.outputs.version }}_aarch64.tar.gz
-          asset_name: yay_${{ steps.set_version.outputs.version }}_aarch64.tar.gz
+          asset_path: ./yay_aarch64/yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
+          asset_name: yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
           asset_content_type: application/tar+gzip
