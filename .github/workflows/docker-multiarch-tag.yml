@@ -16,24 +16,17 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tag_prefix: 'v'
-    - shell: bash
-      run: echo ${{ steps.tag_version.outputs.new_version }} > /home/runner/work/yay/yay/new_version.
-    - shell: bash
-      run: echo ${{ steps.tag_version.outputs.new_tag }} > /home/runner/work/yay/yay/new_tag.
-    - shell: bash
-      run: echo ${{ steps.tag_version.outputs.previous_tag }} > /home/runner/work/yay/yay/previous_tag.
+    - name: share variables
+      shell: bash
+      run: |
+        mkdir env
+        echo ${{ steps.tag_version.outputs.new_version }} > env/new_version
+        echo ${{ steps.tag_version.outputs.new_tag }} > env/new_tag
+        echo ${{ steps.tag_version.outputs.previous_tag }} > env/previous_tag
     - uses: actions/upload-artifact@v1
       with:
-        name: new_version
-        path: new_version
-    - uses: actions/upload-artifact@v1
-      with:
-        name: new_tag
-        path: new_tag
-    - uses: actions/upload-artifact@v1
-      with:
-        name: previous_tag
-        path: previous_tag
+        name: env
+        path: env
   build-releases:
     strategy:
       matrix:
@@ -46,12 +39,12 @@ jobs:
         uses: actions/checkout@v1
       - uses: actions/download-artifact@v1
         with:
-          name: new_version
+          name: env
       - name: Read info
         id: tags
         shell: bash
         run: |
-          `:set-output name=VERSION::$(cat new_version/new_version)`
+          `:set-output name=VERSION::$(cat env/new_version)`
       - name: Install dependencies
         run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
       - name: Setup qemu-user-static
@@ -74,20 +67,14 @@ jobs:
         uses: actions/checkout@master
       - uses: actions/download-artifact@v1
         with:
-          name: new_version
-      - uses: actions/download-artifact@v1
-        with:
-          name: new_tag
-      - uses: actions/download-artifact@v1
-        with:
-          name: previous_tag
+          name: env
       - name: Read info
         id: tags
         shell: bash
         run: |
-          `:set-output name=VERSION::$(cat new_version/new_version)`
-          `:set-output name=TAG::$(cat new_tag/new_tag)`
-          `:set-output name=PREV_TAG::$(cat previous_tag/previous_tag)`
+          `:set-output name=VERSION::$(cat env/new_version)`
+          `:set-output name=TAG::$(cat env/new_tag)`
+          `:set-output name=PREV_TAG::$(cat env/previous_tag)`
       - name: Set version
         id: changelog
         run: ./testdata/ci/changelog.sh ${{ steps.tags.outputs.previous_tag }} ${{ steps.tags.outputs.new_tag }}
