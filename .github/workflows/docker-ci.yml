@@ -29,9 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Generate changelog
-      uses: zthulj/changelog-and-tag-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_USER: jguer
-        LOG_LEVEL: 1
+    - uses: mathieudutour/github-tag-action@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        tag_prefix: 'v'
+        create_annotated_tag: true
