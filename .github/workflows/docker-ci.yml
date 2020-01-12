@@ -6,6 +6,7 @@ on:
     - 'doc/**'
     - 'README.md'
     - '.gitignore'
+    - 'CHANGELOG.md'
   pull_request:
 
 jobs:
@@ -27,9 +28,10 @@ jobs:
     name: Tag release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Bump version and push tag
-        uses: mathieudutour/github-tag-action@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          create_annotated_tag: true
+    - uses: actions/checkout@v1
+    - name: Generate changelog
+      uses: zthulj/changelog-and-tag-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USER: jguer
+        LOG_LEVEL: 1
