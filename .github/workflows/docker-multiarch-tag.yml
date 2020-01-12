@@ -44,7 +44,7 @@ jobs:
         id: tags
         shell: bash
         run: |
-          `echo ::set-output name=VERSION::$(cat env/new_version)`
+          echo ::set-output name=VERSION::$(cat env/new_version)
       - name: Install dependencies
         run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
       - name: Setup qemu-user-static
@@ -72,9 +72,9 @@ jobs:
         id: tags
         shell: bash
         run: |
-          `echo ::set-output name=VERSION::$(cat env/new_version)`
-          `echo ::set-output name=TAG::$(cat env/new_tag)`
-          `echo ::set-output name=PREV_TAG::$(cat env/previous_tag)`
+          echo ::set-output name=VERSION::$(cat env/new_version)
+          echo ::set-output name=TAG::$(cat env/new_tag)
+          echo ::set-output name=PREV_TAG::$(cat env/previous_tag)
       - name: Set version
         id: changelog
         run: ./testdata/ci/changelog.sh ${{ steps.tags.outputs.previous_tag }} ${{ steps.tags.outputs.new_tag }}
