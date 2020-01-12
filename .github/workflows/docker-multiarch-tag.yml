@@ -78,7 +78,7 @@ jobs:
       - name: Set version
         id: changelog
         shell: bash
-        run: ./testdata/ci/changelog.sh $(cat env/previous_tag) $(cat env/new_tag)
+        run: ./testdata/ci/changelog.sh $(cat env/previous_tag)
       - uses: actions/download-artifact@master
         with:
           name: yay_x86_64
