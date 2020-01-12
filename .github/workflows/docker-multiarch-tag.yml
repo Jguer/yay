@@ -1,8 +1,9 @@
 name: Release
 on:
   push:
-    tags:
-      - v**
+    branches:
+      - master
+
 
 jobs:
   build-releases:
@@ -13,10 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v1
+      - name: Tag version
+        uses: mathieudutour/github-tag-action@v3
+        id: tag_version
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: 'v'
       - name: Set version
         id: set_version
-        run: ./testdata/ci/version.sh
+        run: ./testdata/ci/version.sh ${{ steps.tag_version.outputs.previous_tag }} ${{ steps.tag_version.outputs.new_tag }}
       - name: Install dependencies
         run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
       - name: Setup qemu-user-static
@@ -30,16 +37,11 @@ jobs:
         with:
           name: yay_${{ matrix.arch }}
           path: artifacts
-  create_release:
-    name: Create release from this build
-    needs: [build-releases]
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout code
         uses: actions/checkout@master
       - name: Set version
         id: set_version
-        run: ./testdata/ci/version.sh
+        run: ./testdata/ci/version.sh ${{ steps.tag_version.outputs.previous_tag }} ${{ steps.tag_version.outputs.new_tag }}
       - uses: actions/download-artifact@master
         with:
           name: yay_x86_64
@@ -57,8 +59,10 @@ jobs:
         with:
           tag_name: ${{ steps.set_version.outputs.version }}
           release_name: ${{ steps.set_version.outputs.version }}
-          body: "## Changelog"
-          draft: true
+          body: |
+            ## Changelog
+            ${{ steps.set_version.outputs.changelog }}
+          draft: false
           prerelease: false
       - name: Upload x86_64 asset
         id: upload-release-asset-x86_64
