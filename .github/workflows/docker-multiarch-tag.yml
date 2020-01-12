@@ -17,11 +17,11 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tag_prefix: 'v'
     - shell: bash
-      run: ${{ steps.tag_version.outputs.new_version }} > new_version.
+      run: echo ${{ steps.tag_version.outputs.new_version }} > new_version.
     - shell: bash
-      run: ${{ steps.tag_version.outputs.new_tag }} > new_tag.
+      run: echo ${{ steps.tag_version.outputs.new_tag }} > new_tag.
     - shell: bash
-      run: ${{ steps.tag_version.outputs.previous_tag }} > previous_tag.
+      run: echo ${{ steps.tag_version.outputs.previous_tag }} > previous_tag.
     - uses: actions/upload-artifact@v1
       with:
         name: new_version
