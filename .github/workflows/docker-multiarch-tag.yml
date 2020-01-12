@@ -77,7 +77,8 @@ jobs:
           echo ::set-output name=PREV_TAG::$(cat env/previous_tag)
       - name: Set version
         id: changelog
-        run: ./testdata/ci/changelog.sh ${{ steps.tags.outputs.previous_tag }} ${{ steps.tags.outputs.new_tag }}
+        shell: bash
+        run: ./testdata/ci/changelog.sh $(cat env/previous_tag) $(cat env/new_tag)
       - uses: actions/download-artifact@master
         with:
           name: yay_x86_64
@@ -93,8 +94,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tags.outputs.version }}
-          release_name: ${{ steps.tags.outputs.version }}
+          tag_name: ${{ steps.tags.outputs.tag }}
+          release_name: ${{ steps.tags.outputs.tag }}
           body: |
             ## Changelog
             ${{ steps.changelog.outputs.changelog }}
