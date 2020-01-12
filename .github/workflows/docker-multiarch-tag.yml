@@ -1,4 +1,4 @@
-name: Multiarch build and release
+name: Release
 on:
   push:
     tags:
