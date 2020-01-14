@@ -1,10 +1,11 @@
-name: Docker CI build
+name: Build
 # This workflow is triggered on pushes to the repository.
 on:
   push:
     paths-ignore:
     - 'doc/**'
-    - 'completions/**'
+    - 'README.md'
+    - '.gitignore'
   pull_request:
 
 jobs:
