@@ -78,7 +78,7 @@ jobs:
       - name: Set version
         id: changelog
         shell: bash
-        run: ./testdata/ci/changelog.sh $(cat env/previous_tag)
+        run: echo "::set-output name=CHANGELOG::$(git log --pretty=format:'%s%n' --abbrev-commit ${{ steps.tags.outputs.prev_tag }}..)"
       - uses: actions/download-artifact@master
         with:
           name: yay_x86_64
