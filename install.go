@@ -162,9 +162,11 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 		return err
 	}
 
-	err = dp.CheckMissing()
-	if err != nil {
-		return err
+	if !parser.existsDouble("d", "nodeps") {
+		err = dp.CheckMissing()
+		if err != nil {
+			return err
+		}
 	}
 
 	if len(dp.Aur) == 0 {
@@ -191,9 +193,12 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 		return fmt.Errorf(gotext.Get("refusing to install AUR packages as root, aborting"))
 	}
 
-	conflicts, err := dp.CheckConflicts()
-	if err != nil {
-		return err
+	var conflicts stringset.MapStringSet
+	if !parser.existsDouble("d", "nodeps") {
+		conflicts, err = dp.CheckConflicts()
+		if err != nil {
+			return err
+		}
 	}
 
 	do = getDepOrder(dp)
