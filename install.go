@@ -149,9 +149,11 @@ func install(parser *arguments) (err error) {
 		return err
 	}
 
-	err = dp.CheckMissing()
-	if err != nil {
-		return err
+	if !parser.existsDouble("d", "nodeps") {
+		err = dp.CheckMissing()
+		if err != nil {
+			return err
+		}
 	}
 
 	if len(dp.Aur) == 0 {
@@ -172,9 +174,12 @@ func install(parser *arguments) (err error) {
 		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
 	}
 
-	conflicts, err := dp.CheckConflicts()
-	if err != nil {
-		return err
+	var conflicts stringset.MapStringSet
+	if !parser.existsDouble("d", "nodeps") {
+		conflicts, err = dp.CheckConflicts()
+		if err != nil {
+			return err
+		}
 	}
 
 	do = getDepOrder(dp)
