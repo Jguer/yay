@@ -1109,19 +1109,39 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			}
 		}
 
-		for _, split := range base {
-			pkgdest, ok := pkgdests[split.Name]
+		doAddTarget := func(name string, optional bool) error {
+			pkgdest, ok := pkgdests[name]
 			if !ok {
-				return fmt.Errorf("Could not find PKGDEST for: %s", split.Name)
+				if !optional {
+					return fmt.Errorf("Could not find PKGDEST for: %s", name)
+				} else {
+					return nil
+				}
 			}
 
 			arguments.addTarget(pkgdest)
 			if parser.existsArg("asdeps", "asdep") {
-				deps = append(deps, split.Name)
+				deps = append(deps, name)
 			} else if parser.existsArg("asexplicit", "asexp") {
-				exp = append(exp, split.Name)
-			} else if !dp.Explicit.Get(split.Name) && !localNamesCache.Get(split.Name) && !remoteNamesCache.Get(split.Name) {
-				deps = append(deps, split.Name)
+				exp = append(exp, name)
+			} else if !dp.Explicit.Get(name) && !localNamesCache.Get(name) && !remoteNamesCache.Get(name) {
+				deps = append(deps, name)
+			}
+
+			return nil
+		}
+
+		for _, split := range base {
+			var err error
+
+			err = doAddTarget(split.Name, false)
+			if err != nil {
+				return err
+			}
+
+			err = doAddTarget(split.Name+"-debug", true)
+			if err != nil {
+				return err
 			}
 		}
 
