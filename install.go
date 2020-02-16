@@ -1114,9 +1114,9 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			if !ok {
 				if !optional {
 					return fmt.Errorf("Could not find PKGDEST for: %s", name)
-				} else {
-					return nil
 				}
+
+				return nil
 			}
 
 			arguments.addTarget(pkgdest)
