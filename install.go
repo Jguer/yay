@@ -1112,11 +1112,11 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		doAddTarget := func(name string, optional bool) error {
 			pkgdest, ok := pkgdests[name]
 			if !ok {
-				if !optional {
-					return fmt.Errorf("Could not find PKGDEST for: %s", name)
+				if optional {
+					return nil
 				}
 
-				return nil
+				return fmt.Errorf("Could not find PKGDEST for: %s", name)
 			}
 
 			arguments.addTarget(pkgdest)
