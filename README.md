@@ -38,6 +38,11 @@ Alternatively, the initial installation of Yay can be done by cloning the PKGBUI
 building with makepkg:
 
 ```sh
+# make sure the dependencies are installed, as root
+pacman -S base-devel git fakeroot --needed --noconfirm
+```
+
+```sh
 git clone https://aur.archlinux.org/yay.git
 cd yay
 makepkg -si
