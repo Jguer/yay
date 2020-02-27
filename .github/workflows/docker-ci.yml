@@ -10,15 +10,16 @@ on:
 
 jobs:
   build:
-    name: Build and test yay
+    name: Lint and test yay
     # This job runs on Linux
     runs-on: ubuntu-latest
+    container: samip537/archlinux:devel
     steps:
       - name: Checkout
-        uses: actions/checkout@v1#
+        uses: actions/checkout@v1
       - name: Run Build and tests
-        run: ./testdata/ci/full.sh
-      - uses: actions/upload-artifact@master
-        with:
-          name: yay_release
-          path: artifacts
+        run: | 
+          pacman -Sy --noconfirm go
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.23.6
+          ./bin/golangci-lint run ./...
+          make test
