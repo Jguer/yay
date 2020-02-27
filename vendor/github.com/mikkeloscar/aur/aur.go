@@ -10,6 +10,11 @@ import (
 //AURURL is the base string from which the query is built
 var AURURL = "https://aur.archlinux.org/rpc.php?"
 
+var (
+	// ErrServiceUnavailable represents a error when AUR is unavailable
+	ErrServiceUnavailable = errors.New("AUR is unavailable at this moment")
+)
+
 type response struct {
 	Error       string `json:"error"`
 	Version     int    `json:"version"`
@@ -22,7 +27,7 @@ type response struct {
 type By int
 
 const (
-	Name By = iota
+	Name By = iota + 1
 	NameDesc
 	Maintainer
 	Depends
@@ -86,12 +91,11 @@ func get(values url.Values) ([]Pkg, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if resp.StatusCode == http.StatusServiceUnavailable {
-		return nil, errors.New("AUR is unavailable at this moment")
-	}
-
 	defer resp.Body.Close()
+
+	if err := getErrorByStatusCode(resp.StatusCode); err != nil {
+		return nil, err
+	}
 
 	dec := json.NewDecoder(resp.Body)
 	result := new(response)
@@ -117,6 +121,16 @@ func searchBy(query, by string) ([]Pkg, error) {
 	}
 
 	return get(v)
+}
+
+func getErrorByStatusCode(code int) error {
+	switch code {
+	case http.StatusBadGateway, http.StatusGatewayTimeout:
+		return ErrServiceUnavailable
+	case http.StatusServiceUnavailable:
+		return ErrServiceUnavailable
+	}
+	return nil
 }
 
 // Search searches for packages using the RPC's default search by.

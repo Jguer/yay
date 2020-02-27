@@ -4,5 +4,5 @@ github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f h1:ptFKy
 github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f/go.mod h1:Hk55m330jNiwxRodIlMCvw5iEyoRUCIY64W1p9D+tHc=
 github.com/Morganamilo/go-srcinfo v1.0.0 h1:Wh4nEF+HJWo+29hnxM18Q2hi+DUf0GejS13+Wg+dzmI=
 github.com/Morganamilo/go-srcinfo v1.0.0/go.mod h1:MP6VGY1NNpVUmYIEgoM9acix95KQqIRyqQ0hCLsyYUY=
-github.com/mikkeloscar/aur v0.0.0-20191216074712-ebecb34b95b4 h1:qPyKOVOjHT0dJOS3FFYQzXTOa9gyDOL7CnjCWltkYtM=
-github.com/mikkeloscar/aur v0.0.0-20191216074712-ebecb34b95b4/go.mod h1:nYOKcK8tIj69ZZ8uDOWoiT+L25NvlOQaraDqTec/idA=
+github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656 h1:j679+jxcDkCFblYk+I+G71HQTFxM3PacYbVCiYmhRhU=
+github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656/go.mod h1:nYOKcK8tIj69ZZ8uDOWoiT+L25NvlOQaraDqTec/idA=
