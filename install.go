@@ -1119,6 +1119,14 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 				return fmt.Errorf("Could not find PKGDEST for: %s", name)
 			}
 
+			if _, err := os.Stat(pkgdest); os.IsNotExist(err) {
+				if optional {
+					return nil
+				}
+
+				return fmt.Errorf("PKGDEST for %s listed by makepkg, but does not exist: %s", name, pkgdest)
+			}
+
 			arguments.addTarget(pkgdest)
 			if parser.existsArg("asdeps", "asdep") {
 				deps = append(deps, name)
