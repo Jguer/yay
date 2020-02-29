@@ -22,7 +22,7 @@ jobs:
         mkdir env
         echo ${{ steps.tag_version.outputs.new_version }} > env/new_version
         echo ${{ steps.tag_version.outputs.new_tag }} > env/new_tag
-        echo ${{ steps.tag_version.outputs.changelog }} > env/changelog
+        echo "${{ steps.tag_version.outputs.changelog }}" > env/changelog
     - uses: actions/upload-artifact@v1
       with:
         name: env
