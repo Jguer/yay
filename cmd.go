@@ -35,6 +35,9 @@ New operations:
     yay {-P --show}        [options]
     yay {-G --getpkgbuild} [package(s)]
 
+If no arguments are provided 'yay -Syu' will be performed
+If no operation is provided -Y will be assumed
+
 New options:
        --repo             Assume targets are from the repositories
     -a --aur              Assume targets are from the AUR
@@ -128,10 +131,7 @@ yay specific options:
        --gendb            Generates development package DB used for updating
 
 getpkgbuild specific options:
-    -f --force            Force download for existing ABS packages
-
-If no arguments are provided 'yay -Syu' will be performed
-If no operation is provided -Y will be assumed`)
+    -f --force            Force download for existing ABS packages`)
 }
 
 func handleCmd() (err error) {

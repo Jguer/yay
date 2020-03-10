@@ -377,7 +377,7 @@ func localStatistics() error {
 //TODO: Make it less hacky
 func printNumberOfUpdates() error {
 	//todo
-	warnings := &aurWarnings{}
+	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	aurUp, repoUp, err := upList(warnings)
@@ -393,7 +393,7 @@ func printNumberOfUpdates() error {
 //TODO: Make it less hacky
 func printUpdateList(parser *arguments) error {
 	targets := stringset.FromSlice(parser.targets)
-	warnings := &aurWarnings{}
+	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := filterPackages()

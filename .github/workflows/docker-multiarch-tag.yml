@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: mathieudutour/github-tag-action@v3
+    - uses: mathieudutour/github-tag-action@v4
       id: tag_version
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -22,7 +22,7 @@ jobs:
         mkdir env
         echo ${{ steps.tag_version.outputs.new_version }} > env/new_version
         echo ${{ steps.tag_version.outputs.new_tag }} > env/new_tag
-        echo ${{ steps.tag_version.outputs.previous_tag }} > env/previous_tag
+        echo "${{ steps.tag_version.outputs.changelog }}" > env/changelog
     - uses: actions/upload-artifact@v1
       with:
         name: env
@@ -52,7 +52,7 @@ jobs:
       - name: Build ${{ matrix.arch }} release
         run: |
           mkdir artifacts
-          make docker-release ARCH=${{ matrix.arch }} VERSION=${{ steps.tags.outputs.version }}
+          make docker-release-${{ matrix.arch }} ARCH=${{ matrix.arch }} VERSION=${{ steps.tags.outputs.version }}
           mv *.tar.gz artifacts
       - uses: actions/upload-artifact@master
         with:
@@ -74,11 +74,7 @@ jobs:
         run: |
           echo ::set-output name=VERSION::$(cat env/new_version)
           echo ::set-output name=TAG::$(cat env/new_tag)
-          echo ::set-output name=PREV_TAG::$(cat env/previous_tag)
-      - name: Set version
-        id: changelog
-        shell: bash
-        run: ./testdata/ci/changelog.sh $(cat env/previous_tag)
+          echo ::set-output name=CHANGELOG::$(cat env/changelog)
       - uses: actions/download-artifact@master
         with:
           name: yay_x86_64
@@ -96,9 +92,7 @@ jobs:
         with:
           tag_name: ${{ steps.tags.outputs.tag }}
           release_name: ${{ steps.tags.outputs.tag }}
-          body: |
-            ## Changelog
-            ${{ steps.changelog.outputs.changelog }}
+          body: ${{ steps.tags.outputs.changelog }}
           draft: false
           prerelease: false
       - name: Upload x86_64 asset

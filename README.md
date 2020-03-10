@@ -111,14 +111,15 @@ If you transition between aur helpers and did not install the devel package usin
 Check `CONTRIBUTING.md` for more information.
 
 ## Examples of Custom Operations
-| Command | Description |
-| ------------- | ------------- |
-|`yay <Search Term>` | Present package-installation selection menu. |
-|`yay -Ps` | Print system statistics.|
-|`yay -Yc`| Clean unneeded dependencies.|
-|`yay -G <AUR Package>`| Download PKGBUILD from ABS or AUR.|
-|`yay -Y --gendb`| Generate development package database used for devel update.|
-|`yay -Syu --devel --timeupdate` | Perform system upgrade, but also check for development package updates and use PKGBUILD modification time (not version number) to determine update. |
+
+| Command                         | Description                                                                                                                                         |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `yay <Search Term>`             | Present package-installation selection menu.                                                                                                        |
+| `yay -Ps`                       | Print system statistics.                                                                                                                            |
+| `yay -Yc`                       | Clean unneeded dependencies.                                                                                                                        |
+| `yay -G <AUR Package>`          | Download PKGBUILD from ABS or AUR.                                                                                                                  |
+| `yay -Y --gendb`                | Generate development package database used for devel update.                                                                                        |
+| `yay -Syu --devel --timeupdate` | Perform system upgrade, but also check for development package updates and use PKGBUILD modification time (not version number) to determine update. |
 
 ## Images
 
@@ -131,4 +132,3 @@ Check `CONTRIBUTING.md` for more information.
 <img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-y.png" width="42%"/> 
 <img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-ps.png" width="42%"/> 
 </p>
-
