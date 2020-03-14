@@ -286,7 +286,7 @@ func printLocalNewerThanAUR(
 
 		left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
 
-		if !isDevelName(pkg.Name()) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
+		if !isDevelPackage(pkg) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
 			fmt.Printf("%s %s: local (%s) is newer than AUR (%s)\n",
 				yellow(bold(smallArrow)),
 				cyan(pkg.Name()),

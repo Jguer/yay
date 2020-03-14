@@ -172,3 +172,7 @@ func isDevelName(name string) bool {
 
 	return strings.Contains(name, "-always-")
 }
+
+func isDevelPackage(pkg alpm.Package) bool {
+	return isDevelName(pkg.Name()) || isDevelName(pkg.Base())
+}
