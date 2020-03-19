@@ -6,3 +6,11 @@ github.com/Morganamilo/go-srcinfo v1.0.0 h1:Wh4nEF+HJWo+29hnxM18Q2hi+DUf0GejS13+
 github.com/Morganamilo/go-srcinfo v1.0.0/go.mod h1:MP6VGY1NNpVUmYIEgoM9acix95KQqIRyqQ0hCLsyYUY=
 github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656 h1:j679+jxcDkCFblYk+I+G71HQTFxM3PacYbVCiYmhRhU=
 github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656/go.mod h1:nYOKcK8tIj69ZZ8uDOWoiT+L25NvlOQaraDqTec/idA=
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
+golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6 h1:TjszyFsQsyZNHwdVdZ5m7bjmreu0znc2kRYsEml9/Ww=
+golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
+golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
+golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20190412213103-97732733099d h1:+R4KGOnez64A81RvjARKc4UT5/tI9ujCIVX+P5KiHuI=
+golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
