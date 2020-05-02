@@ -40,9 +40,7 @@ func (q providers) Swap(i, j int) {
 	q.Pkgs[i], q.Pkgs[j] = q.Pkgs[j], q.Pkgs[i]
 }
 
-func splitDep(dep string) (string, string, string) {
-	mod := ""
-
+func splitDep(dep string) (pkg, mod, ver string) {
 	split := strings.FieldsFunc(dep, func(c rune) bool {
 		match := c == '>' || c == '<' || c == '='
 
@@ -139,8 +137,8 @@ func satisfiesRepo(dep string, pkg *alpm.Package) bool {
 	return false
 }
 
-//split apart db/package to db and package
-func splitDBFromName(pkg string) (string, string) {
+// split apart db/package to db and package
+func splitDBFromName(pkg string) (db, name string) {
 	split := strings.SplitN(pkg, "/", 2)
 
 	if len(split) == 2 {

@@ -37,14 +37,14 @@ func setPaths() error {
 func initConfig() error {
 	cfile, err := os.Open(configFile)
 	if !os.IsNotExist(err) && err != nil {
-		return fmt.Errorf("Failed to open config file '%s': %s", configFile, err)
+		return fmt.Errorf("failed to open config file '%s': %s", configFile, err)
 	}
 
 	defer cfile.Close()
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(cfile)
 		if err = decoder.Decode(&config); err != nil {
-			return fmt.Errorf("Failed to read config '%s': %s", configFile, err)
+			return fmt.Errorf("failed to read config '%s': %s", configFile, err)
 		}
 	}
 
@@ -59,14 +59,14 @@ func initConfig() error {
 func initVCS() error {
 	vfile, err := os.Open(vcsFile)
 	if !os.IsNotExist(err) && err != nil {
-		return fmt.Errorf("Failed to open vcs file '%s': %s", vcsFile, err)
+		return fmt.Errorf("failed to open vcs file '%s': %s", vcsFile, err)
 	}
 
 	defer vfile.Close()
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(vfile)
 		if err = decoder.Decode(&savedInfo); err != nil {
-			return fmt.Errorf("Failed to read vcs '%s': %s", vcsFile, err)
+			return fmt.Errorf("failed to read vcs '%s': %s", vcsFile, err)
 		}
 	}
 
@@ -76,7 +76,7 @@ func initVCS() error {
 func initHomeDirs() error {
 	if _, err := os.Stat(configHome); os.IsNotExist(err) {
 		if err = os.MkdirAll(configHome, 0755); err != nil {
-			return fmt.Errorf("Failed to create config directory '%s': %s", configHome, err)
+			return fmt.Errorf("failed to create config directory '%s': %s", configHome, err)
 		}
 	} else if err != nil {
 		return err
@@ -84,7 +84,7 @@ func initHomeDirs() error {
 
 	if _, err := os.Stat(cacheHome); os.IsNotExist(err) {
 		if err = os.MkdirAll(cacheHome, 0755); err != nil {
-			return fmt.Errorf("Failed to create cache directory '%s': %s", cacheHome, err)
+			return fmt.Errorf("failed to create cache directory '%s': %s", cacheHome, err)
 		}
 	} else if err != nil {
 		return err
@@ -96,7 +96,7 @@ func initHomeDirs() error {
 func initBuildDir() error {
 	if _, err := os.Stat(config.BuildDir); os.IsNotExist(err) {
 		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
-			return fmt.Errorf("Failed to create BuildDir directory '%s': %s", config.BuildDir, err)
+			return fmt.Errorf("failed to create BuildDir directory '%s': %s", config.BuildDir, err)
 		}
 	} else if err != nil {
 		return err
@@ -135,10 +135,10 @@ func initAlpm() error {
 		pacmanConf.IgnoreGroup = append(pacmanConf.IgnoreGroup, strings.Split(value, ",")...)
 	}
 
-	//TODO
-	//current system does not allow duplicate arguments
-	//but pacman allows multiple cachedirs to be passed
-	//for now only handle one cache dir
+	// TODO
+	// current system does not allow duplicate arguments
+	// but pacman allows multiple cachedirs to be passed
+	// for now only handle one cache dir
 	if value, _, exists := cmdArgs.getArg("cachedir"); exists {
 		pacmanConf.CacheDir = []string{value}
 	}
@@ -166,19 +166,18 @@ func initAlpm() error {
 }
 
 func initAlpmHandle() error {
-	var err error
-
 	if alpmHandle != nil {
-		if err := alpmHandle.Release(); err != nil {
-			return err
+		if errRelease := alpmHandle.Release(); errRelease != nil {
+			return errRelease
 		}
 	}
 
+	var err error
 	if alpmHandle, err = alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
-		return fmt.Errorf("Unable to CreateHandle: %s", err)
+		return fmt.Errorf("unable to CreateHandle: %s", err)
 	}
 
-	if err := configureAlpm(pacmanConf); err != nil {
+	if err := configureAlpm(); err != nil {
 		return err
 	}
 

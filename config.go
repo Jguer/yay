@@ -47,7 +47,6 @@ type Configuration struct {
 	PacmanConf         string `json:"pacmanconf"`
 	ReDownload         string `json:"redownload"`
 	ReBuild            string `json:"rebuild"`
-	BatchInstall       bool   `json:"batchinstall"`
 	AnswerClean        string `json:"answerclean"`
 	AnswerDiff         string `json:"answerdiff"`
 	AnswerEdit         string `json:"answeredit"`
@@ -79,9 +78,10 @@ type Configuration struct {
 	EditMenu           bool   `json:"editmenu"`
 	CombinedUpgrade    bool   `json:"combinedupgrade"`
 	UseAsk             bool   `json:"useask"`
+	BatchInstall       bool   `json:"batchinstall"`
 }
 
-var version = "9.4.3"
+var yayVersion = "9.4.3"
 
 // configFileName holds the name of the config file.
 const configFileName string = "config.json"
@@ -142,7 +142,7 @@ func (config *Configuration) saveConfig() error {
 }
 
 func defaultSettings() *Configuration {
-	config := &Configuration{
+	newConfig := &Configuration{
 		AURURL:             "https://aur.archlinux.org",
 		BuildDir:           "$HOME/.cache/yay",
 		ABSDir:             "$HOME/.cache/yay/abs",
@@ -191,7 +191,7 @@ func defaultSettings() *Configuration {
 		config.BuildDir = "$XDG_CACHE_HOME/yay"
 	}
 
-	return config
+	return newConfig
 }
 
 func (config *Configuration) expandEnv() {
@@ -223,7 +223,7 @@ func (config *Configuration) expandEnv() {
 }
 
 // Editor returns the preferred system editor.
-func editor() (string, []string) {
+func editor() (editor string, args []string) {
 	switch {
 	case config.Editor != "":
 		editor, err := exec.LookPath(config.Editor)
@@ -256,7 +256,13 @@ func editor() (string, []string) {
 	default:
 		fmt.Fprintln(os.Stderr)
 		fmt.Fprintln(os.Stderr, bold(red(arrow)), bold(cyan("$EDITOR")), bold("is not set"))
-		fmt.Fprintln(os.Stderr, bold(red(arrow))+bold(" Please add ")+bold(cyan("$EDITOR"))+bold(" or ")+bold(cyan("$VISUAL"))+bold(" to your environment variables."))
+		fmt.Fprintln(os.Stderr,
+			bold(red(arrow))+
+				bold(" Please add ")+
+				bold(cyan("$EDITOR"))+
+				bold(" or ")+
+				bold(cyan("$VISUAL"))+
+				bold(" to your environment variables."))
 
 		for {
 			fmt.Print(green(bold(arrow + " Edit PKGBUILD with: ")))
@@ -282,7 +288,7 @@ func editor() (string, []string) {
 }
 
 // ContinueTask prompts if user wants to continue task.
-//If NoConfirm is set the action will continue without user input.
+// If NoConfirm is set the action will continue without user input.
 func continueTask(s string, cont bool) bool {
 	if config.NoConfirm {
 		return cont
@@ -325,13 +331,13 @@ func getInput(defaultValue string) (string, error) {
 	}
 
 	if overflow {
-		return "", fmt.Errorf("Input too long")
+		return "", fmt.Errorf("input too long")
 	}
 
 	return string(buf), nil
 }
 
-func (config Configuration) String() string {
+func (config *Configuration) String() string {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "\t")
@@ -365,12 +371,11 @@ func toUsage(usages []string) alpm.Usage {
 	return ret
 }
 
-func configureAlpm(conf *pacmanconf.Config) error {
-
+func configureAlpm() error {
 	// TODO: set SigLevel
-	//sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
-	//localFileSigLevel := alpm.SigUseDefault
-	//remoteFileSigLevel := alpm.SigUseDefault
+	// sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
+	// localFileSigLevel := alpm.SigUseDefault
+	// remoteFileSigLevel := alpm.SigUseDefault
 
 	for _, repo := range pacmanConf.Repos {
 		// TODO: set SigLevel
@@ -381,7 +386,6 @@ func configureAlpm(conf *pacmanconf.Config) error {
 
 		db.SetServers(repo.Servers)
 		db.SetUsage(toUsage(repo.Usage))
-
 	}
 
 	if err := alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {

@@ -7,11 +7,13 @@ import (
 	"unicode"
 
 	alpm "github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v9/pkg/intrange"
+
+	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
-	rpc "github.com/mikkeloscar/aur"
 )
 
 // upgrade type describes a system upgrade.
@@ -63,7 +65,6 @@ func (u upSlice) Less(i, j int) bool {
 	iRunes := []rune(u[i].Repository)
 	jRunes := []rune(u[j].Repository)
 	return LessRunes(iRunes, jRunes)
-
 }
 
 func getVersionDiff(oldVersion, newVersion string) (left, right string) {
@@ -109,21 +110,18 @@ func getVersionDiff(oldVersion, newVersion string) (left, right string) {
 	left = samePart + red(oldVersion[diffPosition:])
 	right = samePart + green(newVersion[diffPosition:])
 
-	return
+	return left, right
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
-	local, remote, _, remoteNames, err := filterPackages()
+func upList(warnings *aurWarnings) (aurUp, repoUp upSlice, err error) {
+	_, remote, _, remoteNames, err := filterPackages()
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var wg sync.WaitGroup
 	var develUp upSlice
-	var repoUp upSlice
-	var aurUp upSlice
-
 	var errs multierror.MultiError
 
 	aurdata := make(map[string]*rpc.Pkg)
@@ -138,7 +136,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
 		wg.Add(1)
 		go func() {
-			repoUp, err = upRepo(local)
+			repoUp, err = upRepo()
 			errs.Add(err)
 			wg.Done()
 		}()
@@ -157,8 +155,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 
 			wg.Add(1)
 			go func() {
-				aurUp, err = upAUR(remote, aurdata)
-				errs.Add(err)
+				aurUp = upAUR(remote, aurdata)
 				wg.Done()
 			}()
 
@@ -194,7 +191,7 @@ func upList(warnings *aurWarnings) (upSlice, upSlice, error) {
 	return aurUp, repoUp, errs.Return()
 }
 
-func upDevel(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (toUpgrade upSlice) {
+func upDevel(remote []alpm.Package, aurdata map[string]*rpc.Pkg) upSlice {
 	toUpdate := make([]alpm.Package, 0)
 	toRemove := make([]string, 0)
 
@@ -230,6 +227,7 @@ func upDevel(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (toUpgrade upSl
 
 	wg.Wait()
 
+	toUpgrade := make(upSlice, 0, len(toUpdate))
 	for _, pkg := range toUpdate {
 		if pkg.ShouldIgnore() {
 			printIgnoringPackage(pkg, "latest-commit")
@@ -239,12 +237,12 @@ func upDevel(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (toUpgrade upSl
 	}
 
 	removeVCSPackage(toRemove)
-	return
+	return toUpgrade
 }
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (upSlice, error) {
+func upAUR(remote []alpm.Package, aurdata map[string]*rpc.Pkg) upSlice {
 	toUpgrade := make(upSlice, 0)
 
 	for _, pkg := range remote {
@@ -263,7 +261,7 @@ func upAUR(remote []alpm.Package, aurdata map[string]*rpc.Pkg) (upSlice, error) 
 		}
 	}
 
-	return toUpgrade, nil
+	return toUpgrade
 }
 
 func printIgnoringPackage(pkg alpm.Package, newPkgVersion string) {
@@ -298,7 +296,7 @@ func printLocalNewerThanAUR(
 
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upRepo(local []alpm.Package) (upSlice, error) {
+func upRepo() (upSlice, error) {
 	slice := upSlice{}
 
 	localDB, err := alpmHandle.LocalDB()
@@ -339,9 +337,9 @@ func upRepo(local []alpm.Package) (upSlice, error) {
 }
 
 // upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(aurUp, repoUp upSlice) (stringset.StringSet, stringset.StringSet, error) {
-	ignore := make(stringset.StringSet)
-	aurNames := make(stringset.StringSet)
+func upgradePkgs(aurUp, repoUp upSlice) (ignore, aurNames stringset.StringSet, err error) {
+	ignore = make(stringset.StringSet)
+	aurNames = make(stringset.StringSet)
 
 	allUpLen := len(repoUp) + len(aurUp)
 	if allUpLen == 0 {
@@ -370,9 +368,8 @@ func upgradePkgs(aurUp, repoUp upSlice) (stringset.StringSet, stringset.StringSe
 		return nil, nil, err
 	}
 
-	//upgrade menu asks you which packages to NOT upgrade so in this case
-	//include and exclude are kind of swapped
-	//include, exclude, other := parseNumberMenu(string(numberBuf))
+	// upgrade menu asks you which packages to NOT upgrade so in this case
+	// include and exclude are kind of swapped
 	include, exclude, otherInclude, otherExclude := intrange.ParseNumberMenu(numbers)
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0

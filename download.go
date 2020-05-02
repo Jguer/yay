@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v9/pkg/multierror"
 )
 
@@ -16,7 +17,7 @@ const gitDiffRefName = "AUR_SEEN"
 
 // Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
 // reviewed by the user
-func gitUpdateSeenRef(path string, name string) error {
+func gitUpdateSeenRef(path, name string) error {
 	_, stderr, err := capture(passToGit(filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"))
 	if err != nil {
 		return fmt.Errorf("%s%s", stderr, err)
@@ -26,14 +27,14 @@ func gitUpdateSeenRef(path string, name string) error {
 
 // Return wether or not we have reviewed a diff yet. It checks for the existence of
 // YAY_DIFF_REVIEW in the git ref-list
-func gitHasLastSeenRef(path string, name string) bool {
+func gitHasLastSeenRef(path, name string) bool {
 	_, _, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName))
 	return err == nil
 }
 
 // Returns the last reviewed hash. If YAY_DIFF_REVIEW exists it will return this hash.
 // If it does not it will return empty tree as no diff have been reviewed yet.
-func getLastSeenHash(path string, name string) (string, error) {
+func getLastSeenHash(path, name string) (string, error) {
 	if gitHasLastSeenRef(path, name) {
 		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName))
 		if err != nil {
@@ -48,7 +49,7 @@ func getLastSeenHash(path string, name string) (string, error) {
 
 // Check whether or not a diff exists between the last reviewed diff and
 // HEAD@{upstream}
-func gitHasDiff(path string, name string) (bool, error) {
+func gitHasDiff(path, name string) (bool, error) {
 	if gitHasLastSeenRef(path, name) {
 		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
 		if err != nil {
@@ -66,14 +67,12 @@ func gitHasDiff(path string, name string) (bool, error) {
 }
 
 // TODO: yay-next passes args through the header, use that to unify ABS and AUR
-func gitDownloadABS(url string, path string, name string) (bool, error) {
-	err := os.MkdirAll(path, 0755)
-	if err != nil {
+func gitDownloadABS(url, path, name string) (bool, error) {
+	if err := os.MkdirAll(path, 0755); err != nil {
 		return false, err
 	}
 
-	_, err = os.Stat(filepath.Join(path, name))
-	if os.IsNotExist(err) {
+	if _, errExist := os.Stat(filepath.Join(path, name)); os.IsNotExist(errExist) {
 		cmd := passToGit(path, "clone", "--no-progress", "--single-branch",
 			"-b", "packages/"+name, url, name)
 		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
@@ -83,7 +82,7 @@ func gitDownloadABS(url string, path string, name string) (bool, error) {
 		}
 
 		return true, nil
-	} else if err != nil {
+	} else if errExist != nil {
 		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
 	}
 
@@ -97,13 +96,13 @@ func gitDownloadABS(url string, path string, name string) (bool, error) {
 	return true, nil
 }
 
-func gitDownload(url string, path string, name string) (bool, error) {
+func gitDownload(url, path, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
 		cmd := passToGit(path, "clone", "--no-progress", url, name)
 		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-		_, stderr, err := capture(cmd)
-		if err != nil {
+		_, stderr, errCapture := capture(cmd)
+		if errCapture != nil {
 			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
 		}
 
@@ -122,7 +121,7 @@ func gitDownload(url string, path string, name string) (bool, error) {
 	return false, nil
 }
 
-func gitMerge(path string, name string) error {
+func gitMerge(path, name string) error {
 	_, stderr, err := capture(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
 	if err != nil {
 		return fmt.Errorf("error resetting %s: %s", name, stderr)
@@ -223,7 +222,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		pkgDB, name := splitDBFromName(pkgN)
 
 		if pkgDB != "" {
-			if db, err := alpmHandle.SyncDBByName(pkgDB); err == nil {
+			if db, errSync := alpmHandle.SyncDBByName(pkgDB); errSync == nil {
 				pkg = db.Pkg(name)
 			}
 		} else {

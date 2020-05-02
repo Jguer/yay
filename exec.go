@@ -3,12 +3,13 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func show(cmd *exec.Cmd) error {
@@ -20,14 +21,14 @@ func show(cmd *exec.Cmd) error {
 	return nil
 }
 
-func capture(cmd *exec.Cmd) (string, string, error) {
+func capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	var outbuf, errbuf bytes.Buffer
 
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
-	err := cmd.Run()
-	stdout := strings.TrimSpace(outbuf.String())
-	stderr := strings.TrimSpace(errbuf.String())
+	err = cmd.Run()
+	stdout = strings.TrimSpace(outbuf.String())
+	stderr = strings.TrimSpace(errbuf.String())
 
 	return stdout, stderr, err
 }
@@ -93,8 +94,7 @@ func passToPacman(args *arguments) *exec.Cmd {
 		argArr = append(argArr, "--noconfirm")
 	}
 
-	argArr = append(argArr, "--config", config.PacmanConf)
-	argArr = append(argArr, "--")
+	argArr = append(argArr, "--config", config.PacmanConf, "--")
 	argArr = append(argArr, args.targets...)
 
 	if args.needRoot() {

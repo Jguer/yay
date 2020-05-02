@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/yay/v9/pkg/intrange"
-
-	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
+
+	"github.com/Jguer/yay/v9/pkg/intrange"
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 const arrow = "==>"
@@ -45,7 +45,6 @@ func (warnings *aurWarnings) print() {
 		}
 		fmt.Println()
 	}
-
 }
 
 // human method returns results in human readable format.
@@ -65,7 +64,7 @@ func human(size int64) string {
 func (q aurQuery) printSearch(start int) {
 	localDB, _ := alpmHandle.LocalDB()
 
-	for i, res := range q {
+	for i := range q {
 		var toprint string
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
@@ -77,31 +76,31 @@ func (q aurQuery) printSearch(start int) {
 				fmt.Println("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
 			}
 		} else if config.SearchMode == minimal {
-			fmt.Println(res.Name)
+			fmt.Println(q[i].Name)
 			continue
 		}
 
-		toprint += bold(colourHash("aur")) + "/" + bold(res.Name) +
-			" " + cyan(res.Version) +
-			bold(" (+"+strconv.Itoa(res.NumVotes)) +
-			" " + bold(strconv.FormatFloat(res.Popularity, 'f', 2, 64)+"%) ")
+		toprint += bold(colorHash("aur")) + "/" + bold(q[i].Name) +
+			" " + cyan(q[i].Version) +
+			bold(" (+"+strconv.Itoa(q[i].NumVotes)) +
+			" " + bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+"%) ")
 
-		if res.Maintainer == "" {
+		if q[i].Maintainer == "" {
 			toprint += bold(red("(Orphaned)")) + " "
 		}
 
-		if res.OutOfDate != 0 {
-			toprint += bold(red("(Out-of-date "+formatTime(res.OutOfDate)+")")) + " "
+		if q[i].OutOfDate != 0 {
+			toprint += bold(red("(Out-of-date "+formatTime(q[i].OutOfDate)+")")) + " "
 		}
 
-		if pkg := localDB.Pkg(res.Name); pkg != nil {
-			if pkg.Version() != res.Version {
+		if pkg := localDB.Pkg(q[i].Name); pkg != nil {
+			if pkg.Version() != q[i].Version {
 				toprint += bold(green("(Installed: " + pkg.Version() + ")"))
 			} else {
 				toprint += bold(green("(Installed)"))
 			}
 		}
-		toprint += "\n    " + res.Description
+		toprint += "\n    " + q[i].Description
 		fmt.Println(toprint)
 	}
 }
@@ -124,7 +123,7 @@ func (s repoQuery) printSearch() {
 			continue
 		}
 
-		toprint += bold(colourHash(res.DB().Name())) + "/" + bold(res.Name()) +
+		toprint += bold(colorHash(res.DB().Name())) + "/" + bold(res.Name()) +
 			" " + cyan(res.Version()) +
 			bold(" ("+human(res.Size())+
 				" "+human(res.ISize())+") ")
@@ -152,12 +151,12 @@ func (s repoQuery) printSearch() {
 // Pretty print a set of packages from the same package base.
 // Packages foo and bar from a pkgbase named base would print like so:
 // base (foo bar)
-func (base Base) String() string {
-	pkg := base[0]
+func (b Base) String() string {
+	pkg := b[0]
 	str := pkg.PackageBase
-	if len(base) > 1 || pkg.PackageBase != pkg.Name {
+	if len(b) > 1 || pkg.PackageBase != pkg.Name {
 		str2 := " ("
-		for _, split := range base {
+		for _, split := range b {
 			str2 += split.Name + " "
 		}
 		str2 = str2[:len(str2)-1] + ")"
@@ -169,7 +168,7 @@ func (base Base) String() string {
 }
 
 func (u upgrade) StylizedNameWithRepository() string {
-	return bold(colourHash(u.Repository)) + "/" + bold(u.Name)
+	return bold(colorHash(u.Repository)) + "/" + bold(u.Name)
 }
 
 // Print prints the details of the packages to upgrade.
@@ -177,8 +176,8 @@ func (u upSlice) print() {
 	longestName, longestVersion := 0, 0
 	for _, pack := range u {
 		packNameLen := len(pack.StylizedNameWithRepository())
-		version, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
-		packVersionLen := len(version)
+		packVersion, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
+		packVersionLen := len(packVersion)
 		longestName = intrange.Max(packNameLen, longestName)
 		longestVersion = intrange.Max(packVersionLen, longestVersion)
 	}
@@ -358,7 +357,7 @@ func localStatistics() error {
 		return err
 	}
 
-	fmt.Printf(bold("Yay version v%s\n"), version)
+	fmt.Printf(bold("Yay version v%s\n"), yayVersion)
 	fmt.Println(bold(cyan("===========================================")))
 	fmt.Println(bold(green("Total installed packages: ")) + cyan(strconv.Itoa(info.Totaln)))
 	fmt.Println(bold(green("Total foreign installed packages: ")) + cyan(strconv.Itoa(len(remoteNames))))
@@ -376,7 +375,6 @@ func localStatistics() error {
 
 //TODO: Make it less hacky
 func printNumberOfUpdates() error {
-	//todo
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
@@ -470,7 +468,7 @@ type item struct {
 	Creator     string `xml:"dc:creator"`
 }
 
-func (item item) print(buildTime time.Time) {
+func (item *item) print(buildTime time.Time) {
 	var fd string
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
@@ -486,7 +484,6 @@ func (item item) print(buildTime time.Time) {
 	}
 
 	fmt.Println(bold(magenta(fd)), bold(strings.TrimSpace(item.Title)))
-	//fmt.Println(strings.TrimSpace(item.Link))
 
 	if !cmdArgs.existsArg("q", "quiet") {
 		desc := strings.TrimSpace(parseNews(item.Description))
@@ -519,10 +516,10 @@ func printNewsFeed() error {
 		return err
 	}
 
-	rss := rss{}
+	rssGot := rss{}
 
 	d := xml.NewDecoder(bytes.NewReader(body))
-	err = d.Decode(&rss)
+	err = d.Decode(&rssGot)
 	if err != nil {
 		return err
 	}
@@ -533,12 +530,12 @@ func printNewsFeed() error {
 	}
 
 	if config.SortMode == bottomUp {
-		for i := len(rss.Channel.Items) - 1; i >= 0; i-- {
-			rss.Channel.Items[i].print(buildTime)
+		for i := len(rssGot.Channel.Items) - 1; i >= 0; i-- {
+			rssGot.Channel.Items[i].print(buildTime)
 		}
 	} else {
-		for i := 0; i < len(rss.Channel.Items); i++ {
-			rss.Channel.Items[i].print(buildTime)
+		for i := 0; i < len(rssGot.Channel.Items); i++ {
+			rssGot.Channel.Items[i].print(buildTime)
 		}
 	}
 
@@ -605,9 +602,9 @@ func bold(in string) string {
 	return stylize(boldCode, in)
 }
 
-// Colours text using a hashing algorithm. The same text will always produce the
-// same colour while different text will produce a different colour.
-func colourHash(name string) (output string) {
+// Colors text using a hashing algorithm. The same text will always produce the
+// same color while different text will produce a different color.
+func colorHash(name string) (output string) {
 	if !useColor {
 		return name
 	}

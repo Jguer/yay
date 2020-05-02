@@ -6,8 +6,9 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
+
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 type target struct {
@@ -19,13 +20,13 @@ type target struct {
 
 func toTarget(pkg string) target {
 	db, dep := splitDBFromName(pkg)
-	name, mod, version := splitDep(dep)
+	name, mod, depVersion := splitDep(dep)
 
 	return target{
-		db,
-		name,
-		mod,
-		version,
+		DB:      db,
+		Name:    name,
+		Mod:     mod,
+		Version: depVersion,
 	}
 }
 
@@ -117,7 +118,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 				return err
 			}
 			foundPkg, err = singleDB.PkgCache().FindSatisfier(target.DepString())
-			//otherwise find it in any repo
+			// otherwise find it in any repo
 		} else {
 			foundPkg, err = dp.SyncDB.FindSatisfier(target.DepString())
 		}
@@ -128,13 +129,13 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			dp.ResolveRepoDependency(foundPkg)
 			continue
 		} else {
-			//check for groups
-			//currently we don't resolve the packages in a group
-			//only check if the group exists
-			//would be better to check the groups from singleDB if
-			//the user specified a db but there's no easy way to do
-			//it without making alpm_lists so don't bother for now
-			//db/group is probably a rare use case
+			// check for groups
+			// currently we don't resolve the packages in a group
+			// only check if the group exists
+			// would be better to check the groups from singleDB if
+			// the user specified a db but there's no easy way to do
+			// it without making alpm_lists so don't bother for now
+			// db/group is probably a rare use case
 			group := dp.SyncDB.FindGroupPkgs(target.Name)
 			if !group.Empty() {
 				dp.Groups = append(dp.Groups, target.String())
@@ -146,7 +147,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 			}
 		}
 
-		//if there was no db prefix check the aur
+		// if there was no db prefix check the aur
 		if target.DB == "" {
 			aurTargets.Set(target.DepString())
 		}
@@ -198,10 +199,10 @@ func (dp *depPool) findProvides(pkgs stringset.StringSet) error {
 			return
 		}
 
-		for _, result := range results {
+		for iR := range results {
 			mux.Lock()
-			if _, ok := dp.AurCache[result.Name]; !ok {
-				pkgs.Set(result.Name)
+			if _, ok := dp.AurCache[results[iR].Name]; !ok {
+				pkgs.Set(results[iR].Name)
 			}
 			mux.Unlock()
 		}
@@ -302,10 +303,10 @@ func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit bool) e
 			continue
 		}
 
-		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep) //has satisfier installed: skip
+		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep) // has satisfier installed: skip
 		hm := hideMenus
 		hideMenus = isInstalled == nil
-		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep) //has satisfier in repo: fetch it
+		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep) // has satisfier in repo: fetch it
 		hideMenus = hm
 		if isInstalled == nil && (config.ReBuild != "tree" || inRepos == nil) {
 			continue
@@ -316,10 +317,9 @@ func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit bool) e
 			continue
 		}
 
-		//assume it's in the aur
-		//ditch the versioning because the RPC can't handle it
+		// assume it's in the aur
+		// ditch the versioning because the RPC can't handle it
 		newAURPackages.Set(dep)
-
 	}
 
 	err = dp.resolveAURPackages(newAURPackages, false)
@@ -330,18 +330,18 @@ func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 	dp.Repo[pkg.Name()] = pkg
 
 	_ = pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
-		//have satisfier in dep tree: skip
+		// have satisfier in dep tree: skip
 		if dp.hasSatisfier(dep.String()) {
 			return
 		}
 
-		//has satisfier installed: skip
+		// has satisfier installed: skip
 		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep.String())
 		if isInstalled == nil {
 			return
 		}
 
-		//has satisfier in repo: fetch it
+		// has satisfier in repo: fetch it
 		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep.String())
 		if inRepos != nil {
 			return
@@ -388,13 +388,12 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 	depName, _, _ := splitDep(dep)
 	seen := make(stringset.StringSet)
-	providers := makeProviders(depName)
+	providerSlice := makeProviders(depName)
 
 	if dp.LocalDB.Pkg(depName) != nil {
 		if pkg, ok := dp.AurCache[dep]; ok && pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			return pkg
 		}
-
 	}
 
 	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
@@ -415,31 +414,31 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 		}
 
 		if pkgSatisfies(pkg.Name, pkg.Version, dep) {
-			providers.Pkgs = append(providers.Pkgs, pkg)
+			providerSlice.Pkgs = append(providerSlice.Pkgs, pkg)
 			seen.Set(pkg.Name)
 			continue
 		}
 
 		for _, provide := range pkg.Provides {
 			if provideSatisfies(provide, dep) {
-				providers.Pkgs = append(providers.Pkgs, pkg)
+				providerSlice.Pkgs = append(providerSlice.Pkgs, pkg)
 				seen.Set(pkg.Name)
 				continue
 			}
 		}
 	}
 
-	if !config.Provides && providers.Len() >= 1 {
-		return providers.Pkgs[0]
+	if !config.Provides && providerSlice.Len() >= 1 {
+		return providerSlice.Pkgs[0]
 	}
 
-	if providers.Len() == 1 {
-		return providers.Pkgs[0]
+	if providerSlice.Len() == 1 {
+		return providerSlice.Pkgs[0]
 	}
 
-	if providers.Len() > 1 {
-		sort.Sort(providers)
-		return providerMenu(dep, providers)
+	if providerSlice.Len() > 1 {
+		sort.Sort(providerSlice)
+		return providerMenu(dep, providerSlice)
 	}
 
 	return nil

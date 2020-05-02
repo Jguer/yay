@@ -58,7 +58,6 @@ func cleanRemove(pkgNames []string) error {
 }
 
 func syncClean(parser *arguments) error {
-	var err error
 	keepInstalled := false
 	keepCurrent := false
 
@@ -92,11 +91,13 @@ func syncClean(parser *arguments) error {
 	fmt.Printf("\nBuild directory: %s\n", config.BuildDir)
 
 	if continueTask(question, true) {
-		err = cleanAUR(keepInstalled, keepCurrent, removeAll)
+		if err := cleanAUR(keepInstalled, keepCurrent, removeAll); err != nil {
+			return err
+		}
 	}
 
-	if err != nil || removeAll {
-		return err
+	if removeAll {
+		return nil
 	}
 
 	if continueTask("Do you want to remove ALL untracked AUR files?", true) {
@@ -136,9 +137,9 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 	// Querying the AUR is slow and needs internet so don't do it if we
 	// don't need to.
 	if keepCurrent {
-		info, err := aurInfo(cachedPackages, &aurWarnings{})
-		if err != nil {
-			return err
+		info, errInfo := aurInfo(cachedPackages, &aurWarnings{})
+		if errInfo != nil {
+			return errInfo
 		}
 
 		for _, pkg := range info {

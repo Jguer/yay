@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-	"github.com/Jguer/yay/v9/pkg/stringset"
 
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 // IntRange stores a max and min amount for range
@@ -59,20 +59,21 @@ func Max(a, b int) int {
 }
 
 // ParseNumberMenu parses input for number menus split by spaces or commas
-//supports individual selection: 1 2 3 4
-//supports range selections: 1-4 10-20
-//supports negation: ^1 ^1-4
+// supports individual selection: 1 2 3 4
+// supports range selections: 1-4 10-20
+// supports negation: ^1 ^1-4
 //
-//include and excule holds numbers that should be added and should not be added
-//respectively. other holds anything that can't be parsed as an int. This is
-//intended to allow words inside of number menus. e.g. 'all' 'none' 'abort'
-//of course the implementation is up to the caller, this function mearley parses
-//the input and organizes it
-func ParseNumberMenu(input string) (IntRanges, IntRanges, stringset.StringSet, stringset.StringSet) {
-	include := make(IntRanges, 0)
-	exclude := make(IntRanges, 0)
-	otherInclude := make(stringset.StringSet)
-	otherExclude := make(stringset.StringSet)
+// include and excule holds numbers that should be added and should not be added
+// respectively. other holds anything that can't be parsed as an int. This is
+// intended to allow words inside of number menus. e.g. 'all' 'none' 'abort'
+// of course the implementation is up to the caller, this function mearley parses
+// the input and organizes it
+func ParseNumberMenu(input string) (include, exclude IntRanges,
+	otherInclude, otherExclude stringset.StringSet) {
+	include = make(IntRanges, 0)
+	exclude = make(IntRanges, 0)
+	otherInclude = make(stringset.StringSet)
+	otherExclude = make(stringset.StringSet)
 
 	words := strings.FieldsFunc(input, func(c rune) bool {
 		return unicode.IsSpace(c) || c == ','

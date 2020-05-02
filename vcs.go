@@ -9,8 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Jguer/yay/v9/pkg/stringset"
 	gosrc "github.com/Morganamilo/go-srcinfo"
+
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 // Info contains the last commit sha of a repo
@@ -49,10 +50,10 @@ func createDevelDB() error {
 		return err
 	}
 
-	for _, pkgbuild := range srcinfos {
-		for _, pkg := range pkgbuild.Packages {
+	for i := range srcinfos {
+		for iP := range srcinfos[i].Packages {
 			wg.Add(1)
-			go updateVCSData(pkg.Pkgname, pkgbuild.Source, &mux, &wg)
+			go updateVCSData(srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
 		}
 	}
 
@@ -62,7 +63,7 @@ func createDevelDB() error {
 }
 
 // parseSource returns the git url, default branch and protocols it supports
-func parseSource(source string) (url string, branch string, protocols []string) {
+func parseSource(source string) (url, branch string, protocols []string) {
 	split := strings.Split(source, "::")
 	source = split[len(split)-1]
 	split = strings.SplitN(source, "://", 2)
@@ -90,8 +91,8 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	if len(split) == 2 {
 		secondSplit := strings.SplitN(split[1], "=", 2)
 		if secondSplit[0] != "branch" {
-			//source has #commit= or #tag= which makes them not vcs
-			//packages because they reference a specific point
+			// source has #commit= or #tag= which makes them not vcs
+			// packages because they reference a specific point
 			return "", "", nil
 		}
 
@@ -107,10 +108,10 @@ func parseSource(source string) (url string, branch string, protocols []string) 
 	url = strings.Split(url, "?")[0]
 	branch = strings.Split(branch, "?")[0]
 
-	return
+	return url, branch, protocols
 }
 
-func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, wg *sync.WaitGroup) {
+func updateVCSData(pkgName string, sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	if savedInfo == nil {
@@ -154,7 +155,7 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString, mux *sync.Mutex, 
 	}
 }
 
-func getCommit(url string, branch string, protocols []string) string {
+func getCommit(url, branch string, protocols []string) string {
 	if len(protocols) > 0 {
 		protocol := protocols[len(protocols)-1]
 		var outbuf bytes.Buffer
@@ -168,10 +169,10 @@ func getCommit(url string, branch string, protocols []string) string {
 			return ""
 		}
 
-		//for some reason
-		//git://bitbucket.org/volumesoffun/polyvox.git` hangs on my
-		//machine but using http:// instead of git does not hang.
-		//Introduce a time out so this can not hang
+		// for some reason
+		// git://bitbucket.org/volumesoffun/polyvox.git` hangs on my
+		// machine but using http:// instead of git does not hang.
+		// Introduce a time out so this can not hang
 		timer := time.AfterFunc(5*time.Second, func() {
 			err = cmd.Process.Kill()
 			if err != nil {
@@ -200,11 +201,11 @@ func getCommit(url string, branch string, protocols []string) string {
 }
 
 func (infos shaInfos) needsUpdate() bool {
-	//used to signal we have gone through all sources and found nothing
+	// used to signal we have gone through all sources and found nothing
 	finished := make(chan struct{})
 	alive := 0
 
-	//if we find an update we use this to exit early and return true
+	// if we find an update we use this to exit early and return true
 	hasUpdate := make(chan struct{})
 
 	checkHash := func(url string, info shaInfo) {

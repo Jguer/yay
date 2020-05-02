@@ -177,15 +177,19 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// B6C8F98282B944E3B0D5C2530FC3042E345AD05D: Hans Wennborg.
 		{
-			pkgs:      Base{newPkg("libc++")},
-			srcinfos:  map[string]*gosrc.Srcinfo{"libc++": makeSrcinfo("libc++", "11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D")},
+			pkgs: Base{newPkg("libc++")},
+			srcinfos: map[string]*gosrc.Srcinfo{
+				"libc++": makeSrcinfo("libc++", "11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D")},
 			wantError: false,
 		},
 		// Two dummy packages requiring the same key.
 		// ABAF11C65A2970B130ABE3C479BE3E4300411886: Linus Torvalds.
 		{
-			pkgs:      Base{newPkg("dummy-1"), newPkg("dummy-2")},
-			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-1": makeSrcinfo("dummy-1", "ABAF11C65A2970B130ABE3C479BE3E4300411886"), "dummy-2": makeSrcinfo("dummy-2", "ABAF11C65A2970B130ABE3C479BE3E4300411886")},
+			pkgs: Base{newPkg("dummy-1"), newPkg("dummy-2")},
+			srcinfos: map[string]*gosrc.Srcinfo{
+				"dummy-1": makeSrcinfo("dummy-1",
+					"ABAF11C65A2970B130ABE3C479BE3E4300411886"),
+				"dummy-2": makeSrcinfo("dummy-2", "ABAF11C65A2970B130ABE3C479BE3E4300411886")},
 			wantError: false,
 		},
 		// dummy package: single package, two valid keys, one of them already
@@ -193,14 +197,17 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// C52048C0C0748FEE227D47A2702353E0F7E48EDB: Thomas Dickey.
 		{
-			pkgs:      Base{newPkg("dummy-3")},
-			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-3": makeSrcinfo("dummy-3", "11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
+			pkgs: Base{newPkg("dummy-3")},
+			srcinfos: map[string]*gosrc.Srcinfo{
+				"dummy-3": makeSrcinfo("dummy-3", "11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
 			wantError: false,
 		},
 		// Two dummy packages with existing keys.
 		{
-			pkgs:      Base{newPkg("dummy-4"), newPkg("dummy-5")},
-			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-4": makeSrcinfo("dummy-4", "11E521D646982372EB577A1F8F0871F202119294"), "dummy-5": makeSrcinfo("dummy-5", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
+			pkgs: Base{newPkg("dummy-4"), newPkg("dummy-5")},
+			srcinfos: map[string]*gosrc.Srcinfo{
+				"dummy-4": makeSrcinfo("dummy-4", "11E521D646982372EB577A1F8F0871F202119294"),
+				"dummy-5": makeSrcinfo("dummy-5", "C52048C0C0748FEE227D47A2702353E0F7E48EDB")},
 			wantError: false,
 		},
 		// Dummy package with invalid key, should fail.

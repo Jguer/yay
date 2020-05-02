@@ -26,7 +26,7 @@ func (set pgpKeySet) set(key string, p Base) {
 	// Using ToUpper to make sure keys with a different case will be
 	// considered the same.
 	upperKey := strings.ToUpper(key)
-	set[key] = append(set[upperKey], p)
+	set[upperKey] = append(set[upperKey], p)
 }
 
 func (set pgpKeySet) get(key string) bool {

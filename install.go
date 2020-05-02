@@ -10,11 +10,12 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	gosrc "github.com/Morganamilo/go-srcinfo"
+
 	"github.com/Jguer/yay/v9/pkg/completion"
 	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
-	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
 func asdeps(parser *arguments, pkgs []string) error {
@@ -66,7 +67,7 @@ func install(parser *arguments) (err error) {
 			if parser.existsArg("y", "refresh") {
 				err = earlyRefresh(parser)
 				if err != nil {
-					return fmt.Errorf("Error refreshing databases")
+					return fmt.Errorf("error refreshing databases")
 				}
 			}
 		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
@@ -77,8 +78,8 @@ func install(parser *arguments) (err error) {
 		}
 	}
 
-	//we may have done -Sy, our handle now has an old
-	//database.
+	// we may have done -Sy, our handle now has an old
+	// database.
 	err = initAlpmHandle()
 	if err != nil {
 		return err
@@ -94,7 +95,7 @@ func install(parser *arguments) (err error) {
 
 	requestTargets := parser.copy().targets
 
-	//create the arguments to pass for the repo install
+	// create the arguments to pass for the repo install
 	arguments := parser.copy()
 	arguments.delArg("asdeps", "asdep")
 	arguments.delArg("asexplicit", "asexp")
@@ -105,7 +106,7 @@ func install(parser *arguments) (err error) {
 		arguments.delArg("u", "sysupgrade")
 	}
 
-	//if we are doing -u also request all packages needing update
+	// if we are doing -u also request all packages needing update
 	if parser.existsArg("u", "sysupgrade") {
 		aurUp, repoUp, err = upList(warnings)
 		if err != nil {
@@ -114,9 +115,9 @@ func install(parser *arguments) (err error) {
 
 		warnings.print()
 
-		ignore, aurUp, err := upgradePkgs(aurUp, repoUp)
-		if err != nil {
-			return err
+		ignore, aurUp, errUp := upgradePkgs(aurUp, repoUp)
+		if errUp != nil {
+			return errUp
 		}
 
 		for _, up := range repoUp {
@@ -223,9 +224,9 @@ func install(parser *arguments) (err error) {
 	if config.CleanMenu {
 		if anyExistInCache(do.Aur) {
 			askClean := pkgbuildNumberMenu(do.Aur, remoteNamesCache)
-			toClean, err := cleanNumberMenu(do.Aur, remoteNamesCache, askClean)
-			if err != nil {
-				return err
+			toClean, errClean := cleanNumberMenu(do.Aur, remoteNamesCache, askClean)
+			if errClean != nil {
+				return errClean
 			}
 
 			cleanBuilds(toClean)
@@ -261,9 +262,9 @@ func install(parser *arguments) (err error) {
 		config.NoConfirm = false
 		fmt.Println()
 		if !continueTask(bold(green("Proceed with install?")), true) {
-			return fmt.Errorf("Aborting due to user")
+			return fmt.Errorf("aborting due to user")
 		}
-		err = updatePkgbuildSeenRef(toDiff, cloned)
+		err = updatePkgbuildSeenRef(toDiff)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 		}
@@ -301,7 +302,7 @@ func install(parser *arguments) (err error) {
 		config.NoConfirm = false
 		fmt.Println()
 		if !continueTask(bold(green("Proceed with install?")), true) {
-			return fmt.Errorf("Aborting due to user")
+			return fmt.Errorf("aborting due to user")
 		}
 		config.NoConfirm = oldValue
 	}
@@ -323,9 +324,8 @@ func install(parser *arguments) (err error) {
 	}
 
 	if len(arguments.targets) > 0 || arguments.existsArg("u") {
-		err := show(passToPacman(arguments))
-		if err != nil {
-			return fmt.Errorf("Error installing repo packages")
+		if errShow := show(passToPacman(arguments)); errShow != nil {
+			return fmt.Errorf("error installing repo packages")
 		}
 
 		deps := make([]string, 0)
@@ -344,11 +344,11 @@ func install(parser *arguments) (err error) {
 			}
 		}
 
-		if err = asdeps(parser, deps); err != nil {
-			return err
+		if errDeps := asdeps(parser, deps); errDeps != nil {
+			return errDeps
 		}
-		if err = asexp(parser, exp); err != nil {
-			return err
+		if errExp := asexp(parser, exp); errExp != nil {
+			return errExp
 		}
 	}
 
@@ -421,7 +421,7 @@ func earlyPacmanCall(parser *arguments) error {
 	if mode == modeRepo {
 		arguments.targets = targets
 	} else {
-		//separate aur and repo targets
+		// separate aur and repo targets
 		for _, target := range targets {
 			if inRepos(syncDB, target) {
 				arguments.addTarget(target)
@@ -434,7 +434,7 @@ func earlyPacmanCall(parser *arguments) error {
 	if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
 		err = show(passToPacman(arguments))
 		if err != nil {
-			return fmt.Errorf("Error installing repo packages")
+			return fmt.Errorf("error installing repo packages")
 		}
 	}
 
@@ -482,23 +482,22 @@ nextpkg:
 		fmt.Println()
 
 		if !continueTask("Try to build them anyway?", true) {
-			return nil, fmt.Errorf("Aborting due to user")
+			return nil, fmt.Errorf("aborting due to user")
 		}
 	}
 
 	return incompatible, nil
 }
 
-func parsePackageList(dir string) (map[string]string, string, error) {
+func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string, err error) {
 	stdout, stderr, err := capture(passToMakepkg(dir, "--packagelist"))
 
 	if err != nil {
 		return nil, "", fmt.Errorf("%s%s", stderr, err)
 	}
 
-	var version string
 	lines := strings.Split(stdout, "\n")
-	pkgdests := make(map[string]string)
+	pkgdests = make(map[string]string)
 
 	for _, line := range lines {
 		if line == "" {
@@ -509,18 +508,18 @@ func parsePackageList(dir string) (map[string]string, string, error) {
 		split := strings.Split(fileName, "-")
 
 		if len(split) < 4 {
-			return nil, "", fmt.Errorf("Can not find package name : %s", split)
+			return nil, "", fmt.Errorf("cannot find package name : %s", split)
 		}
 
 		// pkgname-pkgver-pkgrel-arch.pkgext
 		// This assumes 3 dashes after the pkgname, Will cause an error
 		// if the PKGEXT contains a dash. Please no one do that.
-		pkgname := strings.Join(split[:len(split)-3], "-")
-		version = strings.Join(split[len(split)-3:len(split)-1], "-")
-		pkgdests[pkgname] = line
+		pkgName := strings.Join(split[:len(split)-3], "-")
+		pkgVersion = strings.Join(split[len(split)-3:len(split)-1], "-")
+		pkgdests[pkgName] = line
 	}
 
-	return pkgdests, version, nil
+	return pkgdests, pkgVersion, nil
 }
 
 func anyExistInCache(bases []Base) bool {
@@ -588,7 +587,7 @@ func cleanNumberMenu(bases []Base, installed stringset.StringSet, hasClean bool)
 	cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
 
 	if cOtherInclude.Get("abort") || cOtherInclude.Get("ab") {
-		return nil, fmt.Errorf("Aborting due to user")
+		return nil, fmt.Errorf("aborting due to user")
 	}
 
 	if !cOtherInclude.Get("n") && !cOtherInclude.Get("none") {
@@ -673,7 +672,7 @@ func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) 
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
 
 	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
-		return nil, fmt.Errorf("Aborting due to user")
+		return nil, fmt.Errorf("aborting due to user")
 	}
 
 	if !eOtherInclude.Get("n") && !eOtherInclude.Get("none") {
@@ -716,7 +715,7 @@ func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) 
 	return toEdit, nil
 }
 
-func updatePkgbuildSeenRef(bases []Base, cloned stringset.StringSet) error {
+func updatePkgbuildSeenRef(bases []Base) error {
 	var errMulti multierror.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
@@ -754,7 +753,9 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 			}
 		}
 
-		args := []string{"diff", start + "..HEAD@{upstream}", "--src-prefix", dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO"}
+		args := []string{"diff",
+			start + "..HEAD@{upstream}", "--src-prefix",
+			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO"}
 		if useColor {
 			args = append(args, "--color=always")
 		} else {
@@ -787,7 +788,7 @@ func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		err := editcmd.Run()
 		if err != nil {
-			return fmt.Errorf("Editor did not exit successfully, Aborting: %s", err)
+			return fmt.Errorf("editor did not exit successfully, Aborting: %s", err)
 		}
 	}
 
@@ -862,7 +863,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string
 	var mux sync.Mutex
 	var errs multierror.MultiError
 
-	download := func(k int, base Base) {
+	download := func(base Base) {
 		defer wg.Done()
 		pkg := base.Pkgbase()
 
@@ -894,9 +895,9 @@ func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string
 	}
 
 	count := 0
-	for k, base := range bases {
+	for _, base := range bases {
 		wg.Add(1)
-		go download(k, base)
+		go download(base)
 		count++
 		if count%25 == 0 {
 			wg.Wait()
@@ -920,14 +921,20 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringset.StringSet) (e
 
 		err = show(passToMakepkg(dir, args...))
 		if err != nil {
-			return fmt.Errorf("Error downloading sources: %s", cyan(base.String()))
+			return fmt.Errorf("error downloading sources: %s", cyan(base.String()))
 		}
 	}
 
 	return
 }
 
-func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc.Srcinfo, parser *arguments, incompatible stringset.StringSet, conflicts stringset.MapStringSet) error {
+func buildInstallPkgbuilds(
+	dp *depPool,
+	do *depOrder,
+	srcinfos map[string]*gosrc.Srcinfo,
+	parser *arguments,
+	incompatible stringset.StringSet,
+	conflicts stringset.MapStringSet) error {
 	arguments := parser.copy()
 	arguments.clearTargets()
 	arguments.op = "U"
@@ -951,8 +958,8 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		return err
 	}
 
-	//cache as a stringset. maybe make it return a string set in the first
-	//place
+	// cache as a stringset. maybe make it return a string set in the first
+	// place
 	remoteNamesCache := stringset.FromSlice(remoteNames)
 	localNamesCache := stringset.FromSlice(localNames)
 
@@ -961,9 +968,8 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			return nil
 		}
 
-		err := show(passToPacman(arguments))
-		if err != nil {
-			return err
+		if errShow := show(passToPacman(arguments)); errShow != nil {
+			return errShow
 		}
 
 		err = saveVCSInfo()
@@ -971,11 +977,11 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			fmt.Fprintln(os.Stderr, err)
 		}
 
-		if err = asdeps(parser, deps); err != nil {
-			return err
+		if errDeps := asdeps(parser, deps); err != nil {
+			return errDeps
 		}
-		if err = asexp(parser, exp); err != nil {
-			return err
+		if errExps := asexp(parser, exp); err != nil {
+			return errExps
 		}
 
 		config.NoConfirm = oldConfirm
@@ -988,7 +994,6 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 	}
 
 	for _, base := range do.Aur {
-		var err error
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		built := true
@@ -998,7 +1003,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		for _, pkg := range base {
 			for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 				for _, dep := range deps {
-					if _, err := dp.LocalDB.PkgCache().FindSatisfier(dep); err != nil {
+					if _, errSatisfier := dp.LocalDB.PkgCache().FindSatisfier(dep); errSatisfier != nil {
 						satisfied = false
 						fmt.Printf("%s not satisfied, flushing install queue\n", dep)
 						break all
@@ -1022,15 +1027,14 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			args = append(args, "--ignorearch")
 		}
 
-		//pkgver bump
-		err = show(passToMakepkg(dir, args...))
-		if err != nil {
-			return fmt.Errorf("Error making: %s", base.String())
+		// pkgver bump
+		if err = show(passToMakepkg(dir, args...)); err != nil {
+			return fmt.Errorf("error making: %s", base.String())
 		}
 
-		pkgdests, version, err := parsePackageList(dir)
-		if err != nil {
-			return err
+		pkgdests, pkgVersion, errList := parsePackageList(dir)
+		if errList != nil {
+			return errList
 		}
 
 		isExplicit := false
@@ -1041,14 +1045,13 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			for _, split := range base {
 				pkgdest, ok := pkgdests[split.Name]
 				if !ok {
-					return fmt.Errorf("Could not find PKGDEST for: %s", split.Name)
+					return fmt.Errorf("could not find PKGDEST for: %s", split.Name)
 				}
 
-				_, err := os.Stat(pkgdest)
-				if os.IsNotExist(err) {
+				if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
 					built = false
-				} else if err != nil {
-					return err
+				} else if errStat != nil {
+					return errStat
 				}
 			}
 		} else {
@@ -1058,7 +1061,7 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		if cmdArgs.existsArg("needed") {
 			installed := true
 			for _, split := range base {
-				if alpmpkg := dp.LocalDB.Pkg(split.Name); alpmpkg == nil || alpmpkg.Version() != version {
+				if alpmpkg := dp.LocalDB.Pkg(split.Name); alpmpkg == nil || alpmpkg.Version() != pkgVersion {
 					installed = false
 				}
 			}
@@ -1066,10 +1069,10 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 			if installed {
 				err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
-					return fmt.Errorf("Error making: %s", err)
+					return fmt.Errorf("error making: %s", err)
 				}
 
-				fmt.Println(cyan(pkg+"-"+version) + bold(" is up to date -- skipping"))
+				fmt.Println(cyan(pkg+"-"+pkgVersion) + bold(" is up to date -- skipping"))
 				continue
 			}
 		}
@@ -1077,11 +1080,11 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		if built {
 			err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
-				return fmt.Errorf("Error making: %s", err)
+				return fmt.Errorf("error making: %s", err)
 			}
 
 			fmt.Println(bold(yellow(arrow)),
-				cyan(pkg+"-"+version)+bold(" already made -- skipping build"))
+				cyan(pkg+"-"+pkgVersion)+bold(" already made -- skipping build"))
 		} else {
 			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 
@@ -1089,13 +1092,12 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 				args = append(args, "--ignorearch")
 			}
 
-			err := show(passToMakepkg(dir, args...))
-			if err != nil {
-				return fmt.Errorf("Error making: %s", base.String())
+			if errMake := show(passToMakepkg(dir, args...)); errMake != nil {
+				return fmt.Errorf("error making: %s", base.String())
 			}
 		}
 
-		//conflicts have been checked so answer y for them
+		// conflicts have been checked so answer y for them
 		if config.UseAsk {
 			ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
 			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
@@ -1116,15 +1118,15 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 					return nil
 				}
 
-				return fmt.Errorf("Could not find PKGDEST for: %s", name)
+				return fmt.Errorf("could not find PKGDEST for: %s", name)
 			}
 
-			if _, err := os.Stat(pkgdest); os.IsNotExist(err) {
+			if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
 				if optional {
 					return nil
 				}
 
-				return fmt.Errorf("PKGDEST for %s listed by makepkg, but does not exist: %s", name, pkgdest)
+				return fmt.Errorf("the PKGDEST for %s listed by makepkg, but does not exist: %s", name, pkgdest)
 			}
 
 			arguments.addTarget(pkgdest)
@@ -1140,16 +1142,12 @@ func buildInstallPkgbuilds(dp *depPool, do *depOrder, srcinfos map[string]*gosrc
 		}
 
 		for _, split := range base {
-			var err error
-
-			err = doAddTarget(split.Name, false)
-			if err != nil {
-				return err
+			if errAdd := doAddTarget(split.Name, false); errAdd != nil {
+				return errAdd
 			}
 
-			err = doAddTarget(split.Name+"-debug", true)
-			if err != nil {
-				return err
+			if errAddDebug := doAddTarget(split.Name+"-debug", true); errAddDebug != nil {
+				return errAddDebug
 			}
 		}
 

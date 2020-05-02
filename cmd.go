@@ -7,6 +7,7 @@ import (
 	"os"
 
 	alpm "github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v9/pkg/completion"
 	"github.com/Jguer/yay/v9/pkg/intrange"
 )
@@ -134,10 +135,9 @@ getpkgbuild specific options:
     -f --force            Force download for existing ABS packages`)
 }
 
-func handleCmd() (err error) {
+func handleCmd() error {
 	if cmdArgs.existsArg("h", "help") {
-		err = handleHelp()
-		return
+		return handleHelp()
 	}
 
 	if config.SudoLoop && cmdArgs.needRoot() {
@@ -147,33 +147,30 @@ func handleCmd() (err error) {
 	switch cmdArgs.op {
 	case "V", "version":
 		handleVersion()
+		return nil
 	case "D", "database":
-		err = show(passToPacman(cmdArgs))
+		return show(passToPacman(cmdArgs))
 	case "F", "files":
-		err = show(passToPacman(cmdArgs))
+		return show(passToPacman(cmdArgs))
 	case "Q", "query":
-		err = handleQuery()
+		return handleQuery()
 	case "R", "remove":
-		err = handleRemove()
+		return handleRemove()
 	case "S", "sync":
-		err = handleSync()
+		return handleSync()
 	case "T", "deptest":
-		err = show(passToPacman(cmdArgs))
+		return show(passToPacman(cmdArgs))
 	case "U", "upgrade":
-		err = show(passToPacman(cmdArgs))
+		return show(passToPacman(cmdArgs))
 	case "G", "getpkgbuild":
-		err = handleGetpkgbuild()
+		return handleGetpkgbuild()
 	case "P", "show":
-		err = handlePrint()
+		return handlePrint()
 	case "Y", "--yay":
-		err = handleYay()
-	default:
-		//this means we allowed an op but not implement it
-		//if this happens it an error in the code and not the usage
-		err = fmt.Errorf("unhandled operation")
+		return handleYay()
 	}
 
-	return
+	return fmt.Errorf("unhandled operation")
 }
 
 func handleQuery() error {
@@ -192,7 +189,7 @@ func handleHelp() error {
 }
 
 func handleVersion() {
-	fmt.Printf("yay v%s - libalpm v%s\n", version, alpm.Version())
+	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
 func handlePrint() (err error) {
@@ -222,7 +219,6 @@ func handlePrint() (err error) {
 }
 
 func handleYay() error {
-	//_, options, targets := cmdArgs.formatArgs()
 	if cmdArgs.existsArg("gendb") {
 		return createDevelDB()
 	}
@@ -318,7 +314,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 	}
 
 	if lenpq == 0 && lenaq == 0 {
-		return fmt.Errorf("No packages match search")
+		return fmt.Errorf("no packages match search")
 	}
 
 	switch config.SortMode {
@@ -337,7 +333,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 			pq.printSearch()
 		}
 	default:
-		return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
+		return fmt.Errorf("invalid sort mode. Fix with yay -Y --bottomup --save")
 	}
 
 	if aurErr != nil {
@@ -355,7 +351,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		return err
 	}
 	if overflow {
-		return fmt.Errorf("Input too long")
+		return fmt.Errorf("input too long")
 	}
 
 	include, exclude, _, otherExclude := intrange.ParseNumberMenu(string(numberBuf))
@@ -371,7 +367,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		case bottomUp:
 			target = len(pq) - i
 		default:
-			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
+			return fmt.Errorf("invalid sort mode. Fix with yay -Y --bottomup --save")
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
@@ -379,7 +375,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		}
 	}
 
-	for i, pkg := range aq {
+	for i := range aq {
 		var target int
 
 		switch config.SortMode {
@@ -388,11 +384,11 @@ func displayNumberMenu(pkgS []string) (err error) {
 		case bottomUp:
 			target = len(aq) - i + len(pq)
 		default:
-			return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
+			return fmt.Errorf("invalid sort mode. Fix with yay -Y --bottomup --save")
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
-			arguments.addTarget("aur/" + pkg.Name)
+			arguments.addTarget("aur/" + aq[i].Name)
 		}
 	}
 

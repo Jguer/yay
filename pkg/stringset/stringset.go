@@ -14,7 +14,7 @@ type MapStringSet map[string]StringSet
 // Add adds a new value to the Map.
 // If n is already in the map, then v is appended to the StringSet under that key.
 // Otherwise a new StringSet is creayed containing v
-func (mss MapStringSet) Add(n string, v string) {
+func (mss MapStringSet) Add(n, v string) {
 	_, ok := mss[n]
 	if !ok {
 		mss[n] = make(StringSet)

@@ -12,7 +12,7 @@ import (
 )
 
 // Show provides completion info for shells
-func Show(alpmHandle *alpm.Handle, aurURL string, cacheDir string, interval int, force bool) error {
+func Show(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force bool) error {
 	path := filepath.Join(cacheDir, "completion.cache")
 
 	err := Update(alpmHandle, aurURL, cacheDir, interval, force)
@@ -31,7 +31,7 @@ func Show(alpmHandle *alpm.Handle, aurURL string, cacheDir string, interval int,
 }
 
 // Update updates completion cache to be used by Complete
-func Update(alpmHandle *alpm.Handle, aurURL string, cacheDir string, interval int, force bool) error {
+func Update(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force bool) error {
 	path := filepath.Join(cacheDir, "completion.cache")
 	info, err := os.Stat(path)
 
@@ -57,7 +57,7 @@ func Update(alpmHandle *alpm.Handle, aurURL string, cacheDir string, interval in
 	return nil
 }
 
-//CreateAURList creates a new completion file
+// CreateAURList creates a new completion file
 func createAURList(aurURL string, out io.Writer) error {
 	resp, err := http.Get(aurURL + "/packages.gz")
 	if err != nil {
@@ -78,7 +78,7 @@ func createAURList(aurURL string, out io.Writer) error {
 	return nil
 }
 
-//CreatePackageList appends Repo packages to completion cache
+// CreatePackageList appends Repo packages to completion cache
 func createRepoList(alpmHandle *alpm.Handle, out io.Writer) error {
 	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {

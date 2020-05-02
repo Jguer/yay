@@ -9,11 +9,11 @@ import (
 	"time"
 
 	alpm "github.com/Jguer/go-alpm"
+	rpc "github.com/mikkeloscar/aur"
+
 	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/multierror"
-
 	"github.com/Jguer/yay/v9/pkg/stringset"
-	rpc "github.com/mikkeloscar/aur"
 )
 
 type aurWarnings struct {
@@ -71,8 +71,10 @@ func (q aurQuery) Swap(i, j int) {
 }
 
 // FilterPackages filters packages based on source and type from local repository.
-func filterPackages() (local []alpm.Package, remote []alpm.Package,
-	localNames []string, remoteNames []string, err error) {
+func filterPackages() (
+	local, remote []alpm.Package,
+	localNames, remoteNames []string,
+	err error) {
 	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return
@@ -106,7 +108,7 @@ func filterPackages() (local []alpm.Package, remote []alpm.Package,
 	}
 
 	err = localDB.PkgCache().ForEach(f)
-	return
+	return local, remote, localNames, remoteNames, err
 }
 
 func getSearchBy(value string) rpc.By {
@@ -162,14 +164,14 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 	var aq aurQuery
 	var n int
 
-	for _, res := range r {
+	for i := range r {
 		match := true
 		for i, pkgN := range pkgS {
 			if usedIndex == i {
 				continue
 			}
 
-			if !(strings.Contains(res.Name, pkgN) || strings.Contains(strings.ToLower(res.Description), pkgN)) {
+			if !(strings.Contains(r[i].Name, pkgN) || strings.Contains(strings.ToLower(r[i].Description), pkgN)) {
 				match = false
 				break
 			}
@@ -177,7 +179,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 		if match {
 			n++
-			aq = append(aq, res)
+			aq = append(aq, r[i])
 		}
 	}
 
@@ -222,7 +224,7 @@ func syncSearch(pkgS []string) (err error) {
 			pq.printSearch()
 		}
 	default:
-		return fmt.Errorf("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
+		return fmt.Errorf("invalid Sort Mode. Fix with yay -Y --bottomup --save")
 	}
 
 	if aurErr != nil {
@@ -234,13 +236,13 @@ func syncSearch(pkgS []string) (err error) {
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(pkgS []string) (err error) {
+func syncInfo(pkgS []string) error {
 	var info []*rpc.Pkg
 	missing := false
 	pkgS = removeInvalidTargets(pkgS)
 	aurS, repoS, err := packageSlices(pkgS)
 	if err != nil {
-		return
+		return err
 	}
 
 	if len(aurS) != 0 {
@@ -266,7 +268,7 @@ func syncInfo(pkgS []string) (err error) {
 		err = show(passToPacman(arguments))
 
 		if err != nil {
-			return
+			return err
 		}
 	}
 
@@ -284,7 +286,7 @@ func syncInfo(pkgS []string) (err error) {
 		err = fmt.Errorf("")
 	}
 
-	return
+	return err
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
@@ -315,10 +317,10 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
+func packageSlices(toCheck []string) (aur, repo []string, err error) {
 	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
-		return
+		return nil, nil, err
 	}
 
 	for _, _pkg := range toCheck {
@@ -337,7 +339,6 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 			if db.Pkg(name) != nil {
 				found = true
 				return fmt.Errorf("")
-
 			}
 			return nil
 		})
@@ -353,7 +354,7 @@ func packageSlices(toCheck []string) (aur []string, repo []string, err error) {
 		}
 	}
 
-	return
+	return aur, repo, nil
 }
 
 // HangingPackages returns a list of packages installed as deps
@@ -443,7 +444,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 		return nil
 	})
 
-	return
+	return hanging, err
 }
 
 func lastBuildTime() (time.Time, error) {
@@ -465,18 +466,18 @@ func lastBuildTime() (time.Time, error) {
 }
 
 // Statistics returns statistics about packages installed in system
-func statistics() (info struct {
+func statistics() (*struct {
 	Totaln    int
 	Expln     int
 	TotalSize int64
-}, err error) {
+}, error) {
 	var tS int64 // TotalSize
 	var nPkg int
 	var ePkg int
 
 	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	for _, pkg := range localDB.PkgCache().Slice() {
@@ -487,7 +488,7 @@ func statistics() (info struct {
 		}
 	}
 
-	info = struct {
+	info := &struct {
 		Totaln    int
 		Expln     int
 		TotalSize int64
@@ -495,7 +496,7 @@ func statistics() (info struct {
 		nPkg, ePkg, tS,
 	}
 
-	return
+	return info, err
 }
 
 // Queries the aur for information about specified packages.
@@ -518,9 +519,8 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 			return
 		}
 		mux.Lock()
-		for _, _i := range tempInfo {
-			i := _i
-			info = append(info, &i)
+		for i := range tempInfo {
+			info = append(info, &tempInfo[i])
 		}
 		mux.Unlock()
 	}

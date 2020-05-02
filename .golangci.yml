@@ -5,8 +5,8 @@ linters-settings:
     lines: 100
     statements: 50
   goconst:
-    min-len: 2
-    min-occurrences: 2
+    min-len: 3
+    min-occurrences: 4
   gocritic:
     enabled-tags:
       - diagnostic
@@ -48,18 +48,13 @@ linters:
     - bodyclose
     - deadcode
     - depguard
-    - dogsled
     - dupl
     - errcheck
-    - funlen
     - gochecknoinits
-    - goconst
     - gocritic
-    - gocyclo
     - gofmt
     - goimports
     - golint
-    - gomnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -70,7 +65,6 @@ linters:
     - misspell
     - nakedret
     - rowserrcheck
-    - scopelint
     - staticcheck
     - structcheck
     - stylecheck
@@ -80,10 +74,18 @@ linters:
     - unused
     - varcheck
     - whitespace
-
-    - godox
-    - maligned
     - prealloc
+    - maligned
+
+    # disabled want to fix
+    #- scopelint
+    #- gomnd
+    #- goconst
+    #- gocyclo
+    #- funlen
+    #- dogsled
+    # disabled for now
+    # - godox
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
@@ -92,9 +94,9 @@ issues:
       linters:
         - gomnd
 
+  exclude:
+    - G204
+    - commentedOutCode
+
 run:
-  skip-dirs:
-    - test/testdata_etc
-    - internal/cache
-    - internal/renameio
-    - internal/robustio
+  tests: false

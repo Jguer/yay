@@ -56,7 +56,8 @@ func TestGetVersionDiff(t *testing.T) {
 		o, n := getVersionDiff(pair.Old, pair.New)
 
 		if o != out[i].Old || n != out[i].New {
-			t.Errorf("Test %d failed for update: expected (%s => %s) got (%s => %s) %d %d %d %d", i+1, in[i].Old, in[i].New, o, n, len(in[i].Old), len(in[i].New), len(o), len(n))
+			t.Errorf("Test %d failed for update: expected (%s => %s) got (%s => %s) %d %d %d %d",
+				i+1, in[i].Old, in[i].New, o, n, len(in[i].Old), len(in[i].New), len(o), len(n))
 		}
 	}
 }

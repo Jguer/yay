@@ -9,8 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Jguer/yay/v9/pkg/stringset"
 	rpc "github.com/mikkeloscar/aur"
+
+	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
 // Parses command line arguments in a way we can interact with programmatically but
@@ -139,7 +140,7 @@ func (parser *arguments) addOP(op string) (err error) {
 	return
 }
 
-func (parser *arguments) addParam(option string, arg string) (err error) {
+func (parser *arguments) addParam(option, arg string) (err error) {
 	if !isArg(option) {
 		return fmt.Errorf("invalid option '%s'", option)
 	}
@@ -188,7 +189,7 @@ func (parser *arguments) existsArg(options ...string) bool {
 	return false
 }
 
-func (parser *arguments) getArg(options ...string) (arg string, double bool, exists bool) {
+func (parser *arguments) getArg(options ...string) (arg string, double, exists bool) {
 	existCount := 0
 
 	for _, option := range options {
@@ -204,7 +205,6 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 			if exists {
 				existCount++
 			}
-
 		}
 
 		value, exists = parser.globals[option]
@@ -217,14 +217,13 @@ func (parser *arguments) getArg(options ...string) (arg string, double bool, exi
 			if exists {
 				existCount++
 			}
-
 		}
 	}
 
 	double = existCount >= 2
 	exists = existCount >= 1
 
-	return
+	return arg, double, exists
 }
 
 func (parser *arguments) addTarget(targets ...string) {
@@ -291,7 +290,6 @@ func (parser *arguments) formatGlobals() (args []string) {
 	}
 
 	return
-
 }
 
 func formatArg(arg string) string {
@@ -375,7 +373,7 @@ func isArg(arg string) bool {
 	case "y", "refresh":
 	case "x", "regex":
 	case "machinereadable":
-	//yay options
+	// yay options
 	case "aururl":
 	case "save":
 	case "afterclean", "cleanafter":
@@ -674,7 +672,7 @@ func hasParam(arg string) bool {
 	case "print-format":
 	case "gpgdir":
 	case "color":
-	//yay params
+	// yay params
 	case "aururl":
 	case "mflags":
 	case "gpgflags":
@@ -707,7 +705,7 @@ func hasParam(arg string) bool {
 
 // Parses short hand options such as:
 // -Syu -b/some/path -
-func (parser *arguments) parseShortOption(arg string, param string) (usedNext bool, err error) {
+func (parser *arguments) parseShortOption(arg, param string) (usedNext bool, err error) {
 	if arg == "-" {
 		err = parser.addArg("-")
 		return
@@ -741,7 +739,7 @@ func (parser *arguments) parseShortOption(arg string, param string) (usedNext bo
 
 // Parses full length options such as:
 // --sync --refresh --sysupgrade --dbpath /some/path --
-func (parser *arguments) parseLongOption(arg string, param string) (usedNext bool, err error) {
+func (parser *arguments) parseLongOption(arg, param string) (usedNext bool, err error) {
 	if arg == "--" {
 		err = parser.addArg(arg)
 		return
@@ -773,16 +771,14 @@ func (parser *arguments) parseStdin() error {
 	return os.Stdin.Close()
 }
 
-func (parser *arguments) parseCommandLine() (err error) {
+func (parser *arguments) parseCommandLine() error {
 	args := os.Args[1:]
 	usedNext := false
 
 	if len(args) < 1 {
-		_, err = parser.parseShortOption("-Syu", "")
-		if err != nil {
-			return
+		if _, err := parser.parseShortOption("-Syu", ""); err != nil {
+			return err
 		}
-
 	} else {
 		for k, arg := range args {
 			var nextArg string
@@ -796,6 +792,7 @@ func (parser *arguments) parseCommandLine() (err error) {
 				nextArg = args[k+1]
 			}
 
+			var err error
 			switch {
 			case parser.existsArg("--"):
 				parser.addTarget(arg)
@@ -808,7 +805,7 @@ func (parser *arguments) parseCommandLine() (err error) {
 			}
 
 			if err != nil {
-				return
+				return err
 			}
 		}
 	}
@@ -818,25 +815,21 @@ func (parser *arguments) parseCommandLine() (err error) {
 	}
 
 	if parser.existsArg("-") {
-		var file *os.File
-		err = parser.parseStdin()
+		if err := parser.parseStdin(); err != nil {
+			return err
+		}
 		parser.delArg("-")
 
+		file, err := os.Open("/dev/tty")
 		if err != nil {
-			return
-		}
-
-		file, err = os.Open("/dev/tty")
-
-		if err != nil {
-			return
+			return err
 		}
 
 		os.Stdin = file
 	}
 
 	cmdArgs.extractYayOptions()
-	return
+	return nil
 }
 
 func (parser *arguments) extractYayOptions() {

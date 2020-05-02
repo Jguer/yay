@@ -7,10 +7,11 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v9/pkg/stringset"
 )
 
-func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts stringset.MapStringSet) {
+func (dp *depPool) checkInnerConflict(name, conflict string, conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -32,7 +33,7 @@ func (dp *depPool) checkInnerConflict(name string, conflict string, conflicts st
 	}
 }
 
-func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts stringset.MapStringSet) {
+func (dp *depPool) checkForwardConflict(name, conflict string, conflicts stringset.MapStringSet) {
 	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
 			return nil
@@ -50,7 +51,7 @@ func (dp *depPool) checkForwardConflict(name string, conflict string, conflicts 
 	})
 }
 
-func (dp *depPool) checkReverseConflict(name string, conflict string, conflicts stringset.MapStringSet) {
+func (dp *depPool) checkReverseConflict(name, conflict string, conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -159,7 +160,6 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 
 			fmt.Println(str)
 		}
-
 	}
 
 	if len(conflicts) != 0 {
@@ -175,7 +175,6 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 
 			fmt.Println(str)
 		}
-
 	}
 
 	// Add the inner conflicts to the conflicts
@@ -191,7 +190,7 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 	if len(conflicts) > 0 {
 		if !config.UseAsk {
 			if config.NoConfirm {
-				return nil, fmt.Errorf("Package conflicts can not be resolved with noconfirm, aborting")
+				return nil, fmt.Errorf("package conflicts can not be resolved with noconfirm, aborting")
 			}
 
 			fmt.Fprintln(os.Stderr)
@@ -276,7 +275,6 @@ func (dp *depPool) CheckMissing() error {
 	fmt.Println(bold(red(arrow+" Error: ")) + "Could not find all required packages:")
 	for dep, trees := range missing.Missing {
 		for _, tree := range trees {
-
 			fmt.Print("    ", cyan(dep))
 
 			if len(tree) == 0 {
