@@ -3,9 +3,9 @@ name: Build
 on:
   push:
     paths-ignore:
-    - 'doc/**'
-    - 'README.md'
-    - '.gitignore'
+      - "doc/**"
+      - "README.md"
+      - ".gitignore"
   pull_request:
 
 jobs:
@@ -16,10 +16,10 @@ jobs:
     container: samip537/archlinux:devel
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Run Build and tests
-        run: | 
+        run: |
           pacman -Sy --noconfirm go
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.23.6
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.25.1
           ./bin/golangci-lint run ./...
           make test
