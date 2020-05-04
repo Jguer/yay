@@ -15,13 +15,23 @@ MINORVERSION := 4
 PATCHVERSION := 2
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
+LOCALEDIR := locale
+SYSTEMLOCALEPATH := $(DESTDIR)$(PREFIX)/share/locale
+
+LANGS := pt
+POTFILE := ${PKGNAME}.pot
+POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
+MOFILES := $(POFILES:.po=.mo)
+
 GOFLAGS := -v -mod=mod
 EXTRA_GOFLAGS ?=
-LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION}"
+LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION} -X main.localePath=${SYSTEMLOCALEPATH}"
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
 SOURCES ?= $(shell find . -name "*.go" -type f ! -path "./vendor/*")
+
+.PRECIOUS: ${LOCALEDIR}/%.po
 
 .PHONY: default
 default: build
@@ -53,7 +63,7 @@ $(RELEASE_DIR):
 	mkdir $(RELEASE_DIR)
 
 $(PACKAGE): $(BIN) $(RELEASE_DIR)
-	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/*
+	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/* ${MOFILES}
 	tar -czvf $(PACKAGE) $(RELEASE_DIR)
 
 .PHONY: docker-release-all
@@ -110,7 +120,7 @@ fmt:
 	gofmt -s -w $(SOURCES)
 
 .PHONY: install
-install:
+install: build ${MOFILES}
 	install -Dm755 ${BIN} $(DESTDIR)$(PREFIX)/bin/${BIN}
 	install -Dm644 doc/${PKGNAME}.8 $(DESTDIR)$(PREFIX)/share/man/man8/${PKGNAME}.8
 	install -Dm644 completions/bash $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
@@ -124,3 +134,19 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
 	rm -f $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
 	rm -f $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
+	for lang in ${LANGS}; do \
+		rm -f $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/${PKGNAME}.mo; \
+	done
+
+locale: ${MOFILES}
+
+${LOCALEDIR}/${POTFILE}: ${GOFILES}
+	xgettext --from-code=UTF-8 -Lc -sc -d ${PKGNAME} -kGet -o locale/${PKGNAME}.pot ${GOFILES}
+
+${LOCALEDIR}/%.po: ${LOCALEDIR}/${POTFILE}
+	test -f $@ || msginit -l $* -i $< -o $@
+	msgmerge -U $@ $<
+	touch $@
+
+${LOCALEDIR}/%.mo: ${LOCALEDIR}/%.po
+	msgfmt $< -o $@

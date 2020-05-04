@@ -1,0 +1,10 @@
+repos:
+  - repo: git://github.com/dnephin/pre-commit-golang
+    rev: master
+    hooks:
+      - id: go-fmt
+      - id: go-imports
+        args: [-local=github.com/Jguer/yay/v9/]
+      - id: golangci-lint
+      - id: go-unit-tests
+      - id: go-build

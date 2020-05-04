@@ -10,8 +10,10 @@ import (
 	"time"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
+	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 // Info contains the last commit sha of a repo
@@ -58,7 +60,7 @@ func createDevelDB() error {
 	}
 
 	wg.Wait()
-	fmt.Println(bold(yellow(arrow) + bold(" GenDB finished. No packages were installed")))
+	text.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
 	return err
 }
 
@@ -141,7 +143,7 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString, mux sync.Locker, 
 		}
 
 		savedInfo[pkgName] = info
-		fmt.Println(bold(yellow(arrow)) + " Found git repo: " + cyan(url))
+		text.Warnln(gotext.Get("Found git repo: %s", cyan(url)))
 		err := saveVCSInfo()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -176,7 +178,7 @@ func getCommit(url, branch string, protocols []string) string {
 		timer := time.AfterFunc(5*time.Second, func() {
 			err = cmd.Process.Kill()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				text.Errorln(err)
 			}
 		})
 

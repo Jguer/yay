@@ -6,7 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/leonelquinteros/gotext"
+
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 // GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
@@ -83,12 +86,12 @@ func syncClean(parser *arguments) error {
 
 	var question string
 	if removeAll {
-		question = "Do you want to remove ALL AUR packages from cache?"
+		question = gotext.Get("Do you want to remove ALL AUR packages from cache?")
 	} else {
-		question = "Do you want to remove all other AUR packages from cache?"
+		question = gotext.Get("Do you want to remove all other AUR packages from cache?")
 	}
 
-	fmt.Printf("\nBuild directory: %s\n", config.BuildDir)
+	fmt.Println(gotext.Get("\nBuild directory:"), config.BuildDir)
 
 	if continueTask(question, true) {
 		if err := cleanAUR(keepInstalled, keepCurrent, removeAll); err != nil {
@@ -100,7 +103,7 @@ func syncClean(parser *arguments) error {
 		return nil
 	}
 
-	if continueTask("Do you want to remove ALL untracked AUR files?", true) {
+	if continueTask(gotext.Get("Do you want to remove ALL untracked AUR files?"), true) {
 		return cleanUntracked()
 	}
 
@@ -108,7 +111,7 @@ func syncClean(parser *arguments) error {
 }
 
 func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
-	fmt.Println("removing AUR packages from cache...")
+	fmt.Println(gotext.Get("removing AUR packages from cache..."))
 
 	installedBases := make(stringset.StringSet)
 	inAURBases := make(stringset.StringSet)
@@ -180,7 +183,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 }
 
 func cleanUntracked() error {
-	fmt.Println("removing Untracked AUR files from cache...")
+	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
 	files, err := ioutil.ReadDir(config.BuildDir)
 	if err != nil {
@@ -202,15 +205,16 @@ func cleanUntracked() error {
 }
 
 func cleanAfter(bases []Base) {
-	fmt.Println("removing Untracked AUR files from cache...")
+	fmt.Println(gotext.Get("removing Untracked AUR files from cache..."))
 
 	for i, base := range bases {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
 
-		fmt.Printf(bold(cyan("::")+" Cleaning (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
+		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(bases), cyan(dir)))
+
 		_, stderr, err := capture(passToGit(dir, "reset", "--hard", "HEAD"))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error resetting %s: %s", base.String(), stderr)
+			text.Errorln(gotext.Get("error resetting %s: %s", base.String(), stderr))
 		}
 
 		if err := show(passToGit(dir, "clean", "-fx")); err != nil {
@@ -222,7 +226,7 @@ func cleanAfter(bases []Base) {
 func cleanBuilds(bases []Base) {
 	for i, base := range bases {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
-		fmt.Printf(bold(cyan("::")+" Deleting (%d/%d): %s\n"), i+1, len(bases), cyan(dir))
+		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(bases), cyan(dir)))
 		if err := os.RemoveAll(dir); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

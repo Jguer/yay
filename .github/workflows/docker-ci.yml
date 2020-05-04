@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     name: Lint and test yay
-    # This job runs on Linux
     runs-on: ubuntu-latest
     container:
       image: samip537/archlinux:devel

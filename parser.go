@@ -3,13 +3,14 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"html"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
+	"github.com/pkg/errors"
 
 	"github.com/Jguer/yay/v9/pkg/stringset"
 )
@@ -132,7 +133,7 @@ func (parser *arguments) needRoot() bool {
 
 func (parser *arguments) addOP(op string) (err error) {
 	if parser.op != "" {
-		err = fmt.Errorf("only one operation may be used at a time")
+		err = errors.New(gotext.Get("only one operation may be used at a time"))
 		return
 	}
 
@@ -142,7 +143,7 @@ func (parser *arguments) addOP(op string) (err error) {
 
 func (parser *arguments) addParam(option, arg string) (err error) {
 	if !isArg(option) {
-		return fmt.Errorf("invalid option '%s'", option)
+		return errors.New(gotext.Get("invalid option '%s'", option))
 	}
 
 	if isOp(option) {

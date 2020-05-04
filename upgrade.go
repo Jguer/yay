@@ -7,8 +7,10 @@ import (
 	"unicode"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v9/pkg/intrange"
+	"github.com/Jguer/yay/v9/pkg/text"
 
 	rpc "github.com/mikkeloscar/aur"
 
@@ -133,7 +135,7 @@ func upList(warnings *aurWarnings) (aurUp, repoUp upSlice, err error) {
 	}
 
 	if mode == modeAny || mode == modeRepo {
-		fmt.Println(bold(cyan("::") + bold(" Searching databases for updates...")))
+		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 		go func() {
 			repoUp, err = upRepo()
@@ -143,7 +145,7 @@ func upList(warnings *aurWarnings) (aurUp, repoUp upSlice, err error) {
 	}
 
 	if mode == modeAny || mode == modeAUR {
-		fmt.Println(bold(cyan("::") + bold(" Searching AUR for updates...")))
+		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []*rpc.Pkg
 		_aurdata, err = aurInfo(remoteNames, warnings)
@@ -160,7 +162,7 @@ func upList(warnings *aurWarnings) (aurUp, repoUp upSlice, err error) {
 			}()
 
 			if config.Devel {
-				fmt.Println(bold(cyan("::") + bold(" Checking development packages...")))
+				text.OperationInfoln(gotext.Get("Checking development packages..."))
 				wg.Add(1)
 				go func() {
 					develUp = upDevel(remote, aurdata)
@@ -267,11 +269,10 @@ func upAUR(remote []alpm.Package, aurdata map[string]*rpc.Pkg) upSlice {
 func printIgnoringPackage(pkg alpm.Package, newPkgVersion string) {
 	left, right := getVersionDiff(pkg.Version(), newPkgVersion)
 
-	fmt.Printf("%s %s: ignoring package upgrade (%s => %s)\n",
-		yellow(bold(smallArrow)),
+	text.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
 		cyan(pkg.Name()),
 		left, right,
-	)
+	))
 }
 
 func printLocalNewerThanAUR(
@@ -285,11 +286,10 @@ func printLocalNewerThanAUR(
 		left, right := getVersionDiff(pkg.Version(), aurPkg.Version)
 
 		if !isDevelPackage(pkg) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
-			fmt.Printf("%s %s: local (%s) is newer than AUR (%s)\n",
-				yellow(bold(smallArrow)),
+			text.Warnln(gotext.Get("%s: local (%s) is newer than AUR (%s)",
 				cyan(pkg.Name()),
 				left, right,
-			)
+			))
 		}
 	}
 }
@@ -360,8 +360,7 @@ func upgradePkgs(aurUp, repoUp upSlice) (ignore, aurNames stringset.StringSet, e
 	fmt.Printf("%s"+bold(" %d ")+"%s\n", bold(cyan("::")), allUpLen, bold("Packages to upgrade."))
 	allUp.print()
 
-	fmt.Println(bold(green(arrow + " Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)")))
-	fmt.Print(bold(green(arrow + " ")))
+	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
 
 	numbers, err := getInput(config.AnswerUpgrade)
 	if err != nil {

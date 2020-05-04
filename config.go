@@ -11,6 +11,9 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 // Verbosity settings for search
@@ -123,6 +126,8 @@ var alpmHandle *alpm.Handle
 var mode = modeAny
 
 var hideMenus = false
+
+var localePath = "/usr/share/locale"
 
 // SaveConfig writes yay config to file.
 func (config *Configuration) saveConfig() error {
@@ -255,17 +260,11 @@ func editor() (editor string, args []string) {
 		fallthrough
 	default:
 		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, bold(red(arrow)), bold(cyan("$EDITOR")), bold("is not set"))
-		fmt.Fprintln(os.Stderr,
-			bold(red(arrow))+
-				bold(" Please add ")+
-				bold(cyan("$EDITOR"))+
-				bold(" or ")+
-				bold(cyan("$VISUAL"))+
-				bold(" to your environment variables."))
+		text.Errorln(gotext.Get("%s is not set", bold(cyan("$EDITOR"))))
+		text.Warnln(gotext.Get("Add %s or %s to your environment variables", bold(cyan("$EDITOR")), bold(cyan("$VISUAL"))))
 
 		for {
-			fmt.Print(green(bold(arrow + " Edit PKGBUILD with: ")))
+			text.Infoln(gotext.Get("Edit PKGBUILD with?"))
 			editorInput, err := getInput("")
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
@@ -296,8 +295,8 @@ func continueTask(s string, cont bool) bool {
 
 	var response string
 	var postFix string
-	yes := "yes"
-	no := "no"
+	yes := gotext.Get("yes")
+	no := gotext.Get("no")
 	y := string([]rune(yes)[0])
 	n := string([]rune(no)[0])
 
@@ -307,7 +306,7 @@ func continueTask(s string, cont bool) bool {
 		postFix = fmt.Sprintf(" [%s/%s] ", y, strings.ToUpper(n))
 	}
 
-	fmt.Print(bold(green(arrow)+" "+s), bold(postFix))
+	text.Info(bold(s), bold(postFix))
 
 	if _, err := fmt.Scanln(&response); err != nil {
 		return cont
@@ -318,6 +317,7 @@ func continueTask(s string, cont bool) bool {
 }
 
 func getInput(defaultValue string) (string, error) {
+	text.Info()
 	if defaultValue != "" || config.NoConfirm {
 		fmt.Println(defaultValue)
 		return defaultValue, nil
@@ -331,7 +331,7 @@ func getInput(defaultValue string) (string, error) {
 	}
 
 	if overflow {
-		return "", fmt.Errorf("input too long")
+		return "", fmt.Errorf(gotext.Get("input too long"))
 	}
 
 	return string(buf), nil

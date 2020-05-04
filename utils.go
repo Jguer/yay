@@ -1,8 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"unicode"
+
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
@@ -36,12 +39,12 @@ func removeInvalidTargets(targets []string) []string {
 		db, _ := splitDBFromName(target)
 
 		if db == "aur" && mode == modeRepo {
-			fmt.Printf("%s %s %s\n", bold(yellow(arrow)), cyan(target), bold("Can't use target with option --repo -- skipping"))
+			text.Warnln(gotext.Get("%s: can't use target with option --repo -- skipping", cyan(target)))
 			continue
 		}
 
 		if db != "aur" && db != "" && mode == modeAUR {
-			fmt.Printf("%s %s %s\n", bold(yellow(arrow)), cyan(target), bold("Can't use target with option --aur -- skipping"))
+			text.Warnln(gotext.Get("%s: can't use target with option --aur -- skipping", cyan(target)))
 			continue
 		}
 

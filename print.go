@@ -12,10 +12,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 const arrow = "==>"
@@ -23,7 +25,7 @@ const smallArrow = " ->"
 
 func (warnings *aurWarnings) print() {
 	if len(warnings.Missing) > 0 {
-		fmt.Print(bold(yellow(smallArrow)) + " Missing AUR Packages:")
+		text.Warn(gotext.Get("Missing AUR Packages:"))
 		for _, name := range warnings.Missing {
 			fmt.Print("  " + cyan(name))
 		}
@@ -31,7 +33,7 @@ func (warnings *aurWarnings) print() {
 	}
 
 	if len(warnings.Orphans) > 0 {
-		fmt.Print(bold(yellow(smallArrow)) + " Orphaned AUR Packages:")
+		text.Warn(gotext.Get("Orphaned AUR Packages:"))
 		for _, name := range warnings.Orphans {
 			fmt.Print("  " + cyan(name))
 		}
@@ -39,7 +41,7 @@ func (warnings *aurWarnings) print() {
 	}
 
 	if len(warnings.OutOfDate) > 0 {
-		fmt.Print(bold(yellow(smallArrow)) + " Flagged Out Of Date AUR Packages:")
+		text.Warn(gotext.Get("Flagged Out Of Date AUR Packages:"))
 		for _, name := range warnings.OutOfDate {
 			fmt.Print("  " + cyan(name))
 		}
@@ -73,7 +75,7 @@ func (q aurQuery) printSearch(start int) {
 			case bottomUp:
 				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			default:
-				fmt.Println("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
+				text.Warnln(gotext.Get("Invalid Sort Mode. Fix with yay -Y --bottomup --save"))
 			}
 		} else if config.SearchMode == minimal {
 			fmt.Println(q[i].Name)
@@ -86,18 +88,18 @@ func (q aurQuery) printSearch(start int) {
 			" " + bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+"%) ")
 
 		if q[i].Maintainer == "" {
-			toprint += bold(red("(Orphaned)")) + " "
+			toprint += bold(red(gotext.Get("(Orphaned)"))) + " "
 		}
 
 		if q[i].OutOfDate != 0 {
-			toprint += bold(red("(Out-of-date "+formatTime(q[i].OutOfDate)+")")) + " "
+			toprint += bold(red(gotext.Get("(Out-of-date: %s)", formatTime(q[i].OutOfDate)))) + " "
 		}
 
 		if pkg := localDB.Pkg(q[i].Name); pkg != nil {
 			if pkg.Version() != q[i].Version {
-				toprint += bold(green("(Installed: " + pkg.Version() + ")"))
+				toprint += bold(green(gotext.Get("(Installed: %)", pkg.Version())))
 			} else {
-				toprint += bold(green("(Installed)"))
+				toprint += bold(green(gotext.Get("(Installed)")))
 			}
 		}
 		toprint += "\n    " + q[i].Description
@@ -116,7 +118,7 @@ func (s repoQuery) printSearch() {
 			case bottomUp:
 				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
 			default:
-				fmt.Println("Invalid Sort Mode. Fix with yay -Y --bottomup --save")
+				text.Warnln(gotext.Get("Invalid Sort Mode. Fix with yay -Y --bottomup --save"))
 			}
 		} else if config.SearchMode == minimal {
 			fmt.Println(res.Name())
@@ -136,9 +138,9 @@ func (s repoQuery) printSearch() {
 		if err == nil {
 			if pkg := localDB.Pkg(res.Name()); pkg != nil {
 				if pkg.Version() != res.Version() {
-					toprint += bold(green("(Installed: " + pkg.Version() + ")"))
+					toprint += bold(green(gotext.Get("(Installed: %s)", pkg.Version())))
 				} else {
-					toprint += bold(green("(Installed)"))
+					toprint += bold(green(gotext.Get("(Installed)")))
 				}
 			}
 		}
@@ -278,48 +280,40 @@ func printDownloads(repoName string, length int, packages string) {
 	fmt.Println(repoInfo + cyan(packages))
 }
 
-func printInfoValue(str, value string) {
-	if value == "" {
-		value = "None"
-	}
-
-	fmt.Printf(bold("%-16s%s")+" %s\n", str, ":", value)
-}
-
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *rpc.Pkg) {
-	printInfoValue("Repository", "aur")
-	printInfoValue("Name", a.Name)
-	printInfoValue("Keywords", strings.Join(a.Keywords, "  "))
-	printInfoValue("Version", a.Version)
-	printInfoValue("Description", a.Description)
-	printInfoValue("URL", a.URL)
-	printInfoValue("AUR URL", config.AURURL+"/packages/"+a.Name)
-	printInfoValue("Groups", strings.Join(a.Groups, "  "))
-	printInfoValue("Licenses", strings.Join(a.License, "  "))
-	printInfoValue("Provides", strings.Join(a.Provides, "  "))
-	printInfoValue("Depends On", strings.Join(a.Depends, "  "))
-	printInfoValue("Make Deps", strings.Join(a.MakeDepends, "  "))
-	printInfoValue("Check Deps", strings.Join(a.CheckDepends, "  "))
-	printInfoValue("Optional Deps", strings.Join(a.OptDepends, "  "))
-	printInfoValue("Conflicts With", strings.Join(a.Conflicts, "  "))
-	printInfoValue("Maintainer", a.Maintainer)
-	printInfoValue("Votes", fmt.Sprintf("%d", a.NumVotes))
-	printInfoValue("Popularity", fmt.Sprintf("%f", a.Popularity))
-	printInfoValue("First Submitted", formatTimeQuery(a.FirstSubmitted))
-	printInfoValue("Last Modified", formatTimeQuery(a.LastModified))
+	text.PrintInfoValue(gotext.Get("Repository"), "aur")
+	text.PrintInfoValue(gotext.Get("Name"), a.Name)
+	text.PrintInfoValue(gotext.Get("Keywords"), strings.Join(a.Keywords, "  "))
+	text.PrintInfoValue(gotext.Get("Version"), a.Version)
+	text.PrintInfoValue(gotext.Get("Description"), a.Description)
+	text.PrintInfoValue(gotext.Get("URL"), a.URL)
+	text.PrintInfoValue(gotext.Get("AUR URL"), config.AURURL+"/packages/"+a.Name)
+	text.PrintInfoValue(gotext.Get("Groups"), strings.Join(a.Groups, "  "))
+	text.PrintInfoValue(gotext.Get("Licenses"), strings.Join(a.License, "  "))
+	text.PrintInfoValue(gotext.Get("Provides"), strings.Join(a.Provides, "  "))
+	text.PrintInfoValue(gotext.Get("Depends On"), strings.Join(a.Depends, "  "))
+	text.PrintInfoValue(gotext.Get("Make Deps"), strings.Join(a.MakeDepends, "  "))
+	text.PrintInfoValue(gotext.Get("Check Deps"), strings.Join(a.CheckDepends, "  "))
+	text.PrintInfoValue(gotext.Get("Optional Deps"), strings.Join(a.OptDepends, "  "))
+	text.PrintInfoValue(gotext.Get("Conflicts With"), strings.Join(a.Conflicts, "  "))
+	text.PrintInfoValue(gotext.Get("Maintainer"), a.Maintainer)
+	text.PrintInfoValue(gotext.Get("Votes"), fmt.Sprintf("%d", a.NumVotes))
+	text.PrintInfoValue(gotext.Get("Popularity"), fmt.Sprintf("%f", a.Popularity))
+	text.PrintInfoValue(gotext.Get("First Submitted"), formatTimeQuery(a.FirstSubmitted))
+	text.PrintInfoValue(gotext.Get("Last Modified"), formatTimeQuery(a.LastModified))
 
 	if a.OutOfDate != 0 {
-		printInfoValue("Out-of-date", formatTimeQuery(a.OutOfDate))
+		text.PrintInfoValue(gotext.Get("Out-of-date"), formatTimeQuery(a.OutOfDate))
 	} else {
-		printInfoValue("Out-of-date", "No")
+		text.PrintInfoValue(gotext.Get("Out-of-date"), "No")
 	}
 
 	if cmdArgs.existsDouble("i") {
-		printInfoValue("ID", fmt.Sprintf("%d", a.ID))
-		printInfoValue("Package Base ID", fmt.Sprintf("%d", a.PackageBaseID))
-		printInfoValue("Package Base", a.PackageBase)
-		printInfoValue("Snapshot URL", config.AURURL+a.URLPath)
+		text.PrintInfoValue("ID", fmt.Sprintf("%d", a.ID))
+		text.PrintInfoValue(gotext.Get("Package Base ID"), fmt.Sprintf("%d", a.PackageBaseID))
+		text.PrintInfoValue(gotext.Get("Package Base"), a.PackageBase)
+		text.PrintInfoValue(gotext.Get("Snapshot URL"), config.AURURL+a.URLPath)
 	}
 
 	fmt.Println()
@@ -340,7 +334,7 @@ func biggestPackages() {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Println(bold(pkgS[i].Name()) + ": " + cyan(human(pkgS[i].ISize())))
+		fmt.Printf("%s: %s\n", bold(pkgS[i].Name()), cyan(human(pkgS[i].ISize())))
 	}
 	// Could implement size here as well, but we just want the general idea
 }
@@ -357,14 +351,14 @@ func localStatistics() error {
 		return err
 	}
 
-	fmt.Printf(bold("Yay version v%s\n"), yayVersion)
+	text.Infoln(gotext.Get("Yay version v%s", yayVersion))
 	fmt.Println(bold(cyan("===========================================")))
-	fmt.Println(bold(green("Total installed packages: ")) + cyan(strconv.Itoa(info.Totaln)))
-	fmt.Println(bold(green("Total foreign installed packages: ")) + cyan(strconv.Itoa(len(remoteNames))))
-	fmt.Println(bold(green("Explicitly installed packages: ")) + cyan(strconv.Itoa(info.Expln)))
-	fmt.Println(bold(green("Total Size occupied by packages: ")) + cyan(human(info.TotalSize)))
+	text.Infoln(gotext.Get("Total installed packages: %s", cyan(strconv.Itoa(info.Totaln))))
+	text.Infoln(gotext.Get("Total foreign installed packages: %s", cyan(strconv.Itoa(len(remoteNames)))))
+	text.Infoln(gotext.Get("Explicitly installed packages: %s", cyan(strconv.Itoa(info.Expln))))
+	text.Infoln(gotext.Get("Total Size occupied by packages: %s", cyan(human(info.TotalSize))))
 	fmt.Println(bold(cyan("===========================================")))
-	fmt.Println(bold(green("Ten biggest packages:")))
+	text.Infoln(gotext.Get("Ten biggest packages:"))
 	biggestPackages()
 	fmt.Println(bold(cyan("===========================================")))
 
@@ -449,7 +443,7 @@ outer:
 			}
 		}
 
-		fmt.Fprintln(os.Stderr, red(bold("error:")), "package '"+pkg+"' was not found")
+		text.Errorln(gotext.Get("package '%s' was not found", pkg))
 		missing = true
 	}
 
@@ -618,21 +612,20 @@ func colorHash(name string) (output string) {
 func providerMenu(dep string, providers providers) *rpc.Pkg {
 	size := providers.Len()
 
-	fmt.Print(bold(cyan(":: ")))
-	str := bold(fmt.Sprintf(bold("There are %d providers available for %s:"), size, dep))
+	str := bold(gotext.Get("There are %d providers available for %s:", size, dep))
 
 	size = 1
-	str += bold(cyan("\n:: ")) + bold("Repository AUR\n    ")
+	str += bold(cyan("\n:: ")) + bold(gotext.Get("Repository AUR")) + "\n    "
 
 	for _, pkg := range providers.Pkgs {
 		str += fmt.Sprintf("%d) %s ", size, pkg.Name)
 		size++
 	}
 
-	fmt.Fprintln(os.Stderr, str)
+	text.OperationInfoln(str)
 
 	for {
-		fmt.Print("\nEnter a number (default=1): ")
+		fmt.Print(gotext.Get("\nEnter a number (default=1): "))
 
 		if config.NoConfirm {
 			fmt.Println("1")
@@ -648,7 +641,7 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 		}
 
 		if overflow {
-			fmt.Fprintln(os.Stderr, "Input too long")
+			text.Errorln(gotext.Get("input too long"))
 			continue
 		}
 
@@ -658,12 +651,12 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 
 		num, err := strconv.Atoi(string(numberBuf))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s invalid number: %s\n", red("error:"), string(numberBuf))
+			text.Errorln(gotext.Get("invalid number: %s", string(numberBuf)))
 			continue
 		}
 
 		if num < 1 || num >= size {
-			fmt.Fprintf(os.Stderr, "%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size-1)
+			text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size-1))
 			continue
 		}
 

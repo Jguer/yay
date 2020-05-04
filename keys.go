@@ -2,12 +2,16 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 // pgpKeySet maps a PGP key with a list of PKGBUILDs that require it.
@@ -77,7 +81,7 @@ func checkPgpKeys(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	fmt.Println()
 	fmt.Println(str)
 
-	if continueTask(bold(green("Import?")), true) {
+	if continueTask(gotext.Get("Import?"), true) {
 		return importKeys(problematic.toSlice())
 	}
 
@@ -90,11 +94,11 @@ func importKeys(keys []string) error {
 	cmd := exec.Command(config.GpgBin, append(args, keys...)...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
-	fmt.Printf("%s %s...\n", bold(cyan("::")), bold("Importing keys with gpg..."))
+	text.OperationInfoln(gotext.Get("Importing keys with gpg..."))
 	err := cmd.Run()
 
 	if err != nil {
-		return fmt.Errorf("%s Problem importing keys", bold(red(arrow+" Error:")))
+		return errors.New(gotext.Get("problem importing keys"))
 	}
 	return nil
 }
@@ -103,19 +107,19 @@ func importKeys(keys []string) error {
 // question asking the user wants to import the problematic keys.
 func formatKeysToImport(keys pgpKeySet) (string, error) {
 	if len(keys) == 0 {
-		return "", fmt.Errorf("%s No keys to import", bold(red(arrow+" Error:")))
+		return "", errors.New(gotext.Get("no keys to import"))
 	}
 
 	var buffer bytes.Buffer
-	buffer.WriteString(bold(green(arrow)))
-	buffer.WriteString(bold(green(" PGP keys need importing:")))
+	buffer.WriteString(bold(green(arrow) + " "))
+	buffer.WriteString(bold(green(gotext.Get("PGP keys need importing:"))))
 	for key, bases := range keys {
 		pkglist := ""
 		for _, base := range bases {
 			pkglist += base.String() + "  "
 		}
 		pkglist = strings.TrimRight(pkglist, " ")
-		buffer.WriteString(fmt.Sprintf("\n%s %s, required by: %s", yellow(bold(smallArrow)), cyan(key), cyan(pkglist)))
+		buffer.WriteString(gotext.Get("\n%s %s, required by: %s", yellow(bold(smallArrow)), cyan(key), cyan(pkglist)))
 	}
 	return buffer.String(), nil
 }

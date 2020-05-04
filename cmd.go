@@ -7,9 +7,11 @@ import (
 	"os"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v9/pkg/completion"
 	"github.com/Jguer/yay/v9/pkg/intrange"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 var cmdArgs = makeArguments()
@@ -170,7 +172,7 @@ func handleCmd() error {
 		return handleYay()
 	}
 
-	return fmt.Errorf("unhandled operation")
+	return fmt.Errorf(gotext.Get("unhandled operation"))
 }
 
 func handleQuery() error {
@@ -291,7 +293,7 @@ func handleRemove() error {
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(pkgS []string) (err error) {
+func displayNumberMenu(pkgS []string) error {
 	var (
 		aurErr, repoErr error
 		aq              aurQuery
@@ -309,12 +311,12 @@ func displayNumberMenu(pkgS []string) (err error) {
 		pq, repoErr = queryRepo(pkgS)
 		lenpq = len(pq)
 		if repoErr != nil {
-			return err
+			return repoErr
 		}
 	}
 
 	if lenpq == 0 && lenaq == 0 {
-		return fmt.Errorf("no packages match search")
+		return fmt.Errorf(gotext.Get("no packages match search"))
 	}
 
 	switch config.SortMode {
@@ -333,16 +335,16 @@ func displayNumberMenu(pkgS []string) (err error) {
 			pq.printSearch()
 		}
 	default:
-		return fmt.Errorf("invalid sort mode. Fix with yay -Y --bottomup --save")
+		return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 	}
 
 	if aurErr != nil {
-		fmt.Fprintf(os.Stderr, "Error during AUR search: %s\n", aurErr)
-		fmt.Fprintln(os.Stderr, "Showing repo packages only")
+		text.Errorln(gotext.Get("Error during AUR search: %s\n", aurErr))
+		text.Warnln(gotext.Get("Showing repo packages only"))
 	}
 
-	fmt.Println(bold(green(arrow + " Packages to install (eg: 1 2 3, 1-3 or ^4)")))
-	fmt.Print(bold(green(arrow + " ")))
+	text.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
+	text.Info()
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -351,7 +353,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		return err
 	}
 	if overflow {
-		return fmt.Errorf("input too long")
+		return fmt.Errorf(gotext.Get("input too long"))
 	}
 
 	include, exclude, _, otherExclude := intrange.ParseNumberMenu(string(numberBuf))
@@ -367,7 +369,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		case bottomUp:
 			target = len(pq) - i
 		default:
-			return fmt.Errorf("invalid sort mode. Fix with yay -Y --bottomup --save")
+			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
@@ -384,7 +386,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		case bottomUp:
 			target = len(aq) - i + len(pq)
 		default:
-			return fmt.Errorf("invalid sort mode. Fix with yay -Y --bottomup --save")
+			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
@@ -393,7 +395,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 	}
 
 	if len(arguments.targets) == 0 {
-		fmt.Println("There is nothing to do")
+		fmt.Println(gotext.Get("There is nothing to do"))
 		return nil
 	}
 
@@ -401,9 +403,7 @@ func displayNumberMenu(pkgS []string) (err error) {
 		sudoLoopBackground()
 	}
 
-	err = install(arguments)
-
-	return err
+	return install(arguments)
 }
 
 func syncList(parser *arguments) error {
@@ -436,10 +436,10 @@ func syncList(parser *arguments) error {
 			if cmdArgs.existsArg("q", "quiet") {
 				fmt.Println(name)
 			} else {
-				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green("unknown-version")))
+				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green(gotext.Get("unknown-version"))))
 
 				if localDB.Pkg(name) != nil {
-					fmt.Print(bold(blue(" [Installed]")))
+					fmt.Print(bold(blue(gotext.Get(" [Installed]"))))
 				}
 
 				fmt.Println()

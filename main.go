@@ -2,6 +2,7 @@ package main // import "github.com/Jguer/yay"
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,9 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 func setPaths() error {
@@ -17,7 +21,7 @@ func setPaths() error {
 	} else if configHome = os.Getenv("HOME"); configHome != "" {
 		configHome = filepath.Join(configHome, ".config/yay")
 	} else {
-		return fmt.Errorf("XDG_CONFIG_HOME and HOME unset")
+		return errors.New(gotext.Get("XDG_CONFIG_HOME and HOME unset"))
 	}
 
 	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
@@ -25,7 +29,7 @@ func setPaths() error {
 	} else if cacheHome = os.Getenv("HOME"); cacheHome != "" {
 		cacheHome = filepath.Join(cacheHome, ".cache/yay")
 	} else {
-		return fmt.Errorf("XDG_CACHE_HOME and HOME unset")
+		return errors.New(gotext.Get("XDG_CACHE_HOME and HOME unset"))
 	}
 
 	configFile = filepath.Join(configHome, configFileName)
@@ -34,17 +38,21 @@ func setPaths() error {
 	return nil
 }
 
+func initGotext() {
+	gotext.Configure(localePath, os.Getenv("LANG"), "yay")
+}
+
 func initConfig() error {
 	cfile, err := os.Open(configFile)
 	if !os.IsNotExist(err) && err != nil {
-		return fmt.Errorf("failed to open config file '%s': %s", configFile, err)
+		return errors.New(gotext.Get("failed to open config file '%s': %s", configFile, err))
 	}
 
 	defer cfile.Close()
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(cfile)
 		if err = decoder.Decode(&config); err != nil {
-			return fmt.Errorf("failed to read config '%s': %s", configFile, err)
+			return errors.New(gotext.Get("failed to read config file '%s': %s", configFile, err))
 		}
 	}
 
@@ -59,14 +67,14 @@ func initConfig() error {
 func initVCS() error {
 	vfile, err := os.Open(vcsFile)
 	if !os.IsNotExist(err) && err != nil {
-		return fmt.Errorf("failed to open vcs file '%s': %s", vcsFile, err)
+		return errors.New(gotext.Get("failed to open vcs file '%s': %s", vcsFile, err))
 	}
 
 	defer vfile.Close()
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(vfile)
 		if err = decoder.Decode(&savedInfo); err != nil {
-			return fmt.Errorf("failed to read vcs '%s': %s", vcsFile, err)
+			return errors.New(gotext.Get("failed to read vcs file '%s': %s", vcsFile, err))
 		}
 	}
 
@@ -76,7 +84,7 @@ func initVCS() error {
 func initHomeDirs() error {
 	if _, err := os.Stat(configHome); os.IsNotExist(err) {
 		if err = os.MkdirAll(configHome, 0755); err != nil {
-			return fmt.Errorf("failed to create config directory '%s': %s", configHome, err)
+			return errors.New(gotext.Get("failed to create config directory '%s': %s", configHome, err))
 		}
 	} else if err != nil {
 		return err
@@ -84,7 +92,7 @@ func initHomeDirs() error {
 
 	if _, err := os.Stat(cacheHome); os.IsNotExist(err) {
 		if err = os.MkdirAll(cacheHome, 0755); err != nil {
-			return fmt.Errorf("failed to create cache directory '%s': %s", cacheHome, err)
+			return errors.New(gotext.Get("failed to create cache directory '%s': %s", cacheHome, err))
 		}
 	} else if err != nil {
 		return err
@@ -96,7 +104,7 @@ func initHomeDirs() error {
 func initBuildDir() error {
 	if _, err := os.Stat(config.BuildDir); os.IsNotExist(err) {
 		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
-			return fmt.Errorf("failed to create BuildDir directory '%s': %s", config.BuildDir, err)
+			return errors.New(gotext.Get("failed to create BuildDir directory '%s': %s", config.BuildDir, err))
 		}
 	} else if err != nil {
 		return err
@@ -174,7 +182,7 @@ func initAlpmHandle() error {
 
 	var err error
 	if alpmHandle, err = alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
-		return fmt.Errorf("unable to CreateHandle: %s", err)
+		return errors.New(gotext.Get("unable to CreateHandle: %s", err))
 	}
 
 	if err := configureAlpm(); err != nil {
@@ -208,8 +216,9 @@ func cleanup() int {
 }
 
 func main() {
+	initGotext()
 	if os.Geteuid() == 0 {
-		fmt.Fprintln(os.Stderr, "Please avoid running yay as root/sudo.")
+		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
 	exitOnError(setPaths())

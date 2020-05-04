@@ -9,7 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leonelquinteros/gotext"
 	"golang.org/x/crypto/ssh/terminal"
+
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 func show(cmd *exec.Cmd) error {
@@ -64,9 +67,8 @@ func waitLock() {
 		return
 	}
 
-	fmt.Println(bold(yellow(smallArrow)), filepath.Join(pacmanConf.DBPath, "db.lck"), "is present.")
-
-	fmt.Print(bold(yellow(smallArrow)), " There may be another Pacman instance running. Waiting...")
+	text.Warnln(gotext.Get("%s is present.", filepath.Join(pacmanConf.DBPath, "db.lck")))
+	text.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
 
 	for {
 		time.Sleep(3 * time.Second)

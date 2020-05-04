@@ -7,8 +7,10 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 func (dp *depPool) checkInnerConflict(name, conflict string, conflicts stringset.MapStringSet) {
@@ -132,14 +134,14 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 	conflicts := make(stringset.MapStringSet)
 	wg.Add(2)
 
-	fmt.Println(bold(cyan("::") + bold(" Checking for conflicts...")))
+	text.OperationInfoln(gotext.Get("Checking for conflicts..."))
 	go func() {
 		dp.checkForwardConflicts(conflicts)
 		dp.checkReverseConflicts(conflicts)
 		wg.Done()
 	}()
 
-	fmt.Println(bold(cyan("::") + bold(" Checking for inner conflicts...")))
+	text.OperationInfoln(gotext.Get("Checking for inner conflicts..."))
 	go func() {
 		dp.checkInnerConflicts(innerConflicts)
 		wg.Done()
@@ -148,8 +150,7 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 	wg.Wait()
 
 	if len(innerConflicts) != 0 {
-		fmt.Println()
-		fmt.Println(bold(red(arrow)), bold("Inner conflicts found:"))
+		text.Errorln(gotext.Get("\nInner conflicts found:"))
 
 		for name, pkgs := range innerConflicts {
 			str := red(bold(smallArrow)) + " " + name + ":"
@@ -163,11 +164,10 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 	}
 
 	if len(conflicts) != 0 {
-		fmt.Println()
-		fmt.Println(bold(red(arrow)), bold("Package conflicts found:"))
+		text.Errorln(gotext.Get("\nPackage conflicts found:"))
 
 		for name, pkgs := range conflicts {
-			str := red(bold(smallArrow)) + " Installing " + cyan(name) + " will remove:"
+			str := gotext.Get("%s Installing %s will remove:", red(bold(smallArrow)), cyan(name))
 			for pkg := range pkgs {
 				str += " " + cyan(pkg) + ","
 			}
@@ -190,12 +190,10 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 	if len(conflicts) > 0 {
 		if !config.UseAsk {
 			if config.NoConfirm {
-				return nil, fmt.Errorf("package conflicts can not be resolved with noconfirm, aborting")
+				return nil, fmt.Errorf(gotext.Get("package conflicts can not be resolved with noconfirm, aborting"))
 			}
 
-			fmt.Fprintln(os.Stderr)
-			fmt.Fprintln(os.Stderr, bold(red(arrow)), bold("Conflicting packages will have to be confirmed manually"))
-			fmt.Fprintln(os.Stderr)
+			text.Errorln(gotext.Get("Conflicting packages will have to be confirmed manually"))
 		}
 	}
 
@@ -272,22 +270,22 @@ func (dp *depPool) CheckMissing() error {
 		return nil
 	}
 
-	fmt.Println(bold(red(arrow+" Error: ")) + "Could not find all required packages:")
+	text.Errorln(gotext.Get("Could not find all required packages:"))
 	for dep, trees := range missing.Missing {
 		for _, tree := range trees {
-			fmt.Print("    ", cyan(dep))
+			fmt.Fprintf(os.Stderr, "\t%s", cyan(dep))
 
 			if len(tree) == 0 {
-				fmt.Print(" (Target")
+				fmt.Fprint(os.Stderr, gotext.Get(" (Target"))
 			} else {
-				fmt.Print(" (Wanted by: ")
+				fmt.Fprint(os.Stderr, gotext.Get(" (Wanted by: "))
 				for n := 0; n < len(tree)-1; n++ {
-					fmt.Print(cyan(tree[n]), " -> ")
+					fmt.Fprint(os.Stderr, cyan(tree[n]), " -> ")
 				}
-				fmt.Print(cyan(tree[len(tree)-1]))
+				fmt.Fprint(os.Stderr, cyan(tree[len(tree)-1]))
 			}
 
-			fmt.Println(")")
+			fmt.Fprintln(os.Stderr, ")")
 		}
 	}
 

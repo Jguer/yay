@@ -9,8 +9,11 @@ import (
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
+	"github.com/pkg/errors"
 
 	"github.com/Jguer/yay/v9/pkg/multierror"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 const gitDiffRefName = "AUR_SEEN"
@@ -20,7 +23,7 @@ const gitDiffRefName = "AUR_SEEN"
 func gitUpdateSeenRef(path, name string) error {
 	_, stderr, err := capture(passToGit(filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"))
 	if err != nil {
-		return fmt.Errorf("%s%s", stderr, err)
+		return fmt.Errorf("%s %s", stderr, err)
 	}
 	return nil
 }
@@ -38,7 +41,7 @@ func getLastSeenHash(path, name string) (string, error) {
 	if gitHasLastSeenRef(path, name) {
 		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName))
 		if err != nil {
-			return "", fmt.Errorf("%s%s", stderr, err)
+			return "", fmt.Errorf("%s %s", stderr, err)
 		}
 
 		lines := strings.Split(stdout, "\n")
@@ -78,19 +81,19 @@ func gitDownloadABS(url, path, name string) (bool, error) {
 		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 		_, stderr, err := capture(cmd)
 		if err != nil {
-			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
+			return false, fmt.Errorf(gotext.Get("error cloning %s: %s", name, stderr))
 		}
 
 		return true, nil
 	} else if errExist != nil {
-		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+		return false, fmt.Errorf(gotext.Get("error reading %s", filepath.Join(path, name, ".git")))
 	}
 
 	cmd := passToGit(filepath.Join(path, name), "pull", "--ff-only")
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 	_, stderr, err := capture(cmd)
 	if err != nil {
-		return false, fmt.Errorf("error fetching %s: %s", name, stderr)
+		return false, fmt.Errorf(gotext.Get("error fetching %s: %s", name, stderr))
 	}
 
 	return true, nil
@@ -103,19 +106,19 @@ func gitDownload(url, path, name string) (bool, error) {
 		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 		_, stderr, errCapture := capture(cmd)
 		if errCapture != nil {
-			return false, fmt.Errorf("error cloning %s: %s", name, stderr)
+			return false, fmt.Errorf(gotext.Get("error cloning %s: %s", name, stderr))
 		}
 
 		return true, nil
 	} else if err != nil {
-		return false, fmt.Errorf("error reading %s", filepath.Join(path, name, ".git"))
+		return false, fmt.Errorf(gotext.Get("error reading %s", filepath.Join(path, name, ".git")))
 	}
 
 	cmd := passToGit(filepath.Join(path, name), "fetch")
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 	_, stderr, err := capture(cmd)
 	if err != nil {
-		return false, fmt.Errorf("error fetching %s: %s", name, stderr)
+		return false, fmt.Errorf(gotext.Get("error fetching %s: %s", name, stderr))
 	}
 
 	return false, nil
@@ -124,12 +127,12 @@ func gitDownload(url, path, name string) (bool, error) {
 func gitMerge(path, name string) error {
 	_, stderr, err := capture(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
 	if err != nil {
-		return fmt.Errorf("error resetting %s: %s", name, stderr)
+		return fmt.Errorf(gotext.Get("error resetting %s: %s", name, stderr))
 	}
 
 	_, stderr, err = capture(passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff"))
 	if err != nil {
-		return fmt.Errorf("error merging %s: %s", name, stderr)
+		return fmt.Errorf(gotext.Get("error merging %s: %s", name, stderr))
 	}
 
 	return nil
@@ -175,11 +178,11 @@ func getPkgbuilds(pkgs []string) error {
 			_, err = os.Stat(filepath.Join(wd, name))
 			switch {
 			case err != nil && !os.IsNotExist(err):
-				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
+				text.Errorln(err)
 				continue
 			default:
 				if err = os.RemoveAll(filepath.Join(wd, name)); err != nil {
-					fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
+					text.Errorln(err)
 					continue
 				}
 			}
@@ -267,7 +270,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 				continue
 			}
 		default:
-			fmt.Printf("%s %s %s\n", yellow(smallArrow), cyan(name), "already downloaded -- use -f to overwrite")
+			text.Warn(gotext.Get("%s already downloaded -- use -f to overwrite", cyan(name)))
 			continue
 		}
 
@@ -275,13 +278,14 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 	}
 
 	if len(missing) != 0 {
-		fmt.Println(yellow(bold(smallArrow)), "Missing ABS packages: ", cyan(strings.Join(missing, "  ")))
+		text.Warnln(gotext.Get("Missing ABS packages:"),
+			cyan(strings.Join(missing, ", ")))
 	}
 
 	download := func(pkg string, url string) {
 		defer wg.Done()
 		if _, err := gitDownloadABS(url, config.ABSDir, pkg); err != nil {
-			errs.Add(fmt.Errorf("%s Failed to get pkgbuild: %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(err.Error()))))
+			errs.Add(errors.New(gotext.Get("failed to get pkgbuild: %s: %s", cyan(pkg), err.Error())))
 			return
 		}
 
@@ -289,9 +293,9 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		mux.Lock()
 		downloaded++
 		if err != nil {
-			errs.Add(fmt.Errorf("%s Failed to link %s: %s", bold(red(arrow)), bold(cyan(pkg)), bold(red(stderr))))
+			errs.Add(errors.New(gotext.Get("failed to link %s: %s", cyan(pkg), stderr)))
 		} else {
-			fmt.Printf(bold(cyan("::"))+" Downloaded PKGBUILD from ABS (%d/%d): %s\n", downloaded, len(names), cyan(pkg))
+			fmt.Fprintln(os.Stdout, gotext.Get("(%d/%d) Downloaded PKGBUILD from ABS: %s", downloaded, len(names), cyan(pkg)))
 		}
 		mux.Unlock()
 	}

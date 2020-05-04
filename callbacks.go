@@ -7,6 +7,9 @@ import (
 	"strconv"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 func questionCallback(question alpm.QuestionAny) {
@@ -30,8 +33,7 @@ func questionCallback(question alpm.QuestionAny) {
 		return nil
 	})
 
-	fmt.Print(bold(cyan(":: ")))
-	str := bold(fmt.Sprintf(bold("There are %d providers available for %s:"), size, qp.Dep()))
+	str := gotext.Get("There are %d providers available for %s:", size, qp.Dep())
 
 	size = 1
 	var db string
@@ -41,17 +43,17 @@ func questionCallback(question alpm.QuestionAny) {
 
 		if db != thisDB {
 			db = thisDB
-			str += bold(cyan("\n:: ")) + bold("Repository "+db+"\n    ")
+			str += bold(cyan("\n:: ")) + bold(gotext.Get("Repository ")+db+"\n    ")
 		}
 		str += fmt.Sprintf("%d) %s ", size, pkg.Name())
 		size++
 		return nil
 	})
 
-	fmt.Println(str)
+	text.OperationInfoln(str)
 
 	for {
-		fmt.Print("\nEnter a number (default=1): ")
+		fmt.Print(gotext.Get("\nEnter a number (default=1): "))
 
 		if config.NoConfirm {
 			fmt.Println()
@@ -62,12 +64,12 @@ func questionCallback(question alpm.QuestionAny) {
 		numberBuf, overflow, err := reader.ReadLine()
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 			break
 		}
 
 		if overflow {
-			fmt.Fprintln(os.Stderr, "Input too long")
+			text.Errorln(gotext.Get(" Input too long"))
 			continue
 		}
 
@@ -77,12 +79,12 @@ func questionCallback(question alpm.QuestionAny) {
 
 		num, err := strconv.Atoi(string(numberBuf))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s invalid number: %s\n", red("error:"), string(numberBuf))
+			text.Errorln(gotext.Get("invalid number: %s", string(numberBuf)))
 			continue
 		}
 
 		if num < 1 || num > size {
-			fmt.Fprintf(os.Stderr, "%s invalid value: %d is not between %d and %d\n", red("error:"), num, 1, size)
+			text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size))
 			continue
 		}
 
@@ -94,8 +96,8 @@ func questionCallback(question alpm.QuestionAny) {
 func logCallback(level alpm.LogLevel, str string) {
 	switch level {
 	case alpm.LogWarning:
-		fmt.Print(bold(yellow(smallArrow)), " ", str)
+		text.Warnln(str)
 	case alpm.LogError:
-		fmt.Print(bold(red(smallArrow)), " ", str)
+		text.Errorln(str)
 	}
 }

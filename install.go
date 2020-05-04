@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,11 +12,13 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	gosrc "github.com/Morganamilo/go-srcinfo"
+	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v9/pkg/completion"
 	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 func asdeps(parser *arguments, pkgs []string) error {
@@ -28,7 +31,7 @@ func asdeps(parser *arguments, pkgs []string) error {
 	parser.addTarget(pkgs...)
 	_, stderr, err := capture(passToPacman(parser))
 	if err != nil {
-		return fmt.Errorf("%s%s", stderr, err)
+		return fmt.Errorf("%s %s", stderr, err)
 	}
 
 	return nil
@@ -44,7 +47,7 @@ func asexp(parser *arguments, pkgs []string) error {
 	parser.addTarget(pkgs...)
 	_, stderr, err := capture(passToPacman(parser))
 	if err != nil {
-		return fmt.Errorf("%s%s", stderr, err)
+		return fmt.Errorf("%s %s", stderr, err)
 	}
 
 	return nil
@@ -67,7 +70,7 @@ func install(parser *arguments) (err error) {
 			if parser.existsArg("y", "refresh") {
 				err = earlyRefresh(parser)
 				if err != nil {
-					return fmt.Errorf("error refreshing databases")
+					return fmt.Errorf(gotext.Get("error refreshing databases"))
 				}
 			}
 		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
@@ -158,7 +161,7 @@ func install(parser *arguments) (err error) {
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
 			if parser.existsArg("u", "sysupgrade") {
-				fmt.Println(" there is nothing to do")
+				fmt.Println(gotext.Get(" there is nothing to do"))
 			}
 			return nil
 		}
@@ -170,7 +173,7 @@ func install(parser *arguments) (err error) {
 	}
 
 	if len(dp.Aur) > 0 && os.Geteuid() == 0 {
-		return fmt.Errorf(bold(red(arrow)) + " Refusing to install AUR Packages as root, Aborting.")
+		return fmt.Errorf(gotext.Get("refusing to install AUR packages as root, aborting"))
 	}
 
 	conflicts, err := dp.CheckConflicts()
@@ -192,7 +195,7 @@ func install(parser *arguments) (err error) {
 	}
 
 	if len(do.Aur) == 0 && len(arguments.targets) == 0 && (!parser.existsArg("u", "sysupgrade") || mode == modeAUR) {
-		fmt.Println(" there is nothing to do")
+		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
 
@@ -213,7 +216,7 @@ func install(parser *arguments) (err error) {
 		case "no":
 			break
 		default:
-			if continueTask("Remove make dependencies after install?", false) {
+			if continueTask(gotext.Get("Remove make dependencies after install?"), false) {
 				defer func() {
 					err = removeMake(do)
 				}()
@@ -261,12 +264,12 @@ func install(parser *arguments) (err error) {
 		oldValue := config.NoConfirm
 		config.NoConfirm = false
 		fmt.Println()
-		if !continueTask(bold(green("Proceed with install?")), true) {
-			return fmt.Errorf("aborting due to user")
+		if !continueTask(gotext.Get("Proceed with install?"), true) {
+			return fmt.Errorf(gotext.Get("aborting due to user"))
 		}
 		err = updatePkgbuildSeenRef(toDiff)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
+			text.Errorln(err.Error())
 		}
 
 		config.NoConfirm = oldValue
@@ -301,8 +304,8 @@ func install(parser *arguments) (err error) {
 		oldValue := config.NoConfirm
 		config.NoConfirm = false
 		fmt.Println()
-		if !continueTask(bold(green("Proceed with install?")), true) {
-			return fmt.Errorf("aborting due to user")
+		if !continueTask(gotext.Get("Proceed with install?"), true) {
+			return errors.New(gotext.Get("aborting due to user"))
 		}
 		config.NoConfirm = oldValue
 	}
@@ -325,7 +328,7 @@ func install(parser *arguments) (err error) {
 
 	if len(arguments.targets) > 0 || arguments.existsArg("u") {
 		if errShow := show(passToPacman(arguments)); errShow != nil {
-			return fmt.Errorf("error installing repo packages")
+			return errors.New(gotext.Get("error installing repo packages"))
 		}
 
 		deps := make([]string, 0)
@@ -434,7 +437,7 @@ func earlyPacmanCall(parser *arguments) error {
 	if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
 		err = show(passToPacman(arguments))
 		if err != nil {
-			return fmt.Errorf("error installing repo packages")
+			return errors.New(gotext.Get("error installing repo packages"))
 		}
 	}
 
@@ -473,16 +476,15 @@ nextpkg:
 	}
 
 	if len(incompatible) > 0 {
-		fmt.Println()
-		fmt.Print(bold(yellow(arrow)) + " The following packages are not compatible with your architecture:")
+		text.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
 		for pkg := range incompatible {
 			fmt.Print("  " + cyan(basesMap[pkg].String()))
 		}
 
 		fmt.Println()
 
-		if !continueTask("Try to build them anyway?", true) {
-			return nil, fmt.Errorf("aborting due to user")
+		if !continueTask(gotext.Get("Try to build them anyway?"), true) {
+			return nil, errors.New(gotext.Get("aborting due to user"))
 		}
 	}
 
@@ -493,7 +495,7 @@ func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string
 	stdout, stderr, err := capture(passToMakepkg(dir, "--packagelist"))
 
 	if err != nil {
-		return nil, "", fmt.Errorf("%s%s", stderr, err)
+		return nil, "", fmt.Errorf("%s %s", stderr, err)
 	}
 
 	lines := strings.Split(stdout, "\n")
@@ -508,7 +510,7 @@ func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string
 		split := strings.Split(fileName, "-")
 
 		if len(split) < 4 {
-			return nil, "", fmt.Errorf("cannot find package name : %s", split)
+			return nil, "", errors.New(gotext.Get("cannot find package name: %v", split))
 		}
 
 		// pkgname-pkgver-pkgrel-arch.pkgext
@@ -552,11 +554,11 @@ func pkgbuildNumberMenu(bases []Base, installed stringset.StringSet) bool {
 		}
 
 		if anyInstalled {
-			toPrint += bold(green(" (Installed)"))
+			toPrint += bold(green(gotext.Get(" (Installed)")))
 		}
 
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			toPrint += bold(green(" (Build Files Exist)"))
+			toPrint += bold(green(gotext.Get(" (Build Files Exist)")))
 			askClean = true
 		}
 
@@ -575,9 +577,8 @@ func cleanNumberMenu(bases []Base, installed stringset.StringSet, hasClean bool)
 		return toClean, nil
 	}
 
-	fmt.Println(bold(green(arrow + " Packages to cleanBuild?")))
-	fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-	fmt.Print(bold(green(arrow + " ")))
+	text.Infoln(gotext.Get("Packages to cleanBuild?"))
+	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", cyan(gotext.Get("[N]one"))))
 	cleanInput, err := getInput(config.AnswerClean)
 	if err != nil {
 		return nil, err
@@ -587,7 +588,7 @@ func cleanNumberMenu(bases []Base, installed stringset.StringSet, hasClean bool)
 	cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
 
 	if cOtherInclude.Get("abort") || cOtherInclude.Get("ab") {
-		return nil, fmt.Errorf("aborting due to user")
+		return nil, fmt.Errorf(gotext.Get("aborting due to user"))
 	}
 
 	if !cOtherInclude.Get("n") && !cOtherInclude.Get("none") {
@@ -651,17 +652,15 @@ func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) 
 	var err error
 
 	if diff {
-		fmt.Println(bold(green(arrow + " Diffs to show?")))
-		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-		fmt.Print(bold(green(arrow + " ")))
+		text.Infoln(gotext.Get("Diffs to show?"))
+		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", cyan(gotext.Get("[N]one"))))
 		editInput, err = getInput(config.AnswerDiff)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		fmt.Println(bold(green(arrow + " PKGBUILDs to edit?")))
-		fmt.Println(bold(green(arrow) + cyan(" [N]one ") + "[A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"))
-		fmt.Print(bold(green(arrow + " ")))
+		text.Infoln(gotext.Get("PKGBUILDs to edit?"))
+		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", cyan(gotext.Get("[N]one"))))
 		editInput, err = getInput(config.AnswerEdit)
 		if err != nil {
 			return nil, err
@@ -672,7 +671,7 @@ func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) 
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
 
 	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
-		return nil, fmt.Errorf("aborting due to user")
+		return nil, fmt.Errorf(gotext.Get("aborting due to user"))
 	}
 
 	if !eOtherInclude.Get("n") && !eOtherInclude.Get("none") {
@@ -748,7 +747,7 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 			}
 
 			if !hasDiff {
-				fmt.Printf("%s %s: %s\n", bold(yellow(arrow)), cyan(base.String()), bold("No changes -- skipping"))
+				text.Warnln(gotext.Get("%s: No changes -- skipping", cyan(base.String())))
 				continue
 			}
 		}
@@ -788,7 +787,7 @@ func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		err := editcmd.Run()
 		if err != nil {
-			return fmt.Errorf("editor did not exit successfully, Aborting: %s", err)
+			return errors.New(gotext.Get("editor did not exit successfully, aborting: %s", err))
 		}
 	}
 
@@ -801,16 +800,15 @@ func parseSrcinfoFiles(bases []Base, errIsFatal bool) (map[string]*gosrc.Srcinfo
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 
-		str := bold(cyan("::") + " Parsing SRCINFO (%d/%d): %s\n")
-		fmt.Printf(str, k+1, len(bases), cyan(base.String()))
+		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(bases), cyan(base.String())))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			if !errIsFatal {
-				fmt.Fprintf(os.Stderr, "failed to parse %s -- skipping: %s\n", base.String(), err)
+				text.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base.String(), err))
 				continue
 			}
-			return nil, fmt.Errorf("failed to parse %s: %s", base.String(), err)
+			return nil, errors.New(gotext.Get("failed to parse %s: %s", base.String(), err))
 		}
 
 		srcinfos[pkg] = pkgbuild
@@ -870,8 +868,9 @@ func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string
 		if toSkip.Get(pkg) {
 			mux.Lock()
 			downloaded++
-			str := bold(cyan("::") + " PKGBUILD up to date, Skipping (%d/%d): %s\n")
-			fmt.Printf(str, downloaded, len(bases), cyan(base.String()))
+			text.OperationInfoln(
+				gotext.Get("PKGBUILD up to date, Skipping (%d/%d): %s",
+					downloaded, len(bases), cyan(base.String())))
 			mux.Unlock()
 			return
 		}
@@ -889,8 +888,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string
 
 		mux.Lock()
 		downloaded++
-		str := bold(cyan("::") + " Downloaded PKGBUILD (%d/%d): %s\n")
-		fmt.Printf(str, downloaded, len(bases), cyan(base.String()))
+		text.OperationInfoln(gotext.Get("Downloaded PKGBUILD (%d/%d): %s", downloaded, len(bases), cyan(base.String())))
 		mux.Unlock()
 	}
 
@@ -921,7 +919,7 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringset.StringSet) (e
 
 		err = show(passToMakepkg(dir, args...))
 		if err != nil {
-			return fmt.Errorf("error downloading sources: %s", cyan(base.String()))
+			return errors.New(gotext.Get("error downloading sources: %s", cyan(base.String())))
 		}
 	}
 
@@ -1005,7 +1003,7 @@ func buildInstallPkgbuilds(
 				for _, dep := range deps {
 					if _, errSatisfier := dp.LocalDB.PkgCache().FindSatisfier(dep); errSatisfier != nil {
 						satisfied = false
-						fmt.Printf("%s not satisfied, flushing install queue\n", dep)
+						text.Warnln(gotext.Get("%s not satisfied, flushing install queue", dep))
 						break all
 					}
 				}
@@ -1029,7 +1027,7 @@ func buildInstallPkgbuilds(
 
 		// pkgver bump
 		if err = show(passToMakepkg(dir, args...)); err != nil {
-			return fmt.Errorf("error making: %s", base.String())
+			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
 
 		pkgdests, pkgVersion, errList := parsePackageList(dir)
@@ -1045,7 +1043,7 @@ func buildInstallPkgbuilds(
 			for _, split := range base {
 				pkgdest, ok := pkgdests[split.Name]
 				if !ok {
-					return fmt.Errorf("could not find PKGDEST for: %s", split.Name)
+					return errors.New(gotext.Get("could not find PKGDEST for: %s", split.Name))
 				}
 
 				if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
@@ -1069,10 +1067,10 @@ func buildInstallPkgbuilds(
 			if installed {
 				err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
-					return fmt.Errorf("error making: %s", err)
+					return errors.New(gotext.Get("error making: %s", err))
 				}
 
-				fmt.Println(cyan(pkg+"-"+pkgVersion) + bold(" is up to date -- skipping"))
+				fmt.Fprintln(os.Stdout, gotext.Get("%s is up to date -- skipping"), cyan(pkg+"-"+pkgVersion))
 				continue
 			}
 		}
@@ -1080,11 +1078,10 @@ func buildInstallPkgbuilds(
 		if built {
 			err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
-				return fmt.Errorf("error making: %s", err)
+				return errors.New(gotext.Get("error making: %s", err))
 			}
 
-			fmt.Println(bold(yellow(arrow)),
-				cyan(pkg+"-"+pkgVersion)+bold(" already made -- skipping build"))
+			text.Warnln(gotext.Get("%s already made -- skipping build", cyan(pkg+"-"+pkgVersion)))
 		} else {
 			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 
@@ -1093,7 +1090,7 @@ func buildInstallPkgbuilds(
 			}
 
 			if errMake := show(passToMakepkg(dir, args...)); errMake != nil {
-				return fmt.Errorf("error making: %s", base.String())
+				return errors.New(gotext.Get("error making: %s", base.String))
 			}
 		}
 
@@ -1118,7 +1115,7 @@ func buildInstallPkgbuilds(
 					return nil
 				}
 
-				return fmt.Errorf("could not find PKGDEST for: %s", name)
+				return errors.New(gotext.Get("could not find PKGDEST for: %s", name))
 			}
 
 			if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
@@ -1126,7 +1123,10 @@ func buildInstallPkgbuilds(
 					return nil
 				}
 
-				return fmt.Errorf("the PKGDEST for %s listed by makepkg, but does not exist: %s", name, pkgdest)
+				return errors.New(
+					gotext.Get(
+						"the PKGDEST for %s is listed by makepkg but does not exist: %s",
+						name, pkgdest))
 			}
 
 			arguments.addTarget(pkgdest)

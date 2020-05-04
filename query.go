@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -9,11 +10,13 @@ import (
 	"time"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v9/pkg/text"
 )
 
 type aurWarnings struct {
@@ -224,12 +227,12 @@ func syncSearch(pkgS []string) (err error) {
 			pq.printSearch()
 		}
 	default:
-		return fmt.Errorf("invalid Sort Mode. Fix with yay -Y --bottomup --save")
+		return errors.New(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 	}
 
 	if aurErr != nil {
-		fmt.Fprintf(os.Stderr, "Error during AUR search: %s\n", aurErr)
-		fmt.Fprintln(os.Stderr, "Showing Repo packages only")
+		text.Errorln(gotext.Get("error during AUR search: %s", aurErr))
+		text.Warnln(gotext.Get("Showing repo packages only"))
 	}
 
 	return nil
@@ -562,7 +565,7 @@ func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
 }
 
 func aurInfoPrint(names []string) ([]*rpc.Pkg, error) {
-	fmt.Println(bold(cyan("::") + bold(" Querying AUR...")))
+	text.OperationInfoln(gotext.Get("Querying AUR..."))
 
 	warnings := &aurWarnings{}
 	info, err := aurInfo(names, warnings)
