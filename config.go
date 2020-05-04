@@ -188,7 +188,7 @@ func defaultSettings() *Configuration {
 	}
 
 	if os.Getenv("XDG_CACHE_HOME") != "" {
-		config.BuildDir = "$XDG_CACHE_HOME/yay"
+		newConfig.BuildDir = "$XDG_CACHE_HOME/yay"
 	}
 
 	return newConfig
