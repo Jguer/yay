@@ -12,14 +12,14 @@ PREFIX := /usr/local
 
 MAJORVERSION := 9
 MINORVERSION := 4
-PATCHVERSION := 2
+PATCHVERSION := 7
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
-LOCALEDIR := locale
+LOCALEDIR := po
 SYSTEMLOCALEPATH := $(DESTDIR)$(PREFIX)/share/locale
 
 LANGS := pt
-POTFILE := ${PKGNAME}.pot
+POTFILE := ${PKGNAME}.po
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
@@ -55,16 +55,6 @@ build: $(BIN)
 
 .PHONY: release
 release: $(PACKAGE)
-
-$(BIN): $(SOURCES)
-	$(GO) build $(GOFLAGS) -ldflags '-s -w $(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@
-
-$(RELEASE_DIR):
-	mkdir $(RELEASE_DIR)
-
-$(PACKAGE): $(BIN) $(RELEASE_DIR)
-	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/* ${MOFILES}
-	tar -czvf $(PACKAGE) $(RELEASE_DIR)
 
 .PHONY: docker-release-all
 docker-release-all:
@@ -137,6 +127,16 @@ uninstall:
 	for lang in ${LANGS}; do \
 		rm -f $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/${PKGNAME}.mo; \
 	done
+
+$(BIN): $(SOURCES)
+	$(GO) build $(GOFLAGS) -ldflags '-s -w $(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@
+
+$(RELEASE_DIR):
+	mkdir $(RELEASE_DIR)
+
+$(PACKAGE): $(BIN) $(RELEASE_DIR)
+	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/* ${MOFILES}
+	tar -czvf $(PACKAGE) $(RELEASE_DIR)
 
 locale: ${MOFILES}
 

@@ -205,7 +205,7 @@ func cleanUntracked() error {
 }
 
 func cleanAfter(bases []Base) {
-	fmt.Println(gotext.Get("removing Untracked AUR files from cache..."))
+	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
 	for i, base := range bases {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())

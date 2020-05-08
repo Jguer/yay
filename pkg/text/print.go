@@ -3,6 +3,8 @@ package text
 import (
 	"fmt"
 	"os"
+
+	"github.com/leonelquinteros/gotext"
 )
 
 const arrow = "==>"
@@ -28,7 +30,7 @@ func Infoln(a ...interface{}) {
 }
 
 func Warn(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{bold(yellow(smallArrow))}, a...)...)
+	fmt.Fprint(os.Stdout, append([]interface{}{bold(yellow(smallArrow + " "))}, a...)...)
 }
 
 func Warnln(a ...interface{}) {
@@ -36,7 +38,7 @@ func Warnln(a ...interface{}) {
 }
 
 func Error(a ...interface{}) {
-	fmt.Fprint(os.Stderr, append([]interface{}{bold(red(smallArrow))}, a...)...)
+	fmt.Fprint(os.Stderr, append([]interface{}{bold(red(smallArrow + " "))}, a...)...)
 }
 
 func Errorln(a ...interface{}) {
@@ -45,7 +47,7 @@ func Errorln(a ...interface{}) {
 
 func PrintInfoValue(str, value string) {
 	if value == "" {
-		value = "None"
+		value = gotext.Get("None")
 	}
 
 	fmt.Fprintln(os.Stdout, bold("%-16s%s")+" %s\n", str, ":", value)

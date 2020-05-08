@@ -395,7 +395,7 @@ func displayNumberMenu(pkgS []string) error {
 	}
 
 	if len(arguments.targets) == 0 {
-		fmt.Println(gotext.Get("There is nothing to do"))
+		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
 

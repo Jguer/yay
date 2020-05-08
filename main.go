@@ -21,7 +21,7 @@ func setPaths() error {
 	} else if configHome = os.Getenv("HOME"); configHome != "" {
 		configHome = filepath.Join(configHome, ".config/yay")
 	} else {
-		return errors.New(gotext.Get("XDG_CONFIG_HOME and HOME unset"))
+		return errors.New(gotext.Get("%s and %s unset", "XDG_CONFIG_HOME", "HOME"))
 	}
 
 	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
@@ -29,7 +29,7 @@ func setPaths() error {
 	} else if cacheHome = os.Getenv("HOME"); cacheHome != "" {
 		cacheHome = filepath.Join(cacheHome, ".cache/yay")
 	} else {
-		return errors.New(gotext.Get("XDG_CACHE_HOME and HOME unset"))
+		return errors.New(gotext.Get("%s and %s unset", "XDG_CACHE_HOME", "HOME"))
 	}
 
 	configFile = filepath.Join(configHome, configFileName)
@@ -39,6 +39,11 @@ func setPaths() error {
 }
 
 func initGotext() {
+	if envLocalePath := os.Getenv("LOCALE_PATH"); envLocalePath != "" {
+		localePath = envLocalePath
+	}
+
+	// fmt.Printf("path: %s Lang: %s", localePath, os.Getenv("LANG"))
 	gotext.Configure(localePath, os.Getenv("LANG"), "yay")
 }
 

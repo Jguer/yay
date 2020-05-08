@@ -75,7 +75,7 @@ func (q aurQuery) printSearch(start int) {
 			case bottomUp:
 				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			default:
-				text.Warnln(gotext.Get("Invalid Sort Mode. Fix with yay -Y --bottomup --save"))
+				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 			}
 		} else if config.SearchMode == minimal {
 			fmt.Println(q[i].Name)
@@ -97,7 +97,7 @@ func (q aurQuery) printSearch(start int) {
 
 		if pkg := localDB.Pkg(q[i].Name); pkg != nil {
 			if pkg.Version() != q[i].Version {
-				toprint += bold(green(gotext.Get("(Installed: %)", pkg.Version())))
+				toprint += bold(green(gotext.Get("(Installed: %s)", pkg.Version())))
 			} else {
 				toprint += bold(green(gotext.Get("(Installed)")))
 			}
@@ -118,7 +118,7 @@ func (s repoQuery) printSearch() {
 			case bottomUp:
 				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
 			default:
-				text.Warnln(gotext.Get("Invalid Sort Mode. Fix with yay -Y --bottomup --save"))
+				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 			}
 		} else if config.SearchMode == minimal {
 			fmt.Println(res.Name())
