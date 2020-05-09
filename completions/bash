@@ -119,6 +119,9 @@ _yay() {
       G)
         _yay_pkg
         ;;
+      P)
+        _arch_incomp 'p pkgbuild' && _yay_pkg
+        ;;
       esac
   fi
   true
