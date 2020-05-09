@@ -171,6 +171,7 @@ _pacman_opts_print_modifiers=(
 		{-s,--stats}'[Display system package statistics]'
 		{-u,--upgrades}'[Print update list]'
 		{-w,--news}'[Print arch news]'
+		{-p,--pkgbuild}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
 )
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(
@@ -506,6 +507,11 @@ _pacman_zsh_comp() {
 			;;
 		Q*)
 			_pacman_action_query
+			;;
+		P*p*)
+			 _arguments -s : \
+				"$_pacman_opts_print_modifiers[@]" \
+				"*:package:_pacman_all_packages"
 			;;
 		P*)
 			 _arguments -s : \

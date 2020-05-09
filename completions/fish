@@ -172,6 +172,8 @@ complete -c $progname -n "$show" -s d -l defaultconfig -d 'Print default yay con
 complete -c $progname -n "$show" -s g -l currentconfig -d 'Print current yay configuration' -f
 complete -c $progname -n "$show" -s s -l stats -d 'Display system package statistics' -f
 complete -c $progname -n "$show" -s w -l news -d 'Print arch news' -f
+complete -c $progname -n "$show" -s p -l pkgbuild -d 'Print pkgbuild of packages' -f
+complete -c $progname -n "$pkgbuild" -xa "$listall"
 complete -c $progname -n "$show" -s q -l quiet -d 'Do not print news description' -f
 
 # Getpkgbuild options

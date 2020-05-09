@@ -79,7 +79,7 @@ _yay() {
           searchby batchinstall nobatchinstall'
     'b d h q r v')
   yays=('clean gendb' 'c')
-  show=('complete defaultconfig currentconfig stats  news' 'c d g s w')
+  show=('complete defaultconfig currentconfig stats  news pkgbuild' 'c d g s w p')
   getpkgbuild=('force' 'f')
 
   for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P show' 'G getpkgbuild'; do
@@ -118,6 +118,9 @@ _yay() {
         ;;
       G)
         _yay_pkg
+        ;;
+      P)
+        _arch_incomp 'p pkgbuild' && _yay_pkg
         ;;
       esac
   fi
