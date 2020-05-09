@@ -611,9 +611,9 @@ func aurPkgbuilds(names []string) ([]string, error) {
 		}
 
 		if strings.Contains(pkgbuild,
-		"<div class='content'><div class='error'>Invalid branch: " + name + "</div>") {
+			"<div class='content'><div class='error'>Invalid branch: "+name+"</div>") {
 			errs.Add(fmt.Errorf("package \"%s\" was not found", name))
-			return;
+			return
 		}
 
 		mux.Lock()
@@ -668,7 +668,7 @@ func repoPkgbuilds(names []string) ([]string, error) {
 		}
 
 		values := url.Values{}
-		values.Set("h", "packages/" +name)
+		values.Set("h", "packages/"+name)
 
 		var url string
 
