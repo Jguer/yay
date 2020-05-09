@@ -35,7 +35,7 @@ operations:
 
 New operations:
     yay {-Y --yay}         [options] [package(s)]
-    yay {-P --show}        [options]
+    yay {-P --show}        [options] [package(s)]
     yay {-G --getpkgbuild} [package(s)]
 
 If no arguments are provided 'yay -Syu' will be performed
@@ -128,6 +128,7 @@ show specific options:
     -g --currentconfig    Print current yay configuration
     -s --stats            Display system package statistics
     -w --news             Print arch news
+    -p --pkgbuild         Print pkgbuild of packages
 
 yay specific options:
     -c --clean            Remove unneeded dependencies
@@ -214,6 +215,8 @@ func handlePrint() (err error) {
 		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
 	case cmdArgs.existsArg("s", "stats"):
 		err = localStatistics()
+	case cmdArgs.existsArg("p", "pkgbuild"):
+		err = printPkgbuilds(cmdArgs.targets)
 	default:
 		err = nil
 	}

@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -576,4 +579,145 @@ func aurInfoPrint(names []string) ([]*rpc.Pkg, error) {
 	warnings.print()
 
 	return info, nil
+}
+
+var AURPKGBUILDURL = "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?"
+
+func aurPkgbuilds(names []string) ([]string, error) {
+	pkgbuilds := make([]string, 0, len(names))
+	var mux sync.Mutex
+	var wg sync.WaitGroup
+	var errs multierror.MultiError
+
+	makeRequest := func(name string) {
+		defer wg.Done()
+
+		values := url.Values{}
+		values.Set("h", name)
+
+		resp, err := http.Get(AURPKGBUILDURL + values.Encode())
+		if err != nil {
+			errs.Add(err)
+			return
+		}
+		defer resp.Body.Close()
+
+		body, readErr := ioutil.ReadAll(resp.Body)
+		pkgbuild := string(body)
+
+		if readErr != nil {
+			errs.Add(readErr)
+			return
+		}
+
+		if strings.Contains(pkgbuild,
+		"<div class='content'><div class='error'>Invalid branch: " + name + "</div>") {
+			errs.Add(fmt.Errorf("package %s was not found.", name))
+			return;
+		}
+
+		mux.Lock()
+		pkgbuilds = append(pkgbuilds, pkgbuild)
+		mux.Unlock()
+	}
+
+	for _, name := range names {
+		wg.Add(1)
+		go makeRequest(name)
+	}
+
+	wg.Wait()
+
+	if err := errs.Return(); err != nil {
+		return pkgbuilds, err
+	}
+
+	return pkgbuilds, nil
+}
+
+type errorString struct {
+	s string
+}
+
+func repoPkgbuilds(names []string) ([]string, error) {
+	pkgbuilds := make([]string, 0, len(names))
+	var mux sync.Mutex
+	var wg sync.WaitGroup
+	var errs multierror.MultiError
+
+	makeRequest := func(full string) {
+		defer wg.Done()
+
+		dbList, dbErr := alpmHandle.SyncDBs()
+		if dbErr != nil {
+			errs.Add(dbErr)
+			return
+		}
+
+		db, name := splitDBFromName(full)
+
+		if len(db) == 0 {
+			var pkg *alpm.Package
+			for _, alpmDB := range dbList.Slice() {
+				mux.Lock()
+				if pkg = alpmDB.Pkg(name); pkg != nil {
+					db = alpmDB.Name()
+					name = pkg.Base()
+					if name == "" {
+						name = pkg.Name()
+					}
+				}
+				mux.Unlock()
+			}
+		}
+
+		values := url.Values{}
+		values.Set("h", "packages/" +name)
+
+		var url string
+
+		// TODO: Check existence with ls-remote
+		// https://git.archlinux.org/svntogit/packages.git
+		switch db {
+		case "core", "extra", "testing":
+			url = "https://git.archlinux.org/svntogit/packages.git/plain/trunk/PKGBUILD?"
+		case "community", "multilib", "community-testing", "multilib-testing":
+			url = "https://git.archlinux.org/svntogit/community.git/plain/trunk/PKGBUILD?"
+		default:
+			errs.Add(fmt.Errorf("unable to get PKGBUILD from repo \"%s\"", db))
+			return
+		}
+
+		resp, err := http.Get(url + values.Encode())
+		if err != nil {
+			errs.Add(err)
+			return
+		}
+		defer resp.Body.Close()
+
+		body, readErr := ioutil.ReadAll(resp.Body)
+		pkgbuild := string(body)
+
+		if readErr != nil {
+			errs.Add(readErr)
+			return
+		}
+
+		mux.Lock()
+		pkgbuilds = append(pkgbuilds, pkgbuild)
+		mux.Unlock()
+	}
+
+	for _, full := range names {
+		wg.Add(1)
+		go makeRequest(full)
+	}
+
+	wg.Wait()
+
+	if err := errs.Return(); err != nil {
+		return pkgbuilds, err
+	}
+
+	return pkgbuilds, nil
 }

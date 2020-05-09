@@ -16,6 +16,7 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v9/pkg/intrange"
+	"github.com/Jguer/yay/v9/pkg/multierror"
 	"github.com/Jguer/yay/v9/pkg/stringset"
 	"github.com/Jguer/yay/v9/pkg/text"
 )
@@ -664,4 +665,54 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 	}
 
 	return nil
+}
+
+func printPkgbuilds(pkgS []string) error {
+	var pkgbuilds []string
+	var local_pkgbuilds []string
+	missing := false
+	pkgS = removeInvalidTargets(pkgS)
+	aurS, repoS, err := packageSlices(pkgS)
+	if err != nil {
+		return err
+	}
+	var errs multierror.MultiError
+
+	if len(aurS) != 0 {
+		noDB := make([]string, 0, len(aurS))
+		for _, pkg := range aurS {
+			_, name := splitDBFromName(pkg)
+			noDB = append(noDB, name)
+		}
+		local_pkgbuilds, err = aurPkgbuilds(noDB)
+		pkgbuilds = append(pkgbuilds, local_pkgbuilds...)
+		errs.Add(err)
+	}
+
+	if len(repoS) != 0 {
+		local_pkgbuilds, err = repoPkgbuilds(repoS)
+		pkgbuilds = append(pkgbuilds, local_pkgbuilds...)
+		errs.Add(err)
+	}
+
+	if err = errs.Return(); err != nil {
+		missing = true
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	if len(aurS) != len(pkgbuilds) {
+		missing = true
+	}
+
+	if len(pkgbuilds) != 0 {
+		for _, pkgbuild := range pkgbuilds {
+			fmt.Print(pkgbuild)
+		}
+	}
+
+	if missing {
+		err = fmt.Errorf("")
+	}
+
+	return err
 }
