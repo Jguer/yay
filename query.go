@@ -581,8 +581,6 @@ func aurInfoPrint(names []string) ([]*rpc.Pkg, error) {
 	return info, nil
 }
 
-var AURPKGBUILDURL = "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?"
-
 func aurPkgbuilds(names []string) ([]string, error) {
 	pkgbuilds := make([]string, 0, len(names))
 	var mux sync.Mutex
@@ -595,7 +593,9 @@ func aurPkgbuilds(names []string) ([]string, error) {
 		values := url.Values{}
 		values.Set("h", name)
 
-		resp, err := http.Get(AURPKGBUILDURL + values.Encode())
+		url := "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?"
+
+		resp, err := http.Get(url + values.Encode())
 		if err != nil {
 			errs.Add(err)
 			return
@@ -612,7 +612,7 @@ func aurPkgbuilds(names []string) ([]string, error) {
 
 		if strings.Contains(pkgbuild,
 		"<div class='content'><div class='error'>Invalid branch: " + name + "</div>") {
-			errs.Add(fmt.Errorf("package %s was not found.", name))
+			errs.Add(fmt.Errorf("package \"%s\" was not found", name))
 			return;
 		}
 
@@ -635,10 +635,6 @@ func aurPkgbuilds(names []string) ([]string, error) {
 	return pkgbuilds, nil
 }
 
-type errorString struct {
-	s string
-}
-
 func repoPkgbuilds(names []string) ([]string, error) {
 	pkgbuilds := make([]string, 0, len(names))
 	var mux sync.Mutex
@@ -656,7 +652,7 @@ func repoPkgbuilds(names []string) ([]string, error) {
 
 		db, name := splitDBFromName(full)
 
-		if len(db) == 0 {
+		if db == "" {
 			var pkg *alpm.Package
 			for _, alpmDB := range dbList.Slice() {
 				mux.Lock()

@@ -669,7 +669,7 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 
 func printPkgbuilds(pkgS []string) error {
 	var pkgbuilds []string
-	var local_pkgbuilds []string
+	var localPkgbuilds []string
 	missing := false
 	pkgS = removeInvalidTargets(pkgS)
 	aurS, repoS, err := packageSlices(pkgS)
@@ -684,14 +684,14 @@ func printPkgbuilds(pkgS []string) error {
 			_, name := splitDBFromName(pkg)
 			noDB = append(noDB, name)
 		}
-		local_pkgbuilds, err = aurPkgbuilds(noDB)
-		pkgbuilds = append(pkgbuilds, local_pkgbuilds...)
+		localPkgbuilds, err = aurPkgbuilds(noDB)
+		pkgbuilds = append(pkgbuilds, localPkgbuilds...)
 		errs.Add(err)
 	}
 
 	if len(repoS) != 0 {
-		local_pkgbuilds, err = repoPkgbuilds(repoS)
-		pkgbuilds = append(pkgbuilds, local_pkgbuilds...)
+		localPkgbuilds, err = repoPkgbuilds(repoS)
+		pkgbuilds = append(pkgbuilds, localPkgbuilds...)
 		errs.Add(err)
 	}
 
