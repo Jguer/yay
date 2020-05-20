@@ -79,6 +79,8 @@ _pacman_opts_common=(
 
 	'--bottomup[Show AUR packages first]'
 	'--topdown[Show repository packages first]'
+	'--fuzzy[Use fuzzy finding instead of number selection]
+	'--nofuzzy[Use number selection instead of fuzzy finding]'
 	'--devel[Check -git/-svn/-hg development version]'
 	'--nodevel[Disable development version checking]'
 	'--cleanafter[Clean package sources after successful build]'
