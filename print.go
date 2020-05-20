@@ -14,7 +14,8 @@ import (
 
 	rpc "github.com/mikkeloscar/aur"
 
-	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v9/pkg/intrange"
 	"github.com/Jguer/yay/v9/pkg/stringset"
 )
@@ -106,7 +107,7 @@ func (q aurQuery) printSearch(start int) {
 	}
 }
 
-func formatAur(pkg rpc.Pkg, i int, localDB *alpm.DB) string {
+func formatAur(pkg *rpc.Pkg, i int, localDB *alpm.DB) string {
 	toprint := magenta(strconv.Itoa(i+1)+" ") +
 		bold(
 			colorHash("aur"),
@@ -183,7 +184,7 @@ func (s repoQuery) printSearch() {
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func format(res alpm.Package, i int) string {
+func format(res *alpm.Package, i int) string {
 	toprint := magenta(strconv.Itoa(i+1)+" ") +
 		bold(
 			colorHash(res.DB().Name()),

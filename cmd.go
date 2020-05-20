@@ -460,20 +460,6 @@ func displayFuzzyMenu(pkgS []string) (err error) {
 	}
 
 	q := make([]interface{}, lenaq+lenpq)
-	for i, a := range aq {
-		if reverse {
-			q[lenpq+lenaq-i-1] = a
-		} else {
-			q[i] = a
-		}
-	}
-	for i, p := range pq {
-		if reverse {
-			q[lenpq-i-1] = p
-		} else {
-			q[lenaq+i] = p
-		}
-	}
 
 	localDB, _ := alpmHandle.LocalDB()
 
@@ -481,17 +467,17 @@ func displayFuzzyMenu(pkgS []string) (err error) {
 		var text string
 		if reverse {
 			if i < lenpq {
-				text = format(pq[lenpq-i-1], i)
+				text = format(&pq[lenpq-i-1], i)
 			} else {
 				j := i - lenpq
-				text = formatAur(aq[lenaq-j-1], i, localDB)
+				text = formatAur(&aq[lenaq-j-1], i, localDB)
 			}
 		} else {
 			if i < lenaq {
-				text = formatAur(aq[i], i, localDB)
+				text = formatAur(&aq[i], i, localDB)
 			} else {
 				j := i - lenaq
-				text = format(pq[j], i)
+				text = format(&pq[j], i)
 			}
 		}
 		return text
