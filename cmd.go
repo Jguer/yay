@@ -112,9 +112,9 @@ Permanent configuration options:
     --combinedupgrade     Refresh then perform the repo and AUR upgrade together
     --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
     --batchinstall        Build multiple AUR packages then install them together
-	--nobatchinstall      Build and install each AUR package one by one
-	--fuzzy            Use fuzzy finding instead of number selection
-	--nofuzzy          Use number selection instead of fuzzy finding
+    --nobatchinstall      Build and install each AUR package one by one
+    --fuzzy               Use fuzzy finding instead of number selection
+    --nofuzzy             Use number selection instead of fuzzy finding
 
     --sudo                <file>  sudo command to use
     --sudoflags           <flags> Pass arguments to sudo
