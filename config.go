@@ -79,9 +79,10 @@ type Configuration struct {
 	CombinedUpgrade    bool   `json:"combinedupgrade"`
 	UseAsk             bool   `json:"useask"`
 	BatchInstall       bool   `json:"batchinstall"`
+	Fuzzy              bool   `json:"fuzzy"`
 }
 
-var yayVersion = "9.4.3"
+var yayVersion = "9.4.4"
 
 // configFileName holds the name of the config file.
 const configFileName string = "config.json"
@@ -185,6 +186,7 @@ func defaultSettings() *Configuration {
 		EditMenu:           false,
 		UseAsk:             false,
 		CombinedUpgrade:    false,
+		Fuzzy:              false,
 	}
 
 	if os.Getenv("XDG_CACHE_HOME") != "" {

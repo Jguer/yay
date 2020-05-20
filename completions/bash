@@ -74,7 +74,7 @@ _yay() {
           sortby answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
           noansweredit noanswerupgrade cleanmenu diffmenu editmenu upgrademenu cleanafter nocleanafter
           nocleanmenu nodiffmenu noupgrademenu provides noprovides pgpfetch nopgpfetch
-          useask nouseask combinedupgrade nocombinedupgrade aur repo makepkgconf
+          useask nouseask fuzzy nofuzzy combinedupgrade nocombinedupgrade aur repo makepkgconf
           nomakepkgconf askremovemake removemake noremovemake completioninterval aururl
           searchby batchinstall nobatchinstall'
     'b d h q r v')

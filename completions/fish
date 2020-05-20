@@ -230,6 +230,8 @@ complete -c $progname -n "not $noopt" -l pgpfetch -d 'Prompt to import PGP keys 
 complete -c $progname -n "not $noopt" -l nopgpfetch -d 'Do not prompt to import PGP keys' -f
 complete -c $progname -n "not $noopt" -l useask -d 'Automatically resolve conflicts using pacmans ask flag' -f
 complete -c $progname -n "not $noopt" -l nouseask -d 'Confirm conflicts manually during the install' -f
+complete -c $progname -n "not $noopt" -l fuzzy -d 'Use fuzzy finding instead of number selection' -f
+complete -c $progname -n "not $noopt" -l nofuzzy -d 'Use number selection instead of fuzzy finding' -f
 complete -c $progname -n "not $noopt" -l combinedupgrade -d 'Refresh then perform the repo and AUR upgrade together' -f
 complete -c $progname -n "not $noopt" -l nocombinedupgrade -d 'Perform the repo upgrade and AUR upgrade separately' -f
 complete -c $progname -n "not $noopt" -l batchinstall -d 'Build multiple AUR packages then install them together' -f
