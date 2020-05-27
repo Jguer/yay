@@ -641,31 +641,13 @@ func repoPkgbuilds(names []string) ([]string, error) {
 	var wg sync.WaitGroup
 	var errs multierror.MultiError
 
-	makeRequest := func(full string) {
+	dbList, dbErr := alpmHandle.SyncDBs()
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	makeRequest := func(db string, name string) {
 		defer wg.Done()
-
-		dbList, dbErr := alpmHandle.SyncDBs()
-		if dbErr != nil {
-			errs.Add(dbErr)
-			return
-		}
-
-		db, name := splitDBFromName(full)
-
-		if db == "" {
-			var pkg *alpm.Package
-			for _, alpmDB := range dbList.Slice() {
-				mux.Lock()
-				if pkg = alpmDB.Pkg(name); pkg != nil {
-					db = alpmDB.Name()
-					name = pkg.Base()
-					if name == "" {
-						name = pkg.Name()
-					}
-				}
-				mux.Unlock()
-			}
-		}
 
 		values := url.Values{}
 		values.Set("h", "packages/"+name)
@@ -706,14 +688,24 @@ func repoPkgbuilds(names []string) ([]string, error) {
 
 	for _, full := range names {
 		wg.Add(1)
-		go makeRequest(full)
+		db, name := splitDBFromName(full)
+
+		if db == "" {
+			var pkg *alpm.Package
+			for _, alpmDB := range dbList.Slice() {
+				if pkg = alpmDB.Pkg(name); pkg != nil {
+					db = alpmDB.Name()
+					name = pkg.Base()
+					if name == "" {
+						name = pkg.Name()
+					}
+				}
+			}
+		}
+		go makeRequest(db, name)
 	}
 
 	wg.Wait()
 
-	if err := errs.Return(); err != nil {
-		return pkgbuilds, err
-	}
-
-	return pkgbuilds, nil
+	return pkgbuilds, errs.Return()
 }
