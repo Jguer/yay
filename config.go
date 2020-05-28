@@ -234,21 +234,23 @@ func editor() (string, []string) {
 		}
 		fallthrough
 	case os.Getenv("EDITOR") != "":
-		editorArgs := strings.Fields(os.Getenv("EDITOR"))
-		editor, err := exec.LookPath(editorArgs[0])
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		} else {
-			return editor, editorArgs[1:]
+		if editorArgs := strings.Fields(os.Getenv("EDITOR")); len(editorArgs) != 0 {
+			editor, err := exec.LookPath(editorArgs[0])
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			} else {
+				return editor, editorArgs[1:]
+			}
 		}
 		fallthrough
 	case os.Getenv("VISUAL") != "":
-		editorArgs := strings.Fields(os.Getenv("VISUAL"))
-		editor, err := exec.LookPath(editorArgs[0])
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		} else {
-			return editor, editorArgs[1:]
+		if editorArgs := strings.Fields(os.Getenv("VISUAL")); len(editorArgs) != 0 {
+			editor, err := exec.LookPath(editorArgs[0])
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			} else {
+				return editor, editorArgs[1:]
+			}
 		}
 		fallthrough
 	default:

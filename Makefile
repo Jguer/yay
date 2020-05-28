@@ -1,5 +1,8 @@
 export GO111MODULE=on
+GOPROXY ?= https://proxy.golang.org
+export GOPROXY
 
+BUILD_TAG = devel
 ARCH ?= $(shell uname -m)
 BIN := yay
 DESTDIR :=
@@ -12,7 +15,7 @@ MINORVERSION := 4
 PATCHVERSION := 2
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
-GOFLAGS := -v -mod=vendor
+GOFLAGS := -v -mod=mod
 EXTRA_GOFLAGS ?=
 LDFLAGS := $(LDFLAGS) -X "main.version=${VERSION}"
 
@@ -29,7 +32,7 @@ all: | clean release
 .PHONY: clean
 clean:
 	$(GO) clean $(GOFLAGS) -i ./...
-	rm -rf $(BIN) $(PKGNAME)_$(VERSION)_*
+	rm -rf $(BIN) $(PKGNAME)_*
 
 .PHONY: test
 test:
@@ -55,23 +58,37 @@ $(PACKAGE): $(BIN) $(RELEASE_DIR)
 
 .PHONY: docker-release-all
 docker-release-all:
-	make docker-release ARCH=x86_64
-	make docker-release ARCH=armv7h
-	make docker-release ARCH=aarch64
+	make docker-release-armv7h ARCH=armv7h
+	make docker-release-x86_64 ARCH=x86_64
+	make docker-release-aarch64 ARCH=aarch64
 
-.PHONY: docker-release
-docker-release:
-	docker build --target builder_env --build-arg BUILD_ARCH="$(ARCH)" -t yay-$(ARCH):${VERSION} .
+.PHONY: docker-release-armv7h
+docker-release-armv7h:
+	docker build --build-arg="BUILD_TAG=arm32v7-devel" -t yay-$(ARCH):${VERSION} .
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
+	docker container rm yay-$(ARCH)
+
+.PHONY: docker-release-aarch64
+docker-release-aarch64:
+	docker build --build-arg="BUILD_TAG=arm64v8-devel" -t yay-$(ARCH):${VERSION} .
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
+	docker container rm yay-$(ARCH)
+
+.PHONY: docker-release-x86_64
+docker-release-x86_64:
+	docker build --build-arg="BUILD_TAG=devel" -t yay-$(ARCH):${VERSION} .
 	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
 .PHONY: docker-build
 docker-build:
-	docker build --target builder --build-arg BUILD_ARCH="$(ARCH)" -t yay-build-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-build-${ARCH} yay-build-${ARCH}:${VERSION} /bin/sh
-	docker cp yay-build-${ARCH}:/app/${BIN} ${BIN}
-	docker container rm yay-build-${ARCH}
+	docker build -t yay-$(ARCH):${VERSION} .
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make build VERSION=${VERSION}
+	docker cp yay-$(ARCH):/app/${BIN} $(BIN)
+	docker container rm yay-$(ARCH)
 
 .PHONY: test-vendor
 test-vendor: vendor
@@ -91,10 +108,6 @@ lint:
 fmt:
 	#go fmt -mod=vendor $(GOFILES) ./... Doesn't work yet but will be supported soon
 	gofmt -s -w $(SOURCES)
-
-.PHONY: vendor
-vendor:
-	$(GO) mod tidy && $(GO) mod vendor
 
 .PHONY: install
 install:

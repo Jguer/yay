@@ -35,6 +35,9 @@ New operations:
     yay {-P --show}        [options]
     yay {-G --getpkgbuild} [package(s)]
 
+If no arguments are provided 'yay -Syu' will be performed
+If no operation is provided -Y will be assumed
+
 New options:
        --repo             Assume targets are from the repositories
     -a --aur              Assume targets are from the AUR
@@ -60,7 +63,7 @@ Permanent configuration options:
     --nomakepkgconf       Use the default makepkg.conf
 
     --requestsplitn <n>   Max amount of packages to query per AUR request
-    --completioninterval  <n> Time in days to to refresh completion cache
+    --completioninterval  <n> Time in days to refresh completion cache
     --sortby    <field>   Sort AUR results by a specific field during search
     --searchby  <field>   Search for packages using a specified field
     --answerclean   <a>   Set a predetermined answer for the clean build menu
@@ -128,10 +131,7 @@ yay specific options:
        --gendb            Generates development package DB used for updating
 
 getpkgbuild specific options:
-    -f --force            Force download for existing ABS packages
-
-If no arguments are provided 'yay -Syu' will be performed
-If no operation is provided -Y will be assumed`)
+    -f --force            Force download for existing ABS packages`)
 }
 
 func handleCmd() (err error) {
