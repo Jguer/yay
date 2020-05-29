@@ -645,9 +645,25 @@ func repoPkgbuilds(names []string) ([]string, error) {
 	if dbErr != nil {
 		return nil, dbErr
 	}
+	dbSlice := dbList.Slice()
 
-	makeRequest := func(db string, name string) {
+	makeRequest := func(full string) {
 		defer wg.Done()
+
+		db, name := splitDBFromName(full)
+
+		if db == "" {
+			var pkg *alpm.Package
+			for _, alpmDB := range dbSlice {
+				if pkg = alpmDB.Pkg(name); pkg != nil {
+					db = alpmDB.Name()
+					name = pkg.Base()
+					if name == "" {
+						name = pkg.Name()
+					}
+				}
+			}
+		}
 
 		values := url.Values{}
 		values.Set("h", "packages/"+name)
@@ -688,21 +704,7 @@ func repoPkgbuilds(names []string) ([]string, error) {
 
 	for _, full := range names {
 		wg.Add(1)
-		db, name := splitDBFromName(full)
-
-		if db == "" {
-			var pkg *alpm.Package
-			for _, alpmDB := range dbList.Slice() {
-				if pkg = alpmDB.Pkg(name); pkg != nil {
-					db = alpmDB.Name()
-					name = pkg.Base()
-					if name == "" {
-						name = pkg.Name()
-					}
-				}
-			}
-		}
-		go makeRequest(db, name)
+		go makeRequest(full)
 	}
 
 	wg.Wait()
