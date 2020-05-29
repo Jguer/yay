@@ -7,8 +7,8 @@ require (
 	github.com/leonelquinteros/gotext v1.4.0
 	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
 	github.com/pkg/errors v0.9.1
-	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
-	golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3 // indirect
+	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
+	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 )
 
 go 1.14
