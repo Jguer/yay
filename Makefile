@@ -140,13 +140,8 @@ $(PACKAGE): $(BIN) $(RELEASE_DIR)
 	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/* ${MOFILES}
 	tar -czvf $(PACKAGE) $(RELEASE_DIR)
 
-locale: ${MOFILES}
-
-${LOCALEDIR}/${POTFILE}: ${SOURCES}
+locale:
 	xgotext -in . -out po
-	# xgettext --from-code=UTF-8 -Lc -sc -d ${PKGNAME} -kGet -o ${LOCALEDIR}/${PKGNAME}.pot ${SOURCES}
-
-${LOCALEDIR}/%.po: ${LOCALEDIR}/${POTFILE}
 	test -f $@ || msginit -l $* -i $< -o $@
 	msgmerge -U $@ $<
 	touch $@
