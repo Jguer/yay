@@ -601,6 +601,10 @@ func aurPkgbuilds(names []string) ([]string, error) {
 				errs.Add(err)
 				return
 			}
+			if resp.StatusCode != 200 {
+				errs.Add(fmt.Errorf("error code %d for package %s", resp.StatusCode, name))
+				return
+			}
 			defer resp.Body.Close()
 
 			body, readErr := ioutil.ReadAll(resp.Body)
@@ -608,12 +612,6 @@ func aurPkgbuilds(names []string) ([]string, error) {
 
 			if readErr != nil {
 				errs.Add(readErr)
-				return
-			}
-
-			if strings.Contains(pkgbuild,
-			"<div class='content'><div class='error'>Invalid branch: "+name+"</div>") {
-				errs.Add(fmt.Errorf("package \"%s\" was not found", name))
 				return
 			}
 
@@ -688,6 +686,10 @@ func repoPkgbuilds(names []string) ([]string, error) {
 		resp, err := http.Get(url + values.Encode())
 		if err != nil {
 			errs.Add(err)
+			return
+		}
+		if resp.StatusCode != 200 {
+			errs.Add(fmt.Errorf("error code %d for package %s", resp.StatusCode, name))
 			return
 		}
 		defer resp.Body.Close()
