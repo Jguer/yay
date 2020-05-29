@@ -587,43 +587,46 @@ func aurPkgbuilds(names []string) ([]string, error) {
 	var wg sync.WaitGroup
 	var errs multierror.MultiError
 
-	makeRequest := func(name string) {
+	makeRequest := func(n, max int) {
 		defer wg.Done()
 
-		values := url.Values{}
-		values.Set("h", name)
+		for _, name := range names[n:max] {
+			values := url.Values{}
+			values.Set("h", name)
 
-		url := "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?"
+			url := "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?"
 
-		resp, err := http.Get(url + values.Encode())
-		if err != nil {
-			errs.Add(err)
-			return
-		}
-		defer resp.Body.Close()
+			resp, err := http.Get(url + values.Encode())
+			if err != nil {
+				errs.Add(err)
+				return
+			}
+			defer resp.Body.Close()
 
-		body, readErr := ioutil.ReadAll(resp.Body)
-		pkgbuild := string(body)
+			body, readErr := ioutil.ReadAll(resp.Body)
+			pkgbuild := string(body)
 
-		if readErr != nil {
-			errs.Add(readErr)
-			return
-		}
+			if readErr != nil {
+				errs.Add(readErr)
+				return
+			}
 
-		if strings.Contains(pkgbuild,
+			if strings.Contains(pkgbuild,
 			"<div class='content'><div class='error'>Invalid branch: "+name+"</div>") {
-			errs.Add(fmt.Errorf("package \"%s\" was not found", name))
-			return
-		}
+				errs.Add(fmt.Errorf("package \"%s\" was not found", name))
+				return
+			}
 
-		mux.Lock()
-		pkgbuilds = append(pkgbuilds, pkgbuild)
-		mux.Unlock()
+			mux.Lock()
+			pkgbuilds = append(pkgbuilds, pkgbuild)
+			mux.Unlock()
+		}
 	}
 
-	for _, name := range names {
+	for n := 0; n < len(names); n += 20 {
+		max := intrange.Min(len(names), n+20)
 		wg.Add(1)
-		go makeRequest(name)
+		go makeRequest(n, max)
 	}
 
 	wg.Wait()
