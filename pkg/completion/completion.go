@@ -59,7 +59,7 @@ func Update(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, forc
 
 // CreateAURList creates a new completion file
 func createAURList(aurURL string, out io.Writer) error {
-	resp, err := http.Get(aurURL + "/packages.gz")
+	resp, err := http.Get(filepath.Join(aurURL, "/packages.gz"))
 	if err != nil {
 		return err
 	}

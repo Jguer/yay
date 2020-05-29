@@ -86,6 +86,8 @@ type Configuration struct {
 
 var yayVersion = "9.4.3"
 
+var localePath = "/usr/share/locale"
+
 // configFileName holds the name of the config file.
 const configFileName string = "config.json"
 
@@ -126,8 +128,6 @@ var alpmHandle *alpm.Handle
 var mode = modeAny
 
 var hideMenus = false
-
-var localePath = "/usr/share/locale"
 
 // SaveConfig writes yay config to file.
 func (config *Configuration) saveConfig() error {

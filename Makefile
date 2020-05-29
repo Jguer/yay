@@ -16,20 +16,20 @@ PATCHVERSION := 7
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
 LOCALEDIR := po
-SYSTEMLOCALEPATH := $(DESTDIR)$(PREFIX)/share/locale
+SYSTEMLOCALEPATH := $(DESTDIR)$(PREFIX)/share/locale/
 
-LANGS := pt
-POTFILE := ${PKGNAME}.po
+LANGS := pt en
+POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
 GOFLAGS := -v -mod=mod
 EXTRA_GOFLAGS ?=
-LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION} -X main.localePath=${SYSTEMLOCALEPATH}"
+LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}"
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
-SOURCES ?= $(shell find . -name "*.go" -type f ! -path "./vendor/*")
+SOURCES ?= $(shell find . -name "*.go" -type f)
 
 .PRECIOUS: ${LOCALEDIR}/%.po
 
@@ -106,8 +106,7 @@ lint:
 
 .PHONY: fmt
 fmt:
-	#go fmt -mod=vendor $(GOFILES) ./... Doesn't work yet but will be supported soon
-	gofmt -s -w $(SOURCES)
+	go fmt ./...
 
 .PHONY: install
 install: build ${MOFILES}
@@ -116,6 +115,9 @@ install: build ${MOFILES}
 	install -Dm644 completions/bash $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
 	install -Dm644 completions/zsh $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
 	install -Dm644 completions/fish $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
+	for lang in ${LANGS}; do \
+		install -Dm644 ${LOCALEDIR}/$${lang}.mo $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/${PKGNAME}.mo; \
+	done
 
 .PHONY: uninstall
 uninstall:
@@ -140,8 +142,9 @@ $(PACKAGE): $(BIN) $(RELEASE_DIR)
 
 locale: ${MOFILES}
 
-${LOCALEDIR}/${POTFILE}: ${GOFILES}
-	xgettext --from-code=UTF-8 -Lc -sc -d ${PKGNAME} -kGet -o locale/${PKGNAME}.pot ${GOFILES}
+${LOCALEDIR}/${POTFILE}: ${SOURCES}
+	xgotext -in . -out po
+	# xgettext --from-code=UTF-8 -Lc -sc -d ${PKGNAME} -kGet -o ${LOCALEDIR}/${PKGNAME}.pot ${SOURCES}
 
 ${LOCALEDIR}/%.po: ${LOCALEDIR}/${POTFILE}
 	test -f $@ || msginit -l $* -i $< -o $@

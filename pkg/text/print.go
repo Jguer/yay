@@ -50,5 +50,5 @@ func PrintInfoValue(str, value string) {
 		value = gotext.Get("None")
 	}
 
-	fmt.Fprintln(os.Stdout, bold("%-16s%s")+" %s\n", str, ":", value)
+	fmt.Fprintf(os.Stdout, bold("%-16s%s")+" %s\n", str, ":", value)
 }

@@ -43,7 +43,6 @@ func initGotext() {
 		localePath = envLocalePath
 	}
 
-	// fmt.Printf("path: %s Lang: %s", localePath, os.Getenv("LANG"))
 	gotext.Configure(localePath, os.Getenv("LANG"), "yay")
 }
 
