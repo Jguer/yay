@@ -599,11 +599,11 @@ func aurPkgbuilds(names []string) ([]string, error) {
 			resp, err := http.Get(url + values.Encode())
 			if err != nil {
 				errs.Add(err)
-				return
+				continue
 			}
 			if resp.StatusCode != 200 {
 				errs.Add(fmt.Errorf("error code %d for package %s", resp.StatusCode, name))
-				return
+				continue
 			}
 			defer resp.Body.Close()
 
@@ -612,7 +612,7 @@ func aurPkgbuilds(names []string) ([]string, error) {
 
 			if readErr != nil {
 				errs.Add(readErr)
-				return
+				continue
 			}
 
 			mux.Lock()
