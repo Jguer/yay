@@ -85,7 +85,7 @@ func (q aurQuery) printSearch(start int) {
 		toprint += bold(colorHash("aur")) + "/" + bold(q[i].Name) +
 			" " + cyan(q[i].Version) +
 			bold(" (+"+strconv.Itoa(q[i].NumVotes)) +
-			" " + bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+"%) ")
+			" " + bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+") ")
 
 		if q[i].Maintainer == "" {
 			toprint += bold(red(gotext.Get("(Orphaned)"))) + " "
