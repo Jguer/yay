@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -126,8 +127,5 @@ func passToGit(dir string, _args ...string) *exec.Cmd {
 }
 
 func isTty() bool {
-	cmd := exec.Command("test", "-t", "1")
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	return err == nil
+	return terminal.IsTerminal(int(os.Stdout.Fd()))
 }
