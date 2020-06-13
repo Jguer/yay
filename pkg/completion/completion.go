@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -13,14 +15,14 @@ import (
 
 // Show provides completion info for shells
 func Show(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force bool) error {
-	path := filepath.Join(cacheDir, "completion.cache")
+	completionPath := filepath.Join(cacheDir, "completion.cache")
 
 	err := Update(alpmHandle, aurURL, cacheDir, interval, force)
 	if err != nil {
 		return err
 	}
 
-	in, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+	in, err := os.OpenFile(completionPath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
@@ -32,21 +34,21 @@ func Show(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force 
 
 // Update updates completion cache to be used by Complete
 func Update(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force bool) error {
-	path := filepath.Join(cacheDir, "completion.cache")
-	info, err := os.Stat(path)
+	completionPath := filepath.Join(cacheDir, "completion.cache")
+	info, err := os.Stat(completionPath)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
-		errd := os.MkdirAll(filepath.Dir(path), 0755)
+		errd := os.MkdirAll(filepath.Dir(completionPath), 0755)
 		if errd != nil {
 			return errd
 		}
-		out, errf := os.Create(path)
+		out, errf := os.Create(completionPath)
 		if errf != nil {
 			return errf
 		}
 
 		if createAURList(aurURL, out) != nil {
-			defer os.Remove(path)
+			defer os.Remove(completionPath)
 		}
 		erra := createRepoList(alpmHandle, out)
 
@@ -59,7 +61,12 @@ func Update(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, forc
 
 // CreateAURList creates a new completion file
 func createAURList(aurURL string, out io.Writer) error {
-	resp, err := http.Get(filepath.Join(aurURL, "/packages.gz"))
+	u, err := url.Parse(aurURL)
+	if err != nil {
+		return err
+	}
+	u.Path = path.Join(u.Path, "packages.gz")
+	resp, err := http.Get(u.String())
 	if err != nil {
 		return err
 	}
