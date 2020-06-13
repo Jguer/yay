@@ -17,5 +17,5 @@ jobs:
       - uses: mathieudutour/github-tag-action@v4.5
         id: tag_version
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PAT }}
           tag_prefix: "v"
