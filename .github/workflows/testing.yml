@@ -6,6 +6,8 @@ on:
       - "doc/**"
       - "README.md"
       - ".gitignore"
+    branches-ignore:
+      - "master"
   pull_request:
 
 jobs:
@@ -26,6 +28,6 @@ jobs:
       - name: Run Build and tests
         run: |
           pacman -Sy --noconfirm go
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.26.0
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
           ./bin/golangci-lint run ./...
           make test

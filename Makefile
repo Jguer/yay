@@ -136,7 +136,7 @@ $(BIN): $(SOURCES)
 $(RELEASE_DIR):
 	mkdir $(RELEASE_DIR)
 
-$(PACKAGE): $(BIN) $(RELEASE_DIR)
+$(PACKAGE): $(BIN) $(RELEASE_DIR) ${MOFILES}
 	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/* ${MOFILES}
 	tar -czvf $(PACKAGE) $(RELEASE_DIR)
 
