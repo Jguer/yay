@@ -18,8 +18,8 @@ jobs:
         id: tags
         shell: bash
         run: |
-          echo ::set-output name=VERSION::${GITHUB_REF#/refs/tags/v}
-          echo ::set-output name=TAG::${GITHUB_REF#/refs/tags/}
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+          echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
       - name: Install dependencies
         run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
       - name: Setup qemu-user-static
@@ -42,8 +42,8 @@ jobs:
         id: tags
         shell: bash
         run: |
-          echo ::set-output name=VERSION::${GITHUB_REF#/refs/tags/v}
-          echo ::set-output name=TAG::${GITHUB_REF#/refs/tags/}
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+          echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
       - name: Changelog
         uses: scottbrenner/generate-changelog-action@master
         id: changelog
