@@ -9,13 +9,13 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v9/pkg/intrange"
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/intrange"
+	"github.com/Jguer/yay/v10/pkg/text"
 
 	rpc "github.com/mikkeloscar/aur"
 
-	"github.com/Jguer/yay/v9/pkg/multierror"
-	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v10/pkg/multierror"
+	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
 // upgrade type describes a system upgrade.

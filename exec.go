@@ -12,7 +12,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 func show(cmd *exec.Cmd) error {

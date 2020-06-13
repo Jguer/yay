@@ -12,8 +12,8 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
 
-	"github.com/Jguer/yay/v9/pkg/multierror"
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/multierror"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 const gitDiffRefName = "AUR_SEEN"

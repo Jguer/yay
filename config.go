@@ -13,7 +13,7 @@ import (
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 // Verbosity settings for search
@@ -84,7 +84,7 @@ type Configuration struct {
 	BatchInstall       bool   `json:"batchinstall"`
 }
 
-var yayVersion = "9.4.3"
+var yayVersion = "10.0.0"
 
 var localePath = "/usr/share/locale"
 

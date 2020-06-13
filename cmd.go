@@ -9,9 +9,9 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v9/pkg/completion"
-	"github.com/Jguer/yay/v9/pkg/intrange"
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/completion"
+	"github.com/Jguer/yay/v10/pkg/intrange"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 var cmdArgs = makeArguments()

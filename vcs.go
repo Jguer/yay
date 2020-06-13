@@ -12,8 +12,8 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v9/pkg/stringset"
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/stringset"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 // Info contains the last commit sha of a repo

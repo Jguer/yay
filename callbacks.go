@@ -9,7 +9,7 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 func questionCallback(question alpm.QuestionAny) {

@@ -1,4 +1,4 @@
-module github.com/Jguer/yay/v9
+module github.com/Jguer/yay/v10
 
 require (
 	github.com/Jguer/go-alpm v0.0.0-20200405152916-a3feea4322e9
@@ -7,8 +7,8 @@ require (
 	github.com/leonelquinteros/gotext v1.4.0
 	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
 	github.com/pkg/errors v0.9.1
-	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
-	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
+	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
+	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 )
 
 go 1.14

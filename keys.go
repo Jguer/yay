@@ -11,7 +11,7 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 // pgpKeySet maps a PGP key with a list of PKGBUILDs that require it.

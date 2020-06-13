@@ -12,7 +12,7 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 	"github.com/pkg/errors"
 
-	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
 // Parses command line arguments in a way we can interact with programmatically but

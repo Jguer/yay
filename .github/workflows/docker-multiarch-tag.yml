@@ -10,11 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: mathieudutour/github-tag-action@v4
+      - uses: mathieudutour/github-tag-action@v4.5
         id: tag_version
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: "v"
+          create_annotated_tag: true
       - name: share variables
         shell: bash
         run: |
@@ -43,7 +44,7 @@ jobs:
         id: tags
         shell: bash
         run: |
-          echo ::set-output name=VERSION::$(cat env/new_version)
+          echo ::set-output name=VERSION::$(cat new_version)
       - name: Install dependencies
         run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
       - name: Setup qemu-user-static
@@ -71,9 +72,9 @@ jobs:
         id: tags
         shell: bash
         run: |
-          echo ::set-output name=VERSION::$(cat env/new_version)
-          echo ::set-output name=TAG::$(cat env/new_tag)
-          echo ::set-output name=CHANGELOG::$(cat env/changelog)
+          echo ::set-output name=VERSION::$(cat new_version)
+          echo ::set-output name=TAG::$(cat new_tag)
+          echo ::set-output name=CHANGELOG::$(cat changelog)
       - uses: actions/download-artifact@v2
         with:
           name: yay_x86_64

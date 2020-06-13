@@ -1,5 +1,5 @@
 export GO111MODULE=on
-GOPROXY ?= https://proxy.golang.org
+GOPROXY ?= https://gocenter.io,direct
 export GOPROXY
 
 BUILD_TAG = devel
@@ -10,9 +10,9 @@ GO ?= go
 PKGNAME := yay
 PREFIX := /usr/local
 
-MAJORVERSION := 9
-MINORVERSION := 4
-PATCHVERSION := 7
+MAJORVERSION := 10
+MINORVERSION := 0
+PATCHVERSION := 0
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
 LOCALEDIR := po

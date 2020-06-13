@@ -23,7 +23,7 @@ linters-settings:
   gocyclo:
     min-complexity: 15
   goimports:
-    local-prefixes: github.com/Jguer/yay/v9
+    local-prefixes: github.com/Jguer/yay/v10
   golint:
     min-confidence: 0
   gomnd:

@@ -8,7 +8,7 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 
-	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
 type target struct {

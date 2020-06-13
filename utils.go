@@ -5,7 +5,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v9/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"

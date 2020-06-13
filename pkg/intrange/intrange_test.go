@@ -3,7 +3,7 @@ package intrange
 import (
 	"testing"
 
-	"github.com/Jguer/yay/v9/pkg/stringset"
+	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
 func TestParseNumberMenu(t *testing.T) {
