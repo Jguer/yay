@@ -65,21 +65,21 @@ docker-release-all:
 .PHONY: docker-release-armv7h
 docker-release-armv7h:
 	docker build --build-arg="BUILD_TAG=arm32v7-devel" -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
 .PHONY: docker-release-aarch64
 docker-release-aarch64:
 	docker build --build-arg="BUILD_TAG=arm64v8-devel" -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
 .PHONY: docker-release-x86_64
 docker-release-x86_64:
 	docker build --build-arg="BUILD_TAG=devel" -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 

@@ -27,7 +27,7 @@ jobs:
       - name: Build ${{ matrix.arch }} release
         run: |
           mkdir artifacts
-          make docker-release-${{ matrix.arch }} ARCH=${{ matrix.arch }} VERSION=${{ steps.tags.outputs.version }}
+          make docker-release-${{ matrix.arch }} ARCH=${{ matrix.arch }} VERSION=${{ steps.tags.outputs.version }} PREFIX="/usr"
           mv *.tar.gz artifacts
       - uses: actions/upload-artifact@v2
         with:
