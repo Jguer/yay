@@ -1,0 +1,641 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"PO-Revision-Date: 2020-06-13 21:30-0500\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.3\n"
+"POT-Creation-Date: 2020-06-13 21:30-0500\n"
+"Last-Translator: Mario Jiménez <mario.emilio.j@gmail.com>\n"
+"Language: es\n"
+
+#: install.go:561
+msgid " (Build Files Exist)"
+msgstr " (Archivos de compilación existen)"
+
+#: install.go:557
+msgid " (Installed)"
+msgstr " (Instalado)"
+
+#: depCheck.go:279
+msgid " (Target"
+msgstr " (Objetivo"
+
+#: depCheck.go:281
+msgid " (Wanted by: "
+msgstr " (Requerido por: "
+
+#: callbacks.go:72
+msgid " Input too long"
+msgstr " Entrada demasiado larga"
+
+#: cmd.go:442
+msgid " [Installed]"
+msgstr " [Instalado]"
+
+#: cmd.go:398 install.go:164 install.go:198
+msgid " there is nothing to do"
+msgstr " no hay nada que hacer"
+
+#: depCheck.go:170
+msgid "%s Installing %s will remove:"
+msgstr "%s Instalar %s removerá:"
+
+#: install.go:581 install.go:656 install.go:663
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgstr "%s [A]Todos [Ab]ortar [I]nstalados [No]Instalados o (1 2 3, 1-3, ^4)"
+
+#: download.go:273
+msgid "%s already downloaded -- use -f to overwrite"
+msgstr "%s ya se ha descargado -- utiliza -f para sobrescribirlo"
+
+#: install.go:1084
+msgid "%s already made -- skipping build"
+msgstr "%s ya se ha creado -- omitiendo la compilación"
+
+#: main.go:24 main.go:32
+msgid "%s and %s unset"
+msgstr "%s y %s no están definidos"
+
+#: config.go:263
+msgid "%s is not set"
+msgstr "%s no está definido"
+
+#: exec.go:70
+msgid "%s is present."
+msgstr "%s está presente."
+
+#: install.go:1073
+msgid "%s is up to date -- skipping"
+msgstr "%s está actualizado -- ignorando"
+
+#: install.go:1006
+msgid "%s not satisfied, flushing install queue"
+msgstr "%s dependencia no está satisfecha, limpiando la fila de instalación"
+
+#: install.go:750
+msgid "%s: No changes -- skipping"
+msgstr "%s: Sin cambios -- ignorando"
+
+#: utils.go:47
+msgid "%s: can't use target with option --aur -- skipping"
+msgstr "%s: no es posible utilizar el objetivo con la opción --aur -- ignorando"
+
+#: utils.go:42
+msgid "%s: can't use target with option --repo -- skipping"
+msgstr "%s: no es posible utilizar el objetivo con la opción --repo -- ignorando"
+
+#: upgrade.go:272
+msgid "%s: ignoring package upgrade (%s => %s)"
+msgstr "%s: actualización del paquete ignorada (%s => %s)"
+
+#: upgrade.go:289
+msgid "%s: local (%s) is newer than AUR (%s)"
+msgstr "%s: paquete local (%s) es más nuevo que el paquete disponible en AUR (%s)"
+
+#: download.go:298
+msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
+msgstr "(%d/%d) PKGBUILD descargado de ABS: %s"
+
+#: install.go:803
+msgid "(%d/%d) Parsing SRCINFO: %s"
+msgstr "(%d/%d) Analizando SRCINFO: %s"
+
+#: print.go:102 print.go:143
+msgid "(Installed)"
+msgstr "(Instalado)"
+
+#: print.go:100 print.go:141
+msgid "(Installed: %s)"
+msgstr "(Instalado: %s)"
+
+#: print.go:91
+msgid "(Orphaned)"
+msgstr "(Huérfano)"
+
+#: print.go:95
+msgid "(Out-of-date: %s)"
+msgstr "(Desactualizado: %s)"
+
+#: print.go:291
+msgid "AUR URL"
+msgstr "URL de AUR"
+
+#: config.go:264
+msgid "Add %s or %s to your environment variables"
+msgstr "Añade %s o %s a tus variables de entorno"
+
+#: main.go:225
+msgid "Avoid running yay as root/sudo."
+msgstr "Evite ejecutar yay como root/sudo."
+
+#: print.go:297
+msgid "Check Deps"
+msgstr "Dependencias de verificación"
+
+#: upgrade.go:165
+msgid "Checking development packages..."
+msgstr "Verificando paquetes de desarrollo..."
+
+#: depCheck.go:137
+msgid "Checking for conflicts..."
+msgstr "Buscando conflictos..."
+
+#: depCheck.go:144
+msgid "Checking for inner conflicts..."
+msgstr "Buscando conflictos internos..."
+
+#: clean.go:213
+msgid "Cleaning (%d/%d): %s"
+msgstr "Limpiando (%d/%d): %s"
+
+#: depCheck.go:196
+msgid "Conflicting packages will have to be confirmed manually"
+msgstr "Paquetes en conflicto tendrán que ser confirmados manualmente"
+
+#: print.go:299
+msgid "Conflicts With"
+msgstr "Conflictos con"
+
+#: depCheck.go:273
+msgid "Could not find all required packages:"
+msgstr "No se pudo encontrar todos los paquetes:"
+
+#: clean.go:229
+msgid "Deleting (%d/%d): %s"
+msgstr "Borrando (%d/%d): %s"
+
+#: print.go:295
+msgid "Depends On"
+msgstr "Depende de"
+
+#: print.go:289
+msgid "Description"
+msgstr "Descripción"
+
+#: install.go:655
+msgid "Diffs to show?"
+msgstr "¿Diffs a mostrar?"
+
+#: clean.go:89
+msgid "Do you want to remove ALL AUR packages from cache?"
+msgstr "¿Quieres borrar TODOS los paquetes de AUR del caché?"
+
+#: clean.go:106
+msgid "Do you want to remove ALL untracked AUR files?"
+msgstr "¿Quieres borrar TODOS los archivos de AUR sin rastrear?"
+
+#: clean.go:91
+msgid "Do you want to remove all other AUR packages from cache?"
+msgstr "¿Quieres borrar los otros paquetes de AUR del caché?"
+
+#: install.go:891
+msgid "Downloaded PKGBUILD (%d/%d): %s"
+msgstr "PKGBUILDs descargados (%d/%d): %s"
+
+#: config.go:267
+msgid "Edit PKGBUILD with?"
+msgstr "¿Editar PKGBUILD con?"
+
+#: cmd.go:342
+msgid "Error during AUR search: %s\n"
+msgstr "Error al buscar en AUR: %s\n"
+
+#: print.go:358
+msgid "Explicitly installed packages: %s"
+msgstr "Paquetes explícitamente instalados: %s"
+
+#: print.go:303
+msgid "First Submitted"
+msgstr "Primera vez subido"
+
+#: print.go:44
+msgid "Flagged Out Of Date AUR Packages:"
+msgstr "Paquetes de AUR marcados como desactualizados:"
+
+#: vcs.go:146
+msgid "Found git repo: %s"
+msgstr "Repositorio git encontrado: %s"
+
+#: vcs.go:63
+msgid "GenDB finished. No packages were installed"
+msgstr "GenDB finalizó. Ningún paquete fue instalado"
+
+#: print.go:292
+msgid "Groups"
+msgstr "Grupos"
+
+#: keys.go:84
+msgid "Import?"
+msgstr "¿Importar?"
+
+#: keys.go:97
+msgid "Importing keys with gpg..."
+msgstr "Importando llaves con gpg..."
+
+#: print.go:287
+msgid "Keywords"
+msgstr "Palabras clave"
+
+#: print.go:304
+msgid "Last Modified"
+msgstr "Última vez modificado"
+
+#: print.go:293
+msgid "Licenses"
+msgstr "Licencias"
+
+#: print.go:300
+msgid "Maintainer"
+msgstr "Responsable"
+
+#: print.go:296
+msgid "Make Deps"
+msgstr "Dependencias de compilación"
+
+#: download.go:281
+msgid "Missing ABS packages:"
+msgstr "Paquetes de ABS faltantes:"
+
+#: print.go:28
+msgid "Missing AUR Packages:"
+msgstr "Paquetes de AUR faltantes:"
+
+#: print.go:286
+msgid "Name"
+msgstr "Nombre"
+
+#: pkg/text/print.go:50
+msgid "None"
+msgstr "Ninguno"
+
+#: print.go:298
+msgid "Optional Deps"
+msgstr "Dependencias opcionales"
+
+#: print.go:36
+msgid "Orphaned AUR Packages:"
+msgstr "Paquetes de AUR huérfanos:"
+
+#: print.go:307 print.go:309
+msgid "Out-of-date"
+msgstr "Desactualizado"
+
+#: keys.go:115
+msgid "PGP keys need importing:"
+msgstr "Llaves PGP a importar:"
+
+#: install.go:872
+msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
+msgstr "PKGBUILD actualizado, Ignorando (%d/%d): %s"
+
+#: install.go:662
+msgid "PKGBUILDs to edit?"
+msgstr "¿PKGBUILDs a editar?"
+
+#: print.go:314
+msgid "Package Base ID"
+msgstr "ID de paquete base"
+
+#: print.go:315
+msgid "Package Base"
+msgstr "Paquete base"
+
+#: install.go:580
+msgid "Packages to cleanBuild?"
+msgstr "¿Paquetes a limpiar antes de compilar?"
+
+#: upgrade.go:363
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr "Paquetes a excluir: (eg: \"1 2 3\", \"1-3\", \"^4\" o nombre del repositorio)"
+
+#: cmd.go:346
+msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
+msgstr "Paquetes a instalar (eg.: 1 2 3, 1-3 or ^4)"
+
+#: upgrade.go:360
+msgid "Packages to upgrade."
+msgstr "Paquetes a actualizar."
+
+#: print.go:302
+msgid "Popularity"
+msgstr "Popularidad"
+
+#: install.go:267 install.go:307
+msgid "Proceed with install?"
+msgstr "¿Proceder con la instalación?"
+
+#: print.go:294
+msgid "Provides"
+msgstr "Provee"
+
+#: query.go:568
+msgid "Querying AUR..."
+msgstr "Buscando en AUR..."
+
+#: install.go:219
+msgid "Remove make dependencies after install?"
+msgstr "¿Borrar dependencias de instalación después de instalar?"
+
+#: callbacks.go:46
+msgid "Repository "
+msgstr "Repositorio "
+
+#: print.go:618
+msgid "Repository AUR"
+msgstr "Repositorio AUR"
+
+#: print.go:285
+msgid "Repository"
+msgstr "Repositorio"
+
+#: upgrade.go:148
+msgid "Searching AUR for updates..."
+msgstr "Buscando actualizaciones en AUR..."
+
+#: upgrade.go:138
+msgid "Searching databases for updates..."
+msgstr "Buscando actualizaciones en los repositorios..."
+
+#: cmd.go:343 query.go:235
+msgid "Showing repo packages only"
+msgstr "Mostrando solamente paquetes de los repositorios"
+
+#: print.go:316
+msgid "Snapshot URL"
+msgstr "URL de snapshot"
+
+#: print.go:361
+msgid "Ten biggest packages:"
+msgstr "Diez paquetes más grandes:"
+
+#: install.go:479
+msgid "The following packages are not compatible with your architecture:"
+msgstr "Los siguientes paquetes no son compatibles con su arquitectura:"
+
+#: callbacks.go:36 print.go:615
+msgid "There are %d providers available for %s:"
+msgstr "Existen %d paquetes que proveen %s:"
+
+#: exec.go:71
+msgid "There may be another Pacman instance running. Waiting..."
+msgstr "Es posible que exista otra instancia de Pacman en ejecución. Esperando..."
+
+#: print.go:359
+msgid "Total Size occupied by packages: %s"
+msgstr "Tamaño total ocupado por los paquetes: %s"
+
+#: print.go:357
+msgid "Total foreign installed packages: %s"
+msgstr "Número de paquetes exteriores instalados: %s"
+
+#: print.go:356
+msgid "Total installed packages: %s"
+msgstr "Número de paquetes instalados: %s"
+
+#: install.go:486
+msgid "Try to build them anyway?"
+msgstr "¿Intentar compilarlos de todas formas?"
+
+#: print.go:290
+msgid "URL"
+msgstr "URL"
+
+#: print.go:288
+msgid "Version"
+msgstr "Versión"
+
+#: print.go:301
+msgid "Votes"
+msgstr "Votos"
+
+#: print.go:354
+msgid "Yay version v%s"
+msgstr "Versión de yay v%s"
+
+#: install.go:581 install.go:656 install.go:663
+msgid "[N]one"
+msgstr "[N]inguno"
+
+#: keys.go:122
+msgid ""
+"\n"
+"%s %s, required by: %s"
+msgstr ""
+"\n"
+"%s %s, necesario para: %s"
+
+#: clean.go:94
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Carpeta de compilación:"
+
+#: callbacks.go:56 print.go:628
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Introduzca un número (por defecto=1): "
+
+#: depCheck.go:153
+msgid ""
+"\n"
+"Inner conflicts found:"
+msgstr ""
+"\n"
+"Conflictos internos encontrados:"
+
+#: depCheck.go:167
+msgid ""
+"\n"
+"Package conflicts found:"
+msgstr ""
+"\n"
+"Conflictos de paquetes encontrados:"
+
+#: install.go:268 install.go:308 install.go:487 install.go:591 install.go:674
+msgid "aborting due to user"
+msgstr "abortando por el usuario"
+
+#: install.go:513
+msgid "cannot find package name: %v"
+msgstr "no es posible encontrar el paquete: %v"
+
+#: install.go:1046 install.go:1118
+msgid "could not find PKGDEST for: %s"
+msgstr "no fue posible encontrar PKGDEST para: %s"
+
+#: install.go:790
+msgid "editor did not exit successfully, aborting: %s"
+msgstr "el editor no terminó correctamente, abortando: %s"
+
+#: download.go:84 download.go:109
+msgid "error cloning %s: %s"
+msgstr "error clonando %s: %s"
+
+#: install.go:922
+msgid "error downloading sources: %s"
+msgstr "error descargando fuentes: %s"
+
+#: query.go:234
+msgid "error during AUR search: %s"
+msgstr "error durante la búsqueda en AUR: %s"
+
+#: download.go:96 download.go:121
+msgid "error fetching %s: %s"
+msgstr "error descargando %s: %s"
+
+#: install.go:331 install.go:440
+msgid "error installing repo packages"
+msgstr "error instalando paquetes del repositorio"
+
+#: install.go:1030 install.go:1070 install.go:1081 install.go:1093
+msgid "error making: %s"
+msgstr "error compilando: %s"
+
+#: download.go:135
+msgid "error merging %s: %s"
+msgstr "error fusionando %s: %s"
+
+#: download.go:89 download.go:114
+msgid "error reading %s"
+msgstr "error leyendo %s"
+
+#: install.go:73
+msgid "error refreshing databases"
+msgstr "error refrescando las bases de datos"
+
+#: clean.go:217 download.go:130
+msgid "error resetting %s: %s"
+msgstr "error al hacer reset en %s: %s"
+
+#: main.go:111
+msgid "failed to create BuildDir directory '%s': %s"
+msgstr "fracaso al crear carpeta de compilación (BuildDir) '%s': %s"
+
+#: main.go:99
+msgid "failed to create cache directory '%s': %s"
+msgstr "fracaso al crear carpeta de caché '%s': %s"
+
+#: main.go:91
+msgid "failed to create config directory '%s': %s"
+msgstr "fracaso al crear carpeta de configuración '%s': %s"
+
+#: download.go:288
+msgid "failed to get pkgbuild: %s: %s"
+msgstr "fracaso al obtener PKGBUILD: %s: %s"
+
+#: download.go:296
+msgid "failed to link %s: %s"
+msgstr "fracaso al crear link %s: %s"
+
+#: main.go:52
+msgid "failed to open config file '%s': %s"
+msgstr "fracaso al abrir archivo de configuración '%s': %s"
+
+#: main.go:74
+msgid "failed to open vcs file '%s': %s"
+msgstr "fracaso al abrir archivo de VCS '%s': %s"
+
+#: install.go:808
+msgid "failed to parse %s -- skipping: %s"
+msgstr "fracaso al analizar %s -- ignorando: %s"
+
+#: install.go:811
+msgid "failed to parse %s: %s"
+msgstr "fracaso al analizar %s: %s"
+
+#: main.go:59
+msgid "failed to read config file '%s': %s"
+msgstr "fracaso al leer archivo de configuración '%s': %s"
+
+#: main.go:81
+msgid "failed to read vcs file '%s': %s"
+msgstr "fracaso al leer archivo de VCS '%s': %s"
+
+#: cmd.go:356 config.go:334 print.go:644
+msgid "input too long"
+msgstr "entrada demasiado larga"
+
+#: callbacks.go:82 print.go:654
+msgid "invalid number: %s"
+msgstr "número no válido: %s"
+
+#: parser.go:146
+msgid "invalid option '%s'"
+msgstr "opción no válida '%s'"
+
+#: cmd.go:338 cmd.go:372 cmd.go:389 print.go:78 print.go:121 query.go:230
+msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
+msgstr "modo de ordenación no válido. Corrígelo con yay -Y --bottomup --save"
+
+#: callbacks.go:87 print.go:659
+msgid "invalid value: %d is not between %d and %d"
+msgstr "valor no válido: %d no está entre %d y %d"
+
+#: keys.go:110
+msgid "no keys to import"
+msgstr "ninguna llave por importar"
+
+#: cmd.go:319
+msgid "no packages match search"
+msgstr "ningún paquete corresponde a la búsqueda "
+
+#: config.go:299
+msgid "no"
+msgstr "no"
+
+#: parser.go:136
+msgid "only one operation may be used at a time"
+msgstr "sólo una operación se puede usar a la vez"
+
+#: print.go:446
+msgid "package '%s' was not found"
+msgstr "paquete '%s' no fue encontrado"
+
+#: depCheck.go:193
+msgid "package conflicts can not be resolved with noconfirm, aborting"
+msgstr "conflictos entre paquetes no puede ser resuelto con noconfirm, abortando"
+
+#: keys.go:101
+msgid "problem importing keys"
+msgstr "problema al importar llaves"
+
+#: install.go:176
+msgid "refusing to install AUR packages as root, aborting"
+msgstr "negándose a instalar paquetes AUR como root, abortando"
+
+#: clean.go:114
+msgid "removing AUR packages from cache..."
+msgstr "borrando paquetes AUR del caché..."
+
+#: clean.go:186 clean.go:208
+msgid "removing untracked AUR files from cache..."
+msgstr "borrando archivos AUR no rastreados del caché..."
+
+#: install.go:1127
+msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
+msgstr "el PKGDEST para %s está listado por makepkg pero no existe: %s"
+
+#: main.go:189
+msgid "unable to CreateHandle: %s"
+msgstr "no fue posible ejecutar CreateHandle: %s"
+
+#: cmd.go:175
+msgid "unhandled operation"
+msgstr "operación no implementada"
+
+#: cmd.go:439
+msgid "unknown-version"
+msgstr "versión-desconocida"
+
+#: config.go:298
+msgid "yes"
+msgstr "sí"
