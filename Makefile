@@ -23,8 +23,8 @@ POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
-GOFLAGS := -v -mod=mod
-EXTRA_GOFLAGS ?=
+GOFLAGS ?= -v -trimpath -mod=readonly -modcacherw
+EXTRA_GOFLAGS ?= -buildmode=pie
 LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}"
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
@@ -86,7 +86,7 @@ docker-release-x86_64:
 .PHONY: docker-build
 docker-build:
 	docker build -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make build VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make build VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${BIN} $(BIN)
 	docker container rm yay-$(ARCH)
 
