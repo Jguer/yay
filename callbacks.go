@@ -96,8 +96,8 @@ func questionCallback(question alpm.QuestionAny) {
 func logCallback(level alpm.LogLevel, str string) {
 	switch level {
 	case alpm.LogWarning:
-		text.Warnln(str)
+		text.Warn(str)
 	case alpm.LogError:
-		text.Errorln(str)
+		text.Error(str)
 	}
 }
