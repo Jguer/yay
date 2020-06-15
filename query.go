@@ -174,7 +174,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 				continue
 			}
 
-			if !(strings.Contains(r[j].Name, pkgN) || strings.Contains(strings.ToLower(r[j].Description), pkgN)) {
+			if !(strings.Contains(r[i].Name, pkgN) || strings.Contains(strings.ToLower(r[i].Description), pkgN)) {
 				match = false
 				break
 			}
