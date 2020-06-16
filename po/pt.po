@@ -23,7 +23,7 @@ msgstr " (Alvo"
 
 #: depCheck.go:281
 msgid " (Wanted by: "
-msgstr " (Querido por: "
+msgstr " (Requerido por: "
 
 #: callbacks.go:72
 msgid " Input too long"
@@ -48,7 +48,7 @@ msgstr ""
 
 #: download.go:273
 msgid "%s already downloaded -- use -f to overwrite"
-msgstr "%s já descarregado -- utilize -f para forçar"
+msgstr "%s já baixado -- utilize -f para forçar"
 
 #: install.go:1084
 msgid "%s already made -- skipping build"
@@ -98,7 +98,7 @@ msgstr "%s: local (%s) é mais recente que AUR (%s)"
 
 #: download.go:298
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) PKGBUILD ABS descarregado: %s"
+msgstr "(%d/%d) PKGBUILD ABS baixado: %s"
 
 #: install.go:803
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -182,11 +182,11 @@ msgstr "Diffs a mostrar?"
 
 #: clean.go:89
 msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "Quer remover todos os pacotes AUR da cache?"
+msgstr "Quer remover todos os pacotes AUR do cache?"
 
 #: clean.go:106
 msgid "Do you want to remove ALL untracked AUR files?"
-msgstr "Quer remove todos os ficheiros AUR não seguidos?"
+msgstr "Quer remover todos os ficheiros AUR não monitorados?"
 
 #: clean.go:91
 msgid "Do you want to remove all other AUR packages from cache?"
@@ -338,7 +338,7 @@ msgstr "Pesquisando na AUR..."
 
 #: install.go:219
 msgid "Remove make dependencies after install?"
-msgstr ""
+msgstr "Remover as dependências de make pós instalação?"
 
 #: callbacks.go:46
 msgid "Repository "
@@ -442,7 +442,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Introduza um número (por defeito=1):"
+"Introduza um número (por padrão=1):"
 
 #: depCheck.go:153
 msgid ""
@@ -462,7 +462,7 @@ msgstr ""
 
 #: install.go:268 install.go:308 install.go:487 install.go:591 install.go:674
 msgid "aborting due to user"
-msgstr "Abortando por opção do utilizador"
+msgstr "Abortando por opção do usuário"
 
 #: install.go:513
 msgid "cannot find package name: %v"
@@ -482,7 +482,7 @@ msgstr "erro clonando %s: %s"
 
 #: install.go:922
 msgid "error downloading sources: %s"
-msgstr "erro ao descarregar fontes: %s"
+msgstr "erro ao baixar fontes: %s"
 
 #: query.go:234
 msgid "error during AUR search: %s"
@@ -490,7 +490,7 @@ msgstr "erro durante pesquisa AUR: %s"
 
 #: download.go:96 download.go:121
 msgid "error fetching %s: %s"
-msgstr "erro ao descarregar %s: %s"
+msgstr "erro ao buscar %s: %s"
 
 #: install.go:331 install.go:440
 msgid "error installing repo packages"
@@ -502,7 +502,7 @@ msgstr "erro compilando: %s"
 
 #: download.go:135
 msgid "error merging %s: %s"
-msgstr "erro merging %s: %s"
+msgstr "erro ao fundir %s: %s"
 
 #: download.go:89 download.go:114
 msgid "error reading %s"
@@ -510,7 +510,7 @@ msgstr "erro lendo %s"
 
 #: install.go:73
 msgid "error refreshing databases"
-msgstr "erro refrescando base de dados"
+msgstr "erro recarregando base de dados"
 
 #: clean.go:217 download.go:130
 msgid "error resetting %s: %s"
@@ -518,11 +518,11 @@ msgstr "erro ao fazer o reset a %s: %s"
 
 #: main.go:111
 msgid "failed to create BuildDir directory '%s': %s"
-msgstr "falha ao crear pasta BuildDir: '%s': %s"
+msgstr "falha ao criar pasta BuildDir: '%s': %s"
 
 #: main.go:99
 msgid "failed to create cache directory '%s': %s"
-msgstr "falha ao crear pasta de cache '%s': %s"
+msgstr "falha ao criar pasta de cache '%s': %s"
 
 #: main.go:91
 msgid "failed to create config directory '%s': %s"
@@ -538,27 +538,27 @@ msgstr "falha ao criar symlink %s: %s"
 
 #: main.go:52
 msgid "failed to open config file '%s': %s"
-msgstr "falha ao abrir ficheiro de configuração '%s': %s"
+msgstr "falha ao abrir arquivo de configuração '%s': %s"
 
 #: main.go:74
 msgid "failed to open vcs file '%s': %s"
-msgstr "falha ao abrir ficheiro VCS '%s': %s"
+msgstr "falha ao abrir arquivo VCS '%s': %s"
 
 #: install.go:808
 msgid "failed to parse %s -- skipping: %s"
-msgstr "falha ao analizar %s -- ignorando: %s"
+msgstr "falha ao analisar %s -- ignorando: %s"
 
 #: install.go:811
 msgid "failed to parse %s: %s"
-msgstr "falha ao analizar %s: %s"
+msgstr "falha ao analisar %s: %s"
 
 #: main.go:59
 msgid "failed to read config file '%s': %s"
-msgstr "falha ao ler ficheiro de configuração '%s': %s"
+msgstr "falha ao ler arquivo de configuração '%s': %s"
 
 #: main.go:81
 msgid "failed to read vcs file '%s': %s"
-msgstr "falha ao ler ficheiro VCS '%s': %s"
+msgstr "falha ao ler arquivo VCS '%s': %s"
 
 #: cmd.go:356 config.go:334 print.go:644
 msgid "input too long"
@@ -634,7 +634,7 @@ msgstr "operação não implementada"
 
 #: cmd.go:439
 msgid "unknown-version"
-msgstr "versão-desconhecida"
+msgstr "versão desconhecida"
 
 #: config.go:298
 msgid "yes"
