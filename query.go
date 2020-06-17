@@ -169,8 +169,8 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 	for i := range r {
 		match := true
-		for i, pkgN := range pkgS {
-			if usedIndex == i {
+		for j, pkgN := range pkgS {
+			if usedIndex == j {
 				continue
 			}
 
