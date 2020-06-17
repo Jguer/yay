@@ -158,7 +158,7 @@ msgstr "Pacotes em conflito terão de ser confirmados manualmente"
 
 #: print.go:299
 msgid "Conflicts With"
-msgstr "Em conflito com:"
+msgstr "Em conflito com"
 
 #: depCheck.go:273
 msgid "Could not find all required packages:"
@@ -170,7 +170,7 @@ msgstr "Removendo (%d/%d): %s"
 
 #: print.go:295
 msgid "Depends On"
-msgstr "Depende de:"
+msgstr "Depende de"
 
 #: print.go:289
 msgid "Description"
@@ -210,7 +210,7 @@ msgstr "Pacotes explicitamente instalados: %s"
 
 #: print.go:303
 msgid "First Submitted"
-msgstr "Primeira submissão:"
+msgstr "Primeira submissão"
 
 #: print.go:44
 msgid "Flagged Out Of Date AUR Packages:"
@@ -246,7 +246,7 @@ msgstr "Última Modificação"
 
 #: print.go:293
 msgid "Licenses"
-msgstr "Licença"
+msgstr "Licenças"
 
 #: print.go:300
 msgid "Maintainer"
@@ -254,7 +254,7 @@ msgstr "Responsável pela manutenção"
 
 #: print.go:296
 msgid "Make Deps"
-msgstr "Dependência Make:"
+msgstr "Dependências Make"
 
 #: download.go:281
 msgid "Missing ABS packages:"
@@ -378,7 +378,7 @@ msgstr "Os seguintes pacotes não são compatíveis com a sua arquitetura:"
 
 #: callbacks.go:36 print.go:615
 msgid "There are %d providers available for %s:"
-msgstr "Existem %d pacotes que fornecem %s:"
+msgstr "Existem %d provedores disponíveis para %s:"
 
 #: exec.go:71
 msgid "There may be another Pacman instance running. Waiting..."
