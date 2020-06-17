@@ -484,7 +484,7 @@ msgstr "erro ao baixar as fontes: %s"
 
 #: query.go:234
 msgid "error during AUR search: %s"
-msgstr "error during AUR search: %s"
+msgstr "erro durante busca no AUR: %s"
 
 #: download.go:96 download.go:121
 msgid "error fetching %s: %s"
@@ -508,15 +508,15 @@ msgstr "erro ao ler %s"
 
 #: install.go:73
 msgid "error refreshing databases"
-msgstr "error ao recarregar base de dados"
+msgstr "erro ao recarregar base de dados"
 
 #: clean.go:217 download.go:130
 msgid "error resetting %s: %s"
-msgstr "error ao resetar %s: %s"
+msgstr "erro ao resetar %s: %s"
 
 #: main.go:111
 msgid "failed to create BuildDir directory '%s': %s"
-msgstr "failed to create BuildDir directory '%s': %s"
+msgstr "falha ao criar diretório BuildDir '%s': %s"
 
 #: main.go:99
 msgid "failed to create cache directory '%s': %s"
