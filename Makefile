@@ -18,7 +18,7 @@ VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 LOCALEDIR := po
 SYSTEMLOCALEPATH := $(PREFIX)/share/locale/
 
-LANGS := pt en fr_FR zh_CN pt_BR
+LANGS := pt pt_BR en es fr_FR pl_PL ru_RU zh_CN
 POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
