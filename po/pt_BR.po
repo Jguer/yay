@@ -1,5 +1,6 @@
 # Translators:
-# Jguer <>, 2020
+# agendator <https://github.com/agendator>, 2020
+# lucasjome <https://github.com/lucasjome>, 2020
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
