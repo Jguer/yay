@@ -481,7 +481,7 @@ msgstr "erro ao clonar %s: %s"
 
 #: install.go:922
 msgid "error downloading sources: %s"
-msgstr "erro ao baixar as fontes: %s"
+msgstr "erro ao descarregar as fontes: %s"
 
 #: query.go:234
 msgid "error during AUR search: %s"
@@ -638,4 +638,3 @@ msgstr "versão-desconhecida"
 #: config.go:298
 msgid "yes"
 msgstr "sim"
-
