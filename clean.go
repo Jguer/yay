@@ -196,12 +196,18 @@ func cleanUntracked() error {
 		}
 
 		dir := filepath.Join(config.BuildDir, file.Name())
-		if err := show(passToGit(dir, "clean", "-fx")); err != nil {
-			return err
+		if isGitRepository(dir) {
+			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
+				return err
+			}
 		}
 	}
-
 	return nil
+}
+
+func isGitRepository(dir string) bool {
+	_, err := os.Stat(filepath.Join(dir, ".git"))
+	return !os.IsNotExist(err)
 }
 
 func cleanAfter(bases []Base) {
