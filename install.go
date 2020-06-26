@@ -755,7 +755,7 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 		args := []string{"diff",
 			start + "..HEAD@{upstream}", "--src-prefix",
 			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO"}
-		if useColor {
+		if text.UseColor {
 			args = append(args, "--color=always")
 		} else {
 			args = append(args, "--color=never")

@@ -49,19 +49,6 @@ func (warnings *aurWarnings) print() {
 	}
 }
 
-// human method returns results in human readable format.
-func human(size int64) string {
-	floatsize := float32(size)
-	units := [...]string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi"}
-	for _, unit := range units {
-		if floatsize < 1024 {
-			return fmt.Sprintf("%.1f %sB", floatsize, unit)
-		}
-		floatsize /= 1024
-	}
-	return fmt.Sprintf("%d%s", size, "B")
-}
-
 // PrintSearch handles printing search results in a given format
 func (q aurQuery) printSearch(start int) {
 	localDB, _ := alpmHandle.LocalDB()
@@ -82,7 +69,7 @@ func (q aurQuery) printSearch(start int) {
 			continue
 		}
 
-		toprint += bold(colorHash("aur")) + "/" + bold(q[i].Name) +
+		toprint += bold(text.ColorHash("aur")) + "/" + bold(q[i].Name) +
 			" " + cyan(q[i].Version) +
 			bold(" (+"+strconv.Itoa(q[i].NumVotes)) +
 			" " + bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+") ")
@@ -125,10 +112,10 @@ func (s repoQuery) printSearch() {
 			continue
 		}
 
-		toprint += bold(colorHash(res.DB().Name())) + "/" + bold(res.Name()) +
+		toprint += bold(text.ColorHash(res.DB().Name())) + "/" + bold(res.Name()) +
 			" " + cyan(res.Version()) +
-			bold(" ("+human(res.Size())+
-				" "+human(res.ISize())+") ")
+			bold(" ("+text.Human(res.Size())+
+				" "+text.Human(res.ISize())+") ")
 
 		if len(res.Groups().Slice()) != 0 {
 			toprint += fmt.Sprint(res.Groups().Slice(), " ")
@@ -169,8 +156,8 @@ func (b Base) String() string {
 	return str
 }
 
-func (u upgrade) StylizedNameWithRepository() string {
-	return bold(colorHash(u.Repository)) + "/" + bold(u.Name)
+func (u *upgrade) StylizedNameWithRepository() string {
+	return bold(text.ColorHash(u.Repository)) + "/" + bold(u.Name)
 }
 
 // Print prints the details of the packages to upgrade.
@@ -334,7 +321,7 @@ func biggestPackages() {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Printf("%s: %s\n", bold(pkgS[i].Name()), cyan(human(pkgS[i].ISize())))
+		fmt.Printf("%s: %s\n", bold(pkgS[i].Name()), cyan(text.Human(pkgS[i].ISize())))
 	}
 	// Could implement size here as well, but we just want the general idea
 }
@@ -356,7 +343,7 @@ func localStatistics() error {
 	text.Infoln(gotext.Get("Total installed packages: %s", cyan(strconv.Itoa(info.Totaln))))
 	text.Infoln(gotext.Get("Total foreign installed packages: %s", cyan(strconv.Itoa(len(remoteNames)))))
 	text.Infoln(gotext.Get("Explicitly installed packages: %s", cyan(strconv.Itoa(info.Expln))))
-	text.Infoln(gotext.Get("Total Size occupied by packages: %s", cyan(human(info.TotalSize))))
+	text.Infoln(gotext.Get("Total Size occupied by packages: %s", cyan(text.Human(info.TotalSize))))
 	fmt.Println(bold(cyan("===========================================")))
 	text.Infoln(gotext.Get("Ten biggest packages:"))
 	biggestPackages()
@@ -561,7 +548,7 @@ const (
 )
 
 func stylize(startCode, in string) string {
-	if useColor {
+	if text.UseColor {
 		return startCode + in + resetCode
 	}
 
@@ -594,19 +581,6 @@ func magenta(in string) string {
 
 func bold(in string) string {
 	return stylize(boldCode, in)
-}
-
-// Colors text using a hashing algorithm. The same text will always produce the
-// same color while different text will produce a different color.
-func colorHash(name string) (output string) {
-	if !useColor {
-		return name
-	}
-	var hash uint = 5381
-	for i := 0; i < len(name); i++ {
-		hash = uint(name[i]) + ((hash << 5) + (hash))
-	}
-	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
 }
 
 func providerMenu(dep string, providers providers) *rpc.Pkg {

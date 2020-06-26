@@ -165,13 +165,13 @@ func initAlpm() error {
 
 	switch value, _, _ := cmdArgs.getArg("color"); value {
 	case "always":
-		useColor = true
+		text.UseColor = true
 	case "auto":
-		useColor = isTty()
+		text.UseColor = isTty()
 	case "never":
-		useColor = false
+		text.UseColor = false
 	default:
-		useColor = pacmanConf.Color && isTty()
+		text.UseColor = pacmanConf.Color && isTty()
 	}
 
 	return nil

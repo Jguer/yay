@@ -1,9 +1,13 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/Jguer/yay/v10/pkg/text"
+)
 
 func TestGetVersionDiff(t *testing.T) {
-	useColor = true
+	text.UseColor = true
 
 	type versionPair struct {
 		Old string

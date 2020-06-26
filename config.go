@@ -94,9 +94,6 @@ const configFileName string = "config.json"
 // vcsFileName holds the name of the vcs file.
 const vcsFileName string = "vcs.json"
 
-// useColor enables/disables colored printing
-var useColor bool
-
 // configHome handles config directory home
 var configHome string
 
