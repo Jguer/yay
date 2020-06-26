@@ -79,7 +79,7 @@ func (q aurQuery) printSearch(start int) {
 		}
 
 		if q[i].OutOfDate != 0 {
-			toprint += bold(red(gotext.Get("(Out-of-date: %s)", formatTime(q[i].OutOfDate)))) + " "
+			toprint += bold(red(gotext.Get("(Out-of-date: %s)", text.FormatTime(q[i].OutOfDate)))) + " "
 		}
 
 		if pkg := localDB.Pkg(q[i].Name); pkg != nil {
@@ -287,11 +287,11 @@ func PrintInfo(a *rpc.Pkg) {
 	text.PrintInfoValue(gotext.Get("Maintainer"), a.Maintainer)
 	text.PrintInfoValue(gotext.Get("Votes"), fmt.Sprintf("%d", a.NumVotes))
 	text.PrintInfoValue(gotext.Get("Popularity"), fmt.Sprintf("%f", a.Popularity))
-	text.PrintInfoValue(gotext.Get("First Submitted"), formatTimeQuery(a.FirstSubmitted))
-	text.PrintInfoValue(gotext.Get("Last Modified"), formatTimeQuery(a.LastModified))
+	text.PrintInfoValue(gotext.Get("First Submitted"), text.FormatTimeQuery(a.FirstSubmitted))
+	text.PrintInfoValue(gotext.Get("Last Modified"), text.FormatTimeQuery(a.LastModified))
 
 	if a.OutOfDate != 0 {
-		text.PrintInfoValue(gotext.Get("Out-of-date"), formatTimeQuery(a.OutOfDate))
+		text.PrintInfoValue(gotext.Get("Out-of-date"), text.FormatTimeQuery(a.OutOfDate))
 	} else {
 		text.PrintInfoValue(gotext.Get("Out-of-date"), "No")
 	}
@@ -456,7 +456,7 @@ func (item *item) print(buildTime time.Time) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	} else {
-		fd = formatTime(int(date.Unix()))
+		fd = text.FormatTime(int(date.Unix()))
 		if _, double, _ := cmdArgs.getArg("news", "w"); !double && !buildTime.IsZero() {
 			if buildTime.After(date) {
 				return
@@ -521,18 +521,6 @@ func printNewsFeed() error {
 	}
 
 	return nil
-}
-
-// Formats a unix timestamp to ISO 8601 date (yyyy-mm-dd)
-func formatTime(i int) string {
-	t := time.Unix(int64(i), 0)
-	return t.Format("2006-01-02")
-}
-
-// Formats a unix timestamp to ISO 8601 date (Mon 02 Jan 2006 03:04:05 PM MST)
-func formatTimeQuery(i int) string {
-	t := time.Unix(int64(i), 0)
-	return t.Format("Mon 02 Jan 2006 03:04:05 PM MST")
 }
 
 const (
