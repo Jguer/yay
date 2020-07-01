@@ -1070,7 +1070,7 @@ func buildInstallPkgbuilds(
 					return errors.New(gotext.Get("error making: %s", err))
 				}
 
-				fmt.Fprintln(os.Stdout, gotext.Get("%s is up to date -- skipping"), cyan(pkg+"-"+pkgVersion))
+				fmt.Fprintln(os.Stdout, gotext.Get("%s is up to date -- skipping", cyan(pkg+"-"+pkgVersion)))
 				continue
 			}
 		}
