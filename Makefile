@@ -93,15 +93,6 @@ docker-build:
 	docker cp yay-$(ARCH):/app/${BIN} $(BIN)
 	docker container rm yay-$(ARCH)
 
-.PHONY: test-vendor
-test-vendor: vendor
-	@diff=$$(git diff vendor/); \
-	if [ -n "$$diff" ]; then \
-		echo "Please run 'make vendor' and commit the result:"; \
-		echo "$${diff}"; \
-		exit 1; \
-	fi;
-
 .PHONY: lint
 lint:
 	golangci-lint run ./...
