@@ -44,11 +44,14 @@ clean:
 	$(GO) clean $(GOFLAGS) -i ./...
 	rm -rf $(BIN) $(PKGNAME)_*
 
+.PHONY: test_lint
+test_lint: test lint
+
 .PHONY: test
 test:
 	$(GO) vet $(GOFLAGS) ./...
-	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted. Use make fmt" && false)
-	$(GO) test $(GOFLAGS) --race -covermode=atomic . ./pkg/...
+	@test -z "$$(gofmt -l $(SOURCES))" || (echo "Files need to be linted. Use make fmt" && false)
+	$(GO) test $(GOFLAGS) ./...
 
 .PHONY: build
 build: $(BIN)
@@ -101,8 +104,7 @@ test-vendor: vendor
 
 .PHONY: lint
 lint:
-	golangci-lint run
-	golint -set_exit_status . ./pkg/...
+	golangci-lint run ./...
 
 .PHONY: fmt
 fmt:
