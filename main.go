@@ -117,7 +117,7 @@ func initBuildDir() error {
 	return nil
 }
 
-func initAlpm() error {
+func initAlpm(pacmanConfigPath string) error {
 	var err error
 	var stderr string
 
@@ -126,7 +126,7 @@ func initAlpm() error {
 		root = value
 	}
 
-	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", config.PacmanConf, "--root", root)
+	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", pacmanConfigPath, "--root", root)
 	if err != nil {
 		return fmt.Errorf("%s", stderr)
 	}
@@ -231,15 +231,15 @@ func main() {
 	exitOnError(initConfig())
 	exitOnError(cmdArgs.parseCommandLine())
 	if shouldSaveConfig {
-		err := config.saveConfig()
+		err := config.SaveConfig(configFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}
-	config.expandEnv()
+	config.ExpandEnv()
 	exitOnError(initBuildDir())
 	exitOnError(initVCS())
-	exitOnError(initAlpm())
+	exitOnError(initAlpm(config.PacmanConf))
 	exitOnError(handleCmd())
 	os.Exit(cleanup())
 }

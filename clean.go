@@ -8,6 +8,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -116,7 +117,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
 	installedBases := make(stringset.StringSet)
 	inAURBases := make(stringset.StringSet)
 
-	_, remotePackages, _, _, err := filterPackages()
+	_, remotePackages, _, _, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return err
 	}

@@ -17,6 +17,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/completion"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -88,7 +89,7 @@ func install(parser *arguments) (err error) {
 		return err
 	}
 
-	_, _, localNames, remoteNames, err := filterPackages()
+	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -951,7 +952,7 @@ func buildInstallPkgbuilds(
 	config.NoConfirm = true
 
 	//remotenames: names of all non repo packages on the system
-	_, _, localNames, remoteNames, err := filterPackages()
+	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -62,7 +62,7 @@ func (q aurQuery) Less(i, j int) bool {
 		result = q[i].PackageBaseID < q[j].PackageBaseID
 	}
 
-	if config.SortMode == bottomUp {
+	if config.SortMode == settings.BottomUp {
 		return !result
 	}
 
@@ -71,47 +71,6 @@ func (q aurQuery) Less(i, j int) bool {
 
 func (q aurQuery) Swap(i, j int) {
 	q[i], q[j] = q[j], q[i]
-}
-
-// FilterPackages filters packages based on source and type from local repository.
-func filterPackages() (
-	local, remote []alpm.Package,
-	localNames, remoteNames []string,
-	err error) {
-	localDB, err := alpmHandle.LocalDB()
-	if err != nil {
-		return
-	}
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return
-	}
-
-	f := func(k alpm.Package) error {
-		found := false
-		// For each DB search for our secret package.
-		_ = dbList.ForEach(func(d alpm.DB) error {
-			if found {
-				return nil
-			}
-
-			if d.Pkg(k.Name()) != nil {
-				found = true
-				local = append(local, k)
-				localNames = append(localNames, k.Name())
-			}
-			return nil
-		})
-
-		if !found {
-			remote = append(remote, k)
-			remoteNames = append(remoteNames, k.Name())
-		}
-		return nil
-	}
-
-	err = localDB.PkgCache().ForEach(f)
-	return local, remote, localNames, remoteNames, err
 }
 
 func getSearchBy(value string) rpc.By {
@@ -212,14 +171,14 @@ func syncSearch(pkgS []string) (err error) {
 	}
 
 	switch config.SortMode {
-	case topDown:
+	case settings.TopDown:
 		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
 		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(1)
 		}
-	case bottomUp:
+	case settings.BottomUp:
 		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(1)
 		}
@@ -310,7 +269,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 		return nil
 	})
 
-	if config.SortMode == bottomUp {
+	if config.SortMode == settings.BottomUp {
 		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 			s[i], s[j] = s[j], s[i]
 		}
@@ -448,24 +407,6 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 	})
 
 	return hanging, err
-}
-
-func lastBuildTime() (time.Time, error) {
-	var lastTime time.Time
-
-	pkgs, _, _, _, err := filterPackages()
-	if err != nil {
-		return lastTime, err
-	}
-
-	for _, pkg := range pkgs {
-		thisTime := pkg.BuildDate()
-		if thisTime.After(lastTime) {
-			lastTime = thisTime
-		}
-	}
-
-	return lastTime, nil
 }
 
 // Statistics returns statistics about packages installed in system

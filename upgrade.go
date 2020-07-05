@@ -10,6 +10,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/intrange"
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/text"
 
 	rpc "github.com/mikkeloscar/aur"
@@ -117,7 +118,7 @@ func getVersionDiff(oldVersion, newVersion string) (left, right string) {
 
 // upList returns lists of packages to upgrade from each source.
 func upList(warnings *aurWarnings) (aurUp, repoUp upSlice, err error) {
-	_, remote, _, remoteNames, err := filterPackages()
+	_, remote, _, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return nil, nil, err
 	}

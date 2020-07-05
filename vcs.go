@@ -12,6 +12,7 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -30,7 +31,7 @@ func createDevelDB() error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 
-	_, _, _, remoteNames, err := filterPackages()
+	_, _, _, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return err
 	}

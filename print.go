@@ -2,20 +2,17 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"encoding/xml"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/intrange"
+	"github.com/Jguer/yay/v10/pkg/query"
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -57,9 +54,9 @@ func (q aurQuery) printSearch(start int) {
 		var toprint string
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
-			case topDown:
+			case settings.TopDown:
 				toprint += magenta(strconv.Itoa(start+i) + " ")
-			case bottomUp:
+			case settings.BottomUp:
 				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			default:
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -100,9 +97,9 @@ func (s repoQuery) printSearch() {
 		var toprint string
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
-			case topDown:
+			case settings.TopDown:
 				toprint += magenta(strconv.Itoa(i+1) + " ")
-			case bottomUp:
+			case settings.BottomUp:
 				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
 			default:
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -333,7 +330,7 @@ func localStatistics() error {
 		return err
 	}
 
-	_, _, _, remoteNames, err := filterPackages()
+	_, _, _, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -375,7 +372,7 @@ func printUpdateList(parser *arguments) error {
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	_, _, localNames, remoteNames, err := filterPackages()
+	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -436,88 +433,6 @@ outer:
 
 	if missing {
 		return fmt.Errorf("")
-	}
-
-	return nil
-}
-
-type item struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	PubDate     string `xml:"pubDate"`
-	Creator     string `xml:"dc:creator"`
-}
-
-func (item *item) print(buildTime time.Time) {
-	var fd string
-	date, err := time.Parse(time.RFC1123Z, item.PubDate)
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-	} else {
-		fd = text.FormatTime(int(date.Unix()))
-		if _, double, _ := cmdArgs.getArg("news", "w"); !double && !buildTime.IsZero() {
-			if buildTime.After(date) {
-				return
-			}
-		}
-	}
-
-	fmt.Println(bold(magenta(fd)), bold(strings.TrimSpace(item.Title)))
-
-	if !cmdArgs.existsArg("q", "quiet") {
-		desc := strings.TrimSpace(parseNews(item.Description))
-		fmt.Println(desc)
-	}
-}
-
-type channel struct {
-	Title         string `xml:"title"`
-	Link          string `xml:"link"`
-	Description   string `xml:"description"`
-	Language      string `xml:"language"`
-	Lastbuilddate string `xml:"lastbuilddate"`
-	Items         []item `xml:"item"`
-}
-
-type rss struct {
-	Channel channel `xml:"channel"`
-}
-
-func printNewsFeed() error {
-	resp, err := http.Get("https://archlinux.org/feeds/news")
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	rssGot := rss{}
-
-	d := xml.NewDecoder(bytes.NewReader(body))
-	err = d.Decode(&rssGot)
-	if err != nil {
-		return err
-	}
-
-	buildTime, err := lastBuildTime()
-	if err != nil {
-		return err
-	}
-
-	if config.SortMode == bottomUp {
-		for i := len(rssGot.Channel.Items) - 1; i >= 0; i-- {
-			rssGot.Channel.Items[i].print(buildTime)
-		}
-	} else {
-		for i := 0; i < len(rssGot.Channel.Items); i++ {
-			rssGot.Channel.Items[i].print(buildTime)
-		}
 	}
 
 	return nil

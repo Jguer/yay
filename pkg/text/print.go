@@ -9,40 +9,40 @@ import (
 
 const arrow = "==>"
 const smallArrow = " ->"
-const opSymbol = ":: "
+const opSymbol = "::"
 
 func OperationInfoln(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{boldCode, cyan(opSymbol), boldCode}, a...)...)
-	fmt.Fprintln(os.Stdout, resetCode)
+	fmt.Fprint(os.Stdout, append([]interface{}{Bold(cyan(opSymbol + " ")), boldCode}, a...)...)
+	fmt.Fprintln(os.Stdout, ResetCode)
 }
 
 func OperationInfo(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{boldCode, cyan(opSymbol), boldCode}, a...)...)
-	fmt.Fprint(os.Stdout, resetCode+" ")
+	fmt.Fprint(os.Stdout, append([]interface{}{Bold(cyan(opSymbol + " ")), boldCode}, a...)...)
+	fmt.Fprint(os.Stdout, ResetCode+" ")
 }
 
 func Info(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{bold(green(arrow + " "))}, a...)...)
+	fmt.Fprint(os.Stdout, append([]interface{}{Bold(green(arrow + " "))}, a...)...)
 }
 
 func Infoln(a ...interface{}) {
-	fmt.Fprintln(os.Stdout, append([]interface{}{bold(green(arrow))}, a...)...)
+	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(green(arrow))}, a...)...)
 }
 
 func Warn(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{bold(yellow(smallArrow + " "))}, a...)...)
+	fmt.Fprint(os.Stdout, append([]interface{}{Bold(yellow(smallArrow + " "))}, a...)...)
 }
 
 func Warnln(a ...interface{}) {
-	fmt.Fprintln(os.Stdout, append([]interface{}{bold(yellow(smallArrow))}, a...)...)
+	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(yellow(smallArrow))}, a...)...)
 }
 
 func Error(a ...interface{}) {
-	fmt.Fprint(os.Stderr, append([]interface{}{bold(red(smallArrow + " "))}, a...)...)
+	fmt.Fprint(os.Stderr, append([]interface{}{Bold(red(smallArrow + " "))}, a...)...)
 }
 
 func Errorln(a ...interface{}) {
-	fmt.Fprintln(os.Stderr, append([]interface{}{bold(red(smallArrow))}, a...)...)
+	fmt.Fprintln(os.Stderr, append([]interface{}{Bold(red(smallArrow))}, a...)...)
 }
 
 func PrintInfoValue(str, value string) {
@@ -50,5 +50,5 @@ func PrintInfoValue(str, value string) {
 		value = gotext.Get("None")
 	}
 
-	fmt.Fprintf(os.Stdout, bold("%-16s%s")+" %s\n", str, ":", value)
+	fmt.Fprintf(os.Stdout, Bold("%-16s%s")+" %s\n", str, ":", value)
 }

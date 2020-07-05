@@ -11,6 +11,8 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/completion"
 	"github.com/Jguer/yay/v10/pkg/intrange"
+	"github.com/Jguer/yay/v10/pkg/news"
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -198,7 +200,7 @@ func handlePrint() (err error) {
 	switch {
 	case cmdArgs.existsArg("d", "defaultconfig"):
 		tmpConfig := defaultSettings()
-		tmpConfig.expandEnv()
+		tmpConfig.ExpandEnv()
 		fmt.Printf("%v", tmpConfig)
 	case cmdArgs.existsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
@@ -207,7 +209,9 @@ func handlePrint() (err error) {
 	case cmdArgs.existsArg("u", "upgrades"):
 		err = printUpdateList(cmdArgs)
 	case cmdArgs.existsArg("w", "news"):
-		err = printNewsFeed()
+		_, double, _ := cmdArgs.getArg("news", "w")
+		quiet := cmdArgs.existsArg("q", "quiet")
+		err = news.PrintNewsFeed(alpmHandle, config.SortMode, double, quiet)
 	case cmdArgs.existsDouble("c", "complete"):
 		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, true)
 	case cmdArgs.existsArg("c", "complete"):
@@ -320,14 +324,14 @@ func displayNumberMenu(pkgS []string) error {
 	}
 
 	switch config.SortMode {
-	case topDown:
+	case settings.TopDown:
 		if mode == modeRepo || mode == modeAny {
 			pq.printSearch()
 		}
 		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(lenpq + 1)
 		}
-	case bottomUp:
+	case settings.BottomUp:
 		if mode == modeAUR || mode == modeAny {
 			aq.printSearch(lenpq + 1)
 		}
@@ -364,9 +368,9 @@ func displayNumberMenu(pkgS []string) error {
 	for i, pkg := range pq {
 		var target int
 		switch config.SortMode {
-		case topDown:
+		case settings.TopDown:
 			target = i + 1
-		case bottomUp:
+		case settings.BottomUp:
 			target = len(pq) - i
 		default:
 			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -381,9 +385,9 @@ func displayNumberMenu(pkgS []string) error {
 		var target int
 
 		switch config.SortMode {
-		case topDown:
+		case settings.TopDown:
 			target = i + 1 + len(pq)
-		case bottomUp:
+		case settings.BottomUp:
 			target = len(aq) - i + len(pq)
 		default:
 			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))

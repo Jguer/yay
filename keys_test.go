@@ -72,6 +72,7 @@ func TestImportKeys(t *testing.T) {
 	}
 	defer os.RemoveAll(keyringDir)
 
+	config = defaultSettings()
 	config.GpgBin = "gpg"
 	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 

@@ -2,8 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"html"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +10,7 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 	"github.com/pkg/errors"
 
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
@@ -474,9 +473,9 @@ func handleConfig(option, value string) bool {
 	case "notimeupdate":
 		config.TimeUpdate = false
 	case "topdown":
-		config.SortMode = topDown
+		config.SortMode = settings.TopDown
 	case "bottomup":
-		config.SortMode = bottomUp
+		config.SortMode = settings.BottomUp
 	case "completioninterval":
 		n, err := strconv.Atoi(value)
 		if err == nil {
@@ -848,67 +847,4 @@ func (parser *arguments) extractYayOptions() {
 
 	rpc.AURURL = strings.TrimRight(config.AURURL, "/") + "/rpc.php?"
 	config.AURURL = strings.TrimRight(config.AURURL, "/")
-}
-
-// Crude html parsing, good enough for the arch news
-// This is only displayed in the terminal so there should be no security
-// concerns
-func parseNews(str string) string {
-	var buffer bytes.Buffer
-	var tagBuffer bytes.Buffer
-	var escapeBuffer bytes.Buffer
-	inTag := false
-	inEscape := false
-
-	for _, char := range str {
-		if inTag {
-			if char == '>' {
-				inTag = false
-				switch tagBuffer.String() {
-				case "code":
-					buffer.WriteString(cyanCode)
-				case "/code":
-					buffer.WriteString(resetCode)
-				case "/p":
-					buffer.WriteRune('\n')
-				}
-
-				continue
-			}
-
-			tagBuffer.WriteRune(char)
-			continue
-		}
-
-		if inEscape {
-			if char == ';' {
-				inEscape = false
-				escapeBuffer.WriteRune(char)
-				s := html.UnescapeString(escapeBuffer.String())
-				buffer.WriteString(s)
-				continue
-			}
-
-			escapeBuffer.WriteRune(char)
-			continue
-		}
-
-		if char == '<' {
-			inTag = true
-			tagBuffer.Reset()
-			continue
-		}
-
-		if char == '&' {
-			inEscape = true
-			escapeBuffer.Reset()
-			escapeBuffer.WriteRune(char)
-			continue
-		}
-
-		buffer.WriteRune(char)
-	}
-
-	buffer.WriteString(resetCode)
-	return buffer.String()
 }
