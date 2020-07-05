@@ -49,7 +49,7 @@ func MakeRuntime() (*Runtime, error) {
 	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
 		configHome = filepath.Join(configHome, "yay")
 	} else if configHome = os.Getenv("HOME"); configHome != "" {
-		configHome = filepath.Join(configHome, ".config/yay")
+		configHome = filepath.Join(configHome, ".config", "yay")
 	} else {
 		return nil, errors.New(gotext.Get("%s and %s unset", "XDG_CONFIG_HOME", "HOME"))
 	}
@@ -61,7 +61,7 @@ func MakeRuntime() (*Runtime, error) {
 	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
 		cacheHome = filepath.Join(cacheHome, "yay")
 	} else if cacheHome = os.Getenv("HOME"); cacheHome != "" {
-		cacheHome = filepath.Join(cacheHome, ".cache/yay")
+		cacheHome = filepath.Join(cacheHome, ".cache", "yay")
 	} else {
 		return nil, errors.New(gotext.Get("%s and %s unset", "XDG_CACHE_HOME", "HOME"))
 	}

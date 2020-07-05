@@ -9,26 +9,45 @@ import (
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 	"github.com/pkg/errors"
-
-	"github.com/Jguer/yay/v10/pkg/stringset"
 )
+
+type Option struct {
+	Args []string
+}
+
+func (o *Option) Add(arg string) {
+	if o.Args == nil {
+		o.Args = []string{arg}
+		return
+	}
+	o.Args = append(o.Args, arg)
+}
+
+func (o *Option) First() string {
+	if o.Args == nil || len(o.Args) == 0 {
+		return ""
+	}
+	return o.Args[0]
+}
+
+func (o *Option) Set(arg string) {
+	o.Args = []string{arg}
+}
 
 // Arguments Parses command line arguments in a way we can interact with programmatically but
 // also in a way that can easily be passed to pacman later on.
 type Arguments struct {
 	Op      string
-	Options map[string]string
-	Globals map[string]string
-	Doubles stringset.StringSet // Tracks args passed twice such as -yy and -dd
+	Options map[string]*Option
+	Globals map[string]*Option
 	Targets []string
 }
 
 func MakeArguments() *Arguments {
 	return &Arguments{
 		"",
-		make(map[string]string),
-		make(map[string]string),
-		make(stringset.StringSet),
+		make(map[string]*Option),
+		make(map[string]*Option),
 		make([]string, 0),
 	}
 }
@@ -58,10 +77,6 @@ func (parser *Arguments) Copy() (cp *Arguments) {
 	cp.Targets = make([]string, len(parser.Targets))
 	copy(cp.Targets, parser.Targets)
 
-	for k, v := range parser.Doubles {
-		cp.Doubles[k] = v
-	}
-
 	return
 }
 
@@ -69,7 +84,6 @@ func (parser *Arguments) DelArg(options ...string) {
 	for _, option := range options {
 		delete(parser.Options, option)
 		delete(parser.Globals, option)
-		delete(parser.Doubles, option)
 	}
 }
 
@@ -150,12 +164,16 @@ func (parser *Arguments) addParam(option, arg string) (err error) {
 	}
 
 	switch {
-	case parser.ExistsArg(option):
-		parser.Doubles[option] = struct{}{}
 	case isGlobal(option):
-		parser.Globals[option] = arg
+		if parser.Globals[option] == nil {
+			parser.Globals[option] = &Option{}
+		}
+		parser.Globals[option].Add(arg)
 	default:
-		parser.Options[option] = arg
+		if parser.Options[option] == nil {
+			parser.Options[option] = &Option{}
+		}
+		parser.Options[option].Add(arg)
 	}
 
 	return
@@ -189,40 +207,21 @@ func (parser *Arguments) ExistsArg(options ...string) bool {
 }
 
 func (parser *Arguments) GetArg(options ...string) (arg string, double, exists bool) {
-	existCount := 0
-
 	for _, option := range options {
-		var value string
-
-		value, exists = parser.Options[option]
-
+		value, exists := parser.Options[option]
 		if exists {
-			arg = value
-			existCount++
-			_, exists = parser.Doubles[option]
-
-			if exists {
-				existCount++
-			}
+			arg = value.First()
+			return arg, len(value.Args) >= 2, len(value.Args) >= 1
 		}
 
 		value, exists = parser.Globals[option]
-
 		if exists {
-			arg = value
-			existCount++
-			_, exists = parser.Doubles[option]
-
-			if exists {
-				existCount++
-			}
+			arg = value.First()
+			return arg, len(value.Args) >= 2, len(value.Args) >= 1
 		}
 	}
 
-	double = existCount >= 2
-	exists = existCount >= 1
-
-	return arg, double, exists
+	return arg, false, false
 }
 
 func (parser *Arguments) AddTarget(targets ...string) {
@@ -236,9 +235,14 @@ func (parser *Arguments) ClearTargets() {
 // Multiple args acts as an OR operator
 func (parser *Arguments) ExistsDouble(options ...string) bool {
 	for _, option := range options {
-		_, exists := parser.Doubles[option]
+		value, exists := parser.Options[option]
 		if exists {
-			return true
+			return len(value.Args) >= 2
+		}
+
+		value, exists = parser.Globals[option]
+		if exists {
+			return len(value.Args) >= 2
 		}
 	}
 
@@ -260,14 +264,12 @@ func (parser *Arguments) FormatArgs() (args []string) {
 		}
 
 		formattedOption := formatArg(option)
-		args = append(args, formattedOption)
 
-		if hasParam(option) {
-			args = append(args, arg)
-		}
-
-		if parser.ExistsDouble(option) {
+		for _, value := range arg.Args {
 			args = append(args, formattedOption)
+			if hasParam(option) {
+				args = append(args, value)
+			}
 		}
 	}
 
@@ -280,7 +282,7 @@ func (parser *Arguments) FormatGlobals() (args []string) {
 		args = append(args, formattedOption)
 
 		if hasParam(option) {
-			args = append(args, arg)
+			args = append(args, arg.First())
 		}
 
 		if parser.ExistsDouble(option) {
@@ -288,7 +290,7 @@ func (parser *Arguments) FormatGlobals() (args []string) {
 		}
 	}
 
-	return
+	return args
 }
 
 func formatArg(arg string) string {
@@ -833,13 +835,13 @@ func (parser *Arguments) ParseCommandLine(config *Configuration) error {
 
 func (parser *Arguments) extractYayOptions(config *Configuration) {
 	for option, value := range parser.Options {
-		if handleConfig(config, option, value) {
+		if handleConfig(config, option, value.First()) {
 			parser.DelArg(option)
 		}
 	}
 
 	for option, value := range parser.Globals {
-		if handleConfig(config, option, value) {
+		if handleConfig(config, option, value.First()) {
 			parser.DelArg(option)
 		}
 	}

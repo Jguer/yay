@@ -145,7 +145,13 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 			if exists {
 				ignoreStr += "," + value
 			}
-			arguments.Options["ignore"] = ignoreStr
+			if arguments.Options["ignore"] == nil {
+				arguments.Options["ignore"] = &settings.Option{
+					Args: []string{ignoreStr},
+				}
+			} else {
+				arguments.Options["ignore"].Add(ignoreStr)
+			}
 		}
 	}
 
@@ -1099,10 +1105,10 @@ func buildInstallPkgbuilds(
 		}
 
 		// conflicts have been checked so answer y for them
-		if config.UseAsk {
-			ask, _ := strconv.Atoi(cmdArgs.Globals["ask"])
+		if config.UseAsk && cmdArgs.ExistsArg("ask") {
+			ask, _ := strconv.Atoi(cmdArgs.Options["ask"].First())
 			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
-			cmdArgs.Globals["ask"] = fmt.Sprint(uask)
+			cmdArgs.Options["ask"].Set(fmt.Sprint(uask))
 		} else {
 			for _, split := range base {
 				if _, ok := conflicts[split.Name]; ok {
