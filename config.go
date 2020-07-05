@@ -32,9 +32,6 @@ var savedInfo vcsInfo
 // YayConf holds the current config values for yay.
 var config *settings.Configuration
 
-// AlpmHandle is the alpm handle used by yay.
-// var alpmHandle *alpm.Handle
-
 var hideMenus = false
 
 // Editor returns the preferred system editor.
