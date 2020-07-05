@@ -52,13 +52,13 @@ func MakeArguments() *Arguments {
 	}
 }
 
-func (parser *Arguments) CopyGlobal() (cp *Arguments) {
-	cp = MakeArguments()
+func (parser *Arguments) CopyGlobal() *Arguments {
+	cp := MakeArguments()
 	for k, v := range parser.Globals {
 		cp.Globals[k] = v
 	}
 
-	return
+	return cp
 }
 
 func (parser *Arguments) Copy() (cp *Arguments) {
@@ -143,51 +143,46 @@ func (parser *Arguments) NeedRoot(runtime *Runtime) bool {
 	}
 }
 
-func (parser *Arguments) addOP(op string) (err error) {
+func (parser *Arguments) addOP(op string) error {
 	if parser.Op != "" {
-		err = errors.New(gotext.Get("only one operation may be used at a time"))
-		return
+		return errors.New(gotext.Get("only one operation may be used at a time"))
 	}
 
 	parser.Op = op
-	return
+	return nil
 }
 
-func (parser *Arguments) addParam(option, arg string) (err error) {
+func (parser *Arguments) addParam(option, arg string) error {
 	if !isArg(option) {
 		return errors.New(gotext.Get("invalid option '%s'", option))
 	}
 
 	if isOp(option) {
-		err = parser.addOP(option)
-		return
+		return parser.addOP(option)
 	}
 
-	switch {
-	case isGlobal(option):
+	if isGlobal(option) {
 		if parser.Globals[option] == nil {
 			parser.Globals[option] = &Option{}
 		}
 		parser.Globals[option].Add(arg)
-	default:
+	} else {
 		if parser.Options[option] == nil {
 			parser.Options[option] = &Option{}
 		}
 		parser.Options[option].Add(arg)
 	}
-
-	return
+	return nil
 }
 
-func (parser *Arguments) AddArg(options ...string) (err error) {
+func (parser *Arguments) AddArg(options ...string) error {
 	for _, option := range options {
-		err = parser.addParam(option, "")
+		err := parser.addParam(option, "")
 		if err != nil {
-			return
+			return err
 		}
 	}
-
-	return
+	return nil
 }
 
 // Multiple args acts as an OR operator
@@ -210,14 +205,12 @@ func (parser *Arguments) GetArg(options ...string) (arg string, double, exists b
 	for _, option := range options {
 		value, exists := parser.Options[option]
 		if exists {
-			arg = value.First()
-			return arg, len(value.Args) >= 2, len(value.Args) >= 1
+			return value.First(), len(value.Args) >= 2, len(value.Args) >= 1
 		}
 
 		value, exists = parser.Globals[option]
 		if exists {
-			arg = value.First()
-			return arg, len(value.Args) >= 2, len(value.Args) >= 1
+			return value.First(), len(value.Args) >= 2, len(value.Args) >= 1
 		}
 	}
 
@@ -279,14 +272,12 @@ func (parser *Arguments) FormatArgs() (args []string) {
 func (parser *Arguments) FormatGlobals() (args []string) {
 	for option, arg := range parser.Globals {
 		formattedOption := formatArg(option)
-		args = append(args, formattedOption)
 
-		if hasParam(option) {
-			args = append(args, arg.First())
-		}
-
-		if parser.ExistsDouble(option) {
+		for _, value := range arg.Args {
 			args = append(args, formattedOption)
+			if hasParam(option) {
+				args = append(args, value)
+			}
 		}
 	}
 

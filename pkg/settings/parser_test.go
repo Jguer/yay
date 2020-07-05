@@ -1,0 +1,214 @@
+package settings
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestOption_Add(t *testing.T) {
+	type fields struct {
+		Args []string
+	}
+	type args struct {
+		arg string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{name: "simple add", fields: fields{
+			Args: []string{"a", "b"},
+		}, args: args{
+			arg: "c",
+		}, want: []string{"a", "b", "c"}},
+		{name: "null add", fields: fields{
+			Args: nil,
+		}, args: args{
+			arg: "c",
+		}, want: []string{"c"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &Option{
+				Args: tt.fields.Args,
+			}
+			o.Add(tt.args.arg)
+			assert.EqualValues(t, tt.want, o.Args)
+		})
+	}
+}
+
+func TestOption_Set(t *testing.T) {
+	type fields struct {
+		Args []string
+	}
+	type args struct {
+		arg string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{name: "simple set", fields: fields{
+			Args: []string{"a", "b"},
+		}, args: args{
+			arg: "c",
+		}, want: []string{"c"}},
+		{name: "null set", fields: fields{
+			Args: nil,
+		}, args: args{
+			arg: "c",
+		}, want: []string{"c"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &Option{
+				Args: tt.fields.Args,
+			}
+			o.Set(tt.args.arg)
+			assert.EqualValues(t, tt.want, o.Args)
+		})
+	}
+}
+
+func TestOption_First(t *testing.T) {
+	type fields struct {
+		Args []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{name: "simple first", fields: fields{
+			Args: []string{"a", "b"},
+		}, want: "a"},
+		{name: "null first", fields: fields{
+			Args: nil,
+		}, want: ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &Option{
+				Args: tt.fields.Args,
+			}
+			assert.Equal(t, tt.want, o.First())
+		})
+	}
+}
+
+func TestMakeArguments(t *testing.T) {
+	args := MakeArguments()
+	assert.NotNil(t, args)
+	assert.Equal(t, "", args.Op)
+	assert.Empty(t, args.Globals)
+	assert.Empty(t, args.Options)
+	assert.Empty(t, args.Targets)
+}
+
+func TestArguments_CopyGlobal(t *testing.T) {
+	type fields struct {
+		Op      string
+		Options map[string]*Option
+		Globals map[string]*Option
+		Targets []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   *Arguments
+	}{
+		{name: "simple", fields: fields{
+			Op:      "Q",
+			Options: map[string]*Option{"a": {}},
+			Globals: map[string]*Option{"arch": {
+				Args: []string{"x86_x64"},
+			}, "boo": {Args: []string{"a", "b"}},
+			},
+			Targets: []string{"a", "b"},
+		}, want: &Arguments{
+			Op:      "",
+			Options: map[string]*Option{},
+			Globals: map[string]*Option{"arch": {
+				Args: []string{"x86_x64"},
+			}, "boo": {Args: []string{"a", "b"}},
+			},
+			Targets: []string{},
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			parser := &Arguments{
+				Op:      tt.fields.Op,
+				Options: tt.fields.Options,
+				Globals: tt.fields.Globals,
+				Targets: tt.fields.Targets,
+			}
+			got := parser.CopyGlobal()
+			assert.NotEqualValues(t, tt.fields.Options, got.Options)
+			assert.NotEqualValues(t, tt.fields.Targets, got.Targets)
+			assert.NotEqual(t, tt.fields.Op, got.Op)
+			assert.EqualValues(t, tt.fields.Globals, got.Globals)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestArguments_Copy(t *testing.T) {
+	type fields struct {
+		Op      string
+		Options map[string]*Option
+		Globals map[string]*Option
+		Targets []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   *Arguments
+	}{
+		{name: "simple", fields: fields{
+			Op:      "Q",
+			Options: map[string]*Option{"a": {}},
+			Globals: map[string]*Option{"arch": {
+				Args: []string{"x86_x64"},
+			}, "boo": {Args: []string{"a", "b"}},
+			},
+			Targets: []string{"a", "b"},
+		}, want: &Arguments{
+			Op:      "Q",
+			Options: map[string]*Option{"a": {}},
+			Globals: map[string]*Option{"arch": {
+				Args: []string{"x86_x64"},
+			}, "boo": {Args: []string{"a", "b"}},
+			},
+			Targets: []string{"a", "b"},
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			parser := &Arguments{
+				Op:      tt.fields.Op,
+				Options: tt.fields.Options,
+				Globals: tt.fields.Globals,
+				Targets: tt.fields.Targets,
+			}
+			got := parser.Copy()
+			assert.Equal(t, parser, got)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestArguments_DelArg(t *testing.T) {
+	args := MakeArguments()
+	args.addParam("arch", "arg")
+	args.addParam("ask", "arg")
+	args.DelArg("arch", "ask")
+	assert.Empty(t, args.Options)
+	assert.Empty(t, args.Globals)
+}
