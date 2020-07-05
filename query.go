@@ -160,10 +160,10 @@ func syncSearch(pkgS []string) (err error) {
 	var aq aurQuery
 	var pq repoQuery
 
-	if mode == modeAUR || mode == modeAny {
+	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
-	if mode == modeRepo || mode == modeAny {
+	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 		pq, repoErr = queryRepo(pkgS)
 		if repoErr != nil {
 			return err
@@ -172,17 +172,17 @@ func syncSearch(pkgS []string) (err error) {
 
 	switch config.SortMode {
 	case settings.TopDown:
-		if mode == modeRepo || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 			pq.printSearch()
 		}
-		if mode == modeAUR || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
 			aq.printSearch(1)
 		}
 	case settings.BottomUp:
-		if mode == modeAUR || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
 			aq.printSearch(1)
 		}
-		if mode == modeRepo || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 			pq.printSearch()
 		}
 	default:
@@ -224,9 +224,9 @@ func syncInfo(pkgS []string) error {
 
 	// Repo always goes first
 	if len(repoS) != 0 {
-		arguments := cmdArgs.copy()
-		arguments.clearTargets()
-		arguments.addTarget(repoS...)
+		arguments := cmdArgs.Copy()
+		arguments.ClearTargets()
+		arguments.AddTarget(repoS...)
 		err = show(passToPacman(arguments))
 
 		if err != nil {
@@ -289,10 +289,10 @@ func packageSlices(toCheck []string) (aur, repo []string, err error) {
 		db, name := splitDBFromName(_pkg)
 		found := false
 
-		if db == "aur" || mode == modeAUR {
+		if db == "aur" || config.Runtime.Mode == settings.ModeAUR {
 			aur = append(aur, _pkg)
 			continue
-		} else if db != "" || mode == modeRepo {
+		} else if db != "" || config.Runtime.Mode == settings.ModeRepo {
 			repo = append(repo, _pkg)
 			continue
 		}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -38,12 +39,12 @@ func removeInvalidTargets(targets []string) []string {
 	for _, target := range targets {
 		db, _ := splitDBFromName(target)
 
-		if db == "aur" && mode == modeRepo {
+		if db == "aur" && config.Runtime.Mode == settings.ModeRepo {
 			text.Warnln(gotext.Get("%s: can't use target with option --repo -- skipping", cyan(target)))
 			continue
 		}
 
-		if db != "aur" && db != "" && mode == modeAUR {
+		if db != "aur" && db != "" && config.Runtime.Mode == settings.ModeAUR {
 			text.Warnln(gotext.Get("%s: can't use target with option --aur -- skipping", cyan(target)))
 			continue
 		}

@@ -12,6 +12,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"golang.org/x/crypto/ssh/terminal"
 
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -79,27 +80,27 @@ func waitLock() {
 	}
 }
 
-func passToPacman(args *arguments) *exec.Cmd {
+func passToPacman(args *settings.Arguments) *exec.Cmd {
 	argArr := make([]string, 0)
 
 	mSudoFlags := strings.Fields(config.SudoFlags)
 
-	if args.needRoot() {
+	if args.NeedRoot(&config.Runtime) {
 		argArr = append(argArr, config.SudoBin)
 		argArr = append(argArr, mSudoFlags...)
 	}
 
 	argArr = append(argArr, config.PacmanBin)
-	argArr = append(argArr, cmdArgs.formatGlobals()...)
-	argArr = append(argArr, args.formatArgs()...)
+	argArr = append(argArr, cmdArgs.FormatGlobals()...)
+	argArr = append(argArr, args.FormatArgs()...)
 	if config.NoConfirm {
 		argArr = append(argArr, "--noconfirm")
 	}
 
 	argArr = append(argArr, "--config", config.PacmanConf, "--")
-	argArr = append(argArr, args.targets...)
+	argArr = append(argArr, args.Targets...)
 
-	if args.needRoot() {
+	if args.NeedRoot(&config.Runtime) {
 		waitLock()
 	}
 	return exec.Command(argArr[0], argArr[1:]...)

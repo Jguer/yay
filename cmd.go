@@ -16,7 +16,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-var cmdArgs = makeArguments()
+var cmdArgs = settings.MakeArguments()
 
 func usage() {
 	fmt.Println(`Usage:
@@ -140,15 +140,15 @@ getpkgbuild specific options:
 }
 
 func handleCmd() error {
-	if cmdArgs.existsArg("h", "help") {
+	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp()
 	}
 
-	if config.SudoLoop && cmdArgs.needRoot() {
+	if config.SudoLoop && cmdArgs.NeedRoot(&config.Runtime) {
 		sudoLoopBackground()
 	}
 
-	switch cmdArgs.op {
+	switch cmdArgs.Op {
 	case "V", "version":
 		handleVersion()
 		return nil
@@ -178,14 +178,14 @@ func handleCmd() error {
 }
 
 func handleQuery() error {
-	if cmdArgs.existsArg("u", "upgrades") {
+	if cmdArgs.ExistsArg("u", "upgrades") {
 		return printUpdateList(cmdArgs)
 	}
 	return show(passToPacman(cmdArgs))
 }
 
 func handleHelp() error {
-	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
+	if cmdArgs.Op == "Y" || cmdArgs.Op == "yay" {
 		usage()
 		return nil
 	}
@@ -198,25 +198,25 @@ func handleVersion() {
 
 func handlePrint() (err error) {
 	switch {
-	case cmdArgs.existsArg("d", "defaultconfig"):
+	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := defaultSettings()
 		tmpConfig.ExpandEnv()
 		fmt.Printf("%v", tmpConfig)
-	case cmdArgs.existsArg("g", "currentconfig"):
+	case cmdArgs.ExistsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
-	case cmdArgs.existsArg("n", "numberupgrades"):
+	case cmdArgs.ExistsArg("n", "numberupgrades"):
 		err = printNumberOfUpdates()
-	case cmdArgs.existsArg("u", "upgrades"):
+	case cmdArgs.ExistsArg("u", "upgrades"):
 		err = printUpdateList(cmdArgs)
-	case cmdArgs.existsArg("w", "news"):
-		_, double, _ := cmdArgs.getArg("news", "w")
-		quiet := cmdArgs.existsArg("q", "quiet")
+	case cmdArgs.ExistsArg("w", "news"):
+		double := cmdArgs.ExistsDouble("w", "news")
+		quiet := cmdArgs.ExistsArg("q", "quiet")
 		err = news.PrintNewsFeed(alpmHandle, config.SortMode, double, quiet)
-	case cmdArgs.existsDouble("c", "complete"):
+	case cmdArgs.ExistsDouble("c", "complete"):
 		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, true)
-	case cmdArgs.existsArg("c", "complete"):
+	case cmdArgs.ExistsArg("c", "complete"):
 		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
-	case cmdArgs.existsArg("s", "stats"):
+	case cmdArgs.ExistsArg("s", "stats"):
 		err = localStatistics()
 	default:
 		err = nil
@@ -225,63 +225,63 @@ func handlePrint() (err error) {
 }
 
 func handleYay() error {
-	if cmdArgs.existsArg("gendb") {
+	if cmdArgs.ExistsArg("gendb") {
 		return createDevelDB()
 	}
-	if cmdArgs.existsDouble("c") {
+	if cmdArgs.ExistsDouble("c") {
 		return cleanDependencies(true)
 	}
-	if cmdArgs.existsArg("c", "clean") {
+	if cmdArgs.ExistsArg("c", "clean") {
 		return cleanDependencies(false)
 	}
-	if len(cmdArgs.targets) > 0 {
+	if len(cmdArgs.Targets) > 0 {
 		return handleYogurt()
 	}
 	return nil
 }
 
 func handleGetpkgbuild() error {
-	return getPkgbuilds(cmdArgs.targets)
+	return getPkgbuilds(cmdArgs.Targets)
 }
 
 func handleYogurt() error {
 	config.SearchMode = numberMenu
-	return displayNumberMenu(cmdArgs.targets)
+	return displayNumberMenu(cmdArgs.Targets)
 }
 
 func handleSync() error {
-	targets := cmdArgs.targets
+	targets := cmdArgs.Targets
 
-	if cmdArgs.existsArg("s", "search") {
-		if cmdArgs.existsArg("q", "quiet") {
+	if cmdArgs.ExistsArg("s", "search") {
+		if cmdArgs.ExistsArg("q", "quiet") {
 			config.SearchMode = minimal
 		} else {
 			config.SearchMode = detailed
 		}
 		return syncSearch(targets)
 	}
-	if cmdArgs.existsArg("p", "print", "print-format") {
+	if cmdArgs.ExistsArg("p", "print", "print-format") {
 		return show(passToPacman(cmdArgs))
 	}
-	if cmdArgs.existsArg("c", "clean") {
+	if cmdArgs.ExistsArg("c", "clean") {
 		return syncClean(cmdArgs)
 	}
-	if cmdArgs.existsArg("l", "list") {
+	if cmdArgs.ExistsArg("l", "list") {
 		return syncList(cmdArgs)
 	}
-	if cmdArgs.existsArg("g", "groups") {
+	if cmdArgs.ExistsArg("g", "groups") {
 		return show(passToPacman(cmdArgs))
 	}
-	if cmdArgs.existsArg("i", "info") {
+	if cmdArgs.ExistsArg("i", "info") {
 		return syncInfo(targets)
 	}
-	if cmdArgs.existsArg("u", "sysupgrade") {
+	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		return install(cmdArgs)
 	}
-	if len(cmdArgs.targets) > 0 {
+	if len(cmdArgs.Targets) > 0 {
 		return install(cmdArgs)
 	}
-	if cmdArgs.existsArg("y", "refresh") {
+	if cmdArgs.ExistsArg("y", "refresh") {
 		return show(passToPacman(cmdArgs))
 	}
 	return nil
@@ -290,7 +290,7 @@ func handleSync() error {
 func handleRemove() error {
 	err := show(passToPacman(cmdArgs))
 	if err == nil {
-		removeVCSPackage(cmdArgs.targets)
+		removeVCSPackage(cmdArgs.Targets)
 	}
 
 	return err
@@ -307,11 +307,11 @@ func displayNumberMenu(pkgS []string) error {
 
 	pkgS = removeInvalidTargets(pkgS)
 
-	if mode == modeAUR || mode == modeAny {
+	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
 		aq, aurErr = narrowSearch(pkgS, true)
 		lenaq = len(aq)
 	}
-	if mode == modeRepo || mode == modeAny {
+	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 		pq, repoErr = queryRepo(pkgS)
 		lenpq = len(pq)
 		if repoErr != nil {
@@ -325,17 +325,17 @@ func displayNumberMenu(pkgS []string) error {
 
 	switch config.SortMode {
 	case settings.TopDown:
-		if mode == modeRepo || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 			pq.printSearch()
 		}
-		if mode == modeAUR || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
 			aq.printSearch(lenpq + 1)
 		}
 	case settings.BottomUp:
-		if mode == modeAUR || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
 			aq.printSearch(lenpq + 1)
 		}
-		if mode == modeRepo || mode == modeAny {
+		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 			pq.printSearch()
 		}
 	default:
@@ -361,7 +361,7 @@ func displayNumberMenu(pkgS []string) error {
 	}
 
 	include, exclude, _, otherExclude := intrange.ParseNumberMenu(string(numberBuf))
-	arguments := cmdArgs.copyGlobal()
+	arguments := cmdArgs.CopyGlobal()
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
@@ -377,7 +377,7 @@ func displayNumberMenu(pkgS []string) error {
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
-			arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
+			arguments.AddTarget(pkg.DB().Name() + "/" + pkg.Name())
 		}
 	}
 
@@ -394,11 +394,11 @@ func displayNumberMenu(pkgS []string) error {
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
-			arguments.addTarget("aur/" + aq[i].Name)
+			arguments.AddTarget("aur/" + aq[i].Name)
 		}
 	}
 
-	if len(arguments.targets) == 0 {
+	if len(arguments.Targets) == 0 {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
@@ -410,17 +410,17 @@ func displayNumberMenu(pkgS []string) error {
 	return install(arguments)
 }
 
-func syncList(parser *arguments) error {
+func syncList(parser *settings.Arguments) error {
 	aur := false
 
-	for i := len(parser.targets) - 1; i >= 0; i-- {
-		if parser.targets[i] == "aur" && (mode == modeAny || mode == modeAUR) {
-			parser.targets = append(parser.targets[:i], parser.targets[i+1:]...)
+	for i := len(parser.Targets) - 1; i >= 0; i-- {
+		if parser.Targets[i] == "aur" && (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) {
+			parser.Targets = append(parser.Targets[:i], parser.Targets[i+1:]...)
 			aur = true
 		}
 	}
 
-	if (mode == modeAny || mode == modeAUR) && (len(parser.targets) == 0 || aur) {
+	if (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) && (len(parser.Targets) == 0 || aur) {
 		localDB, err := alpmHandle.LocalDB()
 		if err != nil {
 			return err
@@ -437,7 +437,7 @@ func syncList(parser *arguments) error {
 		scanner.Scan()
 		for scanner.Scan() {
 			name := scanner.Text()
-			if cmdArgs.existsArg("q", "quiet") {
+			if cmdArgs.ExistsArg("q", "quiet") {
 				fmt.Println(name)
 			} else {
 				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green(gotext.Get("unknown-version"))))
@@ -451,7 +451,7 @@ func syncList(parser *arguments) error {
 		}
 	}
 
-	if (mode == modeAny || mode == modeRepo) && (len(parser.targets) != 0 || !aur) {
+	if (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo) && (len(parser.Targets) != 0 || !aur) {
 		return show(passToPacman(parser))
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/query"
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -54,18 +55,18 @@ func cleanRemove(pkgNames []string) error {
 		return nil
 	}
 
-	arguments := cmdArgs.copyGlobal()
-	_ = arguments.addArg("R")
-	arguments.addTarget(pkgNames...)
+	arguments := cmdArgs.CopyGlobal()
+	_ = arguments.AddArg("R")
+	arguments.AddTarget(pkgNames...)
 
 	return show(passToPacman(arguments))
 }
 
-func syncClean(parser *arguments) error {
+func syncClean(parser *settings.Arguments) error {
 	keepInstalled := false
 	keepCurrent := false
 
-	_, removeAll, _ := parser.getArg("c", "clean")
+	_, removeAll, _ := parser.GetArg("c", "clean")
 
 	for _, v := range pacmanConf.CleanMethod {
 		if v == "KeepInstalled" {
@@ -75,13 +76,13 @@ func syncClean(parser *arguments) error {
 		}
 	}
 
-	if mode == modeRepo || mode == modeAny {
+	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 		if err := show(passToPacman(parser)); err != nil {
 			return err
 		}
 	}
 
-	if !(mode == modeAUR || mode == modeAny) {
+	if !(config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny) {
 		return nil
 	}
 

@@ -18,18 +18,19 @@ import (
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/query"
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-func asdeps(parser *arguments, pkgs []string) error {
+func asdeps(parser *settings.Arguments, pkgs []string) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
-	parser = parser.copyGlobal()
-	_ = parser.addArg("D", "asdeps")
-	parser.addTarget(pkgs...)
+	parser = parser.CopyGlobal()
+	_ = parser.AddArg("D", "asdeps")
+	parser.AddTarget(pkgs...)
 	_, stderr, err := capture(passToPacman(parser))
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
@@ -38,14 +39,14 @@ func asdeps(parser *arguments, pkgs []string) error {
 	return nil
 }
 
-func asexp(parser *arguments, pkgs []string) error {
+func asexp(parser *settings.Arguments, pkgs []string) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
-	parser = parser.copyGlobal()
-	_ = parser.addArg("D", "asexplicit")
-	parser.addTarget(pkgs...)
+	parser = parser.CopyGlobal()
+	_ = parser.AddArg("D", "asexplicit")
+	parser.AddTarget(pkgs...)
 	_, stderr, err := capture(passToPacman(parser))
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
@@ -55,7 +56,7 @@ func asexp(parser *arguments, pkgs []string) error {
 }
 
 // Install handles package installs
-func install(parser *arguments) (err error) {
+func install(parser *settings.Arguments) (err error) {
 	var incompatible stringset.StringSet
 	var do *depOrder
 
@@ -66,15 +67,15 @@ func install(parser *arguments) (err error) {
 
 	warnings := makeWarnings()
 
-	if mode == modeAny || mode == modeRepo {
+	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
 		if config.CombinedUpgrade {
-			if parser.existsArg("y", "refresh") {
+			if parser.ExistsArg("y", "refresh") {
 				err = earlyRefresh(parser)
 				if err != nil {
 					return fmt.Errorf(gotext.Get("error refreshing databases"))
 				}
 			}
-		} else if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(parser.targets) > 0 {
+		} else if parser.ExistsArg("y", "refresh") || parser.ExistsArg("u", "sysupgrade") || len(parser.Targets) > 0 {
 			err = earlyPacmanCall(parser)
 			if err != nil {
 				return err
@@ -97,21 +98,21 @@ func install(parser *arguments) (err error) {
 	remoteNamesCache := stringset.FromSlice(remoteNames)
 	localNamesCache := stringset.FromSlice(localNames)
 
-	requestTargets := parser.copy().targets
+	requestTargets := parser.Copy().Targets
 
 	// create the arguments to pass for the repo install
-	arguments := parser.copy()
-	arguments.delArg("asdeps", "asdep")
-	arguments.delArg("asexplicit", "asexp")
-	arguments.op = "S"
-	arguments.clearTargets()
+	arguments := parser.Copy()
+	arguments.DelArg("asdeps", "asdep")
+	arguments.DelArg("asexplicit", "asexp")
+	arguments.Op = "S"
+	arguments.ClearTargets()
 
-	if mode == modeAUR {
-		arguments.delArg("u", "sysupgrade")
+	if config.Runtime.Mode == settings.ModeAUR {
+		arguments.DelArg("u", "sysupgrade")
 	}
 
 	// if we are doing -u also request all packages needing update
-	if parser.existsArg("u", "sysupgrade") {
+	if parser.ExistsArg("u", "sysupgrade") {
 		aurUp, repoUp, err = upList(warnings)
 		if err != nil {
 			return err
@@ -127,27 +128,27 @@ func install(parser *arguments) (err error) {
 		for _, up := range repoUp {
 			if !ignore.Get(up.Name) {
 				requestTargets = append(requestTargets, up.Name)
-				parser.addTarget(up.Name)
+				parser.AddTarget(up.Name)
 			}
 		}
 
 		for up := range aurUp {
 			requestTargets = append(requestTargets, "aur/"+up)
-			parser.addTarget("aur/" + up)
+			parser.AddTarget("aur/" + up)
 		}
 
-		value, _, exists := cmdArgs.getArg("ignore")
+		value, _, exists := cmdArgs.GetArg("ignore")
 
 		if len(ignore) > 0 {
 			ignoreStr := strings.Join(ignore.ToSlice(), ",")
 			if exists {
 				ignoreStr += "," + value
 			}
-			arguments.options["ignore"] = ignoreStr
+			arguments.Options["ignore"] = ignoreStr
 		}
 	}
 
-	targets := stringset.FromSlice(parser.targets)
+	targets := stringset.FromSlice(parser.Targets)
 
 	dp, err := getDepPool(requestTargets, warnings)
 	if err != nil {
@@ -161,15 +162,15 @@ func install(parser *arguments) (err error) {
 
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
-			if parser.existsArg("u", "sysupgrade") {
+			if parser.ExistsArg("u", "sysupgrade") {
 				fmt.Println(gotext.Get(" there is nothing to do"))
 			}
 			return nil
 		}
 
-		parser.op = "S"
-		parser.delArg("y", "refresh")
-		parser.options["ignore"] = arguments.options["ignore"]
+		parser.Op = "S"
+		parser.DelArg("y", "refresh")
+		parser.Options["ignore"] = arguments.Options["ignore"]
 		return show(passToPacman(parser))
 	}
 
@@ -188,14 +189,14 @@ func install(parser *arguments) (err error) {
 	}
 
 	for _, pkg := range do.Repo {
-		arguments.addTarget(pkg.DB().Name() + "/" + pkg.Name())
+		arguments.AddTarget(pkg.DB().Name() + "/" + pkg.Name())
 	}
 
 	for _, pkg := range dp.Groups {
-		arguments.addTarget(pkg)
+		arguments.AddTarget(pkg)
 	}
 
-	if len(do.Aur) == 0 && len(arguments.targets) == 0 && (!parser.existsArg("u", "sysupgrade") || mode == modeAUR) {
+	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!parser.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == settings.ModeAUR) {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
@@ -324,10 +325,10 @@ func install(parser *arguments) (err error) {
 	}
 
 	if !config.CombinedUpgrade {
-		arguments.delArg("u", "sysupgrade")
+		arguments.DelArg("u", "sysupgrade")
 	}
 
-	if len(arguments.targets) > 0 || arguments.existsArg("u") {
+	if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
 		if errShow := show(passToPacman(arguments)); errShow != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
@@ -341,9 +342,9 @@ func install(parser *arguments) (err error) {
 				continue
 			}
 
-			if parser.existsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
+			if parser.ExistsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
 				deps = append(deps, pkg.Name())
-			} else if parser.existsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
+			} else if parser.ExistsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
 				exp = append(exp, pkg.Name())
 			}
 		}
@@ -372,14 +373,14 @@ func install(parser *arguments) (err error) {
 }
 
 func removeMake(do *depOrder) error {
-	removeArguments := makeArguments()
-	err := removeArguments.addArg("R", "u")
+	removeArguments := settings.MakeArguments()
+	err := removeArguments.AddArg("R", "u")
 	if err != nil {
 		return err
 	}
 
 	for _, pkg := range do.getMake() {
-		removeArguments.addTarget(pkg)
+		removeArguments.AddTarget(pkg)
 	}
 
 	oldValue := config.NoConfirm
@@ -410,32 +411,32 @@ func inRepos(syncDB alpm.DBList, pkg string) bool {
 	return !syncDB.FindGroupPkgs(target.Name).Empty()
 }
 
-func earlyPacmanCall(parser *arguments) error {
-	arguments := parser.copy()
-	arguments.op = "S"
-	targets := parser.targets
-	parser.clearTargets()
-	arguments.clearTargets()
+func earlyPacmanCall(parser *settings.Arguments) error {
+	arguments := parser.Copy()
+	arguments.Op = "S"
+	targets := parser.Targets
+	parser.ClearTargets()
+	arguments.ClearTargets()
 
 	syncDB, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return err
 	}
 
-	if mode == modeRepo {
-		arguments.targets = targets
+	if config.Runtime.Mode == settings.ModeRepo {
+		arguments.Targets = targets
 	} else {
 		// separate aur and repo targets
 		for _, target := range targets {
 			if inRepos(syncDB, target) {
-				arguments.addTarget(target)
+				arguments.AddTarget(target)
 			} else {
-				parser.addTarget(target)
+				parser.AddTarget(target)
 			}
 		}
 	}
 
-	if parser.existsArg("y", "refresh") || parser.existsArg("u", "sysupgrade") || len(arguments.targets) > 0 {
+	if parser.ExistsArg("y", "refresh") || parser.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
 		err = show(passToPacman(arguments))
 		if err != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
@@ -445,14 +446,14 @@ func earlyPacmanCall(parser *arguments) error {
 	return nil
 }
 
-func earlyRefresh(parser *arguments) error {
-	arguments := parser.copy()
-	parser.delArg("y", "refresh")
-	arguments.delArg("u", "sysupgrade")
-	arguments.delArg("s", "search")
-	arguments.delArg("i", "info")
-	arguments.delArg("l", "list")
-	arguments.clearTargets()
+func earlyRefresh(parser *settings.Arguments) error {
+	arguments := parser.Copy()
+	parser.DelArg("y", "refresh")
+	arguments.DelArg("u", "sysupgrade")
+	arguments.DelArg("s", "search")
+	arguments.DelArg("i", "info")
+	arguments.DelArg("l", "list")
+	arguments.ClearTargets()
 	return show(passToPacman(arguments))
 }
 
@@ -931,20 +932,20 @@ func buildInstallPkgbuilds(
 	dp *depPool,
 	do *depOrder,
 	srcinfos map[string]*gosrc.Srcinfo,
-	parser *arguments,
+	parser *settings.Arguments,
 	incompatible stringset.StringSet,
 	conflicts stringset.MapStringSet) error {
-	arguments := parser.copy()
-	arguments.clearTargets()
-	arguments.op = "U"
-	arguments.delArg("confirm")
-	arguments.delArg("noconfirm")
-	arguments.delArg("c", "clean")
-	arguments.delArg("q", "quiet")
-	arguments.delArg("q", "quiet")
-	arguments.delArg("y", "refresh")
-	arguments.delArg("u", "sysupgrade")
-	arguments.delArg("w", "downloadonly")
+	arguments := parser.Copy()
+	arguments.ClearTargets()
+	arguments.Op = "U"
+	arguments.DelArg("confirm")
+	arguments.DelArg("noconfirm")
+	arguments.DelArg("c", "clean")
+	arguments.DelArg("q", "quiet")
+	arguments.DelArg("q", "quiet")
+	arguments.DelArg("y", "refresh")
+	arguments.DelArg("u", "sysupgrade")
+	arguments.DelArg("w", "downloadonly")
 
 	deps := make([]string, 0)
 	exp := make([]string, 0)
@@ -963,7 +964,7 @@ func buildInstallPkgbuilds(
 	localNamesCache := stringset.FromSlice(localNames)
 
 	doInstall := func() error {
-		if len(arguments.targets) == 0 {
+		if len(arguments.Targets) == 0 {
 			return nil
 		}
 
@@ -985,7 +986,7 @@ func buildInstallPkgbuilds(
 
 		config.NoConfirm = oldConfirm
 
-		arguments.clearTargets()
+		arguments.ClearTargets()
 		deps = make([]string, 0)
 		exp = make([]string, 0)
 		config.NoConfirm = true
@@ -1057,7 +1058,7 @@ func buildInstallPkgbuilds(
 			built = false
 		}
 
-		if cmdArgs.existsArg("needed") {
+		if cmdArgs.ExistsArg("needed") {
 			installed := true
 			for _, split := range base {
 				if alpmpkg := dp.LocalDB.Pkg(split.Name); alpmpkg == nil || alpmpkg.Version() != pkgVersion {
@@ -1097,9 +1098,9 @@ func buildInstallPkgbuilds(
 
 		// conflicts have been checked so answer y for them
 		if config.UseAsk {
-			ask, _ := strconv.Atoi(cmdArgs.globals["ask"])
+			ask, _ := strconv.Atoi(cmdArgs.Globals["ask"])
 			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
-			cmdArgs.globals["ask"] = fmt.Sprint(uask)
+			cmdArgs.Globals["ask"] = fmt.Sprint(uask)
 		} else {
 			for _, split := range base {
 				if _, ok := conflicts[split.Name]; ok {
@@ -1130,10 +1131,10 @@ func buildInstallPkgbuilds(
 						name, pkgdest))
 			}
 
-			arguments.addTarget(pkgdest)
-			if parser.existsArg("asdeps", "asdep") {
+			arguments.AddTarget(pkgdest)
+			if parser.ExistsArg("asdeps", "asdep") {
 				deps = append(deps, name)
-			} else if parser.existsArg("asexplicit", "asexp") {
+			} else if parser.ExistsArg("asexplicit", "asexp") {
 				exp = append(exp, name)
 			} else if !dp.Explicit.Get(name) && !localNamesCache.Get(name) && !remoteNamesCache.Get(name) {
 				deps = append(deps, name)

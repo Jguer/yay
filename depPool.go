@@ -8,6 +8,7 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
@@ -105,7 +106,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		var singleDB *alpm.DB
 
 		// aur/ prefix means we only check the aur
-		if target.DB == "aur" || mode == modeAUR {
+		if target.DB == "aur" || config.Runtime.Mode == settings.ModeAUR {
 			dp.Targets = append(dp.Targets, target)
 			aurTargets.Set(target.DepString())
 			continue
@@ -155,7 +156,7 @@ func (dp *depPool) ResolveTargets(pkgs []string) error {
 		dp.Targets = append(dp.Targets, target)
 	}
 
-	if len(aurTargets) > 0 && (mode == modeAny || mode == modeAUR) {
+	if len(aurTargets) > 0 && (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) {
 		return dp.resolveAURPackages(aurTargets, true)
 	}
 
@@ -396,7 +397,7 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 		}
 	}
 
-	if cmdArgs.op == "Y" || cmdArgs.op == "yay" {
+	if cmdArgs.Op == "Y" || cmdArgs.Op == "yay" {
 		for _, pkg := range dp.AurCache {
 			if pkgSatisfies(pkg.Name, pkg.Version, dep) {
 				for _, target := range dp.Targets {

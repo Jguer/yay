@@ -293,7 +293,7 @@ func PrintInfo(a *rpc.Pkg) {
 		text.PrintInfoValue(gotext.Get("Out-of-date"), "No")
 	}
 
-	if cmdArgs.existsDouble("i") {
+	if cmdArgs.ExistsDouble("i") {
 		text.PrintInfoValue("ID", fmt.Sprintf("%d", a.ID))
 		text.PrintInfoValue(gotext.Get("Package Base ID"), fmt.Sprintf("%d", a.PackageBaseID))
 		text.PrintInfoValue(gotext.Get("Package Base"), a.PackageBase)
@@ -367,8 +367,8 @@ func printNumberOfUpdates() error {
 }
 
 //TODO: Make it less hacky
-func printUpdateList(parser *arguments) error {
-	targets := stringset.FromSlice(parser.targets)
+func printUpdateList(parser *settings.Arguments) error {
+	targets := stringset.FromSlice(parser.Targets)
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
@@ -385,10 +385,10 @@ func printUpdateList(parser *arguments) error {
 
 	noTargets := len(targets) == 0
 
-	if !parser.existsArg("m", "foreign") {
+	if !parser.ExistsArg("m", "foreign") {
 		for _, pkg := range repoUp {
 			if noTargets || targets.Get(pkg.Name) {
-				if parser.existsArg("q", "quiet") {
+				if parser.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
 					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
@@ -398,10 +398,10 @@ func printUpdateList(parser *arguments) error {
 		}
 	}
 
-	if !parser.existsArg("n", "native") {
+	if !parser.ExistsArg("n", "native") {
 		for _, pkg := range aurUp {
 			if noTargets || targets.Get(pkg.Name) {
-				if parser.existsArg("q", "quiet") {
+				if parser.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
 					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))

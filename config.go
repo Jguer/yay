@@ -22,14 +22,6 @@ const (
 	minimal
 )
 
-const (
-	modeAUR targetMode = iota
-	modeRepo
-	modeAny
-)
-
-type targetMode int
-
 var yayVersion = "10.0.0"
 
 var localePath = "/usr/share/locale"
@@ -55,9 +47,6 @@ var configFile string
 // vcsfile holds yay vcs info file path.
 var vcsFile string
 
-// shouldSaveConfig holds whether or not the config should be saved
-var shouldSaveConfig bool
-
 // YayConf holds the current config values for yay.
 var config *settings.Configuration
 
@@ -66,9 +55,6 @@ var pacmanConf *pacmanconf.Config
 
 // AlpmHandle is the alpm handle used by yay.
 var alpmHandle *alpm.Handle
-
-// Mode is used to restrict yay to AUR or repo only modes
-var mode = modeAny
 
 var hideMenus = false
 

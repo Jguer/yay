@@ -122,7 +122,7 @@ func initAlpm(pacmanConfigPath string) error {
 	var stderr string
 
 	root := "/"
-	if value, _, exists := cmdArgs.getArg("root", "r"); exists {
+	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value
 	}
 
@@ -131,19 +131,19 @@ func initAlpm(pacmanConfigPath string) error {
 		return fmt.Errorf("%s", stderr)
 	}
 
-	if value, _, exists := cmdArgs.getArg("dbpath", "b"); exists {
+	if value, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {
 		pacmanConf.DBPath = value
 	}
 
-	if value, _, exists := cmdArgs.getArg("arch"); exists {
+	if value, _, exists := cmdArgs.GetArg("arch"); exists {
 		pacmanConf.Architecture = value
 	}
 
-	if value, _, exists := cmdArgs.getArg("ignore"); exists {
+	if value, _, exists := cmdArgs.GetArg("ignore"); exists {
 		pacmanConf.IgnorePkg = append(pacmanConf.IgnorePkg, strings.Split(value, ",")...)
 	}
 
-	if value, _, exists := cmdArgs.getArg("ignoregroup"); exists {
+	if value, _, exists := cmdArgs.GetArg("ignoregroup"); exists {
 		pacmanConf.IgnoreGroup = append(pacmanConf.IgnoreGroup, strings.Split(value, ",")...)
 	}
 
@@ -151,11 +151,11 @@ func initAlpm(pacmanConfigPath string) error {
 	// current system does not allow duplicate arguments
 	// but pacman allows multiple cachedirs to be passed
 	// for now only handle one cache dir
-	if value, _, exists := cmdArgs.getArg("cachedir"); exists {
+	if value, _, exists := cmdArgs.GetArg("cachedir"); exists {
 		pacmanConf.CacheDir = []string{value}
 	}
 
-	if value, _, exists := cmdArgs.getArg("gpgdir"); exists {
+	if value, _, exists := cmdArgs.GetArg("gpgdir"); exists {
 		pacmanConf.GPGDir = value
 	}
 
@@ -163,7 +163,7 @@ func initAlpm(pacmanConfigPath string) error {
 		return err
 	}
 
-	switch value, _, _ := cmdArgs.getArg("color"); value {
+	switch value, _, _ := cmdArgs.GetArg("color"); value {
 	case "always":
 		text.UseColor = true
 	case "auto":
@@ -229,8 +229,8 @@ func main() {
 	config = defaultSettings()
 	exitOnError(initHomeDirs())
 	exitOnError(initConfig())
-	exitOnError(cmdArgs.parseCommandLine())
-	if shouldSaveConfig {
+	exitOnError(cmdArgs.ParseCommandLine(config))
+	if config.Runtime.SaveConfig {
 		err := config.SaveConfig(configFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)

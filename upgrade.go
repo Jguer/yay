@@ -11,6 +11,7 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/query"
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 
 	rpc "github.com/mikkeloscar/aur"
@@ -135,7 +136,7 @@ func upList(warnings *aurWarnings) (aurUp, repoUp upSlice, err error) {
 		}
 	}
 
-	if mode == modeAny || mode == modeRepo {
+	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
 		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 		go func() {
@@ -145,7 +146,7 @@ func upList(warnings *aurWarnings) (aurUp, repoUp upSlice, err error) {
 		}()
 	}
 
-	if mode == modeAny || mode == modeAUR {
+	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR {
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []*rpc.Pkg
@@ -314,7 +315,7 @@ func upRepo() (upSlice, error) {
 		err = alpmHandle.TransRelease()
 	}()
 
-	err = alpmHandle.SyncSysupgrade(cmdArgs.existsDouble("u", "sysupgrade"))
+	err = alpmHandle.SyncSysupgrade(cmdArgs.ExistsDouble("u", "sysupgrade"))
 	if err != nil {
 		return slice, err
 	}

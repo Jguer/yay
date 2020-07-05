@@ -264,7 +264,7 @@ func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
 		case err != nil && !os.IsNotExist(err):
 			fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 			continue
-		case os.IsNotExist(err), cmdArgs.existsArg("f", "force"):
+		case os.IsNotExist(err), cmdArgs.ExistsArg("f", "force"):
 			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
 				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 				continue
