@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func expect(t *testing.T, field string, a interface{}, b interface{}, err error) {
@@ -14,10 +16,9 @@ func expect(t *testing.T, field string, a interface{}, b interface{}, err error)
 }
 
 func TestInitAlpm(t *testing.T) {
-	err := initAlpm("testdata/pacman.conf")
-	if err != nil {
-		t.Fatal(err)
-	}
+	pacmanConf, err := initAlpm("testdata/pacman.conf")
+	assert.Nil(t, err)
+	assert.NotNil(t, pacmanConf)
 
 	h := alpmHandle
 

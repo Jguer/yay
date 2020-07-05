@@ -63,17 +63,18 @@ func updateSudo() {
 }
 
 // waitLock will lock yay checking the status of db.lck until it does not exist
-func waitLock() {
-	if _, err := os.Stat(filepath.Join(pacmanConf.DBPath, "db.lck")); err != nil {
+func waitLock(dbPath string) {
+	lockDBPath := filepath.Join(dbPath, "db.lck")
+	if _, err := os.Stat(lockDBPath); err != nil {
 		return
 	}
 
-	text.Warnln(gotext.Get("%s is present.", filepath.Join(pacmanConf.DBPath, "db.lck")))
+	text.Warnln(gotext.Get("%s is present.", lockDBPath))
 	text.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
 
 	for {
 		time.Sleep(3 * time.Second)
-		if _, err := os.Stat(filepath.Join(pacmanConf.DBPath, "db.lck")); err != nil {
+		if _, err := os.Stat(lockDBPath); err != nil {
 			fmt.Println()
 			return
 		}
@@ -101,7 +102,7 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 	argArr = append(argArr, args.Targets...)
 
 	if args.NeedRoot(config.Runtime) {
-		waitLock()
+		waitLock(config.Runtime.PacmanConf.DBPath)
 	}
 	return exec.Command(argArr[0], argArr[1:]...)
 }

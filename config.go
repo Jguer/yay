@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
-	pacmanconf "github.com/Morganamilo/go-pacmanconf"
+	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/settings"
@@ -31,9 +31,6 @@ var savedInfo vcsInfo
 
 // YayConf holds the current config values for yay.
 var config *settings.Configuration
-
-// AlpmConf holds the current config values for pacman.
-var pacmanConf *pacmanconf.Config
 
 // AlpmHandle is the alpm handle used by yay.
 var alpmHandle *alpm.Handle
@@ -174,7 +171,7 @@ func toUsage(usages []string) alpm.Usage {
 	return ret
 }
 
-func configureAlpm() error {
+func configureAlpm(pacmanConf *pacmanconf.Config) error {
 	// TODO: set SigLevel
 	// sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
 	// localFileSigLevel := alpm.SigUseDefault

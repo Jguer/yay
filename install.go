@@ -85,7 +85,7 @@ func install(parser *settings.Arguments) (err error) {
 
 	// we may have done -Sy, our handle now has an old
 	// database.
-	err = initAlpmHandle()
+	err = initAlpmHandle(config.Runtime.PacmanConf)
 	if err != nil {
 		return err
 	}

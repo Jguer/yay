@@ -68,7 +68,7 @@ func syncClean(parser *settings.Arguments) error {
 
 	_, removeAll, _ := parser.GetArg("c", "clean")
 
-	for _, v := range pacmanConf.CleanMethod {
+	for _, v := range config.Runtime.PacmanConf.CleanMethod {
 		if v == "KeepInstalled" {
 			keepInstalled = true
 		} else if v == "KeepCurrent" {

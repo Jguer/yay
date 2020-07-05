@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
 )
@@ -30,6 +31,7 @@ type Runtime struct {
 	CompletionPath string
 	ConfigPath     string
 	VCSPath        string
+	PacmanConf     *pacmanconf.Config
 }
 
 func MakeRuntime() (*Runtime, error) {

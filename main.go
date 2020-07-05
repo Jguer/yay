@@ -74,18 +74,15 @@ func initBuildDir() error {
 	return nil
 }
 
-func initAlpm(pacmanConfigPath string) error {
-	var err error
-	var stderr string
-
+func initAlpm(pacmanConfigPath string) (*pacmanconf.Config, error) {
 	root := "/"
 	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value
 	}
 
-	pacmanConf, stderr, err = pacmanconf.PacmanConf("--config", pacmanConfigPath, "--root", root)
+	pacmanConf, stderr, err := pacmanconf.PacmanConf("--config", pacmanConfigPath, "--root", root)
 	if err != nil {
-		return fmt.Errorf("%s", stderr)
+		return nil, fmt.Errorf("%s", stderr)
 	}
 
 	if value, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {
@@ -116,8 +113,8 @@ func initAlpm(pacmanConfigPath string) error {
 		pacmanConf.GPGDir = value
 	}
 
-	if err := initAlpmHandle(); err != nil {
-		return err
+	if err := initAlpmHandle(pacmanConf); err != nil {
+		return nil, err
 	}
 
 	switch value, _, _ := cmdArgs.GetArg("color"); value {
@@ -131,10 +128,10 @@ func initAlpm(pacmanConfigPath string) error {
 		text.UseColor = pacmanConf.Color && isTty()
 	}
 
-	return nil
+	return pacmanConf, nil
 }
 
-func initAlpmHandle() error {
+func initAlpmHandle(pacmanConf *pacmanconf.Config) error {
 	if alpmHandle != nil {
 		if errRelease := alpmHandle.Release(); errRelease != nil {
 			return errRelease
@@ -146,7 +143,7 @@ func initAlpmHandle() error {
 		return errors.New(gotext.Get("unable to CreateHandle: %s", err))
 	}
 
-	if err := configureAlpm(); err != nil {
+	if err := configureAlpm(pacmanConf); err != nil {
 		return err
 	}
 
@@ -189,15 +186,16 @@ func main() {
 	exitOnError(initConfig(runtime.ConfigPath))
 	exitOnError(cmdArgs.ParseCommandLine(config))
 	if config.Runtime.SaveConfig {
-		err := config.SaveConfig(runtime.ConfigPath)
-		if err != nil {
+		errS := config.SaveConfig(runtime.ConfigPath)
+		if errS != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}
 	config.ExpandEnv()
 	exitOnError(initBuildDir())
 	exitOnError(initVCS(runtime.VCSPath))
-	exitOnError(initAlpm(config.PacmanConf))
+	config.Runtime.PacmanConf, err = initAlpm(config.PacmanConf)
+	exitOnError(err)
 	exitOnError(handleCmd())
 	os.Exit(cleanup())
 }
