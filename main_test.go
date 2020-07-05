@@ -1,19 +1,10 @@
 package main
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func expect(t *testing.T, field string, a interface{}, b interface{}, err error) {
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(a, b) {
-		t.Errorf("%s expected: %s got %s", field, a, b)
-	}
-}
 
 func TestInitAlpm(t *testing.T) {
 	alpmHandle, pacmanConf, err := initAlpm("testdata/pacman.conf")
@@ -23,35 +14,46 @@ func TestInitAlpm(t *testing.T) {
 	h := alpmHandle
 
 	root, err := h.Root()
-	expect(t, "RootDir", "/", root, err)
+	assert.Nil(t, err)
+	assert.Equal(t, "/", root)
 
 	cache, err := h.CacheDirs()
-	expect(t, "CacheDir", []string{"/cachedir/", "/another/"}, cache.Slice(), err)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"/cachedir/", "/another/"}, cache.Slice())
 
 	log, err := h.LogFile()
-	expect(t, "LogFile", "/logfile", log, err)
+	assert.Nil(t, err)
+	assert.Equal(t, "/logfile", log)
 
 	gpg, err := h.GPGDir()
-	expect(t, "GPGDir", "/gpgdir/", gpg, err)
+	assert.Nil(t, err)
+	assert.Equal(t, "/gpgdir/", gpg)
 
 	hook, err := h.HookDirs()
-	expect(t, "HookDir", []string{"/usr/share/libalpm/hooks/", "/hookdir/"}, hook.Slice(), err)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"/usr/share/libalpm/hooks/", "/hookdir/"}, hook.Slice())
 
 	arch, err := h.Arch()
-	expect(t, "Architecture", "8086", arch, err)
+	assert.Nil(t, err)
+	assert.Equal(t, "8086", arch)
 
 	ignorePkg, err := h.IgnorePkgs()
-	expect(t, "IgnorePkg", []string{"ignore", "this", "package"}, ignorePkg.Slice(), err)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"ignore", "this", "package"}, ignorePkg.Slice())
 
 	ignoreGroup, err := h.IgnoreGroups()
-	expect(t, "IgnoreGroup", []string{"ignore", "this", "group"}, ignoreGroup.Slice(), err)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"ignore", "this", "group"}, ignoreGroup.Slice())
 
 	noUp, err := h.NoUpgrades()
-	expect(t, "NoUpgrade", []string{"noupgrade"}, noUp.Slice(), err)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"noupgrade"}, noUp.Slice())
 
 	noEx, err := h.NoExtracts()
-	expect(t, "NoExtract", []string{"noextract"}, noEx.Slice(), err)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"noextract"}, noEx.Slice())
 
 	check, err := h.CheckSpace()
-	expect(t, "CheckSpace", true, check, err)
+	assert.Nil(t, err)
+	assert.Equal(t, true, check)
 }
