@@ -8,14 +8,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: install.go:561
+#: install.go:563
 msgid " (Build Files Exist)"
 msgstr " (файлы сборки существуют)"
 
-#: install.go:557
+#: install.go:559
 msgid " (Installed)"
 msgstr " (установлено)"
 
@@ -31,11 +32,11 @@ msgstr " (требуется пакетом: "
 msgid " Input too long"
 msgstr " Ввод слишком длинный"
 
-#: cmd.go:442
+#: cmd.go:446
 msgid " [Installed]"
 msgstr " [Установлено]"
 
-#: cmd.go:398 install.go:164 install.go:198
+#: cmd.go:402 install.go:166 install.go:200
 msgid " there is nothing to do"
 msgstr " нечего выполнять"
 
@@ -43,55 +44,57 @@ msgstr " нечего выполнять"
 msgid "%s Installing %s will remove:"
 msgstr "%s Установка %s приведёт к удалению:"
 
-#: install.go:581 install.go:656 install.go:663
+#: install.go:583 install.go:658 install.go:665
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
-msgstr "%s [A]Все [Ab]Прервать [I]Установленные [No]Не установленные или (1 2 3, 1-3, ^4)"
+msgstr ""
+"%s [A]Все [Ab]Прервать [I]Установленные [No]Не установленные или (1 2 3, "
+"1-3, ^4)"
 
 #: download.go:273
 msgid "%s already downloaded -- use -f to overwrite"
 msgstr "%s уже загружен -- используйте -f для перезаписи"
 
-#: install.go:1084
+#: install.go:1086
 msgid "%s already made -- skipping build"
 msgstr "%s уже собран -- пропуск"
 
-#: main.go:24 main.go:32
+#: pkg/settings/runtime.go:50 pkg/settings/runtime.go:62
 msgid "%s and %s unset"
 msgstr "%s и %s не установлены"
 
-#: config.go:263
+#: config.go:76
 msgid "%s is not set"
 msgstr "%s не установлена"
 
-#: exec.go:70
+#: exec.go:71
 msgid "%s is present."
 msgstr "%s существует."
 
-#: install.go:1073
+#: install.go:1075
 msgid "%s is up to date -- skipping"
 msgstr "%s обновлён -- пропуск"
 
-#: install.go:1006
+#: install.go:1008
 msgid "%s not satisfied, flushing install queue"
 msgstr "%s не удовлетворена, очистка очереди установки"
 
-#: install.go:750
+#: install.go:752
 msgid "%s: No changes -- skipping"
 msgstr "%s: Нет изменений -- пропуск"
 
-#: utils.go:47
+#: utils.go:48
 msgid "%s: can't use target with option --aur -- skipping"
 msgstr "%s: невозможно использовать цель с опцией --aur -- пропуск"
 
-#: utils.go:42
+#: utils.go:43
 msgid "%s: can't use target with option --repo -- skipping"
 msgstr "%s: невозможно использовать цель с опцией --repo -- пропуск"
 
-#: upgrade.go:272
+#: upgrade.go:274
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: пропуск обновления пакета (%s => %s)"
 
-#: upgrade.go:289
+#: upgrade.go:291
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr "%s: локальная версия (%s) новее, чем в AUR (%s)"
 
@@ -99,43 +102,43 @@ msgstr "%s: локальная версия (%s) новее, чем в AUR (%s)"
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr "(%d/%d) Загружен PKGBUILD из ABS: %s"
 
-#: install.go:803
+#: install.go:805
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Разбор SRCINFO: %s"
 
-#: print.go:102 print.go:143
+#: print.go:86 print.go:127
 msgid "(Installed)"
 msgstr "(установлено)"
 
-#: print.go:100 print.go:141
+#: print.go:84 print.go:125
 msgid "(Installed: %s)"
 msgstr "(установлено: %s)"
 
-#: print.go:91
+#: print.go:75
 msgid "(Orphaned)"
 msgstr "(брошенный)"
 
-#: print.go:95
+#: print.go:79
 msgid "(Out-of-date: %s)"
 msgstr "(устарел: %s)"
 
-#: print.go:291
+#: print.go:275
 msgid "AUR URL"
 msgstr "AUR URL"
 
-#: config.go:264
+#: config.go:77
 msgid "Add %s or %s to your environment variables"
 msgstr "Добавьте %s или %s в ваши переменные окружения"
 
-#: main.go:225
+#: main.go:182
 msgid "Avoid running yay as root/sudo."
 msgstr "Не запускайте yay от имени root/sudo."
 
-#: print.go:297
+#: print.go:281
 msgid "Check Deps"
 msgstr "Зависимости проверки"
 
-#: upgrade.go:165
+#: upgrade.go:167
 msgid "Checking development packages..."
 msgstr "Проверка пакетов в разработке..."
 
@@ -147,15 +150,16 @@ msgstr "Проверка конфликтов..."
 msgid "Checking for inner conflicts..."
 msgstr "Проверка внутренних конфликтов..."
 
-#: clean.go:213
+#: clean.go:224
 msgid "Cleaning (%d/%d): %s"
 msgstr "Очистка (%d/%d): %s"
 
 #: depCheck.go:196
 msgid "Conflicting packages will have to be confirmed manually"
-msgstr "Подтверждение удаления конфликтующих пакетов должны быть выполнено вручную"
+msgstr ""
+"Подтверждение удаления конфликтующих пакетов должны быть выполнено вручную"
 
-#: print.go:299
+#: print.go:283
 msgid "Conflicts With"
 msgstr "Конфликтует с"
 
@@ -163,67 +167,67 @@ msgstr "Конфликтует с"
 msgid "Could not find all required packages:"
 msgstr "Невозможно найти все требуемые пакеты:"
 
-#: clean.go:229
+#: clean.go:240
 msgid "Deleting (%d/%d): %s"
 msgstr "Удаление (%d/%d): %s"
 
-#: print.go:295
+#: print.go:279
 msgid "Depends On"
 msgstr "Зависит от"
 
-#: print.go:289
+#: print.go:273
 msgid "Description"
 msgstr "Описание"
 
-#: install.go:655
+#: install.go:657
 msgid "Diffs to show?"
 msgstr "Показать изменения?"
 
-#: clean.go:89
+#: clean.go:91
 msgid "Do you want to remove ALL AUR packages from cache?"
 msgstr "Вы хотите удалить все пакеты AUR из кеша?"
 
-#: clean.go:106
+#: clean.go:108
 msgid "Do you want to remove ALL untracked AUR files?"
 msgstr "Вы хотите удалить все неотслеживаемые файлы AUR?"
 
-#: clean.go:91
+#: clean.go:93
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "Вы хотите удалить все остальные пакеты AUR из кеша?"
 
-#: install.go:891
+#: install.go:893
 msgid "Downloaded PKGBUILD (%d/%d): %s"
 msgstr "Загружен PKGBUILD (%d/%d): %s"
 
-#: config.go:267
+#: config.go:80
 msgid "Edit PKGBUILD with?"
 msgstr "Отредактировать PKGBUILD?"
 
-#: cmd.go:342
+#: cmd.go:346
 msgid "Error during AUR search: %s\n"
 msgstr "Ошибка поиска в AUR: %s\n"
 
-#: print.go:358
+#: print.go:342
 msgid "Explicitly installed packages: %s"
 msgstr "Явно установленные пакеты: %s"
 
-#: print.go:303
+#: print.go:287
 msgid "First Submitted"
 msgstr "Впервые послан"
 
-#: print.go:44
+#: print.go:41
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Отмеченные устаревшие пакеты AUR:"
 
-#: vcs.go:146
+#: vcs.go:147
 msgid "Found git repo: %s"
 msgstr "Найден git-репозиторий: %s"
 
-#: vcs.go:63
+#: vcs.go:64
 msgid "GenDB finished. No packages were installed"
 msgstr "GenDB завершён. Пакеты не установлены"
 
-#: print.go:292
+#: print.go:276
 msgid "Groups"
 msgstr "Группы"
 
@@ -235,23 +239,23 @@ msgstr "Импортировать?"
 msgid "Importing keys with gpg..."
 msgstr "Импортирование ключей с помощью gpg..."
 
-#: print.go:287
+#: print.go:271
 msgid "Keywords"
 msgstr "Ключевые слова"
 
-#: print.go:304
+#: print.go:288
 msgid "Last Modified"
 msgstr "Последнее изменение"
 
-#: print.go:293
+#: print.go:277
 msgid "Licenses"
 msgstr "Лицензии"
 
-#: print.go:300
+#: print.go:284
 msgid "Maintainer"
 msgstr "Сопровождающий"
 
-#: print.go:296
+#: print.go:280
 msgid "Make Deps"
 msgstr "Зависимости сборки"
 
@@ -259,11 +263,11 @@ msgstr "Зависимости сборки"
 msgid "Missing ABS packages:"
 msgstr "Отсутствующие в ABS пакеты:"
 
-#: print.go:28
+#: print.go:25
 msgid "Missing AUR Packages:"
 msgstr "Отсутствующие в AUR пакеты:"
 
-#: print.go:286
+#: print.go:270
 msgid "Name"
 msgstr "Имя"
 
@@ -271,15 +275,15 @@ msgstr "Имя"
 msgid "None"
 msgstr "Нет"
 
-#: print.go:298
+#: print.go:282
 msgid "Optional Deps"
 msgstr "Дополнительные зависимости"
 
-#: print.go:36
+#: print.go:33
 msgid "Orphaned AUR Packages:"
 msgstr "Брошенные пакеты AUR:"
 
-#: print.go:307 print.go:309
+#: print.go:291 print.go:293
 msgid "Out-of-date"
 msgstr "Устарел"
 
@@ -287,55 +291,57 @@ msgstr "Устарел"
 msgid "PGP keys need importing:"
 msgstr "Ключи PGP, требующие импорта:"
 
-#: install.go:872
+#: install.go:874
 msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
 msgstr "PKGBUILD обновлён, пропуск (%d/%d): %s"
 
-#: install.go:662
+#: install.go:664
 msgid "PKGBUILDs to edit?"
 msgstr "Отредактировать PKGBUILD?"
 
-#: print.go:314
+#: print.go:298
 msgid "Package Base ID"
 msgstr "ID группы пакетов"
 
-#: print.go:315
+#: print.go:299
 msgid "Package Base"
 msgstr "Группа пакетов"
 
-#: install.go:580
+#: install.go:582
 msgid "Packages to cleanBuild?"
 msgstr "Пакеты для чистовой сборки?"
 
-#: upgrade.go:363
+#: upgrade.go:365
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Пакеты для исключения: (например: \"1 2 3\", \"1-3\", \"^4\" или имя в репозитории)"
+msgstr ""
+"Пакеты для исключения: (например: \"1 2 3\", \"1-3\", \"^4\" или имя в "
+"репозитории)"
 
-#: cmd.go:346
+#: cmd.go:350
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Пакеты для установки (например: 1 2 3, 1-3 или ^4)"
 
-#: upgrade.go:360
+#: upgrade.go:362
 msgid "Packages to upgrade."
 msgstr "Пакеты для обновления."
 
-#: print.go:302
+#: print.go:286
 msgid "Popularity"
 msgstr "Популярность"
 
-#: install.go:267 install.go:307
+#: install.go:269 install.go:309
 msgid "Proceed with install?"
 msgstr "Продолжить установку?"
 
-#: print.go:294
+#: print.go:278
 msgid "Provides"
 msgstr "Предоставляет"
 
-#: query.go:568
+#: query.go:509
 msgid "Querying AUR..."
 msgstr "Выполнение запроса в AUR..."
 
-#: install.go:219
+#: install.go:221
 msgid "Remove make dependencies after install?"
 msgstr "Удалить зависимости для сборки после установки?"
 
@@ -343,79 +349,79 @@ msgstr "Удалить зависимости для сборки после у�
 msgid "Repository "
 msgstr "Репозиторий "
 
-#: print.go:618
+#: print.go:495
 msgid "Repository AUR"
 msgstr "Репозиторий AUR"
 
-#: print.go:285
+#: print.go:269
 msgid "Repository"
 msgstr "Репозиторий"
 
-#: upgrade.go:148
+#: upgrade.go:150
 msgid "Searching AUR for updates..."
 msgstr "Поиск обновлений в AUR..."
 
-#: upgrade.go:138
+#: upgrade.go:140
 msgid "Searching databases for updates..."
 msgstr "Поиск обновлений в базе данных..."
 
-#: cmd.go:343 query.go:235
+#: cmd.go:347 query.go:194
 msgid "Showing repo packages only"
 msgstr "Показываются только пакеты из репозиториев"
 
-#: print.go:316
+#: print.go:300
 msgid "Snapshot URL"
 msgstr "URL снимка"
 
-#: print.go:361
+#: print.go:345
 msgid "Ten biggest packages:"
 msgstr "10 самых объёмных пакетов:"
 
-#: install.go:479
+#: install.go:481
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Следующие пакеты несовместимы с вашей архитектурой:"
 
-#: callbacks.go:36 print.go:615
+#: callbacks.go:36 print.go:492
 msgid "There are %d providers available for %s:"
 msgstr "Доступно %d источников для %s:"
 
-#: exec.go:71
+#: exec.go:72
 msgid "There may be another Pacman instance running. Waiting..."
 msgstr "Возможно, запущен другой экземпляр Pacman. Ожидание..."
 
-#: print.go:359
+#: print.go:343
 msgid "Total Size occupied by packages: %s"
 msgstr "Суммарный размер, занятый пакетами: %s"
 
-#: print.go:357
+#: print.go:341
 msgid "Total foreign installed packages: %s"
 msgstr "Всего сторонних установленных пакетов: %s"
 
-#: print.go:356
+#: print.go:340
 msgid "Total installed packages: %s"
 msgstr "Всего пакетов установлено: %s"
 
-#: install.go:486
+#: install.go:488
 msgid "Try to build them anyway?"
 msgstr "Попытаться собрать их?"
 
-#: print.go:290
+#: print.go:274
 msgid "URL"
 msgstr "URL"
 
-#: print.go:288
+#: print.go:272
 msgid "Version"
 msgstr "Версия"
 
-#: print.go:301
+#: print.go:285
 msgid "Votes"
 msgstr "Голоса"
 
-#: print.go:354
+#: print.go:338
 msgid "Yay version v%s"
 msgstr "Yay версии v%s"
 
-#: install.go:581 install.go:656 install.go:663
+#: install.go:583 install.go:658 install.go:665
 msgid "[N]one"
 msgstr "[N]Нет"
 
@@ -427,7 +433,7 @@ msgstr ""
 "\n"
 "%s %s, требуется: %s"
 
-#: clean.go:94
+#: clean.go:96
 msgid ""
 "\n"
 "Build directory:"
@@ -435,7 +441,7 @@ msgstr ""
 "\n"
 "Каталог сборки:"
 
-#: callbacks.go:56 print.go:628
+#: callbacks.go:56 print.go:505
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -459,19 +465,19 @@ msgstr ""
 "\n"
 "Обнаружены конфликты пакетов:"
 
-#: install.go:268 install.go:308 install.go:487 install.go:591 install.go:674
+#: install.go:270 install.go:310 install.go:489 install.go:593 install.go:676
 msgid "aborting due to user"
 msgstr "прерывание по запросу пользователя"
 
-#: install.go:513
+#: install.go:515
 msgid "cannot find package name: %v"
 msgstr "невозможно найти пакет: %v"
 
-#: install.go:1046 install.go:1118
+#: install.go:1048 install.go:1120
 msgid "could not find PKGDEST for: %s"
 msgstr "невозможно найти файл PKGDEST для: %s"
 
-#: install.go:790
+#: install.go:792
 msgid "editor did not exit successfully, aborting: %s"
 msgstr "выход из редактора был неудачен, прерывание: %s"
 
@@ -479,11 +485,11 @@ msgstr "выход из редактора был неудачен, прерыв
 msgid "error cloning %s: %s"
 msgstr "ошибка клонирования %s: %s"
 
-#: install.go:922
+#: install.go:924
 msgid "error downloading sources: %s"
 msgstr "ошибка загрузки исходников: %s"
 
-#: query.go:234
+#: query.go:193
 msgid "error during AUR search: %s"
 msgstr "ошибка поиска в AUR: %s"
 
@@ -491,11 +497,11 @@ msgstr "ошибка поиска в AUR: %s"
 msgid "error fetching %s: %s"
 msgstr "ошибка получения %s: %s"
 
-#: install.go:331 install.go:440
+#: install.go:333 install.go:442
 msgid "error installing repo packages"
 msgstr "ошибка установки пакетов из репозиториев"
 
-#: install.go:1030 install.go:1070 install.go:1081 install.go:1093
+#: install.go:1032 install.go:1072 install.go:1083 install.go:1095
 msgid "error making: %s"
 msgstr "ошибка сборки: %s"
 
@@ -507,23 +513,19 @@ msgstr "ошибка объединения %s: %s"
 msgid "error reading %s"
 msgstr "ошибка чтения %s"
 
-#: install.go:73
+#: install.go:75
 msgid "error refreshing databases"
 msgstr "ошибка обновления базы данных"
 
-#: clean.go:217 download.go:130
+#: clean.go:228 download.go:130
 msgid "error resetting %s: %s"
 msgstr "ошибка сброса %s: %s"
 
-#: main.go:111
+#: main.go:68
 msgid "failed to create BuildDir directory '%s': %s"
 msgstr "ошибка создания каталога BuildDir '%s': %s"
 
-#: main.go:99
-msgid "failed to create cache directory '%s': %s"
-msgstr "ошибка создания каталога кеша '%s': %s"
-
-#: main.go:91
+#: pkg/settings/runtime.go:79
 msgid "failed to create config directory '%s': %s"
 msgstr "ошибка создания каталога конфигурации '%s': %s"
 
@@ -535,47 +537,48 @@ msgstr "ошибка получения PKGBUILD: %s: %s"
 msgid "failed to link %s: %s"
 msgstr "ошибка создания ссылки %s: %s"
 
-#: main.go:52
+#: main.go:29
 msgid "failed to open config file '%s': %s"
 msgstr "ошибка открытия файла конфигурации '%s': %s"
 
-#: main.go:74
+#: main.go:51
 msgid "failed to open vcs file '%s': %s"
 msgstr "ошибка открытия файла VCS '%s': %s"
 
-#: install.go:808
+#: install.go:810
 msgid "failed to parse %s -- skipping: %s"
 msgstr "ошибка разбора %s -- пропуск: %s"
 
-#: install.go:811
+#: install.go:813
 msgid "failed to parse %s: %s"
 msgstr "ошибка разбора %s: %s"
 
-#: main.go:59
+#: main.go:36
 msgid "failed to read config file '%s': %s"
 msgstr "ошибка чтения файла конфигурации '%s': %s"
 
-#: main.go:81
+#: main.go:58
 msgid "failed to read vcs file '%s': %s"
 msgstr "ошибка открытия файла VCS '%s': %s"
 
-#: cmd.go:356 config.go:334 print.go:644
+#: cmd.go:360 config.go:147 print.go:521
 msgid "input too long"
 msgstr "ввод слишком длинный"
 
-#: callbacks.go:82 print.go:654
+#: callbacks.go:82 print.go:531
 msgid "invalid number: %s"
 msgstr "некорректный номер: %s"
 
-#: parser.go:146
+#: pkg/settings/parser.go:144
 msgid "invalid option '%s'"
 msgstr "некорректный параметр '%s'"
 
-#: cmd.go:338 cmd.go:372 cmd.go:389 print.go:78 print.go:121 query.go:230
+#: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
 msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
-msgstr "некорректный режим сортировки. Исправьте при помощи yay -Y --bottomup --save"
+msgstr ""
+"некорректный режим сортировки. Исправьте при помощи yay -Y --bottomup --save"
 
-#: callbacks.go:87 print.go:659
+#: callbacks.go:87 print.go:536
 msgid "invalid value: %d is not between %d and %d"
 msgstr "некорректное значение: %d не лежит между %d и %d"
 
@@ -583,19 +586,19 @@ msgstr "некорректное значение: %d не лежит между
 msgid "no keys to import"
 msgstr "нет ключей для импорта"
 
-#: cmd.go:319
+#: cmd.go:323
 msgid "no packages match search"
 msgstr "нет пакетов, отвечающих ключу поиска"
 
-#: config.go:299
+#: config.go:112
 msgid "no"
 msgstr "нет"
 
-#: parser.go:136
+#: pkg/settings/parser.go:134
 msgid "only one operation may be used at a time"
 msgstr "только одна операция может быть использована за один раз"
 
-#: print.go:446
+#: print.go:430
 msgid "package '%s' was not found"
 msgstr "пакет '%s' не найден"
 
@@ -607,34 +610,37 @@ msgstr "конфликты пакетов не могут быть разреш�
 msgid "problem importing keys"
 msgstr "проблема импортирования ключей"
 
-#: install.go:176
+#: install.go:178
 msgid "refusing to install AUR packages as root, aborting"
 msgstr "пакеты из AUR не устанавливаются от имени root, прерывание"
 
-#: clean.go:114
+#: clean.go:116
 msgid "removing AUR packages from cache..."
 msgstr "удаление пакетов AUR из кеша..."
 
-#: clean.go:186 clean.go:208
+#: clean.go:188 clean.go:216
 msgid "removing untracked AUR files from cache..."
 msgstr "удаление неотслеживаемых файлов AUR из кеша..."
 
-#: install.go:1127
+#: install.go:1129
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "файл PKGDEST для %s есть в выводе makepkg, но не существует: %s"
 
-#: main.go:189
+#: main.go:146
 msgid "unable to CreateHandle: %s"
 msgstr "невозможно выполнить CreateHandle: %s"
 
-#: cmd.go:175
+#: cmd.go:177
 msgid "unhandled operation"
 msgstr "неизвестная операция"
 
-#: cmd.go:439
+#: cmd.go:443
 msgid "unknown-version"
 msgstr "неизвестная версия"
 
-#: config.go:298
+#: config.go:111
 msgid "yes"
 msgstr "да"
+
+#~ msgid "failed to create cache directory '%s': %s"
+#~ msgstr "ошибка создания каталога кеша '%s': %s"

@@ -12,11 +12,11 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 2.3\n"
 
-#: install.go:561
+#: install.go:563
 msgid " (Build Files Exist)"
 msgstr " (构建文件已存在)"
 
-#: install.go:557
+#: install.go:559
 msgid " (Installed)"
 msgstr " (已安装)"
 
@@ -32,11 +32,11 @@ msgstr " (被这些包需要: "
 msgid " Input too long"
 msgstr " 输入过长"
 
-#: cmd.go:442
+#: cmd.go:446
 msgid " [Installed]"
 msgstr " [已安装]"
 
-#: cmd.go:398 install.go:164 install.go:198
+#: cmd.go:402 install.go:166 install.go:200
 msgid " there is nothing to do"
 msgstr " 今日无事可做"
 
@@ -44,7 +44,7 @@ msgstr " 今日无事可做"
 msgid "%s Installing %s will remove:"
 msgstr "%s 安装 %s 将删除:"
 
-#: install.go:581 install.go:656 install.go:663
+#: install.go:583 install.go:658 install.go:665
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr "%s [A]全部 [Ab]中止 [I]已安装 [No]未安装 或 (1 2 3, 1-3, ^4)"
 
@@ -52,47 +52,47 @@ msgstr "%s [A]全部 [Ab]中止 [I]已安装 [No]未安装 或 (1 2 3, 1-3, ^4)"
 msgid "%s already downloaded -- use -f to overwrite"
 msgstr "%s 已下载 -- 使用 -f 覆盖"
 
-#: install.go:1084
+#: install.go:1086
 msgid "%s already made -- skipping build"
 msgstr "%s 已生成 -- 跳过构建"
 
-#: main.go:24 main.go:32
+#: pkg/settings/runtime.go:50 pkg/settings/runtime.go:62
 msgid "%s and %s unset"
 msgstr "未设置 %s 和 %s"
 
-#: config.go:263
+#: config.go:76
 msgid "%s is not set"
 msgstr "未设置 %s"
 
-#: exec.go:70
+#: exec.go:71
 msgid "%s is present."
 msgstr "%s 存在。"
 
-#: install.go:1073
+#: install.go:1075
 msgid "%s is up to date -- skipping"
 msgstr "%s 是最新的 -- 跳过"
 
-#: install.go:1006
+#: install.go:1008
 msgid "%s not satisfied, flushing install queue"
 msgstr "%s 未满足，正在刷新安装队列"
 
-#: install.go:750
+#: install.go:752
 msgid "%s: No changes -- skipping"
 msgstr "%s: 没有更改 -- 跳过"
 
-#: utils.go:47
+#: utils.go:48
 msgid "%s: can't use target with option --aur -- skipping"
 msgstr "%s: 不能将目标与选项 --aur 一起使用 -- 跳过"
 
-#: utils.go:42
+#: utils.go:43
 msgid "%s: can't use target with option --repo -- skipping"
 msgstr "%s: 不能将目标与选项 --repo 一起使用 -- 跳过"
 
-#: upgrade.go:272
+#: upgrade.go:274
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: 忽略包升级 (%s => %s)"
 
-#: upgrade.go:289
+#: upgrade.go:291
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr "%s: 本地 (%s) 比 AUR (%s) 更新"
 
@@ -100,43 +100,43 @@ msgstr "%s: 本地 (%s) 比 AUR (%s) 更新"
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr "(%d/%d) 从 ABS 下载了 PKGBUILD: %s"
 
-#: install.go:803
+#: install.go:805
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) 正在解析 SRCINFO: %s"
 
-#: print.go:102 print.go:143
+#: print.go:86 print.go:127
 msgid "(Installed)"
 msgstr "(已安装)"
 
-#: print.go:100 print.go:141
+#: print.go:84 print.go:125
 msgid "(Installed: %s)"
 msgstr "(已安装: %s)"
 
-#: print.go:91
+#: print.go:75
 msgid "(Orphaned)"
 msgstr "(孤立)"
 
-#: print.go:95
+#: print.go:79
 msgid "(Out-of-date: %s)"
 msgstr "(过时的: %s)"
 
-#: print.go:291
+#: print.go:275
 msgid "AUR URL"
 msgstr "AUR URL"
 
-#: config.go:264
+#: config.go:77
 msgid "Add %s or %s to your environment variables"
 msgstr "将 %s 或 %s 添加到你的环境变量"
 
-#: main.go:225
+#: main.go:182
 msgid "Avoid running yay as root/sudo."
 msgstr "避免以 root/sudo 运行 yay。"
 
-#: print.go:297
+#: print.go:281
 msgid "Check Deps"
 msgstr "检查依赖"
 
-#: upgrade.go:165
+#: upgrade.go:167
 msgid "Checking development packages..."
 msgstr "正在检查开发包..."
 
@@ -148,7 +148,7 @@ msgstr "正在检查冲突..."
 msgid "Checking for inner conflicts..."
 msgstr "正在检查内部冲突..."
 
-#: clean.go:213
+#: clean.go:224
 msgid "Cleaning (%d/%d): %s"
 msgstr "正在清理 (%d/%d): %s"
 
@@ -156,7 +156,7 @@ msgstr "正在清理 (%d/%d): %s"
 msgid "Conflicting packages will have to be confirmed manually"
 msgstr "必须手动确认冲突的包"
 
-#: print.go:299
+#: print.go:283
 msgid "Conflicts With"
 msgstr "与它冲突"
 
@@ -164,67 +164,67 @@ msgstr "与它冲突"
 msgid "Could not find all required packages:"
 msgstr "找不到所有需要的包:"
 
-#: clean.go:229
+#: clean.go:240
 msgid "Deleting (%d/%d): %s"
 msgstr "正在删除 (%d/%d): %s"
 
-#: print.go:295
+#: print.go:279
 msgid "Depends On"
 msgstr "依赖于"
 
-#: print.go:289
+#: print.go:273
 msgid "Description"
 msgstr "描述"
 
-#: install.go:655
+#: install.go:657
 msgid "Diffs to show?"
 msgstr "显示哪些差异？"
 
-#: clean.go:89
+#: clean.go:91
 msgid "Do you want to remove ALL AUR packages from cache?"
 msgstr "你是否要从缓存中删除所有 AUR 软件包？"
 
-#: clean.go:106
+#: clean.go:108
 msgid "Do you want to remove ALL untracked AUR files?"
 msgstr "你是否要删除所有未跟踪的 AUR 文件？"
 
-#: clean.go:91
+#: clean.go:93
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "你是否要从缓存中删除所有其他 AUR 软件包？"
 
-#: install.go:891
+#: install.go:893
 msgid "Downloaded PKGBUILD (%d/%d): %s"
 msgstr "已下载 PKGBUILD (%d/%d): %s"
 
-#: config.go:267
+#: config.go:80
 msgid "Edit PKGBUILD with?"
 msgstr "使用什么来编辑 PKGBUILD？"
 
-#: cmd.go:342
+#: cmd.go:346
 msgid "Error during AUR search: %s\n"
 msgstr "搜索 AUR 时出错: %s\n"
 
-#: print.go:358
+#: print.go:342
 msgid "Explicitly installed packages: %s"
 msgstr "显式安装的软件包: %s"
 
-#: print.go:303
+#: print.go:287
 msgid "First Submitted"
 msgstr "首次提交"
 
-#: print.go:44
+#: print.go:41
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "标记为过时的 AUR 软件包:"
 
-#: vcs.go:146
+#: vcs.go:147
 msgid "Found git repo: %s"
 msgstr "已找到 git 仓库: %s"
 
-#: vcs.go:63
+#: vcs.go:64
 msgid "GenDB finished. No packages were installed"
 msgstr "GenDB 完成。 没有安装任何软件包"
 
-#: print.go:292
+#: print.go:276
 msgid "Groups"
 msgstr "组"
 
@@ -236,23 +236,23 @@ msgstr "导入？"
 msgid "Importing keys with gpg..."
 msgstr "正在用 gpg 导入密钥..."
 
-#: print.go:287
+#: print.go:271
 msgid "Keywords"
 msgstr "关键字"
 
-#: print.go:304
+#: print.go:288
 msgid "Last Modified"
 msgstr "最后修改"
 
-#: print.go:293
+#: print.go:277
 msgid "Licenses"
 msgstr "许可证"
 
-#: print.go:300
+#: print.go:284
 msgid "Maintainer"
 msgstr "维护者"
 
-#: print.go:296
+#: print.go:280
 msgid "Make Deps"
 msgstr "生成依赖"
 
@@ -260,11 +260,11 @@ msgstr "生成依赖"
 msgid "Missing ABS packages:"
 msgstr "缺少 ABS 软件包:"
 
-#: print.go:28
+#: print.go:25
 msgid "Missing AUR Packages:"
 msgstr "缺少 AUR 软件包:"
 
-#: print.go:286
+#: print.go:270
 msgid "Name"
 msgstr "名字"
 
@@ -272,15 +272,15 @@ msgstr "名字"
 msgid "None"
 msgstr "没有"
 
-#: print.go:298
+#: print.go:282
 msgid "Optional Deps"
 msgstr "可选依赖"
 
-#: print.go:36
+#: print.go:33
 msgid "Orphaned AUR Packages:"
 msgstr "孤立的 AUR 软件包:"
 
-#: print.go:307 print.go:309
+#: print.go:291 print.go:293
 msgid "Out-of-date"
 msgstr "过时"
 
@@ -288,55 +288,55 @@ msgstr "过时"
 msgid "PGP keys need importing:"
 msgstr "PGP 密钥需要导入:"
 
-#: install.go:872
+#: install.go:874
 msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
 msgstr "PKGBUILD 是最新的，跳过 (%d/%d): %s"
 
-#: install.go:662
+#: install.go:664
 msgid "PKGBUILDs to edit?"
 msgstr "要编辑哪些 PKGBUILDs？"
 
-#: print.go:314
+#: print.go:298
 msgid "Package Base ID"
 msgstr "包基础 ID"
 
-#: print.go:315
+#: print.go:299
 msgid "Package Base"
 msgstr "包基础"
 
-#: install.go:580
+#: install.go:582
 msgid "Packages to cleanBuild?"
 msgstr "清理哪些软件包的构建？"
 
-#: upgrade.go:363
+#: upgrade.go:365
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "要排除的包: (示例: \"1 2 3\", \"1-3\", \"^4\" 或存储库名字)"
 
-#: cmd.go:346
+#: cmd.go:350
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "要安装的包 (示例: 1 2 3, 1-3 或 ^4)"
 
-#: upgrade.go:360
+#: upgrade.go:362
 msgid "Packages to upgrade."
 msgstr "要升级的包。"
 
-#: print.go:302
+#: print.go:286
 msgid "Popularity"
 msgstr "受欢迎度"
 
-#: install.go:267 install.go:307
+#: install.go:269 install.go:309
 msgid "Proceed with install?"
 msgstr "继续安装？"
 
-#: print.go:294
+#: print.go:278
 msgid "Provides"
 msgstr "提供"
 
-#: query.go:568
+#: query.go:509
 msgid "Querying AUR..."
 msgstr "正在查询 AUR..."
 
-#: install.go:219
+#: install.go:221
 msgid "Remove make dependencies after install?"
 msgstr "安装后删除生成依赖？"
 
@@ -344,79 +344,79 @@ msgstr "安装后删除生成依赖？"
 msgid "Repository "
 msgstr "软件库 "
 
-#: print.go:618
+#: print.go:495
 msgid "Repository AUR"
 msgstr "AUR 软件库"
 
-#: print.go:285
+#: print.go:269
 msgid "Repository"
 msgstr "软件库"
 
-#: upgrade.go:148
+#: upgrade.go:150
 msgid "Searching AUR for updates..."
 msgstr "搜索 AUR 以获取更新..."
 
-#: upgrade.go:138
+#: upgrade.go:140
 msgid "Searching databases for updates..."
 msgstr "搜索数据库以获取更新..."
 
-#: cmd.go:343 query.go:235
+#: cmd.go:347 query.go:194
 msgid "Showing repo packages only"
 msgstr "仅显示软件库软件包"
 
-#: print.go:316
+#: print.go:300
 msgid "Snapshot URL"
 msgstr "快照 URL"
 
-#: print.go:361
+#: print.go:345
 msgid "Ten biggest packages:"
 msgstr "十个最大的软件包:"
 
-#: install.go:479
+#: install.go:481
 msgid "The following packages are not compatible with your architecture:"
 msgstr "以下软件包与您的体系架构不兼容:"
 
-#: callbacks.go:36 print.go:615
+#: callbacks.go:36 print.go:492
 msgid "There are %d providers available for %s:"
 msgstr "有 %d 个提供者可用于 %s:"
 
-#: exec.go:71
+#: exec.go:72
 msgid "There may be another Pacman instance running. Waiting..."
 msgstr "可能还有另一个 Pacman 实例正在运行。等待中..."
 
-#: print.go:359
+#: print.go:343
 msgid "Total Size occupied by packages: %s"
 msgstr "包占用的总大小: %s"
 
-#: print.go:357
+#: print.go:341
 msgid "Total foreign installed packages: %s"
 msgstr "已安装的外部软件包总数: %s"
 
-#: print.go:356
+#: print.go:340
 msgid "Total installed packages: %s"
 msgstr "已安装的软件包总数:  %s"
 
-#: install.go:486
+#: install.go:488
 msgid "Try to build them anyway?"
 msgstr "依然尝试构建它们？"
 
-#: print.go:290
+#: print.go:274
 msgid "URL"
 msgstr "URL"
 
-#: print.go:288
+#: print.go:272
 msgid "Version"
 msgstr "版本"
 
-#: print.go:301
+#: print.go:285
 msgid "Votes"
 msgstr "得票"
 
-#: print.go:354
+#: print.go:338
 msgid "Yay version v%s"
 msgstr "Yay 版本 v%s"
 
-#: install.go:581 install.go:656 install.go:663
+#: install.go:583 install.go:658 install.go:665
 msgid "[N]one"
 msgstr "[N]没有"
 
@@ -428,7 +428,7 @@ msgstr ""
 "\n"
 "%s %s, 需要: %s"
 
-#: clean.go:94
+#: clean.go:96
 msgid ""
 "\n"
 "Build directory:"
@@ -436,7 +436,7 @@ msgstr ""
 "\n"
 "构建目录:"
 
-#: callbacks.go:56 print.go:628
+#: callbacks.go:56 print.go:505
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -460,19 +460,19 @@ msgstr ""
 "\n"
 "发现包冲突:"
 
-#: install.go:268 install.go:308 install.go:487 install.go:591 install.go:674
+#: install.go:270 install.go:310 install.go:489 install.go:593 install.go:676
 msgid "aborting due to user"
 msgstr "由于用户而中止"
 
-#: install.go:513
+#: install.go:515
 msgid "cannot find package name: %v"
 msgstr "找不到软件包名字: %v"
 
-#: install.go:1046 install.go:1118
+#: install.go:1048 install.go:1120
 msgid "could not find PKGDEST for: %s"
 msgstr "找不到 PKGDEST: %s"
 
-#: install.go:790
+#: install.go:792
 msgid "editor did not exit successfully, aborting: %s"
 msgstr "编辑器未成功退出，正在中止: %s"
 
@@ -480,11 +480,11 @@ msgstr "编辑器未成功退出，正在中止: %s"
 msgid "error cloning %s: %s"
 msgstr "克隆 %s 时出错: %s"
 
-#: install.go:922
+#: install.go:924
 msgid "error downloading sources: %s"
 msgstr "下载源文件时出错: %s"
 
-#: query.go:234
+#: query.go:193
 msgid "error during AUR search: %s"
 msgstr "搜索 AUR 时出错: %s"
 
@@ -492,11 +492,11 @@ msgstr "搜索 AUR 时出错: %s"
 msgid "error fetching %s: %s"
 msgstr "获取 %s 时出错: %s"
 
-#: install.go:331 install.go:440
+#: install.go:333 install.go:442
 msgid "error installing repo packages"
 msgstr "安装软件库软件包时出错"
 
-#: install.go:1030 install.go:1070 install.go:1081 install.go:1093
+#: install.go:1032 install.go:1072 install.go:1083 install.go:1095
 msgid "error making: %s"
 msgstr "生成时出错: %s"
 
@@ -508,23 +508,19 @@ msgstr "合并 %s 时出错: %s"
 msgid "error reading %s"
 msgstr "读取 %s 时出错"
 
-#: install.go:73
+#: install.go:75
 msgid "error refreshing databases"
 msgstr "刷新数据库时出错"
 
-#: clean.go:217 download.go:130
+#: clean.go:228 download.go:130
 msgid "error resetting %s: %s"
 msgstr "重置 %s 时出错: %s"
 
-#: main.go:111
+#: main.go:68
 msgid "failed to create BuildDir directory '%s': %s"
 msgstr "无法创建 BuildDir 目录 '%s': %s"
 
-#: main.go:99
-msgid "failed to create cache directory '%s': %s"
-msgstr "无法创建缓存目录 '%s': %s"
-
-#: main.go:91
+#: pkg/settings/runtime.go:79
 msgid "failed to create config directory '%s': %s"
 msgstr "无法创建配置目录 '%s': %s"
 
@@ -536,43 +532,48 @@ msgstr "无法获取 pkgbuild: %s: %s"
 msgid "failed to link %s: %s"
 msgstr "无法链接 %s: %s"
 
-#: main.go:52
+#: main.go:29
 msgid "failed to open config file '%s': %s"
 msgstr "无法打开配置文件 '%s': %s"
 
-#: main.go:74 install.go:808
+#: main.go:51
+#, fuzzy
+msgid "failed to open vcs file '%s': %s"
+msgstr "无法读取 vcs 文件 '%s': %s"
+
+#: install.go:810
 msgid "failed to parse %s -- skipping: %s"
 msgstr "无法解析 %s -- 跳过: %s"
 
-#: install.go:811
+#: install.go:813
 msgid "failed to parse %s: %s"
 msgstr "无法解析 %s: %s"
 
-#: main.go:59
+#: main.go:36
 msgid "failed to read config file '%s': %s"
 msgstr "无法读取配置文件 '%s': %s"
 
-#: main.go:81
+#: main.go:58
 msgid "failed to read vcs file '%s': %s"
 msgstr "无法读取 vcs 文件 '%s': %s"
 
-#: cmd.go:356 config.go:334 print.go:644
+#: cmd.go:360 config.go:147 print.go:521
 msgid "input too long"
 msgstr "输入过长"
 
-#: callbacks.go:82 print.go:654
+#: callbacks.go:82 print.go:531
 msgid "invalid number: %s"
 msgstr "无效数字: %s"
 
-#: parser.go:146
+#: pkg/settings/parser.go:144
 msgid "invalid option '%s'"
 msgstr "无效选项 '%s'"
 
-#: cmd.go:338 cmd.go:372 cmd.go:389 print.go:78 print.go:121 query.go:230
+#: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
 msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
 msgstr "无效排序方法。用 yay -Y --bottomup --save 修复"
 
-#: callbacks.go:87 print.go:659
+#: callbacks.go:87 print.go:536
 msgid "invalid value: %d is not between %d and %d"
 msgstr "无效值: %d 不在 %d 和 %d 之间"
 
@@ -580,19 +581,19 @@ msgstr "无效值: %d 不在 %d 和 %d 之间"
 msgid "no keys to import"
 msgstr "没有要导入的密钥"
 
-#: cmd.go:319
+#: cmd.go:323
 msgid "no packages match search"
 msgstr "没有与搜索匹配的软件包"
 
-#: config.go:299
+#: config.go:112
 msgid "no"
 msgstr "no"
 
-#: parser.go:136
+#: pkg/settings/parser.go:134
 msgid "only one operation may be used at a time"
 msgstr "一次只能使用一项操作"
 
-#: print.go:446
+#: print.go:430
 msgid "package '%s' was not found"
 msgstr "找不到软件包 '%s'"
 
@@ -604,34 +605,37 @@ msgstr "包冲突无法通过 noconfirm 解决，正在中止"
 msgid "problem importing keys"
 msgstr "导入密钥时出现问题"
 
-#: install.go:176
+#: install.go:178
 msgid "refusing to install AUR packages as root, aborting"
 msgstr "拒绝以 root 身份安装 AUR 软件包，正在中止"
 
-#: clean.go:114
+#: clean.go:116
 msgid "removing AUR packages from cache..."
 msgstr "正在从缓存中删除 AUR 软件包..."
 
-#: clean.go:186 clean.go:208
+#: clean.go:188 clean.go:216
 msgid "removing untracked AUR files from cache..."
 msgstr "正在从缓存中删除未跟踪的 AUR 文件..."
 
-#: install.go:1127
+#: install.go:1129
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "%s 的 PKGDEST 由 makepkg 列出，但不存在: %s"
 
-#: main.go:189
+#: main.go:146
 msgid "unable to CreateHandle: %s"
 msgstr "无法创建句柄: %s"
 
-#: cmd.go:175
+#: cmd.go:177
 msgid "unhandled operation"
 msgstr "未处理的操作"
 
-#: cmd.go:439
+#: cmd.go:443
 msgid "unknown-version"
 msgstr "未知版本"
 
-#: config.go:298
+#: config.go:111
 msgid "yes"
 msgstr "yes"
+
+#~ msgid "failed to create cache directory '%s': %s"
+#~ msgstr "无法创建缓存目录 '%s': %s"

@@ -135,9 +135,13 @@ $(PACKAGE): $(BIN) $(RELEASE_DIR) ${MOFILES}
 
 locale:
 	xgotext -in . -out po
-	test -f $@ || msginit -l $* -i $< -o $@
-	msgmerge -U $@ $<
-	touch $@
+	for lang in ${LANGS}; do \
+		test -f po/$$lang.po || msginit -l po/$$lang.po -i po/${POTFILE} -o po/$$lang.po \
+		msgmerge -U po/$$lang.po po/${POTFILE}; \
+		touch po/$$lang.po; \
+	done
+
+
 
 ${LOCALEDIR}/%.mo: ${LOCALEDIR}/%.po
 	msgfmt $< -o $@
