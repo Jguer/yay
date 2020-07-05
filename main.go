@@ -184,7 +184,7 @@ func main() {
 
 	runtime, err := settings.MakeRuntime()
 	exitOnError(err)
-	config = defaultSettings()
+	config = settings.MakeConfig()
 	config.Runtime = runtime
 	exitOnError(initConfig(runtime.ConfigPath))
 	exitOnError(cmdArgs.ParseCommandLine(config))

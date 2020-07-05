@@ -199,7 +199,7 @@ func handleVersion() {
 func handlePrint() (err error) {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
-		tmpConfig := defaultSettings()
+		tmpConfig := settings.MakeConfig()
 		tmpConfig.ExpandEnv()
 		fmt.Printf("%v", tmpConfig)
 	case cmdArgs.ExistsArg("g", "currentconfig"):

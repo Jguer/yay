@@ -40,59 +40,6 @@ var alpmHandle *alpm.Handle
 
 var hideMenus = false
 
-func defaultSettings() *settings.Configuration {
-	newConfig := &settings.Configuration{
-		AURURL:             "https://aur.archlinux.org",
-		BuildDir:           "$HOME/.cache/yay",
-		ABSDir:             "$HOME/.cache/yay/abs",
-		CleanAfter:         false,
-		Editor:             "",
-		EditorFlags:        "",
-		Devel:              false,
-		MakepkgBin:         "makepkg",
-		MakepkgConf:        "",
-		NoConfirm:          false,
-		PacmanBin:          "pacman",
-		PGPFetch:           true,
-		PacmanConf:         "/etc/pacman.conf",
-		GpgFlags:           "",
-		MFlags:             "",
-		GitFlags:           "",
-		SortMode:           settings.BottomUp,
-		CompletionInterval: 7,
-		SortBy:             "votes",
-		SearchBy:           "name-desc",
-		SudoLoop:           false,
-		GitBin:             "git",
-		GpgBin:             "gpg",
-		SudoBin:            "sudo",
-		SudoFlags:          "",
-		TimeUpdate:         false,
-		RequestSplitN:      150,
-		ReDownload:         "no",
-		ReBuild:            "no",
-		BatchInstall:       false,
-		AnswerClean:        "",
-		AnswerDiff:         "",
-		AnswerEdit:         "",
-		AnswerUpgrade:      "",
-		RemoveMake:         "ask",
-		Provides:           true,
-		UpgradeMenu:        true,
-		CleanMenu:          true,
-		DiffMenu:           true,
-		EditMenu:           false,
-		UseAsk:             false,
-		CombinedUpgrade:    false,
-	}
-
-	if os.Getenv("XDG_CACHE_HOME") != "" {
-		newConfig.BuildDir = "$XDG_CACHE_HOME/yay"
-	}
-
-	return newConfig
-}
-
 // Editor returns the preferred system editor.
 func editor() (editor string, args []string) {
 	switch {
