@@ -245,8 +245,8 @@ func (dp *depPool) cacheAURPackages(_pkgs stringset.StringSet) error {
 
 	for pkg := range pkgs {
 		if _, ok := dp.AurCache[pkg]; !ok {
-			name, _, _ := splitDep(pkg)
-			query = append(query, name)
+			name, _, ver := splitDep(pkg)
+			query = append(query, name, name+"-"+ver)
 		}
 	}
 
