@@ -29,9 +29,6 @@ var localePath = "/usr/share/locale"
 // savedInfo holds the current vcs info
 var savedInfo vcsInfo
 
-// vcsfile holds yay vcs info file path.
-var vcsFile string
-
 // YayConf holds the current config values for yay.
 var config *settings.Configuration
 

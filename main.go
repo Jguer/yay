@@ -45,17 +45,17 @@ func initConfig(configPath string) error {
 	return nil
 }
 
-func initVCS() error {
-	vfile, err := os.Open(vcsFile)
+func initVCS(vcsFilePath string) error {
+	vfile, err := os.Open(vcsFilePath)
 	if !os.IsNotExist(err) && err != nil {
-		return errors.New(gotext.Get("failed to open vcs file '%s': %s", vcsFile, err))
+		return errors.New(gotext.Get("failed to open vcs file '%s': %s", vcsFilePath, err))
 	}
 
 	defer vfile.Close()
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(vfile)
 		if err = decoder.Decode(&savedInfo); err != nil {
-			return errors.New(gotext.Get("failed to read vcs file '%s': %s", vcsFile, err))
+			return errors.New(gotext.Get("failed to read vcs file '%s': %s", vcsFilePath, err))
 		}
 	}
 
@@ -196,7 +196,7 @@ func main() {
 	}
 	config.ExpandEnv()
 	exitOnError(initBuildDir())
-	exitOnError(initVCS())
+	exitOnError(initVCS(runtime.VCSPath))
 	exitOnError(initAlpm(config.PacmanConf))
 	exitOnError(handleCmd())
 	os.Exit(cleanup())

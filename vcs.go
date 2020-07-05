@@ -27,7 +27,7 @@ type shaInfo struct {
 }
 
 // createDevelDB forces yay to create a DB of the existing development packages
-func createDevelDB() error {
+func createDevelDB(vcsFilePath string) error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 
@@ -56,7 +56,7 @@ func createDevelDB() error {
 	for i := range srcinfos {
 		for iP := range srcinfos[i].Packages {
 			wg.Add(1)
-			go updateVCSData(srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
+			go updateVCSData(vcsFilePath, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
 		}
 	}
 
@@ -114,7 +114,7 @@ func parseSource(source string) (url, branch string, protocols []string) {
 	return url, branch, protocols
 }
 
-func updateVCSData(pkgName string, sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup) {
+func updateVCSData(vcsFilePath, pkgName string, sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	if savedInfo == nil {
@@ -145,7 +145,7 @@ func updateVCSData(pkgName string, sources []gosrc.ArchString, mux sync.Locker, 
 
 		savedInfo[pkgName] = info
 		text.Warnln(gotext.Get("Found git repo: %s", cyan(url)))
-		err := saveVCSInfo()
+		err := saveVCSInfo(vcsFilePath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
@@ -238,12 +238,12 @@ func (infos shaInfos) needsUpdate() bool {
 	}
 }
 
-func saveVCSInfo() error {
+func saveVCSInfo(vcsFilePath string) error {
 	marshalledinfo, err := json.MarshalIndent(savedInfo, "", "\t")
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}
-	in, err := os.OpenFile(vcsFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	in, err := os.OpenFile(vcsFilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}

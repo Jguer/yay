@@ -972,7 +972,7 @@ func buildInstallPkgbuilds(
 			return errShow
 		}
 
-		err = saveVCSInfo()
+		err = saveVCSInfo(config.Runtime.VCSPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
@@ -1157,7 +1157,7 @@ func buildInstallPkgbuilds(
 		var wg sync.WaitGroup
 		for _, pkg := range base {
 			wg.Add(1)
-			go updateVCSData(pkg.Name, srcinfo.Source, &mux, &wg)
+			go updateVCSData(config.Runtime.VCSPath, pkg.Name, srcinfo.Source, &mux, &wg)
 		}
 
 		wg.Wait()

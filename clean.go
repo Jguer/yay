@@ -28,7 +28,7 @@ func removeVCSPackage(pkgs []string) {
 	}
 
 	if updated {
-		err := saveVCSInfo()
+		err := saveVCSInfo(config.Runtime.VCSPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

@@ -226,7 +226,7 @@ func handlePrint() (err error) {
 
 func handleYay() error {
 	if cmdArgs.ExistsArg("gendb") {
-		return createDevelDB()
+		return createDevelDB(config.Runtime.VCSPath)
 	}
 	if cmdArgs.ExistsDouble("c") {
 		return cleanDependencies(true)
