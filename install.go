@@ -357,7 +357,7 @@ func install(parser *settings.Arguments) (err error) {
 		}
 	}
 
-	go exitOnError(completion.Update(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false))
+	go exitOnError(completion.Update(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false))
 
 	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {

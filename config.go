@@ -26,23 +26,8 @@ var yayVersion = "10.0.0"
 
 var localePath = "/usr/share/locale"
 
-// configFileName holds the name of the config file.
-const configFileName string = "config.json"
-
-// vcsFileName holds the name of the vcs file.
-const vcsFileName string = "vcs.json"
-
-// configHome handles config directory home
-var configHome string
-
-// cacheHome handles cache home
-var cacheHome string
-
 // savedInfo holds the current vcs info
 var savedInfo vcsInfo
-
-// configfile holds yay config file path.
-var configFile string
 
 // vcsfile holds yay vcs info file path.
 var vcsFile string

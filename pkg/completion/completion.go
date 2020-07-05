@@ -14,10 +14,8 @@ import (
 )
 
 // Show provides completion info for shells
-func Show(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force bool) error {
-	completionPath := filepath.Join(cacheDir, "completion.cache")
-
-	err := Update(alpmHandle, aurURL, cacheDir, interval, force)
+func Show(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int, force bool) error {
+	err := Update(alpmHandle, aurURL, completionPath, interval, force)
 	if err != nil {
 		return err
 	}
@@ -33,8 +31,7 @@ func Show(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force 
 }
 
 // Update updates completion cache to be used by Complete
-func Update(alpmHandle *alpm.Handle, aurURL, cacheDir string, interval int, force bool) error {
-	completionPath := filepath.Join(cacheDir, "completion.cache")
+func Update(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int, force bool) error {
 	info, err := os.Stat(completionPath)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {

@@ -5,38 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
-
-func setPaths() error {
-	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
-		configHome = filepath.Join(configHome, "yay")
-	} else if configHome = os.Getenv("HOME"); configHome != "" {
-		configHome = filepath.Join(configHome, ".config/yay")
-	} else {
-		return errors.New(gotext.Get("%s and %s unset", "XDG_CONFIG_HOME", "HOME"))
-	}
-
-	if cacheHome = os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
-		cacheHome = filepath.Join(cacheHome, "yay")
-	} else if cacheHome = os.Getenv("HOME"); cacheHome != "" {
-		cacheHome = filepath.Join(cacheHome, ".cache/yay")
-	} else {
-		return errors.New(gotext.Get("%s and %s unset", "XDG_CACHE_HOME", "HOME"))
-	}
-
-	configFile = filepath.Join(configHome, configFileName)
-	vcsFile = filepath.Join(cacheHome, vcsFileName)
-
-	return nil
-}
 
 func initGotext() {
 	if envLocalePath := os.Getenv("LOCALE_PATH"); envLocalePath != "" {
@@ -46,17 +23,17 @@ func initGotext() {
 	gotext.Configure(localePath, os.Getenv("LANG"), "yay")
 }
 
-func initConfig() error {
-	cfile, err := os.Open(configFile)
+func initConfig(configPath string) error {
+	cfile, err := os.Open(configPath)
 	if !os.IsNotExist(err) && err != nil {
-		return errors.New(gotext.Get("failed to open config file '%s': %s", configFile, err))
+		return errors.New(gotext.Get("failed to open config file '%s': %s", configPath, err))
 	}
 
 	defer cfile.Close()
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(cfile)
 		if err = decoder.Decode(&config); err != nil {
-			return errors.New(gotext.Get("failed to read config file '%s': %s", configFile, err))
+			return errors.New(gotext.Get("failed to read config file '%s': %s", configPath, err))
 		}
 	}
 
@@ -80,26 +57,6 @@ func initVCS() error {
 		if err = decoder.Decode(&savedInfo); err != nil {
 			return errors.New(gotext.Get("failed to read vcs file '%s': %s", vcsFile, err))
 		}
-	}
-
-	return nil
-}
-
-func initHomeDirs() error {
-	if _, err := os.Stat(configHome); os.IsNotExist(err) {
-		if err = os.MkdirAll(configHome, 0755); err != nil {
-			return errors.New(gotext.Get("failed to create config directory '%s': %s", configHome, err))
-		}
-	} else if err != nil {
-		return err
-	}
-
-	if _, err := os.Stat(cacheHome); os.IsNotExist(err) {
-		if err = os.MkdirAll(cacheHome, 0755); err != nil {
-			return errors.New(gotext.Get("failed to create cache directory '%s': %s", cacheHome, err))
-		}
-	} else if err != nil {
-		return err
 	}
 
 	return nil
@@ -225,13 +182,14 @@ func main() {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
-	exitOnError(setPaths())
+	runtime, err := settings.MakeRuntime()
+	exitOnError(err)
 	config = defaultSettings()
-	exitOnError(initHomeDirs())
-	exitOnError(initConfig())
+	config.Runtime = runtime
+	exitOnError(initConfig(runtime.ConfigPath))
 	exitOnError(cmdArgs.ParseCommandLine(config))
 	if config.Runtime.SaveConfig {
-		err := config.SaveConfig(configFile)
+		err := config.SaveConfig(runtime.ConfigPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

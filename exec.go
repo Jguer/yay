@@ -85,7 +85,7 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 
 	mSudoFlags := strings.Fields(config.SudoFlags)
 
-	if args.NeedRoot(&config.Runtime) {
+	if args.NeedRoot(config.Runtime) {
 		argArr = append(argArr, config.SudoBin)
 		argArr = append(argArr, mSudoFlags...)
 	}
@@ -100,7 +100,7 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 	argArr = append(argArr, "--config", config.PacmanConf, "--")
 	argArr = append(argArr, args.Targets...)
 
-	if args.NeedRoot(&config.Runtime) {
+	if args.NeedRoot(config.Runtime) {
 		waitLock()
 	}
 	return exec.Command(argArr[0], argArr[1:]...)

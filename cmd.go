@@ -144,7 +144,7 @@ func handleCmd() error {
 		return handleHelp()
 	}
 
-	if config.SudoLoop && cmdArgs.NeedRoot(&config.Runtime) {
+	if config.SudoLoop && cmdArgs.NeedRoot(config.Runtime) {
 		sudoLoopBackground()
 	}
 
@@ -213,9 +213,9 @@ func handlePrint() (err error) {
 		quiet := cmdArgs.ExistsArg("q", "quiet")
 		err = news.PrintNewsFeed(alpmHandle, config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, true)
+		err = completion.Show(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, cacheHome, config.CompletionInterval, false)
+		err = completion.Show(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	case cmdArgs.ExistsArg("s", "stats"):
 		err = localStatistics()
 	default:
