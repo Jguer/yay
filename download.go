@@ -175,14 +175,20 @@ func getPkgbuilds(pkgs []string) error {
 
 		for _, base := range allBases {
 			name := base.Pkgbase()
-			_, err = os.Stat(filepath.Join(wd, name))
+			pkgDest := filepath.Join(wd, name)
+			_, err = os.Stat(pkgDest)
 			switch {
 			case err != nil && !os.IsNotExist(err):
 				text.Errorln(err)
 				continue
 			default:
-				if err = os.RemoveAll(filepath.Join(wd, name)); err != nil {
-					text.Errorln(err)
+				if cmdArgs.ExistsArg("f", "force") {
+					if err = os.RemoveAll(pkgDest); err != nil {
+						text.Errorln(err)
+						continue
+					}
+				} else {
+					text.Warnln(gotext.Get("%s already exists. Use -f/--force to overwrite", pkgDest))
 					continue
 				}
 			}
