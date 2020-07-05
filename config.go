@@ -33,7 +33,7 @@ var savedInfo vcsInfo
 var config *settings.Configuration
 
 // AlpmHandle is the alpm handle used by yay.
-var alpmHandle *alpm.Handle
+// var alpmHandle *alpm.Handle
 
 var hideMenus = false
 
@@ -171,7 +171,7 @@ func toUsage(usages []string) alpm.Usage {
 	return ret
 }
 
-func configureAlpm(pacmanConf *pacmanconf.Config) error {
+func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error {
 	// TODO: set SigLevel
 	// sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
 	// localFileSigLevel := alpm.SigUseDefault

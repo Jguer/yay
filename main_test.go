@@ -16,7 +16,7 @@ func expect(t *testing.T, field string, a interface{}, b interface{}, err error)
 }
 
 func TestInitAlpm(t *testing.T) {
-	pacmanConf, err := initAlpm("testdata/pacman.conf")
+	alpmHandle, pacmanConf, err := initAlpm("testdata/pacman.conf")
 	assert.Nil(t, err)
 	assert.NotNil(t, pacmanConf)
 

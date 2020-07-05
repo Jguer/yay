@@ -8,6 +8,8 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -36,8 +38,8 @@ func removeVCSPackage(pkgs []string) {
 }
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies(removeOptional bool) error {
-	hanging, err := hangingPackages(removeOptional)
+func cleanDependencies(removeOptional bool, alpmHandle *alpm.Handle) error {
+	hanging, err := hangingPackages(removeOptional, alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -62,7 +64,7 @@ func cleanRemove(pkgNames []string) error {
 	return show(passToPacman(arguments))
 }
 
-func syncClean(parser *settings.Arguments) error {
+func syncClean(parser *settings.Arguments, alpmHandle *alpm.Handle) error {
 	keepInstalled := false
 	keepCurrent := false
 
@@ -96,7 +98,7 @@ func syncClean(parser *settings.Arguments) error {
 	fmt.Println(gotext.Get("\nBuild directory:"), config.BuildDir)
 
 	if continueTask(question, true) {
-		if err := cleanAUR(keepInstalled, keepCurrent, removeAll); err != nil {
+		if err := cleanAUR(keepInstalled, keepCurrent, removeAll, alpmHandle); err != nil {
 			return err
 		}
 	}
@@ -112,7 +114,7 @@ func syncClean(parser *settings.Arguments) error {
 	return nil
 }
 
-func cleanAUR(keepInstalled, keepCurrent, removeAll bool) error {
+func cleanAUR(keepInstalled, keepCurrent, removeAll bool, alpmHandle *alpm.Handle) error {
 	fmt.Println(gotext.Get("removing AUR packages from cache..."))
 
 	installedBases := make(stringset.StringSet)

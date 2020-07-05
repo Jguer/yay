@@ -138,7 +138,7 @@ func gitMerge(path, name string) error {
 	return nil
 }
 
-func getPkgbuilds(pkgs []string) error {
+func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle) error {
 	missing := false
 	wd, err := os.Getwd()
 	if err != nil {
@@ -146,7 +146,7 @@ func getPkgbuilds(pkgs []string) error {
 	}
 
 	pkgs = removeInvalidTargets(pkgs)
-	aur, repo, err := packageSlices(pkgs)
+	aur, repo, err := packageSlices(pkgs, alpmHandle)
 
 	if err != nil {
 		return err
@@ -163,7 +163,7 @@ func getPkgbuilds(pkgs []string) error {
 	}
 
 	if len(repo) > 0 {
-		missing, err = getPkgbuildsfromABS(repo, wd)
+		missing, err = getPkgbuildsfromABS(repo, wd, alpmHandle)
 		if err != nil {
 			return err
 		}
@@ -211,7 +211,7 @@ func getPkgbuilds(pkgs []string) error {
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string) (bool, error) {
+func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle) (bool, error) {
 	var wg sync.WaitGroup
 	var mux sync.Mutex
 	var errs multierror.MultiError

@@ -56,7 +56,7 @@ func asexp(parser *settings.Arguments, pkgs []string) error {
 }
 
 // Install handles package installs
-func install(parser *settings.Arguments) (err error) {
+func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 	var incompatible stringset.StringSet
 	var do *depOrder
 
@@ -76,7 +76,7 @@ func install(parser *settings.Arguments) (err error) {
 				}
 			}
 		} else if parser.ExistsArg("y", "refresh") || parser.ExistsArg("u", "sysupgrade") || len(parser.Targets) > 0 {
-			err = earlyPacmanCall(parser)
+			err = earlyPacmanCall(parser, alpmHandle)
 			if err != nil {
 				return err
 			}
@@ -85,10 +85,11 @@ func install(parser *settings.Arguments) (err error) {
 
 	// we may have done -Sy, our handle now has an old
 	// database.
-	err = initAlpmHandle(config.Runtime.PacmanConf)
+	alpmHandle, err = initAlpmHandle(config.Runtime.PacmanConf, alpmHandle)
 	if err != nil {
 		return err
 	}
+	config.Runtime.AlpmHandle = alpmHandle
 
 	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
@@ -113,7 +114,7 @@ func install(parser *settings.Arguments) (err error) {
 
 	// if we are doing -u also request all packages needing update
 	if parser.ExistsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upList(warnings)
+		aurUp, repoUp, err = upList(warnings, alpmHandle)
 		if err != nil {
 			return err
 		}
@@ -150,7 +151,7 @@ func install(parser *settings.Arguments) (err error) {
 
 	targets := stringset.FromSlice(parser.Targets)
 
-	dp, err := getDepPool(requestTargets, warnings)
+	dp, err := getDepPool(requestTargets, warnings, alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -312,7 +313,7 @@ func install(parser *settings.Arguments) (err error) {
 		config.NoConfirm = oldValue
 	}
 
-	incompatible, err = getIncompatible(do.Aur, srcinfos)
+	incompatible, err = getIncompatible(do.Aur, srcinfos, alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -364,7 +365,7 @@ func install(parser *settings.Arguments) (err error) {
 		return err
 	}
 
-	err = buildInstallPkgbuilds(dp, do, srcinfos, parser, incompatible, conflicts)
+	err = buildInstallPkgbuilds(dp, do, srcinfos, parser, incompatible, conflicts, alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -411,7 +412,7 @@ func inRepos(syncDB alpm.DBList, pkg string) bool {
 	return !syncDB.FindGroupPkgs(target.Name).Empty()
 }
 
-func earlyPacmanCall(parser *settings.Arguments) error {
+func earlyPacmanCall(parser *settings.Arguments, alpmHandle *alpm.Handle) error {
 	arguments := parser.Copy()
 	arguments.Op = "S"
 	targets := parser.Targets
@@ -457,7 +458,7 @@ func earlyRefresh(parser *settings.Arguments) error {
 	return show(passToPacman(arguments))
 }
 
-func getIncompatible(bases []Base, srcinfos map[string]*gosrc.Srcinfo) (stringset.StringSet, error) {
+func getIncompatible(bases []Base, srcinfos map[string]*gosrc.Srcinfo, alpmHandle *alpm.Handle) (stringset.StringSet, error) {
 	incompatible := make(stringset.StringSet)
 	basesMap := make(map[string]Base)
 	alpmArch, err := alpmHandle.Arch()
@@ -934,7 +935,8 @@ func buildInstallPkgbuilds(
 	srcinfos map[string]*gosrc.Srcinfo,
 	parser *settings.Arguments,
 	incompatible stringset.StringSet,
-	conflicts stringset.MapStringSet) error {
+	conflicts stringset.MapStringSet,
+	alpmHandle *alpm.Handle) error {
 	arguments := parser.Copy()
 	arguments.ClearTargets()
 	arguments.Op = "U"

@@ -74,7 +74,7 @@ func initBuildDir() error {
 	return nil
 }
 
-func initAlpm(pacmanConfigPath string) (*pacmanconf.Config, error) {
+func initAlpm(pacmanConfigPath string) (*alpm.Handle, *pacmanconf.Config, error) {
 	root := "/"
 	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value
@@ -82,7 +82,7 @@ func initAlpm(pacmanConfigPath string) (*pacmanconf.Config, error) {
 
 	pacmanConf, stderr, err := pacmanconf.PacmanConf("--config", pacmanConfigPath, "--root", root)
 	if err != nil {
-		return nil, fmt.Errorf("%s", stderr)
+		return nil, nil, fmt.Errorf("%s", stderr)
 	}
 
 	if value, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {
@@ -113,8 +113,9 @@ func initAlpm(pacmanConfigPath string) (*pacmanconf.Config, error) {
 		pacmanConf.GPGDir = value
 	}
 
-	if err := initAlpmHandle(pacmanConf); err != nil {
-		return nil, err
+	alpmHandle, err := initAlpmHandle(pacmanConf, nil)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	switch value, _, _ := cmdArgs.GetArg("color"); value {
@@ -128,28 +129,28 @@ func initAlpm(pacmanConfigPath string) (*pacmanconf.Config, error) {
 		text.UseColor = pacmanConf.Color && isTty()
 	}
 
-	return pacmanConf, nil
+	return alpmHandle, pacmanConf, nil
 }
 
-func initAlpmHandle(pacmanConf *pacmanconf.Config) error {
-	if alpmHandle != nil {
-		if errRelease := alpmHandle.Release(); errRelease != nil {
-			return errRelease
+func initAlpmHandle(pacmanConf *pacmanconf.Config, oldAlpmHandle *alpm.Handle) (*alpm.Handle, error) {
+	if oldAlpmHandle != nil {
+		if errRelease := oldAlpmHandle.Release(); errRelease != nil {
+			return nil, errRelease
 		}
 	}
 
-	var err error
-	if alpmHandle, err = alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath); err != nil {
-		return errors.New(gotext.Get("unable to CreateHandle: %s", err))
+	alpmHandle, err := alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath)
+	if err != nil {
+		return nil, errors.New(gotext.Get("unable to CreateHandle: %s", err))
 	}
 
-	if err := configureAlpm(pacmanConf); err != nil {
-		return err
+	if err := configureAlpm(pacmanConf, alpmHandle); err != nil {
+		return nil, err
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)
 	alpmHandle.SetLogCallback(logCallback)
-	return nil
+	return alpmHandle, nil
 }
 
 func exitOnError(err error) {
@@ -157,12 +158,12 @@ func exitOnError(err error) {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
 		}
-		cleanup()
+		cleanup(config.Runtime.AlpmHandle)
 		os.Exit(1)
 	}
 }
 
-func cleanup() int {
+func cleanup(alpmHandle *alpm.Handle) int {
 	if alpmHandle != nil {
 		if err := alpmHandle.Release(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -194,8 +195,8 @@ func main() {
 	config.ExpandEnv()
 	exitOnError(initBuildDir())
 	exitOnError(initVCS(runtime.VCSPath))
-	config.Runtime.PacmanConf, err = initAlpm(config.PacmanConf)
+	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(config.PacmanConf)
 	exitOnError(err)
-	exitOnError(handleCmd())
-	os.Exit(cleanup())
+	exitOnError(handleCmd(config.Runtime.AlpmHandle))
+	os.Exit(cleanup(config.Runtime.AlpmHandle))
 }

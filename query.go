@@ -153,7 +153,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 }
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(pkgS []string) (err error) {
+func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
 	pkgS = removeInvalidTargets(pkgS)
 	var aurErr error
 	var repoErr error
@@ -164,7 +164,7 @@ func syncSearch(pkgS []string) (err error) {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		pq, repoErr = queryRepo(pkgS)
+		pq, repoErr = queryRepo(pkgS, alpmHandle)
 		if repoErr != nil {
 			return err
 		}
@@ -173,17 +173,17 @@ func syncSearch(pkgS []string) (err error) {
 	switch config.SortMode {
 	case settings.TopDown:
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch()
+			pq.printSearch(alpmHandle)
 		}
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1)
+			aq.printSearch(1, alpmHandle)
 		}
 	case settings.BottomUp:
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1)
+			aq.printSearch(1, alpmHandle)
 		}
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch()
+			pq.printSearch(alpmHandle)
 		}
 	default:
 		return errors.New(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -198,11 +198,11 @@ func syncSearch(pkgS []string) (err error) {
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(pkgS []string) error {
+func syncInfo(pkgS []string, alpmHandle *alpm.Handle) error {
 	var info []*rpc.Pkg
 	missing := false
 	pkgS = removeInvalidTargets(pkgS)
-	aurS, repoS, err := packageSlices(pkgS)
+	aurS, repoS, err := packageSlices(pkgS, alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -252,7 +252,7 @@ func syncInfo(pkgS []string) error {
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string) (s repoQuery, err error) {
+func queryRepo(pkgInputN []string, alpmHandle *alpm.Handle) (s repoQuery, err error) {
 	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return
@@ -279,7 +279,7 @@ func queryRepo(pkgInputN []string) (s repoQuery, err error) {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string) (aur, repo []string, err error) {
+func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []string, err error) {
 	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return nil, nil, err
@@ -322,7 +322,7 @@ func packageSlices(toCheck []string) (aur, repo []string, err error) {
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
 // removeOptional decides whether optional dependencies are counted or not
-func hangingPackages(removeOptional bool) (hanging []string, err error) {
+func hangingPackages(removeOptional bool, alpmHandle *alpm.Handle) (hanging []string, err error) {
 	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return
@@ -410,7 +410,7 @@ func hangingPackages(removeOptional bool) (hanging []string, err error) {
 }
 
 // Statistics returns statistics about packages installed in system
-func statistics() (*struct {
+func statistics(alpmHandle *alpm.Handle) (*struct {
 	Totaln    int
 	Expln     int
 	TotalSize int64

@@ -55,7 +55,7 @@ type depPool struct {
 	Warnings *aurWarnings
 }
 
-func makeDepPool() (*depPool, error) {
+func makeDepPool(alpmHandle *alpm.Handle) (*depPool, error) {
 	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func makeDepPool() (*depPool, error) {
 }
 
 // Includes db/ prefixes and group installs
-func (dp *depPool) ResolveTargets(pkgs []string) error {
+func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
@@ -358,14 +358,14 @@ func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 	})
 }
 
-func getDepPool(pkgs []string, warnings *aurWarnings) (*depPool, error) {
-	dp, err := makeDepPool()
+func getDepPool(pkgs []string, warnings *aurWarnings, alpmHandle *alpm.Handle) (*depPool, error) {
+	dp, err := makeDepPool(alpmHandle)
 	if err != nil {
 		return nil, err
 	}
 
 	dp.Warnings = warnings
-	err = dp.ResolveTargets(pkgs)
+	err = dp.ResolveTargets(pkgs, alpmHandle)
 
 	return dp, err
 }

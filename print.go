@@ -10,6 +10,8 @@ import (
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
+	"github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
@@ -47,7 +49,7 @@ func (warnings *aurWarnings) print() {
 }
 
 // PrintSearch handles printing search results in a given format
-func (q aurQuery) printSearch(start int) {
+func (q aurQuery) printSearch(start int, alpmHandle *alpm.Handle) {
 	localDB, _ := alpmHandle.LocalDB()
 
 	for i := range q {
@@ -92,7 +94,7 @@ func (q aurQuery) printSearch(start int) {
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func (s repoQuery) printSearch() {
+func (s repoQuery) printSearch(alpmHandle *alpm.Handle) {
 	for i, res := range s {
 		var toprint string
 		if config.SearchMode == numberMenu {
@@ -304,7 +306,7 @@ func PrintInfo(a *rpc.Pkg) {
 }
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
-func biggestPackages() {
+func biggestPackages(alpmHandle *alpm.Handle) {
 	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return
@@ -324,8 +326,8 @@ func biggestPackages() {
 }
 
 // localStatistics prints installed packages statistics.
-func localStatistics() error {
-	info, err := statistics()
+func localStatistics(alpmHandle *alpm.Handle) error {
+	info, err := statistics(alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -343,7 +345,7 @@ func localStatistics() error {
 	text.Infoln(gotext.Get("Total Size occupied by packages: %s", cyan(text.Human(info.TotalSize))))
 	fmt.Println(bold(cyan("===========================================")))
 	text.Infoln(gotext.Get("Ten biggest packages:"))
-	biggestPackages()
+	biggestPackages(alpmHandle)
 	fmt.Println(bold(cyan("===========================================")))
 
 	aurInfoPrint(remoteNames)
@@ -352,11 +354,11 @@ func localStatistics() error {
 }
 
 //TODO: Make it less hacky
-func printNumberOfUpdates() error {
+func printNumberOfUpdates(alpmHandle *alpm.Handle) error {
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(warnings)
+	aurUp, repoUp, err := upList(warnings, alpmHandle)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -367,7 +369,7 @@ func printNumberOfUpdates() error {
 }
 
 //TODO: Make it less hacky
-func printUpdateList(parser *settings.Arguments) error {
+func printUpdateList(parser *settings.Arguments, alpmHandle *alpm.Handle) error {
 	targets := stringset.FromSlice(parser.Targets)
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
@@ -377,7 +379,7 @@ func printUpdateList(parser *settings.Arguments) error {
 		return err
 	}
 
-	aurUp, repoUp, err := upList(warnings)
+	aurUp, repoUp, err := upList(warnings, alpmHandle)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err

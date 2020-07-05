@@ -12,6 +12,8 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/go-alpm"
+
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -27,7 +29,7 @@ type shaInfo struct {
 }
 
 // createDevelDB forces yay to create a DB of the existing development packages
-func createDevelDB(vcsFilePath string) error {
+func createDevelDB(vcsFilePath string, alpmHandle *alpm.Handle) error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 
