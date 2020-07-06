@@ -48,8 +48,8 @@ type Arguments struct {
 	Targets []string
 }
 
-func (parser *Arguments) String() string {
-	return fmt.Sprintf("Op:%v Options:%+v Targets: %v", parser.Op, parser.Options, parser.Targets)
+func (a *Arguments) String() string {
+	return fmt.Sprintf("Op:%v Options:%+v Targets: %v", a.Op, a.Options, a.Targets)
 }
 
 func MakeArguments() *Arguments {
@@ -60,9 +60,9 @@ func MakeArguments() *Arguments {
 	}
 }
 
-func (parser *Arguments) CopyGlobal() *Arguments {
+func (a *Arguments) CopyGlobal() *Arguments {
 	cp := MakeArguments()
-	for k, v := range parser.Options {
+	for k, v := range a.Options {
 		if v.Global {
 			cp.Options[k] = v
 		}
@@ -71,73 +71,73 @@ func (parser *Arguments) CopyGlobal() *Arguments {
 	return cp
 }
 
-func (parser *Arguments) Copy() (cp *Arguments) {
+func (a *Arguments) Copy() (cp *Arguments) {
 	cp = MakeArguments()
 
-	cp.Op = parser.Op
+	cp.Op = a.Op
 
-	for k, v := range parser.Options {
+	for k, v := range a.Options {
 		cp.Options[k] = v
 	}
 
-	cp.Targets = make([]string, len(parser.Targets))
-	copy(cp.Targets, parser.Targets)
+	cp.Targets = make([]string, len(a.Targets))
+	copy(cp.Targets, a.Targets)
 
 	return
 }
 
-func (parser *Arguments) DelArg(options ...string) {
+func (a *Arguments) DelArg(options ...string) {
 	for _, option := range options {
-		delete(parser.Options, option)
+		delete(a.Options, option)
 	}
 }
 
-func (parser *Arguments) NeedRoot(runtime *Runtime) bool {
-	if parser.ExistsArg("h", "help") {
+func (a *Arguments) NeedRoot(runtime *Runtime) bool {
+	if a.ExistsArg("h", "help") {
 		return false
 	}
 
-	switch parser.Op {
+	switch a.Op {
 	case "D", "database":
-		if parser.ExistsArg("k", "check") {
+		if a.ExistsArg("k", "check") {
 			return false
 		}
 		return true
 	case "F", "files":
-		if parser.ExistsArg("y", "refresh") {
+		if a.ExistsArg("y", "refresh") {
 			return true
 		}
 		return false
 	case "Q", "query":
-		if parser.ExistsArg("k", "check") {
+		if a.ExistsArg("k", "check") {
 			return true
 		}
 		return false
 	case "R", "remove":
-		if parser.ExistsArg("p", "print", "print-format") {
+		if a.ExistsArg("p", "print", "print-format") {
 			return false
 		}
 		return true
 	case "S", "sync":
-		if parser.ExistsArg("y", "refresh") {
+		if a.ExistsArg("y", "refresh") {
 			return true
 		}
-		if parser.ExistsArg("p", "print", "print-format") {
+		if a.ExistsArg("p", "print", "print-format") {
 			return false
 		}
-		if parser.ExistsArg("s", "search") {
+		if a.ExistsArg("s", "search") {
 			return false
 		}
-		if parser.ExistsArg("l", "list") {
+		if a.ExistsArg("l", "list") {
 			return false
 		}
-		if parser.ExistsArg("g", "groups") {
+		if a.ExistsArg("g", "groups") {
 			return false
 		}
-		if parser.ExistsArg("i", "info") {
+		if a.ExistsArg("i", "info") {
 			return false
 		}
-		if parser.ExistsArg("c", "clean") && runtime.Mode == ModeAUR {
+		if a.ExistsArg("c", "clean") && runtime.Mode == ModeAUR {
 			return false
 		}
 		return true
@@ -148,38 +148,38 @@ func (parser *Arguments) NeedRoot(runtime *Runtime) bool {
 	}
 }
 
-func (parser *Arguments) addOP(op string) error {
-	if parser.Op != "" {
+func (a *Arguments) addOP(op string) error {
+	if a.Op != "" {
 		return errors.New(gotext.Get("only one operation may be used at a time"))
 	}
 
-	parser.Op = op
+	a.Op = op
 	return nil
 }
 
-func (parser *Arguments) addParam(option, arg string) error {
+func (a *Arguments) addParam(option, arg string) error {
 	if !isArg(option) {
 		return errors.New(gotext.Get("invalid option '%s'", option))
 	}
 
 	if isOp(option) {
-		return parser.addOP(option)
+		return a.addOP(option)
 	}
 
-	if parser.Options[option] == nil {
-		parser.Options[option] = &Option{}
+	if a.Options[option] == nil {
+		a.Options[option] = &Option{}
 	}
-	parser.Options[option].Add(arg)
+	a.Options[option].Add(arg)
 
 	if isGlobal(option) {
-		parser.Options[option].Global = true
+		a.Options[option].Global = true
 	}
 	return nil
 }
 
-func (parser *Arguments) AddArg(options ...string) error {
+func (a *Arguments) AddArg(options ...string) error {
 	for _, option := range options {
-		err := parser.addParam(option, "")
+		err := a.addParam(option, "")
 		if err != nil {
 			return err
 		}
@@ -188,18 +188,18 @@ func (parser *Arguments) AddArg(options ...string) error {
 }
 
 // Multiple args acts as an OR operator
-func (parser *Arguments) ExistsArg(options ...string) bool {
+func (a *Arguments) ExistsArg(options ...string) bool {
 	for _, option := range options {
-		if _, exists := parser.Options[option]; exists {
+		if _, exists := a.Options[option]; exists {
 			return true
 		}
 	}
 	return false
 }
 
-func (parser *Arguments) GetArg(options ...string) (arg string, double, exists bool) {
+func (a *Arguments) GetArg(options ...string) (arg string, double, exists bool) {
 	for _, option := range options {
-		value, exists := parser.Options[option]
+		value, exists := a.Options[option]
 		if exists {
 			return value.First(), len(value.Args) >= 2, len(value.Args) >= 1
 		}
@@ -208,40 +208,35 @@ func (parser *Arguments) GetArg(options ...string) (arg string, double, exists b
 	return arg, false, false
 }
 
-func (parser *Arguments) AddTarget(targets ...string) {
-	parser.Targets = append(parser.Targets, targets...)
+func (a *Arguments) AddTarget(targets ...string) {
+	a.Targets = append(a.Targets, targets...)
 }
 
-func (parser *Arguments) ClearTargets() {
-	parser.Targets = make([]string, 0)
+func (a *Arguments) ClearTargets() {
+	a.Targets = make([]string, 0)
 }
 
 // Multiple args acts as an OR operator
-func (parser *Arguments) ExistsDouble(options ...string) bool {
+func (a *Arguments) ExistsDouble(options ...string) bool {
 	for _, option := range options {
-		if value, exists := parser.Options[option]; exists {
+		if value, exists := a.Options[option]; exists {
 			return len(value.Args) >= 2
 		}
 	}
 	return false
 }
 
-func (parser *Arguments) FormatArgs() (args []string) {
-	var op string
-
-	if parser.Op != "" {
-		op = formatArg(parser.Op)
+func (a *Arguments) FormatArgs() (args []string) {
+	if a.Op != "" {
+		args = append(args, formatArg(a.Op))
 	}
 
-	args = append(args, op)
-
-	for option, arg := range parser.Options {
+	for option, arg := range a.Options {
 		if arg.Global || option == "--" {
 			continue
 		}
 
 		formattedOption := formatArg(option)
-
 		for _, value := range arg.Args {
 			args = append(args, formattedOption)
 			if hasParam(option) {
@@ -249,11 +244,11 @@ func (parser *Arguments) FormatArgs() (args []string) {
 			}
 		}
 	}
-	return
+	return args
 }
 
-func (parser *Arguments) FormatGlobals() (args []string) {
-	for option, arg := range parser.Options {
+func (a *Arguments) FormatGlobals() (args []string) {
+	for option, arg := range a.Options {
 		if !arg.Global {
 			continue
 		}
@@ -682,9 +677,9 @@ func hasParam(arg string) bool {
 
 // Parses short hand options such as:
 // -Syu -b/some/path -
-func (parser *Arguments) parseShortOption(arg, param string) (usedNext bool, err error) {
+func (a *Arguments) parseShortOption(arg, param string) (usedNext bool, err error) {
 	if arg == "-" {
-		err = parser.AddArg("-")
+		err = a.AddArg("-")
 		return
 	}
 
@@ -695,15 +690,15 @@ func (parser *Arguments) parseShortOption(arg, param string) (usedNext bool, err
 
 		if hasParam(char) {
 			if k < len(arg)-1 {
-				err = parser.addParam(char, arg[k+1:])
+				err = a.addParam(char, arg[k+1:])
 			} else {
 				usedNext = true
-				err = parser.addParam(char, param)
+				err = a.addParam(char, param)
 			}
 
 			break
 		} else {
-			err = parser.AddArg(char)
+			err = a.AddArg(char)
 
 			if err != nil {
 				return
@@ -716,9 +711,9 @@ func (parser *Arguments) parseShortOption(arg, param string) (usedNext bool, err
 
 // Parses full length options such as:
 // --sync --refresh --sysupgrade --dbpath /some/path --
-func (parser *Arguments) parseLongOption(arg, param string) (usedNext bool, err error) {
+func (a *Arguments) parseLongOption(arg, param string) (usedNext bool, err error) {
 	if arg == "--" {
-		err = parser.AddArg(arg)
+		err = a.AddArg(arg)
 		return
 	}
 
@@ -726,34 +721,34 @@ func (parser *Arguments) parseLongOption(arg, param string) (usedNext bool, err 
 
 	switch split := strings.SplitN(arg, "=", 2); {
 	case len(split) == 2:
-		err = parser.addParam(split[0], split[1])
+		err = a.addParam(split[0], split[1])
 	case hasParam(arg):
-		err = parser.addParam(arg, param)
+		err = a.addParam(arg, param)
 		usedNext = true
 	default:
-		err = parser.AddArg(arg)
+		err = a.AddArg(arg)
 	}
 
 	return
 }
 
-func (parser *Arguments) parseStdin() error {
+func (a *Arguments) parseStdin() error {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(bufio.ScanLines)
 
 	for scanner.Scan() {
-		parser.AddTarget(scanner.Text())
+		a.AddTarget(scanner.Text())
 	}
 
 	return os.Stdin.Close()
 }
 
-func (parser *Arguments) ParseCommandLine(config *Configuration) error {
+func (a *Arguments) ParseCommandLine(config *Configuration) error {
 	args := os.Args[1:]
 	usedNext := false
 
 	if len(args) < 1 {
-		if _, err := parser.parseShortOption("-Syu", ""); err != nil {
+		if _, err := a.parseShortOption("-Syu", ""); err != nil {
 			return err
 		}
 	} else {
@@ -771,14 +766,14 @@ func (parser *Arguments) ParseCommandLine(config *Configuration) error {
 
 			var err error
 			switch {
-			case parser.ExistsArg("--"):
-				parser.AddTarget(arg)
+			case a.ExistsArg("--"):
+				a.AddTarget(arg)
 			case strings.HasPrefix(arg, "--"):
-				usedNext, err = parser.parseLongOption(arg, nextArg)
+				usedNext, err = a.parseLongOption(arg, nextArg)
 			case strings.HasPrefix(arg, "-"):
-				usedNext, err = parser.parseShortOption(arg, nextArg)
+				usedNext, err = a.parseShortOption(arg, nextArg)
 			default:
-				parser.AddTarget(arg)
+				a.AddTarget(arg)
 			}
 
 			if err != nil {
@@ -787,15 +782,15 @@ func (parser *Arguments) ParseCommandLine(config *Configuration) error {
 		}
 	}
 
-	if parser.Op == "" {
-		parser.Op = "Y"
+	if a.Op == "" {
+		a.Op = "Y"
 	}
 
-	if parser.ExistsArg("-") {
-		if err := parser.parseStdin(); err != nil {
+	if a.ExistsArg("-") {
+		if err := a.parseStdin(); err != nil {
 			return err
 		}
-		parser.DelArg("-")
+		a.DelArg("-")
 
 		file, err := os.Open("/dev/tty")
 		if err != nil {
@@ -805,14 +800,14 @@ func (parser *Arguments) ParseCommandLine(config *Configuration) error {
 		os.Stdin = file
 	}
 
-	parser.extractYayOptions(config)
+	a.extractYayOptions(config)
 	return nil
 }
 
-func (parser *Arguments) extractYayOptions(config *Configuration) {
-	for option, value := range parser.Options {
+func (a *Arguments) extractYayOptions(config *Configuration) {
+	for option, value := range a.Options {
 		if handleConfig(config, option, value.First()) {
-			parser.DelArg(option)
+			a.DelArg(option)
 		}
 	}
 

@@ -201,3 +201,101 @@ func TestArguments_DelArg(t *testing.T) {
 	args.DelArg("arch", "ask")
 	assert.Empty(t, args.Options)
 }
+
+func TestArguments_FormatArgs(t *testing.T) {
+	type fields struct {
+		Op      string
+		Options map[string]*Option
+		Targets []string
+	}
+	tests := []struct {
+		name     string
+		fields   fields
+		wantArgs []string
+	}{
+		{name: "simple", fields: fields{
+			Op:      "S",
+			Options: map[string]*Option{},
+			Targets: []string{"yay", "yay-bin", "yay-git"},
+		}, wantArgs: []string{"-S"}},
+		{name: "only global", fields: fields{
+			Op:      "Y",
+			Options: map[string]*Option{"noconfirm": {Global: true, Args: []string{""}}},
+			Targets: []string{"yay", "yay-bin", "yay-git"},
+		}, wantArgs: []string{"-Y"}},
+		{name: "options single", fields: fields{
+			Op:      "Y",
+			Options: map[string]*Option{"overwrite": {Args: []string{"/tmp/a"}}, "useask": {Args: []string{""}}},
+			Targets: []string{},
+		}, wantArgs: []string{"-Y", "--overwrite", "/tmp/a", "--useask"}},
+		{name: "options doubles", fields: fields{
+			Op:      "Y",
+			Options: map[string]*Option{"overwrite": {Args: []string{"/tmp/a", "/tmp/b", "/tmp/c"}}, "needed": {Args: []string{""}}},
+			Targets: []string{},
+		}, wantArgs: []string{"-Y", "--overwrite", "/tmp/a", "--overwrite", "/tmp/b", "--overwrite", "/tmp/c", "--needed"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			parser := &Arguments{
+				Op:      tt.fields.Op,
+				Options: tt.fields.Options,
+				Targets: tt.fields.Targets,
+			}
+			gotArgs := parser.FormatArgs()
+			assert.Equal(t, tt.wantArgs, gotArgs)
+		})
+	}
+}
+
+func TestArguments_FormatGlobalArgs(t *testing.T) {
+	type fields struct {
+		Op      string
+		Options map[string]*Option
+		Targets []string
+	}
+	tests := []struct {
+		name     string
+		fields   fields
+		wantArgs []string
+	}{
+		{name: "simple", fields: fields{
+			Op:      "S",
+			Options: map[string]*Option{"dbpath": {Global: true, Args: []string{"/tmp/a", "/tmp/b"}}},
+			Targets: []string{"yay", "yay-bin", "yay-git"},
+		}, wantArgs: []string{"--dbpath", "/tmp/a", "--dbpath", "/tmp/b"}},
+		{name: "only global", fields: fields{
+			Op:      "Y",
+			Options: map[string]*Option{"noconfirm": {Global: true, Args: []string{""}}},
+			Targets: []string{"yay", "yay-bin", "yay-git"},
+		}, wantArgs: []string{"--noconfirm"}},
+		{name: "options single", fields: fields{
+			Op:      "Y",
+			Options: map[string]*Option{"overwrite": {Args: []string{"/tmp/a"}}, "useask": {Args: []string{""}}},
+			Targets: []string{},
+		}, wantArgs: []string(nil)},
+		{name: "options doubles", fields: fields{
+			Op:      "Y",
+			Options: map[string]*Option{"overwrite": {Args: []string{"/tmp/a", "/tmp/b", "/tmp/c"}}, "needed": {Args: []string{""}}},
+			Targets: []string{},
+		}, wantArgs: []string(nil)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			parser := &Arguments{
+				Op:      tt.fields.Op,
+				Options: tt.fields.Options,
+				Targets: tt.fields.Targets,
+			}
+			gotArgs := parser.FormatGlobals()
+			assert.Equal(t, tt.wantArgs, gotArgs)
+		})
+	}
+}
+
+func Test_isArg(t *testing.T) {
+	got := isArg("zorg")
+	assert.False(t, got)
+
+	got = isArg("dbpath")
+	assert.True(t, got)
+}
