@@ -162,7 +162,7 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 		return err
 	}
 
-	if !parser.existsDouble("d", "nodeps") {
+	if !parser.ExistsDouble("d", "nodeps") {
 		err = dp.CheckMissing()
 		if err != nil {
 			return err
@@ -194,7 +194,7 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 	}
 
 	var conflicts stringset.MapStringSet
-	if !parser.existsDouble("d", "nodeps") {
+	if !parser.ExistsDouble("d", "nodeps") {
 		conflicts, err = dp.CheckConflicts()
 		if err != nil {
 			return err
