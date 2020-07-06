@@ -106,7 +106,6 @@ func TestMakeArguments(t *testing.T) {
 	args := MakeArguments()
 	assert.NotNil(t, args)
 	assert.Equal(t, "", args.Op)
-	assert.Empty(t, args.Globals)
 	assert.Empty(t, args.Options)
 	assert.Empty(t, args.Targets)
 }
@@ -115,7 +114,6 @@ func TestArguments_CopyGlobal(t *testing.T) {
 	type fields struct {
 		Op      string
 		Options map[string]*Option
-		Globals map[string]*Option
 		Targets []string
 	}
 	tests := []struct {
@@ -124,19 +122,17 @@ func TestArguments_CopyGlobal(t *testing.T) {
 		want   *Arguments
 	}{
 		{name: "simple", fields: fields{
-			Op:      "Q",
-			Options: map[string]*Option{"a": {}},
-			Globals: map[string]*Option{"arch": {
+			Op: "Q",
+			Options: map[string]*Option{"a": {}, "arch": {Global: true,
 				Args: []string{"x86_x64"},
-			}, "boo": {Args: []string{"a", "b"}},
+			}, "boo": {Global: true, Args: []string{"a", "b"}},
 			},
 			Targets: []string{"a", "b"},
 		}, want: &Arguments{
-			Op:      "",
-			Options: map[string]*Option{},
-			Globals: map[string]*Option{"arch": {
+			Op: "",
+			Options: map[string]*Option{"arch": {Global: true,
 				Args: []string{"x86_x64"},
-			}, "boo": {Args: []string{"a", "b"}},
+			}, "boo": {Global: true, Args: []string{"a", "b"}},
 			},
 			Targets: []string{},
 		}},
@@ -146,14 +142,12 @@ func TestArguments_CopyGlobal(t *testing.T) {
 			parser := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
-				Globals: tt.fields.Globals,
 				Targets: tt.fields.Targets,
 			}
 			got := parser.CopyGlobal()
 			assert.NotEqualValues(t, tt.fields.Options, got.Options)
 			assert.NotEqualValues(t, tt.fields.Targets, got.Targets)
 			assert.NotEqual(t, tt.fields.Op, got.Op)
-			assert.EqualValues(t, tt.fields.Globals, got.Globals)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -163,7 +157,6 @@ func TestArguments_Copy(t *testing.T) {
 	type fields struct {
 		Op      string
 		Options map[string]*Option
-		Globals map[string]*Option
 		Targets []string
 	}
 	tests := []struct {
@@ -172,19 +165,17 @@ func TestArguments_Copy(t *testing.T) {
 		want   *Arguments
 	}{
 		{name: "simple", fields: fields{
-			Op:      "Q",
-			Options: map[string]*Option{"a": {}},
-			Globals: map[string]*Option{"arch": {
-				Args: []string{"x86_x64"},
-			}, "boo": {Args: []string{"a", "b"}},
+			Op: "Q",
+			Options: map[string]*Option{"a": {}, "arch": {
+				Args: []string{"x86_x64"}, Global: true,
+			}, "boo": {Args: []string{"a", "b"}, Global: true},
 			},
 			Targets: []string{"a", "b"},
 		}, want: &Arguments{
-			Op:      "Q",
-			Options: map[string]*Option{"a": {}},
-			Globals: map[string]*Option{"arch": {
+			Op: "Q",
+			Options: map[string]*Option{"a": {}, "arch": {Global: true,
 				Args: []string{"x86_x64"},
-			}, "boo": {Args: []string{"a", "b"}},
+			}, "boo": {Args: []string{"a", "b"}, Global: true},
 			},
 			Targets: []string{"a", "b"},
 		}},
@@ -194,7 +185,6 @@ func TestArguments_Copy(t *testing.T) {
 			parser := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
-				Globals: tt.fields.Globals,
 				Targets: tt.fields.Targets,
 			}
 			got := parser.Copy()
@@ -210,5 +200,4 @@ func TestArguments_DelArg(t *testing.T) {
 	args.addParam("ask", "arg")
 	args.DelArg("arch", "ask")
 	assert.Empty(t, args.Options)
-	assert.Empty(t, args.Globals)
 }

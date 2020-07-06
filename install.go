@@ -177,7 +177,13 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 
 		parser.Op = "S"
 		parser.DelArg("y", "refresh")
-		parser.Options["ignore"] = arguments.Options["ignore"]
+		if arguments.ExistsArg("ignore") {
+			if parser.ExistsArg("ignore") {
+				parser.Options["ignore"].Args = append(parser.Options["ignore"].Args, arguments.Options["ignore"].Args...)
+			} else {
+				parser.Options["ignore"] = arguments.Options["ignore"]
+			}
+		}
 		return show(passToPacman(parser))
 	}
 

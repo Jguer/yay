@@ -79,7 +79,7 @@ func MakeRuntime() (*Runtime, error) {
 
 func initDir(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err = os.MkdirAll(dir, 0755); err != nil {
+		if err = os.MkdirAll(dir, 0o755); err != nil {
 			return errors.New(gotext.Get("failed to create config directory '%s': %s", dir, err))
 		}
 	} else if err != nil {

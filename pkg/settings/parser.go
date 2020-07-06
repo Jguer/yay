@@ -2,6 +2,7 @@ package settings
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -12,7 +13,8 @@ import (
 )
 
 type Option struct {
-	Args []string
+	Global bool
+	Args   []string
 }
 
 func (o *Option) Add(arg string) {
@@ -34,19 +36,25 @@ func (o *Option) Set(arg string) {
 	o.Args = []string{arg}
 }
 
+func (o *Option) String() string {
+	return fmt.Sprintf("Global:%v Args:%v", o.Global, o.Args)
+}
+
 // Arguments Parses command line arguments in a way we can interact with programmatically but
 // also in a way that can easily be passed to pacman later on.
 type Arguments struct {
 	Op      string
 	Options map[string]*Option
-	Globals map[string]*Option
 	Targets []string
+}
+
+func (parser *Arguments) String() string {
+	return fmt.Sprintf("Op:%v Options:%+v Targets: %v", parser.Op, parser.Options, parser.Targets)
 }
 
 func MakeArguments() *Arguments {
 	return &Arguments{
 		"",
-		make(map[string]*Option),
 		make(map[string]*Option),
 		make([]string, 0),
 	}
@@ -54,8 +62,10 @@ func MakeArguments() *Arguments {
 
 func (parser *Arguments) CopyGlobal() *Arguments {
 	cp := MakeArguments()
-	for k, v := range parser.Globals {
-		cp.Globals[k] = v
+	for k, v := range parser.Options {
+		if v.Global {
+			cp.Options[k] = v
+		}
 	}
 
 	return cp
@@ -70,10 +80,6 @@ func (parser *Arguments) Copy() (cp *Arguments) {
 		cp.Options[k] = v
 	}
 
-	for k, v := range parser.Globals {
-		cp.Globals[k] = v
-	}
-
 	cp.Targets = make([]string, len(parser.Targets))
 	copy(cp.Targets, parser.Targets)
 
@@ -83,7 +89,6 @@ func (parser *Arguments) Copy() (cp *Arguments) {
 func (parser *Arguments) DelArg(options ...string) {
 	for _, option := range options {
 		delete(parser.Options, option)
-		delete(parser.Globals, option)
 	}
 }
 
@@ -161,16 +166,13 @@ func (parser *Arguments) addParam(option, arg string) error {
 		return parser.addOP(option)
 	}
 
+	if parser.Options[option] == nil {
+		parser.Options[option] = &Option{}
+	}
+	parser.Options[option].Add(arg)
+
 	if isGlobal(option) {
-		if parser.Globals[option] == nil {
-			parser.Globals[option] = &Option{}
-		}
-		parser.Globals[option].Add(arg)
-	} else {
-		if parser.Options[option] == nil {
-			parser.Options[option] = &Option{}
-		}
-		parser.Options[option].Add(arg)
+		parser.Options[option].Global = true
 	}
 	return nil
 }
@@ -188,13 +190,7 @@ func (parser *Arguments) AddArg(options ...string) error {
 // Multiple args acts as an OR operator
 func (parser *Arguments) ExistsArg(options ...string) bool {
 	for _, option := range options {
-		_, exists := parser.Options[option]
-		if exists {
-			return true
-		}
-
-		_, exists = parser.Globals[option]
-		if exists {
+		if _, exists := parser.Options[option]; exists {
 			return true
 		}
 	}
@@ -204,11 +200,6 @@ func (parser *Arguments) ExistsArg(options ...string) bool {
 func (parser *Arguments) GetArg(options ...string) (arg string, double, exists bool) {
 	for _, option := range options {
 		value, exists := parser.Options[option]
-		if exists {
-			return value.First(), len(value.Args) >= 2, len(value.Args) >= 1
-		}
-
-		value, exists = parser.Globals[option]
 		if exists {
 			return value.First(), len(value.Args) >= 2, len(value.Args) >= 1
 		}
@@ -228,17 +219,10 @@ func (parser *Arguments) ClearTargets() {
 // Multiple args acts as an OR operator
 func (parser *Arguments) ExistsDouble(options ...string) bool {
 	for _, option := range options {
-		value, exists := parser.Options[option]
-		if exists {
-			return len(value.Args) >= 2
-		}
-
-		value, exists = parser.Globals[option]
-		if exists {
+		if value, exists := parser.Options[option]; exists {
 			return len(value.Args) >= 2
 		}
 	}
-
 	return false
 }
 
@@ -252,7 +236,7 @@ func (parser *Arguments) FormatArgs() (args []string) {
 	args = append(args, op)
 
 	for option, arg := range parser.Options {
-		if option == "--" {
+		if arg.Global || option == "--" {
 			continue
 		}
 
@@ -265,12 +249,14 @@ func (parser *Arguments) FormatArgs() (args []string) {
 			}
 		}
 	}
-
 	return
 }
 
 func (parser *Arguments) FormatGlobals() (args []string) {
-	for option, arg := range parser.Globals {
+	for option, arg := range parser.Options {
+		if !arg.Global {
+			continue
+		}
 		formattedOption := formatArg(option)
 
 		for _, value := range arg.Args {
@@ -280,7 +266,6 @@ func (parser *Arguments) FormatGlobals() (args []string) {
 			}
 		}
 	}
-
 	return args
 }
 
@@ -826,12 +811,6 @@ func (parser *Arguments) ParseCommandLine(config *Configuration) error {
 
 func (parser *Arguments) extractYayOptions(config *Configuration) {
 	for option, value := range parser.Options {
-		if handleConfig(config, option, value.First()) {
-			parser.DelArg(option)
-		}
-	}
-
-	for option, value := range parser.Globals {
 		if handleConfig(config, option, value.First()) {
 			parser.DelArg(option)
 		}

@@ -20,7 +20,7 @@ func Show(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int, 
 		return err
 	}
 
-	in, err := os.OpenFile(completionPath, os.O_RDWR|os.O_CREATE, 0644)
+	in, err := os.OpenFile(completionPath, os.O_RDWR|os.O_CREATE, 0o644)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func Update(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int
 	info, err := os.Stat(completionPath)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
-		errd := os.MkdirAll(filepath.Dir(completionPath), 0755)
+		errd := os.MkdirAll(filepath.Dir(completionPath), 0o755)
 		if errd != nil {
 			return errd
 		}

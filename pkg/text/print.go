@@ -7,9 +7,11 @@ import (
 	"github.com/leonelquinteros/gotext"
 )
 
-const arrow = "==>"
-const smallArrow = " ->"
-const opSymbol = "::"
+const (
+	arrow      = "==>"
+	smallArrow = " ->"
+	opSymbol   = "::"
+)
 
 func OperationInfoln(a ...interface{}) {
 	fmt.Fprint(os.Stdout, append([]interface{}{Bold(cyan(opSymbol + " ")), boldCode}, a...)...)
