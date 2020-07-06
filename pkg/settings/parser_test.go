@@ -36,7 +36,7 @@ func TestOption_Add(t *testing.T) {
 				Args: tt.fields.Args,
 			}
 			o.Add(tt.args.arg)
-			assert.EqualValues(t, tt.want, o.Args)
+			assert.ElementsMatch(t, tt.want, o.Args)
 		})
 	}
 }
@@ -71,7 +71,7 @@ func TestOption_Set(t *testing.T) {
 				Args: tt.fields.Args,
 			}
 			o.Set(tt.args.arg)
-			assert.EqualValues(t, tt.want, o.Args)
+			assert.ElementsMatch(t, tt.want, o.Args)
 		})
 	}
 }
@@ -242,7 +242,7 @@ func TestArguments_FormatArgs(t *testing.T) {
 				Targets: tt.fields.Targets,
 			}
 			gotArgs := parser.FormatArgs()
-			assert.Equal(t, tt.wantArgs, gotArgs)
+			assert.ElementsMatch(t, gotArgs, tt.wantArgs)
 		})
 	}
 }
@@ -287,7 +287,7 @@ func TestArguments_FormatGlobalArgs(t *testing.T) {
 				Targets: tt.fields.Targets,
 			}
 			gotArgs := parser.FormatGlobals()
-			assert.Equal(t, tt.wantArgs, gotArgs)
+			assert.ElementsMatch(t, tt.wantArgs, gotArgs)
 		})
 	}
 }
