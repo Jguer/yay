@@ -38,21 +38,21 @@ func removeVCSPackage(pkgs []string) {
 }
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies(removeOptional bool, alpmHandle *alpm.Handle) error {
+func cleanDependencies(cmdArgs *settings.Arguments, removeOptional bool, alpmHandle *alpm.Handle) error {
 	hanging, err := hangingPackages(removeOptional, alpmHandle)
 	if err != nil {
 		return err
 	}
 
 	if len(hanging) != 0 {
-		return cleanRemove(hanging)
+		return cleanRemove(hanging, cmdArgs)
 	}
 
 	return nil
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice
-func cleanRemove(pkgNames []string) error {
+func cleanRemove(pkgNames []string, cmdArgs *settings.Arguments) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}
@@ -64,11 +64,11 @@ func cleanRemove(pkgNames []string) error {
 	return show(passToPacman(arguments))
 }
 
-func syncClean(parser *settings.Arguments, alpmHandle *alpm.Handle) error {
+func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	keepInstalled := false
 	keepCurrent := false
 
-	_, removeAll, _ := parser.GetArg("c", "clean")
+	_, removeAll, _ := cmdArgs.GetArg("c", "clean")
 
 	for _, v := range config.Runtime.PacmanConf.CleanMethod {
 		if v == "KeepInstalled" {
@@ -79,7 +79,7 @@ func syncClean(parser *settings.Arguments, alpmHandle *alpm.Handle) error {
 	}
 
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		if err := show(passToPacman(parser)); err != nil {
+		if err := show(passToPacman(cmdArgs)); err != nil {
 			return err
 		}
 	}

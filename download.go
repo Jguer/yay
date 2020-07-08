@@ -138,7 +138,7 @@ func gitMerge(path, name string) error {
 	return nil
 }
 
-func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle) error {
+func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 	missing := false
 	wd, err := os.Getwd()
 	if err != nil {
@@ -163,7 +163,7 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle) error {
 	}
 
 	if len(repo) > 0 {
-		missing, err = getPkgbuildsfromABS(repo, wd, alpmHandle)
+		missing, err = getPkgbuildsfromABS(repo, wd, alpmHandle, force)
 		if err != nil {
 			return err
 		}
@@ -182,7 +182,7 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle) error {
 				text.Errorln(err)
 				continue
 			default:
-				if cmdArgs.ExistsArg("f", "force") {
+				if force {
 					if err = os.RemoveAll(pkgDest); err != nil {
 						text.Errorln(err)
 						continue
@@ -211,7 +211,7 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle) error {
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle) (bool, error) {
+func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle, force bool) (bool, error) {
 	var wg sync.WaitGroup
 	var mux sync.Mutex
 	var errs multierror.MultiError
@@ -270,7 +270,7 @@ func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle) (b
 		case err != nil && !os.IsNotExist(err):
 			fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 			continue
-		case os.IsNotExist(err), cmdArgs.ExistsArg("f", "force"):
+		case os.IsNotExist(err), force:
 			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
 				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
 				continue

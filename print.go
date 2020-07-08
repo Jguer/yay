@@ -267,7 +267,7 @@ func printDownloads(repoName string, length int, packages string) {
 }
 
 // PrintInfo prints package info like pacman -Si.
-func PrintInfo(a *rpc.Pkg) {
+func PrintInfo(a *rpc.Pkg, extendedInfo bool) {
 	text.PrintInfoValue(gotext.Get("Repository"), "aur")
 	text.PrintInfoValue(gotext.Get("Name"), a.Name)
 	text.PrintInfoValue(gotext.Get("Keywords"), strings.Join(a.Keywords, "  "))
@@ -295,7 +295,7 @@ func PrintInfo(a *rpc.Pkg) {
 		text.PrintInfoValue(gotext.Get("Out-of-date"), "No")
 	}
 
-	if cmdArgs.ExistsDouble("i") {
+	if extendedInfo {
 		text.PrintInfoValue("ID", fmt.Sprintf("%d", a.ID))
 		text.PrintInfoValue(gotext.Get("Package Base ID"), fmt.Sprintf("%d", a.PackageBaseID))
 		text.PrintInfoValue(gotext.Get("Package Base"), a.PackageBase)
@@ -354,11 +354,11 @@ func localStatistics(alpmHandle *alpm.Handle) error {
 }
 
 //TODO: Make it less hacky
-func printNumberOfUpdates(alpmHandle *alpm.Handle) error {
+func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(warnings, alpmHandle)
+	aurUp, repoUp, err := upList(warnings, alpmHandle, enableDowngrade)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -369,8 +369,8 @@ func printNumberOfUpdates(alpmHandle *alpm.Handle) error {
 }
 
 //TODO: Make it less hacky
-func printUpdateList(parser *settings.Arguments, alpmHandle *alpm.Handle) error {
-	targets := stringset.FromSlice(parser.Targets)
+func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enableDowngrade bool) error {
+	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
@@ -379,7 +379,7 @@ func printUpdateList(parser *settings.Arguments, alpmHandle *alpm.Handle) error 
 		return err
 	}
 
-	aurUp, repoUp, err := upList(warnings, alpmHandle)
+	aurUp, repoUp, err := upList(warnings, alpmHandle, enableDowngrade)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -387,10 +387,10 @@ func printUpdateList(parser *settings.Arguments, alpmHandle *alpm.Handle) error 
 
 	noTargets := len(targets) == 0
 
-	if !parser.ExistsArg("m", "foreign") {
+	if !cmdArgs.ExistsArg("m", "foreign") {
 		for _, pkg := range repoUp {
 			if noTargets || targets.Get(pkg.Name) {
-				if parser.ExistsArg("q", "quiet") {
+				if cmdArgs.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
 					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
@@ -400,10 +400,10 @@ func printUpdateList(parser *settings.Arguments, alpmHandle *alpm.Handle) error 
 		}
 	}
 
-	if !parser.ExistsArg("n", "native") {
+	if !cmdArgs.ExistsArg("n", "native") {
 		for _, pkg := range aurUp {
 			if noTargets || targets.Get(pkg.Name) {
-				if parser.ExistsArg("q", "quiet") {
+				if cmdArgs.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
 					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))

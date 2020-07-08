@@ -4,10 +4,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Jguer/yay/v10/pkg/settings"
 )
 
 func TestInitAlpm(t *testing.T) {
-	alpmHandle, pacmanConf, err := initAlpm("testdata/pacman.conf")
+	alpmHandle, pacmanConf, err := initAlpm("testdata/pacman.conf", settings.MakeArguments())
 	assert.Nil(t, err)
 	assert.NotNil(t, pacmanConf)
 

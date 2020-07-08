@@ -92,7 +92,7 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 	}
 
 	argArr = append(argArr, config.PacmanBin)
-	argArr = append(argArr, cmdArgs.FormatGlobals()...)
+	argArr = append(argArr, args.FormatGlobals()...)
 	argArr = append(argArr, args.FormatArgs()...)
 	if config.NoConfirm {
 		argArr = append(argArr, "--noconfirm")

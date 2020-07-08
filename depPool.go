@@ -81,7 +81,7 @@ func makeDepPool(alpmHandle *alpm.Handle) (*depPool, error) {
 }
 
 // Includes db/ prefixes and group installs
-func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle) error {
+func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle, ignoreProviders bool) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
@@ -157,7 +157,7 @@ func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle) error 
 	}
 
 	if len(aurTargets) > 0 && (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) {
-		return dp.resolveAURPackages(aurTargets, true)
+		return dp.resolveAURPackages(aurTargets, true, ignoreProviders)
 	}
 
 	return nil
@@ -267,7 +267,7 @@ func (dp *depPool) cacheAURPackages(_pkgs stringset.StringSet) error {
 	return nil
 }
 
-func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit bool) error {
+func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit, ignoreProviders bool) error {
 	newPackages := make(stringset.StringSet)
 	newAURPackages := make(stringset.StringSet)
 
@@ -286,7 +286,7 @@ func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit bool) e
 			continue
 		}
 
-		pkg := dp.findSatisfierAurCache(name)
+		pkg := dp.findSatisfierAurCache(name, ignoreProviders)
 		if pkg == nil {
 			continue
 		}
@@ -327,7 +327,7 @@ func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit bool) e
 		newAURPackages.Set(dep)
 	}
 
-	err = dp.resolveAURPackages(newAURPackages, false)
+	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders)
 	return err
 }
 
@@ -358,14 +358,14 @@ func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 	})
 }
 
-func getDepPool(pkgs []string, warnings *aurWarnings, alpmHandle *alpm.Handle) (*depPool, error) {
+func getDepPool(pkgs []string, warnings *aurWarnings, alpmHandle *alpm.Handle, ignoreProviders bool) (*depPool, error) {
 	dp, err := makeDepPool(alpmHandle)
 	if err != nil {
 		return nil, err
 	}
 
 	dp.Warnings = warnings
-	err = dp.ResolveTargets(pkgs, alpmHandle)
+	err = dp.ResolveTargets(pkgs, alpmHandle, ignoreProviders)
 
 	return dp, err
 }
@@ -390,7 +390,7 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 // Using Pacman's ways trying to install foo would never give you
 // a menu.
 // TODO: maybe intermix repo providers in the menu
-func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
+func (dp *depPool) findSatisfierAurCache(dep string, ignoreProviders bool) *rpc.Pkg {
 	depName, _, _ := splitDep(dep)
 	seen := make(stringset.StringSet)
 	providerSlice := makeProviders(depName)
@@ -401,7 +401,7 @@ func (dp *depPool) findSatisfierAurCache(dep string) *rpc.Pkg {
 		}
 	}
 
-	if cmdArgs.Op == "Y" || cmdArgs.Op == "yay" {
+	if ignoreProviders {
 		for _, pkg := range dp.AurCache {
 			if pkgSatisfies(pkg.Name, pkg.Version, dep) {
 				for _, target := range dp.Targets {

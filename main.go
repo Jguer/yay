@@ -74,7 +74,7 @@ func initBuildDir() error {
 	return nil
 }
 
-func initAlpm(pacmanConfigPath string) (*alpm.Handle, *pacmanconf.Config, error) {
+func initAlpm(pacmanConfigPath string, cmdArgs *settings.Arguments) (*alpm.Handle, *pacmanconf.Config, error) {
 	root := "/"
 	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value
@@ -180,6 +180,7 @@ func main() {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
+	cmdArgs := settings.MakeArguments()
 	runtime, err := settings.MakeRuntime()
 	exitOnError(err)
 	config = settings.MakeConfig()
@@ -195,8 +196,8 @@ func main() {
 	config.ExpandEnv()
 	exitOnError(initBuildDir())
 	exitOnError(initVCS(runtime.VCSPath))
-	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(config.PacmanConf)
+	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(config.PacmanConf, cmdArgs)
 	exitOnError(err)
-	exitOnError(handleCmd(config.Runtime.AlpmHandle))
+	exitOnError(handleCmd(config.Runtime.AlpmHandle, cmdArgs))
 	os.Exit(cleanup(config.Runtime.AlpmHandle))
 }

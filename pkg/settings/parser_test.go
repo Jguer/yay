@@ -139,12 +139,12 @@ func TestArguments_CopyGlobal(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &Arguments{
+			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
 				Targets: tt.fields.Targets,
 			}
-			got := parser.CopyGlobal()
+			got := cmdArgs.CopyGlobal()
 			assert.NotEqualValues(t, tt.fields.Options, got.Options)
 			assert.NotEqualValues(t, tt.fields.Targets, got.Targets)
 			assert.NotEqual(t, tt.fields.Op, got.Op)
@@ -182,13 +182,13 @@ func TestArguments_Copy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &Arguments{
+			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
 				Targets: tt.fields.Targets,
 			}
-			got := parser.Copy()
-			assert.Equal(t, parser, got)
+			got := cmdArgs.Copy()
+			assert.Equal(t, cmdArgs, got)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -236,12 +236,12 @@ func TestArguments_FormatArgs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &Arguments{
+			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
 				Targets: tt.fields.Targets,
 			}
-			gotArgs := parser.FormatArgs()
+			gotArgs := cmdArgs.FormatArgs()
 			assert.ElementsMatch(t, gotArgs, tt.wantArgs)
 		})
 	}
@@ -281,12 +281,12 @@ func TestArguments_FormatGlobalArgs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &Arguments{
+			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
 				Targets: tt.fields.Targets,
 			}
-			gotArgs := parser.FormatGlobals()
+			gotArgs := cmdArgs.FormatGlobals()
 			assert.ElementsMatch(t, tt.wantArgs, gotArgs)
 		})
 	}

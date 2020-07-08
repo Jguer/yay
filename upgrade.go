@@ -118,7 +118,7 @@ func getVersionDiff(oldVersion, newVersion string) (left, right string) {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(warnings *aurWarnings, alpmHandle *alpm.Handle) (aurUp, repoUp upSlice, err error) {
+func upList(warnings *aurWarnings, alpmHandle *alpm.Handle, enableDowngrade bool) (aurUp, repoUp upSlice, err error) {
 	_, remote, _, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return nil, nil, err
@@ -140,7 +140,7 @@ func upList(warnings *aurWarnings, alpmHandle *alpm.Handle) (aurUp, repoUp upSli
 		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 		go func() {
-			repoUp, err = upRepo(alpmHandle)
+			repoUp, err = upRepo(alpmHandle, enableDowngrade)
 			errs.Add(err)
 			wg.Done()
 		}()
@@ -298,7 +298,7 @@ func printLocalNewerThanAUR(
 
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upRepo(alpmHandle *alpm.Handle) (upSlice, error) {
+func upRepo(alpmHandle *alpm.Handle, enableDowngrade bool) (upSlice, error) {
 	slice := upSlice{}
 
 	localDB, err := alpmHandle.LocalDB()
@@ -315,7 +315,7 @@ func upRepo(alpmHandle *alpm.Handle) (upSlice, error) {
 		err = alpmHandle.TransRelease()
 	}()
 
-	err = alpmHandle.SyncSysupgrade(cmdArgs.ExistsDouble("u", "sysupgrade"))
+	err = alpmHandle.SyncSysupgrade(enableDowngrade)
 	if err != nil {
 		return slice, err
 	}

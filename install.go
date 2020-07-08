@@ -23,15 +23,15 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-func asdeps(parser *settings.Arguments, pkgs []string) error {
+func asdeps(cmdArgs *settings.Arguments, pkgs []string) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
-	parser = parser.CopyGlobal()
-	_ = parser.AddArg("D", "asdeps")
-	parser.AddTarget(pkgs...)
-	_, stderr, err := capture(passToPacman(parser))
+	cmdArgs = cmdArgs.CopyGlobal()
+	_ = cmdArgs.AddArg("D", "asdeps")
+	cmdArgs.AddTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(cmdArgs))
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
 	}
@@ -39,15 +39,15 @@ func asdeps(parser *settings.Arguments, pkgs []string) error {
 	return nil
 }
 
-func asexp(parser *settings.Arguments, pkgs []string) error {
+func asexp(cmdArgs *settings.Arguments, pkgs []string) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
-	parser = parser.CopyGlobal()
-	_ = parser.AddArg("D", "asexplicit")
-	parser.AddTarget(pkgs...)
-	_, stderr, err := capture(passToPacman(parser))
+	cmdArgs = cmdArgs.CopyGlobal()
+	_ = cmdArgs.AddArg("D", "asexplicit")
+	cmdArgs.AddTarget(pkgs...)
+	_, stderr, err := capture(passToPacman(cmdArgs))
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
 	}
@@ -56,7 +56,7 @@ func asexp(parser *settings.Arguments, pkgs []string) error {
 }
 
 // Install handles package installs
-func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
+func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProviders bool) (err error) {
 	var incompatible stringset.StringSet
 	var do *depOrder
 
@@ -69,14 +69,14 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 
 	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
 		if config.CombinedUpgrade {
-			if parser.ExistsArg("y", "refresh") {
-				err = earlyRefresh(parser)
+			if cmdArgs.ExistsArg("y", "refresh") {
+				err = earlyRefresh(cmdArgs)
 				if err != nil {
 					return fmt.Errorf(gotext.Get("error refreshing databases"))
 				}
 			}
-		} else if parser.ExistsArg("y", "refresh") || parser.ExistsArg("u", "sysupgrade") || len(parser.Targets) > 0 {
-			err = earlyPacmanCall(parser, alpmHandle)
+		} else if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0 {
+			err = earlyPacmanCall(cmdArgs, alpmHandle)
 			if err != nil {
 				return err
 			}
@@ -99,10 +99,10 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 	remoteNamesCache := stringset.FromSlice(remoteNames)
 	localNamesCache := stringset.FromSlice(localNames)
 
-	requestTargets := parser.Copy().Targets
+	requestTargets := cmdArgs.Copy().Targets
 
 	// create the arguments to pass for the repo install
-	arguments := parser.Copy()
+	arguments := cmdArgs.Copy()
 	arguments.DelArg("asdeps", "asdep")
 	arguments.DelArg("asexplicit", "asexp")
 	arguments.Op = "S"
@@ -113,8 +113,8 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 	}
 
 	// if we are doing -u also request all packages needing update
-	if parser.ExistsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upList(warnings, alpmHandle)
+	if cmdArgs.ExistsArg("u", "sysupgrade") {
+		aurUp, repoUp, err = upList(warnings, alpmHandle, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if err != nil {
 			return err
 		}
@@ -129,13 +129,13 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 		for _, up := range repoUp {
 			if !ignore.Get(up.Name) {
 				requestTargets = append(requestTargets, up.Name)
-				parser.AddTarget(up.Name)
+				cmdArgs.AddTarget(up.Name)
 			}
 		}
 
 		for up := range aurUp {
 			requestTargets = append(requestTargets, "aur/"+up)
-			parser.AddTarget("aur/" + up)
+			cmdArgs.AddTarget("aur/" + up)
 		}
 
 		value, _, exists := cmdArgs.GetArg("ignore")
@@ -155,14 +155,14 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 		}
 	}
 
-	targets := stringset.FromSlice(parser.Targets)
+	targets := stringset.FromSlice(cmdArgs.Targets)
 
-	dp, err := getDepPool(requestTargets, warnings, alpmHandle)
+	dp, err := getDepPool(requestTargets, warnings, alpmHandle, ignoreProviders)
 	if err != nil {
 		return err
 	}
 
-	if !parser.ExistsDouble("d", "nodeps") {
+	if !cmdArgs.ExistsDouble("d", "nodeps") {
 		err = dp.CheckMissing()
 		if err != nil {
 			return err
@@ -171,22 +171,22 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
-			if parser.ExistsArg("u", "sysupgrade") {
+			if cmdArgs.ExistsArg("u", "sysupgrade") {
 				fmt.Println(gotext.Get(" there is nothing to do"))
 			}
 			return nil
 		}
 
-		parser.Op = "S"
-		parser.DelArg("y", "refresh")
+		cmdArgs.Op = "S"
+		cmdArgs.DelArg("y", "refresh")
 		if arguments.ExistsArg("ignore") {
-			if parser.ExistsArg("ignore") {
-				parser.Options["ignore"].Args = append(parser.Options["ignore"].Args, arguments.Options["ignore"].Args...)
+			if cmdArgs.ExistsArg("ignore") {
+				cmdArgs.Options["ignore"].Args = append(cmdArgs.Options["ignore"].Args, arguments.Options["ignore"].Args...)
 			} else {
-				parser.Options["ignore"] = arguments.Options["ignore"]
+				cmdArgs.Options["ignore"] = arguments.Options["ignore"]
 			}
 		}
-		return show(passToPacman(parser))
+		return show(passToPacman(cmdArgs))
 	}
 
 	if len(dp.Aur) > 0 && os.Geteuid() == 0 {
@@ -194,7 +194,7 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 	}
 
 	var conflicts stringset.MapStringSet
-	if !parser.ExistsDouble("d", "nodeps") {
+	if !cmdArgs.ExistsDouble("d", "nodeps") {
 		conflicts, err = dp.CheckConflicts()
 		if err != nil {
 			return err
@@ -214,7 +214,7 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 		arguments.AddTarget(pkg)
 	}
 
-	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!parser.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == settings.ModeAUR) {
+	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!cmdArgs.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == settings.ModeAUR) {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
@@ -360,17 +360,17 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 				continue
 			}
 
-			if parser.ExistsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
+			if cmdArgs.ExistsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
 				deps = append(deps, pkg.Name())
-			} else if parser.ExistsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
+			} else if cmdArgs.ExistsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
 				exp = append(exp, pkg.Name())
 			}
 		}
 
-		if errDeps := asdeps(parser, deps); errDeps != nil {
+		if errDeps := asdeps(cmdArgs, deps); errDeps != nil {
 			return errDeps
 		}
-		if errExp := asexp(parser, exp); errExp != nil {
+		if errExp := asexp(cmdArgs, exp); errExp != nil {
 			return errExp
 		}
 	}
@@ -382,7 +382,7 @@ func install(parser *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 		return err
 	}
 
-	err = buildInstallPkgbuilds(dp, do, srcinfos, parser, incompatible, conflicts, alpmHandle)
+	err = buildInstallPkgbuilds(dp, do, srcinfos, cmdArgs, incompatible, conflicts, alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -429,11 +429,11 @@ func inRepos(syncDB alpm.DBList, pkg string) bool {
 	return !syncDB.FindGroupPkgs(target.Name).Empty()
 }
 
-func earlyPacmanCall(parser *settings.Arguments, alpmHandle *alpm.Handle) error {
-	arguments := parser.Copy()
+func earlyPacmanCall(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+	arguments := cmdArgs.Copy()
 	arguments.Op = "S"
-	targets := parser.Targets
-	parser.ClearTargets()
+	targets := cmdArgs.Targets
+	cmdArgs.ClearTargets()
 	arguments.ClearTargets()
 
 	syncDB, err := alpmHandle.SyncDBs()
@@ -449,12 +449,12 @@ func earlyPacmanCall(parser *settings.Arguments, alpmHandle *alpm.Handle) error 
 			if inRepos(syncDB, target) {
 				arguments.AddTarget(target)
 			} else {
-				parser.AddTarget(target)
+				cmdArgs.AddTarget(target)
 			}
 		}
 	}
 
-	if parser.ExistsArg("y", "refresh") || parser.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
+	if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
 		err = show(passToPacman(arguments))
 		if err != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
@@ -464,9 +464,9 @@ func earlyPacmanCall(parser *settings.Arguments, alpmHandle *alpm.Handle) error 
 	return nil
 }
 
-func earlyRefresh(parser *settings.Arguments) error {
-	arguments := parser.Copy()
-	parser.DelArg("y", "refresh")
+func earlyRefresh(cmdArgs *settings.Arguments) error {
+	arguments := cmdArgs.Copy()
+	cmdArgs.DelArg("y", "refresh")
 	arguments.DelArg("u", "sysupgrade")
 	arguments.DelArg("s", "search")
 	arguments.DelArg("i", "info")
@@ -950,11 +950,11 @@ func buildInstallPkgbuilds(
 	dp *depPool,
 	do *depOrder,
 	srcinfos map[string]*gosrc.Srcinfo,
-	parser *settings.Arguments,
+	cmdArgs *settings.Arguments,
 	incompatible stringset.StringSet,
 	conflicts stringset.MapStringSet,
 	alpmHandle *alpm.Handle) error {
-	arguments := parser.Copy()
+	arguments := cmdArgs.Copy()
 	arguments.ClearTargets()
 	arguments.Op = "U"
 	arguments.DelArg("confirm")
@@ -996,10 +996,10 @@ func buildInstallPkgbuilds(
 			fmt.Fprintln(os.Stderr, err)
 		}
 
-		if errDeps := asdeps(parser, deps); err != nil {
+		if errDeps := asdeps(cmdArgs, deps); err != nil {
 			return errDeps
 		}
-		if errExps := asexp(parser, exp); err != nil {
+		if errExps := asexp(cmdArgs, exp); err != nil {
 			return errExps
 		}
 
@@ -1151,9 +1151,9 @@ func buildInstallPkgbuilds(
 			}
 
 			arguments.AddTarget(pkgdest)
-			if parser.ExistsArg("asdeps", "asdep") {
+			if cmdArgs.ExistsArg("asdeps", "asdep") {
 				deps = append(deps, name)
-			} else if parser.ExistsArg("asexplicit", "asexp") {
+			} else if cmdArgs.ExistsArg("asexplicit", "asexp") {
 				exp = append(exp, name)
 			} else if !dp.Explicit.Get(name) && !localNamesCache.Get(name) && !remoteNamesCache.Get(name) {
 				deps = append(deps, name)
