@@ -38,21 +38,21 @@ func removeVCSPackage(pkgs []string) {
 }
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies(cmdArgs *settings.Arguments, removeOptional bool, alpmHandle *alpm.Handle) error {
+func cleanDependencies(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, removeOptional bool) error {
 	hanging, err := hangingPackages(removeOptional, alpmHandle)
 	if err != nil {
 		return err
 	}
 
 	if len(hanging) != 0 {
-		return cleanRemove(hanging, cmdArgs)
+		return cleanRemove(cmdArgs, hanging)
 	}
 
 	return nil
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice
-func cleanRemove(pkgNames []string, cmdArgs *settings.Arguments) error {
+func cleanRemove(cmdArgs *settings.Arguments, pkgNames []string) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}

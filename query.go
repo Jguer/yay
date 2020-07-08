@@ -198,7 +198,7 @@ func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handle) error {
 	var info []*rpc.Pkg
 	missing := false
 	pkgS = removeInvalidTargets(pkgS)

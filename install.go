@@ -382,7 +382,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		return err
 	}
 
-	err = buildInstallPkgbuilds(dp, do, srcinfos, cmdArgs, incompatible, conflicts, alpmHandle)
+	err = buildInstallPkgbuilds(cmdArgs, alpmHandle, dp, do, srcinfos, incompatible, conflicts)
 	if err != nil {
 		return err
 	}
@@ -947,13 +947,14 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringset.StringSet) (e
 }
 
 func buildInstallPkgbuilds(
+	cmdArgs *settings.Arguments,
+	alpmHandle *alpm.Handle,
 	dp *depPool,
 	do *depOrder,
 	srcinfos map[string]*gosrc.Srcinfo,
-	cmdArgs *settings.Arguments,
 	incompatible stringset.StringSet,
 	conflicts stringset.MapStringSet,
-	alpmHandle *alpm.Handle) error {
+) error {
 	arguments := cmdArgs.Copy()
 	arguments.ClearTargets()
 	arguments.Op = "U"

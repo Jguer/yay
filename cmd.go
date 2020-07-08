@@ -137,7 +137,7 @@ getpkgbuild specific options:
     -f --force            Force download for existing ABS packages`)
 }
 
-func handleCmd(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp(cmdArgs)
 	}
@@ -155,27 +155,27 @@ func handleCmd(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
 	case "F", "files":
 		return show(passToPacman(cmdArgs))
 	case "Q", "query":
-		return handleQuery(alpmHandle, cmdArgs)
+		return handleQuery(cmdArgs, alpmHandle)
 	case "R", "remove":
 		return handleRemove(cmdArgs)
 	case "S", "sync":
-		return handleSync(alpmHandle, cmdArgs)
+		return handleSync(cmdArgs, alpmHandle)
 	case "T", "deptest":
 		return show(passToPacman(cmdArgs))
 	case "U", "upgrade":
 		return show(passToPacman(cmdArgs))
 	case "G", "getpkgbuild":
-		return handleGetpkgbuild(alpmHandle, cmdArgs)
+		return handleGetpkgbuild(cmdArgs, alpmHandle)
 	case "P", "show":
-		return handlePrint(alpmHandle, cmdArgs)
+		return handlePrint(cmdArgs, alpmHandle)
 	case "Y", "--yay":
-		return handleYay(alpmHandle, cmdArgs)
+		return handleYay(cmdArgs, alpmHandle)
 	}
 
 	return fmt.Errorf(gotext.Get("unhandled operation"))
 }
 
-func handleQuery(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func handleQuery(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	if cmdArgs.ExistsArg("u", "upgrades") {
 		return printUpdateList(cmdArgs, alpmHandle, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	}
@@ -194,7 +194,7 @@ func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
-func handlePrint(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) (err error) {
+func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.MakeConfig()
@@ -220,32 +220,32 @@ func handlePrint(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) (err erro
 	return err
 }
 
-func handleYay(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func handleYay(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	if cmdArgs.ExistsArg("gendb") {
 		return createDevelDB(config.Runtime.VCSPath, alpmHandle)
 	}
 	if cmdArgs.ExistsDouble("c") {
-		return cleanDependencies(cmdArgs, true, alpmHandle)
+		return cleanDependencies(cmdArgs, alpmHandle, true)
 	}
 	if cmdArgs.ExistsArg("c", "clean") {
-		return cleanDependencies(cmdArgs, false, alpmHandle)
+		return cleanDependencies(cmdArgs, alpmHandle, false)
 	}
 	if len(cmdArgs.Targets) > 0 {
-		return handleYogurt(alpmHandle, cmdArgs)
+		return handleYogurt(cmdArgs, alpmHandle)
 	}
 	return nil
 }
 
-func handleGetpkgbuild(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func handleGetpkgbuild(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	return getPkgbuilds(cmdArgs.Targets, alpmHandle, cmdArgs.ExistsArg("f", "force"))
 }
 
-func handleYogurt(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func handleYogurt(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	config.SearchMode = numberMenu
 	return displayNumberMenu(cmdArgs.Targets, alpmHandle, cmdArgs)
 }
 
-func handleSync(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	targets := cmdArgs.Targets
 
 	if cmdArgs.ExistsArg("s", "search") {
@@ -269,7 +269,7 @@ func handleSync(alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
 		return show(passToPacman(cmdArgs))
 	}
 	if cmdArgs.ExistsArg("i", "info") {
-		return syncInfo(targets, alpmHandle, cmdArgs)
+		return syncInfo(cmdArgs, targets, alpmHandle)
 	}
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		return install(cmdArgs, alpmHandle, false)

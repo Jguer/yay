@@ -74,7 +74,7 @@ func initBuildDir() error {
 	return nil
 }
 
-func initAlpm(pacmanConfigPath string, cmdArgs *settings.Arguments) (*alpm.Handle, *pacmanconf.Config, error) {
+func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handle, *pacmanconf.Config, error) {
 	root := "/"
 	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value
@@ -196,8 +196,8 @@ func main() {
 	config.ExpandEnv()
 	exitOnError(initBuildDir())
 	exitOnError(initVCS(runtime.VCSPath))
-	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(config.PacmanConf, cmdArgs)
+	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(cmdArgs, config.PacmanConf)
 	exitOnError(err)
-	exitOnError(handleCmd(config.Runtime.AlpmHandle, cmdArgs))
+	exitOnError(handleCmd(cmdArgs, config.Runtime.AlpmHandle))
 	os.Exit(cleanup(config.Runtime.AlpmHandle))
 }
