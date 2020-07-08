@@ -20,13 +20,15 @@ import (
 )
 
 // Info contains the last commit sha of a repo
-type vcsInfo map[string]shaInfos
-type shaInfos map[string]shaInfo
-type shaInfo struct {
-	Protocols []string `json:"protocols"`
-	Branch    string   `json:"branch"`
-	SHA       string   `json:"sha"`
-}
+type (
+	vcsInfo  map[string]shaInfos
+	shaInfos map[string]shaInfo
+	shaInfo  struct {
+		Protocols []string `json:"protocols"`
+		Branch    string   `json:"branch"`
+		SHA       string   `json:"sha"`
+	}
+)
 
 // createDevelDB forces yay to create a DB of the existing development packages
 func createDevelDB(vcsFilePath string, alpmHandle *alpm.Handle) error {
@@ -245,7 +247,7 @@ func saveVCSInfo(vcsFilePath string) error {
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}
-	in, err := os.OpenFile(vcsFilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	in, err := os.OpenFile(vcsFilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}

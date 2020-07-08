@@ -5,7 +5,6 @@ import (
 )
 
 func isEqual(a, b []string) bool {
-
 	if a == nil && b == nil {
 		return true
 	}
@@ -59,10 +58,8 @@ func TestParsing(t *testing.T) {
 		if url != compare.URL ||
 			branch != compare.Branch ||
 			!isEqual(protocols, compare.Protocols) {
-
 			t.Fatalf("Test %d failed: Expected: url=%+v branch=%+v protocols=%+v\ngot url=%+v branch=%+v protocols=%+v",
 				n+1, compare.URL, compare.Branch, compare.Protocols, url, branch, protocols)
 		}
 	}
-
 }

@@ -513,7 +513,6 @@ nextpkg:
 
 func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string, err error) {
 	stdout, stderr, err := capture(passToMakepkg(dir, "--packagelist"))
-
 	if err != nil {
 		return nil, "", fmt.Errorf("%s %s", stderr, err)
 	}
@@ -772,9 +771,11 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 			}
 		}
 
-		args := []string{"diff",
+		args := []string{
+			"diff",
 			start + "..HEAD@{upstream}", "--src-prefix",
-			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO"}
+			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO",
+		}
 		if text.UseColor {
 			args = append(args, "--color=always")
 		} else {

@@ -123,16 +123,20 @@ func TestArguments_CopyGlobal(t *testing.T) {
 	}{
 		{name: "simple", fields: fields{
 			Op: "Q",
-			Options: map[string]*Option{"a": {}, "arch": {Global: true,
-				Args: []string{"x86_x64"},
-			}, "boo": {Global: true, Args: []string{"a", "b"}},
+			Options: map[string]*Option{
+				"a": {}, "arch": {
+					Global: true,
+					Args:   []string{"x86_x64"},
+				}, "boo": {Global: true, Args: []string{"a", "b"}},
 			},
 			Targets: []string{"a", "b"},
 		}, want: &Arguments{
 			Op: "",
-			Options: map[string]*Option{"arch": {Global: true,
-				Args: []string{"x86_x64"},
-			}, "boo": {Global: true, Args: []string{"a", "b"}},
+			Options: map[string]*Option{
+				"arch": {
+					Global: true,
+					Args:   []string{"x86_x64"},
+				}, "boo": {Global: true, Args: []string{"a", "b"}},
 			},
 			Targets: []string{},
 		}},
@@ -166,16 +170,19 @@ func TestArguments_Copy(t *testing.T) {
 	}{
 		{name: "simple", fields: fields{
 			Op: "Q",
-			Options: map[string]*Option{"a": {}, "arch": {
-				Args: []string{"x86_x64"}, Global: true,
-			}, "boo": {Args: []string{"a", "b"}, Global: true},
+			Options: map[string]*Option{
+				"a": {}, "arch": {
+					Args: []string{"x86_x64"}, Global: true,
+				}, "boo": {Args: []string{"a", "b"}, Global: true},
 			},
 			Targets: []string{"a", "b"},
 		}, want: &Arguments{
 			Op: "Q",
-			Options: map[string]*Option{"a": {}, "arch": {Global: true,
-				Args: []string{"x86_x64"},
-			}, "boo": {Args: []string{"a", "b"}, Global: true},
+			Options: map[string]*Option{
+				"a": {}, "arch": {
+					Global: true,
+					Args:   []string{"x86_x64"},
+				}, "boo": {Args: []string{"a", "b"}, Global: true},
 			},
 			Targets: []string{"a", "b"},
 		}},

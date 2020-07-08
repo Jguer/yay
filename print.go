@@ -19,8 +19,10 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-const arrow = "==>"
-const smallArrow = " ->"
+const (
+	arrow      = "==>"
+	smallArrow = " ->"
+)
 
 func (warnings *aurWarnings) print() {
 	if len(warnings.Missing) > 0 {
@@ -353,7 +355,7 @@ func localStatistics(alpmHandle *alpm.Handle) error {
 	return nil
 }
 
-//TODO: Make it less hacky
+// TODO: Make it less hacky
 func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
 	warnings := makeWarnings()
 	old := os.Stdout // keep backup of the real stdout
@@ -368,7 +370,7 @@ func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
 	return nil
 }
 
-//TODO: Make it less hacky
+// TODO: Make it less hacky
 func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enableDowngrade bool) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := makeWarnings()
@@ -513,7 +515,6 @@ func providerMenu(dep string, providers providers) *rpc.Pkg {
 
 		reader := bufio.NewReader(os.Stdin)
 		numberBuf, overflow, err := reader.ReadLine()
-
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			break

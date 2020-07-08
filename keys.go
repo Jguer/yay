@@ -96,7 +96,6 @@ func importKeys(keys []string) error {
 
 	text.OperationInfoln(gotext.Get("Importing keys with gpg..."))
 	err := cmd.Run()
-
 	if err != nil {
 		return errors.New(gotext.Get("problem importing keys"))
 	}

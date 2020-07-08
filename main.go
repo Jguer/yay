@@ -64,7 +64,7 @@ func initVCS(vcsFilePath string) error {
 
 func initBuildDir() error {
 	if _, err := os.Stat(config.BuildDir); os.IsNotExist(err) {
-		if err = os.MkdirAll(config.BuildDir, 0755); err != nil {
+		if err = os.MkdirAll(config.BuildDir, 0o755); err != nil {
 			return errors.New(gotext.Get("failed to create BuildDir directory '%s': %s", config.BuildDir, err))
 		}
 	} else if err != nil {

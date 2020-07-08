@@ -62,7 +62,6 @@ func questionCallback(question alpm.QuestionAny) {
 
 		reader := bufio.NewReader(os.Stdin)
 		numberBuf, overflow, err := reader.ReadLine()
-
 		if err != nil {
 			text.Errorln(err)
 			break
