@@ -269,11 +269,11 @@ func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle, fo
 		_, err = os.Stat(filepath.Join(path, name))
 		switch {
 		case err != nil && !os.IsNotExist(err):
-			fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
+			text.Errorln(err)
 			continue
 		case os.IsNotExist(err), force:
 			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
-				fmt.Fprintln(os.Stderr, bold(red(smallArrow)), err)
+				text.Errorln(err)
 				continue
 			}
 		default:

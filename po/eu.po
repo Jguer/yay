@@ -424,12 +424,8 @@ msgid "[N]one"
 msgstr "I[N]or ez"
 
 #: keys.go:122
-msgid ""
-"\n"
-"%s %s, required by: %s"
-msgstr ""
-"\n"
-"%s %s, beharrezkoa egiteko: %s"
+msgid "%s, required by: %s"
+msgstr "%s, beharrezkoa egiteko: %s"
 
 #: clean.go:96
 msgid ""

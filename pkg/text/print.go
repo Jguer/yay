@@ -35,6 +35,10 @@ func Infoln(a ...interface{}) {
 	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(green(arrow))}, a...)...)
 }
 
+func SprintWarn(a ...interface{}) string {
+	return fmt.Sprint(append([]interface{}{Bold(yellow(smallArrow + " "))}, a...)...)
+}
+
 func Warn(a ...interface{}) {
 	fmt.Fprint(os.Stdout, append([]interface{}{Bold(yellow(smallArrow + " "))}, a...)...)
 }

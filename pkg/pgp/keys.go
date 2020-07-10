@@ -1,4 +1,4 @@
-package main
+package pgp
 
 import (
 	"bytes"
@@ -40,13 +40,14 @@ func (set pgpKeySet) get(key string) bool {
 	return exists
 }
 
-// checkPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
+// CheckPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func checkPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo) error {
+func CheckPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo,
+	gpgBin, gpgFlags string, noConfirm bool) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
-	args := append(strings.Fields(config.GpgFlags), "--list-keys")
+	args := append(strings.Fields(gpgFlags), "--list-keys")
 
 	// Mapping all the keys.
 	for _, base := range bases {
@@ -61,7 +62,7 @@ func checkPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo) error {
 				continue
 			}
 
-			cmd := exec.Command(config.GpgBin, append(args, key)...)
+			cmd := exec.Command(gpgBin, append(args, key)...)
 			err := cmd.Run()
 			if err != nil {
 				problematic.set(key, base)
@@ -82,17 +83,17 @@ func checkPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	fmt.Println()
 	fmt.Println(str)
 
-	if continueTask(gotext.Get("Import?"), true) {
-		return importKeys(problematic.toSlice())
+	if text.ContinueTask(gotext.Get("Import?"), true, noConfirm) {
+		return importKeys(problematic.toSlice(), gpgBin, gpgFlags)
 	}
 
 	return nil
 }
 
 // importKeys tries to import the list of keys specified in its argument.
-func importKeys(keys []string) error {
-	args := append(strings.Fields(config.GpgFlags), "--recv-keys")
-	cmd := exec.Command(config.GpgBin, append(args, keys...)...)
+func importKeys(keys []string, gpgBin, gpgFlags string) error {
+	args := append(strings.Fields(gpgFlags), "--recv-keys")
+	cmd := exec.Command(gpgBin, append(args, keys...)...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
 	text.OperationInfoln(gotext.Get("Importing keys with gpg..."))
@@ -111,15 +112,14 @@ func formatKeysToImport(keys pgpKeySet) (string, error) {
 	}
 
 	var buffer bytes.Buffer
-	buffer.WriteString(bold(green(arrow) + " "))
-	buffer.WriteString(bold(green(gotext.Get("PGP keys need importing:"))))
+	buffer.WriteString(text.SprintOperationInfo(gotext.Get("PGP keys need importing:")))
 	for key, bases := range keys {
 		pkglist := ""
 		for _, base := range bases {
 			pkglist += base.String() + "  "
 		}
 		pkglist = strings.TrimRight(pkglist, " ")
-		buffer.WriteString(gotext.Get("\n%s %s, required by: %s", yellow(bold(smallArrow)), cyan(key), cyan(pkglist)))
+		buffer.WriteString("\n" + text.SprintWarn(gotext.Get("%s, required by: %s", text.Cyan(key), text.Cyan(pkglist))))
 	}
 	return buffer.String(), nil
 }

@@ -1,4 +1,4 @@
-package main
+package pgp
 
 import (
 	"bytes"
@@ -12,10 +12,10 @@ import (
 	"testing"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
+	"github.com/bradleyjkemp/cupaloy"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/dep"
-	"github.com/Jguer/yay/v10/pkg/settings"
 )
 
 const (
@@ -46,7 +46,7 @@ func newPkg(basename string) *rpc.Pkg {
 func getPgpKey(key string) string {
 	var buffer bytes.Buffer
 
-	if contents, err := ioutil.ReadFile(path.Join("testdata", "keys", key)); err == nil {
+	if contents, err := ioutil.ReadFile(path.Join("testdata", key)); err == nil {
 		buffer.WriteString("-----BEGIN PGP PUBLIC KEY BLOCK-----\n")
 		buffer.WriteString("Version: SKS 1.1.6\n")
 		buffer.WriteString("Comment: Hostname: yay\n\n")
@@ -74,10 +74,6 @@ func TestImportKeys(t *testing.T) {
 		t.Fatalf("Unable to init test keyring %q: %v\n", keyringDir, err)
 	}
 	defer os.RemoveAll(keyringDir)
-
-	config = settings.MakeConfig()
-	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
 
 	server := startPgpKeyServer()
 	defer func() {
@@ -129,7 +125,7 @@ func TestImportKeys(t *testing.T) {
 	}
 
 	for _, tt := range casetests {
-		err := importKeys(tt.keys)
+		err := importKeys(tt.keys, "gpg", fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir))
 		if !tt.wantError {
 			if err != nil {
 				t.Fatalf("Got error %q, want no error", err)
@@ -158,9 +154,6 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 	defer os.RemoveAll(keyringDir)
 
-	config.GpgBin = "gpg"
-	config.GpgFlags = fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir)
-
 	server := startPgpKeyServer()
 	defer func() {
 		err := server.Shutdown(context.TODO())
@@ -170,6 +163,7 @@ func TestCheckPgpKeys(t *testing.T) {
 	}()
 
 	casetests := []struct {
+		name      string
 		pkgs      dep.Base
 		srcinfos  map[string]*gosrc.Srcinfo
 		wantError bool
@@ -177,6 +171,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// cower: single package, one valid key not yet in the keyring.
 		// 487EACC08557AD082088DABA1EB2638FF56C0C53: Dave Reisner.
 		{
+			name:      " one valid key not yet in the keyring",
 			pkgs:      dep.Base{newPkg("cower")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"cower": makeSrcinfo("cower", "487EACC08557AD082088DABA1EB2638FF56C0C53")},
 			wantError: false,
@@ -185,6 +180,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// B6C8F98282B944E3B0D5C2530FC3042E345AD05D: Hans Wennborg.
 		{
+			name: "two valid keys not yet in the keyring",
 			pkgs: dep.Base{newPkg("libc++")},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"libc++": makeSrcinfo("libc++", "11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D"),
@@ -194,6 +190,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// Two dummy packages requiring the same key.
 		// ABAF11C65A2970B130ABE3C479BE3E4300411886: Linus Torvalds.
 		{
+			name: "Two dummy packages requiring the same key",
 			pkgs: dep.Base{newPkg("dummy-1"), newPkg("dummy-2")},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"dummy-1": makeSrcinfo("dummy-1",
@@ -207,6 +204,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// C52048C0C0748FEE227D47A2702353E0F7E48EDB: Thomas Dickey.
 		{
+			name: "one already in keyring",
 			pkgs: dep.Base{newPkg("dummy-3")},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"dummy-3": makeSrcinfo("dummy-3", "11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB"),
@@ -215,6 +213,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		},
 		// Two dummy packages with existing keys.
 		{
+			name: "two existing",
 			pkgs: dep.Base{newPkg("dummy-4"), newPkg("dummy-5")},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"dummy-4": makeSrcinfo("dummy-4", "11E521D646982372EB577A1F8F0871F202119294"),
@@ -224,6 +223,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		},
 		// Dummy package with invalid key, should fail.
 		{
+			name:      "one invalid",
 			pkgs:      dep.Base{newPkg("dummy-7")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-7": makeSrcinfo("dummy-7", "THIS-SHOULD-FAIL")},
 			wantError: true,
@@ -231,6 +231,7 @@ func TestCheckPgpKeys(t *testing.T) {
 		// Dummy package with both an invalid an another valid key, should fail.
 		// A314827C4E4250A204CE6E13284FC34C8E4B1A25: Thomas Bächler.
 		{
+			name:      "one invalid, one valid",
 			pkgs:      dep.Base{newPkg("dummy-8")},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-8": makeSrcinfo("dummy-8", "A314827C4E4250A204CE6E13284FC34C8E4B1A25", "THIS-SHOULD-FAIL")},
 			wantError: true,
@@ -238,16 +239,29 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 
 	for _, tt := range casetests {
-		err := checkPgpKeys([]dep.Base{tt.pkgs}, tt.srcinfos)
-		if !tt.wantError {
-			if err != nil {
-				t.Fatalf("Got error %q, want no error", err)
+		t.Run(tt.name, func(t *testing.T) {
+			rescueStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			err := CheckPgpKeys([]dep.Base{tt.pkgs}, tt.srcinfos, "gpg",
+				fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir), true)
+			if !tt.wantError {
+				if err != nil {
+					t.Fatalf("Got error %q, want no error", err)
+				}
+
+				w.Close()
+				out, _ := ioutil.ReadAll(r)
+				os.Stdout = rescueStdout
+
+				cupaloy.SnapshotT(t, string(out))
+				return
 			}
-			continue
-		}
-		// Here, we want to see the error.
-		if err == nil {
-			t.Fatalf("Got no error; want error")
-		}
+			// Here, we want to see the error.
+			if err == nil {
+				t.Fatalf("Got no error; want error")
+			}
+		})
 	}
 }

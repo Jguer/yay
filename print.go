@@ -18,11 +18,6 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-const (
-	arrow      = "==>"
-	smallArrow = " ->"
-)
-
 // PrintSearch handles printing search results in a given format
 func (q aurQuery) printSearch(start int, alpmHandle *alpm.Handle) {
 	localDB, _ := alpmHandle.LocalDB()
@@ -320,7 +315,6 @@ outer:
 const (
 	redCode     = "\x1b[31m"
 	greenCode   = "\x1b[32m"
-	yellowCode  = "\x1b[33m"
 	blueCode    = "\x1b[34m"
 	magentaCode = "\x1b[35m"
 	cyanCode    = "\x1b[36m"
@@ -343,10 +337,6 @@ func red(in string) string {
 
 func green(in string) string {
 	return stylize(greenCode, in)
-}
-
-func yellow(in string) string {
-	return stylize(yellowCode, in)
 }
 
 func blue(in string) string {

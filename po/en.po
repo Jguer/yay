@@ -420,12 +420,8 @@ msgid "[N]one"
 msgstr "[N]one"
 
 #: keys.go:122
-msgid ""
-"\n"
-"%s %s, required by: %s"
-msgstr ""
-"\n"
-"%s %s, required by: %s"
+msgid "%s, required by: %s"
+msgstr "%s, required by: %s"
 
 #: clean.go:96
 msgid ""

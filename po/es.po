@@ -426,12 +426,8 @@ msgid "[N]one"
 msgstr "[N]inguno"
 
 #: keys.go:122
-msgid ""
-"\n"
-"%s %s, required by: %s"
-msgstr ""
-"\n"
-"%s %s, necesario para: %s"
+msgid "%s, required by: %s"
+msgstr "%s, necesario para: %s"
 
 #: clean.go:96
 msgid ""

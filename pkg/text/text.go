@@ -1,8 +1,11 @@
 package text
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
+
+	"github.com/leonelquinteros/gotext"
 )
 
 // SplitDBFromName split apart db/package to db and package
@@ -40,4 +43,34 @@ func LessRunes(iRunes, jRunes []rune) bool {
 	}
 
 	return len(iRunes) < len(jRunes)
+}
+
+// ContinueTask prompts if user wants to continue task.
+// If NoConfirm is set the action will continue without user input.
+func ContinueTask(s string, cont, noConfirm bool) bool {
+	if noConfirm {
+		return cont
+	}
+
+	var response string
+	var postFix string
+	yes := gotext.Get("yes")
+	no := gotext.Get("no")
+	y := string([]rune(yes)[0])
+	n := string([]rune(no)[0])
+
+	if cont {
+		postFix = fmt.Sprintf(" [%s/%s] ", strings.ToUpper(y), n)
+	} else {
+		postFix = fmt.Sprintf(" [%s/%s] ", y, strings.ToUpper(n))
+	}
+
+	Info(Bold(s), Bold(postFix))
+
+	if _, err := fmt.Scanln(&response); err != nil {
+		return cont
+	}
+
+	response = strings.ToLower(response)
+	return response == yes || response == y
 }

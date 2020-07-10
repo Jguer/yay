@@ -98,7 +98,7 @@ func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 
 	fmt.Println(gotext.Get("\nBuild directory:"), config.BuildDir)
 
-	if continueTask(question, true) {
+	if text.ContinueTask(question, true, config.NoConfirm) {
 		if err := cleanAUR(keepInstalled, keepCurrent, removeAll, alpmHandle); err != nil {
 			return err
 		}
@@ -108,7 +108,7 @@ func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		return nil
 	}
 
-	if continueTask(gotext.Get("Do you want to remove ALL untracked AUR files?"), true) {
+	if text.ContinueTask(gotext.Get("Do you want to remove ALL untracked AUR files?"), true, config.NoConfirm) {
 		return cleanUntracked()
 	}
 

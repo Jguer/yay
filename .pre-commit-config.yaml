@@ -1,6 +1,6 @@
 repos:
   - repo: git://github.com/dnephin/pre-commit-golang
-    rev: master
+    rev: v0.3.5
     hooks:
       - id: go-fmt
       - id: go-imports
@@ -8,3 +8,15 @@ repos:
       - id: golangci-lint
       - id: go-unit-tests
       - id: go-build
+
+  - repo: https://github.com/prettier/prettier
+    rev: 2.0.5 # Use the sha or tag you want to point at
+    hooks:
+      - id: prettier
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.1.0 # Use the ref you want to point at
+    hooks:
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-yaml

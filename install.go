@@ -18,6 +18,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
+	"github.com/Jguer/yay/v10/pkg/pgp"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -239,7 +240,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		case "no":
 			break
 		default:
-			if continueTask(gotext.Get("Remove make dependencies after install?"), false) {
+			if text.ContinueTask(gotext.Get("Remove make dependencies after install?"), false, config.NoConfirm) {
 				defer func() {
 					err = removeMake(do)
 				}()
@@ -287,7 +288,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		oldValue := config.NoConfirm
 		config.NoConfirm = false
 		fmt.Println()
-		if !continueTask(gotext.Get("Proceed with install?"), true) {
+		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, config.NoConfirm) {
 			return fmt.Errorf(gotext.Get("aborting due to user"))
 		}
 		err = updatePkgbuildSeenRef(toDiff)
@@ -327,7 +328,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		oldValue := config.NoConfirm
 		config.NoConfirm = false
 		fmt.Println()
-		if !continueTask(gotext.Get("Proceed with install?"), true) {
+		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, config.NoConfirm) {
 			return errors.New(gotext.Get("aborting due to user"))
 		}
 		config.NoConfirm = oldValue
@@ -339,7 +340,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 	}
 
 	if config.PGPFetch {
-		err = checkPgpKeys(do.Aur, srcinfos)
+		err = pgp.CheckPgpKeys(do.Aur, srcinfos, config.GpgBin, config.GpgFlags, config.NoConfirm)
 		if err != nil {
 			return err
 		}
@@ -506,7 +507,7 @@ nextpkg:
 
 		fmt.Println()
 
-		if !continueTask(gotext.Get("Try to build them anyway?"), true) {
+		if !text.ContinueTask(gotext.Get("Try to build them anyway?"), true, config.NoConfirm) {
 			return nil, errors.New(gotext.Get("aborting due to user"))
 		}
 	}
