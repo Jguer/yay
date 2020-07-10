@@ -178,23 +178,23 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 			name := base.Pkgbase()
 			pkgDest := filepath.Join(wd, name)
 			_, err = os.Stat(pkgDest)
-			switch {
-			case err != nil && !os.IsNotExist(err):
+			if os.IsNotExist(err) {
+				bases = append(bases, base)
+			} else if err != nil {
 				text.Errorln(err)
 				continue
-			default:
+			} else {
 				if force {
 					if err = os.RemoveAll(pkgDest); err != nil {
 						text.Errorln(err)
 						continue
 					}
+					bases = append(bases, base)
 				} else {
 					text.Warnln(gotext.Get("%s already exists. Use -f/--force to overwrite", pkgDest))
 					continue
 				}
 			}
-
-			bases = append(bases, base)
 		}
 
 		if _, err = downloadPkgbuilds(bases, nil, wd); err != nil {
