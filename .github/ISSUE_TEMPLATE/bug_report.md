@@ -1,13 +1,13 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: 'Status: Triage, Type: Bug'
-assignees: ''
-
+title: ""
+labels: "Status: Triage, Type: Bug"
+assignees: ""
 ---
 
 #### Affected Version
+
 <!-- Please ensure you are using the latest yay-git package -->
 <!-- Use `yay -V` to get installed version -->
 <!-- Example: `yay v8.1139.r0.g9ac4ab6 - libalpm v11.0.1` -->

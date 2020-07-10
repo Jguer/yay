@@ -1,10 +1,9 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: ''
-labels: 'Type: Feature Request, Status: Discussion Open'
-assignees: ''
-
+title: ""
+labels: "Type: Feature Request, Status: Discussion Open"
+assignees: ""
 ---
 
 **Is your feature request related to a problem? Please describe.**
