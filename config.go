@@ -32,8 +32,6 @@ var savedInfo vcsInfo
 // YayConf holds the current config values for yay.
 var config *settings.Configuration
 
-var hideMenus = false
-
 // Editor returns the preferred system editor.
 func editor() (editor string, args []string) {
 	switch {

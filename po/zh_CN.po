@@ -41,8 +41,8 @@ msgid " there is nothing to do"
 msgstr " 今日无事可做"
 
 #: depCheck.go:170
-msgid "%s Installing %s will remove:"
-msgstr "%s 安装 %s 将删除:"
+msgid "Installing %s will remove:"
+msgstr "安装 %s 将删除:"
 
 #: install.go:583 install.go:658 install.go:665
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"

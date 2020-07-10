@@ -13,6 +13,9 @@ const (
 	TopDown
 )
 
+// HideMenus indicates if pacman's provider menus must be hidden
+var HideMenus = false
+
 // Configuration stores yay's config.
 type Configuration struct {
 	AURURL             string   `json:"aururl"`

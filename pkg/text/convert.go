@@ -1,6 +1,8 @@
 package text
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Human method returns results in human readable format.
 func Human(size int64) string {

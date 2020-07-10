@@ -15,6 +15,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/completion"
+	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -58,14 +59,14 @@ func asexp(cmdArgs *settings.Arguments, pkgs []string) error {
 // Install handles package installs
 func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProviders bool) (err error) {
 	var incompatible stringset.StringSet
-	var do *depOrder
+	var do *dep.Order
 
 	var aurUp upSlice
 	var repoUp upSlice
 
 	var srcinfos map[string]*gosrc.Srcinfo
 
-	warnings := makeWarnings()
+	warnings := query.NewWarnings()
 
 	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
 		if config.CombinedUpgrade {
@@ -119,7 +120,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 			return err
 		}
 
-		warnings.print()
+		warnings.Print()
 
 		ignore, aurUp, errUp := upgradePkgs(aurUp, repoUp)
 		if errUp != nil {
@@ -157,7 +158,9 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 
 	targets := stringset.FromSlice(cmdArgs.Targets)
 
-	dp, err := getDepPool(requestTargets, warnings, alpmHandle, ignoreProviders)
+	dp, err := dep.GetPool(requestTargets,
+		warnings, alpmHandle, config.Runtime.Mode,
+		ignoreProviders, config.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN)
 	if err != nil {
 		return err
 	}
@@ -195,13 +198,13 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 
 	var conflicts stringset.MapStringSet
 	if !cmdArgs.ExistsDouble("d", "nodeps") {
-		conflicts, err = dp.CheckConflicts()
+		conflicts, err = dp.CheckConflicts(config.UseAsk, config.NoConfirm)
 		if err != nil {
 			return err
 		}
 	}
 
-	do = getDepOrder(dp)
+	do = dep.GetOrder(dp)
 	if err != nil {
 		return err
 	}
@@ -262,8 +265,8 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		return err
 	}
 
-	var toDiff []Base
-	var toEdit []Base
+	var toDiff []dep.Base
+	var toEdit []dep.Base
 
 	if config.DiffMenu {
 		pkgbuildNumberMenu(do.Aur, remoteNamesCache)
@@ -390,14 +393,14 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 	return nil
 }
 
-func removeMake(do *depOrder) error {
+func removeMake(do *dep.Order) error {
 	removeArguments := settings.MakeArguments()
 	err := removeArguments.AddArg("R", "u")
 	if err != nil {
 		return err
 	}
 
-	for _, pkg := range do.getMake() {
+	for _, pkg := range do.GetMake() {
 		removeArguments.AddTarget(pkg)
 	}
 
@@ -410,7 +413,7 @@ func removeMake(do *depOrder) error {
 }
 
 func inRepos(syncDB alpm.DBList, pkg string) bool {
-	target := toTarget(pkg)
+	target := dep.ToTarget(pkg)
 
 	if target.DB == "aur" {
 		return false
@@ -418,10 +421,10 @@ func inRepos(syncDB alpm.DBList, pkg string) bool {
 		return true
 	}
 
-	previousHideMenus := hideMenus
-	hideMenus = false
+	previousHideMenus := settings.HideMenus
+	settings.HideMenus = false
 	_, err := syncDB.FindSatisfier(target.DepString())
-	hideMenus = previousHideMenus
+	settings.HideMenus = previousHideMenus
 	if err == nil {
 		return true
 	}
@@ -475,9 +478,9 @@ func earlyRefresh(cmdArgs *settings.Arguments) error {
 	return show(passToPacman(arguments))
 }
 
-func getIncompatible(bases []Base, srcinfos map[string]*gosrc.Srcinfo, alpmHandle *alpm.Handle) (stringset.StringSet, error) {
+func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, alpmHandle *alpm.Handle) (stringset.StringSet, error) {
 	incompatible := make(stringset.StringSet)
-	basesMap := make(map[string]Base)
+	basesMap := make(map[string]dep.Base)
 	alpmArch, err := alpmHandle.Arch()
 	if err != nil {
 		return nil, err
@@ -543,7 +546,7 @@ func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string
 	return pkgdests, pkgVersion, nil
 }
 
-func anyExistInCache(bases []Base) bool {
+func anyExistInCache(bases []dep.Base) bool {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -556,7 +559,7 @@ func anyExistInCache(bases []Base) bool {
 	return false
 }
 
-func pkgbuildNumberMenu(bases []Base, installed stringset.StringSet) bool {
+func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) bool {
 	toPrint := ""
 	askClean := false
 
@@ -589,8 +592,8 @@ func pkgbuildNumberMenu(bases []Base, installed stringset.StringSet) bool {
 	return askClean
 }
 
-func cleanNumberMenu(bases []Base, installed stringset.StringSet, hasClean bool) ([]Base, error) {
-	toClean := make([]Base, 0)
+func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet, hasClean bool) ([]dep.Base, error) {
+	toClean := make([]dep.Base, 0)
 
 	if !hasClean {
 		return toClean, nil
@@ -657,16 +660,16 @@ func cleanNumberMenu(bases []Base, installed stringset.StringSet, hasClean bool)
 	return toClean, nil
 }
 
-func editNumberMenu(bases []Base, installed stringset.StringSet) ([]Base, error) {
+func editNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
 	return editDiffNumberMenu(bases, installed, false)
 }
 
-func diffNumberMenu(bases []Base, installed stringset.StringSet) ([]Base, error) {
+func diffNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
 	return editDiffNumberMenu(bases, installed, true)
 }
 
-func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) ([]Base, error) {
-	toEdit := make([]Base, 0)
+func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet, diff bool) ([]dep.Base, error) {
+	toEdit := make([]dep.Base, 0)
 	var editInput string
 	var err error
 
@@ -733,7 +736,7 @@ func editDiffNumberMenu(bases []Base, installed stringset.StringSet, diff bool) 
 	return toEdit, nil
 }
 
-func updatePkgbuildSeenRef(bases []Base) error {
+func updatePkgbuildSeenRef(bases []dep.Base) error {
 	var errMulti multierror.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
@@ -745,7 +748,7 @@ func updatePkgbuildSeenRef(bases []Base) error {
 	return errMulti.Return()
 }
 
-func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
+func showPkgbuildDiffs(bases []dep.Base, cloned stringset.StringSet) error {
 	var errMulti multierror.MultiError
 	for _, base := range bases {
 		pkg := base.Pkgbase()
@@ -787,7 +790,7 @@ func showPkgbuildDiffs(bases []Base, cloned stringset.StringSet) error {
 	return errMulti.Return()
 }
 
-func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
+func editPkgbuilds(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	pkgbuilds := make([]string, 0, len(bases))
 	for _, base := range bases {
 		pkg := base.Pkgbase()
@@ -815,7 +818,7 @@ func editPkgbuilds(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	return nil
 }
 
-func parseSrcinfoFiles(bases []Base, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
+func parseSrcinfoFiles(bases []dep.Base, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
 	srcinfos := make(map[string]*gosrc.Srcinfo)
 	for k, base := range bases {
 		pkg := base.Pkgbase()
@@ -838,7 +841,7 @@ func parseSrcinfoFiles(bases []Base, errIsFatal bool) (map[string]*gosrc.Srcinfo
 	return srcinfos, nil
 }
 
-func pkgbuildsToSkip(bases []Base, targets stringset.StringSet) stringset.StringSet {
+func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.StringSet {
 	toSkip := make(stringset.StringSet)
 
 	for _, base := range bases {
@@ -864,7 +867,7 @@ func pkgbuildsToSkip(bases []Base, targets stringset.StringSet) stringset.String
 	return toSkip
 }
 
-func mergePkgbuilds(bases []Base) error {
+func mergePkgbuilds(bases []dep.Base) error {
 	for _, base := range bases {
 		err := gitMerge(config.BuildDir, base.Pkgbase())
 		if err != nil {
@@ -875,14 +878,14 @@ func mergePkgbuilds(bases []Base) error {
 	return nil
 }
 
-func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string) (stringset.StringSet, error) {
+func downloadPkgbuilds(bases []dep.Base, toSkip stringset.StringSet, buildDir string) (stringset.StringSet, error) {
 	cloned := make(stringset.StringSet)
 	downloaded := 0
 	var wg sync.WaitGroup
 	var mux sync.Mutex
 	var errs multierror.MultiError
 
-	download := func(base Base) {
+	download := func(base dep.Base) {
 		defer wg.Done()
 		pkg := base.Pkgbase()
 
@@ -928,7 +931,7 @@ func downloadPkgbuilds(bases []Base, toSkip stringset.StringSet, buildDir string
 	return cloned, errs.Return()
 }
 
-func downloadPkgbuildsSources(bases []Base, incompatible stringset.StringSet) (err error) {
+func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet) (err error) {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -950,8 +953,8 @@ func downloadPkgbuildsSources(bases []Base, incompatible stringset.StringSet) (e
 func buildInstallPkgbuilds(
 	cmdArgs *settings.Arguments,
 	alpmHandle *alpm.Handle,
-	dp *depPool,
-	do *depOrder,
+	dp *dep.Pool,
+	do *dep.Order,
 	srcinfos map[string]*gosrc.Srcinfo,
 	incompatible stringset.StringSet,
 	conflicts stringset.MapStringSet,

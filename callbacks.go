@@ -9,6 +9,7 @@ import (
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -22,7 +23,7 @@ func questionCallback(question alpm.QuestionAny) {
 		return
 	}
 
-	if hideMenus {
+	if settings.HideMenus {
 		return
 	}
 

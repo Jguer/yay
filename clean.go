@@ -10,6 +10,7 @@ import (
 
 	"github.com/Jguer/go-alpm"
 
+	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -144,7 +145,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool, alpmHandle *alpm.Handl
 	// Querying the AUR is slow and needs internet so don't do it if we
 	// don't need to.
 	if keepCurrent {
-		info, errInfo := aurInfo(cachedPackages, &aurWarnings{})
+		info, errInfo := query.AURInfo(cachedPackages, &query.AURWarnings{}, config.RequestSplitN)
 		if errInfo != nil {
 			return errInfo
 		}
@@ -214,7 +215,7 @@ func isGitRepository(dir string) bool {
 	return !os.IsNotExist(err)
 }
 
-func cleanAfter(bases []Base) {
+func cleanAfter(bases []dep.Base) {
 	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
 	for i, base := range bases {
@@ -236,7 +237,7 @@ func cleanAfter(bases []Base) {
 	}
 }
 
-func cleanBuilds(bases []Base) {
+func cleanBuilds(bases []dep.Base) {
 	for i, base := range bases {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
 		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(bases), cyan(dir)))

@@ -6,29 +6,16 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
-	"github.com/Jguer/yay/v10/pkg/intrange"
-	"github.com/Jguer/yay/v10/pkg/multierror"
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
-
-type aurWarnings struct {
-	Orphans   []string
-	OutOfDate []string
-	Missing   []string
-	Ignore    stringset.StringSet
-}
-
-func makeWarnings() *aurWarnings {
-	return &aurWarnings{Ignore: make(stringset.StringSet)}
-}
 
 // Query is a collection of Results
 type aurQuery []rpc.Pkg
@@ -49,9 +36,9 @@ func (q aurQuery) Less(i, j int) bool {
 	case "popularity":
 		result = q[i].Popularity > q[j].Popularity
 	case "name":
-		result = LessRunes([]rune(q[i].Name), []rune(q[j].Name))
+		result = text.LessRunes([]rune(q[i].Name), []rune(q[j].Name))
 	case "base":
-		result = LessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
+		result = text.LessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
 	case "submitted":
 		result = q[i].FirstSubmitted < q[j].FirstSubmitted
 	case "modified":
@@ -154,7 +141,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
-	pkgS = removeInvalidTargets(pkgS)
+	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 	var aurErr error
 	var repoErr error
 	var aq aurQuery
@@ -201,7 +188,7 @@ func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
 func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handle) error {
 	var info []*rpc.Pkg
 	missing := false
-	pkgS = removeInvalidTargets(pkgS)
+	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 	aurS, repoS, err := packageSlices(pkgS, alpmHandle)
 	if err != nil {
 		return err
@@ -211,11 +198,11 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handl
 		noDB := make([]string, 0, len(aurS))
 
 		for _, pkg := range aurS {
-			_, name := splitDBFromName(pkg)
+			_, name := text.SplitDBFromName(pkg)
 			noDB = append(noDB, name)
 		}
 
-		info, err = aurInfoPrint(noDB)
+		info, err = query.AURInfoPrint(noDB, config.RequestSplitN)
 		if err != nil {
 			missing = true
 			fmt.Fprintln(os.Stderr, err)
@@ -286,7 +273,7 @@ func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []strin
 	}
 
 	for _, _pkg := range toCheck {
-		db, name := splitDBFromName(_pkg)
+		db, name := text.SplitDBFromName(_pkg)
 		found := false
 
 		if db == "aur" || config.Runtime.Mode == settings.ModeAUR {
@@ -441,80 +428,4 @@ func statistics(alpmHandle *alpm.Handle) (*struct {
 	}
 
 	return info, err
-}
-
-// Queries the aur for information about specified packages.
-// All packages should be queried in a single rpc request except when the number
-// of packages exceeds the number set in config.RequestSplitN.
-// If the number does exceed config.RequestSplitN multiple rpc requests will be
-// performed concurrently.
-func aurInfo(names []string, warnings *aurWarnings) ([]*rpc.Pkg, error) {
-	info := make([]*rpc.Pkg, 0, len(names))
-	seen := make(map[string]int)
-	var mux sync.Mutex
-	var wg sync.WaitGroup
-	var errs multierror.MultiError
-
-	makeRequest := func(n, max int) {
-		defer wg.Done()
-		tempInfo, requestErr := rpc.Info(names[n:max])
-		errs.Add(requestErr)
-		if requestErr != nil {
-			return
-		}
-		mux.Lock()
-		for i := range tempInfo {
-			info = append(info, &tempInfo[i])
-		}
-		mux.Unlock()
-	}
-
-	for n := 0; n < len(names); n += config.RequestSplitN {
-		max := intrange.Min(len(names), n+config.RequestSplitN)
-		wg.Add(1)
-		go makeRequest(n, max)
-	}
-
-	wg.Wait()
-
-	if err := errs.Return(); err != nil {
-		return info, err
-	}
-
-	for k, pkg := range info {
-		seen[pkg.Name] = k
-	}
-
-	for _, name := range names {
-		i, ok := seen[name]
-		if !ok && !warnings.Ignore.Get(name) {
-			warnings.Missing = append(warnings.Missing, name)
-			continue
-		}
-
-		pkg := info[i]
-
-		if pkg.Maintainer == "" && !warnings.Ignore.Get(name) {
-			warnings.Orphans = append(warnings.Orphans, name)
-		}
-		if pkg.OutOfDate != 0 && !warnings.Ignore.Get(name) {
-			warnings.OutOfDate = append(warnings.OutOfDate, name)
-		}
-	}
-
-	return info, nil
-}
-
-func aurInfoPrint(names []string) ([]*rpc.Pkg, error) {
-	text.OperationInfoln(gotext.Get("Querying AUR..."))
-
-	warnings := &aurWarnings{}
-	info, err := aurInfo(names, warnings)
-	if err != nil {
-		return info, err
-	}
-
-	warnings.print()
-
-	return info, nil
 }

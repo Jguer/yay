@@ -11,12 +11,13 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 // pgpKeySet maps a PGP key with a list of PKGBUILDs that require it.
 // This is similar to stringSet, used throughout the code.
-type pgpKeySet map[string][]Base
+type pgpKeySet map[string][]dep.Base
 
 func (set pgpKeySet) toSlice() []string {
 	slice := make([]string, 0, len(set))
@@ -26,7 +27,7 @@ func (set pgpKeySet) toSlice() []string {
 	return slice
 }
 
-func (set pgpKeySet) set(key string, p Base) {
+func (set pgpKeySet) set(key string, p dep.Base) {
 	// Using ToUpper to make sure keys with a different case will be
 	// considered the same.
 	upperKey := strings.ToUpper(key)
@@ -41,7 +42,7 @@ func (set pgpKeySet) get(key string) bool {
 
 // checkPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func checkPgpKeys(bases []Base, srcinfos map[string]*gosrc.Srcinfo) error {
+func checkPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)

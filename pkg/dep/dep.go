@@ -1,4 +1,4 @@
-package main
+package dep
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 
 	alpm "github.com/Jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
+
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 type providers struct {
@@ -33,7 +35,7 @@ func (q providers) Less(i, j int) bool {
 		return false
 	}
 
-	return LessRunes([]rune(q.Pkgs[i].Name), []rune(q.Pkgs[j].Name))
+	return text.LessRunes([]rune(q.Pkgs[i].Name), []rune(q.Pkgs[j].Name))
 }
 
 func (q providers) Swap(i, j int) {
@@ -135,42 +137,4 @@ func satisfiesRepo(dep string, pkg *alpm.Package) bool {
 	}
 
 	return false
-}
-
-// split apart db/package to db and package
-func splitDBFromName(pkg string) (db, name string) {
-	split := strings.SplitN(pkg, "/", 2)
-
-	if len(split) == 2 {
-		return split[0], split[1]
-	}
-	return "", split[0]
-}
-
-func getBases(pkgs []*rpc.Pkg) []Base {
-	basesMap := make(map[string]Base)
-	for _, pkg := range pkgs {
-		basesMap[pkg.PackageBase] = append(basesMap[pkg.PackageBase], pkg)
-	}
-
-	bases := make([]Base, 0, len(basesMap))
-	for _, base := range basesMap {
-		bases = append(bases, base)
-	}
-
-	return bases
-}
-
-func isDevelName(name string) bool {
-	for _, suffix := range []string{"git", "svn", "hg", "bzr", "nightly"} {
-		if strings.HasSuffix(name, "-"+suffix) {
-			return true
-		}
-	}
-
-	return strings.Contains(name, "-always-")
-}
-
-func isDevelPackage(pkg alpm.Package) bool {
-	return isDevelName(pkg.Name()) || isDevelName(pkg.Base())
 }

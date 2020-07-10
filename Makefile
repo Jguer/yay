@@ -141,7 +141,5 @@ locale:
 		touch po/$$lang.po; \
 	done
 
-
-
 ${LOCALEDIR}/%.mo: ${LOCALEDIR}/%.po
 	msgfmt $< -o $@

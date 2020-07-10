@@ -1,4 +1,4 @@
-package main
+package dep
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-func (dp *depPool) checkInnerConflict(name, conflict string, conflicts stringset.MapStringSet) {
+func (dp *Pool) checkInnerConflict(name, conflict string, conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -35,7 +35,7 @@ func (dp *depPool) checkInnerConflict(name, conflict string, conflicts stringset
 	}
 }
 
-func (dp *depPool) checkForwardConflict(name, conflict string, conflicts stringset.MapStringSet) {
+func (dp *Pool) checkForwardConflict(name, conflict string, conflicts stringset.MapStringSet) {
 	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
 			return nil
@@ -53,7 +53,7 @@ func (dp *depPool) checkForwardConflict(name, conflict string, conflicts strings
 	})
 }
 
-func (dp *depPool) checkReverseConflict(name, conflict string, conflicts stringset.MapStringSet) {
+func (dp *Pool) checkReverseConflict(name, conflict string, conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		if pkg.Name == name {
 			continue
@@ -83,7 +83,7 @@ func (dp *depPool) checkReverseConflict(name, conflict string, conflicts strings
 	}
 }
 
-func (dp *depPool) checkInnerConflicts(conflicts stringset.MapStringSet) {
+func (dp *Pool) checkInnerConflicts(conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		for _, conflict := range pkg.Conflicts {
 			dp.checkInnerConflict(pkg.Name, conflict, conflicts)
@@ -98,7 +98,7 @@ func (dp *depPool) checkInnerConflicts(conflicts stringset.MapStringSet) {
 	}
 }
 
-func (dp *depPool) checkForwardConflicts(conflicts stringset.MapStringSet) {
+func (dp *Pool) checkForwardConflicts(conflicts stringset.MapStringSet) {
 	for _, pkg := range dp.Aur {
 		for _, conflict := range pkg.Conflicts {
 			dp.checkForwardConflict(pkg.Name, conflict, conflicts)
@@ -113,7 +113,7 @@ func (dp *depPool) checkForwardConflicts(conflicts stringset.MapStringSet) {
 	}
 }
 
-func (dp *depPool) checkReverseConflicts(conflicts stringset.MapStringSet) {
+func (dp *Pool) checkReverseConflicts(conflicts stringset.MapStringSet) {
 	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		if dp.hasPackage(pkg.Name()) {
 			return nil
@@ -128,7 +128,7 @@ func (dp *depPool) checkReverseConflicts(conflicts stringset.MapStringSet) {
 	})
 }
 
-func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
+func (dp *Pool) CheckConflicts(useAsk, noConfirm bool) (stringset.MapStringSet, error) {
 	var wg sync.WaitGroup
 	innerConflicts := make(stringset.MapStringSet)
 	conflicts := make(stringset.MapStringSet)
@@ -153,9 +153,9 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 		text.Errorln(gotext.Get("\nInner conflicts found:"))
 
 		for name, pkgs := range innerConflicts {
-			str := red(bold(smallArrow)) + " " + name + ":"
+			str := text.SprintError(name + ":")
 			for pkg := range pkgs {
-				str += " " + cyan(pkg) + ","
+				str += " " + text.Cyan(pkg) + ","
 			}
 			str = strings.TrimSuffix(str, ",")
 
@@ -167,9 +167,9 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 		text.Errorln(gotext.Get("\nPackage conflicts found:"))
 
 		for name, pkgs := range conflicts {
-			str := gotext.Get("%s Installing %s will remove:", red(bold(smallArrow)), cyan(name))
+			str := text.SprintError(gotext.Get("Installing %s will remove:", text.Cyan(name)))
 			for pkg := range pkgs {
-				str += " " + cyan(pkg) + ","
+				str += " " + text.Cyan(pkg) + ","
 			}
 			str = strings.TrimSuffix(str, ",")
 
@@ -188,8 +188,8 @@ func (dp *depPool) CheckConflicts() (stringset.MapStringSet, error) {
 	}
 
 	if len(conflicts) > 0 {
-		if !config.UseAsk {
-			if config.NoConfirm {
+		if !useAsk {
+			if noConfirm {
 				return nil, fmt.Errorf(gotext.Get("package conflicts can not be resolved with noconfirm, aborting"))
 			}
 
@@ -205,7 +205,7 @@ type missing struct {
 	Missing map[string][][]string
 }
 
-func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
+func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing) {
 	if missing.Good.Get(dep) {
 		return
 	}
@@ -256,7 +256,29 @@ func (dp *depPool) _checkMissing(dep string, stack []string, missing *missing) {
 	missing.Missing[dep] = [][]string{stack}
 }
 
-func (dp *depPool) CheckMissing() error {
+func stringSliceEqual(a, b []string) bool {
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (dp *Pool) CheckMissing() error {
 	missing := &missing{
 		make(stringset.StringSet),
 		make(map[string][][]string),
@@ -273,16 +295,16 @@ func (dp *depPool) CheckMissing() error {
 	text.Errorln(gotext.Get("Could not find all required packages:"))
 	for dep, trees := range missing.Missing {
 		for _, tree := range trees {
-			fmt.Fprintf(os.Stderr, "\t%s", cyan(dep))
+			fmt.Fprintf(os.Stderr, "\t%s", text.Cyan(dep))
 
 			if len(tree) == 0 {
 				fmt.Fprint(os.Stderr, gotext.Get(" (Target"))
 			} else {
 				fmt.Fprint(os.Stderr, gotext.Get(" (Wanted by: "))
 				for n := 0; n < len(tree)-1; n++ {
-					fmt.Fprint(os.Stderr, cyan(tree[n]), " -> ")
+					fmt.Fprint(os.Stderr, text.Cyan(tree[n]), " -> ")
 				}
-				fmt.Fprint(os.Stderr, cyan(tree[len(tree)-1]))
+				fmt.Fprint(os.Stderr, text.Cyan(tree[len(tree)-1]))
 			}
 
 			fmt.Fprintln(os.Stderr, ")")

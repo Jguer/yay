@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"unicode"
 
@@ -38,14 +39,14 @@ func (u upSlice) Less(i, j int) bool {
 	if u[i].Repository == u[j].Repository {
 		iRunes := []rune(u[i].Name)
 		jRunes := []rune(u[j].Name)
-		return LessRunes(iRunes, jRunes)
+		return text.LessRunes(iRunes, jRunes)
 	}
 
 	syncDB, err := config.Runtime.AlpmHandle.SyncDBs()
 	if err != nil {
 		iRunes := []rune(u[i].Repository)
 		jRunes := []rune(u[j].Repository)
-		return LessRunes(iRunes, jRunes)
+		return text.LessRunes(iRunes, jRunes)
 	}
 
 	less := false
@@ -68,7 +69,7 @@ func (u upSlice) Less(i, j int) bool {
 
 	iRunes := []rune(u[i].Repository)
 	jRunes := []rune(u[j].Repository)
-	return LessRunes(iRunes, jRunes)
+	return text.LessRunes(iRunes, jRunes)
 }
 
 func getVersionDiff(oldVersion, newVersion string) (left, right string) {
@@ -118,7 +119,7 @@ func getVersionDiff(oldVersion, newVersion string) (left, right string) {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(warnings *aurWarnings, alpmHandle *alpm.Handle, enableDowngrade bool) (aurUp, repoUp upSlice, err error) {
+func upList(warnings *query.AURWarnings, alpmHandle *alpm.Handle, enableDowngrade bool) (aurUp, repoUp upSlice, err error) {
 	_, remote, _, remoteNames, err := query.FilterPackages(alpmHandle)
 	if err != nil {
 		return nil, nil, err
@@ -150,7 +151,7 @@ func upList(warnings *aurWarnings, alpmHandle *alpm.Handle, enableDowngrade bool
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []*rpc.Pkg
-		_aurdata, err = aurInfo(remoteNames, warnings)
+		_aurdata, err = query.AURInfo(remoteNames, warnings, config.RequestSplitN)
 		errs.Add(err)
 		if err == nil {
 			for _, pkg := range _aurdata {
@@ -294,6 +295,20 @@ func printLocalNewerThanAUR(
 			))
 		}
 	}
+}
+
+func isDevelName(name string) bool {
+	for _, suffix := range []string{"git", "svn", "hg", "bzr", "nightly"} {
+		if strings.HasSuffix(name, "-"+suffix) {
+			return true
+		}
+	}
+
+	return strings.Contains(name, "-always-")
+}
+
+func isDevelPackage(pkg alpm.Package) bool {
+	return isDevelName(pkg.Name()) || isDevelName(pkg.Base())
 }
 
 // upRepo gathers local packages and checks if they have new versions.

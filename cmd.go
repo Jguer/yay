@@ -12,6 +12,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/completion"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/news"
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -301,7 +302,7 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 		lenaq, lenpq    int
 	)
 
-	pkgS = removeInvalidTargets(pkgS)
+	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 
 	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
 		aq, aurErr = narrowSearch(pkgS, true)

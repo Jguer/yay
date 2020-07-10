@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/Jguer/yay/v10/pkg/text"
+)
 
 func TestLessRunes(t *testing.T) {
 	t.Parallel()
@@ -25,7 +29,7 @@ func TestLessRunes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := LessRunes(tt.args.iRunes, tt.args.jRunes); got != tt.want {
+			if got := text.LessRunes(tt.args.iRunes, tt.args.jRunes); got != tt.want {
 				t.Errorf("LessRunes() = %v, want %v", got, tt.want)
 			}
 		})

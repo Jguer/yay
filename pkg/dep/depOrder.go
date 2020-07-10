@@ -1,46 +1,31 @@
-package main
+package dep
 
 import (
+	"fmt"
+
 	alpm "github.com/Jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/stringset"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// Base is an AUR base package
-type Base []*rpc.Pkg
-
-// Pkgbase returns the first base package.
-func (b Base) Pkgbase() string {
-	return b[0].PackageBase
-}
-
-// Version returns the first base package version.
-func (b Base) Version() string {
-	return b[0].Version
-}
-
-// URLPath returns the first base package URL.
-func (b Base) URLPath() string {
-	return b[0].URLPath
-}
-
-type depOrder struct {
+type Order struct {
 	Aur     []Base
 	Repo    []*alpm.Package
 	Runtime stringset.StringSet
 }
 
-func makeDepOrder() *depOrder {
-	return &depOrder{
+func makeOrder() *Order {
+	return &Order{
 		make([]Base, 0),
 		make([]*alpm.Package, 0),
 		make(stringset.StringSet),
 	}
 }
 
-func getDepOrder(dp *depPool) *depOrder {
-	do := makeDepOrder()
+func GetOrder(dp *Pool) *Order {
+	do := makeOrder()
 
 	for _, target := range dp.Targets {
 		dep := target.DepString()
@@ -63,7 +48,7 @@ func getDepOrder(dp *depPool) *depOrder {
 	return do
 }
 
-func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
+func (do *Order) orderPkgAur(pkg *rpc.Pkg, dp *Pool, runtime bool) {
 	if runtime {
 		do.Runtime.Set(pkg.Name)
 	}
@@ -93,7 +78,7 @@ func (do *depOrder) orderPkgAur(pkg *rpc.Pkg, dp *depPool, runtime bool) {
 	do.Aur = append(do.Aur, Base{pkg})
 }
 
-func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
+func (do *Order) orderPkgRepo(pkg *alpm.Package, dp *Pool, runtime bool) {
 	if runtime {
 		do.Runtime.Set(pkg.Name())
 	}
@@ -111,7 +96,7 @@ func (do *depOrder) orderPkgRepo(pkg *alpm.Package, dp *depPool, runtime bool) {
 	do.Repo = append(do.Repo, pkg)
 }
 
-func (do *depOrder) HasMake() bool {
+func (do *Order) HasMake() bool {
 	lenAur := 0
 	for _, base := range do.Aur {
 		lenAur += len(base)
@@ -120,7 +105,7 @@ func (do *depOrder) HasMake() bool {
 	return len(do.Runtime) != lenAur+len(do.Repo)
 }
 
-func (do *depOrder) getMake() []string {
+func (do *Order) GetMake() []string {
 	makeOnly := []string{}
 
 	for _, base := range do.Aur {
@@ -138,4 +123,85 @@ func (do *depOrder) getMake() []string {
 	}
 
 	return makeOnly
+}
+
+// Print prints repository packages to be downloaded
+func (do *Order) Print() {
+	repo := ""
+	repoMake := ""
+	aur := ""
+	aurMake := ""
+
+	repoLen := 0
+	repoMakeLen := 0
+	aurLen := 0
+	aurMakeLen := 0
+
+	for _, pkg := range do.Repo {
+		pkgStr := fmt.Sprintf("  %s-%s", pkg.Name(), pkg.Version())
+		if do.Runtime.Get(pkg.Name()) {
+			repo += pkgStr
+			repoLen++
+		} else {
+			repoMake += pkgStr
+			repoMakeLen++
+		}
+	}
+
+	for _, base := range do.Aur {
+		pkg := base.Pkgbase()
+		pkgStr := "  " + pkg + "-" + base[0].Version
+		pkgStrMake := pkgStr
+
+		push := false
+		pushMake := false
+
+		switch {
+		case len(base) > 1, pkg != base[0].Name:
+			pkgStr += " ("
+			pkgStrMake += " ("
+
+			for _, split := range base {
+				if do.Runtime.Get(split.Name) {
+					pkgStr += split.Name + " "
+					aurLen++
+					push = true
+				} else {
+					pkgStrMake += split.Name + " "
+					aurMakeLen++
+					pushMake = true
+				}
+			}
+
+			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
+			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
+		case do.Runtime.Get(base[0].Name):
+			aurLen++
+			push = true
+		default:
+			aurMakeLen++
+			pushMake = true
+		}
+
+		if push {
+			aur += pkgStr
+		}
+		if pushMake {
+			aurMake += pkgStrMake
+		}
+	}
+
+	printDownloads("Repo", repoLen, repo)
+	printDownloads("Repo Make", repoMakeLen, repoMake)
+	printDownloads("Aur", aurLen, aur)
+	printDownloads("Aur Make", aurMakeLen, aurMake)
+}
+
+func printDownloads(repoName string, length int, packages string) {
+	if length < 1 {
+		return
+	}
+
+	repoInfo := fmt.Sprintf(text.Bold(text.Blue("[%s:%d]")), repoName, length)
+	fmt.Println(repoInfo + text.Cyan(packages))
 }

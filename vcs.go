@@ -14,6 +14,7 @@ import (
 
 	"github.com/Jguer/go-alpm"
 
+	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -40,12 +41,12 @@ func createDevelDB(vcsFilePath string, alpmHandle *alpm.Handle) error {
 		return err
 	}
 
-	info, err := aurInfoPrint(remoteNames)
+	info, err := query.AURInfoPrint(remoteNames, config.RequestSplitN)
 	if err != nil {
 		return err
 	}
 
-	bases := getBases(info)
+	bases := dep.GetBases(info)
 	toSkip := pkgbuildsToSkip(bases, stringset.FromSlice(remoteNames))
 	_, err = downloadPkgbuilds(bases, toSkip, config.BuildDir)
 	if err != nil {

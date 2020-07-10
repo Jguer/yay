@@ -6,6 +6,7 @@ const (
 	redCode     = "\x1b[31m"
 	greenCode   = "\x1b[32m"
 	yellowCode  = "\x1b[33m"
+	blueCode    = "\x1b[34m"
 	magentaCode = "\x1b[35m"
 	CyanCode    = "\x1b[36m"
 	boldCode    = "\x1b[1m"
@@ -24,7 +25,7 @@ func stylize(startCode, in string) string {
 	return in
 }
 
-func red(in string) string {
+func Red(in string) string {
 	return stylize(redCode, in)
 }
 
@@ -36,12 +37,16 @@ func yellow(in string) string {
 	return stylize(yellowCode, in)
 }
 
-func cyan(in string) string {
+func Cyan(in string) string {
 	return stylize(CyanCode, in)
 }
 
 func Magenta(in string) string {
 	return stylize(magentaCode, in)
+}
+
+func Blue(in string) string {
+	return stylize(blueCode, in)
 }
 
 func Bold(in string) string {

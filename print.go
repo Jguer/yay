@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strconv"
@@ -23,32 +22,6 @@ const (
 	arrow      = "==>"
 	smallArrow = " ->"
 )
-
-func (warnings *aurWarnings) print() {
-	if len(warnings.Missing) > 0 {
-		text.Warn(gotext.Get("Missing AUR Packages:"))
-		for _, name := range warnings.Missing {
-			fmt.Print("  " + cyan(name))
-		}
-		fmt.Println()
-	}
-
-	if len(warnings.Orphans) > 0 {
-		text.Warn(gotext.Get("Orphaned AUR Packages:"))
-		for _, name := range warnings.Orphans {
-			fmt.Print("  " + cyan(name))
-		}
-		fmt.Println()
-	}
-
-	if len(warnings.OutOfDate) > 0 {
-		text.Warn(gotext.Get("Flagged Out Of Date AUR Packages:"))
-		for _, name := range warnings.OutOfDate {
-			fmt.Print("  " + cyan(name))
-		}
-		fmt.Println()
-	}
-}
 
 // PrintSearch handles printing search results in a given format
 func (q aurQuery) printSearch(start int, alpmHandle *alpm.Handle) {
@@ -139,23 +112,6 @@ func (s repoQuery) printSearch(alpmHandle *alpm.Handle) {
 }
 
 // Pretty print a set of packages from the same package base.
-// Packages foo and bar from a pkgbase named base would print like so:
-// base (foo bar)
-func (b Base) String() string {
-	pkg := b[0]
-	str := pkg.PackageBase
-	if len(b) > 1 || pkg.PackageBase != pkg.Name {
-		str2 := " ("
-		for _, split := range b {
-			str2 += split.Name + " "
-		}
-		str2 = str2[:len(str2)-1] + ")"
-
-		str += str2
-	}
-
-	return str
-}
 
 func (u *upgrade) StylizedNameWithRepository() string {
 	return bold(text.ColorHash(u.Repository)) + "/" + bold(u.Name)
@@ -185,87 +141,6 @@ func (u upSlice) print() {
 
 		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
 	}
-}
-
-// Print prints repository packages to be downloaded
-func (do *depOrder) Print() {
-	repo := ""
-	repoMake := ""
-	aur := ""
-	aurMake := ""
-
-	repoLen := 0
-	repoMakeLen := 0
-	aurLen := 0
-	aurMakeLen := 0
-
-	for _, pkg := range do.Repo {
-		if do.Runtime.Get(pkg.Name()) {
-			repo += "  " + pkg.Name() + "-" + pkg.Version()
-			repoLen++
-		} else {
-			repoMake += "  " + pkg.Name() + "-" + pkg.Version()
-			repoMakeLen++
-		}
-	}
-
-	for _, base := range do.Aur {
-		pkg := base.Pkgbase()
-		pkgStr := "  " + pkg + "-" + base[0].Version
-		pkgStrMake := pkgStr
-
-		push := false
-		pushMake := false
-
-		switch {
-		case len(base) > 1, pkg != base[0].Name:
-			pkgStr += " ("
-			pkgStrMake += " ("
-
-			for _, split := range base {
-				if do.Runtime.Get(split.Name) {
-					pkgStr += split.Name + " "
-					aurLen++
-					push = true
-				} else {
-					pkgStrMake += split.Name + " "
-					aurMakeLen++
-					pushMake = true
-				}
-			}
-
-			pkgStr = pkgStr[:len(pkgStr)-1] + ")"
-			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
-		case do.Runtime.Get(base[0].Name):
-			aurLen++
-			push = true
-		default:
-			aurMakeLen++
-			pushMake = true
-		}
-
-		if push {
-			aur += pkgStr
-		}
-		if pushMake {
-			aurMake += pkgStrMake
-		}
-	}
-
-	printDownloads("Repo", repoLen, repo)
-	printDownloads("Repo Make", repoMakeLen, repoMake)
-	printDownloads("Aur", aurLen, aur)
-	printDownloads("Aur Make", aurMakeLen, aurMake)
-}
-
-func printDownloads(repoName string, length int, packages string) {
-	if length < 1 {
-		return
-	}
-
-	repoInfo := bold(blue(
-		"[" + repoName + ": " + strconv.Itoa(length) + "]"))
-	fmt.Println(repoInfo + cyan(packages))
 }
 
 // PrintInfo prints package info like pacman -Si.
@@ -350,14 +225,14 @@ func localStatistics(alpmHandle *alpm.Handle) error {
 	biggestPackages(alpmHandle)
 	fmt.Println(bold(cyan("===========================================")))
 
-	aurInfoPrint(remoteNames)
+	query.AURInfoPrint(remoteNames, config.RequestSplitN)
 
 	return nil
 }
 
 // TODO: Make it less hacky
 func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
-	warnings := makeWarnings()
+	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	aurUp, repoUp, err := upList(warnings, alpmHandle, enableDowngrade)
@@ -373,7 +248,7 @@ func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
 // TODO: Make it less hacky
 func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enableDowngrade bool) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
-	warnings := makeWarnings()
+	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
@@ -488,60 +363,4 @@ func magenta(in string) string {
 
 func bold(in string) string {
 	return stylize(boldCode, in)
-}
-
-func providerMenu(dep string, providers providers) *rpc.Pkg {
-	size := providers.Len()
-
-	str := bold(gotext.Get("There are %d providers available for %s:", size, dep))
-
-	size = 1
-	str += bold(cyan("\n:: ")) + bold(gotext.Get("Repository AUR")) + "\n    "
-
-	for _, pkg := range providers.Pkgs {
-		str += fmt.Sprintf("%d) %s ", size, pkg.Name)
-		size++
-	}
-
-	text.OperationInfoln(str)
-
-	for {
-		fmt.Print(gotext.Get("\nEnter a number (default=1): "))
-
-		if config.NoConfirm {
-			fmt.Println("1")
-			return providers.Pkgs[0]
-		}
-
-		reader := bufio.NewReader(os.Stdin)
-		numberBuf, overflow, err := reader.ReadLine()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			break
-		}
-
-		if overflow {
-			text.Errorln(gotext.Get("input too long"))
-			continue
-		}
-
-		if string(numberBuf) == "" {
-			return providers.Pkgs[0]
-		}
-
-		num, err := strconv.Atoi(string(numberBuf))
-		if err != nil {
-			text.Errorln(gotext.Get("invalid number: %s", string(numberBuf)))
-			continue
-		}
-
-		if num < 1 || num >= size {
-			text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size-1))
-			continue
-		}
-
-		return providers.Pkgs[num-1]
-	}
-
-	return nil
 }

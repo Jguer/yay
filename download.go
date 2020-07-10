@@ -12,7 +12,9 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
 
+	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/multierror"
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -145,18 +147,18 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 		return err
 	}
 
-	pkgs = removeInvalidTargets(pkgs)
+	pkgs = query.RemoveInvalidTargets(pkgs, config.Runtime.Mode)
 	aur, repo, err := packageSlices(pkgs, alpmHandle)
 	if err != nil {
 		return err
 	}
 
 	for n := range aur {
-		_, pkg := splitDBFromName(aur[n])
+		_, pkg := text.SplitDBFromName(aur[n])
 		aur[n] = pkg
 	}
 
-	info, err := aurInfoPrint(aur)
+	info, err := query.AURInfoPrint(aur, config.RequestSplitN)
 	if err != nil {
 		return err
 	}
@@ -169,8 +171,8 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 	}
 
 	if len(aur) > 0 {
-		allBases := getBases(info)
-		bases := make([]Base, 0)
+		allBases := dep.GetBases(info)
+		bases := make([]dep.Base, 0)
 
 		for _, base := range allBases {
 			name := base.Pkgbase()
@@ -227,7 +229,7 @@ func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle, fo
 		var pkg *alpm.Package
 		var err error
 		var url string
-		pkgDB, name := splitDBFromName(pkgN)
+		pkgDB, name := text.SplitDBFromName(pkgN)
 
 		if pkgDB != "" {
 			if db, errSync := alpmHandle.SyncDBByName(pkgDB); errSync == nil {

@@ -1,6 +1,12 @@
 package query
 
-import "github.com/Jguer/go-alpm"
+import (
+	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/text"
+)
 
 // FilterPackages filters packages based on source and type from local repository.
 func FilterPackages(alpmHandle *alpm.Handle) (
@@ -41,4 +47,26 @@ func FilterPackages(alpmHandle *alpm.Handle) (
 
 	err = localDB.PkgCache().ForEach(f)
 	return local, remote, localNames, remoteNames, err
+}
+
+func RemoveInvalidTargets(targets []string, mode settings.TargetMode) []string {
+	filteredTargets := make([]string, 0)
+
+	for _, target := range targets {
+		db, _ := text.SplitDBFromName(target)
+
+		if db == "aur" && mode == settings.ModeRepo {
+			text.Warnln(gotext.Get("%s: can't use target with option --repo -- skipping", text.Cyan(target)))
+			continue
+		}
+
+		if db != "aur" && db != "" && mode == settings.ModeAUR {
+			text.Warnln(gotext.Get("%s: can't use target with option --aur -- skipping", text.Cyan(target)))
+			continue
+		}
+
+		filteredTargets = append(filteredTargets, target)
+	}
+
+	return filteredTargets
 }

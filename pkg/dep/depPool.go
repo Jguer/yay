@@ -1,29 +1,36 @@
-package main
+package dep
 
 import (
+	"bufio"
+	"fmt"
+	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
+	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-type target struct {
+type Target struct {
 	DB      string
 	Name    string
 	Mod     string
 	Version string
 }
 
-func toTarget(pkg string) target {
-	db, dep := splitDBFromName(pkg)
+func ToTarget(pkg string) Target {
+	db, dep := text.SplitDBFromName(pkg)
 	name, mod, depVersion := splitDep(dep)
 
-	return target{
+	return Target{
 		DB:      db,
 		Name:    name,
 		Mod:     mod,
@@ -31,11 +38,11 @@ func toTarget(pkg string) target {
 	}
 }
 
-func (t target) DepString() string {
+func (t Target) DepString() string {
 	return t.Name + t.Mod + t.Version
 }
 
-func (t target) String() string {
+func (t Target) String() string {
 	if t.DB != "" {
 		return t.DB + "/" + t.DepString()
 	}
@@ -43,8 +50,8 @@ func (t target) String() string {
 	return t.DepString()
 }
 
-type depPool struct {
-	Targets  []target
+type Pool struct {
+	Targets  []Target
 	Explicit stringset.StringSet
 	Repo     map[string]*alpm.Package
 	Aur      map[string]*rpc.Pkg
@@ -52,10 +59,10 @@ type depPool struct {
 	Groups   []string
 	LocalDB  *alpm.DB
 	SyncDB   alpm.DBList
-	Warnings *aurWarnings
+	Warnings *query.AURWarnings
 }
 
-func makeDepPool(alpmHandle *alpm.Handle) (*depPool, error) {
+func makePool(alpmHandle *alpm.Handle) (*Pool, error) {
 	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
 		return nil, err
@@ -65,8 +72,8 @@ func makeDepPool(alpmHandle *alpm.Handle) (*depPool, error) {
 		return nil, err
 	}
 
-	dp := &depPool{
-		make([]target, 0),
+	dp := &Pool{
+		make([]Target, 0),
 		make(stringset.StringSet),
 		make(map[string]*alpm.Package),
 		make(map[string]*rpc.Pkg),
@@ -81,17 +88,19 @@ func makeDepPool(alpmHandle *alpm.Handle) (*depPool, error) {
 }
 
 // Includes db/ prefixes and group installs
-func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle, ignoreProviders bool) error {
+func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
+	mode settings.TargetMode,
+	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
 	aurTargets := make(stringset.StringSet)
 
-	pkgs = removeInvalidTargets(pkgs)
+	pkgs = query.RemoveInvalidTargets(pkgs, mode)
 
 	for _, pkg := range pkgs {
 		var err error
-		target := toTarget(pkg)
+		target := ToTarget(pkg)
 
 		// skip targets already satisfied
 		// even if the user enters db/pkg and aur/pkg the latter will
@@ -106,7 +115,7 @@ func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle, ignore
 		var singleDB *alpm.DB
 
 		// aur/ prefix means we only check the aur
-		if target.DB == "aur" || config.Runtime.Mode == settings.ModeAUR {
+		if target.DB == "aur" || mode == settings.ModeAUR {
 			dp.Targets = append(dp.Targets, target)
 			aurTargets.Set(target.DepString())
 			continue
@@ -156,8 +165,8 @@ func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle, ignore
 		dp.Targets = append(dp.Targets, target)
 	}
 
-	if len(aurTargets) > 0 && (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) {
-		return dp.resolveAURPackages(aurTargets, true, ignoreProviders)
+	if len(aurTargets) > 0 && (mode == settings.ModeAny || mode == settings.ModeAUR) {
+		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN)
 	}
 
 	return nil
@@ -175,7 +184,7 @@ func (dp *depPool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle, ignore
 // positives.
 //
 // This method increases dependency resolve time
-func (dp *depPool) findProvides(pkgs stringset.StringSet) error {
+func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 
@@ -222,9 +231,9 @@ func (dp *depPool) findProvides(pkgs stringset.StringSet) error {
 	return nil
 }
 
-func (dp *depPool) cacheAURPackages(_pkgs stringset.StringSet) error {
+func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, splitN int) error {
 	pkgs := _pkgs.Copy()
-	query := make([]string, 0)
+	toQuery := make([]string, 0)
 
 	for pkg := range pkgs {
 		if _, ok := dp.AurCache[pkg]; ok {
@@ -236,7 +245,7 @@ func (dp *depPool) cacheAURPackages(_pkgs stringset.StringSet) error {
 		return nil
 	}
 
-	if config.Provides {
+	if provides {
 		err := dp.findProvides(pkgs)
 		if err != nil {
 			return err
@@ -247,14 +256,14 @@ func (dp *depPool) cacheAURPackages(_pkgs stringset.StringSet) error {
 		if _, ok := dp.AurCache[pkg]; !ok {
 			name, _, ver := splitDep(pkg)
 			if ver != "" {
-				query = append(query, name, name+"-"+ver)
+				toQuery = append(toQuery, name, name+"-"+ver)
 			} else {
-				query = append(query, name)
+				toQuery = append(toQuery, name)
 			}
 		}
 	}
 
-	info, err := aurInfo(query, dp.Warnings)
+	info, err := query.AURInfo(toQuery, dp.Warnings, splitN)
 	if err != nil {
 		return err
 	}
@@ -267,11 +276,13 @@ func (dp *depPool) cacheAURPackages(_pkgs stringset.StringSet) error {
 	return nil
 }
 
-func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit, ignoreProviders bool) error {
+func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
+	explicit, ignoreProviders, noConfirm, provides bool,
+	rebuild string, splitN int) error {
 	newPackages := make(stringset.StringSet)
 	newAURPackages := make(stringset.StringSet)
 
-	err := dp.cacheAURPackages(pkgs)
+	err := dp.cacheAURPackages(pkgs, provides, splitN)
 	if err != nil {
 		return err
 	}
@@ -286,7 +297,7 @@ func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit, ignore
 			continue
 		}
 
-		pkg := dp.findSatisfierAurCache(name, ignoreProviders)
+		pkg := dp.findSatisfierAurCache(name, ignoreProviders, noConfirm, provides)
 		if pkg == nil {
 			continue
 		}
@@ -309,11 +320,11 @@ func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit, ignore
 		}
 
 		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep) // has satisfier installed: skip
-		hm := hideMenus
-		hideMenus = isInstalled == nil
+		hm := settings.HideMenus
+		settings.HideMenus = isInstalled == nil
 		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep) // has satisfier in repo: fetch it
-		hideMenus = hm
-		if isInstalled == nil && (config.ReBuild != "tree" || inRepos == nil) {
+		settings.HideMenus = hm
+		if isInstalled == nil && (rebuild != "tree" || inRepos == nil) {
 			continue
 		}
 
@@ -327,11 +338,11 @@ func (dp *depPool) resolveAURPackages(pkgs stringset.StringSet, explicit, ignore
 		newAURPackages.Set(dep)
 	}
 
-	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders)
+	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN)
 	return err
 }
 
-func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
+func (dp *Pool) ResolveRepoDependency(pkg *alpm.Package) {
 	dp.Repo[pkg.Name()] = pkg
 
 	_ = pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
@@ -358,19 +369,24 @@ func (dp *depPool) ResolveRepoDependency(pkg *alpm.Package) {
 	})
 }
 
-func getDepPool(pkgs []string, warnings *aurWarnings, alpmHandle *alpm.Handle, ignoreProviders bool) (*depPool, error) {
-	dp, err := makeDepPool(alpmHandle)
+func GetPool(pkgs []string,
+	warnings *query.AURWarnings,
+	alpmHandle *alpm.Handle,
+	mode settings.TargetMode,
+	ignoreProviders, noConfirm, provides bool,
+	rebuild string, splitN int) (*Pool, error) {
+	dp, err := makePool(alpmHandle)
 	if err != nil {
 		return nil, err
 	}
 
 	dp.Warnings = warnings
-	err = dp.ResolveTargets(pkgs, alpmHandle, ignoreProviders)
+	err = dp.ResolveTargets(pkgs, alpmHandle, mode, ignoreProviders, noConfirm, provides, rebuild, splitN)
 
 	return dp, err
 }
 
-func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
+func (dp *Pool) findSatisfierAur(dep string) *rpc.Pkg {
 	for _, pkg := range dp.Aur {
 		if satisfiesAur(dep, pkg) {
 			return pkg
@@ -390,7 +406,7 @@ func (dp *depPool) findSatisfierAur(dep string) *rpc.Pkg {
 // Using Pacman's ways trying to install foo would never give you
 // a menu.
 // TODO: maybe intermix repo providers in the menu
-func (dp *depPool) findSatisfierAurCache(dep string, ignoreProviders bool) *rpc.Pkg {
+func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, provides bool) *rpc.Pkg {
 	depName, _, _ := splitDep(dep)
 	seen := make(stringset.StringSet)
 	providerSlice := makeProviders(depName)
@@ -433,7 +449,7 @@ func (dp *depPool) findSatisfierAurCache(dep string, ignoreProviders bool) *rpc.
 		}
 	}
 
-	if !config.Provides && providerSlice.Len() >= 1 {
+	if !provides && providerSlice.Len() >= 1 {
 		return providerSlice.Pkgs[0]
 	}
 
@@ -443,13 +459,13 @@ func (dp *depPool) findSatisfierAurCache(dep string, ignoreProviders bool) *rpc.
 
 	if providerSlice.Len() > 1 {
 		sort.Sort(providerSlice)
-		return providerMenu(dep, providerSlice)
+		return providerMenu(dep, providerSlice, noConfirm)
 	}
 
 	return nil
 }
 
-func (dp *depPool) findSatisfierRepo(dep string) *alpm.Package {
+func (dp *Pool) findSatisfierRepo(dep string) *alpm.Package {
 	for _, pkg := range dp.Repo {
 		if satisfiesRepo(dep, pkg) {
 			return pkg
@@ -459,11 +475,11 @@ func (dp *depPool) findSatisfierRepo(dep string) *alpm.Package {
 	return nil
 }
 
-func (dp *depPool) hasSatisfier(dep string) bool {
+func (dp *Pool) hasSatisfier(dep string) bool {
 	return dp.findSatisfierRepo(dep) != nil || dp.findSatisfierAur(dep) != nil
 }
 
-func (dp *depPool) hasPackage(name string) bool {
+func (dp *Pool) hasPackage(name string) bool {
 	for _, pkg := range dp.Repo {
 		if pkg.Name() == name {
 			return true
@@ -483,4 +499,60 @@ func (dp *depPool) hasPackage(name string) bool {
 	}
 
 	return false
+}
+
+func providerMenu(dep string, providers providers, noConfirm bool) *rpc.Pkg {
+	size := providers.Len()
+
+	str := text.Bold(gotext.Get("There are %d providers available for %s:", size, dep))
+
+	size = 1
+	str += text.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
+
+	for _, pkg := range providers.Pkgs {
+		str += fmt.Sprintf("%d) %s ", size, pkg.Name)
+		size++
+	}
+
+	text.OperationInfoln(str)
+
+	for {
+		fmt.Print(gotext.Get("\nEnter a number (default=1): "))
+
+		if noConfirm {
+			fmt.Println("1")
+			return providers.Pkgs[0]
+		}
+
+		reader := bufio.NewReader(os.Stdin)
+		numberBuf, overflow, err := reader.ReadLine()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			break
+		}
+
+		if overflow {
+			text.Errorln(gotext.Get("input too long"))
+			continue
+		}
+
+		if string(numberBuf) == "" {
+			return providers.Pkgs[0]
+		}
+
+		num, err := strconv.Atoi(string(numberBuf))
+		if err != nil {
+			text.Errorln(gotext.Get("invalid number: %s", string(numberBuf)))
+			continue
+		}
+
+		if num < 1 || num >= size {
+			text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size-1))
+			continue
+		}
+
+		return providers.Pkgs[num-1]
+	}
+
+	return nil
 }
