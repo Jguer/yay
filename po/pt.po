@@ -374,7 +374,7 @@ msgstr "Os seguintes pacotes não são compatíveis com a sua arquitetura:"
 
 #: callbacks.go:36 print.go:492
 msgid "There are %d providers available for %s:\n"
-msgstr "Existem %d provedores disponíveis para %s:"
+msgstr "Existem %d provedores disponíveis para %s:\n"
 
 #: exec.go:72
 msgid "There may be another Pacman instance running. Waiting..."
