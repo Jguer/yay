@@ -343,15 +343,11 @@ msgstr "AUR-en bilatzen"
 msgid "Remove make dependencies after install?"
 msgstr "Deps ezabatu instalatu ostean?"
 
-#: callbacks.go:46
-msgid "Repository "
-msgstr "Biltegia "
-
 #: print.go:495
 msgid "Repository AUR"
 msgstr "AUR biltegia"
 
-#: print.go:269
+#: callbacks.go:46 print.go:269
 msgid "Repository"
 msgstr "Biltegia"
 
@@ -380,7 +376,7 @@ msgid "The following packages are not compatible with your architecture:"
 msgstr "Ondorengo paketeak ez dira zure arkitekturarekin bateragarriak:"
 
 #: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:"
+msgid "There are %d providers available for %s:\n"
 msgstr "%d hornitzaile eskuragarri %s -entzat:"
 
 #: exec.go:72

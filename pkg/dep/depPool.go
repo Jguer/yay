@@ -504,7 +504,7 @@ func (dp *Pool) hasPackage(name string) bool {
 func providerMenu(dep string, providers providers, noConfirm bool) *rpc.Pkg {
 	size := providers.Len()
 
-	str := text.Bold(gotext.Get("There are %d providers available for %s:", size, dep))
+	str := text.Bold(gotext.Get("There are %d providers available for %s:\n", size, dep))
 
 	size = 1
 	str += text.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")

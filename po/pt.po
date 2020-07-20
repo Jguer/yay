@@ -340,15 +340,11 @@ msgstr "Pesquisando na AUR..."
 msgid "Remove make dependencies after install?"
 msgstr "Remover as dependências de make pós instalação?"
 
-#: callbacks.go:46
-msgid "Repository "
-msgstr "Repositório "
-
 #: print.go:495
 msgid "Repository AUR"
 msgstr "Repositório AUR"
 
-#: print.go:269
+#: callbacks.go:46 print.go:269
 msgid "Repository"
 msgstr "Repositório"
 
@@ -377,7 +373,7 @@ msgid "The following packages are not compatible with your architecture:"
 msgstr "Os seguintes pacotes não são compatíveis com a sua arquitetura:"
 
 #: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:"
+msgid "There are %d providers available for %s:\n"
 msgstr "Existem %d provedores disponíveis para %s:"
 
 #: exec.go:72

@@ -345,15 +345,11 @@ msgstr "Выполнение запроса в AUR..."
 msgid "Remove make dependencies after install?"
 msgstr "Удалить зависимости для сборки после установки?"
 
-#: callbacks.go:46
-msgid "Repository "
-msgstr "Репозиторий "
-
 #: print.go:495
 msgid "Repository AUR"
 msgstr "Репозиторий AUR"
 
-#: print.go:269
+#: callbacks.go:46 print.go:269
 msgid "Repository"
 msgstr "Репозиторий"
 
@@ -382,7 +378,7 @@ msgid "The following packages are not compatible with your architecture:"
 msgstr "Следующие пакеты несовместимы с вашей архитектурой:"
 
 #: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:"
+msgid "There are %d providers available for %s:\n"
 msgstr "Доступно %d источников для %s:"
 
 #: exec.go:72

@@ -340,15 +340,11 @@ msgstr "正在查询 AUR..."
 msgid "Remove make dependencies after install?"
 msgstr "安装后删除生成依赖？"
 
-#: callbacks.go:46
-msgid "Repository "
-msgstr "软件库 "
-
 #: print.go:495
 msgid "Repository AUR"
 msgstr "AUR 软件库"
 
-#: print.go:269
+#: callbacks.go:46 print.go:269
 msgid "Repository"
 msgstr "软件库"
 
@@ -377,7 +373,7 @@ msgid "The following packages are not compatible with your architecture:"
 msgstr "以下软件包与您的体系架构不兼容:"
 
 #: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:"
+msgid "There are %d providers available for %s:\n"
 msgstr "有 %d 个提供者可用于 %s:"
 
 #: exec.go:72

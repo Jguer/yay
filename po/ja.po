@@ -340,15 +340,11 @@ msgstr "AUR を検索..."
 msgid "Remove make dependencies after install?"
 msgstr "ビルド時の依存パッケージをインストール後に削除しますか？"
 
-#: callbacks.go:46
-msgid "Repository "
-msgstr "リポジトリ "
-
 #: print.go:495
 msgid "Repository AUR"
 msgstr "リポジトリ AUR"
 
-#: print.go:269
+#: callbacks.go:46 print.go:269
 msgid "Repository"
 msgstr "リポジトリ"
 
@@ -377,7 +373,7 @@ msgid "The following packages are not compatible with your architecture:"
 msgstr "以下のパッケージはあなたの使っているアーキテクチャと互換性がありません:"
 
 #: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:"
+msgid "There are %d providers available for %s:\n"
 msgstr "%d 個のパッケージが %s を提供しています:"
 
 #: exec.go:72

@@ -339,15 +339,11 @@ msgstr "Querying AUR..."
 msgid "Remove make dependencies after install?"
 msgstr "Remove make dependencies after install?"
 
-#: callbacks.go:46
-msgid "Repository "
-msgstr "Repository "
-
 #: print.go:495
 msgid "Repository AUR"
 msgstr "Repository AUR"
 
-#: print.go:269
+#: callbacks.go:46 print.go:269
 msgid "Repository"
 msgstr "Repository"
 
@@ -376,8 +372,8 @@ msgid "The following packages are not compatible with your architecture:"
 msgstr "The following packages are not compatible with your architecture:"
 
 #: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:"
-msgstr "There are %d providers available for %s:"
+msgid "There are %d providers available for %s:\n"
+msgstr "There are %d providers available for %s:\n"
 
 #: exec.go:72
 msgid "There may be another Pacman instance running. Waiting..."

@@ -34,7 +34,7 @@ func questionCallback(question alpm.QuestionAny) {
 		return nil
 	})
 
-	str := gotext.Get("There are %d providers available for %s:", size, qp.Dep())
+	str := text.Bold(gotext.Get("There are %d providers available for %s:\n", size, qp.Dep()))
 
 	size = 1
 	var db string
@@ -44,7 +44,7 @@ func questionCallback(question alpm.QuestionAny) {
 
 		if db != thisDB {
 			db = thisDB
-			str += bold(cyan("\n:: ")) + bold(gotext.Get("Repository ")+db+"\n    ")
+			str += text.SprintOperationInfo(gotext.Get("Repository"), db, "\n    ")
 		}
 		str += fmt.Sprintf("%d) %s ", size, pkg.Name())
 		size++
