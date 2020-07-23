@@ -2,29 +2,9 @@ package main
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
-
-func isEqual(a, b []string) bool {
-	if a == nil && b == nil {
-		return true
-	}
-
-	if a == nil || b == nil {
-		return false
-	}
-
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
-	return true
-}
 
 func TestParsing(t *testing.T) {
 	type source struct {
@@ -55,11 +35,8 @@ func TestParsing(t *testing.T) {
 		url, branch, protocols := parseSource(url)
 		compare := sources[n]
 
-		if url != compare.URL ||
-			branch != compare.Branch ||
-			!isEqual(protocols, compare.Protocols) {
-			t.Fatalf("Test %d failed: Expected: url=%+v branch=%+v protocols=%+v\ngot url=%+v branch=%+v protocols=%+v",
-				n+1, compare.URL, compare.Branch, compare.Protocols, url, branch, protocols)
-		}
+		assert.Equal(t, compare.URL, url)
+		assert.Equal(t, compare.Branch, branch)
+		assert.Equal(t, compare.Protocols, protocols)
 	}
 }
