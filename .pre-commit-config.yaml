@@ -20,3 +20,10 @@ repos:
       - id: trailing-whitespace
       - id: check-json
       - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/Woile/commitizen
+    rev: v1.23.1
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
