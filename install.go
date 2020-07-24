@@ -25,6 +25,8 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
+const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
 func asdeps(cmdArgs *settings.Arguments, pkgs []string) error {
 	if len(pkgs) == 0 {
 		return nil

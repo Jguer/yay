@@ -1,9 +1,9 @@
-package main
+package text
 
 import (
 	"testing"
 
-	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLessRunes(t *testing.T) {
@@ -29,9 +29,8 @@ func TestLessRunes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := text.LessRunes(tt.args.iRunes, tt.args.jRunes); got != tt.want {
-				t.Errorf("LessRunes() = %v, want %v", got, tt.want)
-			}
+			got := LessRunes(tt.args.iRunes, tt.args.jRunes)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
