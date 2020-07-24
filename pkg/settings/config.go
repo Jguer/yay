@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/Morganamilo/go-pacmanconf/ini"
 	"github.com/leonelquinteros/gotext"
@@ -412,6 +413,17 @@ func (config *YayConfig) setPaths() error {
 	aurdest := os.Getenv("AURDEST")
 	if aurdest != "" {
 		config.BuildDir = aurdest
+	}
+
+	if _, err := os.Stat(filepath.Join(configHome, "config.json")); !os.IsNotExist(err) {
+		text.Warnln("Yay has transitioned to a pacman style configuration system.")
+		text.Warnln("If you have configured yay in any way, you should edit the new config file to reflect the changes you have made.")
+		text.Warnln("Until then yay will be functioning under the default settings.")
+		text.Warnln("Configure yay using /etc/yay.conf or " + config.ConfigPath)
+		text.Warnln("Your old configuration file is still present.")
+		text.Warnln("To remove this warning remove your old file")
+	} else {
+		return err
 	}
 
 	return nil

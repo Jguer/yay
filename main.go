@@ -148,6 +148,7 @@ func main() {
 	}
 
 	config = settings.DefaultConfig()
+	
 	loaded, err := config.LoadFile(config.ConfigPath)
 	exitOnError(err)
 	if !loaded {
