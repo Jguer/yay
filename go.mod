@@ -12,6 +12,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
+	gopkg.in/h2non/gock.v1 v1.0.15
 )
 
 go 1.14

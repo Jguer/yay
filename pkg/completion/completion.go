@@ -2,12 +2,14 @@ package completion
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	alpm "github.com/Jguer/go-alpm"
@@ -47,7 +49,12 @@ func Update(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int
 		if createAURList(aurURL, out) != nil {
 			defer os.Remove(completionPath)
 		}
-		erra := createRepoList(alpmHandle, out)
+
+		dbList, err := alpmHandle.SyncDBs()
+		if err != nil {
+			return err
+		}
+		erra := createRepoList(&dbList, out)
 
 		out.Close()
 		return erra
@@ -68,12 +75,19 @@ func createAURList(aurURL string, out io.Writer) error {
 		return err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("invalid status code: %d", resp.StatusCode)
+	}
 
 	scanner := bufio.NewScanner(resp.Body)
 
 	scanner.Scan()
 	for scanner.Scan() {
-		_, err = io.WriteString(out, scanner.Text()+"\tAUR\n")
+		text := scanner.Text()
+		if strings.HasPrefix(text, "#") {
+			continue
+		}
+		_, err = io.WriteString(out, text+"\tAUR\n")
 		if err != nil {
 			return err
 		}
@@ -83,15 +97,10 @@ func createAURList(aurURL string, out io.Writer) error {
 }
 
 // CreatePackageList appends Repo packages to completion cache
-func createRepoList(alpmHandle *alpm.Handle, out io.Writer) error {
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return err
-	}
-
+func createRepoList(dbList *alpm.DBList, out io.Writer) error {
 	_ = dbList.ForEach(func(db alpm.DB) error {
 		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
-			_, err = io.WriteString(out, pkg.Name()+"\t"+pkg.DB().Name()+"\n")
+			_, err := io.WriteString(out, pkg.Name()+"\t"+pkg.DB().Name()+"\n")
 			return err
 		})
 		return nil
