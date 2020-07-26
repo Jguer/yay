@@ -174,11 +174,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		cmdArgs.Op = "S"
 		cmdArgs.DelArg("y", "refresh")
 		if arguments.ExistsArg("ignore") {
-			if cmdArgs.ExistsArg("ignore") {
-				cmdArgs.Options["ignore"].Args = append(cmdArgs.Options["ignore"].Args, arguments.Options["ignore"].Args...)
-			} else {
-				cmdArgs.Options["ignore"] = arguments.Options["ignore"]
-			}
+			cmdArgs.CreateOrAppendOption("ignore", arguments.GetArgs("ignore")...)
 		}
 		return show(passToPacman(cmdArgs))
 	}
