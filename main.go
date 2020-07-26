@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
@@ -85,32 +84,28 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handl
 		return nil, nil, fmt.Errorf("%s", stderr)
 	}
 
-	if value, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {
-		pacmanConf.DBPath = value
+	if dbPath, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {
+		pacmanConf.DBPath = dbPath
 	}
 
-	if value, _, exists := cmdArgs.GetArg("arch"); exists {
-		pacmanConf.Architecture = value
+	if arch, _, exists := cmdArgs.GetArg("arch"); exists {
+		pacmanConf.Architecture = arch
 	}
 
 	if ignoreArray := cmdArgs.GetArgs("ignore"); ignoreArray != nil {
 		pacmanConf.IgnorePkg = append(pacmanConf.IgnorePkg, ignoreArray...)
 	}
 
-	if value, _, exists := cmdArgs.GetArg("ignoregroup"); exists {
-		pacmanConf.IgnoreGroup = append(pacmanConf.IgnoreGroup, strings.Split(value, ",")...)
+	if ignoreGroupsArray := cmdArgs.GetArgs("ignoregroup"); ignoreGroupsArray != nil {
+		pacmanConf.IgnoreGroup = append(pacmanConf.IgnoreGroup, ignoreGroupsArray...)
 	}
 
-	// TODO
-	// current system does not allow duplicate arguments
-	// but pacman allows multiple cachedirs to be passed
-	// for now only handle one cache dir
-	if value, _, exists := cmdArgs.GetArg("cachedir"); exists {
-		pacmanConf.CacheDir = []string{value}
+	if cacheArray := cmdArgs.GetArgs("cachedir"); cacheArray != nil {
+		pacmanConf.CacheDir = cacheArray
 	}
 
-	if value, _, exists := cmdArgs.GetArg("gpgdir"); exists {
-		pacmanConf.GPGDir = value
+	if gpgDir, _, exists := cmdArgs.GetArg("gpgdir"); exists {
+		pacmanConf.GPGDir = gpgDir
 	}
 
 	alpmHandle, err := initAlpmHandle(pacmanConf, nil)
