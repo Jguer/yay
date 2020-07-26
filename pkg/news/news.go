@@ -26,7 +26,7 @@ type item struct {
 	Creator     string `xml:"dc:creator"`
 }
 
-func (item *item) print(buildTime time.Time, double, quiet bool) {
+func (item *item) print(buildTime time.Time, all, quiet bool) {
 	var fd string
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
@@ -34,7 +34,7 @@ func (item *item) print(buildTime time.Time, double, quiet bool) {
 		fmt.Fprintln(os.Stderr, err)
 	} else {
 		fd = text.FormatTime(int(date.Unix()))
-		if !double && !buildTime.IsZero() {
+		if !all && !buildTime.IsZero() {
 			if buildTime.After(date) {
 				return
 			}
