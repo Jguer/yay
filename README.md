@@ -112,7 +112,7 @@ If you transition between aur helpers and did not install the devel package usin
 
 #### I want to help out!
 
-Check `CONTRIBUTING.md` for more information.
+Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
 
 ## Examples of Custom Operations
 

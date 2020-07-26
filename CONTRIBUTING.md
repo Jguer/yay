@@ -14,26 +14,14 @@ Yay depends on:
 - go (make only)
 - git
 - base-devel
+- pacman
 
-Note: Yay also depends on a few other projects (as vendored dependencies). These
-projects are stored in `vendor/`, are built into yay at build time, and do not
-need to be installed separately. These files are managed as go modules and should not be modified manually.
-
-Following are the dependencies managed as go modules:
-
-- https://github.com/Jguer/go-alpm
-- https://github.com/Morganamilo/go-srcinfo
-- https://github.com/Morganamilo/go-pacmanconf
-- https://github.com/mikkeloscar/aur
+Note: Yay also depends on a few other projects, these are pulled as go modules.
 
 ### Building
 
 Run `make` to build Yay. This command will generate a binary called `yay` in
 the same directory as the Makefile.
-
-Note: Yay's Makefile sources its dependencies from `vendor/`. When
-building manually, dependencies will instead be sourced from `GOPATH`. To
-build against `vendor/` you must specify `-mod=vendor` in the build command.
 
 #### Docker Release
 
@@ -54,6 +42,9 @@ repeated runs tend to succeed.
 All code should be formatted through `go fmt`. This tool will automatically
 format code for you. We recommend, however, that you write code in the proper
 style and use `go fmt` only to catch mistakes.
+
+Use [pre-commit](https://pre-commit.com/) to validate your commits against the various
+linters configured for this repository.
 
 ### Testing
 
