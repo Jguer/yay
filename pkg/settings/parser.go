@@ -17,12 +17,12 @@ type Option struct {
 	Args   []string
 }
 
-func (o *Option) Add(arg string) {
+func (o *Option) Add(args ...string) {
 	if o.Args == nil {
-		o.Args = []string{arg}
+		o.Args = args
 		return
 	}
-	o.Args = append(o.Args, arg)
+	o.Args = append(o.Args, args...)
 }
 
 func (o *Option) First() string {
@@ -169,7 +169,7 @@ func (a *Arguments) addParam(option, arg string) error {
 	if a.Options[option] == nil {
 		a.Options[option] = &Option{}
 	}
-	a.Options[option].Add(arg)
+	a.Options[option].Add(strings.Split(arg, ",")...)
 
 	if isGlobal(option) {
 		a.Options[option].Global = true
@@ -206,6 +206,15 @@ func (a *Arguments) GetArg(options ...string) (arg string, double, exists bool) 
 	}
 
 	return arg, false, false
+}
+
+func (a *Arguments) GetArgs(option string) (args []string) {
+	value, exists := a.Options[option]
+	if exists {
+		return value.Args
+	}
+
+	return nil
 }
 
 func (a *Arguments) AddTarget(targets ...string) {

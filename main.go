@@ -93,8 +93,8 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handl
 		pacmanConf.Architecture = value
 	}
 
-	if value, _, exists := cmdArgs.GetArg("ignore"); exists {
-		pacmanConf.IgnorePkg = append(pacmanConf.IgnorePkg, strings.Split(value, ",")...)
+	if ignoreArray := cmdArgs.GetArgs("ignore"); ignoreArray != nil {
+		pacmanConf.IgnorePkg = append(pacmanConf.IgnorePkg, ignoreArray...)
 	}
 
 	if value, _, exists := cmdArgs.GetArg("ignoregroup"); exists {

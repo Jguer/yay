@@ -142,19 +142,13 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 			cmdArgs.AddTarget("aur/" + up)
 		}
 
-		value, _, exists := cmdArgs.GetArg("ignore")
-
 		if len(ignore) > 0 {
-			ignoreStr := strings.Join(ignore.ToSlice(), ",")
-			if exists {
-				ignoreStr += "," + value
-			}
 			if arguments.Options["ignore"] == nil {
 				arguments.Options["ignore"] = &settings.Option{
-					Args: []string{ignoreStr},
+					Args: ignore.ToSlice(),
 				}
 			} else {
-				arguments.Options["ignore"].Add(ignoreStr)
+				arguments.Options["ignore"].Add(ignore.ToSlice()...)
 			}
 		}
 	}
