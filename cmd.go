@@ -197,18 +197,22 @@ func handleVersion() {
 }
 
 func lastBuildTime(alpmHandle *alpm.Handle) time.Time {
-	pkgs, _, _, _, err := query.FilterPackages(alpmHandle)
+	dbList, err := alpmHandle.SyncDBs()
 	if err != nil {
 		return time.Now()
 	}
 
 	var lastTime time.Time
-	for _, pkg := range pkgs {
-		thisTime := pkg.BuildDate()
-		if thisTime.After(lastTime) {
-			lastTime = thisTime
-		}
-	}
+	_ = dbList.ForEach(func(db alpm.DB) error {
+		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
+			thisTime := pkg.BuildDate()
+			if thisTime.After(lastTime) {
+				lastTime = thisTime
+			}
+			return nil
+		})
+		return nil
+	})
 
 	return lastTime
 }
