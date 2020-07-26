@@ -143,13 +143,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		}
 
 		if len(ignore) > 0 {
-			if arguments.Options["ignore"] == nil {
-				arguments.Options["ignore"] = &settings.Option{
-					Args: ignore.ToSlice(),
-				}
-			} else {
-				arguments.Options["ignore"].Add(ignore.ToSlice()...)
-			}
+			arguments.CreateOrAppendOption("ignore", ignore.ToSlice()...)
 		}
 	}
 

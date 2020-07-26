@@ -52,6 +52,16 @@ func (a *Arguments) String() string {
 	return fmt.Sprintf("Op:%v Options:%+v Targets: %v", a.Op, a.Options, a.Targets)
 }
 
+func (a *Arguments) CreateOrAppendOption(option string, values ...string) {
+	if a.Options[option] == nil {
+		a.Options[option] = &Option{
+			Args: values,
+		}
+	} else {
+		a.Options[option].Add(values...)
+	}
+}
+
 func MakeArguments() *Arguments {
 	return &Arguments{
 		"",
@@ -166,10 +176,7 @@ func (a *Arguments) addParam(option, arg string) error {
 		return a.addOP(option)
 	}
 
-	if a.Options[option] == nil {
-		a.Options[option] = &Option{}
-	}
-	a.Options[option].Add(strings.Split(arg, ",")...)
+	a.CreateOrAppendOption(option, strings.Split(arg, ",")...)
 
 	if isGlobal(option) {
 		a.Options[option].Global = true
