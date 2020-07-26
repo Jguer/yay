@@ -11,9 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/go-alpm"
-
-	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -62,7 +59,7 @@ type rss struct {
 	Channel channel `xml:"channel"`
 }
 
-func PrintNewsFeed(alpmHandle *alpm.Handle, sortMode int, double, quiet bool) error {
+func PrintNewsFeed(cutOffDate time.Time, sortMode int, all, quiet bool) error {
 	resp, err := http.Get("https://archlinux.org/feeds/news")
 	if err != nil {
 		return err
@@ -82,40 +79,17 @@ func PrintNewsFeed(alpmHandle *alpm.Handle, sortMode int, double, quiet bool) er
 		return err
 	}
 
-	buildTime, err := lastBuildTime(alpmHandle)
-	if err != nil {
-		return err
-	}
-
 	if sortMode == settings.BottomUp {
 		for i := len(rssGot.Channel.Items) - 1; i >= 0; i-- {
-			rssGot.Channel.Items[i].print(buildTime, double, quiet)
+			rssGot.Channel.Items[i].print(cutOffDate, all, quiet)
 		}
 	} else {
 		for i := 0; i < len(rssGot.Channel.Items); i++ {
-			rssGot.Channel.Items[i].print(buildTime, double, quiet)
+			rssGot.Channel.Items[i].print(cutOffDate, all, quiet)
 		}
 	}
 
 	return nil
-}
-
-func lastBuildTime(alpmHandle *alpm.Handle) (time.Time, error) {
-	var lastTime time.Time
-
-	pkgs, _, _, _, err := query.FilterPackages(alpmHandle)
-	if err != nil {
-		return lastTime, err
-	}
-
-	for _, pkg := range pkgs {
-		thisTime := pkg.BuildDate()
-		if thisTime.After(lastTime) {
-			lastTime = thisTime
-		}
-	}
-
-	return lastTime, nil
 }
 
 // Crude html parsing, good enough for the arch news

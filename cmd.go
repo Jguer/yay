@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
@@ -195,6 +196,23 @@ func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
+func lastBuildTime(alpmHandle *alpm.Handle) time.Time {
+	pkgs, _, _, _, err := query.FilterPackages(alpmHandle)
+	if err != nil {
+		return time.Now()
+	}
+
+	var lastTime time.Time
+	for _, pkg := range pkgs {
+		thisTime := pkg.BuildDate()
+		if thisTime.After(lastTime) {
+			lastTime = thisTime
+		}
+	}
+
+	return lastTime
+}
+
 func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
@@ -208,7 +226,7 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) (err erro
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
-		err = news.PrintNewsFeed(alpmHandle, config.SortMode, double, quiet)
+		err = news.PrintNewsFeed(lastBuildTime(alpmHandle), config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
 		err = completion.Show(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):

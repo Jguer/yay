@@ -1,0 +1,114 @@
+[1m[35m2019-12-20[0m[0m [1mXorg cleanup requires manual intervention[0m
+In the process of Xorg cleanup the update requires manual
+intervention when you hit this message:
+
+[36m:: installing xorgproto (2019.2-2) breaks dependency 'inputproto' required by lib32-libxi
+:: installing xorgproto (2019.2-2) breaks dependency 'dmxproto' required by libdmx
+:: installing xorgproto (2019.2-2) breaks dependency 'xf86dgaproto' required by libxxf86dga
+:: installing xorgproto (2019.2-2) breaks dependency 'xf86miscproto' required by libxxf86misc
+[0m
+when updating, use: [36mpacman -Rdd libdmx libxxf86dga libxxf86misc && pacman -Syu[0m to perform the upgrade.
+[0m
+[1m[35m2020-01-04[0m[0m [1mNow using Zstandard instead of xz for package compression[0m
+As announced on the mailing list, on Friday, Dec 27 2019, our package compression scheme has changed from xz (.pkg.tar.xz) to zstd (.pkg.tar.zst).
+
+zstd and xz trade blows in their compression ratio. Recompressing all packages to zstd with our options yields a total ~0.8% increase in package size on all of our packages combined, but the decompression time for all packages saw a ~1300% speedup.
+
+We already have more than 545 zstd-compressed packages in our repositories, and as packages get updated more will keep rolling in. We have not found any user-facing issues as of yet, so things appear to be working.
+
+As a packager, you will automatically start building .pkg.tar.zst packages if you are using the latest version of devtools (>= 20191227).
+As an end-user no manual intervention is required, assuming that you have read and followed the news post from late last year.
+
+If you nevertheless haven't updated libarchive since 2018, all hope is not lost! Binary builds of pacman-static are available from Eli Schwartz' personal repository (or direct link to binary), signed with their Trusted User keys, with which you can perform the update.
+[0m
+[1m[35m2020-01-15[0m[0m [1mrsync compatibility[0m
+Our [36mrsync[0m package was shipped with bundled [36mzlib[0m to provide compatibility
+with the old-style [36m--compress[0m option up to version 3.1.0. Version 3.1.1 was
+released on 2014-06-22 and is shipped by all major distributions now.
+
+So we decided to finally drop the bundled library and ship a package with
+system [36mzlib[0m. This also fixes security issues, actual ones and in future. Go
+and blame those running old versions if you encounter errors with [36mrsync
+3.1.3-3[0m.
+[0m
+[1m[35m2020-02-17[0m[0m [1msshd needs restarting after upgrading to openssh-8.2p1[0m
+After upgrading to openssh-8.2p1, the existing SSH daemon will be unable to accept new connections. (See FS#65517.) When upgrading remote hosts, please make sure to restart the SSH daemon using [36msystemctl restart sshd[0m right after running [36mpacman -Syu[0m. If you are upgrading to openssh-8.2p1-3 or higher, this restart will happen automatically.
+[0m
+[1m[35m2020-02-22[0m[0m [1mPlanet Arch Linux migration[0m
+The software behind planet.archlinux.org was implemented in Python 2 and is no longer maintained upstream. This functionality has now been implemented in archlinux.org's archweb backend which is actively maintained but offers a slightly different experience.
+
+The most notable changes are the offered feeds and the feed location. Archweb only offers an Atom feed which is located at here.
+[0m
+[1m[35m2020-02-24[0m[0m [1mThe Future of the Arch Linux Project Leader[0m
+Hello everyone,
+
+Some of you may know me from the days when I was much more involved in Arch, but most of you probably just know me as a name on the website. I’ve been with Arch for some time, taking the leadership of this beast over from Judd back in 2007. But, as these things often go, my involvement has slid down to minimal levels over time. It’s high time that changes.
+
+Arch Linux needs involved leadership to make hard decisions and direct the project where it needs to go. And I am not in a position to do this.
+
+In a team effort, the Arch Linux staff devised a new process for determining future leaders. From now on, leaders will be elected by the staff for a term length of two years. Details of this new process can be found here
+
+In the first official vote with Levente Polyak (anthraxx), Gaetan Bisson (vesath), Giancarlo Razzolini (grazzolini), and Sven-Hendrik Haase (svenstaro) as candidates, and through 58 verified votes, a winner was chosen:
+
+Levente Polyak (anthraxx) will be taking over the reins of this ship. Congratulations!
+
+Thanks for everything over all these years,
+Aaron Griffin (phrakture)
+[0m
+[1m[35m2020-03-01[0m[0m [1mfirewalld>=0.8.1-2 update requires manual intervention[0m
+The firewalld package prior to version 0.8.1-2 was missing the compiled python modules. This has been fixed in 0.8.1-2, so the upgrade will need to overwrite the untracked pyc files created. If you get errors like these
+
+[36mfirewalld: /usr/lib/python3.8/site-packages/firewall/__pycache__/__init__.cpython-38.pyc exists in filesystem
+firewalld: /usr/lib/python3.8/site-packages/firewall/__pycache__/client.cpython-38.pyc exists in filesystem
+firewalld: /usr/lib/python3.8/site-packages/firewall/__pycache__/dbus_utils.cpython-38.pyc exists in filesystem
+...many more...
+[0m
+when updating, use
+
+[36mpacman -Suy --overwrite /usr/lib/python3.8/site-packages/firewall/\*
+[0m
+to perform the upgrade.
+[0m
+[1m[35m2020-03-19[0m[0m [1mhplip 3.20.3-2 update requires manual intervention[0m
+The hplip package prior to version 3.20.3-2 was missing the compiled
+python modules. This has been fixed in 3.20.3-2, so the upgrade will
+need to overwrite the untracked pyc files that were created. If you get errors
+such as these
+
+[36mhplip: /usr/share/hplip/base/__pycache__/__init__.cpython-38.pyc exists in filesystem
+hplip: /usr/share/hplip/base/__pycache__/avahi.cpython-38.pyc exists in filesystem
+hplip: /usr/share/hplip/base/__pycache__/codes.cpython-38.pyc exists in filesystem
+...many more...
+[0m
+when updating, use
+
+[36mpacman -Suy --overwrite /usr/share/hplip/\*
+[0m
+to perform the upgrade.
+[0m
+[1m[35m2020-04-13[0m[0m [1mnss>=3.51.1-1 and lib32-nss>=3.51.1-1 updates require manual intervention[0m
+The nss and lib32-nss packages prior to version 3.51.1-1 were missing a soname link each. This has been fixed in 3.51.1-1, so the upgrade will need to overwrite the untracked files created by ldconfig. If you get any of these errors
+
+[36mnss: /usr/lib/p11-kit-trust.so exists in filesystem
+lib32-nss: /usr/lib32/p11-kit-trust.so exists in filesystem
+[0m
+when updating, use
+
+[36mpacman -Syu --overwrite /usr/lib\*/p11-kit-trust.so
+[0m
+to perform the upgrade.
+[0m
+[1m[35m2020-04-14[0m[0m [1mzn_poly 0.9.2-2 update requires manual intervention[0m
+The zn_poly package prior to version 0.9.2-2 was missing a soname link.
+This has been fixed in 0.9.2-2, so the upgrade will need to overwrite the
+untracked files created by ldconfig. If you get an error
+
+[36mzn_poly: /usr/lib/libzn_poly-0.9.so  exists in filesystem
+[0m
+when updating, use
+
+[36mpacman -Syu --overwrite usr/lib/libzn_poly-0.9.so
+[0m
+to perform the upgrade.
+[0m
+
