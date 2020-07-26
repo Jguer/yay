@@ -8,10 +8,43 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// FilterPackages filters packages based on source and type from local repository.
-func FilterPackages(alpmHandle *alpm.Handle) (
-	local, remote []alpm.Package,
-	localNames, remoteNames []string,
+// GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively
+func GetPackageNamesBySource(alpmHandle *alpm.Handle) (local, remote []string, err error) {
+	localDB, err := alpmHandle.LocalDB()
+	if err != nil {
+		return nil, nil, err
+	}
+	dbList, err := alpmHandle.SyncDBs()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = localDB.PkgCache().ForEach(func(k alpm.Package) error {
+		found := false
+		// For each DB search for our secret package.
+		_ = dbList.ForEach(func(d alpm.DB) error {
+			if found {
+				return nil
+			}
+
+			if d.Pkg(k.Name()) != nil {
+				found = true
+				local = append(local, k.Name())
+			}
+			return nil
+		})
+		if !found {
+			remote = append(remote, k.Name())
+		}
+		return nil
+	})
+	return local, remote, err
+}
+
+// GetRemotePackages returns packages with no correspondence in SyncDBS.
+func GetRemotePackages(alpmHandle *alpm.Handle) (
+	remote []alpm.Package,
+	remoteNames []string,
 	err error) {
 	localDB, err := alpmHandle.LocalDB()
 	if err != nil {
@@ -32,8 +65,6 @@ func FilterPackages(alpmHandle *alpm.Handle) (
 
 			if d.Pkg(k.Name()) != nil {
 				found = true
-				local = append(local, k)
-				localNames = append(localNames, k.Name())
 			}
 			return nil
 		})
@@ -46,7 +77,7 @@ func FilterPackages(alpmHandle *alpm.Handle) (
 	}
 
 	err = localDB.PkgCache().ForEach(f)
-	return local, remote, localNames, remoteNames, err
+	return remote, remoteNames, err
 }
 
 func RemoveInvalidTargets(targets []string, mode settings.TargetMode) []string {

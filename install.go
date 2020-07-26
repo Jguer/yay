@@ -95,7 +95,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 	}
 	config.Runtime.AlpmHandle = alpmHandle
 
-	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
+	localNames, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -964,7 +964,7 @@ func buildInstallPkgbuilds(
 	config.NoConfirm = true
 
 	//remotenames: names of all non repo packages on the system
-	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
+	localNames, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
 	if err != nil {
 		return err
 	}

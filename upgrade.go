@@ -120,7 +120,7 @@ func getVersionDiff(oldVersion, newVersion string) (left, right string) {
 
 // upList returns lists of packages to upgrade from each source.
 func upList(warnings *query.AURWarnings, alpmHandle *alpm.Handle, enableDowngrade bool) (aurUp, repoUp upSlice, err error) {
-	_, remote, _, remoteNames, err := query.FilterPackages(alpmHandle)
+	remote, remoteNames, err := query.GetRemotePackages(alpmHandle)
 	if err != nil {
 		return nil, nil, err
 	}

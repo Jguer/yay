@@ -204,7 +204,7 @@ func localStatistics(alpmHandle *alpm.Handle) error {
 		return err
 	}
 
-	_, _, _, remoteNames, err := query.FilterPackages(alpmHandle)
+	_, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
 	if err != nil {
 		return err
 	}
@@ -246,7 +246,7 @@ func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enabl
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	_, _, localNames, remoteNames, err := query.FilterPackages(alpmHandle)
+	localNames, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
 	if err != nil {
 		return err
 	}

@@ -121,7 +121,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool, alpmHandle *alpm.Handl
 	installedBases := make(stringset.StringSet)
 	inAURBases := make(stringset.StringSet)
 
-	_, remotePackages, _, _, err := query.FilterPackages(alpmHandle)
+	remotePackages, _, err := query.GetRemotePackages(alpmHandle)
 	if err != nil {
 		return err
 	}
