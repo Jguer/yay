@@ -1014,7 +1014,7 @@ func buildInstallPkgbuilds(
 		for _, pkg := range base {
 			for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
 				for _, dep := range deps {
-					if _, errSatisfier := dp.LocalDB.PkgCache().FindSatisfier(dep); errSatisfier != nil {
+					if !dp.AlpmExecutor.LocalSatisfierExists(dep) {
 						satisfied = false
 						text.Warnln(gotext.Get("%s not satisfied, flushing install queue", dep))
 						break all
@@ -1072,9 +1072,7 @@ func buildInstallPkgbuilds(
 		if cmdArgs.ExistsArg("needed") {
 			installed := true
 			for _, split := range base {
-				if alpmpkg := dp.LocalDB.Pkg(split.Name); alpmpkg == nil || alpmpkg.Version() != pkgVersion {
-					installed = false
-				}
+				installed = dp.AlpmExecutor.IsCorrectVersionInstalled(split.Name, pkgVersion)
 			}
 
 			if installed {

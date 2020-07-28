@@ -13,6 +13,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -27,11 +28,11 @@ type Target struct {
 }
 
 func ToTarget(pkg string) Target {
-	db, dep := text.SplitDBFromName(pkg)
-	name, mod, depVersion := splitDep(dep)
+	dbName, depString := text.SplitDBFromName(pkg)
+	name, mod, depVersion := splitDep(depString)
 
 	return Target{
-		DB:      db,
+		DB:      dbName,
 		Name:    name,
 		Mod:     mod,
 		Version: depVersion,
@@ -51,44 +52,34 @@ func (t Target) String() string {
 }
 
 type Pool struct {
-	Targets  []Target
-	Explicit stringset.StringSet
-	Repo     map[string]*alpm.Package
-	Aur      map[string]*rpc.Pkg
-	AurCache map[string]*rpc.Pkg
-	Groups   []string
-	LocalDB  *alpm.DB
-	SyncDB   alpm.DBList
-	Warnings *query.AURWarnings
+	Targets      []Target
+	Explicit     stringset.StringSet
+	Repo         map[string]db.RepoPackage
+	Aur          map[string]*rpc.Pkg
+	AurCache     map[string]*rpc.Pkg
+	Groups       []string
+	AlpmExecutor *db.AlpmExecutor
+	Warnings     *query.AURWarnings
 }
 
-func makePool(alpmHandle *alpm.Handle) (*Pool, error) {
-	localDB, err := alpmHandle.LocalDB()
-	if err != nil {
-		return nil, err
-	}
-	syncDB, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return nil, err
-	}
-
+func makePool(alpmHandle *alpm.Handle) *Pool {
+	ae, _ := db.NewExecutor(alpmHandle)
 	dp := &Pool{
 		make([]Target, 0),
 		make(stringset.StringSet),
-		make(map[string]*alpm.Package),
+		make(map[string]db.RepoPackage),
 		make(map[string]*rpc.Pkg),
 		make(map[string]*rpc.Pkg),
 		make([]string, 0),
-		localDB,
-		syncDB,
+		ae,
 		nil,
 	}
 
-	return dp, nil
+	return dp
 }
 
 // Includes db/ prefixes and group installs
-func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
+func (dp *Pool) ResolveTargets(pkgs []string,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int) error {
 	// RPC requests are slow
@@ -99,7 +90,6 @@ func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
 	pkgs = query.RemoveInvalidTargets(pkgs, mode)
 
 	for _, pkg := range pkgs {
-		var err error
 		target := ToTarget(pkg)
 
 		// skip targets already satisfied
@@ -111,8 +101,7 @@ func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
 			continue
 		}
 
-		var foundPkg *alpm.Package
-		var singleDB *alpm.DB
+		var foundPkg db.RepoPackage
 
 		// aur/ prefix means we only check the aur
 		if target.DB == "aur" || mode == settings.ModeAUR {
@@ -121,19 +110,15 @@ func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
 			continue
 		}
 
-		// If there'ss a different priefix only look in that repo
+		// If there'ss a different prefix only look in that repo
 		if target.DB != "" {
-			singleDB, err = alpmHandle.SyncDBByName(target.DB)
-			if err != nil {
-				return err
-			}
-			foundPkg, err = singleDB.PkgCache().FindSatisfier(target.DepString())
-			// otherwise find it in any repo
+			foundPkg = dp.AlpmExecutor.PackageFromDB(target.DepString(), target.DB)
 		} else {
-			foundPkg, err = dp.SyncDB.FindSatisfier(target.DepString())
+			// otherwise find it in any repo
+			foundPkg = dp.AlpmExecutor.SyncSatisfier(target.DepString())
 		}
 
-		if err == nil {
+		if foundPkg != nil {
 			dp.Targets = append(dp.Targets, target)
 			dp.Explicit.Set(foundPkg.Name())
 			dp.ResolveRepoDependency(foundPkg)
@@ -146,13 +131,12 @@ func (dp *Pool) ResolveTargets(pkgs []string, alpmHandle *alpm.Handle,
 			// the user specified a db but there's no easy way to do
 			// it without making alpm_lists so don't bother for now
 			// db/group is probably a rare use case
-			group := dp.SyncDB.FindGroupPkgs(target.Name)
-			if !group.Empty() {
+			groupPackages := dp.AlpmExecutor.PackagesFromGroup(target.Name)
+			if len(groupPackages) > 0 {
 				dp.Groups = append(dp.Groups, target.String())
-				_ = group.ForEach(func(pkg alpm.Package) error {
+				for _, pkg := range groupPackages {
 					dp.Explicit.Set(pkg.Name())
-					return nil
-				})
+				}
 				continue
 			}
 		}
@@ -219,7 +203,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 	}
 
 	for pkg := range pkgs {
-		if dp.LocalDB.Pkg(pkg) != nil {
+		if dp.AlpmExecutor.LocalSatisfierExists(pkg) {
 			continue
 		}
 		wg.Add(1)
@@ -319,16 +303,16 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 			continue
 		}
 
-		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep) // has satisfier installed: skip
+		isInstalled := dp.AlpmExecutor.LocalSatisfierExists(dep)
 		hm := settings.HideMenus
-		settings.HideMenus = isInstalled == nil
-		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep) // has satisfier in repo: fetch it
+		settings.HideMenus = isInstalled
+		repoPkg := dp.AlpmExecutor.SyncSatisfier(dep) // has satisfier in repo: fetch it
 		settings.HideMenus = hm
-		if isInstalled == nil && (rebuild != "tree" || inRepos == nil) {
+		if isInstalled && (rebuild != "tree" || repoPkg != nil) {
 			continue
 		}
 
-		if inRepos == nil {
+		if repoPkg != nil {
 			dp.ResolveRepoDependency(repoPkg)
 			continue
 		}
@@ -342,31 +326,25 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 	return err
 }
 
-func (dp *Pool) ResolveRepoDependency(pkg *alpm.Package) {
+func (dp *Pool) ResolveRepoDependency(pkg db.RepoPackage) {
 	dp.Repo[pkg.Name()] = pkg
 
-	_ = pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
-		// have satisfier in dep tree: skip
+	for _, dep := range dp.AlpmExecutor.PackageDepends(pkg) {
 		if dp.hasSatisfier(dep.String()) {
-			return
+			continue
 		}
 
 		// has satisfier installed: skip
-		_, isInstalled := dp.LocalDB.PkgCache().FindSatisfier(dep.String())
-		if isInstalled == nil {
-			return
+		if dp.AlpmExecutor.LocalSatisfierExists(dep.String()) {
+			continue
 		}
 
 		// has satisfier in repo: fetch it
-		repoPkg, inRepos := dp.SyncDB.FindSatisfier(dep.String())
-		if inRepos != nil {
-			return
+		repoPkg := dp.AlpmExecutor.SyncSatisfier(dep.String())
+		if repoPkg != nil {
+			dp.ResolveRepoDependency(repoPkg)
 		}
-
-		dp.ResolveRepoDependency(repoPkg)
-
-		return nil
-	})
+	}
 }
 
 func GetPool(pkgs []string,
@@ -375,13 +353,10 @@ func GetPool(pkgs []string,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int) (*Pool, error) {
-	dp, err := makePool(alpmHandle)
-	if err != nil {
-		return nil, err
-	}
+	dp := makePool(alpmHandle)
 
 	dp.Warnings = warnings
-	err = dp.ResolveTargets(pkgs, alpmHandle, mode, ignoreProviders, noConfirm, provides, rebuild, splitN)
+	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN)
 
 	return dp, err
 }
@@ -411,7 +386,7 @@ func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, pr
 	seen := make(stringset.StringSet)
 	providerSlice := makeProviders(depName)
 
-	if dp.LocalDB.Pkg(depName) != nil {
+	if dp.AlpmExecutor.LocalSatisfierExists(depName) {
 		if pkg, ok := dp.AurCache[dep]; ok && pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			return pkg
 		}
@@ -465,9 +440,9 @@ func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, pr
 	return nil
 }
 
-func (dp *Pool) findSatisfierRepo(dep string) *alpm.Package {
+func (dp *Pool) findSatisfierRepo(dep string) db.RepoPackage {
 	for _, pkg := range dp.Repo {
-		if satisfiesRepo(dep, pkg) {
+		if satisfiesRepo(dep, pkg, dp.AlpmExecutor) {
 			return pkg
 		}
 	}

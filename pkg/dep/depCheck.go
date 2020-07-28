@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -29,28 +28,26 @@ func (dp *Pool) checkInnerConflict(name, conflict string, conflicts stringset.Ma
 			continue
 		}
 
-		if satisfiesRepo(conflict, pkg) {
+		if satisfiesRepo(conflict, pkg, dp.AlpmExecutor) {
 			conflicts.Add(name, pkg.Name())
 		}
 	}
 }
 
 func (dp *Pool) checkForwardConflict(name, conflict string, conflicts stringset.MapStringSet) {
-	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
+	for _, pkg := range dp.AlpmExecutor.LocalPackages() {
 		if pkg.Name() == name || dp.hasPackage(pkg.Name()) {
-			return nil
+			continue
 		}
 
-		if satisfiesRepo(conflict, &pkg) {
+		if satisfiesRepo(conflict, pkg, dp.AlpmExecutor) {
 			n := pkg.Name()
 			if n != conflict {
 				n += " (" + conflict + ")"
 			}
 			conflicts.Add(name, n)
 		}
-
-		return nil
-	})
+	}
 }
 
 func (dp *Pool) checkReverseConflict(name, conflict string, conflicts stringset.MapStringSet) {
@@ -73,7 +70,7 @@ func (dp *Pool) checkReverseConflict(name, conflict string, conflicts stringset.
 			continue
 		}
 
-		if satisfiesRepo(conflict, pkg) {
+		if satisfiesRepo(conflict, pkg, dp.AlpmExecutor) {
 			if name != conflict {
 				name += " (" + conflict + ")"
 			}
@@ -91,10 +88,9 @@ func (dp *Pool) checkInnerConflicts(conflicts stringset.MapStringSet) {
 	}
 
 	for _, pkg := range dp.Repo {
-		_ = pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+		for _, conflict := range dp.AlpmExecutor.PackageConflicts(pkg) {
 			dp.checkInnerConflict(pkg.Name(), conflict.String(), conflicts)
-			return nil
-		})
+		}
 	}
 }
 
@@ -106,26 +102,21 @@ func (dp *Pool) checkForwardConflicts(conflicts stringset.MapStringSet) {
 	}
 
 	for _, pkg := range dp.Repo {
-		_ = pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+		for _, conflict := range dp.AlpmExecutor.PackageConflicts(pkg) {
 			dp.checkForwardConflict(pkg.Name(), conflict.String(), conflicts)
-			return nil
-		})
+		}
 	}
 }
 
 func (dp *Pool) checkReverseConflicts(conflicts stringset.MapStringSet) {
-	_ = dp.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
+	for _, pkg := range dp.AlpmExecutor.LocalPackages() {
 		if dp.hasPackage(pkg.Name()) {
-			return nil
+			continue
 		}
-
-		_ = pkg.Conflicts().ForEach(func(conflict alpm.Depend) error {
+		for _, conflict := range dp.AlpmExecutor.PackageConflicts(pkg) {
 			dp.checkReverseConflict(pkg.Name(), conflict.String(), conflicts)
-			return nil
-		})
-
-		return nil
-	})
+		}
+	}
 }
 
 func (dp *Pool) CheckConflicts(useAsk, noConfirm bool) (stringset.MapStringSet, error) {
@@ -225,7 +216,7 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing) {
 		missing.Good.Set(dep)
 		for _, deps := range [3][]string{aurPkg.Depends, aurPkg.MakeDepends, aurPkg.CheckDepends} {
 			for _, aurDep := range deps {
-				if _, err := dp.LocalDB.PkgCache().FindSatisfier(aurDep); err == nil {
+				if dp.AlpmExecutor.LocalSatisfierExists(aurDep) {
 					missing.Good.Set(aurDep)
 					continue
 				}
@@ -240,15 +231,14 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing) {
 	repoPkg := dp.findSatisfierRepo(dep)
 	if repoPkg != nil {
 		missing.Good.Set(dep)
-		_ = repoPkg.Depends().ForEach(func(repoDep alpm.Depend) error {
-			if _, err := dp.LocalDB.PkgCache().FindSatisfier(repoDep.String()); err == nil {
-				missing.Good.Set(repoDep.String())
-				return nil
+		for _, dep := range dp.AlpmExecutor.PackageDepends(repoPkg) {
+			if dp.AlpmExecutor.LocalSatisfierExists(dep.String()) {
+				missing.Good.Set(dep.String())
+				continue
 			}
 
-			dp._checkMissing(repoDep.String(), append(stack, repoPkg.Name()), missing)
-			return nil
-		})
+			dp._checkMissing(dep.String(), append(stack, repoPkg.Name()), missing)
+		}
 
 		return
 	}

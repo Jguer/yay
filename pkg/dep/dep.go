@@ -1,12 +1,12 @@
 package dep
 
 import (
-	"fmt"
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -121,19 +121,15 @@ func satisfiesAur(dep string, pkg *rpc.Pkg) bool {
 	return false
 }
 
-func satisfiesRepo(dep string, pkg *alpm.Package) bool {
+func satisfiesRepo(dep string, pkg db.RepoPackage, ae *db.AlpmExecutor) bool {
 	if pkgSatisfies(pkg.Name(), pkg.Version(), dep) {
 		return true
 	}
 
-	if pkg.Provides().ForEach(func(provide alpm.Depend) error {
-		if provideSatisfies(provide.String(), dep) {
-			return fmt.Errorf("")
+	for _, provided := range ae.PackageProvides(pkg) {
+		if provideSatisfies(provided.String(), dep) {
+			return true
 		}
-
-		return nil
-	}) != nil {
-		return true
 	}
 
 	return false

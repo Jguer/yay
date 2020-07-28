@@ -3,23 +3,23 @@ package dep
 import (
 	"fmt"
 
-	alpm "github.com/Jguer/go-alpm"
 	rpc "github.com/mikkeloscar/aur"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 type Order struct {
 	Aur     []Base
-	Repo    []*alpm.Package
+	Repo    []db.RepoPackage
 	Runtime stringset.StringSet
 }
 
 func makeOrder() *Order {
 	return &Order{
 		make([]Base, 0),
-		make([]*alpm.Package, 0),
+		make([]db.RepoPackage, 0),
 		make(stringset.StringSet),
 	}
 }
@@ -78,20 +78,18 @@ func (do *Order) orderPkgAur(pkg *rpc.Pkg, dp *Pool, runtime bool) {
 	do.Aur = append(do.Aur, Base{pkg})
 }
 
-func (do *Order) orderPkgRepo(pkg *alpm.Package, dp *Pool, runtime bool) {
+func (do *Order) orderPkgRepo(pkg db.RepoPackage, dp *Pool, runtime bool) {
 	if runtime {
 		do.Runtime.Set(pkg.Name())
 	}
 	delete(dp.Repo, pkg.Name())
 
-	_ = pkg.Depends().ForEach(func(dep alpm.Depend) (err error) {
+	for _, dep := range dp.AlpmExecutor.PackageDepends(pkg) {
 		repoPkg := dp.findSatisfierRepo(dep.String())
 		if repoPkg != nil {
 			do.orderPkgRepo(repoPkg, dp, runtime)
 		}
-
-		return nil
-	})
+	}
 
 	do.Repo = append(do.Repo, pkg)
 }
