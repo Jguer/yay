@@ -150,7 +150,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 	targets := stringset.FromSlice(cmdArgs.Targets)
 
 	dp, err := dep.GetPool(requestTargets,
-		warnings, alpmHandle, config.Runtime.Mode,
+		warnings, config.Runtime.DBExecutor, config.Runtime.Mode,
 		ignoreProviders, config.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN)
 	if err != nil {
 		return err

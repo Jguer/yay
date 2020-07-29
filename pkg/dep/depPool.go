@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
@@ -62,8 +61,7 @@ type Pool struct {
 	Warnings     *query.AURWarnings
 }
 
-func makePool(alpmHandle *alpm.Handle) *Pool {
-	ae, _ := db.NewExecutor(alpmHandle)
+func makePool(dbExecutor *db.AlpmExecutor) *Pool {
 	dp := &Pool{
 		make([]Target, 0),
 		make(stringset.StringSet),
@@ -71,7 +69,7 @@ func makePool(alpmHandle *alpm.Handle) *Pool {
 		make(map[string]*rpc.Pkg),
 		make(map[string]*rpc.Pkg),
 		make([]string, 0),
-		ae,
+		dbExecutor,
 		nil,
 	}
 
@@ -349,11 +347,11 @@ func (dp *Pool) ResolveRepoDependency(pkg db.RepoPackage) {
 
 func GetPool(pkgs []string,
 	warnings *query.AURWarnings,
-	alpmHandle *alpm.Handle,
+	dbExecutor *db.AlpmExecutor,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int) (*Pool, error) {
-	dp := makePool(alpmHandle)
+	dp := makePool(dbExecutor)
 
 	dp.Warnings = warnings
 	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN)

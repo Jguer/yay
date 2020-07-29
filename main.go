@@ -10,6 +10,7 @@ import (
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -192,6 +193,8 @@ func main() {
 	exitOnError(initBuildDir())
 	exitOnError(initVCS(runtime.VCSPath))
 	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(cmdArgs, config.PacmanConf)
+	exitOnError(err)
+	config.Runtime.DBExecutor, err = db.NewExecutor(config.Runtime.AlpmHandle)
 	exitOnError(err)
 	exitOnError(handleCmd(cmdArgs, config.Runtime.AlpmHandle))
 	os.Exit(cleanup(config.Runtime.AlpmHandle))
