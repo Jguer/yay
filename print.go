@@ -12,7 +12,6 @@ import (
 	"github.com/Jguer/go-alpm"
 
 	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -105,36 +104,6 @@ func (s repoQuery) printSearch(dbExecutor *db.AlpmExecutor) {
 
 // Pretty print a set of packages from the same package base.
 
-func (u *upgrade) StylizedNameWithRepository() string {
-	return bold(text.ColorHash(u.Repository)) + "/" + bold(u.Name)
-}
-
-// Print prints the details of the packages to upgrade.
-func (u upSlice) print() {
-	longestName, longestVersion := 0, 0
-	for _, pack := range u {
-		packNameLen := len(pack.StylizedNameWithRepository())
-		packVersion, _ := getVersionDiff(pack.LocalVersion, pack.RemoteVersion)
-		packVersionLen := len(packVersion)
-		longestName = intrange.Max(packNameLen, longestName)
-		longestVersion = intrange.Max(packVersionLen, longestVersion)
-	}
-
-	namePadding := fmt.Sprintf("%%-%ds  ", longestName)
-	versionPadding := fmt.Sprintf("%%-%ds", longestVersion)
-	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u))))
-
-	for k, i := range u {
-		left, right := getVersionDiff(i.LocalVersion, i.RemoteVersion)
-
-		fmt.Print(magenta(fmt.Sprintf(numberPadding, len(u)-k)))
-
-		fmt.Printf(namePadding, i.StylizedNameWithRepository())
-
-		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
-	}
-}
-
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *rpc.Pkg, extendedInfo bool) {
 	text.PrintInfoValue(gotext.Get("Repository"), "aur")
@@ -201,7 +170,7 @@ func localStatistics(alpmHandle *alpm.Handle) error {
 		return err
 	}
 
-	_, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
+	_, remoteNames, err := query.GetPackageNamesBySource(config.Runtime.DBExecutor)
 	if err != nil {
 		return err
 	}
@@ -227,7 +196,7 @@ func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(warnings, alpmHandle, enableDowngrade)
+	aurUp, repoUp, err := upList(warnings, config.Runtime.DBExecutor, enableDowngrade)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -243,12 +212,12 @@ func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enabl
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	localNames, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
+	localNames, remoteNames, err := query.GetPackageNamesBySource(config.Runtime.DBExecutor)
 	if err != nil {
 		return err
 	}
 
-	aurUp, repoUp, err := upList(warnings, alpmHandle, enableDowngrade)
+	aurUp, repoUp, err := upList(warnings, config.Runtime.DBExecutor, enableDowngrade)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err

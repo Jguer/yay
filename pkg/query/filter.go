@@ -1,83 +1,46 @@
 package query
 
 import (
-	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively
-func GetPackageNamesBySource(alpmHandle *alpm.Handle) (local, remote []string, err error) {
-	localDB, err := alpmHandle.LocalDB()
-	if err != nil {
-		return nil, nil, err
-	}
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = localDB.PkgCache().ForEach(func(k alpm.Package) error {
-		found := false
-		// For each DB search for our secret package.
-		_ = dbList.ForEach(func(d alpm.DB) error {
-			if found {
-				return nil
+func GetPackageNamesBySource(dbExecutor *db.AlpmExecutor) (local, remote []string, err error) {
+outer:
+	for _, localpkg := range dbExecutor.LocalPackages() {
+		for _, syncpkg := range dbExecutor.SyncPackages() {
+			if localpkg.Name() == syncpkg.Name() {
+				local = append(local, localpkg.Name())
+				continue outer
 			}
-
-			if d.Pkg(k.Name()) != nil {
-				found = true
-				local = append(local, k.Name())
-			}
-			return nil
-		})
-		if !found {
-			remote = append(remote, k.Name())
 		}
-		return nil
-	})
+		remote = append(remote, localpkg.Name())
+	}
 	return local, remote, err
 }
 
 // GetRemotePackages returns packages with no correspondence in SyncDBS.
-func GetRemotePackages(alpmHandle *alpm.Handle) (
-	remote []alpm.Package,
-	remoteNames []string,
-	err error) {
-	localDB, err := alpmHandle.LocalDB()
-	if err != nil {
-		return
-	}
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return
-	}
+func GetRemotePackages(dbExecutor *db.AlpmExecutor) (
+	[]db.RepoPackage,
+	[]string) {
+	remoteNames := []string{}
+	remote := []db.RepoPackage{}
 
-	f := func(k alpm.Package) error {
-		found := false
-		// For each DB search for our secret package.
-		_ = dbList.ForEach(func(d alpm.DB) error {
-			if found {
-				return nil
+outer:
+	for _, localpkg := range dbExecutor.LocalPackages() {
+		for _, syncpkg := range dbExecutor.SyncPackages() {
+			if localpkg.Name() == syncpkg.Name() {
+				continue outer
 			}
-
-			if d.Pkg(k.Name()) != nil {
-				found = true
-			}
-			return nil
-		})
-
-		if !found {
-			remote = append(remote, k)
-			remoteNames = append(remoteNames, k.Name())
 		}
-		return nil
+		remote = append(remote, localpkg)
+		remoteNames = append(remoteNames, localpkg.Name())
 	}
-
-	err = localDB.PkgCache().ForEach(f)
-	return remote, remoteNames, err
+	return remote, remoteNames
 }
 
 func RemoveInvalidTargets(targets []string, mode settings.TargetMode) []string {

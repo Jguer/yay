@@ -11,6 +11,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/completion"
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/news"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -169,7 +170,7 @@ func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(cmdArgs, alpmHandle)
 	case "P", "show":
-		return handlePrint(cmdArgs, alpmHandle)
+		return handlePrint(cmdArgs, alpmHandle, config.Runtime.DBExecutor)
 	case "Y", "--yay":
 		return handleYay(cmdArgs, alpmHandle)
 	}
@@ -217,7 +218,7 @@ func lastBuildTime(alpmHandle *alpm.Handle) time.Time {
 	return lastTime
 }
 
-func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) (err error) {
+func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) (err error) {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.MakeConfig()
@@ -232,9 +233,9 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) (err erro
 		quiet := cmdArgs.ExistsArg("q", "quiet")
 		err = news.PrintNewsFeed(lastBuildTime(alpmHandle), config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
+		err = completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
-		err = completion.Show(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		err = completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	case cmdArgs.ExistsArg("s", "stats"):
 		err = localStatistics(alpmHandle)
 	default:
@@ -295,10 +296,10 @@ func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		return syncInfo(cmdArgs, targets, alpmHandle)
 	}
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
-		return install(cmdArgs, alpmHandle, false)
+		return install(cmdArgs, config.Runtime.DBExecutor, false)
 	}
 	if len(cmdArgs.Targets) > 0 {
-		return install(cmdArgs, alpmHandle, false)
+		return install(cmdArgs, config.Runtime.DBExecutor, false)
 	}
 	if cmdArgs.ExistsArg("y", "refresh") {
 		return show(passToPacman(cmdArgs))
@@ -426,7 +427,7 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 		sudoLoopBackground()
 	}
 
-	return install(arguments, alpmHandle, true)
+	return install(arguments, config.Runtime.DBExecutor, true)
 }
 
 func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {

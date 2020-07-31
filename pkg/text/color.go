@@ -29,7 +29,7 @@ func Red(in string) string {
 	return stylize(redCode, in)
 }
 
-func green(in string) string {
+func Green(in string) string {
 	return stylize(greenCode, in)
 }
 

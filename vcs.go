@@ -36,7 +36,7 @@ func createDevelDB(vcsFilePath string, alpmHandle *alpm.Handle) error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 
-	_, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
+	_, remoteNames, err := query.GetPackageNamesBySource(config.Runtime.DBExecutor)
 	if err != nil {
 		return err
 	}

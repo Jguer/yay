@@ -28,11 +28,11 @@ func SprintOperationInfo(a ...interface{}) string {
 }
 
 func Info(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{Bold(green(arrow + " "))}, a...)...)
+	fmt.Fprint(os.Stdout, append([]interface{}{Bold(Green(arrow + " "))}, a...)...)
 }
 
 func Infoln(a ...interface{}) {
-	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(green(arrow))}, a...)...)
+	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(Green(arrow))}, a...)...)
 }
 
 func SprintWarn(a ...interface{}) string {

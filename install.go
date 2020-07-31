@@ -15,6 +15,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/completion"
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
@@ -23,6 +24,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
@@ -60,12 +62,12 @@ func asexp(cmdArgs *settings.Arguments, pkgs []string) error {
 }
 
 // Install handles package installs
-func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProviders bool) (err error) {
+func install(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor, ignoreProviders bool) (err error) {
 	var incompatible stringset.StringSet
 	var do *dep.Order
 
-	var aurUp upSlice
-	var repoUp upSlice
+	var aurUp upgrade.UpSlice
+	var repoUp upgrade.UpSlice
 
 	var srcinfos map[string]*gosrc.Srcinfo
 
@@ -80,7 +82,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 				}
 			}
 		} else if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0 {
-			err = earlyPacmanCall(cmdArgs, alpmHandle)
+			err = earlyPacmanCall(cmdArgs, config.Runtime.DBExecutor)
 			if err != nil {
 				return err
 			}
@@ -89,17 +91,12 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 
 	// we may have done -Sy, our handle now has an old
 	// database.
-	alpmHandle, err = initAlpmHandle(config.Runtime.PacmanConf, alpmHandle)
-	if err != nil {
-		return err
-	}
-	config.Runtime.AlpmHandle = alpmHandle
 	err = config.Runtime.DBExecutor.RefreshHandle()
 	if err != nil {
 		return err
 	}
 
-	localNames, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
+	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
 		return err
 	}
@@ -122,7 +119,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 
 	// if we are doing -u also request all packages needing update
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upList(warnings, alpmHandle, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		aurUp, repoUp, err = upList(warnings, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if err != nil {
 			return err
 		}
@@ -324,7 +321,7 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		config.NoConfirm = oldValue
 	}
 
-	incompatible, err = getIncompatible(do.Aur, srcinfos, alpmHandle)
+	incompatible, err = getIncompatible(do.Aur, srcinfos, dbExecutor)
 	if err != nil {
 		return err
 	}
@@ -369,14 +366,14 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		}
 	}
 
-	go exitOnError(completion.Update(alpmHandle, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false))
+	go exitOnError(completion.Update(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false))
 
 	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {
 		return err
 	}
 
-	err = buildInstallPkgbuilds(cmdArgs, alpmHandle, dp, do, srcinfos, incompatible, conflicts)
+	err = buildInstallPkgbuilds(cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts)
 	if err != nil {
 		return err
 	}
@@ -403,7 +400,7 @@ func removeMake(do *dep.Order) error {
 	return err
 }
 
-func inRepos(syncDB alpm.DBList, pkg string) bool {
+func inRepos(dbExecutor *db.AlpmExecutor, pkg string) bool {
 	target := dep.ToTarget(pkg)
 
 	if target.DB == "aur" {
@@ -414,33 +411,25 @@ func inRepos(syncDB alpm.DBList, pkg string) bool {
 
 	previousHideMenus := settings.HideMenus
 	settings.HideMenus = false
-	_, err := syncDB.FindSatisfier(target.DepString())
+	exists := dbExecutor.SyncSatisfierExists(target.DepString())
 	settings.HideMenus = previousHideMenus
-	if err == nil {
-		return true
-	}
 
-	return !syncDB.FindGroupPkgs(target.Name).Empty()
+	return exists || len(dbExecutor.PackagesFromGroup(target.Name)) > 0
 }
 
-func earlyPacmanCall(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func earlyPacmanCall(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	arguments := cmdArgs.Copy()
 	arguments.Op = "S"
 	targets := cmdArgs.Targets
 	cmdArgs.ClearTargets()
 	arguments.ClearTargets()
 
-	syncDB, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return err
-	}
-
 	if config.Runtime.Mode == settings.ModeRepo {
 		arguments.Targets = targets
 	} else {
 		// separate aur and repo targets
 		for _, target := range targets {
-			if inRepos(syncDB, target) {
+			if inRepos(dbExecutor, target) {
 				arguments.AddTarget(target)
 			} else {
 				cmdArgs.AddTarget(target)
@@ -449,8 +438,7 @@ func earlyPacmanCall(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error
 	}
 
 	if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
-		err = show(passToPacman(arguments))
-		if err != nil {
+		if err := show(passToPacman(arguments)); err != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 	}
@@ -469,10 +457,10 @@ func earlyRefresh(cmdArgs *settings.Arguments) error {
 	return show(passToPacman(arguments))
 }
 
-func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, alpmHandle *alpm.Handle) (stringset.StringSet, error) {
+func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor *db.AlpmExecutor) (stringset.StringSet, error) {
 	incompatible := make(stringset.StringSet)
 	basesMap := make(map[string]dep.Base)
-	alpmArch, err := alpmHandle.Arch()
+	alpmArch, err := dbExecutor.AlpmArch()
 	if err != nil {
 		return nil, err
 	}
@@ -943,7 +931,7 @@ func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet
 
 func buildInstallPkgbuilds(
 	cmdArgs *settings.Arguments,
-	alpmHandle *alpm.Handle,
+	dbExecutor *db.AlpmExecutor,
 	dp *dep.Pool,
 	do *dep.Order,
 	srcinfos map[string]*gosrc.Srcinfo,
@@ -968,7 +956,7 @@ func buildInstallPkgbuilds(
 	config.NoConfirm = true
 
 	//remotenames: names of all non repo packages on the system
-	localNames, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
+	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
 		return err
 	}

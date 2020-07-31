@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/yay/v10/pkg/db"
 )
 
 // Show provides completion info for shells
-func Show(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int, force bool) error {
-	err := Update(alpmHandle, aurURL, completionPath, interval, force)
+func Show(dbExecutor *db.AlpmExecutor, aurURL, completionPath string, interval int, force bool) error {
+	err := Update(dbExecutor, aurURL, completionPath, interval, force)
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func Show(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int, 
 }
 
 // Update updates completion cache to be used by Complete
-func Update(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int, force bool) error {
+func Update(dbExecutor *db.AlpmExecutor, aurURL, completionPath string, interval int, force bool) error {
 	info, err := os.Stat(completionPath)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
@@ -50,11 +50,7 @@ func Update(alpmHandle *alpm.Handle, aurURL, completionPath string, interval int
 			defer os.Remove(completionPath)
 		}
 
-		dbList, err := alpmHandle.SyncDBs()
-		if err != nil {
-			return err
-		}
-		erra := createRepoList(&dbList, out)
+		erra := createRepoList(dbExecutor, out)
 
 		out.Close()
 		return erra
@@ -97,13 +93,12 @@ func createAURList(aurURL string, out io.Writer) error {
 }
 
 // CreatePackageList appends Repo packages to completion cache
-func createRepoList(dbList *alpm.DBList, out io.Writer) error {
-	_ = dbList.ForEach(func(db alpm.DB) error {
-		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
-			_, err := io.WriteString(out, pkg.Name()+"\t"+pkg.DB().Name()+"\n")
+func createRepoList(dbExecutor *db.AlpmExecutor, out io.Writer) error {
+	for _, pkg := range dbExecutor.SyncPackages() {
+		_, err := io.WriteString(out, pkg.Name()+"\t"+pkg.DB().Name()+"\n")
+		if err != nil {
 			return err
-		})
-		return nil
-	})
+		}
+	}
 	return nil
 }

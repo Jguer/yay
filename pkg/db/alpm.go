@@ -8,6 +8,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
 type AlpmExecutor struct {
@@ -176,6 +177,13 @@ func (ae *AlpmExecutor) LocalSatisfierExists(pkgName string) bool {
 	return true
 }
 
+func (ae *AlpmExecutor) SyncSatisfierExists(pkgName string) bool {
+	if _, err := ae.syncDB.FindSatisfier(pkgName); err != nil {
+		return false
+	}
+	return true
+}
+
 func (ae *AlpmExecutor) IsCorrectVersionInstalled(pkgName, versionRequired string) bool {
 	alpmPackage := ae.localDB.Pkg(pkgName)
 	if alpmPackage == nil {
@@ -265,4 +273,50 @@ func (ae *AlpmExecutor) PackageConflicts(pkg RepoPackage) []alpm.Depend {
 func (ae *AlpmExecutor) PackageGroups(pkg RepoPackage) []string {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Groups().Slice()
+}
+
+// upRepo gathers local packages and checks if they have new versions.
+// Output: Upgrade type package list.
+func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) (upgrade.UpSlice, error) {
+	slice := upgrade.UpSlice{}
+
+	localDB, err := ae.handle.LocalDB()
+	if err != nil {
+		return slice, err
+	}
+
+	err = ae.handle.TransInit(alpm.TransFlagNoLock)
+	if err != nil {
+		return slice, err
+	}
+
+	defer func() {
+		err = ae.handle.TransRelease()
+	}()
+
+	err = ae.handle.SyncSysupgrade(enableDowngrade)
+	if err != nil {
+		return slice, err
+	}
+	_ = ae.handle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
+		localVer := "-"
+
+		if localPkg := localDB.Pkg(pkg.Name()); localPkg != nil {
+			localVer = localPkg.Version()
+		}
+
+		slice = append(slice, upgrade.Upgrade{
+			Name:          pkg.Name(),
+			Repository:    pkg.DB().Name(),
+			LocalVersion:  localVer,
+			RemoteVersion: pkg.Version(),
+		})
+		return nil
+	})
+
+	return slice, nil
+}
+
+func (ae *AlpmExecutor) AlpmArch() (string, error) {
+	return ae.handle.Arch()
 }
