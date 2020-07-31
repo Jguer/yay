@@ -277,7 +277,7 @@ func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		} else {
 			config.SearchMode = detailed
 		}
-		return syncSearch(targets, alpmHandle)
+		return syncSearch(targets)
 	}
 	if cmdArgs.ExistsArg("p", "print", "print-format") {
 		return show(passToPacman(cmdArgs))
@@ -331,7 +331,7 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 		lenaq = len(aq)
 	}
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		pq, repoErr = queryRepo(pkgS, alpmHandle)
+		pq = queryRepo(pkgS, config.Runtime.DBExecutor)
 		lenpq = len(pq)
 		if repoErr != nil {
 			return repoErr
@@ -345,17 +345,17 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 	switch config.SortMode {
 	case settings.TopDown:
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(alpmHandle)
+			pq.printSearch(config.Runtime.DBExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(lenpq+1, alpmHandle)
+			aq.printSearch(lenpq+1, config.Runtime.DBExecutor)
 		}
 	case settings.BottomUp:
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(lenpq+1, alpmHandle)
+			aq.printSearch(lenpq+1, config.Runtime.DBExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(alpmHandle)
+			pq.printSearch(config.Runtime.DBExecutor)
 		}
 	default:
 		return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))

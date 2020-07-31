@@ -94,6 +94,10 @@ func install(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, ignoreProvide
 		return err
 	}
 	config.Runtime.AlpmHandle = alpmHandle
+	err = config.Runtime.DBExecutor.RefreshHandle()
+	if err != nil {
+		return err
+	}
 
 	localNames, remoteNames, err := query.GetPackageNamesBySource(alpmHandle)
 	if err != nil {

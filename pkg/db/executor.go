@@ -7,4 +7,7 @@ type RepoPackage interface {
 	Name() string
 	Version() string
 	DB() *alpm.DB
+	ISize() int64
+	Size() int64
+	Description() string
 }

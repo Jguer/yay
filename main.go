@@ -145,7 +145,6 @@ func initAlpmHandle(pacmanConf *pacmanconf.Config, oldAlpmHandle *alpm.Handle) (
 	}
 
 	alpmHandle.SetQuestionCallback(questionCallback)
-	alpmHandle.SetLogCallback(logCallback)
 	return alpmHandle, nil
 }
 
@@ -194,7 +193,7 @@ func main() {
 	exitOnError(initVCS(runtime.VCSPath))
 	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(cmdArgs, config.PacmanConf)
 	exitOnError(err)
-	config.Runtime.DBExecutor, err = db.NewExecutor(config.Runtime.AlpmHandle)
+	config.Runtime.DBExecutor, err = db.NewAlpmExecutor(config.Runtime.AlpmHandle, runtime.PacmanConf, questionCallback)
 	exitOnError(err)
 	exitOnError(handleCmd(cmdArgs, config.Runtime.AlpmHandle))
 	os.Exit(cleanup(config.Runtime.AlpmHandle))

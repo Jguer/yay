@@ -11,6 +11,7 @@ import (
 
 	"github.com/Jguer/go-alpm"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
@@ -19,9 +20,7 @@ import (
 )
 
 // PrintSearch handles printing search results in a given format
-func (q aurQuery) printSearch(start int, alpmHandle *alpm.Handle) {
-	localDB, _ := alpmHandle.LocalDB()
-
+func (q aurQuery) printSearch(start int, dbExecutor *db.AlpmExecutor) {
 	for i := range q {
 		var toprint string
 		if config.SearchMode == numberMenu {
@@ -51,7 +50,7 @@ func (q aurQuery) printSearch(start int, alpmHandle *alpm.Handle) {
 			toprint += bold(red(gotext.Get("(Out-of-date: %s)", text.FormatTime(q[i].OutOfDate)))) + " "
 		}
 
-		if pkg := localDB.Pkg(q[i].Name); pkg != nil {
+		if pkg := dbExecutor.LocalPackage(q[i].Name); pkg != nil {
 			if pkg.Version() != q[i].Version {
 				toprint += bold(green(gotext.Get("(Installed: %s)", pkg.Version())))
 			} else {
@@ -64,7 +63,7 @@ func (q aurQuery) printSearch(start int, alpmHandle *alpm.Handle) {
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func (s repoQuery) printSearch(alpmHandle *alpm.Handle) {
+func (s repoQuery) printSearch(dbExecutor *db.AlpmExecutor) {
 	for i, res := range s {
 		var toprint string
 		if config.SearchMode == numberMenu {
@@ -86,18 +85,16 @@ func (s repoQuery) printSearch(alpmHandle *alpm.Handle) {
 			bold(" ("+text.Human(res.Size())+
 				" "+text.Human(res.ISize())+") ")
 
-		if len(res.Groups().Slice()) != 0 {
-			toprint += fmt.Sprint(res.Groups().Slice(), " ")
+		packageGroups := dbExecutor.PackageGroups(res)
+		if len(packageGroups) != 0 {
+			toprint += fmt.Sprint(packageGroups, " ")
 		}
 
-		localDB, err := alpmHandle.LocalDB()
-		if err == nil {
-			if pkg := localDB.Pkg(res.Name()); pkg != nil {
-				if pkg.Version() != res.Version() {
-					toprint += bold(green(gotext.Get("(Installed: %s)", pkg.Version())))
-				} else {
-					toprint += bold(green(gotext.Get("(Installed)")))
-				}
+		if pkg := dbExecutor.LocalPackage(res.Name()); pkg != nil {
+			if pkg.Version() != res.Version() {
+				toprint += bold(green(gotext.Get("(Installed: %s)", pkg.Version())))
+			} else {
+				toprint += bold(green(gotext.Get("(Installed)")))
 			}
 		}
 

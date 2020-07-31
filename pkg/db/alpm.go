@@ -1,16 +1,26 @@
 package db
 
 import (
+	"errors"
+
 	alpm "github.com/Jguer/go-alpm"
+	"github.com/Morganamilo/go-pacmanconf"
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 type AlpmExecutor struct {
-	Handle  *alpm.Handle
-	LocalDB *alpm.DB
-	SyncDB  alpm.DBList
+	handle           *alpm.Handle
+	localDB          *alpm.DB
+	syncDB           alpm.DBList
+	conf             *pacmanconf.Config
+	questionCallback func(question alpm.QuestionAny)
 }
 
-func NewExecutor(handle *alpm.Handle) (*AlpmExecutor, error) {
+func NewAlpmExecutor(handle *alpm.Handle,
+	pacamnConf *pacmanconf.Config,
+	questionCallback func(question alpm.QuestionAny)) (*AlpmExecutor, error) {
 	localDB, err := handle.LocalDB()
 	if err != nil {
 		return nil, err
@@ -20,18 +30,154 @@ func NewExecutor(handle *alpm.Handle) (*AlpmExecutor, error) {
 		return nil, err
 	}
 
-	return &AlpmExecutor{Handle: handle, LocalDB: localDB, SyncDB: syncDB}, nil
+	return &AlpmExecutor{handle: handle, localDB: localDB, syncDB: syncDB, conf: pacamnConf, questionCallback: questionCallback}, nil
+}
+
+func toUsage(usages []string) alpm.Usage {
+	if len(usages) == 0 {
+		return alpm.UsageAll
+	}
+
+	var ret alpm.Usage
+	for _, usage := range usages {
+		switch usage {
+		case "Sync":
+			ret |= alpm.UsageSync
+		case "Search":
+			ret |= alpm.UsageSearch
+		case "Install":
+			ret |= alpm.UsageInstall
+		case "Upgrade":
+			ret |= alpm.UsageUpgrade
+		case "All":
+			ret |= alpm.UsageAll
+		}
+	}
+
+	return ret
+}
+
+func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error {
+	// TODO: set SigLevel
+	// sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
+	// localFileSigLevel := alpm.SigUseDefault
+	// remoteFileSigLevel := alpm.SigUseDefault
+
+	for _, repo := range pacmanConf.Repos {
+		// TODO: set SigLevel
+		db, err := alpmHandle.RegisterSyncDB(repo.Name, 0)
+		if err != nil {
+			return err
+		}
+
+		db.SetServers(repo.Servers)
+		db.SetUsage(toUsage(repo.Usage))
+	}
+
+	if err := alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {
+		return err
+	}
+
+	// add hook directories 1-by-1 to avoid overwriting the system directory
+	for _, dir := range pacmanConf.HookDir {
+		if err := alpmHandle.AddHookDir(dir); err != nil {
+			return err
+		}
+	}
+
+	if err := alpmHandle.SetGPGDir(pacmanConf.GPGDir); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetLogFile(pacmanConf.LogFile); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetIgnorePkgs(pacmanConf.IgnorePkg); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetIgnoreGroups(pacmanConf.IgnoreGroup); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetArch(pacmanConf.Architecture); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetNoUpgrades(pacmanConf.NoUpgrade); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetNoExtracts(pacmanConf.NoExtract); err != nil {
+		return err
+	}
+
+	/*if err := alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetLocalFileSigLevel(localFileSigLevel); err != nil {
+		return err
+	}
+
+	if err := alpmHandle.SetRemoteFileSigLevel(remoteFileSigLevel); err != nil {
+		return err
+	}*/
+
+	if err := alpmHandle.SetUseSyslog(pacmanConf.UseSyslog); err != nil {
+		return err
+	}
+
+	return alpmHandle.SetCheckSpace(pacmanConf.CheckSpace)
+}
+
+func logCallback(level alpm.LogLevel, str string) {
+	switch level {
+	case alpm.LogWarning:
+		text.Warn(str)
+	case alpm.LogError:
+		text.Error(str)
+	}
+}
+
+func (ae *AlpmExecutor) RefreshHandle() error {
+	if ae.handle != nil {
+		if errRelease := ae.handle.Release(); errRelease != nil {
+			return errRelease
+		}
+	}
+
+	alpmHandle, err := alpm.Initialize(ae.conf.RootDir, ae.conf.DBPath)
+	if err != nil {
+		return errors.New(gotext.Get("unable to CreateHandle: %s", err))
+	}
+
+	if errConf := configureAlpm(ae.conf, alpmHandle); errConf != nil {
+		return errConf
+	}
+
+	alpmHandle.SetQuestionCallback(ae.questionCallback)
+	alpmHandle.SetLogCallback(logCallback)
+	ae.handle = alpmHandle
+	ae.syncDB, err = alpmHandle.SyncDBs()
+	if err != nil {
+		return err
+	}
+
+	ae.localDB, err = alpmHandle.LocalDB()
+	return err
 }
 
 func (ae *AlpmExecutor) LocalSatisfierExists(pkgName string) bool {
-	if _, err := ae.LocalDB.PkgCache().FindSatisfier(pkgName); err != nil {
+	if _, err := ae.localDB.PkgCache().FindSatisfier(pkgName); err != nil {
 		return false
 	}
 	return true
 }
 
 func (ae *AlpmExecutor) IsCorrectVersionInstalled(pkgName, versionRequired string) bool {
-	alpmPackage := ae.LocalDB.Pkg(pkgName)
+	alpmPackage := ae.localDB.Pkg(pkgName)
 	if alpmPackage == nil {
 		return false
 	}
@@ -40,7 +186,7 @@ func (ae *AlpmExecutor) IsCorrectVersionInstalled(pkgName, versionRequired strin
 }
 
 func (ae *AlpmExecutor) SyncSatisfier(pkgName string) RepoPackage {
-	foundPkg, err := ae.SyncDB.FindSatisfier(pkgName)
+	foundPkg, err := ae.syncDB.FindSatisfier(pkgName)
 	if err != nil {
 		return nil
 	}
@@ -49,7 +195,7 @@ func (ae *AlpmExecutor) SyncSatisfier(pkgName string) RepoPackage {
 
 func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []RepoPackage {
 	groupPackages := []RepoPackage{}
-	_ = ae.SyncDB.FindGroupPkgs(groupName).ForEach(func(pkg alpm.Package) error {
+	_ = ae.syncDB.FindGroupPkgs(groupName).ForEach(func(pkg alpm.Package) error {
 		groupPackages = append(groupPackages, &pkg)
 		return nil
 	})
@@ -58,15 +204,39 @@ func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []RepoPackage {
 
 func (ae *AlpmExecutor) LocalPackages() []RepoPackage {
 	localPackages := []RepoPackage{}
-	_ = ae.LocalDB.PkgCache().ForEach(func(pkg alpm.Package) error {
+	_ = ae.localDB.PkgCache().ForEach(func(pkg alpm.Package) error {
 		localPackages = append(localPackages, RepoPackage(&pkg))
 		return nil
 	})
 	return localPackages
 }
 
+// SyncPackages searches SyncDB for packages or returns all packages if no search param is given
+func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []RepoPackage {
+	repoPackages := []RepoPackage{}
+	_ = ae.syncDB.ForEach(func(db alpm.DB) error {
+		if len(pkgNames) == 0 {
+			_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
+				repoPackages = append(repoPackages, RepoPackage(&pkg))
+				return nil
+			})
+		} else {
+			_ = db.Search(pkgNames).ForEach(func(pkg alpm.Package) error {
+				repoPackages = append(repoPackages, RepoPackage(&pkg))
+				return nil
+			})
+		}
+		return nil
+	})
+	return repoPackages
+}
+
+func (ae *AlpmExecutor) LocalPackage(pkgName string) RepoPackage {
+	return ae.localDB.Pkg(pkgName)
+}
+
 func (ae *AlpmExecutor) PackageFromDB(pkgName, dbName string) RepoPackage {
-	singleDB, err := ae.Handle.SyncDBByName(dbName)
+	singleDB, err := ae.handle.SyncDBByName(dbName)
 	if err != nil {
 		return nil
 	}
@@ -90,4 +260,9 @@ func (ae *AlpmExecutor) PackageProvides(pkg RepoPackage) []alpm.Depend {
 func (ae *AlpmExecutor) PackageConflicts(pkg RepoPackage) []alpm.Depend {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Conflicts().Slice()
+}
+
+func (ae *AlpmExecutor) PackageGroups(pkg RepoPackage) []string {
+	alpmPackage := pkg.(*alpm.Package)
+	return alpmPackage.Groups().Slice()
 }

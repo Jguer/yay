@@ -11,6 +11,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -21,7 +22,13 @@ import (
 type aurQuery []rpc.Pkg
 
 // Query holds the results of a repository search.
-type repoQuery []alpm.Package
+type repoQuery []db.RepoPackage
+
+func (s repoQuery) Reverse() {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+}
 
 func (q aurQuery) Len() int {
 	return len(q)
@@ -140,10 +147,9 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 }
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
+func syncSearch(pkgS []string) (err error) {
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 	var aurErr error
-	var repoErr error
 	var aq aurQuery
 	var pq repoQuery
 
@@ -151,26 +157,23 @@ func syncSearch(pkgS []string, alpmHandle *alpm.Handle) (err error) {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		pq, repoErr = queryRepo(pkgS, alpmHandle)
-		if repoErr != nil {
-			return err
-		}
+		pq = queryRepo(pkgS, config.Runtime.DBExecutor)
 	}
 
 	switch config.SortMode {
 	case settings.TopDown:
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(alpmHandle)
+			pq.printSearch(config.Runtime.DBExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1, alpmHandle)
+			aq.printSearch(1, config.Runtime.DBExecutor)
 		}
 	case settings.BottomUp:
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1, alpmHandle)
+			aq.printSearch(1, config.Runtime.DBExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(alpmHandle)
+			pq.printSearch(config.Runtime.DBExecutor)
 		}
 	default:
 		return errors.New(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -239,30 +242,13 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handl
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string, alpmHandle *alpm.Handle) (s repoQuery, err error) {
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return
-	}
-
-	_ = dbList.ForEach(func(db alpm.DB) error {
-		if len(pkgInputN) == 0 {
-			pkgs := db.PkgCache()
-			s = append(s, pkgs.Slice()...)
-		} else {
-			pkgs := db.Search(pkgInputN)
-			s = append(s, pkgs.Slice()...)
-		}
-		return nil
-	})
+func queryRepo(pkgInputN []string, dbExecutor *db.AlpmExecutor) repoQuery {
+	s := repoQuery(dbExecutor.SyncPackages(pkgInputN...))
 
 	if config.SortMode == settings.BottomUp {
-		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-			s[i], s[j] = s[j], s[i]
-		}
+		s.Reverse()
 	}
-
-	return
+	return s
 }
 
 // PackageSlices separates an input slice into aur and repo slices
@@ -273,13 +259,13 @@ func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []strin
 	}
 
 	for _, _pkg := range toCheck {
-		db, name := text.SplitDBFromName(_pkg)
+		dbName, name := text.SplitDBFromName(_pkg)
 		found := false
 
-		if db == "aur" || config.Runtime.Mode == settings.ModeAUR {
+		if dbName == "aur" || config.Runtime.Mode == settings.ModeAUR {
 			aur = append(aur, _pkg)
 			continue
-		} else if db != "" || config.Runtime.Mode == settings.ModeRepo {
+		} else if dbName != "" || config.Runtime.Mode == settings.ModeRepo {
 			repo = append(repo, _pkg)
 			continue
 		}
