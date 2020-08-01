@@ -140,7 +140,7 @@ getpkgbuild specific options:
     -f --force            Force download for existing ABS packages`)
 }
 
-func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) error {
 	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp(cmdArgs)
 	}
@@ -158,11 +158,11 @@ func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	case "F", "files":
 		return show(passToPacman(cmdArgs))
 	case "Q", "query":
-		return handleQuery(cmdArgs, alpmHandle)
+		return handleQuery(cmdArgs, dbExecutor)
 	case "R", "remove":
 		return handleRemove(cmdArgs)
 	case "S", "sync":
-		return handleSync(cmdArgs, alpmHandle)
+		return handleSync(cmdArgs, alpmHandle, dbExecutor)
 	case "T", "deptest":
 		return show(passToPacman(cmdArgs))
 	case "U", "upgrade":
@@ -170,17 +170,17 @@ func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(cmdArgs, alpmHandle)
 	case "P", "show":
-		return handlePrint(cmdArgs, alpmHandle, config.Runtime.DBExecutor)
+		return handlePrint(cmdArgs, alpmHandle, dbExecutor)
 	case "Y", "--yay":
-		return handleYay(cmdArgs, alpmHandle)
+		return handleYay(cmdArgs, alpmHandle, dbExecutor)
 	}
 
 	return fmt.Errorf(gotext.Get("unhandled operation"))
 }
 
-func handleQuery(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func handleQuery(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	if cmdArgs.ExistsArg("u", "upgrades") {
-		return printUpdateList(cmdArgs, alpmHandle, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		return printUpdateList(cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	}
 	return show(passToPacman(cmdArgs))
 }
@@ -227,7 +227,7 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecuto
 	case cmdArgs.ExistsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
 	case cmdArgs.ExistsArg("n", "numberupgrades"):
-		err = printNumberOfUpdates(alpmHandle, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		err = printNumberOfUpdates(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
@@ -244,9 +244,9 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecuto
 	return err
 }
 
-func handleYay(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func handleYay(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) error {
 	if cmdArgs.ExistsArg("gendb") {
-		return createDevelDB(config.Runtime.VCSPath, alpmHandle)
+		return createDevelDB(config.Runtime.VCSPath, dbExecutor)
 	}
 	if cmdArgs.ExistsDouble("c") {
 		return cleanDependencies(cmdArgs, alpmHandle, true)
@@ -255,7 +255,7 @@ func handleYay(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		return cleanDependencies(cmdArgs, alpmHandle, false)
 	}
 	if len(cmdArgs.Targets) > 0 {
-		return handleYogurt(cmdArgs, alpmHandle)
+		return handleYogurt(cmdArgs, dbExecutor)
 	}
 	return nil
 }
@@ -264,12 +264,12 @@ func handleGetpkgbuild(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) err
 	return getPkgbuilds(cmdArgs.Targets, alpmHandle, cmdArgs.ExistsArg("f", "force"))
 }
 
-func handleYogurt(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func handleYogurt(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	config.SearchMode = numberMenu
-	return displayNumberMenu(cmdArgs.Targets, alpmHandle, cmdArgs)
+	return displayNumberMenu(cmdArgs.Targets, dbExecutor, cmdArgs)
 }
 
-func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) error {
 	targets := cmdArgs.Targets
 
 	if cmdArgs.ExistsArg("s", "search") {
@@ -284,7 +284,7 @@ func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 		return show(passToPacman(cmdArgs))
 	}
 	if cmdArgs.ExistsArg("c", "clean") {
-		return syncClean(cmdArgs, alpmHandle)
+		return syncClean(cmdArgs, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("l", "list") {
 		return syncList(cmdArgs, alpmHandle)
@@ -317,7 +317,7 @@ func handleRemove(cmdArgs *settings.Arguments) error {
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings.Arguments) error {
+func displayNumberMenu(pkgS []string, dbExecutor *db.AlpmExecutor, cmdArgs *settings.Arguments) error {
 	var (
 		aurErr, repoErr error
 		aq              aurQuery
@@ -332,7 +332,7 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 		lenaq = len(aq)
 	}
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		pq = queryRepo(pkgS, config.Runtime.DBExecutor)
+		pq = queryRepo(pkgS, dbExecutor)
 		lenpq = len(pq)
 		if repoErr != nil {
 			return repoErr
@@ -427,7 +427,7 @@ func displayNumberMenu(pkgS []string, alpmHandle *alpm.Handle, cmdArgs *settings
 		sudoLoopBackground()
 	}
 
-	return install(arguments, config.Runtime.DBExecutor, true)
+	return install(arguments, dbExecutor, true)
 }
 
 func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {

@@ -175,7 +175,12 @@ func upAUR(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSlice
 			if pkg.ShouldIgnore() {
 				printIgnoringPackage(pkg, aurPkg.Version)
 			} else {
-				toUpgrade = append(toUpgrade, upgrade.Upgrade{Name: aurPkg.Name, Repository: "aur", LocalVersion: pkg.Version(), RemoteVersion: aurPkg.Version})
+				toUpgrade = append(toUpgrade,
+					upgrade.Upgrade{
+						Name:          aurPkg.Name,
+						Repository:    "aur",
+						LocalVersion:  pkg.Version(),
+						RemoteVersion: aurPkg.Version})
 			}
 		}
 	}

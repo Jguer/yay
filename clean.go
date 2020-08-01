@@ -10,6 +10,7 @@ import (
 
 	"github.com/Jguer/go-alpm"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
@@ -65,7 +66,7 @@ func cleanRemove(cmdArgs *settings.Arguments, pkgNames []string) error {
 	return show(passToPacman(arguments))
 }
 
-func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func syncClean(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	keepInstalled := false
 	keepCurrent := false
 
@@ -99,7 +100,7 @@ func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	fmt.Println(gotext.Get("\nBuild directory:"), config.BuildDir)
 
 	if text.ContinueTask(question, true, config.NoConfirm) {
-		if err := cleanAUR(keepInstalled, keepCurrent, removeAll, alpmHandle); err != nil {
+		if err := cleanAUR(keepInstalled, keepCurrent, removeAll, dbExecutor); err != nil {
 			return err
 		}
 	}
@@ -115,13 +116,13 @@ func syncClean(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	return nil
 }
 
-func cleanAUR(keepInstalled, keepCurrent, removeAll bool, alpmHandle *alpm.Handle) error {
+func cleanAUR(keepInstalled, keepCurrent, removeAll bool, dbExecutor *db.AlpmExecutor) error {
 	fmt.Println(gotext.Get("removing AUR packages from cache..."))
 
 	installedBases := make(stringset.StringSet)
 	inAURBases := make(stringset.StringSet)
 
-	remotePackages, _ := query.GetRemotePackages(config.Runtime.DBExecutor)
+	remotePackages, _ := query.GetRemotePackages(dbExecutor)
 
 	files, err := ioutil.ReadDir(config.BuildDir)
 	if err != nil {

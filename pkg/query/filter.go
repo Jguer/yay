@@ -25,11 +25,8 @@ outer:
 
 // GetRemotePackages returns packages with no correspondence in SyncDBS.
 func GetRemotePackages(dbExecutor *db.AlpmExecutor) (
-	[]db.RepoPackage,
-	[]string) {
-	remoteNames := []string{}
-	remote := []db.RepoPackage{}
-
+	remote []db.RepoPackage,
+	remoteNames []string) {
 outer:
 	for _, localpkg := range dbExecutor.LocalPackages() {
 		for _, syncpkg := range dbExecutor.SyncPackages() {
@@ -47,14 +44,14 @@ func RemoveInvalidTargets(targets []string, mode settings.TargetMode) []string {
 	filteredTargets := make([]string, 0)
 
 	for _, target := range targets {
-		db, _ := text.SplitDBFromName(target)
+		dbName, _ := text.SplitDBFromName(target)
 
-		if db == "aur" && mode == settings.ModeRepo {
+		if dbName == "aur" && mode == settings.ModeRepo {
 			text.Warnln(gotext.Get("%s: can't use target with option --repo -- skipping", text.Cyan(target)))
 			continue
 		}
 
-		if db != "aur" && db != "" && mode == settings.ModeAUR {
+		if dbName != "aur" && dbName != "" && mode == settings.ModeAUR {
 			text.Warnln(gotext.Get("%s: can't use target with option --aur -- skipping", text.Cyan(target)))
 			continue
 		}

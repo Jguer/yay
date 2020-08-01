@@ -195,6 +195,6 @@ func main() {
 	exitOnError(err)
 	config.Runtime.DBExecutor, err = db.NewAlpmExecutor(config.Runtime.AlpmHandle, runtime.PacmanConf, questionCallback)
 	exitOnError(err)
-	exitOnError(handleCmd(cmdArgs, config.Runtime.AlpmHandle))
+	exitOnError(handleCmd(cmdArgs, config.Runtime.AlpmHandle, config.Runtime.DBExecutor))
 	os.Exit(cleanup(config.Runtime.AlpmHandle))
 }

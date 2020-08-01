@@ -192,11 +192,11 @@ func localStatistics(alpmHandle *alpm.Handle) error {
 }
 
 // TODO: Make it less hacky
-func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
+func printNumberOfUpdates(dbExecutor *db.AlpmExecutor, enableDowngrade bool) error {
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(warnings, config.Runtime.DBExecutor, enableDowngrade)
+	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -207,17 +207,17 @@ func printNumberOfUpdates(alpmHandle *alpm.Handle, enableDowngrade bool) error {
 }
 
 // TODO: Make it less hacky
-func printUpdateList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, enableDowngrade bool) error {
+func printUpdateList(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor, enableDowngrade bool) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	localNames, remoteNames, err := query.GetPackageNamesBySource(config.Runtime.DBExecutor)
+	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
 		return err
 	}
 
-	aurUp, repoUp, err := upList(warnings, config.Runtime.DBExecutor, enableDowngrade)
+	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
