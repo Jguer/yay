@@ -16,4 +16,5 @@ type RepoPackage interface {
 	ShouldIgnore() bool
 	Size() int64
 	Version() string
+	Reason() alpm.PkgReason
 }

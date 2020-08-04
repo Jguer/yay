@@ -383,25 +383,21 @@ func hangingPackages(removeOptional bool, alpmHandle *alpm.Handle) (hanging []st
 }
 
 // Statistics returns statistics about packages installed in system
-func statistics(alpmHandle *alpm.Handle) (*struct {
+func statistics(dbExecutor *db.AlpmExecutor) *struct {
 	Totaln    int
 	Expln     int
 	TotalSize int64
-}, error) {
-	var tS int64 // TotalSize
-	var nPkg int
-	var ePkg int
+} {
+	var totalSize int64
+	localPackages := dbExecutor.LocalPackages()
+	totalInstalls := 0
+	explicitInstalls := 0
 
-	localDB, err := alpmHandle.LocalDB()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, pkg := range localDB.PkgCache().Slice() {
-		tS += pkg.ISize()
-		nPkg++
-		if pkg.Reason() == 0 {
-			ePkg++
+	for _, pkg := range localPackages {
+		totalSize += pkg.ISize()
+		totalInstalls++
+		if pkg.Reason() == alpm.PkgReasonExplicit {
+			explicitInstalls++
 		}
 	}
 
@@ -410,8 +406,8 @@ func statistics(alpmHandle *alpm.Handle) (*struct {
 		Expln     int
 		TotalSize int64
 	}{
-		nPkg, ePkg, tS,
+		totalInstalls, explicitInstalls, totalSize,
 	}
 
-	return info, err
+	return info
 }

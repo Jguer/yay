@@ -9,8 +9,6 @@ import (
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
-	"github.com/Jguer/go-alpm"
-
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
@@ -144,14 +142,8 @@ func PrintInfo(a *rpc.Pkg, extendedInfo bool) {
 }
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
-func biggestPackages(alpmHandle *alpm.Handle) {
-	localDB, err := alpmHandle.LocalDB()
-	if err != nil {
-		return
-	}
-
-	pkgCache := localDB.PkgCache()
-	pkgS := pkgCache.SortBySize().Slice()
+func biggestPackages(dbExecutor *db.AlpmExecutor) {
+	pkgS := dbExecutor.BiggestPackages()
 
 	if len(pkgS) < 10 {
 		return
@@ -164,11 +156,8 @@ func biggestPackages(alpmHandle *alpm.Handle) {
 }
 
 // localStatistics prints installed packages statistics.
-func localStatistics(alpmHandle *alpm.Handle) error {
-	info, err := statistics(alpmHandle)
-	if err != nil {
-		return err
-	}
+func localStatistics(dbExecutor *db.AlpmExecutor) error {
+	info := statistics(dbExecutor)
 
 	_, remoteNames, err := query.GetPackageNamesBySource(config.Runtime.DBExecutor)
 	if err != nil {
@@ -183,7 +172,7 @@ func localStatistics(alpmHandle *alpm.Handle) error {
 	text.Infoln(gotext.Get("Total Size occupied by packages: %s", cyan(text.Human(info.TotalSize))))
 	fmt.Println(bold(cyan("===========================================")))
 	text.Infoln(gotext.Get("Ten biggest packages:"))
-	biggestPackages(alpmHandle)
+	biggestPackages(dbExecutor)
 	fmt.Println(bold(cyan("===========================================")))
 
 	query.AURInfoPrint(remoteNames, config.RequestSplitN)

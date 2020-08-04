@@ -320,3 +320,12 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) (upgrade.UpSlice, err
 func (ae *AlpmExecutor) AlpmArch() (string, error) {
 	return ae.handle.Arch()
 }
+
+func (ae *AlpmExecutor) BiggestPackages() []RepoPackage {
+	localPackages := []RepoPackage{}
+	_ = ae.localDB.PkgCache().SortBySize().ForEach(func(pkg alpm.Package) error {
+		localPackages = append(localPackages, RepoPackage(&pkg))
+		return nil
+	})
+	return localPackages
+}

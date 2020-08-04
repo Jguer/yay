@@ -237,7 +237,7 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecuto
 	case cmdArgs.ExistsArg("c", "complete"):
 		err = completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	case cmdArgs.ExistsArg("s", "stats"):
-		err = localStatistics(alpmHandle)
+		err = localStatistics(dbExecutor)
 	default:
 		err = nil
 	}
