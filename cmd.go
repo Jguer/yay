@@ -172,7 +172,7 @@ func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor 
 	case "P", "show":
 		return handlePrint(cmdArgs, alpmHandle, dbExecutor)
 	case "Y", "--yay":
-		return handleYay(cmdArgs, alpmHandle, dbExecutor)
+		return handleYay(cmdArgs, dbExecutor)
 	}
 
 	return fmt.Errorf(gotext.Get("unhandled operation"))
@@ -244,15 +244,15 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecuto
 	return err
 }
 
-func handleYay(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) error {
+func handleYay(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	if cmdArgs.ExistsArg("gendb") {
 		return createDevelDB(config.Runtime.VCSPath, dbExecutor)
 	}
 	if cmdArgs.ExistsDouble("c") {
-		return cleanDependencies(cmdArgs, alpmHandle, true)
+		return cleanDependencies(cmdArgs, dbExecutor, true)
 	}
 	if cmdArgs.ExistsArg("c", "clean") {
-		return cleanDependencies(cmdArgs, alpmHandle, false)
+		return cleanDependencies(cmdArgs, dbExecutor, false)
 	}
 	if len(cmdArgs.Targets) > 0 {
 		return handleYogurt(cmdArgs, dbExecutor)

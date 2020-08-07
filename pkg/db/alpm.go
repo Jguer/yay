@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	alpm "github.com/Jguer/go-alpm"
-	"github.com/Morganamilo/go-pacmanconf"
+	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -258,6 +258,11 @@ func (ae *AlpmExecutor) PackageFromDB(pkgName, dbName string) RepoPackage {
 func (ae *AlpmExecutor) PackageDepends(pkg RepoPackage) []alpm.Depend {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Depends().Slice()
+}
+
+func (ae *AlpmExecutor) PackageOptionalDepends(pkg RepoPackage) []alpm.Depend {
+	alpmPackage := pkg.(*alpm.Package)
+	return alpmPackage.OptionalDepends().Slice()
 }
 
 func (ae *AlpmExecutor) PackageProvides(pkg RepoPackage) []alpm.Depend {

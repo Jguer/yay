@@ -295,12 +295,7 @@ func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []strin
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
 // removeOptional decides whether optional dependencies are counted or not
-func hangingPackages(removeOptional bool, alpmHandle *alpm.Handle) (hanging []string, err error) {
-	localDB, err := alpmHandle.LocalDB()
-	if err != nil {
-		return
-	}
-
+func hangingPackages(removeOptional bool, dbExecutor *db.AlpmExecutor) (hanging []string) {
 	// safePackages represents every package in the system in one of 3 states
 	// State = 0 - Remove package from the system
 	// State = 1 - Keep package in the system; need to iterate over dependencies
@@ -308,78 +303,69 @@ func hangingPackages(removeOptional bool, alpmHandle *alpm.Handle) (hanging []st
 	safePackages := make(map[string]uint8)
 	// provides stores a mapping from the provides name back to the original package name
 	provides := make(stringset.MapStringSet)
-	packages := localDB.PkgCache()
 
+	packages := dbExecutor.LocalPackages()
 	// Mark explicit dependencies and enumerate the provides list
-	setupResources := func(pkg alpm.Package) error {
+	for _, pkg := range packages {
 		if pkg.Reason() == alpm.PkgReasonExplicit {
 			safePackages[pkg.Name()] = 1
 		} else {
 			safePackages[pkg.Name()] = 0
 		}
 
-		_ = pkg.Provides().ForEach(func(dep alpm.Depend) error {
+		for _, dep := range dbExecutor.PackageProvides(pkg) {
 			provides.Add(dep.Name, pkg.Name())
-			return nil
-		})
-		return nil
+		}
 	}
-	_ = packages.ForEach(setupResources)
 
 	iterateAgain := true
-	processDependencies := func(pkg alpm.Package) error {
-		if state := safePackages[pkg.Name()]; state == 0 || state == 2 {
-			return nil
-		}
-
-		safePackages[pkg.Name()] = 2
-
-		// Update state for dependencies
-		markDependencies := func(dep alpm.Depend) error {
-			// Don't assume a dependency is installed
-			state, ok := safePackages[dep.Name]
-			if !ok {
-				// Check if dep is a provides rather than actual package name
-				if pset, ok2 := provides[dep.Name]; ok2 {
-					for p := range pset {
-						if safePackages[p] == 0 {
-							iterateAgain = true
-							safePackages[p] = 1
-						}
-					}
-				}
-
-				return nil
-			}
-
-			if state == 0 {
-				iterateAgain = true
-				safePackages[dep.Name] = 1
-			}
-			return nil
-		}
-
-		_ = pkg.Depends().ForEach(markDependencies)
-		if !removeOptional {
-			_ = pkg.OptionalDepends().ForEach(markDependencies)
-		}
-		return nil
-	}
 
 	for iterateAgain {
 		iterateAgain = false
-		_ = packages.ForEach(processDependencies)
+		for _, pkg := range packages {
+			if state := safePackages[pkg.Name()]; state == 0 || state == 2 {
+				continue
+			}
+
+			safePackages[pkg.Name()] = 2
+			deps := dbExecutor.PackageDepends(pkg)
+			if !removeOptional {
+				deps = append(deps, dbExecutor.PackageOptionalDepends(pkg)...)
+			}
+
+			// Update state for dependencies
+			for _, dep := range deps {
+				// Don't assume a dependency is installed
+				state, ok := safePackages[dep.Name]
+				if !ok {
+					// Check if dep is a provides rather than actual package name
+					if pset, ok2 := provides[dep.Name]; ok2 {
+						for p := range pset {
+							if safePackages[p] == 0 {
+								iterateAgain = true
+								safePackages[p] = 1
+							}
+						}
+					}
+					continue
+				}
+
+				if state == 0 {
+					iterateAgain = true
+					safePackages[dep.Name] = 1
+				}
+			}
+		}
 	}
 
 	// Build list of packages to be removed
-	_ = packages.ForEach(func(pkg alpm.Package) error {
+	for _, pkg := range packages {
 		if safePackages[pkg.Name()] == 0 {
 			hanging = append(hanging, pkg.Name())
 		}
-		return nil
-	})
+	}
 
-	return hanging, err
+	return hanging
 }
 
 // Statistics returns statistics about packages installed in system

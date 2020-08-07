@@ -8,8 +8,6 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/go-alpm"
-
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -40,12 +38,8 @@ func removeVCSPackage(pkgs []string) {
 }
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, removeOptional bool) error {
-	hanging, err := hangingPackages(removeOptional, alpmHandle)
-	if err != nil {
-		return err
-	}
-
+func cleanDependencies(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor, removeOptional bool) error {
+	hanging := hangingPackages(removeOptional, dbExecutor)
 	if len(hanging) != 0 {
 		return cleanRemove(cmdArgs, hanging)
 	}
