@@ -1103,7 +1103,7 @@ func buildInstallPkgbuilds(
 			}
 
 			if errMake := show(passToMakepkg(dir, args...)); errMake != nil {
-				return errors.New(gotext.Get("error making: %s", base.String))
+				return errors.New(gotext.Get("error making: %s", base.String()))
 			}
 		}
 

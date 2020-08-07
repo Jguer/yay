@@ -70,6 +70,8 @@ func (config *Configuration) SaveConfig(configPath string) error {
 	if err != nil {
 		return err
 	}
+	// https://github.com/Jguer/yay/issues/1325
+	marshalledinfo = append(marshalledinfo, '\n')
 	in, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
