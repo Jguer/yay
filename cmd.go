@@ -168,7 +168,7 @@ func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor 
 	case "U", "upgrade":
 		return show(passToPacman(cmdArgs))
 	case "G", "getpkgbuild":
-		return handleGetpkgbuild(cmdArgs, alpmHandle)
+		return handleGetpkgbuild(cmdArgs, dbExecutor)
 	case "P", "show":
 		return handlePrint(cmdArgs, alpmHandle, dbExecutor)
 	case "Y", "--yay":
@@ -260,8 +260,8 @@ func handleYay(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	return nil
 }
 
-func handleGetpkgbuild(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
-	return getPkgbuilds(cmdArgs.Targets, alpmHandle, cmdArgs.ExistsArg("f", "force"))
+func handleGetpkgbuild(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+	return getPkgbuilds(cmdArgs.Targets, dbExecutor, cmdArgs.ExistsArg("f", "force"))
 }
 
 func handleYogurt(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
@@ -278,7 +278,7 @@ func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor
 		} else {
 			config.SearchMode = detailed
 		}
-		return syncSearch(targets)
+		return syncSearch(targets, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("p", "print", "print-format") {
 		return show(passToPacman(cmdArgs))
@@ -293,13 +293,13 @@ func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor
 		return show(passToPacman(cmdArgs))
 	}
 	if cmdArgs.ExistsArg("i", "info") {
-		return syncInfo(cmdArgs, targets, alpmHandle)
+		return syncInfo(cmdArgs, targets, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
-		return install(cmdArgs, config.Runtime.DBExecutor, false)
+		return install(cmdArgs, dbExecutor, false)
 	}
 	if len(cmdArgs.Targets) > 0 {
-		return install(cmdArgs, config.Runtime.DBExecutor, false)
+		return install(cmdArgs, dbExecutor, false)
 	}
 	if cmdArgs.ExistsArg("y", "refresh") {
 		return show(passToPacman(cmdArgs))

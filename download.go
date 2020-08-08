@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -140,7 +140,7 @@ func gitMerge(path, name string) error {
 	return nil
 }
 
-func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
+func getPkgbuilds(pkgs []string, dbExecutor *db.AlpmExecutor, force bool) error {
 	missing := false
 	wd, err := os.Getwd()
 	if err != nil {
@@ -148,10 +148,7 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 	}
 
 	pkgs = query.RemoveInvalidTargets(pkgs, config.Runtime.Mode)
-	aur, repo, err := packageSlices(pkgs, alpmHandle)
-	if err != nil {
-		return err
-	}
+	aur, repo := packageSlices(pkgs, dbExecutor)
 
 	for n := range aur {
 		_, pkg := text.SplitDBFromName(aur[n])
@@ -164,7 +161,7 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 	}
 
 	if len(repo) > 0 {
-		missing, err = getPkgbuildsfromABS(repo, wd, alpmHandle, force)
+		missing, err = getPkgbuildsfromABS(repo, wd, dbExecutor, force)
 		if err != nil {
 			return err
 		}
@@ -212,7 +209,7 @@ func getPkgbuilds(pkgs []string, alpmHandle *alpm.Handle, force bool) error {
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle, force bool) (bool, error) {
+func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor *db.AlpmExecutor, force bool) (bool, error) {
 	var wg sync.WaitGroup
 	var mux sync.Mutex
 	var errs multierror.MultiError
@@ -220,28 +217,16 @@ func getPkgbuildsfromABS(pkgs []string, path string, alpmHandle *alpm.Handle, fo
 	missing := make([]string, 0)
 	downloaded := 0
 
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return false, err
-	}
-
 	for _, pkgN := range pkgs {
-		var pkg *alpm.Package
+		var pkg db.RepoPackage
 		var err error
 		var url string
 		pkgDB, name := text.SplitDBFromName(pkgN)
 
 		if pkgDB != "" {
-			if db, errSync := alpmHandle.SyncDBByName(pkgDB); errSync == nil {
-				pkg = db.Pkg(name)
-			}
+			pkg = dbExecutor.PackageFromDB(name, pkgDB)
 		} else {
-			_ = dbList.ForEach(func(db alpm.DB) error {
-				if pkg = db.Pkg(name); pkg != nil {
-					return fmt.Errorf("")
-				}
-				return nil
-			})
+			pkg = dbExecutor.SyncSatisfier(name)
 		}
 
 		if pkg == nil {

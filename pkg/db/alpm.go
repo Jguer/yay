@@ -240,7 +240,11 @@ func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []RepoPackage {
 }
 
 func (ae *AlpmExecutor) LocalPackage(pkgName string) RepoPackage {
-	return ae.localDB.Pkg(pkgName)
+	pkg := ae.localDB.Pkg(pkgName)
+	if pkg == nil {
+		return nil
+	}
+	return pkg
 }
 
 func (ae *AlpmExecutor) PackageFromDB(pkgName, dbName string) RepoPackage {

@@ -147,7 +147,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 }
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(pkgS []string) (err error) {
+func syncSearch(pkgS []string, dbExecutor *db.AlpmExecutor) (err error) {
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 	var aurErr error
 	var aq aurQuery
@@ -157,23 +157,23 @@ func syncSearch(pkgS []string) (err error) {
 		aq, aurErr = narrowSearch(pkgS, true)
 	}
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		pq = queryRepo(pkgS, config.Runtime.DBExecutor)
+		pq = queryRepo(pkgS, dbExecutor)
 	}
 
 	switch config.SortMode {
 	case settings.TopDown:
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(config.Runtime.DBExecutor)
+			pq.printSearch(dbExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1, config.Runtime.DBExecutor)
+			aq.printSearch(1, dbExecutor)
 		}
 	case settings.BottomUp:
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(1, config.Runtime.DBExecutor)
+			aq.printSearch(1, dbExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(config.Runtime.DBExecutor)
+			pq.printSearch(dbExecutor)
 		}
 	default:
 		return errors.New(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
@@ -188,14 +188,12 @@ func syncSearch(pkgS []string) (err error) {
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(cmdArgs *settings.Arguments, pkgS []string, alpmHandle *alpm.Handle) error {
+func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor *db.AlpmExecutor) error {
 	var info []*rpc.Pkg
+	var err error
 	missing := false
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
-	aurS, repoS, err := packageSlices(pkgS, alpmHandle)
-	if err != nil {
-		return err
-	}
+	aurS, repoS := packageSlices(pkgS, dbExecutor)
 
 	if len(aurS) != 0 {
 		noDB := make([]string, 0, len(aurS))
@@ -252,12 +250,7 @@ func queryRepo(pkgInputN []string, dbExecutor *db.AlpmExecutor) repoQuery {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []string, err error) {
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return nil, nil, err
-	}
-
+func packageSlices(toCheck []string, dbExecutor *db.AlpmExecutor) (aur, repo []string) {
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
 		found := false
@@ -270,16 +263,10 @@ func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []strin
 			continue
 		}
 
-		_ = dbList.ForEach(func(db alpm.DB) error {
-			if db.Pkg(name) != nil {
-				found = true
-				return fmt.Errorf("")
-			}
-			return nil
-		})
+		found = dbExecutor.SyncSatisfierExists(name)
 
 		if !found {
-			found = !dbList.FindGroupPkgs(name).Empty()
+			found = len(dbExecutor.PackagesFromGroup(name)) != 0
 		}
 
 		if found {
@@ -289,7 +276,7 @@ func packageSlices(toCheck []string, alpmHandle *alpm.Handle) (aur, repo []strin
 		}
 	}
 
-	return aur, repo, nil
+	return aur, repo
 }
 
 // HangingPackages returns a list of packages installed as deps
