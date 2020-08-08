@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
@@ -74,7 +73,7 @@ func initBuildDir() error {
 	return nil
 }
 
-func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handle, *pacmanconf.Config, error) {
+func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*pacmanconf.Config, bool, error) {
 	root := "/"
 	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value
@@ -82,7 +81,7 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handl
 
 	pacmanConf, stderr, err := pacmanconf.PacmanConf("--config", pacmanConfigPath, "--root", root)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%s", stderr)
+		return nil, false, fmt.Errorf("%s", stderr)
 	}
 
 	if dbPath, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {
@@ -109,67 +108,22 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*alpm.Handl
 		pacmanConf.GPGDir = gpgDir
 	}
 
-	alpmHandle, err := initAlpmHandle(pacmanConf, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
+	useColor := pacmanConf.Color && isTty()
 	switch value, _, _ := cmdArgs.GetArg("color"); value {
 	case "always":
-		text.UseColor = true
+		useColor = true
 	case "auto":
-		text.UseColor = isTty()
+		useColor = isTty()
 	case "never":
-		text.UseColor = false
-	default:
-		text.UseColor = pacmanConf.Color && isTty()
+		useColor = false
 	}
 
-	return alpmHandle, pacmanConf, nil
-}
-
-func initAlpmHandle(pacmanConf *pacmanconf.Config, oldAlpmHandle *alpm.Handle) (*alpm.Handle, error) {
-	if oldAlpmHandle != nil {
-		if errRelease := oldAlpmHandle.Release(); errRelease != nil {
-			return nil, errRelease
-		}
-	}
-
-	alpmHandle, err := alpm.Initialize(pacmanConf.RootDir, pacmanConf.DBPath)
-	if err != nil {
-		return nil, errors.New(gotext.Get("unable to CreateHandle: %s", err))
-	}
-
-	if err := configureAlpm(pacmanConf, alpmHandle); err != nil {
-		return nil, err
-	}
-
-	alpmHandle.SetQuestionCallback(questionCallback)
-	return alpmHandle, nil
-}
-
-func exitOnError(err error) {
-	if err != nil {
-		if str := err.Error(); str != "" {
-			fmt.Fprintln(os.Stderr, str)
-		}
-		cleanup(config.Runtime.AlpmHandle)
-		os.Exit(1)
-	}
-}
-
-func cleanup(alpmHandle *alpm.Handle) int {
-	if alpmHandle != nil {
-		if err := alpmHandle.Release(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 1
-		}
-	}
-
-	return 0
+	return pacmanConf, useColor, nil
 }
 
 func main() {
+	ret := 0
+	defer func() { os.Exit(ret) }()
 	initGotext()
 	if os.Geteuid() == 0 {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
@@ -177,24 +131,88 @@ func main() {
 
 	cmdArgs := settings.MakeArguments()
 	runtime, err := settings.MakeRuntime()
-	exitOnError(err)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
+
 	config = settings.MakeConfig()
 	config.Runtime = runtime
-	exitOnError(initConfig(runtime.ConfigPath))
-	exitOnError(cmdArgs.ParseCommandLine(config))
+
+	err = initConfig(runtime.ConfigPath)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
+
+	err = cmdArgs.ParseCommandLine(config)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
+
 	if config.Runtime.SaveConfig {
 		errS := config.SaveConfig(runtime.ConfigPath)
 		if errS != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}
+
 	config.ExpandEnv()
-	exitOnError(initBuildDir())
-	exitOnError(initVCS(runtime.VCSPath))
-	config.Runtime.AlpmHandle, config.Runtime.PacmanConf, err = initAlpm(cmdArgs, config.PacmanConf)
-	exitOnError(err)
-	config.Runtime.DBExecutor, err = db.NewAlpmExecutor(config.Runtime.AlpmHandle, runtime.PacmanConf, questionCallback)
-	exitOnError(err)
-	exitOnError(handleCmd(cmdArgs, config.Runtime.AlpmHandle, config.Runtime.DBExecutor))
-	os.Exit(cleanup(config.Runtime.AlpmHandle))
+	err = initBuildDir()
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
+
+	err = initVCS(runtime.VCSPath)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
+	var useColor bool
+	config.Runtime.PacmanConf, useColor, err = initAlpm(cmdArgs, config.PacmanConf)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
+
+	text.UseColor = useColor
+
+	dbExecutor, err := db.NewExecutor(runtime.PacmanConf, questionCallback)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
+
+	defer dbExecutor.Cleanup()
+	err = handleCmd(cmdArgs, dbExecutor)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			fmt.Fprintln(os.Stderr, str)
+		}
+		ret = 1
+		return
+	}
 }

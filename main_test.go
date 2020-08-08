@@ -9,11 +9,10 @@ import (
 )
 
 func TestInitAlpm(t *testing.T) {
-	alpmHandle, pacmanConf, err := initAlpm(settings.MakeArguments(), "testdata/pacman.conf")
+	pacmanConf, color, err := initAlpm(settings.MakeArguments(), "testdata/pacman.conf")
 	assert.Nil(t, err)
 	assert.NotNil(t, pacmanConf)
-
-	h := alpmHandle
+	assert.Equal(t, color, false)
 
 	root, err := h.Root()
 	assert.Nil(t, err)

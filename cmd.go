@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	alpm "github.com/Jguer/go-alpm"
 	"github.com/leonelquinteros/gotext"
@@ -140,7 +139,7 @@ getpkgbuild specific options:
     -f --force            Force download for existing ABS packages`)
 }
 
-func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) error {
+func handleCmd(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp(cmdArgs)
 	}
@@ -162,7 +161,7 @@ func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor 
 	case "R", "remove":
 		return handleRemove(cmdArgs)
 	case "S", "sync":
-		return handleSync(cmdArgs, alpmHandle, dbExecutor)
+		return handleSync(cmdArgs, dbExecutor)
 	case "T", "deptest":
 		return show(passToPacman(cmdArgs))
 	case "U", "upgrade":
@@ -170,7 +169,7 @@ func handleCmd(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor 
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(cmdArgs, dbExecutor)
 	case "P", "show":
-		return handlePrint(cmdArgs, alpmHandle, dbExecutor)
+		return handlePrint(cmdArgs, dbExecutor)
 	case "Y", "--yay":
 		return handleYay(cmdArgs, dbExecutor)
 	}
@@ -197,28 +196,7 @@ func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
-func lastBuildTime(alpmHandle *alpm.Handle) time.Time {
-	dbList, err := alpmHandle.SyncDBs()
-	if err != nil {
-		return time.Now()
-	}
-
-	var lastTime time.Time
-	_ = dbList.ForEach(func(db alpm.DB) error {
-		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
-			thisTime := pkg.BuildDate()
-			if thisTime.After(lastTime) {
-				lastTime = thisTime
-			}
-			return nil
-		})
-		return nil
-	})
-
-	return lastTime
-}
-
-func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) (err error) {
+func handlePrint(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) (err error) {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.MakeConfig()
@@ -231,7 +209,7 @@ func handlePrint(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecuto
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
-		err = news.PrintNewsFeed(lastBuildTime(alpmHandle), config.SortMode, double, quiet)
+		err = news.PrintNewsFeed(dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
 		err = completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
@@ -269,7 +247,7 @@ func handleYogurt(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) erro
 	return displayNumberMenu(cmdArgs.Targets, dbExecutor, cmdArgs)
 }
 
-func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor *db.AlpmExecutor) error {
+func handleSync(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	targets := cmdArgs.Targets
 
 	if cmdArgs.ExistsArg("s", "search") {
@@ -287,7 +265,7 @@ func handleSync(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle, dbExecutor
 		return syncClean(cmdArgs, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("l", "list") {
-		return syncList(cmdArgs, alpmHandle)
+		return syncList(cmdArgs, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("g", "groups") {
 		return show(passToPacman(cmdArgs))
@@ -430,7 +408,7 @@ func displayNumberMenu(pkgS []string, dbExecutor *db.AlpmExecutor, cmdArgs *sett
 	return install(arguments, dbExecutor, true)
 }
 
-func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
+func syncList(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	aur := false
 
 	for i := len(cmdArgs.Targets) - 1; i >= 0; i-- {
@@ -441,11 +419,6 @@ func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 	}
 
 	if (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) && (len(cmdArgs.Targets) == 0 || aur) {
-		localDB, err := alpmHandle.LocalDB()
-		if err != nil {
-			return err
-		}
-
 		resp, err := http.Get(config.AURURL + "/packages.gz")
 		if err != nil {
 			return err
@@ -462,7 +435,7 @@ func syncList(cmdArgs *settings.Arguments, alpmHandle *alpm.Handle) error {
 			} else {
 				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green(gotext.Get("unknown-version"))))
 
-				if localDB.Pkg(name) != nil {
+				if dbExecutor.LocalPackage(name) != nil {
 					fmt.Print(bold(blue(gotext.Get(" [Installed]"))))
 				}
 

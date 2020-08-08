@@ -2,6 +2,9 @@ package db
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"time"
 
 	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
@@ -19,19 +22,26 @@ type AlpmExecutor struct {
 	questionCallback func(question alpm.QuestionAny)
 }
 
-func NewAlpmExecutor(handle *alpm.Handle,
-	pacamnConf *pacmanconf.Config,
+func NewExecutor(pacamnConf *pacmanconf.Config,
 	questionCallback func(question alpm.QuestionAny)) (*AlpmExecutor, error) {
-	localDB, err := handle.LocalDB()
-	if err != nil {
-		return nil, err
-	}
-	syncDB, err := handle.SyncDBs()
+	ae := &AlpmExecutor{conf: pacamnConf, questionCallback: questionCallback}
+
+	err := ae.RefreshHandle()
 	if err != nil {
 		return nil, err
 	}
 
-	return &AlpmExecutor{handle: handle, localDB: localDB, syncDB: syncDB, conf: pacamnConf, questionCallback: questionCallback}, nil
+	ae.localDB, err = ae.handle.LocalDB()
+	if err != nil {
+		return nil, err
+	}
+
+	ae.syncDB, err = ae.handle.SyncDBs()
+	if err != nil {
+		return nil, err
+	}
+
+	return ae, nil
 }
 
 func toUsage(usages []string) alpm.Usage {
@@ -337,4 +347,28 @@ func (ae *AlpmExecutor) BiggestPackages() []RepoPackage {
 		return nil
 	})
 	return localPackages
+}
+
+func (ae *AlpmExecutor) LastBuildTime() time.Time {
+	var lastTime time.Time
+	_ = ae.syncDB.ForEach(func(db alpm.DB) error {
+		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
+			thisTime := pkg.BuildDate()
+			if thisTime.After(lastTime) {
+				lastTime = thisTime
+			}
+			return nil
+		})
+		return nil
+	})
+
+	return lastTime
+}
+
+func (ae *AlpmExecutor) Cleanup() {
+	if ae.handle != nil {
+		if err := ae.handle.Release(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
 }

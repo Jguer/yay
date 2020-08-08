@@ -366,7 +366,9 @@ func install(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor, ignorePro
 		}
 	}
 
-	go exitOnError(completion.Update(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false))
+	go func() {
+		_ = completion.Update(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+	}()
 
 	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {
