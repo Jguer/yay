@@ -9,7 +9,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 2.3\n"
 "POT-Creation-Date: \n"
-"Last-Translator: Shohei Kusakata\n"
+"Last-Translator: Yamada Hayao\n"
 "Language: ja\n"
 
 #: install.go:563
@@ -50,7 +50,7 @@ msgstr "%s [A]全て [Ab]中止 [I]インストール済み [No]未インスト�
 
 #: download.go:273
 msgid "%s already downloaded -- use -f to overwrite"
-msgstr "%s は既にダウンロードされています -- -f で上書きすることができます"
+msgstr "%s は既にダウンロードされています -- -f で上書きできます"
 
 #: install.go:1086
 msgid "%s already made -- skipping build"
@@ -94,7 +94,7 @@ msgstr "%s: パッケージのアップグレードを無視 (%s => %s)"
 
 #: upgrade.go:291
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s: ローカルのパッケージ (%s) が AUR (%s) よりも新しいバージョンです"
+msgstr "%s: ローカルのパッケージ (%s) は AUR (%s) よりも新しいバージョンです"
 
 #: download.go:298
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -102,7 +102,7 @@ msgstr "(%d/%d) ABS から PKGBUILD をダウンロード: %s"
 
 #: install.go:805
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) SRCINFO をパース: %s"
+msgstr "(%d/%d) SRCINFO を解析中: %s"
 
 #: print.go:86 print.go:127
 msgid "(Installed)"
@@ -562,7 +562,7 @@ msgstr "不正なオプション '%s'"
 
 #: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
 msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
-msgstr "不正なソートモード。yay -Y --bottomup --save で修正してください"
+msgstr "不正なソートモードです。yay -Y --bottomup --save で修正してください"
 
 #: callbacks.go:87 print.go:536
 msgid "invalid value: %d is not between %d and %d"
