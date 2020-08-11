@@ -47,6 +47,10 @@ cd yay
 makepkg -si
 ```
 
+Note: If you are having an issue with `makepkg` ensure you have the `base-devel` packages installed.
+
+`pacman -S base-devel`
+
 ## Support
 
 All support related to Yay should be requested via GitHub issues. Since Yay is not
