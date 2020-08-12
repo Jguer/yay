@@ -41,6 +41,8 @@ If you are migrating from another AUR helper, you can simply install Yay with th
 Alternatively, the initial installation of Yay can be done by cloning the PKGBUILD and
 building with makepkg:
 
+Before you begin, make sure you have the `base-devel` package group installed.
+
 ```sh
 git clone https://aur.archlinux.org/yay.git
 cd yay
