@@ -10,6 +10,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/db"
+	"github.com/Jguer/yay/v10/pkg/db/ialpm"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -197,7 +198,7 @@ func main() {
 
 	text.UseColor = useColor
 
-	dbExecutor, err := db.NewExecutor(runtime.PacmanConf, questionCallback)
+	dbExecutor, err := ialpm.NewExecutor(runtime.PacmanConf)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
@@ -207,7 +208,7 @@ func main() {
 	}
 
 	defer dbExecutor.Cleanup()
-	err = handleCmd(cmdArgs, dbExecutor)
+	err = handleCmd(cmdArgs, db.Executor(dbExecutor))
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)

@@ -31,7 +31,7 @@ type (
 )
 
 // createDevelDB forces yay to create a DB of the existing development packages
-func createDevelDB(vcsFilePath string, dbExecutor *db.AlpmExecutor) error {
+func createDevelDB(vcsFilePath string, dbExecutor db.Executor) error {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 

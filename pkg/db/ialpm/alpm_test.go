@@ -1,9 +1,8 @@
-package db
+package ialpm
 
 import (
 	"testing"
 
-	alpm "github.com/Jguer/go-alpm"
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +36,7 @@ func TestAlpmExecutor(t *testing.T) {
 			{Name: "repo1", Servers: []string{"repo1"}, SigLevel: []string(nil), Usage: []string{"All"}},
 			{Name: "repo2", Servers: []string{"repo2"}, SigLevel: []string(nil), Usage: []string{"All"}}}}
 
-	aExec, err := NewExecutor(pacmanConf, func(question alpm.QuestionAny) {})
+	aExec, err := NewExecutor(pacmanConf)
 	assert.NoError(t, err)
 
 	assert.NotNil(t, aExec.conf)

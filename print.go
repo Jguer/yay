@@ -17,7 +17,7 @@ import (
 )
 
 // PrintSearch handles printing search results in a given format
-func (q aurQuery) printSearch(start int, dbExecutor *db.AlpmExecutor) {
+func (q aurQuery) printSearch(start int, dbExecutor db.Executor) {
 	for i := range q {
 		var toprint string
 		if config.SearchMode == numberMenu {
@@ -60,7 +60,7 @@ func (q aurQuery) printSearch(start int, dbExecutor *db.AlpmExecutor) {
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func (s repoQuery) printSearch(dbExecutor *db.AlpmExecutor) {
+func (s repoQuery) printSearch(dbExecutor db.Executor) {
 	for i, res := range s {
 		var toprint string
 		if config.SearchMode == numberMenu {
@@ -142,7 +142,7 @@ func PrintInfo(a *rpc.Pkg, extendedInfo bool) {
 }
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
-func biggestPackages(dbExecutor *db.AlpmExecutor) {
+func biggestPackages(dbExecutor db.Executor) {
 	pkgS := dbExecutor.BiggestPackages()
 
 	if len(pkgS) < 10 {
@@ -156,7 +156,7 @@ func biggestPackages(dbExecutor *db.AlpmExecutor) {
 }
 
 // localStatistics prints installed packages statistics.
-func localStatistics(dbExecutor *db.AlpmExecutor) error {
+func localStatistics(dbExecutor db.Executor) error {
 	info := statistics(dbExecutor)
 
 	_, remoteNames, err := query.GetPackageNamesBySource(config.Runtime.DBExecutor)
@@ -181,7 +181,7 @@ func localStatistics(dbExecutor *db.AlpmExecutor) error {
 }
 
 // TODO: Make it less hacky
-func printNumberOfUpdates(dbExecutor *db.AlpmExecutor, enableDowngrade bool) error {
+func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool) error {
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
@@ -196,7 +196,7 @@ func printNumberOfUpdates(dbExecutor *db.AlpmExecutor, enableDowngrade bool) err
 }
 
 // TODO: Make it less hacky
-func printUpdateList(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor, enableDowngrade bool) error {
+func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enableDowngrade bool) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout

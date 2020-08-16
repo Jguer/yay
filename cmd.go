@@ -139,7 +139,7 @@ getpkgbuild specific options:
     -f --force            Force download for existing ABS packages`)
 }
 
-func handleCmd(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp(cmdArgs)
 	}
@@ -177,7 +177,7 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	return fmt.Errorf(gotext.Get("unhandled operation"))
 }
 
-func handleQuery(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func handleQuery(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("u", "upgrades") {
 		return printUpdateList(cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	}
@@ -196,7 +196,7 @@ func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
-func handlePrint(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) (err error) {
+func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) (err error) {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.MakeConfig()
@@ -222,7 +222,7 @@ func handlePrint(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) (err 
 	return err
 }
 
-func handleYay(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func handleYay(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("gendb") {
 		return createDevelDB(config.Runtime.VCSPath, dbExecutor)
 	}
@@ -238,16 +238,16 @@ func handleYay(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	return nil
 }
 
-func handleGetpkgbuild(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func handleGetpkgbuild(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	return getPkgbuilds(cmdArgs.Targets, dbExecutor, cmdArgs.ExistsArg("f", "force"))
 }
 
-func handleYogurt(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func handleYogurt(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	config.SearchMode = numberMenu
 	return displayNumberMenu(cmdArgs.Targets, dbExecutor, cmdArgs)
 }
 
-func handleSync(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	targets := cmdArgs.Targets
 
 	if cmdArgs.ExistsArg("s", "search") {
@@ -295,7 +295,7 @@ func handleRemove(cmdArgs *settings.Arguments) error {
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(pkgS []string, dbExecutor *db.AlpmExecutor, cmdArgs *settings.Arguments) error {
+func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *settings.Arguments) error {
 	var (
 		aurErr, repoErr error
 		aq              aurQuery
@@ -408,7 +408,7 @@ func displayNumberMenu(pkgS []string, dbExecutor *db.AlpmExecutor, cmdArgs *sett
 	return install(arguments, dbExecutor, true)
 }
 
-func syncList(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func syncList(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	aur := false
 
 	for i := len(cmdArgs.Targets) - 1; i >= 0; i-- {

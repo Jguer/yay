@@ -1,30 +1,32 @@
-package db
+package ialpm
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	alpm "github.com/Jguer/go-alpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/db"
+	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
 type AlpmExecutor struct {
-	handle           *alpm.Handle
-	localDB          *alpm.DB
-	syncDB           alpm.DBList
-	conf             *pacmanconf.Config
-	questionCallback func(question alpm.QuestionAny)
+	handle  *alpm.Handle
+	localDB *alpm.DB
+	syncDB  alpm.DBList
+	conf    *pacmanconf.Config
 }
 
-func NewExecutor(pacamnConf *pacmanconf.Config,
-	questionCallback func(question alpm.QuestionAny)) (*AlpmExecutor, error) {
-	ae := &AlpmExecutor{conf: pacamnConf, questionCallback: questionCallback}
+func NewExecutor(pacamnConf *pacmanconf.Config) (*AlpmExecutor, error) {
+	ae := &AlpmExecutor{conf: pacamnConf}
 
 	err := ae.RefreshHandle()
 	if err != nil {
@@ -76,13 +78,13 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error
 
 	for _, repo := range pacmanConf.Repos {
 		// TODO: set SigLevel
-		db, err := alpmHandle.RegisterSyncDB(repo.Name, 0)
+		alpmDB, err := alpmHandle.RegisterSyncDB(repo.Name, 0)
 		if err != nil {
 			return err
 		}
 
-		db.SetServers(repo.Servers)
-		db.SetUsage(toUsage(repo.Usage))
+		alpmDB.SetServers(repo.Servers)
+		alpmDB.SetUsage(toUsage(repo.Usage))
 	}
 
 	if err := alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {
@@ -152,6 +154,89 @@ func logCallback(level alpm.LogLevel, str string) {
 	}
 }
 
+func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
+	return func(question alpm.QuestionAny) {
+		if qi, err := question.QuestionInstallIgnorepkg(); err == nil {
+			qi.SetInstall(true)
+		}
+
+		qp, err := question.QuestionSelectProvider()
+		if err != nil {
+			return
+		}
+
+		if settings.HideMenus {
+			return
+		}
+
+		size := 0
+
+		_ = qp.Providers(ae.handle).ForEach(func(pkg alpm.Package) error {
+			size++
+			return nil
+		})
+
+		str := text.Bold(gotext.Get("There are %d providers available for %s:\n", size, qp.Dep()))
+
+		size = 1
+		var dbName string
+
+		_ = qp.Providers(ae.handle).ForEach(func(pkg alpm.Package) error {
+			thisDB := pkg.DB().Name()
+
+			if dbName != thisDB {
+				dbName = thisDB
+				str += text.SprintOperationInfo(gotext.Get("Repository"), dbName, "\n    ")
+			}
+			str += fmt.Sprintf("%d) %s ", size, pkg.Name())
+			size++
+			return nil
+		})
+
+		text.OperationInfoln(str)
+
+		for {
+			fmt.Print(gotext.Get("\nEnter a number (default=1): "))
+
+			// TODO: reenable noconfirm
+			// if config.NoConfirm {
+			// 	fmt.Println()
+			// 	break
+			// }
+
+			reader := bufio.NewReader(os.Stdin)
+			numberBuf, overflow, err := reader.ReadLine()
+			if err != nil {
+				text.Errorln(err)
+				break
+			}
+
+			if overflow {
+				text.Errorln(gotext.Get(" Input too long"))
+				continue
+			}
+
+			if string(numberBuf) == "" {
+				break
+			}
+
+			num, err := strconv.Atoi(string(numberBuf))
+			if err != nil {
+				text.Errorln(gotext.Get("invalid number: %s", string(numberBuf)))
+				continue
+			}
+
+			if num < 1 || num > size {
+				text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size))
+				continue
+			}
+
+			qp.SetUseIndex(num - 1)
+			break
+		}
+	}
+}
+
 func (ae *AlpmExecutor) RefreshHandle() error {
 	if ae.handle != nil {
 		if errRelease := ae.handle.Release(); errRelease != nil {
@@ -168,7 +253,7 @@ func (ae *AlpmExecutor) RefreshHandle() error {
 		return errConf
 	}
 
-	alpmHandle.SetQuestionCallback(ae.questionCallback)
+	alpmHandle.SetQuestionCallback(ae.questionCallback())
 	alpmHandle.SetLogCallback(logCallback)
 	ae.handle = alpmHandle
 	ae.syncDB, err = alpmHandle.SyncDBs()
@@ -203,7 +288,7 @@ func (ae *AlpmExecutor) IsCorrectVersionInstalled(pkgName, versionRequired strin
 	return alpmPackage.Version() == versionRequired
 }
 
-func (ae *AlpmExecutor) SyncSatisfier(pkgName string) RepoPackage {
+func (ae *AlpmExecutor) SyncSatisfier(pkgName string) db.RepoPackage {
 	foundPkg, err := ae.syncDB.FindSatisfier(pkgName)
 	if err != nil {
 		return nil
@@ -211,8 +296,8 @@ func (ae *AlpmExecutor) SyncSatisfier(pkgName string) RepoPackage {
 	return foundPkg
 }
 
-func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []RepoPackage {
-	groupPackages := []RepoPackage{}
+func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []db.RepoPackage {
+	groupPackages := []db.RepoPackage{}
 	_ = ae.syncDB.FindGroupPkgs(groupName).ForEach(func(pkg alpm.Package) error {
 		groupPackages = append(groupPackages, &pkg)
 		return nil
@@ -220,27 +305,27 @@ func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []RepoPackage {
 	return groupPackages
 }
 
-func (ae *AlpmExecutor) LocalPackages() []RepoPackage {
-	localPackages := []RepoPackage{}
+func (ae *AlpmExecutor) LocalPackages() []db.RepoPackage {
+	localPackages := []db.RepoPackage{}
 	_ = ae.localDB.PkgCache().ForEach(func(pkg alpm.Package) error {
-		localPackages = append(localPackages, RepoPackage(&pkg))
+		localPackages = append(localPackages, db.RepoPackage(&pkg))
 		return nil
 	})
 	return localPackages
 }
 
 // SyncPackages searches SyncDB for packages or returns all packages if no search param is given
-func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []RepoPackage {
-	repoPackages := []RepoPackage{}
-	_ = ae.syncDB.ForEach(func(db alpm.DB) error {
+func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []db.RepoPackage {
+	repoPackages := []db.RepoPackage{}
+	_ = ae.syncDB.ForEach(func(alpmDB alpm.DB) error {
 		if len(pkgNames) == 0 {
-			_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
-				repoPackages = append(repoPackages, RepoPackage(&pkg))
+			_ = alpmDB.PkgCache().ForEach(func(pkg alpm.Package) error {
+				repoPackages = append(repoPackages, db.RepoPackage(&pkg))
 				return nil
 			})
 		} else {
-			_ = db.Search(pkgNames).ForEach(func(pkg alpm.Package) error {
-				repoPackages = append(repoPackages, RepoPackage(&pkg))
+			_ = alpmDB.Search(pkgNames).ForEach(func(pkg alpm.Package) error {
+				repoPackages = append(repoPackages, db.RepoPackage(&pkg))
 				return nil
 			})
 		}
@@ -249,7 +334,7 @@ func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []RepoPackage {
 	return repoPackages
 }
 
-func (ae *AlpmExecutor) LocalPackage(pkgName string) RepoPackage {
+func (ae *AlpmExecutor) LocalPackage(pkgName string) db.RepoPackage {
 	pkg := ae.localDB.Pkg(pkgName)
 	if pkg == nil {
 		return nil
@@ -257,7 +342,7 @@ func (ae *AlpmExecutor) LocalPackage(pkgName string) RepoPackage {
 	return pkg
 }
 
-func (ae *AlpmExecutor) PackageFromDB(pkgName, dbName string) RepoPackage {
+func (ae *AlpmExecutor) PackageFromDB(pkgName, dbName string) db.RepoPackage {
 	singleDB, err := ae.handle.SyncDBByName(dbName)
 	if err != nil {
 		return nil
@@ -269,27 +354,27 @@ func (ae *AlpmExecutor) PackageFromDB(pkgName, dbName string) RepoPackage {
 	return foundPkg
 }
 
-func (ae *AlpmExecutor) PackageDepends(pkg RepoPackage) []alpm.Depend {
+func (ae *AlpmExecutor) PackageDepends(pkg db.RepoPackage) []alpm.Depend {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Depends().Slice()
 }
 
-func (ae *AlpmExecutor) PackageOptionalDepends(pkg RepoPackage) []alpm.Depend {
+func (ae *AlpmExecutor) PackageOptionalDepends(pkg db.RepoPackage) []alpm.Depend {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.OptionalDepends().Slice()
 }
 
-func (ae *AlpmExecutor) PackageProvides(pkg RepoPackage) []alpm.Depend {
+func (ae *AlpmExecutor) PackageProvides(pkg db.RepoPackage) []alpm.Depend {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Provides().Slice()
 }
 
-func (ae *AlpmExecutor) PackageConflicts(pkg RepoPackage) []alpm.Depend {
+func (ae *AlpmExecutor) PackageConflicts(pkg db.RepoPackage) []alpm.Depend {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Conflicts().Slice()
 }
 
-func (ae *AlpmExecutor) PackageGroups(pkg RepoPackage) []string {
+func (ae *AlpmExecutor) PackageGroups(pkg db.RepoPackage) []string {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Groups().Slice()
 }
@@ -340,10 +425,10 @@ func (ae *AlpmExecutor) AlpmArch() (string, error) {
 	return ae.handle.Arch()
 }
 
-func (ae *AlpmExecutor) BiggestPackages() []RepoPackage {
-	localPackages := []RepoPackage{}
+func (ae *AlpmExecutor) BiggestPackages() []db.RepoPackage {
+	localPackages := []db.RepoPackage{}
 	_ = ae.localDB.PkgCache().SortBySize().ForEach(func(pkg alpm.Package) error {
-		localPackages = append(localPackages, RepoPackage(&pkg))
+		localPackages = append(localPackages, db.RepoPackage(&pkg))
 		return nil
 	})
 	return localPackages

@@ -62,7 +62,7 @@ func asexp(cmdArgs *settings.Arguments, pkgs []string) error {
 }
 
 // Install handles package installs
-func install(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor, ignoreProviders bool) (err error) {
+func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProviders bool) (err error) {
 	var incompatible stringset.StringSet
 	var do *dep.Order
 
@@ -402,7 +402,7 @@ func removeMake(do *dep.Order) error {
 	return err
 }
 
-func inRepos(dbExecutor *db.AlpmExecutor, pkg string) bool {
+func inRepos(dbExecutor db.Executor, pkg string) bool {
 	target := dep.ToTarget(pkg)
 
 	if target.DB == "aur" {
@@ -419,7 +419,7 @@ func inRepos(dbExecutor *db.AlpmExecutor, pkg string) bool {
 	return exists || len(dbExecutor.PackagesFromGroup(target.Name)) > 0
 }
 
-func earlyPacmanCall(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func earlyPacmanCall(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	arguments := cmdArgs.Copy()
 	arguments.Op = "S"
 	targets := cmdArgs.Targets
@@ -459,7 +459,7 @@ func earlyRefresh(cmdArgs *settings.Arguments) error {
 	return show(passToPacman(arguments))
 }
 
-func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor *db.AlpmExecutor) (stringset.StringSet, error) {
+func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) (stringset.StringSet, error) {
 	incompatible := make(stringset.StringSet)
 	basesMap := make(map[string]dep.Base)
 	alpmArch, err := dbExecutor.AlpmArch()
@@ -933,7 +933,7 @@ func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet
 
 func buildInstallPkgbuilds(
 	cmdArgs *settings.Arguments,
-	dbExecutor *db.AlpmExecutor,
+	dbExecutor db.Executor,
 	dp *dep.Pool,
 	do *dep.Order,
 	srcinfos map[string]*gosrc.Srcinfo,

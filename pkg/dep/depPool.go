@@ -57,11 +57,11 @@ type Pool struct {
 	Aur          map[string]*rpc.Pkg
 	AurCache     map[string]*rpc.Pkg
 	Groups       []string
-	AlpmExecutor *db.AlpmExecutor
+	AlpmExecutor db.Executor
 	Warnings     *query.AURWarnings
 }
 
-func makePool(dbExecutor *db.AlpmExecutor) *Pool {
+func makePool(dbExecutor db.Executor) *Pool {
 	dp := &Pool{
 		make([]Target, 0),
 		make(stringset.StringSet),
@@ -347,7 +347,7 @@ func (dp *Pool) ResolveRepoDependency(pkg db.RepoPackage) {
 
 func GetPool(pkgs []string,
 	warnings *query.AURWarnings,
-	dbExecutor *db.AlpmExecutor,
+	dbExecutor db.Executor,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int) (*Pool, error) {

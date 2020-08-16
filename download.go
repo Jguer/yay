@@ -140,7 +140,7 @@ func gitMerge(path, name string) error {
 	return nil
 }
 
-func getPkgbuilds(pkgs []string, dbExecutor *db.AlpmExecutor, force bool) error {
+func getPkgbuilds(pkgs []string, dbExecutor db.Executor, force bool) error {
 	missing := false
 	wd, err := os.Getwd()
 	if err != nil {
@@ -209,7 +209,7 @@ func getPkgbuilds(pkgs []string, dbExecutor *db.AlpmExecutor, force bool) error 
 }
 
 // GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor *db.AlpmExecutor, force bool) (bool, error) {
+func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, force bool) (bool, error) {
 	var wg sync.WaitGroup
 	var mux sync.Mutex
 	var errs multierror.MultiError

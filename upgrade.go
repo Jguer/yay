@@ -23,7 +23,7 @@ import (
 )
 
 // upList returns lists of packages to upgrade from each source.
-func upList(warnings *query.AURWarnings, dbExecutor *db.AlpmExecutor, enableDowngrade bool) (aurUp, repoUp upgrade.UpSlice, err error) {
+func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool) (aurUp, repoUp upgrade.UpSlice, err error) {
 	remote, remoteNames := query.GetRemotePackages(dbExecutor)
 
 	var wg sync.WaitGroup
@@ -139,10 +139,12 @@ func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSli
 			printIgnoringPackage(pkg, "latest-commit")
 		} else {
 			toUpgrade = append(toUpgrade,
-				upgrade.Upgrade{Name: pkg.Name(),
+				upgrade.Upgrade{
+					Name:          pkg.Name(),
 					Repository:    "devel",
 					LocalVersion:  pkg.Version(),
-					RemoteVersion: "latest-commit"})
+					RemoteVersion: "latest-commit",
+				})
 		}
 	}
 
@@ -180,7 +182,8 @@ func upAUR(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSlice
 						Name:          aurPkg.Name,
 						Repository:    "aur",
 						LocalVersion:  pkg.Version(),
-						RemoteVersion: aurPkg.Version})
+						RemoteVersion: aurPkg.Version,
+					})
 			}
 		}
 	}

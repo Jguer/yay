@@ -38,7 +38,7 @@ func removeVCSPackage(pkgs []string) {
 }
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor, removeOptional bool) error {
+func cleanDependencies(cmdArgs *settings.Arguments, dbExecutor db.Executor, removeOptional bool) error {
 	hanging := hangingPackages(removeOptional, dbExecutor)
 	if len(hanging) != 0 {
 		return cleanRemove(cmdArgs, hanging)
@@ -60,7 +60,7 @@ func cleanRemove(cmdArgs *settings.Arguments, pkgNames []string) error {
 	return show(passToPacman(arguments))
 }
 
-func syncClean(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
+func syncClean(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	keepInstalled := false
 	keepCurrent := false
 
@@ -110,7 +110,7 @@ func syncClean(cmdArgs *settings.Arguments, dbExecutor *db.AlpmExecutor) error {
 	return nil
 }
 
-func cleanAUR(keepInstalled, keepCurrent, removeAll bool, dbExecutor *db.AlpmExecutor) error {
+func cleanAUR(keepInstalled, keepCurrent, removeAll bool, dbExecutor db.Executor) error {
 	fmt.Println(gotext.Get("removing AUR packages from cache..."))
 
 	installedBases := make(stringset.StringSet)

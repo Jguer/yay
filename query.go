@@ -147,7 +147,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 }
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(pkgS []string, dbExecutor *db.AlpmExecutor) (err error) {
+func syncSearch(pkgS []string, dbExecutor db.Executor) (err error) {
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 	var aurErr error
 	var aq aurQuery
@@ -188,7 +188,7 @@ func syncSearch(pkgS []string, dbExecutor *db.AlpmExecutor) (err error) {
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor *db.AlpmExecutor) error {
+func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor db.Executor) error {
 	var info []*rpc.Pkg
 	var err error
 	missing := false
@@ -240,7 +240,7 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor *db.AlpmExe
 }
 
 // Search handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string, dbExecutor *db.AlpmExecutor) repoQuery {
+func queryRepo(pkgInputN []string, dbExecutor db.Executor) repoQuery {
 	s := repoQuery(dbExecutor.SyncPackages(pkgInputN...))
 
 	if config.SortMode == settings.BottomUp {
@@ -250,7 +250,7 @@ func queryRepo(pkgInputN []string, dbExecutor *db.AlpmExecutor) repoQuery {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string, dbExecutor *db.AlpmExecutor) (aur, repo []string) {
+func packageSlices(toCheck []string, dbExecutor db.Executor) (aur, repo []string) {
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
 		found := false
@@ -282,7 +282,7 @@ func packageSlices(toCheck []string, dbExecutor *db.AlpmExecutor) (aur, repo []s
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
 // removeOptional decides whether optional dependencies are counted or not
-func hangingPackages(removeOptional bool, dbExecutor *db.AlpmExecutor) (hanging []string) {
+func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []string) {
 	// safePackages represents every package in the system in one of 3 states
 	// State = 0 - Remove package from the system
 	// State = 1 - Keep package in the system; need to iterate over dependencies
@@ -356,7 +356,7 @@ func hangingPackages(removeOptional bool, dbExecutor *db.AlpmExecutor) (hanging 
 }
 
 // Statistics returns statistics about packages installed in system
-func statistics(dbExecutor *db.AlpmExecutor) *struct {
+func statistics(dbExecutor db.Executor) *struct {
 	Totaln    int
 	Expln     int
 	TotalSize int64

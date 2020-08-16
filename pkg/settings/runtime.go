@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Jguer/go-alpm"
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
@@ -35,8 +34,7 @@ type Runtime struct {
 	ConfigPath     string
 	VCSPath        string
 	PacmanConf     *pacmanconf.Config
-	AlpmHandle     *alpm.Handle
-	DBExecutor     *db.AlpmExecutor
+	DBExecutor     db.Executor
 }
 
 func MakeRuntime() (*Runtime, error) {

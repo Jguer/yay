@@ -121,12 +121,12 @@ func satisfiesAur(dep string, pkg *rpc.Pkg) bool {
 	return false
 }
 
-func satisfiesRepo(dep string, pkg db.RepoPackage, ae *db.AlpmExecutor) bool {
+func satisfiesRepo(dep string, pkg db.RepoPackage, dbExecutor db.Executor) bool {
 	if pkgSatisfies(pkg.Name(), pkg.Version(), dep) {
 		return true
 	}
 
-	for _, provided := range ae.PackageProvides(pkg) {
+	for _, provided := range dbExecutor.PackageProvides(pkg) {
 		if provideSatisfies(provided.String(), dep) {
 			return true
 		}

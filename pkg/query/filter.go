@@ -9,7 +9,7 @@ import (
 )
 
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively
-func GetPackageNamesBySource(dbExecutor *db.AlpmExecutor) (local, remote []string, err error) {
+func GetPackageNamesBySource(dbExecutor db.Executor) (local, remote []string, err error) {
 outer:
 	for _, localpkg := range dbExecutor.LocalPackages() {
 		for _, syncpkg := range dbExecutor.SyncPackages() {
@@ -24,7 +24,7 @@ outer:
 }
 
 // GetRemotePackages returns packages with no correspondence in SyncDBS.
-func GetRemotePackages(dbExecutor *db.AlpmExecutor) (
+func GetRemotePackages(dbExecutor db.Executor) (
 	remote []db.RepoPackage,
 	remoteNames []string) {
 outer:
