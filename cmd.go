@@ -324,17 +324,17 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *settings.
 	switch config.SortMode {
 	case settings.TopDown:
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(config.Runtime.DBExecutor)
+			pq.printSearch(dbExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(lenpq+1, config.Runtime.DBExecutor)
+			aq.printSearch(lenpq+1, dbExecutor)
 		}
 	case settings.BottomUp:
 		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-			aq.printSearch(lenpq+1, config.Runtime.DBExecutor)
+			aq.printSearch(lenpq+1, dbExecutor)
 		}
 		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-			pq.printSearch(config.Runtime.DBExecutor)
+			pq.printSearch(dbExecutor)
 		}
 	default:
 		return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))

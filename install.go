@@ -82,7 +82,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 				}
 			}
 		} else if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0 {
-			err = earlyPacmanCall(cmdArgs, config.Runtime.DBExecutor)
+			err = earlyPacmanCall(cmdArgs, dbExecutor)
 			if err != nil {
 				return err
 			}
@@ -91,7 +91,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	// we may have done -Sy, our handle now has an old
 	// database.
-	err = config.Runtime.DBExecutor.RefreshHandle()
+	err = dbExecutor.RefreshHandle()
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	targets := stringset.FromSlice(cmdArgs.Targets)
 
 	dp, err := dep.GetPool(requestTargets,
-		warnings, config.Runtime.DBExecutor, config.Runtime.Mode,
+		warnings, dbExecutor, config.Runtime.Mode,
 		ignoreProviders, config.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN)
 	if err != nil {
 		return err

@@ -7,8 +7,6 @@ import (
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
-
-	"github.com/Jguer/yay/v10/pkg/db"
 )
 
 type TargetMode int
@@ -34,7 +32,6 @@ type Runtime struct {
 	ConfigPath     string
 	VCSPath        string
 	PacmanConf     *pacmanconf.Config
-	DBExecutor     db.Executor
 }
 
 func MakeRuntime() (*Runtime, error) {

@@ -159,7 +159,7 @@ func biggestPackages(dbExecutor db.Executor) {
 func localStatistics(dbExecutor db.Executor) error {
 	info := statistics(dbExecutor)
 
-	_, remoteNames, err := query.GetPackageNamesBySource(config.Runtime.DBExecutor)
+	_, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
 		return err
 	}
