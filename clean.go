@@ -216,7 +216,7 @@ func cleanAfter(bases []dep.Base) {
 			continue
 		}
 
-		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(bases), cyan(dir)))
+		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
 
 		_, stderr, err := capture(passToGit(dir, "reset", "--hard", "HEAD"))
 		if err != nil {
@@ -232,7 +232,7 @@ func cleanAfter(bases []dep.Base) {
 func cleanBuilds(bases []dep.Base) {
 	for i, base := range bases {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
-		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(bases), cyan(dir)))
+		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
 		if err := os.RemoveAll(dir); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

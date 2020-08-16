@@ -262,7 +262,7 @@ func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, for
 				continue
 			}
 		default:
-			text.Warn(gotext.Get("%s already downloaded -- use -f to overwrite", cyan(name)))
+			text.Warn(gotext.Get("%s already downloaded -- use -f to overwrite", text.Cyan(name)))
 			continue
 		}
 
@@ -271,13 +271,13 @@ func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, for
 
 	if len(missing) != 0 {
 		text.Warnln(gotext.Get("Missing ABS packages:"),
-			cyan(strings.Join(missing, ", ")))
+			text.Cyan(strings.Join(missing, ", ")))
 	}
 
 	download := func(pkg string, url string) {
 		defer wg.Done()
 		if _, err := gitDownloadABS(url, config.ABSDir, pkg); err != nil {
-			errs.Add(errors.New(gotext.Get("failed to get pkgbuild: %s: %s", cyan(pkg), err.Error())))
+			errs.Add(errors.New(gotext.Get("failed to get pkgbuild: %s: %s", text.Cyan(pkg), err.Error())))
 			return
 		}
 
@@ -285,9 +285,9 @@ func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, for
 		mux.Lock()
 		downloaded++
 		if err != nil {
-			errs.Add(errors.New(gotext.Get("failed to link %s: %s", cyan(pkg), stderr)))
+			errs.Add(errors.New(gotext.Get("failed to link %s: %s", text.Cyan(pkg), stderr)))
 		} else {
-			fmt.Fprintln(os.Stdout, gotext.Get("(%d/%d) Downloaded PKGBUILD from ABS: %s", downloaded, len(names), cyan(pkg)))
+			fmt.Fprintln(os.Stdout, gotext.Get("(%d/%d) Downloaded PKGBUILD from ABS: %s", downloaded, len(names), text.Cyan(pkg)))
 		}
 		mux.Unlock()
 	}

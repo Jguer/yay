@@ -433,10 +433,10 @@ func syncList(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 			if cmdArgs.ExistsArg("q", "quiet") {
 				fmt.Println(name)
 			} else {
-				fmt.Printf("%s %s %s", magenta("aur"), bold(name), bold(green(gotext.Get("unknown-version"))))
+				fmt.Printf("%s %s %s", text.Magenta("aur"), text.Bold(name), text.Bold(text.Green(gotext.Get("unknown-version"))))
 
 				if dbExecutor.LocalPackage(name) != nil {
-					fmt.Print(bold(blue(gotext.Get(" [Installed]"))))
+					fmt.Print(text.Bold(text.Blue(gotext.Get(" [Installed]"))))
 				}
 
 				fmt.Println()

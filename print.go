@@ -23,9 +23,9 @@ func (q aurQuery) printSearch(start int, dbExecutor db.Executor) {
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
 			case settings.TopDown:
-				toprint += magenta(strconv.Itoa(start+i) + " ")
+				toprint += text.Magenta(strconv.Itoa(start+i) + " ")
 			case settings.BottomUp:
-				toprint += magenta(strconv.Itoa(len(q)+start-i-1) + " ")
+				toprint += text.Magenta(strconv.Itoa(len(q)+start-i-1) + " ")
 			default:
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 			}
@@ -34,24 +34,24 @@ func (q aurQuery) printSearch(start int, dbExecutor db.Executor) {
 			continue
 		}
 
-		toprint += bold(text.ColorHash("aur")) + "/" + bold(q[i].Name) +
-			" " + cyan(q[i].Version) +
-			bold(" (+"+strconv.Itoa(q[i].NumVotes)) +
-			" " + bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+") ")
+		toprint += text.Bold(text.ColorHash("aur")) + "/" + text.Bold(q[i].Name) +
+			" " + text.Cyan(q[i].Version) +
+			text.Bold(" (+"+strconv.Itoa(q[i].NumVotes)) +
+			" " + text.Bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+") ")
 
 		if q[i].Maintainer == "" {
-			toprint += bold(red(gotext.Get("(Orphaned)"))) + " "
+			toprint += text.Bold(text.Red(gotext.Get("(Orphaned)"))) + " "
 		}
 
 		if q[i].OutOfDate != 0 {
-			toprint += bold(red(gotext.Get("(Out-of-date: %s)", text.FormatTime(q[i].OutOfDate)))) + " "
+			toprint += text.Bold(text.Red(gotext.Get("(Out-of-date: %s)", text.FormatTime(q[i].OutOfDate)))) + " "
 		}
 
 		if pkg := dbExecutor.LocalPackage(q[i].Name); pkg != nil {
 			if pkg.Version() != q[i].Version {
-				toprint += bold(green(gotext.Get("(Installed: %s)", pkg.Version())))
+				toprint += text.Bold(text.Green(gotext.Get("(Installed: %s)", pkg.Version())))
 			} else {
-				toprint += bold(green(gotext.Get("(Installed)")))
+				toprint += text.Bold(text.Green(gotext.Get("(Installed)")))
 			}
 		}
 		toprint += "\n    " + q[i].Description
@@ -66,9 +66,9 @@ func (s repoQuery) printSearch(dbExecutor db.Executor) {
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
 			case settings.TopDown:
-				toprint += magenta(strconv.Itoa(i+1) + " ")
+				toprint += text.Magenta(strconv.Itoa(i+1) + " ")
 			case settings.BottomUp:
-				toprint += magenta(strconv.Itoa(len(s)-i) + " ")
+				toprint += text.Magenta(strconv.Itoa(len(s)-i) + " ")
 			default:
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 			}
@@ -77,9 +77,9 @@ func (s repoQuery) printSearch(dbExecutor db.Executor) {
 			continue
 		}
 
-		toprint += bold(text.ColorHash(res.DB().Name())) + "/" + bold(res.Name()) +
-			" " + cyan(res.Version()) +
-			bold(" ("+text.Human(res.Size())+
+		toprint += text.Bold(text.ColorHash(res.DB().Name())) + "/" + text.Bold(res.Name()) +
+			" " + text.Cyan(res.Version()) +
+			text.Bold(" ("+text.Human(res.Size())+
 				" "+text.Human(res.ISize())+") ")
 
 		packageGroups := dbExecutor.PackageGroups(res)
@@ -89,9 +89,9 @@ func (s repoQuery) printSearch(dbExecutor db.Executor) {
 
 		if pkg := dbExecutor.LocalPackage(res.Name()); pkg != nil {
 			if pkg.Version() != res.Version() {
-				toprint += bold(green(gotext.Get("(Installed: %s)", pkg.Version())))
+				toprint += text.Bold(text.Green(gotext.Get("(Installed: %s)", pkg.Version())))
 			} else {
-				toprint += bold(green(gotext.Get("(Installed)")))
+				toprint += text.Bold(text.Green(gotext.Get("(Installed)")))
 			}
 		}
 
@@ -150,7 +150,7 @@ func biggestPackages(dbExecutor db.Executor) {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Printf("%s: %s\n", bold(pkgS[i].Name()), cyan(text.Human(pkgS[i].ISize())))
+		fmt.Printf("%s: %s\n", text.Bold(pkgS[i].Name()), text.Cyan(text.Human(pkgS[i].ISize())))
 	}
 	// Could implement size here as well, but we just want the general idea
 }
@@ -165,15 +165,15 @@ func localStatistics(dbExecutor db.Executor) error {
 	}
 
 	text.Infoln(gotext.Get("Yay version v%s", yayVersion))
-	fmt.Println(bold(cyan("===========================================")))
-	text.Infoln(gotext.Get("Total installed packages: %s", cyan(strconv.Itoa(info.Totaln))))
-	text.Infoln(gotext.Get("Total foreign installed packages: %s", cyan(strconv.Itoa(len(remoteNames)))))
-	text.Infoln(gotext.Get("Explicitly installed packages: %s", cyan(strconv.Itoa(info.Expln))))
-	text.Infoln(gotext.Get("Total Size occupied by packages: %s", cyan(text.Human(info.TotalSize))))
-	fmt.Println(bold(cyan("===========================================")))
+	fmt.Println(text.Bold(text.Cyan("===========================================")))
+	text.Infoln(gotext.Get("Total installed packages: %s", text.Cyan(strconv.Itoa(info.Totaln))))
+	text.Infoln(gotext.Get("Total foreign installed packages: %s", text.Cyan(strconv.Itoa(len(remoteNames)))))
+	text.Infoln(gotext.Get("Explicitly installed packages: %s", text.Cyan(strconv.Itoa(info.Expln))))
+	text.Infoln(gotext.Get("Total Size occupied by packages: %s", text.Cyan(text.Human(info.TotalSize))))
+	fmt.Println(text.Bold(text.Cyan("===========================================")))
 	text.Infoln(gotext.Get("Ten biggest packages:"))
 	biggestPackages(dbExecutor)
-	fmt.Println(bold(cyan("===========================================")))
+	fmt.Println(text.Bold(text.Cyan("===========================================")))
 
 	query.AURInfoPrint(remoteNames, config.RequestSplitN)
 
@@ -220,7 +220,7 @@ func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enable
 				if cmdArgs.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
-					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+					fmt.Printf("%s %s -> %s\n", text.Bold(pkg.Name), text.Green(pkg.LocalVersion), text.Green(pkg.RemoteVersion))
 				}
 				delete(targets, pkg.Name)
 			}
@@ -233,7 +233,7 @@ func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enable
 				if cmdArgs.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
 				} else {
-					fmt.Printf("%s %s -> %s\n", bold(pkg.Name), green(pkg.LocalVersion), green(pkg.RemoteVersion))
+					fmt.Printf("%s %s -> %s\n", text.Bold(pkg.Name), text.Green(pkg.LocalVersion), text.Green(pkg.RemoteVersion))
 				}
 				delete(targets, pkg.Name)
 			}
@@ -265,47 +265,4 @@ outer:
 	}
 
 	return nil
-}
-
-const (
-	redCode     = "\x1b[31m"
-	greenCode   = "\x1b[32m"
-	blueCode    = "\x1b[34m"
-	magentaCode = "\x1b[35m"
-	cyanCode    = "\x1b[36m"
-	boldCode    = "\x1b[1m"
-
-	resetCode = "\x1b[0m"
-)
-
-func stylize(startCode, in string) string {
-	if text.UseColor {
-		return startCode + in + resetCode
-	}
-
-	return in
-}
-
-func red(in string) string {
-	return stylize(redCode, in)
-}
-
-func green(in string) string {
-	return stylize(greenCode, in)
-}
-
-func blue(in string) string {
-	return stylize(blueCode, in)
-}
-
-func cyan(in string) string {
-	return stylize(cyanCode, in)
-}
-
-func magenta(in string) string {
-	return stylize(magentaCode, in)
-}
-
-func bold(in string) string {
-	return stylize(boldCode, in)
 }

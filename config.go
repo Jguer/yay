@@ -63,8 +63,8 @@ func editor() (editor string, args []string) {
 		fallthrough
 	default:
 		fmt.Fprintln(os.Stderr)
-		text.Errorln(gotext.Get("%s is not set", bold(cyan("$EDITOR"))))
-		text.Warnln(gotext.Get("Add %s or %s to your environment variables", bold(cyan("$EDITOR")), bold(cyan("$VISUAL"))))
+		text.Errorln(gotext.Get("%s is not set", text.Bold(text.Cyan("$EDITOR"))))
+		text.Warnln(gotext.Get("Add %s or %s to your environment variables", text.Bold(text.Cyan("$EDITOR")), text.Bold(text.Cyan("$VISUAL"))))
 
 		for {
 			text.Infoln(gotext.Get("Edit PKGBUILD with?"))

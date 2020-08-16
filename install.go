@@ -482,7 +482,7 @@ nextpkg:
 	if len(incompatible) > 0 {
 		text.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
 		for pkg := range incompatible {
-			fmt.Print("  " + cyan(basesMap[pkg].String()))
+			fmt.Print("  " + text.Cyan(basesMap[pkg].String()))
 		}
 
 		fmt.Println()
@@ -548,8 +548,8 @@ func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) bool {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 
-		toPrint += fmt.Sprintf(magenta("%3d")+" %-40s", len(bases)-n,
-			bold(base.String()))
+		toPrint += fmt.Sprintf(text.Magenta("%3d")+" %-40s", len(bases)-n,
+			text.Bold(base.String()))
 
 		anyInstalled := false
 		for _, b := range base {
@@ -557,11 +557,11 @@ func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) bool {
 		}
 
 		if anyInstalled {
-			toPrint += bold(green(gotext.Get(" (Installed)")))
+			toPrint += text.Bold(text.Green(gotext.Get(" (Installed)")))
 		}
 
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			toPrint += bold(green(gotext.Get(" (Build Files Exist)")))
+			toPrint += text.Bold(text.Green(gotext.Get(" (Build Files Exist)")))
 			askClean = true
 		}
 
@@ -581,7 +581,7 @@ func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet, hasClean b
 	}
 
 	text.Infoln(gotext.Get("Packages to cleanBuild?"))
-	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", cyan(gotext.Get("[N]one"))))
+	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 	cleanInput, err := getInput(config.AnswerClean)
 	if err != nil {
 		return nil, err
@@ -656,14 +656,14 @@ func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet, diff bo
 
 	if diff {
 		text.Infoln(gotext.Get("Diffs to show?"))
-		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", cyan(gotext.Get("[N]one"))))
+		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 		editInput, err = getInput(config.AnswerDiff)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		text.Infoln(gotext.Get("PKGBUILDs to edit?"))
-		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", cyan(gotext.Get("[N]one"))))
+		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 		editInput, err = getInput(config.AnswerEdit)
 		if err != nil {
 			return nil, err
@@ -750,7 +750,7 @@ func showPkgbuildDiffs(bases []dep.Base, cloned stringset.StringSet) error {
 			}
 
 			if !hasDiff {
-				text.Warnln(gotext.Get("%s: No changes -- skipping", cyan(base.String())))
+				text.Warnln(gotext.Get("%s: No changes -- skipping", text.Cyan(base.String())))
 				continue
 			}
 		}
@@ -805,7 +805,7 @@ func parseSrcinfoFiles(bases []dep.Base, errIsFatal bool) (map[string]*gosrc.Src
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 
-		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(bases), cyan(base.String())))
+		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(bases), text.Cyan(base.String())))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
@@ -875,7 +875,7 @@ func downloadPkgbuilds(bases []dep.Base, toSkip stringset.StringSet, buildDir st
 			downloaded++
 			text.OperationInfoln(
 				gotext.Get("PKGBUILD up to date, Skipping (%d/%d): %s",
-					downloaded, len(bases), cyan(base.String())))
+					downloaded, len(bases), text.Cyan(base.String())))
 			mux.Unlock()
 			return
 		}
@@ -893,7 +893,7 @@ func downloadPkgbuilds(bases []dep.Base, toSkip stringset.StringSet, buildDir st
 
 		mux.Lock()
 		downloaded++
-		text.OperationInfoln(gotext.Get("Downloaded PKGBUILD (%d/%d): %s", downloaded, len(bases), cyan(base.String())))
+		text.OperationInfoln(gotext.Get("Downloaded PKGBUILD (%d/%d): %s", downloaded, len(bases), text.Cyan(base.String())))
 		mux.Unlock()
 	}
 
@@ -924,7 +924,7 @@ func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet
 
 		err = show(passToMakepkg(dir, args...))
 		if err != nil {
-			return errors.New(gotext.Get("error downloading sources: %s", cyan(base.String())))
+			return errors.New(gotext.Get("error downloading sources: %s", text.Cyan(base.String())))
 		}
 	}
 
@@ -1075,7 +1075,7 @@ func buildInstallPkgbuilds(
 					return errors.New(gotext.Get("error making: %s", err))
 				}
 
-				fmt.Fprintln(os.Stdout, gotext.Get("%s is up to date -- skipping", cyan(pkg+"-"+pkgVersion)))
+				fmt.Fprintln(os.Stdout, gotext.Get("%s is up to date -- skipping", text.Cyan(pkg+"-"+pkgVersion)))
 				continue
 			}
 		}
@@ -1086,7 +1086,7 @@ func buildInstallPkgbuilds(
 				return errors.New(gotext.Get("error making: %s", err))
 			}
 
-			text.Warnln(gotext.Get("%s already made -- skipping build", cyan(pkg+"-"+pkgVersion)))
+			text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(pkg+"-"+pkgVersion)))
 		} else {
 			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 

@@ -156,7 +156,7 @@ func printIgnoringPackage(pkg db.RepoPackage, newPkgVersion string) {
 	left, right := upgrade.GetVersionDiff(pkg.Version(), newPkgVersion)
 
 	text.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
-		cyan(pkg.Name()),
+		text.Cyan(pkg.Name()),
 		left, right,
 	))
 }
@@ -203,7 +203,7 @@ func printLocalNewerThanAUR(
 
 		if !isDevelPackage(pkg) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
 			text.Warnln(gotext.Get("%s: local (%s) is newer than AUR (%s)",
-				cyan(pkg.Name()),
+				text.Cyan(pkg.Name()),
 				left, right,
 			))
 		}
@@ -245,7 +245,7 @@ func upgradePkgs(aurUp, repoUp upgrade.UpSlice) (ignore, aurNames stringset.Stri
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
 	allUp := append(repoUp, aurUp...)
-	fmt.Printf("%s"+bold(" %d ")+"%s\n", bold(cyan("::")), allUpLen, bold(gotext.Get("Packages to upgrade.")))
+	fmt.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
 	allUp.Print()
 
 	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))

@@ -148,7 +148,7 @@ func updateVCSData(vcsFilePath, pkgName string, sources []gosrc.ArchString, mux 
 		}
 
 		savedInfo[pkgName] = info
-		text.Warnln(gotext.Get("Found git repo: %s", cyan(url)))
+		text.Warnln(gotext.Get("Found git repo: %s", text.Cyan(url)))
 		err := saveVCSInfo(vcsFilePath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
