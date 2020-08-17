@@ -19,12 +19,12 @@ import (
 // GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
 
 // RemovePackage removes package from VCS information
-func removeVCSPackage(pkgs []string) {
+func removeVCSPackage(pkgs []string, localCache vcsInfo) {
 	updated := false
 
 	for _, pkgName := range pkgs {
-		if _, ok := savedInfo[pkgName]; ok {
-			delete(savedInfo, pkgName)
+		if _, ok := localCache[pkgName]; ok {
+			delete(localCache, pkgName)
 			updated = true
 		}
 	}

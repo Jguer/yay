@@ -159,7 +159,7 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	case "Q", "query":
 		return handleQuery(cmdArgs, dbExecutor)
 	case "R", "remove":
-		return handleRemove(cmdArgs)
+		return handleRemove(cmdArgs, savedInfo)
 	case "S", "sync":
 		return handleSync(cmdArgs, dbExecutor)
 	case "T", "deptest":
@@ -285,10 +285,10 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	return nil
 }
 
-func handleRemove(cmdArgs *settings.Arguments) error {
+func handleRemove(cmdArgs *settings.Arguments, localCache vcsInfo) error {
 	err := show(passToPacman(cmdArgs))
 	if err == nil {
-		removeVCSPackage(cmdArgs.Targets)
+		removeVCSPackage(cmdArgs.Targets, localCache)
 	}
 
 	return err

@@ -61,7 +61,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 
 			wg.Add(1)
 			go func() {
-				aurUp = upAUR(remote, aurdata)
+				aurUp = upAUR(remote, aurdata, config.TimeUpdate)
 				wg.Done()
 			}()
 
@@ -69,7 +69,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 				text.OperationInfoln(gotext.Get("Checking development packages..."))
 				wg.Add(1)
 				go func() {
-					develUp = upDevel(remote, aurdata)
+					develUp = upDevel(remote, aurdata, savedInfo)
 					wg.Done()
 				}()
 			}
@@ -97,12 +97,11 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 	return aurUp, repoUp, errs.Return()
 }
 
-func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSlice {
-	toUpdate := make([]db.RepoPackage, 0)
+func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg, localCache vcsInfo) upgrade.UpSlice {
+	toUpdate := make([]db.RepoPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)
 
-	var mux1 sync.Mutex
-	var mux2 sync.Mutex
+	var mux1, mux2 sync.Mutex
 	var wg sync.WaitGroup
 
 	checkUpdate := func(vcsName string, e shaInfos) {
@@ -126,7 +125,7 @@ func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSli
 		}
 	}
 
-	for vcsName, e := range savedInfo {
+	for vcsName, e := range localCache {
 		wg.Add(1)
 		go checkUpdate(vcsName, e)
 	}
@@ -148,7 +147,7 @@ func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSli
 		}
 	}
 
-	removeVCSPackage(toRemove)
+	removeVCSPackage(toRemove, localCache)
 	return toUpgrade
 }
 
@@ -163,7 +162,7 @@ func printIgnoringPackage(pkg db.RepoPackage, newPkgVersion string) {
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSlice {
+func upAUR(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg, timeUpdate bool) upgrade.UpSlice {
 	toUpgrade := make(upgrade.UpSlice, 0)
 
 	for _, pkg := range remote {
@@ -172,7 +171,7 @@ func upAUR(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) upgrade.UpSlice
 			continue
 		}
 
-		if (config.TimeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
+		if (timeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
 			(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
 			if pkg.ShouldIgnore() {
 				printIgnoringPackage(pkg, aurPkg.Version)
