@@ -121,56 +121,17 @@ func passToMakepkg(dir string, args ...string) *exec.Cmd {
 }
 
 func passToGit(dir string, _args ...string) *exec.Cmd {
-	gitflags := strings.Fields(config.GitFlags)
-	args := []string{"-C", dir}
-	args = append(args, gitflags...)
+	args := strings.Fields(config.GitFlags)
+	if dir != "" {
+		args = append(args, "-C", dir)
+	}
 	args = append(args, _args...)
 
 	cmd := exec.Command(config.GitBin, args...)
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 	return cmd
 }
 
 func isTty() bool {
 	return terminal.IsTerminal(int(os.Stdout.Fd()))
-}
-
-type Runner interface {
-	Capture(string, int64, ...string) (string, string, error)
-}
-
-type OSRunner struct{}
-
-func (r *OSRunner) Capture(command string, timeout int64, args ...string) (stdout, stderr string, err error) {
-	var outbuf, errbuf bytes.Buffer
-	var timer *time.Timer
-
-	cmd := exec.Command(command, args...)
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-	err = cmd.Start()
-	if err != nil {
-		return "", "", err
-	}
-
-	if timeout != 0 {
-		timer = time.AfterFunc(time.Duration(timeout)*time.Second, func() {
-			err = cmd.Process.Kill()
-			if err != nil {
-				text.Errorln(err)
-			}
-		})
-	}
-
-	err = cmd.Wait()
-	if timeout != 0 {
-		timer.Stop()
-	}
-	if err != nil {
-		return "", "", err
-	}
-
-	stdout = strings.TrimSpace(outbuf.String())
-	stderr = strings.TrimSpace(errbuf.String())
-
-	return stdout, stderr, err
 }

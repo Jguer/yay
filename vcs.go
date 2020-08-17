@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 	"sync"
-	"time"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
@@ -165,35 +163,14 @@ func updateVCSData(vcsFilePath, pkgName string, sources []gosrc.ArchString, mux 
 func getCommit(url, branch string, protocols []string) string {
 	if len(protocols) > 0 {
 		protocol := protocols[len(protocols)-1]
-		var outbuf bytes.Buffer
 
 		cmd := passToGit("", "ls-remote", protocol+"://"+url, branch)
-		cmd.Stdout = &outbuf
-		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-
-		err := cmd.Start()
+		stdout, _, err := config.Runtime.CmdRunner.Capture(cmd, 5)
 		if err != nil {
+			text.Warnln(err)
 			return ""
 		}
 
-		// for some reason
-		// git://bitbucket.org/volumesoffun/polyvox.git` hangs on my
-		// machine but using http:// instead of git does not hang.
-		// Introduce a time out so this can not hang
-		timer := time.AfterFunc(5*time.Second, func() {
-			err = cmd.Process.Kill()
-			if err != nil {
-				text.Errorln(err)
-			}
-		})
-
-		err = cmd.Wait()
-		timer.Stop()
-		if err != nil {
-			return ""
-		}
-
-		stdout := outbuf.String()
 		split := strings.Fields(stdout)
 
 		if len(split) < 2 {
