@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,32 +9,10 @@ import (
 	"time"
 
 	"github.com/leonelquinteros/gotext"
-	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
-
-func show(cmd *exec.Cmd) error {
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("")
-	}
-	return nil
-}
-
-func capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
-	var outbuf, errbuf bytes.Buffer
-
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-	err = cmd.Run()
-	stdout = strings.TrimSpace(outbuf.String())
-	stderr = strings.TrimSpace(errbuf.String())
-
-	return stdout, stderr, err
-}
 
 func sudoLoopBackground() {
 	updateSudo()
@@ -53,7 +30,7 @@ func updateSudo() {
 	for {
 		mSudoFlags := strings.Fields(config.SudoFlags)
 		mSudoFlags = append([]string{"-v"}, mSudoFlags...)
-		err := show(exec.Command(config.SudoBin, mSudoFlags...))
+		err := config.Runtime.CmdRunner.Show(exec.Command(config.SudoBin, mSudoFlags...))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		} else {
@@ -82,13 +59,11 @@ func waitLock(dbPath string) {
 }
 
 func passToPacman(args *settings.Arguments) *exec.Cmd {
-	argArr := make([]string, 0)
-
-	mSudoFlags := strings.Fields(config.SudoFlags)
+	argArr := make([]string, 0, 32)
 
 	if args.NeedRoot(config.Runtime) {
 		argArr = append(argArr, config.SudoBin)
-		argArr = append(argArr, mSudoFlags...)
+		argArr = append(argArr, strings.Fields(config.SudoFlags)...)
 	}
 
 	argArr = append(argArr, config.PacmanBin)
@@ -108,8 +83,7 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 }
 
 func passToMakepkg(dir string, args ...string) *exec.Cmd {
-	mflags := strings.Fields(config.MFlags)
-	args = append(args, mflags...)
+	args = append(args, strings.Fields(config.MFlags)...)
 
 	if config.MakepkgConf != "" {
 		args = append(args, "--config", config.MakepkgConf)
@@ -130,8 +104,4 @@ func passToGit(dir string, _args ...string) *exec.Cmd {
 	cmd := exec.Command(config.GitBin, args...)
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 	return cmd
-}
-
-func isTty() bool {
-	return terminal.IsTerminal(int(os.Stdout.Fd()))
 }

@@ -57,7 +57,7 @@ func cleanRemove(cmdArgs *settings.Arguments, pkgNames []string) error {
 	_ = arguments.AddArg("R")
 	arguments.AddTarget(pkgNames...)
 
-	return show(passToPacman(arguments))
+	return config.Runtime.CmdRunner.Show(passToPacman(arguments))
 }
 
 func syncClean(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
@@ -75,7 +75,7 @@ func syncClean(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	}
 
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
-		if err := show(passToPacman(cmdArgs)); err != nil {
+		if err := config.Runtime.CmdRunner.Show(passToPacman(cmdArgs)); err != nil {
 			return err
 		}
 	}
@@ -194,7 +194,7 @@ func cleanUntracked() error {
 
 		dir := filepath.Join(config.BuildDir, file.Name())
 		if isGitRepository(dir) {
-			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
+			if err := config.Runtime.CmdRunner.Show(passToGit(dir, "clean", "-fx")); err != nil {
 				text.Warnln(gotext.Get("Unable to clean:"), dir)
 				return err
 			}
@@ -219,12 +219,12 @@ func cleanAfter(bases []dep.Base) {
 
 		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
 
-		_, stderr, err := capture(passToGit(dir, "reset", "--hard", "HEAD"))
+		_, stderr, err := config.Runtime.CmdRunner.Capture(passToGit(dir, "reset", "--hard", "HEAD"), 0)
 		if err != nil {
 			text.Errorln(gotext.Get("error resetting %s: %s", base.String(), stderr))
 		}
 
-		if err := show(passToGit(dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
+		if err := config.Runtime.CmdRunner.Show(passToGit(dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}

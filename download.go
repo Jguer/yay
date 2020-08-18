@@ -23,7 +23,7 @@ const gitDiffRefName = "AUR_SEEN"
 // Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
 // reviewed by the user
 func gitUpdateSeenRef(path, name string) error {
-	_, stderr, err := capture(passToGit(filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"))
+	_, stderr, err := config.Runtime.CmdRunner.Capture(passToGit(filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"), 0)
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
 	}
@@ -33,7 +33,7 @@ func gitUpdateSeenRef(path, name string) error {
 // Return wether or not we have reviewed a diff yet. It checks for the existence of
 // YAY_DIFF_REVIEW in the git ref-list
 func gitHasLastSeenRef(path, name string) bool {
-	_, _, err := capture(passToGit(filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName))
+	_, _, err := config.Runtime.CmdRunner.Capture(passToGit(filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName), 0)
 	return err == nil
 }
 
@@ -41,7 +41,7 @@ func gitHasLastSeenRef(path, name string) bool {
 // If it does not it will return empty tree as no diff have been reviewed yet.
 func getLastSeenHash(path, name string) (string, error) {
 	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName))
+		stdout, stderr, err := config.Runtime.CmdRunner.Capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName), 0)
 		if err != nil {
 			return "", fmt.Errorf("%s %s", stderr, err)
 		}
@@ -56,7 +56,8 @@ func getLastSeenHash(path, name string) (string, error) {
 // HEAD@{upstream}
 func gitHasDiff(path, name string) (bool, error) {
 	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := capture(passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
+		stdout, stderr, err := config.Runtime.CmdRunner.Capture(
+			passToGit(filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"), 0)
 		if err != nil {
 			return false, fmt.Errorf("%s%s", stderr, err)
 		}
@@ -80,8 +81,7 @@ func gitDownloadABS(url, path, name string) (bool, error) {
 	if _, errExist := os.Stat(filepath.Join(path, name)); os.IsNotExist(errExist) {
 		cmd := passToGit(path, "clone", "--no-progress", "--single-branch",
 			"-b", "packages/"+name, url, name)
-		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-		_, stderr, err := capture(cmd)
+		_, stderr, err := config.Runtime.CmdRunner.Capture(cmd, 0)
 		if err != nil {
 			return false, fmt.Errorf(gotext.Get("error cloning %s: %s", name, stderr))
 		}
@@ -92,8 +92,7 @@ func gitDownloadABS(url, path, name string) (bool, error) {
 	}
 
 	cmd := passToGit(filepath.Join(path, name), "pull", "--ff-only")
-	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-	_, stderr, err := capture(cmd)
+	_, stderr, err := config.Runtime.CmdRunner.Capture(cmd, 0)
 	if err != nil {
 		return false, fmt.Errorf(gotext.Get("error fetching %s: %s", name, stderr))
 	}
@@ -105,8 +104,7 @@ func gitDownload(url, path, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
 		cmd := passToGit(path, "clone", "--no-progress", url, name)
-		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-		_, stderr, errCapture := capture(cmd)
+		_, stderr, errCapture := config.Runtime.CmdRunner.Capture(cmd, 0)
 		if errCapture != nil {
 			return false, fmt.Errorf(gotext.Get("error cloning %s: %s", name, stderr))
 		}
@@ -117,8 +115,7 @@ func gitDownload(url, path, name string) (bool, error) {
 	}
 
 	cmd := passToGit(filepath.Join(path, name), "fetch")
-	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-	_, stderr, err := capture(cmd)
+	_, stderr, err := config.Runtime.CmdRunner.Capture(cmd, 0)
 	if err != nil {
 		return false, fmt.Errorf(gotext.Get("error fetching %s: %s", name, stderr))
 	}
@@ -127,12 +124,12 @@ func gitDownload(url, path, name string) (bool, error) {
 }
 
 func gitMerge(path, name string) error {
-	_, stderr, err := capture(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"))
+	_, stderr, err := config.Runtime.CmdRunner.Capture(passToGit(filepath.Join(path, name), "reset", "--hard", "HEAD"), 0)
 	if err != nil {
 		return fmt.Errorf(gotext.Get("error resetting %s: %s", name, stderr))
 	}
 
-	_, stderr, err = capture(passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff"))
+	_, stderr, err = config.Runtime.CmdRunner.Capture(passToGit(filepath.Join(path, name), "merge", "--no-edit", "--ff"), 0)
 	if err != nil {
 		return fmt.Errorf(gotext.Get("error merging %s: %s", name, stderr))
 	}
@@ -281,7 +278,11 @@ func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, for
 			return
 		}
 
-		_, stderr, err := capture(exec.Command("cp", "-r", filepath.Join(config.ABSDir, pkg, "trunk"), filepath.Join(path, pkg)))
+		_, stderr, err := config.Runtime.CmdRunner.Capture(
+			exec.Command(
+				"cp", "-r",
+				filepath.Join(config.ABSDir, pkg, "trunk"),
+				filepath.Join(path, pkg)), 0)
 		mux.Lock()
 		downloaded++
 		if err != nil {

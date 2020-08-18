@@ -37,7 +37,7 @@ func asdeps(cmdArgs *settings.Arguments, pkgs []string) error {
 	cmdArgs = cmdArgs.CopyGlobal()
 	_ = cmdArgs.AddArg("D", "asdeps")
 	cmdArgs.AddTarget(pkgs...)
-	_, stderr, err := capture(passToPacman(cmdArgs))
+	_, stderr, err := config.Runtime.CmdRunner.Capture(passToPacman(cmdArgs), 0)
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
 	}
@@ -53,7 +53,7 @@ func asexp(cmdArgs *settings.Arguments, pkgs []string) error {
 	cmdArgs = cmdArgs.CopyGlobal()
 	_ = cmdArgs.AddArg("D", "asexplicit")
 	cmdArgs.AddTarget(pkgs...)
-	_, stderr, err := capture(passToPacman(cmdArgs))
+	_, stderr, err := config.Runtime.CmdRunner.Capture(passToPacman(cmdArgs), 0)
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
 	}
@@ -177,7 +177,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		if arguments.ExistsArg("ignore") {
 			cmdArgs.CreateOrAppendOption("ignore", arguments.GetArgs("ignore")...)
 		}
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	}
 
 	if len(dp.Aur) > 0 && os.Geteuid() == 0 {
@@ -338,7 +338,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	}
 
 	if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
-		if errShow := show(passToPacman(arguments)); errShow != nil {
+		if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 
@@ -396,7 +396,7 @@ func removeMake(do *dep.Order) error {
 
 	oldValue := settings.NoConfirm
 	settings.NoConfirm = true
-	err = show(passToPacman(removeArguments))
+	err = config.Runtime.CmdRunner.Show(passToPacman(removeArguments))
 	settings.NoConfirm = oldValue
 
 	return err
@@ -440,7 +440,7 @@ func earlyPacmanCall(cmdArgs *settings.Arguments, dbExecutor db.Executor) error 
 	}
 
 	if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
-		if err := show(passToPacman(arguments)); err != nil {
+		if err := config.Runtime.CmdRunner.Show(passToPacman(arguments)); err != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 	}
@@ -456,7 +456,7 @@ func earlyRefresh(cmdArgs *settings.Arguments) error {
 	arguments.DelArg("i", "info")
 	arguments.DelArg("l", "list")
 	arguments.ClearTargets()
-	return show(passToPacman(arguments))
+	return config.Runtime.CmdRunner.Show(passToPacman(arguments))
 }
 
 func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) (stringset.StringSet, error) {
@@ -496,7 +496,7 @@ nextpkg:
 }
 
 func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string, err error) {
-	stdout, stderr, err := capture(passToMakepkg(dir, "--packagelist"))
+	stdout, stderr, err := config.Runtime.CmdRunner.Capture(passToMakepkg(dir, "--packagelist"), 0)
 	if err != nil {
 		return nil, "", fmt.Errorf("%s %s", stderr, err)
 	}
@@ -765,7 +765,7 @@ func showPkgbuildDiffs(bases []dep.Base, cloned stringset.StringSet) error {
 		} else {
 			args = append(args, "--color=never")
 		}
-		_ = show(passToGit(dir, args...))
+		_ = config.Runtime.CmdRunner.Show(passToGit(dir, args...))
 	}
 
 	return errMulti.Return()
@@ -922,7 +922,7 @@ func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet
 			args = append(args, "--ignorearch")
 		}
 
-		err = show(passToMakepkg(dir, args...))
+		err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, args...))
 		if err != nil {
 			return errors.New(gotext.Get("error downloading sources: %s", text.Cyan(base.String())))
 		}
@@ -973,7 +973,7 @@ func buildInstallPkgbuilds(
 			return nil
 		}
 
-		if errShow := show(passToPacman(arguments)); errShow != nil {
+		if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
 			return errShow
 		}
 
@@ -1033,7 +1033,7 @@ func buildInstallPkgbuilds(
 		}
 
 		// pkgver bump
-		if err = show(passToMakepkg(dir, args...)); err != nil {
+		if err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, args...)); err != nil {
 			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
 
@@ -1070,7 +1070,7 @@ func buildInstallPkgbuilds(
 			}
 
 			if installed {
-				err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+				err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
 					return errors.New(gotext.Get("error making: %s", err))
 				}
@@ -1081,7 +1081,7 @@ func buildInstallPkgbuilds(
 		}
 
 		if built {
-			err = show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+			err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
 				return errors.New(gotext.Get("error making: %s", err))
 			}
@@ -1094,7 +1094,7 @@ func buildInstallPkgbuilds(
 				args = append(args, "--ignorearch")
 			}
 
-			if errMake := show(passToMakepkg(dir, args...)); errMake != nil {
+			if errMake := config.Runtime.CmdRunner.Show(passToMakepkg(dir, args...)); errMake != nil {
 				return errors.New(gotext.Get("error making: %s", base.String()))
 			}
 		}

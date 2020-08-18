@@ -215,7 +215,7 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor db.Executor
 		arguments := cmdArgs.Copy()
 		arguments.ClearTargets()
 		arguments.AddTarget(repoS...)
-		err = show(passToPacman(arguments))
+		err = config.Runtime.CmdRunner.Show(passToPacman(arguments))
 
 		if err != nil {
 			return err

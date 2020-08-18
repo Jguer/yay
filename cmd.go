@@ -153,9 +153,9 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		handleVersion()
 		return nil
 	case "D", "database":
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	case "F", "files":
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	case "Q", "query":
 		return handleQuery(cmdArgs, dbExecutor)
 	case "R", "remove":
@@ -163,9 +163,9 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	case "S", "sync":
 		return handleSync(cmdArgs, dbExecutor)
 	case "T", "deptest":
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	case "U", "upgrade":
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(cmdArgs, dbExecutor)
 	case "P", "show":
@@ -181,7 +181,7 @@ func handleQuery(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("u", "upgrades") {
 		return printUpdateList(cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	}
-	return show(passToPacman(cmdArgs))
+	return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 }
 
 func handleHelp(cmdArgs *settings.Arguments) error {
@@ -189,7 +189,7 @@ func handleHelp(cmdArgs *settings.Arguments) error {
 		usage()
 		return nil
 	}
-	return show(passToPacman(cmdArgs))
+	return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 }
 
 func handleVersion() {
@@ -259,7 +259,7 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		return syncSearch(targets, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("p", "print", "print-format") {
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	}
 	if cmdArgs.ExistsArg("c", "clean") {
 		return syncClean(cmdArgs, dbExecutor)
@@ -268,7 +268,7 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		return syncList(cmdArgs, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("g", "groups") {
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	}
 	if cmdArgs.ExistsArg("i", "info") {
 		return syncInfo(cmdArgs, targets, dbExecutor)
@@ -280,13 +280,13 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		return install(cmdArgs, dbExecutor, false)
 	}
 	if cmdArgs.ExistsArg("y", "refresh") {
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	}
 	return nil
 }
 
 func handleRemove(cmdArgs *settings.Arguments, localCache vcsInfo) error {
-	err := show(passToPacman(cmdArgs))
+	err := config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	if err == nil {
 		removeVCSPackage(cmdArgs.Targets, localCache)
 	}
@@ -445,7 +445,7 @@ func syncList(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	}
 
 	if (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo) && (len(cmdArgs.Targets) != 0 || !aur) {
-		return show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	}
 
 	return nil
