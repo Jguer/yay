@@ -195,6 +195,7 @@ func cleanUntracked() error {
 		dir := filepath.Join(config.BuildDir, file.Name())
 		if isGitRepository(dir) {
 			if err := show(passToGit(dir, "clean", "-fx")); err != nil {
+				text.Warnln(gotext.Get("Unable to clean:"), dir)
 				return err
 			}
 		}
