@@ -110,7 +110,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 
 		// If there'ss a different prefix only look in that repo
 		if target.DB != "" {
-			foundPkg = dp.AlpmExecutor.PackageFromDB(target.DepString(), target.DB)
+			foundPkg = dp.AlpmExecutor.SatisfierFromDB(target.DepString(), target.DB)
 		} else {
 			// otherwise find it in any repo
 			foundPkg = dp.AlpmExecutor.SyncSatisfier(target.DepString())
@@ -201,7 +201,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 	}
 
 	for pkg := range pkgs {
-		if dp.AlpmExecutor.LocalSatisfierExists(pkg) {
+		if dp.AlpmExecutor.LocalPackage(pkg) != nil {
 			continue
 		}
 		wg.Add(1)
@@ -384,7 +384,7 @@ func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, pr
 	seen := make(stringset.StringSet)
 	providerSlice := makeProviders(depName)
 
-	if dp.AlpmExecutor.LocalSatisfierExists(depName) {
+	if dp.AlpmExecutor.LocalPackage(depName) != nil {
 		if pkg, ok := dp.AurCache[dep]; ok && pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			return pkg
 		}

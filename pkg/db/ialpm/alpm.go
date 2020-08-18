@@ -342,7 +342,7 @@ func (ae *AlpmExecutor) LocalPackage(pkgName string) db.RepoPackage {
 	return pkg
 }
 
-func (ae *AlpmExecutor) PackageFromDB(pkgName, dbName string) db.RepoPackage {
+func (ae *AlpmExecutor) SatisfierFromDB(pkgName, dbName string) db.RepoPackage {
 	singleDB, err := ae.handle.SyncDBByName(dbName)
 	if err != nil {
 		return nil

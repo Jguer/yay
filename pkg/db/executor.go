@@ -32,7 +32,7 @@ type Executor interface {
 	LocalSatisfierExists(string) bool
 	PackageConflicts(RepoPackage) []alpm.Depend
 	PackageDepends(RepoPackage) []alpm.Depend
-	PackageFromDB(string, string) RepoPackage
+	SatisfierFromDB(string, string) RepoPackage
 	PackageGroups(RepoPackage) []string
 	PackageOptionalDepends(RepoPackage) []alpm.Depend
 	PackageProvides(RepoPackage) []alpm.Depend

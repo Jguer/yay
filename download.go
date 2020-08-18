@@ -224,7 +224,7 @@ func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, for
 		pkgDB, name := text.SplitDBFromName(pkgN)
 
 		if pkgDB != "" {
-			pkg = dbExecutor.PackageFromDB(name, pkgDB)
+			pkg = dbExecutor.SatisfierFromDB(name, pkgDB)
 		} else {
 			pkg = dbExecutor.SyncSatisfier(name)
 		}
