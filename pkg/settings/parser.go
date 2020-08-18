@@ -474,7 +474,7 @@ func handleConfig(config *Configuration, option, value string) bool {
 	case "searchby":
 		config.SearchBy = value
 	case "noconfirm":
-		config.NoConfirm = true
+		NoConfirm = true
 	case "config":
 		config.PacmanConf = value
 	case "redownload":

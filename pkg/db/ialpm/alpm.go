@@ -199,10 +199,10 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 			fmt.Print(gotext.Get("\nEnter a number (default=1): "))
 
 			// TODO: reenable noconfirm
-			// if config.NoConfirm {
-			// 	fmt.Println()
-			// 	break
-			// }
+			if settings.NoConfirm {
+				fmt.Println()
+				break
+			}
 
 			reader := bufio.NewReader(os.Stdin)
 			numberBuf, overflow, err := reader.ReadLine()

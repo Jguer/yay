@@ -91,7 +91,7 @@ func editor() (editor string, args []string) {
 
 func getInput(defaultValue string) (string, error) {
 	text.Info()
-	if defaultValue != "" || config.NoConfirm {
+	if defaultValue != "" || settings.NoConfirm {
 		fmt.Println(defaultValue)
 		return defaultValue, nil
 	}

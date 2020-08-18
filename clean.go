@@ -93,7 +93,7 @@ func syncClean(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 
 	fmt.Println(gotext.Get("\nBuild directory:"), config.BuildDir)
 
-	if text.ContinueTask(question, true, config.NoConfirm) {
+	if text.ContinueTask(question, true, settings.NoConfirm) {
 		if err := cleanAUR(keepInstalled, keepCurrent, removeAll, dbExecutor); err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func syncClean(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		return nil
 	}
 
-	if text.ContinueTask(gotext.Get("Do you want to remove ALL untracked AUR files?"), true, config.NoConfirm) {
+	if text.ContinueTask(gotext.Get("Do you want to remove ALL untracked AUR files?"), true, settings.NoConfirm) {
 		return cleanUntracked()
 	}
 

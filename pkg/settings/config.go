@@ -16,6 +16,9 @@ const (
 // HideMenus indicates if pacman's provider menus must be hidden
 var HideMenus = false
 
+// NoConfirm indicates if user input should be skipped
+var NoConfirm = false
+
 // Configuration stores yay's config.
 type Configuration struct {
 	AURURL             string   `json:"aururl"`
@@ -49,7 +52,6 @@ type Configuration struct {
 	CompletionInterval int      `json:"completionrefreshtime"`
 	SudoLoop           bool     `json:"sudoloop"`
 	TimeUpdate         bool     `json:"timeupdate"`
-	NoConfirm          bool     `json:"-"`
 	Devel              bool     `json:"devel"`
 	CleanAfter         bool     `json:"cleanAfter"`
 	Provides           bool     `json:"provides"`
@@ -132,7 +134,6 @@ func MakeConfig() *Configuration {
 		Devel:              false,
 		MakepkgBin:         "makepkg",
 		MakepkgConf:        "",
-		NoConfirm:          false,
 		PacmanBin:          "pacman",
 		PGPFetch:           true,
 		PacmanConf:         "/etc/pacman.conf",

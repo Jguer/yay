@@ -152,7 +152,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	dp, err := dep.GetPool(requestTargets,
 		warnings, dbExecutor, config.Runtime.Mode,
-		ignoreProviders, config.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN)
+		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	var conflicts stringset.MapStringSet
 	if !cmdArgs.ExistsDouble("d", "nodeps") {
-		conflicts, err = dp.CheckConflicts(config.UseAsk, config.NoConfirm)
+		conflicts, err = dp.CheckConflicts(config.UseAsk, settings.NoConfirm)
 		if err != nil {
 			return err
 		}
@@ -227,7 +227,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		case "no":
 			break
 		default:
-			if text.ContinueTask(gotext.Get("Remove make dependencies after install?"), false, config.NoConfirm) {
+			if text.ContinueTask(gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
 				defer func() {
 					err = removeMake(do)
 				}()
@@ -272,10 +272,10 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	}
 
 	if len(toDiff) > 0 {
-		oldValue := config.NoConfirm
-		config.NoConfirm = false
+		oldValue := settings.NoConfirm
+		settings.NoConfirm = false
 		fmt.Println()
-		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, config.NoConfirm) {
+		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, settings.NoConfirm) {
 			return fmt.Errorf(gotext.Get("aborting due to user"))
 		}
 		err = updatePkgbuildSeenRef(toDiff)
@@ -283,7 +283,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 			text.Errorln(err.Error())
 		}
 
-		config.NoConfirm = oldValue
+		settings.NoConfirm = oldValue
 	}
 
 	err = mergePkgbuilds(do.Aur)
@@ -312,13 +312,13 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	}
 
 	if len(toEdit) > 0 {
-		oldValue := config.NoConfirm
-		config.NoConfirm = false
+		oldValue := settings.NoConfirm
+		settings.NoConfirm = false
 		fmt.Println()
-		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, config.NoConfirm) {
+		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, settings.NoConfirm) {
 			return errors.New(gotext.Get("aborting due to user"))
 		}
-		config.NoConfirm = oldValue
+		settings.NoConfirm = oldValue
 	}
 
 	incompatible, err = getIncompatible(do.Aur, srcinfos, dbExecutor)
@@ -327,7 +327,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	}
 
 	if config.PGPFetch {
-		err = pgp.CheckPgpKeys(do.Aur, srcinfos, config.GpgBin, config.GpgFlags, config.NoConfirm)
+		err = pgp.CheckPgpKeys(do.Aur, srcinfos, config.GpgBin, config.GpgFlags, settings.NoConfirm)
 		if err != nil {
 			return err
 		}
@@ -394,10 +394,10 @@ func removeMake(do *dep.Order) error {
 		removeArguments.AddTarget(pkg)
 	}
 
-	oldValue := config.NoConfirm
-	config.NoConfirm = true
+	oldValue := settings.NoConfirm
+	settings.NoConfirm = true
 	err = show(passToPacman(removeArguments))
-	config.NoConfirm = oldValue
+	settings.NoConfirm = oldValue
 
 	return err
 }
@@ -487,7 +487,7 @@ nextpkg:
 
 		fmt.Println()
 
-		if !text.ContinueTask(gotext.Get("Try to build them anyway?"), true, config.NoConfirm) {
+		if !text.ContinueTask(gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
 			return nil, errors.New(gotext.Get("aborting due to user"))
 		}
 	}
@@ -954,8 +954,8 @@ func buildInstallPkgbuilds(
 
 	deps := make([]string, 0)
 	exp := make([]string, 0)
-	oldConfirm := config.NoConfirm
-	config.NoConfirm = true
+	oldConfirm := settings.NoConfirm
+	settings.NoConfirm = true
 
 	//remotenames: names of all non repo packages on the system
 	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
@@ -989,12 +989,12 @@ func buildInstallPkgbuilds(
 			return errExps
 		}
 
-		config.NoConfirm = oldConfirm
+		settings.NoConfirm = oldConfirm
 
 		arguments.ClearTargets()
 		deps = make([]string, 0)
 		exp = make([]string, 0)
-		config.NoConfirm = true
+		settings.NoConfirm = true
 		return nil
 	}
 
@@ -1107,7 +1107,7 @@ func buildInstallPkgbuilds(
 		} else {
 			for _, split := range base {
 				if _, ok := conflicts[split.Name]; ok {
-					config.NoConfirm = false
+					settings.NoConfirm = false
 					break
 				}
 			}
@@ -1167,6 +1167,6 @@ func buildInstallPkgbuilds(
 	}
 
 	err = doInstall()
-	config.NoConfirm = oldConfirm
+	settings.NoConfirm = oldConfirm
 	return err
 }
