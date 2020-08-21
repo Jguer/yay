@@ -64,7 +64,11 @@ func TestNewInfoStore(t *testing.T) {
 	}{
 		{
 			name: "normal",
-			args: args{"/tmp/a.json", &exe.OSRunner{}, exe.NewCmdBuilder("git", "--a --b")},
+			args: args{
+				"/tmp/a.json",
+				&exe.OSRunner{},
+				&exe.CmdBuilder{GitBin: "git", GitFlags: []string{"--a", "--b"}},
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -122,7 +126,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 				Runner: &MockRunner{
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD"},
 				},
-				CmdBuilder: exe.NewCmdBuilder("git", ""),
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 			},
 			want: true,
 		},
@@ -146,7 +150,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
 					},
 				},
-				CmdBuilder: exe.NewCmdBuilder("git", ""),
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 			},
 			want: true,
 		},
@@ -162,7 +166,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 				Runner: &MockRunner{
 					Returned: []string{"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD"},
 				},
-				CmdBuilder: exe.NewCmdBuilder("git", ""),
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 			},
 			want: false,
 		},
@@ -178,7 +182,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 				Runner: &MockRunner{
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
 				},
-				CmdBuilder: exe.NewCmdBuilder("git", ""),
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 			},
 			want: false,
 		},
@@ -194,7 +198,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 				Runner: &MockRunner{
 					Returned: []string{"error"},
 				},
-				CmdBuilder: exe.NewCmdBuilder("git", ""),
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 			},
 			want: false,
 		},
@@ -210,7 +214,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 				Runner: &MockRunner{
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
 				},
-				CmdBuilder: exe.NewCmdBuilder("git", ""),
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 			},
 			want: false,
 		},
@@ -247,7 +251,7 @@ func TestInfoStore_Update(t *testing.T) {
 				sources: []gosrc.ArchString{{Value: "git://github.com/jguer/yay.git#branch=master"}}},
 			fields: fields{
 				OriginsByPackage: make(map[string]OriginInfoByURL),
-				CmdBuilder:       exe.NewCmdBuilder("git", ""),
+				CmdBuilder:       &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 				Runner:           &MockRunner{Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa HEAD"}},
 			},
 		},

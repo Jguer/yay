@@ -81,27 +81,3 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 	}
 	return exec.Command(argArr[0], argArr[1:]...)
 }
-
-func passToMakepkg(dir string, args ...string) *exec.Cmd {
-	args = append(args, strings.Fields(config.MFlags)...)
-
-	if config.MakepkgConf != "" {
-		args = append(args, "--config", config.MakepkgConf)
-	}
-
-	cmd := exec.Command(config.MakepkgBin, args...)
-	cmd.Dir = dir
-	return cmd
-}
-
-func passToGit(dir string, _args ...string) *exec.Cmd {
-	args := strings.Fields(config.GitFlags)
-	if dir != "" {
-		args = append(args, "-C", dir)
-	}
-	args = append(args, _args...)
-
-	cmd := exec.Command(config.GitBin, args...)
-	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-	return cmd
-}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -196,9 +197,15 @@ func NewConfig() (*Configuration, error) {
 		SaveConfig:     false,
 		CompletionPath: filepath.Join(cacheHome, completionFileName),
 		CmdRunner:      &exe.OSRunner{},
-		CmdBuilder:     exe.NewCmdBuilder(newConfig.GitBin, newConfig.GitFlags),
-		PacmanConf:     nil,
-		VCSStore:       nil,
+		CmdBuilder: &exe.CmdBuilder{
+			GitBin:          newConfig.GitBin,
+			GitFlags:        strings.Fields(newConfig.GitFlags),
+			MakepkgFlags:    strings.Fields(newConfig.MFlags),
+			MakepkgConfPath: newConfig.MakepkgConf,
+			MakepkgBin:      newConfig.MakepkgBin,
+		},
+		PacmanConf: nil,
+		VCSStore:   nil,
 	}
 
 	newConfig.Runtime.VCSStore = vcs.NewInfoStore(filepath.Join(cacheHome, vcsFileName),

@@ -496,7 +496,8 @@ nextpkg:
 }
 
 func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string, err error) {
-	stdout, stderr, err := config.Runtime.CmdRunner.Capture(passToMakepkg(dir, "--packagelist"), 0)
+	stdout, stderr, err := config.Runtime.CmdRunner.Capture(
+		config.Runtime.CmdBuilder.BuildMakepkgCmd(dir, "--packagelist"), 0)
 	if err != nil {
 		return nil, "", fmt.Errorf("%s %s", stderr, err)
 	}
@@ -765,7 +766,7 @@ func showPkgbuildDiffs(bases []dep.Base, cloned stringset.StringSet) error {
 		} else {
 			args = append(args, "--color=never")
 		}
-		_ = config.Runtime.CmdRunner.Show(passToGit(dir, args...))
+		_ = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, args...))
 	}
 
 	return errMulti.Return()
@@ -922,7 +923,8 @@ func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet
 			args = append(args, "--ignorearch")
 		}
 
-		err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, args...))
+		err = config.Runtime.CmdRunner.Show(
+			config.Runtime.CmdBuilder.BuildMakepkgCmd(dir, args...))
 		if err != nil {
 			return errors.New(gotext.Get("error downloading sources: %s", text.Cyan(base.String())))
 		}
@@ -1032,7 +1034,8 @@ func buildInstallPkgbuilds(
 		}
 
 		// pkgver bump
-		if err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, args...)); err != nil {
+		if err = config.Runtime.CmdRunner.Show(
+			config.Runtime.CmdBuilder.BuildMakepkgCmd(dir, args...)); err != nil {
 			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
 
@@ -1069,7 +1072,9 @@ func buildInstallPkgbuilds(
 			}
 
 			if installed {
-				err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+				err = config.Runtime.CmdRunner.Show(
+					config.Runtime.CmdBuilder.BuildMakepkgCmd(
+						dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
 					return errors.New(gotext.Get("error making: %s", err))
 				}
@@ -1080,7 +1085,9 @@ func buildInstallPkgbuilds(
 		}
 
 		if built {
-			err = config.Runtime.CmdRunner.Show(passToMakepkg(dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
+			err = config.Runtime.CmdRunner.Show(
+				config.Runtime.CmdBuilder.BuildMakepkgCmd(
+					dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
 				return errors.New(gotext.Get("error making: %s", err))
 			}
@@ -1093,7 +1100,9 @@ func buildInstallPkgbuilds(
 				args = append(args, "--ignorearch")
 			}
 
-			if errMake := config.Runtime.CmdRunner.Show(passToMakepkg(dir, args...)); errMake != nil {
+			if errMake := config.Runtime.CmdRunner.Show(
+				config.Runtime.CmdBuilder.BuildMakepkgCmd(
+					dir, args...)); errMake != nil {
 				return errors.New(gotext.Get("error making: %s", base.String()))
 			}
 		}

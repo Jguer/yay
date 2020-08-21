@@ -173,7 +173,7 @@ func cleanUntracked() error {
 
 		dir := filepath.Join(config.BuildDir, file.Name())
 		if isGitRepository(dir) {
-			if err := config.Runtime.CmdRunner.Show(passToGit(dir, "clean", "-fx")); err != nil {
+			if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx")); err != nil {
 				text.Warnln(gotext.Get("Unable to clean:"), dir)
 				return err
 			}
@@ -198,12 +198,12 @@ func cleanAfter(bases []dep.Base) {
 
 		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
 
-		_, stderr, err := config.Runtime.CmdRunner.Capture(passToGit(dir, "reset", "--hard", "HEAD"), 0)
+		_, stderr, err := config.Runtime.CmdRunner.Capture(config.Runtime.CmdBuilder.BuildGitCmd(dir, "reset", "--hard", "HEAD"), 0)
 		if err != nil {
 			text.Errorln(gotext.Get("error resetting %s: %s", base.String(), stderr))
 		}
 
-		if err := config.Runtime.CmdRunner.Show(passToGit(dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
+		if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}
