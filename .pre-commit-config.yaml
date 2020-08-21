@@ -15,7 +15,7 @@ repos:
       - id: prettier
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.1.0 # Use the ref you want to point at
+    rev: v3.2.0 # Use the ref you want to point at
     hooks:
       - id: trailing-whitespace
       - id: check-json
@@ -23,7 +23,7 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/Woile/commitizen
-    rev: v1.23.1
+    rev: v2.1.0
     hooks:
       - id: commitizen
         stages: [commit-msg]
