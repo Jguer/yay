@@ -43,7 +43,7 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 	for i := range srcinfos {
 		for iP := range srcinfos[i].Packages {
 			wg.Add(1)
-			go savedInfo.Update(srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
+			go config.Runtime.VCSStore.Update(srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
 		}
 	}
 

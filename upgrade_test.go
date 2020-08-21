@@ -266,7 +266,7 @@ func Test_upDevel(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config.Runtime.CmdRunner.(*MockRunner).t = t
-			got := upDevel(tt.args.remote, tt.args.aurdata, tt.args.cached)
+			got := upDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
 			assert.ElementsMatch(t, tt.want, got)
 			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))
 		})

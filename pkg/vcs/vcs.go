@@ -200,7 +200,7 @@ func (v *InfoStore) NeedsUpdate(infos OriginInfoByURL) bool {
 }
 
 func (v *InfoStore) Save() error {
-	marshalledinfo, err := json.MarshalIndent(v, "", "\t")
+	marshalledinfo, err := json.MarshalIndent(v.OriginsByPackage, "", "\t")
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}

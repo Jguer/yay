@@ -160,7 +160,7 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	case "Q", "query":
 		return handleQuery(cmdArgs, dbExecutor)
 	case "R", "remove":
-		return handleRemove(cmdArgs, savedInfo)
+		return handleRemove(cmdArgs, config.Runtime.VCSStore)
 	case "S", "sync":
 		return handleSync(cmdArgs, dbExecutor)
 	case "T", "deptest":
@@ -285,7 +285,7 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	return nil
 }
 
-func handleRemove(cmdArgs *settings.Arguments, localCache vcs.InfoStore) error {
+func handleRemove(cmdArgs *settings.Arguments, localCache *vcs.InfoStore) error {
 	err := config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	if err == nil {
 		localCache.RemovePackage(cmdArgs.Targets)

@@ -1,0 +1,11 @@
+{
+	"hello": {
+		"github.com/jguer/yay.git": {
+			"protocols": [
+				"git"
+			],
+			"branch": "master",
+			"sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		}
+	}
+}

@@ -70,7 +70,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 				text.OperationInfoln(gotext.Get("Checking development packages..."))
 				wg.Add(1)
 				go func() {
-					develUp = upDevel(remote, aurdata, savedInfo)
+					develUp = upDevel(remote, aurdata, config.Runtime.VCSStore)
 					wg.Done()
 				}()
 			}
@@ -101,7 +101,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 func upDevel(
 	remote []db.RepoPackage,
 	aurdata map[string]*rpc.Pkg,
-	localCache vcs.InfoStore) upgrade.UpSlice {
+	localCache *vcs.InfoStore) upgrade.UpSlice {
 	toUpdate := make([]db.RepoPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)
 

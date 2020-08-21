@@ -11,7 +11,6 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
-	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
 // Verbosity settings for search
@@ -24,9 +23,6 @@ const (
 var yayVersion = "10.0.0"
 
 var localePath = "/usr/share/locale"
-
-// savedInfo holds the current vcs info
-var savedInfo vcs.InfoStore
 
 // YayConf holds the current config values for yay.
 var config *settings.Configuration
