@@ -15,6 +15,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
+	"github.com/Jguer/yay/v10/pkg/vcs"
 
 	rpc "github.com/mikkeloscar/aur"
 
@@ -97,20 +98,23 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 	return aurUp, repoUp, errs.Return()
 }
 
-func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg, localCache vcsInfo) upgrade.UpSlice {
+func upDevel(
+	remote []db.RepoPackage,
+	aurdata map[string]*rpc.Pkg,
+	localCache vcs.InfoStore) upgrade.UpSlice {
 	toUpdate := make([]db.RepoPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)
 
 	var mux1, mux2 sync.Mutex
 	var wg sync.WaitGroup
 
-	checkUpdate := func(vcsName string, e shaInfos) {
+	checkUpdate := func(pkgName string, e vcs.OriginInfoByURL) {
 		defer wg.Done()
 
-		if e.needsUpdate() {
-			if _, ok := aurdata[vcsName]; ok {
+		if localCache.NeedsUpdate(e) {
+			if _, ok := aurdata[pkgName]; ok {
 				for _, pkg := range remote {
-					if pkg.Name() == vcsName {
+					if pkg.Name() == pkgName {
 						mux1.Lock()
 						toUpdate = append(toUpdate, pkg)
 						mux1.Unlock()
@@ -120,14 +124,14 @@ func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg, localCache vc
 			}
 
 			mux2.Lock()
-			toRemove = append(toRemove, vcsName)
+			toRemove = append(toRemove, pkgName)
 			mux2.Unlock()
 		}
 	}
 
-	for vcsName, e := range localCache {
+	for pkgName, e := range localCache.OriginsByPackage {
 		wg.Add(1)
-		go checkUpdate(vcsName, e)
+		go checkUpdate(pkgName, e)
 	}
 
 	wg.Wait()
@@ -147,7 +151,7 @@ func upDevel(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg, localCache vc
 		}
 	}
 
-	removeVCSPackage(toRemove, localCache)
+	localCache.RemovePackage(toRemove)
 	return toUpgrade
 }
 

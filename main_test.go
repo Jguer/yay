@@ -10,7 +10,8 @@ import (
 )
 
 func TestPacmanConf(t *testing.T) {
-	expectedPacmanConf := &pacmanconf.Config{RootDir: "/",
+	expectedPacmanConf := &pacmanconf.Config{
+		RootDir:                "/",
 		DBPath:                 "//var/lib/pacman/",
 		CacheDir:               []string{"/cachedir/", "/another/"},
 		HookDir:                []string{"/hookdir/"},
@@ -36,12 +37,13 @@ func TestPacmanConf(t *testing.T) {
 		DisableDownloadTimeout: false,
 		Repos: []pacmanconf.Repository{
 			{Name: "repo1", Servers: []string{"repo1"}, SigLevel: []string(nil), Usage: []string{"All"}},
-			{Name: "repo2", Servers: []string{"repo2"}, SigLevel: []string(nil), Usage: []string{"All"}}}}
+			{Name: "repo2", Servers: []string{"repo2"}, SigLevel: []string(nil), Usage: []string{"All"}},
+		},
+	}
 
 	pacmanConf, color, err := initAlpm(settings.MakeArguments(), "testdata/pacman.conf")
 	assert.Nil(t, err)
 	assert.NotNil(t, pacmanConf)
 	assert.Equal(t, color, false)
 	assert.EqualValues(t, expectedPacmanConf, pacmanConf)
-
 }

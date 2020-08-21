@@ -8,7 +8,8 @@ import (
 )
 
 func TestAlpmExecutor(t *testing.T) {
-	pacmanConf := &pacmanconf.Config{RootDir: "/",
+	pacmanConf := &pacmanconf.Config{
+		RootDir:                "/",
 		DBPath:                 "/var/lib/pacman/",
 		CacheDir:               []string{"/cachedir/", "/another/"},
 		HookDir:                []string{"/hookdir/"},
@@ -34,7 +35,9 @@ func TestAlpmExecutor(t *testing.T) {
 		DisableDownloadTimeout: false,
 		Repos: []pacmanconf.Repository{
 			{Name: "repo1", Servers: []string{"repo1"}, SigLevel: []string(nil), Usage: []string{"All"}},
-			{Name: "repo2", Servers: []string{"repo2"}, SigLevel: []string(nil), Usage: []string{"All"}}}}
+			{Name: "repo2", Servers: []string{"repo2"}, SigLevel: []string(nil), Usage: []string{"All"}},
+		},
+	}
 
 	aExec, err := NewExecutor(pacmanConf)
 	assert.NoError(t, err)

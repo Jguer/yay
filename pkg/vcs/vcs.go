@@ -46,7 +46,8 @@ func NewInfoStore(filePath string, runner exe.Runner, cmdBuilder *exe.CmdBuilder
 		CmdBuilder:       cmdBuilder,
 		FilePath:         filePath,
 		OriginsByPackage: map[string]OriginInfoByURL{},
-		Runner:           runner}
+		Runner:           runner,
+	}
 
 	return infoStore
 }

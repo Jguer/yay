@@ -16,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
 func usage() {
@@ -199,8 +200,7 @@ func handleVersion() {
 func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) (err error) {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
-		tmpConfig := settings.MakeConfig()
-		tmpConfig.ExpandEnv()
+		tmpConfig := settings.DefaultConfig()
 		fmt.Printf("%v", tmpConfig)
 	case cmdArgs.ExistsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
@@ -224,7 +224,7 @@ func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) (err error
 
 func handleYay(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("gendb") {
-		return createDevelDB(config.Runtime.VCSPath, dbExecutor)
+		return createDevelDB(config, dbExecutor)
 	}
 	if cmdArgs.ExistsDouble("c") {
 		return cleanDependencies(cmdArgs, dbExecutor, true)
@@ -285,10 +285,10 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	return nil
 }
 
-func handleRemove(cmdArgs *settings.Arguments, localCache vcsInfo) error {
+func handleRemove(cmdArgs *settings.Arguments, localCache vcs.InfoStore) error {
 	err := config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	if err == nil {
-		removeVCSPackage(cmdArgs.Targets, localCache)
+		localCache.RemovePackage(cmdArgs.Targets)
 	}
 
 	return err

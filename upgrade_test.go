@@ -17,6 +17,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/db/mock"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
+	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
 func Test_upAUR(t *testing.T) {
@@ -30,32 +31,40 @@ func Test_upAUR(t *testing.T) {
 		args args
 		want upgrade.UpSlice
 	}{
-		{name: "No Updates",
+		{
+			name: "No Updates",
 			args: args{
 				remote: []db.RepoPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
 					&mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
-					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true}},
+					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
+				},
 				aurdata: map[string]*rpc.Pkg{
 					"hello":   {Version: "2.0.0", Name: "hello"},
-					"ignored": {Version: "2.0.0", Name: "ignored"}},
+					"ignored": {Version: "2.0.0", Name: "ignored"},
+				},
 				timeUpdate: false,
 			},
-			want: upgrade.UpSlice{}},
-		{name: "Simple Update",
+			want: upgrade.UpSlice{},
+		},
+		{
+			name: "Simple Update",
 			args: args{
 				remote:     []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.1.0", Name: "hello"}},
 				timeUpdate: false,
 			},
-			want: upgrade.UpSlice{upgrade.Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"}}},
-		{name: "Time Update",
+			want: upgrade.UpSlice{upgrade.Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"}},
+		},
+		{
+			name: "Time Update",
 			args: args{
 				remote:     []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PBuildDate: time.Now()}},
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello", LastModified: int(time.Now().AddDate(0, 0, 2).Unix())}},
 				timeUpdate: true,
 			},
-			want: upgrade.UpSlice{upgrade.Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.0.0"}}},
+			want: upgrade.UpSlice{upgrade.Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.0.0"}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -96,8 +105,10 @@ func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr strin
 }
 
 func Test_upDevel(t *testing.T) {
-	config = settings.MakeConfig()
-	config.Runtime, _ = settings.MakeRuntime()
+	var err error
+	config, err = settings.NewConfig()
+	assert.NoError(t, err)
+
 	config.Runtime.CmdRunner = &MockRunner{
 		Returned: []string{
 			"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
@@ -111,7 +122,7 @@ func Test_upDevel(t *testing.T) {
 	type args struct {
 		remote  []db.RepoPackage
 		aurdata map[string]*rpc.Pkg
-		cached  vcsInfo
+		cached  vcs.InfoStore
 	}
 	tests := []struct {
 		name     string
@@ -119,102 +130,145 @@ func Test_upDevel(t *testing.T) {
 		want     upgrade.UpSlice
 		finalLen int
 	}{
-		{name: "No Updates",
+		{
+			name: "No Updates",
 			args: args{
-				cached: vcsInfo{},
+				cached: vcs.InfoStore{
+					Runner:     config.Runtime.CmdRunner,
+					CmdBuilder: config.Runtime.CmdBuilder,
+				},
 				remote: []db.RepoPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
 					&mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
-					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true}},
+					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
+				},
 				aurdata: map[string]*rpc.Pkg{
 					"hello":   {Version: "2.0.0", Name: "hello"},
-					"ignored": {Version: "2.0.0", Name: "ignored"}},
+					"ignored": {Version: "2.0.0", Name: "ignored"},
+				},
 			},
-			want: upgrade.UpSlice{}},
-		{name: "Simple Update",
+			want: upgrade.UpSlice{},
+		},
+		{
+			name:     "Simple Update",
 			finalLen: 3,
 			args: args{
-				cached: vcsInfo{
-					"hello": shaInfos{
-						"github.com/Jguer/z.git": shaInfo{
-							Protocols: []string{"https"},
-							Branch:    "0",
-							SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1"}},
-					"hello-non-existant": shaInfos{
-						"github.com/Jguer/y.git": shaInfo{
-							Protocols: []string{"https"},
-							Branch:    "0",
-							SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1"}},
-					"hello2": shaInfos{
-						"github.com/Jguer/a.git": shaInfo{
-							Protocols: []string{"https"},
-							Branch:    "1",
-							SHA:       "7f4c277ce7149665d1c79b76ca8fbb832a65a03b"}},
-					"hello4": shaInfos{
-						"github.com/Jguer/b.git": shaInfo{
-							Protocols: []string{"https"},
-							Branch:    "2",
-							SHA:       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-						"github.com/Jguer/c.git": shaInfo{
-							Protocols: []string{"https"},
-							Branch:    "3",
-							SHA:       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+				cached: vcs.InfoStore{
+					Runner:     config.Runtime.CmdRunner,
+					CmdBuilder: config.Runtime.CmdBuilder,
+					OriginsByPackage: map[string]vcs.OriginInfoByURL{
+						"hello": {
+							"github.com/Jguer/z.git": vcs.OriginInfo{
+								Protocols: []string{"https"},
+								Branch:    "0",
+								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+							},
+						},
+						"hello-non-existant": {
+							"github.com/Jguer/y.git": vcs.OriginInfo{
+								Protocols: []string{"https"},
+								Branch:    "0",
+								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+							},
+						},
+						"hello2": {
+							"github.com/Jguer/a.git": vcs.OriginInfo{
+								Protocols: []string{"https"},
+								Branch:    "1",
+								SHA:       "7f4c277ce7149665d1c79b76ca8fbb832a65a03b",
+							},
+						},
+						"hello4": {
+							"github.com/Jguer/b.git": vcs.OriginInfo{
+								Protocols: []string{"https"},
+								Branch:    "2",
+								SHA:       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+							},
+							"github.com/Jguer/c.git": vcs.OriginInfo{
+								Protocols: []string{"https"},
+								Branch:    "3",
+								SHA:       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+							},
+						},
 					},
 				},
 				remote: []db.RepoPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
 					&mock.Package{PName: "hello2", PVersion: "3.0.0"},
-					&mock.Package{PName: "hello4", PVersion: "4.0.0"}},
+					&mock.Package{PName: "hello4", PVersion: "4.0.0"},
+				},
 				aurdata: map[string]*rpc.Pkg{
 					"hello":  {Version: "2.0.0", Name: "hello"},
 					"hello2": {Version: "2.0.0", Name: "hello2"},
 					"hello4": {Version: "2.0.0", Name: "hello4"},
 				},
 			},
-			want: upgrade.UpSlice{upgrade.Upgrade{
-				Name:          "hello",
-				Repository:    "devel",
-				LocalVersion:  "2.0.0",
-				RemoteVersion: "latest-commit"},
+			want: upgrade.UpSlice{
+				upgrade.Upgrade{
+					Name:          "hello",
+					Repository:    "devel",
+					LocalVersion:  "2.0.0",
+					RemoteVersion: "latest-commit",
+				},
 				upgrade.Upgrade{
 					Name:          "hello4",
 					Repository:    "devel",
 					LocalVersion:  "4.0.0",
-					RemoteVersion: "latest-commit"},
-			}},
-		{name: "No update returned",
+					RemoteVersion: "latest-commit",
+				},
+			},
+		},
+		{
+			name:     "No update returned",
 			finalLen: 1,
 			args: args{
-				cached: vcsInfo{
-					"hello": shaInfos{
-						"github.com/Jguer/d.git": shaInfo{
-							Protocols: []string{"https"},
-							Branch:    "4",
-							SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1"}}},
+				cached: vcs.InfoStore{
+					Runner:     config.Runtime.CmdRunner,
+					CmdBuilder: config.Runtime.CmdBuilder,
+					OriginsByPackage: map[string]vcs.OriginInfoByURL{
+						"hello": {
+							"github.com/Jguer/d.git": vcs.OriginInfo{
+								Protocols: []string{"https"},
+								Branch:    "4",
+								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+							},
+						},
+					},
+				},
 				remote:  []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
-			want: upgrade.UpSlice{}},
-		{name: "No update returned - ignored",
+			want: upgrade.UpSlice{},
+		},
+		{
+			name:     "No update returned - ignored",
 			finalLen: 1,
 			args: args{
-				cached: vcsInfo{
-					"hello": shaInfos{
-						"github.com/Jguer/e.git": shaInfo{
-							Protocols: []string{"https"},
-							Branch:    "3",
-							SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1"}}},
+				cached: vcs.InfoStore{
+					Runner:     config.Runtime.CmdRunner,
+					CmdBuilder: config.Runtime.CmdBuilder,
+					OriginsByPackage: map[string]vcs.OriginInfoByURL{
+						"hello": {
+							"github.com/Jguer/e.git": vcs.OriginInfo{
+								Protocols: []string{"https"},
+								Branch:    "3",
+								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+							},
+						},
+					},
+				},
 				remote:  []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
-			want: upgrade.UpSlice{}},
+			want: upgrade.UpSlice{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config.Runtime.CmdRunner.(*MockRunner).t = t
 			got := upDevel(tt.args.remote, tt.args.aurdata, tt.args.cached)
 			assert.ElementsMatch(t, tt.want, got)
-			assert.Equal(t, tt.finalLen, len(tt.args.cached))
+			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))
 		})
 	}
 }

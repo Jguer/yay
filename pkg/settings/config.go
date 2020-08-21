@@ -5,6 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+
+	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
 const (
@@ -67,11 +73,12 @@ type Configuration struct {
 }
 
 // SaveConfig writes yay config to file.
-func (config *Configuration) SaveConfig(configPath string) error {
-	marshalledinfo, err := json.MarshalIndent(config, "", "\t")
+func (c *Configuration) Save(configPath string) error {
+	marshalledinfo, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return err
 	}
+
 	// https://github.com/Jguer/yay/issues/1325
 	marshalledinfo = append(marshalledinfo, '\n')
 	in, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
@@ -85,49 +92,49 @@ func (config *Configuration) SaveConfig(configPath string) error {
 	return in.Sync()
 }
 
-func (config *Configuration) ExpandEnv() {
-	config.AURURL = os.ExpandEnv(config.AURURL)
-	config.ABSDir = os.ExpandEnv(config.ABSDir)
-	config.BuildDir = os.ExpandEnv(config.BuildDir)
-	config.Editor = os.ExpandEnv(config.Editor)
-	config.EditorFlags = os.ExpandEnv(config.EditorFlags)
-	config.MakepkgBin = os.ExpandEnv(config.MakepkgBin)
-	config.MakepkgConf = os.ExpandEnv(config.MakepkgConf)
-	config.PacmanBin = os.ExpandEnv(config.PacmanBin)
-	config.PacmanConf = os.ExpandEnv(config.PacmanConf)
-	config.GpgFlags = os.ExpandEnv(config.GpgFlags)
-	config.MFlags = os.ExpandEnv(config.MFlags)
-	config.GitFlags = os.ExpandEnv(config.GitFlags)
-	config.SortBy = os.ExpandEnv(config.SortBy)
-	config.SearchBy = os.ExpandEnv(config.SearchBy)
-	config.GitBin = os.ExpandEnv(config.GitBin)
-	config.GpgBin = os.ExpandEnv(config.GpgBin)
-	config.SudoBin = os.ExpandEnv(config.SudoBin)
-	config.SudoFlags = os.ExpandEnv(config.SudoFlags)
-	config.ReDownload = os.ExpandEnv(config.ReDownload)
-	config.ReBuild = os.ExpandEnv(config.ReBuild)
-	config.AnswerClean = os.ExpandEnv(config.AnswerClean)
-	config.AnswerDiff = os.ExpandEnv(config.AnswerDiff)
-	config.AnswerEdit = os.ExpandEnv(config.AnswerEdit)
-	config.AnswerUpgrade = os.ExpandEnv(config.AnswerUpgrade)
-	config.RemoveMake = os.ExpandEnv(config.RemoveMake)
+func (c *Configuration) expandEnv() {
+	c.AURURL = os.ExpandEnv(c.AURURL)
+	c.ABSDir = os.ExpandEnv(c.ABSDir)
+	c.BuildDir = os.ExpandEnv(c.BuildDir)
+	c.Editor = os.ExpandEnv(c.Editor)
+	c.EditorFlags = os.ExpandEnv(c.EditorFlags)
+	c.MakepkgBin = os.ExpandEnv(c.MakepkgBin)
+	c.MakepkgConf = os.ExpandEnv(c.MakepkgConf)
+	c.PacmanBin = os.ExpandEnv(c.PacmanBin)
+	c.PacmanConf = os.ExpandEnv(c.PacmanConf)
+	c.GpgFlags = os.ExpandEnv(c.GpgFlags)
+	c.MFlags = os.ExpandEnv(c.MFlags)
+	c.GitFlags = os.ExpandEnv(c.GitFlags)
+	c.SortBy = os.ExpandEnv(c.SortBy)
+	c.SearchBy = os.ExpandEnv(c.SearchBy)
+	c.GitBin = os.ExpandEnv(c.GitBin)
+	c.GpgBin = os.ExpandEnv(c.GpgBin)
+	c.SudoBin = os.ExpandEnv(c.SudoBin)
+	c.SudoFlags = os.ExpandEnv(c.SudoFlags)
+	c.ReDownload = os.ExpandEnv(c.ReDownload)
+	c.ReBuild = os.ExpandEnv(c.ReBuild)
+	c.AnswerClean = os.ExpandEnv(c.AnswerClean)
+	c.AnswerDiff = os.ExpandEnv(c.AnswerDiff)
+	c.AnswerEdit = os.ExpandEnv(c.AnswerEdit)
+	c.AnswerUpgrade = os.ExpandEnv(c.AnswerUpgrade)
+	c.RemoveMake = os.ExpandEnv(c.RemoveMake)
 }
 
-func (config *Configuration) String() string {
+func (c *Configuration) String() string {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "\t")
-	if err := enc.Encode(config); err != nil {
+	if err := enc.Encode(c); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
 	return buf.String()
 }
 
-func MakeConfig() *Configuration {
-	newConfig := &Configuration{
+func DefaultConfig() *Configuration {
+	return &Configuration{
 		AURURL:             "https://aur.archlinux.org",
-		BuildDir:           "$HOME/.cache/yay",
-		ABSDir:             "$HOME/.cache/yay/abs",
+		BuildDir:           os.ExpandEnv("$HOME/.cache/yay"),
+		ABSDir:             os.ExpandEnv("$HOME/.cache/yay/abs"),
 		CleanAfter:         false,
 		Editor:             "",
 		EditorFlags:        "",
@@ -167,10 +174,59 @@ func MakeConfig() *Configuration {
 		UseAsk:             false,
 		CombinedUpgrade:    false,
 	}
+}
 
-	if os.Getenv("XDG_CACHE_HOME") != "" {
-		newConfig.BuildDir = "$XDG_CACHE_HOME/yay"
+func NewConfig() (*Configuration, error) {
+	newConfig := DefaultConfig()
+
+	cacheHome := getCacheHome()
+	newConfig.BuildDir = cacheHome
+
+	configPath := getConfigPath()
+	newConfig.load(configPath)
+
+	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
+		newConfig.BuildDir = aurdest
 	}
 
-	return newConfig
+	newConfig.expandEnv()
+
+	newConfig.Runtime = &Runtime{
+		Mode:           ModeAny,
+		SaveConfig:     false,
+		CompletionPath: filepath.Join(cacheHome, completionFileName),
+		CmdRunner:      &exe.OSRunner{},
+		CmdBuilder:     exe.NewCmdBuilder(newConfig.GitBin, newConfig.GitFlags),
+		PacmanConf:     nil,
+		VCSStore:       nil,
+	}
+
+	newConfig.Runtime.VCSStore = vcs.NewInfoStore(filepath.Join(cacheHome, vcsFileName),
+		newConfig.Runtime.CmdRunner, newConfig.Runtime.CmdBuilder)
+
+	if err := initDir(newConfig.BuildDir); err != nil {
+		return nil, err
+	}
+
+	err := newConfig.Runtime.VCSStore.Load()
+
+	return newConfig, err
+}
+
+func (c *Configuration) load(configPath string) {
+	cfile, err := os.Open(configPath)
+	if !os.IsNotExist(err) && err != nil {
+		fmt.Fprintln(os.Stderr,
+			gotext.Get("failed to open config file '%s': %s", configPath, err))
+		return
+	}
+
+	defer cfile.Close()
+	if !os.IsNotExist(err) {
+		decoder := json.NewDecoder(cfile)
+		if err = decoder.Decode(c); err != nil {
+			fmt.Fprintln(os.Stderr,
+				gotext.Get("failed to read config file '%s': %s", configPath, err))
+		}
+	}
 }

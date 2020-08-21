@@ -16,27 +16,6 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// GetPkgbuild gets the pkgbuild of the package 'pkg' trying the ABS first and then the AUR trying the ABS first and then the AUR.
-
-// RemovePackage removes package from VCS information
-func removeVCSPackage(pkgs []string, localCache vcsInfo) {
-	updated := false
-
-	for _, pkgName := range pkgs {
-		if _, ok := localCache[pkgName]; ok {
-			delete(localCache, pkgName)
-			updated = true
-		}
-	}
-
-	if updated {
-		err := saveVCSInfo(config.Runtime.VCSPath)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-	}
-}
-
 // CleanDependencies removes all dangling dependencies in system
 func cleanDependencies(cmdArgs *settings.Arguments, dbExecutor db.Executor, removeOptional bool) error {
 	hanging := hangingPackages(removeOptional, dbExecutor)
