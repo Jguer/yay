@@ -183,7 +183,11 @@ func NewConfig() (*Configuration, error) {
 	cacheHome := getCacheHome()
 	newConfig.BuildDir = cacheHome
 
-	configPath := getConfigPath()
+	configPath, err := getConfigPath()
+	if err != nil {
+		return nil, err
+	}
+
 	newConfig.load(configPath)
 
 	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
@@ -193,6 +197,7 @@ func NewConfig() (*Configuration, error) {
 	newConfig.expandEnv()
 
 	newConfig.Runtime = &Runtime{
+		ConfigPath:     configPath,
 		Mode:           ModeAny,
 		SaveConfig:     false,
 		CompletionPath: filepath.Join(cacheHome, completionFileName),
@@ -215,9 +220,11 @@ func NewConfig() (*Configuration, error) {
 		return nil, err
 	}
 
-	err := newConfig.Runtime.VCSStore.Load()
+	if err := newConfig.Runtime.VCSStore.Load(); err != nil {
+		return nil, err
+	}
 
-	return newConfig, err
+	return newConfig, nil
 }
 
 func (c *Configuration) load(configPath string) {

@@ -16,20 +16,22 @@ const vcsFileName string = "vcs.json"
 
 const completionFileName string = "completion.cache"
 
-func getConfigPath() string {
-	if configHome := os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
-		if err := initDir(configHome); err == nil {
-			return filepath.Join(configHome, "yay", configFileName)
-		}
+func getConfigPath() (string, error) {
+	var configHome string
+
+	if configHome = os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
+		configHome = filepath.Join(configHome, "yay")
+	} else if configHome = os.Getenv("HOME"); configHome != "" {
+		configHome = filepath.Join(configHome, ".config", "yay")
+	} else {
+		return "", errors.New(gotext.Get("%s and %s unset", "XDG_CACHE_HOME", "HOME"))
 	}
 
-	if configHome := os.Getenv("HOME"); configHome != "" {
-		if err := initDir(configHome); err == nil {
-			return filepath.Join(configHome, ".config", "yay", configFileName)
-		}
+	if err := initDir(configHome); err != nil {
+		return "", err
 	}
 
-	return ""
+	return filepath.Join(configHome, configFileName), nil
 }
 
 func getCacheHome() string {
