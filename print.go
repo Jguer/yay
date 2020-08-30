@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
@@ -106,19 +105,19 @@ func (s repoQuery) printSearch(dbExecutor db.Executor) {
 func PrintInfo(a *rpc.Pkg, extendedInfo bool) {
 	text.PrintInfoValue(gotext.Get("Repository"), "aur")
 	text.PrintInfoValue(gotext.Get("Name"), a.Name)
-	text.PrintInfoValue(gotext.Get("Keywords"), strings.Join(a.Keywords, "  "))
+	text.PrintInfoValue(gotext.Get("Keywords"), a.Keywords...)
 	text.PrintInfoValue(gotext.Get("Version"), a.Version)
 	text.PrintInfoValue(gotext.Get("Description"), a.Description)
 	text.PrintInfoValue(gotext.Get("URL"), a.URL)
 	text.PrintInfoValue(gotext.Get("AUR URL"), config.AURURL+"/packages/"+a.Name)
-	text.PrintInfoValue(gotext.Get("Groups"), strings.Join(a.Groups, "  "))
-	text.PrintInfoValue(gotext.Get("Licenses"), strings.Join(a.License, "  "))
-	text.PrintInfoValue(gotext.Get("Provides"), strings.Join(a.Provides, "  "))
-	text.PrintInfoValue(gotext.Get("Depends On"), strings.Join(a.Depends, "  "))
-	text.PrintInfoValue(gotext.Get("Make Deps"), strings.Join(a.MakeDepends, "  "))
-	text.PrintInfoValue(gotext.Get("Check Deps"), strings.Join(a.CheckDepends, "  "))
-	text.PrintInfoValue(gotext.Get("Optional Deps"), strings.Join(a.OptDepends, "  "))
-	text.PrintInfoValue(gotext.Get("Conflicts With"), strings.Join(a.Conflicts, "  "))
+	text.PrintInfoValue(gotext.Get("Groups"), a.Groups...)
+	text.PrintInfoValue(gotext.Get("Licenses"), a.License...)
+	text.PrintInfoValue(gotext.Get("Provides"), a.Provides...)
+	text.PrintInfoValue(gotext.Get("Depends On"), a.Depends...)
+	text.PrintInfoValue(gotext.Get("Make Deps"), a.MakeDepends...)
+	text.PrintInfoValue(gotext.Get("Check Deps"), a.CheckDepends...)
+	text.PrintInfoValue(gotext.Get("Optional Deps"), a.OptDepends...)
+	text.PrintInfoValue(gotext.Get("Conflicts With"), a.Conflicts...)
 	text.PrintInfoValue(gotext.Get("Maintainer"), a.Maintainer)
 	text.PrintInfoValue(gotext.Get("Votes"), fmt.Sprintf("%d", a.NumVotes))
 	text.PrintInfoValue(gotext.Get("Popularity"), fmt.Sprintf("%f", a.Popularity))
