@@ -193,6 +193,7 @@ func NewConfig() (*Configuration, error) {
 	newConfig.expandEnv()
 
 	newConfig.Runtime = &Runtime{
+		ConfigPath:     configPath,
 		Mode:           ModeAny,
 		SaveConfig:     false,
 		CompletionPath: filepath.Join(cacheHome, completionFileName),
