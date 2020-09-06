@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/go-alpm/v2"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 

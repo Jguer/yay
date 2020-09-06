@@ -3,7 +3,7 @@ package dep
 import (
 	"strings"
 
-	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/go-alpm/v2"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"

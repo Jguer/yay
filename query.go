@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/go-alpm/v2"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
@@ -20,8 +20,8 @@ import (
 
 type AlpmExecutor struct {
 	handle  *alpm.Handle
-	localDB *alpm.DB
-	syncDB  alpm.DBList
+	localDB alpm.IDB
+	syncDB  alpm.IDBList
 	conf    *pacmanconf.Config
 }
 
@@ -171,7 +171,7 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 
 		size := 0
 
-		_ = qp.Providers(ae.handle).ForEach(func(pkg alpm.Package) error {
+		_ = qp.Providers(ae.handle).ForEach(func(pkg alpm.IPackage) error {
 			size++
 			return nil
 		})
@@ -181,7 +181,7 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 		size = 1
 		var dbName string
 
-		_ = qp.Providers(ae.handle).ForEach(func(pkg alpm.Package) error {
+		_ = qp.Providers(ae.handle).ForEach(func(pkg alpm.IPackage) error {
 			thisDB := pkg.DB().Name()
 
 			if dbName != thisDB {
@@ -298,8 +298,8 @@ func (ae *AlpmExecutor) SyncSatisfier(pkgName string) db.RepoPackage {
 
 func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []db.RepoPackage {
 	groupPackages := []db.RepoPackage{}
-	_ = ae.syncDB.FindGroupPkgs(groupName).ForEach(func(pkg alpm.Package) error {
-		groupPackages = append(groupPackages, &pkg)
+	_ = ae.syncDB.FindGroupPkgs(groupName).ForEach(func(pkg alpm.IPackage) error {
+		groupPackages = append(groupPackages, pkg)
 		return nil
 	})
 	return groupPackages
@@ -307,8 +307,8 @@ func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []db.RepoPackage {
 
 func (ae *AlpmExecutor) LocalPackages() []db.RepoPackage {
 	localPackages := []db.RepoPackage{}
-	_ = ae.localDB.PkgCache().ForEach(func(pkg alpm.Package) error {
-		localPackages = append(localPackages, db.RepoPackage(&pkg))
+	_ = ae.localDB.PkgCache().ForEach(func(pkg alpm.IPackage) error {
+		localPackages = append(localPackages, db.RepoPackage(pkg))
 		return nil
 	})
 	return localPackages
@@ -317,15 +317,15 @@ func (ae *AlpmExecutor) LocalPackages() []db.RepoPackage {
 // SyncPackages searches SyncDB for packages or returns all packages if no search param is given
 func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []db.RepoPackage {
 	repoPackages := []db.RepoPackage{}
-	_ = ae.syncDB.ForEach(func(alpmDB alpm.DB) error {
+	_ = ae.syncDB.ForEach(func(alpmDB alpm.IDB) error {
 		if len(pkgNames) == 0 {
-			_ = alpmDB.PkgCache().ForEach(func(pkg alpm.Package) error {
-				repoPackages = append(repoPackages, db.RepoPackage(&pkg))
+			_ = alpmDB.PkgCache().ForEach(func(pkg alpm.IPackage) error {
+				repoPackages = append(repoPackages, db.RepoPackage(pkg))
 				return nil
 			})
 		} else {
-			_ = alpmDB.Search(pkgNames).ForEach(func(pkg alpm.Package) error {
-				repoPackages = append(repoPackages, db.RepoPackage(&pkg))
+			_ = alpmDB.Search(pkgNames).ForEach(func(pkg alpm.IPackage) error {
+				repoPackages = append(repoPackages, db.RepoPackage(pkg))
 				return nil
 			})
 		}
@@ -402,7 +402,7 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) (upgrade.UpSlice, err
 	if err != nil {
 		return slice, err
 	}
-	_ = ae.handle.TransGetAdd().ForEach(func(pkg alpm.Package) error {
+	_ = ae.handle.TransGetAdd().ForEach(func(pkg alpm.IPackage) error {
 		localVer := "-"
 
 		if localPkg := localDB.Pkg(pkg.Name()); localPkg != nil {
@@ -427,8 +427,8 @@ func (ae *AlpmExecutor) AlpmArch() (string, error) {
 
 func (ae *AlpmExecutor) BiggestPackages() []db.RepoPackage {
 	localPackages := []db.RepoPackage{}
-	_ = ae.localDB.PkgCache().SortBySize().ForEach(func(pkg alpm.Package) error {
-		localPackages = append(localPackages, db.RepoPackage(&pkg))
+	_ = ae.localDB.PkgCache().SortBySize().ForEach(func(pkg alpm.IPackage) error {
+		localPackages = append(localPackages, db.RepoPackage(pkg))
 		return nil
 	})
 	return localPackages
@@ -436,8 +436,8 @@ func (ae *AlpmExecutor) BiggestPackages() []db.RepoPackage {
 
 func (ae *AlpmExecutor) LastBuildTime() time.Time {
 	var lastTime time.Time
-	_ = ae.syncDB.ForEach(func(db alpm.DB) error {
-		_ = db.PkgCache().ForEach(func(pkg alpm.Package) error {
+	_ = ae.syncDB.ForEach(func(db alpm.IDB) error {
+		_ = db.PkgCache().ForEach(func(pkg alpm.IPackage) error {
 			thisTime := pkg.BuildDate()
 			if thisTime.After(lastTime) {
 				lastTime = thisTime

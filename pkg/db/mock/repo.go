@@ -3,13 +3,13 @@ package mock
 import (
 	"time"
 
-	"github.com/Jguer/go-alpm"
+	"github.com/Jguer/go-alpm/v2"
 )
 
 type Package struct {
 	PBase         string
 	PBuildDate    time.Time
-	PDB           *alpm.DB
+	PDB           alpm.IDB
 	PDescription  string
 	PISize        int64
 	PName         string
@@ -27,7 +27,7 @@ func (p *Package) BuildDate() time.Time {
 	return p.PBuildDate
 }
 
-func (p *Package) DB() *alpm.DB {
+func (p *Package) DB() alpm.IDB {
 	return p.PDB
 }
 

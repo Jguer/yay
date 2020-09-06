@@ -3,7 +3,7 @@ package db
 import (
 	"time"
 
-	alpm "github.com/Jguer/go-alpm"
+	"github.com/Jguer/go-alpm/v2"
 
 	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
@@ -11,7 +11,7 @@ import (
 type RepoPackage interface {
 	Base() string
 	BuildDate() time.Time
-	DB() *alpm.DB
+	DB() alpm.IDB
 	Description() string
 	ISize() int64
 	Name() string
