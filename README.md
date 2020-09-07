@@ -44,6 +44,7 @@ building with makepkg:
 Before you begin, make sure you have the `base-devel` package group installed.
 
 ```sh
+pacman -S git fakeroot binutils gcc make
 git clone https://aur.archlinux.org/yay.git
 cd yay
 makepkg -si
