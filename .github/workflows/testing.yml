@@ -15,7 +15,7 @@ jobs:
     name: Lint and test yay
     runs-on: ubuntu-latest
     container:
-      image: samip537/archlinux:devel
+      image: jguer/yay-builder:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -25,9 +25,7 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Run Build and tests
-        run: |
-          pacman -Sy --noconfirm go
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.27.0
-          ./bin/golangci-lint run ./...
-          make test
+      - name: Lint
+        run: /app/bin/golangci-lint run ./...
+      - name: Run Build and Tests
+        run: make test
