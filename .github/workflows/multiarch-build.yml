@@ -1,0 +1,102 @@
+name: Build Release
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build-releases:
+    strategy:
+      matrix:
+        arch: ["x86_64", "armv7h", "aarch64"]
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Read info
+        id: tags
+        shell: bash
+        run: |
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+          echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
+      - name: Install dependencies
+        run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
+      - name: Setup qemu-user-static
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - name: Build ${{ matrix.arch }} release
+        run: |
+          mkdir artifacts
+          make docker-release-${{ matrix.arch }} ARCH=${{ matrix.arch }} VERSION=${{ steps.tags.outputs.version }} PREFIX="/usr"
+          mv *.tar.gz artifacts
+      - uses: actions/upload-artifact@v2
+        with:
+          name: yay_${{ matrix.arch }}
+          path: artifacts
+  create_release:
+    name: Create release from this build
+    needs: [build-releases]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read info
+        id: tags
+        shell: bash
+        run: |
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+          echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: changelog
+        env:
+          REPO: ${{ github.repository }}
+      - uses: actions/download-artifact@v2
+        with:
+          name: yay_x86_64
+      - uses: actions/download-artifact@v2
+        with:
+          name: yay_armv7h
+      - uses: actions/download-artifact@v2
+        with:
+          name: yay_aarch64
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tags.outputs.tag }}
+          release_name: ${{ steps.tags.outputs.tag }}
+          body: |
+            ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+      - name: Upload x86_64 asset
+        id: upload-release-asset-x86_64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./yay_${{ steps.tags.outputs.version }}_x86_64.tar.gz
+          asset_name: yay_${{ steps.tags.outputs.version }}_x86_64.tar.gz
+          asset_content_type: application/tar+gzip
+      - name: Upload armv7h asset
+        id: upload-release-asset-armv7h
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
+          asset_name: yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
+          asset_content_type: application/tar+gzip
+      - name: Upload aarch64 asset
+        id: upload-release-asset-aarch64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
+          asset_name: yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
+          asset_content_type: application/tar+gzip

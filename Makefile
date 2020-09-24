@@ -1,5 +1,5 @@
 export GO111MODULE=on
-GOPROXY ?= https://proxy.golang.org
+GOPROXY ?= https://gocenter.io,direct
 export GOPROXY
 
 BUILD_TAG = devel
@@ -10,21 +10,21 @@ GO ?= go
 PKGNAME := yay
 PREFIX := /usr/local
 
-MAJORVERSION := 9
-MINORVERSION := 4
-PATCHVERSION := 7
+MAJORVERSION := 10
+MINORVERSION := 0
+PATCHVERSION := 0
 VERSION ?= ${MAJORVERSION}.${MINORVERSION}.${PATCHVERSION}
 
 LOCALEDIR := po
 SYSTEMLOCALEPATH := $(PREFIX)/share/locale/
 
-LANGS := pt en zh_CN
+LANGS := pt pt_BR en es eu fr_FR ja pl_PL ru_RU zh_CN
 POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
-GOFLAGS := -v -mod=mod
-EXTRA_GOFLAGS ?=
+GOFLAGS ?= -v -trimpath -mod=readonly -modcacherw
+EXTRA_GOFLAGS ?= -buildmode=pie
 LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}"
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
@@ -44,11 +44,14 @@ clean:
 	$(GO) clean $(GOFLAGS) -i ./...
 	rm -rf $(BIN) $(PKGNAME)_*
 
+.PHONY: test_lint
+test_lint: test lint
+
 .PHONY: test
 test:
 	$(GO) vet $(GOFLAGS) ./...
-	@test -z "$$(gofmt -l *.go)" || (echo "Files need to be linted. Use make fmt" && false)
-	$(GO) test $(GOFLAGS) --race -covermode=atomic . ./pkg/...
+	@test -z "$$(gofmt -l $(SOURCES))" || (echo "Files need to be linted. Use make fmt" && false)
+	$(GO) test $(GOFLAGS) ./...
 
 .PHONY: build
 build: $(BIN)
@@ -65,44 +68,34 @@ docker-release-all:
 .PHONY: docker-release-armv7h
 docker-release-armv7h:
 	docker build --build-arg="BUILD_TAG=arm32v7-devel" -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
 .PHONY: docker-release-aarch64
 docker-release-aarch64:
 	docker build --build-arg="BUILD_TAG=arm64v8-devel" -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
 .PHONY: docker-release-x86_64
 docker-release-x86_64:
 	docker build --build-arg="BUILD_TAG=devel" -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make release VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
 .PHONY: docker-build
 docker-build:
 	docker build -t yay-$(ARCH):${VERSION} .
-	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make build VERSION=${VERSION}
+	docker run -e="ARCH=$(ARCH)" --name yay-$(ARCH) yay-$(ARCH):${VERSION} make build VERSION=${VERSION} PREFIX=${PREFIX}
 	docker cp yay-$(ARCH):/app/${BIN} $(BIN)
 	docker container rm yay-$(ARCH)
 
-.PHONY: test-vendor
-test-vendor: vendor
-	@diff=$$(git diff vendor/); \
-	if [ -n "$$diff" ]; then \
-		echo "Please run 'make vendor' and commit the result:"; \
-		echo "$${diff}"; \
-		exit 1; \
-	fi;
-
 .PHONY: lint
 lint:
-	golangci-lint run
-	golint -set_exit_status . ./pkg/...
+	golangci-lint run ./...
 
 .PHONY: fmt
 fmt:
@@ -136,15 +129,17 @@ $(BIN): $(SOURCES)
 $(RELEASE_DIR):
 	mkdir $(RELEASE_DIR)
 
-$(PACKAGE): $(BIN) $(RELEASE_DIR)
+$(PACKAGE): $(BIN) $(RELEASE_DIR) ${MOFILES}
 	cp -t $(RELEASE_DIR) ${BIN} doc/${PKGNAME}.8 completions/* ${MOFILES}
 	tar -czvf $(PACKAGE) $(RELEASE_DIR)
 
 locale:
 	xgotext -in . -out po
-	test -f $@ || msginit -l $* -i $< -o $@
-	msgmerge -U $@ $<
-	touch $@
+	for lang in ${LANGS}; do \
+		test -f po/$$lang.po || msginit -l po/$$lang.po -i po/${POTFILE} -o po/$$lang.po \
+		msgmerge -U po/$$lang.po po/${POTFILE}; \
+		touch po/$$lang.po; \
+	done
 
 ${LOCALEDIR}/%.mo: ${LOCALEDIR}/%.po
 	msgfmt $< -o $@

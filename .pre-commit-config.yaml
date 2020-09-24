@@ -1,10 +1,29 @@
 repos:
   - repo: git://github.com/dnephin/pre-commit-golang
-    rev: master
+    rev: v0.3.5
     hooks:
       - id: go-fmt
       - id: go-imports
-        args: [-local=github.com/Jguer/yay/v9/]
+        args: [-local=github.com/Jguer/yay/v10/]
       - id: golangci-lint
       - id: go-unit-tests
       - id: go-build
+
+  - repo: https://github.com/prettier/prettier
+    rev: 2.0.5 # Use the sha or tag you want to point at
+    hooks:
+      - id: prettier
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0 # Use the ref you want to point at
+    hooks:
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/Woile/commitizen
+    rev: v2.1.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]

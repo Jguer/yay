@@ -1,0 +1,9 @@
+*
+!*.go
+!pkg
+!go.mod
+!go.sum
+!Makefile
+!po
+!doc
+!completions

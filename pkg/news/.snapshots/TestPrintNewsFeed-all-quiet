@@ -1,0 +1,11 @@
+[1m[35m2019-12-20[0m[0m [1mXorg cleanup requires manual intervention[0m
+[1m[35m2020-01-04[0m[0m [1mNow using Zstandard instead of xz for package compression[0m
+[1m[35m2020-01-15[0m[0m [1mrsync compatibility[0m
+[1m[35m2020-02-17[0m[0m [1msshd needs restarting after upgrading to openssh-8.2p1[0m
+[1m[35m2020-02-22[0m[0m [1mPlanet Arch Linux migration[0m
+[1m[35m2020-02-24[0m[0m [1mThe Future of the Arch Linux Project Leader[0m
+[1m[35m2020-03-01[0m[0m [1mfirewalld>=0.8.1-2 update requires manual intervention[0m
+[1m[35m2020-03-19[0m[0m [1mhplip 3.20.3-2 update requires manual intervention[0m
+[1m[35m2020-04-13[0m[0m [1mnss>=3.51.1-1 and lib32-nss>=3.51.1-1 updates require manual intervention[0m
+[1m[35m2020-04-14[0m[0m [1mzn_poly 0.9.2-2 update requires manual intervention[0m
+

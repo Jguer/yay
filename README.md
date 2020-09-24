@@ -4,7 +4,11 @@ Yet Another Yogurt - An AUR Helper Written in Go
 
 #### Packages
 
-[![yay](https://img.shields.io/aur/version/yay.svg?label=yay)](https://aur.archlinux.org/packages/yay/) [![yay-bin](https://img.shields.io/aur/version/yay-bin.svg?label=yay-bin)](https://aur.archlinux.org/packages/yay-bin/) [![yay-git](https://img.shields.io/aur/version/yay-git.svg?label=yay-git)](https://aur.archlinux.org/packages/yay-git/) [![GitHub license](https://img.shields.io/github/license/jguer/yay.svg)](https://github.com/Jguer/yay/blob/master/LICENSE)
+[![yay](https://img.shields.io/aur/version/yay?color=1793d1&label=yay&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay/)
+[![yay-bin](https://img.shields.io/aur/version/yay-bin?color=1793d1&label=yay-bin&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay-bin/)
+[![yay-git](https://img.shields.io/aur/version/yay-git?color=1793d1&label=yay-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay-git/)
+![AUR votes](https://img.shields.io/aur/votes/yay?color=333333&style=for-the-badge)
+[![GitHub license](https://img.shields.io/github/license/jguer/yay?color=333333&style=for-the-badge)](https://github.com/Jguer/yay/blob/master/LICENSE)
 
 ## Objectives
 
@@ -36,6 +40,8 @@ If you are migrating from another AUR helper, you can simply install Yay with th
 
 Alternatively, the initial installation of Yay can be done by cloning the PKGBUILD and
 building with makepkg:
+
+Before you begin, make sure you have the `base-devel` package group installed.
 
 ```sh
 git clone https://aur.archlinux.org/yay.git
@@ -108,7 +114,7 @@ If you transition between aur helpers and did not install the devel package usin
 
 #### I want to help out!
 
-Check `CONTRIBUTING.md` for more information.
+Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
 
 ## Examples of Custom Operations
 
@@ -129,6 +135,6 @@ Check `CONTRIBUTING.md` for more information.
 </p>
 
 <p float="left">
-<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-y.png" width="42%"/> 
-<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-ps.png" width="42%"/> 
+<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-y.png" width="42%"/>
+<img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-ps.png" width="42%"/>
 </p>

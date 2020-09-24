@@ -1,0 +1,637 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2020-06-17 17:34+0200\n"
+"PO-Revision-Date: 2020-06-17 17:34+0200\n"
+"Last-Translator: David Revillas <r3v1@pm.me>\n"
+"Language-Team: None\n"
+"Language: eu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.3\n"
+
+#: install.go:563
+msgid " (Build Files Exist)"
+msgstr " (Konpilazio fitxategiak existitzen dira)"
+
+#: install.go:559
+msgid " (Installed)"
+msgstr " (Instalatuta)"
+
+#: depCheck.go:279
+msgid " (Target"
+msgstr " (Helburu"
+
+#: depCheck.go:281
+msgid " (Wanted by: "
+msgstr " (Beharra: "
+
+#: callbacks.go:72
+msgid " Input too long"
+msgstr "Sarrera luzeegia"
+
+#: cmd.go:446
+msgid " [Installed]"
+msgstr " [Instalatuta]"
+
+#: cmd.go:402 install.go:166 install.go:200
+msgid " there is nothing to do"
+msgstr "ez dago ezer egiteko"
+
+#: depCheck.go:170
+msgid "Installing %s will remove:"
+msgstr "%s instalatzeak ezabatuko du:"
+
+#: install.go:583 install.go:658 install.go:665
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgstr ""
+"%s [A]Guztiak [Ab]ortatu [I]nstalatutak [No]Ez instalatutak o (1 2 3, 1-3, "
+"^4)"
+
+#: download.go:273
+msgid "%s already downloaded -- use -f to overwrite"
+msgstr "%s deskargatuta dago -- erabili -f gainidazteko"
+
+#: install.go:1086
+msgid "%s already made -- skipping build"
+msgstr "%s eginda dago jada -- konpilazioa alde batera uzten"
+
+#: pkg/settings/runtime.go:50 pkg/settings/runtime.go:62
+msgid "%s and %s unset"
+msgstr "%s eta %s ezarri gabe"
+
+#: config.go:76
+msgid "%s is not set"
+msgstr "%s ezarri gabe"
+
+#: exec.go:71
+msgid "%s is present."
+msgstr "%s presente dago."
+
+#: install.go:1075
+msgid "%s is up to date -- skipping"
+msgstr "%s eguneratuta dago - alde batera uzten"
+
+#: install.go:1008
+msgid "%s not satisfied, flushing install queue"
+msgstr "%s ez da betetzen, instalazio ilara ezabatzen"
+
+#: install.go:752
+msgid "%s: No changes -- skipping"
+msgstr "%s: Aldaketarik ez -- alde batera uzten"
+
+#: utils.go:48
+msgid "%s: can't use target with option --aur -- skipping"
+msgstr "%s: ezin da helburua --aur aukerarekin erabili -- alde batera uzten"
+
+#: utils.go:43
+msgid "%s: can't use target with option --repo -- skipping"
+msgstr "%s: ezin da helburua --repo aukerarekin erabili -- alde batera uzten"
+
+#: upgrade.go:274
+msgid "%s: ignoring package upgrade (%s => %s)"
+msgstr "%s: paketearen eguneraketa alde batera uzten (%s => %s)"
+
+#: upgrade.go:291
+msgid "%s: local (%s) is newer than AUR (%s)"
+msgstr "%s: pakete lokala (%s) AUR-en (%s) baino berriagoa da"
+
+#: download.go:298
+msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
+msgstr "(%d/%d) PKGBUILD ABS-tik lortuta: %s"
+
+#: install.go:805
+msgid "(%d/%d) Parsing SRCINFO: %s"
+msgstr "(%d/%d) SRCINFO aztertzen: %s"
+
+#: print.go:86 print.go:127
+msgid "(Installed)"
+msgstr "(Instalatuta)"
+
+#: print.go:84 print.go:125
+msgid "(Installed: %s)"
+msgstr "(Instalatuta: %s)"
+
+#: print.go:75
+msgid "(Orphaned)"
+msgstr "(Umezurtz)"
+
+#: print.go:79
+msgid "(Out-of-date: %s)"
+msgstr "(Zaharkituta: %s)"
+
+#: print.go:275
+msgid "AUR URL"
+msgstr "AUR-en URL-a"
+
+#: config.go:77
+msgid "Add %s or %s to your environment variables"
+msgstr "Gehitu %s edo %s zure ingurune aldagaietara"
+
+#: main.go:182
+msgid "Avoid running yay as root/sudo."
+msgstr "yay root/sudo bezala exekutatzea saihestu"
+
+#: print.go:281
+msgid "Check Deps"
+msgstr "Deps egiaztatzen"
+
+#: upgrade.go:167
+msgid "Checking development packages..."
+msgstr "Garapen paketeak egiaztatzen"
+
+#: depCheck.go:137
+msgid "Checking for conflicts..."
+msgstr "Gatazkak bilatzen..."
+
+#: depCheck.go:144
+msgid "Checking for inner conflicts..."
+msgstr "Barneko gatazkak bilatzen..."
+
+#: clean.go:224
+msgid "Cleaning (%d/%d): %s"
+msgstr "(%d/%d) garbitzen: %s"
+
+#: depCheck.go:196
+msgid "Conflicting packages will have to be confirmed manually"
+msgstr "Pakete gatazkatsuak eskuz egiaztatu beharko dira"
+
+#: print.go:283
+msgid "Conflicts With"
+msgstr "Gatazka"
+
+#: depCheck.go:273
+msgid "Could not find all required packages:"
+msgstr "Pakete guztiak ez dira aurkitu:"
+
+#: clean.go:240
+msgid "Deleting (%d/%d): %s"
+msgstr "(%d/%d) ezabatzen: %s"
+
+#: print.go:279
+msgid "Depends On"
+msgstr "Behar du"
+
+#: print.go:273
+msgid "Description"
+msgstr "Deskribapena"
+
+#: install.go:657
+msgid "Diffs to show?"
+msgstr "Diffs-ak erakutsi?"
+
+#: clean.go:91
+msgid "Do you want to remove ALL AUR packages from cache?"
+msgstr "Katxen dauden AUR pakete guztiak kendu nahi dituzu?"
+
+#: clean.go:108
+msgid "Do you want to remove ALL untracked AUR files?"
+msgstr "Kontrolatu gabe AUR fitxategi guztiak kendu nahi dituzu?"
+
+#: clean.go:93
+msgid "Do you want to remove all other AUR packages from cache?"
+msgstr "Katxen dauden beste AUR paketeak kendu nahi dituzu?"
+
+#: install.go:893
+msgid "Downloaded PKGBUILD (%d/%d): %s"
+msgstr "(%d/%d) PKGBUILD-ak lortuta: %s"
+
+#: config.go:80
+msgid "Edit PKGBUILD with?"
+msgstr "¿PKGBUILD-a zerekin editatu?"
+
+#: cmd.go:346
+msgid "Error during AUR search: %s\n"
+msgstr "Zerbait gaizki atera da AUR-en bilatzean: %s\n"
+
+#: print.go:342
+msgid "Explicitly installed packages: %s"
+msgstr "Esplizituki instalatutako paketeak: %s"
+
+#: print.go:287
+msgid "First Submitted"
+msgstr "Lehenengo bidalita"
+
+#: print.go:41
+msgid "Flagged Out Of Date AUR Packages:"
+msgstr "Zaharkiturik bezala markutata dauden AUR paketeak:"
+
+#: vcs.go:147
+msgid "Found git repo: %s"
+msgstr "git biltegia aurkituta: %s"
+
+#: vcs.go:64
+msgid "GenDB finished. No packages were installed"
+msgstr "GenDB amaitu da. Ez da paketerik instalatu"
+
+#: print.go:276
+msgid "Groups"
+msgstr "Taldeak"
+
+#: keys.go:84
+msgid "Import?"
+msgstr "Inportatu?"
+
+#: keys.go:97
+msgid "Importing keys with gpg..."
+msgstr "Gpg-rekin giltzak inportatzen"
+
+#: print.go:271
+msgid "Keywords"
+msgstr "Gako-hitzak"
+
+#: print.go:288
+msgid "Last Modified"
+msgstr "Azken aldaketa"
+
+#: print.go:277
+msgid "Licenses"
+msgstr "Lizentzia"
+
+#: print.go:284
+msgid "Maintainer"
+msgstr "Arduraduna"
+
+#: print.go:280
+msgid "Make Deps"
+msgstr "Deps-ak egin"
+
+#: download.go:281
+msgid "Missing ABS packages:"
+msgstr "Faltan dauden ABS paketeak:"
+
+#: print.go:25
+msgid "Missing AUR Packages:"
+msgstr "Faltan dauden AUR paketeak:"
+
+#: print.go:270
+msgid "Name"
+msgstr "Izena"
+
+#: pkg/text/print.go:50
+msgid "None"
+msgstr "Deus ez"
+
+#: print.go:282
+msgid "Optional Deps"
+msgstr "Hautazko Deps"
+
+#: print.go:33
+msgid "Orphaned AUR Packages:"
+msgstr "Umezurtz geratu diren AUR paketeak:"
+
+#: print.go:291 print.go:293
+msgid "Out-of-date"
+msgstr "Zaharkituta"
+
+#: keys.go:115
+msgid "PGP keys need importing:"
+msgstr "Inportatzeko PGP giltzak:"
+
+#: install.go:874
+msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
+msgstr "PKGBUILD eguneratuta, (%d/%d) alde batera uzten: %s"
+
+#: install.go:664
+msgid "PKGBUILDs to edit?"
+msgstr "Editatzeko PKGBUILD-ak?"
+
+#: print.go:298
+msgid "Package Base ID"
+msgstr "Pakete basearen IDa"
+
+#: print.go:299
+msgid "Package Base"
+msgstr "Pakete basea"
+
+#: install.go:582
+msgid "Packages to cleanBuild?"
+msgstr "cleanBuild egiteko paketeak?"
+
+#: upgrade.go:365
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr ""
+"Kanpoan uzteko paketeak: (eg: \"1 2 3\", \"1-3\", \"^4\" edo repo-ren izena)"
+
+#: cmd.go:350
+msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
+msgstr "Instalatzeko paketeak (eg.: 1 2 3, 1-3 edo ^4)"
+
+#: upgrade.go:362
+msgid "Packages to upgrade."
+msgstr "Eguneratzeko paketeak."
+
+#: print.go:286
+msgid "Popularity"
+msgstr "Ospea"
+
+#: install.go:269 install.go:309
+msgid "Proceed with install?"
+msgstr "Instalatu?"
+
+#: print.go:278
+msgid "Provides"
+msgstr "Hornitu"
+
+#: query.go:509
+msgid "Querying AUR..."
+msgstr "AUR-en bilatzen"
+
+#: install.go:221
+msgid "Remove make dependencies after install?"
+msgstr "Deps ezabatu instalatu ostean?"
+
+#: print.go:495
+msgid "Repository AUR"
+msgstr "AUR biltegia"
+
+#: callbacks.go:46 print.go:269
+msgid "Repository"
+msgstr "Biltegia"
+
+#: upgrade.go:150
+msgid "Searching AUR for updates..."
+msgstr "Eguneratzeak AUR-en bilatzen..."
+
+#: upgrade.go:140
+msgid "Searching databases for updates..."
+msgstr "Datu baseetan eguneratzeak bilatzen ..."
+
+#: cmd.go:347 query.go:194
+msgid "Showing repo packages only"
+msgstr "Biltegietako paketeak soilik erakusten"
+
+#: print.go:300
+msgid "Snapshot URL"
+msgstr "Snapshot-aren URLa"
+
+#: print.go:345
+msgid "Ten biggest packages:"
+msgstr "Hamar pakete handienak:"
+
+#: install.go:481
+msgid "The following packages are not compatible with your architecture:"
+msgstr "Ondorengo paketeak ez dira zure arkitekturarekin bateragarriak:"
+
+#: callbacks.go:36 print.go:492
+msgid "There are %d providers available for %s:\n"
+msgstr "%d hornitzaile eskuragarri %s -entzat:\n"
+
+#: exec.go:72
+msgid "There may be another Pacman instance running. Waiting..."
+msgstr "Baliteke, beste Pacman instantzia exekutzan ari izatea. Zain..."
+
+#: print.go:343
+msgid "Total Size occupied by packages: %s"
+msgstr "Pakete guztien pisuera totala: %s"
+
+#: print.go:341
+msgid "Total foreign installed packages: %s"
+msgstr "Kanpotik instalatu egin diren paketeak: %s"
+
+#: print.go:340
+msgid "Total installed packages: %s"
+msgstr "Instalatu egin diren paketeak: %s"
+
+#: install.go:488
+msgid "Try to build them anyway?"
+msgstr "Saiatu konpilatzen hala ere?"
+
+#: print.go:274
+msgid "URL"
+msgstr "URL"
+
+#: print.go:272
+msgid "Version"
+msgstr "Bertsio"
+
+#: print.go:285
+msgid "Votes"
+msgstr "Botoak"
+
+#: print.go:338
+msgid "Yay version v%s"
+msgstr "Yay bertsioa v%s"
+
+#: install.go:583 install.go:658 install.go:665
+msgid "[N]one"
+msgstr "I[N]or ez"
+
+#: keys.go:122
+msgid "%s, required by: %s"
+msgstr "%s, beharrezkoa egiteko: %s"
+
+#: clean.go:96
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Konpilazio bidea:"
+
+#: callbacks.go:56 print.go:505
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Idatzi zenbaki bat (lehenetsia=1): "
+
+#: depCheck.go:153
+msgid ""
+"\n"
+"Inner conflicts found:"
+msgstr ""
+"\n"
+"Barne gatazkak aurkitutak:"
+
+#: depCheck.go:167
+msgid ""
+"\n"
+"Package conflicts found:"
+msgstr ""
+"\n"
+"Pakete gaztakak aurkitutak:"
+
+#: install.go:270 install.go:310 install.go:489 install.go:593 install.go:676
+msgid "aborting due to user"
+msgstr "erabiltzailea dela eta bertan behera uzten"
+
+#: install.go:515
+msgid "cannot find package name: %v"
+msgstr "ezin da paketearen izena bilatu: %v"
+
+#: install.go:1048 install.go:1120
+msgid "could not find PKGDEST for: %s"
+msgstr "ezin da PKGDEST aurkitu %s -entzat"
+
+#: install.go:792
+msgid "editor did not exit successfully, aborting: %s"
+msgstr "editorea ez da behar bezala irten, bertan behera uzten: %s"
+
+#: download.go:84 download.go:109
+msgid "error cloning %s: %s"
+msgstr "%s klonatzen akatsa: %s"
+
+#: install.go:924
+msgid "error downloading sources: %s"
+msgstr "iturriak deskargatzean akatsa: %s"
+
+#: query.go:193
+msgid "error during AUR search: %s"
+msgstr "AUR bilaketa egiterakoan akatsa: %s"
+
+#: download.go:96 download.go:121
+msgid "error fetching %s: %s"
+msgstr "%s lortzen akatsa: %s"
+
+#: install.go:333 install.go:442
+msgid "error installing repo packages"
+msgstr "biltegitik instalatzerakoan akatsa"
+
+#: install.go:1032 install.go:1072 install.go:1083 install.go:1095
+msgid "error making: %s"
+msgstr "konpilazio akatsa: %s"
+
+#: download.go:135
+msgid "error merging %s: %s"
+msgstr "akatsa  %s bateratzean: %s"
+
+#: download.go:89 download.go:114
+msgid "error reading %s"
+msgstr "%s irakurtzen akatsa"
+
+#: install.go:75
+msgid "error refreshing databases"
+msgstr "datu-baseak eguneratzerakoan akatsa akatsa"
+
+#: clean.go:228 download.go:130
+msgid "error resetting %s: %s"
+msgstr "%s-n reset egitean huts egin du: %s"
+
+#: main.go:68
+msgid "failed to create BuildDir directory '%s': %s"
+msgstr "(BuildDir) '%s' konpilazio karpeta egiterakoan huts egin du: %s"
+
+#: pkg/settings/runtime.go:79
+msgid "failed to create config directory '%s': %s"
+msgstr "'%s' konfigurazio karpeta egiterakoan huts egin du: %s"
+
+#: download.go:288
+msgid "failed to get pkgbuild: %s: %s"
+msgstr "PKGBUILD lortzean huts egin du: %s: %s"
+
+#: download.go:296
+msgid "failed to link %s: %s"
+msgstr "%s link-a sortzerakoan huts egin du: %s"
+
+#: main.go:29
+msgid "failed to open config file '%s': %s"
+msgstr "'%s' konfigurazio fitxategia irekitzean huts egin du: %s"
+
+#: main.go:51
+msgid "failed to open vcs file '%s': %s"
+msgstr "'%s' VCS fitxategia irekitzean huts egin du: %s"
+
+#: install.go:810
+msgid "failed to parse %s -- skipping: %s"
+msgstr "%s irakurtzean huts egin du-- alde batera uzten: %s"
+
+#: install.go:813
+msgid "failed to parse %s: %s"
+msgstr "%s irakurtzean huts egin du: %s"
+
+#: main.go:36
+msgid "failed to read config file '%s': %s"
+msgstr "'%s' konfigurazio fitxategia irakurtzean huts egin du: %s"
+
+#: main.go:58
+msgid "failed to read vcs file '%s': %s"
+msgstr "'%s' VCS fitxategia irakurtzean huts egin du: %s"
+
+#: cmd.go:360 config.go:147 print.go:521
+msgid "input too long"
+msgstr "sarrera luzeegia"
+
+#: callbacks.go:82 print.go:531
+msgid "invalid number: %s"
+msgstr "baliogabeko zenbakia: %s"
+
+#: pkg/settings/parser.go:144
+msgid "invalid option '%s'"
+msgstr "baliogabeko aukera '%s'"
+
+#: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
+msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
+msgstr ""
+"baliogabeako ordenatzeko modua .' yay -Y --bottomup --save' -rekin zuzendu"
+
+#: callbacks.go:87 print.go:536
+msgid "invalid value: %d is not between %d and %d"
+msgstr "baliogabeko balorea: %d ez dago %d eta %d artean"
+
+#: keys.go:110
+msgid "no keys to import"
+msgstr "inportatzeko giltzarik ez"
+
+#: cmd.go:323
+msgid "no packages match search"
+msgstr "ningún paquete corresponde a la búsqueda "
+
+#: config.go:112
+msgid "no"
+msgstr "ez"
+
+#: pkg/settings/parser.go:134
+msgid "only one operation may be used at a time"
+msgstr "aldi berean operazio bakarra erabil daiteke"
+
+#: print.go:430
+msgid "package '%s' was not found"
+msgstr "'%s' paketea ez da aurkitu"
+
+#: depCheck.go:193
+msgid "package conflicts can not be resolved with noconfirm, aborting"
+msgstr ""
+"paketeen gatazkak ezin dira noconfirm -ekin konpondu, alde batera uzten"
+
+#: keys.go:101
+msgid "problem importing keys"
+msgstr "Arazoak gakoak inportatzean"
+
+#: install.go:178
+msgid "refusing to install AUR packages as root, aborting"
+msgstr "AUR paketeak root gisa instalatzeari uko egiten, alde batera uzten"
+
+#: clean.go:116
+msgid "removing AUR packages from cache..."
+msgstr "AUR paketeak cache-tik kentzea ..."
+
+#: clean.go:188 clean.go:216
+msgid "removing untracked AUR files from cache..."
+msgstr "ARA fitxategiak cache-tik kentzen ..."
+
+#: install.go:1129
+msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
+msgstr "%s -ko PKGDEST-a makepkg-ek behar du, baina ez da existitzen: %s"
+
+#: main.go:146
+msgid "unable to CreateHandle: %s"
+msgstr "ezin da CreateHandle: %s"
+
+#: cmd.go:177
+msgid "unhandled operation"
+msgstr "kontrolik gabeko eragiketa"
+
+#: cmd.go:443
+msgid "unknown-version"
+msgstr "bertsio ezezaguna"
+
+#: config.go:111
+msgid "yes"
+msgstr "bai"
+
+#~ msgid "failed to create cache directory '%s': %s"
+#~ msgstr "'%s' cache karpeta egiterakoan huts egin du: %s"

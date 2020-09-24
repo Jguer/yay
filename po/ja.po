@@ -1,0 +1,632 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"PO-Revision-Date: 2020-07-13 21:09+0900\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 2.3\n"
+"POT-Creation-Date: \n"
+"Last-Translator: Yamada Hayao\n"
+"Language: ja\n"
+
+#: install.go:563
+msgid " (Build Files Exist)"
+msgstr " (ビルドファイルが存在)"
+
+#: install.go:559
+msgid " (Installed)"
+msgstr " (インストール済み)"
+
+#: depCheck.go:279
+msgid " (Target"
+msgstr " (対象"
+
+#: depCheck.go:281
+msgid " (Wanted by: "
+msgstr " (必要としているパッケージ: "
+
+#: callbacks.go:72
+msgid " Input too long"
+msgstr " 入力が長すぎます"
+
+#: cmd.go:446
+msgid " [Installed]"
+msgstr " [インストール済み]"
+
+#: cmd.go:402 install.go:166 install.go:200
+msgid " there is nothing to do"
+msgstr " 何もすることがありません"
+
+#: depCheck.go:170
+msgid "Installing %s will remove:"
+msgstr "%s をインストールすることで削除されるパッケージ:"
+
+#: install.go:583 install.go:658 install.go:665
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgstr "%s [A]全て [Ab]中止 [I]インストール済み [No]未インストール または (1 2 3, 1-3, ^4)"
+
+#: download.go:273
+msgid "%s already downloaded -- use -f to overwrite"
+msgstr "%s は既にダウンロードされています -- -f で上書きできます"
+
+#: install.go:1086
+msgid "%s already made -- skipping build"
+msgstr "%s は既に作成済みです -- ビルドをスキップします"
+
+#: pkg/settings/runtime.go:50 pkg/settings/runtime.go:62
+msgid "%s and %s unset"
+msgstr "%s と %s が設定されていません"
+
+#: config.go:76
+msgid "%s is not set"
+msgstr "%s が設定されていません"
+
+#: exec.go:71
+msgid "%s is present."
+msgstr "%s が存在します。"
+
+#: install.go:1075
+msgid "%s is up to date -- skipping"
+msgstr "%s は最新です -- スキップ"
+
+#: install.go:1008
+msgid "%s not satisfied, flushing install queue"
+msgstr "%s が満たされていません、インストールキューを消去"
+
+#: install.go:752
+msgid "%s: No changes -- skipping"
+msgstr "%s: 変更なし -- スキップ"
+
+#: utils.go:48
+msgid "%s: can't use target with option --aur -- skipping"
+msgstr "%s: 対象に --aur オプションを使うことができません -- スキップ"
+
+#: utils.go:43
+msgid "%s: can't use target with option --repo -- skipping"
+msgstr "%s: 対象に --repo オプションを使うことができません -- スキップ"
+
+#: upgrade.go:274
+msgid "%s: ignoring package upgrade (%s => %s)"
+msgstr "%s: パッケージのアップグレードを無視 (%s => %s)"
+
+#: upgrade.go:291
+msgid "%s: local (%s) is newer than AUR (%s)"
+msgstr "%s: ローカルのパッケージ (%s) は AUR (%s) よりも新しいバージョンです"
+
+#: download.go:298
+msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
+msgstr "(%d/%d) ABS から PKGBUILD をダウンロード: %s"
+
+#: install.go:805
+msgid "(%d/%d) Parsing SRCINFO: %s"
+msgstr "(%d/%d) SRCINFO を解析中: %s"
+
+#: print.go:86 print.go:127
+msgid "(Installed)"
+msgstr "(インストール済み)"
+
+#: print.go:84 print.go:125
+msgid "(Installed: %s)"
+msgstr "(インストール済み: %s)"
+
+#: print.go:75
+msgid "(Orphaned)"
+msgstr "(メンテナ不在)"
+
+#: print.go:79
+msgid "(Out-of-date: %s)"
+msgstr "(古いバージョン: %s)"
+
+#: print.go:275
+msgid "AUR URL"
+msgstr "AUR URL"
+
+#: config.go:77
+msgid "Add %s or %s to your environment variables"
+msgstr "%s または %s を環境変数に追加してください"
+
+#: main.go:182
+msgid "Avoid running yay as root/sudo."
+msgstr "yay を root や sudo で実行しないでください。"
+
+#: print.go:281
+msgid "Check Deps"
+msgstr "チェック時の依存パッケージ"
+
+#: upgrade.go:167
+msgid "Checking development packages..."
+msgstr "開発パッケージを確認..."
+
+#: depCheck.go:137
+msgid "Checking for conflicts..."
+msgstr "衝突を確認..."
+
+#: depCheck.go:144
+msgid "Checking for inner conflicts..."
+msgstr "内部衝突を確認..."
+
+#: clean.go:224
+msgid "Cleaning (%d/%d): %s"
+msgstr "消去 (%d/%d): %s"
+
+#: depCheck.go:196
+msgid "Conflicting packages will have to be confirmed manually"
+msgstr "衝突するパッケージを手動で確認する必要があります"
+
+#: print.go:283
+msgid "Conflicts With"
+msgstr "衝突するパッケージ"
+
+#: depCheck.go:273
+msgid "Could not find all required packages:"
+msgstr "必要なパッケージを全て確認することができません:"
+
+#: clean.go:240
+msgid "Deleting (%d/%d): %s"
+msgstr "削除 (%d/%d): %s"
+
+#: print.go:279
+msgid "Depends On"
+msgstr "依存するパッケージ"
+
+#: print.go:273
+msgid "Description"
+msgstr "説明"
+
+#: install.go:657
+msgid "Diffs to show?"
+msgstr "差異を表示しますか？"
+
+#: clean.go:91
+msgid "Do you want to remove ALL AUR packages from cache?"
+msgstr "キャッシュから全ての AUR パッケージを削除しますか？"
+
+#: clean.go:108
+msgid "Do you want to remove ALL untracked AUR files?"
+msgstr "未追跡の AUR ファイルを全て削除しますか？"
+
+#: clean.go:93
+msgid "Do you want to remove all other AUR packages from cache?"
+msgstr "キャッシュから他の全ての AUR パッケージを削除しますか？"
+
+#: install.go:893
+msgid "Downloaded PKGBUILD (%d/%d): %s"
+msgstr "PKGBUILD のダウンロード (%d/%d): %s"
+
+#: config.go:80
+msgid "Edit PKGBUILD with?"
+msgstr "PKGBUILD をどのエディタで編集しますか？"
+
+#: cmd.go:346
+msgid "Error during AUR search: %s\n"
+msgstr "AUR 検索時のエラー: %s\n"
+
+#: print.go:342
+msgid "Explicitly installed packages: %s"
+msgstr "明示的にインストールしたパッケージ: %s"
+
+#: print.go:287
+msgid "First Submitted"
+msgstr "最初の投稿"
+
+#: print.go:41
+msgid "Flagged Out Of Date AUR Packages:"
+msgstr "古いバージョンのフラグが立てられた AUR パッケージ:"
+
+#: vcs.go:147
+msgid "Found git repo: %s"
+msgstr "git リポジトリを発見しました: %s"
+
+#: vcs.go:64
+msgid "GenDB finished. No packages were installed"
+msgstr "GenDB が完了しました。パッケージのインストールは行われません"
+
+#: print.go:276
+msgid "Groups"
+msgstr "グループ"
+
+#: keys.go:84
+msgid "Import?"
+msgstr "インポートしますか？"
+
+#: keys.go:97
+msgid "Importing keys with gpg..."
+msgstr "鍵を gpg でインポートします..."
+
+#: print.go:271
+msgid "Keywords"
+msgstr "キーワード"
+
+#: print.go:288
+msgid "Last Modified"
+msgstr "最終更新"
+
+#: print.go:277
+msgid "Licenses"
+msgstr "ライセンス"
+
+#: print.go:284
+msgid "Maintainer"
+msgstr "メンテナ"
+
+#: print.go:280
+msgid "Make Deps"
+msgstr "ビルド時の依存パッケージ"
+
+#: download.go:281
+msgid "Missing ABS packages:"
+msgstr "存在しない ABS パッケージ:"
+
+#: print.go:25
+msgid "Missing AUR Packages:"
+msgstr "存在しない AUR パッケージ:"
+
+#: print.go:270
+msgid "Name"
+msgstr "名前"
+
+#: pkg/text/print.go:50
+msgid "None"
+msgstr "なし"
+
+#: print.go:282
+msgid "Optional Deps"
+msgstr "任意の依存パッケージ"
+
+#: print.go:33
+msgid "Orphaned AUR Packages:"
+msgstr "メンテナが存在しない AUR パッケージ:"
+
+#: print.go:291 print.go:293
+msgid "Out-of-date"
+msgstr "古いバージョン"
+
+#: keys.go:115
+msgid "PGP keys need importing:"
+msgstr "PGP 鍵をインポートする必要があります:"
+
+#: install.go:874
+msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
+msgstr "PKGBUILD は最新です、スキップ (%d/%d): %s"
+
+#: install.go:664
+msgid "PKGBUILDs to edit?"
+msgstr "PKGBUILD を編集しますか？"
+
+#: print.go:298
+msgid "Package Base ID"
+msgstr "パッケージベース ID"
+
+#: print.go:299
+msgid "Package Base"
+msgstr "パッケージベース"
+
+#: install.go:582
+msgid "Packages to cleanBuild?"
+msgstr "パッケージをクリーンビルドしますか？"
+
+#: upgrade.go:365
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr "除外するパッケージ: (例: \"1 2 3\", \"1-3\", \"^4\" またはリポジトリ名)"
+
+#: cmd.go:350
+msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
+msgstr "インストールするパッケージ (例: 1 2 3, 1-3 または ^4)"
+
+#: upgrade.go:362
+msgid "Packages to upgrade."
+msgstr "アップグレードするパッケージ。"
+
+#: print.go:286
+msgid "Popularity"
+msgstr "人気度"
+
+#: install.go:269 install.go:309
+msgid "Proceed with install?"
+msgstr "インストールを実行しますか？"
+
+#: print.go:278
+msgid "Provides"
+msgstr "提供"
+
+#: query.go:509
+msgid "Querying AUR..."
+msgstr "AUR を検索..."
+
+#: install.go:221
+msgid "Remove make dependencies after install?"
+msgstr "ビルド時の依存パッケージをインストール後に削除しますか？"
+
+#: print.go:495
+msgid "Repository AUR"
+msgstr "リポジトリ AUR"
+
+#: callbacks.go:46 print.go:269
+msgid "Repository"
+msgstr "リポジトリ"
+
+#: upgrade.go:150
+msgid "Searching AUR for updates..."
+msgstr "AUR からアップデートを検索..."
+
+#: upgrade.go:140
+msgid "Searching databases for updates..."
+msgstr "データベースからアップデートを検索..."
+
+#: cmd.go:347 query.go:194
+msgid "Showing repo packages only"
+msgstr "リポジトリのパッケージだけを表示"
+
+#: print.go:300
+msgid "Snapshot URL"
+msgstr "スナップショット URL"
+
+#: print.go:345
+msgid "Ten biggest packages:"
+msgstr "最も巨大な10のパッケージ:"
+
+#: install.go:481
+msgid "The following packages are not compatible with your architecture:"
+msgstr "以下のパッケージはあなたの使っているアーキテクチャと互換性がありません:"
+
+#: callbacks.go:36 print.go:492
+msgid "There are %d providers available for %s:\n"
+msgstr "%d 個のパッケージが %s を提供しています:\n"
+
+#: exec.go:72
+msgid "There may be another Pacman instance running. Waiting..."
+msgstr "他の Pacman インスタンスが実行中です。待機します..."
+
+#: print.go:343
+msgid "Total Size occupied by packages: %s"
+msgstr "パッケージによって使用される合計容量: %s"
+
+#: print.go:341
+msgid "Total foreign installed packages: %s"
+msgstr "全ての外部からインストールされたパッケージ: %s"
+
+#: print.go:340
+msgid "Total installed packages: %s"
+msgstr "全てのインストールされたパッケージ: %s"
+
+#: install.go:488
+msgid "Try to build them anyway?"
+msgstr "それでもパッケージをビルドしますか？"
+
+#: print.go:274
+msgid "URL"
+msgstr "URL"
+
+#: print.go:272
+msgid "Version"
+msgstr "バージョン"
+
+#: print.go:285
+msgid "Votes"
+msgstr "投票"
+
+#: print.go:338
+msgid "Yay version v%s"
+msgstr "Yay バージョン v%s"
+
+#: install.go:583 install.go:658 install.go:665
+msgid "[N]one"
+msgstr "[N]なし"
+
+#: keys.go:122
+msgid "%s, required by: %s"
+msgstr "%s、必要とするパッケージ: %s"
+
+#: clean.go:96
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"ビルドディレクトリ:"
+
+#: callbacks.go:56 print.go:505
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"数字を入力してください (デフォルト=1): "
+
+#: depCheck.go:153
+msgid ""
+"\n"
+"Inner conflicts found:"
+msgstr ""
+"\n"
+"内部衝突が存在します:"
+
+#: depCheck.go:167
+msgid ""
+"\n"
+"Package conflicts found:"
+msgstr ""
+"\n"
+"パッケージの衝突が存在します:"
+
+#: install.go:270 install.go:310 install.go:489 install.go:593 install.go:676
+msgid "aborting due to user"
+msgstr "ユーザーによって中止"
+
+#: install.go:515
+msgid "cannot find package name: %v"
+msgstr "パッケージの名前を見つけることができません: %v"
+
+#: install.go:1048 install.go:1120
+msgid "could not find PKGDEST for: %s"
+msgstr "PKGDEST を見つけることができません: %s"
+
+#: install.go:792
+msgid "editor did not exit successfully, aborting: %s"
+msgstr "エディタが正しく終了しませんでした、中止: %s"
+
+#: download.go:84 download.go:109
+msgid "error cloning %s: %s"
+msgstr "%s の複製時にエラー: %s"
+
+#: install.go:924
+msgid "error downloading sources: %s"
+msgstr "ソースのダウンロード時にエラー: %s"
+
+#: query.go:193
+msgid "error during AUR search: %s"
+msgstr "AUR の検索時にエラー: %s"
+
+#: download.go:96 download.go:121
+msgid "error fetching %s: %s"
+msgstr "%s の取得時にエラー: %s"
+
+#: install.go:333 install.go:442
+msgid "error installing repo packages"
+msgstr "リポジトリのパッケージのインストール時にエラー"
+
+#: install.go:1032 install.go:1072 install.go:1083 install.go:1095
+msgid "error making: %s"
+msgstr "ビルド時にエラー: %s"
+
+#: download.go:135
+msgid "error merging %s: %s"
+msgstr "%s のマージ時にエラー: %s"
+
+#: download.go:89 download.go:114
+msgid "error reading %s"
+msgstr "%s の読み取り時にエラー"
+
+#: install.go:75
+msgid "error refreshing databases"
+msgstr "データベースの更新時にエラー"
+
+#: clean.go:228 download.go:130
+msgid "error resetting %s: %s"
+msgstr "%s の再設定時にエラー: %s"
+
+#: main.go:68
+msgid "failed to create BuildDir directory '%s': %s"
+msgstr "BuildDir ディレクトリ '%s' の作成に失敗: %s"
+
+#: pkg/settings/runtime.go:79
+msgid "failed to create config directory '%s': %s"
+msgstr "設定ディレクトリ '%s' の作成に失敗: %s"
+
+#: download.go:288
+msgid "failed to get pkgbuild: %s: %s"
+msgstr "pkgbuild の取得に失敗: %s: %s"
+
+#: download.go:296
+msgid "failed to link %s: %s"
+msgstr "%s のリンクに失敗: %s"
+
+#: main.go:29
+msgid "failed to open config file '%s': %s"
+msgstr "設定ファイル '%s' のオープンに失敗: %s"
+
+#: main.go:51
+msgid "failed to open vcs file '%s': %s"
+msgstr "vcs ファイル '%s' のオープンに失敗: %s"
+
+#: install.go:810
+msgid "failed to parse %s -- skipping: %s"
+msgstr "%s のパースに失敗 -- スキップ: %s"
+
+#: install.go:813
+msgid "failed to parse %s: %s"
+msgstr "%s のパースに失敗: %s"
+
+#: main.go:36
+msgid "failed to read config file '%s': %s"
+msgstr "設定ファイル '%s' の読み込みに失敗: %s"
+
+#: main.go:58
+msgid "failed to read vcs file '%s': %s"
+msgstr "vcs ファイル '%s' の読み込みに失敗: %s"
+
+#: cmd.go:360 config.go:147 print.go:521
+msgid "input too long"
+msgstr "入力が長すぎます"
+
+#: callbacks.go:82 print.go:531
+msgid "invalid number: %s"
+msgstr "不正な数字: %s"
+
+#: pkg/settings/parser.go:144
+msgid "invalid option '%s'"
+msgstr "不正なオプション '%s'"
+
+#: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
+msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
+msgstr "不正なソートモードです。yay -Y --bottomup --save で修正してください"
+
+#: callbacks.go:87 print.go:536
+msgid "invalid value: %d is not between %d and %d"
+msgstr "不正な値: %d は %d と %d の間にありません"
+
+#: keys.go:110
+msgid "no keys to import"
+msgstr "インポートする鍵がありません"
+
+#: cmd.go:323
+msgid "no packages match search"
+msgstr "検索にマッチするパッケージがありません"
+
+#: config.go:112
+msgid "no"
+msgstr "no"
+
+#: pkg/settings/parser.go:134
+msgid "only one operation may be used at a time"
+msgstr "一度に使用できる操作はひとつだけです"
+
+#: print.go:430
+msgid "package '%s' was not found"
+msgstr "パッケージ '%s' が見つかりませんでした"
+
+#: depCheck.go:193
+msgid "package conflicts can not be resolved with noconfirm, aborting"
+msgstr "パッケージの衝突は noconfirm で解決できません、中止"
+
+#: keys.go:101
+msgid "problem importing keys"
+msgstr "鍵のインポート時にエラー"
+
+#: install.go:178
+msgid "refusing to install AUR packages as root, aborting"
+msgstr "AUR パッケージの root によるインストールを拒否します、中止"
+
+#: clean.go:116
+msgid "removing AUR packages from cache..."
+msgstr "キャッシュから AUR パッケージを削除..."
+
+#: clean.go:188 clean.go:216
+msgid "removing untracked AUR files from cache..."
+msgstr "キャッシュから未追跡の AUR ファイルを削除..."
+
+#: install.go:1129
+msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
+msgstr "%s の PKGDEST が makepkg によって指定されていますが存在しません: %s"
+
+#: main.go:146
+msgid "unable to CreateHandle: %s"
+msgstr "ハンドルを作成できません: %s"
+
+#: cmd.go:177
+msgid "unhandled operation"
+msgstr "ハンドルが存在しない操作"
+
+#: cmd.go:443
+msgid "unknown-version"
+msgstr "不明なバージョン"
+
+#: config.go:111
+msgid "yes"
+msgstr "yes"
+
+msgid "failed to create cache directory '%s': %s"
+msgstr "キャッシュディレクトリ '%s' の作成に失敗: %s"

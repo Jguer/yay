@@ -1,0 +1,21 @@
+name: Tag
+on:
+  push:
+    paths-ignore:
+      - ".github/**"
+      - "README.md"
+      - ".gitignore"
+    branches:
+      - master
+
+jobs:
+  tag:
+    name: Tag release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mathieudutour/github-tag-action@v4.5
+        id: tag_version
+        with:
+          github_token: ${{ secrets.PAT }}
+          tag_prefix: "v"
