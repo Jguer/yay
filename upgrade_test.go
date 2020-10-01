@@ -13,7 +13,8 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v10/pkg/db"
+	alpm "github.com/Jguer/go-alpm/v2"
+
 	"github.com/Jguer/yay/v10/pkg/db/mock"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
@@ -22,7 +23,7 @@ import (
 
 func Test_upAUR(t *testing.T) {
 	type args struct {
-		remote     []db.RepoPackage
+		remote     []alpm.IPackage
 		aurdata    map[string]*rpc.Pkg
 		timeUpdate bool
 	}
@@ -34,7 +35,7 @@ func Test_upAUR(t *testing.T) {
 		{
 			name: "No Updates",
 			args: args{
-				remote: []db.RepoPackage{
+				remote: []alpm.IPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
 					&mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
 					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
@@ -50,7 +51,7 @@ func Test_upAUR(t *testing.T) {
 		{
 			name: "Simple Update",
 			args: args{
-				remote:     []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
+				remote:     []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.1.0", Name: "hello"}},
 				timeUpdate: false,
 			},
@@ -59,7 +60,7 @@ func Test_upAUR(t *testing.T) {
 		{
 			name: "Time Update",
 			args: args{
-				remote:     []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PBuildDate: time.Now()}},
+				remote:     []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PBuildDate: time.Now()}},
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello", LastModified: int(time.Now().AddDate(0, 0, 2).Unix())}},
 				timeUpdate: true,
 			},
@@ -120,7 +121,7 @@ func Test_upDevel(t *testing.T) {
 	}
 
 	type args struct {
-		remote  []db.RepoPackage
+		remote  []alpm.IPackage
 		aurdata map[string]*rpc.Pkg
 		cached  vcs.InfoStore
 	}
@@ -137,7 +138,7 @@ func Test_upDevel(t *testing.T) {
 					Runner:     config.Runtime.CmdRunner,
 					CmdBuilder: config.Runtime.CmdBuilder,
 				},
-				remote: []db.RepoPackage{
+				remote: []alpm.IPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
 					&mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
 					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
@@ -192,7 +193,7 @@ func Test_upDevel(t *testing.T) {
 						},
 					},
 				},
-				remote: []db.RepoPackage{
+				remote: []alpm.IPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
 					&mock.Package{PName: "hello2", PVersion: "3.0.0"},
 					&mock.Package{PName: "hello4", PVersion: "4.0.0"},
@@ -235,7 +236,7 @@ func Test_upDevel(t *testing.T) {
 						},
 					},
 				},
-				remote:  []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
+				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
 			want: upgrade.UpSlice{},
@@ -257,7 +258,7 @@ func Test_upDevel(t *testing.T) {
 						},
 					},
 				},
-				remote:  []db.RepoPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true}},
+				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
 			want: upgrade.UpSlice{},

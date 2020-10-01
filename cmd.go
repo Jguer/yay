@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/completion"

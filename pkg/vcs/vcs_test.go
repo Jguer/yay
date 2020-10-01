@@ -246,9 +246,12 @@ func TestInfoStore_Update(t *testing.T) {
 		fields fields
 		args   args
 	}{
-		{name: "simple",
-			args: args{pkgName: "hello",
-				sources: []gosrc.ArchString{{Value: "git://github.com/jguer/yay.git#branch=master"}}},
+		{
+			name: "simple",
+			args: args{
+				pkgName: "hello",
+				sources: []gosrc.ArchString{{Value: "git://github.com/jguer/yay.git#branch=master"}},
+			},
 			fields: fields{
 				OriginsByPackage: make(map[string]OriginInfoByURL),
 				CmdBuilder:       &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
@@ -305,7 +308,8 @@ func TestInfoStore_Remove(t *testing.T) {
 		fields fields
 		args   args
 	}{
-		{name: "simple",
+		{
+			name: "simple",
 			args: args{pkgs: []string{"a", "c"}},
 			fields: fields{
 				OriginsByPackage: map[string]OriginInfoByURL{

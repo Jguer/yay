@@ -3,43 +3,30 @@ package db
 import (
 	"time"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/go-alpm/v2"
 
 	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
-type RepoPackage interface {
-	Base() string
-	BuildDate() time.Time
-	DB() alpm.IDB
-	Description() string
-	ISize() int64
-	Name() string
-	ShouldIgnore() bool
-	Size() int64
-	Version() string
-	Reason() alpm.PkgReason
-}
-
 type Executor interface {
 	AlpmArch() (string, error)
-	BiggestPackages() []RepoPackage
+	BiggestPackages() []alpm.IPackage
 	Cleanup()
 	IsCorrectVersionInstalled(string, string) bool
 	LastBuildTime() time.Time
-	LocalPackage(string) RepoPackage
-	LocalPackages() []RepoPackage
+	LocalPackage(string) alpm.IPackage
+	LocalPackages() []alpm.IPackage
 	LocalSatisfierExists(string) bool
-	PackageConflicts(RepoPackage) []alpm.Depend
-	PackageDepends(RepoPackage) []alpm.Depend
-	SatisfierFromDB(string, string) RepoPackage
-	PackageGroups(RepoPackage) []string
-	PackageOptionalDepends(RepoPackage) []alpm.Depend
-	PackageProvides(RepoPackage) []alpm.Depend
-	PackagesFromGroup(string) []RepoPackage
+	PackageConflicts(alpm.IPackage) []alpm.Depend
+	PackageDepends(alpm.IPackage) []alpm.Depend
+	SatisfierFromDB(string, string) alpm.IPackage
+	PackageGroups(alpm.IPackage) []string
+	PackageOptionalDepends(alpm.IPackage) []alpm.Depend
+	PackageProvides(alpm.IPackage) []alpm.Depend
+	PackagesFromGroup(string) []alpm.IPackage
 	RefreshHandle() error
 	RepoUpgrades(bool) (upgrade.UpSlice, error)
-	SyncPackages(...string) []RepoPackage
-	SyncSatisfier(string) RepoPackage
+	SyncPackages(...string) []alpm.IPackage
+	SyncSatisfier(string) alpm.IPackage
 	SyncSatisfierExists(string) bool
 }

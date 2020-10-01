@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
@@ -22,7 +22,7 @@ import (
 type aurQuery []rpc.Pkg
 
 // Query holds the results of a repository search.
-type repoQuery []db.RepoPackage
+type repoQuery []alpm.IPackage
 
 func (s repoQuery) Reverse() {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {

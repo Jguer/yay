@@ -5,21 +5,22 @@ import (
 
 	rpc "github.com/mikkeloscar/aur"
 
-	"github.com/Jguer/yay/v10/pkg/db"
+	alpm "github.com/Jguer/go-alpm/v2"
+
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 type Order struct {
 	Aur     []Base
-	Repo    []db.RepoPackage
+	Repo    []alpm.IPackage
 	Runtime stringset.StringSet
 }
 
 func makeOrder() *Order {
 	return &Order{
 		make([]Base, 0),
-		make([]db.RepoPackage, 0),
+		make([]alpm.IPackage, 0),
 		make(stringset.StringSet),
 	}
 }
@@ -78,7 +79,7 @@ func (do *Order) orderPkgAur(pkg *rpc.Pkg, dp *Pool, runtime bool) {
 	do.Aur = append(do.Aur, Base{pkg})
 }
 
-func (do *Order) orderPkgRepo(pkg db.RepoPackage, dp *Pool, runtime bool) {
+func (do *Order) orderPkgRepo(pkg alpm.IPackage, dp *Pool, runtime bool) {
 	if runtime {
 		do.Runtime.Set(pkg.Name())
 	}

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/db"
@@ -99,10 +99,10 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 }
 
 func upDevel(
-	remote []db.RepoPackage,
+	remote []alpm.IPackage,
 	aurdata map[string]*rpc.Pkg,
 	localCache *vcs.InfoStore) upgrade.UpSlice {
-	toUpdate := make([]db.RepoPackage, 0, len(aurdata))
+	toUpdate := make([]alpm.IPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)
 
 	var mux1, mux2 sync.Mutex
@@ -155,7 +155,7 @@ func upDevel(
 	return toUpgrade
 }
 
-func printIgnoringPackage(pkg db.RepoPackage, newPkgVersion string) {
+func printIgnoringPackage(pkg alpm.IPackage, newPkgVersion string) {
 	left, right := upgrade.GetVersionDiff(pkg.Version(), newPkgVersion)
 
 	text.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
@@ -166,7 +166,7 @@ func printIgnoringPackage(pkg db.RepoPackage, newPkgVersion string) {
 
 // upAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func upAUR(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg, timeUpdate bool) upgrade.UpSlice {
+func upAUR(remote []alpm.IPackage, aurdata map[string]*rpc.Pkg, timeUpdate bool) upgrade.UpSlice {
 	toUpgrade := make(upgrade.UpSlice, 0)
 
 	for _, pkg := range remote {
@@ -195,7 +195,7 @@ func upAUR(remote []db.RepoPackage, aurdata map[string]*rpc.Pkg, timeUpdate bool
 }
 
 func printLocalNewerThanAUR(
-	remote []db.RepoPackage, aurdata map[string]*rpc.Pkg) {
+	remote []alpm.IPackage, aurdata map[string]*rpc.Pkg) {
 	for _, pkg := range remote {
 		aurPkg, ok := aurdata[pkg.Name()]
 		if !ok {
@@ -223,7 +223,7 @@ func isDevelName(name string) bool {
 	return strings.Contains(name, "-always-")
 }
 
-func isDevelPackage(pkg db.RepoPackage) bool {
+func isDevelPackage(pkg alpm.IPackage) bool {
 	return isDevelName(pkg.Name()) || isDevelName(pkg.Base())
 }
 

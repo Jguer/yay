@@ -3,7 +3,7 @@ package dep
 import (
 	"strings"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/go-alpm/v2"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
@@ -121,7 +121,7 @@ func satisfiesAur(dep string, pkg *rpc.Pkg) bool {
 	return false
 }
 
-func satisfiesRepo(dep string, pkg db.RepoPackage, dbExecutor db.Executor) bool {
+func satisfiesRepo(dep string, pkg alpm.IPackage, dbExecutor db.Executor) bool {
 	if pkgSatisfies(pkg.Name(), pkg.Version(), dep) {
 		return true
 	}
