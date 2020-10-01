@@ -10,8 +10,8 @@ require (
 	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
-	golang.org/x/sys v0.0.0-20200915084602-288bc346aa39
+	golang.org/x/crypto v0.0.0-20200930160638-afb6bcd081ae
+	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
