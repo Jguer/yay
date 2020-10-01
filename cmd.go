@@ -20,124 +20,124 @@ import (
 )
 
 func usage() {
-	fmt.Println(`Usage:
-    yay
-    yay <operation> [...]
-    yay <package(s)>
-
-operations:
-    yay {-h --help}
-    yay {-V --version}
-    yay {-D --database}    <options> <package(s)>
-    yay {-F --files}       [options] [package(s)]
-    yay {-Q --query}       [options] [package(s)]
-    yay {-R --remove}      [options] <package(s)>
-    yay {-S --sync}        [options] [package(s)]
-    yay {-T --deptest}     [options] [package(s)]
-    yay {-U --upgrade}     [options] <file(s)>
-
-New operations:
-    yay {-Y --yay}         [options] [package(s)]
-    yay {-P --show}        [options]
-    yay {-G --getpkgbuild} [package(s)]
-
-If no arguments are provided 'yay -Syu' will be performed
-If no operation is provided -Y will be assumed
-
-New options:
-       --repo             Assume targets are from the repositories
-    -a --aur              Assume targets are from the AUR
-
-Permanent configuration options:
-    --save                Causes the following options to be saved back to the
-                          config file when used
-
-    --aururl      <url>   Set an alternative AUR URL
-    --builddir    <dir>   Directory used to download and run PKGBUILDS
-    --absdir      <dir>   Directory used to store downloads from the ABS
-    --editor      <file>  Editor to use when editing PKGBUILDs
-    --editorflags <flags> Pass arguments to editor
-    --makepkg     <file>  makepkg command to use
-    --mflags      <flags> Pass arguments to makepkg
-    --pacman      <file>  pacman command to use
-    --git         <file>  git command to use
-    --gitflags    <flags> Pass arguments to git
-    --gpg         <file>  gpg command to use
-    --gpgflags    <flags> Pass arguments to gpg
-    --config      <file>  pacman.conf file to use
-    --makepkgconf <file>  makepkg.conf file to use
-    --nomakepkgconf       Use the default makepkg.conf
-
-    --requestsplitn <n>   Max amount of packages to query per AUR request
-    --completioninterval  <n> Time in days to refresh completion cache
-    --sortby    <field>   Sort AUR results by a specific field during search
-    --searchby  <field>   Search for packages using a specified field
-    --answerclean   <a>   Set a predetermined answer for the clean build menu
-    --answerdiff    <a>   Set a predetermined answer for the diff menu
-    --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
-    --answerupgrade <a>   Set a predetermined answer for the upgrade menu
-    --noanswerclean       Unset the answer for the clean build menu
-    --noanswerdiff        Unset the answer for the edit diff menu
-    --noansweredit        Unset the answer for the edit pkgbuild menu
-    --noanswerupgrade     Unset the answer for the upgrade menu
-    --cleanmenu           Give the option to clean build PKGBUILDS
-    --diffmenu            Give the option to show diffs for build files
-    --editmenu            Give the option to edit/view PKGBUILDS
-    --upgrademenu         Show a detailed list of updates with the option to skip any
-    --nocleanmenu         Don't clean build PKGBUILDS
-    --nodiffmenu          Don't show diffs for build files
-    --noeditmenu          Don't edit/view PKGBUILDS
-    --noupgrademenu       Don't show the upgrade menu
-    --askremovemake       Ask to remove makedepends after install
-    --removemake          Remove makedepends after install
-    --noremovemake        Don't remove makedepends after install
-
-    --cleanafter          Remove package sources after successful install
-    --nocleanafter        Do not remove package sources after successful build
-    --bottomup            Shows AUR's packages first and then repository's
-    --topdown             Shows repository's packages first and then AUR's
-
-    --devel               Check development packages during sysupgrade
-    --nodevel             Do not check development packages
-    --rebuild             Always build target packages
-    --rebuildall          Always build all AUR packages
-    --norebuild           Skip package build if in cache and up to date
-    --rebuildtree         Always build all AUR packages even if installed
-    --redownload          Always download pkgbuilds of targets
-    --noredownload        Skip pkgbuild download if in cache and up to date
-    --redownloadall       Always download pkgbuilds of all AUR packages
-    --provides            Look for matching providers when searching for packages
-    --noprovides          Just look for packages by pkgname
-    --pgpfetch            Prompt to import PGP keys from PKGBUILDs
-    --nopgpfetch          Don't prompt to import PGP keys
-    --useask              Automatically resolve conflicts using pacman's ask flag
-    --nouseask            Confirm conflicts manually during the install
-    --combinedupgrade     Refresh then perform the repo and AUR upgrade together
-    --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
-    --batchinstall        Build multiple AUR packages then install them together
-    --nobatchinstall      Build and install each AUR package one by one
-
-    --sudo                <file>  sudo command to use
-    --sudoflags           <flags> Pass arguments to sudo
-    --sudoloop            Loop sudo calls in the background to avoid timeout
-    --nosudoloop          Do not loop sudo calls in the background
-
-    --timeupdate          Check packages' AUR page for changes during sysupgrade
-    --notimeupdate        Do not check packages' AUR page for changes
-
-show specific options:
-    -c --complete         Used for completions
-    -d --defaultconfig    Print default yay configuration
-    -g --currentconfig    Print current yay configuration
-    -s --stats            Display system package statistics
-    -w --news             Print arch news
-
-yay specific options:
-    -c --clean            Remove unneeded dependencies
-       --gendb            Generates development package DB used for updating
-
-getpkgbuild specific options:
-    -f --force            Force download for existing ABS packages`)
+	fmt.Println(gotext.Get("Usage:"))
+	fmt.Println("    yay")
+	fmt.Println(gotext.Get("    yay <operation> [...]"))
+	fmt.Println(gotext.Get("    yay <package(s)>"))
+	fmt.Println()
+	fmt.Println(gotext.Get("operations:"))
+	fmt.Println("    yay {-h --help}")
+	fmt.Println("    yay {-V --version}")
+	fmt.Println(gotext.Get("    yay {-D --database}    <options> <package(s)>"))
+	fmt.Println(gotext.Get("    yay {-F --files}       [options] [package(s)]"))
+	fmt.Println(gotext.Get("    yay {-Q --query}       [options] [package(s)]"))
+	fmt.Println(gotext.Get("    yay {-R --remove}      [options] <package(s)>"))
+	fmt.Println(gotext.Get("    yay {-S --sync}        [options] [package(s)]"))
+	fmt.Println(gotext.Get("    yay {-T --deptest}     [options] [package(s)]"))
+	fmt.Println(gotext.Get("    yay {-U --upgrade}     [options] <file(s)>"))
+	fmt.Println()
+	fmt.Println(gotext.Get("New operations:"))
+	fmt.Println(gotext.Get("    yay {-Y --yay}         [options] [package(s)]"))
+	fmt.Println(gotext.Get("    yay {-P --show}        [options]"))
+	fmt.Println(gotext.Get("    yay {-G --getpkgbuild} [package(s)]"))
+	fmt.Println()
+	fmt.Println(gotext.Get("If no arguments are provided 'yay -Syu' will be performed"))
+	fmt.Println(gotext.Get("If no operation is provided -Y will be assumed"))
+	fmt.Println()
+	fmt.Println(gotext.Get("New options:"))
+	fmt.Println(gotext.Get("       --repo             Assume targets are from the repositories"))
+	fmt.Println(gotext.Get("    -a --aur              Assume targets are from the AUR"))
+	fmt.Println()
+	fmt.Println(gotext.Get("Permanent configuration options:"))
+	fmt.Println(gotext.Get("    --save                Causes the following options to be saved back to the"))
+	fmt.Println(gotext.Get("                          config file when used"))
+	fmt.Println()
+	fmt.Println(gotext.Get("    --aururl      <url>   Set an alternative AUR URL"))
+	fmt.Println(gotext.Get("    --builddir    <dir>   Directory used to download and run PKGBUILDS"))
+	fmt.Println(gotext.Get("    --absdir      <dir>   Directory used to store downloads from the ABS"))
+	fmt.Println(gotext.Get("    --editor      <file>  Editor to use when editing PKGBUILDs"))
+	fmt.Println(gotext.Get("    --editorflags <flags> Pass arguments to editor"))
+	fmt.Println(gotext.Get("    --makepkg     <file>  makepkg command to use"))
+	fmt.Println(gotext.Get("    --mflags      <flags> Pass arguments to makepkg"))
+	fmt.Println(gotext.Get("    --pacman      <file>  pacman command to use"))
+	fmt.Println(gotext.Get("    --git         <file>  git command to use"))
+	fmt.Println(gotext.Get("    --gitflags    <flags> Pass arguments to git"))
+	fmt.Println(gotext.Get("    --gpg         <file>  gpg command to use"))
+	fmt.Println(gotext.Get("    --gpgflags    <flags> Pass arguments to gpg"))
+	fmt.Println(gotext.Get("    --config      <file>  pacman.conf file to use"))
+	fmt.Println(gotext.Get("    --makepkgconf <file>  makepkg.conf file to use"))
+	fmt.Println(gotext.Get("    --nomakepkgconf       Use the default makepkg.conf"))
+	fmt.Println()
+	fmt.Println(gotext.Get("    --requestsplitn <n>   Max amount of packages to query per AUR request"))
+	fmt.Println(gotext.Get("    --completioninterval  <n> Time in days to refresh completion cache"))
+	fmt.Println(gotext.Get("    --sortby    <field>   Sort AUR results by a specific field during search"))
+	fmt.Println(gotext.Get("    --searchby  <field>   Search for packages using a specified field"))
+	fmt.Println(gotext.Get("    --answerclean   <a>   Set a predetermined answer for the clean build menu"))
+	fmt.Println(gotext.Get("    --answerdiff    <a>   Set a predetermined answer for the diff menu"))
+	fmt.Println(gotext.Get("    --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu"))
+	fmt.Println(gotext.Get("    --answerupgrade <a>   Set a predetermined answer for the upgrade menu"))
+	fmt.Println(gotext.Get("    --noanswerclean       Unset the answer for the clean build menu"))
+	fmt.Println(gotext.Get("    --noanswerdiff        Unset the answer for the edit diff menu"))
+	fmt.Println(gotext.Get("    --noansweredit        Unset the answer for the edit pkgbuild menu"))
+	fmt.Println(gotext.Get("    --noanswerupgrade     Unset the answer for the upgrade menu"))
+	fmt.Println(gotext.Get("    --cleanmenu           Give the option to clean build PKGBUILDS"))
+	fmt.Println(gotext.Get("    --diffmenu            Give the option to show diffs for build files"))
+	fmt.Println(gotext.Get("    --editmenu            Give the option to edit/view PKGBUILDS"))
+	fmt.Println(gotext.Get("    --upgrademenu         Show a detailed list of updates with the option to skip any"))
+	fmt.Println(gotext.Get("    --nocleanmenu         Don't clean build PKGBUILDS"))
+	fmt.Println(gotext.Get("    --nodiffmenu          Don't show diffs for build files"))
+	fmt.Println(gotext.Get("    --noeditmenu          Don't edit/view PKGBUILDS"))
+	fmt.Println(gotext.Get("    --noupgrademenu       Don't show the upgrade menu"))
+	fmt.Println(gotext.Get("    --askremovemake       Ask to remove makedepends after install"))
+	fmt.Println(gotext.Get("    --removemake          Remove makedepends after install"))
+	fmt.Println(gotext.Get("    --noremovemake        Don't remove makedepends after install"))
+	fmt.Println()
+	fmt.Println(gotext.Get("    --cleanafter          Remove package sources after successful install"))
+	fmt.Println(gotext.Get("    --nocleanafter        Do not remove package sources after successful build"))
+	fmt.Println(gotext.Get("    --bottomup            Shows AUR's packages first and then repository's"))
+	fmt.Println(gotext.Get("    --topdown             Shows repository's packages first and then AUR's"))
+	fmt.Println()
+	fmt.Println(gotext.Get("    --devel               Check development packages during sysupgrade"))
+	fmt.Println(gotext.Get("    --nodevel             Do not check development packages"))
+	fmt.Println(gotext.Get("    --rebuild             Always build target packages"))
+	fmt.Println(gotext.Get("    --rebuildall          Always build all AUR packages"))
+	fmt.Println(gotext.Get("    --norebuild           Skip package build if in cache and up to date"))
+	fmt.Println(gotext.Get("    --rebuildtree         Always build all AUR packages even if installed"))
+	fmt.Println(gotext.Get("    --redownload          Always download pkgbuilds of targets"))
+	fmt.Println(gotext.Get("    --noredownload        Skip pkgbuild download if in cache and up to date"))
+	fmt.Println(gotext.Get("    --redownloadall       Always download pkgbuilds of all AUR packages"))
+	fmt.Println(gotext.Get("    --provides            Look for matching providers when searching for packages"))
+	fmt.Println(gotext.Get("    --noprovides          Just look for packages by pkgname"))
+	fmt.Println(gotext.Get("    --pgpfetch            Prompt to import PGP keys from PKGBUILDs"))
+	fmt.Println(gotext.Get("    --nopgpfetch          Don't prompt to import PGP keys"))
+	fmt.Println(gotext.Get("    --useask              Automatically resolve conflicts using pacman's ask flag"))
+	fmt.Println(gotext.Get("    --nouseask            Confirm conflicts manually during the install"))
+	fmt.Println(gotext.Get("    --combinedupgrade     Refresh then perform the repo and AUR upgrade together"))
+	fmt.Println(gotext.Get("    --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately"))
+	fmt.Println(gotext.Get("    --batchinstall        Build multiple AUR packages then install them together"))
+	fmt.Println(gotext.Get("    --nobatchinstall      Build and install each AUR package one by one"))
+	fmt.Println()
+	fmt.Println(gotext.Get("    --sudo                <file>  sudo command to use"))
+	fmt.Println(gotext.Get("    --sudoflags           <flags> Pass arguments to sudo"))
+	fmt.Println(gotext.Get("    --sudoloop            Loop sudo calls in the background to avoid timeout"))
+	fmt.Println(gotext.Get("    --nosudoloop          Do not loop sudo calls in the background"))
+	fmt.Println()
+	fmt.Println(gotext.Get("    --timeupdate          Check packages' AUR page for changes during sysupgrade"))
+	fmt.Println(gotext.Get("    --notimeupdate        Do not check packages' AUR page for changes"))
+	fmt.Println()
+	fmt.Println(gotext.Get("show specific options:"))
+	fmt.Println(gotext.Get("    -c --complete         Used for completions"))
+	fmt.Println(gotext.Get("    -d --defaultconfig    Print default yay configuration"))
+	fmt.Println(gotext.Get("    -g --currentconfig    Print current yay configuration"))
+	fmt.Println(gotext.Get("    -s --stats            Display system package statistics"))
+	fmt.Println(gotext.Get("    -w --news             Print arch news"))
+	fmt.Println()
+	fmt.Println(gotext.Get("yay specific options:"))
+	fmt.Println(gotext.Get("    -c --clean            Remove unneeded dependencies"))
+	fmt.Println(gotext.Get("       --gendb            Generates development package DB used for updating"))
+	fmt.Println()
+	fmt.Println(gotext.Get("getpkgbuild specific options:"))
+	fmt.Println(gotext.Get("    -f --force            Force download for existing ABS packages"))
 }
 
 func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
