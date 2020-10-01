@@ -1,4 +1,4 @@
-package main
+package upgrade
 
 import (
 	"fmt"
@@ -17,7 +17,6 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/db/mock"
 	"github.com/Jguer/yay/v10/pkg/settings"
-	"github.com/Jguer/yay/v10/pkg/upgrade"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
@@ -30,7 +29,7 @@ func Test_upAUR(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want upgrade.UpSlice
+		want UpSlice
 	}{
 		{
 			name: "No Updates",
@@ -46,7 +45,7 @@ func Test_upAUR(t *testing.T) {
 				},
 				timeUpdate: false,
 			},
-			want: upgrade.UpSlice{},
+			want: UpSlice{},
 		},
 		{
 			name: "Simple Update",
@@ -55,7 +54,7 @@ func Test_upAUR(t *testing.T) {
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.1.0", Name: "hello"}},
 				timeUpdate: false,
 			},
-			want: upgrade.UpSlice{upgrade.Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"}},
+			want: UpSlice{Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"}},
 		},
 		{
 			name: "Time Update",
@@ -64,7 +63,7 @@ func Test_upAUR(t *testing.T) {
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello", LastModified: int(time.Now().AddDate(0, 0, 2).Unix())}},
 				timeUpdate: true,
 			},
-			want: upgrade.UpSlice{upgrade.Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.0.0"}},
+			want: UpSlice{Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.0.0"}},
 		},
 	}
 	for _, tt := range tests {
@@ -72,7 +71,7 @@ func Test_upAUR(t *testing.T) {
 			rescueStdout := os.Stdout
 			r, w, _ := os.Pipe()
 			os.Stdout = w
-			got := upAUR(tt.args.remote, tt.args.aurdata, tt.args.timeUpdate)
+			got := UpAUR(tt.args.remote, tt.args.aurdata, tt.args.timeUpdate)
 			assert.EqualValues(t, tt.want, got)
 
 			w.Close()
@@ -107,7 +106,7 @@ func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr strin
 
 func Test_upDevel(t *testing.T) {
 	var err error
-	config, err = settings.NewConfig()
+	config, err := settings.NewConfig()
 	assert.NoError(t, err)
 
 	config.Runtime.CmdRunner = &MockRunner{
@@ -128,7 +127,7 @@ func Test_upDevel(t *testing.T) {
 	tests := []struct {
 		name     string
 		args     args
-		want     upgrade.UpSlice
+		want     UpSlice
 		finalLen int
 	}{
 		{
@@ -148,7 +147,7 @@ func Test_upDevel(t *testing.T) {
 					"ignored": {Version: "2.0.0", Name: "ignored"},
 				},
 			},
-			want: upgrade.UpSlice{},
+			want: UpSlice{},
 		},
 		{
 			name:     "Simple Update",
@@ -204,14 +203,14 @@ func Test_upDevel(t *testing.T) {
 					"hello4": {Version: "2.0.0", Name: "hello4"},
 				},
 			},
-			want: upgrade.UpSlice{
-				upgrade.Upgrade{
+			want: UpSlice{
+				Upgrade{
 					Name:          "hello",
 					Repository:    "devel",
 					LocalVersion:  "2.0.0",
 					RemoteVersion: "latest-commit",
 				},
-				upgrade.Upgrade{
+				Upgrade{
 					Name:          "hello4",
 					Repository:    "devel",
 					LocalVersion:  "4.0.0",
@@ -239,7 +238,7 @@ func Test_upDevel(t *testing.T) {
 				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
-			want: upgrade.UpSlice{},
+			want: UpSlice{},
 		},
 		{
 			name:     "No update returned - ignored",
@@ -261,13 +260,13 @@ func Test_upDevel(t *testing.T) {
 				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
-			want: upgrade.UpSlice{},
+			want: UpSlice{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config.Runtime.CmdRunner.(*MockRunner).t = t
-			got := upDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
+			got := UpDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
 			assert.ElementsMatch(t, tt.want, got)
 			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))
 		})

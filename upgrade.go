@@ -8,19 +8,16 @@ import (
 
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
+	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/intrange"
+	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
-	"github.com/Jguer/yay/v10/pkg/vcs"
-
-	rpc "github.com/mikkeloscar/aur"
-
-	"github.com/Jguer/yay/v10/pkg/multierror"
-	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
 // upList returns lists of packages to upgrade from each source.
@@ -62,7 +59,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 
 			wg.Add(1)
 			go func() {
-				aurUp = upAUR(remote, aurdata, config.TimeUpdate)
+				aurUp = upgrade.UpAUR(remote, aurdata, config.TimeUpdate)
 				wg.Done()
 			}()
 
@@ -70,7 +67,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 				text.OperationInfoln(gotext.Get("Checking development packages..."))
 				wg.Add(1)
 				go func() {
-					develUp = upDevel(remote, aurdata, config.Runtime.VCSStore)
+					develUp = upgrade.UpDevel(remote, aurdata, config.Runtime.VCSStore)
 					wg.Done()
 				}()
 			}
@@ -96,102 +93,6 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 	}
 
 	return aurUp, repoUp, errs.Return()
-}
-
-func upDevel(
-	remote []alpm.IPackage,
-	aurdata map[string]*rpc.Pkg,
-	localCache *vcs.InfoStore) upgrade.UpSlice {
-	toUpdate := make([]alpm.IPackage, 0, len(aurdata))
-	toRemove := make([]string, 0)
-
-	var mux1, mux2 sync.Mutex
-	var wg sync.WaitGroup
-
-	checkUpdate := func(pkgName string, e vcs.OriginInfoByURL) {
-		defer wg.Done()
-
-		if localCache.NeedsUpdate(e) {
-			if _, ok := aurdata[pkgName]; ok {
-				for _, pkg := range remote {
-					if pkg.Name() == pkgName {
-						mux1.Lock()
-						toUpdate = append(toUpdate, pkg)
-						mux1.Unlock()
-						return
-					}
-				}
-			}
-
-			mux2.Lock()
-			toRemove = append(toRemove, pkgName)
-			mux2.Unlock()
-		}
-	}
-
-	for pkgName, e := range localCache.OriginsByPackage {
-		wg.Add(1)
-		go checkUpdate(pkgName, e)
-	}
-
-	wg.Wait()
-
-	toUpgrade := make(upgrade.UpSlice, 0, len(toUpdate))
-	for _, pkg := range toUpdate {
-		if pkg.ShouldIgnore() {
-			printIgnoringPackage(pkg, "latest-commit")
-		} else {
-			toUpgrade = append(toUpgrade,
-				upgrade.Upgrade{
-					Name:          pkg.Name(),
-					Repository:    "devel",
-					LocalVersion:  pkg.Version(),
-					RemoteVersion: "latest-commit",
-				})
-		}
-	}
-
-	localCache.RemovePackage(toRemove)
-	return toUpgrade
-}
-
-func printIgnoringPackage(pkg alpm.IPackage, newPkgVersion string) {
-	left, right := upgrade.GetVersionDiff(pkg.Version(), newPkgVersion)
-
-	text.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
-		text.Cyan(pkg.Name()),
-		left, right,
-	))
-}
-
-// upAUR gathers foreign packages and checks if they have new versions.
-// Output: Upgrade type package list.
-func upAUR(remote []alpm.IPackage, aurdata map[string]*rpc.Pkg, timeUpdate bool) upgrade.UpSlice {
-	toUpgrade := make(upgrade.UpSlice, 0)
-
-	for _, pkg := range remote {
-		aurPkg, ok := aurdata[pkg.Name()]
-		if !ok {
-			continue
-		}
-
-		if (timeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
-			(alpm.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
-			if pkg.ShouldIgnore() {
-				printIgnoringPackage(pkg, aurPkg.Version)
-			} else {
-				toUpgrade = append(toUpgrade,
-					upgrade.Upgrade{
-						Name:          aurPkg.Name,
-						Repository:    "aur",
-						LocalVersion:  pkg.Version(),
-						RemoteVersion: aurPkg.Version,
-					})
-			}
-		}
-	}
-
-	return toUpgrade
 }
 
 func printLocalNewerThanAUR(
