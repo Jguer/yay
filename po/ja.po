@@ -12,467 +12,408 @@ msgstr ""
 "Last-Translator: Yamada Hayao\n"
 "Language: ja\n"
 
-#: cmd.go:53
-msgid "                          config file when used"
-msgstr "                          保存されます。"
-
-#: cmd.go:137
-msgid ""
-"       --gendb            Generates development package DB used for updating"
-msgstr ""
-"       --gendb            アップデートに使用する開発パッケージDB を生成"
-
-#: cmd.go:48
-msgid "       --repo             Assume targets are from the repositories"
-msgstr "       --repo             ターゲットが公式リポジトリにあると想定します"
-
-#: cmd.go:57
-msgid ""
-"    --absdir      <dir>   Directory used to store downloads from the ABS"
-msgstr ""
-"    --absdir      <dir>   ABS からのダウンロードを保存するために使用されるディレクトリ"
-
-#: cmd.go:75
-msgid ""
-"    --answerclean   <a>   Set a predetermined answer for the clean build menu"
-msgstr ""
-"    --answerclean   <a>   クリーンビルドメニューに所定の返答を設定"
-
-#: cmd.go:76
-msgid "    --answerdiff    <a>   Set a predetermined answer for the diff menu"
-msgstr "    --answerdiff    <a>   差異メニューに所定の返答を設定"
-
-#: cmd.go:77
-msgid ""
-"    --answeredit    <a>   Set a predetermined answer for the edit pkgbuild "
-"menu"
-msgstr ""
-"    --answeredit    <a>   PKGBUILD の編集メニューに所定の返答を設定"
-
-#: cmd.go:78
-msgid ""
-"    --answerupgrade <a>   Set a predetermined answer for the upgrade menu"
-msgstr ""
-"    --answerupgrade <a>   アップグレードメニューに所定の返答を設定"
-
-#: cmd.go:91
-msgid "    --askremovemake       Ask to remove makedepends after install"
-msgstr "    --askremovemake       インストール後にmake 時の依存関係を削除するか尋ねます"
-
-#: cmd.go:55
-msgid "    --aururl      <url>   Set an alternative AUR URL"
-msgstr "    --aururl      <url>   代替のAUR のURL を設定"
-
-#: cmd.go:117
-msgid ""
-"    --batchinstall        Build multiple AUR packages then install them "
-"together"
-msgstr ""
-"    --batchinstall        複数のAUR パッケージをビルドして一緒にインストール"
-
-#: cmd.go:97
-msgid ""
-"    --bottomup            Shows AUR's packages first and then repository's"
-msgstr ""
-"    --bottomup            最初にAUR のパッケージを表示し、次にリポジトリのパッケージを表示"
-
-#: cmd.go:56
-msgid "    --builddir    <dir>   Directory used to download and run PKGBUILDS"
-msgstr "    --builddir    <dir>   PKGBUILD のダウンロードと実行に使用されるディレクトリ"
-
-#: cmd.go:95
-msgid ""
-"    --cleanafter          Remove package sources after successful install"
-msgstr ""
-"    --cleanafter          インストールが成功した後にパッケージソースを削除"
-
-#: cmd.go:83
-msgid "    --cleanmenu           Give the option to clean build PKGBUILDS"
-msgstr "    --cleanmenu           PKGBUILD をクリーンビルドするオプションを提供"
-
-#: cmd.go:115
-msgid ""
-"    --combinedupgrade     Refresh then perform the repo and AUR upgrade "
-"together"
-msgstr ""
-"    --combinedupgrade     更新してから、リポジトリとAUR のアップグレードを一緒に実行"
-
-#: cmd.go:72
-msgid "    --completioninterval  <n> Time in days to refresh completion cache"
-msgstr "    --completioninterval  <n> 完了キャッシュを更新するための日数"
-
-#: cmd.go:67
-msgid "    --config      <file>  pacman.conf file to use"
-msgstr "    --config      <file>  pacman.conf に使用するファイル"
-
-#: cmd.go:100
-msgid "    --devel               Check development packages during sysupgrade"
-msgstr "    --devel               sysupgrade 中に開発パッケージをチェック"
-
-#: cmd.go:84
-msgid "    --diffmenu            Give the option to show diffs for build files"
-msgstr ""
-"    --diffmenu            PKGBUILD ファイルの差異を表示するオプションを提供"
-
-#: cmd.go:85
-msgid "    --editmenu            Give the option to edit/view PKGBUILDS"
-msgstr "    --editmenu            PKGBUILD を編集/表示するオプションを提供"
-
-#: cmd.go:58
-msgid "    --editor      <file>  Editor to use when editing PKGBUILDs"
-msgstr "    --editor      <file>  PKGBUILD を編集するときに使用するエディタ"
-
-#: cmd.go:59
-msgid "    --editorflags <flags> Pass arguments to editor"
-msgstr "    --editorflags <flags> 引数をエディタに渡します"
-
-#: cmd.go:63
-msgid "    --git         <file>  git command to use"
-msgstr "    --git         <file>  git コマンドを使います"
-
-#: cmd.go:64
-msgid "    --gitflags    <flags> Pass arguments to git"
-msgstr "    --gitflags    <flags> git に引数を渡します"
-
-#: cmd.go:65
-msgid "    --gpg         <file>  gpg command to use"
-msgstr "    --gpg         <file>  gpg コマンドを使います"
-
-#: cmd.go:66
-msgid "    --gpgflags    <flags> Pass arguments to gpg"
-msgstr "    --gpgflags    <flags> gpg に引数を渡します"
-
-#: cmd.go:60
-msgid "    --makepkg     <file>  makepkg command to use"
-msgstr "    --makepkg     <file>  makepkg コマンドを使います"
-
-#: cmd.go:68
-msgid "    --makepkgconf <file>  makepkg.conf file to use"
-msgstr "    --makepkgconf <file>  makepkg.conf に使用するファイル"
-
-#: cmd.go:61
-msgid "    --mflags      <flags> Pass arguments to makepkg"
-msgstr "    --mflags      <flags> makepkg に引数を渡します"
-
-#: cmd.go:79
-msgid "    --noanswerclean       Unset the answer for the clean build menu"
-msgstr "    --noanswerclean       クリーンビルドメニューの返答の設定を解除"
-
-#: cmd.go:80
-msgid "    --noanswerdiff        Unset the answer for the edit diff menu"
-msgstr "    --noanswerdiff        差異編集メニューの返答の設定を解除"
-
-#: cmd.go:81
-msgid "    --noansweredit        Unset the answer for the edit pkgbuild menu"
-msgstr "    --noansweredit        PKGBUILD の編集メニューの返答の設定を解除"
-
-#: cmd.go:82
-msgid "    --noanswerupgrade     Unset the answer for the upgrade menu"
-msgstr "    --noanswerupgrade     アップグレードメニューの返答を解除"
-
-#: cmd.go:118
-msgid "    --nobatchinstall      Build and install each AUR package one by one"
-msgstr ""
-"    --nobatchinstall      各AUR パッケージを1つずつビルドしてインストール"
-
-#: cmd.go:96
-msgid ""
-"    --nocleanafter        Do not remove package sources after successful "
-"build"
-msgstr ""
-"    --nocleanafter        インストールが成功した後にパッケージソースを削除しません"
-
-#: cmd.go:87
-msgid "    --nocleanmenu         Don't clean build PKGBUILDS"
-msgstr "    --nocleanmenu         PKGBUILD をクリーンビルドしません"
-
-#: cmd.go:116
-msgid ""
-"    --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately"
-msgstr ""
-"    --nocombinedupgrade   リポジトリのアップグレードとAUR のアップグレードを個別に実行"
-
-#: cmd.go:101
-msgid "    --nodevel             Do not check development packages"
-msgstr "    --nodevel             開発パッケージをチェックしません"
-
-#: cmd.go:88
-msgid "    --nodiffmenu          Don't show diffs for build files"
-msgstr "    --nodiffmenu          PKGBUILD ファイルの差異を表示しません"
-
-#: cmd.go:89
-msgid "    --noeditmenu          Don't edit/view PKGBUILDS"
-msgstr "    --noeditmenu          PKGBUILD を編集/表示しません"
-
-#: cmd.go:69
-msgid "    --nomakepkgconf       Use the default makepkg.conf"
-msgstr "    --nomakepkgconf       デフォルトのmakepkg.conf を使用"
-
-#: cmd.go:112
-msgid "    --nopgpfetch          Don't prompt to import PGP keys"
-msgstr "    --nopgpfetch          PGP キーのインポートを要求しません"
-
-#: cmd.go:110
-msgid "    --noprovides          Just look for packages by pkgname"
-msgstr "    --noprovides          パッケージ名でパッケージを探すだけです"
-
-#: cmd.go:104
-msgid "    --norebuild           Skip package build if in cache and up to date"
-msgstr ""
-"    --norebuild           キャッシュ内にあり、最新の場合、パッケージのビルドをスキップ"
-
-#: cmd.go:107
-msgid ""
-"    --noredownload        Skip pkgbuild download if in cache and up to date"
-msgstr ""
-"    --noredownload        キャッシュ内にあり、最新の場合、PKGBUILD のダウンロードをスキップ"
-
-#: cmd.go:93
-msgid "    --noremovemake        Don't remove makedepends after install"
-msgstr "    --noremovemake        インストール後にmake 時の依存関係を削除しません"
-
-#: cmd.go:123
-msgid "    --nosudoloop          Do not loop sudo calls in the background"
-msgstr "    --nosudoloop          バックグラウンドでsudo 呼び出しをループしません"
-
-#: cmd.go:126
-msgid "    --notimeupdate        Do not check packages' AUR page for changes"
-msgstr "    --notimeupdate        AUR のパッケージの変更をチェックしません"
-
-#: cmd.go:90
-msgid "    --noupgrademenu       Don't show the upgrade menu"
-msgstr "    --noupgrademenu       アップグレードメニューを表示しません"
-
-#: cmd.go:114
-msgid "    --nouseask            Confirm conflicts manually during the install"
-msgstr ""
-"    --nouseask            インストール中に手動で競合を確認"
-
-#: cmd.go:62
-msgid "    --pacman      <file>  pacman command to use"
-msgstr "    --pacman      <file>  pacman コマンドを使います"
-
-#: cmd.go:111
-msgid "    --pgpfetch            Prompt to import PGP keys from PKGBUILDs"
-msgstr "    --pgpfetch            PKGBUILD からPGP キーをインポートするように要求"
-
-#: cmd.go:109
-msgid ""
-"    --provides            Look for matching providers when searching for "
-"packages"
-msgstr ""
-"    --provides            パッケージを検索するときに一致するプロバイダーを探します"
-
-#: cmd.go:102
-msgid "    --rebuild             Always build target packages"
-msgstr "    --rebuild             常にターゲットパッケージをビルド"
-
-#: cmd.go:103
-msgid "    --rebuildall          Always build all AUR packages"
-msgstr "    --rebuildall          常にすべてのAUR パッケージをビルド"
-
-#: cmd.go:105
-msgid ""
-"    --rebuildtree         Always build all AUR packages even if installed"
-msgstr ""
-"    --rebuildtree         インストールされている場合でも、常にすべてのAURパッケージをビルド"
-
-#: cmd.go:106
-msgid "    --redownload          Always download pkgbuilds of targets"
-msgstr "    --redownload          常にターゲットのPKGBUILD をダウンロード"
-
-#: cmd.go:108
-msgid "    --redownloadall       Always download pkgbuilds of all AUR packages"
-msgstr ""
-"    --redownloadall       常にすべてのAURパッケージのPKGBUILD をダウンロード"
-
-#: cmd.go:92
-msgid "    --removemake          Remove makedepends after install"
-msgstr "    --removemake          インストール後にmake 時の依存関係を削除"
-
-#: cmd.go:71
-msgid ""
-"    --requestsplitn <n>   Max amount of packages to query per AUR request"
-msgstr ""
-"    --requestsplitn <n>   AUR リクエストごとにクエリするパッケージの最大量"
-
-#: cmd.go:52
-msgid ""
-"    --save                Causes the following options to be saved back to "
-"the"
-msgstr ""
-"    --save                次のオプションを使用すると、設定ファイルに"
-
-#: cmd.go:74
-msgid "    --searchby  <field>   Search for packages using a specified field"
-msgstr "    --searchby  <field>   指定されたフィールドを使用してパッケージを検索"
-
-#: cmd.go:73
-msgid ""
-"    --sortby    <field>   Sort AUR results by a specific field during search"
-msgstr ""
-"    --sortby    <field>   検索中にAUR の結果を特定のフィールドで並べ替え"
-
-#: cmd.go:120
-msgid "    --sudo                <file>  sudo command to use"
-msgstr "    --sudo                <file>  sudo コマンドを使います"
-
-#: cmd.go:121
-msgid "    --sudoflags           <flags> Pass arguments to sudo"
-msgstr "    --sudoflags           <flags> sudo に引数を渡します"
-
-#: cmd.go:122
-msgid ""
-"    --sudoloop            Loop sudo calls in the background to avoid timeout"
-msgstr ""
-"    --sudoloop            バックグラウンドでsudo 呼び出しをループして、タイムアウトを回避"
-
-#: cmd.go:125
-msgid ""
-"    --timeupdate          Check packages' AUR page for changes during "
-"sysupgrade"
-msgstr ""
-"    --timeupdate          sysupgrade 中に、AUR のパッケージの変更をチェック"
-
-#: cmd.go:98
-msgid ""
-"    --topdown             Shows repository's packages first and then AUR's"
-msgstr ""
-"    --topdown             最初にリポジトリのパッケージを表示し、次にAUR のパッケージを表示"
-
-#: cmd.go:86
-msgid ""
-"    --upgrademenu         Show a detailed list of updates with the option to "
-"skip any"
-msgstr ""
-"    --upgrademenu         更新の詳細リストを表示し、スキップするオプションを選択します"
-
-#: cmd.go:113
-msgid ""
-"    --useask              Automatically resolve conflicts using pacman's ask "
-"flag"
-msgstr ""
-"    --useask              pacman の質問フラグを使用して競合を自動的に解決します"
-
-#: cmd.go:49
-msgid "    -a --aur              Assume targets are from the AUR"
-msgstr "    -a --aur              ターゲットがAUR にあると想定します"
-
-#: cmd.go:136
-msgid "    -c --clean            Remove unneeded dependencies"
-msgstr "    -c --clean            不要な依存関係を削除"
-
-#: cmd.go:129
-msgid "    -c --complete         Used for completions"
-msgstr "    -c --complete         補完を使います"
+#: cmd.go:242 cmd.go:248 cmd.go:254 cmd.go:260
+msgid "<a>"
+msgstr "<a>"
+
+#: cmd.go:136 cmd.go:142
+msgid "<dir>"
+msgstr "<dir>"
+
+#: cmd.go:230 cmd.go:236
+msgid "<field>"
+msgstr "<field>"
+
+#: cmd.go:148 cmd.go:160 cmd.go:172 cmd.go:178 cmd.go:190 cmd.go:202 cmd.go:208
+#: cmd.go:418
+msgid "<file>"
+msgstr "<file>"
+
+#: cmd.go:154 cmd.go:166 cmd.go:184 cmd.go:196 cmd.go:424
+msgid "<flags>"
+msgstr "<flags>"
+
+#: cmd.go:218 cmd.go:224
+msgid "<n>"
+msgstr "<n>"
 
 #: cmd.go:130
-msgid "    -d --defaultconfig    Print default yay configuration"
-msgstr "    -d --defaultconfig    デフォルトのyay の設定を表示"
+msgid "<url>"
+msgstr "<URL>"
 
-#: cmd.go:140
-msgid "    -f --force            Force download for existing ABS packages"
-msgstr "    -f --force            既存のABS パッケージを強制ダウンロード"
+#: cmd.go:362
+msgid "Always build all AUR packages even if installed"
+msgstr "インストールされている場合でも、常にすべてのAURパッケージをビルド"
 
-#: cmd.go:131
-msgid "    -g --currentconfig    Print current yay configuration"
-msgstr "    -g --currentconfig    現在のyay の設定を表示"
+#: cmd.go:354
+msgid "Always build all AUR packages"
+msgstr "常にすべてのAUR パッケージをビルド"
 
-#: cmd.go:132
-msgid "    -s --stats            Display system package statistics"
-msgstr "    -s --stats            システムのパッケージの統計情報を表示"
+#: cmd.go:350
+msgid "Always build target packages"
+msgstr "常にターゲットパッケージをビルド"
 
-#: cmd.go:133
-msgid "    -w --news             Print arch news"
-msgstr "    -w --news             Arch ニュースを表示"
+#: cmd.go:374
+msgid "Always download pkgbuilds of all AUR packages"
+msgstr "常にすべてのAURパッケージのPKGBUILD をダウンロード"
 
-#: cmd.go:25
-msgid "    yay <operation> [...]"
-msgstr "    yay <オペレーション> [...]"
+#: cmd.go:366
+msgid "Always download pkgbuilds of targets"
+msgstr "常にターゲットのPKGBUILD をダウンロード"
 
-#: cmd.go:26
-msgid "    yay <package(s)>"
-msgstr "    yay <パッケージ>"
+#: cmd.go:314
+msgid "Ask to remove makedepends after install"
+msgstr "インストール後にmake 時の依存関係を削除するか尋ねます"
 
-#: cmd.go:31
-msgid "    yay {-D --database}    <options> <package(s)>"
-msgstr "    yay {-D --database}    <オプション> <パッケージ>"
+#: cmd.go:115
+msgid "Assume targets are from the AUR"
+msgstr "ターゲットがAUR にあると想定します"
 
-#: cmd.go:32
-msgid "    yay {-F --files}       [options] [package(s)]"
-msgstr "    yay {-F --files}       [オプション] [パッケージ]"
+#: cmd.go:111
+msgid "Assume targets are from the repositories"
+msgstr "ターゲットが公式リポジトリにあると想定します"
 
-#: cmd.go:42
-msgid "    yay {-G --getpkgbuild} [package(s)]"
-msgstr "    yay {-G --getpkgbuild} [パッケージ]"
+#: cmd.go:394
+msgid "Automatically resolve conflicts using pacman's ask flag"
+msgstr "pacman の質問フラグを使用して競合を自動的に解決します"
 
-#: cmd.go:41
-msgid "    yay {-P --show}        [options]"
-msgstr "    yay {-P --show}        [オプション]"
+#: cmd.go:414
+msgid "Build and install each AUR package one by one"
+msgstr "各AUR パッケージを1つずつビルドしてインストール"
 
-#: cmd.go:33
-msgid "    yay {-Q --query}       [options] [package(s)]"
-msgstr "    yay {-Q --query}       [オプション] [パッケージ]"
+#: cmd.go:410
+msgid "Build multiple AUR packages then install them together"
+msgstr "複数のAUR パッケージをビルドして一緒にインストール"
 
-#: cmd.go:34
-msgid "    yay {-R --remove}      [options] <package(s)>"
-msgstr "    yay {-R --remove}      [オプション] <パッケージ>"
+#: cmd.go:122
+msgid "Causes the following options to be saved back to the"
+msgstr "次のオプションを使用すると、設定ファイルに"
 
-#: cmd.go:35
-msgid "    yay {-S --sync}        [options] [package(s)]"
-msgstr "    yay {-S --sync}        [オプション] [パッケージ]"
+#: cmd.go:342
+msgid "Check development packages during sysupgrade"
+msgstr "sysupgrade 中に開発パッケージをチェック"
 
-#: cmd.go:36
-msgid "    yay {-T --deptest}     [options] [package(s)]"
-msgstr "    yay {-T --deptest}     [オプション] [パッケージ]"
+#: cmd.go:438
+msgid "Check packages' AUR page for changes during sysupgrade"
+msgstr "sysupgrade 中に、AUR のパッケージの変更をチェック"
 
-#: cmd.go:37
-msgid "    yay {-U --upgrade}     [options] <file(s)>"
-msgstr "    yay {-U --upgrade}     [オプション] <ファイル>"
+#: cmd.go:398
+msgid "Confirm conflicts manually during the install"
+msgstr "インストール中に手動で競合を確認"
 
-#: cmd.go:40
-msgid "    yay {-Y --yay}         [options] [package(s)]"
-msgstr "    yay {-Y --yay}         [オプション] [パッケージ]"
+#: cmd.go:138
+msgid "Directory used to download and run PKGBUILDS"
+msgstr "PKGBUILD のダウンロードと実行に使用されるディレクトリ"
 
-#: cmd.go:44
+#: cmd.go:144
+msgid "Directory used to store downloads from the ABS"
+msgstr "ABS からのダウンロードを保存するために使用されるディレクトリ"
+
+#: cmd.go:462
+msgid "Display system package statistics"
+msgstr "システムのパッケージの統計情報を表示"
+
+#: cmd.go:346
+msgid "Do not check development packages"
+msgstr "開発パッケージをチェックしません"
+
+#: cmd.go:442
+msgid "Do not check packages' AUR page for changes"
+msgstr "AUR のパッケージの変更をチェックしません"
+
+#: cmd.go:434
+msgid "Do not loop sudo calls in the background"
+msgstr "バックグラウンドでsudo 呼び出しをループしません"
+
+#: cmd.go:330
+msgid "Do not remove package sources after successful build"
+msgstr "インストールが成功した後にパッケージソースを削除しません"
+
+#: cmd.go:298
+msgid "Don't clean build PKGBUILDS"
+msgstr "PKGBUILD をクリーンビルドしません"
+
+#: cmd.go:306
+msgid "Don't edit/view PKGBUILDS"
+msgstr "PKGBUILD を編集/表示しません"
+
+#: cmd.go:390
+msgid "Don't prompt to import PGP keys"
+msgstr "PGP キーのインポートを要求しません"
+
+#: cmd.go:322
+msgid "Don't remove makedepends after install"
+msgstr "インストール後にmake 時の依存関係を削除しません"
+
+#: cmd.go:302
+msgid "Don't show diffs for build files"
+msgstr "PKGBUILD ファイルの差異を表示しません"
+
+#: cmd.go:310
+msgid "Don't show the upgrade menu"
+msgstr "アップグレードメニューを表示しません"
+
+#: cmd.go:150
+msgid "Editor to use when editing PKGBUILDs"
+msgstr "PKGBUILD を編集するときに使用するエディタ"
+
+#: cmd.go:484
+msgid "Force download for existing ABS packages"
+msgstr "既存のABS パッケージを強制ダウンロード"
+
+#: cmd.go:477
+msgid "Generates development package DB used for updating"
+msgstr "アップデートに使用する開発パッケージDB を生成"
+
+#: cmd.go:282
+msgid "Give the option to clean build PKGBUILDS"
+msgstr "PKGBUILD をクリーンビルドするオプションを提供"
+
+#: cmd.go:290
+msgid "Give the option to edit/view PKGBUILDS"
+msgstr "PKGBUILD を編集/表示するオプションを提供"
+
+#: cmd.go:286
+msgid "Give the option to show diffs for build files"
+msgstr "PKGBUILD ファイルの差異を表示するオプションを提供"
+
+#: cmd.go:101
 msgid "If no arguments are provided 'yay -Syu' will be performed"
 msgstr "引数を指定しない場合、「yay -Syu」が実行されます"
 
-#: cmd.go:45
+#: cmd.go:104
 msgid "If no operation is provided -Y will be assumed"
 msgstr "オペレーションを指定しない場合、「-Y」と想定します"
 
-#: cmd.go:39
-msgid "New operations:"
-msgstr "新しいオペレーション:"
+#: cmd.go:382
+msgid "Just look for packages by pkgname"
+msgstr "パッケージ名でパッケージを探すだけです"
 
-#: cmd.go:47
-msgid "New options:"
-msgstr "新しいオプション:"
+#: cmd.go:378
+msgid "Look for matching providers when searching for packages"
+msgstr "パッケージを検索するときに一致するプロバイダーを探します"
 
-#: cmd.go:51
-msgid "Permanent configuration options:"
-msgstr "永続的な構成オプション:"
+#: cmd.go:430
+msgid "Loop sudo calls in the background to avoid timeout"
+msgstr "バックグラウンドでsudo 呼び出しをループして、タイムアウトを回避"
+
+#: cmd.go:220
+msgid "Max amount of packages to query per AUR request"
+msgstr "AUR リクエストごとにクエリするパッケージの最大量"
+
+#: cmd.go:84
+msgid "New operations"
+msgstr "新しいオペレーション"
+
+#: cmd.go:107
+msgid "New options"
+msgstr "新しいオプション"
+
+#: cmd.go:156
+msgid "Pass arguments to editor"
+msgstr "引数をエディタに渡します"
+
+#: cmd.go:186
+msgid "Pass arguments to git"
+msgstr "git に引数を渡します"
+
+#: cmd.go:198
+msgid "Pass arguments to gpg"
+msgstr "gpg に引数を渡します"
+
+#: cmd.go:168
+msgid "Pass arguments to makepkg"
+msgstr "makepkg に引数を渡します"
+
+#: cmd.go:426
+msgid "Pass arguments to sudo"
+msgstr "sudo に引数を渡します"
+
+#: cmd.go:406
+msgid "Perform the repo upgrade and AUR upgrade separately"
+msgstr "リポジトリのアップグレードとAUR のアップグレードを個別に実行"
+
+#: cmd.go:118
+msgid "Permanent configuration options"
+msgstr "永続的な構成オプション"
+
+#: cmd.go:466
+msgid "Print arch news"
+msgstr "Arch ニュースを表示"
+
+#: cmd.go:458
+msgid "Print current yay configuration"
+msgstr "現在のyay の設定を表示"
+
+#: cmd.go:454
+msgid "Print default yay configuration"
+msgstr "デフォルトのyay の設定を表示"
+
+#: cmd.go:386
+msgid "Prompt to import PGP keys from PKGBUILDs"
+msgstr "PKGBUILD からPGP キーをインポートするように要求"
+
+#: cmd.go:402
+msgid "Refresh then perform the repo and AUR upgrade together"
+msgstr "更新してから、リポジトリとAUR のアップグレードを一緒に実行"
+
+#: cmd.go:318
+msgid "Remove makedepends after install"
+msgstr "インストール後にmake 時の依存関係を削除"
+
+#: cmd.go:326
+msgid "Remove package sources after successful install"
+msgstr "インストールが成功した後にパッケージソースを削除"
+
+#: cmd.go:473
+msgid "Remove unneeded dependencies"
+msgstr "不要な依存関係を削除"
+
+#: cmd.go:238
+msgid "Search for packages using a specified field"
+msgstr "指定されたフィールドを使用してパッケージを検索"
+
+#: cmd.go:244
+msgid "Set a predetermined answer for the clean build menu"
+msgstr "クリーンビルドメニューに所定の返答を設定"
+
+#: cmd.go:250
+msgid "Set a predetermined answer for the diff menu"
+msgstr "差異メニューに所定の返答を設定"
+
+#: cmd.go:256
+msgid "Set a predetermined answer for the edit pkgbuild menu"
+msgstr "PKGBUILD の編集メニューに所定の返答を設定"
+
+#: cmd.go:262
+msgid "Set a predetermined answer for the upgrade menu"
+msgstr "アップグレードメニューに所定の返答を設定"
+
+#: cmd.go:132
+msgid "Set an alternative AUR URL"
+msgstr "代替のAUR のURL を設定"
+
+#: cmd.go:294
+msgid "Show a detailed list of updates with the option to skip any"
+msgstr "更新の詳細リストを表示し、スキップするオプションを選択します"
+
+#: cmd.go:334
+msgid "Shows AUR's packages first and then repository's"
+msgstr "最初にAUR のパッケージを表示し、次にリポジトリのパッケージを表示"
+
+#: cmd.go:338
+msgid "Shows repository's packages first and then AUR's"
+msgstr "最初にリポジトリのパッケージを表示し、次にAUR のパッケージを表示"
+
+#: cmd.go:358
+msgid "Skip package build if in cache and up to date"
+msgstr "キャッシュ内にあり、最新の場合、パッケージのビルドをスキップ"
+
+#: cmd.go:370
+msgid "Skip pkgbuild download if in cache and up to date"
+msgstr "キャッシュ内にあり、最新の場合、PKGBUILD のダウンロードをスキップ"
+
+#: cmd.go:232
+msgid "Sort AUR results by a specific field during search"
+msgstr "検索中にAUR の結果を特定のフィールドで並べ替え"
+
+#: cmd.go:226
+msgid "Time in days to refresh completion cache"
+msgstr "完了キャッシュを更新するための日数"
+
+#: cmd.go:266
+msgid "Unset the answer for the clean build menu"
+msgstr "クリーンビルドメニューの返答の設定を解除"
+
+#: cmd.go:270
+msgid "Unset the answer for the edit diff menu"
+msgstr "差異メニューに所定の返答を設定"
+
+#: cmd.go:274
+msgid "Unset the answer for the edit pkgbuild menu"
+msgstr "PKGBUILD の編集メニューに所定の返答を設定"
+
+#: cmd.go:278
+msgid "Unset the answer for the upgrade menu"
+msgstr "アップグレードメニューに所定の返答を設定"
 
 #: cmd.go:23
-msgid "Usage:"
-msgstr "使用方法:"
+msgid "Usage"
+msgstr "使用方法"
 
-#: cmd.go:139
-msgid "getpkgbuild specific options:"
-msgstr "getpkgbuild の特定のオプション:"
+#: cmd.go:214
+msgid "Use the default makepkg.conf"
+msgstr "デフォルトのmakepkg.conf を使用"
 
-#: cmd.go:28
-msgid "operations:"
-msgstr "オペレーション:"
+#: cmd.go:450
+msgid "Used for completions"
+msgstr "補完を使います"
 
-#: cmd.go:128
-msgid "show specific options:"
-msgstr "表示の特定のオプション:"
+#: cmd.go:126
+msgid "config file when used"
+msgstr "保存されます。"
 
-#: cmd.go:135
-msgid "yay specific options:"
-msgstr "yay の特定のオプション:"
+#: cmd.go:81
+msgid "file(s)"
+msgstr "ファイル"
+
+#: cmd.go:480
+msgid "getpkgbuild specific options"
+msgstr "getpkgbuild の特定のオプション"
+
+#: cmd.go:180
+msgid "git command to use"
+msgstr "git コマンドを使います"
+
+#: cmd.go:192
+msgid "gpg command to use"
+msgstr "gpg コマンドを使います"
+
+#: cmd.go:162
+msgid "makepkg command to use"
+msgstr "makepkg コマンドを使います"
+
+#: cmd.go:210
+msgid "makepkg.conf file to use"
+msgstr "makepkg.conf に使うファイル"
+
+#: cmd.go:29
+msgid "operation"
+msgstr "オペレーション"
+
+#: cmd.go:36
+msgid "operations"
+msgstr "オペレーション"
+
+#: cmd.go:43 cmd.go:49 cmd.go:55 cmd.go:61 cmd.go:67 cmd.go:73 cmd.go:79
+#: cmd.go:88 cmd.go:94
+msgid "options"
+msgstr "オプション"
+
+#: cmd.go:33 cmd.go:45 cmd.go:51 cmd.go:57 cmd.go:63 cmd.go:69 cmd.go:75
+#: cmd.go:90 cmd.go:98
+msgid "package(s)"
+msgstr "パッケージ"
+
+#: cmd.go:174
+msgid "pacman command to use"
+msgstr "pacman コマンドを使います"
+
+#: cmd.go:204
+msgid "pacman.conf file to use"
+msgstr "pacman.conf に使うファイル"
+
+#: cmd.go:445
+msgid "show specific options"
+msgstr "表示の特定のオプション"
+
+#: cmd.go:420
+msgid "sudo command to use"
+msgstr "sudo コマンドを使います"
+
+#: cmd.go:469
+msgid "yay specific options"
+msgstr "yay の特定のオプション"
 
 #: install.go:563
 msgid " (Build Files Exist)"
