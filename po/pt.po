@@ -9,6 +9,409 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
+#: cmd.go:242 cmd.go:248 cmd.go:254 cmd.go:260
+msgid "<a>"
+msgstr ""
+
+#: cmd.go:136 cmd.go:142
+msgid "<dir>"
+msgstr ""
+
+#: cmd.go:230 cmd.go:236
+msgid "<field>"
+msgstr ""
+
+#: cmd.go:148 cmd.go:160 cmd.go:172 cmd.go:178 cmd.go:190 cmd.go:202 cmd.go:208
+#: cmd.go:418
+msgid "<file>"
+msgstr ""
+
+#: cmd.go:154 cmd.go:166 cmd.go:184 cmd.go:196 cmd.go:424
+msgid "<flags>"
+msgstr ""
+
+#: cmd.go:218 cmd.go:224
+msgid "<n>"
+msgstr ""
+
+#: cmd.go:130
+msgid "<url>"
+msgstr ""
+
+#: cmd.go:362
+msgid "Always build all AUR packages even if installed"
+msgstr ""
+
+#: cmd.go:354
+msgid "Always build all AUR packages"
+msgstr ""
+
+#: cmd.go:350
+msgid "Always build target packages"
+msgstr ""
+
+#: cmd.go:374
+msgid "Always download pkgbuilds of all AUR packages"
+msgstr ""
+
+#: cmd.go:366
+msgid "Always download pkgbuilds of targets"
+msgstr ""
+
+#: cmd.go:314
+msgid "Ask to remove makedepends after install"
+msgstr ""
+
+#: cmd.go:115
+msgid "Assume targets are from the AUR"
+msgstr ""
+
+#: cmd.go:111
+msgid "Assume targets are from the repositories"
+msgstr ""
+
+#: cmd.go:394
+msgid "Automatically resolve conflicts using pacman's ask flag"
+msgstr ""
+
+#: cmd.go:414
+msgid "Build and install each AUR package one by one"
+msgstr ""
+
+#: cmd.go:410
+msgid "Build multiple AUR packages then install them together"
+msgstr ""
+
+#: cmd.go:122
+msgid "Causes the following options to be saved back to the"
+msgstr ""
+
+#: cmd.go:342
+msgid "Check development packages during sysupgrade"
+msgstr ""
+
+#: cmd.go:438
+msgid "Check packages' AUR page for changes during sysupgrade"
+msgstr ""
+
+#: cmd.go:398
+msgid "Confirm conflicts manually during the install"
+msgstr ""
+
+#: cmd.go:138
+msgid "Directory used to download and run PKGBUILDS"
+msgstr ""
+
+#: cmd.go:144
+msgid "Directory used to store downloads from the ABS"
+msgstr ""
+
+#: cmd.go:461
+msgid "Display system package statistics"
+msgstr ""
+
+#: cmd.go:346
+msgid "Do not check development packages"
+msgstr ""
+
+#: cmd.go:442
+msgid "Do not check packages' AUR page for changes"
+msgstr ""
+
+#: cmd.go:434
+msgid "Do not loop sudo calls in the background"
+msgstr ""
+
+#: cmd.go:330
+msgid "Do not remove package sources after successful build"
+msgstr ""
+
+#: cmd.go:298
+msgid "Don't clean build PKGBUILDS"
+msgstr ""
+
+#: cmd.go:306
+msgid "Don't edit/view PKGBUILDS"
+msgstr ""
+
+#: cmd.go:390
+msgid "Don't prompt to import PGP keys"
+msgstr ""
+
+#: cmd.go:322
+msgid "Don't remove makedepends after install"
+msgstr ""
+
+#: cmd.go:302
+msgid "Don't show diffs for build files"
+msgstr ""
+
+#: cmd.go:310
+msgid "Don't show the upgrade menu"
+msgstr ""
+
+#: cmd.go:150
+msgid "Editor to use when editing PKGBUILDs"
+msgstr ""
+
+#: cmd.go:483
+msgid "Force download for existing ABS packages"
+msgstr ""
+
+#: cmd.go:476
+msgid "Generates development package DB used for updating"
+msgstr ""
+
+#: cmd.go:282
+msgid "Give the option to clean build PKGBUILDS"
+msgstr ""
+
+#: cmd.go:290
+msgid "Give the option to edit/view PKGBUILDS"
+msgstr ""
+
+#: cmd.go:286
+msgid "Give the option to show diffs for build files"
+msgstr ""
+
+#: cmd.go:101
+msgid "If no arguments are provided 'yay -Syu' will be performed"
+msgstr ""
+
+#: cmd.go:104
+msgid "If no operation is provided -Y will be assumed"
+msgstr ""
+
+#: cmd.go:382
+msgid "Just look for packages by pkgname"
+msgstr ""
+
+#: cmd.go:378
+msgid "Look for matching providers when searching for packages"
+msgstr ""
+
+#: cmd.go:430
+msgid "Loop sudo calls in the background to avoid timeout"
+msgstr ""
+
+#: cmd.go:220
+msgid "Max amount of packages to query per AUR request"
+msgstr ""
+
+#: cmd.go:84
+msgid "New operations"
+msgstr ""
+
+#: cmd.go:107
+msgid "New options"
+msgstr ""
+
+#: cmd.go:156
+msgid "Pass arguments to editor"
+msgstr ""
+
+#: cmd.go:186
+msgid "Pass arguments to git"
+msgstr ""
+
+#: cmd.go:198
+msgid "Pass arguments to gpg"
+msgstr ""
+
+#: cmd.go:168
+msgid "Pass arguments to makepkg"
+msgstr ""
+
+#: cmd.go:426
+msgid "Pass arguments to sudo"
+msgstr ""
+
+#: cmd.go:406
+msgid "Perform the repo upgrade and AUR upgrade separately"
+msgstr ""
+
+#: cmd.go:118
+msgid "Permanent configuration options"
+msgstr ""
+
+#: cmd.go:465
+msgid "Print arch news"
+msgstr ""
+
+#: cmd.go:457
+msgid "Print current yay configuration"
+msgstr ""
+
+#: cmd.go:453
+msgid "Print default yay configuration"
+msgstr ""
+
+#: cmd.go:386
+msgid "Prompt to import PGP keys from PKGBUILDs"
+msgstr ""
+
+#: cmd.go:402
+msgid "Refresh then perform the repo and AUR upgrade together"
+msgstr ""
+
+#: cmd.go:318
+msgid "Remove makedepends after install"
+msgstr ""
+
+#: cmd.go:326
+msgid "Remove package sources after successful install"
+msgstr ""
+
+#: cmd.go:472
+msgid "Remove unneeded dependencies"
+msgstr ""
+
+#: cmd.go:238
+msgid "Search for packages using a specified field"
+msgstr ""
+
+#: cmd.go:244
+msgid "Set a predetermined answer for the clean build menu"
+msgstr ""
+
+#: cmd.go:250
+msgid "Set a predetermined answer for the diff menu"
+msgstr ""
+
+#: cmd.go:256
+msgid "Set a predetermined answer for the edit pkgbuild menu"
+msgstr ""
+
+#: cmd.go:262
+msgid "Set a predetermined answer for the upgrade menu"
+msgstr ""
+
+#: cmd.go:132
+msgid "Set an alternative AUR URL"
+msgstr ""
+
+#: cmd.go:294
+msgid "Show a detailed list of updates with the option to skip any"
+msgstr ""
+
+#: cmd.go:334
+msgid "Shows AUR's packages first and then repository's"
+msgstr ""
+
+#: cmd.go:338
+msgid "Shows repository's packages first and then AUR's"
+msgstr ""
+
+#: cmd.go:358
+msgid "Skip package build if in cache and up to date"
+msgstr ""
+
+#: cmd.go:370
+msgid "Skip pkgbuild download if in cache and up to date"
+msgstr ""
+
+#: cmd.go:232
+msgid "Sort AUR results by a specific field during search"
+msgstr ""
+
+#: cmd.go:226
+msgid "Time in days to refresh completion cache"
+msgstr ""
+
+#: cmd.go:266
+msgid "Unset the answer for the clean build menu"
+msgstr ""
+
+#: cmd.go:270
+msgid "Unset the answer for the edit diff menu"
+msgstr ""
+
+#: cmd.go:274
+msgid "Unset the answer for the edit pkgbuild menu"
+msgstr ""
+
+#: cmd.go:278
+msgid "Unset the answer for the upgrade menu"
+msgstr ""
+
+#: cmd.go:23
+msgid "Usage"
+msgstr ""
+
+#: cmd.go:214
+msgid "Use the default makepkg.conf"
+msgstr ""
+
+#: cmd.go:449
+msgid "Used for completions"
+msgstr ""
+
+#: cmd.go:126
+msgid "config file when used"
+msgstr ""
+
+#: cmd.go:81
+msgid "file(s)"
+msgstr ""
+
+#: cmd.go:479
+msgid "getpkgbuild specific options"
+msgstr ""
+
+#: cmd.go:180
+msgid "git command to use"
+msgstr ""
+
+#: cmd.go:192
+msgid "gpg command to use"
+msgstr ""
+
+#: cmd.go:162
+msgid "makepkg command to use"
+msgstr ""
+
+#: cmd.go:210
+msgid "makepkg.conf file to use"
+msgstr ""
+
+#: cmd.go:29
+msgid "operation"
+msgstr ""
+
+#: cmd.go:36
+msgid "operations"
+msgstr ""
+
+#: cmd.go:43 cmd.go:49 cmd.go:55 cmd.go:61 cmd.go:67 cmd.go:73 cmd.go:79
+#: cmd.go:88 cmd.go:94
+msgid "options"
+msgstr ""
+
+#: cmd.go:33 cmd.go:45 cmd.go:51 cmd.go:57 cmd.go:63 cmd.go:69 cmd.go:75
+#: cmd.go:90 cmd.go:98
+msgid "package(s)"
+msgstr ""
+
+#: cmd.go:174
+msgid "pacman command to use"
+msgstr ""
+
+#: cmd.go:204
+msgid "pacman.conf file to use"
+msgstr ""
+
+#: cmd.go:445
+msgid "show specific options"
+msgstr ""
+
+#: cmd.go:420
+msgid "sudo command to use"
+msgstr ""
+
+#: cmd.go:468
+msgid "yay specific options"
+msgstr ""
+
 #: install.go:563
 msgid " (Build Files Exist)"
 msgstr " (Ficheiros de compilação existem)"
