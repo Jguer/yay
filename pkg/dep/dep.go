@@ -74,7 +74,7 @@ func pkgSatisfies(name, version, dep string) bool {
 	return verSatisfies(version, depMod, depVersion)
 }
 
-func provideSatisfies(provide, dep string) bool {
+func provideSatisfies(provide, dep, pkgVersion string) bool {
 	depName, depMod, depVersion := splitDep(dep)
 	provideName, provideMod, provideVersion := splitDep(provide)
 
@@ -84,7 +84,7 @@ func provideSatisfies(provide, dep string) bool {
 
 	// Unversioned provieds can not satisfy a versioned dep
 	if provideMod == "" && depMod != "" {
-		return false
+		provideVersion = pkgVersion // Example package: pagure
 	}
 
 	return verSatisfies(provideVersion, depMod, depVersion)
@@ -113,7 +113,7 @@ func satisfiesAur(dep string, pkg *rpc.Pkg) bool {
 	}
 
 	for _, provide := range pkg.Provides {
-		if provideSatisfies(provide, dep) {
+		if provideSatisfies(provide, dep, pkg.Version) {
 			return true
 		}
 	}
@@ -127,7 +127,7 @@ func satisfiesRepo(dep string, pkg alpm.IPackage, dbExecutor db.Executor) bool {
 	}
 
 	for _, provided := range dbExecutor.PackageProvides(pkg) {
-		if provideSatisfies(provided.String(), dep) {
+		if provideSatisfies(provided.String(), dep, pkg.Version()) {
 			return true
 		}
 	}

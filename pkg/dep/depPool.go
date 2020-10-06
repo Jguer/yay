@@ -416,7 +416,7 @@ func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, pr
 		}
 
 		for _, provide := range pkg.Provides {
-			if provideSatisfies(provide, dep) {
+			if provideSatisfies(provide, dep, pkg.Version) {
 				providerSlice.Pkgs = append(providerSlice.Pkgs, pkg)
 				seen.Set(pkg.Name)
 				continue
