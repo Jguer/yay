@@ -110,7 +110,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 			continue
 		}
 
-		// If there'ss a different prefix only look in that repo
+		// If there's a different prefix only look in that repo
 		if target.DB != "" {
 			foundPkg = dp.AlpmExecutor.SatisfierFromDB(target.DepString(), target.DB)
 		} else {
@@ -180,6 +180,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 		// Hack for a bigger search result, if the user wants
 		// java-envronment we can search for just java instead and get
 		// more hits.
+		pkg, _, _ = splitDep(pkg) // openimagedenoise-git > ispc-git #1234
 		words := strings.Split(pkg, "-")
 
 		for i := range words {
