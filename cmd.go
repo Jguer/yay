@@ -20,124 +20,388 @@ import (
 )
 
 func usage() {
-	fmt.Println(`Usage:
-    yay
-    yay <operation> [...]
-    yay <package(s)>
+	fmt.Printf("%v", gotext.Get("Usage"))
+	fmt.Printf("%v\n", ":")
 
-operations:
-    yay {-h --help}
-    yay {-V --version}
-    yay {-D --database}    <options> <package(s)>
-    yay {-F --files}       [options] [package(s)]
-    yay {-Q --query}       [options] [package(s)]
-    yay {-R --remove}      [options] <package(s)>
-    yay {-S --sync}        [options] [package(s)]
-    yay {-T --deptest}     [options] [package(s)]
-    yay {-U --upgrade}     [options] <file(s)>
+	fmt.Printf("%v\n", "    yay")
 
-New operations:
-    yay {-Y --yay}         [options] [package(s)]
-    yay {-P --show}        [options]
-    yay {-G --getpkgbuild} [package(s)]
+	fmt.Printf("%v", "    yay <")
+	fmt.Printf("%v", gotext.Get("operation"))
+	fmt.Printf("%v\n", "> [...]")
 
-If no arguments are provided 'yay -Syu' will be performed
-If no operation is provided -Y will be assumed
+	fmt.Printf("%v", "    yay <")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n\n", ">")
 
-New options:
-       --repo             Assume targets are from the repositories
-    -a --aur              Assume targets are from the AUR
+	fmt.Printf("%v", gotext.Get("operations"))
+	fmt.Printf("%v\n", ":")
 
-Permanent configuration options:
-    --save                Causes the following options to be saved back to the
-                          config file when used
+	fmt.Printf("%v\n", "    yay {-h --help}")
 
-    --aururl      <url>   Set an alternative AUR URL
-    --builddir    <dir>   Directory used to download and run PKGBUILDS
-    --absdir      <dir>   Directory used to store downloads from the ABS
-    --editor      <file>  Editor to use when editing PKGBUILDs
-    --editorflags <flags> Pass arguments to editor
-    --makepkg     <file>  makepkg command to use
-    --mflags      <flags> Pass arguments to makepkg
-    --pacman      <file>  pacman command to use
-    --git         <file>  git command to use
-    --gitflags    <flags> Pass arguments to git
-    --gpg         <file>  gpg command to use
-    --gpgflags    <flags> Pass arguments to gpg
-    --config      <file>  pacman.conf file to use
-    --makepkgconf <file>  makepkg.conf file to use
-    --nomakepkgconf       Use the default makepkg.conf
+	fmt.Printf("%v\n", "    yay {-V --version}")
 
-    --requestsplitn <n>   Max amount of packages to query per AUR request
-    --completioninterval  <n> Time in days to refresh completion cache
-    --sortby    <field>   Sort AUR results by a specific field during search
-    --searchby  <field>   Search for packages using a specified field
-    --answerclean   <a>   Set a predetermined answer for the clean build menu
-    --answerdiff    <a>   Set a predetermined answer for the diff menu
-    --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
-    --answerupgrade <a>   Set a predetermined answer for the upgrade menu
-    --noanswerclean       Unset the answer for the clean build menu
-    --noanswerdiff        Unset the answer for the edit diff menu
-    --noansweredit        Unset the answer for the edit pkgbuild menu
-    --noanswerupgrade     Unset the answer for the upgrade menu
-    --cleanmenu           Give the option to clean build PKGBUILDS
-    --diffmenu            Give the option to show diffs for build files
-    --editmenu            Give the option to edit/view PKGBUILDS
-    --upgrademenu         Show a detailed list of updates with the option to skip any
-    --nocleanmenu         Don't clean build PKGBUILDS
-    --nodiffmenu          Don't show diffs for build files
-    --noeditmenu          Don't edit/view PKGBUILDS
-    --noupgrademenu       Don't show the upgrade menu
-    --askremovemake       Ask to remove makedepends after install
-    --removemake          Remove makedepends after install
-    --noremovemake        Don't remove makedepends after install
+	fmt.Printf("%v", "    yay {-D --database}    <")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "> <")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n", ">")
 
-    --cleanafter          Remove package sources after successful install
-    --nocleanafter        Do not remove package sources after successful build
-    --bottomup            Shows AUR's packages first and then repository's
-    --topdown             Shows repository's packages first and then AUR's
+	fmt.Printf("%v", "    yay {-F --files}       [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "] [")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n", "]")
 
-    --devel               Check development packages during sysupgrade
-    --nodevel             Do not check development packages
-    --rebuild             Always build target packages
-    --rebuildall          Always build all AUR packages
-    --norebuild           Skip package build if in cache and up to date
-    --rebuildtree         Always build all AUR packages even if installed
-    --redownload          Always download pkgbuilds of targets
-    --noredownload        Skip pkgbuild download if in cache and up to date
-    --redownloadall       Always download pkgbuilds of all AUR packages
-    --provides            Look for matching providers when searching for packages
-    --noprovides          Just look for packages by pkgname
-    --pgpfetch            Prompt to import PGP keys from PKGBUILDs
-    --nopgpfetch          Don't prompt to import PGP keys
-    --useask              Automatically resolve conflicts using pacman's ask flag
-    --nouseask            Confirm conflicts manually during the install
-    --combinedupgrade     Refresh then perform the repo and AUR upgrade together
-    --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
-    --batchinstall        Build multiple AUR packages then install them together
-    --nobatchinstall      Build and install each AUR package one by one
+	fmt.Printf("%v", "    yay {-Q --query}       [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "] [")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n", "]")
 
-    --sudo                <file>  sudo command to use
-    --sudoflags           <flags> Pass arguments to sudo
-    --sudoloop            Loop sudo calls in the background to avoid timeout
-    --nosudoloop          Do not loop sudo calls in the background
+	fmt.Printf("%v", "    yay {-R --remove}      [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "] [")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n", "]")
 
-    --timeupdate          Check packages' AUR page for changes during sysupgrade
-    --notimeupdate        Do not check packages' AUR page for changes
+	fmt.Printf("%v", "    yay {-S --sync}        [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "] [")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n", "]")
 
-show specific options:
-    -c --complete         Used for completions
-    -d --defaultconfig    Print default yay configuration
-    -g --currentconfig    Print current yay configuration
-    -s --stats            Display system package statistics
-    -w --news             Print arch news
+	fmt.Printf("%v", "    yay {-T --deptest}     [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "] [")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n", "]")
 
-yay specific options:
-    -c --clean            Remove unneeded dependencies
-       --gendb            Generates development package DB used for updating
+	fmt.Printf("%v", "    yay {-U --upgrade}     [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "] <")
+	fmt.Printf("%v", gotext.Get("file(s)"))
+	fmt.Printf("%v\n\n", ">")
 
-getpkgbuild specific options:
-    -f --force            Force download for existing ABS packages`)
+	fmt.Printf("%v", gotext.Get("New operations"))
+	fmt.Printf("%v\n", ":")
+
+	fmt.Printf("%v", "    yay {-Y --yay}         [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v", "] [")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v\n", "]")
+
+	fmt.Printf("%v", "    yay {-P --show}        [")
+	fmt.Printf("%v", gotext.Get("options"))
+	fmt.Printf("%v\n", "]")
+
+	fmt.Printf("%v", "    yay {-G --getpkgbuild} [")
+	fmt.Printf("%v", gotext.Get("package(s)"))
+	fmt.Printf("%v", "]\n\n")
+
+	fmt.Printf("%v\n", gotext.Get("If no arguments are provided 'yay -Syu' will be performed"))
+
+	fmt.Printf("%v\n\n", gotext.Get("If no operation is provided -Y will be assumed"))
+
+	fmt.Printf("%v", gotext.Get("New options"))
+	fmt.Printf("%v\n", ":")
+
+	fmt.Printf("%v", "       --repo             ")
+	fmt.Printf("%v\n", gotext.Get("Assume targets are from the repositories"))
+
+	fmt.Printf("%v", "    -a --aur              ")
+	fmt.Printf("%v\n\n", gotext.Get("Assume targets are from the AUR"))
+
+	fmt.Printf("%v", gotext.Get("Permanent configuration options"))
+	fmt.Printf("%v\n", ":")
+
+	fmt.Printf("%v", "    --save                ")
+	fmt.Printf("%v\n", gotext.Get("Causes the following options to be saved back to the"))
+
+	fmt.Printf("%v", "                          ")
+	fmt.Printf("%v\n\n", gotext.Get("config file when used"))
+
+	fmt.Printf("%v", "    --aururl      ")
+	fmt.Printf("%v", gotext.Get("<url>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Set an alternative AUR URL"))
+
+	fmt.Printf("%v", "    --builddir    ")
+	fmt.Printf("%v", gotext.Get("<dir>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Directory used to download and run PKGBUILDS"))
+
+	fmt.Printf("%v", "    --absdir      ")
+	fmt.Printf("%v", gotext.Get("<dir>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Directory used to store downloads from the ABS"))
+
+	fmt.Printf("%v", "    --editor      ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("Editor to use when editing PKGBUILDs"))
+
+	fmt.Printf("%v", "    --editorflags ")
+	fmt.Printf("%v", gotext.Get("<flags>"))
+	fmt.Printf("%v", " ")
+	fmt.Printf("%v\n", gotext.Get("Pass arguments to editor"))
+
+	fmt.Printf("%v", "    --makepkg     ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("makepkg command to use"))
+
+	fmt.Printf("%v", "    --mflags      ")
+	fmt.Printf("%v", gotext.Get("<flags>"))
+	fmt.Printf("%v", " ")
+	fmt.Printf("%v\n", gotext.Get("Pass arguments to makepkg"))
+
+	fmt.Printf("%v", "    --pacman      ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("pacman command to use"))
+
+	fmt.Printf("%v", "    --git         ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("git command to use"))
+
+	fmt.Printf("%v", "    --gitflags    ")
+	fmt.Printf("%v", gotext.Get("<flags>"))
+	fmt.Printf("%v", " ")
+	fmt.Printf("%v\n", gotext.Get("Pass arguments to git"))
+
+	fmt.Printf("%v", "    --gpg         ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("gpg command to use"))
+
+	fmt.Printf("%v", "    --gpgflags    ")
+	fmt.Printf("%v", gotext.Get("<flags>"))
+	fmt.Printf("%v", " ")
+	fmt.Printf("%v\n", gotext.Get("Pass arguments to gpg"))
+
+	fmt.Printf("%v", "    --config      ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("pacman.conf file to use"))
+
+	fmt.Printf("%v", "    --makepkgconf ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("makepkg.conf file to use"))
+
+	fmt.Printf("%v", "    --nomakepkgconf       ")
+	fmt.Printf("%v\n\n", gotext.Get("Use the default makepkg.conf"))
+
+	fmt.Printf("%v", "    --requestsplitn ")
+	fmt.Printf("%v", gotext.Get("<n>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Max amount of packages to query per AUR request"))
+
+	fmt.Printf("%v", "    --completioninterval  ")
+	fmt.Printf("%v", gotext.Get("<n>"))
+	fmt.Printf("%v", " ")
+	fmt.Printf("%v\n", gotext.Get("Time in days to refresh completion cache"))
+
+	fmt.Printf("%v", "    --sortby    ")
+	fmt.Printf("%v", gotext.Get("<field>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Sort AUR results by a specific field during search"))
+
+	fmt.Printf("%v", "    --searchby  ")
+	fmt.Printf("%v", gotext.Get("<field>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Search for packages using a specified field"))
+
+	fmt.Printf("%v", "    --answerclean   ")
+	fmt.Printf("%v", gotext.Get("<a>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Set a predetermined answer for the clean build menu"))
+
+	fmt.Printf("%v", "    --answerdiff    ")
+	fmt.Printf("%v", gotext.Get("<a>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Set a predetermined answer for the diff menu"))
+
+	fmt.Printf("%v", "    --answeredit    ")
+	fmt.Printf("%v", gotext.Get("<a>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Set a predetermined answer for the edit pkgbuild menu"))
+
+	fmt.Printf("%v", "    --answerupgrade ")
+	fmt.Printf("%v", gotext.Get("<a>"))
+	fmt.Printf("%v", "   ")
+	fmt.Printf("%v\n", gotext.Get("Set a predetermined answer for the upgrade menu"))
+
+	fmt.Printf("%v", "    --noanswerclean       ")
+	fmt.Printf("%v\n", gotext.Get("Unset the answer for the clean build menu"))
+
+	fmt.Printf("%v", "    --noanswerdiff        ")
+	fmt.Printf("%v\n", gotext.Get("Unset the answer for the edit diff menu"))
+
+	fmt.Printf("%v", "    --noansweredit        ")
+	fmt.Printf("%v\n", gotext.Get("Unset the answer for the edit pkgbuild menu"))
+
+	fmt.Printf("%v", "    --noanswerupgrade     ")
+	fmt.Printf("%v\n", gotext.Get("Unset the answer for the upgrade menu"))
+
+	fmt.Printf("%v", "    --cleanmenu           ")
+	fmt.Printf("%v\n", gotext.Get("Give the option to clean build PKGBUILDS"))
+
+	fmt.Printf("%v", "    --diffmenu            ")
+	fmt.Printf("%v\n", gotext.Get("Give the option to show diffs for build files"))
+
+	fmt.Printf("%v", "    --editmenu            ")
+	fmt.Printf("%v\n", gotext.Get("Give the option to edit/view PKGBUILDS"))
+
+	fmt.Printf("%v", "    --upgrademenu         ")
+	fmt.Printf("%v\n", gotext.Get("Show a detailed list of updates with the option to skip any"))
+
+	fmt.Printf("%v", "    --nocleanmenu         ")
+	fmt.Printf("%v\n", gotext.Get("Don't clean build PKGBUILDS"))
+
+	fmt.Printf("%v", "    --nodiffmenu          ")
+	fmt.Printf("%v\n", gotext.Get("Don't show diffs for build files"))
+
+	fmt.Printf("%v", "    --noeditmenu          ")
+	fmt.Printf("%v\n", gotext.Get("Don't edit/view PKGBUILDS"))
+
+	fmt.Printf("%v", "    --noupgrademenu       ")
+	fmt.Printf("%v\n", gotext.Get("Don't show the upgrade menu"))
+
+	fmt.Printf("%v", "    --askremovemake       ")
+	fmt.Printf("%v\n", gotext.Get("Ask to remove makedepends after install"))
+
+	fmt.Printf("%v", "    --removemake          ")
+	fmt.Printf("%v\n", gotext.Get("Remove makedepends after install"))
+
+	fmt.Printf("%v", "    --noremovemake        ")
+	fmt.Printf("%v\n\n", gotext.Get("Don't remove makedepends after install"))
+
+	fmt.Printf("%v", "    --cleanafter          ")
+	fmt.Printf("%v\n", gotext.Get("Remove package sources after successful install"))
+
+	fmt.Printf("%v", "    --nocleanafter        ")
+	fmt.Printf("%v\n", gotext.Get("Do not remove package sources after successful build"))
+
+	fmt.Printf("%v", "    --bottomup            ")
+	fmt.Printf("%v\n", gotext.Get("Shows AUR's packages first and then repository's"))
+
+	fmt.Printf("%v", "    --topdown             ")
+	fmt.Printf("%v\n\n", gotext.Get("Shows repository's packages first and then AUR's"))
+
+	fmt.Printf("%v", "    --devel               ")
+	fmt.Printf("%v\n", gotext.Get("Check development packages during sysupgrade"))
+
+	fmt.Printf("%v", "    --nodevel             ")
+	fmt.Printf("%v\n", gotext.Get("Do not check development packages"))
+
+	fmt.Printf("%v", "    --rebuild             ")
+	fmt.Printf("%v\n", gotext.Get("Always build target packages"))
+
+	fmt.Printf("%v", "    --rebuildall          ")
+	fmt.Printf("%v\n", gotext.Get("Always build all AUR packages"))
+
+	fmt.Printf("%v", "    --norebuild           ")
+	fmt.Printf("%v\n", gotext.Get("Skip package build if in cache and up to date"))
+
+	fmt.Printf("%v", "    --rebuildtree         ")
+	fmt.Printf("%v\n", gotext.Get("Always build all AUR packages even if installed"))
+
+	fmt.Printf("%v", "    --redownload          ")
+	fmt.Printf("%v\n", gotext.Get("Always download pkgbuilds of targets"))
+
+	fmt.Printf("%v", "    --noredownload        ")
+	fmt.Printf("%v\n", gotext.Get("Skip pkgbuild download if in cache and up to date"))
+
+	fmt.Printf("%v", "    --redownloadall       ")
+	fmt.Printf("%v\n", gotext.Get("Always download pkgbuilds of all AUR packages"))
+
+	fmt.Printf("%v", "    --provides            ")
+	fmt.Printf("%v\n", gotext.Get("Look for matching providers when searching for packages"))
+
+	fmt.Printf("%v", "    --noprovides          ")
+	fmt.Printf("%v\n", gotext.Get("Just look for packages by pkgname"))
+
+	fmt.Printf("%v", "    --pgpfetch            ")
+	fmt.Printf("%v\n", gotext.Get("Prompt to import PGP keys from PKGBUILDs"))
+
+	fmt.Printf("%v", "    --nopgpfetch          ")
+	fmt.Printf("%v\n", gotext.Get("Don't prompt to import PGP keys"))
+
+	fmt.Printf("%v", "    --useask              ")
+	fmt.Printf("%v\n", gotext.Get("Automatically resolve conflicts using pacman's ask flag"))
+
+	fmt.Printf("%v", "    --nouseask            ")
+	fmt.Printf("%v\n", gotext.Get("Confirm conflicts manually during the install"))
+
+	fmt.Printf("%v", "    --combinedupgrade     ")
+	fmt.Printf("%v\n", gotext.Get("Refresh then perform the repo and AUR upgrade together"))
+
+	fmt.Printf("%v", "    --nocombinedupgrade   ")
+	fmt.Printf("%v\n", gotext.Get("Perform the repo upgrade and AUR upgrade separately"))
+
+	fmt.Printf("%v", "    --batchinstall        ")
+	fmt.Printf("%v\n", gotext.Get("Build multiple AUR packages then install them together"))
+
+	fmt.Printf("%v", "    --nobatchinstall      ")
+	fmt.Printf("%v\n\n", gotext.Get("Build and install each AUR package one by one"))
+
+	fmt.Printf("%v", "    --sudo                ")
+	fmt.Printf("%v", gotext.Get("<file>"))
+	fmt.Printf("%v", "  ")
+	fmt.Printf("%v\n", gotext.Get("sudo command to use"))
+
+	fmt.Printf("%v", "    --sudoflags           ")
+	fmt.Printf("%v", gotext.Get("<flags>"))
+	fmt.Printf("%v", " ")
+	fmt.Printf("%v\n", gotext.Get("Pass arguments to sudo"))
+
+	fmt.Printf("%v", "    --sudoloop            ")
+	fmt.Printf("%v\n", gotext.Get("Loop sudo calls in the background to avoid timeout"))
+
+	fmt.Printf("%v", "    --nosudoloop          ")
+	fmt.Printf("%v\n\n", gotext.Get("Do not loop sudo calls in the background"))
+
+	fmt.Printf("%v", "    --timeupdate          ")
+	fmt.Printf("%v\n", gotext.Get("Check packages' AUR page for changes during sysupgrade"))
+
+	fmt.Printf("%v", "    --notimeupdate        ")
+	fmt.Printf("%v\n\n", gotext.Get("Do not check packages' AUR page for changes"))
+
+	fmt.Printf("%v", gotext.Get("show specific options"))
+	fmt.Printf("%v\n", ":")
+
+	fmt.Printf("%v", "    -c --complete         ")
+	fmt.Printf("%v\n", gotext.Get("Used for completions"))
+
+	fmt.Printf("%v", "    -d --defaultconfig    ")
+	fmt.Printf("%v\n", gotext.Get("Print default yay configuration"))
+
+	fmt.Printf("%v", "    -g --currentconfig    ")
+	fmt.Printf("%v\n", gotext.Get("Print current yay configuration"))
+
+	fmt.Printf("%v", "    -s --stats            ")
+	fmt.Printf("%v\n", gotext.Get("Display system package statistics"))
+
+	fmt.Printf("%v", "    -w --news             ")
+	fmt.Printf("%v\n\n", gotext.Get("Print arch news"))
+
+	fmt.Printf("%v", gotext.Get("yay specific options"))
+	fmt.Printf("%v\n", ":")
+
+	fmt.Printf("%v", "    -c --clean            ")
+	fmt.Printf("%v\n", gotext.Get("Remove unneeded dependencies"))
+
+	fmt.Printf("%v", "       --gendb            ")
+	fmt.Printf("%v\n\n", gotext.Get("Generates development package DB used for updating"))
+
+	fmt.Printf("%v", gotext.Get("getpkgbuild specific options"))
+	fmt.Printf("%v\n", ":")
+
+	fmt.Printf("%v", "    -f --force            ")
+	fmt.Printf("%v\n", gotext.Get("Force download for existing ABS packages"))
 }
 
 func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
