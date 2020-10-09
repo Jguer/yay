@@ -76,7 +76,7 @@ _yay() {
           nocleanmenu nodiffmenu noupgrademenu provides noprovides pgpfetch nopgpfetch
           useask nouseask combinedupgrade nocombinedupgrade aur repo makepkgconf
           nomakepkgconf askremovemake removemake noremovemake completioninterval aururl
-          searchby batchinstall nobatchinstall'
+          searchby batchinstall nobatchinstall mitmsslcert'
     'b d h q r v')
   yays=('clean gendb' 'c')
   show=('complete defaultconfig currentconfig stats  news' 'c d g s w')

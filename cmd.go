@@ -149,6 +149,10 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		sudoLoopBackground()
 	}
 
+	if config.MitmSSLCert != "" {
+		addMitmSSLCert(config.MitmSSLCert)
+	}
+
 	switch cmdArgs.Op {
 	case "V", "version":
 		handleVersion()

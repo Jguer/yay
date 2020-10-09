@@ -53,6 +53,7 @@ type Configuration struct {
 	RemoveMake         string   `json:"removemake"`
 	SudoBin            string   `json:"sudobin"`
 	SudoFlags          string   `json:"sudoflags"`
+	MitmSSLCert        string   `json:"mitmsslcert"`
 	RequestSplitN      int      `json:"requestsplitn"`
 	SearchMode         int      `json:"-"`
 	SortMode           int      `json:"sortmode"`
@@ -112,6 +113,7 @@ func (c *Configuration) expandEnv() {
 	c.GpgBin = os.ExpandEnv(c.GpgBin)
 	c.SudoBin = os.ExpandEnv(c.SudoBin)
 	c.SudoFlags = os.ExpandEnv(c.SudoFlags)
+	c.MitmSSLCert = os.ExpandEnv(c.MitmSSLCert)
 	c.ReDownload = os.ExpandEnv(c.ReDownload)
 	c.ReBuild = os.ExpandEnv(c.ReBuild)
 	c.AnswerClean = os.ExpandEnv(c.AnswerClean)
@@ -157,6 +159,7 @@ func DefaultConfig() *Configuration {
 		GpgBin:             "gpg",
 		SudoBin:            "sudo",
 		SudoFlags:          "",
+		MitmSSLCert:        "",
 		TimeUpdate:         false,
 		RequestSplitN:      150,
 		ReDownload:         "no",

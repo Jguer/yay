@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -80,4 +82,24 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 		waitLock(config.Runtime.PacmanConf.DBPath)
 	}
 	return exec.Command(argArr[0], argArr[1:]...)
+}
+
+func addMitmSSLCert(sslCertFile string) (ok bool) {
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil || rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	certs, err := ioutil.ReadFile(sslCertFile)
+	if err != nil {
+		text.Warnln(gotext.Get("The SSL cert file at '%s' cannot be read: %s", sslCertFile, err))
+		return false
+	}
+	if !rootCAs.AppendCertsFromPEM(certs) {
+		text.Warnln(gotext.Get(
+			"No SSL certificates were added to the cert pool. Maybe the file '%s' is empty or in a wrong format?",
+			sslCertFile,
+		))
+		return false
+	}
+	return true
 }

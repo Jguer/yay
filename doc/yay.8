@@ -508,6 +508,12 @@ builds.
 .B \-\-nosudoloop
 Do not loop sudo calls in the background.
 
+.TP
+.B \-\-mitmsslcert <certfile>
+Add the PEM-formatted SSL certificate(s) in the given file to the certificate
+pool. This can enable downloads in networks where HTTPS connections are
+intercepted like in some corporate networks.
+
 .SH EXAMPLES
 .TP
 yay \fIfoo\fR
