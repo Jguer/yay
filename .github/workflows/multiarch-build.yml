@@ -66,8 +66,6 @@ jobs:
         with:
           tag_name: ${{ steps.tags.outputs.tag }}
           release_name: ${{ steps.tags.outputs.tag }}
-          body: |
-            ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: false
       - name: Upload x86_64 asset
@@ -100,3 +98,7 @@ jobs:
           asset_path: ./yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
           asset_name: yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
           asset_content_type: application/tar+gzip
+      - name: Release Notary Action
+        uses: commitsar-app/release-notary@v0.8.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
