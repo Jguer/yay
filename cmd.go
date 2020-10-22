@@ -28,6 +28,14 @@ func opHelp(operation string, args ...string) string {
 	return fmt.Sprintf("    yay %-18s %s", operation, strings.Join(newArgs, " "))
 }
 
+func opHlp2(operation string, args ...string) string {
+	newArgs := make([]string, 0, len(args))
+	for _, arg := range args {
+		newArgs = append(newArgs, fmt.Sprintf("<%s>", arg))
+	}
+	return fmt.Sprintf("    yay %-18s %s", operation, strings.Join(newArgs, " "))
+}
+
 func optionHelp(option, description string, args ...string) string {
 	newArgs := make([]string, 0, len(args))
 	for _, arg := range args {
@@ -36,26 +44,40 @@ func optionHelp(option, description string, args ...string) string {
 	return fmt.Sprintf("    %-18s %-2s %s", option, strings.Join(newArgs, " "), description)
 }
 
+func optionHlp2(option, description string, args ...string) string {
+	newArgs := make([]string, 0, len(args))
+	for _, arg := range args {
+		newArgs = append(newArgs, fmt.Sprintf("<%s>", arg))
+	}
+	return fmt.Sprintf("    %-13s %-7s %s", option, strings.Join(newArgs, " "), description)
+}
+
+func optionHlp3(option, description string, args ...string) string {
+	newArgs := make([]string, 0, len(args))
+	for _, arg := range args {
+		newArgs = append(newArgs, fmt.Sprintf("<%s>", arg))
+	}
+	return fmt.Sprintf("    %-15s %-5s %s", option, strings.Join(newArgs, " "), description)
+}
+
 func usage() {
 	fmt.Print(gotext.Get("Usage"), ":\n    yay\n")
-
 	fmt.Printf("    yay <%s> [...]\n", gotext.Get("operation"))
 	fmt.Printf("    yay <%s>\n", gotext.Get("package(s)"))
 
 	fmt.Print("\n", gotext.Get("operations"), ":\n")
-
 	fmt.Println(opHelp("{-h --help}"))
 	fmt.Println(opHelp("{-V --version}"))
-	fmt.Println(opHelp("{-D --database}", gotext.Get("options"), gotext.Get("package(s)")))
+	fmt.Println(opHlp2("{-D --database}", gotext.Get("options"), gotext.Get("package(s)")))
 	fmt.Println(opHelp("{-F --files}", gotext.Get("options"), gotext.Get("package(s)")))
 	fmt.Println(opHelp("{-Q --query}", gotext.Get("options"), gotext.Get("package(s)")))
-	fmt.Println(opHelp("{-R --remove}", gotext.Get("options"), gotext.Get("package(s)")))
+	fmt.Println(opHelp("{-R --remove}", gotext.Get("options")), "<"+gotext.Get("package(s)")+">")
 	fmt.Println(opHelp("{-S --sync}", gotext.Get("options"), gotext.Get("package(s)")))
 	fmt.Println(opHelp("{-T --deptest}", gotext.Get("options"), gotext.Get("package(s)")))
-	fmt.Println(opHelp("{-U --upgrade}", gotext.Get("options"), gotext.Get("file(s)")))
+	fmt.Println(opHelp("{-U --upgrade}", gotext.Get("options")), "<"+gotext.Get("file(s)")+">")
 
 	fmt.Print("\n", gotext.Get("New operations"), ":\n")
-	fmt.Println(opHelp("{-G --getpkgbuild}", gotext.Get("options"), gotext.Get("package(s)")))
+	fmt.Println(opHelp("{-G --getpkgbuild}", gotext.Get("package(s)")))
 	fmt.Println(opHelp("{-P --show}", gotext.Get("options")))
 	fmt.Println(opHelp("{-Y --yay}", gotext.Get("options"), gotext.Get("package(s)")))
 
@@ -64,36 +86,37 @@ func usage() {
 	fmt.Println(gotext.Get("If no operation is provided -Y will be assumed"))
 
 	fmt.Print("\n", gotext.Get("New options"), ":\n")
-
 	fmt.Println(optionHelp("--repo", gotext.Get("Assume targets are from the repositories")))
 	fmt.Println(optionHelp("-a --aur", gotext.Get("Assume targets are from the AUR")))
 
 	fmt.Print("\n", gotext.Get("Permanent configuration options"), ":\n")
+	fmt.Println(optionHelp("--save", gotext.Get("Causes the following options to be saved back to the")))
+	fmt.Println(optionHelp("      ", gotext.Get("config file when used")))
 
-	fmt.Println(optionHelp("--save", gotext.Get("Causes the following options to be saved back to the config file when used")))
-	fmt.Println(optionHelp("--aururl", gotext.Get("Set an alternative AUR URL"), gotext.Get("url")))
-	fmt.Println(optionHelp("--builddir", gotext.Get("Directory used to download and run PKGBUILDS"), gotext.Get("dir")))
-	fmt.Println(optionHelp("--absdir", gotext.Get("Directory used to store downloads from the ABS"), gotext.Get("dir")))
-	fmt.Println(optionHelp("--editor", gotext.Get("Editor to use when editing PKGBUILDs"), gotext.Get("file")))
-	fmt.Println(optionHelp("--editorflags", gotext.Get("Pass arguments to editor"), gotext.Get("flags")))
-	fmt.Println(optionHelp("--makepkg", gotext.Get("makepkg command to use"), gotext.Get("file")))
-	fmt.Println(optionHelp("--mflags", gotext.Get("Pass arguments to makepkg"), gotext.Get("flags")))
-	fmt.Println(optionHelp("--pacman", gotext.Get("pacman command to use"), gotext.Get("file")))
-	fmt.Println(optionHelp("--git", gotext.Get("git command to use"), gotext.Get("file")))
-	fmt.Println(optionHelp("--gitflags", gotext.Get("Pass arguments to git"), gotext.Get("flags")))
-	fmt.Println(optionHelp("--gpg", gotext.Get("gpg command to use"), gotext.Get("file")))
-	fmt.Println(optionHelp("--gpgflags", gotext.Get("Pass arguments to gpg"), gotext.Get("flags")))
-	fmt.Println(optionHelp("--config", gotext.Get("pacman.conf file to use"), gotext.Get("file")))
-	fmt.Println(optionHelp("--makepkgconf", gotext.Get("makepkg.conf file to use"), gotext.Get("file")))
+	fmt.Println()
+	fmt.Println(optionHlp2("--aururl", gotext.Get("Set an alternative AUR URL"), gotext.Get("url")))
+	fmt.Println(optionHlp2("--builddir", gotext.Get("Directory used to download and run PKGBUILDS"), gotext.Get("dir")))
+	fmt.Println(optionHlp2("--absdir", gotext.Get("Directory used to store downloads from the ABS"), gotext.Get("dir")))
+	fmt.Println(optionHlp2("--editor", gotext.Get("Editor to use when editing PKGBUILDs"), gotext.Get("file")))
+	fmt.Println(optionHlp2("--editorflags", gotext.Get("Pass arguments to editor"), gotext.Get("flags")))
+	fmt.Println(optionHlp2("--makepkg", gotext.Get("makepkg command to use"), gotext.Get("file")))
+	fmt.Println(optionHlp2("--mflags", gotext.Get("Pass arguments to makepkg"), gotext.Get("flags")))
+	fmt.Println(optionHlp2("--pacman", gotext.Get("pacman command to use"), gotext.Get("file")))
+	fmt.Println(optionHlp2("--git", gotext.Get("git command to use"), gotext.Get("file")))
+	fmt.Println(optionHlp2("--gitflags", gotext.Get("Pass arguments to git"), gotext.Get("flags")))
+	fmt.Println(optionHlp2("--gpg", gotext.Get("gpg command to use"), gotext.Get("file")))
+	fmt.Println(optionHlp2("--gpgflags", gotext.Get("Pass arguments to gpg"), gotext.Get("flags")))
+	fmt.Println(optionHlp2("--config", gotext.Get("pacman.conf file to use"), gotext.Get("file")))
+	fmt.Println(optionHlp2("--makepkgconf", gotext.Get("makepkg.conf file to use"), gotext.Get("file")))
 	fmt.Println(optionHelp("--nomakepkgconf", gotext.Get("Use the default makepkg.conf")))
-	fmt.Println(optionHelp("--requestsplitn", gotext.Get("Max amount of packages to query per AUR request"), "n"))
-	fmt.Println(optionHelp("--completioninterval", gotext.Get("Time in days to refresh completion cache"), "n"))
-	fmt.Println(optionHelp("--sortby", gotext.Get("Sort AUR results by a specific field during search"), gotext.Get("field")))
-	fmt.Println(optionHelp("--searchby", gotext.Get("Search for packages using a specified field"), gotext.Get("field")))
-	fmt.Println(optionHelp("--answerclean", gotext.Get("Set a predetermined answer for the clean build menu"), "a"))
-	fmt.Println(optionHelp("--answerdiff", gotext.Get("Set a predetermined answer for the diff menu"), "a"))
-	fmt.Println(optionHelp("--answeredit", gotext.Get("Set a predetermined answer for the edit pkgbuild menu"), "a"))
-	fmt.Println(optionHelp("--answerupgrade", gotext.Get("Set a predetermined answer for the upgrade menu"), "a"))
+	fmt.Println(optionHlp3("--requestsplitn", gotext.Get("Max amount of packages to query per AUR request"), "n"))
+	fmt.Println(optionHelp("--completioninterval ", gotext.Get("Time in days to refresh completion cache"), "n"))
+	fmt.Println(optionHlp2("--sortby", gotext.Get("Sort AUR results by a specific field during search"), gotext.Get("field")))
+	fmt.Println(optionHlp2("--searchby", gotext.Get("Search for packages using a specified field"), gotext.Get("field")))
+	fmt.Println(optionHlp3("--answerclean", gotext.Get("Set a predetermined answer for the clean build menu"), "a"))
+	fmt.Println(optionHlp3("--answerdiff", gotext.Get("Set a predetermined answer for the diff menu"), "a"))
+	fmt.Println(optionHlp3("--answeredit", gotext.Get("Set a predetermined answer for the edit pkgbuild menu"), "a"))
+	fmt.Println(optionHlp3("--answerupgrade", gotext.Get("Set a predetermined answer for the upgrade menu"), "a"))
 	fmt.Println(optionHelp("--noanswerclean", gotext.Get("Unset the answer for the clean build menu")))
 	fmt.Println(optionHelp("--noanswerdiff", gotext.Get("Unset the answer for the edit diff menu")))
 	fmt.Println(optionHelp("--noansweredit", gotext.Get("Unset the answer for the edit pkgbuild menu")))
@@ -131,8 +154,8 @@ func usage() {
 	fmt.Println(optionHelp("--combinedupgrade", gotext.Get("Refresh then perform the repo and AUR upgrade together")))
 	fmt.Println(optionHelp("--batchinstall", gotext.Get("Build multiple AUR packages then install them together")))
 	fmt.Println(optionHelp("--nobatchinstall", gotext.Get("Build and install each AUR package one by one")))
-	fmt.Println(optionHelp("--sudo", gotext.Get("sudo command to use"), gotext.Get("file")))
-	fmt.Println(optionHelp("--sudoflags", gotext.Get("Pass arguments to sudo"), gotext.Get("flags")))
+	fmt.Println(optionHlp2("--sudo", gotext.Get("sudo command to use"), gotext.Get("file")))
+	fmt.Println(optionHlp2("--sudoflags", gotext.Get("Pass arguments to sudo"), gotext.Get("flags")))
 	fmt.Println(optionHelp("--sudoloop", gotext.Get("Loop sudo calls in the background to avoid timeout")))
 	fmt.Println(optionHelp("--nosudoloop", gotext.Get("Do not loop sudo calls in the background")))
 	fmt.Println(optionHelp("--timeupdate", gotext.Get("Check packages' AUR page for changes during sysupgrade")))
