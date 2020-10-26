@@ -86,7 +86,7 @@ func (c *Configuration) Save(configPath string) error {
 	// fix: unsaved config when yay's config path does not exist
 	_, err = os.Stat(filepath.Dir(configPath))
 	if os.IsNotExist(err) && err != nil {
-		os.MkdirAll(filepath.Dir(configPath), 0761)
+		_ = os.MkdirAll(filepath.Dir(configPath), 0761)
 	}
 	in, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
