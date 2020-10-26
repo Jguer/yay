@@ -14,7 +14,7 @@ type CmdBuilder struct {
 }
 
 func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
-	args := make([]string, 0, len(c.GitFlags)+len(extraArgs))
+	args := make([]string, len(c.GitFlags), len(c.GitFlags)+len(extraArgs))
 	copy(args, c.GitFlags)
 
 	if dir != "" {
@@ -29,7 +29,7 @@ func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
 }
 
 func (c *CmdBuilder) BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd {
-	args := make([]string, 0, len(c.MakepkgFlags)+len(extraArgs))
+	args := make([]string, len(c.MakepkgFlags), len(c.MakepkgFlags)+len(extraArgs))
 	copy(args, c.MakepkgFlags)
 
 	if c.MakepkgConfPath != "" {
