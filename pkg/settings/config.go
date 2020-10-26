@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -85,10 +84,9 @@ func (c *Configuration) Save(configPath string) error {
 	marshalledinfo = append(marshalledinfo, '\n')
 	// https://github.com/Jguer/yay/issues/1399
 	// fix: unsaved config when yay's config path does not exist
-	if _, err := os.Stat(filepath.Dir(configPath)); os.IsNotExist(err) {
-		if err = os.MkdirAll(path.Dir(configPath), 0761); err != nil {
-			return err
-		}
+	_, err = os.Stat(filepath.Dir(configPath))
+	if os.IsNotExist(err) && err != nil {
+		os.MkdirAll(filepath.Dir(configPath), 0761)
 	}
 	in, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
