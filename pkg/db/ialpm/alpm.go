@@ -24,8 +24,8 @@ type AlpmExecutor struct {
 	conf    *pacmanconf.Config
 }
 
-func NewExecutor(pacamnConf *pacmanconf.Config) (*AlpmExecutor, error) {
-	ae := &AlpmExecutor{conf: pacamnConf}
+func NewExecutor(pacmanConf *pacmanconf.Config) (*AlpmExecutor, error) {
+	ae := &AlpmExecutor{conf: pacmanConf}
 
 	err := ae.RefreshHandle()
 	if err != nil {

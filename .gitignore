@@ -26,3 +26,4 @@ qemu-*
 *.mo
 *.pot
 *.po~
+*.pprof
