@@ -21,7 +21,9 @@ func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
 		args = append(args, "-C", dir)
 	}
 
-	args = append(args, extraArgs...)
+	if len(extraArgs) > 0 {
+		args = append(args, extraArgs...)
+	}
 
 	cmd := exec.Command(c.GitBin, args...)
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
@@ -36,7 +38,9 @@ func (c *CmdBuilder) BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd 
 		args = append(args, "--config", c.MakepkgConfPath)
 	}
 
-	args = append(args, extraArgs...)
+	if len(extraArgs) > 0 {
+		args = append(args, extraArgs...)
+	}
 
 	cmd := exec.Command(c.MakepkgBin, args...)
 	cmd.Dir = dir

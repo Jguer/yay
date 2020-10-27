@@ -817,8 +817,8 @@ func (a *Arguments) ParseCommandLine(config *Configuration) error {
 	}
 
 	a.extractYayOptions(config)
-	config.Runtime.CmdBuilder.MakepkgFlags = strings.Split(config.MFlags, " ")
-	config.Runtime.CmdBuilder.GitFlags = strings.Split(config.GitFlags, " ")
+	config.Runtime.CmdBuilder.MakepkgFlags = strings.Fields(config.MFlags)
+	config.Runtime.CmdBuilder.GitFlags = strings.Fields(config.GitFlags)
 	return nil
 }
 

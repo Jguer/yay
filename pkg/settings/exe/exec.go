@@ -37,7 +37,9 @@ func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string,
 	cmd.Stderr = &errbuf
 	err = cmd.Start()
 	if err != nil {
-		return "", "", err
+		stdout = strings.TrimSpace(outbuf.String())
+		stderr = strings.TrimSpace(errbuf.String())
+		return stdout, stderr, err
 	}
 
 	if timeout != 0 {
@@ -54,12 +56,13 @@ func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string,
 	if timeout != 0 {
 		timer.Stop()
 	}
-	if err != nil {
-		return "", "", err
-	}
 
 	stdout = strings.TrimSpace(outbuf.String())
 	stderr = strings.TrimSpace(errbuf.String())
+	if err != nil {
+		return stdout, stderr, err
+	}
+
 	if timedOut {
 		err = fmt.Errorf("command timed out")
 	}
