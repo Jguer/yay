@@ -99,8 +99,7 @@ func main() {
 	}
 
 	if config.Runtime.SaveConfig {
-		errS := config.Save(config.Runtime.ConfigPath)
-		if errS != nil {
+		if errS := config.Save(config.Runtime.ConfigPath); errS != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}

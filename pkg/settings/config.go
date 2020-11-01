@@ -83,10 +83,8 @@ func (c *Configuration) Save(configPath string) error {
 	// https://github.com/Jguer/yay/issues/1325
 	marshalledinfo = append(marshalledinfo, '\n')
 	// https://github.com/Jguer/yay/issues/1399
-	// fix: unsaved config when yay's config path does not exist
-	_, err = os.Stat(filepath.Dir(configPath))
-	if os.IsNotExist(err) && err != nil {
-		if mkErr := os.MkdirAll(filepath.Dir(configPath), 0761); mkErr != nil {
+	if _, err = os.Stat(filepath.Dir(configPath)); os.IsNotExist(err) && err != nil {
+		if mkErr := os.MkdirAll(filepath.Dir(configPath), 0o755); mkErr != nil {
 			return mkErr
 		}
 	}
