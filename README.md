@@ -139,3 +139,9 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
 <img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-y.png" width="42%"/>
 <img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-ps.png" width="42%"/>
 </p>
+
+### Other AUR helpers/tools
+
+- [Paru](https://github.com/morganamilo/paru)
+- [aurutils](https://github.com/AladW/aurutils)
+- [pikaur](https://github.com/actionless/pikaur)
