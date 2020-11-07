@@ -817,8 +817,14 @@ func (a *Arguments) ParseCommandLine(config *Configuration) error {
 	}
 
 	a.extractYayOptions(config)
-	config.Runtime.CmdBuilder.MakepkgFlags = strings.Fields(config.MFlags)
-	config.Runtime.CmdBuilder.GitFlags = strings.Fields(config.GitFlags)
+
+	cmdBuilder := config.Runtime.CmdBuilder
+	cmdBuilder.GitBin = config.GitBin
+	cmdBuilder.GitFlags = strings.Fields(config.GitFlags)
+	cmdBuilder.MakepkgFlags = strings.Fields(config.MFlags)
+	cmdBuilder.MakepkgConfPath = config.MakepkgConf
+	cmdBuilder.MakepkgBin = config.MakepkgBin
+
 	return nil
 }
 
