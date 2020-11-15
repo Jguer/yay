@@ -103,38 +103,53 @@ func (s repoQuery) printSearch(dbExecutor db.Executor) {
 
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *rpc.Pkg, extendedInfo bool) {
-	text.PrintInfoValue(gotext.Get("Repository"), "aur")
-	text.PrintInfoValue(gotext.Get("Name"), a.Name)
-	text.PrintInfoValue(gotext.Get("Keywords"), a.Keywords...)
-	text.PrintInfoValue(gotext.Get("Version"), a.Version)
-	text.PrintInfoValue(gotext.Get("Description"), a.Description)
-	text.PrintInfoValue(gotext.Get("URL"), a.URL)
-	text.PrintInfoValue(gotext.Get("AUR URL"), config.AURURL+"/packages/"+a.Name)
-	text.PrintInfoValue(gotext.Get("Groups"), a.Groups...)
-	text.PrintInfoValue(gotext.Get("Licenses"), a.License...)
-	text.PrintInfoValue(gotext.Get("Provides"), a.Provides...)
-	text.PrintInfoValue(gotext.Get("Depends On"), a.Depends...)
-	text.PrintInfoValue(gotext.Get("Make Deps"), a.MakeDepends...)
-	text.PrintInfoValue(gotext.Get("Check Deps"), a.CheckDepends...)
-	text.PrintInfoValue(gotext.Get("Optional Deps"), a.OptDepends...)
-	text.PrintInfoValue(gotext.Get("Conflicts With"), a.Conflicts...)
-	text.PrintInfoValue(gotext.Get("Maintainer"), a.Maintainer)
-	text.PrintInfoValue(gotext.Get("Votes"), fmt.Sprintf("%d", a.NumVotes))
-	text.PrintInfoValue(gotext.Get("Popularity"), fmt.Sprintf("%f", a.Popularity))
-	text.PrintInfoValue(gotext.Get("First Submitted"), text.FormatTimeQuery(a.FirstSubmitted))
-	text.PrintInfoValue(gotext.Get("Last Modified"), text.FormatTimeQuery(a.LastModified))
-
+	type Info struct {
+		key string
+		values []string
+	}
+	infos := []Info{}
+	infos = append(infos, Info{gotext.Get("Repository"), []string{"aur"}})
+	infos = append(infos, Info{gotext.Get("Name"), []string{a.Name}})
+	infos = append(infos, Info{gotext.Get("Keywords"), a.Keywords})
+	infos = append(infos, Info{gotext.Get("Version"), []string{a.Version}})
+	infos = append(infos, Info{gotext.Get("Description"), []string{a.Description}})
+	infos = append(infos, Info{gotext.Get("URL"), []string{a.URL}})
+	infos = append(infos, Info{gotext.Get("AUR URL"), []string{config.AURURL+"/packages/"+a.Name}})
+	infos = append(infos, Info{gotext.Get("Groups"), a.Groups})
+	infos = append(infos, Info{gotext.Get("Licenses"), a.License})
+	infos = append(infos, Info{gotext.Get("Provides"), a.Provides})
+	infos = append(infos, Info{gotext.Get("Depends On"), a.Depends})
+	infos = append(infos, Info{gotext.Get("Make Deps"), a.MakeDepends})
+	infos = append(infos, Info{gotext.Get("Check Deps"), a.CheckDepends})
+	infos = append(infos, Info{gotext.Get("Optional Deps"), a.OptDepends})
+	infos = append(infos, Info{gotext.Get("Conflicts With"), a.Conflicts})
+	infos = append(infos, Info{gotext.Get("Maintainer"), []string{a.Maintainer}})
+	infos = append(infos, Info{gotext.Get("Votes"), []string{fmt.Sprintf("%d", a.NumVotes)}})
+	infos = append(infos, Info{gotext.Get("Popularity"), []string{fmt.Sprintf("%f", a.Popularity)}})
+	infos = append(infos, Info{gotext.Get("First Submitted"), []string{text.FormatTimeQuery(a.FirstSubmitted)}})
+	infos = append(infos, Info{gotext.Get("Last Modified"), []string{text.FormatTimeQuery(a.LastModified)}})
+	
 	if a.OutOfDate != 0 {
-		text.PrintInfoValue(gotext.Get("Out-of-date"), text.FormatTimeQuery(a.OutOfDate))
+		infos = append(infos, Info{gotext.Get("Out-of-date"), []string{text.FormatTimeQuery(a.OutOfDate)}})
 	} else {
-		text.PrintInfoValue(gotext.Get("Out-of-date"), "No")
+		infos = append(infos, Info{gotext.Get("Out-of-date"), []string{"No"}})
+	}
+	
+	if extendedInfo {
+		infos = append(infos, Info{"ID", []string{fmt.Sprintf("%d", a.ID)}})
+		infos = append(infos, Info{gotext.Get("Package Base ID"), []string{fmt.Sprintf("%d", a.PackageBaseID)}})
+		infos = append(infos, Info{gotext.Get("Package Base"), []string{a.PackageBase}})
+		infos = append(infos, Info{gotext.Get("Snapshot URL"), []string{config.AURURL+a.URLPath}})
 	}
 
-	if extendedInfo {
-		text.PrintInfoValue("ID", fmt.Sprintf("%d", a.ID))
-		text.PrintInfoValue(gotext.Get("Package Base ID"), fmt.Sprintf("%d", a.PackageBaseID))
-		text.PrintInfoValue(gotext.Get("Package Base"), a.PackageBase)
-		text.PrintInfoValue(gotext.Get("Snapshot URL"), config.AURURL+a.URLPath)
+	for _, info := range infos {
+		if keyWidth := text.GetStringWidth(info.key); keyWidth > text.MaxKeyWidth {
+			text.MaxKeyWidth = keyWidth
+		}
+	}
+
+	for _, info := range infos {
+		text.PrintInfoValue(info.key, info.values...)
 	}
 
 	fmt.Println()

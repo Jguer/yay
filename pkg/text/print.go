@@ -17,6 +17,7 @@ const (
 	opSymbol   = "::"
 )
 
+var MaxKeyWidth = 16
 var cachedColumnCount = -1
 
 func OperationInfoln(a ...interface{}) {
@@ -81,13 +82,12 @@ func getColumnCount() int {
 }
 
 func PrintInfoValue(key string, values ...string) {
-	// 16 (text) + 1 (:) + 1 ( )
-	const (
-		keyLength  = 18
-		delimCount = 2
-	)
+	// keyWidth (text) + 2 ( :) + 1 ( )
+	const delimCount = 3
+	keyLength := MaxKeyWidth + delimCount
 
-	str := fmt.Sprintf(Bold("%-16s: "), key)
+	formatStr := fmt.Sprintf("%s-%ds : ", "%", MaxKeyWidth - GetDoubleWidthCharNumber(key))
+	str := fmt.Sprintf(Bold(formatStr), key)
 	if len(values) == 0 || (len(values) == 1 && values[0] == "") {
 		fmt.Fprintf(os.Stdout, "%s%s\n", str, gotext.Get("None"))
 		return

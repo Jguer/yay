@@ -6,6 +6,7 @@ import (
 	"unicode"
 
 	"github.com/leonelquinteros/gotext"
+	"golang.org/x/text/width"
 )
 
 // SplitDBFromName split apart db/package to db and package
@@ -73,4 +74,33 @@ func ContinueTask(s string, cont, noConfirm bool) bool {
 
 	response = strings.ToLower(response)
 	return response == yes || response == y
+}
+
+// Get the width of the string.
+// Some special text and characters make up twice the width of the font in the console output.
+func GetStringWidth(str string) int {
+	stringWidth := 0
+	for _, char := range str {
+		prop := width.LookupRune(char)
+		if prop.Kind() == width.EastAsianWide || prop.Kind() == width.EastAsianFullwidth {
+			stringWidth += 2
+			continue
+		}
+		stringWidth++
+	}
+	return stringWidth
+}
+
+// Get the number of double-width characters.
+// The console outputs text with a width of 2
+func GetDoubleWidthCharNumber(str string) int {
+	charNumber := 0
+	for _, char := range str {
+		prop := width.LookupRune(char)
+		if prop.Kind() == width.EastAsianWide || prop.Kind() == width.EastAsianFullwidth {
+			charNumber++
+			continue
+		}
+	}
+	return charNumber
 }
