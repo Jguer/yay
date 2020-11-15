@@ -18,10 +18,11 @@ import (
 )
 
 type AlpmExecutor struct {
-	handle  *alpm.Handle
-	localDB alpm.IDB
-	syncDB  alpm.IDBList
-	conf    *pacmanconf.Config
+	handle       *alpm.Handle
+	localDB      alpm.IDB
+	syncDB       alpm.IDBList
+	syncDBsCache []alpm.IDB
+	conf         *pacmanconf.Config
 }
 
 func NewExecutor(pacmanConf *pacmanconf.Config) (*AlpmExecutor, error) {
@@ -255,6 +256,7 @@ func (ae *AlpmExecutor) RefreshHandle() error {
 	alpmHandle.SetQuestionCallback(ae.questionCallback())
 	alpmHandle.SetLogCallback(logCallback)
 	ae.handle = alpmHandle
+	ae.syncDBsCache = nil
 	ae.syncDB, err = alpmHandle.SyncDBs()
 	if err != nil {
 		return err
@@ -339,6 +341,22 @@ func (ae *AlpmExecutor) LocalPackage(pkgName string) alpm.IPackage {
 		return nil
 	}
 	return pkg
+}
+
+func (ae *AlpmExecutor) syncDBs() []alpm.IDB {
+	if ae.syncDBsCache == nil {
+		ae.syncDBsCache = ae.syncDB.Slice()
+	}
+	return ae.syncDBsCache
+}
+
+func (ae *AlpmExecutor) SyncPackage(pkgName string) alpm.IPackage {
+	for _, db := range ae.syncDBs() {
+		if dbPkg := db.Pkg(pkgName); dbPkg != nil {
+			return dbPkg
+		}
+	}
+	return nil
 }
 
 func (ae *AlpmExecutor) SatisfierFromDB(pkgName, dbName string) alpm.IPackage {

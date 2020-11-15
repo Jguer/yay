@@ -26,6 +26,7 @@ type Executor interface {
 	PackagesFromGroup(string) []alpm.IPackage
 	RefreshHandle() error
 	RepoUpgrades(bool) (upgrade.UpSlice, error)
+	SyncPackage(string) alpm.IPackage
 	SyncPackages(...string) []alpm.IPackage
 	SyncSatisfier(string) alpm.IPackage
 	SyncSatisfierExists(string) bool

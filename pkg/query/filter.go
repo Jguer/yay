@@ -12,15 +12,13 @@ import (
 
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively
 func GetPackageNamesBySource(dbExecutor db.Executor) (local, remote []string, err error) {
-outer:
 	for _, localpkg := range dbExecutor.LocalPackages() {
-		for _, syncpkg := range dbExecutor.SyncPackages() {
-			if localpkg.Name() == syncpkg.Name() {
-				local = append(local, localpkg.Name())
-				continue outer
-			}
+		pkgName := localpkg.Name()
+		if dbExecutor.SyncPackage(pkgName) != nil {
+			local = append(local, pkgName)
+		} else {
+			remote = append(remote, pkgName)
 		}
-		remote = append(remote, localpkg.Name())
 	}
 	return local, remote, err
 }
@@ -29,15 +27,12 @@ outer:
 func GetRemotePackages(dbExecutor db.Executor) (
 	remote []alpm.IPackage,
 	remoteNames []string) {
-outer:
 	for _, localpkg := range dbExecutor.LocalPackages() {
-		for _, syncpkg := range dbExecutor.SyncPackages() {
-			if localpkg.Name() == syncpkg.Name() {
-				continue outer
-			}
+		pkgName := localpkg.Name()
+		if dbExecutor.SyncPackage(pkgName) == nil {
+			remote = append(remote, localpkg)
+			remoteNames = append(remoteNames, pkgName)
 		}
-		remote = append(remote, localpkg)
-		remoteNames = append(remoteNames, localpkg.Name())
 	}
 	return remote, remoteNames
 }
