@@ -104,42 +104,42 @@ func (s repoQuery) printSearch(dbExecutor db.Executor) {
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *rpc.Pkg, extendedInfo bool) {
 	type Info struct {
-		key string
+		key    string
 		values []string
 	}
 	infos := []Info{}
-	infos = append(infos, Info{gotext.Get("Repository"), []string{"aur"}})
-	infos = append(infos, Info{gotext.Get("Name"), []string{a.Name}})
-	infos = append(infos, Info{gotext.Get("Keywords"), a.Keywords})
-	infos = append(infos, Info{gotext.Get("Version"), []string{a.Version}})
-	infos = append(infos, Info{gotext.Get("Description"), []string{a.Description}})
-	infos = append(infos, Info{gotext.Get("URL"), []string{a.URL}})
-	infos = append(infos, Info{gotext.Get("AUR URL"), []string{config.AURURL+"/packages/"+a.Name}})
-	infos = append(infos, Info{gotext.Get("Groups"), a.Groups})
-	infos = append(infos, Info{gotext.Get("Licenses"), a.License})
-	infos = append(infos, Info{gotext.Get("Provides"), a.Provides})
-	infos = append(infos, Info{gotext.Get("Depends On"), a.Depends})
-	infos = append(infos, Info{gotext.Get("Make Deps"), a.MakeDepends})
-	infos = append(infos, Info{gotext.Get("Check Deps"), a.CheckDepends})
-	infos = append(infos, Info{gotext.Get("Optional Deps"), a.OptDepends})
-	infos = append(infos, Info{gotext.Get("Conflicts With"), a.Conflicts})
-	infos = append(infos, Info{gotext.Get("Maintainer"), []string{a.Maintainer}})
-	infos = append(infos, Info{gotext.Get("Votes"), []string{fmt.Sprintf("%d", a.NumVotes)}})
-	infos = append(infos, Info{gotext.Get("Popularity"), []string{fmt.Sprintf("%f", a.Popularity)}})
-	infos = append(infos, Info{gotext.Get("First Submitted"), []string{text.FormatTimeQuery(a.FirstSubmitted)}})
-	infos = append(infos, Info{gotext.Get("Last Modified"), []string{text.FormatTimeQuery(a.LastModified)}})
-	
+	infos = append(infos, Info{gotext.Get("Repository"), []string{"aur"}},
+		Info{gotext.Get("Name"), []string{a.Name}},
+		Info{gotext.Get("Keywords"), a.Keywords},
+		Info{gotext.Get("Version"), []string{a.Version}},
+		Info{gotext.Get("Description"), []string{a.Description}},
+		Info{gotext.Get("URL"), []string{a.URL}},
+		Info{gotext.Get("AUR URL"), []string{config.AURURL + "/packages/" + a.Name}},
+		Info{gotext.Get("Groups"), a.Groups},
+		Info{gotext.Get("Licenses"), a.License},
+		Info{gotext.Get("Provides"), a.Provides},
+		Info{gotext.Get("Depends On"), a.Depends},
+		Info{gotext.Get("Make Deps"), a.MakeDepends},
+		Info{gotext.Get("Check Deps"), a.CheckDepends},
+		Info{gotext.Get("Optional Deps"), a.OptDepends},
+		Info{gotext.Get("Conflicts With"), a.Conflicts},
+		Info{gotext.Get("Maintainer"), []string{a.Maintainer}},
+		Info{gotext.Get("Votes"), []string{fmt.Sprintf("%d", a.NumVotes)}},
+		Info{gotext.Get("Popularity"), []string{fmt.Sprintf("%f", a.Popularity)}},
+		Info{gotext.Get("First Submitted"), []string{text.FormatTimeQuery(a.FirstSubmitted)}},
+		Info{gotext.Get("Last Modified"), []string{text.FormatTimeQuery(a.LastModified)}})
+
 	if a.OutOfDate != 0 {
 		infos = append(infos, Info{gotext.Get("Out-of-date"), []string{text.FormatTimeQuery(a.OutOfDate)}})
 	} else {
 		infos = append(infos, Info{gotext.Get("Out-of-date"), []string{"No"}})
 	}
-	
+
 	if extendedInfo {
-		infos = append(infos, Info{"ID", []string{fmt.Sprintf("%d", a.ID)}})
-		infos = append(infos, Info{gotext.Get("Package Base ID"), []string{fmt.Sprintf("%d", a.PackageBaseID)}})
-		infos = append(infos, Info{gotext.Get("Package Base"), []string{a.PackageBase}})
-		infos = append(infos, Info{gotext.Get("Snapshot URL"), []string{config.AURURL+a.URLPath}})
+		infos = append(infos, Info{"ID", []string{fmt.Sprintf("%d", a.ID)}},
+			Info{gotext.Get("Package Base ID"), []string{fmt.Sprintf("%d", a.PackageBaseID)}},
+			Info{gotext.Get("Package Base"), []string{a.PackageBase}},
+			Info{gotext.Get("Snapshot URL"), []string{config.AURURL + a.URLPath}})
 	}
 
 	for _, info := range infos {

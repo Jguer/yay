@@ -86,7 +86,7 @@ func PrintInfoValue(key string, values ...string) {
 	const delimCount = 3
 	keyLength := MaxKeyWidth + delimCount
 
-	formatStr := fmt.Sprintf("%s-%ds : ", "%", MaxKeyWidth - GetDoubleWidthCharNumber(key))
+	formatStr := fmt.Sprintf("%s-%ds : ", "%", MaxKeyWidth-GetDoubleWidthCharNumber(key))
 	str := fmt.Sprintf(Bold(formatStr), key)
 	if len(values) == 0 || (len(values) == 1 && values[0] == "") {
 		fmt.Fprintf(os.Stdout, "%s%s\n", str, gotext.Get("None"))
