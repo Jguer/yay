@@ -8,30 +8,49 @@ jobs:
   build-releases:
     strategy:
       matrix:
-        arch: ["x86_64", "armv7h", "aarch64"]
+        arch:
+          [
+            "linux/amd64 x86_64",
+            "linux/arm/v6 armv6h",
+            "linux/arm/v7 armv7h",
+            "linux/arm64 aarch64",
+          ]
     name: Build ${{ matrix.arch }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: latest
       - name: Read info
         id: tags
         shell: bash
         run: |
           echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
           echo ::set-output name=TAG::${GITHUB_REF/refs\/tags\//}
-      - name: Install dependencies
-        run: sudo apt update -y && sudo apt install -y qemu qemu-user-static
-      - name: Setup qemu-user-static
-        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          arch="${{ matrix.arch }}"
+          echo ::set-output name=PLATFORM::${arch%% *}
+          echo ::set-output name=ARCH::${arch##* }
       - name: Build ${{ matrix.arch }} release
         run: |
           mkdir artifacts
-          make docker-release-${{ matrix.arch }} ARCH=${{ matrix.arch }} VERSION=${{ steps.tags.outputs.version }} PREFIX="/usr"
+          docker buildx build --platform ${{ steps.tags.outputs.platform }} \
+            --build-arg VERSION=${{ steps.tags.outputs.version }} \
+            --build-arg ARCH=${{ steps.tags.outputs.arch }} \
+            --build-arg PREFIX="/usr" \
+            -t yay:${{ steps.tags.outputs.arch }} . --load
+          make docker-release ARCH=${{ steps.tags.outputs.arch }} VERSION=${{ steps.tags.outputs.version }} PREFIX="/usr"
           mv *.tar.gz artifacts
       - uses: actions/upload-artifact@v2
         with:
-          name: yay_${{ matrix.arch }}
+          name: yay_${{ steps.tags.outputs.arch }}
           path: artifacts
   create_release:
     name: Create release from this build
@@ -50,6 +69,9 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: yay_armv7h
+      - uses: actions/download-artifact@v2
+        with:
+          name: yay_armv6h
       - uses: actions/download-artifact@v2
         with:
           name: yay_aarch64
@@ -82,6 +104,16 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
           asset_name: yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
+          asset_content_type: application/tar+gzip
+      - name: Upload armv6h asset
+        id: upload-release-asset-armv6h
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./yay_${{ steps.tags.outputs.version }}_armv6h.tar.gz
+          asset_name: yay_${{ steps.tags.outputs.version }}_armv6h.tar.gz
           asset_content_type: application/tar+gzip
       - name: Upload aarch64 asset
         id: upload-release-asset-aarch64
