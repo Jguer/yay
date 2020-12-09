@@ -23,7 +23,8 @@ POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
-GOFLAGS ?= -v -trimpath -mod=readonly -modcacherw
+GOFLAGS ?= -v -trimpath -modcacherw
+GOFLAGS += $(shell pacman -T 'pacman>6' && echo "-tags six")
 EXTRA_GOFLAGS ?= -buildmode=pie
 LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}"
 
