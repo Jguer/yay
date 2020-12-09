@@ -9,6 +9,8 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"sort"
+	"strings"
 	"testing"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -255,7 +257,10 @@ func TestCheckPgpKeys(t *testing.T) {
 				out, _ := ioutil.ReadAll(r)
 				os.Stdout = rescueStdout
 
-				cupaloy.SnapshotT(t, string(out))
+				splitLines := strings.Split(string(out), "\n")
+				sort.Strings(splitLines)
+
+				cupaloy.SnapshotT(t, strings.Join(splitLines, "\n"))
 				return
 			}
 			// Here, we want to see the error.
