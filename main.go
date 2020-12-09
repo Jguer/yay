@@ -6,7 +6,7 @@ import (
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/db/ialpm"
@@ -57,12 +57,12 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*pacmanconf
 		pacmanConf.GPGDir = gpgDir
 	}
 
-	useColor := pacmanConf.Color && terminal.IsTerminal(int(os.Stdout.Fd()))
+	useColor := pacmanConf.Color && term.IsTerminal(int(os.Stdout.Fd()))
 	switch value, _, _ := cmdArgs.GetArg("color"); value {
 	case "always":
 		useColor = true
 	case "auto":
-		useColor = terminal.IsTerminal(int(os.Stdout.Fd()))
+		useColor = term.IsTerminal(int(os.Stdout.Fd()))
 	case "never":
 		useColor = false
 	}
