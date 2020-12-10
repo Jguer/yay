@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -35,6 +36,8 @@ func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string,
 
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
 	err = cmd.Start()
 	if err != nil {
 		stdout = strings.TrimSpace(outbuf.String())
@@ -44,7 +47,7 @@ func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string,
 
 	if timeout != 0 {
 		timer = time.AfterFunc(time.Duration(timeout)*time.Second, func() {
-			err = cmd.Process.Kill()
+			err = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 			if err != nil {
 				text.Errorln(err)
 			}
