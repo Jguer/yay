@@ -5,7 +5,6 @@
 set -l progname yay
 
 # Yay constants
-set -l noopt 'not __fish_contains_opt -s Y -s G -s V -s P -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files version'
 set -l listall "(yay -Pc)"
 set -l listpacman "(__fish_print_packages)"
 set -l yayspecific '__fish_contains_opt -s Y yay'
@@ -13,15 +12,19 @@ set -l show '__fish_contains_opt -s P show'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
 
 # Pacman constants
-set -l listinstalled "(pacman -Q | string replace ' ' \t)"
+set -l listinstalled "(__fish_print_packages --installed)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
+
+set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
 set -l database '__fish_contains_opt -s D database'
 set -l query '__fish_contains_opt -s Q query'
 set -l remove '__fish_contains_opt -s R remove'
 set -l sync '__fish_contains_opt -s S sync'
 set -l upgrade '__fish_contains_opt -s U upgrade'
 set -l files '__fish_contains_opt -s F files'
+
+
 
 complete -c $progname -e
 complete -c $progname -f
@@ -35,9 +38,9 @@ complete -c $progname -s Q -f -l query -n "$noopt" -d 'Query the package databas
 complete -c $progname -s R -f -l remove -n "$noopt" -d 'Remove packages from the system'
 complete -c $progname -s S -f -l sync -n "$noopt" -d 'Synchronize packages'
 complete -c $progname -s T -f -l deptest -n "$noopt" -d 'Check dependencies'
-complete -c $progname -s U -f -l upgrade -n "$noopt" -d 'Upgrade or add a local package'
+complete -c $progname -s U -l upgrade -n "$noopt" -d 'Upgrade or add a local package'
 complete -c $progname -s F -f -l files -n "$noopt" -d 'Query the files database'
-complete -c $progname -s V -f -l version -n "$noopt" -d 'Display version and exit'
+complete -c $progname -s V -f -l version -d 'Display version and exit'
 complete -c $progname -s h -f -l help -d 'Display help'
 
 # General options
@@ -48,7 +51,7 @@ complete -c $progname -n "not $noopt" -s v -l verbose -d 'Output more status mes
 complete -c $progname -n "not $noopt" -l arch -d 'Alternate architecture' -f
 complete -c $progname -n "not $noopt" -l cachedir -d 'Alternate package cache location' -xa "(__fish_complete_directories)"
 complete -c $progname -n "not $noopt" -l color -d 'Colorize the output' -fa '{auto,always,never}'
-complete -c $progname -n "not $noopt" -l config -d 'Alternate config file' -r
+complete -c $progname -n "not $noopt" -l config -d 'Alternate config file' -rF
 complete -c $progname -n "not $noopt" -l confirm -d 'Always ask for confirmation' -f
 complete -c $progname -n "not $noopt" -l debug -d 'Display debug messages' -f
 complete -c $progname -n "not $noopt" -l disable-download-timeout -d 'Use relaxed timeouts for download' -f
@@ -96,7 +99,7 @@ for condition in sync upgrade
     complete -c $progname -n "$$condition" -l ignore -d 'Ignore a package upgrade (can be used more than once)' -xa "$listall"
     complete -c $progname -n "$$condition" -l ignoregroup -d 'Ignore a group upgrade (can be used more than once)' -xa "$listgroups"
     complete -c $progname -n "$$condition" -l needed -d 'Do not reinstall up to date packages' -f
-    complete -c $progname -n "$$condition" -l overwrite -d 'Overwrite conflicting files (can be used more than once)' -r
+    complete -c $progname -n "$$condition" -l overwrite -d 'Overwrite conflicting files (can be used more than once)' -rF
 end
 
 # Database options
@@ -110,7 +113,7 @@ complete -c $progname -n "$has_db_opt; and $database" -xa "$listinstalled"
 # File options - since pacman 5
 complete -c $progname -n "$files" -s x -l regex -d 'Interpret each query as a regular expression' -f
 complete -c $progname -n "$files" -l machinereadable -d 'Print each match in a machine readable output format' -f
-complete -c $progname -n "$files" -d 'Package' -xa "$listpacman"
+complete -c $progname -n "$files" -d Package -xa "$listpacman"
 
 # Query options
 complete -c $progname -n "$query" -s c -l changelog -d 'View the change log of PACKAGE' -f
@@ -120,8 +123,8 @@ complete -c $progname -n "$query" -s i -l info -d 'View PACKAGE [backup files] i
 complete -c $progname -n "$query" -s k -l check -d 'Check that PACKAGE files exist' -f
 complete -c $progname -n "$query" -s m -l foreign -d 'List installed packages not found in sync database' -f
 complete -c $progname -n "$query" -s n -l native -d 'list installed packages only found in sync database' -f
-complete -c $progname -n "$query" -s o -l owns -d 'Query the package that owns FILE' -r
-complete -c $progname -n "$query" -s p -l file -d 'Query a package file instead of the database' -r
+complete -c $progname -n "$query" -s o -l owns -d 'Query the package that owns FILE' -rF
+complete -c $progname -n "$query" -s p -l file -d 'Query a package file instead of the database' -rF
 complete -c $progname -n "$query" -s s -l search -d 'Search locally-installed packages for regexp' -f
 complete -c $progname -n "$query" -s t -l unrequired -d 'List only unrequired packages [and optdepends]' -f
 complete -c $progname -n "$query" -s u -l upgrades -d 'List only out-of-date packages' -f
@@ -145,8 +148,8 @@ complete -c $progname -n "$sync" -xa "$listall $listgroups"
 
 # Upgrade options
 # Theoretically, pacman reads packages in all formats that libarchive supports
-# In practice, it's going to be tar.xz, tar.gz or tar.zst
-complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.zst; __fish_complete_suffix pkg.tar.xz; __fish_complete_suffix pkg.tar.gz)' -d 'Package file'
+# In practice, it's going to be tar.xz, tar.gz, tar.zst, or just pkg.tar (uncompressed pkg)
+complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.zst; __fish_complete_suffix pkg.tar.xz; __fish_complete_suffix pkg.tar.gz; __fish_complete_suffix pkg.tar;)' -d 'Package file'
 
 
 # Yay operations
@@ -175,7 +178,7 @@ complete -c $progname -n "$show" -s q -l quiet -d 'Do not print news description
 complete -c $progname -n "$getpkgbuild" -s f -l force -d 'Force download for existing ABS packages' -f
 complete -c $progname -n "$getpkgbuild" -xa "$listall"
 
-# Premenent configuration settings
+# Permanent configuration settings
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
 complete -c $progname -n "not $noopt" -l aururl -d 'Set an alternative AUR URL' -f
 complete -c $progname -n "not $noopt" -l builddir -d 'Directory to use for Building AUR Packages' -r
