@@ -12,7 +12,7 @@ set -l show '__fish_contains_opt -s P show'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
 
 # Pacman constants
-set -l listinstalled "(__fish_print_packages --installed)"
+set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 
