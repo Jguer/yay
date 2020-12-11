@@ -9,6 +9,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
@@ -445,34 +446,22 @@ func aurPkgbuilds(names []string) ([]string, error) {
 	return pkgbuilds, nil
 }
 
-func repoPkgbuilds(names []string) ([]string, error) {
+func repoPkgbuilds(dbExecutor db.Executor, names []string) ([]string, error) {
 	pkgbuilds := make([]string, 0, len(names))
 	var mux sync.Mutex
 	var wg sync.WaitGroup
 	var errs multierror.MultiError
 
-	dbList, dbErr := alpmHandle.SyncDBs()
-	if dbErr != nil {
-		return nil, dbErr
-	}
-	dbSlice := dbList.Slice()
-
 	makeRequest := func(full string) {
+		var pkg alpm.IPackage
 		defer wg.Done()
 
-		db, name := splitDBFromName(full)
+		db, name := text.SplitDBFromName(full)
 
-		if db == "" {
-			var pkg *alpm.Package
-			for _, alpmDB := range dbSlice {
-				if pkg = alpmDB.Pkg(name); pkg != nil {
-					db = alpmDB.Name()
-					name = pkg.Base()
-					if name == "" {
-						name = pkg.Name()
-					}
-				}
-			}
+		if db != "" {
+			pkg = dbExecutor.SatisfierFromDB(name, db)
+		} else {
+			pkg = dbExecutor.SyncSatisfier(name)
 		}
 
 		values := url.Values{}
@@ -482,7 +471,7 @@ func repoPkgbuilds(names []string) ([]string, error) {
 
 		// TODO: Check existence with ls-remote
 		// https://git.archlinux.org/svntogit/packages.git
-		switch db {
+		switch pkg.DB().Name() {
 		case "core", "extra", "testing":
 			url = "https://git.archlinux.org/svntogit/packages.git/plain/trunk/PKGBUILD?"
 		case "community", "multilib", "community-testing", "multilib-testing":

@@ -9,6 +9,7 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
+	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -265,4 +266,47 @@ outer:
 	}
 
 	return nil
+}
+
+func printPkgbuilds(dbExecutor db.Executor, pkgS []string) error {
+	var pkgbuilds []string
+	var localPkgbuilds []string
+	missing := false
+	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
+	aurS, repoS := packageSlices(pkgS, dbExecutor)
+	var err error
+	var errs multierror.MultiError
+
+	if len(aurS) != 0 {
+		noDB := make([]string, 0, len(aurS))
+		for _, pkg := range aurS {
+			_, name := text.SplitDBFromName(pkg)
+			noDB = append(noDB, name)
+		}
+		localPkgbuilds, err = aurPkgbuilds(noDB)
+		pkgbuilds = append(pkgbuilds, localPkgbuilds...)
+		errs.Add(err)
+	}
+
+	if len(repoS) != 0 {
+		localPkgbuilds, err = repoPkgbuilds(dbExecutor, repoS)
+		pkgbuilds = append(pkgbuilds, localPkgbuilds...)
+		errs.Add(err)
+	}
+
+	if len(aurS)+len(repoS) != len(pkgbuilds) {
+		missing = true
+	}
+
+	if len(pkgbuilds) != 0 {
+		for _, pkgbuild := range pkgbuilds {
+			fmt.Print(pkgbuild)
+		}
+	}
+
+	if missing {
+		err = fmt.Errorf("Missing packages")
+	}
+
+	return err
 }

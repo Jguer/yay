@@ -217,8 +217,8 @@ func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) (err error
 		err = completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	case cmdArgs.ExistsArg("s", "stats"):
 		err = localStatistics(dbExecutor)
-	case cmdArgs.existsArg("p", "pkgbuild"):
-		err = printPkgbuilds(cmdArgs.targets)
+	case cmdArgs.ExistsArg("p", "pkgbuild"):
+		err = printPkgbuilds(dbExecutor, cmdArgs.Targets)
 	default:
 		err = nil
 	}
