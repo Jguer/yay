@@ -129,6 +129,3 @@ jobs:
         uses: actions/checkout@v2
       - name: Release Notary Action
         uses: commitsar-app/release-notary@v0.8.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: jguer/yay
