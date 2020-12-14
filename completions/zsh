@@ -160,6 +160,7 @@ _pacman_opts_yay_modifiers=(
 # -G
 _pacman_opts_getpkgbuild_modifiers=(
 	{-f,--force}'[Force download for existing ABS packages]'
+	{-p,--pkgbuild}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
 )
 
 # -P
@@ -171,7 +172,6 @@ _pacman_opts_print_modifiers=(
 		{-s,--stats}'[Display system package statistics]'
 		{-u,--upgrades}'[Print update list]'
 		{-w,--news}'[Print arch news]'
-		{-p,--pkgbuild}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
 )
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(

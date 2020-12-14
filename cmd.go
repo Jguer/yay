@@ -198,31 +198,29 @@ func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
-func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) (err error) {
+func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.DefaultConfig()
 		fmt.Printf("%v", tmpConfig)
+		return nil
 	case cmdArgs.ExistsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
+		return nil
 	case cmdArgs.ExistsArg("n", "numberupgrades"):
-		err = printNumberOfUpdates(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		return printNumberOfUpdates(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
-		err = news.PrintNewsFeed(dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
+		return news.PrintNewsFeed(dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
-		err = completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
+		return completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
-		err = completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		return completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	case cmdArgs.ExistsArg("s", "stats"):
-		err = localStatistics(dbExecutor)
-	case cmdArgs.ExistsArg("p", "pkgbuild"):
-		err = printPkgbuilds(dbExecutor, cmdArgs.Targets)
-	default:
-		err = nil
+		return localStatistics(dbExecutor)
 	}
-	return err
+	return nil
 }
 
 func handleYay(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
@@ -242,6 +240,10 @@ func handleYay(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 }
 
 func handleGetpkgbuild(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
+	switch {
+	case cmdArgs.ExistsArg("p", "pkgbuild"):
+		return printPkgbuilds(dbExecutor, cmdArgs.Targets)
+	}
 	return getPkgbuilds(cmdArgs.Targets, dbExecutor, cmdArgs.ExistsArg("f", "force"))
 }
 
