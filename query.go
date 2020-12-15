@@ -3,21 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
 	"sort"
 	"strings"
-	"sync"
 
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/intrange"
-	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -259,7 +253,6 @@ func queryRepo(pkgInputN []string, dbExecutor db.Executor) repoQuery {
 func packageSlices(toCheck []string, dbExecutor db.Executor) (aur, repo []string) {
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
-		found := false
 
 		if dbName == "aur" || config.Runtime.Mode == settings.ModeAUR {
 			aur = append(aur, _pkg)
@@ -269,13 +262,8 @@ func packageSlices(toCheck []string, dbExecutor db.Executor) (aur, repo []string
 			continue
 		}
 
-		found = dbExecutor.SyncSatisfierExists(name)
-
-		if !found {
-			found = len(dbExecutor.PackagesFromGroup(name)) != 0
-		}
-
-		if found {
+		if dbExecutor.SyncSatisfierExists(name) ||
+			len(dbExecutor.PackagesFromGroup(name)) != 0 {
 			repo = append(repo, _pkg)
 		} else {
 			aur = append(aur, _pkg)
@@ -389,128 +377,4 @@ func statistics(dbExecutor db.Executor) *struct {
 	}
 
 	return info
-}
-
-func aurPkgbuilds(names []string) ([]string, error) {
-	pkgbuilds := make([]string, 0, len(names))
-	var mux sync.Mutex
-	var wg sync.WaitGroup
-	var errs multierror.MultiError
-
-	makeRequest := func(n, max int) {
-		defer wg.Done()
-
-		for _, name := range names[n:max] {
-			values := url.Values{}
-			values.Set("h", name)
-
-			url := "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?"
-
-			resp, err := http.Get(url + values.Encode())
-			if err != nil {
-				errs.Add(err)
-				continue
-			}
-			if resp.StatusCode != 200 {
-				errs.Add(fmt.Errorf("error code %d for package %s", resp.StatusCode, name))
-				continue
-			}
-			defer resp.Body.Close()
-
-			body, readErr := ioutil.ReadAll(resp.Body)
-			pkgbuild := string(body)
-
-			if readErr != nil {
-				errs.Add(readErr)
-				continue
-			}
-
-			mux.Lock()
-			pkgbuilds = append(pkgbuilds, pkgbuild)
-			mux.Unlock()
-		}
-	}
-
-	for n := 0; n < len(names); n += 20 {
-		max := intrange.Min(len(names), n+20)
-		wg.Add(1)
-		go makeRequest(n, max)
-	}
-
-	wg.Wait()
-
-	if err := errs.Return(); err != nil {
-		return pkgbuilds, err
-	}
-
-	return pkgbuilds, nil
-}
-
-func repoPkgbuilds(dbExecutor db.Executor, names []string) ([]string, error) {
-	pkgbuilds := make([]string, 0, len(names))
-	var mux sync.Mutex
-	var wg sync.WaitGroup
-	var errs multierror.MultiError
-
-	makeRequest := func(full string) {
-		var pkg alpm.IPackage
-		defer wg.Done()
-
-		db, name := text.SplitDBFromName(full)
-
-		if db != "" {
-			pkg = dbExecutor.SatisfierFromDB(name, db)
-		} else {
-			pkg = dbExecutor.SyncSatisfier(name)
-		}
-
-		values := url.Values{}
-		values.Set("h", "packages/"+name)
-
-		var url string
-
-		// TODO: Check existence with ls-remote
-		// https://git.archlinux.org/svntogit/packages.git
-		switch pkg.DB().Name() {
-		case "core", "extra", "testing":
-			url = "https://git.archlinux.org/svntogit/packages.git/plain/trunk/PKGBUILD?"
-		case "community", "multilib", "community-testing", "multilib-testing":
-			url = "https://git.archlinux.org/svntogit/community.git/plain/trunk/PKGBUILD?"
-		default:
-			errs.Add(fmt.Errorf("unable to get PKGBUILD from repo \"%s\"", db))
-			return
-		}
-
-		resp, err := http.Get(url + values.Encode())
-		if err != nil {
-			errs.Add(err)
-			return
-		}
-		if resp.StatusCode != 200 {
-			errs.Add(fmt.Errorf("error code %d for package %s", resp.StatusCode, name))
-			return
-		}
-		defer resp.Body.Close()
-
-		body, readErr := ioutil.ReadAll(resp.Body)
-		pkgbuild := string(body)
-
-		if readErr != nil {
-			errs.Add(readErr)
-			return
-		}
-
-		mux.Lock()
-		pkgbuilds = append(pkgbuilds, pkgbuild)
-		mux.Unlock()
-	}
-
-	for _, full := range names {
-		wg.Add(1)
-		go makeRequest(full)
-	}
-
-	wg.Wait()
-
-	return pkgbuilds, errs.Return()
 }

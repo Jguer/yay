@@ -95,6 +95,7 @@ issues:
         - gomnd
 
   exclude:
+    - G107
     - G204
     - commentedOutCode
 
