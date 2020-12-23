@@ -30,7 +30,11 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*pacmanconf
 
 	pacmanConf, stderr, err := pacmanconf.PacmanConf("--config", pacmanConfigPath, "--root", root)
 	if err != nil {
-		return nil, false, fmt.Errorf("%s", stderr)
+		cmdErr := err
+		if stderr != "" {
+			cmdErr = fmt.Errorf("%s\n%s", err, stderr)
+		}
+		return nil, false, cmdErr
 	}
 
 	if dbPath, _, exists := cmdArgs.GetArg("dbpath", "b"); exists {

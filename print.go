@@ -202,6 +202,7 @@ func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enable
 	os.Stdout = nil
 	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
+		os.Stdout = old
 		return err
 	}
 

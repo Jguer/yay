@@ -22,11 +22,7 @@ type OSRunner struct {
 
 func (r *OSRunner) Show(cmd *exec.Cmd) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("")
-	}
-	return nil
+	return cmd.Run()
 }
 
 func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
