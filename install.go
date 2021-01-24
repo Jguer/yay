@@ -29,33 +29,33 @@ import (
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
-func asdeps(cmdArgs *settings.Arguments, pkgs []string) error {
+func asdeps(cmdArgs *settings.Arguments, pkgs []string) (err error) {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
 	cmdArgs = cmdArgs.CopyGlobal()
-	_ = cmdArgs.AddArg("D", "asdeps")
+	_ = cmdArgs.AddArg("q", "D", "asdeps")
 	cmdArgs.AddTarget(pkgs...)
-	_, stderr, err := config.Runtime.CmdRunner.Capture(passToPacman(cmdArgs), 0)
+	err = config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	if err != nil {
-		return fmt.Errorf("%s %s", stderr, err)
+		return fmt.Errorf(gotext.Get("error updating package install reason to dependency"))
 	}
 
 	return nil
 }
 
-func asexp(cmdArgs *settings.Arguments, pkgs []string) error {
+func asexp(cmdArgs *settings.Arguments, pkgs []string) (err error) {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
 	cmdArgs = cmdArgs.CopyGlobal()
-	_ = cmdArgs.AddArg("D", "asexplicit")
+	_ = cmdArgs.AddArg("q", "D", "asexplicit")
 	cmdArgs.AddTarget(pkgs...)
-	_, stderr, err := config.Runtime.CmdRunner.Capture(passToPacman(cmdArgs), 0)
+	err = config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 	if err != nil {
-		return fmt.Errorf("%s %s", stderr, err)
+		return fmt.Errorf(gotext.Get("error updating package install reason to explicit"))
 	}
 
 	return nil
