@@ -9,11 +9,11 @@ require (
 	github.com/leonelquinteros/gotext v1.4.0
 	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.6.1
-	golang.org/x/sys v0.0.0-20201207223542-d4d67f95c62d
-	golang.org/x/term v0.0.0-20201207232118-ee85cb95a76b
+	github.com/stretchr/testify v1.7.0
+	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c
+	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf
 	gopkg.in/h2non/gock.v1 v1.0.15
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
 go 1.14
