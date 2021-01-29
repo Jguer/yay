@@ -19,7 +19,11 @@ func initGotext() {
 		localePath = envLocalePath
 	}
 
-	gotext.Configure(localePath, os.Getenv("LANG"), "yay")
+	if os.Getenv("LC_MESSAGES") != "" {
+		gotext.Configure(localePath, os.Getenv("LC_MESSAGES"), "yay")
+	} else {
+		gotext.Configure(localePath, os.Getenv("LANG"), "yay")
+	}
 }
 
 func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*pacmanconf.Config, bool, error) {
