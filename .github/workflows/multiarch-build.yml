@@ -128,4 +128,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Release Notary Action
-        uses: commitsar-app/release-notary@v0.8.0
+        uses: commitsar-app/release-notary@v0.9.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
