@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -213,6 +214,7 @@ func NewConfig() (*Configuration, error) {
 		},
 		PacmanConf: nil,
 		VCSStore:   nil,
+		HTTPClient: &http.Client{},
 	}
 
 	newConfig.Runtime.VCSStore = vcs.NewInfoStore(filepath.Join(cacheHome, vcsFileName),

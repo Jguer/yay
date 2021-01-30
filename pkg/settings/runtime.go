@@ -1,6 +1,8 @@
 package settings
 
 import (
+	"net/http"
+
 	"github.com/Morganamilo/go-pacmanconf"
 
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
@@ -24,4 +26,5 @@ type Runtime struct {
 	VCSStore       *vcs.InfoStore
 	CmdBuilder     *exe.CmdBuilder
 	CmdRunner      exe.Runner
+	HTTPClient     *http.Client
 }

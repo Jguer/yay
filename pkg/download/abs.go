@@ -5,14 +5,18 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/leonelquinteros/gotext"
 )
 
-var ErrInvalidRepository = errors.New("invalid repository")
-var ErrABSPackageNotFound = errors.New("package not found in repos")
+var ErrInvalidRepository = errors.New(gotext.Get("invalid repository"))
+var ErrABSPackageNotFound = errors.New(gotext.Get("package not found in repos"))
 
 const MaxConcurrentFetch = 20
-const ABSPackageURL = "https://git.archlinux.org/svntogit/packages.git/plain/trunk/PKGBUILD?"
-const ABSCommunityURL = "https://git.archlinux.org/svntogit/community.git/plain/trunk/PKGBUILD?"
+const urlPackagePath = "/plain/trunk/PKGBUILD?"
+
+var ABSPackageURL = "https://git.archlinux.org/svntogit/packages.git"
+var ABSCommunityURL = "https://git.archlinux.org/svntogit/community.git"
 
 func getPackageURL(db, pkgName string) (string, error) {
 	values := url.Values{}
@@ -20,22 +24,26 @@ func getPackageURL(db, pkgName string) (string, error) {
 	nameEncoded := values.Encode()
 	switch db {
 	case "core", "extra", "testing":
-		return ABSPackageURL + nameEncoded, nil
+		return ABSPackageURL + urlPackagePath + nameEncoded, nil
 	case "community", "multilib", "community-testing", "multilib-testing":
-		return ABSCommunityURL + nameEncoded, nil
+		return ABSCommunityURL + urlPackagePath + nameEncoded, nil
 	}
 	return "", ErrInvalidRepository
 }
 
-func GetABSPkgbuild(dbName, pkgName string) ([]byte, error) {
+func GetABSPkgbuild(httpClient *http.Client, dbName, pkgName string) ([]byte, error) {
 	packageURL, err := getPackageURL(dbName, pkgName)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := http.Get(packageURL)
+	resp, err := httpClient.Get(packageURL)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, ErrABSPackageNotFound
 	}
 
 	defer resp.Body.Close()

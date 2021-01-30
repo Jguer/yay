@@ -1,6 +1,7 @@
 package download
 
 import (
+	"net/http"
 	"sync"
 
 	"github.com/Jguer/go-alpm/v2"
@@ -19,7 +20,7 @@ func getURLName(pkg alpm.IPackage) string {
 	return name
 }
 
-func GetPkgbuilds(dbExecutor db.Executor, targets []string, mode settings.TargetMode) (map[string][]byte, error) {
+func GetPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string, mode settings.TargetMode) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 	var mux sync.Mutex
 	var errs multierror.MultiError
@@ -51,9 +52,9 @@ func GetPkgbuilds(dbExecutor db.Executor, targets []string, mode settings.Target
 			var pkgbuild []byte
 
 			if aur {
-				pkgbuild, err = GetAURPkgbuild(pkgName)
+				pkgbuild, err = GetAURPkgbuild(httpClient, pkgName)
 			} else {
-				pkgbuild, err = GetABSPkgbuild(dbName, pkgName)
+				pkgbuild, err = GetABSPkgbuild(httpClient, dbName, pkgName)
 			}
 
 			if err == nil {

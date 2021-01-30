@@ -241,7 +241,7 @@ func handleYay(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 
 func handleGetpkgbuild(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("p", "pkgbuild") {
-		return printPkgbuilds(dbExecutor, cmdArgs.Targets)
+		return printPkgbuilds(dbExecutor, config.Runtime.HTTPClient, cmdArgs.Targets)
 	}
 	return getPkgbuilds(cmdArgs.Targets, dbExecutor, cmdArgs.ExistsArg("f", "force"))
 }

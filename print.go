@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -269,8 +270,8 @@ outer:
 	return nil
 }
 
-func printPkgbuilds(dbExecutor db.Executor, targets []string) error {
-	pkgbuilds, err := download.GetPkgbuilds(dbExecutor, targets, config.Runtime.Mode)
+func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string) error {
+	pkgbuilds, err := download.GetPkgbuilds(dbExecutor, httpClient, targets, config.Runtime.Mode)
 	if err != nil {
 		text.Errorln(err)
 	}

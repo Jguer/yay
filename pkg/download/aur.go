@@ -5,18 +5,20 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/leonelquinteros/gotext"
 )
 
-const AURPackageURL = "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?"
+var AURPackageURL = "https://aur.archlinux.org/cgit/aur.git"
 
-var ErrAURPackageNotFound = errors.New("package not found in AUR")
+var ErrAURPackageNotFound = errors.New(gotext.Get("package not found in AUR"))
 
-func GetAURPkgbuild(pkgName string) ([]byte, error) {
+func GetAURPkgbuild(httpClient *http.Client, pkgName string) ([]byte, error) {
 	values := url.Values{}
 	values.Set("h", pkgName)
-	pkgURL := AURPackageURL + values.Encode()
+	pkgURL := AURPackageURL + "/plain/PKGBUILD?" + values.Encode()
 
-	resp, err := http.Get(pkgURL)
+	resp, err := httpClient.Get(pkgURL)
 	if err != nil {
 		return nil, err
 	}
