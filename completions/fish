@@ -177,7 +177,7 @@ complete -c $progname -n "$show" -s q -l quiet -d 'Do not print news description
 # Getpkgbuild options
 complete -c $progname -n "$getpkgbuild" -s f -l force -d 'Force download for existing ABS packages' -f
 complete -c $progname -n "$getpkgbuild" -xa "$listall"
-complete -c $progname -n "$getpkgbuild" -s p -l pkgbuild -d 'Print pkgbuild of packages' -f
+complete -c $progname -n "$getpkgbuild" -s p -l print -d 'Print pkgbuild of packages' -f
 
 # Permanent configuration settings
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f

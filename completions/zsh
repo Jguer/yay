@@ -160,7 +160,7 @@ _pacman_opts_yay_modifiers=(
 # -G
 _pacman_opts_getpkgbuild_modifiers=(
 	{-f,--force}'[Force download for existing ABS packages]'
-	{-p,--pkgbuild}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
+	{-p,--print}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
 )
 
 # -P
@@ -507,11 +507,6 @@ _pacman_zsh_comp() {
 			;;
 		Q*)
 			_pacman_action_query
-			;;
-		P*p*)
-			 _arguments -s : \
-				"$_pacman_opts_print_modifiers[@]" \
-				"*:package:_pacman_all_packages"
 			;;
 		P*)
 			 _arguments -s : \

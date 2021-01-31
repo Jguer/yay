@@ -38,8 +38,8 @@ operations:
 
 New operations:
     yay {-Y --yay}         [options] [package(s)]
-    yay {-P --show}        [options] [package(s)]
-    yay {-G --getpkgbuild} [package(s)]
+    yay {-P --show}        [options]
+    yay {-G --getpkgbuild} [options] [package(s)]
 
 If no arguments are provided 'yay -Syu' will be performed
 If no operation is provided -Y will be assumed
@@ -131,14 +131,14 @@ show specific options:
     -g --currentconfig    Print current yay configuration
     -s --stats            Display system package statistics
     -w --news             Print arch news
-    -p --pkgbuild         Print pkgbuild of packages
 
 yay specific options:
     -c --clean            Remove unneeded dependencies
        --gendb            Generates development package DB used for updating
 
 getpkgbuild specific options:
-    -f --force            Force download for existing ABS packages`)
+    -f --force            Force download for existing ABS packages
+    -p --print            Print pkgbuild of packages`)
 }
 
 func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
@@ -240,7 +240,7 @@ func handleYay(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 }
 
 func handleGetpkgbuild(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
-	if cmdArgs.ExistsArg("p", "pkgbuild") {
+	if cmdArgs.ExistsArg("p", "print") {
 		return printPkgbuilds(dbExecutor, config.Runtime.HTTPClient, cmdArgs.Targets)
 	}
 	return getPkgbuilds(cmdArgs.Targets, dbExecutor, cmdArgs.ExistsArg("f", "force"))
