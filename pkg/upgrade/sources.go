@@ -99,6 +99,7 @@ func UpAUR(remote []alpm.IPackage, aurdata map[string]*rpc.Pkg, timeUpdate bool)
 						Repository:    "aur",
 						LocalVersion:  pkg.Version(),
 						RemoteVersion: aurPkg.Version,
+						Reason:        pkg.Reason(),
 					})
 			}
 		}

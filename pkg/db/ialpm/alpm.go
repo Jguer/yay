@@ -421,9 +421,11 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) (upgrade.UpSlice, err
 	}
 	_ = ae.handle.TransGetAdd().ForEach(func(pkg alpm.IPackage) error {
 		localVer := "-"
+		reason := alpm.PkgReasonExplicit
 
 		if localPkg := localDB.Pkg(pkg.Name()); localPkg != nil {
 			localVer = localPkg.Version()
+			reason = localPkg.Reason()
 		}
 
 		slice = append(slice, upgrade.Upgrade{
@@ -431,6 +433,7 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) (upgrade.UpSlice, err
 			Repository:    pkg.DB().Name(),
 			LocalVersion:  localVer,
 			RemoteVersion: pkg.Version(),
+			Reason:        reason,
 		})
 		return nil
 	})

@@ -16,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/upgrade"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
@@ -179,9 +180,32 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	return fmt.Errorf(gotext.Get("unhandled operation"))
 }
 
+func getFilter(cmdArgs *settings.Arguments) (upgrade.Filter, error) {
+	deps, explicit := cmdArgs.ExistsArg("d", "deps"), cmdArgs.ExistsArg("e", "explicit")
+	switch {
+	case deps && explicit:
+		return nil, fmt.Errorf(gotext.Get("invalid option: '--deps' and '--explicit' may not be used together"))
+	case deps:
+		return func(pkg upgrade.Upgrade) bool {
+			return pkg.Reason == alpm.PkgReasonDepend
+		}, nil
+	case explicit:
+		return func(pkg upgrade.Upgrade) bool {
+			return pkg.Reason == alpm.PkgReasonExplicit
+		}, nil
+	}
+	return func(pkg upgrade.Upgrade) bool {
+		return true
+	}, nil
+}
+
 func handleQuery(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("u", "upgrades") {
-		return printUpdateList(cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		filter, err := getFilter(cmdArgs)
+		if err != nil {
+			return err
+		}
+		return printUpdateList(cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	}
 	return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
 }
@@ -208,7 +232,11 @@ func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		fmt.Printf("%v", config)
 		return nil
 	case cmdArgs.ExistsArg("n", "numberupgrades"):
-		return printNumberOfUpdates(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		filter, err := getFilter(cmdArgs)
+		if err != nil {
+			return err
+		}
+		return printNumberOfUpdates(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")

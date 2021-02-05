@@ -119,7 +119,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	// if we are doing -u also request all packages needing update
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upList(warnings, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		aurUp, repoUp, err = upList(warnings, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), func(upgrade.Upgrade) bool { return true })
 		if err != nil {
 			return err
 		}

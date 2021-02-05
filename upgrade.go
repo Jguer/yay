@@ -20,8 +20,19 @@ import (
 	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
+func filterUpdateList(list upgrade.UpSlice, filter upgrade.Filter) upgrade.UpSlice {
+	tmp := list[:0]
+	for _, pkg := range list {
+		if filter(pkg) {
+			tmp = append(tmp, pkg)
+		}
+	}
+	return tmp
+}
+
 // upList returns lists of packages to upgrade from each source.
-func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool) (aurUp, repoUp upgrade.UpSlice, err error) {
+func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
+	filter upgrade.Filter) (aurUp, repoUp upgrade.UpSlice, err error) {
 	remote, remoteNames := query.GetRemotePackages(dbExecutor)
 
 	var wg sync.WaitGroup
@@ -92,7 +103,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 		aurUp = develUp
 	}
 
-	return aurUp, repoUp, errs.Return()
+	return filterUpdateList(aurUp, filter), filterUpdateList(repoUp, filter), errs.Return()
 }
 
 func printLocalNewerThanAUR(
