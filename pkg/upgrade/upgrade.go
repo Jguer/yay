@@ -6,7 +6,12 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/text"
+
+	alpm "github.com/Jguer/go-alpm/v2"
 )
+
+// Filter decides if specific package should be included in theincluded in the  results.
+type Filter func(Upgrade) bool
 
 // Upgrade type describes a system upgrade.
 type Upgrade struct {
@@ -14,6 +19,7 @@ type Upgrade struct {
 	Repository    string
 	LocalVersion  string
 	RemoteVersion string
+	Reason        alpm.PkgReason
 }
 
 func (u *Upgrade) StylizedNameWithRepository() string {

@@ -16,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
 // PrintSearch handles printing search results in a given format
@@ -183,11 +184,11 @@ func localStatistics(dbExecutor db.Executor) error {
 }
 
 // TODO: Make it less hacky
-func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool) error {
+func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade)
+	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
@@ -198,7 +199,7 @@ func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool) error {
 }
 
 // TODO: Make it less hacky
-func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enableDowngrade bool) error {
+func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
@@ -209,7 +210,7 @@ func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enable
 		return err
 	}
 
-	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade)
+	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 	if err != nil {
 		return err
