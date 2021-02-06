@@ -180,6 +180,9 @@ func handleCmd(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	return fmt.Errorf(gotext.Get("unhandled operation"))
 }
 
+// getFilter returns filter function which can keep packages which were only
+// explicitly installed or ones installed as dependencies for showing available
+// updates or their count.
 func getFilter(cmdArgs *settings.Arguments) (upgrade.Filter, error) {
 	deps, explicit := cmdArgs.ExistsArg("d", "deps"), cmdArgs.ExistsArg("e", "explicit")
 	switch {
