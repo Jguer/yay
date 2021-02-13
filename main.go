@@ -3,6 +3,7 @@ package main // import "github.com/Jguer/yay"
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
@@ -135,10 +136,19 @@ func main() {
 
 	defer dbExecutor.Cleanup()
 	err = handleCmd(cmdArgs, db.Executor(dbExecutor))
+
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
 		}
+
+		if exitError, ok := err.(*exec.ExitError); ok {
+			// mirror pacman exit code when applicable
+			ret = exitError.ExitCode()
+			return
+		}
+
+		// fallback
 		ret = 1
 		return
 	}
