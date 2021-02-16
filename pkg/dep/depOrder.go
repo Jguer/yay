@@ -3,10 +3,9 @@ package dep
 import (
 	"fmt"
 
-	rpc "github.com/mikkeloscar/aur"
-
 	alpm "github.com/Jguer/go-alpm/v2"
 
+	rpc "github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )

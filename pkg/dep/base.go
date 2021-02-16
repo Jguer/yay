@@ -1,6 +1,6 @@
 package dep
 
-import rpc "github.com/mikkeloscar/aur"
+import rpc "github.com/Jguer/yay/v10/pkg/query"
 
 // Base is an AUR base package
 type Base []*rpc.Pkg

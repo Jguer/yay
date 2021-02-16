@@ -11,13 +11,20 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
+type Pkg = rpc.Pkg
+
+// Search is a reexport of rpc.Search
+func Search(query string) ([]Pkg, error) {
+	return rpc.Search(query)
+}
+
 // Queries the aur for information about specified packages.
 // All packages should be queried in a single rpc request except when the number
 // of packages exceeds the number set in config.RequestSplitN.
 // If the number does exceed config.RequestSplitN multiple rpc requests will be
 // performed concurrently.
-func AURInfo(names []string, warnings *AURWarnings, splitN int) ([]*rpc.Pkg, error) {
-	info := make([]*rpc.Pkg, 0, len(names))
+func AURInfo(names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) {
+	info := make([]*Pkg, 0, len(names))
 	seen := make(map[string]int)
 	var mux sync.Mutex
 	var wg sync.WaitGroup
@@ -73,7 +80,7 @@ func AURInfo(names []string, warnings *AURWarnings, splitN int) ([]*rpc.Pkg, err
 	return info, nil
 }
 
-func AURInfoPrint(names []string, splitN int) ([]*rpc.Pkg, error) {
+func AURInfoPrint(names []string, splitN int) ([]*Pkg, error) {
 	text.OperationInfoln(gotext.Get("Querying AUR..."))
 
 	warnings := &AURWarnings{}
