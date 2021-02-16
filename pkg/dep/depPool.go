@@ -11,8 +11,6 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	alpm "github.com/Jguer/go-alpm/v2"
-
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
@@ -54,7 +52,7 @@ func (t Target) String() string {
 type Pool struct {
 	Targets      []Target
 	Explicit     stringset.StringSet
-	Repo         map[string]alpm.IPackage
+	Repo         map[string]db.IPackage
 	Aur          map[string]*query.Pkg
 	AurCache     map[string]*query.Pkg
 	Groups       []string
@@ -66,7 +64,7 @@ func makePool(dbExecutor db.Executor) *Pool {
 	dp := &Pool{
 		make([]Target, 0),
 		make(stringset.StringSet),
-		make(map[string]alpm.IPackage),
+		make(map[string]db.IPackage),
 		make(map[string]*query.Pkg),
 		make(map[string]*query.Pkg),
 		make([]string, 0),
@@ -100,7 +98,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 			continue
 		}
 
-		var foundPkg alpm.IPackage
+		var foundPkg db.IPackage
 
 		// aur/ prefix means we only check the aur
 		if target.DB == "aur" || mode == settings.ModeAUR {
@@ -326,7 +324,7 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 	return err
 }
 
-func (dp *Pool) ResolveRepoDependency(pkg alpm.IPackage) {
+func (dp *Pool) ResolveRepoDependency(pkg db.IPackage) {
 	dp.Repo[pkg.Name()] = pkg
 
 	for _, dep := range dp.AlpmExecutor.PackageDepends(pkg) {
@@ -440,7 +438,7 @@ func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, pr
 	return nil
 }
 
-func (dp *Pool) findSatisfierRepo(dep string) alpm.IPackage {
+func (dp *Pool) findSatisfierRepo(dep string) db.IPackage {
 	for _, pkg := range dp.Repo {
 		if satisfiesRepo(dep, pkg, dp.AlpmExecutor) {
 			return pkg

@@ -3,8 +3,6 @@ package dep
 import (
 	"strings"
 
-	alpm "github.com/Jguer/go-alpm/v2"
-
 	"github.com/Jguer/yay/v10/pkg/db"
 	rpc "github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -93,15 +91,15 @@ func provideSatisfies(provide, dep, pkgVersion string) bool {
 func verSatisfies(ver1, mod, ver2 string) bool {
 	switch mod {
 	case "=":
-		return alpm.VerCmp(ver1, ver2) == 0
+		return db.VerCmp(ver1, ver2) == 0
 	case "<":
-		return alpm.VerCmp(ver1, ver2) < 0
+		return db.VerCmp(ver1, ver2) < 0
 	case "<=":
-		return alpm.VerCmp(ver1, ver2) <= 0
+		return db.VerCmp(ver1, ver2) <= 0
 	case ">":
-		return alpm.VerCmp(ver1, ver2) > 0
+		return db.VerCmp(ver1, ver2) > 0
 	case ">=":
-		return alpm.VerCmp(ver1, ver2) >= 0
+		return db.VerCmp(ver1, ver2) >= 0
 	}
 
 	return true
@@ -121,7 +119,7 @@ func satisfiesAur(dep string, pkg *rpc.Pkg) bool {
 	return false
 }
 
-func satisfiesRepo(dep string, pkg alpm.IPackage, dbExecutor db.Executor) bool {
+func satisfiesRepo(dep string, pkg db.IPackage, dbExecutor db.Executor) bool {
 	if pkgSatisfies(pkg.Name(), pkg.Version(), dep) {
 		return true
 	}

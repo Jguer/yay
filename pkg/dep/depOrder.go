@@ -3,8 +3,7 @@ package dep
 import (
 	"fmt"
 
-	alpm "github.com/Jguer/go-alpm/v2"
-
+	"github.com/Jguer/yay/v10/pkg/db"
 	rpc "github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -12,14 +11,14 @@ import (
 
 type Order struct {
 	Aur     []Base
-	Repo    []alpm.IPackage
+	Repo    []db.IPackage
 	Runtime stringset.StringSet
 }
 
 func makeOrder() *Order {
 	return &Order{
 		make([]Base, 0),
-		make([]alpm.IPackage, 0),
+		make([]db.IPackage, 0),
 		make(stringset.StringSet),
 	}
 }
@@ -78,7 +77,7 @@ func (do *Order) orderPkgAur(pkg *rpc.Pkg, dp *Pool, runtime bool) {
 	do.Aur = append(do.Aur, Base{pkg})
 }
 
-func (do *Order) orderPkgRepo(pkg alpm.IPackage, dp *Pool, runtime bool) {
+func (do *Order) orderPkgRepo(pkg db.IPackage, dp *Pool, runtime bool) {
 	if runtime {
 		do.Runtime.Set(pkg.Name())
 	}
