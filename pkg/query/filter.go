@@ -3,8 +3,6 @@ package query
 import (
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/go-alpm/v2"
-
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -25,7 +23,7 @@ func GetPackageNamesBySource(dbExecutor db.Executor) (local, remote []string, er
 
 // GetRemotePackages returns packages with no correspondence in SyncDBS.
 func GetRemotePackages(dbExecutor db.Executor) (
-	remote []alpm.IPackage,
+	remote []db.IPackage,
 	remoteNames []string) {
 	for _, localpkg := range dbExecutor.LocalPackages() {
 		pkgName := localpkg.Name()

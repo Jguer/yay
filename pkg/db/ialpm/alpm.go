@@ -12,6 +12,7 @@ import (
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
@@ -398,7 +399,7 @@ func (ae *AlpmExecutor) PackageGroups(pkg alpm.IPackage) []string {
 
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) (upgrade.UpSlice, error) {
+func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error) {
 	slice := upgrade.UpSlice{}
 
 	localDB, err := ae.handle.LocalDB()

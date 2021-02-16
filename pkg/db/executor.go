@@ -4,12 +4,22 @@ import (
 	"time"
 
 	alpm "github.com/Jguer/go-alpm/v2"
-
-	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
 type IPackage = alpm.IPackage
 type Depend = alpm.Depend
+
+func VerCmp(a string, b string) int {
+	return alpm.VerCmp(a, b)
+}
+
+type Upgrade struct {
+	Name          string
+	Repository    string
+	LocalVersion  string
+	RemoteVersion string
+	Reason        alpm.PkgReason
+}
 
 type Executor interface {
 	AlpmArch() (string, error)
@@ -28,7 +38,7 @@ type Executor interface {
 	PackageProvides(IPackage) []Depend
 	PackagesFromGroup(string) []IPackage
 	RefreshHandle() error
-	RepoUpgrades(bool) (upgrade.UpSlice, error)
+	RepoUpgrades(bool) ([]Upgrade, error)
 	SyncPackage(string) IPackage
 	SyncPackages(...string) []IPackage
 	SyncSatisfier(string) IPackage
