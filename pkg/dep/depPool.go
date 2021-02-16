@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
-	rpc "github.com/mikkeloscar/aur"
 
 	alpm "github.com/Jguer/go-alpm/v2"
 
@@ -56,8 +55,8 @@ type Pool struct {
 	Targets      []Target
 	Explicit     stringset.StringSet
 	Repo         map[string]alpm.IPackage
-	Aur          map[string]*rpc.Pkg
-	AurCache     map[string]*rpc.Pkg
+	Aur          map[string]*query.Pkg
+	AurCache     map[string]*query.Pkg
 	Groups       []string
 	AlpmExecutor db.Executor
 	Warnings     *query.AURWarnings
@@ -68,8 +67,8 @@ func makePool(dbExecutor db.Executor) *Pool {
 		make([]Target, 0),
 		make(stringset.StringSet),
 		make(map[string]alpm.IPackage),
-		make(map[string]*rpc.Pkg),
-		make(map[string]*rpc.Pkg),
+		make(map[string]*query.Pkg),
+		make(map[string]*query.Pkg),
 		make([]string, 0),
 		dbExecutor,
 		nil,
@@ -175,7 +174,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 	doSearch := func(pkg string) {
 		defer wg.Done()
 		var err error
-		var results []rpc.Pkg
+		var results []query.Pkg
 
 		// Hack for a bigger search result, if the user wants
 		// java-envronment we can search for just java instead and get
@@ -184,7 +183,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 		words := strings.Split(pkg, "-")
 
 		for i := range words {
-			results, err = rpc.Search(strings.Join(words[:i+1], "-"))
+			results, err = query.Search(strings.Join(words[:i+1], "-"))
 			if err == nil {
 				break
 			}
@@ -362,7 +361,7 @@ func GetPool(pkgs []string,
 	return dp, err
 }
 
-func (dp *Pool) findSatisfierAur(dep string) *rpc.Pkg {
+func (dp *Pool) findSatisfierAur(dep string) *query.Pkg {
 	for _, pkg := range dp.Aur {
 		if satisfiesAur(dep, pkg) {
 			return pkg
@@ -382,7 +381,7 @@ func (dp *Pool) findSatisfierAur(dep string) *rpc.Pkg {
 // Using Pacman's ways trying to install foo would never give you
 // a menu.
 // TODO: maybe intermix repo providers in the menu
-func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, provides bool) *rpc.Pkg {
+func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, provides bool) *query.Pkg {
 	depName, _, _ := splitDep(dep)
 	seen := make(stringset.StringSet)
 	providerSlice := makeProviders(depName)
@@ -477,7 +476,7 @@ func (dp *Pool) hasPackage(name string) bool {
 	return false
 }
 
-func providerMenu(dep string, providers providers, noConfirm bool) *rpc.Pkg {
+func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 	size := providers.Len()
 
 	str := text.Bold(gotext.Get("There are %d providers available for %s:\n", size, dep))
