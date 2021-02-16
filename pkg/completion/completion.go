@@ -15,8 +15,12 @@ import (
 	"github.com/Jguer/yay/v10/pkg/db"
 )
 
+type PkgSynchronizer interface {
+	SyncPackages(...string) []db.IPackage
+}
+
 // Show provides completion info for shells
-func Show(dbExecutor db.Executor, aurURL, completionPath string, interval int, force bool) error {
+func Show(dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
 	err := Update(dbExecutor, aurURL, completionPath, interval, force)
 	if err != nil {
 		return err
@@ -33,7 +37,7 @@ func Show(dbExecutor db.Executor, aurURL, completionPath string, interval int, f
 }
 
 // Update updates completion cache to be used by Complete
-func Update(dbExecutor db.Executor, aurURL, completionPath string, interval int, force bool) error {
+func Update(dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
 	info, err := os.Stat(completionPath)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
@@ -93,7 +97,7 @@ func createAURList(aurURL string, out io.Writer) error {
 }
 
 // CreatePackageList appends Repo packages to completion cache
-func createRepoList(dbExecutor db.Executor, out io.Writer) error {
+func createRepoList(dbExecutor PkgSynchronizer, out io.Writer) error {
 	for _, pkg := range dbExecutor.SyncPackages() {
 		_, err := io.WriteString(out, pkg.Name()+"\t"+pkg.DB().Name()+"\n")
 		if err != nil {
