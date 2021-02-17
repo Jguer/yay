@@ -4,15 +4,13 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Jguer/go-alpm/v2"
-
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-func getURLName(pkg alpm.IPackage) string {
+func getURLName(pkg db.IPackage) string {
 	name := pkg.Base()
 	if name == "" {
 		name = pkg.Name()
