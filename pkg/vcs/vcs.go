@@ -172,12 +172,22 @@ func (v *InfoStore) NeedsUpdate(infos OriginInfoByURL) bool {
 	// if we find an update we use this to exit early and return true
 	hasUpdate := make(chan struct{})
 
+	closed := make(chan struct{})
+	defer close(closed)
+
 	checkHash := func(url string, info OriginInfo) {
 		hash := v.getCommit(url, info.Branch, info.Protocols)
+
+		var sendTo chan<- struct{}
 		if hash != "" && hash != info.SHA {
-			hasUpdate <- struct{}{}
+			sendTo = hasUpdate
 		} else {
-			finished <- struct{}{}
+			sendTo = finished
+		}
+
+		select {
+		case sendTo <- struct{}{}:
+		case <-closed:
 		}
 	}
 
