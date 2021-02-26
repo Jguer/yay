@@ -9,7 +9,7 @@ import (
 type IPackage = alpm.IPackage
 type Depend = alpm.Depend
 
-func VerCmp(a string, b string) int {
+func VerCmp(a, b string) int {
 	return alpm.VerCmp(a, b)
 }
 

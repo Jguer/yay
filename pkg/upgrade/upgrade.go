@@ -15,7 +15,7 @@ type Filter func(Upgrade) bool
 // Upgrade type describes a system upgrade.
 type Upgrade = db.Upgrade
 
-func StylizedNameWithRepository(u *Upgrade) string {
+func StylizedNameWithRepository(u Upgrade) string {
 	return text.Bold(text.ColorHash(u.Repository)) + "/" + text.Bold(u.Name)
 }
 
@@ -87,7 +87,7 @@ func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
 func (u UpSlice) Print() {
 	longestName, longestVersion := 0, 0
 	for _, pack := range u {
-		packNameLen := len(StylizedNameWithRepository(&pack))
+		packNameLen := len(StylizedNameWithRepository(pack))
 		packVersion, _ := GetVersionDiff(pack.LocalVersion, pack.RemoteVersion)
 		packVersionLen := len(packVersion)
 		longestName = intrange.Max(packNameLen, longestName)
@@ -103,7 +103,7 @@ func (u UpSlice) Print() {
 
 		fmt.Print(text.Magenta(fmt.Sprintf(numberPadding, len(u)-k)))
 
-		fmt.Printf(namePadding, StylizedNameWithRepository(&i))
+		fmt.Printf(namePadding, StylizedNameWithRepository(i))
 
 		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
 	}
