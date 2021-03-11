@@ -1,3 +1,5 @@
+default_stages: [commit]
+
 repos:
   - repo: git://github.com/dnephin/pre-commit-golang
     rev: v0.3.5
