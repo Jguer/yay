@@ -60,7 +60,6 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
     - misspell
     - nakedret
@@ -85,7 +84,8 @@ linters:
     #- funlen
     #- dogsled
     # disabled for now
-    # - godox
+    #- godox
+    #- interfacer
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
