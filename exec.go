@@ -22,7 +22,7 @@ func sudoLoopBackground() {
 func sudoLoop() {
 	for {
 		updateSudo()
-		time.Sleep(298 * time.Second)
+		time.Sleep(241 * time.Second)
 	}
 }
 
