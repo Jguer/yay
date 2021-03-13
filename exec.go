@@ -28,9 +28,7 @@ func sudoLoop() {
 
 func updateSudo() {
 	for {
-		mSudoFlags := strings.Fields(config.SudoFlags)
-		mSudoFlags = append([]string{"-v"}, mSudoFlags...)
-		err := config.Runtime.CmdRunner.Show(exec.Command(config.SudoBin, mSudoFlags...))
+		err := config.Runtime.CmdRunner.Show(exec.Command(config.SudoBin, "-v"))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		} else {
