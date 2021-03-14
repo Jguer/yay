@@ -119,10 +119,14 @@ func (dp *Pool) checkReverseConflicts(conflicts stringset.MapStringSet) {
 	}
 }
 
-func (dp *Pool) CheckConflicts(useAsk, noConfirm bool) (stringset.MapStringSet, error) {
+func (dp *Pool) CheckConflicts(useAsk, noConfirm, noDeps bool) (stringset.MapStringSet, error) {
+	conflicts := make(stringset.MapStringSet)
+	if noDeps {
+		return conflicts, nil
+	}
+
 	var wg sync.WaitGroup
 	innerConflicts := make(stringset.MapStringSet)
-	conflicts := make(stringset.MapStringSet)
 	wg.Add(2)
 
 	text.OperationInfoln(gotext.Get("Checking for conflicts..."))
@@ -268,7 +272,11 @@ func stringSliceEqual(a, b []string) bool {
 	return true
 }
 
-func (dp *Pool) CheckMissing() error {
+func (dp *Pool) CheckMissing(noDeps bool) error {
+	if noDeps {
+		return nil
+	}
+
 	missing := &missing{
 		make(stringset.StringSet),
 		make(map[string][][]string),
