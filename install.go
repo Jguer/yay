@@ -66,18 +66,20 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	var do *dep.Order
 
 	var srcinfos map[string]*gosrc.Srcinfo
-
+	noDeps := cmdArgs.ExistsDouble("d", "nodeps")
+	sysupgradeArg := cmdArgs.ExistsArg("u", "sysupgrade")
+	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	warnings := query.NewWarnings()
 
 	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
 		if config.CombinedUpgrade {
-			if cmdArgs.ExistsArg("y", "refresh") {
+			if refreshArg {
 				err = earlyRefresh(cmdArgs)
 				if err != nil {
 					return fmt.Errorf(gotext.Get("error refreshing databases"))
 				}
 			}
-		} else if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0 {
+		} else if refreshArg || sysupgradeArg || len(cmdArgs.Targets) > 0 {
 			err = earlyPacmanCall(cmdArgs, dbExecutor)
 			if err != nil {
 				return err
@@ -114,7 +116,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	}
 
 	// if we are doing -u also request all packages needing update
-	if cmdArgs.ExistsArg("u", "sysupgrade") {
+	if sysupgradeArg {
 		ignore, targets, errUp := sysupgradeTargets(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errUp != nil {
 			return errUp
@@ -139,16 +141,14 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		return err
 	}
 
-	if !cmdArgs.ExistsDouble("d", "nodeps") {
-		err = dp.CheckMissing()
-		if err != nil {
-			return err
-		}
+	err = dp.CheckMissing(noDeps)
+	if err != nil {
+		return err
 	}
 
 	if len(dp.Aur) == 0 {
 		if !config.CombinedUpgrade {
-			if cmdArgs.ExistsArg("u", "sysupgrade") {
+			if sysupgradeArg {
 				fmt.Println(gotext.Get(" there is nothing to do"))
 			}
 			return nil
@@ -166,12 +166,9 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		return fmt.Errorf(gotext.Get("refusing to install AUR packages as root, aborting"))
 	}
 
-	var conflicts stringset.MapStringSet
-	if !cmdArgs.ExistsDouble("d", "nodeps") {
-		conflicts, err = dp.CheckConflicts(config.UseAsk, settings.NoConfirm)
-		if err != nil {
-			return err
-		}
+	conflicts, err := dp.CheckConflicts(config.UseAsk, settings.NoConfirm, noDeps)
+	if err != nil {
+		return err
 	}
 
 	do = dep.GetOrder(dp)
