@@ -24,7 +24,6 @@ import (
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
-	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
@@ -65,9 +64,6 @@ func asexp(cmdArgs *settings.Arguments, pkgs []string) (err error) {
 func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProviders bool) (err error) {
 	var incompatible stringset.StringSet
 	var do *dep.Order
-
-	var aurUp upgrade.UpSlice
-	var repoUp upgrade.UpSlice
 
 	var srcinfos map[string]*gosrc.Srcinfo
 
@@ -119,28 +115,14 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	// if we are doing -u also request all packages needing update
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
-		aurUp, repoUp, err = upList(warnings, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), func(upgrade.Upgrade) bool { return true })
-		if err != nil {
-			return err
-		}
-
-		warnings.Print()
-
-		ignore, aurUp, errUp := upgradePkgs(aurUp, repoUp)
+		ignore, targets, errUp := sysupgradeTargets(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errUp != nil {
 			return errUp
 		}
 
-		for _, up := range repoUp {
-			if !ignore.Get(up.Name) {
-				requestTargets = append(requestTargets, up.Name)
-				cmdArgs.AddTarget(up.Name)
-			}
-		}
-
-		for up := range aurUp {
-			requestTargets = append(requestTargets, "aur/"+up)
-			cmdArgs.AddTarget("aur/" + up)
+		for _, up := range targets {
+			cmdArgs.AddTarget(up)
+			requestTargets = append(requestTargets, up)
 		}
 
 		if len(ignore) > 0 {

@@ -139,22 +139,22 @@ func isDevelPackage(pkg alpm.IPackage) bool {
 	return isDevelName(pkg.Name()) || isDevelName(pkg.Base())
 }
 
-// upgradePkgs handles updating the cache and installing updates.
-func upgradePkgs(aurUp, repoUp upgrade.UpSlice) (ignore, aurNames stringset.StringSet, err error) {
-	ignore = make(stringset.StringSet)
-	aurNames = make(stringset.StringSet)
+// upgradePkgsMenu handles updating the cache and installing updates.
+func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []string, error) {
+	ignore := make(stringset.StringSet)
+	targets := []string{}
 
 	allUpLen := len(repoUp) + len(aurUp)
 	if allUpLen == 0 {
-		return ignore, aurNames, nil
+		return ignore, nil, nil
 	}
 
 	if !config.UpgradeMenu {
 		for _, pkg := range aurUp {
-			aurNames.Set(pkg.Name)
+			targets = append(targets, pkg.Name)
 		}
 
-		return ignore, aurNames, nil
+		return ignore, targets, nil
 	}
 
 	sort.Sort(repoUp)
@@ -182,10 +182,12 @@ func upgradePkgs(aurUp, repoUp upgrade.UpSlice) (ignore, aurNames stringset.Stri
 		}
 
 		if isInclude && !include.Get(len(repoUp)-i+len(aurUp)) {
+			targets = append(targets, pkg.Name)
 			continue
 		}
 
 		if !isInclude && (exclude.Get(len(repoUp)-i+len(aurUp)) || otherExclude.Get(pkg.Repository)) {
+			targets = append(targets, pkg.Name)
 			continue
 		}
 
@@ -198,13 +200,27 @@ func upgradePkgs(aurUp, repoUp upgrade.UpSlice) (ignore, aurNames stringset.Stri
 		}
 
 		if isInclude && !include.Get(len(aurUp)-i) {
-			aurNames.Set(pkg.Name)
+			targets = append(targets, "aur/"+pkg.Name)
 		}
 
 		if !isInclude && (exclude.Get(len(aurUp)-i) || otherExclude.Get(pkg.Repository)) {
-			aurNames.Set(pkg.Name)
+			targets = append(targets, "aur/"+pkg.Name)
 		}
 	}
 
-	return ignore, aurNames, err
+	return ignore, targets, err
+}
+
+// Targets for sys upgrade
+func sysupgradeTargets(dbExecutor db.Executor, enableDowngrade bool) (stringset.StringSet, []string, error) {
+	warnings := query.NewWarnings()
+	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, func(upgrade.Upgrade) bool { return true })
+	if err != nil {
+		return nil, nil, err
+	}
+
+	warnings.Print()
+
+	ignore, targets, errUp := upgradePkgsMenu(aurUp, repoUp)
+	return ignore, targets, errUp
 }
