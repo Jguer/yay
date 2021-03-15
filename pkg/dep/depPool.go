@@ -78,7 +78,7 @@ func makePool(dbExecutor db.Executor) *Pool {
 // Includes db/ prefixes and group installs
 func (dp *Pool) ResolveTargets(pkgs []string,
 	mode settings.TargetMode,
-	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int) error {
+	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps bool) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
@@ -118,7 +118,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 		if foundPkg != nil {
 			dp.Targets = append(dp.Targets, target)
 			dp.Explicit.Set(foundPkg.Name())
-			dp.ResolveRepoDependency(foundPkg)
+			dp.ResolveRepoDependency(foundPkg, noDeps)
 			continue
 		} else {
 			// check for groups
@@ -147,7 +147,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 	}
 
 	if len(aurTargets) > 0 && (mode == settings.ModeAny || mode == settings.ModeAUR) {
-		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN)
+		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps)
 	}
 
 	return nil
@@ -260,7 +260,7 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 
 func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 	explicit, ignoreProviders, noConfirm, provides bool,
-	rebuild string, splitN int) error {
+	rebuild string, splitN int, noDeps bool) error {
 	newPackages := make(stringset.StringSet)
 	newAURPackages := make(stringset.StringSet)
 
@@ -289,7 +289,14 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		}
 		dp.Aur[pkg.Name] = pkg
 
-		for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+		var combinedDepList [][]string
+		if noDeps {
+			combinedDepList = [][]string{pkg.MakeDepends, pkg.CheckDepends}
+		} else {
+			combinedDepList = [][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends}
+		}
+
+		for _, deps := range combinedDepList {
 			for _, dep := range deps {
 				newPackages.Set(dep)
 			}
@@ -311,7 +318,7 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		}
 
 		if repoPkg != nil {
-			dp.ResolveRepoDependency(repoPkg)
+			dp.ResolveRepoDependency(repoPkg, false)
 			continue
 		}
 
@@ -320,12 +327,15 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		newAURPackages.Set(dep)
 	}
 
-	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN)
+	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps)
 	return err
 }
 
-func (dp *Pool) ResolveRepoDependency(pkg db.IPackage) {
+func (dp *Pool) ResolveRepoDependency(pkg db.IPackage, noDeps bool) {
 	dp.Repo[pkg.Name()] = pkg
+	if noDeps {
+		return
+	}
 
 	for _, dep := range dp.AlpmExecutor.PackageDepends(pkg) {
 		if dp.hasSatisfier(dep.String()) {
@@ -340,7 +350,7 @@ func (dp *Pool) ResolveRepoDependency(pkg db.IPackage) {
 		// has satisfier in repo: fetch it
 		repoPkg := dp.AlpmExecutor.SyncSatisfier(dep.String())
 		if repoPkg != nil {
-			dp.ResolveRepoDependency(repoPkg)
+			dp.ResolveRepoDependency(repoPkg, noDeps)
 		}
 	}
 }
@@ -350,11 +360,11 @@ func GetPool(pkgs []string,
 	dbExecutor db.Executor,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
-	rebuild string, splitN int) (*Pool, error) {
+	rebuild string, splitN int, noDeps bool) (*Pool, error) {
 	dp := makePool(dbExecutor)
 
 	dp.Warnings = warnings
-	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN)
+	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps)
 
 	return dp, err
 }

@@ -136,7 +136,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	dp, err := dep.GetPool(requestTargets,
 		warnings, dbExecutor, config.Runtime.Mode,
-		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN)
+		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN, noDeps)
 	if err != nil {
 		return err
 	}
