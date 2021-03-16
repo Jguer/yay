@@ -29,8 +29,7 @@ func GetPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []str
 		aur := true
 		dbName, name := text.SplitDBFromName(target)
 		if dbName != "aur" && (mode == settings.ModeAny || mode == settings.ModeRepo) {
-			pkg := dbExecutor.SyncPackage(name)
-			if pkg != nil {
+			if pkg := dbExecutor.SyncPackage(name); pkg != nil {
 				aur = false
 				name = getURLName(pkg)
 				dbName = pkg.DB().Name()

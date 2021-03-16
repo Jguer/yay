@@ -28,18 +28,16 @@ func GetOrder(dp *Pool, noDeps, noCheckDeps bool) *Order {
 
 	for _, target := range dp.Targets {
 		dep := target.DepString()
-		aurPkg := dp.Aur[dep]
-		if aurPkg != nil && pkgSatisfies(aurPkg.Name, aurPkg.Version, dep) {
+
+		if aurPkg := dp.Aur[dep]; aurPkg != nil && pkgSatisfies(aurPkg.Name, aurPkg.Version, dep) {
 			do.orderPkgAur(aurPkg, dp, true, noDeps, noCheckDeps)
 		}
 
-		aurPkg = dp.findSatisfierAur(dep)
-		if aurPkg != nil {
+		if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
 			do.orderPkgAur(aurPkg, dp, true, noDeps, noCheckDeps)
 		}
 
-		repoPkg := dp.findSatisfierRepo(dep)
-		if repoPkg != nil {
+		if repoPkg := dp.findSatisfierRepo(dep); repoPkg != nil {
 			do.orderPkgRepo(repoPkg, dp, true)
 		}
 	}
@@ -55,13 +53,11 @@ func (do *Order) orderPkgAur(pkg *rpc.Pkg, dp *Pool, runtime, noDeps, noCheckDep
 
 	for i, deps := range ComputeCombinedDepList(pkg, noDeps, noCheckDeps) {
 		for _, dep := range deps {
-			aurPkg := dp.findSatisfierAur(dep)
-			if aurPkg != nil {
+			if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
 				do.orderPkgAur(aurPkg, dp, runtime && i == 0, noDeps, noCheckDeps)
 			}
 
-			repoPkg := dp.findSatisfierRepo(dep)
-			if repoPkg != nil {
+			if repoPkg := dp.findSatisfierRepo(dep); repoPkg != nil {
 				do.orderPkgRepo(repoPkg, dp, runtime && i == 0)
 			}
 		}
@@ -84,8 +80,7 @@ func (do *Order) orderPkgRepo(pkg db.IPackage, dp *Pool, runtime bool) {
 	delete(dp.Repo, pkg.Name())
 
 	for _, dep := range dp.AlpmExecutor.PackageDepends(pkg) {
-		repoPkg := dp.findSatisfierRepo(dep.String())
-		if repoPkg != nil {
+		if repoPkg := dp.findSatisfierRepo(dep.String()); repoPkg != nil {
 			do.orderPkgRepo(repoPkg, dp, runtime)
 		}
 	}
