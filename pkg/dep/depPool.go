@@ -356,8 +356,7 @@ func (dp *Pool) ResolveRepoDependency(pkg db.IPackage, noDeps bool) {
 		}
 
 		// has satisfier in repo: fetch it
-		repoPkg := dp.AlpmExecutor.SyncSatisfier(dep.String())
-		if repoPkg != nil {
+		if repoPkg := dp.AlpmExecutor.SyncSatisfier(dep.String()); repoPkg != nil {
 			dp.ResolveRepoDependency(repoPkg, noDeps)
 		}
 	}

@@ -215,8 +215,7 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing, noDe
 		return
 	}
 
-	aurPkg := dp.findSatisfierAur(dep)
-	if aurPkg != nil {
+	if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
 		missing.Good.Set(dep)
 		combinedDepList := ComputeCombinedDepList(aurPkg, noDeps, noCheckDeps)
 		for _, deps := range combinedDepList {
@@ -233,8 +232,7 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing, noDe
 		return
 	}
 
-	repoPkg := dp.findSatisfierRepo(dep)
-	if repoPkg != nil {
+	if repoPkg := dp.findSatisfierRepo(dep); repoPkg != nil {
 		missing.Good.Set(dep)
 
 		if noDeps {
