@@ -1,0 +1,6 @@
+github: [Jguer]
+custom:
+  [
+    "https://www.blockchain.com/btc/payment_request?address=bc1q703ukdwfpfh24hqzusckt4r6dn88eqve5d0847&message=yay!",
+    "https://coinrequest.io/request/kOSc4hkqYzeJoQv",
+  ]
