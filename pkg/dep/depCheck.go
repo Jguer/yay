@@ -200,7 +200,7 @@ type missing struct {
 	Missing map[string][][]string
 }
 
-func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing) {
+func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing, noDeps, noCheckDeps bool) {
 	if missing.Good.Get(dep) {
 		return
 	}
@@ -218,14 +218,15 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing) {
 	aurPkg := dp.findSatisfierAur(dep)
 	if aurPkg != nil {
 		missing.Good.Set(dep)
-		for _, deps := range [3][]string{aurPkg.Depends, aurPkg.MakeDepends, aurPkg.CheckDepends} {
+		combinedDepList := ComputeCombinedDepList(aurPkg, noDeps, noCheckDeps)
+		for _, deps := range combinedDepList {
 			for _, aurDep := range deps {
 				if dp.AlpmExecutor.LocalSatisfierExists(aurDep) {
 					missing.Good.Set(aurDep)
 					continue
 				}
 
-				dp._checkMissing(aurDep, append(stack, aurPkg.Name), missing)
+				dp._checkMissing(aurDep, append(stack, aurPkg.Name), missing, noDeps, noCheckDeps)
 			}
 		}
 
@@ -235,13 +236,18 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing) {
 	repoPkg := dp.findSatisfierRepo(dep)
 	if repoPkg != nil {
 		missing.Good.Set(dep)
+
+		if noDeps {
+			return
+		}
+
 		for _, dep := range dp.AlpmExecutor.PackageDepends(repoPkg) {
 			if dp.AlpmExecutor.LocalSatisfierExists(dep.String()) {
 				missing.Good.Set(dep.String())
 				continue
 			}
 
-			dp._checkMissing(dep.String(), append(stack, repoPkg.Name()), missing)
+			dp._checkMissing(dep.String(), append(stack, repoPkg.Name()), missing, noDeps, noCheckDeps)
 		}
 
 		return
@@ -272,18 +278,14 @@ func stringSliceEqual(a, b []string) bool {
 	return true
 }
 
-func (dp *Pool) CheckMissing(noDeps bool) error {
-	if noDeps {
-		return nil
-	}
-
+func (dp *Pool) CheckMissing(noDeps, noCheckDeps bool) error {
 	missing := &missing{
 		make(stringset.StringSet),
 		make(map[string][][]string),
 	}
 
 	for _, target := range dp.Targets {
-		dp._checkMissing(target.DepString(), make([]string, 0), missing)
+		dp._checkMissing(target.DepString(), make([]string, 0), missing, noDeps, noCheckDeps)
 	}
 
 	if len(missing.Missing) == 0 {
