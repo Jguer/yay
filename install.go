@@ -67,9 +67,14 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	var srcinfos map[string]*gosrc.Srcinfo
 	noDeps := cmdArgs.ExistsDouble("d", "nodeps")
+	noCheck := strings.Contains(config.MFlags, "--nocheck")
 	sysupgradeArg := cmdArgs.ExistsArg("u", "sysupgrade")
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	warnings := query.NewWarnings()
+
+	if noDeps {
+		config.Runtime.CmdBuilder.MakepkgFlags = append(config.Runtime.CmdBuilder.MakepkgFlags, "-d")
+	}
 
 	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
 		if config.CombinedUpgrade {
@@ -136,12 +141,12 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	dp, err := dep.GetPool(requestTargets,
 		warnings, dbExecutor, config.Runtime.Mode,
-		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN, noDeps)
+		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN, noDeps, noCheck)
 	if err != nil {
 		return err
 	}
 
-	err = dp.CheckMissing(noDeps)
+	err = dp.CheckMissing(noDeps, noCheck)
 	if err != nil {
 		return err
 	}
@@ -171,7 +176,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		return err
 	}
 
-	do = dep.GetOrder(dp)
+	do = dep.GetOrder(dp, noDeps, noCheck)
 	if err != nil {
 		return err
 	}
@@ -354,7 +359,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		return err
 	}
 
-	err = buildInstallPkgbuilds(cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts)
+	err = buildInstallPkgbuilds(cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts, noDeps, noCheck)
 	if err != nil {
 		return err
 	}
@@ -919,7 +924,7 @@ func buildInstallPkgbuilds(
 	do *dep.Order,
 	srcinfos map[string]*gosrc.Srcinfo,
 	incompatible stringset.StringSet,
-	conflicts stringset.MapStringSet,
+	conflicts stringset.MapStringSet, noDeps, noCheck bool,
 ) error {
 	arguments := cmdArgs.Copy()
 	arguments.ClearTargets()
@@ -986,7 +991,7 @@ func buildInstallPkgbuilds(
 		satisfied := true
 	all:
 		for _, pkg := range base {
-			for _, deps := range [3][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends} {
+			for _, deps := range dep.ComputeCombinedDepList(pkg, noDeps, noCheck) {
 				for _, dep := range deps {
 					if !dp.AlpmExecutor.LocalSatisfierExists(dep) {
 						satisfied = false

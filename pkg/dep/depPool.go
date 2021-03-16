@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
+	"github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -78,7 +79,7 @@ func makePool(dbExecutor db.Executor) *Pool {
 // Includes db/ prefixes and group installs
 func (dp *Pool) ResolveTargets(pkgs []string,
 	mode settings.TargetMode,
-	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps bool) error {
+	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC
 	// call
@@ -147,7 +148,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 	}
 
 	if len(aurTargets) > 0 && (mode == settings.ModeAny || mode == settings.ModeAUR) {
-		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps)
+		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
 	}
 
 	return nil
@@ -258,9 +259,22 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 	return nil
 }
 
+func ComputeCombinedDepList(pkg *aur.Pkg, noDeps, noCheckDeps bool) [][]string {
+	combinedDepList := [][]string{pkg.MakeDepends}
+	if !noDeps {
+		combinedDepList = append(combinedDepList, pkg.Depends)
+	}
+
+	if !noCheckDeps {
+		combinedDepList = append(combinedDepList, pkg.CheckDepends)
+	}
+
+	return combinedDepList
+}
+
 func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 	explicit, ignoreProviders, noConfirm, provides bool,
-	rebuild string, splitN int, noDeps bool) error {
+	rebuild string, splitN int, noDeps, noCheckDeps bool) error {
 	newPackages := make(stringset.StringSet)
 	newAURPackages := make(stringset.StringSet)
 
@@ -289,13 +303,7 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		}
 		dp.Aur[pkg.Name] = pkg
 
-		var combinedDepList [][]string
-		if noDeps {
-			combinedDepList = [][]string{pkg.MakeDepends, pkg.CheckDepends}
-		} else {
-			combinedDepList = [][]string{pkg.Depends, pkg.MakeDepends, pkg.CheckDepends}
-		}
-
+		combinedDepList := ComputeCombinedDepList(pkg, noDeps, noCheckDeps)
 		for _, deps := range combinedDepList {
 			for _, dep := range deps {
 				newPackages.Set(dep)
@@ -327,7 +335,7 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		newAURPackages.Set(dep)
 	}
 
-	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps)
+	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
 	return err
 }
 
@@ -360,11 +368,11 @@ func GetPool(pkgs []string,
 	dbExecutor db.Executor,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
-	rebuild string, splitN int, noDeps bool) (*Pool, error) {
+	rebuild string, splitN int, noDeps bool, noCheckDeps bool) (*Pool, error) {
 	dp := makePool(dbExecutor)
 
 	dp.Warnings = warnings
-	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps)
+	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
 
 	return dp, err
 }
