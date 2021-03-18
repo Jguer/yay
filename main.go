@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
@@ -138,7 +139,7 @@ func main() {
 	err = handleCmd(cmdArgs, db.Executor(dbExecutor))
 
 	if err != nil {
-		if str := err.Error(); str != "" {
+		if str := err.Error(); str != "" && !strings.Contains(str, "exit status") {
 			fmt.Fprintln(os.Stderr, str)
 		}
 
