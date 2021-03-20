@@ -23,10 +23,10 @@ POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
-GOFLAGS ?= -v -trimpath -modcacherw
+GOFLAGS ?= -trimpath -mod=readonly -modcacherw
 GOFLAGS += $(shell pacman -T 'pacman>6' && echo "-tags six")
 EXTRA_GOFLAGS ?= -buildmode=pie
-LDFLAGS := $(LDFLAGS) -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}"
+LDFLAGS := -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}" -linkmode=external
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
@@ -109,7 +109,7 @@ uninstall:
 	done
 
 $(BIN): $(SOURCES)
-	$(GO) build $(GOFLAGS) -ldflags '-s -w $(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@
+	$(GO) build $(GOFLAGS) -ldflags '$(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@
 
 $(RELEASE_DIR):
 	mkdir $(RELEASE_DIR)
