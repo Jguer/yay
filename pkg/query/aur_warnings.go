@@ -2,6 +2,7 @@ package query
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -21,9 +22,16 @@ func NewWarnings() *AURWarnings {
 }
 
 func (warnings *AURWarnings) Print() {
-	if len(warnings.Missing) > 0 {
+	normalMissing, debugMissing := filterDebugPkgs(warnings.Missing)
+
+	if len(normalMissing) > 0 {
 		text.Warn(gotext.Get("Missing AUR Packages:"))
-		printRange(warnings.Missing)
+		printRange(normalMissing)
+	}
+
+	if len(debugMissing) > 0 {
+		text.Warn(gotext.Get("Missing AUR Debug Packages:"))
+		printRange(debugMissing)
 	}
 
 	if len(warnings.Orphans) > 0 {
@@ -35,6 +43,21 @@ func (warnings *AURWarnings) Print() {
 		text.Warn(gotext.Get("Flagged Out Of Date AUR Packages:"))
 		printRange(warnings.OutOfDate)
 	}
+}
+
+func filterDebugPkgs(names []string) (normal, debug []string) {
+	normal = make([]string, 0)
+	debug = make([]string, 0)
+
+	for _, name := range names {
+		if strings.HasSuffix(name, "-debug") {
+			debug = append(debug, name)
+		} else {
+			normal = append(normal, name)
+		}
+	}
+
+	return
 }
 
 func printRange(names []string) {
