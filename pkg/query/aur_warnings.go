@@ -46,8 +46,8 @@ func (warnings *AURWarnings) Print() {
 }
 
 func filterDebugPkgs(names []string) (normal, debug []string) {
-	normal = make([]string, 0)
-	debug = make([]string, 0)
+	normal = make([]string, 0, len(names))
+	debug = make([]string, 0, len(names))
 
 	for _, name := range names {
 		if strings.HasSuffix(name, "-debug") {
