@@ -127,7 +127,9 @@ jobs:
           asset_content_type: application/tar+gzip
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Release Notary Action
-        uses: aevea/release-notary@v0.9.1
+        uses: aevea/release-notary@v0.9.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
