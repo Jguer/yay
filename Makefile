@@ -1,5 +1,5 @@
 export GO111MODULE=on
-GOPROXY ?= https://gocenter.io,direct
+GOPROXY ?= direct,https://proxy.golang.org
 export GOPROXY
 
 BUILD_TAG = devel
