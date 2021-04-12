@@ -141,8 +141,8 @@ func (c *Configuration) String() string {
 func DefaultConfig() *Configuration {
 	return &Configuration{
 		AURURL:             "https://aur.archlinux.org",
-		BuildDir:           os.ExpandEnv("$HOME/.cache/yay"),
-		ABSDir:             os.ExpandEnv("$HOME/.cache/yay/abs"),
+		BuildDir:           os.ExpandEnv("$XDG_CACHE_HOME/yay"),
+		ABSDir:             os.ExpandEnv("$XDG_CACHE_HOME/yay/abs"),
 		CleanAfter:         false,
 		Editor:             "",
 		EditorFlags:        "",
