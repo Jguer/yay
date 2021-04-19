@@ -21,22 +21,30 @@ func StylizedNameWithRepository(u Upgrade) string {
 
 // upSlice is a slice of Upgrades
 type UpSlice struct {
-	Up []Upgrade
+	Up    []Upgrade
+	Repos []string
 }
 
 func (u UpSlice) Len() int      { return len(u.Up) }
 func (u UpSlice) Swap(i, j int) { u.Up[i], u.Up[j] = u.Up[j], u.Up[i] }
 
 func (u UpSlice) Less(i, j int) bool {
-	up := u.Up
-	if up[i].Repository == up[j].Repository {
-		iRunes := []rune(up[i].Name)
-		jRunes := []rune(up[j].Name)
+	if u.Up[i].Repository == u.Up[j].Repository {
+		iRunes := []rune(u.Up[i].Name)
+		jRunes := []rune(u.Up[j].Name)
 		return text.LessRunes(iRunes, jRunes)
 	}
 
-	iRunes := []rune(up[i].Repository)
-	jRunes := []rune(up[j].Repository)
+	for _, db := range u.Repos {
+		if db == u.Up[i].Repository {
+			return true
+		} else if db == u.Up[j].Repository {
+			return false
+		}
+	}
+
+	iRunes := []rune(u.Up[i].Repository)
+	jRunes := []rune(u.Up[j].Repository)
 	return text.LessRunes(iRunes, jRunes)
 }
 

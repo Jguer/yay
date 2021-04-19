@@ -1,3 +1,5 @@
+github.com/Jguer/go-alpm v0.0.0-20200405152916-a3feea4322e9 h1:lLQSUe6iRdtFrP0zkDV7n8I8XKSxRHQTEU1KRh4IOLg=
+github.com/Jguer/go-alpm v0.0.0-20200405152916-a3feea4322e9/go.mod h1:D5SUcIS9Yiz/L8cjRzq/992eERnx6ugYmGlc4e7xdus=
 github.com/Jguer/go-alpm/v2 v2.0.2 h1:BbF/6dg2tXISEJiCtxlX6J/TCSoB/g+31bCfEiH9D0c=
 github.com/Jguer/go-alpm/v2 v2.0.2/go.mod h1:zU4iKCtNkDARfj5BrKJXYAQ5nIjtZbySfa0paboSmTQ=
 github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f h1:ptFKynTV1p8JCzqk81NcMj0DV0Xle+PdKxfHjPbdIOU=

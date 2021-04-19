@@ -43,4 +43,5 @@ type Executor interface {
 	SyncPackages(...string) []IPackage
 	SyncSatisfier(string) IPackage
 	SyncSatisfierExists(string) bool
+	Repos() []string
 }

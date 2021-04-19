@@ -45,7 +45,7 @@ func Test_upAUR(t *testing.T) {
 				},
 				timeUpdate: false,
 			},
-			want: UpSlice{},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{}},
 		},
 		{
 			name: "Simple Update",
@@ -54,7 +54,7 @@ func Test_upAUR(t *testing.T) {
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.1.0", Name: "hello"}},
 				timeUpdate: false,
 			},
-			want: UpSlice{Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"}},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"}}},
 		},
 		{
 			name: "Time Update",
@@ -63,7 +63,7 @@ func Test_upAUR(t *testing.T) {
 				aurdata:    map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello", LastModified: int(time.Now().AddDate(0, 0, 2).Unix())}},
 				timeUpdate: true,
 			},
-			want: UpSlice{Upgrade{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.0.0"}},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.0.0"}}},
 		},
 	}
 	for _, tt := range tests {
@@ -147,7 +147,7 @@ func Test_upDevel(t *testing.T) {
 					"ignored": {Version: "2.0.0", Name: "ignored"},
 				},
 			},
-			want: UpSlice{},
+			want: UpSlice{Repos: []string{"devel"}},
 		},
 		{
 			name:     "Simple Update",
@@ -203,19 +203,18 @@ func Test_upDevel(t *testing.T) {
 					"hello4": {Version: "2.0.0", Name: "hello4"},
 				},
 			},
-			want: UpSlice{
-				Upgrade{
-					Name:          "hello",
-					Repository:    "devel",
-					LocalVersion:  "2.0.0",
-					RemoteVersion: "latest-commit",
-				},
-				Upgrade{
+			want: UpSlice{Repos: []string{"devel"}, Up: []Upgrade{{
+				Name:          "hello",
+				Repository:    "devel",
+				LocalVersion:  "2.0.0",
+				RemoteVersion: "latest-commit",
+			},
+				{
 					Name:          "hello4",
 					Repository:    "devel",
 					LocalVersion:  "4.0.0",
 					RemoteVersion: "latest-commit",
-				},
+				}},
 			},
 		},
 		{
@@ -238,7 +237,7 @@ func Test_upDevel(t *testing.T) {
 				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
-			want: UpSlice{},
+			want: UpSlice{Repos: []string{"devel"}},
 		},
 		{
 			name:     "No update returned - ignored",
@@ -260,14 +259,14 @@ func Test_upDevel(t *testing.T) {
 				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true}},
 				aurdata: map[string]*rpc.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
-			want: UpSlice{},
+			want: UpSlice{Repos: []string{"devel"}},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			config.Runtime.CmdRunner.(*MockRunner).t = t
 			got := UpDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
-			assert.ElementsMatch(t, tt.want, got)
+			assert.ElementsMatch(t, tt.want.Up, got.Up)
 			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))
 		})
 	}

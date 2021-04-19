@@ -49,7 +49,7 @@ func UpDevel(
 
 	wg.Wait()
 
-	toUpgrade := UpSlice{Up: make([]Upgrade, 0)}
+	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"devel"}}
 	for _, pkg := range toUpdate {
 		if pkg.ShouldIgnore() {
 			printIgnoringPackage(pkg, "latest-commit")
@@ -80,7 +80,7 @@ func printIgnoringPackage(pkg db.IPackage, newPkgVersion string) {
 // UpAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func UpAUR(remote []db.IPackage, aurdata map[string]*query.Pkg, timeUpdate bool) UpSlice {
-	toUpgrade := UpSlice{Up: make([]Upgrade, 0)}
+	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"aur"}}
 
 	for _, pkg := range remote {
 		aurPkg, ok := aurdata[pkg.Name()]
