@@ -20,20 +20,23 @@ func StylizedNameWithRepository(u Upgrade) string {
 }
 
 // upSlice is a slice of Upgrades
-type UpSlice []Upgrade
+type UpSlice struct {
+	Up []Upgrade
+}
 
-func (u UpSlice) Len() int      { return len(u) }
-func (u UpSlice) Swap(i, j int) { u[i], u[j] = u[j], u[i] }
+func (u UpSlice) Len() int      { return len(u.Up) }
+func (u UpSlice) Swap(i, j int) { u.Up[i], u.Up[j] = u.Up[j], u.Up[i] }
 
 func (u UpSlice) Less(i, j int) bool {
-	if u[i].Repository == u[j].Repository {
-		iRunes := []rune(u[i].Name)
-		jRunes := []rune(u[j].Name)
+	up := u.Up
+	if up[i].Repository == up[j].Repository {
+		iRunes := []rune(up[i].Name)
+		jRunes := []rune(up[j].Name)
 		return text.LessRunes(iRunes, jRunes)
 	}
 
-	iRunes := []rune(u[i].Repository)
-	jRunes := []rune(u[j].Repository)
+	iRunes := []rune(up[i].Repository)
+	jRunes := []rune(up[j].Repository)
 	return text.LessRunes(iRunes, jRunes)
 }
 
@@ -86,7 +89,7 @@ func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
 // Print prints the details of the packages to upgrade.
 func (u UpSlice) Print() {
 	longestName, longestVersion := 0, 0
-	for _, pack := range u {
+	for _, pack := range u.Up {
 		packNameLen := len(StylizedNameWithRepository(pack))
 		packVersion, _ := GetVersionDiff(pack.LocalVersion, pack.RemoteVersion)
 		packVersionLen := len(packVersion)
@@ -96,12 +99,12 @@ func (u UpSlice) Print() {
 
 	namePadding := fmt.Sprintf("%%-%ds  ", longestName)
 	versionPadding := fmt.Sprintf("%%-%ds", longestVersion)
-	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u))))
+	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u.Up))))
 
-	for k, i := range u {
+	for k, i := range u.Up {
 		left, right := GetVersionDiff(i.LocalVersion, i.RemoteVersion)
 
-		fmt.Print(text.Magenta(fmt.Sprintf(numberPadding, len(u)-k)))
+		fmt.Print(text.Magenta(fmt.Sprintf(numberPadding, len(u.Up)-k)))
 
 		fmt.Printf(namePadding, StylizedNameWithRepository(i))
 

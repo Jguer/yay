@@ -20,7 +20,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
-func filterUpdateList(list upgrade.UpSlice, filter upgrade.Filter) upgrade.UpSlice {
+func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 	tmp := list[:0]
 	for _, pkg := range list {
 		if filter(pkg) {
@@ -37,6 +37,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 
 	var wg sync.WaitGroup
 	var develUp upgrade.UpSlice
+	var repoSlice []db.Upgrade
 	var errs multierror.MultiError
 
 	aurdata := make(map[string]*rpc.Pkg)
@@ -51,7 +52,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 		go func() {
-			repoUp, err = dbExecutor.RepoUpgrades(enableDowngrade)
+			repoSlice, err = dbExecutor.RepoUpgrades(enableDowngrade)
 			errs.Add(err)
 			wg.Done()
 		}()
@@ -88,22 +89,22 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 	wg.Wait()
 
 	printLocalNewerThanAUR(remote, aurdata)
-
-	if develUp != nil {
-		names := make(stringset.StringSet)
-		for _, up := range develUp {
-			names.Set(up.Name)
-		}
-		for _, up := range aurUp {
-			if !names.Get(up.Name) {
-				develUp = append(develUp, up)
-			}
-		}
-
-		aurUp = develUp
+	names := make(stringset.StringSet)
+	for _, up := range develUp.Up {
+		names.Set(up.Name)
 	}
+	for _, up := range aurUp.Up {
+		if !names.Get(up.Name) {
+			develUp.Up = append(develUp.Up, up)
+		}
+	}
+	aurUp = develUp
 
-	return filterUpdateList(aurUp, filter), filterUpdateList(repoUp, filter), errs.Return()
+	repoUp = upgrade.UpSlice{Up: repoSlice}
+
+	aurUp.Up = filterUpdateList(aurUp.Up, filter)
+	repoUp.Up = filterUpdateList(repoUp.Up, filter)
+	return aurUp, repoUp, errs.Return()
 }
 
 func printLocalNewerThanAUR(
@@ -144,13 +145,13 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 	ignore := make(stringset.StringSet)
 	targets := []string{}
 
-	allUpLen := len(repoUp) + len(aurUp)
+	allUpLen := len(repoUp.Up) + len(aurUp.Up)
 	if allUpLen == 0 {
 		return ignore, nil, nil
 	}
 
 	if !config.UpgradeMenu {
-		for _, pkg := range aurUp {
+		for _, pkg := range aurUp.Up {
 			targets = append(targets, pkg.Name)
 		}
 
@@ -159,7 +160,7 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
-	allUp := append(repoUp, aurUp...)
+	allUp := upgrade.UpSlice{Up: append(repoUp.Up, aurUp.Up...)}
 	fmt.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
 	allUp.Print()
 
@@ -176,17 +177,17 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
-	for i, pkg := range repoUp {
+	for i, pkg := range repoUp.Up {
 		if isInclude && otherInclude.Get(pkg.Repository) {
 			ignore.Set(pkg.Name)
 		}
 
-		if isInclude && !include.Get(len(repoUp)-i+len(aurUp)) {
+		if isInclude && !include.Get(len(repoUp.Up)-i+len(aurUp.Up)) {
 			targets = append(targets, pkg.Name)
 			continue
 		}
 
-		if !isInclude && (exclude.Get(len(repoUp)-i+len(aurUp)) || otherExclude.Get(pkg.Repository)) {
+		if !isInclude && (exclude.Get(len(repoUp.Up)-i+len(aurUp.Up)) || otherExclude.Get(pkg.Repository)) {
 			targets = append(targets, pkg.Name)
 			continue
 		}
@@ -194,16 +195,16 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 		ignore.Set(pkg.Name)
 	}
 
-	for i, pkg := range aurUp {
+	for i, pkg := range aurUp.Up {
 		if isInclude && otherInclude.Get(pkg.Repository) {
 			continue
 		}
 
-		if isInclude && !include.Get(len(aurUp)-i) {
+		if isInclude && !include.Get(len(aurUp.Up)-i) {
 			targets = append(targets, "aur/"+pkg.Name)
 		}
 
-		if !isInclude && (exclude.Get(len(aurUp)-i) || otherExclude.Get(pkg.Repository)) {
+		if !isInclude && (exclude.Get(len(aurUp.Up)-i) || otherExclude.Get(pkg.Repository)) {
 			targets = append(targets, "aur/"+pkg.Name)
 		}
 	}

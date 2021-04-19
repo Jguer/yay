@@ -400,7 +400,7 @@ func (ae *AlpmExecutor) PackageGroups(pkg alpm.IPackage) []string {
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error) {
-	slice := upgrade.UpSlice{}
+	slice := []db.Upgrade{}
 
 	localDB, err := ae.handle.LocalDB()
 	if err != nil {
