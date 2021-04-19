@@ -193,7 +193,7 @@ func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool, filter u
 	if err != nil {
 		return err
 	}
-	fmt.Println(len(aurUp) + len(repoUp))
+	fmt.Println(len(aurUp.Up) + len(repoUp.Up))
 
 	return nil
 }
@@ -219,7 +219,7 @@ func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enable
 	noTargets := len(targets) == 0
 
 	if !cmdArgs.ExistsArg("m", "foreign") {
-		for _, pkg := range repoUp {
+		for _, pkg := range repoUp.Up {
 			if noTargets || targets.Get(pkg.Name) {
 				if cmdArgs.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
@@ -232,7 +232,7 @@ func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enable
 	}
 
 	if !cmdArgs.ExistsArg("n", "native") {
-		for _, pkg := range aurUp {
+		for _, pkg := range aurUp.Up {
 			if noTargets || targets.Get(pkg.Name) {
 				if cmdArgs.ExistsArg("q", "quiet") {
 					fmt.Printf("%s\n", pkg.Name)
