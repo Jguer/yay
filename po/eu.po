@@ -134,7 +134,7 @@ msgstr "Saihestu yay root/sudo bezala exekutatzea."
 
 #: print.go:281
 msgid "Check Deps"
-msgstr "Menpekotasunak egiaztatzea"
+msgstr "Egiaztapen menpekotasunak"
 
 #: upgrade.go:167
 msgid "Checking development packages..."
@@ -298,11 +298,11 @@ msgstr "Editatzeko PKGBUILDak?"
 
 #: print.go:298
 msgid "Package Base ID"
-msgstr "Pakete Base IDa"
+msgstr "Pakete-oinarriaren IDa"
 
 #: print.go:299
 msgid "Package Base"
-msgstr "Pakete Base-a"
+msgstr "Pakete-oinarria"
 
 #: install.go:582
 msgid "Packages to cleanBuild?"
@@ -362,7 +362,7 @@ msgstr "Biltegietako paketeak soilik erakusten"
 
 #: print.go:300
 msgid "Snapshot URL"
-msgstr "Snapshot-aren URLa"
+msgstr "PKGBUILDaren argazkiaren URLa"
 
 #: print.go:345
 msgid "Ten biggest packages:"
