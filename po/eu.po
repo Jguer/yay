@@ -22,7 +22,7 @@ msgstr " (Instalatuta)"
 
 #: depCheck.go:279
 msgid " (Target"
-msgstr " (Helburu"
+msgstr " (Helburua"
 
 #: depCheck.go:281
 msgid " (Wanted by: "
@@ -46,9 +46,7 @@ msgstr "%s instalatzeak ezabatuko du:"
 
 #: install.go:583 install.go:658 install.go:665
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
-msgstr ""
-"%s [A]Guztiak [Ab]ortatu [I]nstalatuak [No]Ez instalatuak edo (1 2 3, 1-3, "
-"^4)"
+msgstr "%s Guzti[A]k [Ab]ortatu [I]nstalatuak [No]Ez instalatuak edo (1 2 3, 1-3, ^4)"
 
 #: download.go:273
 msgid "%s already downloaded -- use -f to overwrite"
@@ -128,7 +126,7 @@ msgstr "AUReko URLa"
 
 #: config.go:77
 msgid "Add %s or %s to your environment variables"
-msgstr "Gehitu %s edo %s zure ingurune aldagaietara"
+msgstr "Gehitu %s edo %s zure ingurune-aldagaietara"
 
 #: main.go:182
 msgid "Avoid running yay as root/sudo."
@@ -180,7 +178,7 @@ msgstr "Deskribapena"
 
 #: install.go:657
 msgid "Diffs to show?"
-msgstr "Diffs-ak erakutsi?"
+msgstr "Aldaketak erakutsi?"
 
 #: clean.go:91
 msgid "Do you want to remove ALL AUR packages from cache?"
@@ -192,7 +190,7 @@ msgstr "Jarraipen gabeko AUR fitxategi GUZTIAK kendu nahi dituzu?"
 
 #: clean.go:93
 msgid "Do you want to remove all other AUR packages from cache?"
-msgstr "Katxen dauden beste AUR paketeak kendu nahi dituzu?"
+msgstr "Cachean dauden beste AUR paketeak kendu nahi dituzu?"
 
 #: install.go:893
 msgid "Downloaded PKGBUILD (%d/%d): %s"
@@ -308,13 +306,11 @@ msgstr "Pakete Base-a"
 
 #: install.go:582
 msgid "Packages to cleanBuild?"
-msgstr "CleanBuild egiteko paketeak?"
+msgstr "Konpilatu aurretik garbitzeko paketeak?"
 
 #: upgrade.go:365
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Kanpoan uzteko paketeak: (adb: \"1 2 3\", \"1-3\", \"^4\" edo biltegiaren "
-"izena)"
+msgstr "Kanpoan uzteko paketeak: (adb: \"1 2 3\", \"1-3\", \"^4\" edo biltegiaren izena)"
 
 #: cmd.go:350
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -378,7 +374,7 @@ msgstr "Ondorengo paketeak ez dira zure arkitekturarekin bateragarriak:"
 
 #: callbacks.go:36 print.go:492
 msgid "There are %d providers available for %s:\n"
-msgstr "%d hornitzaile eskuragarri %s-(r)entzat:\n"
+msgstr "%d hornitzaile eskuragarri %s paketearentzat:\n"
 
 #: exec.go:72
 msgid "There may be another Pacman instance running. Waiting..."
@@ -422,7 +418,7 @@ msgstr "I[N]or ez"
 
 #: keys.go:122
 msgid "%s, required by: %s"
-msgstr "%s, hoenk beharrezkoa du: %s"
+msgstr "%s, honek beharrezkoa du: %s"
 
 #: clean.go:96
 msgid ""
@@ -454,11 +450,11 @@ msgid ""
 "Package conflicts found:"
 msgstr ""
 "\n"
-"Pakete gaztakak aurkitu dira:"
+"Pakete arteko gaztakak aurkitu dira:"
 
 #: install.go:270 install.go:310 install.go:489 install.go:593 install.go:676
 msgid "aborting due to user"
-msgstr "erabiltzailea dela eta bertan behera uzten"
+msgstr "erabiltzailearengatik bertan behera uzten"
 
 #: install.go:515
 msgid "cannot find package name: %v"
@@ -466,7 +462,7 @@ msgstr "ezin da paketearen izena aurkitu: %v"
 
 #: install.go:1048 install.go:1120
 msgid "could not find PKGDEST for: %s"
-msgstr "ezin izan da PKGDEST aurkitu %s(r)entzat"
+msgstr "ezin izan da aurkitu PKGDEST %s paketearentzat"
 
 #: install.go:792
 msgid "editor did not exit successfully, aborting: %s"
@@ -482,7 +478,7 @@ msgstr "errorea iturriak deskargatzerakoan: %s"
 
 #: query.go:193
 msgid "error during AUR search: %s"
-msgstr "errorea AUR bilaketa egiterakoan: %s"
+msgstr "errorea AURen bilatzerakoan: %s"
 
 #: download.go:96 download.go:121
 msgid "error fetching %s: %s"
@@ -522,7 +518,7 @@ msgstr "'%s' konfigurazio direktorioa sortzeak huts egin du: %s"
 
 #: download.go:288
 msgid "failed to get pkgbuild: %s: %s"
-msgstr "PKGBUILD lortzean huts egin du: %s: %s"
+msgstr "PKGBUILD lortzeak huts egin du: %s: %s"
 
 #: download.go:296
 msgid "failed to link %s: %s"
@@ -566,8 +562,7 @@ msgstr "'%s' aukera baliogabea"
 
 #: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
 msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
-msgstr ""
-"ordenatzeko modu baliogabea. Konpondu 'yay -Y --bottomup --save' exekutatzen"
+msgstr "ordenatzeko modu baliogabea. Konpondu 'yay -Y --bottomup --save' exekutatzen"
 
 #: callbacks.go:87 print.go:536
 msgid "invalid value: %d is not between %d and %d"
@@ -595,29 +590,27 @@ msgstr "ez da aurkitu '%s' paketea"
 
 #: depCheck.go:193
 msgid "package conflicts can not be resolved with noconfirm, aborting"
-msgstr ""
-"paketeen gatazkak ezin dira noconfirm-ekin konpondu, alde batera uzten"
+msgstr "pakete arteko gatazkak ezin dira noconfirm-ekin konpondu, bertan behera uzten"
 
 #: keys.go:101
 msgid "problem importing keys"
-msgstr "arazoak gakoak inportatzerakoan"
+msgstr "arazoa gakoak inportatzerakoan"
 
 #: install.go:178
 msgid "refusing to install AUR packages as root, aborting"
-msgstr "AUR paketeak root gisa instalatzeari uko egiten, alde batera uzten"
+msgstr "AUR paketeak root gisa instalatzeari uko egiten, bertan behera uzten"
 
 #: clean.go:116
 msgid "removing AUR packages from cache..."
-msgstr "AUR paketeak cache-tik kentzen..."
+msgstr "AUR paketeak cachetik kentzen..."
 
 #: clean.go:188 clean.go:216
 msgid "removing untracked AUR files from cache..."
-msgstr "jarraipen gabeko AUR fitxategiak cache-tik kentzen..."
+msgstr "jarraipen gabeko AUR fitxategiak cachetik kentzen..."
 
 #: install.go:1129
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr ""
-"%s-(e)rako PKGDESTa makepkg-ek zerrendatzen du, baina ez da existitzen: %s"
+msgstr "%s(e)rako PKGDESTa makepkg-ek zerrendatzen du, baina ez da existitzen: %s"
 
 #: main.go:146
 msgid "unable to CreateHandle: %s"
@@ -636,4 +629,4 @@ msgid "yes"
 msgstr "bai"
 
 #~ msgid "failed to create cache directory '%s': %s"
-#~ msgstr "'%s' cache karpeta egiterakoan huts egin du: %s"
+#~ msgstr "'%s' cache direktorioa sortzeak huts egin du: %s"
