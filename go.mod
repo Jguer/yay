@@ -1,6 +1,7 @@
 module github.com/Jguer/yay/v10
 
 require (
+	github.com/Jguer/go-alpm v0.0.0-20200405152916-a3feea4322e9 // indirect
 	github.com/Jguer/go-alpm/v2 v2.0.2
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f
 	github.com/Morganamilo/go-srcinfo v1.0.0

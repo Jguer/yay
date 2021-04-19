@@ -478,3 +478,11 @@ func (ae *AlpmExecutor) Cleanup() {
 		}
 	}
 }
+
+func (ae *AlpmExecutor) Repos() (repos []string) {
+	_ = ae.syncDB.ForEach(func(db alpm.IDB) error {
+		repos = append(repos, db.Name())
+		return nil
+	})
+	return
+}

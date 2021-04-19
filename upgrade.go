@@ -99,8 +99,9 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 		}
 	}
 	aurUp = develUp
+	aurUp.Repos = []string{"aur", "devel"}
 
-	repoUp = upgrade.UpSlice{Up: repoSlice}
+	repoUp = upgrade.UpSlice{Up: repoSlice, Repos: dbExecutor.Repos()}
 
 	aurUp.Up = filterUpdateList(aurUp.Up, filter)
 	repoUp.Up = filterUpdateList(repoUp.Up, filter)
@@ -160,7 +161,7 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
-	allUp := upgrade.UpSlice{Up: append(repoUp.Up, aurUp.Up...)}
+	allUp := upgrade.UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
 	fmt.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
 	allUp.Print()
 
