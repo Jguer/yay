@@ -115,7 +115,7 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error
 		return err
 	}
 
-	if err := alpmHandle.SetArch(pacmanConf.Architecture); err != nil {
+	if err := alpmSetArchitecture(alpmHandle, pacmanConf.Architecture); err != nil {
 		return err
 	}
 
@@ -440,10 +440,6 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error)
 	})
 
 	return slice, nil
-}
-
-func (ae *AlpmExecutor) AlpmArch() (string, error) {
-	return ae.handle.Arch()
 }
 
 func (ae *AlpmExecutor) BiggestPackages() []alpm.IPackage {
