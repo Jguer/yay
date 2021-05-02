@@ -47,8 +47,8 @@ func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*pacmanconf
 		pacmanConf.DBPath = dbPath
 	}
 
-	if arch, _, exists := cmdArgs.GetArg("arch"); exists {
-		pacmanConf.Architecture = arch
+	if arch := cmdArgs.GetArgs("arch"); arch != nil {
+		pacmanConf.Architecture = append(pacmanConf.Architecture, arch...)
 	}
 
 	if ignoreArray := cmdArgs.GetArgs("ignore"); ignoreArray != nil {

@@ -2,8 +2,8 @@ module github.com/Jguer/yay/v10
 
 require (
 	github.com/Jguer/go-alpm v0.0.0-20200405152916-a3feea4322e9 // indirect
-	github.com/Jguer/go-alpm/v2 v2.0.2
-	github.com/Morganamilo/go-pacmanconf v0.0.0-20180910220353-9c5265e1b14f
+	github.com/Jguer/go-alpm/v2 v2.0.3-0.20210503120603-1e8b5ec6f821
+	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/davecgh/go-spew v1.1.1 // indirect

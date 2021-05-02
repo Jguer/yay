@@ -443,10 +443,24 @@ func earlyRefresh(cmdArgs *settings.Arguments) error {
 	return config.Runtime.CmdRunner.Show(passToPacman(arguments))
 }
 
+func alpmArchIsSupported(alpmArch []string, arch string) bool {
+	if arch == "any" {
+		return true
+	}
+
+	for _, a := range alpmArch {
+		if a == arch {
+			return true
+		}
+	}
+
+	return false
+}
+
 func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) (stringset.StringSet, error) {
 	incompatible := make(stringset.StringSet)
 	basesMap := make(map[string]dep.Base)
-	alpmArch, err := dbExecutor.AlpmArch()
+	alpmArch, err := dbExecutor.AlpmArchitectures()
 	if err != nil {
 		return nil, err
 	}
@@ -454,7 +468,7 @@ func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExe
 nextpkg:
 	for _, base := range bases {
 		for _, arch := range srcinfos[base.Pkgbase()].Arch {
-			if arch == "any" || arch == alpmArch {
+			if alpmArchIsSupported(alpmArch, arch) {
 				continue nextpkg
 			}
 		}

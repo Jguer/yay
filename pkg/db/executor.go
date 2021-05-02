@@ -22,7 +22,7 @@ type Upgrade struct {
 }
 
 type Executor interface {
-	AlpmArch() (string, error)
+	AlpmArchitectures() ([]string, error)
 	BiggestPackages() []IPackage
 	Cleanup()
 	IsCorrectVersionInstalled(string, string) bool
