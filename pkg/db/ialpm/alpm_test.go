@@ -18,7 +18,7 @@ func TestAlpmExecutor(t *testing.T) {
 		HoldPkg:                []string(nil),
 		IgnorePkg:              []string{"ignore", "this", "package"},
 		IgnoreGroup:            []string{"ignore", "this", "group"},
-		Architecture:           "8086",
+		Architecture:           []string{"8086"},
 		XferCommand:            "",
 		NoUpgrade:              []string{"noupgrade"},
 		NoExtract:              []string{"noextract"},
@@ -75,9 +75,9 @@ func TestAlpmExecutor(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, []string{"/usr/share/libalpm/hooks/", "/hookdir/"}, hook.Slice())
 
-	arch, err := h.Arch()
+	arch, err := alpmTestGetArch(h)
 	assert.Nil(t, err)
-	assert.Equal(t, "8086", arch)
+	assert.Equal(t, []string{"8086"}, arch)
 
 	ignorePkg, err := h.IgnorePkgs()
 	assert.Nil(t, err)

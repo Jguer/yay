@@ -20,7 +20,7 @@ func TestPacmanConf(t *testing.T) {
 		HoldPkg:                []string(nil),
 		IgnorePkg:              []string{"ignore", "this", "package"},
 		IgnoreGroup:            []string{"ignore", "this", "group"},
-		Architecture:           "8086",
+		Architecture:           []string{"8086"},
 		XferCommand:            "",
 		NoUpgrade:              []string{"noupgrade"},
 		NoExtract:              []string{"noextract"},
