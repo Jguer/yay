@@ -15,3 +15,11 @@ func (ae *AlpmExecutor) AlpmArchitectures() ([]string, error) {
 
 	return []string{arch}, err
 }
+
+func alpmSetLogCallback(alpmHandle *alpm.Handle, cb func(alpm.LogLevel, string)) {
+	alpmHandle.SetLogCallback(cb)
+}
+
+func alpmSetQuestionCallback(alpmHandle *alpm.Handle, cb func(alpm.QuestionAny)) {
+	alpmHandle.SetQuestionCallback(cb)
+}
