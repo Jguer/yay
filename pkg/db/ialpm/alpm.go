@@ -254,8 +254,8 @@ func (ae *AlpmExecutor) RefreshHandle() error {
 		return errConf
 	}
 
-	alpmHandle.SetQuestionCallback(ae.questionCallback())
-	alpmHandle.SetLogCallback(logCallback)
+	alpmSetQuestionCallback(alpmHandle, ae.questionCallback())
+	alpmSetLogCallback(alpmHandle, logCallback)
 	ae.handle = alpmHandle
 	ae.syncDBsCache = nil
 	ae.syncDB, err = alpmHandle.SyncDBs()
