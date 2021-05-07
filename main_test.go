@@ -31,7 +31,7 @@ func TestPacmanConf(t *testing.T) {
 		UseSyslog:              false,
 		Color:                  false,
 		UseDelta:               0,
-		TotalDownload:          true,
+		TotalDownload:          false,
 		CheckSpace:             true,
 		VerbosePkgLists:        true,
 		DisableDownloadTimeout: false,
