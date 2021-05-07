@@ -25,7 +25,7 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/Woile/commitizen
-    rev: v2.15.3
+    rev: v2.17.6
     hooks:
       - id: commitizen
         stages: [commit-msg]
