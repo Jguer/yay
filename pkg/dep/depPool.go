@@ -259,11 +259,16 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 	return nil
 }
 
+// Compute dependency lists used in Package dep searching and ordering.
+// Order sensitive TOFIX
 func ComputeCombinedDepList(pkg *aur.Pkg, noDeps, noCheckDeps bool) [][]string {
-	combinedDepList := [][]string{pkg.MakeDepends}
+	combinedDepList := make([][]string, 0, 3)
+
 	if !noDeps {
 		combinedDepList = append(combinedDepList, pkg.Depends)
 	}
+
+	combinedDepList = append(combinedDepList, pkg.MakeDepends)
 
 	if !noCheckDeps {
 		combinedDepList = append(combinedDepList, pkg.CheckDepends)

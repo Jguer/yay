@@ -31,13 +31,9 @@ func GetOrder(dp *Pool, noDeps, noCheckDeps bool) *Order {
 
 		if aurPkg := dp.Aur[dep]; aurPkg != nil && pkgSatisfies(aurPkg.Name, aurPkg.Version, dep) {
 			do.orderPkgAur(aurPkg, dp, true, noDeps, noCheckDeps)
-		}
-
-		if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
+		} else if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
 			do.orderPkgAur(aurPkg, dp, true, noDeps, noCheckDeps)
-		}
-
-		if repoPkg := dp.findSatisfierRepo(dep); repoPkg != nil {
+		} else if repoPkg := dp.findSatisfierRepo(dep); repoPkg != nil {
 			do.orderPkgRepo(repoPkg, dp, true)
 		}
 	}
