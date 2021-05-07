@@ -57,6 +57,10 @@ jobs:
     needs: [build-releases]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Read info
         id: tags
         shell: bash
@@ -125,11 +129,7 @@ jobs:
           asset_path: ./yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
           asset_name: yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
           asset_content_type: application/tar+gzip
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: Release Notary Action
-        uses: aevea/release-notary@v0.9.3
+        uses: docker://aevea/release-notary:0.9.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
