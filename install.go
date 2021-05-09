@@ -70,6 +70,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	noCheck := strings.Contains(config.MFlags, "--nocheck")
 	sysupgradeArg := cmdArgs.ExistsArg("u", "sysupgrade")
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
+	downloadOnly := cmdArgs.ExistsArg("w", "downloadonly")
 	warnings := query.NewWarnings()
 
 	if noDeps {
@@ -317,11 +318,29 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		}
 	}
 
-	if !config.CombinedUpgrade {
+	if !config.CombinedUpgrade || downloadOnly {
 		arguments.DelArg("u", "sysupgrade")
 	}
 
-	if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
+	if downloadOnly {
+		if !noDeps {
+			deps := make([]string, 0)
+
+			for _, pkg := range do.Repo {
+				if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Get(pkg.Name()) {
+					deps = append(deps, pkg.Name())
+				}
+			}
+
+			if len(deps) > 0 {
+				arguments.Targets = deps
+
+				if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
+					return errors.New(gotext.Get("error installing repo packages"))
+				}
+			}
+		}
+	} else if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
 		if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
@@ -357,6 +376,10 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	err = downloadPkgbuildsSources(do.Aur, incompatible)
 	if err != nil {
 		return err
+	}
+
+	if downloadOnly {
+		return nil
 	}
 
 	err = buildInstallPkgbuilds(cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts, noDeps, noCheck)
