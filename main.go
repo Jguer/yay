@@ -89,7 +89,7 @@ func main() {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
-	config, err = settings.NewConfig()
+	config, err = settings.NewConfig(yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)

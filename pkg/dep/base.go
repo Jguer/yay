@@ -1,9 +1,9 @@
 package dep
 
-import rpc "github.com/Jguer/yay/v10/pkg/query"
+import aur "github.com/Jguer/yay/v10/pkg/query"
 
 // Base is an AUR base package
-type Base []*rpc.Pkg
+type Base []*aur.Pkg
 
 // Pkgbase returns the first base package.
 func (b Base) Pkgbase() string {
@@ -38,7 +38,7 @@ func (b Base) String() string {
 	return str
 }
 
-func GetBases(pkgs []*rpc.Pkg) []Base {
+func GetBases(pkgs []*aur.Pkg) []Base {
 	basesMap := make(map[string]Base)
 	for _, pkg := range pkgs {
 		basesMap[pkg.PackageBase] = append(basesMap[pkg.PackageBase], pkg)

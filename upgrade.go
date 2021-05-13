@@ -6,9 +6,9 @@ import (
 	"strings"
 	"sync"
 
+	aur "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
-	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/intrange"
@@ -40,7 +40,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 	var repoSlice []db.Upgrade
 	var errs multierror.MultiError
 
-	aurdata := make(map[string]*rpc.Pkg)
+	aurdata := make(map[string]*aur.Pkg)
 
 	for _, pkg := range remote {
 		if pkg.ShouldIgnore() {
@@ -61,8 +61,8 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR {
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
-		var _aurdata []*rpc.Pkg
-		_aurdata, err = query.AURInfo(remoteNames, warnings, config.RequestSplitN)
+		var _aurdata []*aur.Pkg
+		_aurdata, err = query.AURInfo(config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
 		errs.Add(err)
 		if err == nil {
 			for _, pkg := range _aurdata {
@@ -109,7 +109,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 }
 
 func printLocalNewerThanAUR(
-	remote []alpm.IPackage, aurdata map[string]*rpc.Pkg) {
+	remote []alpm.IPackage, aurdata map[string]*aur.Pkg) {
 	for _, pkg := range remote {
 		aurPkg, ok := aurdata[pkg.Name()]
 		if !ok {

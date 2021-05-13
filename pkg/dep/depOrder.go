@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Jguer/yay/v10/pkg/db"
-	rpc "github.com/Jguer/yay/v10/pkg/query"
+	aur "github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -41,7 +41,7 @@ func GetOrder(dp *Pool, noDeps, noCheckDeps bool) *Order {
 	return do
 }
 
-func (do *Order) orderPkgAur(pkg *rpc.Pkg, dp *Pool, runtime, noDeps, noCheckDeps bool) {
+func (do *Order) orderPkgAur(pkg *aur.Pkg, dp *Pool, runtime, noDeps, noCheckDeps bool) {
 	if runtime {
 		do.Runtime.Set(pkg.Name)
 	}
@@ -117,7 +117,7 @@ func (do *Order) GetMake() []string {
 func (do *Order) Print() {
 	repo := ""
 	repoMake := ""
-	aur := ""
+	aurString := ""
 	aurMake := ""
 
 	repoLen := 0
@@ -172,7 +172,7 @@ func (do *Order) Print() {
 		}
 
 		if push {
-			aur += pkgStr
+			aurString += pkgStr
 		}
 		if pushMake {
 			aurMake += pkgStrMake
@@ -181,7 +181,7 @@ func (do *Order) Print() {
 
 	printDownloads("Repo", repoLen, repo)
 	printDownloads("Repo Make", repoMakeLen, repoMake)
-	printDownloads("Aur", aurLen, aur)
+	printDownloads("Aur", aurLen, aurString)
 	printDownloads("Aur Make", aurMakeLen, aurMake)
 }
 

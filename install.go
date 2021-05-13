@@ -140,7 +140,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	targets := stringset.FromSlice(cmdArgs.Targets)
 
 	dp, err := dep.GetPool(requestTargets,
-		warnings, dbExecutor, config.Runtime.Mode,
+		warnings, dbExecutor, config.Runtime.AURClient, config.Runtime.Mode,
 		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN, noDeps, noCheck)
 	if err != nil {
 		return err
