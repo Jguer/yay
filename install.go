@@ -968,35 +968,6 @@ func buildInstallPkgbuilds(
 	remoteNamesCache := stringset.FromSlice(remoteNames)
 	localNamesCache := stringset.FromSlice(localNames)
 
-	doInstall := func() error {
-		if len(arguments.Targets) == 0 {
-			return nil
-		}
-
-		if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
-			return errShow
-		}
-
-		if errStore := config.Runtime.VCSStore.Save(); err != nil {
-			fmt.Fprintln(os.Stderr, errStore)
-		}
-
-		if errDeps := asdeps(cmdArgs, deps); err != nil {
-			return errDeps
-		}
-		if errExps := asexp(cmdArgs, exp); err != nil {
-			return errExps
-		}
-
-		settings.NoConfirm = oldConfirm
-
-		arguments.ClearTargets()
-		deps = make([]string, 0)
-		exp = make([]string, 0)
-		settings.NoConfirm = true
-		return nil
-	}
-
 	for _, base := range do.Aur {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -1017,9 +988,8 @@ func buildInstallPkgbuilds(
 		}
 
 		if !satisfied || !config.BatchInstall {
-			err = doInstall()
-			if err != nil {
-				return err
+			if errInstall := doInstall(cmdArgs, arguments, deps, exp); errInstall != nil {
+				return errInstall
 			}
 		}
 
@@ -1172,7 +1142,30 @@ func buildInstallPkgbuilds(
 		wg.Wait()
 	}
 
-	err = doInstall()
+	err = doInstall(cmdArgs, arguments, deps, exp)
 	settings.NoConfirm = oldConfirm
 	return err
+}
+
+// doInstall installs built packages
+func doInstall(cmdArgs, arguments *settings.Arguments, dependencies, explicits []string) error {
+	if len(arguments.Targets) == 0 {
+		return nil
+	}
+
+	if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
+		return errShow
+	}
+
+	if errStore := config.Runtime.VCSStore.Save(); errStore != nil {
+		text.Errorln(errStore)
+	}
+
+	if errDeps := asdeps(cmdArgs, dependencies); errDeps != nil {
+		return errDeps
+	}
+	if errExps := asexp(cmdArgs, explicits); errExps != nil {
+		return errExps
+	}
+	return nil
 }
