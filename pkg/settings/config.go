@@ -2,6 +2,7 @@ package settings
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/aur"
 
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
 	"github.com/Jguer/yay/v10/pkg/vcs"
@@ -184,7 +187,7 @@ func DefaultConfig() *Configuration {
 	}
 }
 
-func NewConfig() (*Configuration, error) {
+func NewConfig(version string) (*Configuration, error) {
 	newConfig := DefaultConfig()
 
 	cacheHome := getCacheHome()
@@ -215,6 +218,20 @@ func NewConfig() (*Configuration, error) {
 		PacmanConf: nil,
 		VCSStore:   nil,
 		HTTPClient: &http.Client{},
+		AURClient:  nil,
+	}
+
+	var errAUR error
+
+	newConfig.Runtime.AURClient, errAUR = aur.NewClient(aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
+		aur.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("User-Agent", fmt.Sprintf("Yay/%s", version))
+
+			return nil
+		}))
+
+	if errAUR != nil {
+		return nil, errAUR
 	}
 
 	newConfig.Runtime.VCSStore = vcs.NewInfoStore(filepath.Join(cacheHome, vcsFileName),

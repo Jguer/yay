@@ -4,19 +4,19 @@ import (
 	"strings"
 
 	"github.com/Jguer/yay/v10/pkg/db"
-	rpc "github.com/Jguer/yay/v10/pkg/query"
+	aur "github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 type providers struct {
 	lookfor string
-	Pkgs    []*rpc.Pkg
+	Pkgs    []*aur.Pkg
 }
 
 func makeProviders(name string) providers {
 	return providers{
 		name,
-		make([]*rpc.Pkg, 0),
+		make([]*aur.Pkg, 0),
 	}
 }
 
@@ -105,7 +105,7 @@ func verSatisfies(ver1, mod, ver2 string) bool {
 	return true
 }
 
-func satisfiesAur(dep string, pkg *rpc.Pkg) bool {
+func satisfiesAur(dep string, pkg *aur.Pkg) bool {
 	if pkgSatisfies(pkg.Name, pkg.Version, dep) {
 		return true
 	}

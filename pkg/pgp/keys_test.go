@@ -13,9 +13,9 @@ import (
 	"strings"
 	"testing"
 
+	aur "github.com/Jguer/aur"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/bradleyjkemp/cupaloy"
-	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/dep"
 )
@@ -41,8 +41,8 @@ func init() {
 	})
 }
 
-func newPkg(basename string) *rpc.Pkg {
-	return &rpc.Pkg{Name: basename, PackageBase: basename}
+func newPkg(basename string) *aur.Pkg {
+	return &aur.Pkg{Name: basename, PackageBase: basename}
 }
 
 func getPgpKey(key string) string {

@@ -1,29 +1,25 @@
 package query
 
 import (
+	"context"
 	"sync"
 
+	"github.com/Jguer/aur"
 	"github.com/leonelquinteros/gotext"
-	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-type Pkg = rpc.Pkg
-
-// Search is a reexport of rpc.Search
-func Search(query string) ([]Pkg, error) {
-	return rpc.Search(query)
-}
+type Pkg = aur.Pkg
 
 // Queries the aur for information about specified packages.
-// All packages should be queried in a single rpc request except when the number
+// All packages should be queried in a single aur request except when the number
 // of packages exceeds the number set in config.RequestSplitN.
-// If the number does exceed config.RequestSplitN multiple rpc requests will be
+// If the number does exceed config.RequestSplitN multiple aur requests will be
 // performed concurrently.
-func AURInfo(names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) {
+func AURInfo(aurClient *aur.Client, names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) {
 	info := make([]*Pkg, 0, len(names))
 	seen := make(map[string]int)
 	var mux sync.Mutex
@@ -32,7 +28,7 @@ func AURInfo(names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) 
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()
-		tempInfo, requestErr := rpc.Info(names[n:max])
+		tempInfo, requestErr := aurClient.Info(context.Background(), names[n:max])
 		errs.Add(requestErr)
 		if requestErr != nil {
 			return
@@ -80,11 +76,11 @@ func AURInfo(names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) 
 	return info, nil
 }
 
-func AURInfoPrint(names []string, splitN int) ([]*Pkg, error) {
+func AURInfoPrint(aurClient *aur.Client, names []string, splitN int) ([]*Pkg, error) {
 	text.OperationInfoln(gotext.Get("Querying AUR..."))
 
 	warnings := &AURWarnings{}
-	info, err := AURInfo(names, warnings, splitN)
+	info, err := AURInfo(aurClient, names, warnings, splitN)
 	if err != nil {
 		return info, err
 	}

@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
-	rpc "github.com/mikkeloscar/aur"
 	"github.com/pkg/errors"
 )
 
@@ -836,6 +835,6 @@ func (a *Arguments) extractYayOptions(config *Configuration) {
 		}
 	}
 
-	rpc.AURURL = strings.TrimRight(config.AURURL, "/") + "/rpc.php?"
+	config.Runtime.AURClient.BaseURL = strings.TrimRight(config.AURURL, "/") + "/aur.php?"
 	config.AURURL = strings.TrimRight(config.AURURL, "/")
 }

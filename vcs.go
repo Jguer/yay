@@ -23,7 +23,7 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 		return err
 	}
 
-	info, err := query.AURInfoPrint(remoteNames, config.RequestSplitN)
+	info, err := query.AURInfoPrint(config.Runtime.AURClient, remoteNames, config.RequestSplitN)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package dep
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"sort"
@@ -9,8 +10,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Jguer/aur"
+	"github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
-	"github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -59,18 +61,20 @@ type Pool struct {
 	Groups       []string
 	AlpmExecutor db.Executor
 	Warnings     *query.AURWarnings
+	aurClient    *aur.Client
 }
 
-func makePool(dbExecutor db.Executor) *Pool {
+func makePool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
 	dp := &Pool{
-		make([]Target, 0),
-		make(stringset.StringSet),
-		make(map[string]db.IPackage),
-		make(map[string]*query.Pkg),
-		make(map[string]*query.Pkg),
-		make([]string, 0),
-		dbExecutor,
-		nil,
+		Targets:      []Target{},
+		Explicit:     map[string]struct{}{},
+		Repo:         map[string]alpm.IPackage{},
+		Aur:          map[string]*aur.Pkg{},
+		AurCache:     map[string]*aur.Pkg{},
+		Groups:       []string{},
+		AlpmExecutor: dbExecutor,
+		Warnings:     nil,
+		aurClient:    aurClient,
 	}
 
 	return dp
@@ -81,8 +85,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool) error {
 	// RPC requests are slow
-	// Combine as many AUR package requests as possible into a single RPC
-	// call
+	// Combine as many AUR package requests as possible into a single RPC call
 	aurTargets := make(stringset.StringSet)
 
 	pkgs = query.RemoveInvalidTargets(pkgs, mode)
@@ -182,7 +185,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 		words := strings.Split(pkg, "-")
 
 		for i := range words {
-			results, err = query.Search(strings.Join(words[:i+1], "-"))
+			results, err = dp.aurClient.Search(context.Background(), strings.Join(words[:i+1], "-"), aur.None)
 			if err == nil {
 				break
 			}
@@ -246,7 +249,7 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 		}
 	}
 
-	info, err := query.AURInfo(toQuery, dp.Warnings, splitN)
+	info, err := query.AURInfo(dp.aurClient, toQuery, dp.Warnings, splitN)
 	if err != nil {
 		return err
 	}
@@ -370,10 +373,11 @@ func (dp *Pool) ResolveRepoDependency(pkg db.IPackage, noDeps bool) {
 func GetPool(pkgs []string,
 	warnings *query.AURWarnings,
 	dbExecutor db.Executor,
+	aurClient *aur.Client,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int, noDeps bool, noCheckDeps bool) (*Pool, error) {
-	dp := makePool(dbExecutor)
+	dp := makePool(dbExecutor, aurClient)
 
 	dp.Warnings = warnings
 	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)

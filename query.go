@@ -1,15 +1,16 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"sort"
 	"strings"
 
+	aur "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
-	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -19,7 +20,7 @@ import (
 )
 
 // Query is a collection of Results
-type aurQuery []rpc.Pkg
+type aurQuery []aur.Pkg
 
 // Query holds the results of a repository search.
 type repoQuery []alpm.IPackage
@@ -67,28 +68,28 @@ func (q aurQuery) Swap(i, j int) {
 	q[i], q[j] = q[j], q[i]
 }
 
-func getSearchBy(value string) rpc.By {
+func getSearchBy(value string) aur.By {
 	switch value {
 	case "name":
-		return rpc.Name
+		return aur.Name
 	case "maintainer":
-		return rpc.Maintainer
+		return aur.Maintainer
 	case "depends":
-		return rpc.Depends
+		return aur.Depends
 	case "makedepends":
-		return rpc.MakeDepends
+		return aur.MakeDepends
 	case "optdepends":
-		return rpc.OptDepends
+		return aur.OptDepends
 	case "checkdepends":
-		return rpc.CheckDepends
+		return aur.CheckDepends
 	default:
-		return rpc.NameDesc
+		return aur.NameDesc
 	}
 }
 
 // NarrowSearch searches AUR and narrows based on subarguments
-func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
-	var r []rpc.Pkg
+func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, error) {
+	var r []aur.Pkg
 	var err error
 	var usedIndex int
 
@@ -99,7 +100,7 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 	}
 
 	for i, word := range pkgS {
-		r, err = rpc.SearchBy(word, by)
+		r, err = aurClient.Search(context.Background(), word, by)
 		if err == nil {
 			usedIndex = i
 			break
@@ -147,14 +148,14 @@ func narrowSearch(pkgS []string, sortS bool) (aurQuery, error) {
 }
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(pkgS []string, dbExecutor db.Executor) (err error) {
+func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (err error) {
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 	var aurErr error
 	var aq aurQuery
 	var pq repoQuery
 
 	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-		aq, aurErr = narrowSearch(pkgS, true)
+		aq, aurErr = narrowSearch(aurClient, pkgS, true)
 	}
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
 		pq = queryRepo(pkgS, dbExecutor)
@@ -189,7 +190,7 @@ func syncSearch(pkgS []string, dbExecutor db.Executor) (err error) {
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor db.Executor) error {
-	var info []*rpc.Pkg
+	var info []*aur.Pkg
 	var err error
 	missing := false
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
@@ -203,7 +204,7 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor db.Executor
 			noDB = append(noDB, name)
 		}
 
-		info, err = query.AURInfoPrint(noDB, config.RequestSplitN)
+		info, err = query.AURInfoPrint(config.Runtime.AURClient, noDB, config.RequestSplitN)
 		if err != nil {
 			missing = true
 			fmt.Fprintln(os.Stderr, err)
@@ -250,27 +251,27 @@ func queryRepo(pkgInputN []string, dbExecutor db.Executor) repoQuery {
 }
 
 // PackageSlices separates an input slice into aur and repo slices
-func packageSlices(toCheck []string, dbExecutor db.Executor) (aur, repo []string) {
+func packageSlices(toCheck []string, dbExecutor db.Executor) (aurNames, repoNames []string) {
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
 
 		if dbName == "aur" || config.Runtime.Mode == settings.ModeAUR {
-			aur = append(aur, _pkg)
+			aurNames = append(aurNames, _pkg)
 			continue
 		} else if dbName != "" || config.Runtime.Mode == settings.ModeRepo {
-			repo = append(repo, _pkg)
+			repoNames = append(repoNames, _pkg)
 			continue
 		}
 
 		if dbExecutor.SyncSatisfierExists(name) ||
 			len(dbExecutor.PackagesFromGroup(name)) != 0 {
-			repo = append(repo, _pkg)
+			repoNames = append(repoNames, _pkg)
 		} else {
-			aur = append(aur, _pkg)
+			aurNames = append(aurNames, _pkg)
 		}
 	}
 
-	return aur, repo
+	return aurNames, repoNames
 }
 
 // HangingPackages returns a list of packages installed as deps

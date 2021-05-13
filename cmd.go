@@ -291,7 +291,7 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		} else {
 			config.SearchMode = detailed
 		}
-		return syncSearch(targets, dbExecutor)
+		return syncSearch(targets, config.Runtime.AURClient, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("p", "print", "print-format") {
 		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
@@ -341,7 +341,7 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *settings.
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 
 	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
-		aq, aurErr = narrowSearch(pkgS, true)
+		aq, aurErr = narrowSearch(config.Runtime.AURClient, pkgS, true)
 		lenaq = len(aq)
 	}
 	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {

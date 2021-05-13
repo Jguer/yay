@@ -116,7 +116,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool, dbExecutor db.Executor
 	// Querying the AUR is slow and needs internet so don't do it if we
 	// don't need to.
 	if keepCurrent {
-		info, errInfo := query.AURInfo(cachedPackages, &query.AURWarnings{}, config.RequestSplitN)
+		info, errInfo := query.AURInfo(config.Runtime.AURClient, cachedPackages, &query.AURWarnings{}, config.RequestSplitN)
 		if errInfo != nil {
 			return errInfo
 		}

@@ -5,6 +5,8 @@ import (
 
 	"github.com/Morganamilo/go-pacmanconf"
 
+	"github.com/Jguer/aur"
+
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
@@ -27,4 +29,5 @@ type Runtime struct {
 	CmdBuilder     *exe.CmdBuilder
 	CmdRunner      exe.Runner
 	HTTPClient     *http.Client
+	AURClient      *aur.Client
 }
