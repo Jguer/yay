@@ -18,6 +18,7 @@ import (
 	rpc "github.com/mikkeloscar/aur"
 
 	"github.com/Jguer/yay/v10/pkg/dep"
+	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 const (
@@ -36,7 +37,7 @@ func init() {
 		w.Header().Set("Content-Type", "application/pgp-keys")
 		_, err := w.Write([]byte(data))
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	})
 }
@@ -64,7 +65,7 @@ func startPgpKeyServer() *http.Server {
 	go func() {
 		err := srv.ListenAndServe()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}()
 	return srv
@@ -81,7 +82,7 @@ func TestImportKeys(t *testing.T) {
 	defer func() {
 		err := server.Shutdown(context.TODO())
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}()
 
@@ -160,7 +161,7 @@ func TestCheckPgpKeys(t *testing.T) {
 	defer func() {
 		err := server.Shutdown(context.TODO())
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}()
 

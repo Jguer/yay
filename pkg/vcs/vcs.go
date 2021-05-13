@@ -104,7 +104,7 @@ func (v *InfoStore) Update(pkgName string, sources []gosrc.ArchString, mux sync.
 		text.Warnln(gotext.Get("Found git repo: %s", text.Cyan(url)))
 
 		if err := v.Save(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 		mux.Unlock()
 	}
@@ -240,7 +240,7 @@ func (v *InfoStore) RemovePackage(pkgs []string) {
 
 	if updated {
 		if err := v.Save(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}
 }

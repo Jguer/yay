@@ -470,7 +470,7 @@ func (ae *AlpmExecutor) LastBuildTime() time.Time {
 func (ae *AlpmExecutor) Cleanup() {
 	if ae.handle != nil {
 		if err := ae.handle.Release(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}
 }

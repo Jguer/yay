@@ -110,7 +110,7 @@ func main() {
 
 	if config.Runtime.SaveConfig {
 		if errS := config.Save(config.Runtime.ConfigPath); errS != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}
 

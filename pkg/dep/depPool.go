@@ -522,7 +522,7 @@ func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 		reader := bufio.NewReader(os.Stdin)
 		numberBuf, overflow, err := reader.ReadLine()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 			break
 		}
 

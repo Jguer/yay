@@ -33,7 +33,7 @@ func editor() (editor string, args []string) {
 	case config.Editor != "":
 		editor, err := exec.LookPath(config.Editor)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		} else {
 			return editor, strings.Fields(config.EditorFlags)
 		}
@@ -42,7 +42,7 @@ func editor() (editor string, args []string) {
 		if editorArgs := strings.Fields(os.Getenv("EDITOR")); len(editorArgs) != 0 {
 			editor, err := exec.LookPath(editorArgs[0])
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				text.Errorln(err)
 			} else {
 				return editor, editorArgs[1:]
 			}
@@ -52,7 +52,7 @@ func editor() (editor string, args []string) {
 		if editorArgs := strings.Fields(os.Getenv("VISUAL")); len(editorArgs) != 0 {
 			editor, err := exec.LookPath(editorArgs[0])
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				text.Errorln(err)
 			} else {
 				return editor, editorArgs[1:]
 			}
@@ -67,7 +67,7 @@ func editor() (editor string, args []string) {
 			text.Infoln(gotext.Get("Edit PKGBUILD with?"))
 			editorInput, err := getInput("")
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				text.Errorln(err)
 				continue
 			}
 
@@ -78,7 +78,7 @@ func editor() (editor string, args []string) {
 
 			editor, err := exec.LookPath(editorArgs[0])
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				text.Errorln(err)
 				continue
 			}
 			return editor, editorArgs[1:]

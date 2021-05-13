@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 
@@ -206,7 +205,7 @@ func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor db.Executor
 		info, err = query.AURInfoPrint(noDB, config.RequestSplitN)
 		if err != nil {
 			missing = true
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}
 

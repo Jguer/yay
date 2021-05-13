@@ -30,7 +30,7 @@ func updateSudo() {
 	for {
 		err := config.Runtime.CmdRunner.Show(exec.Command(config.SudoBin, "-v"))
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		} else {
 			break
 		}

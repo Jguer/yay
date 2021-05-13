@@ -12,6 +12,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
@@ -133,7 +134,7 @@ func (c *Configuration) String() string {
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "\t")
 	if err := enc.Encode(c); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		text.Errorln(err)
 	}
 	return buf.String()
 }

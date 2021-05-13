@@ -204,7 +204,7 @@ func cleanAfter(bases []dep.Base) {
 		}
 
 		if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}
 }
@@ -214,7 +214,7 @@ func cleanBuilds(bases []dep.Base) {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
 		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
 		if err := os.RemoveAll(dir); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(err)
 		}
 	}
 }
