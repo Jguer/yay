@@ -396,7 +396,7 @@ func inRepos(dbExecutor db.Executor, pkg string) bool {
 	}
 
 	previousHideMenus := settings.HideMenus
-	settings.HideMenus = false
+	settings.HideMenus = true
 	exists := dbExecutor.SyncSatisfierExists(target.DepString())
 	settings.HideMenus = previousHideMenus
 
