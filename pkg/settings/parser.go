@@ -835,6 +835,6 @@ func (a *Arguments) extractYayOptions(config *Configuration) {
 		}
 	}
 
-	config.Runtime.AURClient.BaseURL = strings.TrimRight(config.AURURL, "/") + "/aur.php?"
+	config.Runtime.AURClient.BaseURL = strings.TrimRight(config.AURURL, "/") + "/rpc.php?"
 	config.AURURL = strings.TrimRight(config.AURURL, "/")
 }
