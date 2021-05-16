@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -302,7 +303,7 @@ func handleSync(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		return syncClean(cmdArgs, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("l", "list") {
-		return syncList(cmdArgs, dbExecutor)
+		return syncList(config.Runtime.HTTPClient, cmdArgs, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("g", "groups") {
 		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
@@ -445,7 +446,7 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *settings.
 	return install(arguments, dbExecutor, true)
 }
 
-func syncList(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
+func syncList(httpClient *http.Client, cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	aur := false
 
 	for i := len(cmdArgs.Targets) - 1; i >= 0; i-- {
@@ -456,7 +457,12 @@ func syncList(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	}
 
 	if (config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR) && (len(cmdArgs.Targets) == 0 || aur) {
-		resp, err := http.Get(config.AURURL + "/packages.gz")
+		req, err := http.NewRequestWithContext(context.Background(), "GET", config.AURURL+"/packages.gz", nil)
+		if err != nil {
+			return err
+		}
+
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			return err
 		}
