@@ -243,7 +243,7 @@ func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
-		return news.PrintNewsFeed(dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
+		return news.PrintNewsFeed(config.Runtime.HTTPClient, dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
 		return completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
