@@ -351,7 +351,8 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	}
 
 	go func() {
-		_ = completion.Update(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		_ = completion.Update(config.Runtime.HTTPClient, dbExecutor,
+			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
 	err = downloadPkgbuildsSources(do.Aur, incompatible)

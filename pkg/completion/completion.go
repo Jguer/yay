@@ -2,6 +2,7 @@ package completion
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,8 +21,8 @@ type PkgSynchronizer interface {
 }
 
 // Show provides completion info for shells
-func Show(dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
-	err := Update(dbExecutor, aurURL, completionPath, interval, force)
+func Show(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
+	err := Update(httpClient, dbExecutor, aurURL, completionPath, interval, force)
 	if err != nil {
 		return err
 	}
@@ -37,7 +38,7 @@ func Show(dbExecutor PkgSynchronizer, aurURL, completionPath string, interval in
 }
 
 // Update updates completion cache to be used by Complete
-func Update(dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
+func Update(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
 	info, err := os.Stat(completionPath)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
@@ -50,7 +51,7 @@ func Update(dbExecutor PkgSynchronizer, aurURL, completionPath string, interval 
 			return errf
 		}
 
-		if createAURList(aurURL, out) != nil {
+		if createAURList(httpClient, aurURL, out) != nil {
 			defer os.Remove(completionPath)
 		}
 
@@ -64,13 +65,19 @@ func Update(dbExecutor PkgSynchronizer, aurURL, completionPath string, interval 
 }
 
 // CreateAURList creates a new completion file
-func createAURList(aurURL string, out io.Writer) error {
+func createAURList(client *http.Client, aurURL string, out io.Writer) error {
 	u, err := url.Parse(aurURL)
 	if err != nil {
 		return err
 	}
 	u.Path = path.Join(u.Path, "packages.gz")
-	resp, err := http.Get(u.String())
+
+	req, err := http.NewRequestWithContext(context.Background(), "GET", u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
