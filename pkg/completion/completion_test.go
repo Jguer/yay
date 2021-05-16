@@ -3,6 +3,7 @@ package completion
 import (
 	"bytes"
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,7 +40,7 @@ func Test_createAURList(t *testing.T) {
 		Reply(200).
 		BodyString(samplePackageResp)
 	out := &bytes.Buffer{}
-	err := createAURList("https://aur.archlinux.org", out)
+	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
@@ -52,7 +53,7 @@ func Test_createAURListHTTPError(t *testing.T) {
 		Get("/packages.gz").
 		ReplyError(errors.New("Not available"))
 	out := &bytes.Buffer{}
-	err := createAURList("https://aur.archlinux.org", out)
+	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "Get \"https://aur.archlinux.org/packages.gz\": Not available")
 }
 
@@ -64,6 +65,6 @@ func Test_createAURListStatusError(t *testing.T) {
 		Reply(503).
 		BodyString(samplePackageResp)
 	out := &bytes.Buffer{}
-	err := createAURList("https://aur.archlinux.org", out)
+	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "invalid status code: 503")
 }

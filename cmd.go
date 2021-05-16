@@ -245,9 +245,11 @@ func handlePrint(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		quiet := cmdArgs.ExistsArg("q", "quiet")
 		return news.PrintNewsFeed(config.Runtime.HTTPClient, dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
-		return completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
+		return completion.Show(config.Runtime.HTTPClient, dbExecutor,
+			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
-		return completion.Show(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		return completion.Show(config.Runtime.HTTPClient, dbExecutor,
+			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	case cmdArgs.ExistsArg("s", "stats"):
 		return localStatistics(dbExecutor)
 	}
