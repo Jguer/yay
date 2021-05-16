@@ -2,6 +2,7 @@ package news
 
 import (
 	"io/ioutil"
+	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -110,7 +111,7 @@ func TestPrintNewsFeed(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			err := PrintNewsFeed(tt.args.cutOffDate, tt.args.sortMode, tt.args.all, tt.args.quiet)
+			err := PrintNewsFeed(&http.Client{}, tt.args.cutOffDate, tt.args.sortMode, tt.args.all, tt.args.quiet)
 			assert.NoError(t, err)
 
 			w.Close()

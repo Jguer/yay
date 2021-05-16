@@ -2,6 +2,7 @@ package news
 
 import (
 	"bytes"
+	"context"
 	"encoding/xml"
 	"fmt"
 	"html"
@@ -59,8 +60,13 @@ type rss struct {
 	Channel channel `xml:"channel"`
 }
 
-func PrintNewsFeed(cutOffDate time.Time, sortMode int, all, quiet bool) error {
-	resp, err := http.Get("https://archlinux.org/feeds/news")
+func PrintNewsFeed(client *http.Client, cutOffDate time.Time, sortMode int, all, quiet bool) error {
+	req, err := http.NewRequestWithContext(context.Background(), "GET", "https://archlinux.org/feeds/news", nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
