@@ -373,13 +373,8 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		_ = completion.Update(dbExecutor, config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	err = downloadPkgbuildsSources(do.Aur, incompatible)
-	if err != nil {
-		return err
-	}
-
 	if downloadOnly {
-		return nil
+		return downloadPkgbuildsSources(do.Aur, incompatible)
 	}
 
 	err = buildInstallPkgbuilds(cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts, noDeps, noCheck)
