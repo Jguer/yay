@@ -25,8 +25,16 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push to Docker Hub
         uses: docker/build-push-action@v2
+        env:
+          DOCKER_BUILDKIT: 0
+          COMPOSE_DOCKER_CLI_BUILD: 0
         with:
           platforms: linux/amd64, linux/arm/v6,linux/arm/v7,linux/arm64
           file: ci.Dockerfile
           push: true
           tags: jguer/yay-builder:latest
+          secrets: |
+            DOCKER_BUILDKIT=0
+            COMPOSE_DOCKER_CLI_BUILD=0
+          cache-from: type=registry,ref=jguer/yay-builder:latest
+          cache-to: type=inline
