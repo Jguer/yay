@@ -20,7 +20,7 @@ const (
 	minimal
 )
 
-var yayVersion = "10.2.2"
+var yayVersion = "10.2.3"
 
 var localePath = "/usr/share/locale"
 
