@@ -24,8 +24,7 @@ POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
 GOFLAGS ?= -trimpath -mod=readonly -modcacherw
-GOFLAGS += $(shell pacman -T 'pacman>6' && echo "-tags six")
-EXTRA_GOFLAGS ?= -buildmode=pie
+EXTRA_GOFLAGS ?= -buildmode=pie $(shell pacman -T 'pacman>6' && echo "-tags six")
 LDFLAGS := -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}" -linkmode=external
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
