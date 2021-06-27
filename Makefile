@@ -23,9 +23,9 @@ POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
-GOFLAGS ?= -trimpath -mod=readonly -modcacherw
-GOFLAGS += $(shell pacman -T 'pacman>6' && echo "-tags six")
-EXTRA_GOFLAGS ?= -buildmode=pie
+FLAGS ?= -trimpath -mod=readonly -modcacherw
+FLAGS += $(shell pacman -T 'pacman>6' && echo "-tags six")
+EXTRA_FLAGS ?= -buildmode=pie
 LDFLAGS := -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}" -linkmode=external
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
@@ -42,7 +42,7 @@ all: | clean release
 
 .PHONY: clean
 clean:
-	$(GO) clean $(GOFLAGS) -i ./...
+	$(GO) clean $(FLAGS) -i ./...
 	rm -rf $(BIN) $(PKGNAME)_*
 
 .PHONY: test_lint
@@ -50,9 +50,9 @@ test_lint: test lint
 
 .PHONY: test
 test:
-	$(GO) vet $(GOFLAGS) ./...
+	$(GO) vet $(FLAGS) ./...
 	@test -z "$$(gofmt -l $(SOURCES))" || (echo "Files need to be linted. Use make fmt" && false)
-	$(GO) test $(GOFLAGS) ./...
+	$(GO) test $(FLAGS) ./...
 
 .PHONY: build
 build: $(BIN)
@@ -109,7 +109,7 @@ uninstall:
 	done
 
 $(BIN): $(SOURCES)
-	$(GO) build $(GOFLAGS) -ldflags '$(LDFLAGS)' $(EXTRA_GOFLAGS) -o $@
+	$(GO) build $(FLAGS) -ldflags '$(LDFLAGS)' $(EXTRA_FLAGS) -o $@
 
 $(RELEASE_DIR):
 	mkdir $(RELEASE_DIR)
