@@ -3,6 +3,7 @@ package ialpm
 import (
 	"testing"
 
+	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
 )
@@ -98,4 +99,10 @@ func TestAlpmExecutor(t *testing.T) {
 	check, err := h.CheckSpace()
 	assert.Nil(t, err)
 	assert.Equal(t, true, check)
+}
+
+func alpmTestGetArch(h *alpm.Handle) ([]string, error) {
+	architectures, err := h.GetArchitectures()
+
+	return architectures.Slice(), err
 }
