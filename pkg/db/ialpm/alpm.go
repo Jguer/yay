@@ -482,3 +482,27 @@ func (ae *AlpmExecutor) Repos() (repos []string) {
 	})
 	return
 }
+
+func alpmSetArchitecture(alpmHandle *alpm.Handle, arch []string) error {
+	return alpmHandle.SetArchitectures(arch)
+}
+
+func (ae *AlpmExecutor) AlpmArchitectures() ([]string, error) {
+	architectures, err := ae.handle.GetArchitectures()
+
+	return architectures.Slice(), err
+}
+
+func alpmSetLogCallback(alpmHandle *alpm.Handle, cb func(alpm.LogLevel, string)) {
+	alpmHandle.SetLogCallback(func(ctx interface{}, lvl alpm.LogLevel, msg string) {
+		cbo := ctx.(func(alpm.LogLevel, string))
+		cbo(lvl, msg)
+	}, cb)
+}
+
+func alpmSetQuestionCallback(alpmHandle *alpm.Handle, cb func(alpm.QuestionAny)) {
+	alpmHandle.SetQuestionCallback(func(ctx interface{}, q alpm.QuestionAny) {
+		cbo := ctx.(func(alpm.QuestionAny))
+		cbo(q)
+	}, cb)
+}

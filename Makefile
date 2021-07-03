@@ -24,7 +24,6 @@ POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
 
 FLAGS ?= -trimpath -mod=readonly -modcacherw
-FLAGS += $(shell pacman -T 'pacman>6' && echo "-tags six")
 EXTRA_FLAGS ?= -buildmode=pie
 LDFLAGS := -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}" -linkmode=external
 
