@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"sync"
 
@@ -60,6 +61,11 @@ func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
 		cmd := v.CmdBuilder.BuildGitCmd("", "ls-remote", protocol+"://"+url, branch)
 		stdout, _, err := v.Runner.Capture(cmd, 5)
 		if err != nil {
+			if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
+				text.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()))
+				return ""
+			}
+
 			text.Warnln(err)
 			return ""
 		}
