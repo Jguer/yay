@@ -252,9 +252,9 @@ func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, for
 		// https://git.archlinux.org/svntogit/packages.git
 		switch pkg.DB().Name() {
 		case "core", "extra", "testing":
-			url = "https://git.archlinux.org/svntogit/packages.git"
+			url = "https://github.com/archlinux/svntogit-packages.git"
 		case "community", "multilib", "community-testing", "multilib-testing":
-			url = "https://git.archlinux.org/svntogit/community.git"
+			url = "https://github.com/archlinux/svntogit-community.git"
 		default:
 			missing = append(missing, name)
 			continue
