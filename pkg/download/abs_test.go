@@ -46,7 +46,7 @@ func Test_getPackageURL(t *testing.T) {
 				db:      "community",
 				pkgName: "kitty",
 			},
-			want:    "https://git.archlinux.org/svntogit/community.git/plain/trunk/PKGBUILD?h=packages%2Fkitty",
+			want:    "https://github.com/archlinux/svntogit-community.git/plain/trunk/PKGBUILD?h=packages%2Fkitty",
 			wantErr: false,
 		},
 		{
@@ -55,7 +55,7 @@ func Test_getPackageURL(t *testing.T) {
 				db:      "core",
 				pkgName: "linux",
 			},
-			want:    "https://git.archlinux.org/svntogit/packages.git/plain/trunk/PKGBUILD?h=packages%2Flinux",
+			want:    "https://github.com/archlinux/svntogit-packages.git/plain/trunk/PKGBUILD?h=packages%2Flinux",
 			wantErr: false,
 		},
 		{

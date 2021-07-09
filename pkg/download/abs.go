@@ -15,8 +15,8 @@ var ErrABSPackageNotFound = errors.New(gotext.Get("package not found in repos"))
 const MaxConcurrentFetch = 20
 const urlPackagePath = "/plain/trunk/PKGBUILD?"
 
-var ABSPackageURL = "https://git.archlinux.org/svntogit/packages.git"
-var ABSCommunityURL = "https://git.archlinux.org/svntogit/community.git"
+var ABSPackageURL = "https://github.com/archlinux/svntogit-packages.git"
+var ABSCommunityURL = "https://github.com/archlinux/svntogit-community.git"
 
 func getPackageURL(db, pkgName string) (string, error) {
 	values := url.Values{}
