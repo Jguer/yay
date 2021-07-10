@@ -71,8 +71,9 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	sysupgradeArg := cmdArgs.ExistsArg("u", "sysupgrade")
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	warnings := query.NewWarnings()
+	downloadOnly := cmdArgs.ExistsArg("w", "downloadonly")
 
-	if noDeps {
+	if noDeps || downloadOnly {
 		config.Runtime.CmdBuilder.MakepkgFlags = append(config.Runtime.CmdBuilder.MakepkgFlags, "-d")
 	}
 
@@ -320,33 +321,34 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	if !config.CombinedUpgrade {
 		arguments.DelArg("u", "sysupgrade")
 	}
-
 	if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
 		if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 
-		deps := make([]string, 0)
-		exp := make([]string, 0)
+		if !downloadOnly {
+			deps := make([]string, 0)
+			exp := make([]string, 0)
 
-		for _, pkg := range do.Repo {
-			if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Get(pkg.Name()) {
-				deps = append(deps, pkg.Name())
-				continue
+			for _, pkg := range do.Repo {
+				if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Get(pkg.Name()) {
+					deps = append(deps, pkg.Name())
+					continue
+				}
+
+				if cmdArgs.ExistsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
+					deps = append(deps, pkg.Name())
+				} else if cmdArgs.ExistsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
+					exp = append(exp, pkg.Name())
+				}
 			}
 
-			if cmdArgs.ExistsArg("asdeps", "asdep") && dp.Explicit.Get(pkg.Name()) {
-				deps = append(deps, pkg.Name())
-			} else if cmdArgs.ExistsArg("asexp", "asexplicit") && dp.Explicit.Get(pkg.Name()) {
-				exp = append(exp, pkg.Name())
+			if errDeps := asdeps(cmdArgs, deps); errDeps != nil {
+				return errDeps
 			}
-		}
-
-		if errDeps := asdeps(cmdArgs, deps); errDeps != nil {
-			return errDeps
-		}
-		if errExp := asexp(cmdArgs, exp); errExp != nil {
-			return errExp
+			if errExp := asexp(cmdArgs, exp); errExp != nil {
+				return errExp
+			}
 		}
 	}
 
@@ -957,6 +959,7 @@ func buildInstallPkgbuilds(
 	exp := make([]string, 0)
 	oldConfirm := settings.NoConfirm
 	settings.NoConfirm = true
+	downloadOnly := cmdArgs.ExistsArg("w", "downloadonly")
 
 	//remotenames: names of all non repo packages on the system
 	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
@@ -1003,24 +1006,26 @@ func buildInstallPkgbuilds(
 		dir := filepath.Join(config.BuildDir, pkg)
 		built := true
 
-		satisfied := true
-	all:
-		for _, pkg := range base {
-			for _, deps := range dep.ComputeCombinedDepList(pkg, noDeps, noCheck) {
-				for _, dep := range deps {
-					if !dp.AlpmExecutor.LocalSatisfierExists(dep) {
-						satisfied = false
-						text.Warnln(gotext.Get("%s not satisfied, flushing install queue", dep))
-						break all
+		if !downloadOnly {
+			satisfied := true
+		all:
+			for _, pkg := range base {
+				for _, deps := range dep.ComputeCombinedDepList(pkg, noDeps, noCheck) {
+					for _, dep := range deps {
+						if !dp.AlpmExecutor.LocalSatisfierExists(dep) {
+							satisfied = false
+							text.Warnln(gotext.Get("%s not satisfied, flushing install queue", dep))
+							break all
+						}
 					}
 				}
 			}
-		}
 
-		if !satisfied || !config.BatchInstall {
-			err = doInstall()
-			if err != nil {
-				return err
+			if !satisfied || !config.BatchInstall {
+				err = doInstall()
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -1153,13 +1158,15 @@ func buildInstallPkgbuilds(
 			return nil
 		}
 
-		for _, split := range base {
-			if errAdd := doAddTarget(split.Name, false); errAdd != nil {
-				return errAdd
-			}
+		if !downloadOnly {
+			for _, split := range base {
+				if errAdd := doAddTarget(split.Name, false); errAdd != nil {
+					return errAdd
+				}
 
-			if errAddDebug := doAddTarget(split.Name+"-debug", true); errAddDebug != nil {
-				return errAddDebug
+				if errAddDebug := doAddTarget(split.Name+"-debug", true); errAddDebug != nil {
+					return errAddDebug
+				}
 			}
 		}
 
