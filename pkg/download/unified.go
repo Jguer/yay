@@ -15,6 +15,7 @@ func getURLName(pkg db.IPackage) string {
 	if name == "" {
 		name = pkg.Name()
 	}
+
 	return name
 }
 
@@ -68,5 +69,6 @@ func GetPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []str
 	}
 
 	wg.Wait()
+
 	return pkgbuilds, errs.Return()
 }
