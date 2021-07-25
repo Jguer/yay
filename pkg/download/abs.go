@@ -2,33 +2,39 @@ package download
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 
 	"github.com/leonelquinteros/gotext"
 )
 
-var ErrInvalidRepository = errors.New(gotext.Get("invalid repository"))
-var ErrABSPackageNotFound = errors.New(gotext.Get("package not found in repos"))
+const (
+	MaxConcurrentFetch = 20
+	_urlPackagePath    = "%s/raw/packages/%s/trunk/PKGBUILD"
+)
 
-const MaxConcurrentFetch = 20
-const urlPackagePath = "/plain/trunk/PKGBUILD?"
+var (
+	ErrInvalidRepository  = errors.New(gotext.Get("invalid repository"))
+	ErrABSPackageNotFound = errors.New(gotext.Get("package not found in repos"))
+	ABSPackageURL         = "https://github.com/archlinux/svntogit-packages"
+	ABSCommunityURL       = "https://github.com/archlinux/svntogit-community"
+)
 
-var ABSPackageURL = "https://github.com/archlinux/svntogit-packages.git"
-var ABSCommunityURL = "https://github.com/archlinux/svntogit-community.git"
-
+// Return format for pkgbuild
+// https://github.com/archlinux/svntogit-community/raw/packages/neovim/trunk/PKGBUILD
 func getPackageURL(db, pkgName string) (string, error) {
-	values := url.Values{}
-	values.Set("h", "packages/"+pkgName)
-	nameEncoded := values.Encode()
+	repoURL := ""
 	switch db {
 	case "core", "extra", "testing":
-		return ABSPackageURL + urlPackagePath + nameEncoded, nil
+		repoURL = ABSPackageURL
 	case "community", "multilib", "community-testing", "multilib-testing":
-		return ABSCommunityURL + urlPackagePath + nameEncoded, nil
+		repoURL = ABSCommunityURL
+	default:
+		return "", ErrInvalidRepository
 	}
-	return "", ErrInvalidRepository
+
+	return fmt.Sprintf(_urlPackagePath, repoURL, pkgName), nil
 }
 
 func GetABSPkgbuild(httpClient *http.Client, dbName, pkgName string) ([]byte, error) {
