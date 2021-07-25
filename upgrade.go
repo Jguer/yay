@@ -128,7 +128,7 @@ func printLocalNewerThanAUR(
 }
 
 func isDevelName(name string) bool {
-	for _, suffix := range []string{"git", "svn", "hg", "bzr", "nightly"} {
+	for _, suffix := range []string{"git", "svn", "hg", "bzr", "nightly", "insiders-bin"} {
 		if strings.HasSuffix(name, "-"+suffix) {
 			return true
 		}
