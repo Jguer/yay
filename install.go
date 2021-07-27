@@ -69,6 +69,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	var srcinfos map[string]*gosrc.Srcinfo
 	noDeps := cmdArgs.ExistsDouble("d", "nodeps")
 	noCheck := strings.Contains(config.MFlags, "--nocheck")
+	assumeInstalled := cmdArgs.GetArgs("assume-installed")
 	sysupgradeArg := cmdArgs.ExistsArg("u", "sysupgrade")
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	warnings := query.NewWarnings()
@@ -142,7 +143,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 
 	dp, err := dep.GetPool(requestTargets,
 		warnings, dbExecutor, config.Runtime.AURClient, config.Runtime.Mode,
-		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN, noDeps, noCheck)
+		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN, noDeps, noCheck, assumeInstalled)
 	if err != nil {
 		return err
 	}

@@ -83,7 +83,7 @@ func makePool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
 // Includes db/ prefixes and group installs
 func (dp *Pool) ResolveTargets(pkgs []string,
 	mode settings.TargetMode,
-	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool) error {
+	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool, assumeInstalled []string) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC call
 	aurTargets := make(stringset.StringSet)
@@ -98,7 +98,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 		// still get skipped even if it's from a different database to
 		// the one specified
 		// this is how pacman behaves
-		if dp.hasPackage(target.DepString()) {
+		if dp.hasPackage(target.DepString()) || isInAssumeInstalled(target.DepString(), assumeInstalled) {
 			continue
 		}
 
@@ -376,11 +376,11 @@ func GetPool(pkgs []string,
 	aurClient *aur.Client,
 	mode settings.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
-	rebuild string, splitN int, noDeps bool, noCheckDeps bool) (*Pool, error) {
+	rebuild string, splitN int, noDeps bool, noCheckDeps bool, assumeInstalled []string) (*Pool, error) {
 	dp := makePool(dbExecutor, aurClient)
 
 	dp.Warnings = warnings
-	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
+	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps, assumeInstalled)
 
 	return dp, err
 }
@@ -493,6 +493,17 @@ func (dp *Pool) hasPackage(name string) bool {
 
 	for _, pkg := range dp.Groups {
 		if pkg == name {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isInAssumeInstalled(name string, assumeInstalled []string) bool {
+	for _, pkgAndVersion := range assumeInstalled {
+		parts := strings.SplitN(pkgAndVersion, "=", 2)
+		if parts[0] == name {
 			return true
 		}
 	}
