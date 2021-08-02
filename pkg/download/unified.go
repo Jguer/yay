@@ -83,19 +83,9 @@ func GetPkgbuilds(dbExecutor DBSearcher, httpClient *http.Client, targets []stri
 	sem := make(chan uint8, MaxConcurrentFetch)
 
 	for _, target := range targets {
-		aur := true
-
-		dbName, name := text.SplitDBFromName(target)
-		if dbName != "aur" && (mode == settings.ModeAny || mode == settings.ModeRepo) {
-			if pkg := dbExecutor.SyncPackage(name); pkg != nil {
-				aur = false
-				name = getURLName(pkg)
-				dbName = pkg.DB().Name()
-			}
-		}
-
-		if aur && mode == settings.ModeRepo {
-			// Mode does not allow AUR packages
+		// Probably replaceable by something in query.
+		dbName, name, aur, toSkip := getPackageUsableName(dbExecutor, target, mode)
+		if toSkip {
 			continue
 		}
 
@@ -148,31 +138,9 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 	sem := make(chan uint8, MaxConcurrentFetch)
 
 	for _, target := range targets {
-		aur := true
-
-		dbName, name := text.SplitDBFromName(target)
-		if dbName != "aur" && (mode == settings.ModeAny || mode == settings.ModeRepo) {
-			var pkg alpm.IPackage
-			if dbName != "" {
-				pkg = dbExecutor.SatisfierFromDB(name, dbName)
-				if pkg == nil {
-					// if the user precised a db but the package is not in the db
-					// then it is missing
-					continue
-				}
-			} else {
-				pkg = dbExecutor.SyncPackage(name)
-			}
-
-			if pkg != nil {
-				aur = false
-				name = getURLName(pkg)
-				dbName = pkg.DB().Name()
-			}
-		}
-
-		if aur && mode == settings.ModeRepo {
-			// Mode does not allow AUR packages
+		// Probably replaceable by something in query.
+		dbName, name, aur, toSkip := getPackageUsableName(dbExecutor, target, mode)
+		if toSkip {
 			continue
 		}
 
@@ -219,4 +187,36 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 	wg.Wait()
 
 	return cloned, errs.Return()
+}
+
+func getPackageUsableName(dbExecutor DBSearcher, target string, mode settings.TargetMode) (dbname, pkgname string, aur, toSkip bool) {
+	aur = true
+
+	dbName, name := text.SplitDBFromName(target)
+	if dbName != "aur" && (mode == settings.ModeAny || mode == settings.ModeRepo) {
+		var pkg alpm.IPackage
+		if dbName != "" {
+			pkg = dbExecutor.SatisfierFromDB(name, dbName)
+			if pkg == nil {
+				// if the user precised a db but the package is not in the db
+				// then it is missing
+				// Mode does not allow AUR packages
+
+				return dbName, name, aur, true
+			}
+		} else {
+			pkg = dbExecutor.SyncPackage(name)
+		}
+
+		if pkg != nil {
+			aur = false
+			name = getURLName(pkg)
+			dbName = pkg.DB().Name()
+		}
+	}
+
+	if aur && mode == settings.ModeRepo {
+		return dbName, name, aur, true
+	}
+	return dbName, name, aur, false
 }
