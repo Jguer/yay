@@ -2,16 +2,13 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strconv"
-	"strings"
 
 	aur "github.com/Jguer/aur"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/download"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -265,34 +262,6 @@ outer:
 	}
 
 	if missing {
-		return fmt.Errorf("")
-	}
-
-	return nil
-}
-
-func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string) error {
-	pkgbuilds, err := download.GetPkgbuilds(dbExecutor, httpClient, targets, config.Runtime.Mode)
-	if err != nil {
-		text.Errorln(err)
-	}
-
-	if len(pkgbuilds) != 0 {
-		for target, pkgbuild := range pkgbuilds {
-			fmt.Printf("\n\n# %s\n\n", target)
-			fmt.Print(string(pkgbuild))
-		}
-	}
-
-	if len(pkgbuilds) != len(targets) {
-		missing := []string{}
-		for _, target := range targets {
-			if _, ok := pkgbuilds[target]; !ok {
-				missing = append(missing, target)
-			}
-		}
-		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
-
 		return fmt.Errorf("")
 	}
 
