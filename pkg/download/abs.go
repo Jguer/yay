@@ -53,8 +53,8 @@ func getPackageRepoURL(db string) (string, error) {
 	return repoURL + ".git", err
 }
 
-// GetABSPkgbuild retrieves the PKGBUILD file to a dest directory
-func GetABSPkgbuild(httpClient *http.Client, dbName, pkgName string) ([]byte, error) {
+// ABSPKGBUILD retrieves the PKGBUILD file to a dest directory.
+func ABSPKGBUILD(httpClient *http.Client, dbName, pkgName string) ([]byte, error) {
 	packageURL, err := getPackageURL(dbName, pkgName)
 	if err != nil {
 		return nil, err
@@ -79,8 +79,8 @@ func GetABSPkgbuild(httpClient *http.Client, dbName, pkgName string) ([]byte, er
 	return pkgBuild, nil
 }
 
-// ABSPkgbuildRepo retrieves the PKGBUILD repository to a dest directory
-func ABSPkgbuildRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, dbName, pkgName, dest string, force bool) error {
+// ABSPKGBUILDRepo retrieves the PKGBUILD repository to a dest directory
+func ABSPKGBUILDRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, dbName, pkgName, dest string, force bool) error {
 	pkgURL, err := getPackageRepoURL(dbName)
 	if err != nil {
 		return err

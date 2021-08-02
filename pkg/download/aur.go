@@ -11,7 +11,7 @@ import (
 
 var AURPackageURL = "https://aur.archlinux.org/cgit/aur.git"
 
-func GetAURPkgbuild(httpClient *http.Client, pkgName string) ([]byte, error) {
+func AURPKGBUILD(httpClient *http.Client, pkgName string) ([]byte, error) {
 	values := url.Values{}
 	values.Set("h", pkgName)
 	pkgURL := AURPackageURL + "/plain/PKGBUILD?" + values.Encode()
@@ -36,7 +36,7 @@ func GetAURPkgbuild(httpClient *http.Client, pkgName string) ([]byte, error) {
 }
 
 // AURPkgbuildRepo retrieves the PKGBUILD repository to a dest directory.
-func AURPkgbuildRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, aurURL, pkgName, dest string, force bool) error {
+func AURPKGBUILDRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, aurURL, pkgName, dest string, force bool) error {
 	pkgURL := fmt.Sprintf("%s/%s.git", aurURL, pkgName)
 
 	return downloadGitRepo(cmdRunner, cmdBuilder, pkgURL, pkgName, dest, force)
