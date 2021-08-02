@@ -24,8 +24,6 @@ linters-settings:
     min-complexity: 15
   goimports:
     local-prefixes: github.com/Jguer/yay/v10
-  golint:
-    min-confidence: 0
   gomnd:
     settings:
       mnd:
@@ -84,7 +82,6 @@ linters:
     #- dogsled
     # disabled for now
     #- godox
-    #- interfacer
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source

@@ -82,7 +82,7 @@ func ABSPKGBUILD(httpClient *http.Client, dbName, pkgName string) ([]byte, error
 	return pkgBuild, nil
 }
 
-// ABSPKGBUILDRepo retrieves the PKGBUILD repository to a dest directory
+// ABSPKGBUILDRepo retrieves the PKGBUILD repository to a dest directory.
 func ABSPKGBUILDRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, dbName, pkgName, dest string, force bool) error {
 	pkgURL, err := getPackageRepoURL(dbName)
 	if err != nil {

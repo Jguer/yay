@@ -199,7 +199,6 @@ func getPackageUsableName(dbExecutor DBSearcher, target string, mode settings.Ta
 				// if the user precised a db but the package is not in the db
 				// then it is missing
 				// Mode does not allow AUR packages
-
 				return dbName, name, aur, true
 			}
 		} else {
@@ -216,5 +215,6 @@ func getPackageUsableName(dbExecutor DBSearcher, target string, mode settings.Ta
 	if aur && mode == settings.ModeRepo {
 		return dbName, name, aur, true
 	}
+
 	return dbName, name, aur, false
 }
