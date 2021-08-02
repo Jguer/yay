@@ -203,18 +203,21 @@ func Test_upDevel(t *testing.T) {
 					"hello4": {Version: "2.0.0", Name: "hello4"},
 				},
 			},
-			want: UpSlice{Repos: []string{"devel"}, Up: []Upgrade{{
-				Name:          "hello",
-				Repository:    "devel",
-				LocalVersion:  "2.0.0",
-				RemoteVersion: "latest-commit",
-			},
-				{
-					Name:          "hello4",
-					Repository:    "devel",
-					LocalVersion:  "4.0.0",
-					RemoteVersion: "latest-commit",
-				}},
+			want: UpSlice{
+				Repos: []string{"devel"}, Up: []Upgrade{
+					{
+						Name:          "hello",
+						Repository:    "devel",
+						LocalVersion:  "2.0.0",
+						RemoteVersion: "latest-commit",
+					},
+					{
+						Name:          "hello4",
+						Repository:    "devel",
+						LocalVersion:  "4.0.0",
+						RemoteVersion: "latest-commit",
+					},
+				},
 			},
 		},
 		{

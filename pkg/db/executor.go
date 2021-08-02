@@ -6,8 +6,10 @@ import (
 	alpm "github.com/Jguer/go-alpm/v2"
 )
 
-type IPackage = alpm.IPackage
-type Depend = alpm.Depend
+type (
+	IPackage = alpm.IPackage
+	Depend   = alpm.Depend
+)
 
 func VerCmp(a, b string) int {
 	return alpm.VerCmp(a, b)
