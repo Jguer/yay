@@ -49,6 +49,9 @@ func getPackageURL(db, pkgName string) (string, error) {
 // https://github.com/archlinux/svntogit-community.git
 func getPackageRepoURL(db string) (string, error) {
 	repoURL, err := getRepoURL(db)
+	if err != nil {
+		return "", err
+	}
 
 	return repoURL + ".git", err
 }

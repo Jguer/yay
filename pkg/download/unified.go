@@ -17,22 +17,27 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
+type DBSearcher interface {
+	SyncPackage(string) db.IPackage
+	SatisfierFromDB(string, string) db.IPackage
+}
+
 func downloadGitRepo(cmdRunner exe.Runner,
 	cmdBuilder exe.GitCmdBuilder, pkgURL, pkgName, dest string, force bool, gitArgs ...string) error {
-	gitArgs = append(gitArgs, pkgURL, pkgName)
-
-	cloneArgs := make([]string, 0, len(gitArgs)+4)
-	cloneArgs = append(cloneArgs, "clone", "--no-progress")
-	cloneArgs = append(cloneArgs, gitArgs...)
 	finalDir := filepath.Join(dest, pkgName)
 
-	if _, err := os.Stat(filepath.Join(finalDir, ".git")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(finalDir, ".git")); os.IsNotExist(err) || (err == nil && force) {
 		if _, errD := os.Stat(finalDir); force && errD == nil {
 			if errR := os.RemoveAll(finalDir); errR != nil {
 				return ErrGetPKGBUILDRepo{inner: errR, pkgName: pkgName, errOut: ""}
 			}
 		}
 
+		gitArgs = append(gitArgs, pkgURL, pkgName)
+
+		cloneArgs := make([]string, 0, len(gitArgs)+4)
+		cloneArgs = append(cloneArgs, "clone", "--no-progress")
+		cloneArgs = append(cloneArgs, gitArgs...)
 		cmd := cmdBuilder.BuildGitCmd(dest, cloneArgs...)
 
 		_, stderr, errCapture := cmdRunner.Capture(cmd, 0)
@@ -66,7 +71,7 @@ func getURLName(pkg db.IPackage) string {
 	return name
 }
 
-func GetPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string, mode settings.TargetMode) (map[string][]byte, error) {
+func GetPkgbuilds(dbExecutor DBSearcher, httpClient *http.Client, targets []string, mode settings.TargetMode) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
 	var (
@@ -128,7 +133,7 @@ func GetPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []str
 	return pkgbuilds, errs.Return()
 }
 
-func PKGBUILDRepos(dbExecutor db.Executor,
+func PKGBUILDRepos(dbExecutor DBSearcher,
 	cmdRunner exe.Runner,
 	cmdBuilder exe.GitCmdBuilder,
 	targets []string, mode settings.TargetMode, aurURL, dest string, force bool) (map[string]bool, error) {
