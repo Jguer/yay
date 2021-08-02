@@ -71,7 +71,7 @@ func getURLName(pkg db.IPackage) string {
 	return name
 }
 
-func GetPkgbuilds(dbExecutor DBSearcher, httpClient *http.Client, targets []string, mode settings.TargetMode) (map[string][]byte, error) {
+func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string, mode settings.TargetMode) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
 	var (
@@ -149,9 +149,7 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 		wg.Add(1)
 
 		go func(target, dbName, pkgName string, aur bool) {
-			var (
-				err error
-			)
+			var err error
 
 			if aur {
 				err = AURPKGBUILDRepo(cmdRunner, cmdBuilder, aurURL, pkgName, dest, force)

@@ -16,7 +16,7 @@ import (
 
 // yay -Gp
 func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string) error {
-	pkgbuilds, err := download.GetPkgbuilds(dbExecutor, httpClient, targets, config.Runtime.Mode)
+	pkgbuilds, err := download.PKGBUILDs(dbExecutor, httpClient, targets, config.Runtime.Mode)
 	if err != nil {
 		text.Errorln(err)
 	}
