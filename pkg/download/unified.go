@@ -29,7 +29,7 @@ func downloadGitRepo(cmdRunner exe.Runner,
 	if _, err := os.Stat(filepath.Join(finalDir, ".git")); os.IsNotExist(err) {
 		if _, errD := os.Stat(finalDir); force && errD == nil {
 			if errR := os.RemoveAll(finalDir); errR != nil {
-				return ErrGetPKGBUILDRepo{inner: errR, pkgName: pkgName}
+				return ErrGetPKGBUILDRepo{inner: errR, pkgName: pkgName, errOut: ""}
 			}
 		}
 
@@ -105,9 +105,9 @@ func GetPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []str
 			)
 
 			if aur {
-				pkgbuild, err = GetAURPkgbuild(httpClient, pkgName)
+				pkgbuild, err = AURPKGBUILD(httpClient, pkgName)
 			} else {
-				pkgbuild, err = GetABSPkgbuild(httpClient, dbName, pkgName)
+				pkgbuild, err = ABSPKGBUILD(httpClient, dbName, pkgName)
 			}
 
 			if err == nil {
@@ -181,9 +181,9 @@ func PKGBUILDRepos(dbExecutor db.Executor,
 			)
 
 			if aur {
-				err = AURPkgbuildRepo(cmdRunner, cmdBuilder, aurURL, pkgName, dest, force)
+				err = AURPKGBUILDRepo(cmdRunner, cmdBuilder, aurURL, pkgName, dest, force)
 			} else {
-				err = ABSPkgbuildRepo(cmdRunner, cmdBuilder, dbName, pkgName, dest, force)
+				err = ABSPKGBUILDRepo(cmdRunner, cmdBuilder, dbName, pkgName, dest, force)
 			}
 
 			success := err == nil
@@ -191,8 +191,7 @@ func PKGBUILDRepos(dbExecutor db.Executor,
 				mux.Lock()
 				cloned[target] = success
 				mux.Unlock()
-			}
-			if !success {
+			} else {
 				errs.Add(err)
 			}
 
@@ -205,7 +204,9 @@ func PKGBUILDRepos(dbExecutor db.Executor,
 					gotext.Get("(%d/%d) Downloaded PKGBUILD from ABS: %s",
 						len(cloned), len(targets), text.Cyan(pkgName)))
 			}
+
 			<-sem
+
 			wg.Done()
 		}(target, dbName, name, aur)
 	}

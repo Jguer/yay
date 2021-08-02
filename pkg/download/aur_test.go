@@ -52,7 +52,7 @@ func TestGetAURPkgbuild(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			AURPackageURL = PKGBuild.URL
 			PKGBuild.Config.Handler = tt.args.handler
-			got, err := GetAURPkgbuild(PKGBuild.Client(), tt.args.pkgName)
+			got, err := AURPKGBUILD(PKGBuild.Client(), tt.args.pkgName)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

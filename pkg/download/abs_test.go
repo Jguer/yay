@@ -126,7 +126,7 @@ func TestGetABSPkgbuild(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ABSPackageURL = PKGBuild.URL
 			PKGBuild.Config.Handler = tt.args.handler
-			got, err := GetABSPkgbuild(PKGBuild.Client(), tt.args.dbName, tt.args.pkgName)
+			got, err := ABSPKGBUILD(PKGBuild.Client(), tt.args.dbName, tt.args.pkgName)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
