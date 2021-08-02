@@ -1,12 +1,14 @@
 package main
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/dep"
+	"github.com/Jguer/yay/v10/pkg/download"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/stringset"
@@ -30,8 +32,23 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 
 	bases := dep.GetBases(info)
 	toSkip := pkgbuildsToSkip(bases, stringset.FromSlice(remoteNames))
-	_, err = downloadPkgbuilds(bases, toSkip, config.BuildDir)
-	if err != nil {
+
+	targets := make([]string, 0, len(bases))
+	for _, base := range bases {
+		if !toSkip.Get(base.Pkgbase()) {
+			targets = append(targets, base.Pkgbase())
+		}
+	}
+
+	toSkipSlice := toSkip.ToSlice()
+	if len(toSkipSlice) != 0 {
+		text.OperationInfoln(
+			gotext.Get("PKGBUILD up to date, Skipping (%d/%d): %s",
+				len(toSkipSlice), len(bases), text.Cyan(strings.Join(toSkipSlice, ", "))))
+	}
+
+	if _, errA := download.AURPKGBUILDRepos(config.Runtime.CmdRunner,
+		config.Runtime.CmdBuilder, targets, config.AURURL, config.BuildDir, false); errA != nil {
 		return err
 	}
 
