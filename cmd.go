@@ -277,7 +277,9 @@ func handleGetpkgbuild(cmdArgs *settings.Arguments, dbExecutor db.Executor) erro
 	if cmdArgs.ExistsArg("p", "print") {
 		return printPkgbuilds(dbExecutor, config.Runtime.HTTPClient, cmdArgs.Targets)
 	}
-	return getPkgbuilds(cmdArgs.Targets, dbExecutor, cmdArgs.ExistsArg("f", "force"))
+	return getPkgbuilds(dbExecutor,
+		config.Runtime.CmdRunner, config.Runtime.CmdBuilder,
+		cmdArgs.Targets, config.Runtime.Mode, config.AURURL, cmdArgs.ExistsArg("f", "force"))
 }
 
 func handleYogurt(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {

@@ -3,20 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
-
-	alpm "github.com/Jguer/go-alpm/v2"
 
 	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/dep"
-	"github.com/Jguer/yay/v10/pkg/multierror"
-	"github.com/Jguer/yay/v10/pkg/query"
+	"github.com/Jguer/yay/v10/pkg/download"
+	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/exe"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -80,34 +75,6 @@ func gitHasDiff(path, name string) (bool, error) {
 	return true, nil
 }
 
-// TODO: yay-next passes args through the header, use that to unify ABS and AUR
-func gitDownloadABS(url, path, name string) (bool, error) {
-	if err := os.MkdirAll(path, 0o755); err != nil {
-		return false, err
-	}
-
-	if _, errExist := os.Stat(filepath.Join(path, name)); os.IsNotExist(errExist) {
-		cmd := config.Runtime.CmdBuilder.BuildGitCmd(path, "clone", "--no-progress", "--single-branch",
-			"-b", "packages/"+name, url, name)
-		_, stderr, err := config.Runtime.CmdRunner.Capture(cmd, 0)
-		if err != nil {
-			return false, fmt.Errorf(gotext.Get("error cloning %s: %s", name, stderr))
-		}
-
-		return true, nil
-	} else if errExist != nil {
-		return false, fmt.Errorf(gotext.Get("error reading %s", filepath.Join(path, name, ".git")))
-	}
-
-	cmd := config.Runtime.CmdBuilder.BuildGitCmd(filepath.Join(path, name), "pull", "--ff-only")
-	_, stderr, err := config.Runtime.CmdRunner.Capture(cmd, 0)
-	if err != nil {
-		return false, fmt.Errorf(gotext.Get("error fetching %s: %s", name, stderr))
-	}
-
-	return true, nil
-}
-
 func gitDownload(url, path, name string) (bool, error) {
 	_, err := os.Stat(filepath.Join(path, name, ".git"))
 	if os.IsNotExist(err) {
@@ -149,173 +116,33 @@ func gitMerge(path, name string) error {
 	return nil
 }
 
-func getPkgbuilds(pkgs []string, dbExecutor db.Executor, force bool) error {
-	missing := false
+func getPkgbuilds(dbExecutor db.Executor,
+	cmdRunner exe.Runner,
+	cmdBuilder exe.GitCmdBuilder, targets []string,
+	mode settings.TargetMode,
+	aurURL string,
+	force bool) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	pkgs = query.RemoveInvalidTargets(pkgs, config.Runtime.Mode)
-	aur, repo := packageSlices(pkgs, dbExecutor)
-
-	for n := range aur {
-		_, pkg := text.SplitDBFromName(aur[n])
-		aur[n] = pkg
+	cloned, errD := download.PKGBUILDRepos(dbExecutor, cmdRunner, cmdBuilder, targets, mode, aurURL, wd, force)
+	if errD != nil {
+		text.Errorln(errD)
 	}
 
-	info, err := query.AURInfoPrint(config.Runtime.AURClient, aur, config.RequestSplitN)
-	if err != nil {
-		return err
-	}
-
-	if len(repo) > 0 {
-		missing, err = getPkgbuildsfromABS(repo, wd, dbExecutor, force)
-		if err != nil {
-			return err
-		}
-	}
-
-	if len(aur) > 0 {
-		allBases := dep.GetBases(info)
-		bases := make([]dep.Base, 0)
-
-		for _, base := range allBases {
-			name := base.Pkgbase()
-			pkgDest := filepath.Join(wd, name)
-			_, err = os.Stat(pkgDest)
-			if os.IsNotExist(err) {
-				bases = append(bases, base)
-			} else if err != nil {
-				text.Errorln(err)
-				continue
-			} else {
-				if force {
-					if err = os.RemoveAll(pkgDest); err != nil {
-						text.Errorln(err)
-						continue
-					}
-					bases = append(bases, base)
-				} else {
-					text.Warnln(gotext.Get("%s already exists. Use -f/--force to overwrite", pkgDest))
-					continue
-				}
+	if len(targets) != len(cloned) {
+		missing := []string{}
+		for _, target := range targets {
+			if _, ok := cloned[target]; !ok {
+				missing = append(missing, target)
 			}
 		}
+		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
 
-		if _, err = downloadPkgbuilds(bases, nil, wd); err != nil {
-			return err
-		}
-
-		missing = missing || len(aur) != len(info)
-	}
-
-	if missing {
 		err = fmt.Errorf("")
 	}
 
 	return err
-}
-
-// GetPkgbuild downloads pkgbuild from the ABS.
-func getPkgbuildsfromABS(pkgs []string, path string, dbExecutor db.Executor, force bool) (bool, error) {
-	var wg sync.WaitGroup
-	var mux sync.Mutex
-	var errs multierror.MultiError
-	names := make(map[string]string)
-	missing := make([]string, 0)
-	downloaded := 0
-
-	for _, pkgN := range pkgs {
-		var pkg alpm.IPackage
-		var err error
-		var url string
-		pkgDB, name := text.SplitDBFromName(pkgN)
-
-		if pkgDB != "" {
-			pkg = dbExecutor.SatisfierFromDB(name, pkgDB)
-		} else {
-			pkg = dbExecutor.SyncSatisfier(name)
-		}
-
-		if pkg == nil {
-			missing = append(missing, name)
-			continue
-		}
-
-		name = pkg.Base()
-		if name == "" {
-			name = pkg.Name()
-		}
-
-		// TODO: Check existence with ls-remote
-		// https://git.archlinux.org/svntogit/packages.git
-		switch pkg.DB().Name() {
-		case "core", "extra", "testing":
-			url = "https://github.com/archlinux/svntogit-packages.git"
-		case "community", "multilib", "community-testing", "multilib-testing":
-			url = "https://github.com/archlinux/svntogit-community.git"
-		default:
-			missing = append(missing, name)
-			continue
-		}
-
-		_, err = os.Stat(filepath.Join(path, name))
-		switch {
-		case err != nil && !os.IsNotExist(err):
-			text.Errorln(err)
-			continue
-		case os.IsNotExist(err), force:
-			if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
-				text.Errorln(err)
-				continue
-			}
-		default:
-			text.Warn(gotext.Get("%s already downloaded -- use -f to overwrite", text.Cyan(name)))
-			continue
-		}
-
-		names[name] = url
-	}
-
-	if len(missing) != 0 {
-		text.Warnln(gotext.Get("Missing ABS packages:"),
-			text.Cyan(strings.Join(missing, ", ")))
-	}
-
-	download := func(pkg string, url string) {
-		defer wg.Done()
-		if _, err := gitDownloadABS(url, config.ABSDir, pkg); err != nil {
-			errs.Add(errors.New(gotext.Get("failed to get pkgbuild: %s: %s", text.Cyan(pkg), err.Error())))
-			return
-		}
-
-		_, stderr, err := config.Runtime.CmdRunner.Capture(
-			exec.Command(
-				"cp", "-r",
-				filepath.Join(config.ABSDir, pkg, "trunk"),
-				filepath.Join(path, pkg)), 0)
-		mux.Lock()
-		downloaded++
-		if err != nil {
-			errs.Add(errors.New(gotext.Get("failed to link %s: %s", text.Cyan(pkg), stderr)))
-		} else {
-			fmt.Fprintln(os.Stdout, gotext.Get("(%d/%d) Downloaded PKGBUILD from ABS: %s", downloaded, len(names), text.Cyan(pkg)))
-		}
-		mux.Unlock()
-	}
-
-	count := 0
-	for name, url := range names {
-		wg.Add(1)
-		go download(name, url)
-		count++
-		if count%25 == 0 {
-			wg.Wait()
-		}
-	}
-
-	wg.Wait()
-
-	return len(missing) != 0, errs.Return()
 }

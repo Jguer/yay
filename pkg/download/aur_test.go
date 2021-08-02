@@ -10,13 +10,11 @@ import (
 
 func TestGetAURPkgbuild(t *testing.T) {
 	pkgBuildHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		w.WriteHeader(200)
 		w.Write([]byte(gitExtrasPKGBUILD))
 	})
 
 	notFoundHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		w.WriteHeader(404)
 	})
 

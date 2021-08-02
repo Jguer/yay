@@ -5,6 +5,10 @@ import (
 	"os/exec"
 )
 
+type GitCmdBuilder interface {
+	BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd
+}
+
 type CmdBuilder struct {
 	GitBin          string
 	GitFlags        []string

@@ -1,17 +1,15 @@
 package download
 
 import (
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	"github.com/leonelquinteros/gotext"
+	"github.com/Jguer/yay/v10/pkg/settings/exe"
 )
 
 var AURPackageURL = "https://aur.archlinux.org/cgit/aur.git"
-
-var ErrAURPackageNotFound = errors.New(gotext.Get("package not found in AUR"))
 
 func GetAURPkgbuild(httpClient *http.Client, pkgName string) ([]byte, error) {
 	values := url.Values{}
@@ -22,8 +20,9 @@ func GetAURPkgbuild(httpClient *http.Client, pkgName string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != 200 {
-		return nil, ErrAURPackageNotFound
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, ErrAURPackageNotFound{pkgName: pkgName}
 	}
 
 	defer resp.Body.Close()
@@ -34,4 +33,11 @@ func GetAURPkgbuild(httpClient *http.Client, pkgName string) ([]byte, error) {
 	}
 
 	return pkgBuild, nil
+}
+
+// AURPkgbuildRepo retrieves the PKGBUILD repository to a dest directory.
+func AURPkgbuildRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, aurURL, pkgName, dest string, force bool) error {
+	pkgURL := fmt.Sprintf("%s/%s.git", aurURL, pkgName)
+
+	return downloadGitRepo(cmdRunner, cmdBuilder, pkgURL, pkgName, dest, force)
 }
