@@ -1,11 +1,17 @@
 package download
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Jguer/yay/v10/pkg/settings/exe"
 )
 
 const gitExtrasPKGBUILD = `pkgname=git-extras
@@ -136,4 +142,111 @@ func TestGetABSPkgbuild(t *testing.T) {
 			assert.Equal(t, tt.want, string(got))
 		})
 	}
+}
+
+func Test_getPackageRepoURL(t *testing.T) {
+	ABSPackageURL = "https://github.com/archlinux/svntogit-packages"
+	ABSCommunityURL = "https://github.com/archlinux/svntogit-community"
+
+	type args struct {
+		db string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "community package",
+			args:    args{db: "community"},
+			want:    "https://github.com/archlinux/svntogit-community.git",
+			wantErr: false,
+		},
+		{
+			name:    "core package",
+			args:    args{db: "core"},
+			want:    "https://github.com/archlinux/svntogit-packages.git",
+			wantErr: false,
+		},
+		{
+			name:    "personal repo package",
+			args:    args{db: "sweswe"},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getPackageRepoURL(tt.args.db)
+			if tt.wantErr {
+				assert.ErrorIs(t, err, ErrInvalidRepository)
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// GIVEN no previous existing folder
+// WHEN ABSPKGBUILDRepo is called
+// THEN a clone command should be formed
+func TestABSPKGBUILDRepo(t *testing.T) {
+	cmdRunner := &testRunner{}
+	cmdBuilder := &testGitBuilder{
+		index: 0,
+		test:  t,
+		want:  "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux",
+		parentBuilder: &exe.CmdBuilder{
+			GitBin:   "/usr/local/bin/git",
+			GitFlags: []string{"--no-replace-objects"},
+		},
+	}
+	err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", "/tmp/doesnt-exist", false)
+	assert.NoError(t, err)
+}
+
+// GIVEN a previous existing folder without permissions
+// WHEN ABSPKGBUILDRepo is called
+// THEN a clone command should be formed
+func TestABSPKGBUILDRepoExistsNoPerms(t *testing.T) {
+	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	defer os.RemoveAll(dir)
+
+	os.MkdirAll(filepath.Join(dir, "linux", ".git"), 0o600)
+
+	cmdRunner := &testRunner{}
+	cmdBuilder := &testGitBuilder{
+		index: 0,
+		test:  t,
+		parentBuilder: &exe.CmdBuilder{
+			GitBin:   "/usr/local/bin/git",
+			GitFlags: []string{"--no-replace-objects"},
+		},
+	}
+	err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", dir, false)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error fetching linux: error reading")
+}
+
+// GIVEN a previous existing folder with permissions
+// WHEN ABSPKGBUILDRepo is called
+// THEN a pull command should be formed
+func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
+	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	defer os.RemoveAll(dir)
+
+	os.MkdirAll(filepath.Join(dir, "linux", ".git"), 0o777)
+
+	cmdRunner := &testRunner{}
+	cmdBuilder := &testGitBuilder{
+		index: 0,
+		test:  t,
+		want:  fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/linux pull --ff-only", dir),
+		parentBuilder: &exe.CmdBuilder{
+			GitBin:   "/usr/local/bin/git",
+			GitFlags: []string{"--no-replace-objects"},
+		},
+	}
+	err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", dir, false)
+	assert.NoError(t, err)
 }

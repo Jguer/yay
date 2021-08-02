@@ -34,16 +34,16 @@ type Executor interface {
 	LocalSatisfierExists(string) bool
 	PackageConflicts(IPackage) []Depend
 	PackageDepends(IPackage) []Depend
-	SatisfierFromDB(string, string) IPackage
 	PackageGroups(IPackage) []string
 	PackageOptionalDepends(IPackage) []Depend
 	PackageProvides(IPackage) []Depend
 	PackagesFromGroup(string) []IPackage
 	RefreshHandle() error
 	RepoUpgrades(bool) ([]Upgrade, error)
+	Repos() []string
+	SatisfierFromDB(string, string) IPackage
 	SyncPackage(string) IPackage
 	SyncPackages(...string) []IPackage
 	SyncSatisfier(string) IPackage
 	SyncSatisfierExists(string) bool
-	Repos() []string
 }
