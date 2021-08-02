@@ -7,6 +7,8 @@ import (
 	"net/http"
 
 	"github.com/leonelquinteros/gotext"
+
+	"github.com/Jguer/yay/v10/pkg/settings/exe"
 )
 
 const (
@@ -21,22 +23,37 @@ var (
 	ABSCommunityURL       = "https://github.com/archlinux/svntogit-community"
 )
 
+func getRepoURL(db string) (string, error) {
+	switch db {
+	case "core", "extra", "testing":
+		return ABSPackageURL, nil
+	case "community", "multilib", "community-testing", "multilib-testing":
+		return ABSCommunityURL, nil
+	}
+
+	return "", ErrInvalidRepository
+}
+
 // Return format for pkgbuild
 // https://github.com/archlinux/svntogit-community/raw/packages/neovim/trunk/PKGBUILD
 func getPackageURL(db, pkgName string) (string, error) {
-	repoURL := ""
-	switch db {
-	case "core", "extra", "testing":
-		repoURL = ABSPackageURL
-	case "community", "multilib", "community-testing", "multilib-testing":
-		repoURL = ABSCommunityURL
-	default:
-		return "", ErrInvalidRepository
+	repoURL, err := getRepoURL(db)
+	if err != nil {
+		return "", err
 	}
 
-	return fmt.Sprintf(_urlPackagePath, repoURL, pkgName), nil
+	return fmt.Sprintf(_urlPackagePath, repoURL, pkgName), err
 }
 
+// Return format for pkgbuild repo
+// https://github.com/archlinux/svntogit-community.git
+func getPackageRepoURL(db string) (string, error) {
+	repoURL, err := getRepoURL(db)
+
+	return repoURL + ".git", err
+}
+
+// GetABSPkgbuild retrieves the PKGBUILD file to a dest directory
 func GetABSPkgbuild(httpClient *http.Client, dbName, pkgName string) ([]byte, error) {
 	packageURL, err := getPackageURL(dbName, pkgName)
 	if err != nil {
@@ -48,7 +65,7 @@ func GetABSPkgbuild(httpClient *http.Client, dbName, pkgName string) ([]byte, er
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return nil, ErrABSPackageNotFound
 	}
 
@@ -60,4 +77,15 @@ func GetABSPkgbuild(httpClient *http.Client, dbName, pkgName string) ([]byte, er
 	}
 
 	return pkgBuild, nil
+}
+
+// ABSPkgbuildRepo retrieves the PKGBUILD repository to a dest directory
+func ABSPkgbuildRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, dbName, pkgName, dest string, force bool) error {
+	pkgURL, err := getPackageRepoURL(dbName)
+	if err != nil {
+		return err
+	}
+
+	return downloadGitRepo(cmdRunner, cmdBuilder, pkgURL,
+		pkgName, dest, force, "--single-branch", "-b", "packages/"+pkgName)
 }

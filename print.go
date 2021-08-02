@@ -291,7 +291,9 @@ func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []s
 				missing = append(missing, target)
 			}
 		}
-		text.Warnln("Unable to find the following packages:", strings.Join(missing, ", "))
+		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
+
+		return fmt.Errorf("")
 	}
 
 	return nil

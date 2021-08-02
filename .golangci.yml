@@ -54,7 +54,6 @@ linters:
     - gocritic
     - gofmt
     - goimports
-    - golint
     - goprintffuncname
     - gosec
     - gosimple
@@ -63,6 +62,8 @@ linters:
     - lll
     - misspell
     - nakedret
+    - prealloc
+    - revive
     - rowserrcheck
     - staticcheck
     - structcheck
@@ -73,7 +74,6 @@ linters:
     - unused
     - varcheck
     - whitespace
-    - prealloc
 
     # disabled want to fix
     #- scopelint
