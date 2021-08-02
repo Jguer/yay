@@ -7,12 +7,6 @@ import (
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
-
-	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/download"
-	"github.com/Jguer/yay/v10/pkg/settings"
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
-	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 const gitDiffRefName = "AUR_SEEN"
@@ -114,35 +108,4 @@ func gitMerge(path, name string) error {
 	}
 
 	return nil
-}
-
-func getPkgbuilds(dbExecutor db.Executor,
-	cmdRunner exe.Runner,
-	cmdBuilder exe.GitCmdBuilder, targets []string,
-	mode settings.TargetMode,
-	aurURL string,
-	force bool) error {
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	cloned, errD := download.PKGBUILDRepos(dbExecutor, cmdRunner, cmdBuilder, targets, mode, aurURL, wd, force)
-	if errD != nil {
-		text.Errorln(errD)
-	}
-
-	if len(targets) != len(cloned) {
-		missing := []string{}
-		for _, target := range targets {
-			if _, ok := cloned[target]; !ok {
-				missing = append(missing, target)
-			}
-		}
-		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
-
-		err = fmt.Errorf("")
-	}
-
-	return err
 }
