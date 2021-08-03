@@ -205,29 +205,6 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// GIVEN a previous existing folder without permissions
-// WHEN ABSPKGBUILDRepo is called
-// THEN a clone command should be formed
-func TestABSPKGBUILDRepoExistsNoPerms(t *testing.T) {
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
-
-	os.MkdirAll(filepath.Join(dir, "linux", ".git"), 0o600)
-
-	cmdRunner := &testRunner{}
-	cmdBuilder := &testGitBuilder{
-		index: 0,
-		test:  t,
-		parentBuilder: &exe.CmdBuilder{
-			GitBin:   "/usr/local/bin/git",
-			GitFlags: []string{"--no-replace-objects"},
-		},
-	}
-	err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", dir, false)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "error fetching linux: error reading")
-}
-
 // GIVEN a previous existing folder with permissions
 // WHEN ABSPKGBUILDRepo is called
 // THEN a pull command should be formed

@@ -88,29 +88,6 @@ func TestAURPKGBUILDRepo(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// GIVEN a previous existing folder without permissions
-// WHEN AURPKGBUILDRepo is called
-// THEN a clone command should be formed
-func TestAURPKGBUILDRepoExistsNoPerms(t *testing.T) {
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
-
-	os.MkdirAll(filepath.Join(dir, "yay-bin", ".git"), 0o600)
-
-	cmdRunner := &testRunner{}
-	cmdBuilder := &testGitBuilder{
-		index: 0,
-		test:  t,
-		parentBuilder: &exe.CmdBuilder{
-			GitBin:   "/usr/local/bin/git",
-			GitFlags: []string{"--no-replace-objects"},
-		},
-	}
-	err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "error fetching yay-bin: error reading")
-}
-
 // GIVEN a previous existing folder with permissions
 // WHEN AURPKGBUILDRepo is called
 // THEN a pull command should be formed
