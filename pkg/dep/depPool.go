@@ -502,8 +502,9 @@ func (dp *Pool) hasPackage(name string) bool {
 
 func isInAssumeInstalled(name string, assumeInstalled []string) bool {
 	for _, pkgAndVersion := range assumeInstalled {
-		parts := strings.SplitN(pkgAndVersion, "=", 2)
-		if parts[0] == name {
+		assumeName, _, _ := splitDep(pkgAndVersion)
+		depName, _, _ := splitDep(name)
+		if assumeName == depName {
 			return true
 		}
 	}
