@@ -17,6 +17,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/completion"
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/dep"
+	"github.com/Jguer/yay/v10/pkg/download"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/pgp"
@@ -232,8 +233,23 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	}
 
 	toSkip := pkgbuildsToSkip(do.Aur, targets)
-	cloned, err := downloadPkgbuilds(do.Aur, toSkip, config.BuildDir)
-	if err != nil {
+	toClone := make([]string, 0, len(do.Aur))
+	for _, base := range do.Aur {
+		if !toSkip.Get(base.Pkgbase()) {
+			toClone = append(toClone, base.Pkgbase())
+		}
+	}
+
+	toSkipSlice := toSkip.ToSlice()
+	if len(toSkipSlice) != 0 {
+		text.OperationInfoln(
+			gotext.Get("PKGBUILD up to date, Skipping (%d/%d): %s",
+				len(toSkipSlice), len(toClone), text.Cyan(strings.Join(toSkipSlice, ", "))))
+	}
+
+	cloned, errA := download.AURPKGBUILDRepos(config.Runtime.CmdRunner,
+		config.Runtime.CmdBuilder, toClone, config.AURURL, config.BuildDir, false)
+	if errA != nil {
 		return err
 	}
 
@@ -729,48 +745,6 @@ func updatePkgbuildSeenRef(bases []dep.Base) error {
 	return errMulti.Return()
 }
 
-func showPkgbuildDiffs(bases []dep.Base, cloned stringset.StringSet) error {
-	var errMulti multierror.MultiError
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-		start, err := getLastSeenHash(config.BuildDir, pkg)
-		if err != nil {
-			errMulti.Add(err)
-			continue
-		}
-
-		if cloned.Get(pkg) {
-			start = gitEmptyTree
-		} else {
-			hasDiff, err := gitHasDiff(config.BuildDir, pkg)
-			if err != nil {
-				errMulti.Add(err)
-				continue
-			}
-
-			if !hasDiff {
-				text.Warnln(gotext.Get("%s: No changes -- skipping", text.Cyan(base.String())))
-				continue
-			}
-		}
-
-		args := []string{
-			"diff",
-			start + "..HEAD@{upstream}", "--src-prefix",
-			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO",
-		}
-		if text.UseColor {
-			args = append(args, "--color=always")
-		} else {
-			args = append(args, "--color=never")
-		}
-		_ = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, args...))
-	}
-
-	return errMulti.Return()
-}
-
 func editPkgbuilds(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo) error {
 	pkgbuilds := make([]string, 0, len(bases))
 	for _, base := range bases {
@@ -859,59 +833,6 @@ func mergePkgbuilds(bases []dep.Base) error {
 	return nil
 }
 
-func downloadPkgbuilds(bases []dep.Base, toSkip stringset.StringSet, buildDir string) (stringset.StringSet, error) {
-	cloned := make(stringset.StringSet)
-	downloaded := 0
-	var wg sync.WaitGroup
-	var mux sync.Mutex
-	var errs multierror.MultiError
-
-	download := func(base dep.Base) {
-		defer wg.Done()
-		pkg := base.Pkgbase()
-
-		if toSkip.Get(pkg) {
-			mux.Lock()
-			downloaded++
-			text.OperationInfoln(
-				gotext.Get("PKGBUILD up to date, Skipping (%d/%d): %s",
-					downloaded, len(bases), text.Cyan(base.String())))
-			mux.Unlock()
-			return
-		}
-
-		clone, err := gitDownload(config.AURURL+"/"+pkg+".git", buildDir, pkg)
-		if err != nil {
-			errs.Add(err)
-			return
-		}
-		if clone {
-			mux.Lock()
-			cloned.Set(pkg)
-			mux.Unlock()
-		}
-
-		mux.Lock()
-		downloaded++
-		text.OperationInfoln(gotext.Get("Downloaded PKGBUILD (%d/%d): %s", downloaded, len(bases), text.Cyan(base.String())))
-		mux.Unlock()
-	}
-
-	count := 0
-	for _, base := range bases {
-		wg.Add(1)
-		go download(base)
-		count++
-		if count%25 == 0 {
-			wg.Wait()
-		}
-	}
-
-	wg.Wait()
-
-	return cloned, errs.Return()
-}
-
 func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet) (err error) {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
@@ -958,7 +879,7 @@ func buildInstallPkgbuilds(
 	oldConfirm := settings.NoConfirm
 	settings.NoConfirm = true
 
-	//remotenames: names of all non repo packages on the system
+	// remotenames: names of all non repo packages on the system
 	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
 		return err
