@@ -41,7 +41,7 @@ func AURPKGBUILD(httpClient *http.Client, pkgName string) ([]byte, error) {
 }
 
 // AURPkgbuildRepo retrieves the PKGBUILD repository to a dest directory.
-func AURPKGBUILDRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, aurURL, pkgName, dest string, force bool) error {
+func AURPKGBUILDRepo(cmdRunner exe.Runner, cmdBuilder exe.GitCmdBuilder, aurURL, pkgName, dest string, force bool) (bool, error) {
 	pkgURL := fmt.Sprintf("%s/%s.git", aurURL, pkgName)
 
 	return downloadGitRepo(cmdRunner, cmdBuilder, pkgURL, pkgName, dest, force)
@@ -67,15 +67,14 @@ func AURPKGBUILDRepos(
 		wg.Add(1)
 
 		go func(target string) {
-			err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, aurURL, target, dest, force)
+			newClone, err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, aurURL, target, dest, force)
 
-			success := err == nil
-			if success {
-				mux.Lock()
-				cloned[target] = success
-				mux.Unlock()
-			} else {
+			if err != nil {
 				errs.Add(err)
+			} else {
+				mux.Lock()
+				cloned[target] = newClone
+				mux.Unlock()
 			}
 
 			text.OperationInfoln(

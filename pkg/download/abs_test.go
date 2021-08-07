@@ -201,8 +201,9 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", "/tmp/doesnt-exist", false)
+	newClone, err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", "/tmp/doesnt-exist", false)
 	assert.NoError(t, err)
+	assert.Equal(t, true, newClone)
 }
 
 // GIVEN a previous existing folder with permissions
@@ -224,6 +225,7 @@ func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", dir, false)
+	newClone, err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", dir, false)
 	assert.NoError(t, err)
+	assert.Equal(t, false, newClone)
 }
