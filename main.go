@@ -124,6 +124,7 @@ func main() {
 		ret = 1
 		return
 	}
+	config.Runtime.CmdBuilder.SetPacmanDBPath(config.Runtime.PacmanConf.DBPath)
 
 	text.UseColor = useColor
 

@@ -19,7 +19,7 @@ type Runtime struct {
 	ConfigPath     string
 	PacmanConf     *pacmanconf.Config
 	VCSStore       *vcs.InfoStore
-	CmdBuilder     *exe.CmdBuilder
+	CmdBuilder     exe.ICmdBuilder
 	CmdRunner      exe.Runner
 	HTTPClient     *http.Client
 	AURClient      *aur.Client

@@ -37,7 +37,9 @@ func cleanRemove(cmdArgs *parser.Arguments, pkgNames []string) error {
 	_ = arguments.AddArg("R")
 	arguments.AddTarget(pkgNames...)
 
-	return config.Runtime.CmdRunner.Show(passToPacman(arguments))
+	return config.Runtime.CmdRunner.Show(
+		config.Runtime.CmdBuilder.BuildPacmanCmd(
+			arguments, config.Runtime.Mode, settings.NoConfirm))
 }
 
 func syncClean(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
@@ -55,7 +57,8 @@ func syncClean(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	}
 
 	if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
-		if err := config.Runtime.CmdRunner.Show(passToPacman(cmdArgs)); err != nil {
+		if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
 			return err
 		}
 	}

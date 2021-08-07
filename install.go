@@ -38,7 +38,8 @@ func asdeps(cmdArgs *parser.Arguments, pkgs []string) (err error) {
 	cmdArgs = cmdArgs.CopyGlobal()
 	_ = cmdArgs.AddArg("q", "D", "asdeps")
 	cmdArgs.AddTarget(pkgs...)
-	err = config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+	err = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
 		return fmt.Errorf(gotext.Get("error updating package install reason to dependency"))
 	}
@@ -54,7 +55,8 @@ func asexp(cmdArgs *parser.Arguments, pkgs []string) (err error) {
 	cmdArgs = cmdArgs.CopyGlobal()
 	_ = cmdArgs.AddArg("q", "D", "asexplicit")
 	cmdArgs.AddTarget(pkgs...)
-	err = config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+	err = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
 		return fmt.Errorf(gotext.Get("error updating package install reason to explicit"))
 	}
@@ -77,7 +79,7 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 	)
 
 	if noDeps {
-		config.Runtime.CmdBuilder.MakepkgFlags = append(config.Runtime.CmdBuilder.MakepkgFlags, "-d")
+		config.Runtime.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
 	if config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeRepo {
@@ -168,7 +170,8 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 		if arguments.ExistsArg("ignore") {
 			cmdArgs.CreateOrAppendOption("ignore", arguments.GetArgs("ignore")...)
 		}
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
 
 	if len(dp.Aur) > 0 && os.Geteuid() == 0 {
@@ -341,7 +344,8 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 	}
 
 	if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
-		if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
+		if errShow := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 
@@ -400,7 +404,8 @@ func removeMake(do *dep.Order) error {
 
 	oldValue := settings.NoConfirm
 	settings.NoConfirm = true
-	err = config.Runtime.CmdRunner.Show(passToPacman(removeArguments))
+	err = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		removeArguments, config.Runtime.Mode, settings.NoConfirm))
 	settings.NoConfirm = oldValue
 
 	return err
@@ -444,7 +449,8 @@ func earlyPacmanCall(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	}
 
 	if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
-		if err := config.Runtime.CmdRunner.Show(passToPacman(arguments)); err != nil {
+		if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			arguments, config.Runtime.Mode, settings.NoConfirm)); err != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 	}
@@ -460,7 +466,8 @@ func earlyRefresh(cmdArgs *parser.Arguments) error {
 	arguments.DelArg("i", "info")
 	arguments.DelArg("l", "list")
 	arguments.ClearTargets()
-	return config.Runtime.CmdRunner.Show(passToPacman(arguments))
+	return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		arguments, config.Runtime.Mode, settings.NoConfirm))
 }
 
 func alpmArchIsSupported(alpmArch []string, arch string) bool {
@@ -898,7 +905,8 @@ func buildInstallPkgbuilds(
 			return nil
 		}
 
-		if errShow := config.Runtime.CmdRunner.Show(passToPacman(arguments)); errShow != nil {
+		if errShow := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
 			return errShow
 		}
 

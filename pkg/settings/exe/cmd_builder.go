@@ -17,6 +17,14 @@ type GitCmdBuilder interface {
 	BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd
 }
 
+type ICmdBuilder interface {
+	BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd
+	BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd
+	BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
+	AddMakepkgFlag(string)
+	SetPacmanDBPath(string)
+}
+
 type CmdBuilder struct {
 	GitBin           string
 	GitFlags         []string
@@ -47,6 +55,10 @@ func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
 	return cmd
 }
 
+func (c *CmdBuilder) AddMakepkgFlag(flag string) {
+	c.MakepkgFlags = append(c.MakepkgFlags, flag)
+}
+
 func (c *CmdBuilder) BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd {
 	args := make([]string, len(c.MakepkgFlags), len(c.MakepkgFlags)+len(extraArgs))
 	copy(args, c.MakepkgFlags)
@@ -62,6 +74,10 @@ func (c *CmdBuilder) BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd 
 	cmd := exec.Command(c.MakepkgBin, args...)
 	cmd.Dir = dir
 	return cmd
+}
+
+func (c *CmdBuilder) SetPacmanDBPath(dbPath string) {
+	c.PacmanDBPath = dbPath
 }
 
 func (c *CmdBuilder) BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd {

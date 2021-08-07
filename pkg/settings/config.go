@@ -209,17 +209,11 @@ func NewConfig(version string) (*Configuration, error) {
 		SaveConfig:     false,
 		CompletionPath: filepath.Join(cacheHome, completionFileName),
 		CmdRunner:      &exe.OSRunner{},
-		CmdBuilder: &exe.CmdBuilder{
-			GitBin:          newConfig.GitBin,
-			GitFlags:        strings.Fields(newConfig.GitFlags),
-			MakepkgFlags:    strings.Fields(newConfig.MFlags),
-			MakepkgConfPath: newConfig.MakepkgConf,
-			MakepkgBin:      newConfig.MakepkgBin,
-		},
-		PacmanConf: nil,
-		VCSStore:   nil,
-		HTTPClient: &http.Client{},
-		AURClient:  nil,
+		CmdBuilder:     newConfig.CmdBuilder(),
+		PacmanConf:     nil,
+		VCSStore:       nil,
+		HTTPClient:     &http.Client{},
+		AURClient:      nil,
 	}
 
 	var errAUR error
@@ -262,5 +256,19 @@ func (c *Configuration) load(configPath string) {
 			fmt.Fprintln(os.Stderr,
 				gotext.Get("failed to read config file '%s': %s", configPath, err))
 		}
+	}
+}
+
+func (c *Configuration) CmdBuilder() exe.ICmdBuilder {
+	return &exe.CmdBuilder{
+		GitBin:           c.GitBin,
+		GitFlags:         strings.Fields(c.GitFlags),
+		MakepkgFlags:     strings.Fields(c.MFlags),
+		MakepkgConfPath:  c.MakepkgConf,
+		MakepkgBin:       c.MakepkgBin,
+		SudoBin:          c.SudoBin,
+		SudoFlags:        strings.Fields(c.SudoFlags),
+		PacmanBin:        c.PacmanBin,
+		PacmanConfigPath: c.PacmanConf,
 	}
 }

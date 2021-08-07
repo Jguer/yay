@@ -21,7 +21,7 @@ type InfoStore struct {
 	OriginsByPackage map[string]OriginInfoByURL
 	FilePath         string
 	Runner           exe.Runner
-	CmdBuilder       *exe.CmdBuilder
+	CmdBuilder       exe.ICmdBuilder
 }
 
 // OriginInfoByURL stores the OriginInfo of each origin URL provided
@@ -42,7 +42,7 @@ type OriginInfo struct {
 	SHA       string   `json:"sha"`
 }
 
-func NewInfoStore(filePath string, runner exe.Runner, cmdBuilder *exe.CmdBuilder) *InfoStore {
+func NewInfoStore(filePath string, runner exe.Runner, cmdBuilder exe.ICmdBuilder) *InfoStore {
 	infoStore := &InfoStore{
 		CmdBuilder:       cmdBuilder,
 		FilePath:         filePath,
