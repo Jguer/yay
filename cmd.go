@@ -158,9 +158,11 @@ func handleCmd(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 		handleVersion()
 		return nil
 	case "D", "database":
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "F", "files":
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "Q", "query":
 		return handleQuery(cmdArgs, dbExecutor)
 	case "R", "remove":
@@ -168,9 +170,11 @@ func handleCmd(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	case "S", "sync":
 		return handleSync(cmdArgs, dbExecutor)
 	case "T", "deptest":
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "U", "upgrade":
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(cmdArgs, dbExecutor)
 	case "P", "show":
@@ -212,7 +216,8 @@ func handleQuery(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 		}
 		return printUpdateList(cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	}
-	return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+	return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 }
 
 func handleHelp(cmdArgs *parser.Arguments) error {
@@ -220,7 +225,8 @@ func handleHelp(cmdArgs *parser.Arguments) error {
 		usage()
 		return nil
 	}
-	return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+	return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 }
 
 func handleVersion() {
@@ -298,7 +304,8 @@ func handleSync(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 		return syncSearch(targets, config.Runtime.AURClient, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("p", "print", "print-format") {
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
 	if cmdArgs.ExistsArg("c", "clean") {
 		return syncClean(cmdArgs, dbExecutor)
@@ -307,7 +314,8 @@ func handleSync(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 		return syncList(config.Runtime.HTTPClient, cmdArgs, dbExecutor)
 	}
 	if cmdArgs.ExistsArg("g", "groups") {
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
 	if cmdArgs.ExistsArg("i", "info") {
 		return syncInfo(cmdArgs, targets, dbExecutor)
@@ -319,13 +327,15 @@ func handleSync(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 		return install(cmdArgs, dbExecutor, false)
 	}
 	if cmdArgs.ExistsArg("y", "refresh") {
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
 	return nil
 }
 
 func handleRemove(cmdArgs *parser.Arguments, localCache *vcs.InfoStore) error {
-	err := config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+	err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err == nil {
 		localCache.RemovePackage(cmdArgs.Targets)
 	}
@@ -489,7 +499,8 @@ func syncList(httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.
 	}
 
 	if (config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeRepo) && (len(cmdArgs.Targets) != 0 || !aur) {
-		return config.Runtime.CmdRunner.Show(passToPacman(cmdArgs))
+		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
 
 	return nil

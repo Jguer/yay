@@ -14,12 +14,8 @@ func (c *Configuration) ParseCommandLine(a *parser.Arguments) error {
 
 	c.extractYayOptions(a)
 
-	cmdBuilder := c.Runtime.CmdBuilder
-	cmdBuilder.GitBin = c.GitBin
-	cmdBuilder.GitFlags = strings.Fields(c.GitFlags)
-	cmdBuilder.MakepkgFlags = strings.Fields(c.MFlags)
-	cmdBuilder.MakepkgConfPath = c.MakepkgConf
-	cmdBuilder.MakepkgBin = c.MakepkgBin
+	// Reload CmdBuilder
+	c.Runtime.CmdBuilder = c.CmdBuilder()
 
 	return nil
 }
