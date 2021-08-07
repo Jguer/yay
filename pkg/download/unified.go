@@ -23,13 +23,14 @@ type DBSearcher interface {
 }
 
 func downloadGitRepo(cmdRunner exe.Runner,
-	cmdBuilder exe.GitCmdBuilder, pkgURL, pkgName, dest string, force bool, gitArgs ...string) error {
+	cmdBuilder exe.GitCmdBuilder, pkgURL, pkgName, dest string, force bool, gitArgs ...string) (bool, error) {
 	finalDir := filepath.Join(dest, pkgName)
+	newClone := true
 
 	if _, err := os.Stat(filepath.Join(finalDir, ".git")); os.IsNotExist(err) || (err == nil && force) {
 		if _, errD := os.Stat(finalDir); force && errD == nil {
 			if errR := os.RemoveAll(finalDir); errR != nil {
-				return ErrGetPKGBUILDRepo{inner: errR, pkgName: pkgName, errOut: ""}
+				return false, ErrGetPKGBUILDRepo{inner: errR, pkgName: pkgName, errOut: ""}
 			}
 		}
 
@@ -42,10 +43,10 @@ func downloadGitRepo(cmdRunner exe.Runner,
 
 		_, stderr, errCapture := cmdRunner.Capture(cmd, 0)
 		if errCapture != nil {
-			return ErrGetPKGBUILDRepo{inner: errCapture, pkgName: pkgName, errOut: stderr}
+			return false, ErrGetPKGBUILDRepo{inner: errCapture, pkgName: pkgName, errOut: stderr}
 		}
 	} else if err != nil {
-		return ErrGetPKGBUILDRepo{
+		return false, ErrGetPKGBUILDRepo{
 			inner:   err,
 			pkgName: pkgName,
 			errOut:  gotext.Get("error reading %s", filepath.Join(dest, pkgName, ".git")),
@@ -55,11 +56,12 @@ func downloadGitRepo(cmdRunner exe.Runner,
 
 		_, stderr, errCmd := cmdRunner.Capture(cmd, 0)
 		if errCmd != nil {
-			return ErrGetPKGBUILDRepo{inner: errCmd, pkgName: pkgName, errOut: stderr}
+			return false, ErrGetPKGBUILDRepo{inner: errCmd, pkgName: pkgName, errOut: stderr}
 		}
+		newClone = false
 	}
 
-	return nil
+	return newClone, nil
 }
 
 func getURLName(pkg db.IPackage) string {
@@ -150,20 +152,20 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 
 		go func(target, dbName, pkgName string, aur bool) {
 			var err error
+			var newClone bool
 
 			if aur {
-				err = AURPKGBUILDRepo(cmdRunner, cmdBuilder, aurURL, pkgName, dest, force)
+				newClone, err = AURPKGBUILDRepo(cmdRunner, cmdBuilder, aurURL, pkgName, dest, force)
 			} else {
-				err = ABSPKGBUILDRepo(cmdRunner, cmdBuilder, dbName, pkgName, dest, force)
+				newClone, err = ABSPKGBUILDRepo(cmdRunner, cmdBuilder, dbName, pkgName, dest, force)
 			}
 
-			success := err == nil
-			if success {
-				mux.Lock()
-				cloned[target] = success
-				mux.Unlock()
-			} else {
+			if err != nil {
 				errs.Add(err)
+			} else {
+				mux.Lock()
+				cloned[target] = newClone
+				mux.Unlock()
 			}
 
 			if aur {

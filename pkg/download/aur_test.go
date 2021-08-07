@@ -84,8 +84,9 @@ func TestAURPKGBUILDRepo(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, "https://aur.archlinux.org", "yay-bin", "/tmp/doesnt-exist", false)
+	newCloned, err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, "https://aur.archlinux.org", "yay-bin", "/tmp/doesnt-exist", false)
 	assert.NoError(t, err)
+	assert.Equal(t, true, newCloned)
 }
 
 // GIVEN a previous existing folder with permissions
@@ -107,6 +108,7 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
+	cloned, err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
 	assert.NoError(t, err)
+	assert.Equal(t, false, cloned)
 }
