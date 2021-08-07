@@ -11,6 +11,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
@@ -196,7 +197,7 @@ func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool, filter u
 }
 
 // TODO: Make it less hacky
-func printUpdateList(cmdArgs *settings.Arguments, dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
+func printUpdateList(cmdArgs *parser.Arguments, dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout

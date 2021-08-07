@@ -6,7 +6,7 @@ import (
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 )
 
 func TestPacmanConf(t *testing.T) {
@@ -41,7 +41,7 @@ func TestPacmanConf(t *testing.T) {
 		},
 	}
 
-	pacmanConf, color, err := initAlpm(settings.MakeArguments(), "testdata/pacman.conf")
+	pacmanConf, color, err := initAlpm(parser.MakeArguments(), "testdata/pacman.conf")
 	assert.Nil(t, err)
 	assert.NotNil(t, pacmanConf)
 	assert.Equal(t, color, false)

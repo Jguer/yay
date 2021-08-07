@@ -17,6 +17,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -82,7 +83,7 @@ func makePool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
 
 // Includes db/ prefixes and group installs
 func (dp *Pool) ResolveTargets(pkgs []string,
-	mode settings.TargetMode,
+	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool, assumeInstalled []string) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC call
@@ -105,7 +106,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 		var foundPkg db.IPackage
 
 		// aur/ prefix means we only check the aur
-		if target.DB == "aur" || mode == settings.ModeAUR {
+		if target.DB == "aur" || mode == parser.ModeAUR {
 			dp.Targets = append(dp.Targets, target)
 			aurTargets.Set(target.DepString())
 			continue
@@ -150,7 +151,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 		dp.Targets = append(dp.Targets, target)
 	}
 
-	if len(aurTargets) > 0 && (mode == settings.ModeAny || mode == settings.ModeAUR) {
+	if len(aurTargets) > 0 && (mode == parser.ModeAny || mode == parser.ModeAUR) {
 		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
 	}
 
@@ -374,7 +375,7 @@ func GetPool(pkgs []string,
 	warnings *query.AURWarnings,
 	dbExecutor db.Executor,
 	aurClient *aur.Client,
-	mode settings.TargetMode,
+	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int, noDeps bool, noCheckDeps bool, assumeInstalled []string) (*Pool, error) {
 	dp := makePool(dbExecutor, aurClient)

@@ -12,8 +12,8 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/multierror"
-	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -73,7 +73,7 @@ func getURLName(pkg db.IPackage) string {
 	return name
 }
 
-func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string, mode settings.TargetMode) (map[string][]byte, error) {
+func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string, mode parser.TargetMode) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
 	var (
@@ -128,7 +128,7 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 func PKGBUILDRepos(dbExecutor DBSearcher,
 	cmdRunner exe.Runner,
 	cmdBuilder exe.GitCmdBuilder,
-	targets []string, mode settings.TargetMode, aurURL, dest string, force bool) (map[string]bool, error) {
+	targets []string, mode parser.TargetMode, aurURL, dest string, force bool) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
 
 	var (
@@ -189,11 +189,12 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 	return cloned, errs.Return()
 }
 
-func getPackageUsableName(dbExecutor DBSearcher, target string, mode settings.TargetMode) (dbname, pkgname string, aur, toSkip bool) {
+// TODO: replace with dep.ResolveTargets
+func getPackageUsableName(dbExecutor DBSearcher, target string, mode parser.TargetMode) (dbname, pkgname string, aur, toSkip bool) {
 	aur = true
 
 	dbName, name := text.SplitDBFromName(target)
-	if dbName != "aur" && (mode == settings.ModeAny || mode == settings.ModeRepo) {
+	if dbName != "aur" && (mode == parser.ModeAny || mode == parser.ModeRepo) {
 		var pkg alpm.IPackage
 		if dbName != "" {
 			pkg = dbExecutor.SatisfierFromDB(name, dbName)
@@ -214,7 +215,7 @@ func getPackageUsableName(dbExecutor DBSearcher, target string, mode settings.Ta
 		}
 	}
 
-	if aur && mode == settings.ModeRepo {
+	if aur && mode == parser.ModeRepo {
 		return dbName, name, aur, true
 	}
 

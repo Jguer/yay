@@ -15,6 +15,7 @@ import (
 	"github.com/Jguer/aur"
 
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
@@ -204,7 +205,7 @@ func NewConfig(version string) (*Configuration, error) {
 
 	newConfig.Runtime = &Runtime{
 		ConfigPath:     configPath,
-		Mode:           ModeAny,
+		Mode:           parser.ModeAny,
 		SaveConfig:     false,
 		CompletionPath: filepath.Join(cacheHome, completionFileName),
 		CmdRunner:      &exe.OSRunner{},
