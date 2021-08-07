@@ -12,12 +12,13 @@ import (
 	"github.com/Jguer/yay/v10/pkg/dep"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 // CleanDependencies removes all dangling dependencies in system
-func cleanDependencies(cmdArgs *settings.Arguments, dbExecutor db.Executor, removeOptional bool) error {
+func cleanDependencies(cmdArgs *parser.Arguments, dbExecutor db.Executor, removeOptional bool) error {
 	hanging := hangingPackages(removeOptional, dbExecutor)
 	if len(hanging) != 0 {
 		return cleanRemove(cmdArgs, hanging)
@@ -27,7 +28,7 @@ func cleanDependencies(cmdArgs *settings.Arguments, dbExecutor db.Executor, remo
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice
-func cleanRemove(cmdArgs *settings.Arguments, pkgNames []string) error {
+func cleanRemove(cmdArgs *parser.Arguments, pkgNames []string) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}
@@ -39,7 +40,7 @@ func cleanRemove(cmdArgs *settings.Arguments, pkgNames []string) error {
 	return config.Runtime.CmdRunner.Show(passToPacman(arguments))
 }
 
-func syncClean(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
+func syncClean(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	keepInstalled := false
 	keepCurrent := false
 
@@ -53,13 +54,13 @@ func syncClean(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
 		}
 	}
 
-	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+	if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
 		if err := config.Runtime.CmdRunner.Show(passToPacman(cmdArgs)); err != nil {
 			return err
 		}
 	}
 
-	if !(config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny) {
+	if !(config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny) {
 		return nil
 	}
 

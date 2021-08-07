@@ -11,6 +11,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -56,10 +57,10 @@ func waitLock(dbPath string) {
 	}
 }
 
-func passToPacman(args *settings.Arguments) *exec.Cmd {
+func passToPacman(args *parser.Arguments) *exec.Cmd {
 	argArr := make([]string, 0, 32)
 
-	if args.NeedRoot(config.Runtime) {
+	if args.NeedRoot(config.Runtime.Mode) {
 		argArr = append(argArr, config.SudoBin)
 		argArr = append(argArr, strings.Fields(config.SudoFlags)...)
 	}
@@ -74,7 +75,7 @@ func passToPacman(args *settings.Arguments) *exec.Cmd {
 	argArr = append(argArr, "--config", config.PacmanConf, "--")
 	argArr = append(argArr, args.Targets...)
 
-	if args.NeedRoot(config.Runtime) {
+	if args.NeedRoot(config.Runtime.Mode) {
 		waitLock(config.Runtime.PacmanConf.DBPath)
 	}
 	return exec.Command(argArr[0], argArr[1:]...)

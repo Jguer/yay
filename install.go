@@ -23,13 +23,14 @@ import (
 	"github.com/Jguer/yay/v10/pkg/pgp"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
-func asdeps(cmdArgs *settings.Arguments, pkgs []string) (err error) {
+func asdeps(cmdArgs *parser.Arguments, pkgs []string) (err error) {
 	if len(pkgs) == 0 {
 		return nil
 	}
@@ -45,7 +46,7 @@ func asdeps(cmdArgs *settings.Arguments, pkgs []string) (err error) {
 	return nil
 }
 
-func asexp(cmdArgs *settings.Arguments, pkgs []string) (err error) {
+func asexp(cmdArgs *parser.Arguments, pkgs []string) (err error) {
 	if len(pkgs) == 0 {
 		return nil
 	}
@@ -62,23 +63,24 @@ func asexp(cmdArgs *settings.Arguments, pkgs []string) (err error) {
 }
 
 // Install handles package installs
-func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProviders bool) (err error) {
-	var incompatible stringset.StringSet
-	var do *dep.Order
-
-	var srcinfos map[string]*gosrc.Srcinfo
-	noDeps := cmdArgs.ExistsDouble("d", "nodeps")
-	noCheck := strings.Contains(config.MFlags, "--nocheck")
-	assumeInstalled := cmdArgs.GetArgs("assume-installed")
-	sysupgradeArg := cmdArgs.ExistsArg("u", "sysupgrade")
-	refreshArg := cmdArgs.ExistsArg("y", "refresh")
-	warnings := query.NewWarnings()
+func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders bool) (err error) {
+	var (
+		incompatible    stringset.StringSet
+		do              *dep.Order
+		srcinfos        map[string]*gosrc.Srcinfo
+		noDeps          = cmdArgs.ExistsDouble("d", "nodeps")
+		noCheck         = strings.Contains(config.MFlags, "--nocheck")
+		assumeInstalled = cmdArgs.GetArgs("assume-installed")
+		sysupgradeArg   = cmdArgs.ExistsArg("u", "sysupgrade")
+		refreshArg      = cmdArgs.ExistsArg("y", "refresh")
+		warnings        = query.NewWarnings()
+	)
 
 	if noDeps {
 		config.Runtime.CmdBuilder.MakepkgFlags = append(config.Runtime.CmdBuilder.MakepkgFlags, "-d")
 	}
 
-	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
+	if config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeRepo {
 		if config.CombinedUpgrade {
 			if refreshArg {
 				err = earlyRefresh(cmdArgs)
@@ -118,7 +120,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 	arguments.Op = "S"
 	arguments.ClearTargets()
 
-	if config.Runtime.Mode == settings.ModeAUR {
+	if config.Runtime.Mode == parser.ModeAUR {
 		arguments.DelArg("u", "sysupgrade")
 	}
 
@@ -191,7 +193,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 		arguments.AddTarget(pkg)
 	}
 
-	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!cmdArgs.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == settings.ModeAUR) {
+	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!cmdArgs.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == parser.ModeAUR) {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
@@ -386,7 +388,7 @@ func install(cmdArgs *settings.Arguments, dbExecutor db.Executor, ignoreProvider
 }
 
 func removeMake(do *dep.Order) error {
-	removeArguments := settings.MakeArguments()
+	removeArguments := parser.MakeArguments()
 	err := removeArguments.AddArg("R", "u")
 	if err != nil {
 		return err
@@ -421,14 +423,14 @@ func inRepos(dbExecutor db.Executor, pkg string) bool {
 	return exists || len(dbExecutor.PackagesFromGroup(target.Name)) > 0
 }
 
-func earlyPacmanCall(cmdArgs *settings.Arguments, dbExecutor db.Executor) error {
+func earlyPacmanCall(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	arguments := cmdArgs.Copy()
 	arguments.Op = "S"
 	targets := cmdArgs.Targets
 	cmdArgs.ClearTargets()
 	arguments.ClearTargets()
 
-	if config.Runtime.Mode == settings.ModeRepo {
+	if config.Runtime.Mode == parser.ModeRepo {
 		arguments.Targets = targets
 	} else {
 		// separate aur and repo targets
@@ -450,7 +452,7 @@ func earlyPacmanCall(cmdArgs *settings.Arguments, dbExecutor db.Executor) error 
 	return nil
 }
 
-func earlyRefresh(cmdArgs *settings.Arguments) error {
+func earlyRefresh(cmdArgs *parser.Arguments) error {
 	arguments := cmdArgs.Copy()
 	cmdArgs.DelArg("y", "refresh")
 	arguments.DelArg("u", "sysupgrade")
@@ -855,7 +857,7 @@ func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet
 }
 
 func buildInstallPkgbuilds(
-	cmdArgs *settings.Arguments,
+	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 	dp *dep.Pool,
 	do *dep.Order,

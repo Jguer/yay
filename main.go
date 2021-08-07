@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/db/ialpm"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
@@ -28,7 +29,7 @@ func initGotext() {
 	}
 }
 
-func initAlpm(cmdArgs *settings.Arguments, pacmanConfigPath string) (*pacmanconf.Config, bool, error) {
+func initAlpm(cmdArgs *parser.Arguments, pacmanConfigPath string) (*pacmanconf.Config, bool, error) {
 	root := "/"
 	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value
@@ -98,8 +99,8 @@ func main() {
 		return
 	}
 
-	cmdArgs := settings.MakeArguments()
-	err = cmdArgs.ParseCommandLine(config)
+	cmdArgs := parser.MakeArguments()
+	err = config.ParseCommandLine(cmdArgs)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)

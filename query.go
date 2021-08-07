@@ -15,6 +15,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/query"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
@@ -154,26 +155,26 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 	var aq aurQuery
 	var pq repoQuery
 
-	if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
+	if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
 		aq, aurErr = narrowSearch(aurClient, pkgS, true)
 	}
-	if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+	if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
 		pq = queryRepo(pkgS, dbExecutor)
 	}
 
 	switch config.SortMode {
 	case settings.TopDown:
-		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+		if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
 			pq.printSearch(dbExecutor)
 		}
-		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
+		if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
 			aq.printSearch(1, dbExecutor)
 		}
 	case settings.BottomUp:
-		if config.Runtime.Mode == settings.ModeAUR || config.Runtime.Mode == settings.ModeAny {
+		if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
 			aq.printSearch(1, dbExecutor)
 		}
-		if config.Runtime.Mode == settings.ModeRepo || config.Runtime.Mode == settings.ModeAny {
+		if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
 			pq.printSearch(dbExecutor)
 		}
 	default:
@@ -189,7 +190,7 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(cmdArgs *settings.Arguments, pkgS []string, dbExecutor db.Executor) error {
+func syncInfo(cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) error {
 	var info []*aur.Pkg
 	var err error
 	missing := false
@@ -255,10 +256,10 @@ func packageSlices(toCheck []string, dbExecutor db.Executor) (aurNames, repoName
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
 
-		if dbName == "aur" || config.Runtime.Mode == settings.ModeAUR {
+		if dbName == "aur" || config.Runtime.Mode == parser.ModeAUR {
 			aurNames = append(aurNames, _pkg)
 			continue
-		} else if dbName != "" || config.Runtime.Mode == settings.ModeRepo {
+		} else if dbName != "" || config.Runtime.Mode == parser.ModeRepo {
 			repoNames = append(repoNames, _pkg)
 			continue
 		}

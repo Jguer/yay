@@ -14,7 +14,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/query"
-	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/stringset"
 	"github.com/Jguer/yay/v10/pkg/text"
 	"github.com/Jguer/yay/v10/pkg/upgrade"
@@ -48,7 +48,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 		}
 	}
 
-	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeRepo {
+	if config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeRepo {
 		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 		go func() {
@@ -58,7 +58,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 		}()
 	}
 
-	if config.Runtime.Mode == settings.ModeAny || config.Runtime.Mode == settings.ModeAUR {
+	if config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeAUR {
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []*aur.Pkg

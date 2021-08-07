@@ -8,19 +8,12 @@ import (
 	"github.com/Jguer/aur"
 
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
-type TargetMode int
-
-const (
-	ModeAny TargetMode = iota
-	ModeAUR
-	ModeRepo
-)
-
 type Runtime struct {
-	Mode           TargetMode
+	Mode           parser.TargetMode
 	SaveConfig     bool
 	CompletionPath string
 	ConfigPath     string
