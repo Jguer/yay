@@ -50,7 +50,7 @@ func getPkgbuilds(dbExecutor db.Executor, config *settings.Configuration, target
 	if err != nil {
 		return err
 	}
-	cloned, errD := download.PKGBUILDRepos(dbExecutor, config.Runtime.CmdRunner,
+	cloned, errD := download.PKGBUILDRepos(dbExecutor,
 		config.Runtime.CmdBuilder, targets, config.Runtime.Mode, config.AURURL, wd, force)
 	if errD != nil {
 		text.Errorln(errD)

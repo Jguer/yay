@@ -80,11 +80,12 @@ func TestAURPKGBUILDRepo(t *testing.T) {
 		test:  t,
 		want:  "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress https://aur.archlinux.org/yay-bin.git yay-bin",
 		parentBuilder: &exe.CmdBuilder{
+			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	newCloned, err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, "https://aur.archlinux.org", "yay-bin", "/tmp/doesnt-exist", false)
+	newCloned, err := AURPKGBUILDRepo(cmdBuilder, "https://aur.archlinux.org", "yay-bin", "/tmp/doesnt-exist", false)
 	assert.NoError(t, err)
 	assert.Equal(t, true, newCloned)
 }
@@ -104,11 +105,12 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 		test:  t,
 		want:  fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/yay-bin pull --ff-only", dir),
 		parentBuilder: &exe.CmdBuilder{
+			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	cloned, err := AURPKGBUILDRepo(cmdRunner, cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
+	cloned, err := AURPKGBUILDRepo(cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
 	assert.NoError(t, err)
 	assert.Equal(t, false, cloned)
 }

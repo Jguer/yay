@@ -208,8 +208,7 @@ func NewConfig(version string) (*Configuration, error) {
 		Mode:           parser.ModeAny,
 		SaveConfig:     false,
 		CompletionPath: filepath.Join(cacheHome, completionFileName),
-		CmdRunner:      &exe.OSRunner{},
-		CmdBuilder:     newConfig.CmdBuilder(),
+		CmdBuilder:     newConfig.CmdBuilder(nil),
 		PacmanConf:     nil,
 		VCSStore:       nil,
 		HTTPClient:     &http.Client{},
@@ -229,8 +228,8 @@ func NewConfig(version string) (*Configuration, error) {
 		return nil, errAUR
 	}
 
-	newConfig.Runtime.VCSStore = vcs.NewInfoStore(filepath.Join(cacheHome, vcsFileName),
-		newConfig.Runtime.CmdRunner, newConfig.Runtime.CmdBuilder)
+	newConfig.Runtime.VCSStore = vcs.NewInfoStore(
+		filepath.Join(cacheHome, vcsFileName), newConfig.Runtime.CmdBuilder)
 
 	if err := initDir(newConfig.BuildDir); err != nil {
 		return nil, err
@@ -259,7 +258,10 @@ func (c *Configuration) load(configPath string) {
 	}
 }
 
-func (c *Configuration) CmdBuilder() exe.ICmdBuilder {
+func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
+	if runner == nil {
+		runner = &exe.OSRunner{}
+	}
 	return &exe.CmdBuilder{
 		GitBin:           c.GitBin,
 		GitFlags:         strings.Fields(c.GitFlags),
@@ -268,7 +270,10 @@ func (c *Configuration) CmdBuilder() exe.ICmdBuilder {
 		MakepkgBin:       c.MakepkgBin,
 		SudoBin:          c.SudoBin,
 		SudoFlags:        strings.Fields(c.SudoFlags),
+		SudoLoopEnabled:  false,
 		PacmanBin:        c.PacmanBin,
 		PacmanConfigPath: c.PacmanConf,
+		PacmanDBPath:     "",
+		Runner:           runner,
 	}
 }

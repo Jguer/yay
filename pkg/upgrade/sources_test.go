@@ -17,6 +17,7 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/db/mock"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/exe"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
@@ -109,7 +110,7 @@ func Test_upDevel(t *testing.T) {
 	config, err := settings.NewConfig("v0")
 	assert.NoError(t, err)
 
-	config.Runtime.CmdRunner = &MockRunner{
+	config.Runtime.CmdBuilder = config.CmdBuilder(&MockRunner{
 		Returned: []string{
 			"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
 			"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
@@ -117,7 +118,7 @@ func Test_upDevel(t *testing.T) {
 			"cccccccccccccccccccccccccccccccccccccccc	HEAD",
 			"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD",
 		},
-	}
+	})
 
 	type args struct {
 		remote  []alpm.IPackage
@@ -134,7 +135,6 @@ func Test_upDevel(t *testing.T) {
 			name: "No Updates",
 			args: args{
 				cached: vcs.InfoStore{
-					Runner:     config.Runtime.CmdRunner,
 					CmdBuilder: config.Runtime.CmdBuilder,
 				},
 				remote: []alpm.IPackage{
@@ -154,7 +154,6 @@ func Test_upDevel(t *testing.T) {
 			finalLen: 3,
 			args: args{
 				cached: vcs.InfoStore{
-					Runner:     config.Runtime.CmdRunner,
 					CmdBuilder: config.Runtime.CmdBuilder,
 					OriginsByPackage: map[string]vcs.OriginInfoByURL{
 						"hello": {
@@ -225,7 +224,6 @@ func Test_upDevel(t *testing.T) {
 			finalLen: 1,
 			args: args{
 				cached: vcs.InfoStore{
-					Runner:     config.Runtime.CmdRunner,
 					CmdBuilder: config.Runtime.CmdBuilder,
 					OriginsByPackage: map[string]vcs.OriginInfoByURL{
 						"hello": {
@@ -247,7 +245,6 @@ func Test_upDevel(t *testing.T) {
 			finalLen: 1,
 			args: args{
 				cached: vcs.InfoStore{
-					Runner:     config.Runtime.CmdRunner,
 					CmdBuilder: config.Runtime.CmdBuilder,
 					OriginsByPackage: map[string]vcs.OriginInfoByURL{
 						"hello": {
@@ -267,7 +264,7 @@ func Test_upDevel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config.Runtime.CmdRunner.(*MockRunner).t = t
+			config.Runtime.CmdBuilder.(*exe.CmdBuilder).Runner.(*MockRunner).t = t
 			got := UpDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
 			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))

@@ -20,7 +20,6 @@ type Runtime struct {
 	PacmanConf     *pacmanconf.Config
 	VCSStore       *vcs.InfoStore
 	CmdBuilder     exe.ICmdBuilder
-	CmdRunner      exe.Runner
 	HTTPClient     *http.Client
 	AURClient      *aur.Client
 }

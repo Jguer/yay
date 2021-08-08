@@ -20,7 +20,6 @@ import (
 type InfoStore struct {
 	OriginsByPackage map[string]OriginInfoByURL
 	FilePath         string
-	Runner           exe.Runner
 	CmdBuilder       exe.GitCmdBuilder
 }
 
@@ -42,12 +41,11 @@ type OriginInfo struct {
 	SHA       string   `json:"sha"`
 }
 
-func NewInfoStore(filePath string, runner exe.Runner, cmdBuilder exe.GitCmdBuilder) *InfoStore {
+func NewInfoStore(filePath string, cmdBuilder exe.GitCmdBuilder) *InfoStore {
 	infoStore := &InfoStore{
 		CmdBuilder:       cmdBuilder,
 		FilePath:         filePath,
 		OriginsByPackage: map[string]OriginInfoByURL{},
-		Runner:           runner,
 	}
 
 	return infoStore
@@ -59,7 +57,7 @@ func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
 		protocol := protocols[len(protocols)-1]
 
 		cmd := v.CmdBuilder.BuildGitCmd("", "ls-remote", protocol+"://"+url, branch)
-		stdout, _, err := v.Runner.Capture(cmd, 5)
+		stdout, _, err := v.CmdBuilder.Capture(cmd, 5)
 		if err != nil {
 			if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
 				text.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()))
