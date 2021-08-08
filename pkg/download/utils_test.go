@@ -9,8 +9,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
 )
 
-type testRunner struct {
-}
+type testRunner struct{}
 
 func (t *testRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout string, stderr string, err error) {
 	return "", "", nil
@@ -34,4 +33,12 @@ func (t *testGitBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd 
 
 	t.index += 1
 	return cmd
+}
+
+func (c *testGitBuilder) Show(cmd *exec.Cmd) error {
+	return c.parentBuilder.Show(cmd)
+}
+
+func (c *testGitBuilder) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
+	return c.parentBuilder.Capture(cmd, timeout)
 }

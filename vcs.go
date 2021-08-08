@@ -47,7 +47,7 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 				len(toSkipSlice), len(bases), text.Cyan(strings.Join(toSkipSlice, ", "))))
 	}
 
-	if _, errA := download.AURPKGBUILDRepos(config.Runtime.CmdRunner,
+	if _, errA := download.AURPKGBUILDRepos(
 		config.Runtime.CmdBuilder, targets, config.AURURL, config.BuildDir, false); errA != nil {
 		return err
 	}

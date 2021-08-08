@@ -197,11 +197,12 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 		test:  t,
 		want:  "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux",
 		parentBuilder: &exe.CmdBuilder{
+			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	newClone, err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", "/tmp/doesnt-exist", false)
+	newClone, err := ABSPKGBUILDRepo(cmdBuilder, "core", "linux", "/tmp/doesnt-exist", false)
 	assert.NoError(t, err)
 	assert.Equal(t, true, newClone)
 }
@@ -221,11 +222,12 @@ func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
 		test:  t,
 		want:  fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/linux pull --ff-only", dir),
 		parentBuilder: &exe.CmdBuilder{
+			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	newClone, err := ABSPKGBUILDRepo(cmdRunner, cmdBuilder, "core", "linux", dir, false)
+	newClone, err := ABSPKGBUILDRepo(cmdBuilder, "core", "linux", dir, false)
 	assert.NoError(t, err)
 	assert.Equal(t, false, newClone)
 }

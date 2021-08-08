@@ -13,16 +13,21 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
+const SudoLoopDuration = 241
+
 type GitCmdBuilder interface {
+	Runner
 	BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd
 }
 
 type ICmdBuilder interface {
+	Runner
 	BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd
 	BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd
 	BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 	AddMakepkgFlag(string)
 	SetPacmanDBPath(string)
+	SudoLoop()
 }
 
 type CmdBuilder struct {
@@ -33,9 +38,11 @@ type CmdBuilder struct {
 	MakepkgBin       string
 	SudoBin          string
 	SudoFlags        []string
+	SudoLoopEnabled  bool
 	PacmanBin        string
 	PacmanConfigPath string
 	PacmanDBPath     string
+	Runner           Runner
 }
 
 func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
@@ -122,4 +129,35 @@ func waitLock(dbPath string) {
 			return
 		}
 	}
+}
+
+func (c *CmdBuilder) SudoLoop() {
+	c.updateSudo()
+	go c.sudoLoopBackground()
+}
+
+func (c *CmdBuilder) sudoLoopBackground() {
+	for {
+		c.updateSudo()
+		time.Sleep(SudoLoopDuration * time.Second)
+	}
+}
+
+func (c *CmdBuilder) updateSudo() {
+	for {
+		err := c.Show(exec.Command(c.SudoBin, "-v"))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		} else {
+			break
+		}
+	}
+}
+
+func (c *CmdBuilder) Show(cmd *exec.Cmd) error {
+	return c.Runner.Show(cmd)
+}
+
+func (c *CmdBuilder) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
+	return c.Runner.Capture(cmd, timeout)
 }

@@ -50,7 +50,7 @@ func showPkgbuildDiffs(bases []dep.Base, cloned map[string]bool) error {
 		} else {
 			args = append(args, "--color=never")
 		}
-		_ = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, args...))
+		_ = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, args...))
 	}
 
 	return errMulti.Return()
@@ -60,7 +60,7 @@ func showPkgbuildDiffs(bases []dep.Base, cloned map[string]bool) error {
 // HEAD@{upstream}
 func gitHasDiff(path, name string) (bool, error) {
 	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := config.Runtime.CmdRunner.Capture(
+		stdout, stderr, err := config.Runtime.CmdBuilder.Capture(
 			config.Runtime.CmdBuilder.BuildGitCmd(filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"), 0)
 		if err != nil {
 			return false, fmt.Errorf("%s%s", stderr, err)
@@ -79,7 +79,7 @@ func gitHasDiff(path, name string) (bool, error) {
 // Return wether or not we have reviewed a diff yet. It checks for the existence of
 // YAY_DIFF_REVIEW in the git ref-list
 func gitHasLastSeenRef(path, name string) bool {
-	_, _, err := config.Runtime.CmdRunner.Capture(
+	_, _, err := config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(
 			filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName), 0)
 	return err == nil
@@ -89,7 +89,7 @@ func gitHasLastSeenRef(path, name string) bool {
 // If it does not it will return empty tree as no diff have been reviewed yet.
 func getLastSeenHash(path, name string) (string, error) {
 	if gitHasLastSeenRef(path, name) {
-		stdout, stderr, err := config.Runtime.CmdRunner.Capture(
+		stdout, stderr, err := config.Runtime.CmdBuilder.Capture(
 			config.Runtime.CmdBuilder.BuildGitCmd(
 				filepath.Join(path, name), "rev-parse", gitDiffRefName), 0)
 		if err != nil {
@@ -105,7 +105,7 @@ func getLastSeenHash(path, name string) (string, error) {
 // Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
 // reviewed by the user
 func gitUpdateSeenRef(path, name string) error {
-	_, stderr, err := config.Runtime.CmdRunner.Capture(
+	_, stderr, err := config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(
 			filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"), 0)
 	if err != nil {
@@ -115,14 +115,14 @@ func gitUpdateSeenRef(path, name string) error {
 }
 
 func gitMerge(path, name string) error {
-	_, stderr, err := config.Runtime.CmdRunner.Capture(
+	_, stderr, err := config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(
 			filepath.Join(path, name), "reset", "--hard", "HEAD"), 0)
 	if err != nil {
 		return fmt.Errorf(gotext.Get("error resetting %s: %s", name, stderr))
 	}
 
-	_, stderr, err = config.Runtime.CmdRunner.Capture(
+	_, stderr, err = config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(
 			filepath.Join(path, name), "merge", "--no-edit", "--ff"), 0)
 	if err != nil {

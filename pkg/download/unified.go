@@ -22,8 +22,8 @@ type DBSearcher interface {
 	SatisfierFromDB(string, string) db.IPackage
 }
 
-func downloadGitRepo(cmdRunner exe.Runner,
-	cmdBuilder exe.GitCmdBuilder, pkgURL, pkgName, dest string, force bool, gitArgs ...string) (bool, error) {
+func downloadGitRepo(cmdBuilder exe.GitCmdBuilder,
+	pkgURL, pkgName, dest string, force bool, gitArgs ...string) (bool, error) {
 	finalDir := filepath.Join(dest, pkgName)
 	newClone := true
 
@@ -41,7 +41,7 @@ func downloadGitRepo(cmdRunner exe.Runner,
 		cloneArgs = append(cloneArgs, gitArgs...)
 		cmd := cmdBuilder.BuildGitCmd(dest, cloneArgs...)
 
-		_, stderr, errCapture := cmdRunner.Capture(cmd, 0)
+		_, stderr, errCapture := cmdBuilder.Capture(cmd, 0)
 		if errCapture != nil {
 			return false, ErrGetPKGBUILDRepo{inner: errCapture, pkgName: pkgName, errOut: stderr}
 		}
@@ -54,7 +54,7 @@ func downloadGitRepo(cmdRunner exe.Runner,
 	} else {
 		cmd := cmdBuilder.BuildGitCmd(filepath.Join(dest, pkgName), "pull", "--ff-only")
 
-		_, stderr, errCmd := cmdRunner.Capture(cmd, 0)
+		_, stderr, errCmd := cmdBuilder.Capture(cmd, 0)
 		if errCmd != nil {
 			return false, ErrGetPKGBUILDRepo{inner: errCmd, pkgName: pkgName, errOut: stderr}
 		}
@@ -126,7 +126,6 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 }
 
 func PKGBUILDRepos(dbExecutor DBSearcher,
-	cmdRunner exe.Runner,
 	cmdBuilder exe.GitCmdBuilder,
 	targets []string, mode parser.TargetMode, aurURL, dest string, force bool) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
@@ -155,9 +154,9 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 			var newClone bool
 
 			if aur {
-				newClone, err = AURPKGBUILDRepo(cmdRunner, cmdBuilder, aurURL, pkgName, dest, force)
+				newClone, err = AURPKGBUILDRepo(cmdBuilder, aurURL, pkgName, dest, force)
 			} else {
-				newClone, err = ABSPKGBUILDRepo(cmdRunner, cmdBuilder, dbName, pkgName, dest, force)
+				newClone, err = ABSPKGBUILDRepo(cmdBuilder, dbName, pkgName, dest, force)
 			}
 
 			if err != nil {

@@ -15,7 +15,7 @@ func (c *Configuration) ParseCommandLine(a *parser.Arguments) error {
 	c.extractYayOptions(a)
 
 	// Reload CmdBuilder
-	c.Runtime.CmdBuilder = c.CmdBuilder()
+	c.Runtime.CmdBuilder = c.CmdBuilder(nil)
 
 	return nil
 }

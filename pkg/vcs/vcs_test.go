@@ -55,7 +55,6 @@ func TestParsing(t *testing.T) {
 func TestNewInfoStore(t *testing.T) {
 	type args struct {
 		filePath   string
-		runner     exe.Runner
 		cmdBuilder *exe.CmdBuilder
 	}
 	tests := []struct {
@@ -66,18 +65,16 @@ func TestNewInfoStore(t *testing.T) {
 			name: "normal",
 			args: args{
 				"/tmp/a.json",
-				&exe.OSRunner{},
-				&exe.CmdBuilder{GitBin: "git", GitFlags: []string{"--a", "--b"}},
+				&exe.CmdBuilder{GitBin: "git", GitFlags: []string{"--a", "--b"}, Runner: &exe.OSRunner{}},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewInfoStore(tt.args.filePath, tt.args.runner, tt.args.cmdBuilder)
+			got := NewInfoStore(tt.args.filePath, tt.args.cmdBuilder)
 			assert.NotNil(t, got)
 			assert.Equal(t, []string{"--a", "--b"}, got.CmdBuilder.(*exe.CmdBuilder).GitFlags)
 			assert.Equal(t, tt.args.cmdBuilder, got.CmdBuilder)
-			assert.Equal(t, tt.args.runner, got.Runner)
 			assert.Equal(t, "/tmp/a.json", got.FilePath)
 		})
 	}
@@ -102,7 +99,6 @@ func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr strin
 
 func TestInfoStore_NeedsUpdate(t *testing.T) {
 	type fields struct {
-		Runner     exe.Runner
 		CmdBuilder *exe.CmdBuilder
 	}
 	type args struct {
@@ -123,10 +119,9 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
 				},
 			}}, fields: fields{
-				Runner: &MockRunner{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD"},
-				},
-				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
+				}},
 			},
 			want: true,
 		},
@@ -144,13 +139,12 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
 				},
 			}}, fields: fields{
-				Runner: &MockRunner{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
 					Returned: []string{
 						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
 						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
 					},
-				},
-				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
+				}},
 			},
 			want: true,
 		},
@@ -163,10 +157,9 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
 				},
 			}}, fields: fields{
-				Runner: &MockRunner{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
 					Returned: []string{"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD"},
-				},
-				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
+				}},
 			},
 			want: false,
 		},
@@ -179,10 +172,9 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
 				},
 			}}, fields: fields{
-				Runner: &MockRunner{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-				},
-				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
+				}},
 			},
 			want: false,
 		},
@@ -195,10 +187,12 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
 				},
 			}}, fields: fields{
-				Runner: &MockRunner{
-					Returned: []string{"error"},
+				CmdBuilder: &exe.CmdBuilder{
+					GitBin: "git", GitFlags: []string{""},
+					Runner: &MockRunner{
+						Returned: []string{"error"},
+					},
 				},
-				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
 			},
 			want: false,
 		},
@@ -211,10 +205,9 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
 				},
 			}}, fields: fields{
-				Runner: &MockRunner{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-				},
-				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
+				}},
 			},
 			want: false,
 		},
@@ -222,7 +215,6 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := &InfoStore{
-				Runner:     tt.fields.Runner,
 				CmdBuilder: tt.fields.CmdBuilder,
 			}
 			got := v.NeedsUpdate(tt.args.infos)
@@ -234,7 +226,6 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 func TestInfoStore_Update(t *testing.T) {
 	type fields struct {
 		OriginsByPackage map[string]OriginInfoByURL
-		Runner           exe.Runner
 		CmdBuilder       *exe.CmdBuilder
 	}
 	type args struct {
@@ -254,8 +245,10 @@ func TestInfoStore_Update(t *testing.T) {
 			},
 			fields: fields{
 				OriginsByPackage: make(map[string]OriginInfoByURL),
-				CmdBuilder:       &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}},
-				Runner:           &MockRunner{Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa HEAD"}},
+				CmdBuilder: &exe.CmdBuilder{
+					GitBin: "git", GitFlags: []string{""},
+					Runner: &MockRunner{Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa HEAD"}},
+				},
 			},
 		},
 	}
@@ -269,7 +262,6 @@ func TestInfoStore_Update(t *testing.T) {
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
 				FilePath:         file.Name(),
-				Runner:           tt.fields.Runner,
 				CmdBuilder:       tt.fields.CmdBuilder,
 			}
 			var mux sync.Mutex

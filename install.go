@@ -38,7 +38,7 @@ func asdeps(cmdArgs *parser.Arguments, pkgs []string) (err error) {
 	cmdArgs = cmdArgs.CopyGlobal()
 	_ = cmdArgs.AddArg("q", "D", "asdeps")
 	cmdArgs.AddTarget(pkgs...)
-	err = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
 		return fmt.Errorf(gotext.Get("error updating package install reason to dependency"))
@@ -55,7 +55,7 @@ func asexp(cmdArgs *parser.Arguments, pkgs []string) (err error) {
 	cmdArgs = cmdArgs.CopyGlobal()
 	_ = cmdArgs.AddArg("q", "D", "asexplicit")
 	cmdArgs.AddTarget(pkgs...)
-	err = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
 		return fmt.Errorf(gotext.Get("error updating package install reason to explicit"))
@@ -170,7 +170,7 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 		if arguments.ExistsArg("ignore") {
 			cmdArgs.CreateOrAppendOption("ignore", arguments.GetArgs("ignore")...)
 		}
-		return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
 
@@ -253,7 +253,7 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 				len(toSkipSlice), len(toClone), text.Cyan(strings.Join(toSkipSlice, ", "))))
 	}
 
-	cloned, errA := download.AURPKGBUILDRepos(config.Runtime.CmdRunner,
+	cloned, errA := download.AURPKGBUILDRepos(
 		config.Runtime.CmdBuilder, toClone, config.AURURL, config.BuildDir, false)
 	if errA != nil {
 		return err
@@ -344,7 +344,7 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 	}
 
 	if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
-		if errShow := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
@@ -404,7 +404,7 @@ func removeMake(do *dep.Order) error {
 
 	oldValue := settings.NoConfirm
 	settings.NoConfirm = true
-	err = config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 		removeArguments, config.Runtime.Mode, settings.NoConfirm))
 	settings.NoConfirm = oldValue
 
@@ -449,7 +449,7 @@ func earlyPacmanCall(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	}
 
 	if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
-		if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			arguments, config.Runtime.Mode, settings.NoConfirm)); err != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
@@ -466,7 +466,7 @@ func earlyRefresh(cmdArgs *parser.Arguments) error {
 	arguments.DelArg("i", "info")
 	arguments.DelArg("l", "list")
 	arguments.ClearTargets()
-	return config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 		arguments, config.Runtime.Mode, settings.NoConfirm))
 }
 
@@ -521,7 +521,7 @@ nextpkg:
 }
 
 func parsePackageList(dir string) (pkgdests map[string]string, pkgVersion string, err error) {
-	stdout, stderr, err := config.Runtime.CmdRunner.Capture(
+	stdout, stderr, err := config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildMakepkgCmd(dir, "--packagelist"), 0)
 	if err != nil {
 		return nil, "", fmt.Errorf("%s %s", stderr, err)
@@ -853,7 +853,7 @@ func downloadPkgbuildsSources(bases []dep.Base, incompatible stringset.StringSet
 			args = append(args, "--ignorearch")
 		}
 
-		err = config.Runtime.CmdRunner.Show(
+		err = config.Runtime.CmdBuilder.Show(
 			config.Runtime.CmdBuilder.BuildMakepkgCmd(dir, args...))
 		if err != nil {
 			return errors.New(gotext.Get("error downloading sources: %s", text.Cyan(base.String())))
@@ -905,7 +905,7 @@ func buildInstallPkgbuilds(
 			return nil
 		}
 
-		if errShow := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
 			return errShow
 		}
@@ -965,7 +965,7 @@ func buildInstallPkgbuilds(
 		}
 
 		// pkgver bump
-		if err = config.Runtime.CmdRunner.Show(
+		if err = config.Runtime.CmdBuilder.Show(
 			config.Runtime.CmdBuilder.BuildMakepkgCmd(dir, args...)); err != nil {
 			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
@@ -1003,7 +1003,7 @@ func buildInstallPkgbuilds(
 			}
 
 			if installed {
-				err = config.Runtime.CmdRunner.Show(
+				err = config.Runtime.CmdBuilder.Show(
 					config.Runtime.CmdBuilder.BuildMakepkgCmd(
 						dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
@@ -1016,7 +1016,7 @@ func buildInstallPkgbuilds(
 		}
 
 		if built {
-			err = config.Runtime.CmdRunner.Show(
+			err = config.Runtime.CmdBuilder.Show(
 				config.Runtime.CmdBuilder.BuildMakepkgCmd(
 					dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
@@ -1031,7 +1031,7 @@ func buildInstallPkgbuilds(
 				args = append(args, "--ignorearch")
 			}
 
-			if errMake := config.Runtime.CmdRunner.Show(
+			if errMake := config.Runtime.CmdBuilder.Show(
 				config.Runtime.CmdBuilder.BuildMakepkgCmd(
 					dir, args...)); errMake != nil {
 				return errors.New(gotext.Get("error making: %s", base.String()))

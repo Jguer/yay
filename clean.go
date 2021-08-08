@@ -37,7 +37,7 @@ func cleanRemove(cmdArgs *parser.Arguments, pkgNames []string) error {
 	_ = arguments.AddArg("R")
 	arguments.AddTarget(pkgNames...)
 
-	return config.Runtime.CmdRunner.Show(
+	return config.Runtime.CmdBuilder.Show(
 		config.Runtime.CmdBuilder.BuildPacmanCmd(
 			arguments, config.Runtime.Mode, settings.NoConfirm))
 }
@@ -57,7 +57,7 @@ func syncClean(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	}
 
 	if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
-		if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
 			return err
 		}
@@ -177,7 +177,7 @@ func cleanUntracked() error {
 
 		dir := filepath.Join(config.BuildDir, file.Name())
 		if isGitRepository(dir) {
-			if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx")); err != nil {
+			if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx")); err != nil {
 				text.Warnln(gotext.Get("Unable to clean:"), dir)
 				return err
 			}
@@ -202,12 +202,12 @@ func cleanAfter(bases []dep.Base) {
 
 		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
 
-		_, stderr, err := config.Runtime.CmdRunner.Capture(config.Runtime.CmdBuilder.BuildGitCmd(dir, "reset", "--hard", "HEAD"), 0)
+		_, stderr, err := config.Runtime.CmdBuilder.Capture(config.Runtime.CmdBuilder.BuildGitCmd(dir, "reset", "--hard", "HEAD"), 0)
 		if err != nil {
 			text.Errorln(gotext.Get("error resetting %s: %s", base.String(), stderr))
 		}
 
-		if err := config.Runtime.CmdRunner.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
+		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}
