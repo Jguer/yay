@@ -75,7 +75,7 @@ func TestNewInfoStore(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewInfoStore(tt.args.filePath, tt.args.runner, tt.args.cmdBuilder)
 			assert.NotNil(t, got)
-			assert.Equal(t, []string{"--a", "--b"}, got.CmdBuilder.GitFlags)
+			assert.Equal(t, []string{"--a", "--b"}, got.CmdBuilder.(*exe.CmdBuilder).GitFlags)
 			assert.Equal(t, tt.args.cmdBuilder, got.CmdBuilder)
 			assert.Equal(t, tt.args.runner, got.Runner)
 			assert.Equal(t, "/tmp/a.json", got.FilePath)
