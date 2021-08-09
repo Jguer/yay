@@ -193,7 +193,7 @@ func getPackageUsableName(dbExecutor DBSearcher, target string, mode parser.Targ
 	aur = true
 
 	dbName, name := text.SplitDBFromName(target)
-	if dbName != "aur" && (mode == parser.ModeAny || mode == parser.ModeRepo) {
+	if dbName != "aur" && mode.AtLeastRepo() {
 		var pkg alpm.IPackage
 		if dbName != "" {
 			pkg = dbExecutor.SatisfierFromDB(name, dbName)

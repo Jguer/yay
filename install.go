@@ -82,7 +82,7 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 		config.Runtime.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
-	if config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeRepo {
+	if config.Runtime.Mode.AtLeastRepo() {
 		if config.CombinedUpgrade {
 			if refreshArg {
 				err = earlyRefresh(cmdArgs)
@@ -196,7 +196,8 @@ func install(cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders 
 		arguments.AddTarget(pkg)
 	}
 
-	if len(do.Aur) == 0 && len(arguments.Targets) == 0 && (!cmdArgs.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == parser.ModeAUR) {
+	if len(do.Aur) == 0 && len(arguments.Targets) == 0 &&
+		(!cmdArgs.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == parser.ModeAUR) {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}

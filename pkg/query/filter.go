@@ -41,12 +41,12 @@ func RemoveInvalidTargets(targets []string, mode parser.TargetMode) []string {
 	for _, target := range targets {
 		dbName, _ := text.SplitDBFromName(target)
 
-		if dbName == "aur" && mode == parser.ModeRepo {
+		if dbName == "aur" && !mode.AtLeastAUR() {
 			text.Warnln(gotext.Get("%s: can't use target with option --repo -- skipping", text.Cyan(target)))
 			continue
 		}
 
-		if dbName != "aur" && dbName != "" && mode == parser.ModeAUR {
+		if dbName != "aur" && dbName != "" && !mode.AtLeastRepo() {
 			text.Warnln(gotext.Get("%s: can't use target with option --aur -- skipping", text.Cyan(target)))
 			continue
 		}
