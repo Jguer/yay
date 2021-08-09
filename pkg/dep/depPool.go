@@ -151,7 +151,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 		dp.Targets = append(dp.Targets, target)
 	}
 
-	if len(aurTargets) > 0 && (mode == parser.ModeAny || mode == parser.ModeAUR) {
+	if len(aurTargets) > 0 && mode.AtLeastAUR() {
 		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
 	}
 

@@ -354,11 +354,11 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Ar
 
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 
-	if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
+	if config.Runtime.Mode.AtLeastAUR() {
 		aq, aurErr = narrowSearch(config.Runtime.AURClient, pkgS, true)
 		lenaq = len(aq)
 	}
-	if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
+	if config.Runtime.Mode.AtLeastRepo() {
 		pq = queryRepo(pkgS, dbExecutor)
 		lenpq = len(pq)
 		if repoErr != nil {
@@ -372,17 +372,17 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Ar
 
 	switch config.SortMode {
 	case settings.TopDown:
-		if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
-		if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(lenpq+1, dbExecutor)
 		}
 	case settings.BottomUp:
-		if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(lenpq+1, dbExecutor)
 		}
-		if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
 	default:
@@ -457,13 +457,13 @@ func syncList(httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.
 	aur := false
 
 	for i := len(cmdArgs.Targets) - 1; i >= 0; i-- {
-		if cmdArgs.Targets[i] == "aur" && (config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeAUR) {
+		if cmdArgs.Targets[i] == "aur" && config.Runtime.Mode.AtLeastAUR() {
 			cmdArgs.Targets = append(cmdArgs.Targets[:i], cmdArgs.Targets[i+1:]...)
 			aur = true
 		}
 	}
 
-	if (config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeAUR) && (len(cmdArgs.Targets) == 0 || aur) {
+	if config.Runtime.Mode.AtLeastAUR() && (len(cmdArgs.Targets) == 0 || aur) {
 		req, err := http.NewRequestWithContext(context.Background(), "GET", config.AURURL+"/packages.gz", nil)
 		if err != nil {
 			return err
@@ -494,7 +494,7 @@ func syncList(httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.
 		}
 	}
 
-	if (config.Runtime.Mode == parser.ModeAny || config.Runtime.Mode == parser.ModeRepo) && (len(cmdArgs.Targets) != 0 || !aur) {
+	if config.Runtime.Mode.AtLeastRepo() && (len(cmdArgs.Targets) != 0 || !aur) {
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}

@@ -155,26 +155,26 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 	var aq aurQuery
 	var pq repoQuery
 
-	if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
+	if config.Runtime.Mode.AtLeastAUR() {
 		aq, aurErr = narrowSearch(aurClient, pkgS, true)
 	}
-	if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
+	if config.Runtime.Mode.AtLeastRepo() {
 		pq = queryRepo(pkgS, dbExecutor)
 	}
 
 	switch config.SortMode {
 	case settings.TopDown:
-		if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
-		if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(1, dbExecutor)
 		}
 	case settings.BottomUp:
-		if config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(1, dbExecutor)
 		}
-		if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
+		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
 	default:

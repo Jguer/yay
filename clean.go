@@ -56,14 +56,14 @@ func syncClean(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 		}
 	}
 
-	if config.Runtime.Mode == parser.ModeRepo || config.Runtime.Mode == parser.ModeAny {
+	if config.Runtime.Mode.AtLeastRepo() {
 		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
 			return err
 		}
 	}
 
-	if !(config.Runtime.Mode == parser.ModeAUR || config.Runtime.Mode == parser.ModeAny) {
+	if !config.Runtime.Mode.AtLeastAUR() {
 		return nil
 	}
 
