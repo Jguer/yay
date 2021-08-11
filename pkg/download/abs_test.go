@@ -3,8 +3,6 @@ package download
 import (
 	"fmt"
 	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -90,19 +88,13 @@ func Test_getPackageURL(t *testing.T) {
 
 func TestGetABSPkgbuild(t *testing.T) {
 	t.Parallel()
-	pkgBuildHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		w.Write([]byte(gitExtrasPKGBUILD))
-	})
-
-	notFoundHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(404)
-	})
 
 	type args struct {
-		handler http.Handler
 		dbName  string
+		body    string
+		status  int
 		pkgName string
+		wantURL string
 	}
 	tests := []struct {
 		name    string
@@ -113,9 +105,11 @@ func TestGetABSPkgbuild(t *testing.T) {
 		{
 			name: "found package",
 			args: args{
-				handler: pkgBuildHandler,
 				dbName:  "core",
+				body:    gitExtrasPKGBUILD,
+				status:  200,
 				pkgName: "git-extras",
+				wantURL: "https://github.com/archlinux/svntogit-packages/raw/packages/git-extras/trunk/PKGBUILD",
 			},
 			want:    gitExtrasPKGBUILD,
 			wantErr: false,
@@ -123,9 +117,11 @@ func TestGetABSPkgbuild(t *testing.T) {
 		{
 			name: "not found package",
 			args: args{
-				handler: notFoundHandler,
 				dbName:  "core",
-				pkgName: "git-extras",
+				body:    "",
+				status:  404,
+				pkgName: "git-git",
+				wantURL: "https://github.com/archlinux/svntogit-packages/raw/packages/git-git/trunk/PKGBUILD",
 			},
 			want:    "",
 			wantErr: true,
@@ -135,10 +131,13 @@ func TestGetABSPkgbuild(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			PKGBuild := httptest.NewServer(pkgBuildHandler)
-			ABSPackageURL = PKGBuild.URL
-			PKGBuild.Config.Handler = tt.args.handler
-			got, err := ABSPKGBUILD(PKGBuild.Client(), tt.args.dbName, tt.args.pkgName)
+			httpClient := &testClient{
+				t:       t,
+				wantURL: tt.args.wantURL,
+				body:    tt.args.body,
+				status:  tt.args.status,
+			}
+			got, err := ABSPKGBUILD(httpClient, tt.args.dbName, tt.args.pkgName)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

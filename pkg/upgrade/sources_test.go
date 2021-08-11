@@ -2,27 +2,24 @@ package upgrade
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"os/exec"
 	"strconv"
 	"testing"
 	"time"
 
 	aur "github.com/Jguer/aur"
-	"github.com/bradleyjkemp/cupaloy"
 	"github.com/stretchr/testify/assert"
 
 	alpm "github.com/Jguer/go-alpm/v2"
 
 	"github.com/Jguer/yay/v10/pkg/db/mock"
-	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
 	"github.com/Jguer/yay/v10/pkg/vcs"
 )
 
 func Test_upAUR(t *testing.T) {
 	t.Parallel()
+
 	type args struct {
 		remote     []alpm.IPackage
 		aurdata    map[string]*aur.Pkg
@@ -72,16 +69,8 @@ func Test_upAUR(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			rescueStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
 			got := UpAUR(tt.args.remote, tt.args.aurdata, tt.args.timeUpdate)
 			assert.EqualValues(t, tt.want, got)
-
-			w.Close()
-			out, _ := ioutil.ReadAll(r)
-			cupaloy.SnapshotT(t, out)
-			os.Stdout = rescueStdout
 		})
 	}
 }
@@ -110,19 +99,13 @@ func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr strin
 
 func Test_upDevel(t *testing.T) {
 	t.Parallel()
-	var err error
-	config, err := settings.NewConfig("v0")
-	assert.NoError(t, err)
-
-	config.Runtime.CmdBuilder = config.CmdBuilder(&MockRunner{
-		Returned: []string{
-			"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
-			"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
-			"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
-			"cccccccccccccccccccccccccccccccccccccccc	HEAD",
-			"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD",
-		},
-	})
+	returnValue := []string{
+		"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
+		"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
+		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
+		"cccccccccccccccccccccccccccccccccccccccc	HEAD",
+		"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD",
+	}
 
 	type args struct {
 		remote  []alpm.IPackage
@@ -139,7 +122,11 @@ func Test_upDevel(t *testing.T) {
 			name: "No Updates",
 			args: args{
 				cached: vcs.InfoStore{
-					CmdBuilder: config.Runtime.CmdBuilder,
+					CmdBuilder: &exe.CmdBuilder{
+						Runner: &MockRunner{
+							Returned: returnValue,
+						},
+					},
 				},
 				remote: []alpm.IPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
@@ -158,7 +145,11 @@ func Test_upDevel(t *testing.T) {
 			finalLen: 3,
 			args: args{
 				cached: vcs.InfoStore{
-					CmdBuilder: config.Runtime.CmdBuilder,
+					CmdBuilder: &exe.CmdBuilder{
+						Runner: &MockRunner{
+							Returned: returnValue,
+						},
+					},
 					OriginsByPackage: map[string]vcs.OriginInfoByURL{
 						"hello": {
 							"github.com/Jguer/z.git": vcs.OriginInfo{
@@ -228,7 +219,11 @@ func Test_upDevel(t *testing.T) {
 			finalLen: 1,
 			args: args{
 				cached: vcs.InfoStore{
-					CmdBuilder: config.Runtime.CmdBuilder,
+					CmdBuilder: &exe.CmdBuilder{
+						Runner: &MockRunner{
+							Returned: returnValue,
+						},
+					},
 					OriginsByPackage: map[string]vcs.OriginInfoByURL{
 						"hello": {
 							"github.com/Jguer/d.git": vcs.OriginInfo{
@@ -249,7 +244,11 @@ func Test_upDevel(t *testing.T) {
 			finalLen: 1,
 			args: args{
 				cached: vcs.InfoStore{
-					CmdBuilder: config.Runtime.CmdBuilder,
+					CmdBuilder: &exe.CmdBuilder{
+						Runner: &MockRunner{
+							Returned: returnValue,
+						},
+					},
 					OriginsByPackage: map[string]vcs.OriginInfoByURL{
 						"hello": {
 							"github.com/Jguer/e.git": vcs.OriginInfo{
@@ -270,7 +269,7 @@ func Test_upDevel(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			config.Runtime.CmdBuilder.(*exe.CmdBuilder).Runner.(*MockRunner).t = t
+			tt.args.cached.CmdBuilder.(*exe.CmdBuilder).Runner.(*MockRunner).t = t
 			got := UpDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
 			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))

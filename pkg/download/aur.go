@@ -14,7 +14,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-func AURPKGBUILD(httpClient *http.Client, pkgName, aurURL string) ([]byte, error) {
+func AURPKGBUILD(httpClient httpRequestDoer, pkgName, aurURL string) ([]byte, error) {
 	values := url.Values{}
 	values.Set("h", pkgName)
 	pkgURL := aurURL + "/cgit/aur.git/plain/PKGBUILD?" + values.Encode()
