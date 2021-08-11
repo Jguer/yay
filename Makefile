@@ -49,9 +49,7 @@ test_lint: test lint
 
 .PHONY: test
 test:
-	$(GO) vet $(FLAGS) ./...
-	@test -z "$$(gofmt -l $(SOURCES))" || (echo "Files need to be linted. Use make fmt" && false)
-	$(GO) test $(FLAGS) ./...
+	$(GO) test -race -covermode=atomic $(FLAGS) ./...
 
 .PHONY: build
 build: $(BIN)
@@ -79,6 +77,8 @@ docker-build:
 
 .PHONY: lint
 lint:
+	$(GO) vet $(FLAGS) ./...
+	@test -z "$$(gofmt -l $(SOURCES))" || (echo "Files need to be linted. Use make fmt" && false)
 	golangci-lint run ./...
 
 .PHONY: fmt
