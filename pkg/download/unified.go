@@ -25,7 +25,8 @@ func downloadGitRepo(cmdBuilder exe.GitCmdBuilder,
 	finalDir := filepath.Join(dest, pkgName)
 	newClone := true
 
-	if _, err := os.Stat(filepath.Join(finalDir, ".git")); os.IsNotExist(err) || (err == nil && force) {
+	switch _, err := os.Stat(filepath.Join(finalDir, ".git")); {
+	case os.IsNotExist(err) || (err == nil && force):
 		if _, errD := os.Stat(finalDir); force && errD == nil {
 			if errR := os.RemoveAll(finalDir); errR != nil {
 				return false, ErrGetPKGBUILDRepo{inner: errR, pkgName: pkgName, errOut: ""}
@@ -43,19 +44,20 @@ func downloadGitRepo(cmdBuilder exe.GitCmdBuilder,
 		if errCapture != nil {
 			return false, ErrGetPKGBUILDRepo{inner: errCapture, pkgName: pkgName, errOut: stderr}
 		}
-	} else if err != nil {
+	case err != nil:
 		return false, ErrGetPKGBUILDRepo{
 			inner:   err,
 			pkgName: pkgName,
 			errOut:  gotext.Get("error reading %s", filepath.Join(dest, pkgName, ".git")),
 		}
-	} else {
+	default:
 		cmd := cmdBuilder.BuildGitCmd(filepath.Join(dest, pkgName), "pull", "--ff-only")
 
 		_, stderr, errCmd := cmdBuilder.Capture(cmd, 0)
 		if errCmd != nil {
 			return false, ErrGetPKGBUILDRepo{inner: errCmd, pkgName: pkgName, errOut: stderr}
 		}
+
 		newClone = false
 	}
 
@@ -149,8 +151,10 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 		wg.Add(1)
 
 		go func(target, dbName, pkgName string, aur bool) {
-			var err error
-			var newClone bool
+			var (
+				err      error
+				newClone bool
+			)
 
 			if aur {
 				newClone, err = AURPKGBUILDRepo(cmdBuilder, aurURL, pkgName, dest, force)
@@ -159,6 +163,7 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 			}
 
 			progress := 0
+
 			if err != nil {
 				errs.Add(err)
 			} else {
@@ -189,7 +194,7 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 	return cloned, errs.Return()
 }
 
-// TODO: replace with dep.ResolveTargets
+// TODO: replace with dep.ResolveTargets.
 func getPackageUsableName(dbExecutor DBSearcher, target string, mode parser.TargetMode) (dbname, pkgname string, aur, toSkip bool) {
 	aur = true
 

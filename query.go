@@ -20,7 +20,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// Query is a collection of Results
+// Query is a collection of Results.
 type aurQuery []aur.Pkg
 
 // Query holds the results of a repository search.
@@ -88,11 +88,13 @@ func getSearchBy(value string) aur.By {
 	}
 }
 
-// NarrowSearch searches AUR and narrows based on subarguments
+// NarrowSearch searches AUR and narrows based on subarguments.
 func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, error) {
-	var r []aur.Pkg
-	var err error
-	var usedIndex int
+	var (
+		r         []aur.Pkg
+		err       error
+		usedIndex int
+	)
 
 	by := getSearchBy(config.SearchBy)
 
@@ -104,6 +106,7 @@ func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, e
 		r, err = aurClient.Search(context.Background(), word, by)
 		if err == nil {
 			usedIndex = i
+
 			break
 		}
 	}
@@ -116,14 +119,18 @@ func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, e
 		if sortS {
 			sort.Sort(aurQuery(r))
 		}
+
 		return r, err
 	}
 
-	var aq aurQuery
-	var n int
+	var (
+		aq aurQuery
+		n  int
+	)
 
 	for i := range r {
 		match := true
+
 		for j, pkgN := range pkgS {
 			if usedIndex == j {
 				continue
@@ -131,12 +138,14 @@ func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, e
 
 			if !(strings.Contains(r[i].Name, pkgN) || strings.Contains(strings.ToLower(r[i].Description), pkgN)) {
 				match = false
+
 				break
 			}
 		}
 
 		if match {
 			n++
+
 			aq = append(aq, r[i])
 		}
 	}
@@ -151,13 +160,17 @@ func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, e
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (err error) {
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
-	var aurErr error
-	var aq aurQuery
-	var pq repoQuery
+
+	var (
+		aurErr error
+		aq     aurQuery
+		pq     repoQuery
+	)
 
 	if config.Runtime.Mode.AtLeastAUR() {
 		aq, aurErr = narrowSearch(aurClient, pkgS, true)
 	}
+
 	if config.Runtime.Mode.AtLeastRepo() {
 		pq = queryRepo(pkgS, dbExecutor)
 	}
@@ -167,6 +180,7 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
+
 		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(1, dbExecutor)
 		}
@@ -174,6 +188,7 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(1, dbExecutor)
 		}
+
 		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
@@ -191,9 +206,12 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) error {
-	var info []*aur.Pkg
-	var err error
-	missing := false
+	var (
+		info    []*aur.Pkg
+		err     error
+		missing = false
+	)
+
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 	aurS, repoS := packageSlices(pkgS, dbExecutor)
 
@@ -208,6 +226,7 @@ func syncInfo(cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) 
 		info, err = query.AURInfoPrint(config.Runtime.AURClient, noDB, config.RequestSplitN)
 		if err != nil {
 			missing = true
+
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}
@@ -217,9 +236,9 @@ func syncInfo(cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) 
 		arguments := cmdArgs.Copy()
 		arguments.ClearTargets()
 		arguments.AddTarget(repoS...)
+
 		err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
-
 		if err != nil {
 			return err
 		}
@@ -249,10 +268,11 @@ func queryRepo(pkgInputN []string, dbExecutor db.Executor) repoQuery {
 	if config.SortMode == settings.BottomUp {
 		s.Reverse()
 	}
+
 	return s
 }
 
-// PackageSlices separates an input slice into aur and repo slices
+// PackageSlices separates an input slice into aur and repo slices.
 func packageSlices(toCheck []string, dbExecutor db.Executor) (aurNames, repoNames []string) {
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
@@ -278,7 +298,7 @@ func packageSlices(toCheck []string, dbExecutor db.Executor) (aurNames, repoName
 
 // HangingPackages returns a list of packages installed as deps
 // and unneeded by the system
-// removeOptional decides whether optional dependencies are counted or not
+// removeOptional decides whether optional dependencies are counted or not.
 func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []string) {
 	// safePackages represents every package in the system in one of 3 states
 	// State = 0 - Remove package from the system
@@ -306,6 +326,7 @@ func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []str
 
 	for iterateAgain {
 		iterateAgain = false
+
 		for _, pkg := range packages {
 			if state := safePackages[pkg.Name()]; state == 0 || state == 2 {
 				continue
@@ -313,6 +334,7 @@ func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []str
 
 			safePackages[pkg.Name()] = 2
 			deps := dbExecutor.PackageDepends(pkg)
+
 			if !removeOptional {
 				deps = append(deps, dbExecutor.PackageOptionalDepends(pkg)...)
 			}
@@ -331,6 +353,7 @@ func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []str
 							}
 						}
 					}
+
 					continue
 				}
 
@@ -352,20 +375,24 @@ func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []str
 	return hanging
 }
 
-// Statistics returns statistics about packages installed in system
+// Statistics returns statistics about packages installed in system.
 func statistics(dbExecutor db.Executor) *struct {
 	Totaln    int
 	Expln     int
 	TotalSize int64
 } {
-	var totalSize int64
-	localPackages := dbExecutor.LocalPackages()
-	totalInstalls := 0
-	explicitInstalls := 0
+	var (
+		totalSize int64
+
+		localPackages    = dbExecutor.LocalPackages()
+		totalInstalls    = 0
+		explicitInstalls = 0
+	)
 
 	for _, pkg := range localPackages {
 		totalSize += pkg.ISize()
 		totalInstalls++
+
 		if pkg.Reason() == alpm.PkgReasonExplicit {
 			explicitInstalls++
 		}

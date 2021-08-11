@@ -17,8 +17,7 @@ type Runner interface {
 	Show(cmd *exec.Cmd) error
 }
 
-type OSRunner struct {
-}
+type OSRunner struct{}
 
 func (r *OSRunner) Show(cmd *exec.Cmd) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -26,9 +25,11 @@ func (r *OSRunner) Show(cmd *exec.Cmd) error {
 }
 
 func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
-	var outbuf, errbuf bytes.Buffer
-	var timer *time.Timer
-	timedOut := false
+	var (
+		outbuf, errbuf bytes.Buffer
+		timer          *time.Timer
+		timedOut       = false
+	)
 
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
@@ -38,6 +39,7 @@ func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string,
 	if err != nil {
 		stdout = strings.TrimSpace(outbuf.String())
 		stderr = strings.TrimSpace(errbuf.String())
+
 		return stdout, stderr, err
 	}
 
@@ -52,12 +54,14 @@ func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string,
 	}
 
 	err = cmd.Wait()
+
 	if timeout != 0 {
 		timer.Stop()
 	}
 
 	stdout = strings.TrimSpace(outbuf.String())
 	stderr = strings.TrimSpace(errbuf.String())
+
 	if err != nil {
 		return stdout, stderr, err
 	}

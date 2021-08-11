@@ -241,6 +241,7 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 
 	for _, tt := range casetests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			rescueStdout := os.Stdout
 			r, w, _ := os.Pipe()

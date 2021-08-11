@@ -12,6 +12,7 @@ import (
 
 	"github.com/Jguer/yay/v10/pkg/completion"
 	"github.com/Jguer/yay/v10/pkg/db"
+	"github.com/Jguer/yay/v10/pkg/download"
 	"github.com/Jguer/yay/v10/pkg/intrange"
 	"github.com/Jguer/yay/v10/pkg/news"
 	"github.com/Jguer/yay/v10/pkg/query"
@@ -156,6 +157,7 @@ func handleCmd(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	switch cmdArgs.Op {
 	case "V", "version":
 		handleVersion()
+
 		return nil
 	case "D", "database":
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
@@ -191,6 +193,7 @@ func handleCmd(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 // updates or their count.
 func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {
 	deps, explicit := cmdArgs.ExistsArg("d", "deps"), cmdArgs.ExistsArg("e", "explicit")
+
 	switch {
 	case deps && explicit:
 		return nil, fmt.Errorf(gotext.Get("invalid option: '--deps' and '--explicit' may not be used together"))
@@ -203,6 +206,7 @@ func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {
 			return pkg.Reason == alpm.PkgReasonExplicit
 		}, nil
 	}
+
 	return func(pkg upgrade.Upgrade) bool {
 		return true
 	}, nil
@@ -214,8 +218,10 @@ func handleQuery(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 		if err != nil {
 			return err
 		}
+
 		return printUpdateList(cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	}
+
 	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 }
@@ -225,6 +231,7 @@ func handleHelp(cmdArgs *parser.Arguments) error {
 		usage()
 		return nil
 	}
+
 	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 }
@@ -238,19 +245,23 @@ func handlePrint(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.DefaultConfig()
 		fmt.Printf("%v", tmpConfig)
+
 		return nil
 	case cmdArgs.ExistsArg("g", "currentconfig"):
 		fmt.Printf("%v", config)
+
 		return nil
 	case cmdArgs.ExistsArg("n", "numberupgrades"):
 		filter, err := getFilter(cmdArgs)
 		if err != nil {
 			return err
 		}
+
 		return printNumberOfUpdates(dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
+
 		return news.PrintNewsFeed(config.Runtime.HTTPClient, dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
 		return completion.Show(config.Runtime.HTTPClient, dbExecutor,
@@ -261,29 +272,30 @@ func handlePrint(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	case cmdArgs.ExistsArg("s", "stats"):
 		return localStatistics(dbExecutor)
 	}
+
 	return nil
 }
 
 func handleYay(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
-	if cmdArgs.ExistsArg("gendb") {
+	switch {
+	case cmdArgs.ExistsArg("gendb"):
 		return createDevelDB(config, dbExecutor)
-	}
-	if cmdArgs.ExistsDouble("c") {
+	case cmdArgs.ExistsDouble("c"):
 		return cleanDependencies(cmdArgs, dbExecutor, true)
-	}
-	if cmdArgs.ExistsArg("c", "clean") {
+	case cmdArgs.ExistsArg("c", "clean"):
 		return cleanDependencies(cmdArgs, dbExecutor, false)
-	}
-	if len(cmdArgs.Targets) > 0 {
+	case len(cmdArgs.Targets) > 0:
 		return handleYogurt(cmdArgs, dbExecutor)
 	}
+
 	return nil
 }
 
-func handleGetpkgbuild(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleGetpkgbuild(cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
 		return printPkgbuilds(dbExecutor, config.Runtime.HTTPClient, cmdArgs.Targets, config.Runtime.Mode, config.AURURL)
 	}
+
 	return getPkgbuilds(dbExecutor, config, cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }
 
@@ -295,41 +307,36 @@ func handleYogurt(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 func handleSync(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	targets := cmdArgs.Targets
 
-	if cmdArgs.ExistsArg("s", "search") {
+	switch {
+	case cmdArgs.ExistsArg("s", "search"):
 		if cmdArgs.ExistsArg("q", "quiet") {
 			config.SearchMode = minimal
 		} else {
 			config.SearchMode = detailed
 		}
+
 		return syncSearch(targets, config.Runtime.AURClient, dbExecutor)
-	}
-	if cmdArgs.ExistsArg("p", "print", "print-format") {
+	case cmdArgs.ExistsArg("p", "print", "print-format"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
-	}
-	if cmdArgs.ExistsArg("c", "clean") {
+	case cmdArgs.ExistsArg("c", "clean"):
 		return syncClean(cmdArgs, dbExecutor)
-	}
-	if cmdArgs.ExistsArg("l", "list") {
+	case cmdArgs.ExistsArg("l", "list"):
 		return syncList(config.Runtime.HTTPClient, cmdArgs, dbExecutor)
-	}
-	if cmdArgs.ExistsArg("g", "groups") {
+	case cmdArgs.ExistsArg("g", "groups"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
-	}
-	if cmdArgs.ExistsArg("i", "info") {
+	case cmdArgs.ExistsArg("i", "info"):
 		return syncInfo(cmdArgs, targets, dbExecutor)
-	}
-	if cmdArgs.ExistsArg("u", "sysupgrade") {
+	case cmdArgs.ExistsArg("u", "sysupgrade"):
 		return install(cmdArgs, dbExecutor, false)
-	}
-	if len(cmdArgs.Targets) > 0 {
+	case len(cmdArgs.Targets) > 0:
 		return install(cmdArgs, dbExecutor, false)
-	}
-	if cmdArgs.ExistsArg("y", "refresh") {
+	case cmdArgs.ExistsArg("y", "refresh"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
+
 	return nil
 }
 
@@ -358,9 +365,11 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Ar
 		aq, aurErr = narrowSearch(config.Runtime.AURClient, pkgS, true)
 		lenaq = len(aq)
 	}
+
 	if config.Runtime.Mode.AtLeastRepo() {
 		pq = queryRepo(pkgS, dbExecutor)
 		lenpq = len(pq)
+
 		if repoErr != nil {
 			return repoErr
 		}
@@ -375,6 +384,7 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Ar
 		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
+
 		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(lenpq+1, dbExecutor)
 		}
@@ -382,6 +392,7 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Ar
 		if config.Runtime.Mode.AtLeastAUR() {
 			aq.printSearch(lenpq+1, dbExecutor)
 		}
+
 		if config.Runtime.Mode.AtLeastRepo() {
 			pq.printSearch(dbExecutor)
 		}
@@ -403,6 +414,7 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Ar
 	if err != nil {
 		return err
 	}
+
 	if overflow {
 		return fmt.Errorf(gotext.Get("input too long"))
 	}
@@ -414,6 +426,7 @@ func displayNumberMenu(pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Ar
 
 	for i, pkg := range pq {
 		var target int
+
 		switch config.SortMode {
 		case settings.TopDown:
 			target = i + 1
@@ -478,6 +491,7 @@ func syncList(httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.
 		scanner := bufio.NewScanner(resp.Body)
 
 		scanner.Scan()
+
 		for scanner.Scan() {
 			name := scanner.Text()
 			if cmdArgs.ExistsArg("q", "quiet") {

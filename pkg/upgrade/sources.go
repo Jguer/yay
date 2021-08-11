@@ -18,8 +18,10 @@ func UpDevel(
 	toUpdate := make([]db.IPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)
 
-	var mux1, mux2 sync.Mutex
-	var wg sync.WaitGroup
+	var (
+		mux1, mux2 sync.Mutex
+		wg         sync.WaitGroup
+	)
 
 	checkUpdate := func(pkgName string, e vcs.OriginInfoByURL) {
 		defer wg.Done()
@@ -31,6 +33,7 @@ func UpDevel(
 						mux1.Lock()
 						toUpdate = append(toUpdate, pkg)
 						mux1.Unlock()
+
 						return
 					}
 				}
@@ -44,12 +47,14 @@ func UpDevel(
 
 	for pkgName, e := range localCache.OriginsByPackage {
 		wg.Add(1)
+
 		go checkUpdate(pkgName, e)
 	}
 
 	wg.Wait()
 
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"devel"}}
+
 	for _, pkg := range toUpdate {
 		if pkg.ShouldIgnore() {
 			printIgnoringPackage(pkg, "latest-commit")
@@ -65,6 +70,7 @@ func UpDevel(
 	}
 
 	localCache.RemovePackage(toRemove)
+
 	return toUpgrade
 }
 

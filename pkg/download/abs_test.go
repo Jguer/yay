@@ -36,6 +36,7 @@ package() {
 }`
 
 func Test_getPackageURL(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		db      string
 		pkgName string
@@ -75,7 +76,9 @@ func Test_getPackageURL(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got, err := getPackageURL(tt.args.db, tt.args.pkgName)
 			if tt.wantErr {
 				assert.ErrorIs(t, err, ErrInvalidRepository)
@@ -86,6 +89,7 @@ func Test_getPackageURL(t *testing.T) {
 }
 
 func TestGetABSPkgbuild(t *testing.T) {
+	t.Parallel()
 	pkgBuildHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write([]byte(gitExtrasPKGBUILD))
@@ -95,7 +99,6 @@ func TestGetABSPkgbuild(t *testing.T) {
 		w.WriteHeader(404)
 	})
 
-	PKGBuild := httptest.NewServer(pkgBuildHandler)
 	type args struct {
 		handler http.Handler
 		dbName  string
@@ -129,7 +132,10 @@ func TestGetABSPkgbuild(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			PKGBuild := httptest.NewServer(pkgBuildHandler)
 			ABSPackageURL = PKGBuild.URL
 			PKGBuild.Config.Handler = tt.args.handler
 			got, err := ABSPKGBUILD(PKGBuild.Client(), tt.args.dbName, tt.args.pkgName)
@@ -145,8 +151,7 @@ func TestGetABSPkgbuild(t *testing.T) {
 }
 
 func Test_getPackageRepoURL(t *testing.T) {
-	ABSPackageURL = "https://github.com/archlinux/svntogit-packages"
-	ABSCommunityURL = "https://github.com/archlinux/svntogit-community"
+	t.Parallel()
 
 	type args struct {
 		db string
@@ -177,7 +182,9 @@ func Test_getPackageRepoURL(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got, err := getPackageRepoURL(tt.args.db)
 			if tt.wantErr {
 				assert.ErrorIs(t, err, ErrInvalidRepository)
@@ -191,6 +198,7 @@ func Test_getPackageRepoURL(t *testing.T) {
 // WHEN ABSPKGBUILDRepo is called
 // THEN a clone command should be formed
 func TestABSPKGBUILDRepo(t *testing.T) {
+	t.Parallel()
 	cmdRunner := &testRunner{}
 	cmdBuilder := &testGitBuilder{
 		index: 0,
@@ -211,6 +219,7 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 // WHEN ABSPKGBUILDRepo is called
 // THEN a pull command should be formed
 func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 

@@ -20,7 +20,7 @@ type PkgSynchronizer interface {
 	SyncPackages(...string) []db.IPackage
 }
 
-// Show provides completion info for shells
+// Show provides completion info for shells.
 func Show(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
 	err := Update(httpClient, dbExecutor, aurURL, completionPath, interval, force)
 	if err != nil {
@@ -34,10 +34,11 @@ func Show(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completio
 	defer in.Close()
 
 	_, err = io.Copy(os.Stdout, in)
+
 	return err
 }
 
-// Update updates completion cache to be used by Complete
+// Update updates completion cache to be used by Complete.
 func Update(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
 	info, err := os.Stat(completionPath)
 
@@ -46,6 +47,7 @@ func Update(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, complet
 		if errd != nil {
 			return errd
 		}
+
 		out, errf := os.Create(completionPath)
 		if errf != nil {
 			return errf
@@ -58,18 +60,20 @@ func Update(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, complet
 		erra := createRepoList(dbExecutor, out)
 
 		out.Close()
+
 		return erra
 	}
 
 	return nil
 }
 
-// CreateAURList creates a new completion file
+// CreateAURList creates a new completion file.
 func createAURList(client *http.Client, aurURL string, out io.Writer) error {
 	u, err := url.Parse(aurURL)
 	if err != nil {
 		return err
 	}
+
 	u.Path = path.Join(u.Path, "packages.gz")
 
 	req, err := http.NewRequestWithContext(context.Background(), "GET", u.String(), nil)
@@ -82,6 +86,7 @@ func createAURList(client *http.Client, aurURL string, out io.Writer) error {
 		return err
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("invalid status code: %d", resp.StatusCode)
 	}
@@ -89,13 +94,14 @@ func createAURList(client *http.Client, aurURL string, out io.Writer) error {
 	scanner := bufio.NewScanner(resp.Body)
 
 	scanner.Scan()
+
 	for scanner.Scan() {
 		text := scanner.Text()
 		if strings.HasPrefix(text, "#") {
 			continue
 		}
-		_, err = io.WriteString(out, text+"\tAUR\n")
-		if err != nil {
+
+		if _, err := io.WriteString(out, text+"\tAUR\n"); err != nil {
 			return err
 		}
 	}
@@ -103,7 +109,7 @@ func createAURList(client *http.Client, aurURL string, out io.Writer) error {
 	return nil
 }
 
-// CreatePackageList appends Repo packages to completion cache
+// CreatePackageList appends Repo packages to completion cache.
 func createRepoList(dbExecutor PkgSynchronizer, out io.Writer) error {
 	for _, pkg := range dbExecutor.SyncPackages() {
 		_, err := io.WriteString(out, pkg.Name()+"\t"+pkg.DB().Name()+"\n")
@@ -111,5 +117,6 @@ func createRepoList(dbExecutor PkgSynchronizer, out io.Writer) error {
 			return err
 		}
 	}
+
 	return nil
 }

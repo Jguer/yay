@@ -69,14 +69,17 @@ func getColumnCount() int {
 	if cachedColumnCount > 0 {
 		return cachedColumnCount
 	}
+
 	if count, err := strconv.Atoi(os.Getenv("COLUMNS")); err == nil {
 		cachedColumnCount = count
 		return cachedColumnCount
 	}
+
 	if ws, err := unix.IoctlGetWinsize(syscall.Stdout, unix.TIOCGWINSZ); err == nil {
 		cachedColumnCount = int(ws.Col)
 		return cachedColumnCount
 	}
+
 	return 80
 }
 
@@ -96,6 +99,7 @@ func PrintInfoValue(key string, values ...string) {
 	maxCols := getColumnCount()
 	cols := keyLength + len(values[0])
 	str += values[0]
+
 	for _, value := range values[1:] {
 		if maxCols > keyLength && cols+len(value)+delimCount >= maxCols {
 			cols = keyLength
@@ -104,8 +108,10 @@ func PrintInfoValue(key string, values ...string) {
 			str += strings.Repeat(" ", delimCount)
 			cols += delimCount
 		}
+
 		str += value
 		cols += len(value)
 	}
+
 	fmt.Println(str)
 }

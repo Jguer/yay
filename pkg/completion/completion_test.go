@@ -39,6 +39,7 @@ func Test_createAURList(t *testing.T) {
 		Get("/packages.gz").
 		Reply(200).
 		BodyString(samplePackageResp)
+
 	out := &bytes.Buffer{}
 	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
 	assert.NoError(t, err)
@@ -52,6 +53,7 @@ func Test_createAURListHTTPError(t *testing.T) {
 	gock.New("https://aur.archlinux.org").
 		Get("/packages.gz").
 		ReplyError(errors.New("Not available"))
+
 	out := &bytes.Buffer{}
 	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "Get \"https://aur.archlinux.org/packages.gz\": Not available")

@@ -22,17 +22,22 @@ type Pkg = aur.Pkg
 func AURInfo(aurClient *aur.Client, names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) {
 	info := make([]*Pkg, 0, len(names))
 	seen := make(map[string]int)
-	var mux sync.Mutex
-	var wg sync.WaitGroup
-	var errs multierror.MultiError
+
+	var (
+		mux  sync.Mutex
+		wg   sync.WaitGroup
+		errs multierror.MultiError
+	)
 
 	makeRequest := func(n, max int) {
 		defer wg.Done()
+
 		tempInfo, requestErr := aurClient.Info(context.Background(), names[n:max])
-		errs.Add(requestErr)
 		if requestErr != nil {
+			errs.Add(requestErr)
 			return
 		}
+
 		mux.Lock()
 		for i := range tempInfo {
 			info = append(info, &tempInfo[i])
@@ -42,7 +47,9 @@ func AURInfo(aurClient *aur.Client, names []string, warnings *AURWarnings, split
 
 	for n := 0; n < len(names); n += splitN {
 		max := intrange.Min(len(names), n+splitN)
+
 		wg.Add(1)
+
 		go makeRequest(n, max)
 	}
 
@@ -68,6 +75,7 @@ func AURInfo(aurClient *aur.Client, names []string, warnings *AURWarnings, split
 		if pkg.Maintainer == "" && !warnings.Ignore.Get(name) {
 			warnings.Orphans = append(warnings.Orphans, name)
 		}
+
 		if pkg.OutOfDate != 0 && !warnings.Ignore.Get(name) {
 			warnings.OutOfDate = append(warnings.OutOfDate, name)
 		}
@@ -80,6 +88,7 @@ func AURInfoPrint(aurClient *aur.Client, names []string, splitN int) ([]*Pkg, er
 	text.OperationInfoln(gotext.Get("Querying AUR..."))
 
 	warnings := &AURWarnings{}
+
 	info, err := AURInfo(aurClient, names, warnings, splitN)
 	if err != nil {
 		return info, err

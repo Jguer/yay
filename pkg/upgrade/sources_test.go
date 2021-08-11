@@ -22,6 +22,7 @@ import (
 )
 
 func Test_upAUR(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		remote     []alpm.IPackage
 		aurdata    map[string]*aur.Pkg
@@ -68,7 +69,9 @@ func Test_upAUR(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			rescueStdout := os.Stdout
 			r, w, _ := os.Pipe()
 			os.Stdout = w
@@ -106,6 +109,7 @@ func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr strin
 }
 
 func Test_upDevel(t *testing.T) {
+	t.Parallel()
 	var err error
 	config, err := settings.NewConfig("v0")
 	assert.NoError(t, err)
@@ -163,7 +167,7 @@ func Test_upDevel(t *testing.T) {
 								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
 							},
 						},
-						"hello-non-existant": {
+						"hello-non-existent": {
 							"github.com/Jguer/y.git": vcs.OriginInfo{
 								Protocols: []string{"https"},
 								Branch:    "0",
@@ -263,7 +267,9 @@ func Test_upDevel(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			config.Runtime.CmdBuilder.(*exe.CmdBuilder).Runner.(*MockRunner).t = t
 			got := UpDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)

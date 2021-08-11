@@ -8,13 +8,13 @@ import (
 	"github.com/Jguer/yay/v10/pkg/stringset"
 )
 
-// IntRange stores a max and min amount for range
+// IntRange stores a max and min amount for range.
 type IntRange struct {
 	min int
 	max int
 }
 
-// IntRanges is a slice of IntRange
+// IntRanges is a slice of IntRange.
 type IntRanges []IntRange
 
 func makeIntRange(min, max int) IntRange {
@@ -25,13 +25,13 @@ func makeIntRange(min, max int) IntRange {
 }
 
 // Get returns true if the argument n is included in the closed range
-// between min and max
+// between min and max.
 func (r IntRange) Get(n int) bool {
 	return n >= r.min && n <= r.max
 }
 
 // Get returns true if the argument n is included in the closed range
-// between min and max of any of the provided IntRanges
+// between min and max of any of the provided IntRanges.
 func (rs IntRanges) Get(n int) bool {
 	for _, r := range rs {
 		if r.Get(n) {
@@ -42,19 +42,21 @@ func (rs IntRanges) Get(n int) bool {
 	return false
 }
 
-// Min returns min value between a and b
+// Min returns min value between a and b.
 func Min(a, b int) int {
 	if a < b {
 		return a
 	}
+
 	return b
 }
 
-// Max returns max value between a and b
+// Max returns max value between a and b.
 func Max(a, b int) int {
 	if a < b {
 		return b
 	}
+
 	return a
 }
 
@@ -67,7 +69,7 @@ func Max(a, b int) int {
 // respectively. other holds anything that can't be parsed as an int. This is
 // intended to allow words inside of number menus. e.g. 'all' 'none' 'abort'
 // of course the implementation is up to the caller, this function mearley parses
-// the input and organizes it
+// the input and organizes it.
 func ParseNumberMenu(input string) (include, exclude IntRanges,
 	otherInclude, otherExclude stringset.StringSet) {
 	include = make(IntRanges, 0)
@@ -80,9 +82,12 @@ func ParseNumberMenu(input string) (include, exclude IntRanges,
 	})
 
 	for _, word := range words {
-		var num1 int
-		var num2 int
-		var err error
+		var (
+			num1 int
+			num2 int
+			err  error
+		)
+
 		invert := false
 		other := otherInclude
 

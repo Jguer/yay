@@ -18,6 +18,7 @@ import (
 )
 
 func TestParsing(t *testing.T) {
+	t.Parallel()
 	type source struct {
 		URL       string
 		Branch    string
@@ -53,6 +54,7 @@ func TestParsing(t *testing.T) {
 }
 
 func TestNewInfoStore(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		filePath   string
 		cmdBuilder *exe.CmdBuilder
@@ -70,7 +72,9 @@ func TestNewInfoStore(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := NewInfoStore(tt.args.filePath, tt.args.cmdBuilder)
 			assert.NotNil(t, got)
 			assert.Equal(t, []string{"--a", "--b"}, got.CmdBuilder.(*exe.CmdBuilder).GitFlags)
@@ -98,6 +102,7 @@ func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr strin
 }
 
 func TestInfoStore_NeedsUpdate(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		CmdBuilder *exe.CmdBuilder
 	}
@@ -213,7 +218,9 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			v := &InfoStore{
 				CmdBuilder: tt.fields.CmdBuilder,
 			}
@@ -224,6 +231,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 }
 
 func TestInfoStore_Update(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		OriginsByPackage map[string]OriginInfoByURL
 		CmdBuilder       *exe.CmdBuilder
@@ -258,7 +266,9 @@ func TestInfoStore_Update(t *testing.T) {
 	defer os.Remove(file.Name())
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
 				FilePath:         file.Name(),
@@ -289,6 +299,7 @@ func TestInfoStore_Update(t *testing.T) {
 }
 
 func TestInfoStore_Remove(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		OriginsByPackage map[string]OriginInfoByURL
 	}
@@ -319,7 +330,9 @@ func TestInfoStore_Remove(t *testing.T) {
 	defer os.Remove(file.Name())
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
 				FilePath:         file.Name(),

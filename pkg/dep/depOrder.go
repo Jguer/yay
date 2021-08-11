@@ -45,6 +45,7 @@ func (do *Order) orderPkgAur(pkg *aur.Pkg, dp *Pool, runtime, noDeps, noCheckDep
 	if runtime {
 		do.Runtime.Set(pkg.Name)
 	}
+
 	delete(dp.Aur, pkg.Name)
 
 	for i, deps := range ComputeCombinedDepList(pkg, noDeps, noCheckDeps) {
@@ -73,6 +74,7 @@ func (do *Order) orderPkgRepo(pkg db.IPackage, dp *Pool, runtime bool) {
 	if runtime {
 		do.Runtime.Set(pkg.Name())
 	}
+
 	delete(dp.Repo, pkg.Name())
 
 	for _, dep := range dp.AlpmExecutor.PackageDepends(pkg) {
@@ -113,7 +115,7 @@ func (do *Order) GetMake() []string {
 	return makeOnly
 }
 
-// Print prints repository packages to be downloaded
+// Print prints repository packages to be downloaded.
 func (do *Order) Print() {
 	repo := ""
 	repoMake := ""
@@ -153,6 +155,7 @@ func (do *Order) Print() {
 				if do.Runtime.Get(split.Name) {
 					pkgStr += split.Name + " "
 					aurLen++
+
 					push = true
 				} else {
 					pkgStrMake += split.Name + " "
@@ -165,15 +168,18 @@ func (do *Order) Print() {
 			pkgStrMake = pkgStrMake[:len(pkgStrMake)-1] + ")"
 		case do.Runtime.Get(base[0].Name):
 			aurLen++
+
 			push = true
 		default:
 			aurMakeLen++
+
 			pushMake = true
 		}
 
 		if push {
 			aurString += pkgStr
 		}
+
 		if pushMake {
 			aurMake += pkgStrMake
 		}

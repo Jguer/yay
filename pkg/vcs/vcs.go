@@ -16,14 +16,14 @@ import (
 )
 
 // InfoStore is a collection of OriginInfoByURL by Package.
-// Containing a map of last commit SHAs of a repo
+// Containing a map of last commit SHAs of a repo.
 type InfoStore struct {
 	OriginsByPackage map[string]OriginInfoByURL
 	FilePath         string
 	CmdBuilder       exe.GitCmdBuilder
 }
 
-// OriginInfoByURL stores the OriginInfo of each origin URL provided
+// OriginInfoByURL stores the OriginInfo of each origin URL provided.
 type OriginInfoByURL map[string]OriginInfo
 
 // OriginInfo contains the last commit sha of a repo
@@ -34,7 +34,7 @@ type OriginInfoByURL map[string]OriginInfo
 // 	],
 // 	"branch": "next",
 // 	"sha": "c1171d41467c68ffd3c46748182a16366aaaf87b"
-// }
+// }.
 type OriginInfo struct {
 	Protocols []string `json:"protocols"`
 	Branch    string   `json:"branch"`
@@ -51,12 +51,13 @@ func NewInfoStore(filePath string, cmdBuilder exe.GitCmdBuilder) *InfoStore {
 	return infoStore
 }
 
-// GetCommit parses HEAD commit from url and branch
+// GetCommit parses HEAD commit from url and branch.
 func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
 	if len(protocols) > 0 {
 		protocol := protocols[len(protocols)-1]
 
 		cmd := v.CmdBuilder.BuildGitCmd("", "ls-remote", protocol+"://"+url, branch)
+
 		stdout, _, err := v.CmdBuilder.Capture(cmd, 5)
 		if err != nil {
 			if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
@@ -65,6 +66,7 @@ func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
 			}
 
 			text.Warnln(err)
+
 			return ""
 		}
 
@@ -75,6 +77,7 @@ func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
 		}
 
 		commit := split[0]
+
 		return commit
 	}
 
@@ -87,6 +90,7 @@ func (v *InfoStore) Update(pkgName string, sources []gosrc.ArchString, mux sync.
 	info := make(OriginInfoByURL)
 	checkSource := func(source gosrc.ArchString) {
 		defer wg.Done()
+
 		url, branch, protocols := parseSource(source.Value)
 		if url == "" || branch == "" {
 			return
@@ -105,6 +109,7 @@ func (v *InfoStore) Update(pkgName string, sources []gosrc.ArchString, mux sync.
 		}
 
 		v.OriginsByPackage[pkgName] = info
+
 		text.Warnln(gotext.Get("Found git repo: %s", text.Cyan(url)))
 
 		if err := v.Save(); err != nil {
@@ -115,11 +120,12 @@ func (v *InfoStore) Update(pkgName string, sources []gosrc.ArchString, mux sync.
 
 	for _, source := range sources {
 		wg.Add(1)
+
 		go checkSource(source)
 	}
 }
 
-// parseSource returns the git url, default branch and protocols it supports
+// parseSource returns the git url, default branch and protocols it supports.
 func parseSource(source string) (url, branch string, protocols []string) {
 	split := strings.Split(source, "::")
 	source = split[len(split)-1]
@@ -128,9 +134,11 @@ func parseSource(source string) (url, branch string, protocols []string) {
 	if len(split) != 2 {
 		return "", "", nil
 	}
+
 	protocols = strings.SplitN(split[0], "+", 2)
 
 	git := false
+
 	for _, protocol := range protocols {
 		if protocol == "git" {
 			git = true
@@ -197,6 +205,7 @@ func (v *InfoStore) NeedsUpdate(infos OriginInfoByURL) bool {
 
 	for url, info := range infos {
 		alive++
+
 		go checkHash(url, info)
 	}
 
@@ -218,26 +227,29 @@ func (v *InfoStore) Save() error {
 	if err != nil || string(marshalledinfo) == "null" {
 		return err
 	}
+
 	in, err := os.OpenFile(v.FilePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
+
 	defer in.Close()
-	_, err = in.Write(marshalledinfo)
-	if err != nil {
-		return err
+
+	if _, errM := in.Write(marshalledinfo); errM != nil {
+		return errM
 	}
-	err = in.Sync()
-	return err
+
+	return in.Sync()
 }
 
-// RemovePackage removes package from VCS information
+// RemovePackage removes package from VCS information.
 func (v *InfoStore) RemovePackage(pkgs []string) {
 	updated := false
 
 	for _, pkgName := range pkgs {
 		if _, ok := v.OriginsByPackage[pkgName]; ok {
 			delete(v.OriginsByPackage, pkgName)
+
 			updated = true
 		}
 	}
@@ -249,7 +261,7 @@ func (v *InfoStore) RemovePackage(pkgs []string) {
 	}
 }
 
-// LoadStore reads a json file and populates a InfoStore structure
+// LoadStore reads a json file and populates a InfoStore structure.
 func (v InfoStore) Load() error {
 	vfile, err := os.Open(v.FilePath)
 	if !os.IsNotExist(err) && err != nil {
@@ -257,6 +269,7 @@ func (v InfoStore) Load() error {
 	}
 
 	defer vfile.Close()
+
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(vfile)
 		if err = decoder.Decode(&v.OriginsByPackage); err != nil {

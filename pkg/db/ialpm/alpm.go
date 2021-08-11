@@ -53,6 +53,7 @@ func toUsage(usages []string) alpm.Usage {
 	}
 
 	var ret alpm.Usage
+
 	for _, usage := range usages {
 		switch usage {
 		case "Sync":
@@ -72,11 +73,6 @@ func toUsage(usages []string) alpm.Usage {
 }
 
 func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error {
-	// TODO: set SigLevel
-	// sigLevel := alpm.SigPackage | alpm.SigPackageOptional | alpm.SigDatabase | alpm.SigDatabaseOptional
-	// localFileSigLevel := alpm.SigUseDefault
-	// remoteFileSigLevel := alpm.SigUseDefault
-
 	for _, repo := range pacmanConf.Repos {
 		// TODO: set SigLevel
 		alpmDB, err := alpmHandle.RegisterSyncDB(repo.Name, 0)
@@ -127,18 +123,6 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error
 		return err
 	}
 
-	/*if err := alpmHandle.SetDefaultSigLevel(sigLevel); err != nil {
-		return err
-	}
-
-	if err := alpmHandle.SetLocalFileSigLevel(localFileSigLevel); err != nil {
-		return err
-	}
-
-	if err := alpmHandle.SetRemoteFileSigLevel(remoteFileSigLevel); err != nil {
-		return err
-	}*/
-
 	if err := alpmHandle.SetUseSyslog(pacmanConf.UseSyslog); err != nil {
 		return err
 	}
@@ -180,6 +164,7 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 		str := text.Bold(gotext.Get("There are %d providers available for %s:\n", size, qp.Dep()))
 
 		size = 1
+
 		var dbName string
 
 		_ = qp.Providers(ae.handle).ForEach(func(pkg alpm.IPackage) error {
@@ -202,18 +187,22 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 			// TODO: reenable noconfirm
 			if settings.NoConfirm {
 				fmt.Println()
+
 				break
 			}
 
 			reader := bufio.NewReader(os.Stdin)
+
 			numberBuf, overflow, err := reader.ReadLine()
 			if err != nil {
 				text.Errorln(err)
+
 				break
 			}
 
 			if overflow {
 				text.Errorln(gotext.Get(" Input too long"))
+
 				continue
 			}
 
@@ -233,6 +222,7 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 			}
 
 			qp.SetUseIndex(num - 1)
+
 			break
 		}
 	}
@@ -258,12 +248,14 @@ func (ae *AlpmExecutor) RefreshHandle() error {
 	alpmSetLogCallback(alpmHandle, logCallback)
 	ae.handle = alpmHandle
 	ae.syncDBsCache = nil
+
 	ae.syncDB, err = alpmHandle.SyncDBs()
 	if err != nil {
 		return err
 	}
 
 	ae.localDB, err = alpmHandle.LocalDB()
+
 	return err
 }
 
@@ -271,6 +263,7 @@ func (ae *AlpmExecutor) LocalSatisfierExists(pkgName string) bool {
 	if _, err := ae.localDB.PkgCache().FindSatisfier(pkgName); err != nil {
 		return false
 	}
+
 	return true
 }
 
@@ -278,6 +271,7 @@ func (ae *AlpmExecutor) SyncSatisfierExists(pkgName string) bool {
 	if _, err := ae.syncDB.FindSatisfier(pkgName); err != nil {
 		return false
 	}
+
 	return true
 }
 
@@ -295,6 +289,7 @@ func (ae *AlpmExecutor) SyncSatisfier(pkgName string) alpm.IPackage {
 	if err != nil {
 		return nil
 	}
+
 	return foundPkg
 }
 
@@ -302,8 +297,10 @@ func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []alpm.IPackage {
 	groupPackages := []alpm.IPackage{}
 	_ = ae.syncDB.FindGroupPkgs(groupName).ForEach(func(pkg alpm.IPackage) error {
 		groupPackages = append(groupPackages, pkg)
+
 		return nil
 	})
+
 	return groupPackages
 }
 
@@ -313,10 +310,11 @@ func (ae *AlpmExecutor) LocalPackages() []alpm.IPackage {
 		localPackages = append(localPackages, pkg)
 		return nil
 	})
+
 	return localPackages
 }
 
-// SyncPackages searches SyncDB for packages or returns all packages if no search param is given
+// SyncPackages searches SyncDB for packages or returns all packages if no search param is given.
 func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []alpm.IPackage {
 	repoPackages := []alpm.IPackage{}
 	_ = ae.syncDB.ForEach(func(alpmDB alpm.IDB) error {
@@ -333,6 +331,7 @@ func (ae *AlpmExecutor) SyncPackages(pkgNames ...string) []alpm.IPackage {
 		}
 		return nil
 	})
+
 	return repoPackages
 }
 
@@ -341,6 +340,7 @@ func (ae *AlpmExecutor) LocalPackage(pkgName string) alpm.IPackage {
 	if pkg == nil {
 		return nil
 	}
+
 	return pkg
 }
 
@@ -348,6 +348,7 @@ func (ae *AlpmExecutor) syncDBs() []alpm.IDB {
 	if ae.syncDBsCache == nil {
 		ae.syncDBsCache = ae.syncDB.Slice()
 	}
+
 	return ae.syncDBsCache
 }
 
@@ -357,6 +358,7 @@ func (ae *AlpmExecutor) SyncPackage(pkgName string) alpm.IPackage {
 			return dbPkg
 		}
 	}
+
 	return nil
 }
 
@@ -365,10 +367,12 @@ func (ae *AlpmExecutor) SatisfierFromDB(pkgName, dbName string) alpm.IPackage {
 	if err != nil {
 		return nil
 	}
+
 	foundPkg, err := singleDB.PkgCache().FindSatisfier(pkgName)
 	if err != nil {
 		return nil
 	}
+
 	return foundPkg
 }
 
@@ -400,26 +404,27 @@ func (ae *AlpmExecutor) PackageGroups(pkg alpm.IPackage) []string {
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error) {
+	var errReturn error
+
 	slice := []db.Upgrade{}
 
-	localDB, err := ae.handle.LocalDB()
-	if err != nil {
-		return slice, err
+	localDB, errDB := ae.handle.LocalDB()
+	if errDB != nil {
+		return slice, errDB
 	}
 
-	err = ae.handle.TransInit(alpm.TransFlagNoLock)
-	if err != nil {
+	if err := ae.handle.TransInit(alpm.TransFlagNoLock); err != nil {
 		return slice, err
 	}
 
 	defer func() {
-		err = ae.handle.TransRelease()
+		errReturn = ae.handle.TransRelease()
 	}()
 
-	err = ae.handle.SyncSysupgrade(enableDowngrade)
-	if err != nil {
+	if err := ae.handle.SyncSysupgrade(enableDowngrade); err != nil {
 		return slice, err
 	}
+
 	_ = ae.handle.TransGetAdd().ForEach(func(pkg alpm.IPackage) error {
 		localVer := "-"
 		reason := alpm.PkgReasonExplicit
@@ -439,7 +444,7 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error)
 		return nil
 	})
 
-	return slice, nil
+	return slice, errReturn
 }
 
 func (ae *AlpmExecutor) BiggestPackages() []alpm.IPackage {
@@ -448,11 +453,13 @@ func (ae *AlpmExecutor) BiggestPackages() []alpm.IPackage {
 		localPackages = append(localPackages, pkg)
 		return nil
 	})
+
 	return localPackages
 }
 
 func (ae *AlpmExecutor) LastBuildTime() time.Time {
 	var lastTime time.Time
+
 	_ = ae.syncDB.ForEach(func(db alpm.IDB) error {
 		_ = db.PkgCache().ForEach(func(pkg alpm.IPackage) error {
 			thisTime := pkg.BuildDate()
@@ -480,6 +487,7 @@ func (ae *AlpmExecutor) Repos() (repos []string) {
 		repos = append(repos, db.Name())
 		return nil
 	})
+
 	return
 }
 

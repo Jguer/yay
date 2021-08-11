@@ -14,7 +14,7 @@ const (
 	ResetCode = "\x1b[0m"
 )
 
-// UseColor determines if package will emit colors
+// UseColor determines if package will emit colors.
 var UseColor = true
 
 func stylize(startCode, in string) string {
@@ -59,9 +59,12 @@ func ColorHash(name string) (output string) {
 	if !UseColor {
 		return name
 	}
+
 	var hash uint = 5381
+
 	for i := 0; i < len(name); i++ {
 		hash = uint(name[i]) + ((hash << 5) + (hash))
 	}
+
 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
 }

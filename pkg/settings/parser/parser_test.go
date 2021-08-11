@@ -7,6 +7,7 @@ import (
 )
 
 func TestOption_Add(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Args []string
 	}
@@ -31,7 +32,9 @@ func TestOption_Add(t *testing.T) {
 		}, want: []string{"c"}},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			o := &Option{
 				Args: tt.fields.Args,
 			}
@@ -42,6 +45,7 @@ func TestOption_Add(t *testing.T) {
 }
 
 func TestOption_Set(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Args []string
 	}
@@ -66,7 +70,9 @@ func TestOption_Set(t *testing.T) {
 		}, want: []string{"c"}},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			o := &Option{
 				Args: tt.fields.Args,
 			}
@@ -77,6 +83,7 @@ func TestOption_Set(t *testing.T) {
 }
 
 func TestOption_First(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Args []string
 	}
@@ -93,7 +100,9 @@ func TestOption_First(t *testing.T) {
 		}, want: ""},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			o := &Option{
 				Args: tt.fields.Args,
 			}
@@ -103,6 +112,7 @@ func TestOption_First(t *testing.T) {
 }
 
 func TestMakeArguments(t *testing.T) {
+	t.Parallel()
 	args := MakeArguments()
 	assert.NotNil(t, args)
 	assert.Equal(t, "", args.Op)
@@ -111,6 +121,7 @@ func TestMakeArguments(t *testing.T) {
 }
 
 func TestArguments_CopyGlobal(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Op      string
 		Options map[string]*Option
@@ -142,7 +153,9 @@ func TestArguments_CopyGlobal(t *testing.T) {
 		}},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
@@ -158,6 +171,7 @@ func TestArguments_CopyGlobal(t *testing.T) {
 }
 
 func TestArguments_Copy(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Op      string
 		Options map[string]*Option
@@ -188,7 +202,9 @@ func TestArguments_Copy(t *testing.T) {
 		}},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
@@ -202,6 +218,7 @@ func TestArguments_Copy(t *testing.T) {
 }
 
 func TestArguments_DelArg(t *testing.T) {
+	t.Parallel()
 	args := MakeArguments()
 	args.addParam("arch", "arg")
 	args.addParam("ask", "arg")
@@ -210,6 +227,7 @@ func TestArguments_DelArg(t *testing.T) {
 }
 
 func TestArguments_FormatArgs(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Op      string
 		Options map[string]*Option
@@ -242,7 +260,9 @@ func TestArguments_FormatArgs(t *testing.T) {
 		}, wantArgs: []string{"-Y", "--overwrite", "/tmp/a", "--overwrite", "/tmp/b", "--overwrite", "/tmp/c", "--needed"}},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
@@ -255,6 +275,7 @@ func TestArguments_FormatArgs(t *testing.T) {
 }
 
 func TestArguments_FormatGlobalArgs(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		Op      string
 		Options map[string]*Option
@@ -287,7 +308,9 @@ func TestArguments_FormatGlobalArgs(t *testing.T) {
 		}, wantArgs: []string(nil)},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			cmdArgs := &Arguments{
 				Op:      tt.fields.Op,
 				Options: tt.fields.Options,
@@ -300,6 +323,7 @@ func TestArguments_FormatGlobalArgs(t *testing.T) {
 }
 
 func Test_isArg(t *testing.T) {
+	t.Parallel()
 	got := isArg("zorg")
 	assert.False(t, got)
 

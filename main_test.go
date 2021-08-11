@@ -10,6 +10,8 @@ import (
 )
 
 func TestPacmanConf(t *testing.T) {
+	t.Parallel()
+
 	expectedPacmanConf := &pacmanconf.Config{
 		RootDir:                "/",
 		DBPath:                 "//var/lib/pacman/",

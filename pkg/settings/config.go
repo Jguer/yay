@@ -20,15 +20,15 @@ import (
 )
 
 const (
-	// Describes Sorting method for numberdisplay
+	// Describes Sorting method for numberdisplay.
 	BottomUp = iota
 	TopDown
 )
 
-// HideMenus indicates if pacman's provider menus must be hidden
+// HideMenus indicates if pacman's provider menus must be hidden.
 var HideMenus = false
 
-// NoConfirm indicates if user input should be skipped
+// NoConfirm indicates if user input should be skipped.
 var NoConfirm = false
 
 // Configuration stores yay's config.
@@ -93,14 +93,17 @@ func (c *Configuration) Save(configPath string) error {
 			return mkErr
 		}
 	}
+
 	in, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
 	defer in.Close()
+
 	if _, err = in.Write(marshalledinfo); err != nil {
 		return err
 	}
+
 	return in.Sync()
 }
 
@@ -136,9 +139,11 @@ func (c *Configuration) String() string {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "\t")
+
 	if err := enc.Encode(c); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
+
 	return buf.String()
 }
 
@@ -249,6 +254,7 @@ func (c *Configuration) load(configPath string) {
 	}
 
 	defer cfile.Close()
+
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(cfile)
 		if err = decoder.Decode(c); err != nil {
@@ -262,6 +268,7 @@ func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
 	if runner == nil {
 		runner = &exe.OSRunner{}
 	}
+
 	return &exe.CmdBuilder{
 		GitBin:           c.GitBin,
 		GitFlags:         strings.Fields(c.GitFlags),

@@ -45,6 +45,7 @@ func (dp *Pool) checkForwardConflict(name, conflict string, conflicts stringset.
 			if n != conflict {
 				n += " (" + conflict + ")"
 			}
+
 			conflicts.Add(name, n)
 		}
 	}
@@ -113,6 +114,7 @@ func (dp *Pool) checkReverseConflicts(conflicts stringset.MapStringSet) {
 		if dp.hasPackage(pkg.Name()) {
 			continue
 		}
+
 		for _, conflict := range dp.AlpmExecutor.PackageConflicts(pkg) {
 			dp.checkReverseConflict(pkg.Name(), conflict.String(), conflicts)
 		}
@@ -126,10 +128,13 @@ func (dp *Pool) CheckConflicts(useAsk, noConfirm, noDeps bool) (stringset.MapStr
 	}
 
 	var wg sync.WaitGroup
+
 	innerConflicts := make(stringset.MapStringSet)
+
 	wg.Add(2)
 
 	text.OperationInfoln(gotext.Get("Checking for conflicts..."))
+
 	go func() {
 		dp.checkForwardConflicts(conflicts)
 		dp.checkReverseConflicts(conflicts)
@@ -137,6 +142,7 @@ func (dp *Pool) CheckConflicts(useAsk, noConfirm, noDeps bool) (stringset.MapStr
 	}()
 
 	text.OperationInfoln(gotext.Get("Checking for inner conflicts..."))
+
 	go func() {
 		dp.checkInnerConflicts(innerConflicts)
 		wg.Done()
@@ -152,6 +158,7 @@ func (dp *Pool) CheckConflicts(useAsk, noConfirm, noDeps bool) (stringset.MapStr
 			for pkg := range pkgs {
 				str += " " + text.Cyan(pkg) + ","
 			}
+
 			str = strings.TrimSuffix(str, ",")
 
 			fmt.Println(str)
@@ -166,6 +173,7 @@ func (dp *Pool) CheckConflicts(useAsk, noConfirm, noDeps bool) (stringset.MapStr
 			for pkg := range pkgs {
 				str += " " + text.Cyan(pkg) + ","
 			}
+
 			str = strings.TrimSuffix(str, ",")
 
 			fmt.Println(str)
@@ -211,12 +219,15 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing, noDe
 				return
 			}
 		}
+
 		missing.Missing[dep] = append(missing.Missing[dep], stack)
+
 		return
 	}
 
 	if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
 		missing.Good.Set(dep)
+
 		combinedDepList := ComputeCombinedDepList(aurPkg, noDeps, noCheckDeps)
 		for _, deps := range combinedDepList {
 			for _, aurDep := range deps {
@@ -291,6 +302,7 @@ func (dp *Pool) CheckMissing(noDeps, noCheckDeps bool) error {
 	}
 
 	text.Errorln(gotext.Get("Could not find all required packages:"))
+
 	for dep, trees := range missing.Missing {
 		for _, tree := range trees {
 			fmt.Fprintf(os.Stderr, "\t%s", text.Cyan(dep))

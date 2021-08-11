@@ -13,7 +13,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// Verbosity settings for search
+// Verbosity settings for search.
 const (
 	numberMenu = iota
 	detailed
@@ -37,6 +37,7 @@ func editor() (editor string, args []string) {
 		} else {
 			return editor, strings.Fields(config.EditorFlags)
 		}
+
 		fallthrough
 	case os.Getenv("EDITOR") != "":
 		if editorArgs := strings.Fields(os.Getenv("EDITOR")); len(editorArgs) != 0 {
@@ -47,6 +48,7 @@ func editor() (editor string, args []string) {
 				return editor, editorArgs[1:]
 			}
 		}
+
 		fallthrough
 	case os.Getenv("VISUAL") != "":
 		if editorArgs := strings.Fields(os.Getenv("VISUAL")); len(editorArgs) != 0 {
@@ -57,6 +59,7 @@ func editor() (editor string, args []string) {
 				return editor, editorArgs[1:]
 			}
 		}
+
 		fallthrough
 	default:
 		fmt.Fprintln(os.Stderr)
@@ -65,6 +68,7 @@ func editor() (editor string, args []string) {
 
 		for {
 			text.Infoln(gotext.Get("Edit PKGBUILD with?"))
+
 			editorInput, err := getInput("")
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
@@ -81,6 +85,7 @@ func editor() (editor string, args []string) {
 				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
+
 			return editor, editorArgs[1:]
 		}
 	}
@@ -88,6 +93,7 @@ func editor() (editor string, args []string) {
 
 func getInput(defaultValue string) (string, error) {
 	text.Info()
+
 	if defaultValue != "" || settings.NoConfirm {
 		fmt.Println(defaultValue)
 		return defaultValue, nil

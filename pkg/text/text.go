@@ -8,13 +8,14 @@ import (
 	"github.com/leonelquinteros/gotext"
 )
 
-// SplitDBFromName split apart db/package to db and package
+// SplitDBFromName split apart db/package to db and package.
 func SplitDBFromName(pkg string) (db, name string) {
 	split := strings.SplitN(pkg, "/", 2)
 
 	if len(split) == 2 {
 		return split[0], split[1]
 	}
+
 	return "", split[0]
 }
 
@@ -52,12 +53,14 @@ func ContinueTask(s string, cont, noConfirm bool) bool {
 		return cont
 	}
 
-	var response string
-	var postFix string
-	yes := gotext.Get("yes")
-	no := gotext.Get("no")
-	y := string([]rune(yes)[0])
-	n := string([]rune(no)[0])
+	var (
+		response string
+		postFix  string
+		yes      = gotext.Get("yes")
+		no       = gotext.Get("no")
+		y        = string([]rune(yes)[0])
+		n        = string([]rune(no)[0])
+	)
 
 	if cont {
 		postFix = fmt.Sprintf(" [%s/%s] ", strings.ToUpper(y), n)
@@ -72,5 +75,6 @@ func ContinueTask(s string, cont, noConfirm bool) bool {
 	}
 
 	response = strings.ToLower(response)
+
 	return response == yes || response == y
 }

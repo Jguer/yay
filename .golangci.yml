@@ -14,12 +14,6 @@ linters-settings:
       - opinionated
       - performance
       - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
   gocyclo:
     min-complexity: 15
   goimports:
@@ -72,28 +66,25 @@ linters:
     - unused
     - varcheck
     - whitespace
+    - wsl
+    - godot
 
-    # disabled want to fix
-    #- scopelint
-    #- gomnd
-    #- goconst
-    #- gocyclo
-    #- funlen
-    #- dogsled
-    # disabled for now
-    #- godox
+run:
 
 issues:
-  # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
     - path: _test\.go
       linters:
-        - gomnd
+        - lll
+        - revive
+        - wsl
+        - govet
+        - godot
+        - errcheck
+        - stylecheck
+        - dupl
+        - gocritic
+        - gochecknoinits
 
   exclude:
-    - G107
     - G204
-    - commentedOutCode
-
-run:
-  tests: false

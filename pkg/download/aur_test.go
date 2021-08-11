@@ -15,6 +15,7 @@ import (
 )
 
 func TestGetAURPkgbuild(t *testing.T) {
+	t.Parallel()
 	pkgBuildHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write([]byte(gitExtrasPKGBUILD))
@@ -24,7 +25,6 @@ func TestGetAURPkgbuild(t *testing.T) {
 		w.WriteHeader(404)
 	})
 
-	PKGBuild := httptest.NewServer(pkgBuildHandler)
 	type args struct {
 		handler http.Handler
 		pkgName string
@@ -55,7 +55,10 @@ func TestGetAURPkgbuild(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			PKGBuild := httptest.NewServer(pkgBuildHandler)
 			PKGBuild.Config.Handler = tt.args.handler
 			got, err := AURPKGBUILD(PKGBuild.Client(), tt.args.pkgName, PKGBuild.URL)
 			if tt.wantErr {
@@ -73,6 +76,7 @@ func TestGetAURPkgbuild(t *testing.T) {
 // WHEN AURPKGBUILDRepo is called
 // THEN a clone command should be formed
 func TestAURPKGBUILDRepo(t *testing.T) {
+	t.Parallel()
 	cmdRunner := &testRunner{}
 	cmdBuilder := &testGitBuilder{
 		index: 0,
@@ -93,6 +97,7 @@ func TestAURPKGBUILDRepo(t *testing.T) {
 // WHEN AURPKGBUILDRepo is called
 // THEN a pull command should be formed
 func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
@@ -114,8 +119,8 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 	assert.Equal(t, false, cloned)
 }
 
-// GIVEN
 func TestAURPKGBUILDRepos(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 

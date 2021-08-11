@@ -17,10 +17,11 @@ import (
 	"github.com/Jguer/yay/v10/pkg/upgrade"
 )
 
-// PrintSearch handles printing search results in a given format
+// PrintSearch handles printing search results in a given format.
 func (q aurQuery) printSearch(start int, dbExecutor db.Executor) {
 	for i := range q {
 		var toprint string
+
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
 			case settings.TopDown:
@@ -55,6 +56,7 @@ func (q aurQuery) printSearch(start int, dbExecutor db.Executor) {
 				toprint += text.Bold(text.Green(gotext.Get("(Installed)")))
 			}
 		}
+
 		toprint += "\n    " + q[i].Description
 		fmt.Println(toprint)
 	}
@@ -64,6 +66,7 @@ func (q aurQuery) printSearch(start int, dbExecutor db.Executor) {
 func (s repoQuery) printSearch(dbExecutor db.Executor) {
 	for i, res := range s {
 		var toprint string
+
 		if config.SearchMode == numberMenu {
 			switch config.SortMode {
 			case settings.TopDown:
@@ -153,7 +156,6 @@ func biggestPackages(dbExecutor db.Executor) {
 	for i := 0; i < 10; i++ {
 		fmt.Printf("%s: %s\n", text.Bold(pkgS[i].Name()), text.Cyan(text.Human(pkgS[i].ISize())))
 	}
-	// Could implement size here as well, but we just want the general idea
 }
 
 // localStatistics prints installed packages statistics.
@@ -181,27 +183,28 @@ func localStatistics(dbExecutor db.Executor) error {
 	return nil
 }
 
-// TODO: Make it less hacky
 func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
+
 	if err != nil {
 		return err
 	}
+
 	fmt.Println(len(aurUp.Up) + len(repoUp.Up))
 
 	return nil
 }
 
-// TODO: Make it less hacky
 func printUpdateList(cmdArgs *parser.Arguments, dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
+
 	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
 		os.Stdout = old
@@ -210,6 +213,7 @@ func printUpdateList(cmdArgs *parser.Arguments, dbExecutor db.Executor, enableDo
 
 	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
+
 	if err != nil {
 		return err
 	}
@@ -224,6 +228,7 @@ func printUpdateList(cmdArgs *parser.Arguments, dbExecutor db.Executor, enableDo
 				} else {
 					fmt.Printf("%s %s -> %s\n", text.Bold(pkg.Name), text.Green(pkg.LocalVersion), text.Green(pkg.RemoteVersion))
 				}
+
 				delete(targets, pkg.Name)
 			}
 		}
@@ -237,6 +242,7 @@ func printUpdateList(cmdArgs *parser.Arguments, dbExecutor db.Executor, enableDo
 				} else {
 					fmt.Printf("%s %s -> %s\n", text.Bold(pkg.Name), text.Green(pkg.LocalVersion), text.Green(pkg.RemoteVersion))
 				}
+
 				delete(targets, pkg.Name)
 			}
 		}
