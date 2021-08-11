@@ -11,12 +11,14 @@ import (
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/download"
 	"github.com/Jguer/yay/v10/pkg/settings"
+	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 // yay -Gp
-func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string) error {
-	pkgbuilds, err := download.PKGBUILDs(dbExecutor, httpClient, targets, config.Runtime.Mode)
+func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string,
+	mode parser.TargetMode, aurURL string) error {
+	pkgbuilds, err := download.PKGBUILDs(dbExecutor, httpClient, targets, aurURL, mode)
 	if err != nil {
 		text.Errorln(err)
 	}

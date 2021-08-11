@@ -901,36 +901,6 @@ func buildInstallPkgbuilds(
 	remoteNamesCache := stringset.FromSlice(remoteNames)
 	localNamesCache := stringset.FromSlice(localNames)
 
-	doInstall := func() error {
-		if len(arguments.Targets) == 0 {
-			return nil
-		}
-
-		if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
-			arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
-			return errShow
-		}
-
-		if errStore := config.Runtime.VCSStore.Save(); err != nil {
-			fmt.Fprintln(os.Stderr, errStore)
-		}
-
-		if errDeps := asdeps(cmdArgs, deps); err != nil {
-			return errDeps
-		}
-		if errExps := asexp(cmdArgs, exp); err != nil {
-			return errExps
-		}
-
-		settings.NoConfirm = oldConfirm
-
-		arguments.ClearTargets()
-		deps = make([]string, 0)
-		exp = make([]string, 0)
-		settings.NoConfirm = true
-		return nil
-	}
-
 	for _, base := range do.Aur {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
@@ -951,7 +921,10 @@ func buildInstallPkgbuilds(
 		}
 
 		if !satisfied || !config.BatchInstall {
-			err = doInstall()
+			err = doInstall(arguments, cmdArgs, deps, exp)
+			arguments.ClearTargets()
+			deps = make([]string, 0)
+			exp = make([]string, 0)
 			if err != nil {
 				return err
 			}
@@ -1053,46 +1026,14 @@ func buildInstallPkgbuilds(
 			}
 		}
 
-		doAddTarget := func(name string, optional bool) error {
-			pkgdest, ok := pkgdests[name]
-			if !ok {
-				if optional {
-					return nil
-				}
-
-				return errors.New(gotext.Get("could not find PKGDEST for: %s", name))
-			}
-
-			if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
-				if optional {
-					return nil
-				}
-
-				return errors.New(
-					gotext.Get(
-						"the PKGDEST for %s is listed by makepkg but does not exist: %s",
-						name, pkgdest))
-			}
-
-			arguments.AddTarget(pkgdest)
-			if cmdArgs.ExistsArg("asdeps", "asdep") {
-				deps = append(deps, name)
-			} else if cmdArgs.ExistsArg("asexplicit", "asexp") {
-				exp = append(exp, name)
-			} else if !dp.Explicit.Get(name) && !localNamesCache.Get(name) && !remoteNamesCache.Get(name) {
-				deps = append(deps, name)
-			}
-
-			return nil
-		}
-
+		var errAdd error
 		for _, split := range base {
-			if errAdd := doAddTarget(split.Name, false); errAdd != nil {
-				return errAdd
-			}
-
-			if errAddDebug := doAddTarget(split.Name+"-debug", true); errAddDebug != nil {
-				return errAddDebug
+			for _, suffix := range []string{"", "-debug"} {
+				deps, exp, errAdd = doAddTarget(dp, localNamesCache, remoteNamesCache,
+					arguments, cmdArgs, pkgdests, deps, exp, split.Name+suffix, false)
+				if errAdd != nil {
+					return errAdd
+				}
 			}
 		}
 
@@ -1106,7 +1047,63 @@ func buildInstallPkgbuilds(
 		wg.Wait()
 	}
 
-	err = doInstall()
+	err = doInstall(arguments, cmdArgs, deps, exp)
 	settings.NoConfirm = oldConfirm
 	return err
+}
+
+func doInstall(arguments, cmdArgs *parser.Arguments, pkgDeps, pkgExp []string) error {
+	if len(arguments.Targets) == 0 {
+		return nil
+	}
+
+	if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
+		return errShow
+	}
+
+	if errStore := config.Runtime.VCSStore.Save(); errStore != nil {
+		fmt.Fprintln(os.Stderr, errStore)
+	}
+
+	if errDeps := asdeps(cmdArgs, pkgDeps); errDeps != nil {
+		return errDeps
+	}
+
+	return asexp(cmdArgs, pkgExp)
+}
+
+func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.StringSet,
+	arguments, cmdArgs *parser.Arguments, pkgdests map[string]string,
+	deps, exp []string, name string, optional bool) (newDeps, newExp []string, err error) {
+	pkgdest, ok := pkgdests[name]
+	if !ok {
+		if optional {
+			return deps, exp, nil
+		}
+
+		return deps, exp, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
+	}
+
+	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
+		if optional {
+			return deps, exp, nil
+		}
+
+		return deps, exp, errors.New(
+			gotext.Get(
+				"the PKGDEST for %s is listed by makepkg but does not exist: %s",
+				name, pkgdest))
+	}
+
+	arguments.AddTarget(pkgdest)
+	if cmdArgs.ExistsArg("asdeps", "asdep") {
+		deps = append(deps, name)
+	} else if cmdArgs.ExistsArg("asexplicit", "asexp") {
+		exp = append(exp, name)
+	} else if !dp.Explicit.Get(name) && !localNamesCache.Get(name) && !remoteNamesCache.Get(name) {
+		deps = append(deps, name)
+	}
+
+	return deps, exp, nil
 }

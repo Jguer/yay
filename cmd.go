@@ -282,7 +282,7 @@ func handleYay(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 
 func handleGetpkgbuild(cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("p", "print") {
-		return printPkgbuilds(dbExecutor, config.Runtime.HTTPClient, cmdArgs.Targets)
+		return printPkgbuilds(dbExecutor, config.Runtime.HTTPClient, cmdArgs.Targets, config.Runtime.Mode, config.AURURL)
 	}
 	return getPkgbuilds(dbExecutor, config, cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }

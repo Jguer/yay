@@ -6,6 +6,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/Jguer/go-alpm/v2"
+
+	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
 )
 
@@ -29,9 +32,10 @@ type testGitBuilder struct {
 func (t *testGitBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
 	cmd := t.parentBuilder.BuildGitCmd(dir, extraArgs...)
 
-	assert.Equal(t.test, t.want, cmd.String())
+	if t.want != "" {
+		assert.Equal(t.test, t.want, cmd.String())
+	}
 
-	t.index += 1
 	return cmd
 }
 
@@ -41,4 +45,60 @@ func (c *testGitBuilder) Show(cmd *exec.Cmd) error {
 
 func (c *testGitBuilder) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
 	return c.parentBuilder.Capture(cmd, timeout)
+}
+
+type (
+	testDB struct {
+		alpm.IDB
+		name string
+	}
+	testPackage struct {
+		db.IPackage
+		name string
+		base string
+		db   *testDB
+	}
+	testDBSearcher struct {
+		absPackagesDB map[string]string
+	}
+)
+
+func (d *testDB) Name() string {
+	return d.name
+}
+
+func (p *testPackage) Name() string {
+	return p.name
+}
+
+func (p *testPackage) Base() string {
+	return p.base
+}
+
+func (p *testPackage) DB() alpm.IDB {
+	return p.db
+}
+
+func (d *testDBSearcher) SyncPackage(name string) db.IPackage {
+	if v, ok := d.absPackagesDB[name]; ok {
+		return &testPackage{
+			name: name,
+			base: name,
+			db:   &testDB{name: v},
+		}
+	}
+
+	return nil
+}
+
+func (d *testDBSearcher) SatisfierFromDB(name string, db string) db.IPackage {
+	if v, ok := d.absPackagesDB[name]; ok && v == db {
+		return &testPackage{
+			name: name,
+			base: name,
+			db:   &testDB{name: v},
+		}
+	}
+
+	return nil
 }
