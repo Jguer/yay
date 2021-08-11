@@ -15,6 +15,10 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
+type httpRequestDoer interface {
+	Get(string) (*http.Response, error)
+}
+
 type DBSearcher interface {
 	SyncPackage(string) db.IPackage
 	SatisfierFromDB(string, string) db.IPackage

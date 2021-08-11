@@ -1,7 +1,10 @@
 package download
 
 import (
+	"io"
+	"net/http"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,6 +64,13 @@ type (
 	testDBSearcher struct {
 		absPackagesDB map[string]string
 	}
+
+	testClient struct {
+		t       *testing.T
+		wantURL string
+		body    string
+		status  int
+	}
 )
 
 func (d *testDB) Name() string {
@@ -101,4 +111,9 @@ func (d *testDBSearcher) SatisfierFromDB(name string, db string) db.IPackage {
 	}
 
 	return nil
+}
+
+func (t *testClient) Get(url string) (*http.Response, error) {
+	assert.Equal(t.t, t.wantURL, url)
+	return &http.Response{StatusCode: t.status, Body: io.NopCloser(strings.NewReader(t.body))}, nil
 }

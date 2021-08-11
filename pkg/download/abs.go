@@ -57,7 +57,7 @@ func getPackageRepoURL(db string) (string, error) {
 }
 
 // ABSPKGBUILD retrieves the PKGBUILD file to a dest directory.
-func ABSPKGBUILD(httpClient *http.Client, dbName, pkgName string) ([]byte, error) {
+func ABSPKGBUILD(httpClient httpRequestDoer, dbName, pkgName string) ([]byte, error) {
 	packageURL, err := getPackageURL(dbName, pkgName)
 	if err != nil {
 		return nil, err
