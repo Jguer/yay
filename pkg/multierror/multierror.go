@@ -2,13 +2,13 @@ package multierror
 
 import "sync"
 
-// MultiError type handles error accumulation from goroutines
+// MultiError type handles error accumulation from goroutines.
 type MultiError struct {
 	Errors []error
 	mux    sync.Mutex
 }
 
-// Error turns the MultiError structure into a string
+// Error turns the MultiError structure into a string.
 func (err *MultiError) Error() string {
 	str := ""
 
@@ -19,7 +19,7 @@ func (err *MultiError) Error() string {
 	return str[:len(str)-1]
 }
 
-// Add adds an error to the Multierror structure
+// Add adds an error to the Multierror structure.
 func (err *MultiError) Add(e error) {
 	if e == nil {
 		return
@@ -31,7 +31,7 @@ func (err *MultiError) Add(e error) {
 }
 
 // Return is used as a wrapper on return on whether to return the
-// MultiError Structure if errors exist or nil instead of delivering an empty structure
+// MultiError Structure if errors exist or nil instead of delivering an empty structure.
 func (err *MultiError) Return() error {
 	if len(err.Errors) > 0 {
 		return err

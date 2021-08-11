@@ -111,7 +111,7 @@ func (p *Package) Files() []alpm.File {
 	panic("not implemented") // TODO: Implement
 }
 
-// ContainsFile checks if the path is in the package filelist
+// ContainsFile checks if the path is in the package filelist.
 func (p *Package) ContainsFile(path string) (alpm.File, error) {
 	panic("not implemented") // TODO: Implement
 }
@@ -166,13 +166,13 @@ func (p *Package) URL() string {
 	panic("not implemented") // TODO: Implement
 }
 
-// ComputeRequiredBy returns the names of reverse dependencies of a package
+// ComputeRequiredBy returns the names of reverse dependencies of a package.
 func (p *Package) ComputeRequiredBy() []string {
 	panic("not implemented") // TODO: Implement
 }
 
 // ComputeOptionalFor returns the names of packages that optionally
-// require the given package
+// require the given package.
 func (p *Package) ComputeOptionalFor() []string {
 	panic("not implemented") // TODO: Implement
 }

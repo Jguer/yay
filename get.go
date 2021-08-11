@@ -8,15 +8,14 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/download"
 	"github.com/Jguer/yay/v10/pkg/settings"
 	"github.com/Jguer/yay/v10/pkg/settings/parser"
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// yay -Gp
-func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []string,
+// yay -Gp.
+func printPkgbuilds(dbExecutor download.DBSearcher, httpClient *http.Client, targets []string,
 	mode parser.TargetMode, aurURL string) error {
 	pkgbuilds, err := download.PKGBUILDs(dbExecutor, httpClient, targets, aurURL, mode)
 	if err != nil {
@@ -32,11 +31,13 @@ func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []s
 
 	if len(pkgbuilds) != len(targets) {
 		missing := []string{}
+
 		for _, target := range targets {
 			if _, ok := pkgbuilds[target]; !ok {
 				missing = append(missing, target)
 			}
 		}
+
 		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
 
 		return fmt.Errorf("")
@@ -45,13 +46,14 @@ func printPkgbuilds(dbExecutor db.Executor, httpClient *http.Client, targets []s
 	return nil
 }
 
-// yay -G
-func getPkgbuilds(dbExecutor db.Executor, config *settings.Configuration, targets []string,
+// yay -G.
+func getPkgbuilds(dbExecutor download.DBSearcher, config *settings.Configuration, targets []string,
 	force bool) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
+
 	cloned, errD := download.PKGBUILDRepos(dbExecutor,
 		config.Runtime.CmdBuilder, targets, config.Runtime.Mode, config.AURURL, wd, force)
 	if errD != nil {
@@ -60,11 +62,13 @@ func getPkgbuilds(dbExecutor db.Executor, config *settings.Configuration, target
 
 	if len(targets) != len(cloned) {
 		missing := []string{}
+
 		for _, target := range targets {
 			if _, ok := cloned[target]; !ok {
 				missing = append(missing, target)
 			}
 		}
+
 		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
 
 		err = fmt.Errorf("")

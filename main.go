@@ -41,6 +41,7 @@ func initAlpm(cmdArgs *parser.Arguments, pacmanConfigPath string) (*pacmanconf.C
 		if stderr != "" {
 			cmdErr = fmt.Errorf("%s\n%s", err, stderr)
 		}
+
 		return nil, false, cmdErr
 	}
 
@@ -69,6 +70,7 @@ func initAlpm(cmdArgs *parser.Arguments, pacmanConfigPath string) (*pacmanconf.C
 	}
 
 	useColor := pacmanConf.Color && term.IsTerminal(int(os.Stdout.Fd()))
+
 	switch value, _, _ := cmdArgs.GetArg("color"); value {
 	case "always":
 		useColor = true
@@ -83,9 +85,13 @@ func initAlpm(cmdArgs *parser.Arguments, pacmanConfigPath string) (*pacmanconf.C
 
 func main() {
 	var err error
+
 	ret := 0
+
 	defer func() { os.Exit(ret) }()
+
 	initGotext()
+
 	if os.Geteuid() == 0 {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
@@ -95,17 +101,21 @@ func main() {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
 		}
+
 		ret = 1
+
 		return
 	}
 
 	cmdArgs := parser.MakeArguments()
-	err = config.ParseCommandLine(cmdArgs)
-	if err != nil {
+
+	if err = config.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
 		}
+
 		ret = 1
+
 		return
 	}
 
@@ -116,14 +126,18 @@ func main() {
 	}
 
 	var useColor bool
+
 	config.Runtime.PacmanConf, useColor, err = initAlpm(cmdArgs, config.PacmanConf)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
 		}
+
 		ret = 1
+
 		return
 	}
+
 	config.Runtime.CmdBuilder.SetPacmanDBPath(config.Runtime.PacmanConf.DBPath)
 
 	text.UseColor = useColor
@@ -133,7 +147,9 @@ func main() {
 		if str := err.Error(); str != "" {
 			fmt.Fprintln(os.Stderr, str)
 		}
+
 		ret = 1
+
 		return
 	}
 
@@ -153,6 +169,7 @@ func main() {
 
 		// fallback
 		ret = 1
+
 		return
 	}
 }

@@ -8,10 +8,12 @@ import (
 
 func TestLessRunes(t *testing.T) {
 	t.Parallel()
+
 	type args struct {
 		iRunes []rune
 		jRunes []rune
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -27,8 +29,11 @@ func TestLessRunes(t *testing.T) {
 		{name: "longerSecondArg", args: args{iRunes: []rune{'a'}, jRunes: []rune{'a', 'b'}}, want: true},
 		{name: "utf8 less", args: args{iRunes: []rune{'世', '2', '0'}, jRunes: []rune{'世', '界', '3'}}, want: true},
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := LessRunes(tt.args.iRunes, tt.args.jRunes)
 			assert.Equal(t, tt.want, got)
 		})

@@ -64,5 +64,6 @@ func printRange(names []string) {
 	for _, name := range names {
 		fmt.Print("  " + text.Cyan(name))
 	}
+
 	fmt.Println()
 }

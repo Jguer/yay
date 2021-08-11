@@ -8,7 +8,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively
+// GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively.
 func GetPackageNamesBySource(dbExecutor db.Executor) (local, remote []string, err error) {
 	for _, localpkg := range dbExecutor.LocalPackages() {
 		pkgName := localpkg.Name()
@@ -18,6 +18,7 @@ func GetPackageNamesBySource(dbExecutor db.Executor) (local, remote []string, er
 			remote = append(remote, pkgName)
 		}
 	}
+
 	return local, remote, err
 }
 
@@ -32,6 +33,7 @@ func GetRemotePackages(dbExecutor db.Executor) (
 			remoteNames = append(remoteNames, pkgName)
 		}
 	}
+
 	return remote, remoteNames
 }
 

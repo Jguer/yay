@@ -58,7 +58,9 @@ func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
 	}
 
 	cmd := exec.Command(c.GitBin, args...)
+
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+
 	return cmd
 }
 
@@ -80,6 +82,7 @@ func (c *CmdBuilder) BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd 
 
 	cmd := exec.Command(c.MakepkgBin, args...)
 	cmd.Dir = dir
+
 	return cmd
 }
 
@@ -99,6 +102,7 @@ func (c *CmdBuilder) BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMo
 	argArr = append(argArr, c.PacmanBin)
 	argArr = append(argArr, args.FormatGlobals()...)
 	argArr = append(argArr, args.FormatArgs()...)
+
 	if noConfirm {
 		argArr = append(argArr, "--noconfirm")
 	}
@@ -109,10 +113,11 @@ func (c *CmdBuilder) BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMo
 	if needsRoot {
 		waitLock(c.PacmanDBPath)
 	}
+
 	return exec.Command(argArr[0], argArr[1:]...)
 }
 
-// waitLock will lock yay checking the status of db.lck until it does not exist
+// waitLock will lock yay checking the status of db.lck until it does not exist.
 func waitLock(dbPath string) {
 	lockDBPath := filepath.Join(dbPath, "db.lck")
 	if _, err := os.Stat(lockDBPath); err != nil {
@@ -124,8 +129,10 @@ func waitLock(dbPath string) {
 
 	for {
 		time.Sleep(3 * time.Second)
+
 		if _, err := os.Stat(lockDBPath); err != nil {
 			fmt.Println()
+
 			return
 		}
 	}
@@ -133,6 +140,7 @@ func waitLock(dbPath string) {
 
 func (c *CmdBuilder) SudoLoop() {
 	c.updateSudo()
+
 	go c.sudoLoopBackground()
 }
 

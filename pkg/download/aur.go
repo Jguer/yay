@@ -14,8 +14,6 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-var AURPackageURL = "https://aur.archlinux.org/cgit/aur.git"
-
 func AURPKGBUILD(httpClient *http.Client, pkgName, aurURL string) ([]byte, error) {
 	values := url.Values{}
 	values.Set("h", pkgName)
@@ -69,6 +67,7 @@ func AURPKGBUILDRepos(
 			newClone, err := AURPKGBUILDRepo(cmdBuilder, aurURL, target, dest, force)
 
 			progress := 0
+
 			if err != nil {
 				errs.Add(err)
 			} else {

@@ -26,6 +26,7 @@ type item struct {
 
 func (item *item) print(buildTime time.Time, all, quiet bool) {
 	var fd string
+
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
 	if err != nil {
@@ -72,6 +73,7 @@ func PrintNewsFeed(client *http.Client, cutOffDate time.Time, sortMode int, all,
 	}
 
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -80,8 +82,7 @@ func PrintNewsFeed(client *http.Client, cutOffDate time.Time, sortMode int, all,
 	rssGot := rss{}
 
 	d := xml.NewDecoder(bytes.NewReader(body))
-	err = d.Decode(&rssGot)
-	if err != nil {
+	if err := d.Decode(&rssGot); err != nil {
 		return err
 	}
 
@@ -100,18 +101,21 @@ func PrintNewsFeed(client *http.Client, cutOffDate time.Time, sortMode int, all,
 
 // Crude html parsing, good enough for the arch news
 // This is only displayed in the terminal so there should be no security
-// concerns
+// concerns.
 func parseNews(str string) string {
-	var buffer bytes.Buffer
-	var tagBuffer bytes.Buffer
-	var escapeBuffer bytes.Buffer
-	inTag := false
-	inEscape := false
+	var (
+		buffer       bytes.Buffer
+		tagBuffer    bytes.Buffer
+		escapeBuffer bytes.Buffer
+		inTag        = false
+		inEscape     = false
+	)
 
 	for _, char := range str {
 		if inTag {
 			if char == '>' {
 				inTag = false
+
 				switch tagBuffer.String() {
 				case "code":
 					buffer.WriteString(text.CyanCode)
@@ -125,32 +129,40 @@ func parseNews(str string) string {
 			}
 
 			tagBuffer.WriteRune(char)
+
 			continue
 		}
 
 		if inEscape {
 			if char == ';' {
 				inEscape = false
+
 				escapeBuffer.WriteRune(char)
 				s := html.UnescapeString(escapeBuffer.String())
 				buffer.WriteString(s)
+
 				continue
 			}
 
 			escapeBuffer.WriteRune(char)
+
 			continue
 		}
 
 		if char == '<' {
 			inTag = true
+
 			tagBuffer.Reset()
+
 			continue
 		}
 
 		if char == '&' {
 			inEscape = true
+
 			escapeBuffer.Reset()
 			escapeBuffer.WriteRune(char)
+
 			continue
 		}
 
@@ -158,5 +170,6 @@ func parseNews(str string) string {
 	}
 
 	buffer.WriteString(text.ResetCode)
+
 	return buffer.String()
 }

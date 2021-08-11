@@ -20,6 +20,7 @@ func (o *Option) Add(args ...string) {
 		o.Args = args
 		return
 	}
+
 	o.Args = append(o.Args, args...)
 }
 
@@ -27,6 +28,7 @@ func (o *Option) First() string {
 	if o.Args == nil || len(o.Args) == 0 {
 		return ""
 	}
+
 	return o.Args[0]
 }
 
@@ -70,6 +72,7 @@ func MakeArguments() *Arguments {
 
 func (a *Arguments) CopyGlobal() *Arguments {
 	cp := MakeArguments()
+
 	for k, v := range a.Options {
 		if v.Global {
 			cp.Options[k] = v
@@ -110,44 +113,44 @@ func (a *Arguments) NeedRoot(mode TargetMode) bool {
 		if a.ExistsArg("k", "check") {
 			return false
 		}
+
 		return true
 	case "F", "files":
 		if a.ExistsArg("y", "refresh") {
 			return true
 		}
+
 		return false
 	case "Q", "query":
 		if a.ExistsArg("k", "check") {
 			return true
 		}
+
 		return false
 	case "R", "remove":
 		if a.ExistsArg("p", "print", "print-format") {
 			return false
 		}
+
 		return true
 	case "S", "sync":
-		if a.ExistsArg("y", "refresh") {
+		switch {
+		case a.ExistsArg("y", "refresh"):
 			return true
-		}
-		if a.ExistsArg("p", "print", "print-format") {
+		case a.ExistsArg("p", "print", "print-format"):
+			return false
+		case a.ExistsArg("s", "search"):
+			return false
+		case a.ExistsArg("l", "list"):
+			return false
+		case a.ExistsArg("g", "groups"):
+			return false
+		case a.ExistsArg("i", "info"):
+			return false
+		case a.ExistsArg("c", "clean") && mode == ModeAUR:
 			return false
 		}
-		if a.ExistsArg("s", "search") {
-			return false
-		}
-		if a.ExistsArg("l", "list") {
-			return false
-		}
-		if a.ExistsArg("g", "groups") {
-			return false
-		}
-		if a.ExistsArg("i", "info") {
-			return false
-		}
-		if a.ExistsArg("c", "clean") && mode == ModeAUR {
-			return false
-		}
+
 		return true
 	case "U", "upgrade":
 		return true
@@ -162,6 +165,7 @@ func (a *Arguments) addOP(op string) error {
 	}
 
 	a.Op = op
+
 	return nil
 }
 
@@ -179,6 +183,7 @@ func (a *Arguments) addParam(option, arg string) error {
 	if isGlobal(option) {
 		a.Options[option].Global = true
 	}
+
 	return nil
 }
 
@@ -189,16 +194,18 @@ func (a *Arguments) AddArg(options ...string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
-// Multiple args acts as an OR operator
+// Multiple args acts as an OR operator.
 func (a *Arguments) ExistsArg(options ...string) bool {
 	for _, option := range options {
 		if _, exists := a.Options[option]; exists {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -230,13 +237,14 @@ func (a *Arguments) ClearTargets() {
 	a.Targets = make([]string, 0)
 }
 
-// Multiple args acts as an OR operator
+// Multiple args acts as an OR operator.
 func (a *Arguments) ExistsDouble(options ...string) bool {
 	for _, option := range options {
 		if value, exists := a.Options[option]; exists {
 			return len(value.Args) >= 2
 		}
 	}
+
 	return false
 }
 
@@ -258,6 +266,7 @@ func (a *Arguments) FormatArgs() (args []string) {
 			}
 		}
 	}
+
 	return args
 }
 
@@ -266,6 +275,7 @@ func (a *Arguments) FormatGlobals() (args []string) {
 		if !arg.Global {
 			continue
 		}
+
 		formattedOption := formatArg(option)
 
 		for _, value := range arg.Args {
@@ -275,6 +285,7 @@ func (a *Arguments) FormatGlobals() (args []string) {
 			}
 		}
 	}
+
 	return args
 }
 
@@ -534,7 +545,7 @@ func hasParam(arg string) bool {
 }
 
 // Parses short hand options such as:
-// -Syu -b/some/path -
+// -Syu -b/some/path -.
 func (a *Arguments) parseShortOption(arg, param string) (usedNext bool, err error) {
 	if arg == "-" {
 		err = a.AddArg("-")
@@ -568,7 +579,7 @@ func (a *Arguments) parseShortOption(arg, param string) (usedNext bool, err erro
 }
 
 // Parses full length options such as:
-// --sync --refresh --sysupgrade --dbpath /some/path --
+// --sync --refresh --sysupgrade --dbpath /some/path --.
 func (a *Arguments) parseLongOption(arg, param string) (usedNext bool, err error) {
 	if arg == "--" {
 		err = a.AddArg(arg)
@@ -648,6 +659,7 @@ func (a *Arguments) Parse() error {
 		if err := a.parseStdin(); err != nil {
 			return err
 		}
+
 		a.DelArg("-")
 
 		file, err := os.Open("/dev/tty")

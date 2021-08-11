@@ -79,6 +79,7 @@ intervention when you hit this message:&lt;/p&gt;
 `
 
 func TestPrintNewsFeed(t *testing.T) {
+	t.Parallel()
 	layout := "2006-01-02"
 	str := "2020-04-13"
 	lastNewsTime, _ := time.Parse(layout, str)
@@ -100,13 +101,15 @@ func TestPrintNewsFeed(t *testing.T) {
 		{name: "latest-quiet-topdown", args: args{sortMode: 1, cutOffDate: lastNewsTime, all: false, quiet: true}, wantErr: false},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			defer gock.Off()
-
 			gock.New("https://archlinux.org").
 				Get("/feeds/news").
 				Reply(200).
 				BodyString(sampleNews)
+
+			defer gock.Off()
+
 			rescueStdout := os.Stdout
 			r, w, _ := os.Pipe()
 			os.Stdout = w

@@ -17,7 +17,7 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// CleanDependencies removes all dangling dependencies in system
+// CleanDependencies removes all dangling dependencies in system.
 func cleanDependencies(cmdArgs *parser.Arguments, dbExecutor db.Executor, removeOptional bool) error {
 	hanging := hangingPackages(removeOptional, dbExecutor)
 	if len(hanging) != 0 {
@@ -27,7 +27,7 @@ func cleanDependencies(cmdArgs *parser.Arguments, dbExecutor db.Executor, remove
 	return nil
 }
 
-// CleanRemove sends a full removal command to pacman with the pkgName slice
+// CleanRemove sends a full removal command to pacman with the pkgName slice.
 func cleanRemove(cmdArgs *parser.Arguments, pkgNames []string) error {
 	if len(pkgNames) == 0 {
 		return nil
@@ -107,6 +107,7 @@ func cleanAUR(keepInstalled, keepCurrent, removeAll bool, dbExecutor db.Executor
 	}
 
 	cachedPackages := make([]string, 0, len(files))
+
 	for _, file := range files {
 		if !file.IsDir() {
 			continue
@@ -179,10 +180,12 @@ func cleanUntracked() error {
 		if isGitRepository(dir) {
 			if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, "clean", "-fx")); err != nil {
 				text.Warnln(gotext.Get("Unable to clean:"), dir)
+
 				return err
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -217,6 +220,7 @@ func cleanBuilds(bases []dep.Base) {
 	for i, base := range bases {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
 		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
+
 		if err := os.RemoveAll(dir); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

@@ -9,6 +9,7 @@ import (
 )
 
 func TestAlpmExecutor(t *testing.T) {
+	t.Parallel()
 	pacmanConf := &pacmanconf.Config{
 		RootDir:                "/",
 		DBPath:                 "/var/lib/pacman/",

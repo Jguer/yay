@@ -15,10 +15,12 @@ import (
 	"github.com/Jguer/yay/v10/pkg/text"
 )
 
-// createDevelDB forces yay to create a DB of the existing development packages
+// createDevelDB forces yay to create a DB of the existing development packages.
 func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error {
-	var mux sync.Mutex
-	var wg sync.WaitGroup
+	var (
+		mux sync.Mutex
+		wg  sync.WaitGroup
+	)
 
 	_, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
 	if err != nil {
@@ -34,6 +36,7 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 	toSkip := pkgbuildsToSkip(bases, stringset.FromSlice(remoteNames))
 
 	targets := make([]string, 0, len(bases))
+
 	for _, base := range bases {
 		if !toSkip.Get(base.Pkgbase()) {
 			targets = append(targets, base.Pkgbase())
@@ -60,11 +63,13 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 	for i := range srcinfos {
 		for iP := range srcinfos[i].Packages {
 			wg.Add(1)
+
 			go config.Runtime.VCSStore.Update(srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
 		}
 	}
 
 	wg.Wait()
 	text.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
+
 	return err
 }

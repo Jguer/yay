@@ -81,7 +81,7 @@ func makePool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
 	return dp
 }
 
-// Includes db/ prefixes and group installs
+// Includes db/ prefixes and group installs.
 func (dp *Pool) ResolveTargets(pkgs []string,
 	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool, assumeInstalled []string) error {
@@ -109,6 +109,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 		if target.DB == "aur" || mode == parser.ModeAUR {
 			dp.Targets = append(dp.Targets, target)
 			aurTargets.Set(target.DepString())
+
 			continue
 		}
 
@@ -124,6 +125,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 			dp.Targets = append(dp.Targets, target)
 			dp.Explicit.Set(foundPkg.Name())
 			dp.ResolveRepoDependency(foundPkg, noDeps)
+
 			continue
 		} else {
 			// check for groups
@@ -169,15 +171,20 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 // Ofcouse only the first three packages provide yay, the rest are just false
 // positives.
 //
-// This method increases dependency resolve time
+// This method increases dependency resolve time.
 func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
-	var mux sync.Mutex
-	var wg sync.WaitGroup
+	var (
+		mux sync.Mutex
+		wg  sync.WaitGroup
+	)
 
 	doSearch := func(pkg string) {
 		defer wg.Done()
-		var err error
-		var results []query.Pkg
+
+		var (
+			err     error
+			results []query.Pkg
+		)
 
 		// Hack for a bigger search result, if the user wants
 		// java-envronment we can search for just java instead and get
@@ -209,7 +216,9 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 		if dp.AlpmExecutor.LocalPackage(pkg) != nil {
 			continue
 		}
+
 		wg.Add(1)
+
 		go doSearch(pkg)
 	}
 
@@ -264,7 +273,7 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 }
 
 // Compute dependency lists used in Package dep searching and ordering.
-// Order sensitive TOFIX
+// Order sensitive TOFIX.
 func ComputeCombinedDepList(pkg *aur.Pkg, noDeps, noCheckDeps bool) [][]string {
 	combinedDepList := make([][]string, 0, 3)
 
@@ -310,6 +319,7 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		if explicit {
 			dp.Explicit.Set(pkg.Name)
 		}
+
 		dp.Aur[pkg.Name] = pkg
 
 		combinedDepList := ComputeCombinedDepList(pkg, noDeps, noCheckDeps)
@@ -330,6 +340,7 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		settings.HideMenus = isInstalled
 		repoPkg := dp.AlpmExecutor.SyncSatisfier(dep) // has satisfier in repo: fetch it
 		settings.HideMenus = hm
+
 		if isInstalled && (rebuild != "tree" || repoPkg != nil) {
 			continue
 		}
@@ -345,11 +356,13 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 	}
 
 	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
+
 	return err
 }
 
 func (dp *Pool) ResolveRepoDependency(pkg db.IPackage, noDeps bool) {
 	dp.Repo[pkg.Name()] = pkg
+
 	if noDeps {
 		return
 	}
@@ -405,7 +418,7 @@ func (dp *Pool) findSatisfierAur(dep string) *query.Pkg {
 // foo and foo-git.
 // Using Pacman's ways trying to install foo would never give you
 // a menu.
-// TODO: maybe intermix repo providers in the menu
+// TODO: maybe intermix repo providers in the menu.
 func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, provides bool) *query.Pkg {
 	depName, _, _ := splitDep(dep)
 	seen := make(stringset.StringSet)
@@ -437,6 +450,7 @@ func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, pr
 		if pkgSatisfies(pkg.Name, pkg.Version, dep) {
 			providerSlice.Pkgs = append(providerSlice.Pkgs, pkg)
 			seen.Set(pkg.Name)
+
 			continue
 		}
 
@@ -444,6 +458,7 @@ func (dp *Pool) findSatisfierAurCache(dep string, ignoreProviders, noConfirm, pr
 			if provideSatisfies(provide, dep, pkg.Version) {
 				providerSlice.Pkgs = append(providerSlice.Pkgs, pkg)
 				seen.Set(pkg.Name)
+
 				continue
 			}
 		}
@@ -504,6 +519,7 @@ func (dp *Pool) hasPackage(name string) bool {
 func isInAssumeInstalled(name string, assumeInstalled []string) bool {
 	for _, pkgAndVersion := range assumeInstalled {
 		assumeName, _, _ := splitDep(pkgAndVersion)
+
 		depName, _, _ := splitDep(name)
 		if assumeName == depName {
 			return true
@@ -537,9 +553,11 @@ func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 		}
 
 		reader := bufio.NewReader(os.Stdin)
+
 		numberBuf, overflow, err := reader.ReadLine()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
+
 			break
 		}
 

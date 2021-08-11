@@ -16,12 +16,15 @@ const gitDiffRefName = "AUR_SEEN"
 
 func showPkgbuildDiffs(bases []dep.Base, cloned map[string]bool) error {
 	var errMulti multierror.MultiError
+
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
+
 		start, err := getLastSeenHash(config.BuildDir, pkg)
 		if err != nil {
 			errMulti.Add(err)
+
 			continue
 		}
 
@@ -31,11 +34,13 @@ func showPkgbuildDiffs(bases []dep.Base, cloned map[string]bool) error {
 			hasDiff, err := gitHasDiff(config.BuildDir, pkg)
 			if err != nil {
 				errMulti.Add(err)
+
 				continue
 			}
 
 			if !hasDiff {
 				text.Warnln(gotext.Get("%s: No changes -- skipping", text.Cyan(base.String())))
+
 				continue
 			}
 		}
@@ -50,6 +55,7 @@ func showPkgbuildDiffs(bases []dep.Base, cloned map[string]bool) error {
 		} else {
 			args = append(args, "--color=never")
 		}
+
 		_ = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(dir, args...))
 	}
 
@@ -57,7 +63,7 @@ func showPkgbuildDiffs(bases []dep.Base, cloned map[string]bool) error {
 }
 
 // Check whether or not a diff exists between the last reviewed diff and
-// HEAD@{upstream}
+// HEAD@{upstream}.
 func gitHasDiff(path, name string) (bool, error) {
 	if gitHasLastSeenRef(path, name) {
 		stdout, stderr, err := config.Runtime.CmdBuilder.Capture(
@@ -69,6 +75,7 @@ func gitHasDiff(path, name string) (bool, error) {
 		lines := strings.Split(stdout, "\n")
 		lastseen := lines[0]
 		upstream := lines[1]
+
 		return lastseen != upstream, nil
 	}
 	// If YAY_DIFF_REVIEW does not exists, we have never reviewed a diff for this package
@@ -77,11 +84,12 @@ func gitHasDiff(path, name string) (bool, error) {
 }
 
 // Return wether or not we have reviewed a diff yet. It checks for the existence of
-// YAY_DIFF_REVIEW in the git ref-list
+// YAY_DIFF_REVIEW in the git ref-list.
 func gitHasLastSeenRef(path, name string) bool {
 	_, _, err := config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(
 			filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName), 0)
+
 	return err == nil
 }
 
@@ -97,13 +105,15 @@ func getLastSeenHash(path, name string) (string, error) {
 		}
 
 		lines := strings.Split(stdout, "\n")
+
 		return lines[0], nil
 	}
+
 	return gitEmptyTree, nil
 }
 
 // Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
-// reviewed by the user
+// reviewed by the user.
 func gitUpdateSeenRef(path, name string) error {
 	_, stderr, err := config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(
@@ -111,6 +121,7 @@ func gitUpdateSeenRef(path, name string) error {
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
 	}
+
 	return nil
 }
 

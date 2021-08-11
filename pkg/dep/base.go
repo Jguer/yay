@@ -2,7 +2,7 @@ package dep
 
 import aur "github.com/Jguer/yay/v10/pkg/query"
 
-// Base is an AUR base package
+// Base is an AUR base package.
 type Base []*aur.Pkg
 
 // Pkgbase returns the first base package.
@@ -21,15 +21,17 @@ func (b Base) URLPath() string {
 }
 
 // Packages foo and bar from a pkgbase named base would print like so:
-// base (foo bar)
+// base (foo bar).
 func (b Base) String() string {
 	pkg := b[0]
 	str := pkg.PackageBase
+
 	if len(b) > 1 || pkg.PackageBase != pkg.Name {
 		str2 := " ("
 		for _, split := range b {
 			str2 += split.Name + " "
 		}
+
 		str2 = str2[:len(str2)-1] + ")"
 
 		str += str2

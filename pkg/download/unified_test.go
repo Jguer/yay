@@ -19,6 +19,7 @@ import (
 // WHEN defining package db as a target
 // THEN all should be found and cloned, except the repo one
 func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
@@ -50,6 +51,7 @@ func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 // WHEN defining package db as a target
 // THEN all should be found and cloned
 func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
@@ -79,6 +81,7 @@ func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
 // WHEN defining as non specified targets
 // THEN all should be found and cloned
 func TestPKGBUILDReposClone(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
@@ -108,6 +111,7 @@ func TestPKGBUILDReposClone(t *testing.T) {
 // WHEN defining as non specified targets
 // THEN all aur be found and cloned
 func TestPKGBUILDReposNotFound(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
@@ -137,6 +141,7 @@ func TestPKGBUILDReposNotFound(t *testing.T) {
 // WHEN defining as non specified targets in repo mode
 // THEN only repo should be cloned
 func TestPKGBUILDReposRepoMode(t *testing.T) {
+	t.Parallel()
 	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
@@ -166,7 +171,7 @@ func TestPKGBUILDReposRepoMode(t *testing.T) {
 // WHEN defining as specified targets
 // THEN all aur be found and cloned
 func TestPKGBUILDFull(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
 	gock.New("https://aur.archlinux.org").
 		Get("/cgit/aur.git/plain/PKGBUILD").MatchParam("h", "yay-git").
@@ -182,6 +187,7 @@ func TestPKGBUILDFull(t *testing.T) {
 		Reply(200).
 		BodyString("example_yay")
 
+	defer gock.Off()
 	targets := []string{"core/yay", "aur/yay-bin", "yay-git"}
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"yay": "core"},
