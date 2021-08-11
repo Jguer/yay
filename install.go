@@ -1066,9 +1066,9 @@ func buildInstallPkgbuilds(
 		var errAdd error
 
 		for _, split := range base {
-			for _, suffix := range []string{"", "-debug"} {
+			for suffix, optional := range map[string]bool{"": false, "-debug": true} {
 				deps, exp, errAdd = doAddTarget(dp, localNamesCache, remoteNamesCache,
-					arguments, cmdArgs, pkgdests, deps, exp, split.Name+suffix, false)
+					arguments, cmdArgs, pkgdests, deps, exp, split.Name+suffix, optional)
 				if errAdd != nil {
 					return errAdd
 				}
