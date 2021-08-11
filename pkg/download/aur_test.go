@@ -56,9 +56,8 @@ func TestGetAURPkgbuild(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			AURPackageURL = PKGBuild.URL
 			PKGBuild.Config.Handler = tt.args.handler
-			got, err := AURPKGBUILD(PKGBuild.Client(), tt.args.pkgName)
+			got, err := AURPKGBUILD(PKGBuild.Client(), tt.args.pkgName, PKGBuild.URL)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -113,4 +112,29 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 	cloned, err := AURPKGBUILDRepo(cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
 	assert.NoError(t, err)
 	assert.Equal(t, false, cloned)
+}
+
+// GIVEN
+func TestAURPKGBUILDRepos(t *testing.T) {
+	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	defer os.RemoveAll(dir)
+
+	os.MkdirAll(filepath.Join(dir, "yay-bin", ".git"), 0o777)
+
+	targets := []string{"yay", "yay-bin", "yay-git"}
+	cmdRunner := &testRunner{}
+	cmdBuilder := &testGitBuilder{
+		index: 0,
+		test:  t,
+		want:  "",
+		parentBuilder: &exe.CmdBuilder{
+			Runner:   cmdRunner,
+			GitBin:   "/usr/local/bin/git",
+			GitFlags: []string{},
+		},
+	}
+	cloned, err := AURPKGBUILDRepos(cmdBuilder, targets, "https://aur.archlinux.org", dir, false)
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, map[string]bool{"yay": true, "yay-bin": false, "yay-git": true}, cloned)
 }

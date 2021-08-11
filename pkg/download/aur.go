@@ -16,10 +16,10 @@ import (
 
 var AURPackageURL = "https://aur.archlinux.org/cgit/aur.git"
 
-func AURPKGBUILD(httpClient *http.Client, pkgName string) ([]byte, error) {
+func AURPKGBUILD(httpClient *http.Client, pkgName, aurURL string) ([]byte, error) {
 	values := url.Values{}
 	values.Set("h", pkgName)
-	pkgURL := AURPackageURL + "/plain/PKGBUILD?" + values.Encode()
+	pkgURL := aurURL + "/cgit/aur.git/plain/PKGBUILD?" + values.Encode()
 
 	resp, err := httpClient.Get(pkgURL)
 	if err != nil {
@@ -68,17 +68,19 @@ func AURPKGBUILDRepos(
 		go func(target string) {
 			newClone, err := AURPKGBUILDRepo(cmdBuilder, aurURL, target, dest, force)
 
+			progress := 0
 			if err != nil {
 				errs.Add(err)
 			} else {
 				mux.Lock()
 				cloned[target] = newClone
+				progress = len(cloned)
 				mux.Unlock()
 			}
 
 			text.OperationInfoln(
 				gotext.Get("(%d/%d) Downloaded PKGBUILD: %s",
-					len(cloned), len(targets), text.Cyan(target)))
+					progress, len(targets), text.Cyan(target)))
 
 			<-sem
 

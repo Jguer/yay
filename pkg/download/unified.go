@@ -8,8 +8,6 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/go-alpm/v2"
-
 	"github.com/Jguer/yay/v10/pkg/db"
 	"github.com/Jguer/yay/v10/pkg/multierror"
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
@@ -73,7 +71,8 @@ func getURLName(pkg db.IPackage) string {
 	return name
 }
 
-func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string, mode parser.TargetMode) (map[string][]byte, error) {
+func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
+	aurURL string, mode parser.TargetMode) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
 	var (
@@ -102,7 +101,7 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 			)
 
 			if aur {
-				pkgbuild, err = AURPKGBUILD(httpClient, pkgName)
+				pkgbuild, err = AURPKGBUILD(httpClient, pkgName, aurURL)
 			} else {
 				pkgbuild, err = ABSPKGBUILD(httpClient, dbName, pkgName)
 			}
@@ -159,22 +158,24 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 				newClone, err = ABSPKGBUILDRepo(cmdBuilder, dbName, pkgName, dest, force)
 			}
 
+			progress := 0
 			if err != nil {
 				errs.Add(err)
 			} else {
 				mux.Lock()
 				cloned[target] = newClone
+				progress = len(cloned)
 				mux.Unlock()
 			}
 
 			if aur {
 				text.OperationInfoln(
 					gotext.Get("(%d/%d) Downloaded PKGBUILD: %s",
-						len(cloned), len(targets), text.Cyan(pkgName)))
+						progress, len(targets), text.Cyan(pkgName)))
 			} else {
 				text.OperationInfoln(
 					gotext.Get("(%d/%d) Downloaded PKGBUILD from ABS: %s",
-						len(cloned), len(targets), text.Cyan(pkgName)))
+						progress, len(targets), text.Cyan(pkgName)))
 			}
 
 			<-sem
@@ -194,7 +195,7 @@ func getPackageUsableName(dbExecutor DBSearcher, target string, mode parser.Targ
 
 	dbName, name := text.SplitDBFromName(target)
 	if dbName != "aur" && mode.AtLeastRepo() {
-		var pkg alpm.IPackage
+		var pkg db.IPackage
 		if dbName != "" {
 			pkg = dbExecutor.SatisfierFromDB(name, dbName)
 			if pkg == nil {
