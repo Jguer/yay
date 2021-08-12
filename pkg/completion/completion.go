@@ -21,8 +21,9 @@ type PkgSynchronizer interface {
 }
 
 // Show provides completion info for shells.
-func Show(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
-	err := Update(httpClient, dbExecutor, aurURL, completionPath, interval, force)
+func Show(ctx context.Context, httpClient *http.Client,
+	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
+	err := Update(ctx, httpClient, dbExecutor, aurURL, completionPath, interval, force)
 	if err != nil {
 		return err
 	}
@@ -39,7 +40,8 @@ func Show(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completio
 }
 
 // Update updates completion cache to be used by Complete.
-func Update(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
+func Update(ctx context.Context, httpClient *http.Client,
+	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool) error {
 	info, err := os.Stat(completionPath)
 
 	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
@@ -53,7 +55,7 @@ func Update(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, complet
 			return errf
 		}
 
-		if createAURList(httpClient, aurURL, out) != nil {
+		if createAURList(ctx, httpClient, aurURL, out) != nil {
 			defer os.Remove(completionPath)
 		}
 
@@ -68,7 +70,7 @@ func Update(httpClient *http.Client, dbExecutor PkgSynchronizer, aurURL, complet
 }
 
 // CreateAURList creates a new completion file.
-func createAURList(client *http.Client, aurURL string, out io.Writer) error {
+func createAURList(ctx context.Context, client *http.Client, aurURL string, out io.Writer) error {
 	u, err := url.Parse(aurURL)
 	if err != nil {
 		return err
@@ -76,7 +78,7 @@ func createAURList(client *http.Client, aurURL string, out io.Writer) error {
 
 	u.Path = path.Join(u.Path, "packages.gz")
 
-	req, err := http.NewRequestWithContext(context.Background(), "GET", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
 	if err != nil {
 		return err
 	}

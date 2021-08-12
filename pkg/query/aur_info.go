@@ -19,7 +19,7 @@ type Pkg = aur.Pkg
 // of packages exceeds the number set in config.RequestSplitN.
 // If the number does exceed config.RequestSplitN multiple aur requests will be
 // performed concurrently.
-func AURInfo(aurClient *aur.Client, names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) {
+func AURInfo(ctx context.Context, aurClient *aur.Client, names []string, warnings *AURWarnings, splitN int) ([]*Pkg, error) {
 	info := make([]*Pkg, 0, len(names))
 	seen := make(map[string]int)
 
@@ -32,7 +32,7 @@ func AURInfo(aurClient *aur.Client, names []string, warnings *AURWarnings, split
 	makeRequest := func(n, max int) {
 		defer wg.Done()
 
-		tempInfo, requestErr := aurClient.Info(context.Background(), names[n:max])
+		tempInfo, requestErr := aurClient.Info(ctx, names[n:max])
 		if requestErr != nil {
 			errs.Add(requestErr)
 			return
@@ -84,12 +84,12 @@ func AURInfo(aurClient *aur.Client, names []string, warnings *AURWarnings, split
 	return info, nil
 }
 
-func AURInfoPrint(aurClient *aur.Client, names []string, splitN int) ([]*Pkg, error) {
+func AURInfoPrint(ctx context.Context, aurClient *aur.Client, names []string, splitN int) ([]*Pkg, error) {
 	text.OperationInfoln(gotext.Get("Querying AUR..."))
 
 	warnings := &AURWarnings{}
 
-	info, err := AURInfo(aurClient, names, warnings, splitN)
+	info, err := AURInfo(ctx, aurClient, names, warnings, splitN)
 	if err != nil {
 		return info, err
 	}

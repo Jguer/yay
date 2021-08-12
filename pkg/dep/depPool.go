@@ -82,7 +82,7 @@ func makePool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
 }
 
 // Includes db/ prefixes and group installs.
-func (dp *Pool) ResolveTargets(pkgs []string,
+func (dp *Pool) ResolveTargets(ctx context.Context, pkgs []string,
 	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool, assumeInstalled []string) error {
 	// RPC requests are slow
@@ -154,7 +154,8 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 	}
 
 	if len(aurTargets) > 0 && mode.AtLeastAUR() {
-		return dp.resolveAURPackages(aurTargets, true, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
+		return dp.resolveAURPackages(ctx, aurTargets, true, ignoreProviders,
+			noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
 	}
 
 	return nil
@@ -172,7 +173,7 @@ func (dp *Pool) ResolveTargets(pkgs []string,
 // positives.
 //
 // This method increases dependency resolve time.
-func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
+func (dp *Pool) findProvides(ctx context.Context, pkgs stringset.StringSet) error {
 	var (
 		mux sync.Mutex
 		wg  sync.WaitGroup
@@ -193,7 +194,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 		words := strings.Split(pkg, "-")
 
 		for i := range words {
-			results, err = dp.aurClient.Search(context.Background(), strings.Join(words[:i+1], "-"), aur.None)
+			results, err = dp.aurClient.Search(ctx, strings.Join(words[:i+1], "-"), aur.None)
 			if err == nil {
 				break
 			}
@@ -227,7 +228,7 @@ func (dp *Pool) findProvides(pkgs stringset.StringSet) error {
 	return nil
 }
 
-func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, splitN int) error {
+func (dp *Pool) cacheAURPackages(ctx context.Context, _pkgs stringset.StringSet, provides bool, splitN int) error {
 	pkgs := _pkgs.Copy()
 	toQuery := make([]string, 0)
 
@@ -242,7 +243,7 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 	}
 
 	if provides {
-		err := dp.findProvides(pkgs)
+		err := dp.findProvides(ctx, pkgs)
 		if err != nil {
 			return err
 		}
@@ -259,7 +260,7 @@ func (dp *Pool) cacheAURPackages(_pkgs stringset.StringSet, provides bool, split
 		}
 	}
 
-	info, err := query.AURInfo(dp.aurClient, toQuery, dp.Warnings, splitN)
+	info, err := query.AURInfo(ctx, dp.aurClient, toQuery, dp.Warnings, splitN)
 	if err != nil {
 		return err
 	}
@@ -290,13 +291,14 @@ func ComputeCombinedDepList(pkg *aur.Pkg, noDeps, noCheckDeps bool) [][]string {
 	return combinedDepList
 }
 
-func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
+func (dp *Pool) resolveAURPackages(ctx context.Context,
+	pkgs stringset.StringSet,
 	explicit, ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int, noDeps, noCheckDeps bool) error {
 	newPackages := make(stringset.StringSet)
 	newAURPackages := make(stringset.StringSet)
 
-	err := dp.cacheAURPackages(pkgs, provides, splitN)
+	err := dp.cacheAURPackages(ctx, pkgs, provides, splitN)
 	if err != nil {
 		return err
 	}
@@ -355,7 +357,8 @@ func (dp *Pool) resolveAURPackages(pkgs stringset.StringSet,
 		newAURPackages.Set(dep)
 	}
 
-	err = dp.resolveAURPackages(newAURPackages, false, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
+	err = dp.resolveAURPackages(ctx, newAURPackages, false, ignoreProviders,
+		noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps)
 
 	return err
 }
@@ -384,7 +387,7 @@ func (dp *Pool) ResolveRepoDependency(pkg db.IPackage, noDeps bool) {
 	}
 }
 
-func GetPool(pkgs []string,
+func GetPool(ctx context.Context, pkgs []string,
 	warnings *query.AURWarnings,
 	dbExecutor db.Executor,
 	aurClient *aur.Client,
@@ -394,7 +397,8 @@ func GetPool(pkgs []string,
 	dp := makePool(dbExecutor, aurClient)
 
 	dp.Warnings = warnings
-	err := dp.ResolveTargets(pkgs, mode, ignoreProviders, noConfirm, provides, rebuild, splitN, noDeps, noCheckDeps, assumeInstalled)
+	err := dp.ResolveTargets(ctx, pkgs, mode, ignoreProviders, noConfirm, provides,
+		rebuild, splitN, noDeps, noCheckDeps, assumeInstalled)
 
 	return dp, err
 }

@@ -1,6 +1,7 @@
 package download
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,7 +25,7 @@ type DBSearcher interface {
 	SatisfierFromDB(string, string) db.IPackage
 }
 
-func downloadGitRepo(cmdBuilder exe.GitCmdBuilder,
+func downloadGitRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 	pkgURL, pkgName, dest string, force bool, gitArgs ...string) (bool, error) {
 	finalDir := filepath.Join(dest, pkgName)
 	newClone := true
@@ -42,9 +43,9 @@ func downloadGitRepo(cmdBuilder exe.GitCmdBuilder,
 		cloneArgs := make([]string, 0, len(gitArgs)+4)
 		cloneArgs = append(cloneArgs, "clone", "--no-progress")
 		cloneArgs = append(cloneArgs, gitArgs...)
-		cmd := cmdBuilder.BuildGitCmd(dest, cloneArgs...)
+		cmd := cmdBuilder.BuildGitCmd(ctx, dest, cloneArgs...)
 
-		_, stderr, errCapture := cmdBuilder.Capture(cmd, 0)
+		_, stderr, errCapture := cmdBuilder.Capture(cmd)
 		if errCapture != nil {
 			return false, ErrGetPKGBUILDRepo{inner: errCapture, pkgName: pkgName, errOut: stderr}
 		}
@@ -55,9 +56,9 @@ func downloadGitRepo(cmdBuilder exe.GitCmdBuilder,
 			errOut:  gotext.Get("error reading %s", filepath.Join(dest, pkgName, ".git")),
 		}
 	default:
-		cmd := cmdBuilder.BuildGitCmd(filepath.Join(dest, pkgName), "pull", "--ff-only")
+		cmd := cmdBuilder.BuildGitCmd(ctx, filepath.Join(dest, pkgName), "pull", "--ff-only")
 
-		_, stderr, errCmd := cmdBuilder.Capture(cmd, 0)
+		_, stderr, errCmd := cmdBuilder.Capture(cmd)
 		if errCmd != nil {
 			return false, ErrGetPKGBUILDRepo{inner: errCmd, pkgName: pkgName, errOut: stderr}
 		}
@@ -130,7 +131,7 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 	return pkgbuilds, errs.Return()
 }
 
-func PKGBUILDRepos(dbExecutor DBSearcher,
+func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher,
 	cmdBuilder exe.GitCmdBuilder,
 	targets []string, mode parser.TargetMode, aurURL, dest string, force bool) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
@@ -161,9 +162,9 @@ func PKGBUILDRepos(dbExecutor DBSearcher,
 			)
 
 			if aur {
-				newClone, err = AURPKGBUILDRepo(cmdBuilder, aurURL, pkgName, dest, force)
+				newClone, err = AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, pkgName, dest, force)
 			} else {
-				newClone, err = ABSPKGBUILDRepo(cmdBuilder, dbName, pkgName, dest, force)
+				newClone, err = ABSPKGBUILDRepo(ctx, cmdBuilder, dbName, pkgName, dest, force)
 			}
 
 			progress := 0

@@ -1,6 +1,7 @@
 package upgrade
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strconv"
@@ -85,7 +86,7 @@ func (r *MockRunner) Show(cmd *exec.Cmd) error {
 	return nil
 }
 
-func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
+func (r *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	i, _ := strconv.Atoi(cmd.Args[len(cmd.Args)-1])
 	if i >= len(r.Returned) {
 		fmt.Println(r.Returned)
@@ -270,7 +271,7 @@ func Test_upDevel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			tt.args.cached.CmdBuilder.(*exe.CmdBuilder).Runner.(*MockRunner).t = t
-			got := UpDevel(tt.args.remote, tt.args.aurdata, &tt.args.cached)
+			got := UpDevel(context.TODO(), tt.args.remote, tt.args.aurdata, &tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
 			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))
 		})

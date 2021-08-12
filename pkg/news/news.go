@@ -61,8 +61,8 @@ type rss struct {
 	Channel channel `xml:"channel"`
 }
 
-func PrintNewsFeed(client *http.Client, cutOffDate time.Time, sortMode int, all, quiet bool) error {
-	req, err := http.NewRequestWithContext(context.Background(), "GET", "https://archlinux.org/feeds/news", nil)
+func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Time, sortMode int, all, quiet bool) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://archlinux.org/feeds/news", nil)
 	if err != nil {
 		return err
 	}

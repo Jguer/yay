@@ -1,6 +1,7 @@
 package upgrade
 
 import (
+	"context"
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
@@ -12,6 +13,7 @@ import (
 )
 
 func UpDevel(
+	ctx context.Context,
 	remote []db.IPackage,
 	aurdata map[string]*query.Pkg,
 	localCache *vcs.InfoStore) UpSlice {
@@ -26,7 +28,7 @@ func UpDevel(
 	checkUpdate := func(pkgName string, e vcs.OriginInfoByURL) {
 		defer wg.Done()
 
-		if localCache.NeedsUpdate(e) {
+		if localCache.NeedsUpdate(ctx, e) {
 			if _, ok := aurdata[pkgName]; ok {
 				for _, pkg := range remote {
 					if pkg.Name() == pkgName {

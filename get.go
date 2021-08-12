@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -47,14 +48,14 @@ func printPkgbuilds(dbExecutor download.DBSearcher, httpClient *http.Client, tar
 }
 
 // yay -G.
-func getPkgbuilds(dbExecutor download.DBSearcher, config *settings.Configuration, targets []string,
-	force bool) error {
+func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher,
+	config *settings.Configuration, targets []string, force bool) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	cloned, errD := download.PKGBUILDRepos(dbExecutor,
+	cloned, errD := download.PKGBUILDRepos(ctx, dbExecutor,
 		config.Runtime.CmdBuilder, targets, config.Runtime.Mode, config.AURURL, wd, force)
 	if errD != nil {
 		text.Errorln(errD)

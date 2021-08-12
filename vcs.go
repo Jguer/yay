@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"strings"
 	"sync"
 
@@ -16,7 +17,7 @@ import (
 )
 
 // createDevelDB forces yay to create a DB of the existing development packages.
-func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error {
+func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecutor db.Executor) error {
 	var (
 		mux sync.Mutex
 		wg  sync.WaitGroup
@@ -27,7 +28,7 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 		return err
 	}
 
-	info, err := query.AURInfoPrint(config.Runtime.AURClient, remoteNames, config.RequestSplitN)
+	info, err := query.AURInfoPrint(ctx, config.Runtime.AURClient, remoteNames, config.RequestSplitN)
 	if err != nil {
 		return err
 	}
@@ -50,7 +51,7 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 				len(toSkipSlice), len(bases), text.Cyan(strings.Join(toSkipSlice, ", "))))
 	}
 
-	if _, errA := download.AURPKGBUILDRepos(
+	if _, errA := download.AURPKGBUILDRepos(ctx,
 		config.Runtime.CmdBuilder, targets, config.AURURL, config.BuildDir, false); errA != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func createDevelDB(config *settings.Configuration, dbExecutor db.Executor) error
 		for iP := range srcinfos[i].Packages {
 			wg.Add(1)
 
-			go config.Runtime.VCSStore.Update(srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
+			go config.Runtime.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
 		}
 	}
 

@@ -1,6 +1,7 @@
 package main // import "github.com/Jguer/yay"
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -84,9 +85,11 @@ func initAlpm(cmdArgs *parser.Arguments, pacmanConfigPath string) (*pacmanconf.C
 }
 
 func main() {
-	var err error
-
-	ret := 0
+	var (
+		err error
+		ctx = context.Background()
+		ret = 0
+	)
 
 	defer func() { os.Exit(ret) }()
 
@@ -154,7 +157,7 @@ func main() {
 	}
 
 	defer dbExecutor.Cleanup()
-	err = handleCmd(cmdArgs, db.Executor(dbExecutor))
+	err = handleCmd(ctx, cmdArgs, db.Executor(dbExecutor))
 
 	if err != nil {
 		if str := err.Error(); str != "" && !strings.Contains(str, "exit status") {

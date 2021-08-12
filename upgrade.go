@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -32,7 +33,7 @@ func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
+func upList(ctx context.Context, warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
 	filter upgrade.Filter) (aurUp, repoUp upgrade.UpSlice, err error) {
 	remote, remoteNames := query.GetRemotePackages(dbExecutor)
 
@@ -66,7 +67,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []*aur.Pkg
-		_aurdata, err = query.AURInfo(config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
+		_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
 		errs.Add(err)
 
 		if err == nil {
@@ -87,7 +88,7 @@ func upList(warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade
 				wg.Add(1)
 
 				go func() {
-					develUp = upgrade.UpDevel(remote, aurdata, config.Runtime.VCSStore)
+					develUp = upgrade.UpDevel(ctx, remote, aurdata, config.Runtime.VCSStore)
 
 					wg.Done()
 				}()
@@ -230,10 +231,12 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 }
 
 // Targets for sys upgrade.
-func sysupgradeTargets(dbExecutor db.Executor, enableDowngrade bool) (stringset.StringSet, []string, error) {
+func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
+	enableDowngrade bool) (stringset.StringSet, []string, error) {
 	warnings := query.NewWarnings()
 
-	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, func(upgrade.Upgrade) bool { return true })
+	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade,
+		func(upgrade.Upgrade) bool { return true })
 	if err != nil {
 		return nil, nil, err
 	}

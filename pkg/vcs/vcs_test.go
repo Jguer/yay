@@ -1,6 +1,7 @@
 package vcs
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -93,7 +94,7 @@ func (r *MockRunner) Show(cmd *exec.Cmd) error {
 	return nil
 }
 
-func (r *MockRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
+func (r *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	stdout = r.Returned[r.Index]
 	if r.Returned[0] == "error" {
 		err = errors.New("possible error")
@@ -224,7 +225,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 			v := &InfoStore{
 				CmdBuilder: tt.fields.CmdBuilder,
 			}
-			got := v.NeedsUpdate(tt.args.infos)
+			got := v.NeedsUpdate(context.TODO(), tt.args.infos)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -277,7 +278,7 @@ func TestInfoStore_Update(t *testing.T) {
 			var mux sync.Mutex
 			var wg sync.WaitGroup
 			wg.Add(1)
-			v.Update(tt.args.pkgName, tt.args.sources, &mux, &wg)
+			v.Update(context.TODO(), tt.args.pkgName, tt.args.sources, &mux, &wg)
 			wg.Wait()
 			assert.Len(t, tt.fields.OriginsByPackage, 1)
 

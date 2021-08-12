@@ -1,12 +1,14 @@
 package vcs
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
@@ -52,13 +54,16 @@ func NewInfoStore(filePath string, cmdBuilder exe.GitCmdBuilder) *InfoStore {
 }
 
 // GetCommit parses HEAD commit from url and branch.
-func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
+func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols []string) string {
 	if len(protocols) > 0 {
 		protocol := protocols[len(protocols)-1]
 
-		cmd := v.CmdBuilder.BuildGitCmd("", "ls-remote", protocol+"://"+url, branch)
+		ctxTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
 
-		stdout, _, err := v.CmdBuilder.Capture(cmd, 5)
+		cmd := v.CmdBuilder.BuildGitCmd(ctxTimeout, "", "ls-remote", protocol+"://"+url, branch)
+
+		stdout, _, err := v.CmdBuilder.Capture(cmd)
 		if err != nil {
 			if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
 				text.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()))
@@ -84,7 +89,8 @@ func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
 	return ""
 }
 
-func (v *InfoStore) Update(pkgName string, sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup) {
+func (v *InfoStore) Update(ctx context.Context, pkgName string,
+	sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	info := make(OriginInfoByURL)
@@ -96,7 +102,7 @@ func (v *InfoStore) Update(pkgName string, sources []gosrc.ArchString, mux sync.
 			return
 		}
 
-		commit := v.getCommit(url, branch, protocols)
+		commit := v.getCommit(ctx, url, branch, protocols)
 		if commit == "" {
 			return
 		}
@@ -176,7 +182,7 @@ func parseSource(source string) (url, branch string, protocols []string) {
 	return url, branch, protocols
 }
 
-func (v *InfoStore) NeedsUpdate(infos OriginInfoByURL) bool {
+func (v *InfoStore) NeedsUpdate(ctx context.Context, infos OriginInfoByURL) bool {
 	// used to signal we have gone through all sources and found nothing
 	finished := make(chan struct{})
 	alive := 0
@@ -188,7 +194,7 @@ func (v *InfoStore) NeedsUpdate(infos OriginInfoByURL) bool {
 	defer close(closed)
 
 	checkHash := func(url string, info OriginInfo) {
-		hash := v.getCommit(url, info.Branch, info.Protocols)
+		hash := v.getCommit(ctx, url, info.Branch, info.Protocols)
 
 		var sendTo chan<- struct{}
 		if hash != "" && hash != info.SHA {
