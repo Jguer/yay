@@ -1,6 +1,7 @@
 package download
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"os/exec"
@@ -17,7 +18,7 @@ import (
 
 type testRunner struct{}
 
-func (t *testRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout string, stderr string, err error) {
+func (t *testRunner) Capture(cmd *exec.Cmd) (stdout string, stderr string, err error) {
 	return "", "", nil
 }
 
@@ -32,8 +33,8 @@ type testGitBuilder struct {
 	parentBuilder *exe.CmdBuilder
 }
 
-func (t *testGitBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
-	cmd := t.parentBuilder.BuildGitCmd(dir, extraArgs...)
+func (t *testGitBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
+	cmd := t.parentBuilder.BuildGitCmd(ctx, dir, extraArgs...)
 
 	if t.want != "" {
 		assert.Equal(t.test, t.want, cmd.String())
@@ -46,8 +47,8 @@ func (c *testGitBuilder) Show(cmd *exec.Cmd) error {
 	return c.parentBuilder.Show(cmd)
 }
 
-func (c *testGitBuilder) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
-	return c.parentBuilder.Capture(cmd, timeout)
+func (c *testGitBuilder) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
+	return c.parentBuilder.Capture(cmd)
 }
 
 type (

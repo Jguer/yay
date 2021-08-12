@@ -1,6 +1,7 @@
 package download
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -83,12 +84,13 @@ func ABSPKGBUILD(httpClient httpRequestDoer, dbName, pkgName string) ([]byte, er
 }
 
 // ABSPKGBUILDRepo retrieves the PKGBUILD repository to a dest directory.
-func ABSPKGBUILDRepo(cmdBuilder exe.GitCmdBuilder, dbName, pkgName, dest string, force bool) (bool, error) {
+func ABSPKGBUILDRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
+	dbName, pkgName, dest string, force bool) (bool, error) {
 	pkgURL, err := getPackageRepoURL(dbName)
 	if err != nil {
 		return false, err
 	}
 
-	return downloadGitRepo(cmdBuilder, pkgURL,
+	return downloadGitRepo(ctx, cmdBuilder, pkgURL,
 		pkgName, dest, force, "--single-branch", "-b", "packages/"+pkgName)
 }

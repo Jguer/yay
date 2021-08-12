@@ -2,6 +2,7 @@ package completion
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"testing"
@@ -41,7 +42,7 @@ func Test_createAURList(t *testing.T) {
 		BodyString(samplePackageResp)
 
 	out := &bytes.Buffer{}
-	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
+	err := createAURList(context.TODO(), &http.Client{}, "https://aur.archlinux.org", out)
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
@@ -55,7 +56,7 @@ func Test_createAURListHTTPError(t *testing.T) {
 		ReplyError(errors.New("Not available"))
 
 	out := &bytes.Buffer{}
-	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
+	err := createAURList(context.TODO(), &http.Client{}, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "Get \"https://aur.archlinux.org/packages.gz\": Not available")
 }
 
@@ -67,6 +68,6 @@ func Test_createAURListStatusError(t *testing.T) {
 		Reply(503).
 		BodyString(samplePackageResp)
 	out := &bytes.Buffer{}
-	err := createAURList(&http.Client{}, "https://aur.archlinux.org", out)
+	err := createAURList(context.TODO(), &http.Client{}, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "invalid status code: 503")
 }

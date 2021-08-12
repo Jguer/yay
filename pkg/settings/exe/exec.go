@@ -1,19 +1,13 @@
 package exe
 
 import (
-	"bytes"
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
-	"time"
-
-	"github.com/Jguer/yay/v10/pkg/text"
 )
 
 type Runner interface {
-	Capture(cmd *exec.Cmd, timeout int64) (stdout string, stderr string, err error)
+	Capture(cmd *exec.Cmd) (stdout string, stderr string, err error)
 	Show(cmd *exec.Cmd) error
 }
 
@@ -24,50 +18,14 @@ func (r *OSRunner) Show(cmd *exec.Cmd) error {
 	return cmd.Run()
 }
 
-func (r *OSRunner) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
-	var (
-		outbuf, errbuf bytes.Buffer
-		timer          *time.Timer
-		timedOut       = false
-	)
-
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-
-	err = cmd.Start()
-	if err != nil {
-		stdout = strings.TrimSpace(outbuf.String())
-		stderr = strings.TrimSpace(errbuf.String())
-
-		return stdout, stderr, err
-	}
-
-	if timeout != 0 {
-		timer = time.AfterFunc(time.Duration(timeout)*time.Second, func() {
-			err = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-			if err != nil {
-				text.Errorln(err)
-			}
-			timedOut = true
-		})
-	}
-
-	err = cmd.Wait()
-
-	if timeout != 0 {
-		timer.Stop()
-	}
-
-	stdout = strings.TrimSpace(outbuf.String())
-	stderr = strings.TrimSpace(errbuf.String())
+func (r *OSRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
+	outbuf, err := cmd.Output()
+	stdout = strings.TrimSpace(string(outbuf))
 
 	if err != nil {
-		return stdout, stderr, err
-	}
-
-	if timedOut {
-		err = fmt.Errorf("command timed out")
+		if exitErr, isExitError := err.(*exec.ExitError); isExitError {
+			stderr = strings.TrimSpace(string(exitErr.Stderr))
+		}
 	}
 
 	return stdout, stderr, err

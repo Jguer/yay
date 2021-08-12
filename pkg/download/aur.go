@@ -1,6 +1,7 @@
 package download
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -39,13 +40,14 @@ func AURPKGBUILD(httpClient httpRequestDoer, pkgName, aurURL string) ([]byte, er
 }
 
 // AURPkgbuildRepo retrieves the PKGBUILD repository to a dest directory.
-func AURPKGBUILDRepo(cmdBuilder exe.GitCmdBuilder, aurURL, pkgName, dest string, force bool) (bool, error) {
+func AURPKGBUILDRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder, aurURL, pkgName, dest string, force bool) (bool, error) {
 	pkgURL := fmt.Sprintf("%s/%s.git", aurURL, pkgName)
 
-	return downloadGitRepo(cmdBuilder, pkgURL, pkgName, dest, force)
+	return downloadGitRepo(ctx, cmdBuilder, pkgURL, pkgName, dest, force)
 }
 
 func AURPKGBUILDRepos(
+	ctx context.Context,
 	cmdBuilder exe.GitCmdBuilder,
 	targets []string, aurURL, dest string, force bool) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
@@ -64,7 +66,7 @@ func AURPKGBUILDRepos(
 		wg.Add(1)
 
 		go func(target string) {
-			newClone, err := AURPKGBUILDRepo(cmdBuilder, aurURL, target, dest, force)
+			newClone, err := AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, target, dest, force)
 
 			progress := 0
 

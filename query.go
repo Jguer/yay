@@ -89,7 +89,7 @@ func getSearchBy(value string) aur.By {
 }
 
 // NarrowSearch searches AUR and narrows based on subarguments.
-func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, error) {
+func narrowSearch(ctx context.Context, aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, error) {
 	var (
 		r         []aur.Pkg
 		err       error
@@ -103,7 +103,7 @@ func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, e
 	}
 
 	for i, word := range pkgS {
-		r, err = aurClient.Search(context.Background(), word, by)
+		r, err = aurClient.Search(ctx, word, by)
 		if err == nil {
 			usedIndex = i
 
@@ -158,7 +158,7 @@ func narrowSearch(aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, e
 }
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (err error) {
+func syncSearch(ctx context.Context, pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (err error) {
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
 
 	var (
@@ -168,7 +168,7 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 	)
 
 	if config.Runtime.Mode.AtLeastAUR() {
-		aq, aurErr = narrowSearch(aurClient, pkgS, true)
+		aq, aurErr = narrowSearch(ctx, aurClient, pkgS, true)
 	}
 
 	if config.Runtime.Mode.AtLeastRepo() {
@@ -205,7 +205,7 @@ func syncSearch(pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (e
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) error {
+func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) error {
 	var (
 		info    []*aur.Pkg
 		err     error
@@ -223,7 +223,7 @@ func syncInfo(cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) 
 			noDB = append(noDB, name)
 		}
 
-		info, err = query.AURInfoPrint(config.Runtime.AURClient, noDB, config.RequestSplitN)
+		info, err = query.AURInfoPrint(ctx, config.Runtime.AURClient, noDB, config.RequestSplitN)
 		if err != nil {
 			missing = true
 
@@ -237,7 +237,7 @@ func syncInfo(cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) 
 		arguments.ClearTargets()
 		arguments.AddTarget(repoS...)
 
-		err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(
+		err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 		if err != nil {
 			return err

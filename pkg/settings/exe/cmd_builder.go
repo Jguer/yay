@@ -1,6 +1,7 @@
 package exe
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,14 +18,14 @@ const SudoLoopDuration = 241
 
 type GitCmdBuilder interface {
 	Runner
-	BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd
+	BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
 }
 
 type ICmdBuilder interface {
 	Runner
-	BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd
-	BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd
-	BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
+	BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
+	BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
+	BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 	AddMakepkgFlag(string)
 	SetPacmanDBPath(string)
 	SudoLoop()
@@ -45,7 +46,7 @@ type CmdBuilder struct {
 	Runner           Runner
 }
 
-func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
+func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
 	args := make([]string, len(c.GitFlags), len(c.GitFlags)+len(extraArgs))
 	copy(args, c.GitFlags)
 
@@ -57,7 +58,7 @@ func (c *CmdBuilder) BuildGitCmd(dir string, extraArgs ...string) *exec.Cmd {
 		args = append(args, extraArgs...)
 	}
 
-	cmd := exec.Command(c.GitBin, args...)
+	cmd := exec.CommandContext(ctx, c.GitBin, args...)
 
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 
@@ -68,7 +69,7 @@ func (c *CmdBuilder) AddMakepkgFlag(flag string) {
 	c.MakepkgFlags = append(c.MakepkgFlags, flag)
 }
 
-func (c *CmdBuilder) BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd {
+func (c *CmdBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
 	args := make([]string, len(c.MakepkgFlags), len(c.MakepkgFlags)+len(extraArgs))
 	copy(args, c.MakepkgFlags)
 
@@ -80,7 +81,7 @@ func (c *CmdBuilder) BuildMakepkgCmd(dir string, extraArgs ...string) *exec.Cmd 
 		args = append(args, extraArgs...)
 	}
 
-	cmd := exec.Command(c.MakepkgBin, args...)
+	cmd := exec.CommandContext(ctx, c.MakepkgBin, args...)
 	cmd.Dir = dir
 
 	return cmd
@@ -90,7 +91,7 @@ func (c *CmdBuilder) SetPacmanDBPath(dbPath string) {
 	c.PacmanDBPath = dbPath
 }
 
-func (c *CmdBuilder) BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd {
+func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd {
 	argArr := make([]string, 0, 32)
 	needsRoot := args.NeedRoot(mode)
 
@@ -114,7 +115,7 @@ func (c *CmdBuilder) BuildPacmanCmd(args *parser.Arguments, mode parser.TargetMo
 		waitLock(c.PacmanDBPath)
 	}
 
-	return exec.Command(argArr[0], argArr[1:]...)
+	return exec.CommandContext(ctx, argArr[0], argArr[1:]...)
 }
 
 // waitLock will lock yay checking the status of db.lck until it does not exist.
@@ -166,6 +167,6 @@ func (c *CmdBuilder) Show(cmd *exec.Cmd) error {
 	return c.Runner.Show(cmd)
 }
 
-func (c *CmdBuilder) Capture(cmd *exec.Cmd, timeout int64) (stdout, stderr string, err error) {
-	return c.Runner.Capture(cmd, timeout)
+func (c *CmdBuilder) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
+	return c.Runner.Capture(cmd)
 }

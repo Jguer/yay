@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -159,7 +160,7 @@ func biggestPackages(dbExecutor db.Executor) {
 }
 
 // localStatistics prints installed packages statistics.
-func localStatistics(dbExecutor db.Executor) error {
+func localStatistics(ctx context.Context, dbExecutor db.Executor) error {
 	info := statistics(dbExecutor)
 
 	_, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
@@ -178,16 +179,16 @@ func localStatistics(dbExecutor db.Executor) error {
 	biggestPackages(dbExecutor)
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 
-	query.AURInfoPrint(config.Runtime.AURClient, remoteNames, config.RequestSplitN)
+	query.AURInfoPrint(ctx, config.Runtime.AURClient, remoteNames, config.RequestSplitN)
 
 	return nil
 }
 
-func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
+func printNumberOfUpdates(ctx context.Context, dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, filter)
+	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 
 	if err != nil {
@@ -199,7 +200,8 @@ func printNumberOfUpdates(dbExecutor db.Executor, enableDowngrade bool, filter u
 	return nil
 }
 
-func printUpdateList(cmdArgs *parser.Arguments, dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
+func printUpdateList(ctx context.Context, cmdArgs *parser.Arguments,
+	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
@@ -211,7 +213,7 @@ func printUpdateList(cmdArgs *parser.Arguments, dbExecutor db.Executor, enableDo
 		return err
 	}
 
-	aurUp, repoUp, err := upList(warnings, dbExecutor, enableDowngrade, filter)
+	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 
 	if err != nil {
