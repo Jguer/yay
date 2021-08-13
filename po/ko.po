@@ -1,16 +1,19 @@
+# 
+# Translators:
+# J G <transifex@jguer.space>, 2021
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"PO-Revision-Date: 2021-06-12 23:39+0900\n"
-"Language-Team: English\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"PO-Revision-Date: 2021-08-13 22:55+0000\n"
+"Last-Translator: J G <transifex@jguer.space>, 2021\n"
+"Language-Team: Korean (https://www.transifex.com/yay-1/teams/123732/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.0\n"
-"POT-Creation-Date: \n"
-"Last-Translator: Adenosie\n"
 "Language: ko\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: xgotext\n"
 
 #: install.go:563
 msgid " (Build Files Exist)"
@@ -628,5 +631,5 @@ msgstr "버전 불명"
 msgid "yes"
 msgstr "예"
 
-msgid "failed to create cache directory '%s': %s"
-msgstr "캐시 디렉토리 '%s' 생성 실패: %s"
+#~ msgid "failed to create cache directory '%s': %s"
+#~ msgstr "캐시 디렉토리 '%s' 생성 실패: %s"
