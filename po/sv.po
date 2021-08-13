@@ -1,16 +1,19 @@
+# 
+# Translators:
+# J G <transifex@jguer.space>, 2021
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"PO-Revision-Date: 2020-12-29 19:47+0100\n"
-"Language-Team: None\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"PO-Revision-Date: 2021-08-13 22:55+0000\n"
+"Last-Translator: J G <transifex@jguer.space>, 2021\n"
+"Language-Team: Swedish (https://www.transifex.com/yay-1/teams/123732/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.1\n"
-"POT-Creation-Date: \n"
-"Last-Translator: \n"
 "Language: sv\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: xgotext\n"
 
 #: install.go:563
 msgid " (Build Files Exist)"
@@ -46,7 +49,9 @@ msgstr "Installation av %s kommer att ta bort:"
 
 #: install.go:583 install.go:658 install.go:665
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
-msgstr "%s [A]lla [Ab]Avbryt [I]nstallerade [No]EjInstallerade eller (1 2 3, 1-3, ^4)"
+msgstr ""
+"%s [A]lla [Ab]Avbryt [I]nstallerade [No]EjInstallerade eller (1 2 3, 1-3, "
+"^4)"
 
 #: download.go:273
 msgid "%s already downloaded -- use -f to overwrite"
@@ -628,5 +633,5 @@ msgstr "okänd-version"
 msgid "yes"
 msgstr "ja"
 
-msgid "failed to create cache directory '%s': %s"
-msgstr "misslyckades med att skapa cachekatalog '%s': %s"
+#~ msgid "failed to create cache directory '%s': %s"
+#~ msgstr "misslyckades med att skapa cachekatalog '%s': %s"
