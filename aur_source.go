@@ -31,9 +31,9 @@ func (e *ErrDownloadSource) Unwrap() error {
 	return e.inner
 }
 
-func downloadPKGBUILDSource(ctx context.Context, cmdBuilder exe.ICmdBuilder,
+func downloadPKGBUILDSource(ctx context.Context, cmdBuilder exe.ICmdBuilder, dest,
 	base string, incompatible stringset.StringSet) (err error) {
-	dir := filepath.Join(config.BuildDir, base)
+	dir := filepath.Join(dest, base)
 	args := []string{"--verifysource", "-Ccf"}
 
 	if incompatible.Get(base) {
@@ -49,11 +49,11 @@ func downloadPKGBUILDSource(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	return nil
 }
 
-func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup,
+func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup, dest string,
 	cBase <-chan string, valOut chan<- string, errOut chan<- error,
 	cmdBuilder exe.ICmdBuilder, incompatible stringset.StringSet) {
 	for base := range cBase {
-		err := downloadPKGBUILDSource(ctx, cmdBuilder, base, incompatible)
+		err := downloadPKGBUILDSource(ctx, cmdBuilder, dest, base, incompatible)
 		if err != nil {
 			errOut <- ErrDownloadSource{inner: err, pkgName: base, errOut: ""}
 		} else {
@@ -64,10 +64,10 @@ func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup,
 	wg.Done()
 }
 
-func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder,
+func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, dest string,
 	bases []dep.Base, incompatible stringset.StringSet) error {
 	if len(bases) == 1 {
-		return downloadPKGBUILDSource(ctx, cmdBuilder, bases[0].Pkgbase(), incompatible)
+		return downloadPKGBUILDSource(ctx, cmdBuilder, dest, bases[0].Pkgbase(), incompatible)
 	}
 
 	var (
@@ -90,7 +90,7 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 	wg.Add(numOfWorkers)
 
 	for s := 0; s < numOfWorkers; s++ {
-		go downloadPKGBUILDSourceWorker(ctx, wg, c,
+		go downloadPKGBUILDSourceWorker(ctx, wg, dest, c,
 			fanInChanValues, fanInChanErrors, cmdBuilder, incompatible)
 	}
 
