@@ -396,7 +396,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	err = downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, do.Aur, incompatible)
+	err = downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, config.BuildDir, do.Aur, incompatible)
 	if err != nil {
 		text.Errorln(err)
 	}
