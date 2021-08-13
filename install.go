@@ -396,9 +396,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	err = downloadPkgbuildsSources(ctx, do.Aur, incompatible)
+	err = downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, do.Aur, incompatible)
 	if err != nil {
-		return err
+		text.Errorln(err)
 	}
 
 	err = buildInstallPkgbuilds(ctx, cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts, noDeps, noCheck)
@@ -874,26 +874,6 @@ func mergePkgbuilds(ctx context.Context, bases []dep.Base) error {
 	}
 
 	return nil
-}
-
-func downloadPkgbuildsSources(ctx context.Context, bases []dep.Base, incompatible stringset.StringSet) (err error) {
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-		args := []string{"--verifysource", "-Ccf"}
-
-		if incompatible.Get(pkg) {
-			args = append(args, "--ignorearch")
-		}
-
-		err = config.Runtime.CmdBuilder.Show(
-			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, args...))
-		if err != nil {
-			return errors.New(gotext.Get("error downloading sources: %s", text.Cyan(base.String())))
-		}
-	}
-
-	return
 }
 
 func buildInstallPkgbuilds(
