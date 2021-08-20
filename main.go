@@ -23,8 +23,12 @@ func initGotext() {
 		localePath = envLocalePath
 	}
 
-	if os.Getenv("LC_MESSAGES") != "" {
-		gotext.Configure(localePath, os.Getenv("LC_MESSAGES"), "yay")
+	if lc := os.Getenv("LANGUAGE"); lc != "" {
+		gotext.Configure(localePath, lc, "yay")
+	} else if lc := os.Getenv("LC_ALL"); lc != "" {
+		gotext.Configure(localePath, lc, "yay")
+	} else if lc := os.Getenv("LC_MESSAGES"); lc != "" {
+		gotext.Configure(localePath, lc, "yay")
 	} else {
 		gotext.Configure(localePath, os.Getenv("LANG"), "yay")
 	}

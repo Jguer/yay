@@ -7,6 +7,15 @@ on, we suggest opening an issue detailing your ideas first.
 
 Otherwise send us a pull request and we will be happy to review it.
 
+### Vision
+
+Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [apacman](https://github.com/oshazard/apacman) and [pacaur](https://github.com/rmarquis/pacaur). It is developed with these objectives in mind:
+
+- Provide an interface for pacman
+- Yaourt-style interactive search/install
+- Minimal dependencies
+- Minimize user input
+
 ### Dependencies
 
 Yay depends on:
