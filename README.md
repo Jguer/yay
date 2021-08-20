@@ -1,38 +1,28 @@
-# Yay
-
-Yet Another Yogurt - An AUR Helper Written in Go
-
-#### Packages
-
 [![yay](https://img.shields.io/aur/version/yay?color=1793d1&label=yay&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay/)
 [![yay-bin](https://img.shields.io/aur/version/yay-bin?color=1793d1&label=yay-bin&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay-bin/)
 [![yay-git](https://img.shields.io/aur/version/yay-git?color=1793d1&label=yay-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay-git/)
 ![AUR votes](https://img.shields.io/aur/votes/yay?color=333333&style=for-the-badge)
 [![GitHub license](https://img.shields.io/github/license/jguer/yay?color=333333&style=for-the-badge)](https://github.com/Jguer/yay/blob/master/LICENSE)
 
-## Objectives
+# Yay
 
-There's a point in everyone's life when you feel the need to write an AUR helper because there are only about 20 of them.
-So say hi to 20+1.
+Yet Another Yogurt - An AUR Helper Written in Go
 
-Yay is based on the design of [yaourt](https://github.com/archlinuxfr/yaourt), [apacman](https://github.com/oshazard/apacman) and [pacaur](https://github.com/rmarquis/pacaur). It is developed with these objectives in mind:
-
-- Provide an interface for pacman
-- Yaourt-style interactive search/install
-- Minimal dependencies
-- Minimize user input
-- Know when git packages are due for upgrades
+### Help translate yay: [Transifex](https://www.transifex.com/yay-1/yay/)
 
 ## Features
 
-- Perform advanced dependency solving
-- Download PKGBUILDs from ABS or AUR
-- Tab-complete the AUR
+- Advanced dependency solving
+- PKGBUILD downloading from ABS or AUR
+- Completions for AUR packages
 - Query user up-front for all input (prior to starting builds)
-- Narrow search terms (`yay linux header` will first search `linux` and then narrow on `header`)
+- Narrow search (`yay linux header` will first search `linux` and then narrow on `header`)
 - Find matching package providers during search and allow selection
 - Remove make dependencies at the end of the build process
-- Run without sourcing PKGBUILD
+
+[![asciicast](https://asciinema.org/a/399431.svg)](https://asciinema.org/a/399431)
+
+[![asciicast](https://asciinema.org/a/399433.svg)](https://asciinema.org/a/399433)
 
 ## Installation
 
@@ -50,17 +40,33 @@ cd yay
 makepkg -si
 ```
 
-## Support
+## First Use
 
-All support related to Yay should be requested via GitHub issues. Since Yay is not
-officially supported by Arch Linux, support should not be sought out on the
-forums, AUR comments or other official channels.
+#### Development packages upgrade
 
-A broken AUR package should be reported as a comment on the package's AUR page.
-A package may only be considered broken if it fails to build with makepkg.
-Reports should be made using makepkg and include the full output as well as any
-other relevant information. Never make reports using Yay or any other external
-tools.
+- Use `yay -Y --gendb` to generate a development package database for `*-git`
+  packages that were installed without yay.
+  This command should only be run once.
+
+- `yay -Syu --devel` will then check for development package updates
+
+- Use `yay -Y --devel --save` to make development pacakge updates permanently
+  enabled (`yay` and `yay -Syu` will then always check dev packages)
+
+## Examples of Custom Operations
+
+| Command                           | Description                                                                                         |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `yay`                             | Alias to `yay -Syu`.                                                                                |
+| `yay <Search Term>`               | Present package-installation selection menu.                                                        |
+| `yay -Y --combinedupgrade --save` | Make combined upgrade the default mode.                                                             |
+| `yay -Ps`                         | Print system statistics.                                                                            |
+| `yay -Yc`                         | Clean unneeded dependencies.                                                                        |
+| `yay -G <AUR Package>`            | Download PKGBUILD from ABS or AUR.                                                                  |
+| `yay -Gp <AUR Package>`           | Print to stdout PKGBUILD from ABS or AUR.                                                           |
+| `yay -Y --gendb`                  | Generate development package database used for devel update.                                        |
+| `yay -Syu --devel`                | Perform system upgrade, but also check for development package updates.                             |
+| `yay -Syu --timeupdate`           | Perform system upgrade and use PKGBUILD modification time (not version number) to determine update. |
 
 ## Frequently Asked Questions
 
@@ -117,16 +123,18 @@ If you transition between aur helpers and did not install the devel package usin
 
 Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
 
-## Examples of Custom Operations
+## Support
 
-| Command                         | Description                                                                                                                                         |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `yay <Search Term>`             | Present package-installation selection menu.                                                                                                        |
-| `yay -Ps`                       | Print system statistics.                                                                                                                            |
-| `yay -Yc`                       | Clean unneeded dependencies.                                                                                                                        |
-| `yay -G <AUR Package>`          | Download PKGBUILD from ABS or AUR.                                                                                                                  |
-| `yay -Y --gendb`                | Generate development package database used for devel update.                                                                                        |
-| `yay -Syu --devel --timeupdate` | Perform system upgrade, but also check for development package updates and use PKGBUILD modification time (not version number) to determine update. |
+All support related to Yay should be requested via GitHub issues. Since Yay is not
+officially supported by Arch Linux, support should not be sought out on the
+forums, AUR comments or other official channels.
+
+A broken AUR package should be reported as a comment on the package's AUR page.
+A package may only be considered broken if it fails to build with makepkg.
+
+Reports should be made using makepkg and include the full output as well as any
+other relevant information. Never make reports using Yay or any other external
+tools.
 
 ## Images
 
@@ -139,10 +147,6 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
 <img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-y.png" width="42%"/>
 <img src="https://rawcdn.githack.com/Jguer/jguer.github.io/77647f396cb7156fd32e30970dbeaf6d6dc7f983/yay/yay-ps.png" width="42%"/>
 </p>
-
-[![asciicast](https://asciinema.org/a/399431.svg)](https://asciinema.org/a/399431)
-
-[![asciicast](https://asciinema.org/a/399433.svg)](https://asciinema.org/a/399433)
 
 ### Other AUR helpers/tools
 
