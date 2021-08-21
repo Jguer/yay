@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
@@ -161,11 +160,10 @@ func main() {
 	}
 
 	defer dbExecutor.Cleanup()
-	err = handleCmd(ctx, cmdArgs, db.Executor(dbExecutor))
 
-	if err != nil {
-		if str := err.Error(); str != "" && !strings.Contains(str, "exit status") {
-			fmt.Fprintln(os.Stderr, str)
+	if err = handleCmd(ctx, cmdArgs, db.Executor(dbExecutor)); err != nil {
+		if str := err.Error(); str != "" {
+			text.Errorln(str)
 		}
 
 		if exitError, ok := err.(*exec.ExitError); ok {

@@ -262,7 +262,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	cloned, errA := download.AURPKGBUILDRepos(ctx,
 		config.Runtime.CmdBuilder, toClone, config.AURURL, config.BuildDir, false)
 	if errA != nil {
-		return err
+		return errA
 	}
 
 	var (

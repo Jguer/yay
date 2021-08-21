@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
@@ -222,8 +223,17 @@ func handleQuery(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 		return printUpdateList(ctx, cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	}
 
-	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+	if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
+		if str := err.Error(); strings.Contains(str, "exit status") {
+			// yay -Qdt should not output anything in case of error
+			return fmt.Errorf("")
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 func handleHelp(ctx context.Context, cmdArgs *parser.Arguments) error {
