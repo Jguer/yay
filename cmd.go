@@ -227,7 +227,8 @@ func handleQuery(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 }
 
 func handleHelp(ctx context.Context, cmdArgs *parser.Arguments) error {
-	if cmdArgs.Op == "Y" || cmdArgs.Op == "yay" {
+	switch cmdArgs.Op {
+	case "Y", "yay", "G", "getpkgbuild", "P", "show":
 		usage()
 		return nil
 	}
