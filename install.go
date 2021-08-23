@@ -68,7 +68,7 @@ func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err e
 }
 
 // Install handles package installs.
-func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders bool) (err error) {
+func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders bool) error {
 	var (
 		incompatible    stringset.StringSet
 		do              *dep.Order
@@ -88,24 +88,21 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	if config.Runtime.Mode.AtLeastRepo() {
 		if config.CombinedUpgrade {
 			if refreshArg {
-				err = earlyRefresh(ctx, cmdArgs)
-				if err != nil {
+				if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
 					return fmt.Errorf(gotext.Get("error refreshing databases"))
 				}
 			}
 		} else if refreshArg || sysupgradeArg || len(cmdArgs.Targets) > 0 {
-			err = earlyPacmanCall(ctx, cmdArgs, dbExecutor)
-			if err != nil {
-				return err
+			if errP := earlyPacmanCall(ctx, cmdArgs, dbExecutor); errP != nil {
+				return errP
 			}
 		}
 	}
 
 	// we may have done -Sy, our handle now has an old
 	// database.
-	err = dbExecutor.RefreshHandle()
-	if err != nil {
-		return err
+	if errRefresh := dbExecutor.RefreshHandle(); errRefresh != nil {
+		return errRefresh
 	}
 
 	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
@@ -155,9 +152,8 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return err
 	}
 
-	err = dp.CheckMissing(noDeps, noCheck)
-	if err != nil {
-		return err
+	if errC := dp.CheckMissing(noDeps, noCheck); errC != nil {
+		return errC
 	}
 
 	if len(dp.Aur) == 0 {
@@ -184,9 +180,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return fmt.Errorf(gotext.Get("refusing to install AUR packages as root, aborting"))
 	}
 
-	conflicts, err := dp.CheckConflicts(config.UseAsk, settings.NoConfirm, noDeps)
-	if err != nil {
-		return err
+	conflicts, errCC := dp.CheckConflicts(config.UseAsk, settings.NoConfirm, noDeps)
+	if errCC != nil {
+		return errCC
 	}
 
 	do = dep.GetOrder(dp, noDeps, noCheck)
@@ -265,10 +261,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errA
 	}
 
-	var (
-		toDiff []dep.Base
-		toEdit []dep.Base
-	)
+	var toDiff, toEdit []dep.Base
 
 	if config.DiffMenu {
 		pkgbuildNumberMenu(do.Aur, remoteNamesCache)
@@ -304,9 +297,8 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		settings.NoConfirm = oldValue
 	}
 
-	err = mergePkgbuilds(ctx, do.Aur)
-	if err != nil {
-		return err
+	if errM := mergePkgbuilds(ctx, do.Aur); errM != nil {
+		return errM
 	}
 
 	srcinfos, err = parseSrcinfoFiles(do.Aur, true)
@@ -349,9 +341,8 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	}
 
 	if config.PGPFetch {
-		err = pgp.CheckPgpKeys(do.Aur, srcinfos, config.GpgBin, config.GpgFlags, settings.NoConfirm)
-		if err != nil {
-			return err
+		if errCPK := pgp.CheckPgpKeys(do.Aur, srcinfos, config.GpgBin, config.GpgFlags, settings.NoConfirm); errCPK != nil {
+			return errCPK
 		}
 	}
 
@@ -396,14 +387,12 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	err = downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, config.BuildDir, do.Aur, incompatible)
-	if err != nil {
-		text.Errorln(err)
+	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, config.BuildDir, do.Aur, incompatible); errP != nil {
+		text.Errorln(errP)
 	}
 
-	err = buildInstallPkgbuilds(ctx, cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts, noDeps, noCheck)
-	if err != nil {
-		return err
+	if errB := buildInstallPkgbuilds(ctx, cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts, noDeps, noCheck); errB != nil {
+		return errB
 	}
 
 	return nil
