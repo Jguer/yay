@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -48,7 +48,7 @@ func newPkg(basename string) *aur.Pkg {
 func getPgpKey(key string) string {
 	var buffer bytes.Buffer
 
-	if contents, err := ioutil.ReadFile(path.Join("testdata", key)); err == nil {
+	if contents, err := os.ReadFile(path.Join("testdata", key)); err == nil {
 		buffer.WriteString("-----BEGIN PGP PUBLIC KEY BLOCK-----\n")
 		buffer.WriteString("Version: SKS 1.1.6\n")
 		buffer.WriteString("Comment: Hostname: yay\n\n")
@@ -71,7 +71,7 @@ func startPgpKeyServer() *http.Server {
 }
 
 func TestImportKeys(t *testing.T) {
-	keyringDir, err := ioutil.TempDir("/tmp", "yay-test-keyring")
+	keyringDir, err := os.MkdirTemp("/tmp", "yay-test-keyring")
 	if err != nil {
 		t.Fatalf("Unable to init test keyring %q: %v\n", keyringDir, err)
 	}
@@ -150,7 +150,7 @@ func makeSrcinfo(pkgbase string, pgpkeys ...string) *gosrc.Srcinfo {
 }
 
 func TestCheckPgpKeys(t *testing.T) {
-	keyringDir, err := ioutil.TempDir("/tmp", "yay-test-keyring")
+	keyringDir, err := os.MkdirTemp("/tmp", "yay-test-keyring")
 	if err != nil {
 		t.Fatalf("Unable to init test keyring: %v\n", err)
 	}
@@ -255,7 +255,7 @@ func TestCheckPgpKeys(t *testing.T) {
 				}
 
 				w.Close()
-				out, _ := ioutil.ReadAll(r)
+				out, _ := io.ReadAll(r)
 				os.Stdout = rescueStdout
 
 				splitLines := strings.Split(string(out), "\n")

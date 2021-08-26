@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"sync"
@@ -262,7 +261,7 @@ func TestInfoStore_Update(t *testing.T) {
 		},
 	}
 
-	file, err := ioutil.TempFile("/tmp", "yay-vcs-test")
+	file, err := os.CreateTemp("/tmp", "yay-vcs-test")
 	assert.NoError(t, err)
 	defer os.Remove(file.Name())
 
@@ -326,7 +325,7 @@ func TestInfoStore_Remove(t *testing.T) {
 		},
 	}
 
-	file, err := ioutil.TempFile("/tmp", "yay-vcs-test")
+	file, err := os.CreateTemp("/tmp", "yay-vcs-test")
 	assert.NoError(t, err)
 	defer os.Remove(file.Name())
 

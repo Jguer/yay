@@ -3,7 +3,6 @@ package download
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -220,7 +219,7 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 // THEN a pull command should be formed
 func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
 	t.Parallel()
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
 	os.MkdirAll(filepath.Join(dir, "linux", ".git"), 0o777)

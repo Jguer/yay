@@ -2,7 +2,6 @@ package download
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -21,7 +20,7 @@ import (
 // THEN all should be found and cloned, except the repo one
 func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 	t.Parallel()
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
 	os.MkdirAll(filepath.Join(dir, "yay", ".git"), 0o777)
@@ -53,7 +52,7 @@ func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 // THEN all should be found and cloned
 func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
 	t.Parallel()
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
 	targets := []string{"core/yay", "yay-bin", "yay-git"}
@@ -83,7 +82,7 @@ func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
 // THEN all should be found and cloned
 func TestPKGBUILDReposClone(t *testing.T) {
 	t.Parallel()
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
 	targets := []string{"yay", "yay-bin", "yay-git"}
@@ -113,7 +112,7 @@ func TestPKGBUILDReposClone(t *testing.T) {
 // THEN all aur be found and cloned
 func TestPKGBUILDReposNotFound(t *testing.T) {
 	t.Parallel()
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
 	targets := []string{"extra/yay", "yay-bin", "yay-git"}
@@ -143,7 +142,7 @@ func TestPKGBUILDReposNotFound(t *testing.T) {
 // THEN only repo should be cloned
 func TestPKGBUILDReposRepoMode(t *testing.T) {
 	t.Parallel()
-	dir, _ := ioutil.TempDir("/tmp/", "yay-test")
+	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
 	defer os.RemoveAll(dir)
 
 	targets := []string{"yay", "yay-bin", "yay-git"}

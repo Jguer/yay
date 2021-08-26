@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -102,7 +101,7 @@ func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, d
 
 	remotePackages, _ := query.GetRemotePackages(dbExecutor)
 
-	files, err := ioutil.ReadDir(config.BuildDir)
+	files, err := os.ReadDir(config.BuildDir)
 	if err != nil {
 		return err
 	}
@@ -167,7 +166,7 @@ func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, d
 func cleanUntracked(ctx context.Context) error {
 	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
-	files, err := ioutil.ReadDir(config.BuildDir)
+	files, err := os.ReadDir(config.BuildDir)
 	if err != nil {
 		return err
 	}

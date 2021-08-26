@@ -6,7 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"html"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -74,7 +74,7 @@ func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Tim
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
