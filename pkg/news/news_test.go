@@ -2,7 +2,7 @@ package news
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"testing"
@@ -119,7 +119,7 @@ func TestPrintNewsFeed(t *testing.T) {
 			assert.NoError(t, err)
 
 			w.Close()
-			out, _ := ioutil.ReadAll(r)
+			out, _ := io.ReadAll(r)
 			cupaloy.SnapshotT(t, out)
 			os.Stdout = rescueStdout
 		})

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/leonelquinteros/gotext"
@@ -75,7 +75,7 @@ func ABSPKGBUILD(httpClient httpRequestDoer, dbName, pkgName string) ([]byte, er
 
 	defer resp.Body.Close()
 
-	pkgBuild, err := ioutil.ReadAll(resp.Body)
+	pkgBuild, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

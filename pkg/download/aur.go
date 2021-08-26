@@ -3,7 +3,7 @@ package download
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"sync"
@@ -31,7 +31,7 @@ func AURPKGBUILD(httpClient httpRequestDoer, pkgName, aurURL string) ([]byte, er
 
 	defer resp.Body.Close()
 
-	pkgBuild, err := ioutil.ReadAll(resp.Body)
+	pkgBuild, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
