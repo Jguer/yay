@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -147,6 +148,28 @@ func (c *Configuration) String() string {
 	return buf.String()
 }
 
+// check privilege elevator exists otherwise try to find another one.
+func (c *Configuration) setPrivilegeElevator() error {
+	for _, bin := range [...]string{c.SudoBin, "sudo"} {
+		if _, err := exec.LookPath(bin); err == nil {
+			c.SudoBin = bin
+			return nil // wrapper or sudo command existing. Retrocompatiblity
+		}
+	}
+
+	c.SudoFlags = ""
+	c.SudoLoop = false
+
+	for _, bin := range [...]string{"doas", "pkexec", "su"} {
+		if _, err := exec.LookPath(bin); err == nil {
+			c.SudoBin = bin
+			return nil // command existing
+		}
+	}
+
+	return &ErrPrivilegeElevatorNotFound{confValue: c.SudoBin}
+}
+
 func DefaultConfig() *Configuration {
 	return &Configuration{
 		AURURL:             "https://aur.archlinux.org",
@@ -207,6 +230,11 @@ func NewConfig(version string) (*Configuration, error) {
 	}
 
 	newConfig.expandEnv()
+
+	errPE := newConfig.setPrivilegeElevator()
+	if errPE != nil {
+		return nil, errPE
+	}
 
 	newConfig.Runtime = &Runtime{
 		ConfigPath:     configPath,
@@ -277,7 +305,7 @@ func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
 		MakepkgBin:       c.MakepkgBin,
 		SudoBin:          c.SudoBin,
 		SudoFlags:        strings.Fields(c.SudoFlags),
-		SudoLoopEnabled:  false,
+		SudoLoopEnabled:  c.SudoLoop,
 		PacmanBin:        c.PacmanBin,
 		PacmanConfigPath: c.PacmanConf,
 		PacmanDBPath:     "",

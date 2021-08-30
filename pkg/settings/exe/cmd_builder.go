@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/leonelquinteros/gotext"
@@ -91,14 +92,21 @@ func (c *CmdBuilder) SetPacmanDBPath(dbPath string) {
 	c.PacmanDBPath = dbPath
 }
 
+func (c *CmdBuilder) buildPrivilegeElevatorCommand(ctx context.Context, ogArgs []string) *exec.Cmd {
+	if c.SudoBin == "su" {
+		return exec.CommandContext(ctx, c.SudoBin, "-c", strings.Join(ogArgs, " "))
+	}
+
+	argArr := make([]string, 0, len(c.SudoFlags)+len(ogArgs))
+	argArr = append(argArr, c.SudoFlags...)
+	argArr = append(argArr, ogArgs...)
+
+	return exec.CommandContext(ctx, c.SudoBin, argArr...)
+}
+
 func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd {
 	argArr := make([]string, 0, 32)
 	needsRoot := args.NeedRoot(mode)
-
-	if needsRoot {
-		argArr = append(argArr, c.SudoBin)
-		argArr = append(argArr, c.SudoFlags...)
-	}
 
 	argArr = append(argArr, c.PacmanBin)
 	argArr = append(argArr, args.FormatGlobals()...)
@@ -113,6 +121,7 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 
 	if needsRoot {
 		waitLock(c.PacmanDBPath)
+		return c.buildPrivilegeElevatorCommand(ctx, argArr)
 	}
 
 	return exec.CommandContext(ctx, argArr[0], argArr[1:]...)
