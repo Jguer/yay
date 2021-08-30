@@ -105,7 +105,7 @@ func main() {
 	config, err = settings.NewConfig(yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
-			fmt.Fprintln(os.Stderr, str)
+			text.Errorln(str)
 		}
 
 		ret = 1
@@ -117,7 +117,7 @@ func main() {
 
 	if err = config.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
-			fmt.Fprintln(os.Stderr, str)
+			text.Errorln(str)
 		}
 
 		ret = 1
@@ -127,7 +127,7 @@ func main() {
 
 	if config.Runtime.SaveConfig {
 		if errS := config.Save(config.Runtime.ConfigPath); errS != nil {
-			fmt.Fprintln(os.Stderr, err)
+			text.Errorln(errS)
 		}
 	}
 
@@ -136,7 +136,7 @@ func main() {
 	config.Runtime.PacmanConf, useColor, err = initAlpm(cmdArgs, config.PacmanConf)
 	if err != nil {
 		if str := err.Error(); str != "" {
-			fmt.Fprintln(os.Stderr, str)
+			text.Errorln(str)
 		}
 
 		ret = 1
@@ -151,7 +151,7 @@ func main() {
 	dbExecutor, err := ialpm.NewExecutor(config.Runtime.PacmanConf)
 	if err != nil {
 		if str := err.Error(); str != "" {
-			fmt.Fprintln(os.Stderr, str)
+			text.Errorln(str)
 		}
 
 		ret = 1
