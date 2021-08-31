@@ -33,19 +33,21 @@ func getConfigPath() string {
 }
 
 func getCacheHome() string {
-	if cacheHome := os.Getenv("XDG_CACHE_HOME"); cacheHome != "" {
+	uid := os.Geteuid()
+
+	if cacheHome := os.Getenv("XDG_CACHE_HOME"); cacheHome != "" && uid != 0 {
 		if err := initDir(cacheHome); err == nil {
 			return filepath.Join(cacheHome, "yay")
 		}
 	}
 
-	if cacheHome := os.Getenv("HOME"); cacheHome != "" {
+	if cacheHome := os.Getenv("HOME"); cacheHome != "" && uid != 0 {
 		if err := initDir(cacheHome); err == nil {
 			return filepath.Join(cacheHome, ".cache", "yay")
 		}
 	}
 
-	return "/tmp"
+	return os.TempDir()
 }
 
 func initDir(dir string) error {
