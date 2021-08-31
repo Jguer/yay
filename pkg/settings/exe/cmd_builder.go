@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/leonelquinteros/gotext"
@@ -63,6 +66,8 @@ func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...s
 
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 
+	c.deElevateCommand(cmd)
+
 	return cmd
 }
 
@@ -85,11 +90,33 @@ func (c *CmdBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs 
 	cmd := exec.CommandContext(ctx, c.MakepkgBin, args...)
 	cmd.Dir = dir
 
+	c.deElevateCommand(cmd)
+
 	return cmd
 }
 
 func (c *CmdBuilder) SetPacmanDBPath(dbPath string) {
 	c.PacmanDBPath = dbPath
+}
+
+func (c *CmdBuilder) deElevateCommand(cmd *exec.Cmd) {
+	if os.Geteuid() != 0 {
+		return
+	}
+
+	ogCaller := ""
+	if caller := os.Getenv("SUDO_USER"); caller != "" {
+		ogCaller = caller
+	} else if caller := os.Getenv("DOAS_USER"); caller != "" {
+		ogCaller = caller
+	}
+
+	if userFound, err := user.Lookup(ogCaller); err == nil {
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+		uid, _ := strconv.Atoi(userFound.Uid)
+		gid, _ := strconv.Atoi(userFound.Gid)
+		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
+	}
 }
 
 func (c *CmdBuilder) buildPrivilegeElevatorCommand(ctx context.Context, ogArgs []string) *exec.Cmd {
@@ -121,7 +148,10 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 
 	if needsRoot {
 		waitLock(c.PacmanDBPath)
-		return c.buildPrivilegeElevatorCommand(ctx, argArr)
+
+		if os.Geteuid() != 0 {
+			return c.buildPrivilegeElevatorCommand(ctx, argArr)
+		}
 	}
 
 	return exec.CommandContext(ctx, argArr[0], argArr[1:]...)
