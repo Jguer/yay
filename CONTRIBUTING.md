@@ -1,4 +1,22 @@
-## Contributing to yay
+# Contributing to yay
+
+## Translation
+
+[Transifex](https://www.transifex.com/yay-1/yay/)
+
+## Quality Assurance
+
+```sh
+pacman -S --needed git base-devel
+git clone https://aur.archlinux.org/yay-git.git
+cd yay-git
+makepkg -si
+```
+
+Installing `yay-git` and using issues to help determine what's broken is already
+a very big help.
+
+## Development
 
 Contributors are always welcome!
 
