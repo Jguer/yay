@@ -75,7 +75,7 @@ pacman -S --needed git base-devel yay
 
 - `yay -Syu --devel` will then check for development package updates
 
-- Use `yay -Y --devel --save` to make development pacakge updates permanently
+- Use `yay -Y --devel --save` to make development package updates permanently
   enabled (`yay` and `yay -Syu` will then always check dev packages)
 
 ## Examples of Custom Operations
