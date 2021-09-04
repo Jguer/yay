@@ -1,6 +1,10 @@
 package settings
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/leonelquinteros/gotext"
+)
 
 type ErrPrivilegeElevatorNotFound struct {
 	confValue string
@@ -8,4 +12,13 @@ type ErrPrivilegeElevatorNotFound struct {
 
 func (e *ErrPrivilegeElevatorNotFound) Error() string {
 	return fmt.Sprintf("unable to find a privilege elevator, config value: %s", e.confValue)
+}
+
+type ErrRuntimeDir struct {
+	inner error
+	dir   string
+}
+
+func (e *ErrRuntimeDir) Error() string {
+	return gotext.Get("failed to create directory '%s': %s", e.dir, e.inner)
 }

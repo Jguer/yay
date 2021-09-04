@@ -523,7 +523,7 @@ msgid "error updating package install reason to explicit"
 msgstr ""
 
 #: pkg/settings/dirs.go:54
-msgid "failed to create config directory '%s': %s"
+msgid "failed to create directory '%s': %s"
 msgstr ""
 
 #: pkg/settings/config.go:252

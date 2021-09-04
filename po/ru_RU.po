@@ -1,7 +1,7 @@
-# 
+#
 # Translators:
 # J G <transifex@jguer.space>, 2021
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -519,7 +519,7 @@ msgid "failed to create BuildDir directory '%s': %s"
 msgstr "ошибка создания каталога BuildDir '%s': %s"
 
 #: pkg/settings/runtime.go:79
-msgid "failed to create config directory '%s': %s"
+msgid "failed to create directory '%s': %s"
 msgstr "ошибка создания каталога конфигурации '%s': %s"
 
 #: download.go:288

@@ -66,7 +66,7 @@ func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...s
 
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
 
-	c.deElevateCommand(cmd)
+	cmd = c.deElevateCommand(ctx, cmd)
 
 	return cmd
 }
@@ -90,7 +90,7 @@ func (c *CmdBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs 
 	cmd := exec.CommandContext(ctx, c.MakepkgBin, args...)
 	cmd.Dir = dir
 
-	c.deElevateCommand(cmd)
+	cmd = c.deElevateCommand(ctx, cmd)
 
 	return cmd
 }
@@ -99,9 +99,10 @@ func (c *CmdBuilder) SetPacmanDBPath(dbPath string) {
 	c.PacmanDBPath = dbPath
 }
 
-func (c *CmdBuilder) deElevateCommand(cmd *exec.Cmd) {
+// deElevateCommand, `systemd-run` code based on pikaur.
+func (c *CmdBuilder) deElevateCommand(ctx context.Context, cmd *exec.Cmd) *exec.Cmd {
 	if os.Geteuid() != 0 {
-		return
+		return cmd
 	}
 
 	ogCaller := ""
@@ -116,7 +117,39 @@ func (c *CmdBuilder) deElevateCommand(cmd *exec.Cmd) {
 		uid, _ := strconv.Atoi(userFound.Uid)
 		gid, _ := strconv.Atoi(userFound.Gid)
 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
+
+		return cmd
 	}
+
+	cmdArgs := []string{
+		"--service-type=oneshot",
+		"--pipe", "--wait", "--pty",
+		"-p", "DynamicUser=yes",
+		"-p", "CacheDirectory=yay",
+		"-E", "HOME=/tmp",
+	}
+
+	if cmd.Dir != "" {
+		cmdArgs = append(cmdArgs, "-p", fmt.Sprintf("WorkingDirectory=%s", cmd.Dir))
+	}
+
+	for _, envVarName := range [...]string{"http_proxy", "https_proxy", "ftp_proxy"} {
+		if env := os.Getenv(envVarName); env != "" {
+			cmdArgs = append(cmdArgs, "-E", fmt.Sprintf("%s=%s", envVarName, env))
+		}
+	}
+
+	path, err := exec.LookPath(cmd.Args[0])
+	if err != nil {
+		panic("path should have already been validated")
+	}
+
+	cmdArgs = append(cmdArgs, path)
+	cmdArgs = append(cmdArgs, cmd.Args[1:]...)
+
+	systemdCmd := exec.CommandContext(ctx, "systemd-run", cmdArgs...)
+
+	return systemdCmd
 }
 
 func (c *CmdBuilder) buildPrivilegeElevatorCommand(ctx context.Context, ogArgs []string) *exec.Cmd {

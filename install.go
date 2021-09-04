@@ -176,10 +176,6 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	}
 
-	if len(dp.Aur) > 0 && os.Geteuid() == 0 && os.Getenv("SUDO_USER") == "" && os.Getenv("DOAS_USER") == "" {
-		return fmt.Errorf(gotext.Get("refusing to install AUR packages as root, aborting"))
-	}
-
 	conflicts, errCC := dp.CheckConflicts(config.UseAsk, settings.NoConfirm, noDeps)
 	if errCC != nil {
 		return errCC
