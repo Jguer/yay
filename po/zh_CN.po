@@ -513,7 +513,7 @@ msgid "failed to create BuildDir directory '%s': %s"
 msgstr "无法创建 BuildDir 目录 '%s': %s"
 
 #: pkg/settings/runtime.go:79
-msgid "failed to create config directory '%s': %s"
+msgid "failed to create directory '%s': %s"
 msgstr "无法创建配置目录 '%s': %s"
 
 #: download.go:288

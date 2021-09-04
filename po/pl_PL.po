@@ -523,7 +523,7 @@ msgid "failed to create BuildDir directory '%s': %s"
 msgstr "nie udało się stworzyć katalogu kompilacji '%s': %s"
 
 #: pkg/settings/runtime.go:79
-msgid "failed to create config directory '%s': %s"
+msgid "failed to create directory '%s': %s"
 msgstr "nie udało się stworzyć katalogu konfiguracyjnego '%s': %s"
 
 #: download.go:288

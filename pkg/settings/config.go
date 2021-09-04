@@ -264,10 +264,6 @@ func NewConfig(version string) (*Configuration, error) {
 	newConfig.Runtime.VCSStore = vcs.NewInfoStore(
 		filepath.Join(cacheHome, vcsFileName), newConfig.Runtime.CmdBuilder)
 
-	if err := initDir(newConfig.BuildDir); err != nil {
-		return nil, err
-	}
-
 	err := newConfig.Runtime.VCSStore.Load()
 
 	return newConfig, err
