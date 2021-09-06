@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -77,11 +78,20 @@ func TestGetAURPkgbuild(t *testing.T) {
 // THEN a clone command should be formed
 func TestAURPKGBUILDRepo(t *testing.T) {
 	t.Parallel()
+	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress https://aur.archlinux.org/yay-bin.git yay-bin"
+	if os.Getuid() == 0 {
+		ld := "systemd-run"
+		if path, _ := exec.LookPath(ld); path != "" {
+			ld = path
+		}
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress https://aur.archlinux.org/yay-bin.git yay-bin", ld)
+	}
+
 	cmdRunner := &testRunner{}
 	cmdBuilder := &testGitBuilder{
 		index: 0,
 		test:  t,
-		want:  "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress https://aur.archlinux.org/yay-bin.git yay-bin",
+		want:  want,
 		parentBuilder: &exe.CmdBuilder{
 			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
@@ -103,11 +113,20 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 
 	os.MkdirAll(filepath.Join(dir, "yay-bin", ".git"), 0o777)
 
+	want := fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/yay-bin pull --ff-only", dir)
+	if os.Getuid() == 0 {
+		ld := "systemd-run"
+		if path, _ := exec.LookPath(ld); path != "" {
+			ld = path
+		}
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C %s/yay-bin pull --ff-only", ld, dir)
+	}
+
 	cmdRunner := &testRunner{}
 	cmdBuilder := &testGitBuilder{
 		index: 0,
 		test:  t,
-		want:  fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/yay-bin pull --ff-only", dir),
+		want:  want,
 		parentBuilder: &exe.CmdBuilder{
 			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
