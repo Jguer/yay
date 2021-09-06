@@ -139,15 +139,13 @@ func (c *CmdBuilder) deElevateCommand(ctx context.Context, cmd *exec.Cmd) *exec.
 		}
 	}
 
-	path, err := exec.LookPath(cmd.Args[0])
-	if err != nil {
-		panic("path should have already been validated")
-	}
+	path, _ := exec.LookPath(cmd.Args[0])
 
 	cmdArgs = append(cmdArgs, path)
 	cmdArgs = append(cmdArgs, cmd.Args[1:]...)
 
 	systemdCmd := exec.CommandContext(ctx, "systemd-run", cmdArgs...)
+	systemdCmd.Dir = cmd.Dir
 
 	return systemdCmd
 }

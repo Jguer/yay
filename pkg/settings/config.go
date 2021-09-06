@@ -231,8 +231,7 @@ func NewConfig(version string) (*Configuration, error) {
 
 	newConfig.expandEnv()
 
-	errPE := newConfig.setPrivilegeElevator()
-	if errPE != nil {
+	if errPE := newConfig.setPrivilegeElevator(); errPE != nil {
 		return nil, errPE
 	}
 

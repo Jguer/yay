@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -199,10 +200,19 @@ func Test_getPackageRepoURL(t *testing.T) {
 func TestABSPKGBUILDRepo(t *testing.T) {
 	t.Parallel()
 	cmdRunner := &testRunner{}
+	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux"
+	if os.Getuid() == 0 {
+		ld := "systemd-run"
+		if path, _ := exec.LookPath(ld); path != "" {
+			ld = path
+		}
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux", ld)
+	}
+
 	cmdBuilder := &testGitBuilder{
 		index: 0,
 		test:  t,
-		want:  "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux",
+		want:  want,
 		parentBuilder: &exe.CmdBuilder{
 			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
@@ -224,11 +234,20 @@ func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
 
 	os.MkdirAll(filepath.Join(dir, "linux", ".git"), 0o777)
 
+	want := fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/linux pull --ff-only", dir)
+	if os.Getuid() == 0 {
+		ld := "systemd-run"
+		if path, _ := exec.LookPath(ld); path != "" {
+			ld = path
+		}
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C %s/linux pull --ff-only", ld, dir)
+	}
+
 	cmdRunner := &testRunner{}
 	cmdBuilder := &testGitBuilder{
 		index: 0,
 		test:  t,
-		want:  fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/linux pull --ff-only", dir),
+		want:  want,
 		parentBuilder: &exe.CmdBuilder{
 			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
