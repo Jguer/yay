@@ -12,10 +12,10 @@ import (
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/settings"
-	"github.com/Jguer/yay/v10/pkg/text"
-	"github.com/Jguer/yay/v10/pkg/upgrade"
+	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/upgrade"
 )
 
 type AlpmExecutor struct {

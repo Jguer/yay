@@ -15,9 +15,9 @@ import (
 
 	"github.com/Jguer/aur"
 
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
-	"github.com/Jguer/yay/v10/pkg/settings/parser"
-	"github.com/Jguer/yay/v10/pkg/vcs"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
 const (

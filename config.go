@@ -9,8 +9,8 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/settings"
-	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 // Verbosity settings for search.

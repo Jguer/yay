@@ -1,6 +1,6 @@
 package dep
 
-import aur "github.com/Jguer/yay/v10/pkg/query"
+import aur "github.com/Jguer/yay/v11/pkg/query"
 
 // Base is an AUR base package.
 type Base []*aur.Pkg

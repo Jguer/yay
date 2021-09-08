@@ -14,7 +14,7 @@ import (
 	"github.com/bradleyjkemp/cupaloy"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 )
 
 func TestParsing(t *testing.T) {

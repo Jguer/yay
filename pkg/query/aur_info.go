@@ -7,9 +7,9 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/intrange"
-	"github.com/Jguer/yay/v10/pkg/multierror"
-	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/intrange"
+	"github.com/Jguer/yay/v11/pkg/multierror"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 type Pkg = aur.Pkg

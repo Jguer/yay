@@ -9,11 +9,11 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/multierror"
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
-	"github.com/Jguer/yay/v10/pkg/settings/parser"
-	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/multierror"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 type httpRequestDoer interface {

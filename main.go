@@ -10,11 +10,11 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"golang.org/x/term"
 
-	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/db/ialpm"
-	"github.com/Jguer/yay/v10/pkg/settings"
-	"github.com/Jguer/yay/v10/pkg/settings/parser"
-	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/db/ialpm"
+	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 func initGotext() {

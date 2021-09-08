@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/yay/v10/pkg/settings"
-	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 type item struct {

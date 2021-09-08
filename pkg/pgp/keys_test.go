@@ -17,7 +17,7 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/bradleyjkemp/cupaloy"
 
-	"github.com/Jguer/yay/v10/pkg/dep"
+	"github.com/Jguer/yay/v11/pkg/dep"
 )
 
 const (

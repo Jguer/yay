@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/yay/v10/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/db"
 )
 
 type PkgSynchronizer interface {

@@ -10,10 +10,10 @@ import (
 
 	"github.com/Jguer/aur"
 
-	"github.com/Jguer/yay/v10/pkg/dep"
-	"github.com/Jguer/yay/v10/pkg/multierror"
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
-	"github.com/Jguer/yay/v10/pkg/stringset"
+	"github.com/Jguer/yay/v11/pkg/dep"
+	"github.com/Jguer/yay/v11/pkg/multierror"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/stringset"
 )
 
 type TestMakepkgBuilder struct {

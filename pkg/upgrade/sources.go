@@ -6,10 +6,10 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/query"
-	"github.com/Jguer/yay/v10/pkg/text"
-	"github.com/Jguer/yay/v10/pkg/vcs"
+	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
 func UpDevel(

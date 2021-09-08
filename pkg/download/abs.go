@@ -9,7 +9,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 )
 
 const (

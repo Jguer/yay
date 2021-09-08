@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
 
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
-	"github.com/Jguer/yay/v10/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/settings/parser"
 )
 
 // GIVEN 2 aur packages and 1 in repo

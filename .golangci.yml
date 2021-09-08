@@ -17,7 +17,7 @@ linters-settings:
   gocyclo:
     min-complexity: 15
   goimports:
-    local-prefixes: github.com/Jguer/yay/v10
+    local-prefixes: github.com/Jguer/yay/v11
   gomnd:
     settings:
       mnd:

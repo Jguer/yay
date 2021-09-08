@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v10/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 )
 
 const gitExtrasPKGBUILD = `pkgname=git-extras

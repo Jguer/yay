@@ -11,13 +11,13 @@ import (
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/intrange"
-	"github.com/Jguer/yay/v10/pkg/multierror"
-	"github.com/Jguer/yay/v10/pkg/query"
-	"github.com/Jguer/yay/v10/pkg/stringset"
-	"github.com/Jguer/yay/v10/pkg/text"
-	"github.com/Jguer/yay/v10/pkg/upgrade"
+	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/intrange"
+	"github.com/Jguer/yay/v11/pkg/multierror"
+	"github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/stringset"
+	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/upgrade"
 )
 
 func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {

@@ -8,13 +8,13 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v10/pkg/db"
-	"github.com/Jguer/yay/v10/pkg/dep"
-	"github.com/Jguer/yay/v10/pkg/query"
-	"github.com/Jguer/yay/v10/pkg/settings"
-	"github.com/Jguer/yay/v10/pkg/settings/parser"
-	"github.com/Jguer/yay/v10/pkg/stringset"
-	"github.com/Jguer/yay/v10/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/dep"
+	"github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/stringset"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 // CleanDependencies removes all dangling dependencies in system.
