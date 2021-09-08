@@ -363,10 +363,10 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 // NumberMenu presents a CLI for selecting packages to install.
 func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Arguments) error {
 	var (
-		aurErr, repoErr error
-		aq              aurQuery
-		pq              repoQuery
-		lenaq, lenpq    int
+		aurErr       error
+		aq           aurQuery
+		pq           repoQuery
+		lenaq, lenpq int
 	)
 
 	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
@@ -379,10 +379,11 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 	if config.Runtime.Mode.AtLeastRepo() {
 		pq = queryRepo(pkgS, dbExecutor)
 		lenpq = len(pq)
+	}
 
-		if repoErr != nil {
-			return repoErr
-		}
+	if aurErr != nil {
+		text.Errorln(gotext.Get("Error during AUR search: %s\n", aurErr))
+		text.Warnln(gotext.Get("Showing repo packages only"))
 	}
 
 	if lenpq == 0 && lenaq == 0 {
@@ -408,11 +409,6 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 		}
 	default:
 		return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
-	}
-
-	if aurErr != nil {
-		text.Errorln(gotext.Get("Error during AUR search: %s\n", aurErr))
-		text.Warnln(gotext.Get("Showing repo packages only"))
 	}
 
 	text.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
