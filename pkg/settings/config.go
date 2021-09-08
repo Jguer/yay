@@ -36,7 +36,6 @@ var NoConfirm = false
 type Configuration struct {
 	AURURL             string   `json:"aururl"`
 	BuildDir           string   `json:"buildDir"`
-	ABSDir             string   `json:"absdir"`
 	Editor             string   `json:"editor"`
 	EditorFlags        string   `json:"editorflags"`
 	MakepkgBin         string   `json:"makepkgbin"`
@@ -110,7 +109,6 @@ func (c *Configuration) Save(configPath string) error {
 
 func (c *Configuration) expandEnv() {
 	c.AURURL = os.ExpandEnv(c.AURURL)
-	c.ABSDir = os.ExpandEnv(c.ABSDir)
 	c.BuildDir = os.ExpandEnv(c.BuildDir)
 	c.Editor = os.ExpandEnv(c.Editor)
 	c.EditorFlags = os.ExpandEnv(c.EditorFlags)
@@ -174,7 +172,6 @@ func DefaultConfig() *Configuration {
 	return &Configuration{
 		AURURL:             "https://aur.archlinux.org",
 		BuildDir:           os.ExpandEnv("$HOME/.cache/yay"),
-		ABSDir:             os.ExpandEnv("$HOME/.cache/yay/abs"),
 		CleanAfter:         false,
 		Editor:             "",
 		EditorFlags:        "",

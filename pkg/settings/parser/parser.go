@@ -333,7 +333,6 @@ func isArg(arg string) bool {
 	case "d", "nodeps":
 	case "assume-installed":
 	case "dbonly":
-	case "absdir":
 	case "noprogressbar":
 	case "numberupgrades":
 	case "noscriptlet":
@@ -519,7 +518,6 @@ func hasParam(arg string) bool {
 	case "gpgflags":
 	case "gitflags":
 	case "builddir":
-	case "absdir":
 	case "editor":
 	case "editorflags":
 	case "makepkg":

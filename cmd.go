@@ -59,7 +59,6 @@ Permanent configuration options:
 
     --aururl      <url>   Set an alternative AUR URL
     --builddir    <dir>   Directory used to download and run PKGBUILDS
-    --absdir      <dir>   Directory used to store downloads from the ABS
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor
     --makepkg     <file>  makepkg command to use

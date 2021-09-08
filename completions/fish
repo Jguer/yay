@@ -183,7 +183,6 @@ complete -c $progname -n "$getpkgbuild" -s p -l print -d 'Print pkgbuild of pack
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
 complete -c $progname -n "not $noopt" -l aururl -d 'Set an alternative AUR URL' -f
 complete -c $progname -n "not $noopt" -l builddir -d 'Directory to use for Building AUR Packages' -r
-complete -c $progname -n "not $noopt" -l absdir -d 'Directory used to store downloads from the ABS' -r
 complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -f
 complete -c $progname -n "not $noopt" -l editorflags -d 'Editor flags to use' -f
 complete -c $progname -n "not $noopt" -l makepkg -d 'Makepkg command to use' -f

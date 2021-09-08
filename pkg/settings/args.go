@@ -108,8 +108,6 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.GitFlags = value
 	case "builddir":
 		c.BuildDir = value
-	case "absdir":
-		c.ABSDir = value
 	case "editor":
 		c.Editor = value
 	case "editorflags":
