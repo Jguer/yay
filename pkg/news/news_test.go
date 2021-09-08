@@ -13,6 +13,27 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+const lastNews = `
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+   <channel>
+      <title>Arch Linux: Recent news updates</title>
+      <link>https://www.archlinux.org/news/</link>
+      <description>The latest and greatest news from the Arch Linux distribution.</description>
+      <atom:link href="https://www.archlinux.org/feeds/news/" rel="self" />
+      <language>en-us</language>
+      <lastBuildDate>Tue, 14 Apr 2020 16:30:32 +0000</lastBuildDate>
+      <item>
+         <title>zn_poly 0.9.2-2 update requires manual intervention</title>
+         <link>https://www.archlinux.org/news/zn_poly-092-2-update-requires-manual-intervention/</link>
+         <description>&lt;p&gt;The zn_poly package prior to version 0.9.2-2 was missing a soname link.</description>
+         <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Antonio Rojas</dc:creator>
+         <pubDate>Tue, 14 Apr 2020 16:30:30 +0000</pubDate>
+         <guid isPermaLink="false">tag:www.archlinux.org,2020-04-14:/news/zn_poly-092-2-update-requires-manual-intervention/</guid>
+      </item>
+   </channel>
+</rss>
+`
+
 const sampleNews = `<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Arch Linux: Recent news updates</title><link>https://www.archlinux.org/news/</link><description>The latest and greatest news from the Arch Linux distribution.</description><atom:link href="https://www.archlinux.org/feeds/news/" rel="self"></atom:link><language>en-us</language><lastBuildDate>Tue, 14 Apr 2020 16:30:32 +0000</lastBuildDate><item><title>zn_poly 0.9.2-2 update requires manual intervention</title><link>https://www.archlinux.org/news/zn_poly-092-2-update-requires-manual-intervention/</link><description>&lt;p&gt;The zn_poly package prior to version 0.9.2-2 was missing a soname link.
 This has been fixed in 0.9.2-2, so the upgrade will need to overwrite the
@@ -124,4 +145,32 @@ func TestPrintNewsFeed(t *testing.T) {
 			os.Stdout = rescueStdout
 		})
 	}
+}
+
+// GIVEN last build time at 13h00
+// WHEN there's a news posted at 18h00
+// THEN it should still be printed
+func TestPrintNewsFeedSameDay(t *testing.T) {
+	t.Parallel()
+	str := "2020-04-14T13:04:05Z"
+	lastNewsTime, _ := time.Parse(time.RFC3339, str)
+
+	gock.New("https://archlinux.org").
+		Get("/feeds/news").
+		Reply(200).
+		BodyString(lastNews)
+
+	defer gock.Off()
+
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := PrintNewsFeed(context.TODO(), &http.Client{}, lastNewsTime, 0, false, false)
+	assert.NoError(t, err)
+
+	w.Close()
+	out, _ := io.ReadAll(r)
+	cupaloy.SnapshotT(t, out)
+	os.Stdout = rescueStdout
 }
