@@ -101,7 +101,6 @@ intervention when you hit this message:&lt;/p&gt;
 `
 
 func TestPrintNewsFeed(t *testing.T) {
-	t.Parallel()
 	layout := "2006-01-02"
 	str := "2020-04-13"
 	lastNewsTime, _ := time.Parse(layout, str)
@@ -151,7 +150,6 @@ func TestPrintNewsFeed(t *testing.T) {
 // WHEN there's a news posted at 18h00
 // THEN it should still be printed
 func TestPrintNewsFeedSameDay(t *testing.T) {
-	t.Parallel()
 	str := "2020-04-14T13:04:05Z"
 	lastNewsTime, _ := time.Parse(time.RFC3339, str)
 
