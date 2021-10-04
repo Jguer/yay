@@ -136,7 +136,11 @@ func narrowSearch(ctx context.Context, aurClient *aur.Client, pkgS []string, sor
 				continue
 			}
 
-			if !(strings.Contains(r[i].Name, pkgN) || strings.Contains(strings.ToLower(r[i].Description), pkgN)) {
+			name := strings.ToLower(r[i].Name)
+			desc := strings.ToLower(r[i].Description)
+			targ := strings.ToLower(pkgN)
+
+			if !(strings.Contains(name, targ) || strings.Contains(desc, targ)) {
 				match = false
 
 				break
