@@ -222,17 +222,12 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		}
 	}
 
-	if config.CleanMenu {
-		if anyExistInCache(do.Aur) {
-			askClean := pkgbuildNumberMenu(do.Aur, remoteNamesCache)
-
-			toClean, errClean := cleanNumberMenu(do.Aur, remoteNamesCache, askClean)
-			if errClean != nil {
-				return errClean
-			}
-
-			cleanBuilds(toClean)
+	if errCleanMenu := cleanMenu(config.CleanMenu, do.Aur, remoteNamesCache); errCleanMenu != nil {
+		if errors.As(errCleanMenu, &settings.ErrUserAbort{}) {
+			return errCleanMenu
 		}
+
+		text.Errorln(errCleanMenu)
 	}
 
 	toSkip := pkgbuildsToSkip(do.Aur, targets)
@@ -282,7 +277,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		fmt.Println()
 
 		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, settings.NoConfirm) {
-			return fmt.Errorf(gotext.Get("aborting due to user"))
+			return &settings.ErrUserAbort{}
 		}
 
 		err = updatePkgbuildSeenRef(ctx, toDiff)
@@ -325,7 +320,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		fmt.Println()
 
 		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, settings.NoConfirm) {
-			return errors.New(gotext.Get("aborting due to user"))
+			return &settings.ErrUserAbort{}
 		}
 
 		settings.NoConfirm = oldValue
@@ -520,7 +515,7 @@ nextpkg:
 		fmt.Println()
 
 		if !text.ContinueTask(gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
-			return nil, errors.New(gotext.Get("aborting due to user"))
+			return nil, &settings.ErrUserAbort{}
 		}
 	}
 
@@ -560,19 +555,6 @@ func parsePackageList(ctx context.Context, dir string) (pkgdests map[string]stri
 	return pkgdests, pkgVersion, nil
 }
 
-func anyExistInCache(bases []dep.Base) bool {
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-
-		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) bool {
 	toPrint := ""
 	askClean := false
@@ -604,76 +586,6 @@ func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) bool {
 	fmt.Print(toPrint)
 
 	return askClean
-}
-
-func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet, hasClean bool) ([]dep.Base, error) {
-	toClean := make([]dep.Base, 0)
-
-	if !hasClean {
-		return toClean, nil
-	}
-
-	text.Infoln(gotext.Get("Packages to cleanBuild?"))
-	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
-
-	cleanInput, err := getInput(config.AnswerClean)
-	if err != nil {
-		return nil, err
-	}
-
-	cInclude, cExclude, cOtherInclude, cOtherExclude := intrange.ParseNumberMenu(cleanInput)
-	cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
-
-	if cOtherInclude.Get("abort") || cOtherInclude.Get("ab") {
-		return nil, fmt.Errorf(gotext.Get("aborting due to user"))
-	}
-
-	if !cOtherInclude.Get("n") && !cOtherInclude.Get("none") {
-		for i, base := range bases {
-			pkg := base.Pkgbase()
-			anyInstalled := false
-
-			for _, b := range base {
-				anyInstalled = anyInstalled || installed.Get(b.Name)
-			}
-
-			dir := filepath.Join(config.BuildDir, pkg)
-			if _, err := os.Stat(dir); os.IsNotExist(err) {
-				continue
-			}
-
-			if !cIsInclude && cExclude.Get(len(bases)-i) {
-				continue
-			}
-
-			if anyInstalled && (cOtherInclude.Get("i") || cOtherInclude.Get("installed")) {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if !anyInstalled && (cOtherInclude.Get("no") || cOtherInclude.Get("notinstalled")) {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if cOtherInclude.Get("a") || cOtherInclude.Get("all") {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if cIsInclude && (cInclude.Get(len(bases)-i) || cOtherInclude.Get(pkg)) {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if !cIsInclude && (!cExclude.Get(len(bases)-i) && !cOtherExclude.Get(pkg)) {
-				toClean = append(toClean, base)
-				continue
-			}
-		}
-	}
-
-	return toClean, nil
 }
 
 func editNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
@@ -712,7 +624,7 @@ func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet, diff bo
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
 
 	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
-		return nil, fmt.Errorf(gotext.Get("aborting due to user"))
+		return nil, &settings.ErrUserAbort{}
 	}
 
 	if !eOtherInclude.Get("n") && !eOtherInclude.Get("none") {

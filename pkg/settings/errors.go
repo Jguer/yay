@@ -22,3 +22,9 @@ type ErrRuntimeDir struct {
 func (e *ErrRuntimeDir) Error() string {
 	return gotext.Get("failed to create directory '%s': %s", e.dir, e.inner)
 }
+
+type ErrUserAbort struct{}
+
+func (e ErrUserAbort) Error() string {
+	return gotext.Get("aborting due to user")
+}
