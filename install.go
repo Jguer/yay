@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -19,8 +18,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/download"
-	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/pgp"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
@@ -251,40 +248,12 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errA
 	}
 
-	var toDiff, toEdit []dep.Base
-
-	if config.DiffMenu {
-		pkgbuildNumberMenu(do.Aur, remoteNamesCache)
-
-		toDiff, err = diffNumberMenu(do.Aur, remoteNamesCache)
-		if err != nil {
-			return err
+	if errDiffMenu := diffMenu(ctx, config.DiffMenu, do.Aur, remoteNamesCache, cloned); errDiffMenu != nil {
+		if errors.As(errDiffMenu, &settings.ErrUserAbort{}) {
+			return errDiffMenu
 		}
 
-		if len(toDiff) > 0 {
-			err = showPkgbuildDiffs(ctx, toDiff, cloned)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(toDiff) > 0 {
-		oldValue := settings.NoConfirm
-		settings.NoConfirm = false
-
-		fmt.Println()
-
-		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, settings.NoConfirm) {
-			return &settings.ErrUserAbort{}
-		}
-
-		err = updatePkgbuildSeenRef(ctx, toDiff)
-		if err != nil {
-			text.Errorln(err.Error())
-		}
-
-		settings.NoConfirm = oldValue
+		text.Errorln(errDiffMenu)
 	}
 
 	if errM := mergePkgbuilds(ctx, do.Aur); errM != nil {
@@ -296,33 +265,12 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return err
 	}
 
-	if config.EditMenu {
-		pkgbuildNumberMenu(do.Aur, remoteNamesCache)
-
-		toEdit, err = editNumberMenu(do.Aur, remoteNamesCache)
-		if err != nil {
-			return err
+	if errEditMenu := editMenu(config.EditMenu, do.Aur, remoteNamesCache, srcinfos); errEditMenu != nil {
+		if errors.As(errEditMenu, &settings.ErrUserAbort{}) {
+			return errEditMenu
 		}
 
-		if len(toEdit) > 0 {
-			err = editPkgbuilds(toEdit, srcinfos)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(toEdit) > 0 {
-		oldValue := settings.NoConfirm
-		settings.NoConfirm = false
-
-		fmt.Println()
-
-		if !text.ContinueTask(gotext.Get("Proceed with install?"), true, settings.NoConfirm) {
-			return &settings.ErrUserAbort{}
-		}
-
-		settings.NoConfirm = oldValue
+		text.Errorln(errEditMenu)
 	}
 
 	incompatible, err = getIncompatible(do.Aur, srcinfos, dbExecutor)
@@ -578,125 +526,6 @@ func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) {
 	fmt.Print(toPrint)
 }
 
-func editNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
-	return editDiffNumberMenu(bases, installed, false)
-}
-
-func diffNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
-	return editDiffNumberMenu(bases, installed, true)
-}
-
-func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet, diff bool) ([]dep.Base, error) {
-	var (
-		toEdit    = make([]dep.Base, 0)
-		editInput string
-		err       error
-	)
-
-	if diff {
-		text.Infoln(gotext.Get("Diffs to show?"))
-		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
-
-		editInput, err = getInput(config.AnswerDiff)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		text.Infoln(gotext.Get("PKGBUILDs to edit?"))
-		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
-		editInput, err = getInput(config.AnswerEdit)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(editInput)
-	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
-
-	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
-		return nil, &settings.ErrUserAbort{}
-	}
-
-	if !eOtherInclude.Get("n") && !eOtherInclude.Get("none") {
-		for i, base := range bases {
-			pkg := base.Pkgbase()
-			anyInstalled := base.AnyIsInSet(installed)
-
-			if !eIsInclude && eExclude.Get(len(bases)-i) {
-				continue
-			}
-
-			if anyInstalled && (eOtherInclude.Get("i") || eOtherInclude.Get("installed")) {
-				toEdit = append(toEdit, base)
-				continue
-			}
-
-			if !anyInstalled && (eOtherInclude.Get("no") || eOtherInclude.Get("notinstalled")) {
-				toEdit = append(toEdit, base)
-				continue
-			}
-
-			if eOtherInclude.Get("a") || eOtherInclude.Get("all") {
-				toEdit = append(toEdit, base)
-				continue
-			}
-
-			if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkg)) {
-				toEdit = append(toEdit, base)
-			}
-
-			if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkg)) {
-				toEdit = append(toEdit, base)
-			}
-		}
-	}
-
-	return toEdit, nil
-}
-
-func updatePkgbuildSeenRef(ctx context.Context, bases []dep.Base) error {
-	var errMulti multierror.MultiError
-
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-
-		if err := gitUpdateSeenRef(ctx, config.BuildDir, pkg); err != nil {
-			errMulti.Add(err)
-		}
-	}
-
-	return errMulti.Return()
-}
-
-func editPkgbuilds(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo) error {
-	pkgbuilds := make([]string, 0, len(bases))
-
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-		pkgbuilds = append(pkgbuilds, filepath.Join(dir, "PKGBUILD"))
-
-		for _, splitPkg := range srcinfos[pkg].SplitPackages() {
-			if splitPkg.Install != "" {
-				pkgbuilds = append(pkgbuilds, filepath.Join(dir, splitPkg.Install))
-			}
-		}
-	}
-
-	if len(pkgbuilds) > 0 {
-		editor, editorArgs := editor()
-		editorArgs = append(editorArgs, pkgbuilds...)
-		editcmd := exec.Command(editor, editorArgs...)
-		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-
-		if err := editcmd.Run(); err != nil {
-			return errors.New(gotext.Get("editor did not exit successfully, aborting: %s", err))
-		}
-	}
-
-	return nil
-}
-
 func parseSrcinfoFiles(bases []dep.Base, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
 	srcinfos := make(map[string]*gosrc.Srcinfo)
 
@@ -746,6 +575,24 @@ func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.St
 	}
 
 	return toSkip
+}
+
+func gitMerge(ctx context.Context, path, name string) error {
+	_, stderr, err := config.Runtime.CmdBuilder.Capture(
+		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
+			filepath.Join(path, name), "reset", "--hard", "HEAD"))
+	if err != nil {
+		return fmt.Errorf(gotext.Get("error resetting %s: %s", name, stderr))
+	}
+
+	_, stderr, err = config.Runtime.CmdBuilder.Capture(
+		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
+			filepath.Join(path, name), "merge", "--no-edit", "--ff"))
+	if err != nil {
+		return fmt.Errorf(gotext.Get("error merging %s: %s", name, stderr))
+	}
+
+	return nil
 }
 
 func mergePkgbuilds(ctx context.Context, bases []dep.Base) error {
