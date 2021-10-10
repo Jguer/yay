@@ -36,11 +36,7 @@ func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Bas
 	if !cOtherInclude.Get("n") && !cOtherInclude.Get("none") {
 		for i, base := range bases {
 			pkg := base.Pkgbase()
-			anyInstalled := false
-
-			for _, b := range base {
-				anyInstalled = anyInstalled || installed.Get(b.Name)
-			}
+			anyInstalled := base.AnyIsInSet(installed)
 
 			dir := filepath.Join(config.BuildDir, pkg)
 			if _, err := os.Stat(dir); os.IsNotExist(err) {

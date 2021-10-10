@@ -1,6 +1,9 @@
 package dep
 
-import aur "github.com/Jguer/yay/v11/pkg/query"
+import (
+	aur "github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/stringset"
+)
 
 // Base is an AUR base package.
 type Base []*aur.Pkg
@@ -18,6 +21,16 @@ func (b Base) Version() string {
 // URLPath returns the first base package URL.
 func (b Base) URLPath() string {
 	return b[0].URLPath
+}
+
+func (b Base) AnyIsInSet(set stringset.StringSet) bool {
+	for _, pkg := range b {
+		if set.Get(pkg.Name) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Packages foo and bar from a pkgbase named base would print like so:

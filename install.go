@@ -564,12 +564,7 @@ func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) {
 		toPrint += fmt.Sprintf(text.Magenta("%3d")+" %-40s", len(bases)-n,
 			text.Bold(base.String()))
 
-		anyInstalled := false
-		for _, b := range base {
-			anyInstalled = anyInstalled || installed.Get(b.Name)
-		}
-
-		if anyInstalled {
+		if base.AnyIsInSet(installed) {
 			toPrint += text.Bold(text.Green(gotext.Get(" (Installed)")))
 		}
 
@@ -625,11 +620,7 @@ func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet, diff bo
 	if !eOtherInclude.Get("n") && !eOtherInclude.Get("none") {
 		for i, base := range bases {
 			pkg := base.Pkgbase()
-			anyInstalled := false
-
-			for _, b := range base {
-				anyInstalled = anyInstalled || installed.Get(b.Name)
-			}
+			anyInstalled := base.AnyIsInSet(installed)
 
 			if !eIsInclude && eExclude.Get(len(bases)-i) {
 				continue
