@@ -1,3 +1,4 @@
+// file dedicated to diff menu
 package main
 
 import (
@@ -10,6 +11,8 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
+	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
@@ -126,19 +129,48 @@ func gitUpdateSeenRef(ctx context.Context, path, name string) error {
 	return nil
 }
 
-func gitMerge(ctx context.Context, path, name string) error {
-	_, stderr, err := config.Runtime.CmdBuilder.Capture(
-		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
-			filepath.Join(path, name), "reset", "--hard", "HEAD"))
-	if err != nil {
-		return fmt.Errorf(gotext.Get("error resetting %s: %s", name, stderr))
+func diffNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
+	return editDiffNumberMenu(bases, installed, true)
+}
+
+func updatePkgbuildSeenRef(ctx context.Context, bases []dep.Base) error {
+	var errMulti multierror.MultiError
+
+	for _, base := range bases {
+		pkg := base.Pkgbase()
+
+		if err := gitUpdateSeenRef(ctx, config.BuildDir, pkg); err != nil {
+			errMulti.Add(err)
+		}
 	}
 
-	_, stderr, err = config.Runtime.CmdBuilder.Capture(
-		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
-			filepath.Join(path, name), "merge", "--no-edit", "--ff"))
-	if err != nil {
-		return fmt.Errorf(gotext.Get("error merging %s: %s", name, stderr))
+	return errMulti.Return()
+}
+
+func diffMenu(ctx context.Context, diffMenuOption bool, bases []dep.Base, installed stringset.StringSet, cloned map[string]bool) error {
+	if !diffMenuOption {
+		return nil
+	}
+
+	pkgbuildNumberMenu(bases, installed)
+
+	toDiff, errMenu := diffNumberMenu(bases, installed)
+	if errMenu != nil || len(toDiff) == 0 {
+		return errMenu
+	}
+
+	if errD := showPkgbuildDiffs(ctx, toDiff, cloned); errD != nil {
+		return errD
+	}
+
+	fmt.Println()
+
+	if !text.ContinueTask(gotext.Get("Proceed with install?"), true, false) {
+		return settings.ErrUserAbort{}
+	}
+
+	if errUpd := updatePkgbuildSeenRef(ctx, toDiff); errUpd != nil {
+		return errUpd
 	}
 
 	return nil
