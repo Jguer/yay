@@ -239,8 +239,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		}
 	}
 
-	toSkipSlice := toSkip.ToSlice()
-	if len(toSkipSlice) != 0 {
+	if toSkipSlice := toSkip.ToSlice(); len(toSkipSlice) != 0 {
 		text.OperationInfoln(
 			gotext.Get("PKGBUILD up to date, Skipping (%d/%d): %s",
 				len(toSkipSlice), len(toClone), text.Cyan(strings.Join(toSkipSlice, ", "))))
