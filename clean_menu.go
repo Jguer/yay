@@ -15,12 +15,8 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet, hasClean bool) ([]dep.Base, error) {
+func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
 	toClean := make([]dep.Base, 0)
-
-	if !hasClean {
-		return toClean, nil
-	}
 
 	text.Infoln(gotext.Get("Packages to cleanBuild?"))
 	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
@@ -103,9 +99,9 @@ func cleanMenu(cleanMenuOption bool, aurBases []dep.Base, installed stringset.St
 		return nil
 	}
 
-	askClean := pkgbuildNumberMenu(aurBases, installed)
+	pkgbuildNumberMenu(aurBases, installed)
 
-	toClean, errClean := cleanNumberMenu(aurBases, installed, askClean)
+	toClean, errClean := cleanNumberMenu(aurBases, installed)
 	if errClean != nil {
 		return errClean
 	}

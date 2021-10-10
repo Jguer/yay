@@ -554,9 +554,8 @@ func parsePackageList(ctx context.Context, dir string) (pkgdests map[string]stri
 	return pkgdests, pkgVersion, nil
 }
 
-func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) bool {
+func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) {
 	toPrint := ""
-	askClean := false
 
 	for n, base := range bases {
 		pkg := base.Pkgbase()
@@ -576,15 +575,12 @@ func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) bool {
 
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
 			toPrint += text.Bold(text.Green(gotext.Get(" (Build Files Exist)")))
-			askClean = true
 		}
 
 		toPrint += "\n"
 	}
 
 	fmt.Print(toPrint)
-
-	return askClean
 }
 
 func editNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
