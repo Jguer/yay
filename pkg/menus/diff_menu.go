@@ -133,10 +133,6 @@ func gitUpdateSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, path, nam
 	return nil
 }
 
-func diffNumberMenu(bases []dep.Base, installed stringset.StringSet, noConfirm bool, defaultAnswer string) ([]dep.Base, error) {
-	return editDiffNumberMenu(bases, installed, true, noConfirm, defaultAnswer)
-}
-
 func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, buildDir string, bases []dep.Base) error {
 	var errMulti multierror.MultiError
 
@@ -160,7 +156,7 @@ func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 
 	pkgbuildNumberMenu(buildDir, bases, installed)
 
-	toDiff, errMenu := diffNumberMenu(bases, installed, noConfirm, diffDefaultAnswer)
+	toDiff, errMenu := editDiffNumberMenu(bases, installed, gotext.Get("Diffs to show?"), noConfirm, diffDefaultAnswer)
 	if errMenu != nil || len(toDiff) == 0 {
 		return errMenu
 	}
