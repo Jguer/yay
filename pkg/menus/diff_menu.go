@@ -1,5 +1,5 @@
 // file dedicated to diff menu
-package main
+package menus
 
 import (
 	"context"
@@ -12,20 +12,24 @@ import (
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-const gitDiffRefName = "AUR_SEEN"
+const (
+	gitEmptyTree   = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+	gitDiffRefName = "AUR_SEEN"
+)
 
-func showPkgbuildDiffs(ctx context.Context, bases []dep.Base, cloned map[string]bool) error {
+func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, buildDir string, bases []dep.Base, cloned map[string]bool) error {
 	var errMulti multierror.MultiError
 
 	for _, base := range bases {
 		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
+		dir := filepath.Join(buildDir, pkg)
 
-		start, err := getLastSeenHash(ctx, config.BuildDir, pkg)
+		start, err := getLastSeenHash(ctx, cmdBuilder, buildDir, pkg)
 		if err != nil {
 			errMulti.Add(err)
 
@@ -35,7 +39,7 @@ func showPkgbuildDiffs(ctx context.Context, bases []dep.Base, cloned map[string]
 		if cloned[pkg] {
 			start = gitEmptyTree
 		} else {
-			hasDiff, err := gitHasDiff(ctx, config.BuildDir, pkg)
+			hasDiff, err := gitHasDiff(ctx, cmdBuilder, buildDir, pkg)
 			if err != nil {
 				errMulti.Add(err)
 
@@ -60,7 +64,7 @@ func showPkgbuildDiffs(ctx context.Context, bases []dep.Base, cloned map[string]
 			args = append(args, "--color=never")
 		}
 
-		_ = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, args...))
+		_ = cmdBuilder.Show(cmdBuilder.BuildGitCmd(ctx, dir, args...))
 	}
 
 	return errMulti.Return()
@@ -68,10 +72,10 @@ func showPkgbuildDiffs(ctx context.Context, bases []dep.Base, cloned map[string]
 
 // Check whether or not a diff exists between the last reviewed diff and
 // HEAD@{upstream}.
-func gitHasDiff(ctx context.Context, path, name string) (bool, error) {
-	if gitHasLastSeenRef(ctx, path, name) {
-		stdout, stderr, err := config.Runtime.CmdBuilder.Capture(
-			config.Runtime.CmdBuilder.BuildGitCmd(ctx, filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
+func gitHasDiff(ctx context.Context, cmdBuilder exe.ICmdBuilder, path, name string) (bool, error) {
+	if gitHasLastSeenRef(ctx, cmdBuilder, path, name) {
+		stdout, stderr, err := cmdBuilder.Capture(
+			cmdBuilder.BuildGitCmd(ctx, filepath.Join(path, name), "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
 		if err != nil {
 			return false, fmt.Errorf("%s%s", stderr, err)
 		}
@@ -89,9 +93,9 @@ func gitHasDiff(ctx context.Context, path, name string) (bool, error) {
 
 // Return wether or not we have reviewed a diff yet. It checks for the existence of
 // YAY_DIFF_REVIEW in the git ref-list.
-func gitHasLastSeenRef(ctx context.Context, path, name string) bool {
-	_, _, err := config.Runtime.CmdBuilder.Capture(
-		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
+func gitHasLastSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, path, name string) bool {
+	_, _, err := cmdBuilder.Capture(
+		cmdBuilder.BuildGitCmd(ctx,
 			filepath.Join(path, name), "rev-parse", "--quiet", "--verify", gitDiffRefName))
 
 	return err == nil
@@ -99,10 +103,10 @@ func gitHasLastSeenRef(ctx context.Context, path, name string) bool {
 
 // Returns the last reviewed hash. If YAY_DIFF_REVIEW exists it will return this hash.
 // If it does not it will return empty tree as no diff have been reviewed yet.
-func getLastSeenHash(ctx context.Context, path, name string) (string, error) {
-	if gitHasLastSeenRef(ctx, path, name) {
-		stdout, stderr, err := config.Runtime.CmdBuilder.Capture(
-			config.Runtime.CmdBuilder.BuildGitCmd(ctx,
+func getLastSeenHash(ctx context.Context, cmdBuilder exe.ICmdBuilder, path, name string) (string, error) {
+	if gitHasLastSeenRef(ctx, cmdBuilder, path, name) {
+		stdout, stderr, err := cmdBuilder.Capture(
+			cmdBuilder.BuildGitCmd(ctx,
 				filepath.Join(path, name), "rev-parse", gitDiffRefName))
 		if err != nil {
 			return "", fmt.Errorf("%s %s", stderr, err)
@@ -118,9 +122,9 @@ func getLastSeenHash(ctx context.Context, path, name string) (string, error) {
 
 // Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
 // reviewed by the user.
-func gitUpdateSeenRef(ctx context.Context, path, name string) error {
-	_, stderr, err := config.Runtime.CmdBuilder.Capture(
-		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
+func gitUpdateSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, path, name string) error {
+	_, stderr, err := cmdBuilder.Capture(
+		cmdBuilder.BuildGitCmd(ctx,
 			filepath.Join(path, name), "update-ref", gitDiffRefName, "HEAD"))
 	if err != nil {
 		return fmt.Errorf("%s %s", stderr, err)
@@ -129,17 +133,17 @@ func gitUpdateSeenRef(ctx context.Context, path, name string) error {
 	return nil
 }
 
-func diffNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
-	return editDiffNumberMenu(bases, installed, true)
+func diffNumberMenu(bases []dep.Base, installed stringset.StringSet, noConfirm bool, defaultAnswer string) ([]dep.Base, error) {
+	return editDiffNumberMenu(bases, installed, true, noConfirm, defaultAnswer)
 }
 
-func updatePkgbuildSeenRef(ctx context.Context, bases []dep.Base) error {
+func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, buildDir string, bases []dep.Base) error {
 	var errMulti multierror.MultiError
 
 	for _, base := range bases {
 		pkg := base.Pkgbase()
 
-		if err := gitUpdateSeenRef(ctx, config.BuildDir, pkg); err != nil {
+		if err := gitUpdateSeenRef(ctx, cmdBuilder, buildDir, pkg); err != nil {
 			errMulti.Add(err)
 		}
 	}
@@ -147,19 +151,21 @@ func updatePkgbuildSeenRef(ctx context.Context, bases []dep.Base) error {
 	return errMulti.Return()
 }
 
-func diffMenu(ctx context.Context, diffMenuOption bool, bases []dep.Base, installed stringset.StringSet, cloned map[string]bool) error {
+func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder,
+	buildDir string, diffMenuOption bool, bases []dep.Base,
+	installed stringset.StringSet, cloned map[string]bool, noConfirm bool, diffDefaultAnswer string) error {
 	if !diffMenuOption {
 		return nil
 	}
 
-	pkgbuildNumberMenu(bases, installed)
+	pkgbuildNumberMenu(buildDir, bases, installed)
 
-	toDiff, errMenu := diffNumberMenu(bases, installed)
+	toDiff, errMenu := diffNumberMenu(bases, installed, noConfirm, diffDefaultAnswer)
 	if errMenu != nil || len(toDiff) == 0 {
 		return errMenu
 	}
 
-	if errD := showPkgbuildDiffs(ctx, toDiff, cloned); errD != nil {
+	if errD := showPkgbuildDiffs(ctx, cmdBuilder, buildDir, toDiff, cloned); errD != nil {
 		return errD
 	}
 
@@ -169,7 +175,7 @@ func diffMenu(ctx context.Context, diffMenuOption bool, bases []dep.Base, instal
 		return settings.ErrUserAbort{}
 	}
 
-	if errUpd := updatePkgbuildSeenRef(ctx, toDiff); errUpd != nil {
+	if errUpd := updatePkgbuildSeenRef(ctx, cmdBuilder, buildDir, toDiff); errUpd != nil {
 		return errUpd
 	}
 
