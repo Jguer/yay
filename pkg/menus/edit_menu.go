@@ -82,10 +82,6 @@ func editor(editorConfig, editorFlags string, noConfirm bool) (editor string, ar
 	}
 }
 
-func editNumberMenu(bases []dep.Base, installed stringset.StringSet, noConfirm bool, defaultAnswer string) ([]dep.Base, error) {
-	return editDiffNumberMenu(bases, installed, false, noConfirm, defaultAnswer)
-}
-
 func editPkgbuilds(buildDir string, bases []dep.Base, editorConfig,
 	editorFlags string, srcinfos map[string]*gosrc.Srcinfo, noConfirm bool) error {
 	pkgbuilds := make([]string, 0, len(bases))
@@ -125,7 +121,7 @@ func Edit(editMenuOption bool, buildDir string, bases []dep.Base, editorConfig,
 
 	pkgbuildNumberMenu(buildDir, bases, installed)
 
-	toEdit, errMenu := editNumberMenu(bases, installed, noConfirm, editDefaultAnswer)
+	toEdit, errMenu := editDiffNumberMenu(bases, installed, gotext.Get("PKGBUILDs to edit?"), noConfirm, editDefaultAnswer)
 	if errMenu != nil || len(toEdit) == 0 {
 		return errMenu
 	}

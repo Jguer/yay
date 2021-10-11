@@ -38,28 +38,16 @@ func pkgbuildNumberMenu(buildDir string, bases []dep.Base, installed stringset.S
 	fmt.Print(toPrint)
 }
 
-func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet, diff, noConfirm bool, defaultAnswer string) ([]dep.Base, error) {
-	var (
-		toEdit    = make([]dep.Base, 0)
-		editInput string
-		err       error
-	)
+func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet,
+	message string, noConfirm bool, defaultAnswer string) ([]dep.Base, error) {
+	toEdit := make([]dep.Base, 0)
 
-	if diff {
-		text.Infoln(gotext.Get("Diffs to show?"))
-		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
+	text.Infoln(message)
+	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 
-		editInput, err = text.GetInput(defaultAnswer, noConfirm)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		text.Infoln(gotext.Get("PKGBUILDs to edit?"))
-		text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
-		editInput, err = text.GetInput(defaultAnswer, noConfirm)
-		if err != nil {
-			return nil, err
-		}
+	editInput, err := text.GetInput(defaultAnswer, noConfirm)
+	if err != nil {
+		return nil, err
 	}
 
 	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(editInput)
