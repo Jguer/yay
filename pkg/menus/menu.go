@@ -38,58 +38,67 @@ func pkgbuildNumberMenu(buildDir string, bases []dep.Base, installed stringset.S
 	fmt.Print(toPrint)
 }
 
-func editDiffNumberMenu(bases []dep.Base, installed stringset.StringSet,
-	message string, noConfirm bool, defaultAnswer string) ([]dep.Base, error) {
-	toEdit := make([]dep.Base, 0)
+func selectionMenu(buildDir string, bases []dep.Base, installed stringset.StringSet,
+	message string, noConfirm bool, defaultAnswer string, skipFunc func(string) bool) ([]dep.Base, error) {
+	selected := make([]dep.Base, 0)
+
+	pkgbuildNumberMenu(buildDir, bases, installed)
 
 	text.Infoln(message)
 	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 
-	editInput, err := text.GetInput(defaultAnswer, noConfirm)
+	selectInput, err := text.GetInput(defaultAnswer, noConfirm)
 	if err != nil {
 		return nil, err
 	}
 
-	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(editInput)
+	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(selectInput)
 	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
 
 	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
-		return nil, &settings.ErrUserAbort{}
+		return nil, settings.ErrUserAbort{}
 	}
 
-	if !eOtherInclude.Get("n") && !eOtherInclude.Get("none") {
-		for i, base := range bases {
-			pkg := base.Pkgbase()
-			anyInstalled := base.AnyIsInSet(installed)
+	if eOtherInclude.Get("n") || eOtherInclude.Get("none") {
+		return selected, nil
+	}
 
-			if !eIsInclude && eExclude.Get(len(bases)-i) {
-				continue
-			}
+	for i, base := range bases {
+		pkg := base.Pkgbase()
 
-			if anyInstalled && (eOtherInclude.Get("i") || eOtherInclude.Get("installed")) {
-				toEdit = append(toEdit, base)
-				continue
-			}
+		if skipFunc != nil && skipFunc(pkg) {
+			continue
+		}
 
-			if !anyInstalled && (eOtherInclude.Get("no") || eOtherInclude.Get("notinstalled")) {
-				toEdit = append(toEdit, base)
-				continue
-			}
+		anyInstalled := base.AnyIsInSet(installed)
 
-			if eOtherInclude.Get("a") || eOtherInclude.Get("all") {
-				toEdit = append(toEdit, base)
-				continue
-			}
+		if !eIsInclude && eExclude.Get(len(bases)-i) {
+			continue
+		}
 
-			if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkg)) {
-				toEdit = append(toEdit, base)
-			}
+		if anyInstalled && (eOtherInclude.Get("i") || eOtherInclude.Get("installed")) {
+			selected = append(selected, base)
+			continue
+		}
 
-			if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkg)) {
-				toEdit = append(toEdit, base)
-			}
+		if !anyInstalled && (eOtherInclude.Get("no") || eOtherInclude.Get("notinstalled")) {
+			selected = append(selected, base)
+			continue
+		}
+
+		if eOtherInclude.Get("a") || eOtherInclude.Get("all") {
+			selected = append(selected, base)
+			continue
+		}
+
+		if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkg)) {
+			selected = append(selected, base)
+		}
+
+		if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkg)) {
+			selected = append(selected, base)
 		}
 	}
 
-	return toEdit, nil
+	return selected, nil
 }

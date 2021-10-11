@@ -154,9 +154,8 @@ func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 		return nil
 	}
 
-	pkgbuildNumberMenu(buildDir, bases, installed)
-
-	toDiff, errMenu := editDiffNumberMenu(bases, installed, gotext.Get("Diffs to show?"), noConfirm, diffDefaultAnswer)
+	toDiff, errMenu := selectionMenu(buildDir, bases, installed, gotext.Get("Diffs to show?"),
+		noConfirm, diffDefaultAnswer, nil)
 	if errMenu != nil || len(toDiff) == 0 {
 		return errMenu
 	}
