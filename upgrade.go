@@ -15,6 +15,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/intrange"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/upgrade"
@@ -184,7 +185,7 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 
 	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
 
-	numbers, err := getInput(config.AnswerUpgrade)
+	numbers, err := text.GetInput(config.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
 		return nil, nil, err
 	}

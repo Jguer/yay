@@ -1,5 +1,5 @@
 // Clean Build Menu functions
-package main
+package menus
 
 import (
 	"fmt"
@@ -15,13 +15,14 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Base, error) {
+func cleanNumberMenu(buildDir string, bases []dep.Base,
+	installed stringset.StringSet, answerClean string, noConfirm bool) ([]dep.Base, error) {
 	toClean := make([]dep.Base, 0)
 
 	text.Infoln(gotext.Get("Packages to cleanBuild?"))
 	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 
-	cleanInput, err := getInput(config.AnswerClean)
+	cleanInput, err := text.GetInput(answerClean, noConfirm)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Bas
 			pkg := base.Pkgbase()
 			anyInstalled := base.AnyIsInSet(installed)
 
-			dir := filepath.Join(config.BuildDir, pkg)
+			dir := filepath.Join(buildDir, pkg)
 			if _, err := os.Stat(dir); os.IsNotExist(err) {
 				continue
 			}
@@ -77,10 +78,10 @@ func cleanNumberMenu(bases []dep.Base, installed stringset.StringSet) ([]dep.Bas
 	return toClean, nil
 }
 
-func anyExistInCache(bases []dep.Base) bool {
+func anyExistInCache(buildDir string, bases []dep.Base) bool {
 	for _, base := range bases {
 		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
+		dir := filepath.Join(buildDir, pkg)
 
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
 			return true
@@ -90,20 +91,21 @@ func anyExistInCache(bases []dep.Base) bool {
 	return false
 }
 
-func cleanMenu(cleanMenuOption bool, aurBases []dep.Base, installed stringset.StringSet) error {
-	if !(cleanMenuOption && anyExistInCache(aurBases)) {
+func Clean(cleanMenuOption bool, buildDir string, aurBases []dep.Base,
+	installed stringset.StringSet, noConfirm bool, answerClean string) error {
+	if !(cleanMenuOption && anyExistInCache(buildDir, aurBases)) {
 		return nil
 	}
 
-	pkgbuildNumberMenu(aurBases, installed)
+	pkgbuildNumberMenu(buildDir, aurBases, installed)
 
-	toClean, errClean := cleanNumberMenu(aurBases, installed)
+	toClean, errClean := cleanNumberMenu(buildDir, aurBases, installed, answerClean, noConfirm)
 	if errClean != nil {
 		return errClean
 	}
 
 	for i, base := range toClean {
-		dir := filepath.Join(config.BuildDir, base.Pkgbase())
+		dir := filepath.Join(buildDir, base.Pkgbase())
 		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
 
 		if err := os.RemoveAll(dir); err != nil {

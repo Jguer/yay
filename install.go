@@ -18,6 +18,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/download"
+	"github.com/Jguer/yay/v11/pkg/menus"
 	"github.com/Jguer/yay/v11/pkg/pgp"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
@@ -25,8 +26,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
-
-const gitEmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
 func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err error) {
 	if len(pkgs) == 0 {
@@ -219,7 +218,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		}
 	}
 
-	if errCleanMenu := cleanMenu(config.CleanMenu, do.Aur, remoteNamesCache); errCleanMenu != nil {
+	if errCleanMenu := menus.Clean(config.CleanMenu,
+		config.BuildDir, do.Aur,
+		remoteNamesCache, settings.NoConfirm, config.AnswerClean); errCleanMenu != nil {
 		if errors.As(errCleanMenu, &settings.ErrUserAbort{}) {
 			return errCleanMenu
 		}
@@ -248,7 +249,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errA
 	}
 
-	if errDiffMenu := diffMenu(ctx, config.DiffMenu, do.Aur, remoteNamesCache, cloned); errDiffMenu != nil {
+	if errDiffMenu := menus.Diff(ctx, config.Runtime.CmdBuilder, config.BuildDir,
+		config.DiffMenu, do.Aur, remoteNamesCache,
+		cloned, settings.NoConfirm, config.AnswerDiff); errDiffMenu != nil {
 		if errors.As(errDiffMenu, &settings.ErrUserAbort{}) {
 			return errDiffMenu
 		}
@@ -265,7 +268,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return err
 	}
 
-	if errEditMenu := editMenu(config.EditMenu, do.Aur, remoteNamesCache, srcinfos); errEditMenu != nil {
+	if errEditMenu := menus.Edit(config.EditMenu, config.BuildDir, do.Aur,
+		config.Editor, config.EditorFlags, remoteNamesCache, srcinfos,
+		settings.NoConfirm, config.AnswerEdit); errEditMenu != nil {
 		if errors.As(errEditMenu, &settings.ErrUserAbort{}) {
 			return errEditMenu
 		}
@@ -500,30 +505,6 @@ func parsePackageList(ctx context.Context, dir string) (pkgdests map[string]stri
 	}
 
 	return pkgdests, pkgVersion, nil
-}
-
-func pkgbuildNumberMenu(bases []dep.Base, installed stringset.StringSet) {
-	toPrint := ""
-
-	for n, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-
-		toPrint += fmt.Sprintf(text.Magenta("%3d")+" %-40s", len(bases)-n,
-			text.Bold(base.String()))
-
-		if base.AnyIsInSet(installed) {
-			toPrint += text.Bold(text.Green(gotext.Get(" (Installed)")))
-		}
-
-		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			toPrint += text.Bold(text.Green(gotext.Get(" (Build Files Exist)")))
-		}
-
-		toPrint += "\n"
-	}
-
-	fmt.Print(toPrint)
 }
 
 func parseSrcinfoFiles(bases []dep.Base, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
