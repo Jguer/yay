@@ -244,7 +244,5 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 
 	warnings.Print()
 
-	ignore, targets, errUp := upgradePkgsMenu(aurUp, repoUp)
-
-	return ignore, targets, errUp
+	return upgradePkgsMenu(aurUp, repoUp)
 }

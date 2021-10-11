@@ -9,74 +9,9 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
-
-func cleanNumberMenu(buildDir string, bases []dep.Base,
-	installed stringset.StringSet, answerClean string, noConfirm bool) ([]dep.Base, error) {
-	toClean := make([]dep.Base, 0)
-
-	text.Infoln(gotext.Get("Packages to cleanBuild?"))
-	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
-
-	cleanInput, err := text.GetInput(answerClean, noConfirm)
-	if err != nil {
-		return nil, err
-	}
-
-	cInclude, cExclude, cOtherInclude, cOtherExclude := intrange.ParseNumberMenu(cleanInput)
-	cIsInclude := len(cExclude) == 0 && len(cOtherExclude) == 0
-
-	if cOtherInclude.Get("abort") || cOtherInclude.Get("ab") {
-		return nil, settings.ErrUserAbort{}
-	}
-
-	if !cOtherInclude.Get("n") && !cOtherInclude.Get("none") {
-		for i, base := range bases {
-			pkg := base.Pkgbase()
-			anyInstalled := base.AnyIsInSet(installed)
-
-			dir := filepath.Join(buildDir, pkg)
-			if _, err := os.Stat(dir); os.IsNotExist(err) {
-				continue
-			}
-
-			if !cIsInclude && cExclude.Get(len(bases)-i) {
-				continue
-			}
-
-			if anyInstalled && (cOtherInclude.Get("i") || cOtherInclude.Get("installed")) {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if !anyInstalled && (cOtherInclude.Get("no") || cOtherInclude.Get("notinstalled")) {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if cOtherInclude.Get("a") || cOtherInclude.Get("all") {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if cIsInclude && (cInclude.Get(len(bases)-i) || cOtherInclude.Get(pkg)) {
-				toClean = append(toClean, base)
-				continue
-			}
-
-			if !cIsInclude && (!cExclude.Get(len(bases)-i) && !cOtherExclude.Get(pkg)) {
-				toClean = append(toClean, base)
-				continue
-			}
-		}
-	}
-
-	return toClean, nil
-}
 
 func anyExistInCache(buildDir string, bases []dep.Base) bool {
 	for _, base := range bases {
@@ -91,15 +26,23 @@ func anyExistInCache(buildDir string, bases []dep.Base) bool {
 	return false
 }
 
-func Clean(cleanMenuOption bool, buildDir string, aurBases []dep.Base,
+func Clean(cleanMenuOption bool, buildDir string, bases []dep.Base,
 	installed stringset.StringSet, noConfirm bool, answerClean string) error {
-	if !(cleanMenuOption && anyExistInCache(buildDir, aurBases)) {
+	if !(cleanMenuOption && anyExistInCache(buildDir, bases)) {
 		return nil
 	}
 
-	pkgbuildNumberMenu(buildDir, aurBases, installed)
+	skipFunc := func(pkg string) bool {
+		dir := filepath.Join(buildDir, pkg)
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			return true
+		}
 
-	toClean, errClean := cleanNumberMenu(buildDir, aurBases, installed, answerClean, noConfirm)
+		return false
+	}
+
+	toClean, errClean := selectionMenu(buildDir, bases, installed, gotext.Get("Packages to cleanBuild?"),
+		noConfirm, answerClean, skipFunc)
 	if errClean != nil {
 		return errClean
 	}

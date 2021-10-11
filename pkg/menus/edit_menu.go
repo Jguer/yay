@@ -119,9 +119,8 @@ func Edit(editMenuOption bool, buildDir string, bases []dep.Base, editorConfig,
 		return nil
 	}
 
-	pkgbuildNumberMenu(buildDir, bases, installed)
-
-	toEdit, errMenu := editDiffNumberMenu(bases, installed, gotext.Get("PKGBUILDs to edit?"), noConfirm, editDefaultAnswer)
+	toEdit, errMenu := selectionMenu(buildDir, bases,
+		installed, gotext.Get("PKGBUILDs to edit?"), noConfirm, editDefaultAnswer, nil)
 	if errMenu != nil || len(toEdit) == 0 {
 		return errMenu
 	}
