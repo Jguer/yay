@@ -227,18 +227,18 @@ func NewConfig(version string) (*Configuration, error) {
 	configPath := getConfigPath()
 	newConfig.load(configPath)
 
+	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
+		newConfig.BuildDir = aurdest
+	}
+
+	newConfig.expandEnv()
+
 	if newConfig.BuildDir != systemdCache {
 		errBuildDir := initDir(newConfig.BuildDir)
 		if errBuildDir != nil {
 			return nil, errBuildDir
 		}
 	}
-
-	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
-		newConfig.BuildDir = aurdest
-	}
-
-	newConfig.expandEnv()
 
 	if errPE := newConfig.setPrivilegeElevator(); errPE != nil {
 		return nil, errPE
