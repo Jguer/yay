@@ -17,6 +17,7 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
@@ -216,11 +217,22 @@ func DefaultConfig() *Configuration {
 func NewConfig(version string) (*Configuration, error) {
 	newConfig := DefaultConfig()
 
-	cacheHome := getCacheHome()
+	cacheHome, errCache := getCacheHome()
+	if errCache != nil {
+		text.Errorln(errCache)
+	}
+
 	newConfig.BuildDir = cacheHome
 
 	configPath := getConfigPath()
 	newConfig.load(configPath)
+
+	if newConfig.BuildDir != systemdCache {
+		errBuildDir := initDir(newConfig.BuildDir)
+		if errBuildDir != nil {
+			return nil, errBuildDir
+		}
+	}
 
 	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
 		newConfig.BuildDir = aurdest

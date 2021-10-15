@@ -5,13 +5,12 @@ import (
 	"path/filepath"
 )
 
-// configFileName holds the name of the config file.
-const configFileName string = "config.json"
-
-// vcsFileName holds the name of the vcs file.
-const vcsFileName string = "vcs.json"
-
-const completionFileName string = "completion.cache"
+const (
+	configFileName     string = "config.json" // configFileName holds the name of the config file.
+	vcsFileName        string = "vcs.json"    // vcsFileName holds the name of the vcs file.
+	completionFileName string = "completion.cache"
+	systemdCache       string = "/var/cache/yay" // systemd should handle cache creation
+)
 
 func getConfigPath() string {
 	if configHome := os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
@@ -31,28 +30,30 @@ func getConfigPath() string {
 	return ""
 }
 
-func getCacheHome() string {
+func getCacheHome() (string, error) {
 	uid := os.Geteuid()
 
 	if cacheHome := os.Getenv("XDG_CACHE_HOME"); cacheHome != "" && uid != 0 {
 		cacheDir := filepath.Join(cacheHome, "yay")
 		if err := initDir(cacheDir); err == nil {
-			return cacheDir
+			return cacheDir, nil
 		}
 	}
 
 	if cacheHome := os.Getenv("HOME"); cacheHome != "" && uid != 0 {
 		cacheDir := filepath.Join(cacheHome, ".cache", "yay")
 		if err := initDir(cacheDir); err == nil {
-			return cacheDir
+			return cacheDir, nil
 		}
 	}
 
 	if uid == 0 && os.Getenv("SUDO_USER") == "" && os.Getenv("DOAS_USER") == "" {
-		return "/var/cache/yay" // Don't create directory if systemd-run takes care of it
+		return systemdCache, nil // Don't create directory if systemd-run takes care of it
 	}
 
-	return os.TempDir()
+	tmpDir := filepath.Join(os.TempDir(), "yay")
+
+	return tmpDir, initDir(tmpDir)
 }
 
 func initDir(dir string) error {
