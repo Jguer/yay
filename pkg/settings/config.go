@@ -60,7 +60,6 @@ type Configuration struct {
 	SudoBin            string   `json:"sudobin"`
 	SudoFlags          string   `json:"sudoflags"`
 	RequestSplitN      int      `json:"requestsplitn"`
-	SearchMode         int      `json:"-"`
 	SortMode           int      `json:"sortmode"`
 	CompletionInterval int      `json:"completionrefreshtime"`
 	SudoLoop           bool     `json:"sudoloop"`

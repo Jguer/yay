@@ -2,15 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
-	"sort"
-	"strings"
 
 	aur "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
-	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/query"
@@ -20,192 +16,18 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-// Query is a collection of Results.
-type aurQuery []aur.Pkg
-
-// Query holds the results of a repository search.
-type repoQuery []alpm.IPackage
-
-func (s repoQuery) Reverse() {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
-}
-
-func (q aurQuery) Len() int {
-	return len(q)
-}
-
-func (q aurQuery) Less(i, j int) bool {
-	var result bool
-
-	switch config.SortBy {
-	case "votes":
-		result = q[i].NumVotes > q[j].NumVotes
-	case "popularity":
-		result = q[i].Popularity > q[j].Popularity
-	case "name":
-		result = text.LessRunes([]rune(q[i].Name), []rune(q[j].Name))
-	case "base":
-		result = text.LessRunes([]rune(q[i].PackageBase), []rune(q[j].PackageBase))
-	case "submitted":
-		result = q[i].FirstSubmitted < q[j].FirstSubmitted
-	case "modified":
-		result = q[i].LastModified < q[j].LastModified
-	case "id":
-		result = q[i].ID < q[j].ID
-	case "baseid":
-		result = q[i].PackageBaseID < q[j].PackageBaseID
-	}
-
-	if config.SortMode == settings.BottomUp {
-		return !result
-	}
-
-	return result
-}
-
-func (q aurQuery) Swap(i, j int) {
-	q[i], q[j] = q[j], q[i]
-}
-
-func getSearchBy(value string) aur.By {
-	switch value {
-	case "name":
-		return aur.Name
-	case "maintainer":
-		return aur.Maintainer
-	case "depends":
-		return aur.Depends
-	case "makedepends":
-		return aur.MakeDepends
-	case "optdepends":
-		return aur.OptDepends
-	case "checkdepends":
-		return aur.CheckDepends
-	default:
-		return aur.NameDesc
-	}
-}
-
-// NarrowSearch searches AUR and narrows based on subarguments.
-func narrowSearch(ctx context.Context, aurClient *aur.Client, pkgS []string, sortS bool) (aurQuery, error) {
-	var (
-		r         []aur.Pkg
-		err       error
-		usedIndex int
-	)
-
-	by := getSearchBy(config.SearchBy)
-
-	if len(pkgS) == 0 {
-		return nil, nil
-	}
-
-	for i, word := range pkgS {
-		r, err = aurClient.Search(ctx, word, by)
-		if err == nil {
-			usedIndex = i
-
-			break
-		}
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(pkgS) == 1 {
-		if sortS {
-			sort.Sort(aurQuery(r))
-		}
-
-		return r, err
-	}
-
-	var (
-		aq aurQuery
-		n  int
-	)
-
-	for i := range r {
-		match := true
-
-		for j, pkgN := range pkgS {
-			if usedIndex == j {
-				continue
-			}
-
-			name := strings.ToLower(r[i].Name)
-			desc := strings.ToLower(r[i].Description)
-			targ := strings.ToLower(pkgN)
-
-			if !(strings.Contains(name, targ) || strings.Contains(desc, targ)) {
-				match = false
-
-				break
-			}
-		}
-
-		if match {
-			n++
-
-			aq = append(aq, r[i])
-		}
-	}
-
-	if sortS {
-		sort.Sort(aq)
-	}
-
-	return aq, err
-}
-
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(ctx context.Context, pkgS []string, aurClient *aur.Client, dbExecutor db.Executor) (err error) {
-	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
+func syncSearch(ctx context.Context, pkgS []string, aurClient *aur.Client, dbExecutor db.Executor, verbose bool) error {
+	queryBuilder := query.NewSourceQueryBuilder(config.SortMode, config.SortBy, config.Runtime.Mode, config.SearchBy)
 
-	var (
-		aurErr error
-		aq     aurQuery
-		pq     repoQuery
-	)
+	queryBuilder.Execute(ctx, dbExecutor, aurClient, pkgS)
 
-	if config.Runtime.Mode.AtLeastAUR() {
-		aq, aurErr = narrowSearch(ctx, aurClient, pkgS, true)
+	searchMode := query.Minimal
+	if verbose {
+		searchMode = query.Detailed
 	}
 
-	if config.Runtime.Mode.AtLeastRepo() {
-		pq = queryRepo(pkgS, dbExecutor)
-	}
-
-	switch config.SortMode {
-	case settings.TopDown:
-		if config.Runtime.Mode.AtLeastRepo() {
-			pq.printSearch(dbExecutor)
-		}
-
-		if config.Runtime.Mode.AtLeastAUR() {
-			aq.printSearch(1, dbExecutor)
-		}
-	case settings.BottomUp:
-		if config.Runtime.Mode.AtLeastAUR() {
-			aq.printSearch(1, dbExecutor)
-		}
-
-		if config.Runtime.Mode.AtLeastRepo() {
-			pq.printSearch(dbExecutor)
-		}
-	default:
-		return errors.New(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
-	}
-
-	if aurErr != nil {
-		text.Errorln(gotext.Get("error during AUR search: %s", aurErr))
-		text.Warnln(gotext.Get("Showing repo packages only"))
-	}
-
-	return nil
+	return queryBuilder.Results(dbExecutor, searchMode)
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
@@ -263,17 +85,6 @@ func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbE
 	}
 
 	return err
-}
-
-// Search handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string, dbExecutor db.Executor) repoQuery {
-	s := repoQuery(dbExecutor.SyncPackages(pkgInputN...))
-
-	if config.SortMode == settings.BottomUp {
-		s.Reverse()
-	}
-
-	return s
 }
 
 // PackageSlices separates an input slice into aur and repo slices.

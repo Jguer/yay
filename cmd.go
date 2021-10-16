@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm/v2"
@@ -310,7 +309,6 @@ func handleGetpkgbuild(ctx context.Context, cmdArgs *parser.Arguments, dbExecuto
 }
 
 func handleYogurt(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
-	config.SearchMode = numberMenu
 	return displayNumberMenu(ctx, cmdArgs.Targets, dbExecutor, cmdArgs)
 }
 
@@ -319,13 +317,7 @@ func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Ex
 
 	switch {
 	case cmdArgs.ExistsArg("s", "search"):
-		if cmdArgs.ExistsArg("q", "quiet") {
-			config.SearchMode = minimal
-		} else {
-			config.SearchMode = detailed
-		}
-
-		return syncSearch(ctx, targets, config.Runtime.AURClient, dbExecutor)
+		return syncSearch(ctx, targets, config.Runtime.AURClient, dbExecutor, !cmdArgs.ExistsArg("q", "quiet"))
 	case cmdArgs.ExistsArg("p", "print", "print-format"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
@@ -362,107 +354,30 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 
 // NumberMenu presents a CLI for selecting packages to install.
 func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Arguments) error {
-	var (
-		aurErr       error
-		aq           aurQuery
-		pq           repoQuery
-		lenaq, lenpq int
-	)
+	queryBuilder := query.NewSourceQueryBuilder(config.SortMode, config.SortBy, config.Runtime.Mode, config.SearchBy)
 
-	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
+	queryBuilder.Execute(ctx, dbExecutor, config.Runtime.AURClient, pkgS)
 
-	if config.Runtime.Mode.AtLeastAUR() {
-		aq, aurErr = narrowSearch(ctx, config.Runtime.AURClient, pkgS, true)
-		lenaq = len(aq)
-	}
-
-	if config.Runtime.Mode.AtLeastRepo() {
-		pq = queryRepo(pkgS, dbExecutor)
-		lenpq = len(pq)
-	}
-
-	if aurErr != nil {
-		text.Errorln(gotext.Get("Error during AUR search: %s\n", aurErr))
-		text.Warnln(gotext.Get("Showing repo packages only"))
-	}
-
-	if lenpq == 0 && lenaq == 0 {
-		return fmt.Errorf(gotext.Get("no packages match search"))
-	}
-
-	switch config.SortMode {
-	case settings.TopDown:
-		if config.Runtime.Mode.AtLeastRepo() {
-			pq.printSearch(dbExecutor)
-		}
-
-		if config.Runtime.Mode.AtLeastAUR() {
-			aq.printSearch(lenpq+1, dbExecutor)
-		}
-	case settings.BottomUp:
-		if config.Runtime.Mode.AtLeastAUR() {
-			aq.printSearch(lenpq+1, dbExecutor)
-		}
-
-		if config.Runtime.Mode.AtLeastRepo() {
-			pq.printSearch(dbExecutor)
-		}
-	default:
-		return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
+	if err := queryBuilder.Results(dbExecutor, query.NumberMenu); err != nil {
+		return err
 	}
 
 	text.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
-	text.Info()
 
-	reader := bufio.NewReader(os.Stdin)
-
-	numberBuf, overflow, err := reader.ReadLine()
+	numberBuf, err := text.GetInput("", false)
 	if err != nil {
 		return err
 	}
 
-	if overflow {
-		return fmt.Errorf(gotext.Get("input too long"))
+	include, exclude, _, otherExclude := intrange.ParseNumberMenu(numberBuf)
+
+	targets, err := queryBuilder.GetTargets(include, exclude, otherExclude)
+	if err != nil {
+		return err
 	}
 
-	include, exclude, _, otherExclude := intrange.ParseNumberMenu(string(numberBuf))
 	arguments := cmdArgs.CopyGlobal()
-
-	isInclude := len(exclude) == 0 && len(otherExclude) == 0
-
-	for i, pkg := range pq {
-		var target int
-
-		switch config.SortMode {
-		case settings.TopDown:
-			target = i + 1
-		case settings.BottomUp:
-			target = len(pq) - i
-		default:
-			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
-		}
-
-		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
-			arguments.AddTarget(pkg.DB().Name() + "/" + pkg.Name())
-		}
-	}
-
-	for i := range aq {
-		var target int
-
-		switch config.SortMode {
-		case settings.TopDown:
-			target = i + 1 + len(pq)
-		case settings.BottomUp:
-			target = len(aq) - i + len(pq)
-		default:
-			return fmt.Errorf(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
-		}
-
-		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
-			arguments.AddTarget("aur/" + aq[i].Name)
-		}
-	}
+	arguments.AddTarget(targets...)
 
 	if len(arguments.Targets) == 0 {
 		fmt.Println(gotext.Get(" there is nothing to do"))
