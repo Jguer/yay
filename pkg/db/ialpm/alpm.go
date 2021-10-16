@@ -1,7 +1,6 @@
 package ialpm
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -191,28 +190,19 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 				break
 			}
 
-			reader := bufio.NewReader(os.Stdin)
-
-			numberBuf, overflow, err := reader.ReadLine()
+			numberBuf, err := text.GetInput("", false)
 			if err != nil {
 				text.Errorln(err)
-
 				break
 			}
 
-			if overflow {
-				text.Errorln(gotext.Get(" Input too long"))
-
-				continue
-			}
-
-			if string(numberBuf) == "" {
+			if numberBuf == "" {
 				break
 			}
 
-			num, err := strconv.Atoi(string(numberBuf))
+			num, err := strconv.Atoi(numberBuf)
 			if err != nil {
-				text.Errorln(gotext.Get("invalid number: %s", string(numberBuf)))
+				text.Errorln(gotext.Get("invalid number: %s", numberBuf))
 				continue
 			}
 
