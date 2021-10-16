@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-
-	"github.com/leonelquinteros/gotext"
 )
 
 func GetInput(defaultValue string, noConfirm bool) (string, error) {
@@ -24,7 +22,7 @@ func GetInput(defaultValue string, noConfirm bool) (string, error) {
 	}
 
 	if overflow {
-		return "", fmt.Errorf(gotext.Get("input too long"))
+		return "", ErrInputOverflow{}
 	}
 
 	return string(buf), nil
