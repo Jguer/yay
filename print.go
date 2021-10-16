@@ -11,101 +11,11 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/query"
-	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/upgrade"
 )
-
-// PrintSearch handles printing search results in a given format.
-func (q aurQuery) printSearch(start int, dbExecutor db.Executor) {
-	for i := range q {
-		var toprint string
-
-		if config.SearchMode == numberMenu {
-			switch config.SortMode {
-			case settings.TopDown:
-				toprint += text.Magenta(strconv.Itoa(start+i) + " ")
-			case settings.BottomUp:
-				toprint += text.Magenta(strconv.Itoa(len(q)+start-i-1) + " ")
-			default:
-				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
-			}
-		} else if config.SearchMode == minimal {
-			fmt.Println(q[i].Name)
-			continue
-		}
-
-		toprint += text.Bold(text.ColorHash("aur")) + "/" + text.Bold(q[i].Name) +
-			" " + text.Cyan(q[i].Version) +
-			text.Bold(" (+"+strconv.Itoa(q[i].NumVotes)) +
-			" " + text.Bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+") ")
-
-		if q[i].Maintainer == "" {
-			toprint += text.Bold(text.Red(gotext.Get("(Orphaned)"))) + " "
-		}
-
-		if q[i].OutOfDate != 0 {
-			toprint += text.Bold(text.Red(gotext.Get("(Out-of-date: %s)", text.FormatTime(q[i].OutOfDate)))) + " "
-		}
-
-		if pkg := dbExecutor.LocalPackage(q[i].Name); pkg != nil {
-			if pkg.Version() != q[i].Version {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed: %s)", pkg.Version())))
-			} else {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed)")))
-			}
-		}
-
-		toprint += "\n    " + q[i].Description
-		fmt.Println(toprint)
-	}
-}
-
-// PrintSearch receives a RepoSearch type and outputs pretty text.
-func (s repoQuery) printSearch(dbExecutor db.Executor) {
-	for i, res := range s {
-		var toprint string
-
-		if config.SearchMode == numberMenu {
-			switch config.SortMode {
-			case settings.TopDown:
-				toprint += text.Magenta(strconv.Itoa(i+1) + " ")
-			case settings.BottomUp:
-				toprint += text.Magenta(strconv.Itoa(len(s)-i) + " ")
-			default:
-				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
-			}
-		} else if config.SearchMode == minimal {
-			fmt.Println(res.Name())
-			continue
-		}
-
-		toprint += text.Bold(text.ColorHash(res.DB().Name())) + "/" + text.Bold(res.Name()) +
-			" " + text.Cyan(res.Version()) +
-			text.Bold(" ("+text.Human(res.Size())+
-				" "+text.Human(res.ISize())+") ")
-
-		packageGroups := dbExecutor.PackageGroups(res)
-		if len(packageGroups) != 0 {
-			toprint += fmt.Sprint(packageGroups, " ")
-		}
-
-		if pkg := dbExecutor.LocalPackage(res.Name()); pkg != nil {
-			if pkg.Version() != res.Version() {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed: %s)", pkg.Version())))
-			} else {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed)")))
-			}
-		}
-
-		toprint += "\n    " + res.Description()
-		fmt.Println(toprint)
-	}
-}
-
-// Pretty print a set of packages from the same package base.
 
 // PrintInfo prints package info like pacman -Si.
 func PrintInfo(a *aur.Pkg, extendedInfo bool) {
