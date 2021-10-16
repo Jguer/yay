@@ -1,7 +1,6 @@
 package dep
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"os"
@@ -556,27 +555,20 @@ func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 			return providers.Pkgs[0]
 		}
 
-		reader := bufio.NewReader(os.Stdin)
-
-		numberBuf, overflow, err := reader.ReadLine()
+		numberBuf, err := text.GetInput("", false)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 
 			break
 		}
 
-		if overflow {
-			text.Errorln(gotext.Get("input too long"))
-			continue
-		}
-
-		if string(numberBuf) == "" {
+		if numberBuf == "" {
 			return providers.Pkgs[0]
 		}
 
-		num, err := strconv.Atoi(string(numberBuf))
+		num, err := strconv.Atoi(numberBuf)
 		if err != nil {
-			text.Errorln(gotext.Get("invalid number: %s", string(numberBuf)))
+			text.Errorln(gotext.Get("invalid number: %s", numberBuf))
 			continue
 		}
 
