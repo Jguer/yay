@@ -139,7 +139,7 @@ func queryRepo(pkgInputN []string, dbExecutor db.Executor, sortMode int) repoQue
 	s := repoQuery(dbExecutor.SyncPackages(pkgInputN...))
 
 	if sortMode == settings.BottomUp {
-		s = sort.Reverse(s).(repoQuery)
+		s.Reverse()
 	}
 
 	return s

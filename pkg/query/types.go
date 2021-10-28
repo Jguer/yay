@@ -24,12 +24,10 @@ type aurSortable struct {
 	sortMode int
 }
 
-func (r repoQuery) Len() int {
-	return len(r)
-}
-
-func (r repoQuery) Swap(i, j int) {
-	r[i], r[j] = r[j], r[i]
+func (r repoQuery) Reverse() {
+	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
+		r[i], r[j] = r[j], r[i]
+	}
 }
 
 func (r repoQuery) Less(i, j int) bool {
