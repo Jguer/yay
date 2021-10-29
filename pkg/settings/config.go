@@ -75,6 +75,7 @@ type Configuration struct {
 	CombinedUpgrade    bool     `json:"combinedupgrade"`
 	UseAsk             bool     `json:"useask"`
 	BatchInstall       bool     `json:"batchinstall"`
+	SingleLineResults  bool     `json:"singlelineresults"`
 	Runtime            *Runtime `json:"-"`
 }
 

@@ -179,6 +179,10 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.RemoveMake = "no"
 	case "askremovemake":
 		c.RemoveMake = "ask"
+	case "singlelineresults":
+		c.SingleLineResults = true
+	case "doublelineresults":
+		c.SingleLineResults = false
 	default:
 		return false
 	}
