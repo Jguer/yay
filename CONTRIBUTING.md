@@ -70,6 +70,9 @@ All code should be formatted through `go fmt`. This tool will automatically
 format code for you. We recommend, however, that you write code in the proper
 style and use `go fmt` only to catch mistakes.
 
+`make lint` will check your code against `go fmt`. You may need to install
+[`golangci-lint`] as a dependency.
+
 Use [pre-commit](https://pre-commit.com/) to validate your commits against the various
 linters configured for this repository.
 
@@ -77,3 +80,5 @@ linters configured for this repository.
 
 Run `make test` to test Yay. This command will verify that the code is
 formatted correctly, run the code through `go vet`, and run unit tests.
+
+[`golangci-lint`]: https://github.com/golangci/golangci-lint
