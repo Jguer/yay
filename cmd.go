@@ -119,6 +119,8 @@ Permanent configuration options:
     --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
     --batchinstall        Build multiple AUR packages then install them together
     --nobatchinstall      Build and install each AUR package one by one
+    --singlelineresults   List each search result on its own line
+    --doublelineresults   List each search result on two lines, like pacman
 
     --sudo                <file>  sudo command to use
     --sudoflags           <flags> Pass arguments to sudo

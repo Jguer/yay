@@ -237,6 +237,8 @@ complete -c $progname -n "not $noopt" -l combinedupgrade -d 'Refresh then perfor
 complete -c $progname -n "not $noopt" -l nocombinedupgrade -d 'Perform the repo upgrade and AUR upgrade separately' -f
 complete -c $progname -n "not $noopt" -l batchinstall -d 'Build multiple AUR packages then install them together' -f
 complete -c $progname -n "not $noopt" -l nobatchinstall -d 'Build and install each AUR package one by one' -f
+complete -c $progname -n "not $noopt" -l singlelineresults -d 'List each search result on its own line' -f
+complete -c $progname -n "not $noopt" -l doublelineresults -d 'List each search result on two lines, like pacman' -f
 complete -c $progname -n "not $noopt" -l rebuild -d 'Always build target packages' -f
 complete -c $progname -n "not $noopt" -l rebuildall -d 'Always build all AUR packages' -f
 complete -c $progname -n "not $noopt" -l rebuildtree -d 'Always build all AUR packages even if installed' -f
