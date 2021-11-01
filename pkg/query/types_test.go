@@ -57,7 +57,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 		want     string
 	}{
 		{
-			name: "Minimal",
+			name: "AUR,Minimal,NoColor",
 			q:    aurQuery{pkgA, pkgB},
 			args: args{
 				searchMode: Minimal,
@@ -65,7 +65,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 			want: "package-a\npackage-b\n",
 		},
 		{
-			name: "DoubleLine, NumberMenu",
+			name: "AUR,DoubleLine,NumberMenu,NoColor",
 			q:    aurQuery{pkgA, pkgB},
 			args: args{
 				searchMode:        NumberMenu,
@@ -74,7 +74,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 			want: "1 aur/package-a 1.0.0 (+0 0.00) \n    Package A description\n2 aur/package-b 1.0.0 (+0 0.00) \n    Package B description\n",
 		},
 		{
-			name: "SingleLine, NumberMenu",
+			name: "AUR,SingleLine,NumberMenu,NoColor",
 			q:    aurQuery{pkgA, pkgB},
 			args: args{
 				searchMode:        NumberMenu,
@@ -83,7 +83,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 			want: "1 aur/package-a 1.0.0 (+0 0.00) \tPackage A description\n2 aur/package-b 1.0.0 (+0 0.00) \tPackage B description\n",
 		},
 		{
-			name: "DoubleLine, Detailed",
+			name: "AUR,DoubleLine,Detailed,NoColor",
 			q:    aurQuery{pkgA, pkgB},
 			args: args{
 				searchMode:        Detailed,
@@ -92,7 +92,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 			want: "aur/package-a 1.0.0 (+0 0.00) \n    Package A description\naur/package-b 1.0.0 (+0 0.00) \n    Package B description\n",
 		},
 		{
-			name: "SingleLine, Detailed",
+			name: "AUR,SingleLine,Detailed,NoColor",
 			q:    aurQuery{pkgA, pkgB},
 			args: args{
 				searchMode:        Detailed,
@@ -101,7 +101,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 			want: "aur/package-a 1.0.0 (+0 0.00) \tPackage A description\naur/package-b 1.0.0 (+0 0.00) \tPackage B description\n",
 		},
 		{
-			name: "DoubleLine, Detailed, With Color",
+			name: "AUR,DoubleLine,Detailed,Color",
 			q:    aurQuery{pkgA, pkgB},
 			args: args{
 				searchMode:        Detailed,
@@ -111,7 +111,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 			want:     "\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mpackage-a\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (+0\x1b[0m \x1b[1m0.00) \x1b[0m\n    Package A description\n\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mpackage-b\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (+0\x1b[0m \x1b[1m0.00) \x1b[0m\n    Package B description\n",
 		},
 		{
-			name: "SingleLine, Detailed, With Color",
+			name: "AUR,SingleLine,Detailed,Color",
 			q:    aurQuery{pkgA, pkgB},
 			args: args{
 				searchMode:        Detailed,
@@ -121,7 +121,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 			want:     "\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mpackage-a\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (+0\x1b[0m \x1b[1m0.00) \x1b[0m\tPackage A description\n\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mpackage-b\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (+0\x1b[0m \x1b[1m0.00) \x1b[0m\tPackage B description\n",
 		},
 		{
-			name: "No packages",
+			name: "AUR,NoPackages",
 			q:    aurQuery{},
 			args: args{
 				searchMode:        Detailed,
@@ -160,7 +160,7 @@ func Test_repoQuery_printSearch(t *testing.T) {
 		want     string
 	}{
 		{
-			name: "Minimal",
+			name: "REPO,Minimal,NoColor",
 			q:    repoQuery{pkgARepo, pkgBRepo},
 			args: args{
 				searchMode: Minimal,
@@ -168,7 +168,7 @@ func Test_repoQuery_printSearch(t *testing.T) {
 			want: "package-a\npackage-b\n",
 		},
 		{
-			name: "DoubleLine, NumberMenu",
+			name: "REPO,DoubleLine,NumberMenu,NoColor",
 			q:    repoQuery{pkgARepo, pkgBRepo},
 			args: args{
 				searchMode:        NumberMenu,
@@ -177,7 +177,7 @@ func Test_repoQuery_printSearch(t *testing.T) {
 			want: "1 dba/package-a 1.0.0 (1.0 B 1.0 B) \n    Package A description\n2 dbb/package-b 1.0.0 (1.0 B 1.0 B) \n    Package B description\n",
 		},
 		{
-			name: "SingleLine, NumberMenu",
+			name: "REPO,SingleLine,NumberMenu,NoColor",
 			q:    repoQuery{pkgARepo, pkgBRepo},
 			args: args{
 				searchMode:        NumberMenu,
@@ -186,7 +186,7 @@ func Test_repoQuery_printSearch(t *testing.T) {
 			want: "1 dba/package-a 1.0.0 (1.0 B 1.0 B) \tPackage A description\n2 dbb/package-b 1.0.0 (1.0 B 1.0 B) \tPackage B description\n",
 		},
 		{
-			name: "DoubleLine, Detailed",
+			name: "REPO,DoubleLine,Detailed,NoColor",
 			q:    repoQuery{pkgARepo, pkgBRepo},
 			args: args{
 				searchMode:        Detailed,
@@ -195,7 +195,7 @@ func Test_repoQuery_printSearch(t *testing.T) {
 			want: "dba/package-a 1.0.0 (1.0 B 1.0 B) \n    Package A description\ndbb/package-b 1.0.0 (1.0 B 1.0 B) \n    Package B description\n",
 		},
 		{
-			name: "SingleLine, Detailed",
+			name: "REPO,SingleLine,Detailed,NoColor",
 			q:    repoQuery{pkgARepo, pkgBRepo},
 			args: args{
 				searchMode:        Detailed,
@@ -204,27 +204,27 @@ func Test_repoQuery_printSearch(t *testing.T) {
 			want: "dba/package-a 1.0.0 (1.0 B 1.0 B) \tPackage A description\ndbb/package-b 1.0.0 (1.0 B 1.0 B) \tPackage B description\n",
 		},
 		{
-			name: "DoubleLine, Detailed, With Color",
+			name: "AUR,DoubleLine,Detailed,Color",
 			q:    repoQuery{pkgARepo, pkgBRepo},
 			args: args{
 				searchMode:        Detailed,
 				singleLineResults: false,
 			},
 			useColor: true,
-			want:     "\x1b[1m\x1b[35mdba\x1b[0m\x1b[0m/\x1b[1mpackage-a\x1b[0m \x1b[36m1.0.0\x1b[0m \x1b[1m(1.0 B\x1b[0m \x1b[1m1.0 B) \x1b[0m\n    Package A description\n\x1b[1m\x1b[36mdbb\x1b[0m\x1b[0m/\x1b[1mpackage-b\x1b[0m \x1b[36m1.0.0\x1b[0m \x1b[1m(1.0 B\x1b[0m \x1b[1m1.0 B) \x1b[0m\n    Package B description\n",
+			want:     "\x1b[1m\x1b[35mdba\x1b[0m\x1b[0m/\x1b[1mpackage-a\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    Package A description\n\x1b[1m\x1b[36mdbb\x1b[0m\x1b[0m/\x1b[1mpackage-b\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    Package B description\n",
 		},
 		{
-			name: "SingleLine, Detailed, With Color",
+			name: "REPO,SingleLine,Detailed,Color",
 			q:    repoQuery{pkgARepo, pkgBRepo},
 			args: args{
 				searchMode:        Detailed,
 				singleLineResults: true,
 			},
 			useColor: true,
-			want:     "\x1b[1m\x1b[35mdba\x1b[0m\x1b[0m/\x1b[1mpackage-a\x1b[0m \x1b[36m1.0.0\x1b[0m \x1b[1m(1.0 B\x1b[0m \x1b[1m1.0 B) \x1b[0m\tPackage A description\n\x1b[1m\x1b[36mdbb\x1b[0m\x1b[0m/\x1b[1mpackage-b\x1b[0m \x1b[36m1.0.0\x1b[0m \x1b[1m(1.0 B\x1b[0m \x1b[1m1.0 B) \x1b[0m\tPackage B description\n",
+			want:     "\x1b[1m\x1b[35mdba\x1b[0m\x1b[0m/\x1b[1mpackage-a\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\tPackage A description\n\x1b[1m\x1b[36mdbb\x1b[0m\x1b[0m/\x1b[1mpackage-b\x1b[0m \x1b[36m1.0.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\tPackage B description\n",
 		},
 		{
-			name: "No packages",
+			name: "REPO,NoPackages",
 			q:    repoQuery{},
 			args: args{
 				searchMode:        Detailed,
