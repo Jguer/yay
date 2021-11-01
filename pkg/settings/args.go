@@ -53,6 +53,10 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.SortMode = TopDown
 	case "bottomup":
 		c.SortMode = BottomUp
+	case "singlelineresults":
+		c.SingleLineResults = true
+	case "doublelineresults":
+		c.SingleLineResults = false
 	case "completioninterval":
 		n, err := strconv.Atoi(value)
 		if err == nil {
@@ -179,10 +183,6 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.RemoveMake = "no"
 	case "askremovemake":
 		c.RemoveMake = "ask"
-	case "singlelineresults":
-		c.SingleLineResults = true
-	case "doublelineresults":
-		c.SingleLineResults = false
 	default:
 		return false
 	}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm/v2"
@@ -99,6 +100,8 @@ Permanent configuration options:
     --nocleanafter        Do not remove package sources after successful build
     --bottomup            Shows AUR's packages first and then repository's
     --topdown             Shows repository's packages first and then AUR's
+    --singlelineresults   List each search result on its own line
+    --doublelineresults   List each search result on two lines, like pacman
 
     --devel               Check development packages during sysupgrade
     --nodevel             Do not check development packages
@@ -119,8 +122,6 @@ Permanent configuration options:
     --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
     --batchinstall        Build multiple AUR packages then install them together
     --nobatchinstall      Build and install each AUR package one by one
-    --singlelineresults   List each search result on its own line
-    --doublelineresults   List each search result on two lines, like pacman
 
     --sudo                <file>  sudo command to use
     --sudoflags           <flags> Pass arguments to sudo
@@ -356,11 +357,11 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 
 // NumberMenu presents a CLI for selecting packages to install.
 func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Arguments) error {
-	queryBuilder := query.NewSourceQueryBuilder(config.SortMode, config.SortBy, config.Runtime.Mode, config.SearchBy)
+	queryBuilder := query.NewSourceQueryBuilder(config.SortMode, config.SortBy, config.Runtime.Mode, config.SearchBy, config.SingleLineResults)
 
 	queryBuilder.Execute(ctx, dbExecutor, config.Runtime.AURClient, pkgS)
 
-	if err := queryBuilder.Results(dbExecutor, query.NumberMenu); err != nil {
+	if err := queryBuilder.Results(os.Stdout, dbExecutor, query.NumberMenu); err != nil {
 		return err
 	}
 

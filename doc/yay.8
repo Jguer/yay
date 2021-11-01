@@ -336,6 +336,16 @@ Display repository packages first and then AUR packages.
 Show AUR packages first and then repository packages.
 
 .TP
+.B \-\-singlelineresults
+Override pacman's usual double-line search result format and list each result
+on its own line.
+
+.TP
+.B \-\-doublelineresults
+Follow pacman's double-line search result format and list each result using
+two lines.
+
+.TP
 .B \-\-devel
 During sysupgrade also check AUR development packages for updates. Currently
 only Git packages are supported.
@@ -448,16 +458,6 @@ another package, install all the packages in the install queue.
 .TP
 .B \-\-nobatchinstall
 Always install AUR packages immediately after building them.
-
-.TP
-.B \-\-singlelineresults
-Override pacman's usual double-line search result format and list each result
-on its own line.
-
-.TP
-.B \-\-doublelineresults
-Follow pacman's double-line search result format and list each result using
-two lines.
 
 .TP
 .B \-\-rebuild

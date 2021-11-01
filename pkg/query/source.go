@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"io"
 	"sort"
 	"strings"
 
@@ -28,18 +29,26 @@ const (
 type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
-	sortMode   int
-	sortBy     string
-	targetMode parser.TargetMode
-	searchBy   string
+	sortMode          int
+	sortBy            string
+	targetMode        parser.TargetMode
+	searchBy          string
+	singleLineResults bool
 }
 
-func NewSourceQueryBuilder(sortMode int, sortBy string, targetMode parser.TargetMode, searchBy string) *SourceQueryBuilder {
+func NewSourceQueryBuilder(
+	sortMode int,
+	sortBy string,
+	targetMode parser.TargetMode,
+	searchBy string,
+	singleLineResults bool,
+) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
-		sortMode:   sortMode,
-		sortBy:     sortBy,
-		targetMode: targetMode,
-		searchBy:   searchBy,
+		sortMode:          sortMode,
+		sortBy:            sortBy,
+		targetMode:        targetMode,
+		searchBy:          searchBy,
+		singleLineResults: singleLineResults,
 	}
 }
 
@@ -62,7 +71,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 	}
 }
 
-func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch SearchVerbosity) error {
+func (s *SourceQueryBuilder) Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error {
 	if s.aurQuery == nil && s.repoQuery == nil {
 		return ErrNoQuery{}
 	}
@@ -70,19 +79,19 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 	switch s.sortMode {
 	case settings.TopDown:
 		if s.targetMode.AtLeastRepo() {
-			s.repoQuery.printSearch(dbExecutor, verboseSearch, s.sortMode)
+			s.repoQuery.printSearch(w, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
 		}
 
 		if s.targetMode.AtLeastAUR() {
-			s.aurQuery.printSearch(1, dbExecutor, verboseSearch, s.sortMode)
+			s.aurQuery.printSearch(w, 1, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
 		}
 	case settings.BottomUp:
 		if s.targetMode.AtLeastAUR() {
-			s.aurQuery.printSearch(1, dbExecutor, verboseSearch, s.sortMode)
+			s.aurQuery.printSearch(w, 1, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
 		}
 
 		if s.targetMode.AtLeastRepo() {
-			s.repoQuery.printSearch(dbExecutor, verboseSearch, s.sortMode)
+			s.repoQuery.printSearch(w, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
 		}
 	default:
 		return ErrInvalidSortMode{}
