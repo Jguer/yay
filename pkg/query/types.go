@@ -2,6 +2,7 @@ package query
 
 import (
 	"fmt"
+	"io"
 	"strconv"
 
 	"github.com/Jguer/aur"
@@ -91,7 +92,14 @@ func getSearchBy(value string) aur.By {
 }
 
 // PrintSearch handles printing search results in a given format.
-func (q aurQuery) printSearch(start int, dbExecutor db.Executor, searchMode SearchVerbosity, sortMode int) {
+func (q aurQuery) printSearch(
+	w io.Writer,
+	start int,
+	dbExecutor db.Executor,
+	searchMode SearchVerbosity,
+	sortMode int,
+	singleLineResults bool,
+) {
 	for i := range q {
 		var toprint string
 
@@ -105,7 +113,7 @@ func (q aurQuery) printSearch(start int, dbExecutor db.Executor, searchMode Sear
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 			}
 		} else if searchMode == Minimal {
-			fmt.Println(q[i].Name)
+			_, _ = fmt.Fprintln(w, q[i].Name)
 			continue
 		}
 
@@ -130,13 +138,19 @@ func (q aurQuery) printSearch(start int, dbExecutor db.Executor, searchMode Sear
 			}
 		}
 
-		toprint += "\n    " + q[i].Description
-		fmt.Println(toprint)
+		if singleLineResults {
+			toprint += "\t"
+		} else {
+			toprint += "\n    "
+		}
+
+		toprint += q[i].Description
+		_, _ = fmt.Fprintln(w, toprint)
 	}
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func (r repoQuery) printSearch(dbExecutor db.Executor, searchMode SearchVerbosity, sortMode int) {
+func (r repoQuery) printSearch(w io.Writer, dbExecutor db.Executor, searchMode SearchVerbosity, sortMode int, singleLineResults bool) {
 	for i, res := range r {
 		var toprint string
 
@@ -150,7 +164,7 @@ func (r repoQuery) printSearch(dbExecutor db.Executor, searchMode SearchVerbosit
 				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
 			}
 		} else if searchMode == Minimal {
-			fmt.Println(res.Name())
+			_, _ = fmt.Fprintln(w, res.Name())
 			continue
 		}
 
@@ -172,7 +186,14 @@ func (r repoQuery) printSearch(dbExecutor db.Executor, searchMode SearchVerbosit
 			}
 		}
 
-		toprint += "\n    " + res.Description()
-		fmt.Println(toprint)
+		if singleLineResults {
+			toprint += "\t"
+		} else {
+			toprint += "\n    "
+		}
+
+		toprint += res.Description()
+
+		_, _ = fmt.Fprintln(w, toprint)
 	}
 }

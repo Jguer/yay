@@ -9,7 +9,7 @@ import (
 type Package struct {
 	PBase         string
 	PBuildDate    time.Time
-	PDB           alpm.IDB
+	PDB           *DB
 	PDescription  string
 	PISize        int64
 	PName         string
@@ -185,4 +185,17 @@ func (p *Package) SyncNewVersion(l alpm.IDBList) alpm.IPackage {
 
 func (p *Package) Type() string {
 	panic("not implemented") // TODO: Implement
+}
+
+type DB struct {
+	alpm.IDB
+	name string
+}
+
+func NewDB(name string) *DB {
+	return &DB{name: name}
+}
+
+func (d *DB) Name() string {
+	return d.name
 }
