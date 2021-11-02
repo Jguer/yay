@@ -362,6 +362,11 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 		return err
 	}
 
+	if queryBuilder.Len() == 0 {
+		// no results were found
+		return nil
+	}
+
 	text.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
 
 	numberBuf, err := text.GetInput("", false)

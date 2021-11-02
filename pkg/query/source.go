@@ -91,6 +91,10 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 	return nil
 }
 
+func (s *SourceQueryBuilder) Len() int {
+	return len(s.repoQuery) + len(s.aurQuery)
+}
+
 func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 	otherExclude stringset.StringSet) ([]string, error) {
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
