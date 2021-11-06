@@ -13,13 +13,6 @@ func (e ErrAURSearch) Error() string {
 	return gotext.Get("Error during AUR search: %s\n", e.inner.Error())
 }
 
-// ErrInvalidSortMode means that the sort mode provided was not valid.
-type ErrInvalidSortMode struct{}
-
-func (e ErrInvalidSortMode) Error() string {
-	return gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save")
-}
-
 // ErrNoQuery means that query was not executed.
 type ErrNoQuery struct{}
 

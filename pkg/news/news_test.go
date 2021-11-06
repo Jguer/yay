@@ -107,7 +107,7 @@ func TestPrintNewsFeed(t *testing.T) {
 
 	type args struct {
 		cutOffDate time.Time
-		sortMode   int
+		bottomUp   bool
 		all        bool
 		quiet      bool
 	}
@@ -116,10 +116,10 @@ func TestPrintNewsFeed(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "all-verbose", args: args{cutOffDate: time.Now(), all: true, quiet: false}, wantErr: false},
-		{name: "all-quiet", args: args{cutOffDate: lastNewsTime, all: true, quiet: true}, wantErr: false},
-		{name: "latest-quiet", args: args{cutOffDate: lastNewsTime, all: false, quiet: true}, wantErr: false},
-		{name: "latest-quiet-topdown", args: args{sortMode: 1, cutOffDate: lastNewsTime, all: false, quiet: true}, wantErr: false},
+		{name: "all-verbose", args: args{bottomUp: true, cutOffDate: time.Now(), all: true, quiet: false}, wantErr: false},
+		{name: "all-quiet", args: args{bottomUp: true, cutOffDate: lastNewsTime, all: true, quiet: true}, wantErr: false},
+		{name: "latest-quiet", args: args{bottomUp: true, cutOffDate: lastNewsTime, all: false, quiet: true}, wantErr: false},
+		{name: "latest-quiet-topdown", args: args{bottomUp: false, cutOffDate: lastNewsTime, all: false, quiet: true}, wantErr: false},
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -135,7 +135,7 @@ func TestPrintNewsFeed(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			err := PrintNewsFeed(context.TODO(), &http.Client{}, tt.args.cutOffDate, tt.args.sortMode, tt.args.all, tt.args.quiet)
+			err := PrintNewsFeed(context.TODO(), &http.Client{}, tt.args.cutOffDate, tt.args.bottomUp, tt.args.all, tt.args.quiet)
 			assert.NoError(t, err)
 
 			w.Close()
@@ -164,7 +164,7 @@ func TestPrintNewsFeedSameDay(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	err := PrintNewsFeed(context.TODO(), &http.Client{}, lastNewsTime, 0, false, false)
+	err := PrintNewsFeed(context.TODO(), &http.Client{}, lastNewsTime, true, false, false)
 	assert.NoError(t, err)
 
 	w.Close()

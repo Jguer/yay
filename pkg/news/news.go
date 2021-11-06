@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
@@ -61,7 +60,7 @@ type rss struct {
 	Channel channel `xml:"channel"`
 }
 
-func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Time, sortMode int, all, quiet bool) error {
+func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Time, bottomUp, all, quiet bool) error {
 	req, err := http.NewRequestWithContext(ctx, "GET", "https://archlinux.org/feeds/news", nil)
 	if err != nil {
 		return err
@@ -86,7 +85,7 @@ func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Tim
 		return err
 	}
 
-	if sortMode == settings.BottomUp {
+	if bottomUp {
 		for i := len(rssGot.Channel.Items) - 1; i >= 0; i-- {
 			rssGot.Channel.Items[i].print(cutOffDate, all, quiet)
 		}

@@ -10,7 +10,6 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
@@ -22,7 +21,7 @@ type (
 type aurSortable struct {
 	aurQuery
 	sortBy   string
-	sortMode int
+	bottomUp bool
 }
 
 func (r repoQuery) Reverse() {
@@ -61,7 +60,7 @@ func (q aurSortable) Less(i, j int) bool {
 		result = q.aurQuery[i].PackageBaseID < q.aurQuery[j].PackageBaseID
 	}
 
-	if q.sortMode == settings.BottomUp {
+	if q.bottomUp {
 		return !result
 	}
 
@@ -97,24 +96,23 @@ func (q aurQuery) printSearch(
 	start int,
 	dbExecutor db.Executor,
 	searchMode SearchVerbosity,
-	sortMode int,
+	bottomUp,
 	singleLineResults bool,
 ) {
 	for i := range q {
+		if searchMode == Minimal {
+			_, _ = fmt.Fprintln(w, q[i].Name)
+			continue
+		}
+
 		var toprint string
 
 		if searchMode == NumberMenu {
-			switch sortMode {
-			case settings.TopDown:
-				toprint += text.Magenta(strconv.Itoa(start+i) + " ")
-			case settings.BottomUp:
+			if bottomUp {
 				toprint += text.Magenta(strconv.Itoa(len(q)+start-i-1) + " ")
-			default:
-				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
+			} else {
+				toprint += text.Magenta(strconv.Itoa(start+i) + " ")
 			}
-		} else if searchMode == Minimal {
-			_, _ = fmt.Fprintln(w, q[i].Name)
-			continue
 		}
 
 		toprint += text.Bold(text.ColorHash("aur")) + "/" + text.Bold(q[i].Name) +
@@ -150,22 +148,21 @@ func (q aurQuery) printSearch(
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func (r repoQuery) printSearch(w io.Writer, dbExecutor db.Executor, searchMode SearchVerbosity, sortMode int, singleLineResults bool) {
+func (r repoQuery) printSearch(w io.Writer, dbExecutor db.Executor, searchMode SearchVerbosity, bottomUp, singleLineResults bool) {
 	for i, res := range r {
+		if searchMode == Minimal {
+			_, _ = fmt.Fprintln(w, res.Name())
+			continue
+		}
+
 		var toprint string
 
 		if searchMode == NumberMenu {
-			switch sortMode {
-			case settings.TopDown:
-				toprint += text.Magenta(strconv.Itoa(i+1) + " ")
-			case settings.BottomUp:
+			if bottomUp {
 				toprint += text.Magenta(strconv.Itoa(len(r)-i) + " ")
-			default:
-				text.Warnln(gotext.Get("invalid sort mode. Fix with yay -Y --bottomup --save"))
+			} else {
+				toprint += text.Magenta(strconv.Itoa(i+1) + " ")
 			}
-		} else if searchMode == Minimal {
-			_, _ = fmt.Fprintln(w, res.Name())
-			continue
 		}
 
 		toprint += text.Bold(text.ColorHash(res.DB().Name())) + "/" + text.Bold(res.Name()) +
