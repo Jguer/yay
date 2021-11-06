@@ -18,7 +18,7 @@ import (
 
 // SyncSearch presents a query to the local repos and to the AUR.
 func syncSearch(ctx context.Context, pkgS []string, aurClient *aur.Client, dbExecutor db.Executor, verbose bool) error {
-	queryBuilder := query.NewSourceQueryBuilder(config.SortMode, config.SortBy, config.Runtime.Mode, config.SearchBy, config.SingleLineResults)
+	queryBuilder := query.NewSourceQueryBuilder(config.SortBy, config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
 
 	queryBuilder.Execute(ctx, dbExecutor, aurClient, pkgS)
 

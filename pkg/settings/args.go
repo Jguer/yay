@@ -50,9 +50,9 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "notimeupdate":
 		c.TimeUpdate = false
 	case "topdown":
-		c.SortMode = TopDown
+		c.BottomUp = false
 	case "bottomup":
-		c.SortMode = BottomUp
+		c.BottomUp = true
 	case "singlelineresults":
 		c.SingleLineResults = true
 	case "doublelineresults":

@@ -134,12 +134,11 @@ func Test_aurQuery_printSearch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &strings.Builder{}
-			sortMode := 1
 			executor := mock.DBExecutor{}
 			text.UseColor = tt.useColor
 
 			// Fire
-			tt.q.printSearch(w, 1, executor, tt.args.searchMode, sortMode, tt.args.singleLineResults)
+			tt.q.printSearch(w, 1, executor, tt.args.searchMode, false, tt.args.singleLineResults)
 
 			got := w.String()
 			assert.Equal(t, tt.want, got)
@@ -237,12 +236,11 @@ func Test_repoQuery_printSearch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &strings.Builder{}
-			sortMode := 1
 			executor := mock.DBExecutor{}
 			text.UseColor = tt.useColor
 
 			// Fire
-			tt.q.printSearch(w, executor, tt.args.searchMode, sortMode, tt.args.singleLineResults)
+			tt.q.printSearch(w, executor, tt.args.searchMode, false, tt.args.singleLineResults)
 
 			got := w.String()
 			assert.Equal(t, tt.want, got)

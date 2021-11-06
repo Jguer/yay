@@ -21,12 +21,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
-const (
-	// Describes Sorting method for numberdisplay.
-	BottomUp = iota
-	TopDown
-)
-
 // HideMenus indicates if pacman's provider menus must be hidden.
 var HideMenus = false
 
@@ -60,8 +54,8 @@ type Configuration struct {
 	SudoBin            string   `json:"sudobin"`
 	SudoFlags          string   `json:"sudoflags"`
 	RequestSplitN      int      `json:"requestsplitn"`
-	SortMode           int      `json:"sortmode"`
 	CompletionInterval int      `json:"completionrefreshtime"`
+	BottomUp           bool     `json:"bottomup"`
 	SudoLoop           bool     `json:"sudoloop"`
 	TimeUpdate         bool     `json:"timeupdate"`
 	Devel              bool     `json:"devel"`
@@ -185,7 +179,7 @@ func DefaultConfig() *Configuration {
 		GpgFlags:           "",
 		MFlags:             "",
 		GitFlags:           "",
-		SortMode:           BottomUp,
+		BottomUp:           true,
 		CompletionInterval: 7,
 		SortBy:             "votes",
 		SearchBy:           "name-desc",

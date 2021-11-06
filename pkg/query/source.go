@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/Jguer/aur"
+	"github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -29,7 +29,7 @@ const (
 type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
-	sortMode          int
+	bottomUp          bool
 	sortBy            string
 	targetMode        parser.TargetMode
 	searchBy          string
@@ -37,14 +37,16 @@ type SourceQueryBuilder struct {
 }
 
 func NewSourceQueryBuilder(
-	sortMode int,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
+	bottomUp,
 	singleLineResults bool,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
-		sortMode:          sortMode,
+		repoQuery:         []alpm.IPackage{},
+		aurQuery:          []aur.Pkg{},
+		bottomUp:          bottomUp,
 		sortBy:            sortBy,
 		targetMode:        targetMode,
 		searchBy:          searchBy,
@@ -58,11 +60,11 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy, s.sortMode, s.sortBy)
+		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy, s.bottomUp, s.sortBy)
 	}
 
 	if s.targetMode.AtLeastRepo() {
-		s.repoQuery = queryRepo(pkgS, dbExecutor, s.sortMode)
+		s.repoQuery = queryRepo(pkgS, dbExecutor, s.bottomUp)
 	}
 
 	if aurErr != nil && len(s.repoQuery) != 0 {
@@ -72,29 +74,26 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 }
 
 func (s *SourceQueryBuilder) Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error {
-	if s.aurQuery == nil && s.repoQuery == nil {
+	if s.aurQuery == nil || s.repoQuery == nil {
 		return ErrNoQuery{}
 	}
 
-	switch s.sortMode {
-	case settings.TopDown:
-		if s.targetMode.AtLeastRepo() {
-			s.repoQuery.printSearch(w, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
-		}
-
+	if s.bottomUp {
 		if s.targetMode.AtLeastAUR() {
-			s.aurQuery.printSearch(w, 1, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
-		}
-	case settings.BottomUp:
-		if s.targetMode.AtLeastAUR() {
-			s.aurQuery.printSearch(w, 1, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
+			s.aurQuery.printSearch(w, len(s.repoQuery)+1, dbExecutor, verboseSearch, s.bottomUp, s.singleLineResults)
 		}
 
 		if s.targetMode.AtLeastRepo() {
-			s.repoQuery.printSearch(w, dbExecutor, verboseSearch, s.sortMode, s.singleLineResults)
+			s.repoQuery.printSearch(w, dbExecutor, verboseSearch, s.bottomUp, s.singleLineResults)
 		}
-	default:
-		return ErrInvalidSortMode{}
+	} else {
+		if s.targetMode.AtLeastRepo() {
+			s.repoQuery.printSearch(w, dbExecutor, verboseSearch, s.bottomUp, s.singleLineResults)
+		}
+
+		if s.targetMode.AtLeastAUR() {
+			s.aurQuery.printSearch(w, len(s.repoQuery)+1, dbExecutor, verboseSearch, s.bottomUp, s.singleLineResults)
+		}
 	}
 
 	return nil
@@ -113,13 +112,10 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 	for i, pkg := range s.repoQuery {
 		var target int
 
-		switch s.sortMode {
-		case settings.TopDown:
-			target = i + 1
-		case settings.BottomUp:
+		if s.bottomUp {
 			target = len(s.repoQuery) - i
-		default:
-			return targets, ErrInvalidSortMode{}
+		} else {
+			target = i + 1
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
@@ -130,13 +126,10 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 	for i := range s.aurQuery {
 		var target int
 
-		switch s.sortMode {
-		case settings.TopDown:
-			target = i + 1 + len(s.repoQuery)
-		case settings.BottomUp:
+		if s.bottomUp {
 			target = len(s.aurQuery) - i + len(s.repoQuery)
-		default:
-			return targets, ErrInvalidSortMode{}
+		} else {
+			target = i + 1 + len(s.repoQuery)
 		}
 
 		if (isInclude && include.Get(target)) || (!isInclude && !exclude.Get(target)) {
@@ -148,10 +141,10 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 }
 
 // queryRepo handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string, dbExecutor db.Executor, sortMode int) repoQuery {
+func queryRepo(pkgInputN []string, dbExecutor db.Executor, bottomUp bool) repoQuery {
 	s := repoQuery(dbExecutor.SyncPackages(pkgInputN...))
 
-	if sortMode == settings.BottomUp {
+	if bottomUp {
 		s.Reverse()
 	}
 
@@ -159,7 +152,7 @@ func queryRepo(pkgInputN []string, dbExecutor db.Executor, sortMode int) repoQue
 }
 
 // queryAUR searches AUR and narrows based on subarguments.
-func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchBy string, sortMode int, sortBy string) (aurQuery, error) {
+func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchBy string, bottomUp bool, sortBy string) (aurQuery, error) {
 	var (
 		r         []aur.Pkg
 		err       error
@@ -189,7 +182,7 @@ func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchB
 		sort.Sort(aurSortable{
 			aurQuery: r,
 			sortBy:   sortBy,
-			sortMode: sortMode,
+			bottomUp: bottomUp,
 		})
 
 		return r, err
@@ -229,7 +222,7 @@ func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchB
 	sort.Sort(aurSortable{
 		aurQuery: aq,
 		sortBy:   sortBy,
-		sortMode: sortMode,
+		bottomUp: bottomUp,
 	})
 
 	return aq, err

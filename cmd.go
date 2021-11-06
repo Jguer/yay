@@ -274,7 +274,7 @@ func handlePrint(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
 
-		return news.PrintNewsFeed(ctx, config.Runtime.HTTPClient, dbExecutor.LastBuildTime(), config.SortMode, double, quiet)
+		return news.PrintNewsFeed(ctx, config.Runtime.HTTPClient, dbExecutor.LastBuildTime(), config.BottomUp, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
 		return completion.Show(ctx, config.Runtime.HTTPClient, dbExecutor,
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
@@ -357,7 +357,7 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 
 // NumberMenu presents a CLI for selecting packages to install.
 func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Arguments) error {
-	queryBuilder := query.NewSourceQueryBuilder(config.SortMode, config.SortBy, config.Runtime.Mode, config.SearchBy, config.SingleLineResults)
+	queryBuilder := query.NewSourceQueryBuilder(config.SortBy, config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
 
 	queryBuilder.Execute(ctx, dbExecutor, config.Runtime.AURClient, pkgS)
 
