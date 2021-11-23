@@ -30,8 +30,8 @@ func editor(editorConfig, editorFlags string, noConfirm bool) (editor string, ar
 		}
 
 		fallthrough
-	case os.Getenv("EDITOR") != "":
-		if editorArgs := strings.Fields(os.Getenv("EDITOR")); len(editorArgs) != 0 {
+	case os.Getenv("VISUAL") != "":
+		if editorArgs := strings.Fields(os.Getenv("VISUAL")); len(editorArgs) != 0 {
 			editor, err := exec.LookPath(editorArgs[0])
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
@@ -41,8 +41,8 @@ func editor(editorConfig, editorFlags string, noConfirm bool) (editor string, ar
 		}
 
 		fallthrough
-	case os.Getenv("VISUAL") != "":
-		if editorArgs := strings.Fields(os.Getenv("VISUAL")); len(editorArgs) != 0 {
+	case os.Getenv("EDITOR") != "":
+		if editorArgs := strings.Fields(os.Getenv("EDITOR")); len(editorArgs) != 0 {
 			editor, err := exec.LookPath(editorArgs[0])
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
