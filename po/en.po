@@ -23,6 +23,10 @@ msgstr ""
 msgid " (Wanted by: "
 msgstr ""
 
+#: cmd.go:323
+msgid "installing packages is disabled"
+msgstr ""
+
 #: cmd.go:424
 msgid " [Installed]"
 msgstr ""

@@ -68,6 +68,7 @@ type Configuration struct {
 	EditMenu           bool     `json:"editmenu"`
 	CombinedUpgrade    bool     `json:"combinedupgrade"`
 	UseAsk             bool     `json:"useask"`
+	DisableInstall     bool     `json:"disableinstall"`
 	BatchInstall       bool     `json:"batchinstall"`
 	SingleLineResults  bool     `json:"singlelineresults"`
 	Runtime            *Runtime `json:"-"`
@@ -192,6 +193,7 @@ func DefaultConfig() *Configuration {
 		RequestSplitN:      150,
 		ReDownload:         "no",
 		ReBuild:            "no",
+		DisableInstall:     false,
 		BatchInstall:       false,
 		AnswerClean:        "",
 		AnswerDiff:         "",

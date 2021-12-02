@@ -318,6 +318,12 @@ func handleYogurt(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.
 func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	targets := cmdArgs.Targets
 
+	if config.DisableInstall {
+		if !cmdArgs.ExistsArg("s", "search") {
+			return fmt.Errorf(gotext.Get("installing packages is disabled"))
+		}
+	}
+
 	switch {
 	case cmdArgs.ExistsArg("s", "search"):
 		return syncSearch(ctx, targets, config.Runtime.AURClient, dbExecutor, !cmdArgs.ExistsArg("q", "quiet"))
