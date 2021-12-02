@@ -31,7 +31,7 @@ msgstr "(Ziel"
 msgid " (Wanted by: "
 msgstr "(Angefordert von:"
 
-#: install.go:81
+#: cmd.go:323
 msgid "installing packages is disabled"
 msgstr "Das Installieren von Paketen ist deaktiviert"
 
