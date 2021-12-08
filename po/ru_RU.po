@@ -280,7 +280,7 @@ msgstr "Нет"
 
 #: print.go:282
 msgid "Optional Deps"
-msgstr "Факультативные зависимости"
+msgstr "Доп. зависимости"
 
 #: print.go:33
 msgid "Orphaned AUR Packages:"
@@ -336,7 +336,7 @@ msgstr "Продолжить установку?"
 
 #: print.go:278
 msgid "Provides"
-msgstr "Обеспечивает"
+msgstr "Предоставляет"
 
 #: query.go:509
 msgid "Querying AUR..."
