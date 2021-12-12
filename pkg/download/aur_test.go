@@ -113,13 +113,13 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 
 	os.MkdirAll(filepath.Join(dir, "yay-bin", ".git"), 0o777)
 
-	want := fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/yay-bin pull --ff-only", dir)
+	want := fmt.Sprintf("/usr/local/bin/git --no-replace-objects -C %s/yay-bin pull --rebase --autostash", dir)
 	if os.Getuid() == 0 {
 		ld := "systemd-run"
 		if path, _ := exec.LookPath(ld); path != "" {
 			ld = path
 		}
-		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C %s/yay-bin pull --ff-only", ld, dir)
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C %s/yay-bin pull --rebase --autostash", ld, dir)
 	}
 
 	cmdRunner := &testRunner{}

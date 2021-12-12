@@ -56,7 +56,7 @@ func downloadGitRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 			errOut:  gotext.Get("error reading %s", filepath.Join(dest, pkgName, ".git")),
 		}
 	default:
-		cmd := cmdBuilder.BuildGitCmd(ctx, filepath.Join(dest, pkgName), "pull", "--ff-only")
+		cmd := cmdBuilder.BuildGitCmd(ctx, filepath.Join(dest, pkgName), "pull", "--rebase", "--autostash")
 
 		_, stderr, errCmd := cmdBuilder.Capture(cmd)
 		if errCmd != nil {
