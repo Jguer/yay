@@ -123,7 +123,7 @@ func (c *CmdBuilder) deElevateCommand(ctx context.Context, cmd *exec.Cmd) *exec.
 
 	cmdArgs := []string{
 		"--service-type=oneshot",
-		"--pipe", "--wait", "--pty",
+		"--pipe", "--wait", "--pty", "--quiet",
 		"-p", "DynamicUser=yes",
 		"-p", "CacheDirectory=yay",
 		"-E", "HOME=/tmp",
