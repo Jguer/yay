@@ -58,8 +58,8 @@ func ContinueTask(s string, cont, noConfirm bool) bool {
 		postFix  string
 		yes      = gotext.Get("yes")
 		no       = gotext.Get("no")
-		y        = string([]rune(yes)[0])
-		n        = string([]rune(no)[0])
+		y        = string([]rune(yes)[0]) // nolint
+		n        = string([]rune(no)[0])  // nolint
 	)
 
 	if cont {
