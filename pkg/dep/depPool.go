@@ -64,7 +64,7 @@ type Pool struct {
 	aurClient    *aur.Client
 }
 
-func makePool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
+func newPool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
 	dp := &Pool{
 		Targets:      []Target{},
 		Explicit:     map[string]struct{}{},
@@ -393,7 +393,7 @@ func GetPool(ctx context.Context, pkgs []string,
 	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int, noDeps bool, noCheckDeps bool, assumeInstalled []string) (*Pool, error) {
-	dp := makePool(dbExecutor, aurClient)
+	dp := newPool(dbExecutor, aurClient)
 
 	dp.Warnings = warnings
 	err := dp.ResolveTargets(ctx, pkgs, mode, ignoreProviders, noConfirm, provides,
