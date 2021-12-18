@@ -61,7 +61,7 @@ type rss struct {
 }
 
 func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Time, bottomUp, all, quiet bool) error {
-	req, err := http.NewRequestWithContext(ctx, "GET", "https://archlinux.org/feeds/news", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://archlinux.org/feeds/news", http.NoBody)
 	if err != nil {
 		return err
 	}

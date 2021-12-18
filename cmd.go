@@ -404,7 +404,7 @@ func syncList(ctx context.Context, httpClient *http.Client, cmdArgs *parser.Argu
 	}
 
 	if config.Runtime.Mode.AtLeastAUR() && (len(cmdArgs.Targets) == 0 || aur) {
-		req, err := http.NewRequestWithContext(ctx, "GET", config.AURURL+"/packages.gz", nil)
+		req, err := http.NewRequestWithContext(ctx, "GET", config.AURURL+"/packages.gz", http.NoBody)
 		if err != nil {
 			return err
 		}

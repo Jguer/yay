@@ -78,7 +78,7 @@ func createAURList(ctx context.Context, client *http.Client, aurURL string, out 
 
 	u.Path = path.Join(u.Path, "packages.gz")
 
-	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), http.NoBody)
 	if err != nil {
 		return err
 	}
