@@ -15,7 +15,7 @@ type Order struct {
 	Runtime stringset.StringSet
 }
 
-func makeOrder() *Order {
+func newOrder() *Order {
 	return &Order{
 		make([]Base, 0),
 		make([]db.IPackage, 0),
@@ -24,7 +24,7 @@ func makeOrder() *Order {
 }
 
 func GetOrder(dp *Pool, noDeps, noCheckDeps bool) *Order {
-	do := makeOrder()
+	do := newOrder()
 
 	for _, target := range dp.Targets {
 		dep := target.DepString()
