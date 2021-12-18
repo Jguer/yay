@@ -6,6 +6,7 @@
 # Folders
 _obj
 _test
+.vscode
 
 *.cgo1.go
 *.cgo2.c
