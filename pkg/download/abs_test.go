@@ -206,7 +206,7 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 		if path, _ := exec.LookPath(ld); path != "" {
 			ld = path
 		}
-		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux", ld)
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux", ld)
 	}
 
 	cmdBuilder := &testGitBuilder{
@@ -240,7 +240,7 @@ func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
 		if path, _ := exec.LookPath(ld); path != "" {
 			ld = path
 		}
-		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C %s/linux pull --rebase --autostash", ld, dir)
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C %s/linux pull --rebase --autostash", ld, dir)
 	}
 
 	cmdRunner := &testRunner{}
