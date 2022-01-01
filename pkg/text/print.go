@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"regexp"
+	"unicode"
 
 	"github.com/leonelquinteros/gotext"
 	"golang.org/x/sys/unix"
@@ -83,6 +85,40 @@ func getColumnCount() int {
 	return 80
 }
 
+func formatInfoValue(keyLength int, maxCols int, startCols int, value string) (int, string) {
+	str := ""
+	re := regexp.MustCompile(`(\s|[^\s]*)`)
+	parts := re.FindAllString(value, -1)
+
+	if len(parts) == 0 {
+		return startCols, str
+	}
+
+	str += parts[0]
+	cols := startCols + len(parts[0])
+
+	for _, part := range parts[1:] {
+		if part == "\n" {
+			cols = keyLength
+			str += "\n" + strings.Repeat(" ", keyLength)
+		} else {
+			if maxCols > keyLength && cols+len(part) >= maxCols {
+				cols = keyLength
+				str += "\n" + strings.Repeat(" ", keyLength)
+			}
+			if strings.IndexFunc(part, unicode.IsSpace) == -1 {
+				str += part
+				cols += len(part)
+			} else if cols != keyLength {
+				str += " "
+				cols += 1
+			}
+		}
+	}
+
+	return cols, str
+}
+
 func PrintInfoValue(key string, values ...string) {
 	// 16 (text) + 1 (:) + 1 ( )
 	const (
@@ -97,8 +133,8 @@ func PrintInfoValue(key string, values ...string) {
 	}
 
 	maxCols := getColumnCount()
-	cols := keyLength + len(values[0])
-	str += values[0]
+	cols, formattedValue := formatInfoValue(keyLength, maxCols, keyLength, values[0])
+	str += formattedValue
 
 	for _, value := range values[1:] {
 		if maxCols > keyLength && cols+len(value)+delimCount >= maxCols {
@@ -109,8 +145,8 @@ func PrintInfoValue(key string, values ...string) {
 			cols += delimCount
 		}
 
-		str += value
-		cols += len(value)
+		cols, formattedValue = formatInfoValue(keyLength, maxCols, cols, value)
+		str += formattedValue
 	}
 
 	fmt.Println(str)
