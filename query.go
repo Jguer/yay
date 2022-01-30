@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 
 	aur "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
@@ -190,36 +192,39 @@ func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []str
 	return hanging
 }
 
+func getFolderSize(path string) (size int64) {
+	_ = filepath.WalkDir(path, func(p string, entry fs.DirEntry, err error) error {
+		info, _ := entry.Info()
+		size += info.Size()
+		return nil
+	})
+
+	return size
+}
+
 // Statistics returns statistics about packages installed in system.
-func statistics(dbExecutor db.Executor) *struct {
-	Totaln    int
-	Expln     int
-	TotalSize int64
-} {
-	var (
-		totalSize int64
-
-		localPackages    = dbExecutor.LocalPackages()
-		totalInstalls    = 0
-		explicitInstalls = 0
-	)
-
-	for _, pkg := range localPackages {
-		totalSize += pkg.ISize()
-		totalInstalls++
+func statistics(dbExecutor db.Executor) (res struct {
+	Totaln       int
+	Expln        int
+	TotalSize    int64
+	pacmanCaches map[string]int64
+	yayCache     int64
+}) {
+	for _, pkg := range dbExecutor.LocalPackages() {
+		res.TotalSize += pkg.ISize()
+		res.Totaln++
 
 		if pkg.Reason() == alpm.PkgReasonExplicit {
-			explicitInstalls++
+			res.Expln++
 		}
 	}
 
-	info := &struct {
-		Totaln    int
-		Expln     int
-		TotalSize int64
-	}{
-		totalInstalls, explicitInstalls, totalSize,
+	res.pacmanCaches = make(map[string]int64)
+	for _, path := range config.Runtime.PacmanConf.CacheDir {
+		res.pacmanCaches[path] = getFolderSize(path)
 	}
 
-	return info
+	res.yayCache = getFolderSize(config.BuildDir)
+
+	return
 }
