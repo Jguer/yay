@@ -23,19 +23,19 @@ msgstr " (Fichiers de compilation existants)"
 msgid " (Installed)"
 msgstr " (Installé)"
 
-#: pkg/dep/depCheck.go:311
+#: pkg/dep/depCheck.go:312
 msgid " (Target"
 msgstr " (Cible"
 
-#: pkg/dep/depCheck.go:313
+#: pkg/dep/depCheck.go:314
 msgid " (Wanted by: "
 msgstr " (Dépendances de: "
 
-#: cmd.go:424
+#: cmd.go:431
 msgid " [Installed]"
 msgstr " [Installé]"
 
-#: cmd.go:383 install.go:158 install.go:192
+#: cmd.go:390 install.go:158 install.go:192
 msgid " there is nothing to do"
 msgstr " il n'y a rien à faire"
 
@@ -100,19 +100,19 @@ msgstr "(%d/%d) PKGBUILD téléchargé : %s"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Lecture de SRCINFO : %s"
 
-#: pkg/query/types.go:129 pkg/query/types.go:171
+#: pkg/query/types.go:135 pkg/query/types.go:182
 msgid "(Installed)"
 msgstr "(Installé)"
 
-#: pkg/query/types.go:127 pkg/query/types.go:169
+#: pkg/query/types.go:133 pkg/query/types.go:180
 msgid "(Installed: %s)"
 msgstr "(Installé : %s)"
 
-#: pkg/query/types.go:118
+#: pkg/query/types.go:124
 msgid "(Orphaned)"
 msgstr "(Orphelin)"
 
-#: pkg/query/types.go:122
+#: pkg/query/types.go:128
 msgid "(Out-of-date: %s)"
 msgstr "(Obsolète : %s)"
 
@@ -136,11 +136,11 @@ msgstr "Vérification des dépendances"
 msgid "Checking development packages..."
 msgstr "Vérification des paquets de développement..."
 
-#: pkg/dep/depCheck.go:136
+#: pkg/dep/depCheck.go:137
 msgid "Checking for conflicts..."
 msgstr "Vérification des conflits..."
 
-#: pkg/dep/depCheck.go:144
+#: pkg/dep/depCheck.go:145
 msgid "Checking for inner conflicts..."
 msgstr "Vérification des conflits internes..."
 
@@ -148,7 +148,7 @@ msgstr "Vérification des conflits internes..."
 msgid "Cleaning (%d/%d): %s"
 msgstr "Nettoyage (%d/%d) : %s"
 
-#: pkg/dep/depCheck.go:199
+#: pkg/dep/depCheck.go:200
 msgid "Conflicting packages will have to be confirmed manually"
 msgstr "Les paquets en conflits devront être confirmés manuellement"
 
@@ -156,7 +156,7 @@ msgstr "Les paquets en conflits devront être confirmés manuellement"
 msgid "Conflicts With"
 msgstr "En conflit avec"
 
-#: pkg/dep/depCheck.go:304
+#: pkg/dep/depCheck.go:305
 msgid "Could not find all required packages:"
 msgstr "Impossible de trouver tous les paquets :"
 
@@ -209,6 +209,10 @@ msgstr "Premier envoi"
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Paquets AUR marqués comme obsolètes :"
 
+#: print.go:84
+msgid "Foreign installed packages: %s"
+msgstr ""
+
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
 msgstr "Dépôt git trouvé : %s"
@@ -229,7 +233,7 @@ msgstr "Import ?"
 msgid "Importing keys with gpg..."
 msgstr "Import des clés avec gpg..."
 
-#: pkg/dep/depCheck.go:172
+#: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
 msgstr "Installer %s supprimera :"
 
@@ -309,7 +313,7 @@ msgstr "Paquets à nettoyer avant compilation (cleanBuild) ?"
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "Paquets à exclure : (ex. \"1 2 3\", \"1-3\", \"^4\" ou nom du dépôt)"
 
-#: cmd.go:365
+#: cmd.go:372
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Paquets à installer (ex. 1 2 3, 1-3 or ^4)"
 
@@ -355,7 +359,7 @@ msgstr "Recherche des mises à jour AUR..."
 msgid "Searching databases for updates..."
 msgstr "Recherche de mises à jour dans les bases de données..."
 
-#: pkg/query/source.go:61
+#: pkg/query/source.go:72
 msgid "Showing repo packages only"
 msgstr "Affichage des dépôts des paquets uniquement"
 
@@ -383,10 +387,6 @@ msgstr "Il y a probablement une autre instance Pacman en cours. Attente..."
 #: print.go:86
 msgid "Total Size occupied by packages: %s"
 msgstr "Taille totale occupée par les paquets : %s"
-
-#: print.go:84
-msgid "Total foreign installed packages: %s"
-msgstr "Nombre de paquets étrangers installés : %s"
 
 #: print.go:83
 msgid "Total installed packages: %s"
@@ -440,7 +440,7 @@ msgstr ""
 "\n"
 "Entrer un numéro (1 par défaut) : "
 
-#: pkg/dep/depCheck.go:154
+#: pkg/dep/depCheck.go:155
 msgid ""
 "\n"
 "Inner conflicts found:"
@@ -448,7 +448,7 @@ msgstr ""
 "\n"
 "Conflits internes trouvés :"
 
-#: pkg/dep/depCheck.go:169
+#: pkg/dep/depCheck.go:170
 msgid ""
 "\n"
 "Package conflicts found:"
@@ -513,20 +513,20 @@ msgstr "erreur lors de la réinitialisation %s : %s"
 #: install.go:42
 msgid "error updating package install reason to dependency"
 msgstr ""
-"erreur lors de la mise à jour de l'installation du paquet, en raison de la "
+"erreur lors de la mise à jour de la raison d'installation du paquet vers "
 "dépendance"
 
 #: install.go:60
 msgid "error updating package install reason to explicit"
 msgstr ""
-"erreur lors de la mise à jour de l'installation du paquet, en raison "
+"erreur lors de la mise à jour de la raison d'installation du paquet vers "
 "explicite"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
 msgstr "impossible de créer le répertoire '%s' : %s"
 
-#: pkg/settings/config.go:283
+#: pkg/settings/config.go:278
 msgid "failed to open config file '%s': %s"
 msgstr "échec lors de l'ouverture du fichier de configuration '%s' : %s"
 
@@ -538,7 +538,7 @@ msgstr "échec lors de la lecture %s -- omission : %s"
 msgid "failed to parse %s: %s"
 msgstr "échec lors de la lecture %s : %s"
 
-#: pkg/settings/config.go:293
+#: pkg/settings/config.go:288
 msgid "failed to read config file '%s': %s"
 msgstr "échec lors de la lecture du fichier de configuration '%s' : %s"
 
@@ -554,7 +554,7 @@ msgstr "nombre invalide : %s"
 msgid "invalid option '%s'"
 msgstr "option invalide '%s'"
 
-#: cmd.go:198
+#: cmd.go:202
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "paramètres incorrects : '--deps' et '--explicit' ne devaient pas être "
@@ -564,10 +564,6 @@ msgstr ""
 msgid "invalid repository"
 msgstr "référentiel invalide"
 
-#: pkg/query/errors.go:20 pkg/query/types.go:105 pkg/query/types.go:150
-msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
-msgstr "mode de tri invalide. Corrigez le avec yay -Y --bottomup --save"
-
 #: pkg/db/ialpm/alpm.go:210 pkg/dep/depPool.go:576
 msgid "invalid value: %d is not between %d and %d"
 msgstr "valeur invalide : %d n'est pas entre %d et %d"
@@ -576,7 +572,7 @@ msgstr "valeur invalide : %d n'est pas entre %d et %d"
 msgid "no keys to import"
 msgstr "aucune clé à importer"
 
-#: pkg/query/errors.go:27
+#: pkg/query/errors.go:20
 msgid "no query was executed"
 msgstr "aucune requête n'a été exécutée"
 
@@ -592,7 +588,7 @@ msgstr "une seule opération peut être réalisée à la fois"
 msgid "package '%s' was not found"
 msgstr "paquet '%s' n'a pas été trouvé"
 
-#: pkg/dep/depCheck.go:196
+#: pkg/dep/depCheck.go:197
 msgid "package conflicts can not be resolved with noconfirm, aborting"
 msgstr "le conflit de paquets ne peut pas être résolu avec noconfirm, arrêt"
 
@@ -625,11 +621,11 @@ msgstr ""
 msgid "unable to CreateHandle: %s"
 msgstr "impossible de créer le répertoire : %s"
 
-#: cmd.go:187
+#: cmd.go:191
 msgid "unhandled operation"
 msgstr "opération non gérée"
 
-#: cmd.go:421
+#: cmd.go:428
 msgid "unknown-version"
 msgstr "version inconnue"
 
