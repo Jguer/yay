@@ -27,7 +27,7 @@ func (c *Configuration) extractYayOptions(a *parser.Arguments) {
 		}
 	}
 
-	c.Runtime.AURClient.BaseURL = strings.TrimRight(c.AURURL, "/") + "/rpc/?"
+	c.Runtime.AURClient.BaseURL = strings.TrimRight(c.AURURL, "/") + "/rpc?"
 	c.AURURL = strings.TrimRight(c.AURURL, "/")
 }
 
