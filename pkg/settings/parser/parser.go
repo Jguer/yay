@@ -2,12 +2,12 @@ package parser
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
 )
 
 type Option struct {

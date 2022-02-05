@@ -1,5 +1,7 @@
 github.com/Jguer/aur v1.0.0 h1:/1oCUucvFGA5kq1vA50UstQoj5hkRQuAKYp/pyBgOz0=
 github.com/Jguer/aur v1.0.0/go.mod h1:1/SQjhWahmk2xKcmAm6XO1zGqK8HgYw3xlJM6a7845E=
+github.com/Jguer/aur v1.0.1 h1:+GDOq0RuVn7CXpXzd8W85/+hPNDYonRZ3ONPm87e1jo=
+github.com/Jguer/aur v1.0.1/go.mod h1:1/SQjhWahmk2xKcmAm6XO1zGqK8HgYw3xlJM6a7845E=
 github.com/Jguer/go-alpm/v2 v2.0.6 h1:VLavW5qFk/TJRHT3Gg7ClDukU4MNWdfkWM9yLxVkYyQ=
 github.com/Jguer/go-alpm/v2 v2.0.6/go.mod h1:zU4iKCtNkDARfj5BrKJXYAQ5nIjtZbySfa0paboSmTQ=
 github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5 h1:TMscPjkb1ThXN32LuFY5bEYIcXZx3YlwzhS1GxNpn/c=
@@ -36,6 +38,8 @@ golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e h1:fLOSk5Q00efkSvAm+4xcoXD+RRmLmmulPn5I3Y9F2EM=
 golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220204135822-1c1b9b1eba6a h1:ppl5mZgokTT8uPkmYOyEUmPTr3ypaKkg5eFOGrAmxxE=
+golang.org/x/sys v0.0.0-20220204135822-1c1b9b1eba6a/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 h1:JGgROgKl9N8DuW20oFS5gxc+lE67/N3FcwmBPMe7ArY=
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
