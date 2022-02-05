@@ -39,7 +39,7 @@ func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err 
 	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
-		return fmt.Errorf(gotext.Get("error updating package install reason to dependency"))
+		return errors.New(gotext.Get("error updating package install reason to dependency"))
 	}
 
 	return nil
@@ -57,7 +57,7 @@ func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err e
 	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
-		return fmt.Errorf(gotext.Get("error updating package install reason to explicit"))
+		return errors.New(gotext.Get("error updating package install reason to explicit"))
 	}
 
 	return nil
@@ -85,7 +85,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		if config.CombinedUpgrade {
 			if refreshArg {
 				if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
-					return fmt.Errorf(gotext.Get("error refreshing databases"))
+					return errors.New(gotext.Get("error refreshing databases"))
 				}
 			}
 		} else if refreshArg || sysupgradeArg || len(cmdArgs.Targets) > 0 {
@@ -563,14 +563,14 @@ func gitMerge(ctx context.Context, path, name string) error {
 		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
 			filepath.Join(path, name), "reset", "--hard", "HEAD"))
 	if err != nil {
-		return fmt.Errorf(gotext.Get("error resetting %s: %s", name, stderr))
+		return errors.New(gotext.Get("error resetting %s: %s", name, stderr))
 	}
 
 	_, stderr, err = config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
 			filepath.Join(path, name), "merge", "--no-edit", "--ff"))
 	if err != nil {
-		return fmt.Errorf(gotext.Get("error merging %s: %s", name, stderr))
+		return errors.New(gotext.Get("error merging %s: %s", name, stderr))
 	}
 
 	return nil

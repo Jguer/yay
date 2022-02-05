@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -187,7 +188,7 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		return handleYay(ctx, cmdArgs, dbExecutor)
 	}
 
-	return fmt.Errorf(gotext.Get("unhandled operation"))
+	return errors.New(gotext.Get("unhandled operation"))
 }
 
 // getFilter returns filter function which can keep packages which were only
@@ -198,7 +199,7 @@ func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {
 
 	switch {
 	case deps && explicit:
-		return nil, fmt.Errorf(gotext.Get("invalid option: '--deps' and '--explicit' may not be used together"))
+		return nil, errors.New(gotext.Get("invalid option: '--deps' and '--explicit' may not be used together"))
 	case deps:
 		return func(pkg upgrade.Upgrade) bool {
 			return pkg.Reason == alpm.PkgReasonDepend
