@@ -15,19 +15,19 @@ msgstr ""
 msgid " (Installed)"
 msgstr ""
 
-#: pkg/dep/depCheck.go:311
+#: pkg/dep/depCheck.go:312
 msgid " (Target"
 msgstr ""
 
-#: pkg/dep/depCheck.go:313
+#: pkg/dep/depCheck.go:314
 msgid " (Wanted by: "
 msgstr ""
 
-#: cmd.go:424
+#: cmd.go:431
 msgid " [Installed]"
 msgstr ""
 
-#: cmd.go:383
+#: cmd.go:390
 #: install.go:158
 #: install.go:192
 msgid " there is nothing to do"
@@ -94,21 +94,21 @@ msgstr ""
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr ""
 
-#: pkg/query/types.go:129
-#: pkg/query/types.go:171
+#: pkg/query/types.go:135
+#: pkg/query/types.go:182
 msgid "(Installed)"
 msgstr ""
 
-#: pkg/query/types.go:127
-#: pkg/query/types.go:169
+#: pkg/query/types.go:133
+#: pkg/query/types.go:180
 msgid "(Installed: %s)"
 msgstr ""
 
-#: pkg/query/types.go:118
+#: pkg/query/types.go:124
 msgid "(Orphaned)"
 msgstr ""
 
-#: pkg/query/types.go:122
+#: pkg/query/types.go:128
 msgid "(Out-of-date: %s)"
 msgstr ""
 
@@ -132,11 +132,11 @@ msgstr ""
 msgid "Checking development packages..."
 msgstr ""
 
-#: pkg/dep/depCheck.go:136
+#: pkg/dep/depCheck.go:137
 msgid "Checking for conflicts..."
 msgstr ""
 
-#: pkg/dep/depCheck.go:144
+#: pkg/dep/depCheck.go:145
 msgid "Checking for inner conflicts..."
 msgstr ""
 
@@ -144,7 +144,7 @@ msgstr ""
 msgid "Cleaning (%d/%d): %s"
 msgstr ""
 
-#: pkg/dep/depCheck.go:199
+#: pkg/dep/depCheck.go:200
 msgid "Conflicting packages will have to be confirmed manually"
 msgstr ""
 
@@ -152,7 +152,7 @@ msgstr ""
 msgid "Conflicts With"
 msgstr ""
 
-#: pkg/dep/depCheck.go:304
+#: pkg/dep/depCheck.go:305
 msgid "Could not find all required packages:"
 msgstr ""
 
@@ -204,6 +204,10 @@ msgstr ""
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr ""
 
+#: print.go:84
+msgid "Foreign installed packages: %s"
+msgstr ""
+
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
 msgstr ""
@@ -224,7 +228,7 @@ msgstr ""
 msgid "Importing keys with gpg..."
 msgstr ""
 
-#: pkg/dep/depCheck.go:172
+#: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
 msgstr ""
 
@@ -306,7 +310,7 @@ msgstr ""
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 
-#: cmd.go:365
+#: cmd.go:372
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr ""
 
@@ -352,7 +356,7 @@ msgstr ""
 msgid "Searching databases for updates..."
 msgstr ""
 
-#: pkg/query/source.go:61
+#: pkg/query/source.go:72
 msgid "Showing repo packages only"
 msgstr ""
 
@@ -379,10 +383,6 @@ msgstr ""
 
 #: print.go:86
 msgid "Total Size occupied by packages: %s"
-msgstr ""
-
-#: print.go:84
-msgid "Total foreign installed packages: %s"
 msgstr ""
 
 #: print.go:83
@@ -431,11 +431,11 @@ msgstr ""
 msgid "\nEnter a number (default=1): "
 msgstr ""
 
-#: pkg/dep/depCheck.go:154
+#: pkg/dep/depCheck.go:155
 msgid "\nInner conflicts found:"
 msgstr ""
 
-#: pkg/dep/depCheck.go:169
+#: pkg/dep/depCheck.go:170
 msgid "\nPackage conflicts found:"
 msgstr ""
 
@@ -509,7 +509,7 @@ msgstr ""
 msgid "failed to create directory '%s': %s"
 msgstr ""
 
-#: pkg/settings/config.go:283
+#: pkg/settings/config.go:278
 msgid "failed to open config file '%s': %s"
 msgstr ""
 
@@ -521,7 +521,7 @@ msgstr ""
 msgid "failed to parse %s: %s"
 msgstr ""
 
-#: pkg/settings/config.go:293
+#: pkg/settings/config.go:288
 msgid "failed to read config file '%s': %s"
 msgstr ""
 
@@ -538,18 +538,12 @@ msgstr ""
 msgid "invalid option '%s'"
 msgstr ""
 
-#: cmd.go:198
+#: cmd.go:202
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 
 #: pkg/download/abs.go:21
 msgid "invalid repository"
-msgstr ""
-
-#: pkg/query/errors.go:20
-#: pkg/query/types.go:105
-#: pkg/query/types.go:150
-msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
 msgstr ""
 
 #: pkg/db/ialpm/alpm.go:210
@@ -561,7 +555,7 @@ msgstr ""
 msgid "no keys to import"
 msgstr ""
 
-#: pkg/query/errors.go:27
+#: pkg/query/errors.go:20
 msgid "no query was executed"
 msgstr ""
 
@@ -577,7 +571,7 @@ msgstr ""
 msgid "package '%s' was not found"
 msgstr ""
 
-#: pkg/dep/depCheck.go:196
+#: pkg/dep/depCheck.go:197
 msgid "package conflicts can not be resolved with noconfirm, aborting"
 msgstr ""
 
@@ -610,11 +604,11 @@ msgstr ""
 msgid "unable to CreateHandle: %s"
 msgstr ""
 
-#: cmd.go:187
+#: cmd.go:191
 msgid "unhandled operation"
 msgstr ""
 
-#: cmd.go:421
+#: cmd.go:428
 msgid "unknown-version"
 msgstr ""
 
