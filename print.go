@@ -84,6 +84,12 @@ func localStatistics(ctx context.Context, dbExecutor db.Executor) error {
 	text.Infoln(gotext.Get("Foreign installed packages: %s", text.Cyan(strconv.Itoa(len(remoteNames)))))
 	text.Infoln(gotext.Get("Explicitly installed packages: %s", text.Cyan(strconv.Itoa(info.Expln))))
 	text.Infoln(gotext.Get("Total Size occupied by packages: %s", text.Cyan(text.Human(info.TotalSize))))
+
+	for path, size := range info.pacmanCaches {
+		text.Infoln(gotext.Get("Size of pacman cache %s: %s", path, text.Cyan(text.Human(size))))
+	}
+
+	text.Infoln(gotext.Get("Size of yay cache %s: %s", config.BuildDir, text.Cyan(text.Human(info.yayCache))))
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 	text.Infoln(gotext.Get("Ten biggest packages:"))
 	biggestPackages(dbExecutor)
