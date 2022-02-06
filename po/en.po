@@ -228,6 +228,10 @@ msgstr ""
 msgid "Importing keys with gpg..."
 msgstr ""
 
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr ""
+
 #: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
 msgstr ""
@@ -300,6 +304,10 @@ msgstr ""
 
 #: print.go:52
 msgid "Package Base"
+msgstr ""
+
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
 msgstr ""
 
 #: pkg/menus/clean_menu.go:44
@@ -429,14 +437,6 @@ msgstr ""
 #: pkg/db/ialpm/alpm.go:184
 #: pkg/dep/depPool.go:551
 msgid "\nEnter a number (default=1): "
-msgstr ""
-
-#: pkg/dep/depCheck.go:155
-msgid "\nInner conflicts found:"
-msgstr ""
-
-#: pkg/dep/depCheck.go:170
-msgid "\nPackage conflicts found:"
 msgstr ""
 
 #: pkg/settings/errors.go:29
