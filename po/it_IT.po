@@ -1,11 +1,11 @@
 # 
 # Translators:
 # Cardellino, 2021
-# Giulio Terigi, 2021
+# Giulio Terigi, 2022
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Giulio Terigi, 2021\n"
+"Last-Translator: Giulio Terigi, 2022\n"
 "Language-Team: Italian (Italy) (https://www.transifex.com/yay-1/teams/123732/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -209,7 +209,7 @@ msgstr "Pacchetto AUR con flag Obsoleto"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr ""
+msgstr "Totale dei pacchetti estranei installati: %s"
 
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
@@ -230,6 +230,10 @@ msgstr "Importare?"
 #: pkg/pgp/keys.go:101
 msgid "Importing keys with gpg..."
 msgstr "Importa le chiavi con gpg..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "Conflitti interni trovati:"
 
 #: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
@@ -302,6 +306,10 @@ msgstr "Pacchetto Base ID"
 #: print.go:52
 msgid "Package Base"
 msgstr "Pacchetto Base"
+
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "Conflitto tra pacchetti trovato:"
 
 #: pkg/menus/clean_menu.go:44
 msgid "Packages to cleanBuild?"
@@ -435,22 +443,6 @@ msgid ""
 msgstr ""
 "\n"
 "Inserisci un numero (default=1) "
-
-#: pkg/dep/depCheck.go:155
-msgid ""
-"\n"
-"Inner conflicts found:"
-msgstr ""
-"\n"
-"Trovati conflitti interni:"
-
-#: pkg/dep/depCheck.go:170
-msgid ""
-"\n"
-"Package conflicts found:"
-msgstr ""
-"\n"
-"Conflitto tra pacchetti trovato:"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
