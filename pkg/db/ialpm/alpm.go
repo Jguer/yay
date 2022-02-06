@@ -181,7 +181,7 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 		text.OperationInfoln(str)
 
 		for {
-			fmt.Print(gotext.Get("\nEnter a number (default=1): "))
+			fmt.Println(gotext.Get("\nEnter a number (default=1): "))
 
 			// TODO: reenable noconfirm
 			if settings.NoConfirm {

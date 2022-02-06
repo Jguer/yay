@@ -548,7 +548,7 @@ func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 	text.OperationInfoln(str)
 
 	for {
-		fmt.Print(gotext.Get("\nEnter a number (default=1): "))
+		fmt.Println(gotext.Get("\nEnter a number (default=1): "))
 
 		if noConfirm {
 			fmt.Println("1")
