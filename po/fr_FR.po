@@ -2,11 +2,11 @@
 # Translators:
 # J G, 2021
 # Oliver Conzen, 2021
-# Sylvain Bx, 2021
+# Sylvain Bx, 2022
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Sylvain Bx, 2021\n"
+"Last-Translator: Sylvain Bx, 2022\n"
 "Language-Team: French (France) (https://www.transifex.com/yay-1/teams/123732/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -211,7 +211,7 @@ msgstr "Paquets AUR marqués comme obsolètes :"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr ""
+msgstr "Paquets étrangers installés :"
 
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
@@ -232,6 +232,10 @@ msgstr "Import ?"
 #: pkg/pgp/keys.go:101
 msgid "Importing keys with gpg..."
 msgstr "Import des clés avec gpg..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "Conflits internes trouvés : "
 
 #: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
@@ -304,6 +308,10 @@ msgstr "Package Base ID"
 #: print.go:52
 msgid "Package Base"
 msgstr "Base des paquets"
+
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "Conflits de paquets trouvés :"
 
 #: pkg/menus/clean_menu.go:44
 msgid "Packages to cleanBuild?"
@@ -439,22 +447,6 @@ msgid ""
 msgstr ""
 "\n"
 "Entrer un numéro (1 par défaut) : "
-
-#: pkg/dep/depCheck.go:155
-msgid ""
-"\n"
-"Inner conflicts found:"
-msgstr ""
-"\n"
-"Conflits internes trouvés :"
-
-#: pkg/dep/depCheck.go:170
-msgid ""
-"\n"
-"Package conflicts found:"
-msgstr ""
-"\n"
-"Paquets en conflits trouvés :"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
