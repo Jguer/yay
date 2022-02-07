@@ -3,10 +3,12 @@
 # Chris Boesch, 2021
 # Oliver Conzen, 2021
 # Julian Neupert <julian.neupert@gmail.com>, 2021
+# J G, 2022
+# Andre Bouillet, 2022
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Julian Neupert <julian.neupert@gmail.com>, 2021\n"
+"Last-Translator: Andre Bouillet, 2022\n"
 "Language-Team: German (https://www.transifex.com/yay-1/teams/123732/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -199,7 +201,7 @@ msgstr "Error während AUR suche: %s\n"
 
 #: print.go:85
 msgid "Explicitly installed packages: %s"
-msgstr "Explizit installierte Pakete:"
+msgstr "Explizit installierte Pakete: %s"
 
 #: print.go:40
 msgid "First Submitted"
@@ -211,7 +213,7 @@ msgstr "Als nicht aktuell markierte AUR-Pakete:"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr ""
+msgstr "Installierte Fremd-Pakete: %s"
 
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
@@ -232,6 +234,10 @@ msgstr "Importieren?"
 #: pkg/pgp/keys.go:101
 msgid "Importing keys with gpg..."
 msgstr "Importiere Schlüssel mit gpg..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "Interne Konflikte gefunden:"
 
 #: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
@@ -304,6 +310,10 @@ msgstr "Paket-Basis-ID"
 #: print.go:52
 msgid "Package Base"
 msgstr "Paketbasis"
+
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "Paket-Konflikte gefunden:"
 
 #: pkg/menus/clean_menu.go:44
 msgid "Packages to cleanBuild?"
@@ -436,22 +446,6 @@ msgid ""
 msgstr ""
 "\n"
 "Geben Sie eine Zahl ein (Vorgabe=1):"
-
-#: pkg/dep/depCheck.go:155
-msgid ""
-"\n"
-"Inner conflicts found:"
-msgstr ""
-"\n"
-"Interne Konflikte gefunden:"
-
-#: pkg/dep/depCheck.go:170
-msgid ""
-"\n"
-"Package conflicts found:"
-msgstr ""
-"\n"
-"Paket-Konflikte gefunden:"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
