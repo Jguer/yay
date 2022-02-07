@@ -211,7 +211,7 @@ msgstr "Paquets AUR marqués comme obsolètes :"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr "Paquets étrangers installés :"
+msgstr "Paquets étrangers installés : %s"
 
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
