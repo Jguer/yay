@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // GIVEN a non existing build dir in the config
@@ -218,6 +219,80 @@ func TestConfiguration_setPrivilegeElevator_custom_script(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, wrapper, config.SudoBin)
+	assert.Equal(t, "-v", config.SudoFlags)
+	assert.True(t, config.SudoLoop)
+}
+
+// GIVEN default config and sudo loop enabled
+// GIVEN doas as PACMAN_AUTH env variable
+// WHEN setPrivilegeElevator gets called
+// THEN sudobin should be changed to "doas"
+func TestConfiguration_setPrivilegeElevator_pacman_auth_doas(t *testing.T) {
+	oldPath := os.Getenv("PATH")
+
+	path, err := os.MkdirTemp("", "yay-test")
+	require.NoError(t, err)
+
+	doas := filepath.Join(path, "doas")
+	_, err = os.Create(doas)
+	os.Chmod(doas, 0o755)
+	require.NoError(t, err)
+
+	sudo := filepath.Join(path, "sudo")
+	_, err = os.Create(sudo)
+	os.Chmod(sudo, 0o755)
+	require.NoError(t, err)
+
+	defer os.RemoveAll(path)
+
+	config := DefaultConfig()
+	config.SudoBin = "sudo"
+	config.SudoLoop = true
+	config.SudoFlags = "-v"
+
+	os.Setenv("PACMAN_AUTH", "doas")
+	os.Setenv("PATH", path)
+	err = config.setPrivilegeElevator()
+	os.Setenv("PATH", oldPath)
+	assert.NoError(t, err)
+	assert.Equal(t, "doas", config.SudoBin)
+	assert.Equal(t, "", config.SudoFlags)
+	assert.False(t, config.SudoLoop)
+}
+
+// GIVEN config with doas configed and sudo loop enabled
+// GIVEN sudo as PACMAN_AUTH env variable
+// WHEN setPrivilegeElevator gets called
+// THEN sudobin should be changed to "sudo"
+func TestConfiguration_setPrivilegeElevator_pacman_auth_sudo(t *testing.T) {
+	oldPath := os.Getenv("PATH")
+
+	path, err := os.MkdirTemp("", "yay-test")
+	require.NoError(t, err)
+
+	doas := filepath.Join(path, "doas")
+	_, err = os.Create(doas)
+	os.Chmod(doas, 0o755)
+	require.NoError(t, err)
+
+	sudo := filepath.Join(path, "sudo")
+	_, err = os.Create(sudo)
+	os.Chmod(sudo, 0o755)
+	require.NoError(t, err)
+
+	defer os.RemoveAll(path)
+
+	config := DefaultConfig()
+	config.SudoBin = "doas"
+	config.SudoLoop = true
+	config.SudoFlags = "-v"
+
+	os.Setenv("PACMAN_AUTH", "sudo")
+	os.Setenv("PATH", path)
+	err = config.setPrivilegeElevator()
+	os.Setenv("PATH", oldPath)
+	assert.NoError(t, err)
+	assert.Equal(t, "sudo", config.SudoBin)
 	assert.Equal(t, "-v", config.SudoFlags)
 	assert.True(t, config.SudoLoop)
 }

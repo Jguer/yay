@@ -143,6 +143,14 @@ func (c *Configuration) String() string {
 
 // check privilege elevator exists otherwise try to find another one.
 func (c *Configuration) setPrivilegeElevator() error {
+	if auth := os.Getenv("PACMAN_AUTH"); auth != "" {
+		c.SudoBin = auth
+		if auth != "sudo" {
+			c.SudoFlags = ""
+			c.SudoLoop = false
+		}
+	}
+
 	for _, bin := range [...]string{c.SudoBin, "sudo"} {
 		if _, err := exec.LookPath(bin); err == nil {
 			c.SudoBin = bin
