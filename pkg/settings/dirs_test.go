@@ -12,8 +12,7 @@ import (
 // WHEN cache home is selected
 // THEN the selected cache home should be in the tmp dir
 func Test_getCacheHome(t *testing.T) {
-	dir, err := os.MkdirTemp(os.TempDir(), "yay-cache-home")
-	assert.NoError(t, err)
+	dir := t.TempDir()
 	os.Unsetenv("XDG_CACHE_HOME")
 	os.Unsetenv("HOME")
 	os.Setenv("SUDO_USER", "test")

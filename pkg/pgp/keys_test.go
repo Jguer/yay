@@ -71,11 +71,7 @@ func startPgpKeyServer() *http.Server {
 }
 
 func TestImportKeys(t *testing.T) {
-	keyringDir, err := os.MkdirTemp("/tmp", "yay-test-keyring")
-	if err != nil {
-		t.Fatalf("Unable to init test keyring %q: %v\n", keyringDir, err)
-	}
-	defer os.RemoveAll(keyringDir)
+	keyringDir := t.TempDir()
 
 	server := startPgpKeyServer()
 	defer func() {
@@ -150,11 +146,7 @@ func makeSrcinfo(pkgbase string, pgpkeys ...string) *gosrc.Srcinfo {
 }
 
 func TestCheckPgpKeys(t *testing.T) {
-	keyringDir, err := os.MkdirTemp("/tmp", "yay-test-keyring")
-	if err != nil {
-		t.Fatalf("Unable to init test keyring: %v\n", err)
-	}
-	defer os.RemoveAll(keyringDir)
+	keyringDir := t.TempDir()
 
 	server := startPgpKeyServer()
 	defer func() {

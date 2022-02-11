@@ -108,8 +108,7 @@ func TestAURPKGBUILDRepo(t *testing.T) {
 // THEN a pull command should be formed
 func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	os.MkdirAll(filepath.Join(dir, "yay-bin", ".git"), 0o777)
 
@@ -140,8 +139,7 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 
 func TestAURPKGBUILDRepos(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	os.MkdirAll(filepath.Join(dir, "yay-bin", ".git"), 0o777)
 
