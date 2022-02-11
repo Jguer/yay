@@ -229,8 +229,7 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 // THEN a pull command should be formed
 func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	os.MkdirAll(filepath.Join(dir, "linux", ".git"), 0o777)
 

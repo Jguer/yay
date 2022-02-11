@@ -20,8 +20,7 @@ import (
 // THEN all should be found and cloned, except the repo one
 func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	os.MkdirAll(filepath.Join(dir, "yay", ".git"), 0o777)
 
@@ -52,8 +51,7 @@ func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 // THEN all should be found and cloned
 func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	targets := []string{"core/yay", "yay-bin", "yay-git"}
 	cmdRunner := &testRunner{}
@@ -82,8 +80,7 @@ func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
 // THEN all should be found and cloned
 func TestPKGBUILDReposClone(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	targets := []string{"yay", "yay-bin", "yay-git"}
 	cmdRunner := &testRunner{}
@@ -112,8 +109,7 @@ func TestPKGBUILDReposClone(t *testing.T) {
 // THEN all aur be found and cloned
 func TestPKGBUILDReposNotFound(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	targets := []string{"extra/yay", "yay-bin", "yay-git"}
 	cmdRunner := &testRunner{}
@@ -142,8 +138,7 @@ func TestPKGBUILDReposNotFound(t *testing.T) {
 // THEN only repo should be cloned
 func TestPKGBUILDReposRepoMode(t *testing.T) {
 	t.Parallel()
-	dir, _ := os.MkdirTemp("/tmp/", "yay-test")
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	targets := []string{"yay", "yay-bin", "yay-git"}
 	cmdRunner := &testRunner{}
