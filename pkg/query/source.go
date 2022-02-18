@@ -188,10 +188,7 @@ func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchB
 		return r, err
 	}
 
-	var (
-		aq aurQuery
-		n  int
-	)
+	aq := make(aurQuery, 0, len(r))
 
 	for i := range r {
 		match := true
@@ -213,8 +210,6 @@ func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchB
 		}
 
 		if match {
-			n++
-
 			aq = append(aq, r[i])
 		}
 	}
