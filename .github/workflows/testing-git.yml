@@ -1,4 +1,4 @@
-name: Test against pacman
+name: Test against pacman-git
 # This workflow is triggered on pushes to the repository.
 on:
   push:
@@ -25,7 +25,13 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Lint
-        run: /app/bin/golangci-lint run ./...
-      - name: Run Build and Tests
+      - name: checkout pacman-git
+        run: |
+          pacman -Sy --noconfirm sudo base-devel
+          git clone https://aur.archlinux.org/pacman-git
+          useradd github
+          chmod -R 777 pacman-git
+          echo 'github ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          su github -c 'cd pacman-git; yes | makepkg -si --nocheck'
+      - name: Run Build and Tests with pacman-git
         run: make test
