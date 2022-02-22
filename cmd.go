@@ -356,7 +356,8 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 
 // NumberMenu presents a CLI for selecting packages to install.
 func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Arguments) error {
-	queryBuilder := query.NewSourceQueryBuilder(config.SortBy, config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
+	queryBuilder := query.NewMixedSourceQueryBuilder(config.SortBy,
+		config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
 
 	queryBuilder.Execute(ctx, dbExecutor, config.Runtime.AURClient, pkgS)
 

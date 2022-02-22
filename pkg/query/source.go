@@ -29,10 +29,10 @@ const (
 type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
-	bottomUp          bool
 	sortBy            string
-	targetMode        parser.TargetMode
 	searchBy          string
+	targetMode        parser.TargetMode
+	bottomUp          bool
 	singleLineResults bool
 }
 
@@ -61,6 +61,8 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 	if s.targetMode.AtLeastAUR() {
 		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy, s.bottomUp, s.sortBy)
+
+		sort.Sort(aurSortable{aurQuery: s.aurQuery, sortBy: s.sortBy, bottomUp: s.bottomUp})
 	}
 
 	if s.targetMode.AtLeastRepo() {
@@ -213,12 +215,6 @@ func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchB
 			aq = append(aq, r[i])
 		}
 	}
-
-	sort.Sort(aurSortable{
-		aurQuery: aq,
-		sortBy:   sortBy,
-		bottomUp: bottomUp,
-	})
 
 	return aq, err
 }

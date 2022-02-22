@@ -68,6 +68,13 @@ linters:
     - whitespace
     - wsl
     - godot
+    # - maligned
+    # - interfacer
+    # - nilerr
+    # - nlreturn
+    # - exhaustivestruct
+    # - errname
+    # - forbidigo
 
 run:
 
