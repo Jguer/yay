@@ -160,7 +160,7 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 			return nil
 		})
 
-		str := text.Bold(gotext.Get("There are %d providers available for %s:\n", size, qp.Dep()))
+		str := text.Bold(gotext.Get("There are %d providers available for %s:", size, qp.Dep()))
 
 		size = 1
 
@@ -171,7 +171,8 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 
 			if dbName != thisDB {
 				dbName = thisDB
-				str += text.SprintOperationInfo(gotext.Get("Repository"), dbName, "\n    ")
+				str += "\n"
+				str += text.SprintOperationInfo(gotext.Get("Repository"), " ", dbName, "\n    ")
 			}
 			str += fmt.Sprintf("%d) %s ", size, pkg.Name())
 			size++
