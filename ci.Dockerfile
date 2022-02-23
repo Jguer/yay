@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY go.mod .
 
-RUN pacman -Syu --overwrite=* --needed --noconfirm go fakeroot binutils gcc make git gettext && \
+RUN pacman -Syu --overwrite=* --needed --noconfirm go git base-devel && \
     rm -rfv /var/cache/pacman/* /var/lib/pacman/sync/* && \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.44.0 && \
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.44.2 && \
     go mod download
