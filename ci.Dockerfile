@@ -1,4 +1,4 @@
-FROM lopsided/archlinux:latest
+FROM docker.io/lopsided/archlinux:latest
 
 ENV GO111MODULE=on
 WORKDIR /app
