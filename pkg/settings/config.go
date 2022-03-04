@@ -77,6 +77,7 @@ type Configuration struct {
 // SaveConfig writes yay config to file.
 func (c *Configuration) Save(configPath string) error {
 	c.Version = c.Runtime.Version
+
 	marshalledinfo, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return err
