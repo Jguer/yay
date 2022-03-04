@@ -71,10 +71,12 @@ type Configuration struct {
 	BatchInstall       bool     `json:"batchinstall"`
 	SingleLineResults  bool     `json:"singlelineresults"`
 	Runtime            *Runtime `json:"-"`
+	Version            string   `json:"version"`
 }
 
 // SaveConfig writes yay config to file.
 func (c *Configuration) Save(configPath string) error {
+	c.Version = c.Runtime.Version
 	marshalledinfo, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return err
@@ -171,7 +173,7 @@ func (c *Configuration) setPrivilegeElevator() error {
 	return &ErrPrivilegeElevatorNotFound{confValue: c.SudoBin}
 }
 
-func DefaultConfig() *Configuration {
+func DefaultConfig(version string) *Configuration {
 	return &Configuration{
 		AURURL:             "https://aur.archlinux.org",
 		BuildDir:           os.ExpandEnv("$HOME/.cache/yay"),
@@ -213,11 +215,12 @@ func DefaultConfig() *Configuration {
 		EditMenu:           false,
 		UseAsk:             false,
 		CombinedUpgrade:    false,
+		Version:            version,
 	}
 }
 
 func NewConfig(version string) (*Configuration, error) {
-	newConfig := DefaultConfig()
+	newConfig := DefaultConfig(version)
 
 	cacheHome, errCache := getCacheHome()
 	if errCache != nil {
@@ -248,6 +251,7 @@ func NewConfig(version string) (*Configuration, error) {
 
 	newConfig.Runtime = &Runtime{
 		ConfigPath:     configPath,
+		Version:        version,
 		Mode:           parser.ModeAny,
 		SaveConfig:     false,
 		CompletionPath: filepath.Join(cacheHome, completionFileName),

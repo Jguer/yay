@@ -88,7 +88,7 @@ func TestConfiguration_setPrivilegeElevator(t *testing.T) {
 	os.Chmod(doas, 0o755)
 	assert.NoError(t, err)
 
-	config := DefaultConfig()
+	config := DefaultConfig("test")
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
@@ -116,7 +116,7 @@ func TestConfiguration_setPrivilegeElevator_su(t *testing.T) {
 	os.Chmod(doas, 0o755)
 	assert.NoError(t, err)
 
-	config := DefaultConfig()
+	config := DefaultConfig("test")
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
@@ -138,7 +138,7 @@ func TestConfiguration_setPrivilegeElevator_no_path(t *testing.T) {
 	oldPath := os.Getenv("PATH")
 
 	os.Setenv("PATH", "")
-	config := DefaultConfig()
+	config := DefaultConfig("test")
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
@@ -165,7 +165,7 @@ func TestConfiguration_setPrivilegeElevator_doas(t *testing.T) {
 	os.Chmod(doas, 0o755)
 	assert.NoError(t, err)
 
-	config := DefaultConfig()
+	config := DefaultConfig("test")
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
@@ -192,7 +192,7 @@ func TestConfiguration_setPrivilegeElevator_custom_script(t *testing.T) {
 	os.Chmod(wrapper, 0o755)
 	assert.NoError(t, err)
 
-	config := DefaultConfig()
+	config := DefaultConfig("test")
 	config.SudoLoop = true
 	config.SudoBin = wrapper
 	config.SudoFlags = "-v"
@@ -226,7 +226,7 @@ func TestConfiguration_setPrivilegeElevator_pacman_auth_doas(t *testing.T) {
 	os.Chmod(sudo, 0o755)
 	require.NoError(t, err)
 
-	config := DefaultConfig()
+	config := DefaultConfig("test")
 	config.SudoBin = "sudo"
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
@@ -260,7 +260,7 @@ func TestConfiguration_setPrivilegeElevator_pacman_auth_sudo(t *testing.T) {
 	os.Chmod(sudo, 0o755)
 	require.NoError(t, err)
 
-	config := DefaultConfig()
+	config := DefaultConfig("test")
 	config.SudoBin = "doas"
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
