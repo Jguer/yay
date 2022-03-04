@@ -2,7 +2,7 @@ module github.com/Jguer/yay/v11
 
 require (
 	github.com/Jguer/aur v1.0.1
-	github.com/Jguer/go-alpm/v2 v2.0.6
+	github.com/Jguer/go-alpm/v2 v2.1.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
