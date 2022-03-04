@@ -256,7 +256,7 @@ func handleVersion() {
 func handlePrint(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
-		tmpConfig := settings.DefaultConfig()
+		tmpConfig := settings.DefaultConfig(yayVersion)
 		fmt.Printf("%v", tmpConfig)
 
 		return nil

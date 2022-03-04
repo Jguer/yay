@@ -14,6 +14,7 @@ import (
 
 type Runtime struct {
 	Mode           parser.TargetMode
+	Version        string // current version of yay
 	SaveConfig     bool
 	CompletionPath string
 	ConfigPath     string

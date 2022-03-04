@@ -1,14 +1,11 @@
 name: Test against pacman
-# This workflow is triggered on pushes to the repository.
 on:
-  push:
+  pull_request:
     paths-ignore:
       - "doc/**"
+      - "**/*.po"
       - "README.md"
       - ".gitignore"
-    branches-ignore:
-      - "master"
-  pull_request:
 
 jobs:
   build:
