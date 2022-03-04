@@ -1,4 +1,4 @@
-FROM docker.io/faddat/archlinux:devel
+FROM docker.io/lopsided/archlinux:devel
 
 ENV GO111MODULE=on
 WORKDIR /app
