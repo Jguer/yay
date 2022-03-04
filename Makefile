@@ -26,6 +26,7 @@ MOFILES := $(POFILES:.po=.mo)
 FLAGS ?= -trimpath -mod=readonly -modcacherw
 EXTRA_FLAGS ?= -buildmode=pie
 LDFLAGS := -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}" -linkmode=external
+FLAGS += $(shell pacman -T 'pacman-git' && echo "-tags next")
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
