@@ -446,6 +446,7 @@ func isArg(arg string) bool {
 	case "currentconfig":
 	case "singlelineresults":
 	case "doublelineresults":
+	case "separatesources", "noseparatesources":
 	default:
 		return false
 	}
