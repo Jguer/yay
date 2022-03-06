@@ -141,7 +141,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 
 	if s.targetMode.AtLeastAUR() {
 		var aurResults aurQuery
-		aurResults, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy, s.bottomUp, s.sortBy)
+		aurResults, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy)
 		dbName := sourceAUR
 
 		for i := range aurResults {
@@ -163,7 +163,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 
 	var repoResults []alpm.IPackage
 	if s.targetMode.AtLeastRepo() {
-		repoResults = repoQuery(dbExecutor.SyncPackages(pkgS...))
+		repoResults = dbExecutor.SyncPackages(pkgS...)
 
 		for i := range repoResults {
 			dbName := repoResults[i].DB().Name()
@@ -193,9 +193,12 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 	sort.Sort(sortableResults)
 	s.results = sortableResults.results
 
-	if aurErr != nil && len(repoResults) != 0 {
+	if aurErr != nil {
 		text.Errorln(ErrAURSearch{inner: aurErr})
-		text.Warnln(gotext.Get("Showing repo packages only"))
+
+		if len(repoResults) != 0 {
+			text.Warnln(gotext.Get("Showing repo packages only"))
+		}
 	}
 }
 
