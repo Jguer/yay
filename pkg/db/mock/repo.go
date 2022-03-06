@@ -148,7 +148,7 @@ func (p *Package) Packager() string {
 
 // Provides returns DependList of packages provides by package.
 func (p *Package) Provides() alpm.DependList {
-	panic("not implemented") // TODO: Implement
+	return alpm.DependList{}
 }
 
 // Origin returns package origin.

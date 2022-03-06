@@ -29,10 +29,10 @@ const (
 type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
-	bottomUp          bool
 	sortBy            string
-	targetMode        parser.TargetMode
 	searchBy          string
+	targetMode        parser.TargetMode
+	bottomUp          bool
 	singleLineResults bool
 }
 
@@ -60,11 +60,18 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy, s.bottomUp, s.sortBy)
+		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy)
+		s.aurQuery = filterAURResults(pkgS, s.aurQuery)
+
+		sort.Sort(aurSortable{aurQuery: s.aurQuery, sortBy: s.sortBy, bottomUp: s.bottomUp})
 	}
 
 	if s.targetMode.AtLeastRepo() {
-		s.repoQuery = queryRepo(pkgS, dbExecutor, s.bottomUp)
+		s.repoQuery = repoQuery(dbExecutor.SyncPackages(pkgS...))
+
+		if s.bottomUp {
+			s.Reverse()
+		}
 	}
 
 	if aurErr != nil && len(s.repoQuery) != 0 {
@@ -104,7 +111,8 @@ func (s *SourceQueryBuilder) Len() int {
 }
 
 func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
-	otherExclude stringset.StringSet) ([]string, error) {
+	otherExclude stringset.StringSet,
+) ([]string, error) {
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
 	var targets []string
@@ -140,85 +148,48 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 	return targets, nil
 }
 
-// queryRepo handles repo searches. Creates a RepoSearch struct.
-func queryRepo(pkgInputN []string, dbExecutor db.Executor, bottomUp bool) repoQuery {
-	s := repoQuery(dbExecutor.SyncPackages(pkgInputN...))
+// filter AUR results to remove strings that don't contain all of the search terms.
+func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
+	aurPkgs := make([]aur.Pkg, 0, len(results))
 
-	if bottomUp {
-		s.Reverse()
-	}
-
-	return s
-}
-
-// queryAUR searches AUR and narrows based on subarguments.
-func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchBy string, bottomUp bool, sortBy string) (aurQuery, error) {
-	var (
-		r         []aur.Pkg
-		err       error
-		usedIndex int
-	)
-
-	by := getSearchBy(searchBy)
-
-	if len(pkgS) == 0 {
-		return nil, nil
-	}
-
-	for i, word := range pkgS {
-		r, err = aurClient.Search(ctx, word, by)
-		if err == nil {
-			usedIndex = i
-
-			break
-		}
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(pkgS) == 1 {
-		sort.Sort(aurSortable{
-			aurQuery: r,
-			sortBy:   sortBy,
-			bottomUp: bottomUp,
-		})
-
-		return r, err
-	}
-
-	aq := make(aurQuery, 0, len(r))
-
-	for i := range r {
-		match := true
-
-		for j, pkgN := range pkgS {
-			if usedIndex == j {
-				continue
-			}
-
-			name := strings.ToLower(r[i].Name)
-			desc := strings.ToLower(r[i].Description)
+	matchesSearchTerms := func(pkg *aur.Pkg, terms []string) bool {
+		for _, pkgN := range terms {
+			name := strings.ToLower(pkg.Name)
+			desc := strings.ToLower(pkg.Description)
 			targ := strings.ToLower(pkgN)
 
 			if !(strings.Contains(name, targ) || strings.Contains(desc, targ)) {
-				match = false
-
-				break
+				return false
 			}
 		}
 
-		if match {
-			aq = append(aq, r[i])
+		return true
+	}
+
+	for i := range results {
+		if matchesSearchTerms(&results[i], pkgS) {
+			aurPkgs = append(aurPkgs, results[i])
 		}
 	}
 
-	sort.Sort(aurSortable{
-		aurQuery: aq,
-		sortBy:   sortBy,
-		bottomUp: bottomUp,
-	})
+	return aurPkgs
+}
 
-	return aq, err
+// queryAUR searches AUR and narrows based on subarguments.
+func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchBy string) ([]aur.Pkg, error) {
+	var (
+		err error
+		by  = getSearchBy(searchBy)
+	)
+
+	for _, word := range pkgS {
+		var r []aur.Pkg
+
+		r, err = aurClient.Search(ctx, word, by)
+		if err == nil {
+			return r, nil
+		}
+	}
+
+	return nil, err
 }

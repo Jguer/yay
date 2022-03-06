@@ -6,6 +6,8 @@ github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5 h1:TMscP
 github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5/go.mod h1:Hk55m330jNiwxRodIlMCvw5iEyoRUCIY64W1p9D+tHc=
 github.com/Morganamilo/go-srcinfo v1.0.0 h1:Wh4nEF+HJWo+29hnxM18Q2hi+DUf0GejS13+Wg+dzmI=
 github.com/Morganamilo/go-srcinfo v1.0.0/go.mod h1:MP6VGY1NNpVUmYIEgoM9acix95KQqIRyqQ0hCLsyYUY=
+github.com/adrg/strutil v0.2.3 h1:WZVn3ItPBovFmP4wMHHVXUr8luRaHrbyIuLlHt32GZQ=
+github.com/adrg/strutil v0.2.3/go.mod h1:+SNxbiH6t+O+5SZqIj5n/9i5yUjR+S3XXVrjEcN2mxg=
 github.com/bradleyjkemp/cupaloy v2.3.0+incompatible h1:UafIjBvWQmS9i/xRg+CamMrnLTKNzo+bdmT/oH34c2Y=
 github.com/bradleyjkemp/cupaloy v2.3.0+incompatible/go.mod h1:Au1Xw1sgaJ5iSFktEhYsS0dbQiS1B0/XMXl+42y9Ilk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -115,36 +115,46 @@ func (q aurQuery) printSearch(
 			}
 		}
 
-		toprint += text.Bold(text.ColorHash("aur")) + "/" + text.Bold(q[i].Name) +
-			" " + text.Cyan(q[i].Version) +
-			text.Bold(" (+"+strconv.Itoa(q[i].NumVotes)) +
-			" " + text.Bold(strconv.FormatFloat(q[i].Popularity, 'f', 2, 64)+") ")
-
-		if q[i].Maintainer == "" {
-			toprint += text.Bold(text.Red(gotext.Get("(Orphaned)"))) + " "
-		}
-
-		if q[i].OutOfDate != 0 {
-			toprint += text.Bold(text.Red(gotext.Get("(Out-of-date: %s)", text.FormatTime(q[i].OutOfDate)))) + " "
-		}
-
-		if pkg := dbExecutor.LocalPackage(q[i].Name); pkg != nil {
-			if pkg.Version() != q[i].Version {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed: %s)", pkg.Version())))
-			} else {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed)")))
-			}
-		}
-
-		if singleLineResults {
-			toprint += "\t"
-		} else {
-			toprint += "\n    "
-		}
-
-		toprint += q[i].Description
+		toprint += aurPkgSearchString(&q[i], dbExecutor, singleLineResults)
 		_, _ = fmt.Fprintln(w, toprint)
 	}
+}
+
+func aurPkgSearchString(
+	pkg *aur.Pkg,
+	dbExecutor db.Executor,
+	singleLineResults bool,
+) string {
+	toPrint := text.Bold(text.ColorHash("aur")) + "/" + text.Bold(pkg.Name) +
+		" " + text.Cyan(pkg.Version) +
+		text.Bold(" (+"+strconv.Itoa(pkg.NumVotes)) +
+		" " + text.Bold(strconv.FormatFloat(pkg.Popularity, 'f', 2, 64)+") ")
+
+	if pkg.Maintainer == "" {
+		toPrint += text.Bold(text.Red(gotext.Get("(Orphaned)"))) + " "
+	}
+
+	if pkg.OutOfDate != 0 {
+		toPrint += text.Bold(text.Red(gotext.Get("(Out-of-date: %s)", text.FormatTime(pkg.OutOfDate)))) + " "
+	}
+
+	if localPkg := dbExecutor.LocalPackage(pkg.Name); localPkg != nil {
+		if localPkg.Version() != pkg.Version {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localPkg.Version())))
+		} else {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
+		}
+	}
+
+	if singleLineResults {
+		toPrint += "\t"
+	} else {
+		toPrint += "\n    "
+	}
+
+	toPrint += pkg.Description
+
+	return toPrint
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
@@ -165,32 +175,38 @@ func (r repoQuery) printSearch(w io.Writer, dbExecutor db.Executor, searchMode S
 			}
 		}
 
-		toprint += text.Bold(text.ColorHash(res.DB().Name())) + "/" + text.Bold(res.Name()) +
-			" " + text.Cyan(res.Version()) +
-			text.Bold(" ("+text.Human(res.Size())+
-				" "+text.Human(res.ISize())+") ")
-
-		packageGroups := dbExecutor.PackageGroups(res)
-		if len(packageGroups) != 0 {
-			toprint += fmt.Sprint(packageGroups, " ")
-		}
-
-		if pkg := dbExecutor.LocalPackage(res.Name()); pkg != nil {
-			if pkg.Version() != res.Version() {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed: %s)", pkg.Version())))
-			} else {
-				toprint += text.Bold(text.Green(gotext.Get("(Installed)")))
-			}
-		}
-
-		if singleLineResults {
-			toprint += "\t"
-		} else {
-			toprint += "\n    "
-		}
-
-		toprint += res.Description()
-
+		toprint += syncPkgSearchString(res, dbExecutor, singleLineResults)
 		_, _ = fmt.Fprintln(w, toprint)
 	}
+}
+
+// PrintSearch receives a RepoSearch type and outputs pretty text.
+func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineResults bool) string {
+	toPrint := text.Bold(text.ColorHash(pkg.DB().Name())) + "/" + text.Bold(pkg.Name()) +
+		" " + text.Cyan(pkg.Version()) +
+		text.Bold(" ("+text.Human(pkg.Size())+
+			" "+text.Human(pkg.ISize())+") ")
+
+	packageGroups := dbExecutor.PackageGroups(pkg)
+	if len(packageGroups) != 0 {
+		toPrint += fmt.Sprint(packageGroups, " ")
+	}
+
+	if localPkg := dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
+		if localPkg.Version() != pkg.Version() {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localPkg.Version())))
+		} else {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
+		}
+	}
+
+	if singleLineResults {
+		toPrint += "\t"
+	} else {
+		toPrint += "\n    "
+	}
+
+	toPrint += pkg.Description()
+
+	return toPrint
 }

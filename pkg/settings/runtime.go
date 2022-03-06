@@ -7,6 +7,7 @@ import (
 
 	"github.com/Jguer/aur"
 
+	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/vcs"
@@ -14,6 +15,7 @@ import (
 
 type Runtime struct {
 	Mode           parser.TargetMode
+	QueryBuilder   query.Builder
 	Version        string // current version of yay
 	SaveConfig     bool
 	CompletionPath string

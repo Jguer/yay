@@ -12,6 +12,7 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/db/ialpm"
+	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -129,6 +130,14 @@ func main() {
 		if errS := config.Save(config.Runtime.ConfigPath); errS != nil {
 			text.Errorln(errS)
 		}
+	}
+
+	if config.SeparateSources {
+		config.Runtime.QueryBuilder = query.NewSourceQueryBuilder(config.SortBy,
+			config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
+	} else {
+		config.Runtime.QueryBuilder = query.NewMixedSourceQueryBuilder(config.SortBy,
+			config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
 	}
 
 	var useColor bool

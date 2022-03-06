@@ -70,6 +70,7 @@ type Configuration struct {
 	UseAsk             bool     `json:"useask"`
 	BatchInstall       bool     `json:"batchinstall"`
 	SingleLineResults  bool     `json:"singlelineresults"`
+	SeparateSources    bool     `json:"separatesources"`
 	Runtime            *Runtime `json:"-"`
 	Version            string   `json:"version"`
 }
@@ -216,6 +217,7 @@ func DefaultConfig(version string) *Configuration {
 		EditMenu:           false,
 		UseAsk:             false,
 		CombinedUpgrade:    false,
+		SeparateSources:    false,
 		Version:            version,
 	}
 }

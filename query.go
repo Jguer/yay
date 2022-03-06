@@ -19,9 +19,9 @@ import (
 )
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(ctx context.Context, pkgS []string, aurClient *aur.Client, dbExecutor db.Executor, verbose bool) error {
-	queryBuilder := query.NewSourceQueryBuilder(config.SortBy, config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
-
+func syncSearch(ctx context.Context, pkgS []string, aurClient *aur.Client,
+	dbExecutor db.Executor, queryBuilder query.Builder, verbose bool,
+) error {
 	queryBuilder.Execute(ctx, dbExecutor, aurClient, pkgS)
 
 	searchMode := query.Minimal
@@ -209,7 +209,8 @@ func statistics(dbExecutor db.Executor) (res struct {
 	TotalSize    int64
 	pacmanCaches map[string]int64
 	yayCache     int64
-}) {
+},
+) {
 	for _, pkg := range dbExecutor.LocalPackages() {
 		res.TotalSize += pkg.ISize()
 		res.Totaln++
