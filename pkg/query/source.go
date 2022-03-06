@@ -106,7 +106,8 @@ func (s *SourceQueryBuilder) Len() int {
 }
 
 func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
-	otherExclude stringset.StringSet) ([]string, error) {
+	otherExclude stringset.StringSet,
+) ([]string, error) {
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
 	var targets []string
