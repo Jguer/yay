@@ -24,14 +24,13 @@ import (
 const sourceAUR = "aur"
 
 type Builder interface {
+	Len() int
 	Execute(ctx context.Context, dbExecutor db.Executor, aurClient *aur.Client, pkgS []string)
 	Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error
 	GetTargets(include, exclude intrange.IntRanges, otherExclude stringset.StringSet) ([]string, error)
 }
 
 type MixedSourceQueryBuilder struct {
-	repoQuery
-	aurQuery
 	results           []abstractResult
 	sortBy            string
 	searchBy          string
@@ -49,8 +48,6 @@ func NewMixedSourceQueryBuilder(
 	singleLineResults bool,
 ) *MixedSourceQueryBuilder {
 	return &MixedSourceQueryBuilder{
-		repoQuery:         []alpm.IPackage{},
-		aurQuery:          []aur.Pkg{},
 		bottomUp:          bottomUp,
 		sortBy:            sortBy,
 		targetMode:        targetMode,
@@ -143,38 +140,40 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 	}
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy, s.bottomUp, s.sortBy)
+		var aurResults aurQuery
+		aurResults, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy, s.bottomUp, s.sortBy)
 		dbName := sourceAUR
 
-		for i := range s.aurQuery {
+		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
 				s.queryMap[dbName] = map[string]interface{}{}
 			}
 
-			s.queryMap[dbName][s.aurQuery[i].Name] = s.aurQuery[i]
+			s.queryMap[dbName][aurResults[i].Name] = aurResults[i]
 
 			sortableResults.results = append(sortableResults.results, abstractResult{
 				source:      dbName,
-				name:        s.aurQuery[i].Name,
-				description: s.aurQuery[i].Description,
-				provides:    s.aurQuery[i].Provides,
-				votes:       s.aurQuery[i].NumVotes,
+				name:        aurResults[i].Name,
+				description: aurResults[i].Description,
+				provides:    aurResults[i].Provides,
+				votes:       aurResults[i].NumVotes,
 			})
 		}
 	}
 
+	var repoResults []alpm.IPackage
 	if s.targetMode.AtLeastRepo() {
-		s.repoQuery = repoQuery(dbExecutor.SyncPackages(pkgS...))
+		repoResults = repoQuery(dbExecutor.SyncPackages(pkgS...))
 
-		for i := range s.repoQuery {
-			dbName := s.repoQuery[i].DB().Name()
+		for i := range repoResults {
+			dbName := repoResults[i].DB().Name()
 			if s.queryMap[dbName] == nil {
 				s.queryMap[dbName] = map[string]interface{}{}
 			}
 
-			s.queryMap[dbName][s.repoQuery[i].Name()] = s.repoQuery[i]
+			s.queryMap[dbName][repoResults[i].Name()] = repoResults[i]
 
-			rawProvides := s.repoQuery[i].Provides().Slice()
+			rawProvides := repoResults[i].Provides().Slice()
 
 			provides := make([]string, len(rawProvides))
 			for j := range rawProvides {
@@ -182,9 +181,9 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 			}
 
 			sortableResults.results = append(sortableResults.results, abstractResult{
-				source:      s.repoQuery[i].DB().Name(),
-				name:        s.repoQuery[i].Name(),
-				description: s.repoQuery[i].Description(),
+				source:      repoResults[i].DB().Name(),
+				name:        repoResults[i].Name(),
+				description: repoResults[i].Description(),
 				provides:    provides,
 				votes:       -1,
 			})
@@ -194,17 +193,13 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 	sort.Sort(sortableResults)
 	s.results = sortableResults.results
 
-	if aurErr != nil && len(s.repoQuery) != 0 {
+	if aurErr != nil && len(repoResults) != 0 {
 		text.Errorln(ErrAURSearch{inner: aurErr})
 		text.Warnln(gotext.Get("Showing repo packages only"))
 	}
 }
 
 func (s *MixedSourceQueryBuilder) Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error {
-	if s.aurQuery == nil || s.repoQuery == nil {
-		return ErrNoQuery{}
-	}
-
 	for i := range s.results {
 		if verboseSearch == Minimal {
 			_, _ = fmt.Fprintln(w, s.results[i].name)
@@ -237,11 +232,12 @@ func (s *MixedSourceQueryBuilder) Results(w io.Writer, dbExecutor db.Executor, v
 }
 
 func (s *MixedSourceQueryBuilder) Len() int {
-	return len(s.repoQuery) + len(s.aurQuery)
+	return len(s.results)
 }
 
 func (s *MixedSourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
-	otherExclude stringset.StringSet) ([]string, error) {
+	otherExclude stringset.StringSet,
+) ([]string, error) {
 	var (
 		isInclude = len(exclude) == 0 && len(otherExclude) == 0
 		targets   []string
