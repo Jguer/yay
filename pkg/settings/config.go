@@ -15,7 +15,6 @@ import (
 
 	"github.com/Jguer/aur"
 
-	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -253,17 +252,7 @@ func NewConfig(version string) (*Configuration, error) {
 		return nil, errPE
 	}
 
-	var queryBuilder query.Builder
-	if newConfig.SeparateSources {
-		queryBuilder = query.NewSourceQueryBuilder(newConfig.SortBy,
-			parser.ModeAny, newConfig.SearchBy, newConfig.BottomUp, newConfig.SingleLineResults)
-	} else {
-		queryBuilder = query.NewMixedSourceQueryBuilder(newConfig.SortBy,
-			parser.ModeAny, newConfig.SearchBy, newConfig.BottomUp, newConfig.SingleLineResults)
-	}
-
 	newConfig.Runtime = &Runtime{
-		QueryBuilder:   queryBuilder,
 		ConfigPath:     configPath,
 		Version:        version,
 		Mode:           parser.ModeAny,
