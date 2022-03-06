@@ -15,6 +15,7 @@ import (
 
 	"github.com/Jguer/aur"
 
+	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -70,6 +71,7 @@ type Configuration struct {
 	UseAsk             bool     `json:"useask"`
 	BatchInstall       bool     `json:"batchinstall"`
 	SingleLineResults  bool     `json:"singlelineresults"`
+	SeparateSources    bool     `json:"separatesources"`
 	Runtime            *Runtime `json:"-"`
 	Version            string   `json:"version"`
 }
@@ -216,6 +218,7 @@ func DefaultConfig(version string) *Configuration {
 		EditMenu:           false,
 		UseAsk:             false,
 		CombinedUpgrade:    false,
+		SeparateSources:    false,
 		Version:            version,
 	}
 }
@@ -250,7 +253,17 @@ func NewConfig(version string) (*Configuration, error) {
 		return nil, errPE
 	}
 
+	var queryBuilder query.Builder
+	if newConfig.SeparateSources {
+		queryBuilder = query.NewSourceQueryBuilder(newConfig.SortBy,
+			parser.ModeAny, newConfig.SearchBy, newConfig.BottomUp, newConfig.SingleLineResults)
+	} else {
+		queryBuilder = query.NewMixedSourceQueryBuilder(newConfig.SortBy,
+			parser.ModeAny, newConfig.SearchBy, newConfig.BottomUp, newConfig.SingleLineResults)
+	}
+
 	newConfig.Runtime = &Runtime{
+		QueryBuilder:   queryBuilder,
 		ConfigPath:     configPath,
 		Version:        version,
 		Mode:           parser.ModeAny,

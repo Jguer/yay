@@ -185,7 +185,7 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 	case "P", "show":
 		return handlePrint(ctx, cmdArgs, dbExecutor)
 	case "Y", "--yay":
-		return handleYay(ctx, cmdArgs, dbExecutor)
+		return handleYay(ctx, cmdArgs, dbExecutor, config.Runtime.QueryBuilder)
 	}
 
 	return errors.New(gotext.Get("unhandled operation"))
@@ -289,7 +289,7 @@ func handlePrint(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 	return nil
 }
 
-func handleYay(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleYay(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor, queryBuilder query.Builder) error {
 	switch {
 	case cmdArgs.ExistsArg("gendb"):
 		return createDevelDB(ctx, config, dbExecutor)
@@ -298,7 +298,7 @@ func handleYay(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 	case cmdArgs.ExistsArg("c", "clean"):
 		return cleanDependencies(ctx, cmdArgs, dbExecutor, false)
 	case len(cmdArgs.Targets) > 0:
-		return handleYogurt(ctx, cmdArgs, dbExecutor)
+		return displayNumberMenu(ctx, cmdArgs.Targets, dbExecutor, queryBuilder, cmdArgs)
 	}
 
 	return nil
@@ -312,16 +312,12 @@ func handleGetpkgbuild(ctx context.Context, cmdArgs *parser.Arguments, dbExecuto
 	return getPkgbuilds(ctx, dbExecutor, config, cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }
 
-func handleYogurt(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
-	return displayNumberMenu(ctx, cmdArgs.Targets, dbExecutor, cmdArgs)
-}
-
 func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	targets := cmdArgs.Targets
 
 	switch {
 	case cmdArgs.ExistsArg("s", "search"):
-		return syncSearch(ctx, targets, config.Runtime.AURClient, dbExecutor, !cmdArgs.ExistsArg("q", "quiet"))
+		return syncSearch(ctx, targets, config.Runtime.AURClient, dbExecutor, config.Runtime.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
 	case cmdArgs.ExistsArg("p", "print", "print-format"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
@@ -355,10 +351,9 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor, cmdArgs *parser.Arguments) error {
-	queryBuilder := query.NewMixedSourceQueryBuilder(config.SortBy,
-		config.Runtime.Mode, config.SearchBy, config.BottomUp, config.SingleLineResults)
-
+func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor,
+	queryBuilder query.Builder, cmdArgs *parser.Arguments,
+) error {
 	queryBuilder.Execute(ctx, dbExecutor, config.Runtime.AURClient, pkgS)
 
 	if err := queryBuilder.Results(os.Stdout, dbExecutor, query.NumberMenu); err != nil {
