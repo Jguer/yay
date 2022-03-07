@@ -83,7 +83,8 @@ func newPool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
 // Includes db/ prefixes and group installs.
 func (dp *Pool) ResolveTargets(ctx context.Context, pkgs []string,
 	mode parser.TargetMode,
-	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool, assumeInstalled []string) error {
+	ignoreProviders, noConfirm, provides bool, rebuild string, splitN int, noDeps, noCheckDeps bool, assumeInstalled []string,
+) error {
 	// RPC requests are slow
 	// Combine as many AUR package requests as possible into a single RPC call
 	aurTargets := make(stringset.StringSet)
@@ -293,7 +294,8 @@ func ComputeCombinedDepList(pkg *aur.Pkg, noDeps, noCheckDeps bool) [][]string {
 func (dp *Pool) resolveAURPackages(ctx context.Context,
 	pkgs stringset.StringSet,
 	explicit, ignoreProviders, noConfirm, provides bool,
-	rebuild string, splitN int, noDeps, noCheckDeps bool) error {
+	rebuild string, splitN int, noDeps, noCheckDeps bool,
+) error {
 	newPackages := make(stringset.StringSet)
 	newAURPackages := make(stringset.StringSet)
 
@@ -392,7 +394,8 @@ func GetPool(ctx context.Context, pkgs []string,
 	aurClient *aur.Client,
 	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
-	rebuild string, splitN int, noDeps bool, noCheckDeps bool, assumeInstalled []string) (*Pool, error) {
+	rebuild string, splitN int, noDeps bool, noCheckDeps bool, assumeInstalled []string,
+) (*Pool, error) {
 	dp := newPool(dbExecutor, aurClient)
 
 	dp.Warnings = warnings
@@ -535,7 +538,9 @@ func isInAssumeInstalled(name string, assumeInstalled []string) bool {
 func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 	size := providers.Len()
 
-	str := text.Bold(gotext.Get("There are %d providers available for %s:\n", size, dep))
+	str := text.Bold(gotext.Get("There are %d providers available for %s:", size, dep))
+
+	fmt.Println()
 
 	size = 1
 	str += text.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")

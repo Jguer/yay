@@ -23,11 +23,11 @@ msgstr ""
 msgid " (Wanted by: "
 msgstr ""
 
-#: cmd.go:431
+#: cmd.go:427
 msgid " [Installed]"
 msgstr ""
 
-#: cmd.go:390
+#: cmd.go:386
 #: install.go:158
 #: install.go:192
 msgid " there is nothing to do"
@@ -94,21 +94,21 @@ msgstr ""
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr ""
 
-#: pkg/query/types.go:135
-#: pkg/query/types.go:182
+#: pkg/query/types.go:145
+#: pkg/query/types.go:199
 msgid "(Installed)"
 msgstr ""
 
-#: pkg/query/types.go:133
-#: pkg/query/types.go:180
+#: pkg/query/types.go:143
+#: pkg/query/types.go:197
 msgid "(Installed: %s)"
 msgstr ""
 
-#: pkg/query/types.go:124
+#: pkg/query/types.go:134
 msgid "(Orphaned)"
 msgstr ""
 
-#: pkg/query/types.go:128
+#: pkg/query/types.go:138
 msgid "(Out-of-date: %s)"
 msgstr ""
 
@@ -120,7 +120,7 @@ msgstr ""
 msgid "Add %s or %s to your environment variables"
 msgstr ""
 
-#: main.go:102
+#: main.go:103
 msgid "Avoid running yay as root/sudo."
 msgstr ""
 
@@ -318,7 +318,7 @@ msgstr ""
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 
-#: cmd.go:372
+#: cmd.go:368
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr ""
 
@@ -347,12 +347,12 @@ msgstr ""
 msgid "Remove make dependencies after install?"
 msgstr ""
 
-#: pkg/dep/depPool.go:541
+#: pkg/dep/depPool.go:546
 msgid "Repository AUR"
 msgstr ""
 
 #: print.go:22
-#: pkg/db/ialpm/alpm.go:174
+#: pkg/db/ialpm/alpm.go:175
 msgid "Repository"
 msgstr ""
 
@@ -364,15 +364,24 @@ msgstr ""
 msgid "Searching databases for updates..."
 msgstr ""
 
-#: pkg/query/source.go:72
+#: pkg/query/mixed_sources.go:200
+#: pkg/query/source.go:79
 msgid "Showing repo packages only"
+msgstr ""
+
+#: print.go:89
+msgid "Size of pacman cache %s: %s"
+msgstr ""
+
+#: print.go:92
+msgid "Size of yay cache %s: %s"
 msgstr ""
 
 #: print.go:53
 msgid "Snapshot URL"
 msgstr ""
 
-#: print.go:88
+#: print.go:94
 msgid "Ten biggest packages:"
 msgstr ""
 
@@ -381,8 +390,8 @@ msgid "The following packages are not compatible with your architecture:"
 msgstr ""
 
 #: pkg/db/ialpm/alpm.go:163
-#: pkg/dep/depPool.go:538
-msgid "There are %d providers available for %s:\n"
+#: pkg/dep/depPool.go:541
+msgid "There are %d providers available for %s:"
 msgstr ""
 
 #: pkg/settings/exe/cmd_builder.go:199
@@ -434,8 +443,8 @@ msgstr ""
 msgid "\nBuild directory:"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:184
-#: pkg/dep/depPool.go:551
+#: pkg/db/ialpm/alpm.go:185
+#: pkg/dep/depPool.go:556
 msgid "\nEnter a number (default=1): "
 msgstr ""
 
@@ -509,7 +518,7 @@ msgstr ""
 msgid "failed to create directory '%s': %s"
 msgstr ""
 
-#: pkg/settings/config.go:278
+#: pkg/settings/config.go:293
 msgid "failed to open config file '%s': %s"
 msgstr ""
 
@@ -521,7 +530,7 @@ msgstr ""
 msgid "failed to parse %s: %s"
 msgstr ""
 
-#: pkg/settings/config.go:288
+#: pkg/settings/config.go:303
 msgid "failed to read config file '%s': %s"
 msgstr ""
 
@@ -529,8 +538,8 @@ msgstr ""
 msgid "input too long"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:205
-#: pkg/dep/depPool.go:571
+#: pkg/db/ialpm/alpm.go:206
+#: pkg/dep/depPool.go:576
 msgid "invalid number: %s"
 msgstr ""
 
@@ -546,8 +555,8 @@ msgstr ""
 msgid "invalid repository"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:210
-#: pkg/dep/depPool.go:576
+#: pkg/db/ialpm/alpm.go:211
+#: pkg/dep/depPool.go:581
 msgid "invalid value: %d is not between %d and %d"
 msgstr ""
 
@@ -567,7 +576,7 @@ msgstr ""
 msgid "only one operation may be used at a time"
 msgstr ""
 
-#: print.go:179
+#: print.go:185
 msgid "package '%s' was not found"
 msgstr ""
 
@@ -600,7 +609,7 @@ msgstr ""
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:230
+#: pkg/db/ialpm/alpm.go:231
 msgid "unable to CreateHandle: %s"
 msgstr ""
 
@@ -608,7 +617,7 @@ msgstr ""
 msgid "unhandled operation"
 msgstr ""
 
-#: cmd.go:428
+#: cmd.go:424
 msgid "unknown-version"
 msgstr ""
 
