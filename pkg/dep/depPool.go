@@ -539,8 +539,7 @@ func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 	size := providers.Len()
 
 	str := text.Bold(gotext.Get("There are %d providers available for %s:", size, dep))
-
-	fmt.Println()
+	str += "\n"
 
 	size = 1
 	str += text.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
