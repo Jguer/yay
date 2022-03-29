@@ -74,7 +74,5 @@ func ContinueTask(s string, cont, noConfirm bool) bool {
 		return cont
 	}
 
-	response = strings.ToLower(response)
-
 	return strings.EqualFold(response, yes) || strings.EqualFold(response, y)
 }
