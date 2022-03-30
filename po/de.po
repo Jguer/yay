@@ -39,7 +39,7 @@ msgstr "[Installiert]"
 
 #: cmd.go:390 install.go:158 install.go:192
 msgid " there is nothing to do"
-msgstr "es gibt nichts zu tun"
+msgstr " es gibt nichts zu tun"
 
 #: pkg/menus/menu.go:48
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
@@ -49,7 +49,7 @@ msgstr ""
 
 #: install.go:729
 msgid "%s already made -- skipping build"
-msgstr "%s Bereits erledigt -- Build wird übersprungen"
+msgstr "%s bereits erledigt -- build wird übersprungen"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
@@ -85,11 +85,11 @@ msgstr "%s : Argument --repo nicht möglich -- überspringe"
 
 #: pkg/upgrade/sources.go:82
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s : Ignoriere Packet-Aktualisierung (1%s => 1%s)"
+msgstr "%s : Ignoriere packet-aktualisierung (1%s => 1%s)"
 
 #: upgrade.go:138
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s : lokal (%s) ist neuer als das AUR (%s)"
+msgstr "%s : Lokal (%s) ist neuer als das AUR (%s)"
 
 #: pkg/download/unified.go:187
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -449,7 +449,7 @@ msgstr ""
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "Abbruch durch den Benutzer"
+msgstr "abbruch durch den benutzer"
 
 #: install.go:496
 msgid "cannot find package name: %v"
@@ -461,7 +461,7 @@ msgstr "Kann PKGDEST nicht finden für: %s"
 
 #: pkg/vcs/vcs.go:69
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr "Entwicklungstest fehlgeschlagen für Paket: '%s' Fehler gefunden."
+msgstr "Entwicklungstest fehlgeschlagen für Paket: '%s' fehler gefunden."
 
 #: pkg/menus/edit_menu.go:108
 msgid "editor did not exit successfully, aborting: %s"
@@ -469,47 +469,47 @@ msgstr "Editor wurde nicht erfogreich beendet, breche ab: %s"
 
 #: aur_source.go:26
 msgid "error downloading sources: %s"
-msgstr "Fehler beim Herunterladen der Quellen: %s"
+msgstr "Fehler beim herunterladen der quellen: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "Fehler beim Holen von %s: %s"
+msgstr "Fehler beim holen von %s: %s"
 
 #: install.go:299 install.go:405
 msgid "error installing repo packages"
-msgstr "Fehler bei der Installation der Repo-Pakete"
+msgstr "Fehler bei der installation der repo-pakete"
 
 #: install.go:671 install.go:712 install.go:726 install.go:740
 msgid "error making: %s"
-msgstr "Fehler beim Ausführen: %s"
+msgstr "Fehler beim ausführen: %s"
 
 #: install.go:573
 msgid "error merging %s: %s"
-msgstr "Fehler beim Zusammenführen von %s: %s"
+msgstr "Fehler beim zusammenführen von %s: %s"
 
 #: pkg/download/unified.go:56
 msgid "error reading %s"
-msgstr "Fehler beim Lesen von %s"
+msgstr "Fehler beim lesen von %s"
 
 #: install.go:88
 msgid "error refreshing databases"
-msgstr "Fehler beim Aktualisieren der Datenbanken"
+msgstr "Fehler beim aktualisieren der datenbanken"
 
 #: clean.go:212 install.go:566
 msgid "error resetting %s: %s"
-msgstr "Fehler beim Zurücksetzen von %s: %s"
+msgstr "Fehler beim zurücksetzen von %s: %s"
 
 #: install.go:42
 msgid "error updating package install reason to dependency"
-msgstr "Fehler beim Aktualisieren des Paketes aufgrund einer Abhängigkeit"
+msgstr "Fehler beim aktualisieren des paketes aufgrund einer abhängigkeit"
 
 #: install.go:60
 msgid "error updating package install reason to explicit"
-msgstr "Fehler beim Installieren der Paket-Aktualisierung: Zu explizit"
+msgstr "Fehler beim installieren der paket-aktualisierung: Zu explizit"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "Fehler beim Erstellen von Verzeichnis '%s': %s"
+msgstr "Fehler beim erstellen von verzeichnis '%s': %s"
 
 #: pkg/settings/config.go:278
 msgid "failed to open config file '%s': %s"
@@ -517,15 +517,15 @@ msgstr "Fehler beim Öffnen der Config-Datei '%s': %s"
 
 #: install.go:522
 msgid "failed to parse %s -- skipping: %s"
-msgstr "Fehler beim Parsen von %s -- überspringe: %s"
+msgstr "Fehler beim parsen von %s -- überspringe: %s"
 
 #: install.go:526
 msgid "failed to parse %s: %s"
-msgstr "Fehler beim Parsen von: %s: %s"
+msgstr "Fehler beim parsen von: %s: %s"
 
 #: pkg/settings/config.go:288
 msgid "failed to read config file '%s': %s"
-msgstr "Fehler beim Lesen der Config-Datei '%s': %s"
+msgstr "Fehler beim lesen der config-datei '%s': %s"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
@@ -533,11 +533,11 @@ msgstr "Eingabe zu lang"
 
 #: pkg/db/ialpm/alpm.go:205 pkg/dep/depPool.go:571
 msgid "invalid number: %s"
-msgstr "Ungültige Nummer: %s"
+msgstr "Ungültige nummer: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "Ungültige Option '%s'"
+msgstr "Ungültige option '%s'"
 
 #: cmd.go:202
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
@@ -555,19 +555,19 @@ msgstr "Ungültiger Wert: %d ist nicht zwischen %d und %d"
 
 #: pkg/pgp/keys.go:114
 msgid "no keys to import"
-msgstr "Keine Schlüssel zu importieren"
+msgstr "Keine schlüssel zu importieren"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
-msgstr "keine Query wurde ausgeführt"
+msgstr "Keine query wurde ausgeführt"
 
 #: pkg/text/text.go:60
 msgid "no"
-msgstr "Nein"
+msgstr "nein"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
-msgstr "Nur eine Operation kann gleichzeitig benutzt werden"
+msgstr "Nur eine operation kann gleichzeitig benutzt werden"
 
 #: print.go:179
 msgid "package '%s' was not found"
@@ -584,19 +584,19 @@ msgstr "Paket nicht im AUR gefunden"
 
 #: pkg/download/abs.go:22
 msgid "package not found in repos"
-msgstr "Paket nicht in den Repos gefunden"
+msgstr "Paket nicht in den repos gefunden"
 
 #: pkg/pgp/keys.go:104
 msgid "problem importing keys"
-msgstr "Problem beim Importieren der Schlüssel"
+msgstr "Problem beim importieren der schlüssel"
 
 #: clean.go:97
 msgid "removing AUR packages from cache..."
-msgstr "Entferne AUR-Pakete aus dem Cache..."
+msgstr "Entferne AUR-Pakete aus dem cache..."
 
 #: clean.go:167 clean.go:198
 msgid "removing untracked AUR files from cache..."
-msgstr "Entferne die nicht überwachten AUR-Dateien aus dem Cache..."
+msgstr "Entferne die nicht überwachten AUR-Dateien aus dem cache..."
 
 #: install.go:830
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
@@ -605,16 +605,16 @@ msgstr ""
 
 #: pkg/db/ialpm/alpm.go:230
 msgid "unable to CreateHandle: %s"
-msgstr "Kann kein Clear-Handle erstellen: %s"
+msgstr "Kann kein CreateHandle erstellen: %s"
 
 #: cmd.go:191
 msgid "unhandled operation"
-msgstr "Unbehandelte Operation"
+msgstr "Unbehandelte operation"
 
 #: cmd.go:428
 msgid "unknown-version"
-msgstr "Unbekannte Version"
+msgstr "Unbekannte version"
 
 #: pkg/text/text.go:59
 msgid "yes"
-msgstr "Ja"
+msgstr "ja"
