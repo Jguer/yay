@@ -3,10 +3,12 @@
 # J G, 2021
 # Ivan Garcia, 2021
 # Juan Manuel Beltrán Osa, 2021
+# Percy De La Rosa, 2022
+# Brighton Saldaña, 2022
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Juan Manuel Beltrán Osa, 2021\n"
+"Last-Translator: Brighton Saldaña, 2022\n"
 "Language-Team: Spanish (https://www.transifex.com/yay-1/teams/123732/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,11 +33,11 @@ msgstr " (Objetivo"
 msgid " (Wanted by: "
 msgstr " (Requerido por: "
 
-#: cmd.go:431
+#: cmd.go:427
 msgid " [Installed]"
 msgstr " [Instalado]"
 
-#: cmd.go:390 install.go:158 install.go:192
+#: cmd.go:386 install.go:158 install.go:192
 msgid " there is nothing to do"
 msgstr " no hay nada que hacer"
 
@@ -45,7 +47,7 @@ msgstr "%s [A]Todos [Ab]ortar [I]nstalados [No]Instalados o (1 2 3, 1-3, ^4)"
 
 #: install.go:729
 msgid "%s already made -- skipping build"
-msgstr "%s ya se ha creado -- omitiendo la compilación"
+msgstr "%s ya creado -- omitiendo compilación"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
@@ -102,19 +104,19 @@ msgstr "(%d/%d) PKGBUILD Descargado : %s"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Analizando SRCINFO: %s"
 
-#: pkg/query/types.go:135 pkg/query/types.go:182
+#: pkg/query/types.go:145 pkg/query/types.go:199
 msgid "(Installed)"
 msgstr "(Instalado)"
 
-#: pkg/query/types.go:133 pkg/query/types.go:180
+#: pkg/query/types.go:143 pkg/query/types.go:197
 msgid "(Installed: %s)"
 msgstr "(Instalado: %s)"
 
-#: pkg/query/types.go:124
+#: pkg/query/types.go:134
 msgid "(Orphaned)"
 msgstr "(Huérfano)"
 
-#: pkg/query/types.go:128
+#: pkg/query/types.go:138
 msgid "(Out-of-date: %s)"
 msgstr "(Desactualizado: %s)"
 
@@ -126,7 +128,7 @@ msgstr "URL de AUR"
 msgid "Add %s or %s to your environment variables"
 msgstr "Añade %s o %s a tus variables de entorno"
 
-#: main.go:102
+#: main.go:103
 msgid "Avoid running yay as root/sudo."
 msgstr "Evite ejecutar yay como root/sudo."
 
@@ -212,7 +214,7 @@ msgstr "Paquetes de AUR marcados como desactualizados:"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr ""
+msgstr "Paquetes exteriores instalados: %s"
 
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
@@ -233,6 +235,10 @@ msgstr "¿Importar?"
 #: pkg/pgp/keys.go:101
 msgid "Importing keys with gpg..."
 msgstr "Importando llaves con gpg..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "Conflictos internos encontrados:"
 
 #: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
@@ -306,6 +312,10 @@ msgstr "ID de paquete base"
 msgid "Package Base"
 msgstr "Paquete base"
 
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "Se han encontrado conflictos entre los paquetes:"
+
 #: pkg/menus/clean_menu.go:44
 msgid "Packages to cleanBuild?"
 msgstr "¿Paquetes a limpiar antes de compilar?"
@@ -314,7 +324,7 @@ msgstr "¿Paquetes a limpiar antes de compilar?"
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "Paquetes a excluir: (eg: \"1 2 3\", \"1-3\", \"^4\" o nombre del repositorio)"
 
-#: cmd.go:372
+#: cmd.go:368
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Paquetes a instalar (eg.: 1 2 3, 1-3 or ^4)"
 
@@ -342,11 +352,11 @@ msgstr "Buscando en AUR..."
 msgid "Remove make dependencies after install?"
 msgstr "¿Borrar dependencias de instalación después de instalar?"
 
-#: pkg/dep/depPool.go:541
+#: pkg/dep/depPool.go:546
 msgid "Repository AUR"
 msgstr "Repositorio AUR"
 
-#: print.go:22 pkg/db/ialpm/alpm.go:174
+#: print.go:22 pkg/db/ialpm/alpm.go:175
 msgid "Repository"
 msgstr "Repositorio"
 
@@ -358,15 +368,23 @@ msgstr "Buscando actualizaciones en AUR..."
 msgid "Searching databases for updates..."
 msgstr "Buscando actualizaciones en los repositorios..."
 
-#: pkg/query/source.go:72
+#: pkg/query/mixed_sources.go:200 pkg/query/source.go:79
 msgid "Showing repo packages only"
 msgstr "Mostrando solamente paquetes de los repositorios"
+
+#: print.go:89
+msgid "Size of pacman cache %s: %s"
+msgstr "Tamaño del cache de pacman %s:%s"
+
+#: print.go:92
+msgid "Size of yay cache %s: %s"
+msgstr "Tamaño del cache de yay %s:%s"
 
 #: print.go:53
 msgid "Snapshot URL"
 msgstr "URL de snapshot"
 
-#: print.go:88
+#: print.go:94
 msgid "Ten biggest packages:"
 msgstr "Diez paquetes más grandes:"
 
@@ -374,9 +392,9 @@ msgstr "Diez paquetes más grandes:"
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Los siguientes paquetes no son compatibles con su arquitectura:"
 
-#: pkg/db/ialpm/alpm.go:163 pkg/dep/depPool.go:538
-msgid "There are %d providers available for %s:\n"
-msgstr "Existen %d paquetes que proveen %s:\n"
+#: pkg/db/ialpm/alpm.go:163 pkg/dep/depPool.go:541
+msgid "There are %d providers available for %s:"
+msgstr "Existen %d paquetes que proveen %s:"
 
 #: pkg/settings/exe/cmd_builder.go:199
 msgid "There may be another Pacman instance running. Waiting..."
@@ -431,29 +449,13 @@ msgstr ""
 "\n"
 "Carpeta de compilación:"
 
-#: pkg/db/ialpm/alpm.go:184 pkg/dep/depPool.go:551
+#: pkg/db/ialpm/alpm.go:185 pkg/dep/depPool.go:556
 msgid ""
 "\n"
 "Enter a number (default=1): "
 msgstr ""
 "\n"
 "Introduzca un número (por defecto=1): "
-
-#: pkg/dep/depCheck.go:155
-msgid ""
-"\n"
-"Inner conflicts found:"
-msgstr ""
-"\n"
-"Conflictos internos encontrados:"
-
-#: pkg/dep/depCheck.go:170
-msgid ""
-"\n"
-"Package conflicts found:"
-msgstr ""
-"\n"
-"Conflictos de paquetes encontrados:"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
@@ -521,7 +523,7 @@ msgstr "error actualizando la instalación del paquete debido a explícito"
 msgid "failed to create directory '%s': %s"
 msgstr "fallo al crear directorio '%s': %s"
 
-#: pkg/settings/config.go:278
+#: pkg/settings/config.go:293
 msgid "failed to open config file '%s': %s"
 msgstr "fracaso al abrir archivo de configuración '%s': %s"
 
@@ -533,7 +535,7 @@ msgstr "fracaso al analizar %s -- ignorando: %s"
 msgid "failed to parse %s: %s"
 msgstr "fracaso al analizar %s: %s"
 
-#: pkg/settings/config.go:288
+#: pkg/settings/config.go:303
 msgid "failed to read config file '%s': %s"
 msgstr "fracaso al leer archivo de configuración '%s': %s"
 
@@ -541,7 +543,7 @@ msgstr "fracaso al leer archivo de configuración '%s': %s"
 msgid "input too long"
 msgstr "entrada demasiado larga"
 
-#: pkg/db/ialpm/alpm.go:205 pkg/dep/depPool.go:571
+#: pkg/db/ialpm/alpm.go:206 pkg/dep/depPool.go:576
 msgid "invalid number: %s"
 msgstr "número no válido: %s"
 
@@ -557,7 +559,7 @@ msgstr "opción invalida: '--deps' y '--explicit' no deben usarse a la vez"
 msgid "invalid repository"
 msgstr "repositorio invalido "
 
-#: pkg/db/ialpm/alpm.go:210 pkg/dep/depPool.go:576
+#: pkg/db/ialpm/alpm.go:211 pkg/dep/depPool.go:581
 msgid "invalid value: %d is not between %d and %d"
 msgstr "valor no válido: %d no está entre %d y %d"
 
@@ -567,7 +569,7 @@ msgstr "ninguna llave por importar"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
-msgstr ""
+msgstr "no se ha realizado ninguna consulta"
 
 #: pkg/text/text.go:60
 msgid "no"
@@ -577,7 +579,7 @@ msgstr "no"
 msgid "only one operation may be used at a time"
 msgstr "sólo una operación se puede usar a la vez"
 
-#: print.go:179
+#: print.go:185
 msgid "package '%s' was not found"
 msgstr "paquete '%s' no fue encontrado"
 
@@ -610,7 +612,7 @@ msgstr "borrando archivos AUR no rastreados del caché..."
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "el PKGDEST para %s está listado por makepkg pero no existe: %s"
 
-#: pkg/db/ialpm/alpm.go:230
+#: pkg/db/ialpm/alpm.go:231
 msgid "unable to CreateHandle: %s"
 msgstr "no fue posible ejecutar CreateHandle: %s"
 
@@ -618,7 +620,7 @@ msgstr "no fue posible ejecutar CreateHandle: %s"
 msgid "unhandled operation"
 msgstr "operación no implementada"
 
-#: cmd.go:428
+#: cmd.go:424
 msgid "unknown-version"
 msgstr "versión-desconocida"
 
