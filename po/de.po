@@ -39,7 +39,7 @@ msgstr "[Installiert]"
 
 #: cmd.go:390 install.go:158 install.go:192
 msgid " there is nothing to do"
-msgstr " es gibt nichts zu tun"
+msgstr "es gibt nichts zu tun"
 
 #: pkg/menus/menu.go:48
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
