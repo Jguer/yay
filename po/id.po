@@ -1,10 +1,11 @@
 # 
 # Translators:
 # Linerly ., 2022
+# Ludovico, 2022
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Linerly ., 2022\n"
+"Last-Translator: Ludovico, 2022\n"
 "Language-Team: Indonesian (https://www.transifex.com/yay-1/teams/123732/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,11 +30,11 @@ msgstr "(Target"
 msgid " (Wanted by: "
 msgstr "(Dibutuhkan oleh:"
 
-#: cmd.go:431
+#: cmd.go:427
 msgid " [Installed]"
 msgstr "[Terpasang]"
 
-#: cmd.go:390 install.go:158 install.go:192
+#: cmd.go:386 install.go:158 install.go:192
 msgid " there is nothing to do"
 msgstr "tidak ada yang dapat dilakukan"
 
@@ -99,19 +100,19 @@ msgstr "(%d/%d) PKGBUILD terunduh: %s"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Menguraikan SRCINFO: %s"
 
-#: pkg/query/types.go:135 pkg/query/types.go:182
+#: pkg/query/types.go:145 pkg/query/types.go:199
 msgid "(Installed)"
 msgstr "(Terpasang)"
 
-#: pkg/query/types.go:133 pkg/query/types.go:180
+#: pkg/query/types.go:143 pkg/query/types.go:197
 msgid "(Installed: %s)"
 msgstr "(Terpasang: %s)"
 
-#: pkg/query/types.go:124
+#: pkg/query/types.go:134
 msgid "(Orphaned)"
 msgstr "(Tertinggal)"
 
-#: pkg/query/types.go:128
+#: pkg/query/types.go:138
 msgid "(Out-of-date: %s)"
 msgstr "(Kadaluarsa: %s)"
 
@@ -123,7 +124,7 @@ msgstr "URL AUR"
 msgid "Add %s or %s to your environment variables"
 msgstr "Tambahkan %s atau %s ke variabel lingkungan Anda"
 
-#: main.go:102
+#: main.go:103
 msgid "Avoid running yay as root/sudo."
 msgstr "Hindari menjalankan yay sebagai root/sudo."
 
@@ -209,7 +210,7 @@ msgstr "Paket AUR Yang Ditandai Sebagai Kadaluarsa:"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr ""
+msgstr "Total paket-paket asing yang terpasang: %s"
 
 #: pkg/vcs/vcs.go:119
 msgid "Found git repo: %s"
@@ -230,6 +231,10 @@ msgstr "Impor?"
 #: pkg/pgp/keys.go:101
 msgid "Importing keys with gpg..."
 msgstr "Mengimpor kunci-kunci dengan gpg..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "Konflik paket ditemukan:"
 
 #: pkg/dep/depCheck.go:173
 msgid "Installing %s will remove:"
@@ -303,6 +308,10 @@ msgstr "ID Basis Paket"
 msgid "Package Base"
 msgstr "Basis Paket"
 
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "Konflik paket ditemukan:"
+
 #: pkg/menus/clean_menu.go:44
 msgid "Packages to cleanBuild?"
 msgstr "Paket-paket di bangunBersih?"
@@ -313,7 +322,7 @@ msgstr ""
 "Paket-paket yang tidak disertakan: (mis: \"1 2 3\", \"1-3\", \"^4\", atau "
 "nama repositori)"
 
-#: cmd.go:372
+#: cmd.go:368
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Paket-paket untuk dipasang (mis: 1 2 3, 1-3, atau ^4)"
 
@@ -341,11 +350,11 @@ msgstr "Mencari di AUR..."
 msgid "Remove make dependencies after install?"
 msgstr "Hapus dependensi make setelah pemasangan?"
 
-#: pkg/dep/depPool.go:541
+#: pkg/dep/depPool.go:546
 msgid "Repository AUR"
 msgstr "Repositori AUR"
 
-#: print.go:22 pkg/db/ialpm/alpm.go:174
+#: print.go:22 pkg/db/ialpm/alpm.go:175
 msgid "Repository"
 msgstr "Repositori"
 
@@ -357,15 +366,23 @@ msgstr "Mencari AUR untuk pembaruan..."
 msgid "Searching databases for updates..."
 msgstr "Mencari basis data untuk pembaruan..."
 
-#: pkg/query/source.go:72
+#: pkg/query/mixed_sources.go:200 pkg/query/source.go:79
 msgid "Showing repo packages only"
 msgstr "Menampilkan paket-paket repositori saja"
+
+#: print.go:89
+msgid "Size of pacman cache %s: %s"
+msgstr "Ukuran cache pacman %s: %s"
+
+#: print.go:92
+msgid "Size of yay cache %s: %s"
+msgstr "Ukuran cache yay%s: %s"
 
 #: print.go:53
 msgid "Snapshot URL"
 msgstr "URL Snapshot"
 
-#: print.go:88
+#: print.go:94
 msgid "Ten biggest packages:"
 msgstr "Sepuluh paket terbesar:"
 
@@ -373,9 +390,9 @@ msgstr "Sepuluh paket terbesar:"
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Paket-paket berikut ini tidak kompatibel dengan arsitektur Anda:"
 
-#: pkg/db/ialpm/alpm.go:163 pkg/dep/depPool.go:538
-msgid "There are %d providers available for %s:\n"
-msgstr "Tersedia %d penyedia untuk %s:\n"
+#: pkg/db/ialpm/alpm.go:163 pkg/dep/depPool.go:541
+msgid "There are %d providers available for %s:"
+msgstr "Tersedia %d penyedia untuk %s:"
 
 #: pkg/settings/exe/cmd_builder.go:199
 msgid "There may be another Pacman instance running. Waiting..."
@@ -429,29 +446,13 @@ msgstr ""
 "\n"
 "Direktori pembangunan:"
 
-#: pkg/db/ialpm/alpm.go:184 pkg/dep/depPool.go:551
+#: pkg/db/ialpm/alpm.go:185 pkg/dep/depPool.go:556
 msgid ""
 "\n"
 "Enter a number (default=1): "
 msgstr ""
 "\n"
 "Masukkan sebuah nomor (default=1):"
-
-#: pkg/dep/depCheck.go:155
-msgid ""
-"\n"
-"Inner conflicts found:"
-msgstr ""
-"\n"
-"Konflik dalaman ditemukan:"
-
-#: pkg/dep/depCheck.go:170
-msgid ""
-"\n"
-"Package conflicts found:"
-msgstr ""
-"\n"
-"Konflik paket ditemukan:"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
@@ -517,7 +518,7 @@ msgstr "terjadi kesalahan memperbarui pemasangan paket karena eksplisit"
 msgid "failed to create directory '%s': %s"
 msgstr "gagal untuk membuat direktori '%s': %s"
 
-#: pkg/settings/config.go:278
+#: pkg/settings/config.go:293
 msgid "failed to open config file '%s': %s"
 msgstr "gagal untuk membuka file konfigurasi '%s': %s"
 
@@ -529,7 +530,7 @@ msgstr "gagal untuk menguraikan %s -- melewatkan: %s"
 msgid "failed to parse %s: %s"
 msgstr "gagal untuk menguraikan %s: %s"
 
-#: pkg/settings/config.go:288
+#: pkg/settings/config.go:303
 msgid "failed to read config file '%s': %s"
 msgstr "gagal untuk membaca file konfigurasi '%s': %s"
 
@@ -537,7 +538,7 @@ msgstr "gagal untuk membaca file konfigurasi '%s': %s"
 msgid "input too long"
 msgstr "input terlalu panjang"
 
-#: pkg/db/ialpm/alpm.go:205 pkg/dep/depPool.go:571
+#: pkg/db/ialpm/alpm.go:206 pkg/dep/depPool.go:576
 msgid "invalid number: %s"
 msgstr "Nomor tidak valid: %s"
 
@@ -554,7 +555,7 @@ msgstr ""
 msgid "invalid repository"
 msgstr "repositori tidak valid"
 
-#: pkg/db/ialpm/alpm.go:210 pkg/dep/depPool.go:576
+#: pkg/db/ialpm/alpm.go:211 pkg/dep/depPool.go:581
 msgid "invalid value: %d is not between %d and %d"
 msgstr "nilai tidak valid: %d tidak di antara %d dan %d"
 
@@ -574,7 +575,7 @@ msgstr "tidak"
 msgid "only one operation may be used at a time"
 msgstr "hanya satu operasi yang dapat digunakan"
 
-#: print.go:179
+#: print.go:185
 msgid "package '%s' was not found"
 msgstr "paket '%s' tidak ditemukan"
 
@@ -606,7 +607,7 @@ msgstr "menghapus file AUR yang tidak dilacak dari cache..."
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "PKGDEST untuk %s didaftarkan oleh makepkg tetapi tidak ada: %s"
 
-#: pkg/db/ialpm/alpm.go:230
+#: pkg/db/ialpm/alpm.go:231
 msgid "unable to CreateHandle: %s"
 msgstr "tidak dapat CreateHandle: %s"
 
@@ -614,7 +615,7 @@ msgstr "tidak dapat CreateHandle: %s"
 msgid "unhandled operation"
 msgstr "operasi tidak diproses"
 
-#: cmd.go:428
+#: cmd.go:424
 msgid "unknown-version"
 msgstr "versi-tidak-diketahui"
 
