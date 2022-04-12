@@ -7,11 +7,11 @@ require (
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.0
-	github.com/stretchr/testify v1.7.0
-	golang.org/x/sys v0.0.0-20220204135822-1c1b9b1eba6a
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
+	github.com/stretchr/testify v1.7.1
+	golang.org/x/sys v0.0.0-20220412071739-889880a91fd5
+	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/h2non/gock.v1 v1.0.15
+	gopkg.in/h2non/gock.v1 v1.1.2
 )
 
 require (
