@@ -184,7 +184,7 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		return handleGetpkgbuild(ctx, cmdArgs, dbExecutor)
 	case "P", "show":
 		return handlePrint(ctx, cmdArgs, dbExecutor)
-	case "Y", "--yay":
+	case "Y", "yay":
 		return handleYay(ctx, cmdArgs, dbExecutor, config.Runtime.QueryBuilder)
 	}
 
