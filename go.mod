@@ -8,8 +8,8 @@ require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.0
 	github.com/stretchr/testify v1.7.1
-	golang.org/x/sys v0.0.0-20220513210249-45d2b4557a2a
-	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171
+	golang.org/x/sys v0.0.0-20220608164250-635b8c9b7f68
+	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
