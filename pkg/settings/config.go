@@ -217,7 +217,7 @@ func DefaultConfig(version string) *Configuration {
 		EditMenu:           false,
 		UseAsk:             false,
 		CombinedUpgrade:    false,
-		SeparateSources:    false,
+		SeparateSources:    true,
 		Version:            version,
 	}
 }
