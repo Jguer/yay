@@ -30,8 +30,7 @@ Perform yay specific print operations.
 
 .TP
 .B \-G, \-\-getpkgbuild
-Downloads PKGBUILD from ABS or AUR. The ABS can only be used for Arch Linux
-repositories
+Downloads PKGBUILD from ABS or AUR. The ABS can only be used for Arch Linux repositories.
 
 .RE
 If no arguments are provided 'yay \-Syu' will be performed.
@@ -136,6 +135,20 @@ ensures directories are not accidentally overwritten.
 .TP
 .B \-p, \-\-print
 Prints the PKGBUILD of the given packages to stdout.
+
+.SH WEB OPTIONS (APPLY TO \-W AND \-\-WEB)
+
+.TP
+Web related operations such as voting for AUR packages.
+Requires setting AUR_USER and AUR_PASSWORD environment variables.
+
+.TP
+.B \-u, \-\-unvote
+Remove vote from AUR package(s)
+
+.TP
+.B \-v, \-\-vote
+Vote for AUR package(s)
 
 .SH PERMANENT CONFIGURATION SETTINGS
 .TP
@@ -522,6 +535,8 @@ builds.
 .TP
 .B \-\-nosudoloop
 Do not loop sudo calls in the background.
+
+.SH WEB OPTIONS (APPLY TO \-W AND \-\-WEB)
 
 .SH EXAMPLES
 .TP

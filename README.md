@@ -19,6 +19,7 @@ Yet Another Yogurt - An AUR Helper Written in Go
 - Narrow search (`yay linux header` will first search `linux` and then narrow on `header`)
 - Find matching package providers during search and allow selection
 - Remove make dependencies at the end of the build process
+- Un/Vote for packages
 
 [![asciicast](https://asciinema.org/a/399431.svg)](https://asciinema.org/a/399431)
 
@@ -99,6 +100,8 @@ pacman -S --needed git base-devel yay
 | `yay -Y --gendb`                  | Generate development package database used for devel update.                                        |
 | `yay -Syu --devel`                | Perform system upgrade, but also check for development package updates.                             |
 | `yay -Syu --timeupdate`           | Perform system upgrade and use PKGBUILD modification time (not version number) to determine update. |
+| `yay -Wv <AUR Package>`           | Vote for package (Requires setting `AUR_USER` and `AUR_PASSWORD` environment variables). (yay v12+) |
+| `yay -Wu <AUR Package>`           | Unvote for package (Requires setting `AUR_USER` and `AUR_PASSWORD` environment variables) (yay v12+)|
 
 ## Frequently Asked Questions
 
