@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/votar/pkg/vote"
@@ -27,6 +28,11 @@ func handlePackageVote(ctx context.Context,
 	infos, err := query.AURInfoPrint(ctx, aurClient, targets, splitN)
 	if err != nil {
 		return err
+	}
+
+	if len(infos) == 0 {
+		fmt.Println(gotext.Get(" there is nothing to do"))
+		return nil
 	}
 
 	for _, info := range infos {

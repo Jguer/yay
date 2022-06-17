@@ -186,6 +186,8 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		return handlePrint(ctx, cmdArgs, dbExecutor)
 	case "Y", "yay":
 		return handleYay(ctx, cmdArgs, dbExecutor, config.Runtime.QueryBuilder)
+	case "W", "web":
+		return handleWeb(ctx, cmdArgs)
 	}
 
 	return errors.New(gotext.Get("unhandled operation"))
@@ -297,14 +299,21 @@ func handleYay(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		return cleanDependencies(ctx, cmdArgs, dbExecutor, true)
 	case cmdArgs.ExistsArg("c", "clean"):
 		return cleanDependencies(ctx, cmdArgs, dbExecutor, false)
+	case len(cmdArgs.Targets) > 0:
+		return displayNumberMenu(ctx, cmdArgs.Targets, dbExecutor, queryBuilder, cmdArgs)
+	}
+
+	return nil
+}
+
+func handleWeb(ctx context.Context, cmdArgs *parser.Arguments) error {
+	switch {
 	case cmdArgs.ExistsArg("v", "vote"):
 		return handlePackageVote(ctx, cmdArgs.Targets, config.Runtime.AURClient,
 			config.Runtime.VoteClient, config.RequestSplitN, true)
 	case cmdArgs.ExistsArg("u", "unvote"):
 		return handlePackageVote(ctx, cmdArgs.Targets, config.Runtime.AURClient,
 			config.Runtime.VoteClient, config.RequestSplitN, false)
-	case len(cmdArgs.Targets) > 0:
-		return displayNumberMenu(ctx, cmdArgs.Targets, dbExecutor, queryBuilder, cmdArgs)
 	}
 
 	return nil
