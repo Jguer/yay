@@ -16,6 +16,7 @@ _pacman_opts_commands=(
 	{-T,--deptest}'[Check if dependencies are installed]'
 	{-U,--upgrade}'[Upgrade a package]'
 	{-Y,--yay}'[Yay specific options]'
+	{-W,--web}'[web options]'
 	{-V,--version}'[Display version and exit]'
 	'(-h --help)'{-h,--help}'[Display usage]'
 )
@@ -163,6 +164,12 @@ _pacman_opts_yay_modifiers=(
 _pacman_opts_getpkgbuild_modifiers=(
 	{-f,--force}'[Force download for existing ABS packages]'
 	{-p,--print}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
+)
+
+# -W
+_pacman_opts_web_modifiers=(
+	{-u,--unvote}'[Unvote AUR package]:package:_pacman_completions_all_packages'
+	{-v,--vote}'[Vote AUR package]:package:_pacman_completions_all_packages'
 )
 
 # -P
@@ -513,6 +520,10 @@ _pacman_zsh_comp() {
 		P*)
 			 _arguments -s : \
 				"$_pacman_opts_print_modifiers[@]"
+			;;
+		W*)
+			 _arguments -s : \
+				"$_pacman_opts_web_modifiers[@]"
 			;;
 		R*)
 			_pacman_action_remove
