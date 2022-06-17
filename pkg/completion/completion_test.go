@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/h2non/gock.v1"
 )
 
 const samplePackageResp = `
@@ -33,41 +33,64 @@ lumina	AUR
 eternallands-sound	AUR
 `
 
+type mockDoer struct {
+	t                *testing.T
+	returnBody       string
+	returnStatusCode int
+	returnErr        error
+	wantUrl          string
+}
+
+func (m *mockDoer) Do(req *http.Request) (*http.Response, error) {
+	assert.Equal(m.t, m.wantUrl, req.URL.String())
+	return &http.Response{
+		StatusCode: m.returnStatusCode,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(m.returnBody)),
+	}, m.returnErr
+}
+
 func Test_createAURList(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://aur.archlinux.org").
-		Get("/packages.gz").
-		Reply(200).
-		BodyString(samplePackageResp)
-
+	t.Parallel()
+	doer := &mockDoer{
+		t:                t,
+		wantUrl:          "https://aur.archlinux.org/packages.gz",
+		returnStatusCode: 200,
+		returnBody:       samplePackageResp,
+		returnErr:        nil,
+	}
 	out := &bytes.Buffer{}
-	err := createAURList(context.TODO(), &http.Client{}, "https://aur.archlinux.org", out)
+	err := createAURList(context.TODO(), doer, "https://aur.archlinux.org", out)
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
 }
 
 func Test_createAURListHTTPError(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://aur.archlinux.org").
-		Get("/packages.gz").
-		ReplyError(errors.New("Not available"))
+	t.Parallel()
+	doer := &mockDoer{
+		t:                t,
+		wantUrl:          "https://aur.archlinux.org/packages.gz",
+		returnStatusCode: 200,
+		returnBody:       samplePackageResp,
+		returnErr:        errors.New("Not available"),
+	}
 
 	out := &bytes.Buffer{}
-	err := createAURList(context.TODO(), &http.Client{}, "https://aur.archlinux.org", out)
-	assert.EqualError(t, err, "Get \"https://aur.archlinux.org/packages.gz\": Not available")
+	err := createAURList(context.TODO(), doer, "https://aur.archlinux.org", out)
+	assert.EqualError(t, err, "Not available")
 }
 
 func Test_createAURListStatusError(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
+	doer := &mockDoer{
+		t:                t,
+		wantUrl:          "https://aur.archlinux.org/packages.gz",
+		returnStatusCode: 503,
+		returnBody:       samplePackageResp,
+		returnErr:        nil,
+	}
 
-	gock.New("https://aur.archlinux.org").
-		Get("/packages.gz").
-		Reply(503).
-		BodyString(samplePackageResp)
 	out := &bytes.Buffer{}
-	err := createAURList(context.TODO(), &http.Client{}, "https://aur.archlinux.org", out)
+	err := createAURList(context.TODO(), doer, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "invalid status code: 503")
 }
