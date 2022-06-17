@@ -51,7 +51,7 @@ _pacman_repo_list() {
 _yay() {
   compopt -o default
   local common core cur database files prev query remove sync upgrade o
-  local yays show getpkgbuild
+  local yays show getpkgbuild web
   local cur prev words cword
 
   _init_completion || return
@@ -81,8 +81,9 @@ _yay() {
   yays=('clean gendb' 'c')
   show=('complete defaultconfig currentconfig stats news' 'c d g s w')
   getpkgbuild=('force print' 'f p')
+  web=('vote unvote' 'v u')
 
-  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P show' 'G getpkgbuild'; do
+  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P show' 'G getpkgbuild' 'W web'; do
     _arch_incomp "$o" && break
   done
 
@@ -119,6 +120,9 @@ _yay() {
       G)
         _yay_pkg
         ;;
+      W)
+        _yay_pkg
+        ;;
       esac
   fi
   true
@@ -126,7 +130,7 @@ _yay() {
 
 _pacman_file() {
   compopt -o filenames
-  _filedir 'pkg.tar*'
+  _filedir 'pkg.*'
 }
 
 complete -F _yay yay
