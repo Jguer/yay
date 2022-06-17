@@ -6,6 +6,7 @@ import (
 	"github.com/Morganamilo/go-pacmanconf"
 
 	"github.com/Jguer/aur"
+	"github.com/Jguer/votar/pkg/vote"
 
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
@@ -25,4 +26,5 @@ type Runtime struct {
 	CmdBuilder     exe.ICmdBuilder
 	HTTPClient     *http.Client
 	AURClient      *aur.Client
+	VoteClient     *vote.Client
 }
