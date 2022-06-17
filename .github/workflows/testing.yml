@@ -22,10 +22,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: update runner
-        run: |
-          pacman -Sy --overwrite=* --noconfirm archlinux-keyring
-          pacman -Su --overwrite=* --noconfirm sudo base-devel
       - name: Lint
         run: /app/bin/golangci-lint run ./...
       - name: Run Build and Tests
