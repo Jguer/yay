@@ -254,10 +254,15 @@ func NewConfig(version string) (*Configuration, error) {
 	}
 
 	userAgent := fmt.Sprintf("Yay/%s", version)
+
 	voteClient, errVote := vote.NewClient(vote.WithUserAgent(userAgent))
 	if errVote != nil {
 		return nil, errVote
 	}
+
+	voteClient.SetCredentials(
+		os.Getenv("AUR_USERNAME"),
+		os.Getenv("AUR_PASSWORD"))
 
 	newConfig.Runtime = &Runtime{
 		ConfigPath:     configPath,
