@@ -8,6 +8,7 @@ set -l progname yay
 set -l listall "(yay -Pc)"
 set -l listpacman "(__fish_print_packages)"
 set -l yayspecific '__fish_contains_opt -s Y yay'
+set -l webspecific '__fish_contains_opt -s W web'
 set -l show '__fish_contains_opt -s P show'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
 
@@ -16,7 +17,7 @@ set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 
-set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F database query sync remove upgrade deptest files'
+set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F -s Y -s W -s P -s G database query sync remove upgrade deptest files show getpkgbuild web yay'
 set -l database '__fish_contains_opt -s D database'
 set -l query '__fish_contains_opt -s Q query'
 set -l remove '__fish_contains_opt -s R remove'
@@ -156,6 +157,12 @@ complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.zst; __
 complete -c $progname -s Y -f -l yay -n "$noopt" -d 'Yay specific operations'
 complete -c $progname -s P -f -l show -n "$noopt" -d 'Print information'
 complete -c $progname -s G -f -l getpkgbuild -n "$noopt" -d 'Get PKGBUILD from ABS or AUR'
+complete -c $progname -s W -f -l web -n "$noopt" -d 'Web operations'
+
+# Web options
+complete -c $progname -n "$webspecific" -s v -l vote -d 'Vote for AUR packages' -f
+complete -c $progname -n "$webspecific" -s u -l unvote -d 'Unvote for AUR packages' -f
+complete -c $progname -n "$webspecific" -xa "$listall"
 
 # New options
 complete -c $progname -n "not $noopt" -l repo -d 'Assume targets are from the AUR' -f
