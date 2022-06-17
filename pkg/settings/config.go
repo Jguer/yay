@@ -14,6 +14,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/aur"
+	"github.com/Jguer/votar/pkg/vote"
 
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
@@ -252,6 +253,12 @@ func NewConfig(version string) (*Configuration, error) {
 		return nil, errPE
 	}
 
+	userAgent := fmt.Sprintf("Yay/%s", version)
+	voteClient, errVote := vote.NewClient(vote.WithUserAgent(userAgent))
+	if errVote != nil {
+		return nil, errVote
+	}
+
 	newConfig.Runtime = &Runtime{
 		ConfigPath:     configPath,
 		Version:        version,
@@ -263,13 +270,14 @@ func NewConfig(version string) (*Configuration, error) {
 		VCSStore:       nil,
 		HTTPClient:     &http.Client{},
 		AURClient:      nil,
+		VoteClient:     voteClient,
 	}
 
 	var errAUR error
 
 	newConfig.Runtime.AURClient, errAUR = aur.NewClient(aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
 		aur.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
-			req.Header.Set("User-Agent", fmt.Sprintf("Yay/%s", version))
+			req.Header.Set("User-Agent", userAgent)
 
 			return nil
 		}))
