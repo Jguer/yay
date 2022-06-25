@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"sync/atomic"
 	"testing"
@@ -82,13 +83,6 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 // THEN 5 calls should be made to makepkg
 func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 	t.Parallel()
-	cmdBuilder := &TestMakepkgBuilder{
-		parentBuilder: &exe.CmdBuilder{
-			MakepkgConfPath: "/etc/not.conf",
-			MakepkgFlags:    []string{"--nocheck"}, MakepkgBin: "makepkg",
-		},
-		test: t,
-	}
 
 	bases := []dep.Base{
 		{&aur.Pkg{PackageBase: "yay"}},
@@ -98,9 +92,21 @@ func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 		{&aur.Pkg{PackageBase: "yay-v12"}},
 	}
 
-	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make())
-	assert.NoError(t, err)
-	assert.Equal(t, 5, int(cmdBuilder.passes))
+	for _, maxConcurrentDownloads := range []int{0, 3} {
+		t.Run(fmt.Sprintf("maxconcurrentdownloads set to %d", maxConcurrentDownloads), func(t *testing.T) {
+			cmdBuilder := &TestMakepkgBuilder{
+				parentBuilder: &exe.CmdBuilder{
+					MakepkgConfPath: "/etc/not.conf",
+					MakepkgFlags:    []string{"--nocheck"}, MakepkgBin: "makepkg",
+				},
+				test: t,
+			}
+
+			err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), maxConcurrentDownloads)
+			assert.NoError(t, err)
+			assert.Equal(t, 5, int(cmdBuilder.passes))
+		})
+	}
 }
 
 // GIVEN 1 package
@@ -120,7 +126,7 @@ func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 		{&aur.Pkg{PackageBase: "yay"}},
 	}
 
-	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make())
+	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(cmdBuilder.passes))
 }
@@ -147,7 +153,7 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 		{&aur.Pkg{PackageBase: "yay-v12"}},
 	}
 
-	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make())
+	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)
 	assert.Error(t, err)
 	assert.Equal(t, 5, int(cmdBuilder.passes))
 	assert.Len(t, err.(*multierror.MultiError).Errors, 5)

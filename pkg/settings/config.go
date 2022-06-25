@@ -30,50 +30,51 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
-	AURURL             string   `json:"aururl"`
-	BuildDir           string   `json:"buildDir"`
-	Editor             string   `json:"editor"`
-	EditorFlags        string   `json:"editorflags"`
-	MakepkgBin         string   `json:"makepkgbin"`
-	MakepkgConf        string   `json:"makepkgconf"`
-	PacmanBin          string   `json:"pacmanbin"`
-	PacmanConf         string   `json:"pacmanconf"`
-	ReDownload         string   `json:"redownload"`
-	ReBuild            string   `json:"rebuild"`
-	AnswerClean        string   `json:"answerclean"`
-	AnswerDiff         string   `json:"answerdiff"`
-	AnswerEdit         string   `json:"answeredit"`
-	AnswerUpgrade      string   `json:"answerupgrade"`
-	GitBin             string   `json:"gitbin"`
-	GpgBin             string   `json:"gpgbin"`
-	GpgFlags           string   `json:"gpgflags"`
-	MFlags             string   `json:"mflags"`
-	SortBy             string   `json:"sortby"`
-	SearchBy           string   `json:"searchby"`
-	GitFlags           string   `json:"gitflags"`
-	RemoveMake         string   `json:"removemake"`
-	SudoBin            string   `json:"sudobin"`
-	SudoFlags          string   `json:"sudoflags"`
-	RequestSplitN      int      `json:"requestsplitn"`
-	CompletionInterval int      `json:"completionrefreshtime"`
-	BottomUp           bool     `json:"bottomup"`
-	SudoLoop           bool     `json:"sudoloop"`
-	TimeUpdate         bool     `json:"timeupdate"`
-	Devel              bool     `json:"devel"`
-	CleanAfter         bool     `json:"cleanAfter"`
-	Provides           bool     `json:"provides"`
-	PGPFetch           bool     `json:"pgpfetch"`
-	UpgradeMenu        bool     `json:"upgrademenu"`
-	CleanMenu          bool     `json:"cleanmenu"`
-	DiffMenu           bool     `json:"diffmenu"`
-	EditMenu           bool     `json:"editmenu"`
-	CombinedUpgrade    bool     `json:"combinedupgrade"`
-	UseAsk             bool     `json:"useask"`
-	BatchInstall       bool     `json:"batchinstall"`
-	SingleLineResults  bool     `json:"singlelineresults"`
-	SeparateSources    bool     `json:"separatesources"`
-	Runtime            *Runtime `json:"-"`
-	Version            string   `json:"version"`
+	AURURL                 string   `json:"aururl"`
+	BuildDir               string   `json:"buildDir"`
+	Editor                 string   `json:"editor"`
+	EditorFlags            string   `json:"editorflags"`
+	MakepkgBin             string   `json:"makepkgbin"`
+	MakepkgConf            string   `json:"makepkgconf"`
+	PacmanBin              string   `json:"pacmanbin"`
+	PacmanConf             string   `json:"pacmanconf"`
+	ReDownload             string   `json:"redownload"`
+	ReBuild                string   `json:"rebuild"`
+	AnswerClean            string   `json:"answerclean"`
+	AnswerDiff             string   `json:"answerdiff"`
+	AnswerEdit             string   `json:"answeredit"`
+	AnswerUpgrade          string   `json:"answerupgrade"`
+	GitBin                 string   `json:"gitbin"`
+	GpgBin                 string   `json:"gpgbin"`
+	GpgFlags               string   `json:"gpgflags"`
+	MFlags                 string   `json:"mflags"`
+	SortBy                 string   `json:"sortby"`
+	SearchBy               string   `json:"searchby"`
+	GitFlags               string   `json:"gitflags"`
+	RemoveMake             string   `json:"removemake"`
+	SudoBin                string   `json:"sudobin"`
+	SudoFlags              string   `json:"sudoflags"`
+	RequestSplitN          int      `json:"requestsplitn"`
+	CompletionInterval     int      `json:"completionrefreshtime"`
+	MaxConcurrentDownloads int      `json:"maxconcurrentdownloads"`
+	BottomUp               bool     `json:"bottomup"`
+	SudoLoop               bool     `json:"sudoloop"`
+	TimeUpdate             bool     `json:"timeupdate"`
+	Devel                  bool     `json:"devel"`
+	CleanAfter             bool     `json:"cleanAfter"`
+	Provides               bool     `json:"provides"`
+	PGPFetch               bool     `json:"pgpfetch"`
+	UpgradeMenu            bool     `json:"upgrademenu"`
+	CleanMenu              bool     `json:"cleanmenu"`
+	DiffMenu               bool     `json:"diffmenu"`
+	EditMenu               bool     `json:"editmenu"`
+	CombinedUpgrade        bool     `json:"combinedupgrade"`
+	UseAsk                 bool     `json:"useask"`
+	BatchInstall           bool     `json:"batchinstall"`
+	SingleLineResults      bool     `json:"singlelineresults"`
+	SeparateSources        bool     `json:"separatesources"`
+	Runtime                *Runtime `json:"-"`
+	Version                string   `json:"version"`
 }
 
 // SaveConfig writes yay config to file.
@@ -178,48 +179,49 @@ func (c *Configuration) setPrivilegeElevator() error {
 
 func DefaultConfig(version string) *Configuration {
 	return &Configuration{
-		AURURL:             "https://aur.archlinux.org",
-		BuildDir:           os.ExpandEnv("$HOME/.cache/yay"),
-		CleanAfter:         false,
-		Editor:             "",
-		EditorFlags:        "",
-		Devel:              false,
-		MakepkgBin:         "makepkg",
-		MakepkgConf:        "",
-		PacmanBin:          "pacman",
-		PGPFetch:           true,
-		PacmanConf:         "/etc/pacman.conf",
-		GpgFlags:           "",
-		MFlags:             "",
-		GitFlags:           "",
-		BottomUp:           true,
-		CompletionInterval: 7,
-		SortBy:             "votes",
-		SearchBy:           "name-desc",
-		SudoLoop:           false,
-		GitBin:             "git",
-		GpgBin:             "gpg",
-		SudoBin:            "sudo",
-		SudoFlags:          "",
-		TimeUpdate:         false,
-		RequestSplitN:      150,
-		ReDownload:         "no",
-		ReBuild:            "no",
-		BatchInstall:       false,
-		AnswerClean:        "",
-		AnswerDiff:         "",
-		AnswerEdit:         "",
-		AnswerUpgrade:      "",
-		RemoveMake:         "ask",
-		Provides:           true,
-		UpgradeMenu:        true,
-		CleanMenu:          true,
-		DiffMenu:           true,
-		EditMenu:           false,
-		UseAsk:             false,
-		CombinedUpgrade:    false,
-		SeparateSources:    true,
-		Version:            version,
+		AURURL:                 "https://aur.archlinux.org",
+		BuildDir:               os.ExpandEnv("$HOME/.cache/yay"),
+		CleanAfter:             false,
+		Editor:                 "",
+		EditorFlags:            "",
+		Devel:                  false,
+		MakepkgBin:             "makepkg",
+		MakepkgConf:            "",
+		PacmanBin:              "pacman",
+		PGPFetch:               true,
+		PacmanConf:             "/etc/pacman.conf",
+		GpgFlags:               "",
+		MFlags:                 "",
+		GitFlags:               "",
+		BottomUp:               true,
+		CompletionInterval:     7,
+		MaxConcurrentDownloads: 0,
+		SortBy:                 "votes",
+		SearchBy:               "name-desc",
+		SudoLoop:               false,
+		GitBin:                 "git",
+		GpgBin:                 "gpg",
+		SudoBin:                "sudo",
+		SudoFlags:              "",
+		TimeUpdate:             false,
+		RequestSplitN:          150,
+		ReDownload:             "no",
+		ReBuild:                "no",
+		BatchInstall:           false,
+		AnswerClean:            "",
+		AnswerDiff:             "",
+		AnswerEdit:             "",
+		AnswerUpgrade:          "",
+		RemoveMake:             "ask",
+		Provides:               true,
+		UpgradeMenu:            true,
+		CleanMenu:              true,
+		DiffMenu:               true,
+		EditMenu:               false,
+		UseAsk:                 false,
+		CombinedUpgrade:        false,
+		SeparateSources:        true,
+		Version:                version,
 	}
 }
 
