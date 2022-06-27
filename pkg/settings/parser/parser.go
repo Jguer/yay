@@ -445,6 +445,7 @@ func isArg(arg string) bool {
 	case "news":
 	case "gendb":
 	case "currentconfig":
+	case "defaultconfig":
 	case "singlelineresults":
 	case "doublelineresults":
 	case "separatesources", "noseparatesources":
