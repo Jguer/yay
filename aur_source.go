@@ -65,7 +65,7 @@ func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup, dest 
 }
 
 func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, dest string,
-	bases []dep.Base, incompatible stringset.StringSet) error {
+	bases []dep.Base, incompatible stringset.StringSet, maxConcurrentDownloads int) error {
 	if len(bases) == 1 {
 		return downloadPKGBUILDSource(ctx, cmdBuilder, dest, bases[0].Pkgbase(), incompatible)
 	}
@@ -77,6 +77,10 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 		fanInChanValues = make(chan string)
 		fanInChanErrors = make(chan error)
 	)
+
+	if maxConcurrentDownloads != 0 {
+		numOfWorkers = maxConcurrentDownloads
+	}
 
 	go func() {
 		for _, base := range bases {
