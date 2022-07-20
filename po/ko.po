@@ -1,12 +1,11 @@
-#
+# 
 # Translators:
-# J G <transifex@jguer.space>, 2021
-#
+# J G, 2021
+# Junghee Lee <daemul72@gmail.com>, 2022
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"PO-Revision-Date: 2021-08-13 22:55+0000\n"
-"Last-Translator: J G <transifex@jguer.space>, 2021\n"
+"Last-Translator: Junghee Lee <daemul72@gmail.com>, 2022\n"
 "Language-Team: Korean (https://www.transifex.com/yay-1/teams/123732/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -15,423 +14,435 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: xgotext\n"
 
-#: install.go:563
+#: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
 msgstr " (빌드 파일 존재)"
 
-#: install.go:559
+#: pkg/menus/menu.go:28
 msgid " (Installed)"
-msgstr " (설치함)"
+msgstr " (설치됨)"
 
-#: depCheck.go:279
+#: pkg/dep/depCheck.go:312
 msgid " (Target"
 msgstr " (대상"
 
-#: depCheck.go:281
+#: pkg/dep/depCheck.go:314
 msgid " (Wanted by: "
 msgstr " (필요로 하는 패키지: "
 
-#: callbacks.go:72
-msgid " Input too long"
-msgstr " 입력이 너무 긺"
-
-#: cmd.go:446
+#: cmd.go:427
 msgid " [Installed]"
-msgstr " [설치함]"
+msgstr " [설치됨]"
 
-#: cmd.go:402 install.go:166 install.go:200
+#: cmd.go:386 install.go:158 install.go:192
 msgid " there is nothing to do"
 msgstr " 할 일이 없습니다"
 
-#: depCheck.go:170
-msgid "Installing %s will remove:"
-msgstr "%s 설치 시 삭제되는 패키지:"
-
-#: install.go:583 install.go:658 install.go:665
+#: pkg/menus/menu.go:48
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
-msgstr "%s [A] 모두 [Ab] 그만두기 [I] 설치한 패키지 [No] 설치하지 않은 패키지 혹은 (1 2 3, 1-3, ^4)"
+msgstr "%s [A]모두 [Ab]그만두기 [I]설치된 패키지 [No]설치안된 패키지 또는 (1 2 3, 1-3, ^4)"
 
-#: download.go:273
-msgid "%s already downloaded -- use -f to overwrite"
-msgstr "%s 이미 설치됨 -- -f 옵션으로 덮어쓰기"
-
-#: install.go:1086
+#: install.go:729
 msgid "%s already made -- skipping build"
-msgstr "%s 이미 빌드됨 -- 건너뜀"
+msgstr "%s 이미 빌드됨 -- 빌드 건너뜀"
 
-#: pkg/settings/runtime.go:50 pkg/settings/runtime.go:62
-msgid "%s and %s unset"
-msgstr "%s와 %s가 설정되지 않음"
-
-#: config.go:76
+#: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
 msgstr "%s가 설정되지 않았습니다"
 
-#: exec.go:71
+#: pkg/settings/exe/cmd_builder.go:198
 msgid "%s is present."
 msgstr "%s가 존재합니다."
 
-#: install.go:1075
+#: install.go:715
 msgid "%s is up to date -- skipping"
 msgstr "%s는 최신 상태입니다 -- 건너뜀"
 
-#: install.go:1008
+#: install.go:640
 msgid "%s not satisfied, flushing install queue"
-msgstr "%s가 만족되지 않음, 설치 큐 비움"
+msgstr "%s가 충족되지 않음, 설치 큐 비움"
 
-#: install.go:752
-msgid "%s: No changes -- skipping"
-msgstr "%s: 변경 사항 없음 -- 건너뜀"
-
-#: utils.go:48
-msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: 대상에 --aur 옵션을 사용할 수 없음 -- 건너뜀"
-
-#: utils.go:43
-msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: 대상에 --repo 옵션을 사용할 수 없음 -- 건너뜀"
-
-#: upgrade.go:274
-msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: 패키지 업그레이드 무시 (%s => %s)"
-
-#: upgrade.go:291
-msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s: 로컬 (%s) 버전이 AUR (%s)보다 높음"
-
-#: download.go:298
-msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) ABS에서 PKGBUILD 다운로드: %s"
-
-#: install.go:805
-msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) SRCINFO 파싱 중: %s"
-
-#: print.go:86 print.go:127
-msgid "(Installed)"
-msgstr "(설치함)"
-
-#: print.go:84 print.go:125
-msgid "(Installed: %s)"
-msgstr "(설치함: %s)"
-
-#: print.go:75
-msgid "(Orphaned)"
-msgstr "(고립됨)"
-
-#: print.go:79
-msgid "(Out-of-date: %s)"
-msgstr "(오래된 패키지: %s)"
-
-#: print.go:275
-msgid "AUR URL"
-msgstr "AUR URL"
-
-#: config.go:77
-msgid "Add %s or %s to your environment variables"
-msgstr "%s나 %s를 환경 변수에 추가해 주세요"
-
-#: main.go:182
-msgid "Avoid running yay as root/sudo."
-msgstr "root나 sudo로 yay를 실행하지 마십시오."
-
-#: print.go:281
-msgid "Check Deps"
-msgstr "의존성 체크"
-
-#: upgrade.go:167
-msgid "Checking development packages..."
-msgstr "개발 패키지 확인 중..."
-
-#: depCheck.go:137
-msgid "Checking for conflicts..."
-msgstr "충돌 확인 중..."
-
-#: depCheck.go:144
-msgid "Checking for inner conflicts..."
-msgstr "내부 충돌 확인 중..."
-
-#: clean.go:224
-msgid "Cleaning (%d/%d): %s"
-msgstr "비우는 중 (%d/%d): %s"
-
-#: depCheck.go:196
-msgid "Conflicting packages will have to be confirmed manually"
-msgstr "충돌하는 패키지는 수동으로 확인해야 합니다"
-
-#: print.go:283
-msgid "Conflicts With"
-msgstr "충돌하는 패키지"
-
-#: depCheck.go:273
-msgid "Could not find all required packages:"
-msgstr "필요한 패키지를 모두 찾을 수 없습니다:"
-
-#: clean.go:240
-msgid "Deleting (%d/%d): %s"
-msgstr "제거 중 (%d/%d): %s"
-
-#: print.go:279
-msgid "Depends On"
-msgstr "의존하는 패키지"
-
-#: print.go:273
-msgid "Description"
-msgstr "설명"
-
-#: install.go:657
-msgid "Diffs to show?"
-msgstr "변경 사항을 볼까요?"
-
-#: clean.go:91
-msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "캐시에 있는 AUR 패키지를 모두 지우겠습니까?"
-
-#: clean.go:108
-msgid "Do you want to remove ALL untracked AUR files?"
-msgstr "추척되지 않은 AUR 파일을 모두 지우겠습니까?"
-
-#: clean.go:93
-msgid "Do you want to remove all other AUR packages from cache?"
-msgstr "캐시의 다른 AUR 패키지를 모두 지우겠습니까?"
-
-#: install.go:893
-msgid "Downloaded PKGBUILD (%d/%d): %s"
-msgstr "PKGBUILD 다운로드 (%d/%d): %s"
-
-#: config.go:80
-msgid "Edit PKGBUILD with?"
-msgstr "PKGBUILD를 무엇으로 편집할까요?"
-
-#: cmd.go:346
-msgid "Error during AUR search: %s\n"
-msgstr "AUR 검색 중 오류: %s\n"
-
-#: print.go:342
-msgid "Explicitly installed packages: %s"
-msgstr "명시적으로 설치한 패키지: %s"
-
-#: print.go:287
-msgid "First Submitted"
-msgstr "최초 작성"
-
-#: print.go:41
-msgid "Flagged Out Of Date AUR Packages:"
-msgstr "플래그가 지정된 오래된 AUR 패키지:"
-
-#: vcs.go:147
-msgid "Found git repo: %s"
-msgstr "git 저장소 찾음: %s"
-
-#: vcs.go:64
-msgid "GenDB finished. No packages were installed"
-msgstr "GenDB 완료. 패키지는 설치되지 않았습니다"
-
-#: print.go:276
-msgid "Groups"
-msgstr "그룹"
-
-#: keys.go:84
-msgid "Import?"
-msgstr "가져올까요?"
-
-#: keys.go:97
-msgid "Importing keys with gpg..."
-msgstr "gpg로 키 가져오는 중..."
-
-#: print.go:271
-msgid "Keywords"
-msgstr "키워드"
-
-#: print.go:288
-msgid "Last Modified"
-msgstr "마지막 수정"
-
-#: print.go:277
-msgid "Licenses"
-msgstr "라이선스"
-
-#: print.go:284
-msgid "Maintainer"
-msgstr "관리자"
-
-#: print.go:280
-msgid "Make Deps"
-msgstr "Make 의존성"
-
-#: download.go:281
-msgid "Missing ABS packages:"
-msgstr "빠진 ABS 패키지:"
-
-#: print.go:25
-msgid "Missing AUR Packages:"
-msgstr "빠진 AUR 패키지:"
-
-#: print.go:270
-msgid "Name"
-msgstr "이름"
-
-#: pkg/text/print.go:50
-msgid "None"
-msgstr "없음"
-
-#: print.go:282
-msgid "Optional Deps"
-msgstr "선택적 의존성"
-
-#: print.go:33
-msgid "Orphaned AUR Packages:"
-msgstr "고립된 AUR 패키지:"
-
-#: print.go:291 print.go:293
-msgid "Out-of-date"
-msgstr "오래된 패키지"
-
-#: keys.go:115
-msgid "PGP keys need importing:"
-msgstr "가져와야 할 PGP 키:"
-
-#: install.go:874
-msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
-msgstr "PKGBUILD가 최신입니다, 건너뜀 (%d/%d): %s"
-
-#: install.go:664
-msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILD를 편집할까요?"
-
-#: print.go:298
-msgid "Package Base ID"
-msgstr "패키지 베이스 ID"
-
-#: print.go:299
-msgid "Package Base"
-msgstr "패키지 베이스"
-
-#: install.go:582
-msgid "Packages to cleanBuild?"
-msgstr "패키지를 클린 빌드할까요?"
-
-#: upgrade.go:365
-msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "제외할 패키지: (예: \"1 2 3\", \"1-3\", \"^4\" 혹은 저장소 이름)"
-
-#: cmd.go:350
-msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "설치할 패키지: (예: 1 2 3, 1-3 혹은 ^4)"
-
-#: upgrade.go:362
-msgid "Packages to upgrade."
-msgstr "업그레이드할 패키지."
-
-#: print.go:286
-msgid "Popularity"
-msgstr "인기도"
-
-#: install.go:269 install.go:309
-msgid "Proceed with install?"
-msgstr "설치를 진행할까요?"
-
-#: print.go:278
-msgid "Provides"
-msgstr "제공하는 패키지"
-
-#: query.go:509
-msgid "Querying AUR..."
-msgstr "AUR 검색 중..."
-
-#: install.go:221
-msgid "Remove make dependencies after install?"
-msgstr "설치 후 make 의존성을 제거할까요?"
-
-#: print.go:495
-msgid "Repository AUR"
-msgstr "저장소 AUR"
-
-#: callbacks.go:46 print.go:269
-msgid "Repository"
-msgstr "저장소"
-
-#: upgrade.go:150
-msgid "Searching AUR for updates..."
-msgstr "AUR에서 업데이트 검색 중..."
-
-#: upgrade.go:140
-msgid "Searching databases for updates..."
-msgstr "데이터베이스에서 업데이트 검색 중..."
-
-#: cmd.go:347 query.go:194
-msgid "Showing repo packages only"
-msgstr "저장소 패키지만 표시"
-
-#: print.go:300
-msgid "Snapshot URL"
-msgstr "스냅숏 URL"
-
-#: print.go:345
-msgid "Ten biggest packages:"
-msgstr "가장 큰 10개 패키지:"
-
-#: install.go:481
-msgid "The following packages are not compatible with your architecture:"
-msgstr "다음 패키지는 이 컴퓨터의 아키텍처와 호환되지 않습니다:"
-
-#: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:\n"
-msgstr "%d개의 패키지가 %s를 제공합니다:\n"
-
-#: exec.go:72
-msgid "There may be another Pacman instance running. Waiting..."
-msgstr "다른 pacman 인스턴스가 실행 중입니다. 대기 중..."
-
-#: print.go:343
-msgid "Total Size occupied by packages: %s"
-msgstr "패키지가 차지하는 전체 크기: %s"
-
-#: print.go:341
-msgid "Total foreign installed packages: %s"
-msgstr "외부에서 설치한 전체 패키지: %s"
-
-#: print.go:340
-msgid "Total installed packages: %s"
-msgstr "전체 설치한 패키지: %s"
-
-#: install.go:488
-msgid "Try to build them anyway?"
-msgstr "그래도 빌드할까요?"
-
-#: print.go:274
-msgid "URL"
-msgstr "URL"
-
-#: print.go:272
-msgid "Version"
-msgstr "버전"
-
-#: print.go:285
-msgid "Votes"
-msgstr "투표"
-
-#: print.go:338
-msgid "Yay version v%s"
-msgstr "Yay 버전 v%s"
-
-#: install.go:583 install.go:658 install.go:665
-msgid "[N]one"
-msgstr "[N] 선택 안함"
-
-#: keys.go:122
+#: pkg/pgp/keys.go:128
 msgid "%s, required by: %s"
 msgstr "%s를 필요로 하는 패키지: %s"
 
-#: clean.go:96
+#: pkg/menus/diff_menu.go:50
+msgid "%s: No changes -- skipping"
+msgstr "%s: 변경 사항 없음 -- 건너뜀"
+
+#: pkg/query/filter.go:52
+msgid "%s: can't use target with option --aur -- skipping"
+msgstr "%s: 대상에 --aur 옵션을 사용할 수 없음 -- 건너뜀"
+
+#: pkg/query/filter.go:47
+msgid "%s: can't use target with option --repo -- skipping"
+msgstr "%s: 대상에 --repo 옵션을 사용할 수 없음 -- 건너뜀"
+
+#: pkg/upgrade/sources.go:82
+msgid "%s: ignoring package upgrade (%s => %s)"
+msgstr "%s: 패키지 업그레이드 무시 (%s => %s)"
+
+#: upgrade.go:138
+msgid "%s: local (%s) is newer than AUR (%s)"
+msgstr "%s: 로컬 (%s) 버전이 AUR (%s)보다 높음"
+
+#: pkg/download/unified.go:187
+msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
+msgstr "(%d/%d) ABS에서 PKGBUILD 다운로드됨: %s"
+
+#: pkg/download/aur.go:83 pkg/download/unified.go:183
+msgid "(%d/%d) Downloaded PKGBUILD: %s"
+msgstr "(%d/%d) PKGBUILD 다운로드됨: %s"
+
+#: install.go:517
+msgid "(%d/%d) Parsing SRCINFO: %s"
+msgstr "(%d/%d) SRCINFO 분석 중: %s"
+
+#: pkg/query/types.go:145 pkg/query/types.go:199
+msgid "(Installed)"
+msgstr "(설치됨)"
+
+#: pkg/query/types.go:143 pkg/query/types.go:197
+msgid "(Installed: %s)"
+msgstr "(설치됨: %s)"
+
+#: pkg/query/types.go:134
+msgid "(Orphaned)"
+msgstr "(고립됨)"
+
+#: pkg/query/types.go:138
+msgid "(Out-of-date: %s)"
+msgstr "(오래된 패키지: %s)"
+
+#: print.go:28
+msgid "AUR URL"
+msgstr "AUR URL"
+
+#: pkg/menus/edit_menu.go:58
+msgid "Add %s or %s to your environment variables"
+msgstr "%s나 %s를 환경 변수에 추가해 주세요"
+
+#: main.go:103
+msgid "Avoid running yay as root/sudo."
+msgstr "root나 sudo로 yay를 실행하지 마십시오."
+
+#: print.go:34
+msgid "Check Deps"
+msgstr "종속성 확인"
+
+#: upgrade.go:88
+msgid "Checking development packages..."
+msgstr "개발 패키지 확인하는 중..."
+
+#: pkg/dep/depCheck.go:137
+msgid "Checking for conflicts..."
+msgstr "충돌 확인하는 중..."
+
+#: pkg/dep/depCheck.go:145
+msgid "Checking for inner conflicts..."
+msgstr "내부 충돌 확인하는 중..."
+
+#: clean.go:206
+msgid "Cleaning (%d/%d): %s"
+msgstr "비우는 중 (%d/%d): %s"
+
+#: pkg/dep/depCheck.go:200
+msgid "Conflicting packages will have to be confirmed manually"
+msgstr "충돌하는 패키지는 수동으로 확인해야 합니다"
+
+#: print.go:36
+msgid "Conflicts With"
+msgstr "충돌하는 패키지"
+
+#: pkg/dep/depCheck.go:305
+msgid "Could not find all required packages:"
+msgstr "필요한 패키지를 모두 찾을 수 없습니다:"
+
+#: pkg/menus/clean_menu.go:52
+msgid "Deleting (%d/%d): %s"
+msgstr "삭제하는 중 (%d/%d): %s"
+
+#: print.go:32
+msgid "Depends On"
+msgstr "종속하는 패키지"
+
+#: print.go:26
+msgid "Description"
+msgstr "설명"
+
+#: pkg/menus/diff_menu.go:157
+msgid "Diffs to show?"
+msgstr "변경 사항을 볼까요?"
+
+#: clean.go:72
+msgid "Do you want to remove ALL AUR packages from cache?"
+msgstr "캐시에 있는 AUR 패키지를 모두 제거하시겠습니까?"
+
+#: clean.go:89
+msgid "Do you want to remove ALL untracked AUR files?"
+msgstr "추척되지 않은 AUR 파일을 모두 제거하시겠습니까?"
+
+#: clean.go:74
+msgid "Do you want to remove all other AUR packages from cache?"
+msgstr "캐시의 다른 AUR 패키지를 모두 제거하시겠습니까?"
+
+#: pkg/menus/edit_menu.go:61
+msgid "Edit PKGBUILD with?"
+msgstr "PKGBUILD를 무엇으로 편집할까요?"
+
+#: pkg/query/errors.go:13
+msgid "Error during AUR search: %s\n"
+msgstr "AUR 검색 중 오류: %s\n"
+
+#: print.go:85
+msgid "Explicitly installed packages: %s"
+msgstr "명시적으로 설치된 패키지: %s"
+
+#: print.go:40
+msgid "First Submitted"
+msgstr "최초 작성"
+
+#: pkg/query/aur_warnings.go:43
+msgid "Flagged Out Of Date AUR Packages:"
+msgstr "플래그가 지정된 오래된 AUR 패키지:"
+
+#: print.go:84
+msgid "Foreign installed packages: %s"
+msgstr "설치된 외부 패키지: %s"
+
+#: pkg/vcs/vcs.go:119
+msgid "Found git repo: %s"
+msgstr "git 저장소 찾음: %s"
+
+#: vcs.go:73
+msgid "GenDB finished. No packages were installed"
+msgstr "GenDB 완료됨. 패키지가 설치되지 않았습니다"
+
+#: print.go:29
+msgid "Groups"
+msgstr "그룹"
+
+#: pkg/pgp/keys.go:88
+msgid "Import?"
+msgstr "가져올까요?"
+
+#: pkg/pgp/keys.go:101
+msgid "Importing keys with gpg..."
+msgstr "gpg로 키 가져오는 중..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "내부 충돌 발견됨:"
+
+#: pkg/dep/depCheck.go:173
+msgid "Installing %s will remove:"
+msgstr "%s 설치 시 제거되는 패키지:"
+
+#: print.go:24
+msgid "Keywords"
+msgstr "키워드"
+
+#: print.go:41
+msgid "Last Modified"
+msgstr "마지막 수정"
+
+#: print.go:30
+msgid "Licenses"
+msgstr "라이선스"
+
+#: print.go:37
+msgid "Maintainer"
+msgstr "관리자"
+
+#: print.go:33
+msgid "Make Deps"
+msgstr "종속성 만들기"
+
+#: pkg/query/aur_warnings.go:33
+msgid "Missing AUR Debug Packages:"
+msgstr "빠진 AUR 디버그 패키지:"
+
+#: pkg/query/aur_warnings.go:28
+msgid "Missing AUR Packages:"
+msgstr "빠진 AUR 패키지:"
+
+#: print.go:23
+msgid "Name"
+msgstr "이름"
+
+#: pkg/text/print.go:95
+msgid "None"
+msgstr "없음"
+
+#: print.go:35
+msgid "Optional Deps"
+msgstr "선택적 종속성"
+
+#: pkg/query/aur_warnings.go:38
+msgid "Orphaned AUR Packages:"
+msgstr "고립된 AUR 패키지:"
+
+#: print.go:44 print.go:46
+msgid "Out-of-date"
+msgstr "오래된 패키지"
+
+#: pkg/pgp/keys.go:119
+msgid "PGP keys need importing:"
+msgstr "가져와야 할 PGP 키:"
+
+#: install.go:242 vcs.go:50
+msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
+msgstr "PKGBUILD가 최신입니다, 건너뜀 (%d/%d): %s"
+
+#: pkg/menus/edit_menu.go:123
+msgid "PKGBUILDs to edit?"
+msgstr "PKGBUILD를 편집할까요?"
+
+#: print.go:51
+msgid "Package Base ID"
+msgstr "패키지 베이스 ID"
+
+#: print.go:52
+msgid "Package Base"
+msgstr "패키지 베이스"
+
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "패키지 충돌 발견됨:"
+
+#: pkg/menus/clean_menu.go:44
+msgid "Packages to cleanBuild?"
+msgstr "패키지를 클린 빌드할까요?"
+
+#: upgrade.go:186
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr "제외할 패키지: (예: \"1 2 3\", \"1-3\", \"^4\" 혹은 저장소 이름)"
+
+#: cmd.go:368
+msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
+msgstr "설치할 패키지: (예: 1 2 3, 1-3 혹은 ^4)"
+
+#: upgrade.go:183
+msgid "Packages to upgrade."
+msgstr "업그레이드할 패키지."
+
+#: print.go:39
+msgid "Popularity"
+msgstr "인기도"
+
+#: pkg/menus/diff_menu.go:169 pkg/menus/edit_menu.go:134
+msgid "Proceed with install?"
+msgstr "설치를 진행할까요?"
+
+#: print.go:31
+msgid "Provides"
+msgstr "제공하는 패키지"
+
+#: pkg/query/aur_info.go:88
+msgid "Querying AUR..."
+msgstr "AUR 검색 중..."
+
+#: install.go:213
+msgid "Remove make dependencies after install?"
+msgstr "설치 후 종속성 만들기를 제거할까요?"
+
+#: pkg/dep/depPool.go:546
+msgid "Repository AUR"
+msgstr "저장소 AUR"
+
+#: print.go:22 pkg/db/ialpm/alpm.go:175
+msgid "Repository"
+msgstr "저장소"
+
+#: upgrade.go:68
+msgid "Searching AUR for updates..."
+msgstr "AUR에서 업데이트 검색하는 중..."
+
+#: upgrade.go:57
+msgid "Searching databases for updates..."
+msgstr "데이터베이스에서 업데이트 검색하는 중..."
+
+#: pkg/query/mixed_sources.go:200 pkg/query/source.go:79
+msgid "Showing repo packages only"
+msgstr "저장소 패키지만 표시하는 중"
+
+#: print.go:89
+msgid "Size of pacman cache %s: %s"
+msgstr "pacman 캐시 %s의 크기: %s"
+
+#: print.go:92
+msgid "Size of yay cache %s: %s"
+msgstr "yay 캐시 %s의 크기: %s"
+
+#: print.go:53
+msgid "Snapshot URL"
+msgstr "스냅숏 URL"
+
+#: print.go:94
+msgid "Ten biggest packages:"
+msgstr "가장 큰 10개 패키지:"
+
+#: install.go:461
+msgid "The following packages are not compatible with your architecture:"
+msgstr "다음 패키지는 이 컴퓨터의 아키텍처와 호환되지 않습니다:"
+
+#: pkg/db/ialpm/alpm.go:163 pkg/dep/depPool.go:541
+msgid "There are %d providers available for %s:"
+msgstr "%s에 대한 %d개의 공급자가 있습니다:"
+
+#: pkg/settings/exe/cmd_builder.go:199
+msgid "There may be another Pacman instance running. Waiting..."
+msgstr "다른 pacman 인스턴스가 실행 중입니다. 대기 중..."
+
+#: print.go:86
+msgid "Total Size occupied by packages: %s"
+msgstr "패키지가 차지하는 전체 크기: %s"
+
+#: print.go:83
+msgid "Total installed packages: %s"
+msgstr "설치된 전체 패키지: %s"
+
+#: install.go:469
+msgid "Try to build them anyway?"
+msgstr "그래도 빌드할까요?"
+
+#: print.go:27
+msgid "URL"
+msgstr "URL"
+
+#: clean.go:182
+msgid "Unable to clean:"
+msgstr "비울 수 없음:"
+
+#: get.go:42 get.go:73
+msgid "Unable to find the following packages:"
+msgstr "다음 패키지를 찾을 수 없음:"
+
+#: print.go:25
+msgid "Version"
+msgstr "버전"
+
+#: print.go:38
+msgid "Votes"
+msgstr "투표"
+
+#: print.go:81
+msgid "Yay version v%s"
+msgstr "Yay 버전 v%s"
+
+#: pkg/menus/menu.go:48
+msgid "[N]one"
+msgstr "[N] 선택 안함"
+
+#: clean.go:77
 msgid ""
 "\n"
 "Build directory:"
 msgstr ""
 "\n"
-"빌드 디렉토리:"
+"빌드 디렉터리:"
 
-#: callbacks.go:56 print.go:505
+#: pkg/db/ialpm/alpm.go:185 pkg/dep/depPool.go:556
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -439,197 +450,170 @@ msgstr ""
 "\n"
 "숫자를 입력하세요 (기본값=1): "
 
-#: depCheck.go:153
-msgid ""
-"\n"
-"Inner conflicts found:"
-msgstr ""
-"\n"
-"내부 충돌을 찾았습니다:"
-
-#: depCheck.go:167
-msgid ""
-"\n"
-"Package conflicts found:"
-msgstr ""
-"\n"
-"패키지 충돌을 찾았습니다:"
-
-#: install.go:270 install.go:310 install.go:489 install.go:593 install.go:676
+#: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "사용자에 의해 중지"
+msgstr "사용자에 의해 중단하는 중"
 
-#: install.go:515
+#: install.go:496
 msgid "cannot find package name: %v"
 msgstr "패키지 이름을 찾을 수 없습니다: %v"
 
-#: install.go:1048 install.go:1120
+#: install.go:688 install.go:821
 msgid "could not find PKGDEST for: %s"
 msgstr "PKGDEST를 찾을 수 없음: %s"
 
-#: install.go:792
+#: pkg/vcs/vcs.go:69
+msgid "devel check for package failed: '%s' encountered an error"
+msgstr "패키지에 대한 devel 확인 실패함: '%s'에 하나의 오류가 발생했습니다"
+
+#: pkg/menus/edit_menu.go:108
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "편집기가 성공적으로 종료하지 않음, 중지: %s"
+msgstr "편집기가 제대로 종료되지 않음, 중단하는 중: %s"
 
-#: download.go:84 download.go:109
-msgid "error cloning %s: %s"
-msgstr "%s 복제 중 오류: %s"
-
-#: install.go:924
+#: aur_source.go:26
 msgid "error downloading sources: %s"
-msgstr "소스 다운로드 중 오류: %s"
+msgstr "소스 다운로드하는 중 오류: %s"
 
-#: query.go:193
-msgid "error during AUR search: %s"
-msgstr "AUR 검색 중 오류: %s"
-
-#: download.go:96 download.go:121
+#: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
 msgstr "%s를 가져오는 중 오류: %s"
 
-#: install.go:333 install.go:442
+#: install.go:299 install.go:405
 msgid "error installing repo packages"
-msgstr "저장소 패키지 설치 중 오류"
+msgstr "저장소 패키지하는 설치 중 오류"
 
-#: install.go:1032 install.go:1072 install.go:1083 install.go:1095
+#: install.go:671 install.go:712 install.go:726 install.go:740
 msgid "error making: %s"
 msgstr "빌드 중 오류: %s"
 
-#: download.go:135
+#: install.go:573
 msgid "error merging %s: %s"
-msgstr "%s 병합 중 오류: %s"
+msgstr "%s 병합하는 중 오류: %s"
 
-#: download.go:89 download.go:114
+#: pkg/download/unified.go:56
 msgid "error reading %s"
 msgstr "%s를 읽는 중 오류"
 
-#: install.go:75
+#: install.go:88
 msgid "error refreshing databases"
-msgstr "데이터베이스 갱신 중 오류"
+msgstr "데이터베이스 갱신하는 중 오류"
 
-#: clean.go:228 download.go:130
+#: clean.go:212 install.go:566
 msgid "error resetting %s: %s"
-msgstr "%s 재설정 중 오류: %s"
+msgstr "%s 재설정하는 중 오류: %s"
 
-#: main.go:68
-msgid "failed to create BuildDir directory '%s': %s"
-msgstr "BuildDir 디렉토리 '%s' 생성 실패: %s"
+#: install.go:42
+msgid "error updating package install reason to dependency"
+msgstr "패키지를 종속성으로 업데이트하는 동안 오류 발생"
 
-#: pkg/settings/runtime.go:79
+#: install.go:60
+msgid "error updating package install reason to explicit"
+msgstr "패키지를 명시적으로 업데이트하는 동안 오류 발생"
+
+#: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "설정 디렉토리 '%s' 생성 실패: %s"
+msgstr "'%s' 디렉터리 만들기 실패함: %s"
 
-#: download.go:288
-msgid "failed to get pkgbuild: %s: %s"
-msgstr "pkgbuild를 얻는 데 실패: %s: %s"
-
-#: download.go:296
-msgid "failed to link %s: %s"
-msgstr "%s를 링크하는 데 실패: %s"
-
-#: main.go:29
+#: pkg/settings/config.go:293
 msgid "failed to open config file '%s': %s"
-msgstr "설정 파일 '%s'를 여는 데 실패: %s"
+msgstr " '%s' 구성 파일 열기 실패함: %s"
 
-#: main.go:51
-msgid "failed to open vcs file '%s': %s"
-msgstr "vcs 파일 '%s'을 여는 데 실패: %s"
-
-#: install.go:810
+#: install.go:522
 msgid "failed to parse %s -- skipping: %s"
-msgstr "%s 파싱 실패 -- 건너뜀: %s"
+msgstr "%s 분석하기 실패함 -- 건너뜀: %s"
 
-#: install.go:813
+#: install.go:526
 msgid "failed to parse %s: %s"
-msgstr "%s 파싱 실패: %s"
+msgstr "%s 분석하기 실패함: %s"
 
-#: main.go:36
+#: pkg/settings/config.go:303
 msgid "failed to read config file '%s': %s"
-msgstr "설정 파일 '%s'를 읽는 데 실패: %s"
+msgstr "'%s' 구성 파일 읽기 실패함: %s"
 
-#: main.go:58
-msgid "failed to read vcs file '%s': %s"
-msgstr "vcs 파일 '%s'를 읽는 데 실패: %s"
-
-#: cmd.go:360 config.go:147 print.go:521
+#: pkg/text/errors.go:8
 msgid "input too long"
 msgstr "입력이 너무 긺"
 
-#: callbacks.go:82 print.go:531
+#: pkg/db/ialpm/alpm.go:206 pkg/dep/depPool.go:576
 msgid "invalid number: %s"
 msgstr "잘못된 숫자: %s"
 
-#: pkg/settings/parser.go:144
+#: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
 msgstr "잘못된 옵션 '%s'"
 
-#: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
-msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
-msgstr "잘못된 정렬 모드. yay -Y --bottomup --save 명령어로 고쳐 주세요"
+#: cmd.go:202
+msgid "invalid option: '--deps' and '--explicit' may not be used together"
+msgstr "잘못된 옵션: '--deps'와 '--explicit'는 함께 사용할 수 없습니다"
 
-#: callbacks.go:87 print.go:536
+#: pkg/download/abs.go:21
+msgid "invalid repository"
+msgstr "잘못된 저장소"
+
+#: pkg/db/ialpm/alpm.go:211 pkg/dep/depPool.go:581
 msgid "invalid value: %d is not between %d and %d"
 msgstr "잘못된 값: %d가 %d와 %d 사이에 있지 않음"
 
-#: keys.go:110
+#: pkg/pgp/keys.go:114
 msgid "no keys to import"
 msgstr "가져올 키 없음"
 
-#: cmd.go:323
-msgid "no packages match search"
-msgstr "검색된 패키지 없음"
+#: pkg/query/errors.go:20
+msgid "no query was executed"
+msgstr "쿼리 없음이 실행되었습니다"
 
-#: config.go:112
+#: pkg/text/text.go:60
 msgid "no"
 msgstr "아니오"
 
-#: pkg/settings/parser.go:134
+#: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
 msgstr "한번에 한 작업만 쓸 수 있음"
 
-#: print.go:430
+#: print.go:185
 msgid "package '%s' was not found"
 msgstr "패키지 '%s'를 찾지 못했습니다"
 
-#: depCheck.go:193
+#: pkg/dep/depCheck.go:197
 msgid "package conflicts can not be resolved with noconfirm, aborting"
-msgstr "nonconfirm으로 패키지 충돌을 해결할 수 없음, 중지"
+msgstr "nonconfirm으로 패키지 충돌을 해결할 수 없음, 중단하는 중"
 
-#: keys.go:101
+#: pkg/download/errors.go:15
+msgid "package not found in AUR"
+msgstr "AUR에서 패키지를 찾을 수 없습니다"
+
+#: pkg/download/abs.go:22
+msgid "package not found in repos"
+msgstr "저장소에서 패키지를 찾을 수 없습니다"
+
+#: pkg/pgp/keys.go:104
 msgid "problem importing keys"
 msgstr "키 가져오는 중 오류"
 
-#: install.go:178
-msgid "refusing to install AUR packages as root, aborting"
-msgstr "root로 AUR 패키지 설치 거부, 중지"
-
-#: clean.go:116
+#: clean.go:97
 msgid "removing AUR packages from cache..."
-msgstr "캐시에서 AUR 패키지 지우는 중..."
+msgstr "캐시에서 AUR 패키지 제거하는 중..."
 
-#: clean.go:188 clean.go:216
+#: clean.go:167 clean.go:198
 msgid "removing untracked AUR files from cache..."
-msgstr "캐시에서 추적되지 않은 AUR 패키지 지우는 중..."
+msgstr "캐시에서 추적되지 않은 AUR 패키지 제거하는 중..."
 
-#: install.go:1129
+#: install.go:830
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "makepkg에 등록된 %s의 PKGDEST가 존재하지 않음: %s"
 
-#: main.go:146
+#: pkg/db/ialpm/alpm.go:231
 msgid "unable to CreateHandle: %s"
 msgstr "핸들 생성 불가: %s"
 
-#: cmd.go:177
+#: cmd.go:191
 msgid "unhandled operation"
 msgstr "핸들되지 않은 작업"
 
-#: cmd.go:443
+#: cmd.go:424
 msgid "unknown-version"
 msgstr "버전 불명"
 
-#: config.go:111
+#: pkg/text/text.go:59
 msgid "yes"
 msgstr "예"
-
-#~ msgid "failed to create cache directory '%s': %s"
-#~ msgstr "캐시 디렉토리 '%s' 생성 실패: %s"
