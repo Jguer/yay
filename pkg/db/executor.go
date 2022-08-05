@@ -11,8 +11,10 @@ type (
 	Depend   = alpm.Depend
 )
 
-func VerCmp(a, b string) int {
-	return alpm.VerCmp(a, b)
+// VerCmp performs version comparison according to Pacman conventions. Return
+// value is <0 if and only if v1 is older than v2.
+func VerCmp(v1, v2 string) int {
+	return alpm.VerCmp(v1, v2)
 }
 
 type Upgrade struct {

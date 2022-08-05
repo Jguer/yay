@@ -3,7 +3,7 @@ package query
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -83,7 +83,7 @@ type mockDoer struct{}
 func (m *mockDoer) Do(req *http.Request) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(validPayload)),
+		Body:       io.NopCloser(bytes.NewBufferString(validPayload)),
 	}, nil
 }
 

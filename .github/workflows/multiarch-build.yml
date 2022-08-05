@@ -11,7 +11,6 @@ jobs:
         arch:
           [
             "linux/amd64 x86_64",
-            "linux/arm/v6 armv6h",
             "linux/arm/v7 armv7h",
             "linux/arm64 aarch64",
           ]
@@ -75,9 +74,6 @@ jobs:
           name: yay_armv7h
       - uses: actions/download-artifact@v2
         with:
-          name: yay_armv6h
-      - uses: actions/download-artifact@v2
-        with:
           name: yay_aarch64
       - name: Create Release
         id: create_release
@@ -108,16 +104,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
           asset_name: yay_${{ steps.tags.outputs.version }}_armv7h.tar.gz
-          asset_content_type: application/tar+gzip
-      - name: Upload armv6h asset
-        id: upload-release-asset-armv6h
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./yay_${{ steps.tags.outputs.version }}_armv6h.tar.gz
-          asset_name: yay_${{ steps.tags.outputs.version }}_armv6h.tar.gz
           asset_content_type: application/tar+gzip
       - name: Upload aarch64 asset
         id: upload-release-asset-aarch64

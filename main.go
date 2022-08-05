@@ -114,6 +114,11 @@ func main() {
 		return
 	}
 
+	if errS := config.RunMigrations(
+		settings.DefaultMigrations(), config.Runtime.ConfigPath); errS != nil {
+		text.Errorln(errS)
+	}
+
 	cmdArgs := parser.MakeArguments()
 
 	if err = config.ParseCommandLine(cmdArgs); err != nil {

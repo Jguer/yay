@@ -550,7 +550,7 @@ func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.St
 		pkgbuild, err := gosrc.ParseFile(dir)
 
 		if err == nil {
-			if alpm.VerCmp(pkgbuild.Version(), base.Version()) >= 0 {
+			if db.VerCmp(pkgbuild.Version(), base.Version()) >= 0 {
 				toSkip.Set(base.Pkgbase())
 			}
 		}
@@ -812,7 +812,8 @@ func doInstall(ctx context.Context, arguments, cmdArgs *parser.Arguments, pkgDep
 
 func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.StringSet,
 	arguments, cmdArgs *parser.Arguments, pkgdests map[string]string,
-	deps, exp []string, name string, optional bool) (newDeps, newExp []string, err error) {
+	deps, exp []string, name string, optional bool,
+) (newDeps, newExp []string, err error) {
 	pkgdest, ok := pkgdests[name]
 	if !ok {
 		if optional {

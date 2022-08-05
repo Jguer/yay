@@ -35,7 +35,8 @@ func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 
 // upList returns lists of packages to upgrade from each source.
 func upList(ctx context.Context, warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
-	filter upgrade.Filter) (aurUp, repoUp upgrade.UpSlice, err error) {
+	filter upgrade.Filter,
+) (aurUp, repoUp upgrade.UpSlice, err error) {
 	remote, remoteNames := query.GetRemotePackages(dbExecutor)
 
 	var (
@@ -125,7 +126,8 @@ func upList(ctx context.Context, warnings *query.AURWarnings, dbExecutor db.Exec
 }
 
 func printLocalNewerThanAUR(
-	remote []alpm.IPackage, aurdata map[string]*aur.Pkg) {
+	remote []alpm.IPackage, aurdata map[string]*aur.Pkg,
+) {
 	for _, pkg := range remote {
 		aurPkg, ok := aurdata[pkg.Name()]
 		if !ok {
@@ -134,7 +136,7 @@ func printLocalNewerThanAUR(
 
 		left, right := upgrade.GetVersionDiff(pkg.Version(), aurPkg.Version)
 
-		if !isDevelPackage(pkg) && alpm.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
+		if !isDevelPackage(pkg) && db.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
 			text.Warnln(gotext.Get("%s: local (%s) is newer than AUR (%s)",
 				text.Cyan(pkg.Name()),
 				left, right,
@@ -233,7 +235,8 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 
 // Targets for sys upgrade.
 func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
-	enableDowngrade bool) (stringset.StringSet, []string, error) {
+	enableDowngrade bool,
+) (stringset.StringSet, []string, error) {
 	warnings := query.NewWarnings()
 
 	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade,

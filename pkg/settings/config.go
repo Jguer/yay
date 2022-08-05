@@ -213,7 +213,7 @@ func DefaultConfig(version string) *Configuration {
 		AnswerEdit:             "",
 		AnswerUpgrade:          "",
 		RemoveMake:             "ask",
-		Provides:               true,
+		Provides:               false,
 		UpgradeMenu:            true,
 		CleanMenu:              true,
 		DiffMenu:               true,
