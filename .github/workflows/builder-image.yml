@@ -29,7 +29,7 @@ jobs:
           DOCKER_BUILDKIT: 0
           COMPOSE_DOCKER_CLI_BUILD: 0
         with:
-          platforms: linux/amd64, linux/arm/v6,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
           file: ci.Dockerfile
           push: true
           tags: jguer/yay-builder:latest
