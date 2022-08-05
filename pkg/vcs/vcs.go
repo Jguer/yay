@@ -30,13 +30,14 @@ type OriginInfoByURL map[string]OriginInfo
 
 // OriginInfo contains the last commit sha of a repo
 // Example:
-// "github.com/Jguer/yay.git": {
-// 	"protocols": [
-// 		"https"
-// 	],
-// 	"branch": "next",
-// 	"sha": "c1171d41467c68ffd3c46748182a16366aaaf87b"
-// }.
+//
+//	"github.com/Jguer/yay.git": {
+//		"protocols": [
+//			"https"
+//		],
+//		"branch": "next",
+//		"sha": "c1171d41467c68ffd3c46748182a16366aaaf87b"
+//	}.
 type OriginInfo struct {
 	Protocols []string `json:"protocols"`
 	Branch    string   `json:"branch"`
@@ -90,7 +91,8 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 }
 
 func (v *InfoStore) Update(ctx context.Context, pkgName string,
-	sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup) {
+	sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup,
+) {
 	defer wg.Done()
 
 	info := make(OriginInfoByURL)

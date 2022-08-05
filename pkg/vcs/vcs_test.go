@@ -13,6 +13,7 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/bradleyjkemp/cupaloy"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 )
@@ -261,9 +262,9 @@ func TestInfoStore_Update(t *testing.T) {
 		},
 	}
 
-	file, err := os.CreateTemp("/tmp", "yay-vcs-test")
-	assert.NoError(t, err)
-	defer os.Remove(file.Name())
+	file, err := os.CreateTemp("/tmp", "yay-infostore-*-test")
+	filePath := file.Name()
+	require.NoError(t, err)
 
 	for _, tt := range tests {
 		tt := tt
@@ -271,7 +272,7 @@ func TestInfoStore_Update(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
-				FilePath:         file.Name(),
+				FilePath:         filePath,
 				CmdBuilder:       tt.fields.CmdBuilder,
 			}
 			var mux sync.Mutex
@@ -296,6 +297,8 @@ func TestInfoStore_Update(t *testing.T) {
 			cupaloy.SnapshotT(t, marshalledinfo)
 		})
 	}
+
+	require.NoError(t, os.Remove(filePath))
 }
 
 func TestInfoStore_Remove(t *testing.T) {
@@ -325,9 +328,9 @@ func TestInfoStore_Remove(t *testing.T) {
 		},
 	}
 
-	file, err := os.CreateTemp("/tmp", "yay-vcs-test")
-	assert.NoError(t, err)
-	defer os.Remove(file.Name())
+	file, err := os.CreateTemp("/tmp", "yay-vcs-*-test")
+	filePath := file.Name()
+	require.NoError(t, err)
 
 	for _, tt := range tests {
 		tt := tt
@@ -335,10 +338,12 @@ func TestInfoStore_Remove(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
-				FilePath:         file.Name(),
+				FilePath:         filePath,
 			}
 			v.RemovePackage(tt.args.pkgs)
 			assert.Len(t, tt.fields.OriginsByPackage, 2)
 		})
 	}
+
+	require.NoError(t, os.Remove(filePath))
 }
