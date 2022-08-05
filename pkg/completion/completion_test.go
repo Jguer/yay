@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -45,7 +45,7 @@ func (m *mockDoer) Do(req *http.Request) (*http.Response, error) {
 	assert.Equal(m.t, m.wantUrl, req.URL.String())
 	return &http.Response{
 		StatusCode: m.returnStatusCode,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(m.returnBody)),
+		Body:       io.NopCloser(bytes.NewBufferString(m.returnBody)),
 	}, m.returnErr
 }
 

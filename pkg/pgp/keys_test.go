@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	aur "github.com/Jguer/aur"
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -59,7 +60,7 @@ func getPgpKey(key string) string {
 }
 
 func startPgpKeyServer() *http.Server {
-	srv := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", gpgServerPort)}
+	srv := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", gpgServerPort), ReadHeaderTimeout: 1 * time.Second}
 
 	go func() {
 		err := srv.ListenAndServe()
