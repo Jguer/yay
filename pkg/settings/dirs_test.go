@@ -16,8 +16,8 @@ func Test_getCacheHome(t *testing.T) {
 	dir := t.TempDir()
 	require.NoError(t, os.Unsetenv("XDG_CACHE_HOME"))
 	require.NoError(t, os.Unsetenv("HOME"))
-	require.NoError(t, os.Setenv("SUDO_USER", "test"))
-	require.NoError(t, os.Setenv("TMPDIR", dir))
+	t.Setenv("SUDO_USER", "test")
+	t.Setenv("TMPDIR", dir)
 
 	got, err := getCacheHome()
 	require.NoError(t, err)

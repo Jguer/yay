@@ -18,7 +18,7 @@ func TestNewConfig(t *testing.T) {
 	err := os.MkdirAll(filepath.Join(configDir, "yay"), 0o755)
 	assert.NoError(t, err)
 
-	os.Setenv("XDG_CONFIG_HOME", configDir)
+	t.Setenv("XDG_CONFIG_HOME", configDir)
 
 	cacheDir := t.TempDir()
 
@@ -50,12 +50,12 @@ func TestNewConfigAURDEST(t *testing.T) {
 	err := os.MkdirAll(filepath.Join(configDir, "yay"), 0o755)
 	assert.NoError(t, err)
 
-	os.Setenv("XDG_CONFIG_HOME", configDir)
+	t.Setenv("XDG_CONFIG_HOME", configDir)
 
 	cacheDir := t.TempDir()
 
 	config := map[string]string{"BuildDir": filepath.Join(cacheDir, "test-other-dir")}
-	os.Setenv("AURDEST", filepath.Join(cacheDir, "test-build-dir"))
+	t.Setenv("AURDEST", filepath.Join(cacheDir, "test-build-dir"))
 
 	f, err := os.Create(filepath.Join(configDir, "yay", "config.json"))
 	assert.NoError(t, err)
@@ -79,8 +79,6 @@ func TestNewConfigAURDEST(t *testing.T) {
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should stay as "sudo" (given sudo exists)
 func TestConfiguration_setPrivilegeElevator(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-
 	path := t.TempDir()
 
 	doas := filepath.Join(path, "sudo")
@@ -92,9 +90,8 @@ func TestConfiguration_setPrivilegeElevator(t *testing.T) {
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
-	os.Setenv("PATH", path)
+	t.Setenv("PATH", path)
 	err = config.setPrivilegeElevator()
-	os.Setenv("PATH", oldPath)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "sudo", config.SudoBin)
@@ -107,8 +104,6 @@ func TestConfiguration_setPrivilegeElevator(t *testing.T) {
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should be changed to "su"
 func TestConfiguration_setPrivilegeElevator_su(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-
 	path := t.TempDir()
 
 	doas := filepath.Join(path, "su")
@@ -120,9 +115,8 @@ func TestConfiguration_setPrivilegeElevator_su(t *testing.T) {
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
-	os.Setenv("PATH", path)
+	t.Setenv("PATH", path)
 	err = config.setPrivilegeElevator()
-	os.Setenv("PATH", oldPath)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "su", config.SudoBin)
@@ -135,15 +129,12 @@ func TestConfiguration_setPrivilegeElevator_su(t *testing.T) {
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should be changed to "su"
 func TestConfiguration_setPrivilegeElevator_no_path(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-
-	os.Setenv("PATH", "")
+	t.Setenv("PATH", "")
 	config := DefaultConfig("test")
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
 	err := config.setPrivilegeElevator()
-	os.Setenv("PATH", oldPath)
 
 	assert.Error(t, err)
 	assert.Equal(t, "sudo", config.SudoBin)
@@ -156,8 +147,6 @@ func TestConfiguration_setPrivilegeElevator_no_path(t *testing.T) {
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should be changed to "doas"
 func TestConfiguration_setPrivilegeElevator_doas(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-
 	path := t.TempDir()
 
 	doas := filepath.Join(path, "doas")
@@ -169,9 +158,8 @@ func TestConfiguration_setPrivilegeElevator_doas(t *testing.T) {
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
-	os.Setenv("PATH", path)
+	t.Setenv("PATH", path)
 	err = config.setPrivilegeElevator()
-	os.Setenv("PATH", oldPath)
 	assert.NoError(t, err)
 	assert.Equal(t, "doas", config.SudoBin)
 	assert.Equal(t, "", config.SudoFlags)
@@ -183,8 +171,6 @@ func TestConfiguration_setPrivilegeElevator_doas(t *testing.T) {
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should be kept as the wrapper
 func TestConfiguration_setPrivilegeElevator_custom_script(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-
 	path := t.TempDir()
 
 	wrapper := filepath.Join(path, "custom-wrapper")
@@ -197,9 +183,8 @@ func TestConfiguration_setPrivilegeElevator_custom_script(t *testing.T) {
 	config.SudoBin = wrapper
 	config.SudoFlags = "-v"
 
-	os.Setenv("PATH", path)
+	t.Setenv("PATH", path)
 	err = config.setPrivilegeElevator()
-	os.Setenv("PATH", oldPath)
 
 	assert.NoError(t, err)
 	assert.Equal(t, wrapper, config.SudoBin)
@@ -212,8 +197,6 @@ func TestConfiguration_setPrivilegeElevator_custom_script(t *testing.T) {
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should be changed to "doas"
 func TestConfiguration_setPrivilegeElevator_pacman_auth_doas(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-
 	path := t.TempDir()
 
 	doas := filepath.Join(path, "doas")
@@ -231,10 +214,9 @@ func TestConfiguration_setPrivilegeElevator_pacman_auth_doas(t *testing.T) {
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
-	os.Setenv("PACMAN_AUTH", "doas")
-	os.Setenv("PATH", path)
+	t.Setenv("PACMAN_AUTH", "doas")
+	t.Setenv("PATH", path)
 	err = config.setPrivilegeElevator()
-	os.Setenv("PATH", oldPath)
 	assert.NoError(t, err)
 	assert.Equal(t, "doas", config.SudoBin)
 	assert.Equal(t, "", config.SudoFlags)
@@ -246,8 +228,6 @@ func TestConfiguration_setPrivilegeElevator_pacman_auth_doas(t *testing.T) {
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should be changed to "sudo"
 func TestConfiguration_setPrivilegeElevator_pacman_auth_sudo(t *testing.T) {
-	oldPath := os.Getenv("PATH")
-
 	path := t.TempDir()
 
 	doas := filepath.Join(path, "doas")
@@ -265,10 +245,9 @@ func TestConfiguration_setPrivilegeElevator_pacman_auth_sudo(t *testing.T) {
 	config.SudoLoop = true
 	config.SudoFlags = "-v"
 
-	os.Setenv("PACMAN_AUTH", "sudo")
-	os.Setenv("PATH", path)
+	t.Setenv("PACMAN_AUTH", "sudo")
+	t.Setenv("PATH", path)
 	err = config.setPrivilegeElevator()
-	os.Setenv("PATH", oldPath)
 	assert.NoError(t, err)
 	assert.Equal(t, "sudo", config.SudoBin)
 	assert.Equal(t, "-v", config.SudoFlags)
