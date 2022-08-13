@@ -93,5 +93,7 @@ func ContinueTask(s string, preset, noConfirm bool) bool {
 		return preset
 	}
 
-	return strings.EqualFold(response, yes) || strings.EqualFold(response, y) || strings.EqualFold(response, yDefault)
+	return strings.EqualFold(response, yes) ||
+		strings.EqualFold(response, y) ||
+		(!strings.EqualFold(yDefault, n) && strings.EqualFold(response, yDefault))
 }
