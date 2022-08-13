@@ -87,7 +87,7 @@ func ContinueTask(s string, preset, noConfirm bool) bool {
 		postFix = fmt.Sprintf(" [%s/%s] ", y, strings.ToUpper(n))
 	}
 
-	Info(Bold(s), Bold(postFix))
+	OperationInfo(Bold(s), Bold(postFix))
 
 	if _, err := fmt.Scanln(&response); err != nil {
 		return preset
