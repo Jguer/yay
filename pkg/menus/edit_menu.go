@@ -83,7 +83,8 @@ func editor(editorConfig, editorFlags string, noConfirm bool) (editor string, ar
 }
 
 func editPkgbuilds(buildDir string, bases []dep.Base, editorConfig,
-	editorFlags string, srcinfos map[string]*gosrc.Srcinfo, noConfirm bool) error {
+	editorFlags string, srcinfos map[string]*gosrc.Srcinfo, noConfirm bool,
+) error {
 	pkgbuilds := make([]string, 0, len(bases))
 
 	for _, base := range bases {
@@ -114,7 +115,8 @@ func editPkgbuilds(buildDir string, bases []dep.Base, editorConfig,
 
 func Edit(editMenuOption bool, buildDir string, bases []dep.Base, editorConfig,
 	editorFlags string, installed stringset.StringSet, srcinfos map[string]*gosrc.Srcinfo,
-	noConfirm bool, editDefaultAnswer string) error {
+	noConfirm bool, editDefaultAnswer string,
+) error {
 	if !editMenuOption {
 		return nil
 	}
@@ -131,7 +133,7 @@ func Edit(editMenuOption bool, buildDir string, bases []dep.Base, editorConfig,
 
 	fmt.Println()
 
-	if !text.ContinueTask(gotext.Get("Proceed with install?"), true, false) {
+	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
 		return settings.ErrUserAbort{}
 	}
 

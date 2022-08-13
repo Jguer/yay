@@ -4,6 +4,7 @@ package menus
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -149,7 +150,8 @@ func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, buil
 
 func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	buildDir string, diffMenuOption bool, bases []dep.Base,
-	installed stringset.StringSet, cloned map[string]bool, noConfirm bool, diffDefaultAnswer string) error {
+	installed stringset.StringSet, cloned map[string]bool, noConfirm bool, diffDefaultAnswer string,
+) error {
 	if !diffMenuOption {
 		return nil
 	}
@@ -166,7 +168,7 @@ func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 
 	fmt.Println()
 
-	if !text.ContinueTask(gotext.Get("Proceed with install?"), true, false) {
+	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
 		return settings.ErrUserAbort{}
 	}
 

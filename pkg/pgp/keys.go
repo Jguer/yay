@@ -45,7 +45,8 @@ func (set pgpKeySet) get(key string) bool {
 // CheckPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
 func CheckPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo,
-	gpgBin, gpgFlags string, noConfirm bool) error {
+	gpgBin, gpgFlags string, noConfirm bool,
+) error {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
@@ -85,7 +86,7 @@ func CheckPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo,
 	fmt.Println()
 	fmt.Println(str)
 
-	if text.ContinueTask(gotext.Get("Import?"), true, noConfirm) {
+	if text.ContinueTask(os.Stdin, gotext.Get("Import?"), true, noConfirm) {
 		return importKeys(problematic.toSlice(), gpgBin, gpgFlags)
 	}
 
