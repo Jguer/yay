@@ -1,12 +1,11 @@
-#
+# 
 # Translators:
-# J G <transifex@jguer.space>, 2021
-#
+# J G, 2021
+# Luna Jernberg <bittin@cafe8bitar.se>, 2022
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"PO-Revision-Date: 2021-08-13 22:55+0000\n"
-"Last-Translator: J G <transifex@jguer.space>, 2021\n"
+"Last-Translator: Luna Jernberg <bittin@cafe8bitar.se>, 2022\n"
 "Language-Team: Swedish (https://www.transifex.com/yay-1/teams/123732/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -15,417 +14,429 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
-#: install.go:563
+#: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
 msgstr " (Byggfiler finns)"
 
-#: install.go:559
+#: pkg/menus/menu.go:28
 msgid " (Installed)"
 msgstr " (Installerad)"
 
-#: depCheck.go:279
+#: pkg/dep/depCheck.go:312
 msgid " (Target"
 msgstr " (Mål"
 
-#: depCheck.go:281
+#: pkg/dep/depCheck.go:314
 msgid " (Wanted by: "
 msgstr " (Önskas av: "
 
-#: callbacks.go:72
-msgid " Input too long"
-msgstr " För lång indata"
-
-#: cmd.go:446
+#: cmd.go:427
 msgid " [Installed]"
 msgstr " [Installerad]"
 
-#: cmd.go:402 install.go:166 install.go:200
+#: cmd.go:386 install.go:158 install.go:192
 msgid " there is nothing to do"
 msgstr " inget behöver göras"
 
-#: depCheck.go:170
-msgid "Installing %s will remove:"
-msgstr "Installation av %s kommer att ta bort:"
-
-#: install.go:583 install.go:658 install.go:665
+#: pkg/menus/menu.go:48
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s [A]lla [Ab]Avbryt [I]nstallerade [No]EjInstallerade eller (1 2 3, 1-3, "
 "^4)"
 
-#: download.go:273
-msgid "%s already downloaded -- use -f to overwrite"
-msgstr "%s redan hämtat -- använd -f för att skriva över"
-
-#: install.go:1086
+#: install.go:729
 msgid "%s already made -- skipping build"
 msgstr "%s redan byggt -- hoppar över bygge"
 
-#: pkg/settings/runtime.go:50 pkg/settings/runtime.go:62
-msgid "%s and %s unset"
-msgstr "%s och %s ej inställda"
-
-#: config.go:76
+#: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
 msgstr "%s är inte inställd"
 
-#: exec.go:71
+#: pkg/settings/exe/cmd_builder.go:198
 msgid "%s is present."
 msgstr "%s finns."
 
-#: install.go:1075
+#: install.go:715
 msgid "%s is up to date -- skipping"
 msgstr "%s är ajour -- hoppar över"
 
-#: install.go:1008
+#: install.go:640
 msgid "%s not satisfied, flushing install queue"
 msgstr "%s ej tillfredsställd, rensar installationskö"
 
-#: install.go:752
-msgid "%s: No changes -- skipping"
-msgstr "%s: Inga ändringar -- hoppar över"
-
-#: utils.go:48
-msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: kan inte använda mål med växlen --aur -- hoppar över"
-
-#: utils.go:43
-msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: kan inte använda mål med växlen --repo -- hoppar över"
-
-#: upgrade.go:274
-msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: ignorerar paketuppgradering (%s => %s)"
-
-#: upgrade.go:291
-msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s: lokalt paket (%s) är nyare än AUR (%s)"
-
-#: download.go:298
-msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) Hämtat PKGBUILD från ABS: %s"
-
-#: install.go:805
-msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Tolkar SRCINFO: %s"
-
-#: print.go:86 print.go:127
-msgid "(Installed)"
-msgstr "(Installerad)"
-
-#: print.go:84 print.go:125
-msgid "(Installed: %s)"
-msgstr "(Installerade: %s)"
-
-#: print.go:75
-msgid "(Orphaned)"
-msgstr "(Övergiven)"
-
-#: print.go:79
-msgid "(Out-of-date: %s)"
-msgstr "(Föråldrade: %s)"
-
-#: print.go:275
-msgid "AUR URL"
-msgstr "AUR URL"
-
-#: config.go:77
-msgid "Add %s or %s to your environment variables"
-msgstr "Lägg till %s eller %s bland dina miljövariabler"
-
-#: main.go:182
-msgid "Avoid running yay as root/sudo."
-msgstr "Undvik att köra yay som root/sudo."
-
-#: print.go:281
-msgid "Check Deps"
-msgstr "Kontrollberoenden"
-
-#: upgrade.go:167
-msgid "Checking development packages..."
-msgstr "Kontrollerar utvecklingspaket..."
-
-#: depCheck.go:137
-msgid "Checking for conflicts..."
-msgstr "Letar efter krockar..."
-
-#: depCheck.go:144
-msgid "Checking for inner conflicts..."
-msgstr "Letar efter interna krockar..."
-
-#: clean.go:224
-msgid "Cleaning (%d/%d): %s"
-msgstr "Rensar (%d/%d): %s"
-
-#: depCheck.go:196
-msgid "Conflicting packages will have to be confirmed manually"
-msgstr "Paket som krockar måste bekräftas manuellt"
-
-#: print.go:283
-msgid "Conflicts With"
-msgstr "Krockar med"
-
-#: depCheck.go:273
-msgid "Could not find all required packages:"
-msgstr "Kunde inte hitta alla paket som krävs:"
-
-#: clean.go:240
-msgid "Deleting (%d/%d): %s"
-msgstr "Tar bort (%d/%d): %s"
-
-#: print.go:279
-msgid "Depends On"
-msgstr "Beror av"
-
-#: print.go:273
-msgid "Description"
-msgstr "Beskrivning"
-
-#: install.go:657
-msgid "Diffs to show?"
-msgstr "Visa diff?"
-
-#: clean.go:91
-msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "Vill du verkligen ta bort ALLA AUR-paket från cachen?"
-
-#: clean.go:108
-msgid "Do you want to remove ALL untracked AUR files?"
-msgstr "Vill du verkligen ta bort ALLA ospårade AUR-filer?"
-
-#: clean.go:93
-msgid "Do you want to remove all other AUR packages from cache?"
-msgstr "Vill du verkligen ta bort alla andra AUR-paket från cachen?"
-
-#: install.go:893
-msgid "Downloaded PKGBUILD (%d/%d): %s"
-msgstr "Hämtat PKGBUILD (%d/%d): %s"
-
-#: config.go:80
-msgid "Edit PKGBUILD with?"
-msgstr "Redigera PKGBUILD med?"
-
-#: cmd.go:346
-msgid "Error during AUR search: %s\n"
-msgstr "Fel vid AUR-sökning: %s\n"
-
-#: print.go:342
-msgid "Explicitly installed packages: %s"
-msgstr "Uttryckligen installerade paket: %s"
-
-#: print.go:287
-msgid "First Submitted"
-msgstr "Först skapad"
-
-#: print.go:41
-msgid "Flagged Out Of Date AUR Packages:"
-msgstr "AUR-paket markerade som föråldrade:"
-
-#: vcs.go:147
-msgid "Found git repo: %s"
-msgstr "Hittade gitförråd: %s"
-
-#: vcs.go:64
-msgid "GenDB finished. No packages were installed"
-msgstr "GenDB klar. Inga paket installerades"
-
-#: print.go:276
-msgid "Groups"
-msgstr "Grupper"
-
-#: keys.go:84
-msgid "Import?"
-msgstr "Importera?"
-
-#: keys.go:97
-msgid "Importing keys with gpg..."
-msgstr "Importerar nycklar med gpg..."
-
-#: print.go:271
-msgid "Keywords"
-msgstr "Nyckelord"
-
-#: print.go:288
-msgid "Last Modified"
-msgstr "Senast ändrad"
-
-#: print.go:277
-msgid "Licenses"
-msgstr "Licenser"
-
-#: print.go:284
-msgid "Maintainer"
-msgstr "Underhållare"
-
-#: print.go:280
-msgid "Make Deps"
-msgstr "Byggberoenden"
-
-#: download.go:281
-msgid "Missing ABS packages:"
-msgstr "Saknade ABS-paket:"
-
-#: print.go:25
-msgid "Missing AUR Packages:"
-msgstr "Saknade AUR-paket:"
-
-#: print.go:270
-msgid "Name"
-msgstr "Namn"
-
-#: pkg/text/print.go:50
-msgid "None"
-msgstr "Inga"
-
-#: print.go:282
-msgid "Optional Deps"
-msgstr "Valfria beroenden"
-
-#: print.go:33
-msgid "Orphaned AUR Packages:"
-msgstr "Övergivna AUR-paket:"
-
-#: print.go:291 print.go:293
-msgid "Out-of-date"
-msgstr "Föråldrat"
-
-#: keys.go:115
-msgid "PGP keys need importing:"
-msgstr "PGP-nycklar kräver import:"
-
-#: install.go:874
-msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
-msgstr "PKGBUILD ajour, Hoppar över (%d/%d): %s"
-
-#: install.go:664
-msgid "PKGBUILDs to edit?"
-msgstr "Redigera PKGBUILD-filer?"
-
-#: print.go:298
-msgid "Package Base ID"
-msgstr "Grundpakets-ID"
-
-#: print.go:299
-msgid "Package Base"
-msgstr "Grundpaket"
-
-#: install.go:582
-msgid "Packages to cleanBuild?"
-msgstr "Bygg paket rent (cleanBuild)?"
-
-#: upgrade.go:365
-msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller förrådsnamn)"
-
-#: cmd.go:350
-msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Paket att installera (t.ex: 1 2 3, 1-3 eller ^4)"
-
-#: upgrade.go:362
-msgid "Packages to upgrade."
-msgstr "Paket att uppgradera."
-
-#: print.go:286
-msgid "Popularity"
-msgstr "Popularitet"
-
-#: install.go:269 install.go:309
-msgid "Proceed with install?"
-msgstr "Fortsätt med installation?"
-
-#: print.go:278
-msgid "Provides"
-msgstr "Tillhandahåller"
-
-#: query.go:509
-msgid "Querying AUR..."
-msgstr "Frågar AUR..."
-
-#: install.go:221
-msgid "Remove make dependencies after install?"
-msgstr "Ta bort byggberoenden efter installation?"
-
-#: print.go:495
-msgid "Repository AUR"
-msgstr "AUR-förråd"
-
-#: callbacks.go:46 print.go:269
-msgid "Repository"
-msgstr "Förråd"
-
-#: upgrade.go:150
-msgid "Searching AUR for updates..."
-msgstr "Söker efter uppdateringar på AUR..."
-
-#: upgrade.go:140
-msgid "Searching databases for updates..."
-msgstr "Söker efter uppdateringar i databaserna..."
-
-#: cmd.go:347 query.go:194
-msgid "Showing repo packages only"
-msgstr "Visa endast förrådspaket"
-
-#: print.go:300
-msgid "Snapshot URL"
-msgstr "Snapshot-URL"
-
-#: print.go:345
-msgid "Ten biggest packages:"
-msgstr "Tio största paketen:"
-
-#: install.go:481
-msgid "The following packages are not compatible with your architecture:"
-msgstr "Följande paket stöds inte av din arkitektur:"
-
-#: callbacks.go:36 print.go:492
-msgid "There are %d providers available for %s:\n"
-msgstr "Det finns %d tillgängliga tillhandahållare av %s:\n"
-
-#: exec.go:72
-msgid "There may be another Pacman instance running. Waiting..."
-msgstr "Det kan finns en till instans av pacman som kör. Väntar..."
-
-#: print.go:343
-msgid "Total Size occupied by packages: %s"
-msgstr "Total paketstorlek: %s"
-
-#: print.go:341
-msgid "Total foreign installed packages: %s"
-msgstr "Antal okända installerade paket: %s"
-
-#: print.go:340
-msgid "Total installed packages: %s"
-msgstr "Antal installerade paket: %s"
-
-#: install.go:488
-msgid "Try to build them anyway?"
-msgstr "Försök att bygga dem ändå?"
-
-#: print.go:274
-msgid "URL"
-msgstr "URL"
-
-#: print.go:272
-msgid "Version"
-msgstr "Version"
-
-#: print.go:285
-msgid "Votes"
-msgstr "Röster"
-
-#: print.go:338
-msgid "Yay version v%s"
-msgstr "Yay-version v%s"
-
-#: install.go:583 install.go:658 install.go:665
-msgid "[N]one"
-msgstr "[N]Inga"
-
-#: keys.go:122
+#: pkg/pgp/keys.go:128
 msgid "%s, required by: %s"
 msgstr "%s, krävs av: %s"
 
-#: clean.go:96
+#: pkg/menus/diff_menu.go:50
+msgid "%s: No changes -- skipping"
+msgstr "%s: Inga ändringar -- hoppar över"
+
+#: pkg/query/filter.go:52
+msgid "%s: can't use target with option --aur -- skipping"
+msgstr "%s: kan inte använda mål med växlen --aur -- hoppar över"
+
+#: pkg/query/filter.go:47
+msgid "%s: can't use target with option --repo -- skipping"
+msgstr "%s: kan inte använda mål med växlen --repo -- hoppar över"
+
+#: pkg/upgrade/sources.go:82
+msgid "%s: ignoring package upgrade (%s => %s)"
+msgstr "%s: ignorerar paketuppgradering (%s => %s)"
+
+#: upgrade.go:138
+msgid "%s: local (%s) is newer than AUR (%s)"
+msgstr "%s: lokalt paket (%s) är nyare än AUR (%s)"
+
+#: pkg/download/unified.go:187
+msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
+msgstr "(%d/%d) Hämtat PKGBUILD från ABS: %s"
+
+#: pkg/download/aur.go:83 pkg/download/unified.go:183
+msgid "(%d/%d) Downloaded PKGBUILD: %s"
+msgstr "(%d/%d) Hämtat PKGBUILD: %s"
+
+#: install.go:517
+msgid "(%d/%d) Parsing SRCINFO: %s"
+msgstr "(%d/%d) Tolkar SRCINFO: %s"
+
+#: pkg/query/types.go:145 pkg/query/types.go:199
+msgid "(Installed)"
+msgstr "(Installerad)"
+
+#: pkg/query/types.go:143 pkg/query/types.go:197
+msgid "(Installed: %s)"
+msgstr "(Installerade: %s)"
+
+#: pkg/query/types.go:134
+msgid "(Orphaned)"
+msgstr "(Övergiven)"
+
+#: pkg/query/types.go:138
+msgid "(Out-of-date: %s)"
+msgstr "(Föråldrade: %s)"
+
+#: print.go:28
+msgid "AUR URL"
+msgstr "AUR URL"
+
+#: pkg/menus/edit_menu.go:58
+msgid "Add %s or %s to your environment variables"
+msgstr "Lägg till %s eller %s bland dina miljövariabler"
+
+#: main.go:103
+msgid "Avoid running yay as root/sudo."
+msgstr "Undvik att köra yay som root/sudo."
+
+#: print.go:34
+msgid "Check Deps"
+msgstr "Kontrollberoenden"
+
+#: upgrade.go:88
+msgid "Checking development packages..."
+msgstr "Kontrollerar utvecklingspaket..."
+
+#: pkg/dep/depCheck.go:137
+msgid "Checking for conflicts..."
+msgstr "Letar efter krockar..."
+
+#: pkg/dep/depCheck.go:145
+msgid "Checking for inner conflicts..."
+msgstr "Letar efter interna krockar..."
+
+#: clean.go:206
+msgid "Cleaning (%d/%d): %s"
+msgstr "Rensar (%d/%d): %s"
+
+#: pkg/dep/depCheck.go:200
+msgid "Conflicting packages will have to be confirmed manually"
+msgstr "Paket som krockar måste bekräftas manuellt"
+
+#: print.go:36
+msgid "Conflicts With"
+msgstr "Krockar med"
+
+#: pkg/dep/depCheck.go:305
+msgid "Could not find all required packages:"
+msgstr "Kunde inte hitta alla paket som krävs:"
+
+#: pkg/menus/clean_menu.go:52
+msgid "Deleting (%d/%d): %s"
+msgstr "Tar bort (%d/%d): %s"
+
+#: print.go:32
+msgid "Depends On"
+msgstr "Beror av"
+
+#: print.go:26
+msgid "Description"
+msgstr "Beskrivning"
+
+#: pkg/menus/diff_menu.go:157
+msgid "Diffs to show?"
+msgstr "Visa diff?"
+
+#: clean.go:72
+msgid "Do you want to remove ALL AUR packages from cache?"
+msgstr "Vill du verkligen ta bort ALLA AUR-paket från cachen?"
+
+#: clean.go:89
+msgid "Do you want to remove ALL untracked AUR files?"
+msgstr "Vill du verkligen ta bort ALLA ospårade AUR-filer?"
+
+#: clean.go:74
+msgid "Do you want to remove all other AUR packages from cache?"
+msgstr "Vill du verkligen ta bort alla andra AUR-paket från cachen?"
+
+#: pkg/menus/edit_menu.go:61
+msgid "Edit PKGBUILD with?"
+msgstr "Redigera PKGBUILD med?"
+
+#: pkg/query/errors.go:13
+msgid "Error during AUR search: %s\n"
+msgstr "Fel vid AUR-sökning: %s\n"
+
+#: print.go:85
+msgid "Explicitly installed packages: %s"
+msgstr "Uttryckligen installerade paket: %s"
+
+#: print.go:40
+msgid "First Submitted"
+msgstr "Först skapad"
+
+#: pkg/query/aur_warnings.go:43
+msgid "Flagged Out Of Date AUR Packages:"
+msgstr "AUR-paket markerade som föråldrade:"
+
+#: print.go:84
+msgid "Foreign installed packages: %s"
+msgstr "Okända installerade paket: %s"
+
+#: pkg/vcs/vcs.go:119
+msgid "Found git repo: %s"
+msgstr "Hittade gitförråd: %s"
+
+#: vcs.go:73
+msgid "GenDB finished. No packages were installed"
+msgstr "GenDB klar. Inga paket installerades"
+
+#: print.go:29
+msgid "Groups"
+msgstr "Grupper"
+
+#: pkg/pgp/keys.go:88
+msgid "Import?"
+msgstr "Importera?"
+
+#: pkg/pgp/keys.go:101
+msgid "Importing keys with gpg..."
+msgstr "Importerar nycklar med gpg..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "Interna krockar funna:"
+
+#: pkg/dep/depCheck.go:173
+msgid "Installing %s will remove:"
+msgstr "Installation av %s kommer att ta bort:"
+
+#: print.go:24
+msgid "Keywords"
+msgstr "Nyckelord"
+
+#: print.go:41
+msgid "Last Modified"
+msgstr "Senast ändrad"
+
+#: print.go:30
+msgid "Licenses"
+msgstr "Licenser"
+
+#: print.go:37
+msgid "Maintainer"
+msgstr "Underhållare"
+
+#: print.go:33
+msgid "Make Deps"
+msgstr "Byggberoenden"
+
+#: pkg/query/aur_warnings.go:33
+msgid "Missing AUR Debug Packages:"
+msgstr "Saknar AUR-felsökningspaket:"
+
+#: pkg/query/aur_warnings.go:28
+msgid "Missing AUR Packages:"
+msgstr "Saknade AUR-paket:"
+
+#: print.go:23
+msgid "Name"
+msgstr "Namn"
+
+#: pkg/text/print.go:95
+msgid "None"
+msgstr "Inga"
+
+#: print.go:35
+msgid "Optional Deps"
+msgstr "Valfria beroenden"
+
+#: pkg/query/aur_warnings.go:38
+msgid "Orphaned AUR Packages:"
+msgstr "Övergivna AUR-paket:"
+
+#: print.go:44 print.go:46
+msgid "Out-of-date"
+msgstr "Föråldrat"
+
+#: pkg/pgp/keys.go:119
+msgid "PGP keys need importing:"
+msgstr "PGP-nycklar kräver import:"
+
+#: install.go:242 vcs.go:50
+msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
+msgstr "PKGBUILD ajour, Hoppar över (%d/%d): %s"
+
+#: pkg/menus/edit_menu.go:123
+msgid "PKGBUILDs to edit?"
+msgstr "Redigera PKGBUILD-filer?"
+
+#: print.go:51
+msgid "Package Base ID"
+msgstr "Grundpakets-ID"
+
+#: print.go:52
+msgid "Package Base"
+msgstr "Grundpaket"
+
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "Paketkonflikter funna:"
+
+#: pkg/menus/clean_menu.go:44
+msgid "Packages to cleanBuild?"
+msgstr "Bygg paket rent (cleanBuild)?"
+
+#: upgrade.go:186
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr "Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller förrådsnamn)"
+
+#: cmd.go:368
+msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
+msgstr "Paket att installera (t.ex: 1 2 3, 1-3 eller ^4)"
+
+#: upgrade.go:183
+msgid "Packages to upgrade."
+msgstr "Paket att uppgradera."
+
+#: print.go:39
+msgid "Popularity"
+msgstr "Popularitet"
+
+#: pkg/menus/diff_menu.go:169 pkg/menus/edit_menu.go:134
+msgid "Proceed with install?"
+msgstr "Fortsätt med installation?"
+
+#: print.go:31
+msgid "Provides"
+msgstr "Tillhandahåller"
+
+#: pkg/query/aur_info.go:88
+msgid "Querying AUR..."
+msgstr "Frågar AUR..."
+
+#: install.go:213
+msgid "Remove make dependencies after install?"
+msgstr "Ta bort byggberoenden efter installation?"
+
+#: pkg/dep/depPool.go:546
+msgid "Repository AUR"
+msgstr "AUR-förråd"
+
+#: print.go:22 pkg/db/ialpm/alpm.go:175
+msgid "Repository"
+msgstr "Förråd"
+
+#: upgrade.go:68
+msgid "Searching AUR for updates..."
+msgstr "Söker efter uppdateringar på AUR..."
+
+#: upgrade.go:57
+msgid "Searching databases for updates..."
+msgstr "Söker efter uppdateringar i databaserna..."
+
+#: pkg/query/mixed_sources.go:200 pkg/query/source.go:79
+msgid "Showing repo packages only"
+msgstr "Visa endast förrådspaket"
+
+#: print.go:89
+msgid "Size of pacman cache %s: %s"
+msgstr "Storlek på pacman cache %s: %s"
+
+#: print.go:92
+msgid "Size of yay cache %s: %s"
+msgstr "Storlek på yay cache %s: %s"
+
+#: print.go:53
+msgid "Snapshot URL"
+msgstr "Snapshot-URL"
+
+#: print.go:94
+msgid "Ten biggest packages:"
+msgstr "Tio största paketen:"
+
+#: install.go:461
+msgid "The following packages are not compatible with your architecture:"
+msgstr "Följande paket stöds inte av din arkitektur:"
+
+#: pkg/db/ialpm/alpm.go:163 pkg/dep/depPool.go:541
+msgid "There are %d providers available for %s:"
+msgstr "Det finns %d tillgängliga tillhandahållare för %s:"
+
+#: pkg/settings/exe/cmd_builder.go:199
+msgid "There may be another Pacman instance running. Waiting..."
+msgstr "Det kan finns en till instans av pacman som kör. Väntar..."
+
+#: print.go:86
+msgid "Total Size occupied by packages: %s"
+msgstr "Total paketstorlek: %s"
+
+#: print.go:83
+msgid "Total installed packages: %s"
+msgstr "Antal installerade paket: %s"
+
+#: install.go:469
+msgid "Try to build them anyway?"
+msgstr "Försök att bygga dem ändå?"
+
+#: print.go:27
+msgid "URL"
+msgstr "URL"
+
+#: clean.go:182
+msgid "Unable to clean:"
+msgstr "Kunde inte rensa:"
+
+#: get.go:42 get.go:73
+msgid "Unable to find the following packages:"
+msgstr "Det gick inte att hitta följande paket:"
+
+#: print.go:25
+msgid "Version"
+msgstr "Version"
+
+#: print.go:38
+msgid "Votes"
+msgstr "Röster"
+
+#: print.go:81
+msgid "Yay version v%s"
+msgstr "Yay-version v%s"
+
+#: pkg/menus/menu.go:48
+msgid "[N]one"
+msgstr "[N]Inga"
+
+#: clean.go:77
 msgid ""
 "\n"
 "Build directory:"
@@ -433,7 +444,7 @@ msgstr ""
 "\n"
 "Byggkatalog:"
 
-#: callbacks.go:56 print.go:505
+#: pkg/db/ialpm/alpm.go:185 pkg/dep/depPool.go:556
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -441,197 +452,172 @@ msgstr ""
 "\n"
 "Ange ett nummer: (standard = 1): "
 
-#: depCheck.go:153
-msgid ""
-"\n"
-"Inner conflicts found:"
-msgstr ""
-"\n"
-"Interna krockar funna:"
-
-#: depCheck.go:167
-msgid ""
-"\n"
-"Package conflicts found:"
-msgstr ""
-"\n"
-"Paketkrockar funna:"
-
-#: install.go:270 install.go:310 install.go:489 install.go:593 install.go:676
+#: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "avbryter på grund av användare"
 
-#: install.go:515
+#: install.go:496
 msgid "cannot find package name: %v"
 msgstr "kunde inte hitta paketet: %v"
 
-#: install.go:1048 install.go:1120
+#: install.go:688 install.go:821
 msgid "could not find PKGDEST for: %s"
 msgstr "kunde inte hitta PKGDEST för: %s"
 
-#: install.go:792
+#: pkg/vcs/vcs.go:69
+msgid "devel check for package failed: '%s' encountered an error"
+msgstr "Utvecklings koll för paket misslyckades '%s' stötte på ett fel"
+
+#: pkg/menus/edit_menu.go:108
 msgid "editor did not exit successfully, aborting: %s"
 msgstr "redigeraren avslutades inte korrekt, avbryter: %s"
 
-#: download.go:84 download.go:109
-msgid "error cloning %s: %s"
-msgstr "fel vid kloning av %s: %s"
-
-#: install.go:924
+#: aur_source.go:26
 msgid "error downloading sources: %s"
 msgstr "fel vid nedladdning av källfiler: %s"
 
-#: query.go:193
-msgid "error during AUR search: %s"
-msgstr "fel vid AUR-sökning: %s"
-
-#: download.go:96 download.go:121
+#: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
 msgstr "fel vid hämtning av %s: %s"
 
-#: install.go:333 install.go:442
+#: install.go:299 install.go:405
 msgid "error installing repo packages"
 msgstr "fel vid installation av paket"
 
-#: install.go:1032 install.go:1072 install.go:1083 install.go:1095
+#: install.go:671 install.go:712 install.go:726 install.go:740
 msgid "error making: %s"
 msgstr "fel vid bygge: %s"
 
-#: download.go:135
+#: install.go:573
 msgid "error merging %s: %s"
 msgstr "fel vid sammanslagning av %s: %s"
 
-#: download.go:89 download.go:114
+#: pkg/download/unified.go:56
 msgid "error reading %s"
 msgstr "fel vid läsning av %s"
 
-#: install.go:75
+#: install.go:88
 msgid "error refreshing databases"
 msgstr "fel vid uppdatering av databaserna"
 
-#: clean.go:228 download.go:130
+#: clean.go:212 install.go:566
 msgid "error resetting %s: %s"
 msgstr "fel vid återställning av %s: %s"
 
-#: main.go:68
-msgid "failed to create BuildDir directory '%s': %s"
-msgstr "misslyckades med att skapa BuildDir-katalog '%s': %s"
+#: install.go:42
+msgid "error updating package install reason to dependency"
+msgstr "fel vid uppdatering av paketinstallationsorsak till beroende"
 
-#: pkg/settings/runtime.go:79
+#: install.go:60
+msgid "error updating package install reason to explicit"
+msgstr "fel vid uppdatering av paketinstallation anledning till uttryckligen"
+
+#: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "misslyckades med att skapa konfigurationskatalog '%s': %s"
+msgstr "misslyckades med att skapa katalog '%s': %s"
 
-#: download.go:288
-msgid "failed to get pkgbuild: %s: %s"
-msgstr "misslyckades med att hämta PKGBUILD: %s: %s"
-
-#: download.go:296
-msgid "failed to link %s: %s"
-msgstr "misslyckades med att länka %s: %s"
-
-#: main.go:29
+#: pkg/settings/config.go:293
 msgid "failed to open config file '%s': %s"
 msgstr "misslyckades med att öppna konfigurationsfilen '%s': %s"
 
-#: main.go:51
-msgid "failed to open vcs file '%s': %s"
-msgstr "misslyckades med att öppna vcs-filen '%s': %s"
-
-#: install.go:810
+#: install.go:522
 msgid "failed to parse %s -- skipping: %s"
 msgstr "misslyckades med att tolka %s -- hoppar över: %s"
 
-#: install.go:813
+#: install.go:526
 msgid "failed to parse %s: %s"
 msgstr "misslyckades med att tolka %s: %s"
 
-#: main.go:36
+#: pkg/settings/config.go:303
 msgid "failed to read config file '%s': %s"
 msgstr "misslyckades med att läsa konfigurationsfilen '%s': %s"
 
-#: main.go:58
-msgid "failed to read vcs file '%s': %s"
-msgstr "misslyckades med att läsa vcs-filen '%s': %s"
-
-#: cmd.go:360 config.go:147 print.go:521
+#: pkg/text/errors.go:8
 msgid "input too long"
 msgstr "för lång indata"
 
-#: callbacks.go:82 print.go:531
+#: pkg/db/ialpm/alpm.go:206 pkg/dep/depPool.go:576
 msgid "invalid number: %s"
 msgstr "ogiltigt nummer: %s"
 
-#: pkg/settings/parser.go:144
+#: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
 msgstr "ogiltig växel '%s'"
 
-#: cmd.go:342 cmd.go:376 cmd.go:393 print.go:62 print.go:105 query.go:189
-msgid "invalid sort mode. Fix with yay -Y --bottomup --save"
-msgstr "ogiltigt sorteringsläge. Lös med yay -Y --bottomup --save"
+#: cmd.go:202
+msgid "invalid option: '--deps' and '--explicit' may not be used together"
+msgstr ""
+"ogiltigt alternativ: '--deps' och ''--explicit' kan inte användas "
+"tillsammans"
 
-#: callbacks.go:87 print.go:536
+#: pkg/download/abs.go:21
+msgid "invalid repository"
+msgstr "ogiltigt förråd"
+
+#: pkg/db/ialpm/alpm.go:211 pkg/dep/depPool.go:581
 msgid "invalid value: %d is not between %d and %d"
 msgstr "ogiltigt värde: %d är inte mellan %d och %d"
 
-#: keys.go:110
+#: pkg/pgp/keys.go:114
 msgid "no keys to import"
 msgstr "inga nycklar att importera"
 
-#: cmd.go:323
-msgid "no packages match search"
-msgstr "inga paket hittades vid sökning"
+#: pkg/query/errors.go:20
+msgid "no query was executed"
+msgstr "ingen fråga utfördes"
 
-#: config.go:112
+#: pkg/text/text.go:60
 msgid "no"
 msgstr "nej"
 
-#: pkg/settings/parser.go:134
+#: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
 msgstr "bara en operation går att utföra åt gången"
 
-#: print.go:430
+#: print.go:185
 msgid "package '%s' was not found"
 msgstr "paketet '%s' kunde inte hittas"
 
-#: depCheck.go:193
+#: pkg/dep/depCheck.go:197
 msgid "package conflicts can not be resolved with noconfirm, aborting"
 msgstr "paketkrocken kunde inte lösas med noconfirm, avbryter"
 
-#: keys.go:101
+#: pkg/download/errors.go:15
+msgid "package not found in AUR"
+msgstr "paketet hittades inte i AUR"
+
+#: pkg/download/abs.go:22
+msgid "package not found in repos"
+msgstr "paketet hittades inte i förråd"
+
+#: pkg/pgp/keys.go:104
 msgid "problem importing keys"
 msgstr "ett problem uppstod vid nyckelimporten"
 
-#: install.go:178
-msgid "refusing to install AUR packages as root, aborting"
-msgstr "vägrar att installera AUR-paket som root, avbryter"
-
-#: clean.go:116
+#: clean.go:97
 msgid "removing AUR packages from cache..."
 msgstr "tar bort AUR-paket från cachen..."
 
-#: clean.go:188 clean.go:216
+#: clean.go:167 clean.go:198
 msgid "removing untracked AUR files from cache..."
 msgstr "tar bort ospårade AUR-filer från cachen..."
 
-#: install.go:1129
+#: install.go:830
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "den PKGDEST för %s som står med i makepkg finns ej: %s"
 
-#: main.go:146
+#: pkg/db/ialpm/alpm.go:231
 msgid "unable to CreateHandle: %s"
 msgstr "misslyckades med att skapa handtag (CreateHandle): %s"
 
-#: cmd.go:177
+#: cmd.go:191
 msgid "unhandled operation"
 msgstr "okänd operation"
 
-#: cmd.go:443
+#: cmd.go:424
 msgid "unknown-version"
 msgstr "okänd-version"
 
-#: config.go:111
+#: pkg/text/text.go:59
 msgid "yes"
 msgstr "ja"
-
-#~ msgid "failed to create cache directory '%s': %s"
-#~ msgstr "misslyckades med att skapa cachekatalog '%s': %s"
