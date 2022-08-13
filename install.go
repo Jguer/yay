@@ -210,7 +210,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		case "no":
 			break
 		default:
-			if text.ContinueTask(gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
+			if text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
 				defer func() {
 					err = removeMake(ctx, do)
 				}()
@@ -467,7 +467,7 @@ nextpkg:
 
 		fmt.Println()
 
-		if !text.ContinueTask(gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
+		if !text.ContinueTask(os.Stdin, gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
 			return nil, &settings.ErrUserAbort{}
 		}
 	}
