@@ -38,6 +38,7 @@ linters:
   disable-all: true
   enable:
     - bodyclose
+    - usestdlibvars
     - deadcode
     - depguard
     - dupl
