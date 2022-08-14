@@ -8,9 +8,9 @@ require (
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.0
-	github.com/stretchr/testify v1.7.2
-	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c
-	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467
+	github.com/stretchr/testify v1.8.0
+	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab
+	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
