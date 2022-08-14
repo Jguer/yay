@@ -4,7 +4,7 @@
 # 
 msgid ""
 msgstr ""
-"Last-Translator: J G, 2022\n"
+"Last-Translator: lakejason0 <sunliyuan200402@outlook.com>, 2022\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/yay-1/teams/123732/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
