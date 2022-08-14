@@ -100,8 +100,8 @@ pacman -S --needed git base-devel yay
 | `yay -Y --gendb`                  | Generate development package database used for devel update.                                        |
 | `yay -Syu --devel`                | Perform system upgrade, but also check for development package updates.                             |
 | `yay -Syu --timeupdate`           | Perform system upgrade and use PKGBUILD modification time (not version number) to determine update. |
-| `yay -Wv <AUR Package>`           | Vote for package (Requires setting `AUR_USER` and `AUR_PASSWORD` environment variables). (yay v12+) |
-| `yay -Wu <AUR Package>`           | Unvote for package (Requires setting `AUR_USER` and `AUR_PASSWORD` environment variables) (yay v12+)|
+| `yay -Wv <AUR Package>`           | Vote for package (Requires setting `AUR_USER` and `AUR_PASSWORD` environment variables). (yay v11.3+) |
+| `yay -Wu <AUR Package>`           | Unvote for package (Requires setting `AUR_USER` and `AUR_PASSWORD` environment variables) (yay v11.3+)|
 
 ## Frequently Asked Questions
 
