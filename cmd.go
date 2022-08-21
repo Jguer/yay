@@ -178,7 +178,7 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "U", "upgrade":
-		return handleUpgrade(ctx, config, cmdArgs)
+		return handleUpgrade(ctx, config, dbExecutor, cmdArgs)
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(ctx, cmdArgs, dbExecutor)
 	case "P", "show":
@@ -327,10 +327,10 @@ func handleGetpkgbuild(ctx context.Context, cmdArgs *parser.Arguments, dbExecuto
 }
 
 func handleUpgrade(ctx context.Context,
-	config *settings.Configuration, cmdArgs *parser.Arguments,
+	config *settings.Configuration, dbExecutor db.Executor, cmdArgs *parser.Arguments,
 ) error {
 	if cmdArgs.ExistsArg("i", "install") {
-		return nil
+		return installLocalPKGBUILD(ctx, cmdArgs, dbExecutor, false)
 	}
 
 	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
