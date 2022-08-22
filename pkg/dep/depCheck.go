@@ -230,15 +230,13 @@ func (dp *Pool) _checkMissing(dep string, stack []string, missing *missing, noDe
 		missing.Good.Set(dep)
 
 		combinedDepList := ComputeCombinedDepList(aurPkg, noDeps, noCheckDeps)
-		for _, deps := range combinedDepList {
-			for _, aurDep := range deps {
-				if dp.AlpmExecutor.LocalSatisfierExists(aurDep) {
-					missing.Good.Set(aurDep)
-					continue
-				}
-
-				dp._checkMissing(aurDep, append(stack, aurPkg.Name), missing, noDeps, noCheckDeps)
+		for _, aurDep := range combinedDepList {
+			if dp.AlpmExecutor.LocalSatisfierExists(aurDep) {
+				missing.Good.Set(aurDep)
+				continue
 			}
+
+			dp._checkMissing(aurDep, append(stack, aurPkg.Name), missing, noDeps, noCheckDeps)
 		}
 
 		return

@@ -61,10 +61,10 @@ type Pool struct {
 	Groups       []string
 	AlpmExecutor db.Executor
 	Warnings     *query.AURWarnings
-	aurClient    *aur.Client
+	aurClient    aur.ClientInterface
 }
 
-func newPool(dbExecutor db.Executor, aurClient *aur.Client) *Pool {
+func newPool(dbExecutor db.Executor, aurClient aur.ClientInterface) *Pool {
 	dp := &Pool{
 		Targets:      []Target{},
 		Explicit:     map[string]struct{}{},
@@ -275,17 +275,17 @@ func (dp *Pool) cacheAURPackages(ctx context.Context, _pkgs stringset.StringSet,
 
 // Compute dependency lists used in Package dep searching and ordering.
 // Order sensitive TOFIX.
-func ComputeCombinedDepList(pkg *aur.Pkg, noDeps, noCheckDeps bool) [][]string {
-	combinedDepList := make([][]string, 0, 3)
+func ComputeCombinedDepList(pkg *aur.Pkg, noDeps, noCheckDeps bool) []string {
+	combinedDepList := make([]string, 0, len(pkg.Depends)+len(pkg.MakeDepends)+len(pkg.CheckDepends))
 
 	if !noDeps {
-		combinedDepList = append(combinedDepList, pkg.Depends)
+		combinedDepList = append(combinedDepList, pkg.Depends...)
 	}
 
-	combinedDepList = append(combinedDepList, pkg.MakeDepends)
+	combinedDepList = append(combinedDepList, pkg.MakeDepends...)
 
 	if !noCheckDeps {
-		combinedDepList = append(combinedDepList, pkg.CheckDepends)
+		combinedDepList = append(combinedDepList, pkg.CheckDepends...)
 	}
 
 	return combinedDepList
@@ -326,10 +326,8 @@ func (dp *Pool) resolveAURPackages(ctx context.Context,
 		dp.Aur[pkg.Name] = pkg
 
 		combinedDepList := ComputeCombinedDepList(pkg, noDeps, noCheckDeps)
-		for _, deps := range combinedDepList {
-			for _, dep := range deps {
-				newPackages.Set(dep)
-			}
+		for _, dep := range combinedDepList {
+			newPackages.Set(dep)
 		}
 	}
 
@@ -391,7 +389,7 @@ func (dp *Pool) ResolveRepoDependency(pkg db.IPackage, noDeps bool) {
 func GetPool(ctx context.Context, pkgs []string,
 	warnings *query.AURWarnings,
 	dbExecutor db.Executor,
-	aurClient *aur.Client,
+	aurClient aur.ClientInterface,
 	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int, noDeps bool, noCheckDeps bool, assumeInstalled []string,
