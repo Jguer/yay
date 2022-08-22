@@ -48,15 +48,13 @@ func (do *Order) orderPkgAur(pkg *aur.Pkg, dp *Pool, runtime, noDeps, noCheckDep
 
 	delete(dp.Aur, pkg.Name)
 
-	for i, deps := range ComputeCombinedDepList(pkg, noDeps, noCheckDeps) {
-		for _, dep := range deps {
-			if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
-				do.orderPkgAur(aurPkg, dp, runtime && i == 0, noDeps, noCheckDeps)
-			}
+	for i, dep := range ComputeCombinedDepList(pkg, noDeps, noCheckDeps) {
+		if aurPkg := dp.findSatisfierAur(dep); aurPkg != nil {
+			do.orderPkgAur(aurPkg, dp, runtime && i == 0, noDeps, noCheckDeps)
+		}
 
-			if repoPkg := dp.findSatisfierRepo(dep); repoPkg != nil {
-				do.orderPkgRepo(repoPkg, dp, runtime && i == 0)
-			}
+		if repoPkg := dp.findSatisfierRepo(dep); repoPkg != nil {
+			do.orderPkgRepo(repoPkg, dp, runtime && i == 0)
 		}
 	}
 
