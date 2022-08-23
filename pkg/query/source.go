@@ -54,7 +54,7 @@ func NewSourceQueryBuilder(
 	}
 }
 
-func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, aurClient *aur.Client, pkgS []string) {
+func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, aurClient aur.ClientInterface, pkgS []string) {
 	var aurErr error
 
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
@@ -176,7 +176,7 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 }
 
 // queryAUR searches AUR and narrows based on subarguments.
-func queryAUR(ctx context.Context, aurClient *aur.Client, pkgS []string, searchBy string) ([]aur.Pkg, error) {
+func queryAUR(ctx context.Context, aurClient aur.ClientInterface, pkgS []string, searchBy string) ([]aur.Pkg, error) {
 	var (
 		err error
 		by  = getSearchBy(searchBy)

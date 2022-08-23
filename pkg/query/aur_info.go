@@ -84,7 +84,7 @@ func AURInfo(ctx context.Context, aurClient aur.ClientInterface, names []string,
 	return info, nil
 }
 
-func AURInfoPrint(ctx context.Context, aurClient *aur.Client, names []string, splitN int) ([]*Pkg, error) {
+func AURInfoPrint(ctx context.Context, aurClient aur.ClientInterface, names []string, splitN int) ([]*Pkg, error) {
 	text.OperationInfoln(gotext.Get("Querying AUR..."))
 
 	warnings := &AURWarnings{}

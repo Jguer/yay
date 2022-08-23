@@ -25,7 +25,7 @@ const sourceAUR = "aur"
 
 type Builder interface {
 	Len() int
-	Execute(ctx context.Context, dbExecutor db.Executor, aurClient *aur.Client, pkgS []string)
+	Execute(ctx context.Context, dbExecutor db.Executor, aurClient aur.ClientInterface, pkgS []string)
 	Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error
 	GetTargets(include, exclude intrange.IntRanges, otherExclude stringset.StringSet) ([]string, error)
 }
@@ -122,7 +122,7 @@ func (a *abstractResults) Less(i, j int) bool {
 	return simA > simB
 }
 
-func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, aurClient *aur.Client, pkgS []string) {
+func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, aurClient aur.ClientInterface, pkgS []string) {
 	var aurErr error
 
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
