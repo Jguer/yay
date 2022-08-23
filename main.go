@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime/debug"
 
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/leonelquinteros/gotext"
@@ -95,7 +96,14 @@ func main() {
 		ret = 0
 	)
 
-	defer func() { os.Exit(ret) }()
+	defer func() {
+		if rec := recover(); rec != nil {
+			text.Errorln(rec)
+			debug.PrintStack()
+		}
+
+		os.Exit(ret)
+	}()
 
 	initGotext()
 
@@ -173,7 +181,14 @@ func main() {
 		return
 	}
 
-	defer dbExecutor.Cleanup()
+	defer func() {
+		if rec := recover(); rec != nil {
+			text.Errorln(rec)
+			debug.PrintStack()
+		}
+
+		dbExecutor.Cleanup()
+	}()
 
 	if err = handleCmd(ctx, cmdArgs, db.Executor(dbExecutor)); err != nil {
 		if str := err.Error(); str != "" {
@@ -188,7 +203,5 @@ func main() {
 
 		// fallback
 		ret = 1
-
-		return
 	}
 }
