@@ -101,6 +101,7 @@ func main() {
 			text.Errorln(rec)
 			debug.PrintStack()
 		}
+
 		os.Exit(ret)
 	}()
 
@@ -185,6 +186,7 @@ func main() {
 			text.Errorln(rec)
 			debug.PrintStack()
 		}
+
 		dbExecutor.Cleanup()
 	}()
 
