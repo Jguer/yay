@@ -132,16 +132,23 @@ func installLocalPKGBUILD(
 func addNodes(dbExecutor db.Executor, aurClient aur.ClientInterface, pkgName string, pkgBase string, deps []string, graph *topo.Graph[string]) {
 	graph.AddNode(pkgBase)
 	graph.Alias(pkgBase, pkgName)
+	graph.SetNodeInfo(pkgBase, &topo.NodeInfo{Color: "blue"})
 
 	for _, depString := range deps {
 		depName, _, _ := splitDep(depString)
 
-		if dbExecutor.LocalSatisfierExists(depString) {
-			continue
-		}
-
 		graph.DependOn(depName, pkgBase)
 
+		warnings := query.AURWarnings{}
+
+		if dbExecutor.LocalSatisfierExists(depString) {
+			graph.SetNodeInfo(depName, &topo.NodeInfo{Color: "green"})
+			continue
+		} else {
+			graph.SetNodeInfo(depName, &topo.NodeInfo{Color: "red"})
+		}
+
+		// Check ALPM
 		if alpmPkg := dbExecutor.SyncSatisfier(depString); alpmPkg != nil {
 			newDeps := alpmPkg.Depends().Slice()
 			newDepsSlice := make([]string, 0, len(newDeps))
@@ -151,10 +158,8 @@ func addNodes(dbExecutor db.Executor, aurClient aur.ClientInterface, pkgName str
 			}
 
 			addNodes(dbExecutor, aurClient, alpmPkg.Name(), alpmPkg.Base(), newDepsSlice, graph)
-		}
-
-		warnings := query.AURWarnings{}
-		if aurPkgs, _ := query.AURInfo(context.TODO(), aurClient, []string{depName}, &warnings, 1); len(aurPkgs) != 0 {
+			// Check AUR
+		} else if aurPkgs, _ := query.AURInfo(context.TODO(), aurClient, []string{depName}, &warnings, 1); len(aurPkgs) != 0 {
 			pkg := aurPkgs[0]
 			newDeps := dep.ComputeCombinedDepList(pkg, false, false)
 			newDepsSlice := make([]string, 0, len(newDeps))
@@ -162,6 +167,4 @@ func addNodes(dbExecutor db.Executor, aurClient aur.ClientInterface, pkgName str
 			addNodes(dbExecutor, aurClient, pkg.PackageBase, pkg.Name, newDepsSlice, graph)
 		}
 	}
-
-	return
 }

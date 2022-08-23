@@ -15,9 +15,16 @@ type (
 	DepMap[T comparable]   map[T]NodeSet[T]
 )
 
+type NodeInfo struct {
+	Color string
+}
+
 type Graph[T comparable] struct {
 	alias AliasMap[T]
 	nodes NodeSet[T]
+
+	// node info map
+	nodeInfo map[T]NodeInfo
 
 	// `dependencies` tracks child -> parents.
 	dependencies DepMap[T]
@@ -32,6 +39,7 @@ func New[T comparable]() *Graph[T] {
 		dependencies: make(DepMap[T]),
 		dependents:   make(DepMap[T]),
 		alias:        make(AliasMap[T]),
+		nodeInfo:     make(map[T]NodeInfo),
 	}
 }
 
@@ -61,6 +69,15 @@ func (g *Graph[T]) AddNode(node T) {
 	g.nodes[node] = true
 }
 
+func (g *Graph[T]) SetNodeInfo(node T, nodeInfo *NodeInfo) {
+	// check aliases
+	if aliasNode, ok := g.alias[node]; ok {
+		node = aliasNode
+	}
+
+	g.nodeInfo[node] = *nodeInfo
+}
+
 func (g *Graph[T]) DependOn(child, parent T) error {
 	if child == parent {
 		return ErrSelfReferential
@@ -87,11 +104,21 @@ func (g *Graph[T]) DependOn(child, parent T) error {
 func (g *Graph[T]) String() string {
 	var sb strings.Builder
 	sb.WriteString("digraph {\n")
-	// sb.WriteString("rankdir=LR;\n")
+	sb.WriteString("compound=true;\n")
+	sb.WriteString("concentrate=true;\n")
 	sb.WriteString("node [shape = record, ordering=out];\n")
+
 	for node := range g.nodes {
-		sb.WriteString(fmt.Sprintf("\t\"%v\";\n", node))
+		extra := ""
+		if info, ok := g.nodeInfo[node]; ok {
+			if info.Color != "" {
+				extra = fmt.Sprintf("[color = %s]", info.Color)
+			}
+		}
+
+		sb.WriteString(fmt.Sprintf("\t\"%v\"%s;\n", node, extra))
 	}
+
 	for parent, children := range g.dependencies {
 		for child := range children {
 			sb.WriteString(fmt.Sprintf("\t\"%v\" -> \"%v\";\n", parent, child))
