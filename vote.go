@@ -22,7 +22,7 @@ func (e *ErrAURVote) Error() string {
 }
 
 func handlePackageVote(ctx context.Context,
-	targets []string, aurClient *aur.Client,
+	targets []string, aurClient aur.ClientInterface,
 	voteClient *vote.Client, splitN int, upvote bool,
 ) error {
 	infos, err := query.AURInfoPrint(ctx, aurClient, targets, splitN)

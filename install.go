@@ -634,14 +634,12 @@ func buildInstallPkgbuilds(
 		satisfied := true
 	all:
 		for _, pkg := range base {
-			for _, deps := range dep.ComputeCombinedDepList(pkg, noDeps, noCheck) {
-				for _, dep := range deps {
-					if !dp.AlpmExecutor.LocalSatisfierExists(dep) {
-						satisfied = false
-						text.Warnln(gotext.Get("%s not satisfied, flushing install queue", dep))
+			for _, dep := range dep.ComputeCombinedDepList(pkg, noDeps, noCheck) {
+				if !dp.AlpmExecutor.LocalSatisfierExists(dep) {
+					satisfied = false
+					text.Warnln(gotext.Get("%s not satisfied, flushing install queue", dep))
 
-						break all
-					}
+					break all
 				}
 			}
 		}

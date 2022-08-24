@@ -19,7 +19,7 @@ import (
 )
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(ctx context.Context, pkgS []string, aurClient *aur.Client,
+func syncSearch(ctx context.Context, pkgS []string, aurClient aur.ClientInterface,
 	dbExecutor db.Executor, queryBuilder query.Builder, verbose bool,
 ) error {
 	queryBuilder.Execute(ctx, dbExecutor, aurClient, pkgS)
