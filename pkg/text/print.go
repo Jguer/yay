@@ -98,6 +98,7 @@ func PrintInfoValue(key string, values ...string) {
 
 	if strings.HasPrefix(language, "zh") {
 		keyRuneCount := utf8.RuneCountInString(key)
+
 		switch {
 		case len(key) == keyRuneCount:
 		// these keys are all English words, do nothing, use the existing logic
@@ -109,6 +110,7 @@ func PrintInfoValue(key string, values ...string) {
 			keyTextCount = -keyTextCount + keyRuneCount
 		}
 	}
+
 	str := fmt.Sprintf(Bold("%-*s: "), keyTextCount, key)
 
 	if len(values) == 0 || (len(values) == 1 && values[0] == "") {
