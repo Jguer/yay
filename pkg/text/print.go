@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-	"unicode/utf8"
+	"unicode"
 
 	"github.com/leonelquinteros/gotext"
 	"golang.org/x/sys/unix"
@@ -85,32 +85,27 @@ func getColumnCount() int {
 }
 
 func PrintInfoValue(key string, values ...string) {
-	// 16 (text) + 1 (:) + 1 ( )
 	const (
-		keyLength  = 18
+		keyLength  = 32
 		delimCount = 2
 	)
 
-	var (
-		language     = gotext.GetLanguage()
-		keyTextCount = keyLength - delimCount
-	)
+	specialWordsCount := 0
 
-	if strings.HasPrefix(language, "zh") {
-		keyRuneCount := utf8.RuneCountInString(key)
-
-		switch {
-		case len(key) == keyRuneCount:
-		// these keys are all English words, do nothing, use the existing logic
-		case strings.HasSuffix(language, "TW") && key == "AUR 網址":
-			// this key is English + Chinese combination
-			keyTextCount = -keyTextCount + keyRuneCount - 4
-		default:
-			// other keys are all Chinese words
-			keyTextCount = -keyTextCount + keyRuneCount
+	for _, runeValue := range key {
+		// CJK handling: the character 'ー' is Katakana
+		// but if use unicode.Katakana, it will return false
+		if unicode.IsOneOf([]*unicode.RangeTable{
+			unicode.Han,
+			unicode.Hiragana,
+			unicode.Katakana,
+			unicode.Hangul,
+		}, runeValue) || runeValue == 'ー' {
+			specialWordsCount++
 		}
 	}
 
+	keyTextCount := specialWordsCount - keyLength + delimCount
 	str := fmt.Sprintf(Bold("%-*s: "), keyTextCount, key)
 
 	if len(values) == 0 || (len(values) == 1 && values[0] == "") {
