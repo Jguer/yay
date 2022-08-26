@@ -92,24 +92,24 @@ func PrintInfoValue(key string, values ...string) {
 	)
 
 	var (
-		str          string
 		language     = gotext.GetLanguage()
 		keyTextCount = keyLength - delimCount
 	)
 
 	if strings.HasPrefix(language, "zh") {
 		keyRuneCount := utf8.RuneCountInString(key)
-		if len(key) == keyRuneCount {
-			// these keys are all English words, do nothing, use the existing logic
-		} else if strings.HasSuffix(language, "TW") && key == "AUR 網址" {
+		switch {
+		case len(key) == keyRuneCount:
+		// these keys are all English words, do nothing, use the existing logic
+		case strings.HasSuffix(language, "TW") && key == "AUR 網址":
 			// this key is English + Chinese combination
 			keyTextCount = -keyTextCount + keyRuneCount - 4
-		} else {
+		default:
 			// other keys are all Chinese words
 			keyTextCount = -keyTextCount + keyRuneCount
 		}
 	}
-	str = fmt.Sprintf(Bold("%-*s: "), keyTextCount, key)
+	str := fmt.Sprintf(Bold("%-*s: "), keyTextCount, key)
 
 	if len(values) == 0 || (len(values) == 1 && values[0] == "") {
 		fmt.Fprintf(os.Stdout, "%s%s\n", str, gotext.Get("None"))
