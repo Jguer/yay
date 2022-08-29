@@ -655,6 +655,7 @@ func buildInstallPkgbuilds(
 				if i != 0 {
 					go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[i-1].String()})
 				}
+
 				return err
 			}
 		}
@@ -788,6 +789,7 @@ func buildInstallPkgbuilds(
 	if err != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
 	}
+
 	settings.NoConfirm = oldConfirm
 
 	return err
