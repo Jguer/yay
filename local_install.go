@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,7 +9,7 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/topo"
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -91,9 +90,13 @@ func installLocalPKGBUILD(
 	ctx context.Context,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
-	aurClient aur.ClientInterface,
 	ignoreProviders bool,
 ) error {
+	aurCache, err := metadata.NewAURCache("aur.json")
+	if err != nil {
+		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
+	}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		return errors.Wrap(err, gotext.Get("failed to retrieve working directory"))
@@ -121,15 +124,19 @@ func installLocalPKGBUILD(
 
 	for _, pkg := range aurPkgs {
 		depSlice := dep.ComputeCombinedDepList(&pkg, false, false)
-		addNodes(dbExecutor, aurClient, pkg.Name, pkg.PackageBase, depSlice, graph)
+		addNodes(dbExecutor, aurCache, pkg.Name, pkg.PackageBase, depSlice, graph)
 	}
 
-	fmt.Println(graph)
+	// fmt.Println(graph)
+	// aurCache.DebugInfo()
+
+	// topoSorted := graph.TopoSortedLayers()
+	// fmt.Println(topoSorted, len(topoSorted))
 
 	return nil
 }
 
-func addNodes(dbExecutor db.Executor, aurClient aur.ClientInterface, pkgName string, pkgBase string, deps []string, graph *topo.Graph[string]) {
+func addNodes(dbExecutor db.Executor, aurCache *metadata.AURCache, pkgName string, pkgBase string, deps []string, graph *topo.Graph[string]) {
 	graph.AddNode(pkgBase)
 	graph.Alias(pkgBase, pkgName)
 	graph.SetNodeInfo(pkgBase, &topo.NodeInfo{Color: "blue"})
@@ -137,16 +144,14 @@ func addNodes(dbExecutor db.Executor, aurClient aur.ClientInterface, pkgName str
 	for _, depString := range deps {
 		depName, _, _ := splitDep(depString)
 
-		graph.DependOn(depName, pkgBase)
-
-		warnings := query.AURWarnings{}
-
 		if dbExecutor.LocalSatisfierExists(depString) {
-			graph.SetNodeInfo(depName, &topo.NodeInfo{Color: "green"})
 			continue
-		} else {
-			graph.SetNodeInfo(depName, &topo.NodeInfo{Color: "red"})
+		} else if graph.Exists(depName) {
+			graph.DependOn(depName, pkgBase)
+			continue
 		}
+
+		graph.DependOn(depName, pkgBase)
 
 		// Check ALPM
 		if alpmPkg := dbExecutor.SyncSatisfier(depString); alpmPkg != nil {
@@ -157,14 +162,21 @@ func addNodes(dbExecutor db.Executor, aurClient aur.ClientInterface, pkgName str
 				newDepsSlice = append(newDepsSlice, newDep.Name)
 			}
 
-			addNodes(dbExecutor, aurClient, alpmPkg.Name(), alpmPkg.Base(), newDepsSlice, graph)
+			if len(newDeps) == 0 {
+				continue
+			}
+
+			addNodes(dbExecutor, aurCache, alpmPkg.Name(), alpmPkg.Base(), newDepsSlice, graph)
 			// Check AUR
-		} else if aurPkgs, _ := query.AURInfo(context.TODO(), aurClient, []string{depName}, &warnings, 1); len(aurPkgs) != 0 {
+		} else if aurPkgs, _ := aurCache.FindDep(depName); len(aurPkgs) != 0 {
 			pkg := aurPkgs[0]
 			newDeps := dep.ComputeCombinedDepList(pkg, false, false)
-			newDepsSlice := make([]string, 0, len(newDeps))
 
-			addNodes(dbExecutor, aurClient, pkg.PackageBase, pkg.Name, newDepsSlice, graph)
+			if len(newDeps) == 0 {
+				continue
+			}
+
+			addNodes(dbExecutor, aurCache, pkg.PackageBase, pkg.Name, newDeps, graph)
 		}
 	}
 }

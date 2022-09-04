@@ -43,6 +43,20 @@ func New[T comparable]() *Graph[T] {
 	}
 }
 
+func (g *Graph[T]) Len() int {
+	return len(g.nodes)
+}
+
+func (g *Graph[T]) Exists(node T) bool {
+	// check aliases
+	if aliasNode, ok := g.alias[node]; ok {
+		node = aliasNode
+	}
+
+	_, ok := g.nodes[node]
+	return ok
+}
+
 func (g *Graph[T]) Alias(node, alias T) error {
 	if alias == node {
 		return ErrSelfReferential
