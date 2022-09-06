@@ -11,6 +11,8 @@ import (
 	aur "github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
+
+	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 )
 
@@ -30,6 +32,21 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache, fullGraph, 
 		noConfirm:  noConfirm,
 		w:          output,
 	}
+}
+
+func (g *Grapher) GraphFromSrcInfo(pkgbuild *gosrc.Srcinfo) (*topo.Graph[string], error) {
+	graph := topo.New[string]()
+	aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, pkg := range aurPkgs {
+		depSlice := ComputeCombinedDepList(&pkg, false, false)
+		g.addNodes(graph, pkg.Name, depSlice)
+	}
+
+	return graph, nil
 }
 
 func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string], error) {
@@ -174,4 +191,51 @@ func provideMenu(w io.Writer, dep string, options []*aur.Pkg, noConfirm bool) *a
 	}
 
 	return nil
+}
+
+func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]aur.Pkg, error) {
+	pkgs := make([]aur.Pkg, 0, 1)
+
+	alpmArch, err := dbExecutor.AlpmArchitectures()
+	if err != nil {
+		return nil, err
+	}
+
+	alpmArch = append(alpmArch, "") // srcinfo assumes no value as ""
+
+	for _, pkg := range srcInfo.Packages {
+		pkgs = append(pkgs, aur.Pkg{
+			ID:            0,
+			Name:          pkg.Pkgname,
+			PackageBaseID: 0,
+			PackageBase:   srcInfo.Pkgbase,
+			Version:       srcInfo.Version(),
+			Description:   pkg.Pkgdesc,
+			URL:           pkg.URL,
+			Depends:       append(archStringToString(alpmArch, pkg.Depends), archStringToString(alpmArch, srcInfo.Package.Depends)...),
+			MakeDepends:   archStringToString(alpmArch, srcInfo.PackageBase.MakeDepends),
+			CheckDepends:  archStringToString(alpmArch, srcInfo.PackageBase.CheckDepends),
+			Conflicts:     append(archStringToString(alpmArch, pkg.Conflicts), archStringToString(alpmArch, srcInfo.Package.Conflicts)...),
+			Provides:      append(archStringToString(alpmArch, pkg.Provides), archStringToString(alpmArch, srcInfo.Package.Provides)...),
+			Replaces:      append(archStringToString(alpmArch, pkg.Replaces), archStringToString(alpmArch, srcInfo.Package.Replaces)...),
+			OptDepends:    []string{},
+			Groups:        pkg.Groups,
+			License:       pkg.License,
+			Keywords:      []string{},
+		})
+	}
+
+	return pkgs, nil
+}
+
+func archStringToString(alpmArches []string, archString []gosrc.ArchString) []string {
+	pkgs := make([]string, 0, len(archString))
+
+	for _, arch := range archString {
+		if db.ArchIsSupported(alpmArches, arch.Arch) {
+			pkgs = append(pkgs, arch.Value)
+		}
+	}
+
+	return pkgs
 }

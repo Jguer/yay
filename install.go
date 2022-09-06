@@ -423,20 +423,6 @@ func earlyRefresh(ctx context.Context, cmdArgs *parser.Arguments) error {
 		arguments, config.Runtime.Mode, settings.NoConfirm))
 }
 
-func alpmArchIsSupported(alpmArch []string, arch string) bool {
-	if arch == "any" {
-		return true
-	}
-
-	for _, a := range alpmArch {
-		if a == arch {
-			return true
-		}
-	}
-
-	return false
-}
-
 func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) (stringset.StringSet, error) {
 	incompatible := make(stringset.StringSet)
 	basesMap := make(map[string]dep.Base)
@@ -449,7 +435,7 @@ func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExe
 nextpkg:
 	for _, base := range bases {
 		for _, arch := range srcinfos[base.Pkgbase()].Arch {
-			if alpmArchIsSupported(alpmArch, arch) {
+			if db.ArchIsSupported(alpmArch, arch) {
 				continue nextpkg
 			}
 		}
