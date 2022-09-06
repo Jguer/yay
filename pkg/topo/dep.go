@@ -49,9 +49,7 @@ func (g *Graph[T]) Len() int {
 
 func (g *Graph[T]) Exists(node T) bool {
 	// check aliases
-	if aliasNode, ok := g.alias[node]; ok {
-		node = aliasNode
-	}
+	node = g.getAlias(node)
 
 	_, ok := g.nodes[node]
 	return ok
@@ -59,7 +57,7 @@ func (g *Graph[T]) Exists(node T) bool {
 
 func (g *Graph[T]) Alias(node, alias T) error {
 	if alias == node {
-		return ErrSelfReferential
+		return nil
 	}
 
 	// add node
@@ -75,24 +73,28 @@ func (g *Graph[T]) Alias(node, alias T) error {
 }
 
 func (g *Graph[T]) AddNode(node T) {
-	// check aliases
-	if aliasNode, ok := g.alias[node]; ok {
-		node = aliasNode
-	}
+	node = g.getAlias(node)
 
 	g.nodes[node] = true
 }
 
-func (g *Graph[T]) SetNodeInfo(node T, nodeInfo *NodeInfo) {
-	// check aliases
+func (g *Graph[T]) getAlias(node T) T {
 	if aliasNode, ok := g.alias[node]; ok {
-		node = aliasNode
+		return aliasNode
 	}
+	return node
+}
+
+func (g *Graph[T]) SetNodeInfo(node T, nodeInfo *NodeInfo) {
+	node = g.getAlias(node)
 
 	g.nodeInfo[node] = *nodeInfo
 }
 
 func (g *Graph[T]) DependOn(child, parent T) error {
+	child = g.getAlias(child)
+	parent = g.getAlias(parent)
+
 	if child == parent {
 		return ErrSelfReferential
 	}

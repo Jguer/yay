@@ -40,18 +40,23 @@ func (a *AURCache) DebugInfo() {
 	fmt.Println("Cache Hits", a.cacheHits)
 }
 
-func (a *AURCache) FindDep(depName string) ([]*aur.Pkg, error) {
-	if pkgs, ok := a.provideCache[depName]; ok {
+func (a *AURCache) SetProvideCache(needle string, pkgs []*aur.Pkg) {
+	a.provideCache[needle] = pkgs
+}
+
+// Get returns a list of packages that provide the given search term
+func (a *AURCache) FindPackage(needle string) ([]*aur.Pkg, error) {
+	if pkgs, ok := a.provideCache[needle]; ok {
 		a.cacheHits++
 		return pkgs, nil
 	}
 
-	final, error := a.gojqGet(depName)
+	final, error := a.gojqGet(needle)
 	if error != nil {
 		return nil, error
 	}
 
-	a.provideCache[depName] = final
+	a.provideCache[needle] = final
 
 	return final, nil
 }
