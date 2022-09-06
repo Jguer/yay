@@ -612,7 +612,7 @@ func buildInstallPkgbuilds(
 	remoteNamesCache := stringset.FromSlice(remoteNames)
 	localNamesCache := stringset.FromSlice(localNames)
 
-	for _, base := range do.Aur {
+	for i, base := range do.Aur {
 		pkg := base.Pkgbase()
 		dir := filepath.Join(config.BuildDir, pkg)
 		built := true
@@ -638,6 +638,10 @@ func buildInstallPkgbuilds(
 			exp = make([]string, 0)
 
 			if err != nil {
+				if i != 0 {
+					go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[i-1].String()})
+				}
+
 				return err
 			}
 		}
@@ -768,6 +772,10 @@ func buildInstallPkgbuilds(
 	}
 
 	err = doInstall(ctx, arguments, cmdArgs, deps, exp)
+	if err != nil {
+		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
+	}
+
 	settings.NoConfirm = oldConfirm
 
 	return err
