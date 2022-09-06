@@ -15,16 +15,18 @@ type (
 	DepMap[T comparable]   map[T]NodeSet[T]
 )
 
-type NodeInfo struct {
-	Color string
+type NodeInfo[V any] struct {
+	Color      string
+	Background string
+	Value      V
 }
 
-type Graph[T comparable] struct {
+type Graph[T comparable, V any] struct {
 	alias AliasMap[T]
 	nodes NodeSet[T]
 
 	// node info map
-	nodeInfo map[T]NodeInfo
+	nodeInfo map[T]*NodeInfo[V]
 
 	// `dependencies` tracks child -> parents.
 	dependencies DepMap[T]
@@ -33,29 +35,30 @@ type Graph[T comparable] struct {
 	// Keep track of the nodes of the graph themselves.
 }
 
-func New[T comparable]() *Graph[T] {
-	return &Graph[T]{
+func New[T comparable, V any]() *Graph[T, V] {
+	return &Graph[T, V]{
 		nodes:        make(NodeSet[T]),
 		dependencies: make(DepMap[T]),
 		dependents:   make(DepMap[T]),
 		alias:        make(AliasMap[T]),
-		nodeInfo:     make(map[T]NodeInfo),
+		nodeInfo:     make(map[T]*NodeInfo[V]),
 	}
 }
 
-func (g *Graph[T]) Len() int {
+func (g *Graph[T, V]) Len() int {
 	return len(g.nodes)
 }
 
-func (g *Graph[T]) Exists(node T) bool {
+func (g *Graph[T, V]) Exists(node T) bool {
 	// check aliases
 	node = g.getAlias(node)
 
 	_, ok := g.nodes[node]
+
 	return ok
 }
 
-func (g *Graph[T]) Alias(node, alias T) error {
+func (g *Graph[T, V]) Alias(node, alias T) error {
 	if alias == node {
 		return nil
 	}
@@ -72,26 +75,32 @@ func (g *Graph[T]) Alias(node, alias T) error {
 	return nil
 }
 
-func (g *Graph[T]) AddNode(node T) {
+func (g *Graph[T, V]) AddNode(node T) {
 	node = g.getAlias(node)
 
 	g.nodes[node] = true
 }
 
-func (g *Graph[T]) getAlias(node T) T {
+func (g *Graph[T, V]) getAlias(node T) T {
 	if aliasNode, ok := g.alias[node]; ok {
 		return aliasNode
 	}
 	return node
 }
 
-func (g *Graph[T]) SetNodeInfo(node T, nodeInfo *NodeInfo) {
+func (g *Graph[T, V]) SetNodeInfo(node T, nodeInfo *NodeInfo[V]) {
 	node = g.getAlias(node)
 
-	g.nodeInfo[node] = *nodeInfo
+	g.nodeInfo[node] = nodeInfo
 }
 
-func (g *Graph[T]) DependOn(child, parent T) error {
+func (g *Graph[T, V]) GetNodeInfo(node T) *NodeInfo[V] {
+	node = g.getAlias(node)
+
+	return g.nodeInfo[node]
+}
+
+func (g *Graph[T, V]) DependOn(child, parent T) error {
 	child = g.getAlias(child)
 	parent = g.getAlias(parent)
 
@@ -117,7 +126,7 @@ func (g *Graph[T]) DependOn(child, parent T) error {
 	return nil
 }
 
-func (g *Graph[T]) String() string {
+func (g *Graph[T, V]) String() string {
 	var sb strings.Builder
 	sb.WriteString("digraph {\n")
 	sb.WriteString("compound=true;\n")
@@ -126,9 +135,10 @@ func (g *Graph[T]) String() string {
 
 	for node := range g.nodes {
 		extra := ""
+
 		if info, ok := g.nodeInfo[node]; ok {
-			if info.Color != "" {
-				extra = fmt.Sprintf("[color = %s]", info.Color)
+			if info.Background != "" || info.Color != "" {
+				extra = fmt.Sprintf("[color = %s ,style = filled, fillcolor = %s]", info.Color, info.Background)
 			}
 		}
 
@@ -144,21 +154,21 @@ func (g *Graph[T]) String() string {
 	return sb.String()
 }
 
-func (g *Graph[T]) DependsOn(child, parent T) bool {
+func (g *Graph[T, V]) DependsOn(child, parent T) bool {
 	deps := g.Dependencies(child)
 	_, ok := deps[parent]
 
 	return ok
 }
 
-func (g *Graph[T]) HasDependent(parent, child T) bool {
+func (g *Graph[T, V]) HasDependent(parent, child T) bool {
 	deps := g.Dependents(parent)
 	_, ok := deps[child]
 
 	return ok
 }
 
-func (g *Graph[T]) Leaves() []T {
+func (g *Graph[T, V]) Leaves() []T {
 	leaves := make([]T, 0)
 
 	for node := range g.nodes {
@@ -177,7 +187,7 @@ func (g *Graph[T]) Leaves() []T {
 // any dependencies within each layer. This is useful, e.g. when building an execution plan for
 // some DAG, in which case each element within each layer could be executed in parallel. If you
 // do not need this layered property, use `Graph.TopoSorted()`, which flattens all elements.
-func (g *Graph[T]) TopoSortedLayers() [][]T {
+func (g *Graph[T, V]) TopoSortedLayers() [][]T {
 	layers := [][]T{}
 
 	// Copy the graph
@@ -210,7 +220,7 @@ func (dm DepMap[T]) removeFromDepmap(key, node T) {
 	}
 }
 
-func (g *Graph[T]) remove(node T) {
+func (g *Graph[T, V]) remove(node T) {
 	// Remove edges from things that depend on `node`.
 	for dependent := range g.dependents[node] {
 		g.dependencies.removeFromDepmap(dependent, node)
@@ -231,7 +241,7 @@ func (g *Graph[T]) remove(node T) {
 
 // TopoSorted returns all the nodes in the graph is topological sort order.
 // See also `Graph.TopoSortedLayers()`.
-func (g *Graph[T]) TopoSorted() []T {
+func (g *Graph[T, V]) TopoSorted() []T {
 	nodeCount := 0
 	layers := g.TopoSortedLayers()
 
@@ -248,24 +258,24 @@ func (g *Graph[T]) TopoSorted() []T {
 	return allNodes
 }
 
-func (g *Graph[T]) Dependencies(child T) NodeSet[T] {
+func (g *Graph[T, V]) Dependencies(child T) NodeSet[T] {
 	return g.buildTransitive(child, g.immediateDependencies)
 }
 
-func (g *Graph[T]) immediateDependencies(node T) NodeSet[T] {
+func (g *Graph[T, V]) immediateDependencies(node T) NodeSet[T] {
 	return g.dependencies[node]
 }
 
-func (g *Graph[T]) Dependents(parent T) NodeSet[T] {
+func (g *Graph[T, V]) Dependents(parent T) NodeSet[T] {
 	return g.buildTransitive(parent, g.immediateDependents)
 }
 
-func (g *Graph[T]) immediateDependents(node T) NodeSet[T] {
+func (g *Graph[T, V]) immediateDependents(node T) NodeSet[T] {
 	return g.dependents[node]
 }
 
-func (g *Graph[T]) clone() *Graph[T] {
-	return &Graph[T]{
+func (g *Graph[T, V]) clone() *Graph[T, V] {
+	return &Graph[T, V]{
 		dependencies: g.dependencies.copy(),
 		dependents:   g.dependents.copy(),
 		nodes:        g.nodes.copy(),
@@ -274,7 +284,7 @@ func (g *Graph[T]) clone() *Graph[T] {
 
 // buildTransitive starts at `root` and continues calling `nextFn` to keep discovering more nodes until
 // the graph cannot produce any more. It returns the set of all discovered nodes.
-func (g *Graph[T]) buildTransitive(root T, nextFn func(T) NodeSet[T]) NodeSet[T] {
+func (g *Graph[T, V]) buildTransitive(root T, nextFn func(T) NodeSet[T]) NodeSet[T] {
 	if _, ok := g.nodes[root]; !ok {
 		return nil
 	}
