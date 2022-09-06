@@ -36,12 +36,14 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache, fullGraph, 
 
 func (g *Grapher) GraphFromSrcInfo(pkgbuild *gosrc.Srcinfo) (*topo.Graph[string], error) {
 	graph := topo.New[string]()
+
 	aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, pkg := range aurPkgs {
+		pkg := pkg
 		depSlice := ComputeCombinedDepList(&pkg, false, false)
 		g.addNodes(graph, pkg.Name, depSlice)
 	}
@@ -78,6 +80,7 @@ func (g *Grapher) addNodes(
 					text.Warnln(depName, parentPkgName, err)
 				}
 			}
+
 			continue
 		}
 
@@ -212,16 +215,20 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]au
 			Version:       srcInfo.Version(),
 			Description:   pkg.Pkgdesc,
 			URL:           pkg.URL,
-			Depends:       append(archStringToString(alpmArch, pkg.Depends), archStringToString(alpmArch, srcInfo.Package.Depends)...),
-			MakeDepends:   archStringToString(alpmArch, srcInfo.PackageBase.MakeDepends),
-			CheckDepends:  archStringToString(alpmArch, srcInfo.PackageBase.CheckDepends),
-			Conflicts:     append(archStringToString(alpmArch, pkg.Conflicts), archStringToString(alpmArch, srcInfo.Package.Conflicts)...),
-			Provides:      append(archStringToString(alpmArch, pkg.Provides), archStringToString(alpmArch, srcInfo.Package.Provides)...),
-			Replaces:      append(archStringToString(alpmArch, pkg.Replaces), archStringToString(alpmArch, srcInfo.Package.Replaces)...),
-			OptDepends:    []string{},
-			Groups:        pkg.Groups,
-			License:       pkg.License,
-			Keywords:      []string{},
+			Depends: append(archStringToString(alpmArch, pkg.Depends),
+				archStringToString(alpmArch, srcInfo.Package.Depends)...),
+			MakeDepends:  archStringToString(alpmArch, srcInfo.PackageBase.MakeDepends),
+			CheckDepends: archStringToString(alpmArch, srcInfo.PackageBase.CheckDepends),
+			Conflicts: append(archStringToString(alpmArch, pkg.Conflicts),
+				archStringToString(alpmArch, srcInfo.Package.Conflicts)...),
+			Provides: append(archStringToString(alpmArch, pkg.Provides),
+				archStringToString(alpmArch, srcInfo.Package.Provides)...),
+			Replaces: append(archStringToString(alpmArch, pkg.Replaces),
+				archStringToString(alpmArch, srcInfo.Package.Replaces)...),
+			OptDepends: []string{},
+			Groups:     pkg.Groups,
+			License:    pkg.License,
+			Keywords:   []string{},
 		})
 	}
 
