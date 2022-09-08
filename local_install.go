@@ -53,7 +53,6 @@ func installLocalPKGBUILD(
 	}
 
 	fmt.Println(graph)
-	// aurCache.DebugInfo()
 
 	topoSorted := graph.TopoSortedLayers()
 	fmt.Println(topoSorted, len(topoSorted))
