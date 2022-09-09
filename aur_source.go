@@ -9,7 +9,6 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/stringset"
@@ -32,7 +31,8 @@ func (e *ErrDownloadSource) Unwrap() error {
 }
 
 func downloadPKGBUILDSource(ctx context.Context, cmdBuilder exe.ICmdBuilder, dest,
-	base string, incompatible stringset.StringSet) (err error) {
+	base string, incompatible stringset.StringSet,
+) error {
 	dir := filepath.Join(dest, base)
 	args := []string{"--verifysource", "-Ccf"}
 
@@ -40,7 +40,7 @@ func downloadPKGBUILDSource(ctx context.Context, cmdBuilder exe.ICmdBuilder, des
 		args = append(args, "--ignorearch")
 	}
 
-	err = cmdBuilder.Show(
+	err := cmdBuilder.Show(
 		cmdBuilder.BuildMakepkgCmd(ctx, dir, args...))
 	if err != nil {
 		return ErrDownloadSource{inner: err, pkgName: base, errOut: ""}
@@ -51,7 +51,8 @@ func downloadPKGBUILDSource(ctx context.Context, cmdBuilder exe.ICmdBuilder, des
 
 func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup, dest string,
 	cBase <-chan string, valOut chan<- string, errOut chan<- error,
-	cmdBuilder exe.ICmdBuilder, incompatible stringset.StringSet) {
+	cmdBuilder exe.ICmdBuilder, incompatible stringset.StringSet,
+) {
 	for base := range cBase {
 		err := downloadPKGBUILDSource(ctx, cmdBuilder, dest, base, incompatible)
 		if err != nil {
@@ -65,9 +66,14 @@ func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup, dest 
 }
 
 func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, dest string,
-	bases []dep.Base, incompatible stringset.StringSet, maxConcurrentDownloads int) error {
+	bases []string, incompatible stringset.StringSet, maxConcurrentDownloads int,
+) error {
+	if len(bases) == 0 {
+		return nil // no work to do
+	}
+
 	if len(bases) == 1 {
-		return downloadPKGBUILDSource(ctx, cmdBuilder, dest, bases[0].Pkgbase(), incompatible)
+		return downloadPKGBUILDSource(ctx, cmdBuilder, dest, bases[0], incompatible)
 	}
 
 	var (
@@ -84,7 +90,7 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 
 	go func() {
 		for _, base := range bases {
-			c <- base.Pkgbase()
+			c <- base
 		}
 
 		close(c)

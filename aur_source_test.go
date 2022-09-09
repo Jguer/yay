@@ -9,9 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/aur"
-
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/stringset"
@@ -84,14 +81,7 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 	t.Parallel()
 
-	bases := []dep.Base{
-		{&aur.Pkg{PackageBase: "yay"}},
-		{&aur.Pkg{PackageBase: "yay-bin"}},
-		{&aur.Pkg{PackageBase: "yay-git"}},
-		{&aur.Pkg{PackageBase: "yay-v11"}},
-		{&aur.Pkg{PackageBase: "yay-v12"}},
-	}
-
+	bases := []string{"yay", "yay-bin", "yay-git", "yay-v11", "yay-v12"}
 	for _, maxConcurrentDownloads := range []int{0, 3} {
 		t.Run(fmt.Sprintf("maxconcurrentdownloads set to %d", maxConcurrentDownloads), func(t *testing.T) {
 			cmdBuilder := &TestMakepkgBuilder{
@@ -122,9 +112,7 @@ func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 		test: t,
 	}
 
-	bases := []dep.Base{
-		{&aur.Pkg{PackageBase: "yay"}},
-	}
+	bases := []string{"yay"}
 
 	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)
 	assert.NoError(t, err)
@@ -145,12 +133,12 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 		showError: &exec.ExitError{},
 	}
 
-	bases := []dep.Base{
-		{&aur.Pkg{PackageBase: "yay"}},
-		{&aur.Pkg{PackageBase: "yay-bin"}},
-		{&aur.Pkg{PackageBase: "yay-git"}},
-		{&aur.Pkg{PackageBase: "yay-v11"}},
-		{&aur.Pkg{PackageBase: "yay-v12"}},
+	bases := []string{
+		"yay",
+		"yay-bin",
+		"yay-git",
+		"yay-v11",
+		"yay-v12",
 	}
 
 	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)

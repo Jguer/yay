@@ -330,8 +330,13 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
+	bases := make([]string, 0, len(do.Aur))
+	for _, base := range do.Aur {
+		bases = append(bases, base.Pkgbase())
+	}
+
 	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, config.BuildDir,
-		do.Aur, incompatible, config.MaxConcurrentDownloads); errP != nil {
+		bases, incompatible, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 
