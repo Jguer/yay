@@ -52,10 +52,61 @@ func installLocalPKGBUILD(
 		return err
 	}
 
-	fmt.Println(graph)
-
-	topoSorted := graph.TopoSortedLayers()
+	topoSorted := graph.TopoSortedLayerMap()
 	fmt.Println(topoSorted, len(topoSorted))
+
+	installer := &Installer{dbExecutor: dbExecutor}
+
+	installer.Install(ctx, topoSorted)
+
+	return nil
+}
+
+type Installer struct {
+	dbExecutor db.Executor
+}
+
+func (installer *Installer) Install(ctx context.Context, targets []map[string]*dep.InstallInfo) error {
+	// Reorganize targets into layers of dependencies
+	for i := len(targets) - 1; i >= 0; i-- {
+		err := installer.handleLayer(ctx, targets[i])
+		if err != nil {
+			// rollback
+			return err
+		}
+	}
+
+	return nil
+}
+
+type MapBySourceAndType map[dep.Source]map[dep.Reason][]string
+
+func (m *MapBySourceAndType) String() string {
+	var s string
+	for source, reasons := range *m {
+		s += fmt.Sprintf("%s: [", source)
+		for reason, names := range reasons {
+			s += fmt.Sprintf(" %d: [%v] ", reason, names)
+		}
+
+		s += "], "
+	}
+
+	return s
+}
+
+func (installer *Installer) handleLayer(ctx context.Context, layer map[string]*dep.InstallInfo) error {
+	// Install layer
+	depByTypeAndReason := make(MapBySourceAndType)
+	for name, info := range layer {
+		if _, ok := depByTypeAndReason[info.Source]; !ok {
+			depByTypeAndReason[info.Source] = make(map[dep.Reason][]string)
+		}
+
+		depByTypeAndReason[info.Source][info.Reason] = append(depByTypeAndReason[info.Source][info.Reason], name)
+	}
+
+	fmt.Printf("%v\n", depByTypeAndReason)
 
 	return nil
 }

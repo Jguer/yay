@@ -5,10 +5,6 @@ import (
 	"strings"
 )
 
-type Mapable interface {
-	Key() string
-}
-
 type (
 	AliasMap[T comparable] map[T]T
 	NodeSet[T comparable]  map[T]bool
@@ -22,8 +18,9 @@ type NodeInfo[V any] struct {
 }
 
 type Graph[T comparable, V any] struct {
-	alias AliasMap[T]
-	nodes NodeSet[T]
+	alias   AliasMap[T] // alias -> aliased
+	aliases DepMap[T]   // aliased -> alias
+	nodes   NodeSet[T]
 
 	// node info map
 	nodeInfo map[T]*NodeInfo[V]
@@ -41,6 +38,7 @@ func New[T comparable, V any]() *Graph[T, V] {
 		dependencies: make(DepMap[T]),
 		dependents:   make(DepMap[T]),
 		alias:        make(AliasMap[T]),
+		aliases:      make(DepMap[T]),
 		nodeInfo:     make(map[T]*NodeInfo[V]),
 	}
 }
@@ -70,7 +68,9 @@ func (g *Graph[T, V]) Alias(node, alias T) error {
 	if _, ok := g.alias[alias]; ok {
 		return ErrConflictingAlias
 	}
+
 	g.alias[alias] = node
+	g.aliases.addNodeToNodeset(node, alias)
 
 	return nil
 }
@@ -89,15 +89,23 @@ func (g *Graph[T, V]) getAlias(node T) T {
 }
 
 func (g *Graph[T, V]) SetNodeInfo(node T, nodeInfo *NodeInfo[V]) {
-	node = g.getAlias(node)
-
-	g.nodeInfo[node] = nodeInfo
+	g.nodeInfo[g.getAlias(node)] = nodeInfo
 }
 
 func (g *Graph[T, V]) GetNodeInfo(node T) *NodeInfo[V] {
-	node = g.getAlias(node)
+	return g.nodeInfo[g.getAlias(node)]
+}
 
-	return g.nodeInfo[node]
+// Retrieve aliases of a node.
+func (g *Graph[T, V]) GetAliases(node T) []T {
+	size := len(g.aliases[node])
+	aliases := make([]T, 0, size)
+
+	for alias := range g.aliases[node] {
+		aliases = append(aliases, alias)
+	}
+
+	return aliases
 }
 
 func (g *Graph[T, V]) DependOn(child, parent T) error {
@@ -150,7 +158,9 @@ func (g *Graph[T, V]) String() string {
 			sb.WriteString(fmt.Sprintf("\t\"%v\" -> \"%v\";\n", parent, child))
 		}
 	}
+
 	sb.WriteString("}")
+
 	return sb.String()
 }
 
@@ -180,13 +190,25 @@ func (g *Graph[T, V]) Leaves() []T {
 	return leaves
 }
 
-// TopoSortedLayers returns a slice of all of the graph nodes in topological sort order. That is,
-// if `B` depends on `A`, then `A` is guaranteed to come before `B` in the sorted output.
-// The graph is guaranteed to be cycle-free because cycles are detected while building the
-// graph. Additionally, the output is grouped into "layers", which are guaranteed to not have
-// any dependencies within each layer. This is useful, e.g. when building an execution plan for
-// some DAG, in which case each element within each layer could be executed in parallel. If you
-// do not need this layered property, use `Graph.TopoSorted()`, which flattens all elements.
+// LeavesMap returns a map of leaves with the node as key and the node info value as value.
+func (g *Graph[T, V]) LeavesMap() map[T]V {
+	leaves := make(map[T]V, 0)
+
+	for node := range g.nodes {
+		if _, ok := g.dependencies[node]; !ok {
+			nodeInfo := g.GetNodeInfo(node)
+			if nodeInfo == nil {
+				nodeInfo = &NodeInfo[V]{}
+			}
+
+			leaves[node] = nodeInfo.Value
+		}
+	}
+
+	return leaves
+}
+
+// TopoSortedLayers returns a slice of all of the graph nodes in topological sort order.
 func (g *Graph[T, V]) TopoSortedLayers() [][]T {
 	layers := [][]T{}
 
@@ -202,6 +224,29 @@ func (g *Graph[T, V]) TopoSortedLayers() [][]T {
 		layers = append(layers, leaves)
 
 		for _, leafNode := range leaves {
+			shrinkingGraph.remove(leafNode)
+		}
+	}
+
+	return layers
+}
+
+// TopoSortedLayerMap returns a slice of all of the graph nodes in topological sort order with their node info
+func (g *Graph[T, V]) TopoSortedLayerMap() []map[T]V {
+	layers := []map[T]V{}
+
+	// Copy the graph
+	shrinkingGraph := g.clone()
+
+	for {
+		leaves := shrinkingGraph.LeavesMap()
+		if len(leaves) == 0 {
+			break
+		}
+
+		layers = append(layers, leaves)
+
+		for leafNode := range leaves {
 			shrinkingGraph.remove(leafNode)
 		}
 	}
@@ -240,7 +285,6 @@ func (g *Graph[T, V]) remove(node T) {
 }
 
 // TopoSorted returns all the nodes in the graph is topological sort order.
-// See also `Graph.TopoSortedLayers()`.
 func (g *Graph[T, V]) TopoSorted() []T {
 	nodeCount := 0
 	layers := g.TopoSortedLayers()
@@ -279,6 +323,7 @@ func (g *Graph[T, V]) clone() *Graph[T, V] {
 		dependencies: g.dependencies.copy(),
 		dependents:   g.dependents.copy(),
 		nodes:        g.nodes.copy(),
+		nodeInfo:     g.nodeInfo, // not copied, as it is not modified
 	}
 }
 

@@ -16,33 +16,66 @@ import (
 	"github.com/leonelquinteros/gotext"
 )
 
+type InstallInfo struct {
+	Source Source
+	Reason Reason
+}
+
+func (i *InstallInfo) String() string {
+	return fmt.Sprintf("InstallInfo{Source: %v, Reason: %v}", i.Source, i.Reason)
+}
+
 type (
-	packageType int
-	sourceType  int
+	Reason int
+	Source int
 )
 
-const (
-	Explicit packageType = iota
-	Dep
-	MakeDep
-	CheckDep
-)
+func (r Reason) String() string {
+	return reasonNames[r]
+}
+
+func (s Source) String() string {
+	return sourceNames[s]
+}
 
 const (
-	AUR sourceType = iota
+	Explicit Reason = iota // 0
+	Dep                    // 1
+	MakeDep                // 2
+	CheckDep               // 3
+)
+
+var reasonNames = map[Reason]string{
+	Explicit: gotext.Get("explicit"),
+	Dep:      gotext.Get("dep"),
+	MakeDep:  gotext.Get("makedep"),
+	CheckDep: gotext.Get("checkdep"),
+}
+
+const (
+	AUR Source = iota
 	Sync
 	Local
+	SrcInfo
 	Missing
 )
 
-var bgColorMap = map[sourceType]string{
+var sourceNames = map[Source]string{
+	AUR:     gotext.Get("aur"),
+	Sync:    gotext.Get("sync"),
+	Local:   gotext.Get("local"),
+	SrcInfo: gotext.Get("srcinfo"),
+	Missing: gotext.Get("missing"),
+}
+
+var bgColorMap = map[Source]string{
 	AUR:     "lightblue",
 	Sync:    "lemonchiffon",
 	Local:   "darkolivegreen1",
 	Missing: "tomato",
 }
 
-var colorMap = map[packageType]string{
+var colorMap = map[Reason]string{
 	Explicit: "black",
 	Dep:      "deeppink",
 	MakeDep:  "navyblue",
@@ -67,8 +100,8 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache, fullGraph, 
 	}
 }
 
-func (g *Grapher) GraphFromSrcInfo(pkgbuild *gosrc.Srcinfo) (*topo.Graph[string, int], error) {
-	graph := topo.New[string, int]()
+func (g *Grapher) GraphFromSrcInfo(pkgbuild *gosrc.Srcinfo) (*topo.Graph[string, *InstallInfo], error) {
+	graph := topo.New[string, *InstallInfo]()
 
 	aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
 	if err != nil {
@@ -77,13 +110,27 @@ func (g *Grapher) GraphFromSrcInfo(pkgbuild *gosrc.Srcinfo) (*topo.Graph[string,
 
 	for _, pkg := range aurPkgs {
 		pkg := pkg
+
+		if err := graph.Alias(pkg.PackageBase, pkg.Name); err != nil {
+			text.Warnln("aur target alias warn:", pkg.PackageBase, pkg.Name, err)
+		}
+
+		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
+			Color:      colorMap[Explicit],
+			Background: bgColorMap[AUR],
+			Value: &InstallInfo{
+				Source: SrcInfo,
+				Reason: Explicit,
+			},
+		})
+
 		g.addDepNodes(&pkg, graph)
 	}
 
 	return graph, nil
 }
 
-func (g *Grapher) addDepNodes(pkg *aur.Pkg, graph *topo.Graph[string, int]) {
+func (g *Grapher) addDepNodes(pkg *aur.Pkg, graph *topo.Graph[string, *InstallInfo]) {
 	if len(pkg.MakeDepends) > 0 {
 		g.addNodes(graph, pkg.Name, pkg.MakeDepends, MakeDep)
 	}
@@ -97,8 +144,8 @@ func (g *Grapher) addDepNodes(pkg *aur.Pkg, graph *topo.Graph[string, int]) {
 	}
 }
 
-func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string, int], error) {
-	graph := topo.New[string, int]()
+func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string, *InstallInfo], error) {
+	graph := topo.New[string, *InstallInfo]()
 
 	for _, target := range targets {
 		aurPkgs, _ := g.aurCache.FindPackage(target)
@@ -108,25 +155,50 @@ func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string, int],
 			text.Warnln("aur target alias warn:", pkg.PackageBase, pkg.Name, err)
 		}
 
-		graph.SetNodeInfo(pkg.Name, &topo.NodeInfo[int]{Color: colorMap[Explicit], Background: bgColorMap[AUR]})
+		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
+			Color:      colorMap[Explicit],
+			Background: bgColorMap[AUR],
+			Value: &InstallInfo{
+				Source: AUR,
+				Reason: Explicit,
+			},
+		})
+
 		g.addDepNodes(pkg, graph)
 	}
 
 	return graph, nil
 }
 
+func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo],
+	node string, nodeInfo *topo.NodeInfo[*InstallInfo],
+) {
+	info := graph.GetNodeInfo(node)
+	if info != nil {
+		if info.Value.Reason < nodeInfo.Value.Reason {
+			return // refuse to downgrade reason from explicit to dep
+		}
+	}
+
+	graph.SetNodeInfo(node, nodeInfo)
+}
+
 func (g *Grapher) addNodes(
-	graph *topo.Graph[string, int],
+	graph *topo.Graph[string, *InstallInfo],
 	parentPkgName string,
 	deps []string,
-	depType packageType,
+	depType Reason,
 ) {
 	for _, depString := range deps {
 		depName, _, _ := splitDep(depString)
 
 		if g.dbExecutor.LocalSatisfierExists(depString) {
 			if g.fullGraph {
-				graph.SetNodeInfo(depName, &topo.NodeInfo[int]{Color: colorMap[depType], Background: bgColorMap[Local]})
+				g.ValidateAndSetNodeInfo(
+					graph,
+					depName,
+					&topo.NodeInfo[*InstallInfo]{Color: colorMap[depType], Background: bgColorMap[Local]})
+
 				if err := graph.DependOn(depName, parentPkgName); err != nil {
 					text.Warnln(depName, parentPkgName, err)
 				}
@@ -149,7 +221,17 @@ func (g *Grapher) addNodes(
 				text.Warnln("repo dep warn:", depName, parentPkgName, err)
 			}
 
-			graph.SetNodeInfo(alpmPkg.Name(), &topo.NodeInfo[int]{Color: colorMap[depType], Background: bgColorMap[Sync]})
+			g.ValidateAndSetNodeInfo(
+				graph,
+				alpmPkg.Name(),
+				&topo.NodeInfo[*InstallInfo]{
+					Color:      colorMap[depType],
+					Background: bgColorMap[Sync],
+					Value: &InstallInfo{
+						Source: Sync,
+						Reason: depType,
+					},
+				})
 
 			if newDeps := alpmPkg.Depends().Slice(); len(newDeps) != 0 && g.fullGraph {
 				newDepsSlice := make([]string, 0, len(newDeps))
@@ -166,7 +248,7 @@ func (g *Grapher) addNodes(
 		if aurPkgs, _ := g.aurCache.FindPackage(depName); len(aurPkgs) != 0 { // Check AUR
 			pkg := aurPkgs[0]
 			if len(aurPkgs) > 1 {
-				pkg := provideMenu(g.w, depName, aurPkgs, g.noConfirm)
+				pkg = provideMenu(g.w, depName, aurPkgs, g.noConfirm)
 				g.aurCache.SetProvideCache(depName, []*aur.Pkg{pkg})
 			}
 
@@ -178,14 +260,23 @@ func (g *Grapher) addNodes(
 				text.Warnln("aur dep warn:", pkg.PackageBase, parentPkgName, err)
 			}
 
-			graph.SetNodeInfo(pkg.PackageBase, &topo.NodeInfo[int]{Color: colorMap[depType], Background: bgColorMap[AUR]})
+			graph.SetNodeInfo(
+				pkg.PackageBase,
+				&topo.NodeInfo[*InstallInfo]{
+					Color:      colorMap[depType],
+					Background: bgColorMap[AUR],
+					Value: &InstallInfo{
+						Source: AUR,
+						Reason: depType,
+					},
+				})
 			g.addDepNodes(pkg, graph)
 
 			continue
 		}
 
 		// no dep found. add as missing
-		graph.SetNodeInfo(depString, &topo.NodeInfo[int]{Color: colorMap[depType], Background: bgColorMap[Missing]})
+		graph.SetNodeInfo(depString, &topo.NodeInfo[*InstallInfo]{Color: colorMap[depType], Background: bgColorMap[Missing]})
 	}
 }
 
