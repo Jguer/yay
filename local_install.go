@@ -286,13 +286,13 @@ func getNewTargets(cmdArgs *parser.Arguments, pkgdests map[string]string, isDep 
 
 		switch {
 		case cmdArgs.ExistsArg("asdeps", "asdep"):
-			deps = append(deps, pkgName)
+			deps = append(deps, pkgDest)
 		case cmdArgs.ExistsArg("asexplicit", "asexp"):
-			exp = append(exp, pkgName)
+			exp = append(exp, pkgDest)
 		case isDep:
-			deps = append(deps, pkgName)
+			deps = append(deps, pkgDest)
 		default:
-			exp = append(exp, pkgName)
+			exp = append(exp, pkgDest)
 		}
 	}
 

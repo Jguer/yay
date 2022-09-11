@@ -784,7 +784,7 @@ func doInstall(ctx context.Context, cmdArgs *parser.Arguments, pkgDeps, pkgExp [
 	arguments.DelArg("confirm")
 	arguments.DelArg("noconfirm")
 	arguments.DelArg("c", "clean")
-	arguments.DelArg("q", "quiet")
+	arguments.DelArg("i", "install")
 	arguments.DelArg("q", "quiet")
 	arguments.DelArg("y", "refresh")
 	arguments.DelArg("u", "sysupgrade")
