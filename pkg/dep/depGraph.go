@@ -17,8 +17,9 @@ import (
 )
 
 type InstallInfo struct {
-	Source Source
-	Reason Reason
+	Source      Source
+	Reason      Reason
+	SrcinfoPath *string
 }
 
 func (i *InstallInfo) String() string {
@@ -100,7 +101,7 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache, fullGraph, 
 	}
 }
 
-func (g *Grapher) GraphFromSrcInfo(pkgbuild *gosrc.Srcinfo) (*topo.Graph[string, *InstallInfo], error) {
+func (g *Grapher) GraphFromSrcInfo(pkgBuildDir string, pkgbuild *gosrc.Srcinfo) (*topo.Graph[string, *InstallInfo], error) {
 	graph := topo.New[string, *InstallInfo]()
 
 	aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
@@ -119,8 +120,9 @@ func (g *Grapher) GraphFromSrcInfo(pkgbuild *gosrc.Srcinfo) (*topo.Graph[string,
 			Color:      colorMap[Explicit],
 			Background: bgColorMap[AUR],
 			Value: &InstallInfo{
-				Source: SrcInfo,
-				Reason: Explicit,
+				Source:      SrcInfo,
+				Reason:      Explicit,
+				SrcinfoPath: &pkgBuildDir,
 			},
 		})
 

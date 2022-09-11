@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"sync/atomic"
 	"testing"
 
@@ -11,7 +12,6 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
-	"github.com/Jguer/yay/v11/pkg/stringset"
 )
 
 type TestMakepkgBuilder struct {
@@ -53,7 +53,7 @@ func Test_downloadPKGBUILDSource(t *testing.T) {
 		want:          "makepkg --nocheck --config /etc/not.conf --verifysource -Ccf",
 		wantDir:       "/tmp/yay-bin",
 	}
-	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, "/tmp", "yay-bin", stringset.Make())
+	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(cmdBuilder.passes))
 }
@@ -70,7 +70,7 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 		wantDir:       "/tmp/yay-bin",
 		showError:     &exec.ExitError{},
 	}
-	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, "/tmp", "yay-bin", stringset.Make())
+	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "error downloading sources: \x1b[36myay-bin\x1b[0m \n\t context: <nil> \n\t \n")
 }
@@ -81,7 +81,7 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 	t.Parallel()
 
-	bases := []string{"yay", "yay-bin", "yay-git", "yay-v11", "yay-v12"}
+	pkgBuildDirs := []string{"/tmp/yay", "/tmp/yay-bin", "/tmp/yay-git", "/tmp/yay-v11", "/tmp/yay-v12"}
 	for _, maxConcurrentDownloads := range []int{0, 3} {
 		t.Run(fmt.Sprintf("maxconcurrentdownloads set to %d", maxConcurrentDownloads), func(t *testing.T) {
 			cmdBuilder := &TestMakepkgBuilder{
@@ -92,7 +92,7 @@ func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 				test: t,
 			}
 
-			err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), maxConcurrentDownloads)
+			err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, maxConcurrentDownloads)
 			assert.NoError(t, err)
 			assert.Equal(t, 5, int(cmdBuilder.passes))
 		})
@@ -112,9 +112,9 @@ func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 		test: t,
 	}
 
-	bases := []string{"yay"}
+	pkgBuildDirs := []string{"/tmp/yay"}
 
-	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)
+	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(cmdBuilder.passes))
 }
@@ -133,15 +133,15 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 		showError: &exec.ExitError{},
 	}
 
-	bases := []string{
-		"yay",
-		"yay-bin",
-		"yay-git",
-		"yay-v11",
-		"yay-v12",
+	pkgBuildDirs := []string{
+		"/tmp/yay",
+		"/tmp/yay-bin",
+		"/tmp/yay-git",
+		"/tmp/yay-v11",
+		"/tmp/yay-v12",
 	}
 
-	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)
+	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.Error(t, err)
 	assert.Equal(t, 5, int(cmdBuilder.passes))
 	assert.Len(t, err.(*multierror.MultiError).Errors, 5)

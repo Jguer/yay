@@ -27,6 +27,7 @@ require (
 require github.com/tidwall/gjson v1.14.3
 
 require (
+	github.com/deckarep/golang-set/v2 v2.1.0
 	github.com/itchyny/gojq v0.12.8
 	github.com/itchyny/timefmt-go v0.1.3 // indirect
 	github.com/ohler55/ojg v1.14.4

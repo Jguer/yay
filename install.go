@@ -331,12 +331,16 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	}()
 
 	bases := make([]string, 0, len(do.Aur))
+	pkgBuildDirs := make([]string, 0, len(do.Aur))
 	for _, base := range do.Aur {
 		bases = append(bases, base.Pkgbase())
+		pkgBuildDirs = append(pkgBuildDirs, filepath.Join(config.BuildDir, base.Pkgbase()))
 	}
 
-	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, config.BuildDir,
-		bases, incompatible, config.MaxConcurrentDownloads); errP != nil {
+	if errP := downloadPKGBUILDSourceFanout(ctx,
+		config.Runtime.CmdBuilder,
+		pkgBuildDirs,
+		len(incompatible) > 0, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 
@@ -589,18 +593,6 @@ func buildInstallPkgbuilds(
 	incompatible stringset.StringSet,
 	conflicts stringset.MapStringSet, noDeps, noCheck bool,
 ) error {
-	arguments := cmdArgs.Copy()
-	arguments.ClearTargets()
-	arguments.Op = "U"
-	arguments.DelArg("confirm")
-	arguments.DelArg("noconfirm")
-	arguments.DelArg("c", "clean")
-	arguments.DelArg("q", "quiet")
-	arguments.DelArg("q", "quiet")
-	arguments.DelArg("y", "refresh")
-	arguments.DelArg("u", "sysupgrade")
-	arguments.DelArg("w", "downloadonly")
-
 	deps := make([]string, 0)
 	exp := make([]string, 0)
 	oldConfirm := settings.NoConfirm
@@ -636,8 +628,7 @@ func buildInstallPkgbuilds(
 		}
 
 		if !satisfied || !config.BatchInstall {
-			err = doInstall(ctx, arguments, cmdArgs, deps, exp)
-			arguments.ClearTargets()
+			err = doInstall(ctx, cmdArgs, deps, exp)
 
 			deps = make([]string, 0)
 			exp = make([]string, 0)
@@ -755,7 +746,7 @@ func buildInstallPkgbuilds(
 		for _, split := range base {
 			for suffix, optional := range map[string]bool{"": false, "-debug": true} {
 				deps, exp, errAdd = doAddTarget(dp, localNamesCache, remoteNamesCache,
-					arguments, cmdArgs, pkgdests, deps, exp, split.Name+suffix, optional)
+					cmdArgs, pkgdests, deps, exp, split.Name+suffix, optional)
 				if errAdd != nil {
 					return errAdd
 				}
@@ -776,7 +767,7 @@ func buildInstallPkgbuilds(
 		wg.Wait()
 	}
 
-	err = doInstall(ctx, arguments, cmdArgs, deps, exp)
+	err = doInstall(ctx, cmdArgs, deps, exp)
 	if err != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
 	}
@@ -786,10 +777,25 @@ func buildInstallPkgbuilds(
 	return err
 }
 
-func doInstall(ctx context.Context, arguments, cmdArgs *parser.Arguments, pkgDeps, pkgExp []string) error {
-	if len(arguments.Targets) == 0 {
+func doInstall(ctx context.Context, cmdArgs *parser.Arguments, pkgDeps, pkgExp []string) error {
+	arguments := cmdArgs.Copy()
+	arguments.ClearTargets()
+	arguments.Op = "U"
+	arguments.DelArg("confirm")
+	arguments.DelArg("noconfirm")
+	arguments.DelArg("c", "clean")
+	arguments.DelArg("q", "quiet")
+	arguments.DelArg("q", "quiet")
+	arguments.DelArg("y", "refresh")
+	arguments.DelArg("u", "sysupgrade")
+	arguments.DelArg("w", "downloadonly")
+
+	if len(pkgDeps)+len(pkgExp) == 0 {
 		return nil
 	}
+
+	arguments.AddTarget(pkgDeps...)
+	arguments.AddTarget(pkgExp...)
 
 	if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
@@ -808,7 +814,7 @@ func doInstall(ctx context.Context, arguments, cmdArgs *parser.Arguments, pkgDep
 }
 
 func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.StringSet,
-	arguments, cmdArgs *parser.Arguments, pkgdests map[string]string,
+	cmdArgs *parser.Arguments, pkgdests map[string]string,
 	deps, exp []string, name string, optional bool,
 ) (newDeps, newExp []string, err error) {
 	pkgdest, ok := pkgdests[name]
@@ -831,8 +837,6 @@ func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.Strin
 				name, pkgdest))
 	}
 
-	arguments.AddTarget(pkgdest)
-
 	switch {
 	case cmdArgs.ExistsArg("asdeps", "asdep"):
 		deps = append(deps, name)
@@ -840,6 +844,8 @@ func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.Strin
 		exp = append(exp, name)
 	case !dp.Explicit.Get(name) && !localNamesCache.Get(name) && !remoteNamesCache.Get(name):
 		deps = append(deps, name)
+	default:
+		exp = append(exp, name)
 	}
 
 	return deps, exp, nil
