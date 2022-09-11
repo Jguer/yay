@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
@@ -66,11 +67,12 @@ func installLocalPKGBUILD(
 	preparer := &Preparer{dbExecutor: dbExecutor, cmdBuilder: config.Runtime.CmdBuilder}
 	installer := &Installer{dbExecutor: dbExecutor}
 
-	if err := preparer.PrepareWorkspace(ctx, topoSorted); err != nil {
+	pkgBuildDirs, err := preparer.PrepareWorkspace(ctx, topoSorted)
+	if err != nil {
 		return err
 	}
 
-	return installer.Install(ctx, cmdArgs, topoSorted)
+	return installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs)
 }
 
 type Preparer struct {
@@ -81,38 +83,44 @@ type Preparer struct {
 }
 
 func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[string]*dep.InstallInfo,
-) error {
+) (map[string]string, error) {
+	pkgBuildDirs := make(map[string]string, 0)
+
 	for _, layer := range targets {
 		for pkgBase, info := range layer {
 			if info.Source == dep.AUR {
 				preper.aurBases = append(preper.aurBases, pkgBase)
-				preper.pkgBuildDirs = append(preper.pkgBuildDirs, filepath.Join(config.BuildDir, pkgBase))
+				pkgBuildDirs[pkgBase] = filepath.Join(config.BuildDir, pkgBase)
 			} else if info.Source == dep.SrcInfo {
-				preper.pkgBuildDirs = append(preper.pkgBuildDirs, *info.SrcinfoPath)
+				pkgBuildDirs[pkgBase] = *info.SrcinfoPath
 			}
 		}
 	}
 
 	if _, errA := download.AURPKGBUILDRepos(ctx,
 		preper.cmdBuilder, preper.aurBases, config.AURURL, config.BuildDir, false); errA != nil {
-		return errA
+		return nil, errA
 	}
 
 	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder,
 		preper.pkgBuildDirs, false, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
-	return nil
+	return pkgBuildDirs, nil
 }
 
 type Installer struct {
 	dbExecutor db.Executor
 }
 
-func (installer *Installer) Install(ctx context.Context, cmdArgs *parser.Arguments, targets []map[string]*dep.InstallInfo) error {
+func (installer *Installer) Install(ctx context.Context,
+	cmdArgs *parser.Arguments,
+	targets []map[string]*dep.InstallInfo,
+	pkgBuildDirs map[string]string,
+) error {
 	// Reorganize targets into layers of dependencies
 	for i := len(targets) - 1; i >= 0; i-- {
-		err := installer.handleLayer(ctx, cmdArgs, targets[i])
+		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs)
 		if err != nil {
 			// rollback
 			return err
@@ -138,7 +146,9 @@ func (m *MapBySourceAndType) String() string {
 	return s
 }
 
-func (installer *Installer) handleLayer(ctx context.Context, cmdArgs *parser.Arguments, layer map[string]*dep.InstallInfo) error {
+func (installer *Installer) handleLayer(ctx context.Context,
+	cmdArgs *parser.Arguments, layer map[string]*dep.InstallInfo, pkgBuildDirs map[string]string,
+) error {
 	// Install layer
 	depByTypeAndReason := make(MapBySourceAndType)
 	for name, info := range layer {
@@ -157,6 +167,8 @@ func (installer *Installer) handleLayer(ctx context.Context, cmdArgs *parser.Arg
 	aurDeps, aurExp := mapset.NewSet[string](), mapset.NewSet[string]()
 	for source, reasons := range depByTypeAndReason {
 		switch source {
+		case dep.SrcInfo:
+			fallthrough
 		case dep.AUR:
 			for reason, names := range reasons {
 				for _, name := range names {
@@ -205,7 +217,9 @@ func (installer *Installer) handleLayer(ctx context.Context, cmdArgs *parser.Arg
 		return ErrInstallRepoPkgs
 	}
 
-	return nil
+	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp, pkgBuildDirs, false)
+
+	return errAur
 }
 
 func (*Installer) installAURPackages(ctx context.Context, cmdArgs *parser.Arguments, aurBaseDeps, aurBaseExp mapset.Set[string], pkgBuildDirs map[string]string, installIncompatible bool) error {
@@ -241,14 +255,12 @@ func (*Installer) installAURPackages(ctx context.Context, cmdArgs *parser.Argume
 			return errors.New(gotext.Get("error making: %s", base))
 		}
 
-		for suffix, optional := range map[string]bool{"": false, "-debug": true} {
-			newDeps, newExp, err := getNewTargets(cmdArgs, pkgdests, base+suffix, aurBaseDeps.Contains(base), optional)
-			if err != nil {
-				return err
-			}
-			deps = append(deps, newDeps...)
-			exp = append(exp, newExp...)
+		newDeps, newExp, err := getNewTargets(cmdArgs, pkgdests, aurBaseDeps.Contains(base))
+		if err != nil {
+			return err
 		}
+		deps = append(deps, newDeps...)
+		exp = append(exp, newExp...)
 	}
 
 	if err := doInstall(ctx, cmdArgs, deps, exp); err != nil {
@@ -258,11 +270,11 @@ func (*Installer) installAURPackages(ctx context.Context, cmdArgs *parser.Argume
 	return nil
 }
 
-func getNewTargets(cmdArgs *parser.Arguments, pkgdests map[string]string, name string, isDep, optional bool,
+func getNewTargets(cmdArgs *parser.Arguments, pkgdests map[string]string, isDep bool,
 ) (deps, exp []string, err error) {
 	for pkgName, pkgDest := range pkgdests {
 		if _, errStat := os.Stat(pkgDest); os.IsNotExist(errStat) {
-			if optional {
+			if strings.HasSuffix(pkgName, "-debug") {
 				continue
 			}
 
@@ -274,13 +286,13 @@ func getNewTargets(cmdArgs *parser.Arguments, pkgdests map[string]string, name s
 
 		switch {
 		case cmdArgs.ExistsArg("asdeps", "asdep"):
-			deps = append(deps, name)
+			deps = append(deps, pkgName)
 		case cmdArgs.ExistsArg("asexplicit", "asexp"):
-			exp = append(exp, name)
+			exp = append(exp, pkgName)
 		case isDep:
-			deps = append(deps, name)
+			deps = append(deps, pkgName)
 		default:
-			exp = append(exp, name)
+			exp = append(exp, pkgName)
 		}
 	}
 
@@ -292,6 +304,10 @@ func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Argum
 	syncDeps, // repo targets that are deps
 	syncExp []string, // repo targets that are exp
 ) error {
+	if len(repoTargets) == 0 {
+		return nil
+	}
+
 	arguments := cmdArgs.Copy()
 	arguments.DelArg("asdeps", "asdep")
 	arguments.DelArg("asexplicit", "asexp")
