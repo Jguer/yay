@@ -30,16 +30,17 @@ func (c *Configuration) extractYayOptions(a *parser.Arguments) {
 	c.AURURL = strings.TrimRight(c.AURURL, "/")
 	c.Runtime.AURClient.BaseURL = c.AURURL + "/rpc?"
 
-	// if AurRpcUrl is set, use that for /rpc calls
-	if c.AurRpcUrl != "" {
-		if !strings.HasSuffix(c.AurRpcUrl, "?") {
-			if strings.HasSuffix(c.AurRpcUrl, "/rpc") {
-				c.AurRpcUrl += "?"
+	// if AurRPCURL is set, use that for /rpc calls
+	if c.AURRPCURL != "" {
+		if !strings.HasSuffix(c.AURRPCURL, "?") {
+			if strings.HasSuffix(c.AURRPCURL, "/rpc") {
+				c.AURRPCURL += "?"
 			} else {
-				c.AurRpcUrl = strings.TrimRight(c.AurRpcUrl, "/") + "/rpc?"
+				c.AURRPCURL = strings.TrimRight(c.AURRPCURL, "/") + "/rpc?"
 			}
 		}
-		c.Runtime.AURClient.BaseURL = c.AurRpcUrl
+
+		c.Runtime.AURClient.BaseURL = c.AURRPCURL
 	}
 }
 
@@ -48,7 +49,7 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "aururl":
 		c.AURURL = value
 	case "aurrpcurl":
-		c.AurRpcUrl = value
+		c.AURRPCURL = value
 	case "save":
 		c.Runtime.SaveConfig = true
 	case "afterclean", "cleanafter":
