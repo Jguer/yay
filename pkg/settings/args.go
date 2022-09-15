@@ -28,7 +28,7 @@ func (c *Configuration) extractYayOptions(a *parser.Arguments) {
 	}
 
 	c.AURURL = strings.TrimRight(c.AURURL, "/")
-	c.Runtime.AURClient.BaseURL = strings.TrimRight(c.AURURL, "/") + "/rpc?"
+	c.Runtime.AURClient.BaseURL = c.AURURL + "/rpc?"
 
 	// if AurRpcUrl is set, use that for /rpc calls
 	if c.AurRpcUrl != "" {
