@@ -1,0 +1,623 @@
+# 
+# Translators:
+# Davidmp <medipas@gmail.com>, 2022
+# 
+msgid ""
+msgstr ""
+"Last-Translator: Davidmp <medipas@gmail.com>, 2022\n"
+"Language-Team: Catalan (https://www.transifex.com/yay-1/teams/123732/ca/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ca\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: xgotext\n"
+
+#: pkg/menus/menu.go:32
+msgid " (Build Files Exist)"
+msgstr "(Els fitxers de compilació ja existeixen)"
+
+#: pkg/menus/menu.go:28
+msgid " (Installed)"
+msgstr "(Instal·lat)"
+
+#: pkg/dep/depCheck.go:312
+msgid " (Target"
+msgstr " (Destinació"
+
+#: pkg/dep/depCheck.go:314
+msgid " (Wanted by: "
+msgstr "(Volgut per:"
+
+#: cmd.go:427
+msgid " [Installed]"
+msgstr "[Instal·lat]"
+
+#: cmd.go:386 install.go:158 install.go:192
+msgid " there is nothing to do"
+msgstr "No hi ha res per fer."
+
+#: pkg/menus/menu.go:48
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgstr "%s [T]ot [Av]orta [I]nstal·lat [No] instal·lat o (1 2 3, 1-3, ^4)"
+
+#: install.go:729
+msgid "%s already made -- skipping build"
+msgstr "%s ja fet: se n'omet la construcció."
+
+#: pkg/menus/edit_menu.go:57
+msgid "%s is not set"
+msgstr "%s no està establert."
+
+#: pkg/settings/exe/cmd_builder.go:198
+msgid "%s is present."
+msgstr "%s és present."
+
+#: install.go:715
+msgid "%s is up to date -- skipping"
+msgstr "%s està al dia: s'omet."
+
+#: install.go:640
+msgid "%s not satisfied, flushing install queue"
+msgstr "%s no satisfet, es buida la cua d'instal·lació."
+
+#: pkg/pgp/keys.go:128
+msgid "%s, required by: %s"
+msgstr "%s, requerit per %s"
+
+#: pkg/menus/diff_menu.go:50
+msgid "%s: No changes -- skipping"
+msgstr "%s: sense canvis, s'omet."
+
+#: pkg/query/filter.go:52
+msgid "%s: can't use target with option --aur -- skipping"
+msgstr "%s: no es pot usar l'objectiu amb l'opció --aur, s'omet."
+
+#: pkg/query/filter.go:47
+msgid "%s: can't use target with option --repo -- skipping"
+msgstr "%s: no es pot usar l'objectiu amb l'opció --repo, s'omet."
+
+#: pkg/upgrade/sources.go:82
+msgid "%s: ignoring package upgrade (%s => %s)"
+msgstr "%s: s'ignora l'actualització del paquet (%s => %s)"
+
+#: upgrade.go:138
+msgid "%s: local (%s) is newer than AUR (%s)"
+msgstr "%s: el paquet local (%s) és més nou que el de l'AUR (%s)"
+
+#: pkg/download/unified.go:187
+msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
+msgstr "(%d/%d) PKGBUILD baixat de l'ABS: %s"
+
+#: pkg/download/aur.go:83 pkg/download/unified.go:183
+msgid "(%d/%d) Downloaded PKGBUILD: %s"
+msgstr "(%d/%d) PKGBUILD baixat: %s"
+
+#: install.go:517
+msgid "(%d/%d) Parsing SRCINFO: %s"
+msgstr "(%d/%d) S'analitza SRCINFO: %s"
+
+#: pkg/query/types.go:145 pkg/query/types.go:199
+msgid "(Installed)"
+msgstr "(Instal·lat)"
+
+#: pkg/query/types.go:143 pkg/query/types.go:197
+msgid "(Installed: %s)"
+msgstr "(Instal·lat: %s)"
+
+#: pkg/query/types.go:134
+msgid "(Orphaned)"
+msgstr "(Orfes)"
+
+#: pkg/query/types.go:138
+msgid "(Out-of-date: %s)"
+msgstr "(Obsolet: %s)"
+
+#: print.go:28
+msgid "AUR URL"
+msgstr "URL de l'AUR"
+
+#: pkg/menus/edit_menu.go:58
+msgid "Add %s or %s to your environment variables"
+msgstr "Afegiu %s o %s a les variables d'entorn."
+
+#: main.go:103
+msgid "Avoid running yay as root/sudo."
+msgstr "Eviteu executar yay com a root / sudo."
+
+#: print.go:34
+msgid "Check Deps"
+msgstr "Comprova les dependències"
+
+#: upgrade.go:88
+msgid "Checking development packages..."
+msgstr "Es comproven els paquets de desenvolupament..."
+
+#: pkg/dep/depCheck.go:137
+msgid "Checking for conflicts..."
+msgstr "Es comprova si hi ha conflictes..."
+
+#: pkg/dep/depCheck.go:145
+msgid "Checking for inner conflicts..."
+msgstr "Es comprova si hi ha conflictes interns..."
+
+#: clean.go:206
+msgid "Cleaning (%d/%d): %s"
+msgstr "Es neteja (%d/%d): %s"
+
+#: pkg/dep/depCheck.go:200
+msgid "Conflicting packages will have to be confirmed manually"
+msgstr "Els paquets conflictius s'hauran de confirmar manualment."
+
+#: print.go:36
+msgid "Conflicts With"
+msgstr "Té conflicte amb"
+
+#: pkg/dep/depCheck.go:305
+msgid "Could not find all required packages:"
+msgstr "No s'han pogut trobar tots els paquets necessaris:"
+
+#: pkg/menus/clean_menu.go:52
+msgid "Deleting (%d/%d): %s"
+msgstr "Se suprimeix (%d/%d): %s"
+
+#: print.go:32
+msgid "Depends On"
+msgstr "Depèn de"
+
+#: print.go:26
+msgid "Description"
+msgstr "Descripció"
+
+#: pkg/menus/diff_menu.go:157
+msgid "Diffs to show?"
+msgstr "Diferències per mostrar?"
+
+#: clean.go:72
+msgid "Do you want to remove ALL AUR packages from cache?"
+msgstr "Voleu suprimir TOTS els paquets de l'AUR de la memòria cau?"
+
+#: clean.go:89
+msgid "Do you want to remove ALL untracked AUR files?"
+msgstr "Voleu suprimir TOTS els fitxers de l'AUR sense seguiment?"
+
+#: clean.go:74
+msgid "Do you want to remove all other AUR packages from cache?"
+msgstr "Voleu suprimir tots els altres paquets de l'AUR de la memòria cau?"
+
+#: pkg/menus/edit_menu.go:61
+msgid "Edit PKGBUILD with?"
+msgstr "Amb què voleu editar el PKGBUILD?"
+
+#: pkg/query/errors.go:13
+msgid "Error during AUR search: %s\n"
+msgstr "Error durant la cerca a l'AUR: %s\n"
+
+#: print.go:85
+msgid "Explicitly installed packages: %s"
+msgstr "Paquets instal·lats explícitament: %s"
+
+#: print.go:40
+msgid "First Submitted"
+msgstr "Enviat primer"
+
+#: pkg/query/aur_warnings.go:43
+msgid "Flagged Out Of Date AUR Packages:"
+msgstr "Paquets de l'AUR obsolets marcats:"
+
+#: print.go:84
+msgid "Foreign installed packages: %s"
+msgstr "Paquets forans instal·lats: %s"
+
+#: pkg/vcs/vcs.go:119
+msgid "Found git repo: %s"
+msgstr "S'ha trobat el repositori git: %s"
+
+#: vcs.go:73
+msgid "GenDB finished. No packages were installed"
+msgstr "GenDB ha acabat. No s'ha instal·lat cap paquet."
+
+#: print.go:29
+msgid "Groups"
+msgstr "Grups"
+
+#: pkg/pgp/keys.go:88
+msgid "Import?"
+msgstr "Ho importo?"
+
+#: pkg/pgp/keys.go:101
+msgid "Importing keys with gpg..."
+msgstr "S'importen claus amb gpg..."
+
+#: pkg/dep/depCheck.go:155
+msgid "Inner conflicts found:"
+msgstr "Conflictes interns trobats:"
+
+#: pkg/dep/depCheck.go:173
+msgid "Installing %s will remove:"
+msgstr "La instal·lació de %s suprimirà el següent:"
+
+#: print.go:24
+msgid "Keywords"
+msgstr "Paraules clau"
+
+#: print.go:41
+msgid "Last Modified"
+msgstr "Darrera modificació"
+
+#: print.go:30
+msgid "Licenses"
+msgstr "Llicències"
+
+#: print.go:37
+msgid "Maintainer"
+msgstr "Mantenidor"
+
+#: print.go:33
+msgid "Make Deps"
+msgstr "Dependències de construcció"
+
+#: pkg/query/aur_warnings.go:33
+msgid "Missing AUR Debug Packages:"
+msgstr "Manquen paquets de depuració de l'AUR:"
+
+#: pkg/query/aur_warnings.go:28
+msgid "Missing AUR Packages:"
+msgstr "Manquen paquets de l'AUR:"
+
+#: print.go:23
+msgid "Name"
+msgstr "Nom"
+
+#: pkg/text/print.go:95
+msgid "None"
+msgstr "Cap"
+
+#: print.go:35
+msgid "Optional Deps"
+msgstr "Dependències opcionals"
+
+#: pkg/query/aur_warnings.go:38
+msgid "Orphaned AUR Packages:"
+msgstr "Paquets de l'AUR orfes:"
+
+#: print.go:44 print.go:46
+msgid "Out-of-date"
+msgstr "Obsolet"
+
+#: pkg/pgp/keys.go:119
+msgid "PGP keys need importing:"
+msgstr "Cal importar claus PGP:"
+
+#: install.go:242 vcs.go:50
+msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
+msgstr "PKGBUILD actualitzat, s'omet (%d/%d): %s"
+
+#: pkg/menus/edit_menu.go:123
+msgid "PKGBUILDs to edit?"
+msgstr "PKGBUILDs per editar?"
+
+#: print.go:51
+msgid "Package Base ID"
+msgstr "ID de la base de paquets"
+
+#: print.go:52
+msgid "Package Base"
+msgstr "Base de paquets"
+
+#: pkg/dep/depCheck.go:170
+msgid "Package conflicts found:"
+msgstr "Conflictes de paquets trobats:"
+
+#: pkg/menus/clean_menu.go:44
+msgid "Packages to cleanBuild?"
+msgstr "Paquets per a la neteja de la construcció?"
+
+#: upgrade.go:186
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr "Paquets per excloure: (p. ex.: \"1 2 3\", \"1-3\", \"^4\" o nom del repositori)"
+
+#: cmd.go:368
+msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
+msgstr "Paquets per instal·lar (p. ex.: 1 2 3, 1-3 o ^4)"
+
+#: upgrade.go:183
+msgid "Packages to upgrade."
+msgstr "Paquets per actualitzar"
+
+#: print.go:39
+msgid "Popularity"
+msgstr "Popularitat"
+
+#: pkg/menus/diff_menu.go:169 pkg/menus/edit_menu.go:134
+msgid "Proceed with install?"
+msgstr "Voleu continuar la instal·lació?"
+
+#: print.go:31
+msgid "Provides"
+msgstr "Proporciona"
+
+#: pkg/query/aur_info.go:88
+msgid "Querying AUR..."
+msgstr "Es consulta l'AUR..."
+
+#: install.go:213
+msgid "Remove make dependencies after install?"
+msgstr ""
+"Suprimeixo les dependències de construcció després de la instal·lació?"
+
+#: pkg/dep/depPool.go:546
+msgid "Repository AUR"
+msgstr "Repositori de l'AUR"
+
+#: print.go:22 pkg/db/ialpm/alpm.go:175
+msgid "Repository"
+msgstr "Repositori"
+
+#: upgrade.go:68
+msgid "Searching AUR for updates..."
+msgstr "Se cerquen actualitzacions a l'AUR..."
+
+#: upgrade.go:57
+msgid "Searching databases for updates..."
+msgstr "Se cerquen actualitzacions a les bases de dades..."
+
+#: pkg/query/mixed_sources.go:200 pkg/query/source.go:79
+msgid "Showing repo packages only"
+msgstr "Es mostren només paquets dels repositoris."
+
+#: print.go:89
+msgid "Size of pacman cache %s: %s"
+msgstr "Mida de la memòria cau del pacman %s: %s"
+
+#: print.go:92
+msgid "Size of yay cache %s: %s"
+msgstr "Mida de la memòria cau del yay %s: %s"
+
+#: print.go:53
+msgid "Snapshot URL"
+msgstr "URL de la instantània"
+
+#: print.go:94
+msgid "Ten biggest packages:"
+msgstr "Els deu paquets més grossos:"
+
+#: install.go:461
+msgid "The following packages are not compatible with your architecture:"
+msgstr "Els paquets següents no són compatibles amb la vostra arquitectura:"
+
+#: pkg/db/ialpm/alpm.go:163 pkg/dep/depPool.go:541
+msgid "There are %d providers available for %s:"
+msgstr "Hi ha %d proveïdors disponibles per a %s:"
+
+#: pkg/settings/exe/cmd_builder.go:199
+msgid "There may be another Pacman instance running. Waiting..."
+msgstr ""
+"Pot ser que hi hagi una altra instància del Pacman en execució. S'espera..."
+
+#: print.go:86
+msgid "Total Size occupied by packages: %s"
+msgstr "Mida total ocupada pels paquets: %s"
+
+#: print.go:83
+msgid "Total installed packages: %s"
+msgstr "Total de paquets instal·lats: %s"
+
+#: install.go:469
+msgid "Try to build them anyway?"
+msgstr "Intento construir-los tanmateix?"
+
+#: print.go:27
+msgid "URL"
+msgstr "URL"
+
+#: clean.go:182
+msgid "Unable to clean:"
+msgstr "No es pot netejar:"
+
+#: get.go:42 get.go:73
+msgid "Unable to find the following packages:"
+msgstr "No s'han pogut trobar els paquets següents:"
+
+#: print.go:25
+msgid "Version"
+msgstr "Versió"
+
+#: print.go:38
+msgid "Votes"
+msgstr "Vots"
+
+#: print.go:81
+msgid "Yay version v%s"
+msgstr "Versió del yay: v%s"
+
+#: pkg/menus/menu.go:48
+msgid "[N]one"
+msgstr "Ca[p]"
+
+#: clean.go:77
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Directori de construcció:"
+
+#: pkg/db/ialpm/alpm.go:185 pkg/dep/depPool.go:556
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Introduïu un número (per defecte = 1):"
+
+#: pkg/settings/errors.go:29
+msgid "aborting due to user"
+msgstr "s'avorta a causa de l'usuari"
+
+#: install.go:496
+msgid "cannot find package name: %v"
+msgstr "no es pot trobar el nom del paquet: %v"
+
+#: install.go:688 install.go:821
+msgid "could not find PKGDEST for: %s"
+msgstr "no s'ha pogut trobar PKGDEST per a %s"
+
+#: pkg/vcs/vcs.go:69
+msgid "devel check for package failed: '%s' encountered an error"
+msgstr "la comprovació del paquet ha fallat: %s ha trobat un error"
+
+#: pkg/menus/edit_menu.go:108
+msgid "editor did not exit successfully, aborting: %s"
+msgstr "l'editor no ha sortit correctament, s'avorta: %s"
+
+#: aur_source.go:26
+msgid "error downloading sources: %s"
+msgstr "error en baixar les fonts: %s"
+
+#: pkg/download/errors.go:25
+msgid "error fetching %s: %s"
+msgstr "error en obtenir %s: %s"
+
+#: install.go:299 install.go:405
+msgid "error installing repo packages"
+msgstr "error en instal·lar paquets dels repositoris"
+
+#: install.go:671 install.go:712 install.go:726 install.go:740
+msgid "error making: %s"
+msgstr "error de construcció: %s"
+
+#: install.go:573
+msgid "error merging %s: %s"
+msgstr "error en combinar %s: %s"
+
+#: pkg/download/unified.go:56
+msgid "error reading %s"
+msgstr "error en llegir %s"
+
+#: install.go:88
+msgid "error refreshing databases"
+msgstr "error en actualitzar les bases de dades"
+
+#: clean.go:212 install.go:566
+msgid "error resetting %s: %s"
+msgstr "error en restablir %s: %s"
+
+#: install.go:42
+msgid "error updating package install reason to dependency"
+msgstr ""
+"error en actualitzar el motiu d'instal·lació del paquet a la dependència"
+
+#: install.go:60
+msgid "error updating package install reason to explicit"
+msgstr "error en actualitzar el motiu d'instal·lació del paquet a explícit"
+
+#: pkg/settings/errors.go:23
+msgid "failed to create directory '%s': %s"
+msgstr "no s'ha pogut crear el directori %s: %s"
+
+#: pkg/settings/config.go:293
+msgid "failed to open config file '%s': %s"
+msgstr "no s'ha pogut obrir el fitxer de configuració %s: %s"
+
+#: install.go:522
+msgid "failed to parse %s -- skipping: %s"
+msgstr "ha fallat analitzar %s, s'omet: %s"
+
+#: install.go:526
+msgid "failed to parse %s: %s"
+msgstr "no s'ha pogut analitzar %s: %s"
+
+#: pkg/settings/config.go:303
+msgid "failed to read config file '%s': %s"
+msgstr "no s'ha pogut llegir el fitxer de configuració %s: %s"
+
+#: pkg/text/errors.go:8
+msgid "input too long"
+msgstr "entrada massa llarga"
+
+#: pkg/db/ialpm/alpm.go:206 pkg/dep/depPool.go:576
+msgid "invalid number: %s"
+msgstr "número no vàlid: %s"
+
+#: pkg/settings/parser/parser.go:174
+msgid "invalid option '%s'"
+msgstr "opció no vàlida: %s"
+
+#: cmd.go:202
+msgid "invalid option: '--deps' and '--explicit' may not be used together"
+msgstr "opció no vàlida: \"--deps\" i \"--explicit\" no es poden usar juntes"
+
+#: pkg/download/abs.go:21
+msgid "invalid repository"
+msgstr "repositori no vàlid"
+
+#: pkg/db/ialpm/alpm.go:211 pkg/dep/depPool.go:581
+msgid "invalid value: %d is not between %d and %d"
+msgstr "valor no vàlid: %d no és entre %d i %d"
+
+#: pkg/pgp/keys.go:114
+msgid "no keys to import"
+msgstr "sense claus per importar"
+
+#: pkg/query/errors.go:20
+msgid "no query was executed"
+msgstr "no s'ha executat cap consulta"
+
+#: pkg/text/text.go:60
+msgid "no"
+msgstr "no"
+
+#: pkg/settings/parser/parser.go:164
+msgid "only one operation may be used at a time"
+msgstr "només es pot usar una operació alhora"
+
+#: print.go:185
+msgid "package '%s' was not found"
+msgstr "no s'ha trobat el paquet %s"
+
+#: pkg/dep/depCheck.go:197
+msgid "package conflicts can not be resolved with noconfirm, aborting"
+msgstr ""
+"els conflictes de paquets no es poden resoldre amb noconfirm, s'avorta"
+
+#: pkg/download/errors.go:15
+msgid "package not found in AUR"
+msgstr "paquet no trobat a l'AUR"
+
+#: pkg/download/abs.go:22
+msgid "package not found in repos"
+msgstr "paquet no trobat als repositoris"
+
+#: pkg/pgp/keys.go:104
+msgid "problem importing keys"
+msgstr "problema d'importació de claus"
+
+#: clean.go:97
+msgid "removing AUR packages from cache..."
+msgstr "se suprimeixen paquets de l'AUR de la memòria cau..."
+
+#: clean.go:167 clean.go:198
+msgid "removing untracked AUR files from cache..."
+msgstr ""
+"se suprimeixen els fitxers de l'AUR sense seguiment de la memòria cau..."
+
+#: install.go:830
+msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
+msgstr "el PKGDEST per a %s està llistat per makepkg però no existeix:%s"
+
+#: pkg/db/ialpm/alpm.go:231
+msgid "unable to CreateHandle: %s"
+msgstr "no se'n pot crear el maneig: %s"
+
+#: cmd.go:191
+msgid "unhandled operation"
+msgstr "operació no gestionada"
+
+#: cmd.go:424
+msgid "unknown-version"
+msgstr "versió desconeguda"
+
+#: pkg/text/text.go:59
+msgid "yes"
+msgstr "sí"
