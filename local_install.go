@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
@@ -130,102 +129,74 @@ func (installer *Installer) Install(ctx context.Context,
 	return nil
 }
 
-type MapBySourceAndType map[dep.Source]map[dep.Reason][]string
-
-func (m *MapBySourceAndType) String() string {
-	var s string
-	for source, reasons := range *m {
-		s += fmt.Sprintf("%s: [", source)
-		for reason, names := range reasons {
-			s += fmt.Sprintf(" %d: [%v] ", reason, names)
-		}
-
-		s += "], "
-	}
-
-	return s
-}
-
 func (installer *Installer) handleLayer(ctx context.Context,
 	cmdArgs *parser.Arguments, layer map[string]*dep.InstallInfo, pkgBuildDirs map[string]string,
 ) error {
 	// Install layer
-	depByTypeAndReason := make(MapBySourceAndType)
+	nameToBaseMap := make(map[string]string, 0)
+	syncDeps, syncExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
+	aurDeps, aurExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 	for name, info := range layer {
-		if _, ok := depByTypeAndReason[info.Source]; !ok {
-			depByTypeAndReason[info.Source] = make(map[dep.Reason][]string)
-		}
-
-		depByTypeAndReason[info.Source][info.Reason] = append(depByTypeAndReason[info.Source][info.Reason], name)
-	}
-
-	fmt.Printf("%v\n", depByTypeAndReason)
-
-	syncDeps, syncExp := make([]string, 0), make([]string, 0)
-	repoTargets := make([]string, 0)
-
-	aurDeps, aurExp := mapset.NewSet[string](), mapset.NewSet[string]()
-	for source, reasons := range depByTypeAndReason {
-		switch source {
+		switch info.Source {
 		case dep.SrcInfo:
 			fallthrough
 		case dep.AUR:
-			for reason, names := range reasons {
-				for _, name := range names {
-					switch reason {
-					case dep.Explicit:
-						if cmdArgs.ExistsArg("asdeps", "asdep") {
-							aurDeps.Add(name)
-						} else {
-							aurExp.Add(name)
-						}
-					case dep.CheckDep:
-						fallthrough
-					case dep.MakeDep:
-						fallthrough
-					case dep.Dep:
-						aurDeps.Add(name)
-					}
+			nameToBaseMap[name] = *info.AURBase
+			switch info.Reason {
+			case dep.Explicit:
+				if cmdArgs.ExistsArg("asdeps", "asdep") {
+					aurDeps.Add(name)
+				} else {
+					aurExp.Add(name)
 				}
+			case dep.CheckDep:
+				fallthrough
+			case dep.MakeDep:
+				fallthrough
+			case dep.Dep:
+				aurDeps.Add(name)
 			}
 		case dep.Sync:
-			for reason, names := range reasons {
-				switch reason {
-				case dep.Explicit:
-					if cmdArgs.ExistsArg("asdeps", "asdep") {
-						syncDeps = append(syncDeps, names...)
-					} else {
-						syncExp = append(syncExp, names...)
-					}
-				case dep.CheckDep:
-					fallthrough
-				case dep.MakeDep:
-					fallthrough
-				case dep.Dep:
-					syncDeps = append(syncDeps, names...)
+			switch info.Reason {
+			case dep.Explicit:
+				if cmdArgs.ExistsArg("asdeps", "asdep") {
+					syncDeps.Add(name)
+				} else {
+					syncExp.Add(name)
 				}
-
-				repoTargets = append(repoTargets, names...)
+			case dep.CheckDep:
+				fallthrough
+			case dep.MakeDep:
+				fallthrough
+			case dep.Dep:
+				syncDeps.Add(name)
 			}
 		}
 	}
 
 	fmt.Println(syncDeps, syncExp)
 
-	errShow := installer.installSyncPackages(ctx, cmdArgs, repoTargets, syncDeps, syncExp)
+	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp)
 	if errShow != nil {
 		return ErrInstallRepoPkgs
 	}
 
-	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp, pkgBuildDirs, false)
+	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp, nameToBaseMap, pkgBuildDirs, false)
 
 	return errAur
 }
 
-func (*Installer) installAURPackages(ctx context.Context, cmdArgs *parser.Arguments, aurBaseDeps, aurBaseExp mapset.Set[string], pkgBuildDirs map[string]string, installIncompatible bool) error {
-	deps, exp := make([]string, 0, aurBaseDeps.Cardinality()), make([]string, 0, aurBaseExp.Cardinality())
-	for _, base := range aurBaseDeps.Union(aurBaseExp).ToSlice() {
-		dir := pkgBuildDirs[base]
+func (installer *Installer) installAURPackages(ctx context.Context,
+	cmdArgs *parser.Arguments,
+	aurDepNames, aurExpNames mapset.Set[string],
+	nameToBase, pkgBuildDirsByBase map[string]string,
+	installIncompatible bool,
+) error {
+	deps, exp := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
+
+	for _, name := range aurDepNames.Union(aurExpNames).ToSlice() {
+		base := nameToBase[name]
+		dir := pkgBuildDirsByBase[base]
 		args := []string{"--nobuild", "-fC"}
 
 		if installIncompatible {
@@ -255,12 +226,18 @@ func (*Installer) installAURPackages(ctx context.Context, cmdArgs *parser.Argume
 			return errors.New(gotext.Get("error making: %s", base))
 		}
 
-		newDeps, newExp, err := getNewTargets(cmdArgs, pkgdests, aurBaseDeps.Contains(base))
+		names, err := installer.getNewTargets(pkgdests, name)
 		if err != nil {
 			return err
 		}
-		deps = append(deps, newDeps...)
-		exp = append(exp, newExp...)
+
+		isDep := installer.isDep(cmdArgs, aurExpNames, name)
+
+		if isDep {
+			deps = append(deps, names...)
+		} else {
+			exp = append(exp, names...)
+		}
 	}
 
 	if err := doInstall(ctx, cmdArgs, deps, exp); err != nil {
@@ -270,40 +247,52 @@ func (*Installer) installAURPackages(ctx context.Context, cmdArgs *parser.Argume
 	return nil
 }
 
-func getNewTargets(cmdArgs *parser.Arguments, pkgdests map[string]string, isDep bool,
-) (deps, exp []string, err error) {
-	for pkgName, pkgDest := range pkgdests {
-		if _, errStat := os.Stat(pkgDest); os.IsNotExist(errStat) {
-			if strings.HasSuffix(pkgName, "-debug") {
-				continue
-			}
+func (*Installer) isDep(cmdArgs *parser.Arguments, aurExpNames mapset.Set[string], name string) bool {
+	switch {
+	case cmdArgs.ExistsArg("asdeps", "asdep"):
+		return true
+	case cmdArgs.ExistsArg("asexplicit", "asexp"):
+		return false
+	case aurExpNames.Contains(name):
+		return false
+	}
 
-			return deps, exp, errors.New(
-				gotext.Get(
-					"the PKGDEST for %s is listed by makepkg but does not exist: %s",
-					pkgName, pkgDest))
-		}
+	return true
+}
 
-		switch {
-		case cmdArgs.ExistsArg("asdeps", "asdep"):
-			deps = append(deps, pkgDest)
-		case cmdArgs.ExistsArg("asexplicit", "asexp"):
-			exp = append(exp, pkgDest)
-		case isDep:
-			deps = append(deps, pkgDest)
-		default:
-			exp = append(exp, pkgDest)
+func (installer *Installer) getNewTargets(pkgdests map[string]string, name string,
+) ([]string, error) {
+	pkgdest, ok := pkgdests[name]
+	names := make([]string, 0, 2)
+	if !ok {
+		return nil, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
+	}
+
+	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
+		return nil, errors.New(
+			gotext.Get(
+				"the PKGDEST for %s is listed by makepkg but does not exist: %s",
+				name, pkgdest))
+	}
+
+	names = append(names, name)
+
+	debugName := pkgdest + "-debug"
+	pkgdestDebug, ok := pkgdests[debugName]
+	if ok {
+		if _, errStat := os.Stat(pkgdestDebug); errStat == nil {
+			names = append(names, debugName)
 		}
 	}
 
-	return deps, exp, nil
+	return names, nil
 }
 
 func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Arguments,
-	repoTargets, // all repo targets
 	syncDeps, // repo targets that are deps
-	syncExp []string, // repo targets that are exp
+	syncExp mapset.Set[string], // repo targets that are exp
 ) error {
+	repoTargets := syncDeps.Union(syncExp).ToSlice()
 	if len(repoTargets) == 0 {
 		return nil
 	}
@@ -319,11 +308,11 @@ func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Argum
 	errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		arguments, config.Runtime.Mode, settings.NoConfirm))
 
-	if errD := asdeps(ctx, cmdArgs, syncDeps); errD != nil {
+	if errD := asdeps(ctx, cmdArgs, syncDeps.ToSlice()); errD != nil {
 		return errD
 	}
 
-	if errE := asexp(ctx, cmdArgs, syncExp); errE != nil {
+	if errE := asexp(ctx, cmdArgs, syncExp.ToSlice()); errE != nil {
 		return errE
 	}
 	return errShow

@@ -20,6 +20,7 @@ type InstallInfo struct {
 	Source      Source
 	Reason      Reason
 	SrcinfoPath *string
+	AURBase     *string
 }
 
 func (i *InstallInfo) String() string {
@@ -112,10 +113,6 @@ func (g *Grapher) GraphFromSrcInfo(pkgBuildDir string, pkgbuild *gosrc.Srcinfo) 
 	for _, pkg := range aurPkgs {
 		pkg := pkg
 
-		if err := graph.Alias(pkg.PackageBase, pkg.Name); err != nil {
-			text.Warnln("aur target alias warn:", pkg.PackageBase, pkg.Name, err)
-		}
-
 		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 			Color:      colorMap[Explicit],
 			Background: bgColorMap[AUR],
@@ -123,6 +120,7 @@ func (g *Grapher) GraphFromSrcInfo(pkgBuildDir string, pkgbuild *gosrc.Srcinfo) 
 				Source:      SrcInfo,
 				Reason:      Explicit,
 				SrcinfoPath: &pkgBuildDir,
+				AURBase:     &pkg.PackageBase,
 			},
 		})
 
@@ -153,16 +151,13 @@ func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string, *Inst
 		aurPkgs, _ := g.aurCache.FindPackage(target)
 		pkg := provideMenu(g.w, target, aurPkgs, g.noConfirm)
 
-		if err := graph.Alias(pkg.PackageBase, pkg.Name); err != nil {
-			text.Warnln("aur target alias warn:", pkg.PackageBase, pkg.Name, err)
-		}
-
 		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 			Color:      colorMap[Explicit],
 			Background: bgColorMap[AUR],
 			Value: &InstallInfo{
-				Source: AUR,
-				Reason: Explicit,
+				Source:  AUR,
+				Reason:  Explicit,
+				AURBase: &pkg.PackageBase,
 			},
 		})
 
@@ -176,7 +171,7 @@ func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo]
 	node string, nodeInfo *topo.NodeInfo[*InstallInfo],
 ) {
 	info := graph.GetNodeInfo(node)
-	if info != nil {
+	if info != nil && info.Value != nil {
 		if info.Value.Reason < nodeInfo.Value.Reason {
 			return // refuse to downgrade reason from explicit to dep
 		}
@@ -254,22 +249,19 @@ func (g *Grapher) addNodes(
 				g.aurCache.SetProvideCache(depName, []*aur.Pkg{pkg})
 			}
 
-			if err := graph.Alias(pkg.PackageBase, pkg.Name); err != nil {
-				text.Warnln("aur alias warn:", pkg.PackageBase, pkg.Name, err)
-			}
-
-			if err := graph.DependOn(pkg.PackageBase, parentPkgName); err != nil {
-				text.Warnln("aur dep warn:", pkg.PackageBase, parentPkgName, err)
+			if err := graph.DependOn(pkg.Name, parentPkgName); err != nil {
+				text.Warnln("aur dep warn:", pkg.Name, parentPkgName, err)
 			}
 
 			graph.SetNodeInfo(
-				pkg.PackageBase,
+				pkg.Name,
 				&topo.NodeInfo[*InstallInfo]{
 					Color:      colorMap[depType],
 					Background: bgColorMap[AUR],
 					Value: &InstallInfo{
-						Source: AUR,
-						Reason: depType,
+						Source:  AUR,
+						Reason:  depType,
+						AURBase: &pkg.PackageBase,
 					},
 				})
 			g.addDepNodes(pkg, graph)

@@ -29,6 +29,7 @@ func (z *TestMakepkgBuilder) BuildMakepkgCmd(ctx context.Context, dir string, ex
 	if z.want != "" {
 		assert.Contains(z.test, cmd.String(), z.want)
 	}
+
 	if z.wantDir != "" {
 		assert.Equal(z.test, z.wantDir, cmd.Dir)
 	}
