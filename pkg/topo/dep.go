@@ -146,7 +146,7 @@ func (g *Graph[T, V]) String() string {
 
 		if info, ok := g.nodeInfo[node]; ok {
 			if info.Background != "" || info.Color != "" {
-				extra = fmt.Sprintf("[color = %s ,style = filled, fillcolor = %s]", info.Color, info.Background)
+				extra = fmt.Sprintf("[color = %s, style = filled, fillcolor = %s]", info.Color, info.Background)
 			}
 		}
 
