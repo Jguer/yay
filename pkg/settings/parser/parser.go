@@ -373,6 +373,7 @@ func isArg(arg string) bool {
 	case "machinereadable":
 	// yay options
 	case "aururl":
+	case "aurrpcurl":
 	case "save":
 	case "afterclean", "cleanafter":
 	case "noafterclean", "nocleanafter":
@@ -520,6 +521,7 @@ func hasParam(arg string) bool {
 	case "color":
 	// yay params
 	case "aururl":
+	case "aurrpcurl":
 	case "mflags":
 	case "gpgflags":
 	case "gitflags":
