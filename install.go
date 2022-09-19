@@ -22,6 +22,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/pgp"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -204,7 +205,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		switch config.RemoveMake {
 		case "yes":
 			defer func() {
-				err = removeMake(ctx, do)
+				err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake())
 			}()
 
 		case "no":
@@ -212,7 +213,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		default:
 			if text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
 				defer func() {
-					err = removeMake(ctx, do)
+					err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake())
 				}()
 			}
 		}
@@ -351,7 +352,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	return nil
 }
 
-func removeMake(ctx context.Context, do *dep.Order) error {
+func removeMake(ctx context.Context, cmdBuilder exe.ICmdBuilder, makeDeps []string) error {
 	removeArguments := parser.MakeArguments()
 
 	err := removeArguments.AddArg("R", "u")
@@ -359,13 +360,13 @@ func removeMake(ctx context.Context, do *dep.Order) error {
 		return err
 	}
 
-	for _, pkg := range do.GetMake() {
+	for _, pkg := range makeDeps {
 		removeArguments.AddTarget(pkg)
 	}
 
 	oldValue := settings.NoConfirm
 	settings.NoConfirm = true
-	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+	err = cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
 		removeArguments, config.Runtime.Mode, settings.NoConfirm))
 	settings.NoConfirm = oldValue
 

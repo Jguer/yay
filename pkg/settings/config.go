@@ -74,6 +74,7 @@ type Configuration struct {
 	SingleLineResults      bool     `json:"singlelineresults"`
 	SeparateSources        bool     `json:"separatesources"`
 	Runtime                *Runtime `json:"-"`
+	NewInstallEngine       bool     `json:"newinstallengine"`
 	Version                string   `json:"version"`
 }
 
@@ -221,6 +222,7 @@ func DefaultConfig(version string) *Configuration {
 		UseAsk:                 false,
 		CombinedUpgrade:        false,
 		SeparateSources:        true,
+		NewInstallEngine:       false,
 		Version:                version,
 	}
 }
@@ -278,6 +280,7 @@ func NewConfig(version string) (*Configuration, error) {
 		HTTPClient:     &http.Client{},
 		AURClient:      nil,
 		VoteClient:     voteClient,
+		QueryBuilder:   nil,
 	}
 
 	var errAUR error

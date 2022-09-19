@@ -356,6 +356,9 @@ func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Ex
 	case cmdArgs.ExistsArg("i", "info"):
 		return syncInfo(ctx, cmdArgs, targets, dbExecutor)
 	case cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0:
+		if config.NewInstallEngine {
+			return syncInstall(ctx, config, cmdArgs, dbExecutor)
+		}
 		return install(ctx, cmdArgs, dbExecutor, false)
 	case cmdArgs.ExistsArg("y", "refresh"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,

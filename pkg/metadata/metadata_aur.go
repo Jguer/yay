@@ -114,7 +114,9 @@ func (a *AURCache) gojqGet(searchTerm string) ([]*aur.Pkg, error) {
 }
 
 func makeGoJQ() *gojq.Code {
-	pattern := ".[] | select((.PackageBase == $x) or (.Name == $x) or (.Provides[]? == ($x)))"
+	// pattern := ".[] | select((.PackageBase == $x) or (.Name == $x) or (.Provides[]? == ($x)))"
+	pattern := ".[] | select((.Name == $x) or (.Provides[]? == ($x)))"
+
 	query, err := gojq.Parse(pattern)
 	if err != nil {
 		log.Fatalln(err)

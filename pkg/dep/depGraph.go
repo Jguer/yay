@@ -19,6 +19,7 @@ import (
 type InstallInfo struct {
 	Source      Source
 	Reason      Reason
+	Version     string
 	SrcinfoPath *string
 	AURBase     *string
 }
@@ -33,11 +34,11 @@ type (
 )
 
 func (r Reason) String() string {
-	return reasonNames[r]
+	return ReasonNames[r]
 }
 
 func (s Source) String() string {
-	return sourceNames[s]
+	return SourceNames[s]
 }
 
 const (
@@ -47,11 +48,11 @@ const (
 	CheckDep               // 3
 )
 
-var reasonNames = map[Reason]string{
-	Explicit: gotext.Get("explicit"),
-	Dep:      gotext.Get("dep"),
-	MakeDep:  gotext.Get("makedep"),
-	CheckDep: gotext.Get("checkdep"),
+var ReasonNames = map[Reason]string{
+	Explicit: gotext.Get("Explicit"),
+	Dep:      gotext.Get("Dependency"),
+	MakeDep:  gotext.Get("Make Dependency"),
+	CheckDep: gotext.Get("Check Dependency"),
 }
 
 const (
@@ -62,12 +63,12 @@ const (
 	Missing
 )
 
-var sourceNames = map[Source]string{
-	AUR:     gotext.Get("aur"),
-	Sync:    gotext.Get("sync"),
-	Local:   gotext.Get("local"),
-	SrcInfo: gotext.Get("srcinfo"),
-	Missing: gotext.Get("missing"),
+var SourceNames = map[Source]string{
+	AUR:     gotext.Get("AUR"),
+	Sync:    gotext.Get("Sync"),
+	Local:   gotext.Get("Local"),
+	SrcInfo: gotext.Get("SRCINFO"),
+	Missing: gotext.Get("Missing"),
 }
 
 var bgColorMap = map[Source]string{
@@ -121,6 +122,7 @@ func (g *Grapher) GraphFromSrcInfo(pkgBuildDir string, pkgbuild *gosrc.Srcinfo) 
 				Reason:      Explicit,
 				SrcinfoPath: &pkgBuildDir,
 				AURBase:     &pkg.PackageBase,
+				Version:     pkg.Version,
 			},
 		})
 
@@ -158,6 +160,7 @@ func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string, *Inst
 				Source:  AUR,
 				Reason:  Explicit,
 				AURBase: &pkg.PackageBase,
+				Version: pkg.Version,
 			},
 		})
 
@@ -225,8 +228,9 @@ func (g *Grapher) addNodes(
 					Color:      colorMap[depType],
 					Background: bgColorMap[Sync],
 					Value: &InstallInfo{
-						Source: Sync,
-						Reason: depType,
+						Source:  Sync,
+						Reason:  depType,
+						Version: alpmPkg.Version(),
 					},
 				})
 
@@ -262,6 +266,7 @@ func (g *Grapher) addNodes(
 						Source:  AUR,
 						Reason:  depType,
 						AURBase: &pkg.PackageBase,
+						Version: pkg.Version,
 					},
 				})
 			g.addDepNodes(pkg, graph)
