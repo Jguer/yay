@@ -28,7 +28,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err error) {
+func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
@@ -37,7 +37,7 @@ func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err 
 	_ = cmdArgs.AddArg("q", "D", "asdeps")
 	cmdArgs.AddTarget(pkgs...)
 
-	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
 		return errors.New(gotext.Get("error updating package install reason to dependency"))
@@ -46,7 +46,7 @@ func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err 
 	return nil
 }
 
-func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err error) {
+func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
@@ -55,10 +55,10 @@ func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err e
 	_ = cmdArgs.AddArg("q", "D", "asexplicit")
 	cmdArgs.AddTarget(pkgs...)
 
-	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
-		return errors.New(gotext.Get("error updating package install reason to explicit"))
+		return fmt.Errorf("%s - %w", gotext.Get("error updating package install reason to explicit"), err)
 	}
 
 	return nil
@@ -86,7 +86,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		if config.CombinedUpgrade {
 			if refreshArg {
 				if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
-					return errors.New(gotext.Get("error refreshing databases"))
+					return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 				}
 			}
 		} else if refreshArg || sysupgradeArg || len(cmdArgs.Targets) > 0 {

@@ -40,8 +40,7 @@ func syncInstall(ctx context.Context,
 	}
 	installer := &Installer{dbExecutor: dbExecutor}
 
-	err = preparer.Present(os.Stdout, topoSorted)
-	if err != nil {
+	if err = preparer.Present(os.Stdout, topoSorted); err != nil {
 		return err
 	}
 

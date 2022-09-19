@@ -22,6 +22,7 @@ type InstallInfo struct {
 	Version     string
 	SrcinfoPath *string
 	AURBase     *string
+	SyncDBName  *string
 }
 
 func (i *InstallInfo) String() string {
@@ -221,6 +222,7 @@ func (g *Grapher) addNodes(
 				text.Warnln("repo dep warn:", depName, parentPkgName, err)
 			}
 
+			dbName := alpmPkg.DB().Name()
 			g.ValidateAndSetNodeInfo(
 				graph,
 				alpmPkg.Name(),
@@ -228,9 +230,10 @@ func (g *Grapher) addNodes(
 					Color:      colorMap[depType],
 					Background: bgColorMap[Sync],
 					Value: &InstallInfo{
-						Source:  Sync,
-						Reason:  depType,
-						Version: alpmPkg.Version(),
+						Source:     Sync,
+						Reason:     depType,
+						Version:    alpmPkg.Version(),
+						SyncDBName: &dbName,
 					},
 				})
 
