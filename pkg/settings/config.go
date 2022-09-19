@@ -30,6 +30,7 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
+	Runtime                *Runtime `json:"-"`
 	AURURL                 string   `json:"aururl"`
 	BuildDir               string   `json:"buildDir"`
 	Editor                 string   `json:"editor"`
@@ -54,6 +55,7 @@ type Configuration struct {
 	RemoveMake             string   `json:"removemake"`
 	SudoBin                string   `json:"sudobin"`
 	SudoFlags              string   `json:"sudoflags"`
+	Version                string   `json:"version"`
 	RequestSplitN          int      `json:"requestsplitn"`
 	CompletionInterval     int      `json:"completionrefreshtime"`
 	MaxConcurrentDownloads int      `json:"maxconcurrentdownloads"`
@@ -73,9 +75,8 @@ type Configuration struct {
 	BatchInstall           bool     `json:"batchinstall"`
 	SingleLineResults      bool     `json:"singlelineresults"`
 	SeparateSources        bool     `json:"separatesources"`
-	Runtime                *Runtime `json:"-"`
 	NewInstallEngine       bool     `json:"newinstallengine"`
-	Version                string   `json:"version"`
+	Debug                  bool     `json:"debug"`
 }
 
 // SaveConfig writes yay config to file.
@@ -224,6 +225,7 @@ func DefaultConfig(version string) *Configuration {
 		SeparateSources:        true,
 		NewInstallEngine:       false,
 		Version:                version,
+		Debug:                  false,
 	}
 }
 

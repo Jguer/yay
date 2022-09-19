@@ -274,7 +274,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 		}
 	}
 
-	fmt.Println(syncDeps, syncExp)
+	text.Debugln("syncDeps", syncDeps, "SyncExp", syncExp, "aurDeps", aurDeps, "aurExp", aurExp)
 
 	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp)
 	if errShow != nil {

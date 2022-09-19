@@ -65,6 +65,10 @@ func main() {
 		return
 	}
 
+	if config.Debug {
+		text.DebugMode = true
+	}
+
 	if errS := config.RunMigrations(
 		settings.DefaultMigrations(), config.Runtime.ConfigPath); errS != nil {
 		text.Errorln(errS)

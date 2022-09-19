@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -33,7 +32,6 @@ func syncInstall(ctx context.Context,
 	}
 
 	topoSorted := graph.TopoSortedLayerMap()
-	fmt.Println(topoSorted, len(topoSorted))
 
 	preparer := &Preparer{
 		dbExecutor: dbExecutor,
