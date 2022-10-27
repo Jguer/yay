@@ -596,6 +596,7 @@ func buildInstallPkgbuilds(
 ) error {
 	deps := make([]string, 0)
 	exp := make([]string, 0)
+	pkgArchives := make([]string, 0)
 	oldConfirm := settings.NoConfirm
 	settings.NoConfirm = true
 
@@ -629,17 +630,23 @@ func buildInstallPkgbuilds(
 		}
 
 		if !satisfied || !config.BatchInstall {
-			err = installPkgArchive(ctx, cmdArgs, append(deps, exp...))
+			errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
+			errReason := setInstallReason(ctx, cmdArgs, deps, exp)
 
 			deps = make([]string, 0)
 			exp = make([]string, 0)
+			pkgArchives = make([]string, 0) // reset the pkgarchives
 
-			if err != nil {
+			if errArchive != nil || errReason != nil {
 				if i != 0 {
 					go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[i-1].String()})
 				}
 
-				return err
+				if errArchive != nil {
+					return errArchive
+				}
+
+				return errReason
 			}
 		}
 
@@ -746,8 +753,8 @@ func buildInstallPkgbuilds(
 
 		for _, split := range base {
 			for suffix, optional := range map[string]bool{"": false, "-debug": true} {
-				deps, exp, errAdd = doAddTarget(dp, localNamesCache, remoteNamesCache,
-					cmdArgs, pkgdests, deps, exp, split.Name+suffix, optional)
+				deps, exp, pkgArchives, errAdd = doAddTarget(dp, localNamesCache, remoteNamesCache,
+					cmdArgs, pkgdests, deps, exp, split.Name+suffix, optional, pkgArchives)
 				if errAdd != nil {
 					return errAdd
 				}
@@ -768,8 +775,13 @@ func buildInstallPkgbuilds(
 		wg.Wait()
 	}
 
-	err = installPkgArchive(ctx, cmdArgs, append(deps, exp...))
-	if err != nil {
+	errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
+	if errArchive != nil {
+		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
+	}
+
+	errReason := setInstallReason(ctx, cmdArgs, deps, exp)
+	if errReason != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
 	}
 
@@ -825,27 +837,29 @@ func setInstallReason(ctx context.Context, cmdArgs *parser.Arguments, deps, exps
 
 func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.StringSet,
 	cmdArgs *parser.Arguments, pkgdests map[string]string,
-	deps, exp []string, name string, optional bool,
-) (newDeps, newExp []string, err error) {
+	deps, exp []string, name string, optional bool, pkgArchives []string,
+) (newDeps, newExp, newPkgArchives []string, err error) {
 	pkgdest, ok := pkgdests[name]
 	if !ok {
 		if optional {
-			return deps, exp, nil
+			return deps, exp, newPkgArchives, nil
 		}
 
-		return deps, exp, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
+		return deps, exp, pkgArchives, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
 	}
 
 	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
 		if optional {
-			return deps, exp, nil
+			return deps, exp, pkgArchives, nil
 		}
 
-		return deps, exp, errors.New(
+		return deps, exp, pkgArchives, errors.New(
 			gotext.Get(
 				"the PKGDEST for %s is listed by makepkg but does not exist: %s",
 				name, pkgdest))
 	}
+
+	pkgArchives = append(pkgArchives, pkgdest)
 
 	switch {
 	case cmdArgs.ExistsArg("asdeps", "asdep"):
@@ -858,5 +872,5 @@ func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.Strin
 		exp = append(exp, name)
 	}
 
-	return deps, exp, nil
+	return deps, exp, pkgArchives, nil
 }

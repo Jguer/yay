@@ -197,23 +197,23 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 		return nil, false, &PkgDestNotInListError{name: name}
 	}
 
-	pkgFiles := make([]string, 0, 2)
+	pkgArchives := make([]string, 0, 2)
 
 	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
 		return nil, false, &UnableToFindPkgDestError{name: name, pkgDest: pkgdest}
 	}
 
-	pkgFiles = append(pkgFiles, pkgdest)
+	pkgArchives = append(pkgArchives, pkgdest)
 
 	debugName := pkgdest + "-debug"
 	pkgdestDebug, ok := pkgdests[debugName]
 	if ok {
 		if _, errStat := os.Stat(pkgdestDebug); errStat == nil {
-			pkgFiles = append(pkgFiles, debugName)
+			pkgArchives = append(pkgArchives, debugName)
 		}
 	}
 
-	return pkgFiles, ok, nil
+	return pkgArchives, ok, nil
 }
 
 func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Arguments,
@@ -243,5 +243,6 @@ func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Argum
 	if errE := asexp(ctx, cmdArgs, syncExp.ToSlice()); errE != nil {
 		return errE
 	}
+
 	return errShow
 }
