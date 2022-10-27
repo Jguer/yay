@@ -28,8 +28,8 @@ func Debugln(a ...interface{}) {
 		return
 	}
 
-	fmt.Fprint(os.Stdout, append([]interface{}{Bold(yellow("[DEBUG] "))}, a...)...)
-	fmt.Fprintln(os.Stdout, ResetCode)
+	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(yellow("[DEBUG] "))}, a...)...)
+	fmt.Fprint(os.Stdout, ResetCode)
 }
 
 func OperationInfoln(a ...interface{}) {

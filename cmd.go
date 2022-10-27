@@ -416,7 +416,7 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 	}
 
 	if config.NewInstallEngine {
-		return syncInstall(ctx, config, cmdArgs, dbExecutor)
+		return syncInstall(ctx, config, arguments, dbExecutor)
 	}
 
 	return install(ctx, arguments, dbExecutor, true)

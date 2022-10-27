@@ -113,7 +113,8 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	nameToBase, pkgBuildDirsByBase map[string]string,
 	installIncompatible bool,
 ) error {
-	deps, exp := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
+	deps, exps := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
+	pkgArchives := make([]string, 0, len(exps)+len(deps))
 
 	for _, name := range aurDepNames.Union(aurExpNames).ToSlice() {
 		base := nameToBase[name]
@@ -147,22 +148,30 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 			return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
 		}
 
-		names, err := installer.getNewTargets(pkgdests, name)
+		newPKGArchives, hasDebug, err := installer.getNewTargets(pkgdests, name)
 		if err != nil {
 			return err
 		}
 
-		isDep := installer.isDep(cmdArgs, aurExpNames, name)
+		pkgArchives = append(pkgArchives, newPKGArchives...)
 
-		if isDep {
-			deps = append(deps, names...)
+		if isDep := installer.isDep(cmdArgs, aurExpNames, name); isDep {
+			deps = append(deps, name)
 		} else {
-			exp = append(exp, names...)
+			exps = append(exps, name)
+		}
+
+		if hasDebug {
+			deps = append(deps, name+"-debug")
 		}
 	}
 
-	if err := doInstall(ctx, cmdArgs, deps, exp); err != nil {
-		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v %v", deps, exp), err)
+	if err := installPkgArchive(ctx, cmdArgs, pkgArchives); err != nil {
+		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)
+	}
+
+	if err := setInstallReason(ctx, cmdArgs, deps, exps); err != nil {
+		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)
 	}
 
 	return nil
@@ -182,28 +191,29 @@ func (*Installer) isDep(cmdArgs *parser.Arguments, aurExpNames mapset.Set[string
 }
 
 func (installer *Installer) getNewTargets(pkgdests map[string]string, name string,
-) ([]string, error) {
+) ([]string, bool, error) {
 	pkgdest, ok := pkgdests[name]
-	names := make([]string, 0, 2)
 	if !ok {
-		return nil, &PkgDestNotInListError{name: name}
+		return nil, false, &PkgDestNotInListError{name: name}
 	}
+
+	pkgFiles := make([]string, 0, 2)
 
 	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
-		return nil, &UnableToFindPkgDestError{name: name, pkgDest: pkgdest}
+		return nil, false, &UnableToFindPkgDestError{name: name, pkgDest: pkgdest}
 	}
 
-	names = append(names, name)
+	pkgFiles = append(pkgFiles, pkgdest)
 
 	debugName := pkgdest + "-debug"
 	pkgdestDebug, ok := pkgdests[debugName]
 	if ok {
 		if _, errStat := os.Stat(pkgdestDebug); errStat == nil {
-			names = append(names, debugName)
+			pkgFiles = append(pkgFiles, debugName)
 		}
 	}
 
-	return names, nil
+	return pkgFiles, ok, nil
 }
 
 func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Arguments,

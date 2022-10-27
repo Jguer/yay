@@ -84,7 +84,7 @@ func graphPackage(
 		return errors.New(gotext.Get("only one target is allowed"))
 	}
 
-	graph, err := grapher.GraphFromAURCache([]string{targets[0]})
+	graph, err := grapher.GraphFromAURCache(nil, []string{targets[0]})
 	if err != nil {
 		return err
 	}

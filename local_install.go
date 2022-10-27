@@ -51,7 +51,7 @@ func installLocalPKGBUILD(
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
 
-	graph, err := grapher.GraphFromSrcInfo(wd, pkgbuild)
+	graph, err := grapher.GraphFromSrcInfo(nil, wd, pkgbuild)
 	if err != nil {
 		return err
 	}

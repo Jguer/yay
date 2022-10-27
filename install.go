@@ -629,7 +629,7 @@ func buildInstallPkgbuilds(
 		}
 
 		if !satisfied || !config.BatchInstall {
-			err = doInstall(ctx, cmdArgs, deps, exp)
+			err = installPkgArchive(ctx, cmdArgs, append(deps, exp...))
 
 			deps = make([]string, 0)
 			exp = make([]string, 0)
@@ -768,7 +768,7 @@ func buildInstallPkgbuilds(
 		wg.Wait()
 	}
 
-	err = doInstall(ctx, cmdArgs, deps, exp)
+	err = installPkgArchive(ctx, cmdArgs, append(deps, exp...))
 	if err != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
 	}
@@ -778,7 +778,7 @@ func buildInstallPkgbuilds(
 	return err
 }
 
-func doInstall(ctx context.Context, cmdArgs *parser.Arguments, pkgDeps, pkgExp []string) error {
+func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchives []string) error {
 	arguments := cmdArgs.Copy()
 	arguments.ClearTargets()
 	arguments.Op = "U"
@@ -790,13 +790,14 @@ func doInstall(ctx context.Context, cmdArgs *parser.Arguments, pkgDeps, pkgExp [
 	arguments.DelArg("y", "refresh")
 	arguments.DelArg("u", "sysupgrade")
 	arguments.DelArg("w", "downloadonly")
+	arguments.DelArg("asdeps", "asdep")
+	arguments.DelArg("asexplicit", "asexp")
 
-	if len(pkgDeps)+len(pkgExp) == 0 {
+	if len(pkgArchives) == 0 {
 		return nil
 	}
 
-	arguments.AddTarget(pkgDeps...)
-	arguments.AddTarget(pkgExp...)
+	arguments.AddTarget(pkgArchives...)
 
 	if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
@@ -807,11 +808,19 @@ func doInstall(ctx context.Context, cmdArgs *parser.Arguments, pkgDeps, pkgExp [
 		fmt.Fprintln(os.Stderr, errStore)
 	}
 
-	if errDeps := asdeps(ctx, cmdArgs, pkgDeps); errDeps != nil {
+	return nil
+}
+
+func setInstallReason(ctx context.Context, cmdArgs *parser.Arguments, deps, exps []string) error {
+	if len(deps)+len(exps) == 0 {
+		return nil
+	}
+
+	if errDeps := asdeps(ctx, cmdArgs, deps); errDeps != nil {
 		return errDeps
 	}
 
-	return asexp(ctx, cmdArgs, pkgExp)
+	return asexp(ctx, cmdArgs, exps)
 }
 
 func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.StringSet,

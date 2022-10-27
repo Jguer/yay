@@ -94,7 +94,9 @@ type Grapher struct {
 	w          io.Writer // output writer
 }
 
-func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache, fullGraph, noConfirm bool, output io.Writer) *Grapher {
+func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache,
+	fullGraph, noConfirm bool, output io.Writer,
+) *Grapher {
 	return &Grapher{
 		dbExecutor: dbExecutor,
 		aurCache:   aurCache,
@@ -104,8 +106,47 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache, fullGraph, 
 	}
 }
 
-func (g *Grapher) GraphFromSrcInfo(pkgBuildDir string, pkgbuild *gosrc.Srcinfo) (*topo.Graph[string, *InstallInfo], error) {
+func (g *Grapher) GraphFromTargets(targets []string) (*topo.Graph[string, *InstallInfo], error) {
 	graph := topo.New[string, *InstallInfo]()
+
+	for _, targetString := range targets {
+		var (
+			err    error
+			target = ToTarget(targetString)
+		)
+
+		switch target.DB {
+		case "aur":
+			graph, err = g.GraphFromAURCache(graph, []string{target.Name})
+		default:
+			graph.AddNode(target.Name)
+			g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
+				Color:      colorMap[Explicit],
+				Background: bgColorMap[AUR],
+				Value: &InstallInfo{
+					Source:     Sync,
+					Reason:     Explicit,
+					Version:    target.Version,
+					SyncDBName: &target.DB,
+				},
+			})
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fmt.Println(graph)
+	return graph, nil
+}
+
+func (g *Grapher) GraphFromSrcInfo(graph *topo.Graph[string, *InstallInfo], pkgBuildDir string,
+	pkgbuild *gosrc.Srcinfo,
+) (*topo.Graph[string, *InstallInfo], error) {
+	if graph == nil {
+		graph = topo.New[string, *InstallInfo]()
+	}
 
 	aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
 	if err != nil {
@@ -147,11 +188,19 @@ func (g *Grapher) addDepNodes(pkg *aur.Pkg, graph *topo.Graph[string, *InstallIn
 	}
 }
 
-func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string, *InstallInfo], error) {
-	graph := topo.New[string, *InstallInfo]()
+func (g *Grapher) GraphFromAURCache(graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
+	if graph == nil {
+		graph = topo.New[string, *InstallInfo]()
+	}
 
 	for _, target := range targets {
 		aurPkgs, _ := g.aurCache.FindPackage(target)
+		if len(aurPkgs) == 0 {
+			text.Errorln("No AUR package found for", target)
+
+			continue
+		}
+
 		pkg := provideMenu(g.w, target, aurPkgs, g.noConfirm)
 
 		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
@@ -165,6 +214,7 @@ func (g *Grapher) GraphFromAURCache(targets []string) (*topo.Graph[string, *Inst
 			},
 		})
 
+		graph.AddNode(pkg.Name)
 		g.addDepNodes(pkg, graph)
 	}
 

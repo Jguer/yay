@@ -26,7 +26,7 @@ func syncInstall(ctx context.Context,
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
 
-	graph, err := grapher.GraphFromAURCache(cmdArgs.Targets)
+	graph, err := grapher.GraphFromTargets(cmdArgs.Targets)
 	if err != nil {
 		return err
 	}

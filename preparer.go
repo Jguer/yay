@@ -55,7 +55,14 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 		for pkgName, info := range layer {
 			source := dep.SourceNames[info.Source]
 			reason := dep.ReasonNames[info.Reason]
-			pkgStr := text.Cyan(fmt.Sprintf("%s-%s", pkgName, info.Version))
+
+			var pkgStr string
+			if info.Version != "" {
+				pkgStr = text.Cyan(fmt.Sprintf("%s-%s", pkgName, info.Version))
+			} else {
+				pkgStr = text.Cyan(pkgName)
+			}
+
 			if _, ok := pkgsBySourceAndReason[source]; !ok {
 				pkgsBySourceAndReason[source] = map[string][]string{}
 			}
