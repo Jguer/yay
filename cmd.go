@@ -59,6 +59,7 @@ Permanent configuration options:
                           config file when used
 
     --aururl      <url>   Set an alternative AUR URL
+    --aurrpcurl   <url>   Set an alternative URL for the AUR /rpc endpoint
     --builddir    <dir>   Directory used to download and run PKGBUILDS
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor

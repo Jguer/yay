@@ -26,6 +26,7 @@ _pacman_opts_common=(
 	'--repo[Assume targets are from the repositories]'
 	{-a,--aur}'[Assume targets are from the AUR]'
 	'--aururl[Set an alternative AUR URL]:url'
+	'--aurrpcurl[Set an alternative URL for the AUR /rpc endpoint]:url'
 	'--arch[Set an alternate architecture]'
 	{-b,--dbpath}'[Alternate database location]:database_location:_files -/'
 	'--color[colorize the output]:color options:(always never auto)'

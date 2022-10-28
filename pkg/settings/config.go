@@ -34,6 +34,7 @@ var NoConfirm = false
 type Configuration struct {
 	Runtime                *Runtime `json:"-"`
 	AURURL                 string   `json:"aururl"`
+	AURRPCURL              string   `json:"aurrpcurl"`
 	BuildDir               string   `json:"buildDir"`
 	Editor                 string   `json:"editor"`
 	EditorFlags            string   `json:"editorflags"`
@@ -114,6 +115,7 @@ func (c *Configuration) Save(configPath string) error {
 
 func (c *Configuration) expandEnv() {
 	c.AURURL = os.ExpandEnv(c.AURURL)
+	c.AURRPCURL = os.ExpandEnv(c.AURRPCURL)
 	c.BuildDir = os.ExpandEnv(c.BuildDir)
 	c.Editor = os.ExpandEnv(c.Editor)
 	c.EditorFlags = os.ExpandEnv(c.EditorFlags)

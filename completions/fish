@@ -189,6 +189,7 @@ complete -c $progname -n "$getpkgbuild" -s p -l print -d 'Print pkgbuild of pack
 # Permanent configuration settings
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
 complete -c $progname -n "not $noopt" -l aururl -d 'Set an alternative AUR URL' -f
+complete -c $progname -n "not $noopt" -l aurrpcurl -d 'Set an alternative URL for the AUR /rpc endpoint' -f
 complete -c $progname -n "not $noopt" -l builddir -d 'Directory to use for Building AUR Packages' -r
 complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -f
 complete -c $progname -n "not $noopt" -l editorflags -d 'Editor flags to use' -f
