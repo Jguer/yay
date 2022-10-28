@@ -12,10 +12,12 @@ import (
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
+	"github.com/pkg/errors"
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/votar/pkg/vote"
 
+	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -285,8 +287,14 @@ func NewConfig(version string) (*Configuration, error) {
 		QueryBuilder:   nil,
 	}
 
-	var errAUR error
+	var errAURCache error
 
+	newConfig.Runtime.AURCache, errAURCache = metadata.NewAURCache(filepath.Join(newConfig.BuildDir, "aur.json"))
+	if errAURCache != nil {
+		return nil, errors.Wrap(errAURCache, gotext.Get("failed to retrieve aur Cache"))
+	}
+
+	var errAUR error
 	newConfig.Runtime.AURClient, errAUR = aur.NewClient(aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
 		aur.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
 			req.Header.Set("User-Agent", userAgent)

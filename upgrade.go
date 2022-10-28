@@ -171,7 +171,7 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 
 	if !config.UpgradeMenu {
 		for _, pkg := range aurUp.Up {
-			targets = append(targets, pkg.Name)
+			targets = append(targets, pkg.Repository+"/"+pkg.Name)
 		}
 
 		return ignore, targets, nil
@@ -204,12 +204,12 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 		}
 
 		if isInclude && !include.Get(len(repoUp.Up)-i+len(aurUp.Up)) {
-			targets = append(targets, pkg.Name)
+			targets = append(targets, pkg.Repository+"/"+pkg.Name)
 			continue
 		}
 
 		if !isInclude && (exclude.Get(len(repoUp.Up)-i+len(aurUp.Up)) || otherExclude.Get(pkg.Repository)) {
-			targets = append(targets, pkg.Name)
+			targets = append(targets, pkg.Repository+"/"+pkg.Name)
 			continue
 		}
 

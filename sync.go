@@ -3,25 +3,28 @@ package main
 import (
 	"context"
 	"os"
-	"path/filepath"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
 )
 
 func syncInstall(ctx context.Context,
 	config *settings.Configuration,
-	cmdArgs *parser.Arguments, dbExecutor db.Executor,
+	cmdArgs *parser.Arguments,
+	dbExecutor db.Executor,
 ) error {
-	aurCache, err := metadata.NewAURCache(filepath.Join(config.BuildDir, "aur.json"))
-	if err != nil {
-		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
+	aurCache := config.Runtime.AURCache
+
+	if cmdArgs.ExistsArg("u", "sysupgrade") {
+		var errSysUp error
+		// All of the installs are done as explicit installs, this should be move to a grapher method
+		_, errSysUp = addUpgradeTargetsToArgs(ctx, dbExecutor, cmdArgs, []string{}, cmdArgs)
+		if errSysUp != nil {
+			return errSysUp
+		}
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)

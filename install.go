@@ -125,18 +125,10 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 
 	// if we are doing -u also request all packages needing update
 	if sysupgradeArg {
-		ignore, targets, errUp := sysupgradeTargets(ctx, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
-		if errUp != nil {
-			return errUp
-		}
-
-		for _, up := range targets {
-			cmdArgs.AddTarget(up)
-			requestTargets = append(requestTargets, up)
-		}
-
-		if len(ignore) > 0 {
-			arguments.CreateOrAppendOption("ignore", ignore.ToSlice()...)
+		var errSysUp error
+		requestTargets, errSysUp = addUpgradeTargetsToArgs(ctx, dbExecutor, cmdArgs, requestTargets, arguments)
+		if errSysUp != nil {
+			return errSysUp
 		}
 	}
 
@@ -350,6 +342,23 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	}
 
 	return nil
+}
+
+func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor, cmdArgs *parser.Arguments, requestTargets []string, arguments *parser.Arguments) ([]string, error) {
+	ignore, targets, errUp := sysupgradeTargets(ctx, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
+	if errUp != nil {
+		return nil, errUp
+	}
+
+	for _, up := range targets {
+		cmdArgs.AddTarget(up)
+		requestTargets = append(requestTargets, up)
+	}
+
+	if len(ignore) > 0 {
+		arguments.CreateOrAppendOption("ignore", ignore.ToSlice()...)
+	}
+	return requestTargets, nil
 }
 
 func removeMake(ctx context.Context, cmdBuilder exe.ICmdBuilder, makeDeps []string) error {
