@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/Jguer/yay/v11/pkg/db"
@@ -9,6 +10,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/leonelquinteros/gotext"
 )
 
 func syncInstall(ctx context.Context,
@@ -17,10 +19,23 @@ func syncInstall(ctx context.Context,
 	dbExecutor db.Executor,
 ) error {
 	aurCache := config.Runtime.AURCache
+	refreshArg := cmdArgs.ExistsArg("y", "refresh")
+
+	if refreshArg && config.Runtime.Mode.AtLeastRepo() {
+		if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
+			return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
+		}
+
+		// we may have done -Sy, our handle now has an old
+		// database.
+		if errRefresh := dbExecutor.RefreshHandle(); errRefresh != nil {
+			return errRefresh
+		}
+	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
 
-	graph, err := grapher.GraphFromTargets(cmdArgs.Targets)
+	graph, err := grapher.GraphFromTargets(nil, cmdArgs.Targets)
 	if err != nil {
 		return err
 	}

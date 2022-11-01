@@ -106,8 +106,10 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache,
 	}
 }
 
-func (g *Grapher) GraphFromTargets(targets []string) (*topo.Graph[string, *InstallInfo], error) {
-	graph := topo.New[string, *InstallInfo]()
+func (g *Grapher) GraphFromTargets(graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
+	if graph == nil {
+		graph = topo.New[string, *InstallInfo]()
+	}
 
 	for _, targetString := range targets {
 		var (
