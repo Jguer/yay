@@ -54,9 +54,8 @@ func setPkgReason(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string,
 		cmdArgs.AddTarget(pkgName)
 	}
 
-	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
-	if err != nil {
+	if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
 		return &SetPkgReasonError{exp: exp}
 	}
 
