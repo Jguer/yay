@@ -200,7 +200,7 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 	pkgArchives := make([]string, 0, 2)
 
 	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
-		return nil, false, &UnableToFindPkgDestError{name: name, pkgDest: pkgdest}
+		return nil, false, &FindPkgDestError{name: name, pkgDest: pkgdest}
 	}
 
 	pkgArchives = append(pkgArchives, pkgdest)
@@ -229,6 +229,7 @@ func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Argum
 	arguments.DelArg("asdeps", "asdep")
 	arguments.DelArg("asexplicit", "asexp")
 	arguments.DelArg("i", "install")
+	arguments.DelArg("u", "upgrade")
 	arguments.Op = "S"
 	arguments.ClearTargets()
 	arguments.AddTarget(repoTargets...)

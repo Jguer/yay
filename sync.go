@@ -18,20 +18,19 @@ func syncInstall(ctx context.Context,
 ) error {
 	aurCache := config.Runtime.AURCache
 
-	if cmdArgs.ExistsArg("u", "sysupgrade") {
-		var errSysUp error
-		// All of the installs are done as explicit installs, this should be move to a grapher method
-		_, errSysUp = addUpgradeTargetsToArgs(ctx, dbExecutor, cmdArgs, []string{}, cmdArgs)
-		if errSysUp != nil {
-			return errSysUp
-		}
-	}
-
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
 
 	graph, err := grapher.GraphFromTargets(cmdArgs.Targets)
 	if err != nil {
 		return err
+	}
+
+	if cmdArgs.ExistsArg("u", "sysupgrade") {
+		var errSysUp error
+		graph, _, errSysUp = sysupgradeTargetsV2(ctx, dbExecutor, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		if errSysUp != nil {
+			return errSysUp
+		}
 	}
 
 	topoSorted := graph.TopoSortedLayerMap()

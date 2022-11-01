@@ -12,12 +12,14 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/intrange"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/topo"
 	"github.com/Jguer/yay/v11/pkg/upgrade"
 )
 
@@ -248,4 +250,107 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 	warnings.Print()
 
 	return upgradePkgsMenu(aurUp, repoUp)
+}
+
+// Targets for sys upgrade.
+func sysupgradeTargetsV2(ctx context.Context,
+	dbExecutor db.Executor,
+	graph *topo.Graph[string, *dep.InstallInfo],
+	enableDowngrade bool,
+) (*topo.Graph[string, *dep.InstallInfo], stringset.StringSet, error) {
+	warnings := query.NewWarnings()
+
+	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade,
+		func(upgrade.Upgrade) bool { return true })
+	if err != nil {
+		return graph, nil, err
+	}
+
+	warnings.Print()
+	ignore := make(stringset.StringSet)
+
+	allUpLen := len(repoUp.Up) + len(aurUp.Up)
+	if allUpLen == 0 {
+		return graph, ignore, nil
+	}
+
+	sort.Sort(repoUp)
+	sort.Sort(aurUp)
+
+	allUp := upgrade.UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
+
+	fmt.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
+	allUp.Print()
+
+	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
+
+	numbers, err := text.GetInput(config.AnswerUpgrade, settings.NoConfirm)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// upgrade menu asks you which packages to NOT upgrade so in this case
+	// include and exclude are kind of swapped
+	include, exclude, otherInclude, otherExclude := intrange.ParseNumberMenu(numbers)
+
+	isInclude := len(exclude) == 0 && len(otherExclude) == 0
+
+	for i, pkg := range repoUp.Up {
+		if isInclude && otherInclude.Get(pkg.Repository) {
+			ignore.Set(pkg.Name)
+		}
+
+		if isInclude && !include.Get(len(repoUp.Up)-i+len(aurUp.Up)) {
+			addUpgradeToGraph(pkg, graph)
+			continue
+		}
+
+		if !isInclude && (exclude.Get(len(repoUp.Up)-i+len(aurUp.Up)) || otherExclude.Get(pkg.Repository)) {
+			addUpgradeToGraph(pkg, graph)
+			continue
+		}
+
+		ignore.Set(pkg.Name)
+	}
+
+	for i, pkg := range aurUp.Up {
+		if isInclude && otherInclude.Get(pkg.Repository) {
+			continue
+		}
+
+		if isInclude && !include.Get(len(aurUp.Up)-i) {
+			addUpgradeToGraph(pkg, graph)
+		}
+
+		if !isInclude && (exclude.Get(len(aurUp.Up)-i) || otherExclude.Get(pkg.Repository)) {
+			addUpgradeToGraph(pkg, graph)
+		}
+	}
+
+	return graph, ignore, err
+}
+
+func addUpgradeToGraph(pkg db.Upgrade, graph *topo.Graph[string, *dep.InstallInfo]) {
+	source := dep.Sync
+	if pkg.Repository == "aur" {
+		source = dep.AUR
+	}
+
+	reason := dep.Explicit
+	if pkg.Reason == alpm.PkgReasonDepend {
+		reason = dep.Dep
+	}
+
+	graph.AddNode(pkg.Name)
+	graph.SetNodeInfo(pkg.Name, &topo.NodeInfo[*dep.InstallInfo]{
+		Color:      "",
+		Background: "",
+		Value: &dep.InstallInfo{
+			Source:     source,
+			Reason:     reason,
+			Version:    pkg.RemoteVersion,
+			AURBase:    &pkg.Base,
+			SyncDBName: &pkg.Repository,
+		},
+	})
 }

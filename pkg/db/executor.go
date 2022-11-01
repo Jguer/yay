@@ -19,6 +19,7 @@ func VerCmp(v1, v2 string) int {
 
 type Upgrade struct {
 	Name          string
+	Base          string
 	Repository    string
 	LocalVersion  string
 	RemoteVersion string

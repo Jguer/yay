@@ -16,7 +16,8 @@ func UpDevel(
 	ctx context.Context,
 	remote []db.IPackage,
 	aurdata map[string]*query.Pkg,
-	localCache *vcs.InfoStore) UpSlice {
+	localCache *vcs.InfoStore,
+) UpSlice {
 	toUpdate := make([]db.IPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)
 
@@ -64,9 +65,11 @@ func UpDevel(
 			toUpgrade.Up = append(toUpgrade.Up,
 				Upgrade{
 					Name:          pkg.Name(),
+					Base:          pkg.Base(),
 					Repository:    "devel",
 					LocalVersion:  pkg.Version(),
 					RemoteVersion: "latest-commit",
+					Reason:        pkg.Reason(),
 				})
 		}
 	}
@@ -104,6 +107,7 @@ func UpAUR(remote []db.IPackage, aurdata map[string]*query.Pkg, timeUpdate bool)
 				toUpgrade.Up = append(toUpgrade.Up,
 					Upgrade{
 						Name:          aurPkg.Name,
+						Base:          aurPkg.PackageBase,
 						Repository:    "aur",
 						LocalVersion:  pkg.Version(),
 						RemoteVersion: aurPkg.Version,

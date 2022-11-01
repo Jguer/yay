@@ -28,40 +28,47 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
+func setPkgReason(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string, exp bool) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
 	cmdArgs = cmdArgs.CopyGlobal()
-	_ = cmdArgs.AddArg("q", "D", "asdeps")
-	cmdArgs.AddTarget(pkgs...)
+	if exp {
+		if err := cmdArgs.AddArg("q", "D", "asexplicit"); err != nil {
+			return err
+		}
+	} else {
+		if err := cmdArgs.AddArg("q", "D", "asdeps"); err != nil {
+			return err
+		}
+	}
+
+	for _, compositePkgName := range pkgs {
+		pkgSplit := strings.Split(compositePkgName, "/")
+		pkgName := pkgSplit[0]
+		if len(pkgSplit) > 1 {
+			pkgName = pkgSplit[1]
+		}
+
+		cmdArgs.AddTarget(pkgName)
+	}
 
 	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err != nil {
-		return errors.New(gotext.Get("error updating package install reason to dependency"))
+		return &SetPkgReasonError{exp: exp}
 	}
 
 	return nil
 }
 
+func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
+	return setPkgReason(ctx, cmdArgs, pkgs, false)
+}
+
 func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
-	if len(pkgs) == 0 {
-		return nil
-	}
-
-	cmdArgs = cmdArgs.CopyGlobal()
-	_ = cmdArgs.AddArg("q", "D", "asexplicit")
-	cmdArgs.AddTarget(pkgs...)
-
-	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
-	if err != nil {
-		return fmt.Errorf("%s - %w", gotext.Get("error updating package install reason to explicit"), err)
-	}
-
-	return nil
+	return setPkgReason(ctx, cmdArgs, pkgs, true)
 }
 
 // Install handles package installs.
