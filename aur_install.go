@@ -25,6 +25,10 @@ type (
 )
 
 func (installer *Installer) AddPostInstallHook(hook PostInstallHookFunc) {
+	if hook == nil {
+		return
+	}
+
 	installer.postInstallHooks = append(installer.postInstallHooks, hook)
 }
 
