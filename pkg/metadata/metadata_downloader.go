@@ -7,24 +7,6 @@ import (
 	"os"
 )
 
-func main() {
-	// check if cache exists
-	cachePath := "aur.json"
-	cacheBytes, err := ReadCache(cachePath)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	if len(cacheBytes) == 0 {
-		cacheBytes, err = MakeCache(cachePath)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-}
-
 func MakeOrReadCache(cachePath string) ([]byte, error) {
 	cacheBytes, err := ReadCache(cachePath)
 	if err != nil {

@@ -296,6 +296,8 @@ func NewConfig(version string) (*Configuration, error) {
 		return nil, errors.Wrap(errAURCache, gotext.Get("failed to retrieve aur Cache"))
 	}
 
+	newConfig.Runtime.AURCache.DebugLoggerFn = text.Debugln
+
 	var errAUR error
 	newConfig.Runtime.AURClient, errAUR = aur.NewClient(aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
 		aur.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {

@@ -1,22 +1,38 @@
 package metadata
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/Jguer/aur"
 	"github.com/itchyny/gojq"
 	"github.com/ohler55/ojg/oj"
-	"github.com/tidwall/gjson"
+)
+
+const (
+	searchCacheCap = 300
+	cacheValidity  = 1 * time.Hour
 )
 
 type AURCache struct {
 	cache             []byte
-	provideCache      map[string][]*aur.Pkg
+	searchCache       map[string][]*aur.Pkg
+	cachePath         string
 	unmarshalledCache []interface{}
 	cacheHits         int
 	gojqCode          *gojq.Code
+	DebugLoggerFn     func(a ...interface{})
+}
+
+type AURQuery struct {
+	ByProvides bool // Returns multiple results of different bases
+	ByBase     bool // Returns multiple results of the same base
+	ByName     bool // Returns only 1 or 0 results
+	Needles    []string
 }
 
 func NewAURCache(cachePath string) (*AURCache, error) {
@@ -28,74 +44,161 @@ func NewAURCache(cachePath string) (*AURCache, error) {
 
 	return &AURCache{
 		cache:             aurCache,
-		provideCache:      make(map[string][]*aur.Pkg, 300),
+		cachePath:         cachePath,
+		searchCache:       make(map[string][]*aur.Pkg, searchCacheCap),
 		unmarshalledCache: inputStruct.([]interface{}),
 		gojqCode:          makeGoJQ(),
 	}, nil
 }
 
+// needsUpdate checks if cachepath is older than 24 hours
+func (a *AURCache) needsUpdate() (bool, error) {
+	// check if cache is older than 24 hours
+	info, err := os.Stat(a.cachePath)
+	if err != nil {
+		return false, fmt.Errorf("unable to read cache: %w", err)
+	}
+
+	return info.ModTime().Before(time.Now().Add(-cacheValidity)), nil
+}
+
+func (a *AURCache) cacheKey(needle string, byProvides, byBase, byName bool) string {
+	return fmt.Sprintf("%s-%v-%v-%v", needle, byProvides, byBase, byName)
+}
+
 func (a *AURCache) DebugInfo() {
 	fmt.Println("Byte Cache", len(a.cache))
-	fmt.Println("Entries Cached", len(a.provideCache))
+	fmt.Println("Entries Cached", len(a.searchCache))
 	fmt.Println("Cache Hits", a.cacheHits)
 }
 
 func (a *AURCache) SetProvideCache(needle string, pkgs []*aur.Pkg) {
-	a.provideCache[needle] = pkgs
+	a.searchCache[needle] = pkgs
+}
+
+// Get returns a list of packages that provide the given search term.
+func (a *AURCache) Get(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
+	update, err := a.needsUpdate()
+	if err != nil {
+		return nil, err
+	}
+
+	if update {
+		if a.DebugLoggerFn != nil {
+			a.DebugLoggerFn("AUR Cache is out of date, updating")
+		}
+
+		var makeErr error
+		if a.cache, makeErr = MakeCache(a.cachePath); makeErr != nil {
+			return nil, makeErr
+		}
+
+		inputStruct, unmarshallErr := oj.Parse(a.cache)
+		if unmarshallErr != nil {
+			return nil, unmarshallErr
+		}
+
+		a.unmarshalledCache = inputStruct.([]interface{})
+	}
+
+	found := make([]*aur.Pkg, 0, len(query.Needles))
+	if len(query.Needles) == 0 {
+		return found, nil
+	}
+
+	iterFound, errNeedle := a.gojqGetBatch(ctx, query)
+	if errNeedle != nil {
+		return nil, errNeedle
+	}
+
+	found = append(found, iterFound...)
+
+	return found, nil
 }
 
 // Get returns a list of packages that provide the given search term
-func (a *AURCache) FindPackage(needle string) ([]*aur.Pkg, error) {
-	if pkgs, ok := a.provideCache[needle]; ok {
+func (a *AURCache) FindPackage(ctx context.Context, needle string) ([]*aur.Pkg, error) {
+	cacheKey := a.cacheKey(needle, true, true, true)
+	if pkgs, ok := a.searchCache[cacheKey]; ok {
 		a.cacheHits++
 		return pkgs, nil
 	}
 
-	final, error := a.gojqGet(needle)
+	final, error := a.gojqGet(ctx, needle)
 	if error != nil {
 		return nil, error
 	}
 
-	a.provideCache[needle] = final
+	a.searchCache[cacheKey] = final
 
 	return final, nil
 }
 
-func (a *AURCache) gjsonGet(depName string) ([]*aur.Pkg, error) {
-	dedupMap := make(map[string]bool)
-	queryProvides := fmt.Sprintf("#(Provides.#(==\"%s\"))#", depName)
-	queryNames := fmt.Sprintf("#(Name==\"%s\")#", depName)
-	queryBases := fmt.Sprintf("#(PackageBase==\"%s\")#", depName)
+func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
+	pattern := ".[] | select("
+	for i, searchTerm := range query.Needles {
+		if i != 0 {
+			pattern += " or "
+		}
 
-	results := gjson.GetManyBytes(a.cache, queryProvides, queryNames, queryBases)
+		if query.ByName {
+			pattern += fmt.Sprintf("(.Name == \"%s\")", searchTerm)
+			if query.ByBase || query.ByProvides {
+				pattern += " or "
+			}
+		}
 
-	aggregated := append(append(results[0].Array(), results[1].Array()...), results[2].Array()...)
+		if query.ByBase {
+			pattern += fmt.Sprintf("(.PackageBase == \"%s\")", searchTerm)
+			if query.ByProvides {
+				pattern += " or "
+			}
+		}
 
-	final := make([]*aur.Pkg, 0, len(aggregated))
-
-	for i := range aggregated {
-		jsonString := aggregated[i].Raw
-		key := jsonString[:15]
-
-		if _, ok := dedupMap[key]; !ok {
-			pkg := &aur.Pkg{}
-			json.Unmarshal([]byte(jsonString), pkg)
-			final = append(final, pkg)
-			dedupMap[key] = true
+		if query.ByProvides {
+			pattern += fmt.Sprintf("(.Provides[]? == \"%s\")", searchTerm)
 		}
 	}
+
+	pattern += ")"
+
+	parsed, err := gojq.Parse(pattern)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	final := make([]*aur.Pkg, 0, len(query.Needles))
+
+	iter := parsed.RunWithContext(ctx, a.unmarshalledCache) // or query.RunWithContext
+
+	for v, ok := iter.Next(); ok; v, ok = iter.Next() {
+		if err, ok := v.(error); ok {
+			return nil, err
+		}
+
+		pkg := new(aur.Pkg)
+		bValue, err := gojq.Marshal(v)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		oj.Unmarshal(bValue, pkg)
+		final = append(final, pkg)
+	}
+
+	if a.DebugLoggerFn != nil {
+		a.DebugLoggerFn("AUR Query", pattern, "Found", len(final))
+	}
+
 	return final, nil
 }
 
-func (a *AURCache) gojqGet(searchTerm string) ([]*aur.Pkg, error) {
+func (a *AURCache) gojqGet(ctx context.Context, searchTerm string) ([]*aur.Pkg, error) {
 	final := make([]*aur.Pkg, 0, 1)
 
-	iter := a.gojqCode.Run(a.unmarshalledCache, searchTerm) // or query.RunWithContext
-	for {
-		v, ok := iter.Next()
-		if !ok {
-			break
-		}
+	iter := a.gojqCode.RunWithContext(ctx, a.unmarshalledCache, searchTerm) // or query.RunWithContext
+
+	for v, ok := iter.Next(); ok; v, ok = iter.Next() {
 		if err, ok := v.(error); ok {
 			return nil, err
 		}

@@ -35,14 +35,14 @@ func syncInstall(ctx context.Context,
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
 
-	graph, err := grapher.GraphFromTargets(nil, cmdArgs.Targets)
+	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {
 		return err
 	}
 
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		var errSysUp error
-		graph, _, errSysUp = sysupgradeTargetsV2(ctx, dbExecutor, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		graph, _, errSysUp = sysupgradeTargetsV2(ctx, aurCache, dbExecutor, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errSysUp != nil {
 			return errSysUp
 		}

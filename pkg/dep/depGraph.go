@@ -1,6 +1,7 @@
 package dep
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -106,7 +107,7 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache,
 	}
 }
 
-func (g *Grapher) GraphFromTargets(graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
+func (g *Grapher) GraphFromTargets(ctx context.Context, graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
 		graph = topo.New[string, *InstallInfo]()
 	}
@@ -119,7 +120,7 @@ func (g *Grapher) GraphFromTargets(graph *topo.Graph[string, *InstallInfo], targ
 
 		switch target.DB {
 		case "aur":
-			graph, err = g.GraphFromAURCache(graph, []string{target.Name})
+			graph, err = g.GraphFromAURCache(ctx, graph, []string{target.Name})
 		default:
 			graph.AddNode(target.Name)
 			g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
@@ -143,7 +144,7 @@ func (g *Grapher) GraphFromTargets(graph *topo.Graph[string, *InstallInfo], targ
 	return graph, nil
 }
 
-func (g *Grapher) GraphFromSrcInfo(graph *topo.Graph[string, *InstallInfo], pkgBuildDir string,
+func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string, *InstallInfo], pkgBuildDir string,
 	pkgbuild *gosrc.Srcinfo,
 ) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
@@ -170,33 +171,33 @@ func (g *Grapher) GraphFromSrcInfo(graph *topo.Graph[string, *InstallInfo], pkgB
 			},
 		})
 
-		g.addDepNodes(&pkg, graph)
+		g.addDepNodes(ctx, &pkg, graph)
 	}
 
 	return graph, nil
 }
 
-func (g *Grapher) addDepNodes(pkg *aur.Pkg, graph *topo.Graph[string, *InstallInfo]) {
+func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Graph[string, *InstallInfo]) {
 	if len(pkg.MakeDepends) > 0 {
-		g.addNodes(graph, pkg.Name, pkg.MakeDepends, MakeDep)
+		g.addNodes(ctx, graph, pkg.Name, pkg.MakeDepends, MakeDep)
 	}
 
 	if !false && len(pkg.Depends) > 0 {
-		g.addNodes(graph, pkg.Name, pkg.Depends, Dep)
+		g.addNodes(ctx, graph, pkg.Name, pkg.Depends, Dep)
 	}
 
 	if !false && len(pkg.CheckDepends) > 0 {
-		g.addNodes(graph, pkg.Name, pkg.CheckDepends, CheckDep)
+		g.addNodes(ctx, graph, pkg.Name, pkg.CheckDepends, CheckDep)
 	}
 }
 
-func (g *Grapher) GraphFromAURCache(graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
+func (g *Grapher) GraphFromAURCache(ctx context.Context, graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
 		graph = topo.New[string, *InstallInfo]()
 	}
 
 	for _, target := range targets {
-		aurPkgs, _ := g.aurCache.FindPackage(target)
+		aurPkgs, _ := g.aurCache.FindPackage(ctx, target)
 		if len(aurPkgs) == 0 {
 			text.Errorln("No AUR package found for", target)
 
@@ -217,7 +218,7 @@ func (g *Grapher) GraphFromAURCache(graph *topo.Graph[string, *InstallInfo], tar
 		})
 
 		graph.AddNode(pkg.Name)
-		g.addDepNodes(pkg, graph)
+		g.addDepNodes(ctx, pkg, graph)
 	}
 
 	return graph, nil
@@ -237,6 +238,7 @@ func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo]
 }
 
 func (g *Grapher) addNodes(
+	ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo],
 	parentPkgName string,
 	deps []string,
@@ -295,13 +297,13 @@ func (g *Grapher) addNodes(
 					newDepsSlice = append(newDepsSlice, newDep.Name)
 				}
 
-				g.addNodes(graph, alpmPkg.Name(), newDepsSlice, Dep)
+				g.addNodes(ctx, graph, alpmPkg.Name(), newDepsSlice, Dep)
 			}
 
 			continue
 		}
 
-		if aurPkgs, _ := g.aurCache.FindPackage(depName); len(aurPkgs) != 0 { // Check AUR
+		if aurPkgs, _ := g.aurCache.FindPackage(ctx, depName); len(aurPkgs) != 0 { // Check AUR
 			pkg := aurPkgs[0]
 			if len(aurPkgs) > 1 {
 				pkg = provideMenu(g.w, depName, aurPkgs, g.noConfirm)
@@ -324,7 +326,7 @@ func (g *Grapher) addNodes(
 						Version: pkg.Version,
 					},
 				})
-			g.addDepNodes(pkg, graph)
+			g.addDepNodes(ctx, pkg, graph)
 
 			continue
 		}

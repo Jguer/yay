@@ -14,6 +14,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/intrange"
+	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
@@ -36,7 +37,8 @@ func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(ctx context.Context, warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
+func upList(ctx context.Context, aurCache *metadata.AURCache,
+	warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
 	filter upgrade.Filter,
 ) (aurUp, repoUp upgrade.UpSlice, err error) {
 	remote, remoteNames := query.GetRemotePackages(dbExecutor)
@@ -71,7 +73,11 @@ func upList(ctx context.Context, warnings *query.AURWarnings, dbExecutor db.Exec
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []*aur.Pkg
-		_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
+		if aurCache != nil {
+			_aurdata, err = aurCache.Get(ctx, &metadata.AURQuery{ByName: true, Needles: remoteNames})
+		} else {
+			_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
+		}
 		errs.Add(err)
 
 		if err == nil {
@@ -241,7 +247,7 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 ) (stringset.StringSet, []string, error) {
 	warnings := query.NewWarnings()
 
-	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade,
+	aurUp, repoUp, err := upList(ctx, nil, warnings, dbExecutor, enableDowngrade,
 		func(upgrade.Upgrade) bool { return true })
 	if err != nil {
 		return nil, nil, err
@@ -254,13 +260,14 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 
 // Targets for sys upgrade.
 func sysupgradeTargetsV2(ctx context.Context,
+	aurCache *metadata.AURCache,
 	dbExecutor db.Executor,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool,
 ) (*topo.Graph[string, *dep.InstallInfo], stringset.StringSet, error) {
 	warnings := query.NewWarnings()
 
-	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade,
+	aurUp, repoUp, err := upList(ctx, aurCache, warnings, dbExecutor, enableDowngrade,
 		func(upgrade.Upgrade) bool { return true })
 	if err != nil {
 		return graph, nil, err

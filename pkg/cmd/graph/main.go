@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -66,7 +67,7 @@ func handleCmd() error {
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm, os.Stdout)
 
-	return graphPackage(grapher, cmdArgs.Targets)
+	return graphPackage(context.Background(), grapher, cmdArgs.Targets)
 }
 
 func main() {
@@ -77,6 +78,7 @@ func main() {
 }
 
 func graphPackage(
+	ctx context.Context,
 	grapher *dep.Grapher,
 	targets []string,
 ) error {
@@ -84,7 +86,7 @@ func graphPackage(
 		return errors.New(gotext.Get("only one target is allowed"))
 	}
 
-	graph, err := grapher.GraphFromAURCache(nil, []string{targets[0]})
+	graph, err := grapher.GraphFromAURCache(ctx, nil, []string{targets[0]})
 	if err != nil {
 		return err
 	}
