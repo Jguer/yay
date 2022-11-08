@@ -107,7 +107,9 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache,
 	}
 }
 
-func (g *Grapher) GraphFromTargets(ctx context.Context, graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
+func (g *Grapher) GraphFromTargets(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo], targets []string,
+) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
 		graph = topo.New[string, *InstallInfo]()
 	}
@@ -140,7 +142,6 @@ func (g *Grapher) GraphFromTargets(ctx context.Context, graph *topo.Graph[string
 		}
 	}
 
-	fmt.Println(graph)
 	return graph, nil
 }
 
