@@ -121,6 +121,24 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		)
 
 		switch target.DB {
+		case "":
+			if g.dbExecutor.SyncPackage(target.Name) != nil {
+				graph.AddNode(target.Name)
+				g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
+					Color:      colorMap[Explicit],
+					Background: bgColorMap[AUR],
+					Value: &InstallInfo{
+						Source:     Sync,
+						Reason:     Explicit,
+						Version:    target.Version,
+						SyncDBName: &target.DB,
+					},
+				})
+
+				continue
+			}
+
+			fallthrough
 		case "aur":
 			graph, err = g.GraphFromAURCache(ctx, graph, []string{target.Name})
 		default:
@@ -192,13 +210,16 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 	}
 }
 
-func (g *Grapher) GraphFromAURCache(ctx context.Context, graph *topo.Graph[string, *InstallInfo], targets []string) (*topo.Graph[string, *InstallInfo], error) {
+func (g *Grapher) GraphFromAURCache(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo],
+	targets []string,
+) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
 		graph = topo.New[string, *InstallInfo]()
 	}
 
 	for _, target := range targets {
-		aurPkgs, _ := g.aurCache.FindPackage(ctx, target)
+		aurPkgs, _ := g.aurCache.Get(ctx, &metadata.AURQuery{ByName: true, Needles: []string{target}})
 		if len(aurPkgs) == 0 {
 			text.Errorln("No AUR package found for", target)
 
