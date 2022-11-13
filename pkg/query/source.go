@@ -30,6 +30,8 @@ const (
 type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
+
+	useAURCache       bool
 	sortBy            string
 	searchBy          string
 	targetMode        parser.TargetMode
@@ -48,6 +50,7 @@ func NewSourceQueryBuilder(
 	searchBy string,
 	bottomUp,
 	singleLineResults bool,
+	useAURCache bool,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
 		aurClient:         aurClient,
@@ -59,6 +62,7 @@ func NewSourceQueryBuilder(
 		targetMode:        targetMode,
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
+		useAURCache:       useAURCache,
 	}
 }
 
@@ -71,7 +75,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context,
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, s.aurClient, s.aurCache, pkgS, s.searchBy)
+		s.aurQuery, aurErr = queryAUR(ctx, s.aurClient, s.aurCache, pkgS, s.searchBy, s.useAURCache)
 		s.aurQuery = filterAURResults(pkgS, s.aurQuery)
 
 		sort.Sort(aurSortable{aurQuery: s.aurQuery, sortBy: s.sortBy, bottomUp: s.bottomUp})
@@ -189,7 +193,7 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
 	aurClient aur.ClientInterface, aurMetadata *metadata.AURCache,
-	pkgS []string, searchBy string,
+	pkgS []string, searchBy string, newEngine bool,
 ) ([]aur.Pkg, error) {
 	var (
 		err error
@@ -199,18 +203,11 @@ func queryAUR(ctx context.Context,
 	for _, word := range pkgS {
 		var r []aur.Pkg
 
-		// if one of the search terms returns a result we start filtering by it
-		if aurClient != nil {
-			r, err = aurClient.Search(ctx, word, by)
-			if err == nil {
-				return r, nil
-			}
-		}
-
-		if aurMetadata != nil {
+		if aurMetadata != nil && newEngine {
 			q, err := aurMetadata.Get(ctx, &metadata.AURQuery{
-				Needles: []string{word},
-				By:      by,
+				Needles:  []string{word},
+				By:       by,
+				Contains: true,
 			})
 
 			for _, pkg := range q {
@@ -218,6 +215,16 @@ func queryAUR(ctx context.Context,
 			}
 
 			if err == nil {
+				return r, nil
+			} else {
+				text.Warnln("AUR Metadata search failed:", err)
+			}
+		}
+		// if one of the search terms returns a result we start filtering by it
+		if aurClient != nil {
+			text.Debugln("AUR RPC:", by, word)
+
+			if r, err = aurClient.Search(ctx, word, by); err == nil {
 				return r, nil
 			}
 		}

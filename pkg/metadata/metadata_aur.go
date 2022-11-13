@@ -29,8 +29,9 @@ type AURCache struct {
 }
 
 type AURQuery struct {
-	Needles []string
-	By      aur.By
+	Needles  []string
+	By       aur.By
+	Contains bool // if true, search for packages containing the needle, not exact matches
 }
 
 func NewAURCache(cachePath string) (*AURCache, error) {
@@ -142,14 +143,23 @@ func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pk
 
 		bys := toSearchBy(query.By)
 		for j, by := range bys {
-			pattern += fmt.Sprintf("(.%s == \"%s\")", by, searchTerm)
+			if query.Contains {
+				pattern += fmt.Sprintf("(.%s // empty | test(\"%s\"))", by, searchTerm)
+			} else {
+				pattern += fmt.Sprintf("(.%s == \"%s\")", by, searchTerm)
+			}
+
 			if j != len(bys)-1 {
-				pattern += " or "
+				pattern += " , "
 			}
 		}
 	}
 
 	pattern += ")"
+
+	if a.DebugLoggerFn != nil {
+		a.DebugLoggerFn("AUR metadata query", pattern)
+	}
 
 	parsed, err := gojq.Parse(pattern)
 	if err != nil {
@@ -176,7 +186,7 @@ func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pk
 	}
 
 	if a.DebugLoggerFn != nil {
-		a.DebugLoggerFn("AUR Query", pattern, "Found", len(final))
+		a.DebugLoggerFn("AUR metadata query found", len(final))
 	}
 
 	return final, nil

@@ -108,7 +108,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			client, err := aur.NewClient(aur.WithHTTPClient(&mockDoer{}))
 			require.NoError(t, err)
 
-			queryBuilder := NewSourceQueryBuilder(client, nil, "votes", parser.ModeAny, "", tc.bottomUp, false)
+			queryBuilder := NewSourceQueryBuilder(client, nil, "votes", parser.ModeAny, "", tc.bottomUp, false, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 
