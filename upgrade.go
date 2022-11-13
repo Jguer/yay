@@ -74,7 +74,7 @@ func upList(ctx context.Context, aurCache *metadata.AURCache,
 
 		var _aurdata []*aur.Pkg
 		if aurCache != nil {
-			_aurdata, err = aurCache.Get(ctx, &metadata.AURQuery{ByName: true, Needles: remoteNames})
+			_aurdata, err = aurCache.Get(ctx, &metadata.AURQuery{Needles: remoteNames, By: aur.Name})
 		} else {
 			_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
 		}

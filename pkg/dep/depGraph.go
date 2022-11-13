@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	aurc "github.com/Jguer/aur"
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/metadata"
 	aur "github.com/Jguer/yay/v11/pkg/query"
@@ -219,7 +220,7 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 	}
 
 	for _, target := range targets {
-		aurPkgs, _ := g.aurCache.Get(ctx, &metadata.AURQuery{ByName: true, Needles: []string{target}})
+		aurPkgs, _ := g.aurCache.Get(ctx, &metadata.AURQuery{By: aurc.Name, Needles: []string{target}})
 		if len(aurPkgs) == 0 {
 			text.Errorln("No AUR package found for", target)
 

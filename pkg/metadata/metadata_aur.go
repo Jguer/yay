@@ -29,10 +29,8 @@ type AURCache struct {
 }
 
 type AURQuery struct {
-	ByProvides bool // Returns multiple results of different bases
-	ByBase     bool // Returns multiple results of the same base
-	ByName     bool // Returns only 1 or 0 results
-	Needles    []string
+	Needles []string
+	By      aur.By
 }
 
 func NewAURCache(cachePath string) (*AURCache, error) {
@@ -136,27 +134,18 @@ func (a *AURCache) FindPackage(ctx context.Context, needle string) ([]*aur.Pkg, 
 
 func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
 	pattern := ".[] | select("
+
 	for i, searchTerm := range query.Needles {
 		if i != 0 {
 			pattern += " or "
 		}
 
-		if query.ByName {
-			pattern += fmt.Sprintf("(.Name == \"%s\")", searchTerm)
-			if query.ByBase || query.ByProvides {
+		bys := toSearchBy(query.By)
+		for j, by := range bys {
+			pattern += fmt.Sprintf("(.%s == \"%s\")", by, searchTerm)
+			if j != len(bys)-1 {
 				pattern += " or "
 			}
-		}
-
-		if query.ByBase {
-			pattern += fmt.Sprintf("(.PackageBase == \"%s\")", searchTerm)
-			if query.ByProvides {
-				pattern += " or "
-			}
-		}
-
-		if query.ByProvides {
-			pattern += fmt.Sprintf("(.Provides[]? == \"%s\")", searchTerm)
 		}
 	}
 
@@ -217,7 +206,6 @@ func (a *AURCache) gojqGet(ctx context.Context, searchTerm string) ([]*aur.Pkg, 
 }
 
 func makeGoJQ() *gojq.Code {
-	// pattern := ".[] | select((.PackageBase == $x) or (.Name == $x) or (.Provides[]? == ($x)))"
 	pattern := ".[] | select((.Name == $x) or (.Provides[]? == ($x)))"
 
 	query, err := gojq.Parse(pattern)
@@ -231,4 +219,27 @@ func makeGoJQ() *gojq.Code {
 	}
 
 	return compiled
+}
+
+func toSearchBy(by aur.By) []string {
+	switch by {
+	case aur.Name:
+		return []string{"Name"}
+	case aur.NameDesc:
+		return []string{"Name", "Description"}
+	case aur.Maintainer:
+		return []string{"Maintainer"}
+	case aur.Depends:
+		return []string{"Depends[]?"}
+	case aur.MakeDepends:
+		return []string{"MakeDepends[]?"}
+	case aur.OptDepends:
+		return []string{"OptDepends[]?"}
+	case aur.CheckDepends:
+		return []string{"CheckDepends[]?"}
+	case aur.None:
+		return []string{"Name", "Provides[]?"}
+	default:
+		panic("invalid By")
+	}
 }

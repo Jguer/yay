@@ -71,7 +71,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context,
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
+		s.aurQuery, aurErr = queryAUR(ctx, s.aurClient, s.aurCache, pkgS, s.searchBy)
 		s.aurQuery = filterAURResults(pkgS, s.aurQuery)
 
 		sort.Sort(aurSortable{aurQuery: s.aurQuery, sortBy: s.sortBy, bottomUp: s.bottomUp})
@@ -187,7 +187,10 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 }
 
 // queryAUR searches AUR and narrows based on subarguments.
-func queryAUR(ctx context.Context, aurClient aur.ClientInterface, pkgS []string, searchBy string) ([]aur.Pkg, error) {
+func queryAUR(ctx context.Context,
+	aurClient aur.ClientInterface, aurMetadata *metadata.AURCache,
+	pkgS []string, searchBy string,
+) ([]aur.Pkg, error) {
 	var (
 		err error
 		by  = getSearchBy(searchBy)
@@ -196,9 +199,27 @@ func queryAUR(ctx context.Context, aurClient aur.ClientInterface, pkgS []string,
 	for _, word := range pkgS {
 		var r []aur.Pkg
 
-		r, err = aurClient.Search(ctx, word, by)
-		if err == nil {
-			return r, nil
+		// if one of the search terms returns a result we start filtering by it
+		if aurClient != nil {
+			r, err = aurClient.Search(ctx, word, by)
+			if err == nil {
+				return r, nil
+			}
+		}
+
+		if aurMetadata != nil {
+			q, err := aurMetadata.Get(ctx, &metadata.AURQuery{
+				Needles: []string{word},
+				By:      by,
+			})
+
+			for _, pkg := range q {
+				r = append(r, *pkg)
+			}
+
+			if err == nil {
+				return r, nil
+			}
 		}
 	}
 

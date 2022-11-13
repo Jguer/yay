@@ -145,7 +145,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 
 	if s.targetMode.AtLeastAUR() {
 		var aurResults aurQuery
-		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
+		aurResults, aurErr = queryAUR(ctx, s.aurClient, nil, pkgS, s.searchBy)
 		dbName := sourceAUR
 
 		for i := range aurResults {
