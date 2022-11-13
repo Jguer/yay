@@ -40,7 +40,7 @@ func downloadPKGBUILDSource(ctx context.Context,
 	err := cmdBuilder.Show(
 		cmdBuilder.BuildMakepkgCmd(ctx, pkgBuildDir, args...))
 	if err != nil {
-		return ErrDownloadSource{inner: err}
+		return ErrDownloadSource{inner: err, pkgName: pkgBuildDir}
 	}
 
 	return nil

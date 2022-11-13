@@ -73,7 +73,7 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 	}
 	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "error downloading sources: \x1b[36myay-bin\x1b[0m \n\t context: <nil> \n\t \n")
+	assert.EqualError(t, err, "error downloading sources: \x1b[36m/tmp/yay-bin\x1b[0m \n\t context: <nil> \n\t \n")
 }
 
 // GIVEN 5 packages
