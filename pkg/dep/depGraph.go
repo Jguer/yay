@@ -94,17 +94,20 @@ type Grapher struct {
 	fullGraph  bool // If true, the graph will include all dependencies including already installed ones or repo
 	noConfirm  bool
 	w          io.Writer // output writer
+
+	providerCache map[string]*aur.Pkg
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache,
 	fullGraph, noConfirm bool, output io.Writer,
 ) *Grapher {
 	return &Grapher{
-		dbExecutor: dbExecutor,
-		aurCache:   aurCache,
-		fullGraph:  fullGraph,
-		noConfirm:  noConfirm,
-		w:          output,
+		dbExecutor:    dbExecutor,
+		aurCache:      aurCache,
+		fullGraph:     fullGraph,
+		noConfirm:     noConfirm,
+		w:             output,
+		providerCache: make(map[string]*aurc.Pkg, 5),
 	}
 }
 
@@ -326,11 +329,27 @@ func (g *Grapher) addNodes(
 			continue
 		}
 
-		if aurPkgs, _ := g.aurCache.FindPackage(ctx, depName); len(aurPkgs) != 0 { // Check AUR
+		var aurPkgs []*aur.Pkg
+		if cachedProvidePkg, ok := g.providerCache[depName]; ok {
+			aurPkgs = []*aur.Pkg{cachedProvidePkg}
+		} else {
+			var errMeta error
+			aurPkgs, errMeta = g.aurCache.Get(ctx,
+				&metadata.AURQuery{
+					Needles:  []string{depName},
+					By:       aurc.None,
+					Contains: false,
+				})
+			if errMeta != nil {
+				text.Warnln("AUR cache error:", errMeta)
+			}
+		}
+
+		if len(aurPkgs) != 0 { // Check AUR
 			pkg := aurPkgs[0]
 			if len(aurPkgs) > 1 {
 				pkg = provideMenu(g.w, depName, aurPkgs, g.noConfirm)
-				g.aurCache.SetProvideCache(depName, []*aur.Pkg{pkg})
+				g.providerCache[depName] = pkg
 			}
 
 			if err := graph.DependOn(pkg.Name, parentPkgName); err != nil {

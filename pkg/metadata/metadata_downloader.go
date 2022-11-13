@@ -45,7 +45,7 @@ func ReadCache(cachePath string) ([]byte, error) {
 
 // Download the metadata for aur packages.
 // create cache file
-// write to cache file
+// write to cache file.
 func MakeCache(cachePath string) ([]byte, error) {
 	body, err := downloadAURMetadata()
 	if err != nil {

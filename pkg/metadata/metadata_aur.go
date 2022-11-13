@@ -2,9 +2,7 @@ package metadata
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -14,17 +12,13 @@ import (
 )
 
 const (
-	searchCacheCap = 300
-	cacheValidity  = 1 * time.Hour
+	cacheValidity = 1 * time.Hour
 )
 
 type AURCache struct {
 	cache             []byte
-	searchCache       map[string][]*aur.Pkg
 	cachePath         string
 	unmarshalledCache []interface{}
-	cacheHits         int
-	gojqCode          *gojq.Code
 	DebugLoggerFn     func(a ...interface{})
 }
 
@@ -39,18 +33,20 @@ func NewAURCache(cachePath string) (*AURCache, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	inputStruct, err := oj.Parse(aurCache)
+	if err != nil {
+		return nil, fmt.Errorf("aur metadata unable to parse cache: %w", err)
+	}
 
 	return &AURCache{
 		cache:             aurCache,
 		cachePath:         cachePath,
-		searchCache:       make(map[string][]*aur.Pkg, searchCacheCap),
 		unmarshalledCache: inputStruct.([]interface{}),
-		gojqCode:          makeGoJQ(),
 	}, nil
 }
 
-// needsUpdate checks if cachepath is older than 24 hours
+// needsUpdate checks if cachepath is older than 24 hours.
 func (a *AURCache) needsUpdate() (bool, error) {
 	// check if cache is older than 24 hours
 	info, err := os.Stat(a.cachePath)
@@ -59,20 +55,6 @@ func (a *AURCache) needsUpdate() (bool, error) {
 	}
 
 	return info.ModTime().Before(time.Now().Add(-cacheValidity)), nil
-}
-
-func (a *AURCache) cacheKey(needle string, byProvides, byBase, byName bool) string {
-	return fmt.Sprintf("%s-%v-%v-%v", needle, byProvides, byBase, byName)
-}
-
-func (a *AURCache) DebugInfo() {
-	fmt.Println("Byte Cache", len(a.cache))
-	fmt.Println("Entries Cached", len(a.searchCache))
-	fmt.Println("Cache Hits", a.cacheHits)
-}
-
-func (a *AURCache) SetProvideCache(needle string, pkgs []*aur.Pkg) {
-	a.searchCache[needle] = pkgs
 }
 
 // Get returns a list of packages that provide the given search term.
@@ -94,7 +76,7 @@ func (a *AURCache) Get(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error)
 
 		inputStruct, unmarshallErr := oj.Parse(a.cache)
 		if unmarshallErr != nil {
-			return nil, unmarshallErr
+			return nil, fmt.Errorf("aur metadata unable to parse cache: %w", unmarshallErr)
 		}
 
 		a.unmarshalledCache = inputStruct.([]interface{})
@@ -115,30 +97,12 @@ func (a *AURCache) Get(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error)
 	return found, nil
 }
 
-// Get returns a list of packages that provide the given search term
-func (a *AURCache) FindPackage(ctx context.Context, needle string) ([]*aur.Pkg, error) {
-	cacheKey := a.cacheKey(needle, true, true, true)
-	if pkgs, ok := a.searchCache[cacheKey]; ok {
-		a.cacheHits++
-		return pkgs, nil
-	}
-
-	final, error := a.gojqGet(ctx, needle)
-	if error != nil {
-		return nil, error
-	}
-
-	a.searchCache[cacheKey] = final
-
-	return final, nil
-}
-
 func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
 	pattern := ".[] | select("
 
 	for i, searchTerm := range query.Needles {
 		if i != 0 {
-			pattern += " or "
+			pattern += ","
 		}
 
 		bys := toSearchBy(query.By)
@@ -150,7 +114,7 @@ func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pk
 			}
 
 			if j != len(bys)-1 {
-				pattern += " , "
+				pattern += ","
 			}
 		}
 	}
@@ -163,25 +127,29 @@ func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pk
 
 	parsed, err := gojq.Parse(pattern)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, fmt.Errorf("unable to parse query: %w", err)
 	}
 
 	final := make([]*aur.Pkg, 0, len(query.Needles))
-
 	iter := parsed.RunWithContext(ctx, a.unmarshalledCache) // or query.RunWithContext
 
-	for v, ok := iter.Next(); ok; v, ok = iter.Next() {
-		if err, ok := v.(error); ok {
+	for pkgMap, ok := iter.Next(); ok; pkgMap, ok = iter.Next() {
+		if err, ok := pkgMap.(error); ok {
 			return nil, err
 		}
 
 		pkg := new(aur.Pkg)
-		bValue, err := gojq.Marshal(v)
+
+		bValue, err := gojq.Marshal(pkgMap)
 		if err != nil {
-			log.Fatalln(err)
+			return nil, fmt.Errorf("unable to marshal aur package: %w", err)
 		}
 
-		oj.Unmarshal(bValue, pkg)
+		errU := oj.Unmarshal(bValue, pkg)
+		if errU != nil {
+			return nil, fmt.Errorf("unable to unmarshal aur package: %w", errU)
+		}
+
 		final = append(final, pkg)
 	}
 
@@ -190,45 +158,6 @@ func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pk
 	}
 
 	return final, nil
-}
-
-func (a *AURCache) gojqGet(ctx context.Context, searchTerm string) ([]*aur.Pkg, error) {
-	final := make([]*aur.Pkg, 0, 1)
-
-	iter := a.gojqCode.RunWithContext(ctx, a.unmarshalledCache, searchTerm) // or query.RunWithContext
-
-	for v, ok := iter.Next(); ok; v, ok = iter.Next() {
-		if err, ok := v.(error); ok {
-			return nil, err
-		}
-
-		pkg := &aur.Pkg{}
-		bValue, err := gojq.Marshal(v)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		json.Unmarshal(bValue, pkg)
-		final = append(final, pkg)
-	}
-
-	return final, nil
-}
-
-func makeGoJQ() *gojq.Code {
-	pattern := ".[] | select((.Name == $x) or (.Provides[]? == ($x)))"
-
-	query, err := gojq.Parse(pattern)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	compiled, err := gojq.Compile(query, gojq.WithVariables([]string{"$x"}))
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	return compiled
 }
 
 func toSearchBy(by aur.By) []string {
