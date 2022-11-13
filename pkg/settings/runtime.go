@@ -8,6 +8,7 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/Jguer/votar/pkg/vote"
 
+	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
@@ -29,4 +30,5 @@ type Runtime struct {
 	AURClient      *aur.Client
 	VoteClient     *vote.Client
 	AURCache       *metadata.AURCache
+	DBExecutor     db.Executor
 }

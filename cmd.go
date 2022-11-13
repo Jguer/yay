@@ -343,7 +343,7 @@ func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Ex
 
 	switch {
 	case cmdArgs.ExistsArg("s", "search"):
-		return syncSearch(ctx, targets, config.Runtime.AURClient, dbExecutor, config.Runtime.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
+		return syncSearch(ctx, targets, dbExecutor, config.Runtime.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
 	case cmdArgs.ExistsArg("p", "print", "print-format"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
@@ -383,7 +383,7 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor,
 	queryBuilder query.Builder, cmdArgs *parser.Arguments,
 ) error {
-	queryBuilder.Execute(ctx, dbExecutor, config.Runtime.AURClient, pkgS)
+	queryBuilder.Execute(ctx, dbExecutor, pkgS)
 
 	if err := queryBuilder.Results(os.Stdout, dbExecutor, query.NumberMenu); err != nil {
 		return err

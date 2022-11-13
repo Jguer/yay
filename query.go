@@ -19,10 +19,10 @@ import (
 )
 
 // SyncSearch presents a query to the local repos and to the AUR.
-func syncSearch(ctx context.Context, pkgS []string, aurClient aur.ClientInterface,
+func syncSearch(ctx context.Context, pkgS []string,
 	dbExecutor db.Executor, queryBuilder query.Builder, verbose bool,
 ) error {
-	queryBuilder.Execute(ctx, dbExecutor, aurClient, pkgS)
+	queryBuilder.Execute(ctx, dbExecutor, pkgS)
 
 	searchMode := query.Minimal
 	if verbose {

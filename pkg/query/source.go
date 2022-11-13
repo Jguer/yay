@@ -12,6 +12,7 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/intrange"
+	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -34,9 +35,14 @@ type SourceQueryBuilder struct {
 	targetMode        parser.TargetMode
 	bottomUp          bool
 	singleLineResults bool
+
+	aurClient aur.ClientInterface
+	aurCache  *metadata.AURCache
 }
 
 func NewSourceQueryBuilder(
+	aurClient aur.ClientInterface,
+	aurCache *metadata.AURCache,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -44,6 +50,8 @@ func NewSourceQueryBuilder(
 	singleLineResults bool,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
+		aurClient:         aurClient,
+		aurCache:          aurCache,
 		repoQuery:         []alpm.IPackage{},
 		aurQuery:          []aur.Pkg{},
 		bottomUp:          bottomUp,
@@ -54,13 +62,16 @@ func NewSourceQueryBuilder(
 	}
 }
 
-func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, aurClient aur.ClientInterface, pkgS []string) {
+func (s *SourceQueryBuilder) Execute(ctx context.Context,
+	dbExecutor db.Executor,
+	pkgS []string,
+) {
 	var aurErr error
 
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy)
+		s.aurQuery, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
 		s.aurQuery = filterAURResults(pkgS, s.aurQuery)
 
 		sort.Sort(aurSortable{aurQuery: s.aurQuery, sortBy: s.sortBy, bottomUp: s.bottomUp})

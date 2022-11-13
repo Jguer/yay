@@ -121,7 +121,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		)
 
 		switch target.DB {
-		case "":
+		case "": // unspecified db
 			if g.dbExecutor.SyncPackage(target.Name) != nil {
 				graph.AddNode(target.Name)
 				g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
