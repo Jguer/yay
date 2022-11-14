@@ -82,7 +82,13 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 	t.Parallel()
 
-	pkgBuildDirs := []string{"/tmp/yay", "/tmp/yay-bin", "/tmp/yay-git", "/tmp/yay-v11", "/tmp/yay-v12"}
+	pkgBuildDirs := map[string]string{
+		"yay":     "/tmp/yay",
+		"yay-bin": "/tmp/yay-bin",
+		"yay-git": "/tmp/yay-git",
+		"yay-v11": "/tmp/yay-v11",
+		"yay-v12": "/tmp/yay-v12",
+	}
 	for _, maxConcurrentDownloads := range []int{0, 3} {
 		t.Run(fmt.Sprintf("maxconcurrentdownloads set to %d", maxConcurrentDownloads), func(t *testing.T) {
 			cmdBuilder := &TestMakepkgBuilder{
@@ -113,7 +119,7 @@ func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 		test: t,
 	}
 
-	pkgBuildDirs := []string{"/tmp/yay"}
+	pkgBuildDirs := map[string]string{"yay": "/tmp/yay"}
 
 	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.NoError(t, err)
@@ -134,12 +140,12 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 		showError: &exec.ExitError{},
 	}
 
-	pkgBuildDirs := []string{
-		"/tmp/yay",
-		"/tmp/yay-bin",
-		"/tmp/yay-git",
-		"/tmp/yay-v11",
-		"/tmp/yay-v12",
+	pkgBuildDirs := map[string]string{
+		"yay":     "/tmp/yay",
+		"yay-bin": "/tmp/yay-bin",
+		"yay-git": "/tmp/yay-git",
+		"yay-v11": "/tmp/yay-v11",
+		"yay-v12": "/tmp/yay-v12",
 	}
 
 	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, 0)

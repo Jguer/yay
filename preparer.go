@@ -23,8 +23,24 @@ type Preparer struct {
 	cmdBuilder exe.ICmdBuilder
 	config     *settings.Configuration
 
-	pkgBuildDirs []string
-	makeDeps     []string
+	makeDeps []string
+}
+
+func (preper *Preparer) ShouldCleanAURDirs(ctx context.Context, pkgBuildDirs map[string]string) PostInstallHookFunc {
+	if !preper.config.CleanAfter {
+		return nil
+	}
+
+	dirs := make([]string, 0, len(pkgBuildDirs))
+	for _, dir := range pkgBuildDirs {
+		dirs = append(dirs, dir)
+	}
+
+	text.Debugln("added post install hook to clean up AUR dirs", dirs)
+	return func(ctx context.Context) error {
+		cleanAfter(ctx, preper.config.Runtime.CmdBuilder, dirs)
+		return nil
+	}
 }
 
 func (preper *Preparer) ShouldCleanMakeDeps(ctx context.Context) PostInstallHookFunc {
@@ -43,6 +59,7 @@ func (preper *Preparer) ShouldCleanMakeDeps(ctx context.Context) PostInstallHook
 		}
 	}
 
+	text.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
 	return func(ctx context.Context) error {
 		return removeMake(ctx, preper.config.Runtime.CmdBuilder, preper.makeDeps)
 	}
@@ -109,7 +126,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 	}
 
 	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder,
-		preper.pkgBuildDirs, false, config.MaxConcurrentDownloads); errP != nil {
+		pkgBuildDirs, false, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 	return pkgBuildDirs, nil

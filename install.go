@@ -196,7 +196,16 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	fmt.Println()
 
 	if config.CleanAfter {
-		defer cleanAfter(ctx, do.Aur)
+		defer func() {
+			pkgbuildDirs := make([]string, 0, len(do.Aur))
+			for _, base := range do.Aur {
+				dir := filepath.Join(config.BuildDir, base.Pkgbase())
+				if isGitRepository(dir) {
+					pkgbuildDirs = append(pkgbuildDirs, dir)
+				}
+			}
+			cleanAfter(ctx, config.Runtime.CmdBuilder, pkgbuildDirs)
+		}()
 	}
 
 	if do.HasMake() {
@@ -329,11 +338,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	bases := make([]string, 0, len(do.Aur))
-	pkgBuildDirs := make([]string, 0, len(do.Aur))
+	pkgBuildDirs := make(map[string]string, len(do.Aur))
 	for _, base := range do.Aur {
-		bases = append(bases, base.Pkgbase())
-		pkgBuildDirs = append(pkgBuildDirs, filepath.Join(config.BuildDir, base.Pkgbase()))
+		pkgBuildDirs[base.Pkgbase()] = filepath.Join(config.BuildDir, base.Pkgbase())
 	}
 
 	if errP := downloadPKGBUILDSourceFanout(ctx,

@@ -182,6 +182,7 @@ func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string
 	for _, pkg := range aurPkgs {
 		pkg := pkg
 
+		graph.AddNode(pkg.Name)
 		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 			Color:      colorMap[Explicit],
 			Background: bgColorMap[AUR],
@@ -232,6 +233,7 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 
 		pkg := provideMenu(g.w, target, aurPkgs, g.noConfirm)
 
+		graph.AddNode(pkg.Name)
 		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 			Color:      colorMap[Explicit],
 			Background: bgColorMap[AUR],
@@ -243,7 +245,6 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 			},
 		})
 
-		graph.AddNode(pkg.Name)
 		g.addDepNodes(ctx, pkg, graph)
 	}
 

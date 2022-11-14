@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"sync"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/multierror"
@@ -62,7 +63,7 @@ func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup,
 	wg.Done()
 }
 
-func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgBuildDirs []string,
+func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgBuildDirs map[string]string,
 	incompatible bool, maxConcurrentDownloads int,
 ) error {
 	if len(pkgBuildDirs) == 0 {
@@ -70,7 +71,9 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 	}
 
 	if len(pkgBuildDirs) == 1 {
-		return downloadPKGBUILDSource(ctx, cmdBuilder, pkgBuildDirs[0], incompatible)
+		for _, pkgBuildDir := range pkgBuildDirs {
+			return downloadPKGBUILDSource(ctx, cmdBuilder, pkgBuildDir, incompatible)
+		}
 	}
 
 	var (
@@ -85,9 +88,14 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 		numOfWorkers = maxConcurrentDownloads
 	}
 
+	dedupSet := mapset.NewThreadUnsafeSet[string]()
+
 	go func() {
 		for _, pkgbuildDir := range pkgBuildDirs {
-			c <- pkgbuildDir
+			if !dedupSet.Contains(pkgbuildDir) {
+				c <- pkgbuildDir
+				dedupSet.Add(pkgbuildDir)
+			}
 		}
 
 		close(c)

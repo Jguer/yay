@@ -69,14 +69,17 @@ func installLocalPKGBUILD(
 		return err
 	}
 
-	cleanFunc := preparer.ShouldCleanMakeDeps(ctx)
-	if cleanFunc != nil {
+	if cleanFunc := preparer.ShouldCleanMakeDeps(ctx); cleanFunc != nil {
 		installer.AddPostInstallHook(cleanFunc)
 	}
 
 	pkgBuildDirs, err := preparer.PrepareWorkspace(ctx, topoSorted)
 	if err != nil {
 		return err
+	}
+
+	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(ctx, pkgBuildDirs); cleanAURDirsFunc != nil {
+		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
 	if err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs); err != nil {
