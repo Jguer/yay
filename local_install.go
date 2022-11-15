@@ -12,6 +12,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/topo"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
@@ -28,29 +29,24 @@ func installLocalPKGBUILD(
 ) error {
 	aurCache := config.Runtime.AURCache
 
-	wd, err := os.Getwd()
-	if err != nil {
-		return errors.Wrap(err, gotext.Get("failed to retrieve working directory"))
-	}
-
-	if len(cmdArgs.Targets) > 1 {
-		return errors.New(gotext.Get("only one target is allowed"))
-	}
-
-	if len(cmdArgs.Targets) == 1 {
-		wd = cmdArgs.Targets[0]
-	}
-
-	pkgbuild, err := gosrc.ParseFile(filepath.Join(wd, ".SRCINFO"))
-	if err != nil {
-		return errors.Wrap(err, gotext.Get("failed to parse .SRCINFO"))
+	if len(cmdArgs.Targets) < 1 {
+		return errors.New(gotext.Get("no target directories specified"))
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
+	graph := topo.New[string, *dep.InstallInfo]()
+	for _, target := range cmdArgs.Targets {
+		var errG error
 
-	graph, err := grapher.GraphFromSrcInfo(ctx, nil, wd, pkgbuild)
-	if err != nil {
-		return err
+		pkgbuild, err := gosrc.ParseFile(filepath.Join(target, ".SRCINFO"))
+		if err != nil {
+			return errors.Wrap(err, gotext.Get("failed to parse .SRCINFO"))
+		}
+
+		graph, errG = grapher.GraphFromSrcInfo(ctx, graph, target, pkgbuild)
+		if errG != nil {
+			return err
+		}
 	}
 
 	topoSorted := graph.TopoSortedLayerMap()
