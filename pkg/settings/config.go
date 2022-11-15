@@ -11,17 +11,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
-
-	"github.com/Jguer/aur"
-	"github.com/Jguer/votar/pkg/vote"
-
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
+
+	"github.com/Jguer/aur"
+	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/votar/pkg/vote"
+	"github.com/leonelquinteros/gotext"
+	"github.com/pkg/errors"
 )
 
 // HideMenus indicates if pacman's provider menus must be hidden.
@@ -291,20 +290,26 @@ func NewConfig(version string) (*Configuration, error) {
 
 	var errAURCache error
 
-	newConfig.Runtime.AURCache, errAURCache = metadata.NewAURCache(newConfig.Runtime.HTTPClient, filepath.Join(newConfig.BuildDir, "aur.json"))
+	userAgentFn := func(ctx context.Context, req *http.Request) error {
+		req.Header.Set("User-Agent", userAgent)
+		return nil
+	}
+
+	newConfig.Runtime.AURCache, errAURCache = metadata.New(
+		metadata.WithHTTPClient(newConfig.Runtime.HTTPClient),
+		metadata.WithCacheFilePath(filepath.Join(newConfig.BuildDir, "aur.json")),
+		metadata.WithRequestEditorFn(userAgentFn),
+		metadata.WithBaseURL(newConfig.AURURL),
+		metadata.WithDebugLogger(text.Debugln),
+	)
 	if errAURCache != nil {
 		return nil, errors.Wrap(errAURCache, gotext.Get("failed to retrieve aur Cache"))
 	}
 
-	newConfig.Runtime.AURCache.DebugLoggerFn = text.Debugln
-
 	var errAUR error
-	newConfig.Runtime.AURClient, errAUR = aur.NewClient(aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
-		aur.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
-			req.Header.Set("User-Agent", userAgent)
-
-			return nil
-		}))
+	newConfig.Runtime.AURClient, errAUR = aur.NewClient(
+		aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
+		aur.WithRequestEditorFn(userAgentFn))
 
 	if errAUR != nil {
 		return nil, errAUR

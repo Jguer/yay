@@ -3,17 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/Jguer/yay/v11/pkg/db/ialpm"
 	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
 
+	"github.com/Jguer/aur/metadata"
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
 )
@@ -39,7 +38,9 @@ func handleCmd() error {
 		return err
 	}
 
-	aurCache, err := metadata.NewAURCache(http.DefaultClient, filepath.Join(config.BuildDir, "aur.json"))
+	aurCache, err := metadata.New(
+		metadata.WithCacheFilePath(
+			filepath.Join(config.BuildDir, "aur.json")))
 	if err != nil {
 		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
 	}

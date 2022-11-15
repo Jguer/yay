@@ -7,14 +7,9 @@ import (
 	"strings"
 	"sync"
 
-	aur "github.com/Jguer/aur"
-	alpm "github.com/Jguer/go-alpm/v2"
-	"github.com/leonelquinteros/gotext"
-
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
@@ -22,6 +17,11 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 	"github.com/Jguer/yay/v11/pkg/upgrade"
+
+	aur "github.com/Jguer/aur"
+	"github.com/Jguer/aur/metadata"
+	alpm "github.com/Jguer/go-alpm/v2"
+	"github.com/leonelquinteros/gotext"
 )
 
 func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
@@ -37,7 +37,7 @@ func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(ctx context.Context, aurCache *metadata.AURCacheClient,
+func upList(ctx context.Context, aurCache *metadata.Client,
 	warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
 	filter upgrade.Filter,
 ) (aurUp, repoUp upgrade.UpSlice, err error) {
@@ -261,7 +261,7 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 
 // Targets for sys upgrade.
 func sysupgradeTargetsV2(ctx context.Context,
-	aurCache *metadata.AURCacheClient,
+	aurCache *metadata.Client,
 	dbExecutor db.Executor,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool,

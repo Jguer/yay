@@ -1,7 +1,7 @@
 module github.com/Jguer/yay/v11
 
 require (
-	github.com/Jguer/aur v1.1.0
+	github.com/Jguer/aur v1.1.1
 	github.com/Jguer/go-alpm/v2 v2.1.2
 	github.com/Jguer/votar v1.0.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
@@ -26,11 +26,9 @@ require (
 
 require (
 	github.com/deckarep/golang-set/v2 v2.1.0
-	github.com/itchyny/gojq v0.12.9
+	github.com/itchyny/gojq v0.12.9 // indirect
 	github.com/itchyny/timefmt-go v0.1.4 // indirect
-	github.com/ohler55/ojg v1.14.5
+	github.com/ohler55/ojg v1.14.5 // indirect
 )
-
-require github.com/stretchr/objx v0.5.0 // indirect
 
 go 1.19

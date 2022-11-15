@@ -3,17 +3,16 @@ package settings
 import (
 	"net/http"
 
-	"github.com/Morganamilo/go-pacmanconf"
-
-	"github.com/Jguer/aur"
-	"github.com/Jguer/votar/pkg/vote"
-
 	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/vcs"
+
+	"github.com/Jguer/aur"
+	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/votar/pkg/vote"
+	"github.com/Morganamilo/go-pacmanconf"
 )
 
 type Runtime struct {
@@ -29,6 +28,6 @@ type Runtime struct {
 	HTTPClient     *http.Client
 	AURClient      *aur.Client
 	VoteClient     *vote.Client
-	AURCache       *metadata.AURCacheClient
+	AURCache       *metadata.Client
 	DBExecutor     db.Executor
 }

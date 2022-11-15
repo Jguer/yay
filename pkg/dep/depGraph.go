@@ -8,12 +8,12 @@ import (
 	"strconv"
 
 	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	aur "github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 
 	aurc "github.com/Jguer/aur"
+	"github.com/Jguer/aur/metadata"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 )
@@ -90,7 +90,7 @@ var colorMap = map[Reason]string{
 
 type Grapher struct {
 	dbExecutor db.Executor
-	aurCache   *metadata.AURCacheClient
+	aurCache   *metadata.Client
 	fullGraph  bool // If true, the graph will include all dependencies including already installed ones or repo
 	noConfirm  bool
 	w          io.Writer // output writer
@@ -98,7 +98,7 @@ type Grapher struct {
 	providerCache map[string]*aur.Pkg
 }
 
-func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCacheClient,
+func NewGrapher(dbExecutor db.Executor, aurCache *metadata.Client,
 	fullGraph, noConfirm bool, output io.Writer,
 ) *Grapher {
 	return &Grapher{

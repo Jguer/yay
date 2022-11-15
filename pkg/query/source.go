@@ -12,10 +12,11 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
+
+	"github.com/Jguer/aur/metadata"
 )
 
 type SearchVerbosity int
@@ -39,12 +40,12 @@ type SourceQueryBuilder struct {
 	singleLineResults bool
 
 	aurClient aur.ClientInterface
-	aurCache  *metadata.AURCacheClient
+	aurCache  *metadata.Client
 }
 
 func NewSourceQueryBuilder(
 	aurClient aur.ClientInterface,
-	aurCache *metadata.AURCacheClient,
+	aurCache *metadata.Client,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -192,7 +193,7 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
-	aurClient aur.ClientInterface, aurMetadata *metadata.AURCacheClient,
+	aurClient aur.ClientInterface, aurMetadata *metadata.Client,
 	pkgS []string, searchBy string, newEngine bool,
 ) ([]aur.Pkg, error) {
 	var (
