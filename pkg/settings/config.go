@@ -291,7 +291,7 @@ func NewConfig(version string) (*Configuration, error) {
 
 	var errAURCache error
 
-	newConfig.Runtime.AURCache, errAURCache = metadata.NewAURCache(filepath.Join(newConfig.BuildDir, "aur.json"))
+	newConfig.Runtime.AURCache, errAURCache = metadata.NewAURCache(newConfig.Runtime.HTTPClient, filepath.Join(newConfig.BuildDir, "aur.json"))
 	if errAURCache != nil {
 		return nil, errors.Wrap(errAURCache, gotext.Get("failed to retrieve aur Cache"))
 	}

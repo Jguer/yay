@@ -37,7 +37,7 @@ func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(ctx context.Context, aurCache *metadata.AURCache,
+func upList(ctx context.Context, aurCache *metadata.AURCacheClient,
 	warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
 	filter upgrade.Filter,
 ) (aurUp, repoUp upgrade.UpSlice, err error) {
@@ -261,7 +261,7 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 
 // Targets for sys upgrade.
 func sysupgradeTargetsV2(ctx context.Context,
-	aurCache *metadata.AURCache,
+	aurCache *metadata.AURCacheClient,
 	dbExecutor db.Executor,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool,

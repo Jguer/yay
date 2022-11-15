@@ -15,11 +15,12 @@ const (
 	cacheValidity = 1 * time.Hour
 )
 
-type AURCache struct {
-	cache             []byte
-	cachePath         string
+type AURCacheClient struct {
+	httpClient    HTTPRequestDoer
+	cachePath     string
+	DebugLoggerFn func(a ...interface{})
+
 	unmarshalledCache []interface{}
-	DebugLoggerFn     func(a ...interface{})
 }
 
 type AURQuery struct {
@@ -28,29 +29,25 @@ type AURQuery struct {
 	Contains bool // if true, search for packages containing the needle, not exact matches
 }
 
-func NewAURCache(cachePath string) (*AURCache, error) {
-	aurCache, err := MakeOrReadCache(cachePath)
-	if err != nil {
-		return nil, err
-	}
+// ClientOption allows setting custom parameters during construction.
+type ClientOption func(*AURCacheClient) error
 
-	inputStruct, err := oj.Parse(aurCache)
-	if err != nil {
-		return nil, fmt.Errorf("aur metadata unable to parse cache: %w", err)
-	}
-
-	return &AURCache{
-		cache:             aurCache,
-		cachePath:         cachePath,
-		unmarshalledCache: inputStruct.([]interface{}),
+func NewAURCache(httpClient HTTPRequestDoer, cachePath string, opts ...ClientOption) (*AURCacheClient, error) {
+	return &AURCacheClient{
+		httpClient: httpClient,
+		cachePath:  cachePath,
 	}, nil
 }
 
 // needsUpdate checks if cachepath is older than 24 hours.
-func (a *AURCache) needsUpdate() (bool, error) {
+func (a *AURCacheClient) needsUpdate() (bool, error) {
 	// check if cache is older than 24 hours
 	info, err := os.Stat(a.cachePath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return true, nil
+		}
+
 		return false, fmt.Errorf("unable to read cache: %w", err)
 	}
 
@@ -58,30 +55,7 @@ func (a *AURCache) needsUpdate() (bool, error) {
 }
 
 // Get returns a list of packages that provide the given search term.
-func (a *AURCache) Get(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
-	update, err := a.needsUpdate()
-	if err != nil {
-		return nil, err
-	}
-
-	if update {
-		if a.DebugLoggerFn != nil {
-			a.DebugLoggerFn("AUR Cache is out of date, updating")
-		}
-
-		var makeErr error
-		if a.cache, makeErr = MakeCache(a.cachePath); makeErr != nil {
-			return nil, makeErr
-		}
-
-		inputStruct, unmarshallErr := oj.Parse(a.cache)
-		if unmarshallErr != nil {
-			return nil, fmt.Errorf("aur metadata unable to parse cache: %w", unmarshallErr)
-		}
-
-		a.unmarshalledCache = inputStruct.([]interface{})
-	}
-
+func (a *AURCacheClient) Get(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
 	found := make([]*aur.Pkg, 0, len(query.Needles))
 	if len(query.Needles) == 0 {
 		return found, nil
@@ -97,7 +71,49 @@ func (a *AURCache) Get(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error)
 	return found, nil
 }
 
-func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
+func (a *AURCacheClient) cache(ctx context.Context) ([]interface{}, error) {
+	if a.unmarshalledCache != nil {
+		return a.unmarshalledCache, nil
+	}
+
+	update, err := a.needsUpdate()
+	if err != nil {
+		return nil, err
+	}
+
+	if update {
+		if a.DebugLoggerFn != nil {
+			a.DebugLoggerFn("AUR Cache is out of date, updating")
+		}
+		cache, makeErr := MakeCache(ctx, a.httpClient, a.cachePath)
+		if makeErr != nil {
+			return nil, makeErr
+		}
+
+		inputStruct, unmarshallErr := oj.Parse(cache)
+		if unmarshallErr != nil {
+			return nil, fmt.Errorf("aur metadata unable to parse cache: %w", unmarshallErr)
+		}
+
+		a.unmarshalledCache = inputStruct.([]interface{})
+	} else {
+		aurCache, err := ReadCache(a.cachePath)
+		if err != nil {
+			return nil, err
+		}
+
+		inputStruct, err := oj.Parse(aurCache)
+		if err != nil {
+			return nil, fmt.Errorf("aur metadata unable to parse cache: %w", err)
+		}
+
+		a.unmarshalledCache = inputStruct.([]interface{})
+	}
+
+	return a.unmarshalledCache, nil
+}
+
+func (a *AURCacheClient) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pkg, error) {
 	pattern := ".[] | select("
 
 	for i, searchTerm := range query.Needles {
@@ -130,8 +146,13 @@ func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pk
 		return nil, fmt.Errorf("unable to parse query: %w", err)
 	}
 
+	unmarshalledCache, errCache := a.cache(ctx)
+	if errCache != nil {
+		return nil, errCache
+	}
+
 	final := make([]*aur.Pkg, 0, len(query.Needles))
-	iter := parsed.RunWithContext(ctx, a.unmarshalledCache) // or query.RunWithContext
+	iter := parsed.RunWithContext(ctx, unmarshalledCache) // or query.RunWithContext
 
 	for pkgMap, ok := iter.Next(); ok; pkgMap, ok = iter.Next() {
 		if err, ok := pkgMap.(error); ok {

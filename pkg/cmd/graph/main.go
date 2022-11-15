@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -38,7 +39,7 @@ func handleCmd() error {
 		return err
 	}
 
-	aurCache, err := metadata.NewAURCache(filepath.Join(config.BuildDir, "aur.json"))
+	aurCache, err := metadata.NewAURCache(http.DefaultClient, filepath.Join(config.BuildDir, "aur.json"))
 	if err != nil {
 		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
 	}

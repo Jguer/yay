@@ -1,26 +1,15 @@
 package metadata
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 )
 
-func MakeOrReadCache(cachePath string) ([]byte, error) {
-	cacheBytes, err := ReadCache(cachePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(cacheBytes) == 0 {
-		cacheBytes, err = MakeCache(cachePath)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return cacheBytes, nil
+type HTTPRequestDoer interface {
+	Do(req *http.Request) (*http.Response, error)
 }
 
 func ReadCache(cachePath string) ([]byte, error) {
@@ -46,8 +35,8 @@ func ReadCache(cachePath string) ([]byte, error) {
 // Download the metadata for aur packages.
 // create cache file
 // write to cache file.
-func MakeCache(cachePath string) ([]byte, error) {
-	body, err := downloadAURMetadata()
+func MakeCache(ctx context.Context, httpClient HTTPRequestDoer, cachePath string) ([]byte, error) {
+	body, err := downloadAURMetadata(ctx, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +60,13 @@ func MakeCache(cachePath string) ([]byte, error) {
 	return s, err
 }
 
-func downloadAURMetadata() (io.ReadCloser, error) {
-	resp, err := http.Get("https://aur.archlinux.org/packages-meta-ext-v1.json.gz")
+func downloadAURMetadata(ctx context.Context, httpClient HTTPRequestDoer) (io.ReadCloser, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://aur.archlinux.org/packages-meta-ext-v1.json.gz", http.NoBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

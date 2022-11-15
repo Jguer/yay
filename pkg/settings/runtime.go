@@ -29,6 +29,6 @@ type Runtime struct {
 	HTTPClient     *http.Client
 	AURClient      *aur.Client
 	VoteClient     *vote.Client
-	AURCache       *metadata.AURCache
+	AURCache       *metadata.AURCacheClient
 	DBExecutor     db.Executor
 }

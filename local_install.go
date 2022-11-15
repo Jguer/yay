@@ -9,7 +9,6 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/metadata"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -23,13 +22,11 @@ var ErrInstallRepoPkgs = errors.New(gotext.Get("error installing repo packages")
 
 func installLocalPKGBUILD(
 	ctx context.Context,
+	config *settings.Configuration,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache, err := metadata.NewAURCache(filepath.Join(config.BuildDir, "aur.json"))
-	if err != nil {
-		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
-	}
+	aurCache := config.Runtime.AURCache
 
 	wd, err := os.Getwd()
 	if err != nil {

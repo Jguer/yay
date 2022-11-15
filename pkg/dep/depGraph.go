@@ -90,7 +90,7 @@ var colorMap = map[Reason]string{
 
 type Grapher struct {
 	dbExecutor db.Executor
-	aurCache   *metadata.AURCache
+	aurCache   *metadata.AURCacheClient
 	fullGraph  bool // If true, the graph will include all dependencies including already installed ones or repo
 	noConfirm  bool
 	w          io.Writer // output writer
@@ -98,7 +98,7 @@ type Grapher struct {
 	providerCache map[string]*aur.Pkg
 }
 
-func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCache,
+func NewGrapher(dbExecutor db.Executor, aurCache *metadata.AURCacheClient,
 	fullGraph, noConfirm bool, output io.Writer,
 ) *Grapher {
 	return &Grapher{

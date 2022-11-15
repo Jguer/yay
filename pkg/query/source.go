@@ -39,12 +39,12 @@ type SourceQueryBuilder struct {
 	singleLineResults bool
 
 	aurClient aur.ClientInterface
-	aurCache  *metadata.AURCache
+	aurCache  *metadata.AURCacheClient
 }
 
 func NewSourceQueryBuilder(
 	aurClient aur.ClientInterface,
-	aurCache *metadata.AURCache,
+	aurCache *metadata.AURCacheClient,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -192,7 +192,7 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
-	aurClient aur.ClientInterface, aurMetadata *metadata.AURCache,
+	aurClient aur.ClientInterface, aurMetadata *metadata.AURCacheClient,
 	pkgS []string, searchBy string, newEngine bool,
 ) ([]aur.Pkg, error) {
 	var (

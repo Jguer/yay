@@ -331,7 +331,7 @@ func handleUpgrade(ctx context.Context,
 	config *settings.Configuration, dbExecutor db.Executor, cmdArgs *parser.Arguments,
 ) error {
 	if cmdArgs.ExistsArg("i", "install") {
-		return installLocalPKGBUILD(ctx, cmdArgs, dbExecutor)
+		return installLocalPKGBUILD(ctx, config, cmdArgs, dbExecutor)
 	}
 
 	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
