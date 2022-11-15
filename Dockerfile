@@ -1,4 +1,4 @@
-FROM jguer/yay-builder:latest
+FROM docker.io/jguer/yay-builder:latest
 LABEL maintainer="Jguer,joaogg3 at google mail"
 
 ARG VERSION
