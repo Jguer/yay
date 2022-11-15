@@ -79,6 +79,7 @@ linters:
     # - forbidigo
 
 run:
+  go: '1.18'
 
 issues:
   exclude-rules:
