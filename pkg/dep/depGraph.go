@@ -7,13 +7,13 @@ import (
 	"os"
 	"strconv"
 
-	aurc "github.com/Jguer/aur"
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/metadata"
 	aur "github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 
+	aurc "github.com/Jguer/aur"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 )
@@ -179,8 +179,8 @@ func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string
 		return nil, err
 	}
 
-	for _, pkg := range aurPkgs {
-		pkg := pkg
+	for i := range aurPkgs {
+		pkg := &aurPkgs[i]
 
 		graph.AddNode(pkg.Name)
 		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
@@ -195,7 +195,7 @@ func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string
 			},
 		})
 
-		g.addDepNodes(ctx, &pkg, graph)
+		g.addDepNodes(ctx, pkg, graph)
 	}
 
 	return graph, nil
@@ -447,7 +447,9 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]au
 
 	alpmArch = append(alpmArch, "") // srcinfo assumes no value as ""
 
-	for _, pkg := range srcInfo.Packages {
+	for i := range srcInfo.Packages {
+		pkg := &srcInfo.Packages[i]
+
 		pkgs = append(pkgs, aur.Pkg{
 			ID:            0,
 			Name:          pkg.Pkgname,

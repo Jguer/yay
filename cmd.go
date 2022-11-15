@@ -360,6 +360,7 @@ func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Ex
 		if config.NewInstallEngine {
 			return syncInstall(ctx, config, cmdArgs, dbExecutor)
 		}
+
 		return install(ctx, cmdArgs, dbExecutor, false)
 	case cmdArgs.ExistsArg("y", "refresh"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,

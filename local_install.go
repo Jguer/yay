@@ -13,10 +13,10 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
+	"github.com/leonelquinteros/gotext"
+	"github.com/pkg/errors"
 )
 
 var ErrInstallRepoPkgs = errors.New(gotext.Get("error installing repo packages"))
@@ -65,11 +65,11 @@ func installLocalPKGBUILD(
 	}
 	installer := &Installer{dbExecutor: dbExecutor}
 
-	if err = preparer.Present(os.Stdout, topoSorted); err != nil {
-		return err
+	if errP := preparer.Present(os.Stdout, topoSorted); errP != nil {
+		return errP
 	}
 
-	if cleanFunc := preparer.ShouldCleanMakeDeps(ctx); cleanFunc != nil {
+	if cleanFunc := preparer.ShouldCleanMakeDeps(); cleanFunc != nil {
 		installer.AddPostInstallHook(cleanFunc)
 	}
 
@@ -78,7 +78,7 @@ func installLocalPKGBUILD(
 		return err
 	}
 
-	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(ctx, pkgBuildDirs); cleanAURDirsFunc != nil {
+	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(pkgBuildDirs); cleanAURDirsFunc != nil {
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 

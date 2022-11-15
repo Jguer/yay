@@ -11,9 +11,9 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/leonelquinteros/gotext"
 
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/leonelquinteros/gotext"
 )
 
 type (
@@ -40,6 +40,7 @@ func (installer *Installer) RunPostInstallHooks(ctx context.Context) error {
 			errMulti.Add(err)
 		}
 	}
+
 	return errMulti.Return()
 }
 
@@ -195,7 +196,7 @@ func (*Installer) isDep(cmdArgs *parser.Arguments, aurExpNames mapset.Set[string
 }
 
 func (installer *Installer) getNewTargets(pkgdests map[string]string, name string,
-) ([]string, bool, error) {
+) (archives []string, good bool, err error) {
 	pkgdest, ok := pkgdests[name]
 	if !ok {
 		return nil, false, &PkgDestNotInListError{name: name}
@@ -210,6 +211,7 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 	pkgArchives = append(pkgArchives, pkgdest)
 
 	debugName := pkgdest + "-debug"
+
 	pkgdestDebug, ok := pkgdests[debugName]
 	if ok {
 		if _, errStat := os.Stat(pkgdestDebug); errStat == nil {

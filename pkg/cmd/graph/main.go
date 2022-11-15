@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/Jguer/yay/v11/pkg/db/ialpm"
 	"github.com/Jguer/yay/v11/pkg/dep"
@@ -13,31 +12,10 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
+
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
 )
-
-func splitDep(dep string) (pkg, mod, ver string) {
-	split := strings.FieldsFunc(dep, func(c rune) bool {
-		match := c == '>' || c == '<' || c == '='
-
-		if match {
-			mod += string(c)
-		}
-
-		return match
-	})
-
-	if len(split) == 0 {
-		return "", "", ""
-	}
-
-	if len(split) == 1 {
-		return split[0], "", ""
-	}
-
-	return split[0], mod, split[1]
-}
 
 func handleCmd() error {
 	config, err := settings.NewConfig("")
@@ -46,8 +24,8 @@ func handleCmd() error {
 	}
 
 	cmdArgs := parser.MakeArguments()
-	if err := config.ParseCommandLine(cmdArgs); err != nil {
-		return err
+	if errP := config.ParseCommandLine(cmdArgs); errP != nil {
+		return errP
 	}
 
 	pacmanConf, _, err := settings.RetrievePacmanConfig(cmdArgs, config.PacmanConf)

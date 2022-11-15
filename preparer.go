@@ -14,6 +14,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/text"
+
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 )
@@ -26,7 +27,7 @@ type Preparer struct {
 	makeDeps []string
 }
 
-func (preper *Preparer) ShouldCleanAURDirs(ctx context.Context, pkgBuildDirs map[string]string) PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostInstallHookFunc {
 	if !preper.config.CleanAfter {
 		return nil
 	}
@@ -37,13 +38,14 @@ func (preper *Preparer) ShouldCleanAURDirs(ctx context.Context, pkgBuildDirs map
 	}
 
 	text.Debugln("added post install hook to clean up AUR dirs", dirs)
+
 	return func(ctx context.Context) error {
 		cleanAfter(ctx, preper.config.Runtime.CmdBuilder, dirs)
 		return nil
 	}
 }
 
-func (preper *Preparer) ShouldCleanMakeDeps(ctx context.Context) PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanMakeDeps() PostInstallHookFunc {
 	if len(preper.makeDeps) == 0 {
 		return nil
 	}
@@ -60,6 +62,7 @@ func (preper *Preparer) ShouldCleanMakeDeps(ctx context.Context) PostInstallHook
 	}
 
 	text.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
+
 	return func(ctx context.Context) error {
 		return removeMake(ctx, preper.config.Runtime.CmdBuilder, preper.makeDeps)
 	}
@@ -85,6 +88,7 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 			}
 
 			pkgsBySourceAndReason[source][reason] = append(pkgsBySourceAndReason[source][reason], pkgStr)
+
 			if info.Reason == dep.MakeDep {
 				preper.makeDeps = append(preper.makeDeps, pkgName)
 			}
@@ -129,5 +133,6 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 		pkgBuildDirs, false, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
+
 	return pkgBuildDirs, nil
 }

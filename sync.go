@@ -10,6 +10,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
+
 	"github.com/leonelquinteros/gotext"
 )
 
@@ -42,6 +43,7 @@ func syncInstall(ctx context.Context,
 
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		var errSysUp error
+
 		graph, _, errSysUp = sysupgradeTargetsV2(ctx, aurCache, dbExecutor, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errSysUp != nil {
 			return errSysUp
@@ -57,11 +59,11 @@ func syncInstall(ctx context.Context,
 	}
 	installer := &Installer{dbExecutor: dbExecutor}
 
-	if err = preparer.Present(os.Stdout, topoSorted); err != nil {
-		return err
+	if errP := preparer.Present(os.Stdout, topoSorted); errP != nil {
+		return errP
 	}
 
-	cleanFunc := preparer.ShouldCleanMakeDeps(ctx)
+	cleanFunc := preparer.ShouldCleanMakeDeps()
 	if cleanFunc != nil {
 		installer.AddPostInstallHook(cleanFunc)
 	}

@@ -15,7 +15,7 @@ type Filter func(Upgrade) bool
 // Upgrade type describes a system upgrade.
 type Upgrade = db.Upgrade
 
-func StylizedNameWithRepository(u Upgrade) string {
+func StylizedNameWithRepository(u *Upgrade) string {
 	return text.Bold(text.ColorHash(u.Repository)) + "/" + text.Bold(u.Name)
 }
 
@@ -103,9 +103,10 @@ func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
 func (u UpSlice) Print() {
 	longestName, longestVersion := 0, 0
 
-	for _, pack := range u.Up {
-		packNameLen := len(StylizedNameWithRepository(pack))
-		packVersion, _ := GetVersionDiff(pack.LocalVersion, pack.RemoteVersion)
+	for k := range u.Up {
+		upgrade := &u.Up[k]
+		packNameLen := len(StylizedNameWithRepository(upgrade))
+		packVersion, _ := GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 		packVersionLen := len(packVersion)
 		longestName = intrange.Max(packNameLen, longestName)
 		longestVersion = intrange.Max(packVersionLen, longestVersion)
@@ -115,12 +116,13 @@ func (u UpSlice) Print() {
 	versionPadding := fmt.Sprintf("%%-%ds", longestVersion)
 	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u.Up))))
 
-	for k, i := range u.Up {
-		left, right := GetVersionDiff(i.LocalVersion, i.RemoteVersion)
+	for k := range u.Up {
+		upgrade := &u.Up[k]
+		left, right := GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 
 		fmt.Print(text.Magenta(fmt.Sprintf(numberPadding, len(u.Up)-k)))
 
-		fmt.Printf(namePadding, StylizedNameWithRepository(i))
+		fmt.Printf(namePadding, StylizedNameWithRepository(upgrade))
 
 		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
 	}

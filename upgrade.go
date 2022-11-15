@@ -78,6 +78,7 @@ func upList(ctx context.Context, aurCache *metadata.AURCache,
 		} else {
 			_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
 		}
+
 		errs.Add(err)
 
 		if err == nil {
@@ -274,6 +275,7 @@ func sysupgradeTargetsV2(ctx context.Context,
 	}
 
 	warnings.Print()
+
 	ignore := make(stringset.StringSet)
 
 	allUpLen := len(repoUp.Up) + len(aurUp.Up)
@@ -302,7 +304,8 @@ func sysupgradeTargetsV2(ctx context.Context,
 
 	isInclude := len(exclude) == 0 && len(otherExclude) == 0
 
-	for i, pkg := range repoUp.Up {
+	for i := range repoUp.Up {
+		pkg := &repoUp.Up[i]
 		if isInclude && otherInclude.Get(pkg.Repository) {
 			ignore.Set(pkg.Name)
 		}
@@ -320,7 +323,8 @@ func sysupgradeTargetsV2(ctx context.Context,
 		ignore.Set(pkg.Name)
 	}
 
-	for i, pkg := range aurUp.Up {
+	for i := range aurUp.Up {
+		pkg := &aurUp.Up[i]
 		if isInclude && otherInclude.Get(pkg.Repository) {
 			continue
 		}
@@ -337,7 +341,7 @@ func sysupgradeTargetsV2(ctx context.Context,
 	return graph, ignore, err
 }
 
-func addUpgradeToGraph(pkg db.Upgrade, graph *topo.Graph[string, *dep.InstallInfo]) {
+func addUpgradeToGraph(pkg *db.Upgrade, graph *topo.Graph[string, *dep.InstallInfo]) {
 	source := dep.Sync
 	if pkg.Repository == "aur" {
 		source = dep.AUR

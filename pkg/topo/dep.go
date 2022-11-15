@@ -85,6 +85,7 @@ func (g *Graph[T, V]) getAlias(node T) T {
 	if aliasNode, ok := g.alias[node]; ok {
 		return aliasNode
 	}
+
 	return node
 }
 
@@ -136,6 +137,7 @@ func (g *Graph[T, V]) DependOn(child, parent T) error {
 
 func (g *Graph[T, V]) String() string {
 	var sb strings.Builder
+
 	sb.WriteString("digraph {\n")
 	sb.WriteString("compound=true;\n")
 	sb.WriteString("concentrate=true;\n")
@@ -231,7 +233,7 @@ func (g *Graph[T, V]) TopoSortedLayers() [][]T {
 	return layers
 }
 
-// TopoSortedLayerMap returns a slice of all of the graph nodes in topological sort order with their node info
+// TopoSortedLayerMap returns a slice of all of the graph nodes in topological sort order with their node info.
 func (g *Graph[T, V]) TopoSortedLayerMap() []map[T]V {
 	layers := []map[T]V{}
 
@@ -370,10 +372,10 @@ func (s NodeSet[T]) copy() NodeSet[T] {
 	return out
 }
 
-func (m DepMap[T]) copy() DepMap[T] {
-	out := make(DepMap[T], len(m))
-	for k, v := range m {
-		out[k] = v.copy()
+func (dm DepMap[T]) copy() DepMap[T] {
+	out := make(DepMap[T], len(dm))
+	for k := range dm {
+		out[k] = dm[k].copy()
 	}
 
 	return out

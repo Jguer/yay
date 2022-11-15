@@ -108,9 +108,9 @@ func (a *AURCache) gojqGetBatch(ctx context.Context, query *AURQuery) ([]*aur.Pk
 		bys := toSearchBy(query.By)
 		for j, by := range bys {
 			if query.Contains {
-				pattern += fmt.Sprintf("(.%s // empty | test(\"%s\"))", by, searchTerm)
+				pattern += fmt.Sprintf("(.%s // empty | test(%q))", by, searchTerm)
 			} else {
-				pattern += fmt.Sprintf("(.%s == \"%s\")", by, searchTerm)
+				pattern += fmt.Sprintf("(.%s == %q)", by, searchTerm)
 			}
 
 			if j != len(bys)-1 {

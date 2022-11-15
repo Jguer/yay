@@ -46,6 +46,7 @@ func setPkgReason(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string,
 
 	for _, compositePkgName := range pkgs {
 		pkgSplit := strings.Split(compositePkgName, "/")
+
 		pkgName := pkgSplit[0]
 		if len(pkgSplit) > 1 {
 			pkgName = pkgSplit[1]
@@ -132,6 +133,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	// if we are doing -u also request all packages needing update
 	if sysupgradeArg {
 		var errSysUp error
+
 		requestTargets, errSysUp = addUpgradeTargetsToArgs(ctx, dbExecutor, cmdArgs, requestTargets, arguments)
 		if errSysUp != nil {
 			return errSysUp
@@ -198,12 +200,14 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	if config.CleanAfter {
 		defer func() {
 			pkgbuildDirs := make([]string, 0, len(do.Aur))
+
 			for _, base := range do.Aur {
 				dir := filepath.Join(config.BuildDir, base.Pkgbase())
 				if isGitRepository(dir) {
 					pkgbuildDirs = append(pkgbuildDirs, dir)
 				}
 			}
+
 			cleanAfter(ctx, config.Runtime.CmdBuilder, pkgbuildDirs)
 		}()
 	}
@@ -357,7 +361,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	return nil
 }
 
-func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor, cmdArgs *parser.Arguments, requestTargets []string, arguments *parser.Arguments) ([]string, error) {
+func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor,
+	cmdArgs *parser.Arguments, requestTargets []string, arguments *parser.Arguments,
+) ([]string, error) {
 	ignore, targets, errUp := sysupgradeTargets(ctx, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	if errUp != nil {
 		return nil, errUp
@@ -371,6 +377,7 @@ func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor, cmdArg
 	if len(ignore) > 0 {
 		arguments.CreateOrAppendOption("ignore", ignore.ToSlice()...)
 	}
+
 	return requestTargets, nil
 }
 

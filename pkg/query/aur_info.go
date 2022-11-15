@@ -33,6 +33,7 @@ func AURInfo(ctx context.Context, aurClient aur.ClientInterface, names []string,
 		defer wg.Done()
 
 		text.Debugln("AUR RPC:", names[n:max])
+
 		tempInfo, requestErr := aurClient.Info(ctx, names[n:max])
 		if requestErr != nil {
 			errs.Add(requestErr)

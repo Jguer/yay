@@ -204,7 +204,7 @@ func queryAUR(ctx context.Context,
 		var r []aur.Pkg
 
 		if aurMetadata != nil && newEngine {
-			q, err := aurMetadata.Get(ctx, &metadata.AURQuery{
+			q, errM := aurMetadata.Get(ctx, &metadata.AURQuery{
 				Needles:  []string{word},
 				By:       by,
 				Contains: true,
@@ -214,11 +214,11 @@ func queryAUR(ctx context.Context,
 				r = append(r, *pkg)
 			}
 
-			if err == nil {
+			if errM == nil {
 				return r, nil
-			} else {
-				text.Warnln("AUR Metadata search failed:", err)
 			}
+
+			text.Warnln("AUR Metadata search failed:", err)
 		}
 		// if one of the search terms returns a result we start filtering by it
 		if aurClient != nil {

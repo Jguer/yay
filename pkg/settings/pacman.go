@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"golang.org/x/term"
 )
