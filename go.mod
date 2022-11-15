@@ -1,14 +1,14 @@
 module github.com/Jguer/yay/v11
 
 require (
-	github.com/Jguer/aur v1.0.1
+	github.com/Jguer/aur v1.1.0
 	github.com/Jguer/go-alpm/v2 v2.1.2
 	github.com/Jguer/votar v1.0.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	golang.org/x/sys v0.2.0
 	golang.org/x/term v0.2.0
 	golang.org/x/text v0.4.0 // indirect
@@ -30,5 +30,7 @@ require (
 	github.com/itchyny/timefmt-go v0.1.4 // indirect
 	github.com/ohler55/ojg v1.14.5
 )
+
+require github.com/stretchr/objx v0.5.0 // indirect
 
 go 1.19
