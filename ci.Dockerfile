@@ -1,4 +1,4 @@
-FROM docker.io/jguer/yay-builder:latest
+FROM docker.io/heywoodlh/archlinux:latest
 
 ENV GO111MODULE=on
 WORKDIR /app
