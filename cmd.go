@@ -180,6 +180,8 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "U", "upgrade":
 		return handleUpgrade(ctx, config, dbExecutor, cmdArgs)
+	case "B", "build":
+		return handleBuild(ctx, config, dbExecutor, cmdArgs)
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(ctx, cmdArgs, dbExecutor)
 	case "P", "show":
@@ -242,7 +244,7 @@ func handleQuery(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 
 func handleHelp(ctx context.Context, cmdArgs *parser.Arguments) error {
 	switch cmdArgs.Op {
-	case "Y", "yay", "G", "getpkgbuild", "P", "show":
+	case "Y", "yay", "G", "getpkgbuild", "P", "show", "W", "web", "B", "build":
 		usage()
 		return nil
 	}
@@ -336,6 +338,17 @@ func handleUpgrade(ctx context.Context,
 
 	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+}
+
+// -B* options
+func handleBuild(ctx context.Context,
+	config *settings.Configuration, dbExecutor db.Executor, cmdArgs *parser.Arguments,
+) error {
+	if cmdArgs.ExistsArg("i", "install") {
+		return installLocalPKGBUILD(ctx, config, cmdArgs, dbExecutor)
+	}
+
+	return nil
 }
 
 func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
