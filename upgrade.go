@@ -311,12 +311,12 @@ func sysupgradeTargetsV2(ctx context.Context,
 		}
 
 		if isInclude && !include.Get(len(repoUp.Up)-i+len(aurUp.Up)) {
-			addUpgradeToGraph(pkg, graph)
+			dep.AddUpgradeToGraph(pkg, graph)
 			continue
 		}
 
 		if !isInclude && (exclude.Get(len(repoUp.Up)-i+len(aurUp.Up)) || otherExclude.Get(pkg.Repository)) {
-			addUpgradeToGraph(pkg, graph)
+			dep.AddUpgradeToGraph(pkg, graph)
 			continue
 		}
 
@@ -330,38 +330,13 @@ func sysupgradeTargetsV2(ctx context.Context,
 		}
 
 		if isInclude && !include.Get(len(aurUp.Up)-i) {
-			addUpgradeToGraph(pkg, graph)
+			dep.AddUpgradeToGraph(pkg, graph)
 		}
 
 		if !isInclude && (exclude.Get(len(aurUp.Up)-i) || otherExclude.Get(pkg.Repository)) {
-			addUpgradeToGraph(pkg, graph)
+			dep.AddUpgradeToGraph(pkg, graph)
 		}
 	}
 
 	return graph, ignore, err
-}
-
-func addUpgradeToGraph(pkg *db.Upgrade, graph *topo.Graph[string, *dep.InstallInfo]) {
-	source := dep.Sync
-	if pkg.Repository == "aur" {
-		source = dep.AUR
-	}
-
-	reason := dep.Explicit
-	if pkg.Reason == alpm.PkgReasonDepend {
-		reason = dep.Dep
-	}
-
-	graph.AddNode(pkg.Name)
-	graph.SetNodeInfo(pkg.Name, &topo.NodeInfo[*dep.InstallInfo]{
-		Color:      "",
-		Background: "",
-		Value: &dep.InstallInfo{
-			Source:     source,
-			Reason:     reason,
-			Version:    pkg.RemoteVersion,
-			AURBase:    &pkg.Base,
-			SyncDBName: &pkg.Repository,
-		},
-	})
 }

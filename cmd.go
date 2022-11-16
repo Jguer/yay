@@ -179,7 +179,7 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "U", "upgrade":
-		return handleUpgrade(ctx, config, dbExecutor, cmdArgs)
+		return handleUpgrade(ctx, config, cmdArgs)
 	case "B", "build":
 		return handleBuild(ctx, config, dbExecutor, cmdArgs)
 	case "G", "getpkgbuild":
@@ -330,7 +330,7 @@ func handleGetpkgbuild(ctx context.Context, cmdArgs *parser.Arguments, dbExecuto
 }
 
 func handleUpgrade(ctx context.Context,
-	config *settings.Configuration, dbExecutor db.Executor, cmdArgs *parser.Arguments,
+	config *settings.Configuration, cmdArgs *parser.Arguments,
 ) error {
 	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))

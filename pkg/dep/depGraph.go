@@ -14,6 +14,7 @@ import (
 
 	aurc "github.com/Jguer/aur"
 	"github.com/Jguer/aur/metadata"
+	alpm "github.com/Jguer/go-alpm/v2"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 )
@@ -489,4 +490,29 @@ func archStringToString(alpmArches []string, archString []gosrc.ArchString) []st
 	}
 
 	return pkgs
+}
+
+func AddUpgradeToGraph(pkg *db.Upgrade, graph *topo.Graph[string, *InstallInfo]) {
+	source := Sync
+	if pkg.Repository == "aur" {
+		source = AUR
+	}
+
+	reason := Explicit
+	if pkg.Reason == alpm.PkgReasonDepend {
+		reason = Dep
+	}
+
+	graph.AddNode(pkg.Name)
+	graph.SetNodeInfo(pkg.Name, &topo.NodeInfo[*InstallInfo]{
+		Color:      colorMap[reason],
+		Background: bgColorMap[source],
+		Value: &InstallInfo{
+			Source:     source,
+			Reason:     reason,
+			Version:    pkg.RemoteVersion,
+			AURBase:    &pkg.Base,
+			SyncDBName: &pkg.Repository,
+		},
+	})
 }
