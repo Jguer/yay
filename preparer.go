@@ -32,15 +32,10 @@ func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostI
 		return nil
 	}
 
-	dirs := make([]string, 0, len(pkgBuildDirs))
-	for _, dir := range pkgBuildDirs {
-		dirs = append(dirs, dir)
-	}
-
-	text.Debugln("added post install hook to clean up AUR dirs", dirs)
+	text.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
 
 	return func(ctx context.Context) error {
-		cleanAfter(ctx, preper.config.Runtime.CmdBuilder, dirs)
+		cleanAfter(ctx, preper.config.Runtime.CmdBuilder, pkgBuildDirs)
 		return nil
 	}
 }
@@ -110,7 +105,7 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 
 func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[string]*dep.InstallInfo) (map[string]string, error) {
 	aurBases := mapset.NewThreadUnsafeSet[string]()
-	pkgBuildDirs := make(map[string]string, 0)
+	pkgBuildDirs := make(map[string]string, len(targets))
 
 	for _, layer := range targets {
 		for pkgName, info := range layer {
@@ -135,4 +130,18 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 	}
 
 	return pkgBuildDirs, nil
+}
+
+func (preper *Preparer) MenuHandler(targets []map[string]*dep.InstallInfo, pkgBuildDirs map[string]string) error {
+	// if errCleanMenu := menus.Clean(config.CleanMenu,
+	// 	config.BuildDir, do.Aur,
+	// 	remoteNamesCache, settings.NoConfirm, config.AnswerClean); errCleanMenu != nil {
+	// 	if errors.As(errCleanMenu, &settings.ErrUserAbort{}) {
+	// 		return errCleanMenu
+	// 	}
+
+	// 	text.Errorln(errCleanMenu)
+	// }
+
+	return nil
 }

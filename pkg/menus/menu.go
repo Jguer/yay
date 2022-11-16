@@ -2,29 +2,27 @@ package menus
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"path/filepath"
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/intrange"
 	"github.com/Jguer/yay/v11/pkg/settings"
-	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
+
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
-func pkgbuildNumberMenu(buildDir string, bases []dep.Base, installed stringset.StringSet) {
+func pkgbuildNumberMenu(w io.Writer, pkgbuildDirs map[string]string, bases []string, installed mapset.Set[string]) {
 	toPrint := ""
 
-	for n, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(buildDir, pkg)
+	for n, pkgBase := range bases {
+		dir := pkgbuildDirs[pkgBase]
+		toPrint += fmt.Sprintf(text.Magenta("%3d")+" %-40s", len(pkgbuildDirs)-n,
+			text.Bold(pkgBase))
 
-		toPrint += fmt.Sprintf(text.Magenta("%3d")+" %-40s", len(bases)-n,
-			text.Bold(base.String()))
-
-		if base.AnyIsInSet(installed) {
+		if installed.Contains(pkgBase) {
 			toPrint += text.Bold(text.Green(gotext.Get(" (Installed)")))
 		}
 
@@ -35,14 +33,15 @@ func pkgbuildNumberMenu(buildDir string, bases []dep.Base, installed stringset.S
 		toPrint += "\n"
 	}
 
-	fmt.Print(toPrint)
+	fmt.Fprint(w, toPrint)
 }
 
-func selectionMenu(buildDir string, bases []dep.Base, installed stringset.StringSet,
-	message string, noConfirm bool, defaultAnswer string, skipFunc func(string) bool) ([]dep.Base, error) {
-	selected := make([]dep.Base, 0)
+func selectionMenu(w io.Writer, pkgbuildDirs map[string]string, bases []string, installed mapset.Set[string],
+	message string, noConfirm bool, defaultAnswer string, skipFunc func(string) bool,
+) ([]string, error) {
+	selected := make([]string, 0)
 
-	pkgbuildNumberMenu(buildDir, bases, installed)
+	pkgbuildNumberMenu(w, pkgbuildDirs, bases, installed)
 
 	text.Infoln(message)
 	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
@@ -63,40 +62,38 @@ func selectionMenu(buildDir string, bases []dep.Base, installed stringset.String
 		return selected, nil
 	}
 
-	for i, base := range bases {
-		pkg := base.Pkgbase()
-
-		if skipFunc != nil && skipFunc(pkg) {
+	for i, pkgBase := range bases {
+		if skipFunc != nil && skipFunc(pkgBase) {
 			continue
 		}
 
-		anyInstalled := base.AnyIsInSet(installed)
+		anyInstalled := installed.Contains(pkgBase)
 
 		if !eIsInclude && eExclude.Get(len(bases)-i) {
 			continue
 		}
 
 		if anyInstalled && (eOtherInclude.Get("i") || eOtherInclude.Get("installed")) {
-			selected = append(selected, base)
+			selected = append(selected, pkgBase)
 			continue
 		}
 
 		if !anyInstalled && (eOtherInclude.Get("no") || eOtherInclude.Get("notinstalled")) {
-			selected = append(selected, base)
+			selected = append(selected, pkgBase)
 			continue
 		}
 
 		if eOtherInclude.Get("a") || eOtherInclude.Get("all") {
-			selected = append(selected, base)
+			selected = append(selected, pkgBase)
 			continue
 		}
 
-		if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkg)) {
-			selected = append(selected, base)
+		if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkgBase)) {
+			selected = append(selected, pkgBase)
 		}
 
-		if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkg)) {
-			selected = append(selected, base)
+		if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkgBase)) {
+			selected = append(selected, pkgBase)
 		}
 	}
 

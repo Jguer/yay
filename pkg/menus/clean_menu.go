@@ -3,21 +3,17 @@ package menus
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"path/filepath"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-func anyExistInCache(buildDir string, bases []dep.Base) bool {
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(buildDir, pkg)
-
+func anyExistInCache(pkgbuildDirs map[string]string) bool {
+	for _, dir := range pkgbuildDirs {
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
 			return true
 		}
@@ -26,14 +22,15 @@ func anyExistInCache(buildDir string, bases []dep.Base) bool {
 	return false
 }
 
-func Clean(cleanMenuOption bool, buildDir string, bases []dep.Base,
-	installed stringset.StringSet, noConfirm bool, answerClean string) error {
-	if !(cleanMenuOption && anyExistInCache(buildDir, bases)) {
+func Clean(w io.Writer, cleanMenuOption bool, pkgbuildDirs map[string]string,
+	installed mapset.Set[string], noConfirm bool, answerClean string,
+) error {
+	if !(cleanMenuOption && anyExistInCache(pkgbuildDirs)) {
 		return nil
 	}
 
 	skipFunc := func(pkg string) bool {
-		dir := filepath.Join(buildDir, pkg)
+		dir := pkgbuildDirs[pkg]
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			return true
 		}
@@ -41,14 +38,19 @@ func Clean(cleanMenuOption bool, buildDir string, bases []dep.Base,
 		return false
 	}
 
-	toClean, errClean := selectionMenu(buildDir, bases, installed, gotext.Get("Packages to cleanBuild?"),
+	bases := make([]string, 0, len(pkgbuildDirs))
+	for pkg := range pkgbuildDirs {
+		bases = append(bases, pkg)
+	}
+
+	toClean, errClean := selectionMenu(w, pkgbuildDirs, bases, installed, gotext.Get("Packages to cleanBuild?"),
 		noConfirm, answerClean, skipFunc)
 	if errClean != nil {
 		return errClean
 	}
 
 	for i, base := range toClean {
-		dir := filepath.Join(buildDir, base.Pkgbase())
+		dir := pkgbuildDirs[base]
 		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
 
 		if err := os.RemoveAll(dir); err != nil {

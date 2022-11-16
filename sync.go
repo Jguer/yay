@@ -73,6 +73,10 @@ func syncInstall(ctx context.Context,
 		return err
 	}
 
+	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(pkgBuildDirs); cleanAURDirsFunc != nil {
+		installer.AddPostInstallHook(cleanAURDirsFunc)
+	}
+
 	err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs)
 	if err != nil {
 		if errHook := installer.RunPostInstallHooks(ctx); errHook != nil {
