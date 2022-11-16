@@ -126,16 +126,17 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 
 		switch target.DB {
 		case "": // unspecified db
-			if g.dbExecutor.SyncPackage(target.Name) != nil {
-				graph.AddNode(target.Name)
+			if pkg := g.dbExecutor.SyncPackage(target.Name); pkg != nil {
+				dbName := pkg.DB().Name()
+				graph.AddNode(pkg.Name())
 				g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
 					Color:      colorMap[Explicit],
-					Background: bgColorMap[AUR],
+					Background: bgColorMap[Sync],
 					Value: &InstallInfo{
 						Source:     Sync,
 						Reason:     Explicit,
-						Version:    target.Version,
-						SyncDBName: &target.DB,
+						Version:    pkg.Version(),
+						SyncDBName: &dbName,
 					},
 				})
 
@@ -149,7 +150,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			graph.AddNode(target.Name)
 			g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
 				Color:      colorMap[Explicit],
-				Background: bgColorMap[AUR],
+				Background: bgColorMap[Sync],
 				Value: &InstallInfo{
 					Source:     Sync,
 					Reason:     Explicit,
