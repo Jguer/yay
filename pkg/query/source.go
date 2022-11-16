@@ -15,6 +15,8 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
+
+	"github.com/Jguer/aur/metadata"
 )
 
 type SearchVerbosity int
@@ -29,21 +31,31 @@ const (
 type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
+
+	useAURCache       bool
 	sortBy            string
 	searchBy          string
 	targetMode        parser.TargetMode
 	bottomUp          bool
 	singleLineResults bool
+
+	aurClient aur.ClientInterface
+	aurCache  *metadata.Client
 }
 
 func NewSourceQueryBuilder(
+	aurClient aur.ClientInterface,
+	aurCache *metadata.Client,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
 	bottomUp,
 	singleLineResults bool,
+	useAURCache bool,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
+		aurClient:         aurClient,
+		aurCache:          aurCache,
 		repoQuery:         []alpm.IPackage{},
 		aurQuery:          []aur.Pkg{},
 		bottomUp:          bottomUp,
@@ -51,16 +63,20 @@ func NewSourceQueryBuilder(
 		targetMode:        targetMode,
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
+		useAURCache:       useAURCache,
 	}
 }
 
-func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, aurClient aur.ClientInterface, pkgS []string) {
+func (s *SourceQueryBuilder) Execute(ctx context.Context,
+	dbExecutor db.Executor,
+	pkgS []string,
+) {
 	var aurErr error
 
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy)
+		s.aurQuery, aurErr = queryAUR(ctx, s.aurClient, s.aurCache, pkgS, s.searchBy, s.useAURCache)
 		s.aurQuery = filterAURResults(pkgS, s.aurQuery)
 
 		sort.Sort(aurSortable{aurQuery: s.aurQuery, sortBy: s.sortBy, bottomUp: s.bottomUp})
@@ -176,7 +192,10 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 }
 
 // queryAUR searches AUR and narrows based on subarguments.
-func queryAUR(ctx context.Context, aurClient aur.ClientInterface, pkgS []string, searchBy string) ([]aur.Pkg, error) {
+func queryAUR(ctx context.Context,
+	aurClient aur.ClientInterface, aurMetadata *metadata.Client,
+	pkgS []string, searchBy string, newEngine bool,
+) ([]aur.Pkg, error) {
 	var (
 		err error
 		by  = getSearchBy(searchBy)
@@ -185,9 +204,30 @@ func queryAUR(ctx context.Context, aurClient aur.ClientInterface, pkgS []string,
 	for _, word := range pkgS {
 		var r []aur.Pkg
 
-		r, err = aurClient.Search(ctx, word, by)
-		if err == nil {
-			return r, nil
+		if aurMetadata != nil && newEngine {
+			q, errM := aurMetadata.Get(ctx, &metadata.AURQuery{
+				Needles:  []string{word},
+				By:       by,
+				Contains: true,
+			})
+
+			for _, pkg := range q {
+				r = append(r, *pkg)
+			}
+
+			if errM == nil {
+				return r, nil
+			}
+
+			text.Warnln("AUR Metadata search failed:", err)
+		}
+		// if one of the search terms returns a result we start filtering by it
+		if aurClient != nil {
+			text.Debugln("AUR RPC:", by, word)
+
+			if r, err = aurClient.Search(ctx, word, by); err == nil {
+				return r, nil
+			}
 		}
 	}
 

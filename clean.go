@@ -9,9 +9,9 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -194,22 +194,17 @@ func isGitRepository(dir string) bool {
 	return !os.IsNotExist(err)
 }
 
-func cleanAfter(ctx context.Context, bases []dep.Base) {
+func cleanAfter(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs []string) {
 	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
-	for i, base := range bases {
-		dir := filepath.Join(config.BuildDir, base.Pkgbase())
-		if !isGitRepository(dir) {
-			continue
-		}
+	for i, dir := range pkgbuildDirs {
+		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(pkgbuildDirs), text.Cyan(dir)))
 
-		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(bases), text.Cyan(dir)))
-
-		_, stderr, err := config.Runtime.CmdBuilder.Capture(
-			config.Runtime.CmdBuilder.BuildGitCmd(
+		_, stderr, err := cmdBuilder.Capture(
+			cmdBuilder.BuildGitCmd(
 				ctx, dir, "reset", "--hard", "HEAD"))
 		if err != nil {
-			text.Errorln(gotext.Get("error resetting %s: %s", base.String(), stderr))
+			text.Errorln(gotext.Get("error resetting %s: %s", dir, stderr))
 		}
 
 		if err := config.Runtime.CmdBuilder.Show(

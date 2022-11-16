@@ -30,13 +30,13 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			queryBuilder := NewMixedSourceQueryBuilder("votes", parser.ModeAny, "", tc.bottomUp, false)
+			client, err := aur.NewClient(aur.WithHTTPClient(&mockDoer{}))
+			queryBuilder := NewMixedSourceQueryBuilder(client, "votes", parser.ModeAny, "", tc.bottomUp, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 
-			client, err := aur.NewClient(aur.WithHTTPClient(&mockDoer{}))
 			require.NoError(t, err)
-			queryBuilder.Execute(context.Background(), mockStore, client, search)
+			queryBuilder.Execute(context.Background(), mockStore, search)
 			assert.Len(t, queryBuilder.results, 3)
 			assert.Equal(t, 3, queryBuilder.Len())
 

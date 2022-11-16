@@ -18,7 +18,19 @@ const (
 	opSymbol   = "::"
 )
 
-var cachedColumnCount = -1
+var (
+	cachedColumnCount = -1
+	DebugMode         = false
+)
+
+func Debugln(a ...interface{}) {
+	if !DebugMode {
+		return
+	}
+
+	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(yellow("[DEBUG]"))}, a...)...)
+	fmt.Fprint(os.Stdout, ResetCode)
+}
 
 func OperationInfoln(a ...interface{}) {
 	fmt.Fprint(os.Stdout, append([]interface{}{Bold(Cyan(opSymbol + " ")), boldCode}, a...)...)

@@ -22,45 +22,53 @@ import (
 	"github.com/Jguer/yay/v11/pkg/pgp"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
-func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err error) {
+func setPkgReason(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string, exp bool) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
 
 	cmdArgs = cmdArgs.CopyGlobal()
-	_ = cmdArgs.AddArg("q", "D", "asdeps")
-	cmdArgs.AddTarget(pkgs...)
+	if exp {
+		if err := cmdArgs.AddArg("q", "D", "asexplicit"); err != nil {
+			return err
+		}
+	} else {
+		if err := cmdArgs.AddArg("q", "D", "asdeps"); err != nil {
+			return err
+		}
+	}
 
-	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
-	if err != nil {
-		return errors.New(gotext.Get("error updating package install reason to dependency"))
+	for _, compositePkgName := range pkgs {
+		pkgSplit := strings.Split(compositePkgName, "/")
+
+		pkgName := pkgSplit[0]
+		if len(pkgSplit) > 1 {
+			pkgName = pkgSplit[1]
+		}
+
+		cmdArgs.AddTarget(pkgName)
+	}
+
+	if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
+		return &SetPkgReasonError{exp: exp}
 	}
 
 	return nil
 }
 
-func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) (err error) {
-	if len(pkgs) == 0 {
-		return nil
-	}
+func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
+	return setPkgReason(ctx, cmdArgs, pkgs, false)
+}
 
-	cmdArgs = cmdArgs.CopyGlobal()
-	_ = cmdArgs.AddArg("q", "D", "asexplicit")
-	cmdArgs.AddTarget(pkgs...)
-
-	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
-	if err != nil {
-		return errors.New(gotext.Get("error updating package install reason to explicit"))
-	}
-
-	return nil
+func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
+	return setPkgReason(ctx, cmdArgs, pkgs, true)
 }
 
 // Install handles package installs.
@@ -85,7 +93,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		if config.CombinedUpgrade {
 			if refreshArg {
 				if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
-					return errors.New(gotext.Get("error refreshing databases"))
+					return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 				}
 			}
 		} else if refreshArg || sysupgradeArg || len(cmdArgs.Targets) > 0 {
@@ -124,18 +132,11 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 
 	// if we are doing -u also request all packages needing update
 	if sysupgradeArg {
-		ignore, targets, errUp := sysupgradeTargets(ctx, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
-		if errUp != nil {
-			return errUp
-		}
+		var errSysUp error
 
-		for _, up := range targets {
-			cmdArgs.AddTarget(up)
-			requestTargets = append(requestTargets, up)
-		}
-
-		if len(ignore) > 0 {
-			arguments.CreateOrAppendOption("ignore", ignore.ToSlice()...)
+		requestTargets, errSysUp = addUpgradeTargetsToArgs(ctx, dbExecutor, cmdArgs, requestTargets, arguments)
+		if errSysUp != nil {
+			return errSysUp
 		}
 	}
 
@@ -197,14 +198,25 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	fmt.Println()
 
 	if config.CleanAfter {
-		defer cleanAfter(ctx, do.Aur)
+		defer func() {
+			pkgbuildDirs := make([]string, 0, len(do.Aur))
+
+			for _, base := range do.Aur {
+				dir := filepath.Join(config.BuildDir, base.Pkgbase())
+				if isGitRepository(dir) {
+					pkgbuildDirs = append(pkgbuildDirs, dir)
+				}
+			}
+
+			cleanAfter(ctx, config.Runtime.CmdBuilder, pkgbuildDirs)
+		}()
 	}
 
 	if do.HasMake() {
 		switch config.RemoveMake {
 		case "yes":
 			defer func() {
-				err = removeMake(ctx, do)
+				err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake())
 			}()
 
 		case "no":
@@ -212,7 +224,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		default:
 			if text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
 				defer func() {
-					err = removeMake(ctx, do)
+					err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake())
 				}()
 			}
 		}
@@ -330,8 +342,15 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder, config.BuildDir,
-		do.Aur, incompatible, config.MaxConcurrentDownloads); errP != nil {
+	pkgBuildDirs := make(map[string]string, len(do.Aur))
+	for _, base := range do.Aur {
+		pkgBuildDirs[base.Pkgbase()] = filepath.Join(config.BuildDir, base.Pkgbase())
+	}
+
+	if errP := downloadPKGBUILDSourceFanout(ctx,
+		config.Runtime.CmdBuilder,
+		pkgBuildDirs,
+		len(incompatible) > 0, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 
@@ -342,7 +361,27 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	return nil
 }
 
-func removeMake(ctx context.Context, do *dep.Order) error {
+func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor,
+	cmdArgs *parser.Arguments, requestTargets []string, arguments *parser.Arguments,
+) ([]string, error) {
+	ignore, targets, errUp := sysupgradeTargets(ctx, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
+	if errUp != nil {
+		return nil, errUp
+	}
+
+	for _, up := range targets {
+		cmdArgs.AddTarget(up)
+		requestTargets = append(requestTargets, up)
+	}
+
+	if len(ignore) > 0 {
+		arguments.CreateOrAppendOption("ignore", ignore.ToSlice()...)
+	}
+
+	return requestTargets, nil
+}
+
+func removeMake(ctx context.Context, cmdBuilder exe.ICmdBuilder, makeDeps []string) error {
 	removeArguments := parser.MakeArguments()
 
 	err := removeArguments.AddArg("R", "u")
@@ -350,13 +389,13 @@ func removeMake(ctx context.Context, do *dep.Order) error {
 		return err
 	}
 
-	for _, pkg := range do.GetMake() {
+	for _, pkg := range makeDeps {
 		removeArguments.AddTarget(pkg)
 	}
 
 	oldValue := settings.NoConfirm
 	settings.NoConfirm = true
-	err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+	err = cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
 		removeArguments, config.Runtime.Mode, settings.NoConfirm))
 	settings.NoConfirm = oldValue
 
@@ -423,20 +462,6 @@ func earlyRefresh(ctx context.Context, cmdArgs *parser.Arguments) error {
 		arguments, config.Runtime.Mode, settings.NoConfirm))
 }
 
-func alpmArchIsSupported(alpmArch []string, arch string) bool {
-	if arch == "any" {
-		return true
-	}
-
-	for _, a := range alpmArch {
-		if a == arch {
-			return true
-		}
-	}
-
-	return false
-}
-
 func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) (stringset.StringSet, error) {
 	incompatible := make(stringset.StringSet)
 	basesMap := make(map[string]dep.Base)
@@ -449,7 +474,7 @@ func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExe
 nextpkg:
 	for _, base := range bases {
 		for _, arch := range srcinfos[base.Pkgbase()].Arch {
-			if alpmArchIsSupported(alpmArch, arch) {
+			if db.ArchIsSupported(alpmArch, arch) {
 				continue nextpkg
 			}
 		}
@@ -598,20 +623,9 @@ func buildInstallPkgbuilds(
 	incompatible stringset.StringSet,
 	conflicts stringset.MapStringSet, noDeps, noCheck bool,
 ) error {
-	arguments := cmdArgs.Copy()
-	arguments.ClearTargets()
-	arguments.Op = "U"
-	arguments.DelArg("confirm")
-	arguments.DelArg("noconfirm")
-	arguments.DelArg("c", "clean")
-	arguments.DelArg("q", "quiet")
-	arguments.DelArg("q", "quiet")
-	arguments.DelArg("y", "refresh")
-	arguments.DelArg("u", "sysupgrade")
-	arguments.DelArg("w", "downloadonly")
-
 	deps := make([]string, 0)
 	exp := make([]string, 0)
+	pkgArchives := make([]string, 0)
 	oldConfirm := settings.NoConfirm
 	settings.NoConfirm = true
 
@@ -645,18 +659,23 @@ func buildInstallPkgbuilds(
 		}
 
 		if !satisfied || !config.BatchInstall {
-			err = doInstall(ctx, arguments, cmdArgs, deps, exp)
-			arguments.ClearTargets()
+			errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
+			errReason := setInstallReason(ctx, cmdArgs, deps, exp)
 
 			deps = make([]string, 0)
 			exp = make([]string, 0)
+			pkgArchives = make([]string, 0) // reset the pkgarchives
 
-			if err != nil {
+			if errArchive != nil || errReason != nil {
 				if i != 0 {
 					go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[i-1].String()})
 				}
 
-				return err
+				if errArchive != nil {
+					return errArchive
+				}
+
+				return errReason
 			}
 		}
 
@@ -763,8 +782,8 @@ func buildInstallPkgbuilds(
 
 		for _, split := range base {
 			for suffix, optional := range map[string]bool{"": false, "-debug": true} {
-				deps, exp, errAdd = doAddTarget(dp, localNamesCache, remoteNamesCache,
-					arguments, cmdArgs, pkgdests, deps, exp, split.Name+suffix, optional)
+				deps, exp, pkgArchives, errAdd = doAddTarget(dp, localNamesCache, remoteNamesCache,
+					cmdArgs, pkgdests, deps, exp, split.Name+suffix, optional, pkgArchives)
 				if errAdd != nil {
 					return errAdd
 				}
@@ -785,8 +804,13 @@ func buildInstallPkgbuilds(
 		wg.Wait()
 	}
 
-	err = doInstall(ctx, arguments, cmdArgs, deps, exp)
-	if err != nil {
+	errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
+	if errArchive != nil {
+		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
+	}
+
+	errReason := setInstallReason(ctx, cmdArgs, deps, exp)
+	if errReason != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
 	}
 
@@ -795,10 +819,26 @@ func buildInstallPkgbuilds(
 	return err
 }
 
-func doInstall(ctx context.Context, arguments, cmdArgs *parser.Arguments, pkgDeps, pkgExp []string) error {
-	if len(arguments.Targets) == 0 {
+func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchives []string) error {
+	arguments := cmdArgs.Copy()
+	arguments.ClearTargets()
+	arguments.Op = "U"
+	arguments.DelArg("confirm")
+	arguments.DelArg("noconfirm")
+	arguments.DelArg("c", "clean")
+	arguments.DelArg("i", "install")
+	arguments.DelArg("q", "quiet")
+	arguments.DelArg("y", "refresh")
+	arguments.DelArg("u", "sysupgrade")
+	arguments.DelArg("w", "downloadonly")
+	arguments.DelArg("asdeps", "asdep")
+	arguments.DelArg("asexplicit", "asexp")
+
+	if len(pkgArchives) == 0 {
 		return nil
 	}
+
+	arguments.AddTarget(pkgArchives...)
 
 	if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
@@ -809,38 +849,46 @@ func doInstall(ctx context.Context, arguments, cmdArgs *parser.Arguments, pkgDep
 		fmt.Fprintln(os.Stderr, errStore)
 	}
 
-	if errDeps := asdeps(ctx, cmdArgs, pkgDeps); errDeps != nil {
+	return nil
+}
+
+func setInstallReason(ctx context.Context, cmdArgs *parser.Arguments, deps, exps []string) error {
+	if len(deps)+len(exps) == 0 {
+		return nil
+	}
+
+	if errDeps := asdeps(ctx, cmdArgs, deps); errDeps != nil {
 		return errDeps
 	}
 
-	return asexp(ctx, cmdArgs, pkgExp)
+	return asexp(ctx, cmdArgs, exps)
 }
 
 func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.StringSet,
-	arguments, cmdArgs *parser.Arguments, pkgdests map[string]string,
-	deps, exp []string, name string, optional bool,
-) (newDeps, newExp []string, err error) {
+	cmdArgs *parser.Arguments, pkgdests map[string]string,
+	deps, exp []string, name string, optional bool, pkgArchives []string,
+) (newDeps, newExp, newPkgArchives []string, err error) {
 	pkgdest, ok := pkgdests[name]
 	if !ok {
 		if optional {
-			return deps, exp, nil
+			return deps, exp, newPkgArchives, nil
 		}
 
-		return deps, exp, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
+		return deps, exp, pkgArchives, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
 	}
 
 	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
 		if optional {
-			return deps, exp, nil
+			return deps, exp, pkgArchives, nil
 		}
 
-		return deps, exp, errors.New(
+		return deps, exp, pkgArchives, errors.New(
 			gotext.Get(
 				"the PKGDEST for %s is listed by makepkg but does not exist: %s",
 				name, pkgdest))
 	}
 
-	arguments.AddTarget(pkgdest)
+	pkgArchives = append(pkgArchives, pkgdest)
 
 	switch {
 	case cmdArgs.ExistsArg("asdeps", "asdep"):
@@ -849,7 +897,9 @@ func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.Strin
 		exp = append(exp, name)
 	case !dp.Explicit.Get(name) && !localNamesCache.Get(name) && !remoteNamesCache.Get(name):
 		deps = append(deps, name)
+	default:
+		exp = append(exp, name)
 	}
 
-	return deps, exp, nil
+	return deps, exp, pkgArchives, nil
 }

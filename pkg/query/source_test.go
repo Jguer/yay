@@ -105,13 +105,14 @@ func TestSourceQueryBuilder(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			queryBuilder := NewSourceQueryBuilder("votes", parser.ModeAny, "", tc.bottomUp, false)
+			client, err := aur.NewClient(aur.WithHTTPClient(&mockDoer{}))
+			require.NoError(t, err)
+
+			queryBuilder := NewSourceQueryBuilder(client, nil, "votes", parser.ModeAny, "", tc.bottomUp, false, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 
-			client, err := aur.NewClient(aur.WithHTTPClient(&mockDoer{}))
-			require.NoError(t, err)
-			queryBuilder.Execute(context.Background(), mockStore, client, search)
+			queryBuilder.Execute(context.Background(), mockStore, search)
 			assert.Len(t, queryBuilder.aurQuery, 1)
 			assert.Len(t, queryBuilder.repoQuery, 2)
 			assert.Equal(t, 3, queryBuilder.Len())

@@ -25,7 +25,7 @@ const sourceAUR = "aur"
 
 type Builder interface {
 	Len() int
-	Execute(ctx context.Context, dbExecutor db.Executor, aurClient aur.ClientInterface, pkgS []string)
+	Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string)
 	Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error
 	GetTargets(include, exclude intrange.IntRanges, otherExclude stringset.StringSet) ([]string, error)
 }
@@ -38,9 +38,12 @@ type MixedSourceQueryBuilder struct {
 	queryMap          map[string]map[string]interface{}
 	bottomUp          bool
 	singleLineResults bool
+
+	aurClient aur.ClientInterface
 }
 
 func NewMixedSourceQueryBuilder(
+	aurClient aur.ClientInterface,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -48,6 +51,7 @@ func NewMixedSourceQueryBuilder(
 	singleLineResults bool,
 ) *MixedSourceQueryBuilder {
 	return &MixedSourceQueryBuilder{
+		aurClient:         aurClient,
 		bottomUp:          bottomUp,
 		sortBy:            sortBy,
 		targetMode:        targetMode,
@@ -122,7 +126,7 @@ func (a *abstractResults) Less(i, j int) bool {
 	return simA > simB
 }
 
-func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, aurClient aur.ClientInterface, pkgS []string) {
+func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string) {
 	var aurErr error
 
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
@@ -141,7 +145,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 
 	if s.targetMode.AtLeastAUR() {
 		var aurResults aurQuery
-		aurResults, aurErr = queryAUR(ctx, aurClient, pkgS, s.searchBy)
+		aurResults, aurErr = queryAUR(ctx, s.aurClient, nil, pkgS, s.searchBy, false)
 		dbName := sourceAUR
 
 		for i := range aurResults {

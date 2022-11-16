@@ -315,6 +315,7 @@ func isArg(arg string) bool {
 	case "Y", "yay":
 	case "W", "web":
 	case "P", "show":
+	case "B", "build":
 	case "G", "getpkgbuild":
 	case "b", "dbpath":
 	case "r", "root":
@@ -470,6 +471,7 @@ func isOp(op string) bool {
 	// yay specific
 	case "Y", "yay":
 	case "W", "web":
+	case "B", "build":
 	case "P", "show":
 	case "G", "getpkgbuild":
 	default:

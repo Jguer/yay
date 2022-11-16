@@ -179,8 +179,9 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	case "U", "upgrade":
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return handleUpgrade(ctx, config, cmdArgs)
+	case "B", "build":
+		return handleBuild(ctx, config, dbExecutor, cmdArgs)
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(ctx, cmdArgs, dbExecutor)
 	case "P", "show":
@@ -243,7 +244,7 @@ func handleQuery(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 
 func handleHelp(ctx context.Context, cmdArgs *parser.Arguments) error {
 	switch cmdArgs.Op {
-	case "Y", "yay", "G", "getpkgbuild", "P", "show":
+	case "Y", "yay", "G", "getpkgbuild", "P", "show", "W", "web", "B", "build":
 		usage()
 		return nil
 	}
@@ -328,12 +329,30 @@ func handleGetpkgbuild(ctx context.Context, cmdArgs *parser.Arguments, dbExecuto
 	return getPkgbuilds(ctx, dbExecutor, config, cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }
 
+func handleUpgrade(ctx context.Context,
+	config *settings.Configuration, cmdArgs *parser.Arguments,
+) error {
+	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+}
+
+// -B* options
+func handleBuild(ctx context.Context,
+	config *settings.Configuration, dbExecutor db.Executor, cmdArgs *parser.Arguments,
+) error {
+	if cmdArgs.ExistsArg("i", "install") {
+		return installLocalPKGBUILD(ctx, config, cmdArgs, dbExecutor)
+	}
+
+	return nil
+}
+
 func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	targets := cmdArgs.Targets
 
 	switch {
 	case cmdArgs.ExistsArg("s", "search"):
-		return syncSearch(ctx, targets, config.Runtime.AURClient, dbExecutor, config.Runtime.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
+		return syncSearch(ctx, targets, dbExecutor, config.Runtime.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
 	case cmdArgs.ExistsArg("p", "print", "print-format"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
@@ -347,6 +366,10 @@ func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Ex
 	case cmdArgs.ExistsArg("i", "info"):
 		return syncInfo(ctx, cmdArgs, targets, dbExecutor)
 	case cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0:
+		if config.NewInstallEngine {
+			return syncInstall(ctx, config, cmdArgs, dbExecutor)
+		}
+
 		return install(ctx, cmdArgs, dbExecutor, false)
 	case cmdArgs.ExistsArg("y", "refresh"):
 		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
@@ -370,7 +393,7 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vc
 func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor,
 	queryBuilder query.Builder, cmdArgs *parser.Arguments,
 ) error {
-	queryBuilder.Execute(ctx, dbExecutor, config.Runtime.AURClient, pkgS)
+	queryBuilder.Execute(ctx, dbExecutor, pkgS)
 
 	if err := queryBuilder.Results(os.Stdout, dbExecutor, query.NumberMenu); err != nil {
 		return err
@@ -401,6 +424,10 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 	if len(arguments.Targets) == 0 {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
+	}
+
+	if config.NewInstallEngine {
+		return syncInstall(ctx, config, arguments, dbExecutor)
 	}
 
 	return install(ctx, arguments, dbExecutor, true)

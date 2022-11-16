@@ -80,7 +80,7 @@ func provideSatisfies(provide, dep, pkgVersion string) bool {
 		return false
 	}
 
-	// Unversioned provieds can not satisfy a versioned dep
+	// Unversioned provides can not satisfy a versioned dep
 	if provideMod == "" && depMod != "" {
 		provideVersion = pkgVersion // Example package: pagure
 	}

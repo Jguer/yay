@@ -3,16 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"runtime"
 	"sync"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
-	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
@@ -31,43 +29,51 @@ func (e *ErrDownloadSource) Unwrap() error {
 	return e.inner
 }
 
-func downloadPKGBUILDSource(ctx context.Context, cmdBuilder exe.ICmdBuilder, dest,
-	base string, incompatible stringset.StringSet) (err error) {
-	dir := filepath.Join(dest, base)
+func downloadPKGBUILDSource(ctx context.Context,
+	cmdBuilder exe.ICmdBuilder, pkgBuildDir string, installIncompatible bool,
+) error {
 	args := []string{"--verifysource", "-Ccf"}
 
-	if incompatible.Get(base) {
+	if installIncompatible {
 		args = append(args, "--ignorearch")
 	}
 
-	err = cmdBuilder.Show(
-		cmdBuilder.BuildMakepkgCmd(ctx, dir, args...))
+	err := cmdBuilder.Show(
+		cmdBuilder.BuildMakepkgCmd(ctx, pkgBuildDir, args...))
 	if err != nil {
-		return ErrDownloadSource{inner: err, pkgName: base, errOut: ""}
+		return ErrDownloadSource{inner: err, pkgName: pkgBuildDir}
 	}
 
 	return nil
 }
 
-func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup, dest string,
-	cBase <-chan string, valOut chan<- string, errOut chan<- error,
-	cmdBuilder exe.ICmdBuilder, incompatible stringset.StringSet) {
-	for base := range cBase {
-		err := downloadPKGBUILDSource(ctx, cmdBuilder, dest, base, incompatible)
+func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup,
+	dirChannel <-chan string, valOut chan<- string, errOut chan<- error,
+	cmdBuilder exe.ICmdBuilder, incompatible bool,
+) {
+	for pkgBuildDir := range dirChannel {
+		err := downloadPKGBUILDSource(ctx, cmdBuilder, pkgBuildDir, incompatible)
 		if err != nil {
-			errOut <- ErrDownloadSource{inner: err, pkgName: base, errOut: ""}
+			errOut <- ErrDownloadSource{inner: err, pkgName: pkgBuildDir, errOut: ""}
 		} else {
-			valOut <- base
+			valOut <- pkgBuildDir
 		}
 	}
 
 	wg.Done()
 }
 
-func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, dest string,
-	bases []dep.Base, incompatible stringset.StringSet, maxConcurrentDownloads int) error {
-	if len(bases) == 1 {
-		return downloadPKGBUILDSource(ctx, cmdBuilder, dest, bases[0].Pkgbase(), incompatible)
+func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgBuildDirs map[string]string,
+	incompatible bool, maxConcurrentDownloads int,
+) error {
+	if len(pkgBuildDirs) == 0 {
+		return nil // no work to do
+	}
+
+	if len(pkgBuildDirs) == 1 {
+		for _, pkgBuildDir := range pkgBuildDirs {
+			return downloadPKGBUILDSource(ctx, cmdBuilder, pkgBuildDir, incompatible)
+		}
 	}
 
 	var (
@@ -82,9 +88,14 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 		numOfWorkers = maxConcurrentDownloads
 	}
 
+	dedupSet := mapset.NewThreadUnsafeSet[string]()
+
 	go func() {
-		for _, base := range bases {
-			c <- base.Pkgbase()
+		for _, pkgbuildDir := range pkgBuildDirs {
+			if !dedupSet.Contains(pkgbuildDir) {
+				c <- pkgbuildDir
+				dedupSet.Add(pkgbuildDir)
+			}
 		}
 
 		close(c)
@@ -94,7 +105,7 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 	wg.Add(numOfWorkers)
 
 	for s := 0; s < numOfWorkers; s++ {
-		go downloadPKGBUILDSourceWorker(ctx, wg, dest, c,
+		go downloadPKGBUILDSourceWorker(ctx, wg, c,
 			fanInChanValues, fanInChanErrors, cmdBuilder, incompatible)
 	}
 

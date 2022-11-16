@@ -4,17 +4,14 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/aur"
-
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
-	"github.com/Jguer/yay/v11/pkg/stringset"
 )
 
 type TestMakepkgBuilder struct {
@@ -32,6 +29,7 @@ func (z *TestMakepkgBuilder) BuildMakepkgCmd(ctx context.Context, dir string, ex
 	if z.want != "" {
 		assert.Contains(z.test, cmd.String(), z.want)
 	}
+
 	if z.wantDir != "" {
 		assert.Equal(z.test, z.wantDir, cmd.Dir)
 	}
@@ -56,7 +54,7 @@ func Test_downloadPKGBUILDSource(t *testing.T) {
 		want:          "makepkg --nocheck --config /etc/not.conf --verifysource -Ccf",
 		wantDir:       "/tmp/yay-bin",
 	}
-	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, "/tmp", "yay-bin", stringset.Make())
+	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(cmdBuilder.passes))
 }
@@ -73,9 +71,9 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 		wantDir:       "/tmp/yay-bin",
 		showError:     &exec.ExitError{},
 	}
-	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, "/tmp", "yay-bin", stringset.Make())
+	err := downloadPKGBUILDSource(context.TODO(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "error downloading sources: \x1b[36myay-bin\x1b[0m \n\t context: <nil> \n\t \n")
+	assert.EqualError(t, err, "error downloading sources: \x1b[36m/tmp/yay-bin\x1b[0m \n\t context: <nil> \n\t \n")
 }
 
 // GIVEN 5 packages
@@ -84,14 +82,13 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 	t.Parallel()
 
-	bases := []dep.Base{
-		{&aur.Pkg{PackageBase: "yay"}},
-		{&aur.Pkg{PackageBase: "yay-bin"}},
-		{&aur.Pkg{PackageBase: "yay-git"}},
-		{&aur.Pkg{PackageBase: "yay-v11"}},
-		{&aur.Pkg{PackageBase: "yay-v12"}},
+	pkgBuildDirs := map[string]string{
+		"yay":     "/tmp/yay",
+		"yay-bin": "/tmp/yay-bin",
+		"yay-git": "/tmp/yay-git",
+		"yay-v11": "/tmp/yay-v11",
+		"yay-v12": "/tmp/yay-v12",
 	}
-
 	for _, maxConcurrentDownloads := range []int{0, 3} {
 		t.Run(fmt.Sprintf("maxconcurrentdownloads set to %d", maxConcurrentDownloads), func(t *testing.T) {
 			cmdBuilder := &TestMakepkgBuilder{
@@ -102,7 +99,7 @@ func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 				test: t,
 			}
 
-			err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), maxConcurrentDownloads)
+			err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, maxConcurrentDownloads)
 			assert.NoError(t, err)
 			assert.Equal(t, 5, int(cmdBuilder.passes))
 		})
@@ -122,11 +119,9 @@ func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 		test: t,
 	}
 
-	bases := []dep.Base{
-		{&aur.Pkg{PackageBase: "yay"}},
-	}
+	pkgBuildDirs := map[string]string{"yay": "/tmp/yay"}
 
-	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)
+	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(cmdBuilder.passes))
 }
@@ -145,15 +140,15 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 		showError: &exec.ExitError{},
 	}
 
-	bases := []dep.Base{
-		{&aur.Pkg{PackageBase: "yay"}},
-		{&aur.Pkg{PackageBase: "yay-bin"}},
-		{&aur.Pkg{PackageBase: "yay-git"}},
-		{&aur.Pkg{PackageBase: "yay-v11"}},
-		{&aur.Pkg{PackageBase: "yay-v12"}},
+	pkgBuildDirs := map[string]string{
+		"yay":     "/tmp/yay",
+		"yay-bin": "/tmp/yay-bin",
+		"yay-git": "/tmp/yay-git",
+		"yay-v11": "/tmp/yay-v11",
+		"yay-v12": "/tmp/yay-v12",
 	}
 
-	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, "/tmp", bases, stringset.Make(), 0)
+	err := downloadPKGBUILDSourceFanout(context.TODO(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.Error(t, err)
 	assert.Equal(t, 5, int(cmdBuilder.passes))
 	assert.Len(t, err.(*multierror.MultiError).Errors, 5)

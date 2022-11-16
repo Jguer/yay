@@ -11,15 +11,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/leonelquinteros/gotext"
-
-	"github.com/Jguer/aur"
-	"github.com/Jguer/votar/pkg/vote"
-
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
+
+	"github.com/Jguer/aur"
+	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/votar/pkg/vote"
+	"github.com/leonelquinteros/gotext"
+	"github.com/pkg/errors"
 )
 
 // HideMenus indicates if pacman's provider menus must be hidden.
@@ -30,6 +31,7 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
+	Runtime                *Runtime `json:"-"`
 	AURURL                 string   `json:"aururl"`
 	AURRPCURL              string   `json:"aurrpcurl"`
 	BuildDir               string   `json:"buildDir"`
@@ -55,6 +57,7 @@ type Configuration struct {
 	RemoveMake             string   `json:"removemake"`
 	SudoBin                string   `json:"sudobin"`
 	SudoFlags              string   `json:"sudoflags"`
+	Version                string   `json:"version"`
 	RequestSplitN          int      `json:"requestsplitn"`
 	CompletionInterval     int      `json:"completionrefreshtime"`
 	MaxConcurrentDownloads int      `json:"maxconcurrentdownloads"`
@@ -74,8 +77,8 @@ type Configuration struct {
 	BatchInstall           bool     `json:"batchinstall"`
 	SingleLineResults      bool     `json:"singlelineresults"`
 	SeparateSources        bool     `json:"separatesources"`
-	Runtime                *Runtime `json:"-"`
-	Version                string   `json:"version"`
+	NewInstallEngine       bool     `json:"newinstallengine"`
+	Debug                  bool     `json:"debug"`
 }
 
 // SaveConfig writes yay config to file.
@@ -223,7 +226,9 @@ func DefaultConfig(version string) *Configuration {
 		UseAsk:                 false,
 		CombinedUpgrade:        false,
 		SeparateSources:        true,
+		NewInstallEngine:       false,
 		Version:                version,
+		Debug:                  false,
 	}
 }
 
@@ -280,16 +285,31 @@ func NewConfig(version string) (*Configuration, error) {
 		HTTPClient:     &http.Client{},
 		AURClient:      nil,
 		VoteClient:     voteClient,
+		QueryBuilder:   nil,
+	}
+
+	var errAURCache error
+
+	userAgentFn := func(ctx context.Context, req *http.Request) error {
+		req.Header.Set("User-Agent", userAgent)
+		return nil
+	}
+
+	newConfig.Runtime.AURCache, errAURCache = metadata.New(
+		metadata.WithHTTPClient(newConfig.Runtime.HTTPClient),
+		metadata.WithCacheFilePath(filepath.Join(newConfig.BuildDir, "aur.json")),
+		metadata.WithRequestEditorFn(userAgentFn),
+		metadata.WithBaseURL(newConfig.AURURL),
+		metadata.WithDebugLogger(text.Debugln),
+	)
+	if errAURCache != nil {
+		return nil, errors.Wrap(errAURCache, gotext.Get("failed to retrieve aur Cache"))
 	}
 
 	var errAUR error
-
-	newConfig.Runtime.AURClient, errAUR = aur.NewClient(aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
-		aur.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
-			req.Header.Set("User-Agent", userAgent)
-
-			return nil
-		}))
+	newConfig.Runtime.AURClient, errAUR = aur.NewClient(
+		aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
+		aur.WithRequestEditorFn(userAgentFn))
 
 	if errAUR != nil {
 		return nil, errAUR

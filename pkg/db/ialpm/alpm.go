@@ -427,6 +427,7 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error)
 
 		slice = append(slice, upgrade.Upgrade{
 			Name:          pkg.Name(),
+			Base:          pkg.Base(),
 			Repository:    pkg.DB().Name(),
 			LocalVersion:  localVer,
 			RemoteVersion: pkg.Version(),
