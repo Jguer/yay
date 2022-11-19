@@ -14,7 +14,9 @@ type (
 	Upgrade  = db.Upgrade
 )
 
-type DBExecutor struct{}
+type DBExecutor struct {
+	db.Executor
+}
 
 func (t DBExecutor) AlpmArchitectures() ([]string, error) {
 	panic("implement me")

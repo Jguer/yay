@@ -110,10 +110,8 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errRefresh
 	}
 
-	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
-	if err != nil {
-		return err
-	}
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
+	localNames := dbExecutor.InstalledSyncPackageNames()
 
 	remoteNamesCache := mapset.NewThreadUnsafeSet(remoteNames...)
 	localNamesCache := stringset.FromSlice(localNames)
@@ -631,10 +629,8 @@ func buildInstallPkgbuilds(
 	settings.NoConfirm = true
 
 	// remotenames: names of all non repo packages on the system
-	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
-	if err != nil {
-		return err
-	}
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
+	localNames := dbExecutor.InstalledSyncPackageNames()
 
 	// cache as a stringset. maybe make it return a string set in the first
 	// place
@@ -689,7 +685,7 @@ func buildInstallPkgbuilds(
 		}
 
 		// pkgver bump
-		if err = config.Runtime.CmdBuilder.Show(
+		if err := config.Runtime.CmdBuilder.Show(
 			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
 			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
@@ -728,7 +724,7 @@ func buildInstallPkgbuilds(
 			}
 
 			if installed {
-				err = config.Runtime.CmdBuilder.Show(
+				err := config.Runtime.CmdBuilder.Show(
 					config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 						dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
@@ -742,7 +738,7 @@ func buildInstallPkgbuilds(
 		}
 
 		if built {
-			err = config.Runtime.CmdBuilder.Show(
+			err := config.Runtime.CmdBuilder.Show(
 				config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 					dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
@@ -817,7 +813,7 @@ func buildInstallPkgbuilds(
 
 	settings.NoConfirm = oldConfirm
 
-	return err
+	return nil
 }
 
 func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchives []string) error {

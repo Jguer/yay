@@ -52,11 +52,7 @@ func syncInstall(ctx context.Context,
 
 	topoSorted := graph.TopoSortedLayerMap()
 
-	preparer := &Preparer{
-		dbExecutor: dbExecutor,
-		cmdBuilder: config.Runtime.CmdBuilder,
-		config:     config,
-	}
+	preparer := NewPreparer(dbExecutor, config.Runtime.CmdBuilder, config)
 	installer := &Installer{dbExecutor: dbExecutor}
 
 	if errP := preparer.Present(os.Stdout, topoSorted); errP != nil {

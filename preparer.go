@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/download"
+	"github.com/Jguer/yay/v11/pkg/menus"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -25,6 +27,14 @@ type Preparer struct {
 	config     *settings.Configuration
 
 	makeDeps []string
+}
+
+func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, config *settings.Configuration) *Preparer {
+	return &Preparer{
+		dbExecutor: dbExecutor,
+		cmdBuilder: cmdBuilder,
+		config:     config,
+	}
 }
 
 func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostInstallHookFunc {
@@ -129,19 +139,26 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 		text.Errorln(errP)
 	}
 
+	if err := preper.MenuHandler(pkgBuildDirs); err != nil {
+		return nil, err
+	}
+
 	return pkgBuildDirs, nil
 }
 
-func (preper *Preparer) MenuHandler(targets []map[string]*dep.InstallInfo, pkgBuildDirs map[string]string) error {
-	// if errCleanMenu := menus.Clean(config.CleanMenu,
-	// 	config.BuildDir, do.Aur,
-	// 	remoteNamesCache, settings.NoConfirm, config.AnswerClean); errCleanMenu != nil {
-	// 	if errors.As(errCleanMenu, &settings.ErrUserAbort{}) {
-	// 		return errCleanMenu
-	// 	}
+func (preper *Preparer) MenuHandler(pkgBuildDirs map[string]string) error {
+	remoteNames := preper.dbExecutor.InstalledRemotePackageNames()
 
-	// 	text.Errorln(errCleanMenu)
-	// }
+	if errCleanMenu := menus.Clean(os.Stdout, config.CleanMenu,
+		pkgBuildDirs,
+		mapset.NewThreadUnsafeSet(remoteNames...),
+		settings.NoConfirm, config.AnswerClean); errCleanMenu != nil {
+		if errors.As(errCleanMenu, &settings.ErrUserAbort{}) {
+			return errCleanMenu
+		}
+
+		text.Errorln(errCleanMenu)
+	}
 
 	return nil
 }

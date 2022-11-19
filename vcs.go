@@ -23,11 +23,7 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 		wg  sync.WaitGroup
 	)
 
-	_, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
-	if err != nil {
-		return err
-	}
-
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	info, err := query.AURInfoPrint(ctx, config.Runtime.AURClient, remoteNames, config.RequestSplitN)
 	if err != nil {
 		return err

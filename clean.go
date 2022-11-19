@@ -99,7 +99,7 @@ func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, d
 	installedBases := make(stringset.StringSet)
 	inAURBases := make(stringset.StringSet)
 
-	remotePackages, _ := query.GetRemotePackages(dbExecutor)
+	remotePackages := dbExecutor.InstalledRemotePackages()
 
 	files, err := os.ReadDir(config.BuildDir)
 	if err != nil {
