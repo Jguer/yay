@@ -26,7 +26,6 @@ type AlpmExecutor struct {
 
 	installedRemotePkgs     []alpm.IPackage
 	installedRemotePkgNames []string
-	installedSyncPkgs       []alpm.IPackage
 	installedSyncPkgNames   []string
 }
 
@@ -39,7 +38,6 @@ func NewExecutor(pacmanConf *pacmanconf.Config) (*AlpmExecutor, error) {
 		conf:                    pacmanConf,
 		installedRemotePkgs:     nil,
 		installedRemotePkgNames: nil,
-		installedSyncPkgs:       nil,
 		installedSyncPkgNames:   nil,
 	}
 
