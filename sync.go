@@ -51,12 +51,33 @@ func syncInstall(ctx context.Context,
 		}
 	}
 
-	topoSorted := graph.TopoSortedLayerMap()
+	opService := NewOperationService(ctx, config, dbExecutor)
+	return opService.Run(ctx, cmdArgs, graph.TopoSortedLayerMap())
+}
 
-	preparer := NewPreparer(dbExecutor, config.Runtime.CmdBuilder, config)
-	installer := &Installer{dbExecutor: dbExecutor}
+type OperationService struct {
+	ctx               context.Context
+	config            *settings.Configuration
+	dbExecutor        db.Executor
+	updateCompletions bool
+}
 
-	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, topoSorted)
+func NewOperationService(ctx context.Context, config *settings.Configuration, dbExecutor db.Executor) *OperationService {
+	return &OperationService{
+		ctx:        ctx,
+		config:     config,
+		dbExecutor: dbExecutor,
+	}
+}
+
+func (o *OperationService) Run(ctx context.Context,
+	cmdArgs *parser.Arguments,
+	targets []map[string]*dep.InstallInfo,
+) error {
+	preparer := NewPreparer(o.dbExecutor, config.Runtime.CmdBuilder, config)
+	installer := &Installer{dbExecutor: o.dbExecutor}
+
+	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, targets)
 	if err != nil {
 		return err
 	}
@@ -70,19 +91,18 @@ func syncInstall(ctx context.Context,
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
-	srcinfoOp := srcinfoOperator{dbExecutor: dbExecutor}
-
+	srcinfoOp := srcinfoOperator{dbExecutor: o.dbExecutor}
 	srcinfos, err := srcinfoOp.Run(pkgBuildDirs)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		_ = completion.Update(ctx, config.Runtime.HTTPClient, dbExecutor,
+		_ = completion.Update(ctx, config.Runtime.HTTPClient, o.dbExecutor,
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs, srcinfos)
+	err = installer.Install(ctx, cmdArgs, targets, pkgBuildDirs, srcinfos)
 	if err != nil {
 		if errHook := installer.RunPostInstallHooks(ctx); errHook != nil {
 			text.Errorln(errHook)
