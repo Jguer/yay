@@ -32,3 +32,17 @@ type PkgDestNotInListError struct {
 func (e *PkgDestNotInListError) Error() string {
 	return gotext.Get("could not find PKGDEST for: %s", e.name)
 }
+
+type FailedIgnoredPkgError struct {
+	pkgErrors map[string]error
+}
+
+func (e *FailedIgnoredPkgError) Error() string {
+	msg := gotext.Get("Failed to install the following packages. Manual intervention is required:")
+
+	for pkg, err := range e.pkgErrors {
+		msg += "\n" + pkg + " - " + err.Error()
+	}
+
+	return msg
+}

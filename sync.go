@@ -8,6 +8,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/completion"
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
+	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -73,8 +74,12 @@ func (o *OperationService) Run(ctx context.Context,
 	cmdArgs *parser.Arguments,
 	targets []map[string]*dep.InstallInfo,
 ) error {
+	if len(targets) == 0 {
+		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
+		return nil
+	}
 	preparer := NewPreparer(o.dbExecutor, config.Runtime.CmdBuilder, config)
-	installer := &Installer{dbExecutor: o.dbExecutor}
+	installer := NewInstaller(o.dbExecutor)
 
 	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, targets)
 	if err != nil {
@@ -110,5 +115,15 @@ func (o *OperationService) Run(ctx context.Context,
 		return err
 	}
 
-	return installer.RunPostInstallHooks(ctx)
+	var multiErr multierror.MultiError
+
+	if err := installer.CompileFailedAndIgnored(); err != nil {
+		multiErr.Add(err)
+	}
+
+	if err := installer.RunPostInstallHooks(ctx); err != nil {
+		multiErr.Add(err)
+	}
+
+	return multiErr.Return()
 }

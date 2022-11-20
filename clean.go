@@ -210,7 +210,7 @@ func cleanAfter(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs ma
 
 		if err := config.Runtime.CmdBuilder.Show(
 			config.Runtime.CmdBuilder.BuildGitCmd(
-				ctx, dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
+				ctx, dir, "clean", "-fx", "--exclude", "*.pkg.*")); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 

@@ -21,10 +21,29 @@ import (
 type (
 	PostInstallHookFunc func(ctx context.Context) error
 	Installer           struct {
-		dbExecutor       db.Executor
-		postInstallHooks []PostInstallHookFunc
+		dbExecutor        db.Executor
+		postInstallHooks  []PostInstallHookFunc
+		failedAndIngnored map[string]error
 	}
 )
+
+func NewInstaller(dbExecutor db.Executor) *Installer {
+	return &Installer{
+		dbExecutor:        dbExecutor,
+		postInstallHooks:  []PostInstallHookFunc{},
+		failedAndIngnored: map[string]error{},
+	}
+}
+
+func (installer *Installer) CompileFailedAndIgnored() error {
+	if len(installer.failedAndIngnored) == 0 {
+		return nil
+	}
+
+	return &FailedIgnoredPkgError{
+		pkgErrors: installer.failedAndIngnored,
+	}
+}
 
 func (installer *Installer) AddPostInstallHook(hook PostInstallHookFunc) {
 	if hook == nil {
@@ -54,7 +73,7 @@ func (installer *Installer) Install(ctx context.Context,
 ) error {
 	// Reorganize targets into layers of dependencies
 	for i := len(targets) - 1; i >= 0; i-- {
-		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, srcinfos)
+		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, srcinfos, i == 0)
 		if err != nil {
 			// rollback
 			return err
@@ -69,6 +88,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	layer map[string]*dep.InstallInfo,
 	pkgBuildDirs map[string]string,
 	srcinfos map[string]*gosrc.Srcinfo,
+	lastLayer bool,
 ) error {
 	// Install layer
 	nameToBaseMap := make(map[string]string, 0)
@@ -114,7 +134,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	}
 
 	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp,
-		nameToBaseMap, pkgBuildDirs, true, srcinfos)
+		nameToBaseMap, pkgBuildDirs, true, srcinfos, lastLayer)
 
 	return errAur
 }
@@ -125,6 +145,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	nameToBase, pkgBuildDirsByBase map[string]string,
 	installIncompatible bool,
 	srcinfos map[string]*gosrc.Srcinfo,
+	lastLayer bool,
 ) error {
 	all := aurDepNames.Union(aurExpNames).ToSlice()
 	if len(all) == 0 {
@@ -151,7 +172,13 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		// pkgver bump
 		if err := config.Runtime.CmdBuilder.Show(
 			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
-			return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), err)
+			if !lastLayer {
+				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), err)
+			}
+
+			installer.failedAndIngnored[name] = err
+			text.Errorln(gotext.Get("error making: %s", base), "-", err)
+			continue
 		}
 
 		pkgdests, _, errList := parsePackageList(ctx, dir)
@@ -168,7 +195,13 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		if errMake := config.Runtime.CmdBuilder.Show(
 			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 				dir, args...)); errMake != nil {
-			return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
+			if !lastLayer {
+				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
+			}
+
+			installer.failedAndIngnored[name] = errMake
+			text.Errorln(gotext.Get("error making: %s", base), "-", errMake)
+			continue
 		}
 
 		newPKGArchives, hasDebug, err := installer.getNewTargets(pkgdests, name)
