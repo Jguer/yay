@@ -41,7 +41,8 @@ func upList(ctx context.Context, aurCache *metadata.Client,
 	warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
 	filter upgrade.Filter,
 ) (aurUp, repoUp upgrade.UpSlice, err error) {
-	remote, remoteNames := query.GetRemotePackages(dbExecutor)
+	remote := dbExecutor.InstalledRemotePackages()
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
 
 	var (
 		wg        sync.WaitGroup

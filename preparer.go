@@ -11,20 +11,48 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/download"
+	"github.com/Jguer/yay/v11/pkg/menus"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/text"
 
+	gosrc "github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 )
 
+type PostDownloadHookFunc func(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error
+
 type Preparer struct {
-	dbExecutor db.Executor
-	cmdBuilder exe.ICmdBuilder
-	config     *settings.Configuration
+	dbExecutor        db.Executor
+	cmdBuilder        exe.ICmdBuilder
+	config            *settings.Configuration
+	postDownloadHooks []PostDownloadHookFunc
 
 	makeDeps []string
+}
+
+func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, config *settings.Configuration) *Preparer {
+	preper := &Preparer{
+		dbExecutor:        dbExecutor,
+		cmdBuilder:        cmdBuilder,
+		config:            config,
+		postDownloadHooks: []PostDownloadHookFunc{},
+	}
+
+	if config.CleanMenu {
+		preper.postDownloadHooks = append(preper.postDownloadHooks, menus.CleanFn)
+	}
+
+	if config.DiffMenu {
+		preper.postDownloadHooks = append(preper.postDownloadHooks, menus.DiffFn)
+	}
+
+	if config.EditMenu {
+		preper.postDownloadHooks = append(preper.postDownloadHooks, menus.EditFn)
+	}
+
+	return preper
 }
 
 func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostInstallHookFunc {
@@ -32,15 +60,10 @@ func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostI
 		return nil
 	}
 
-	dirs := make([]string, 0, len(pkgBuildDirs))
-	for _, dir := range pkgBuildDirs {
-		dirs = append(dirs, dir)
-	}
-
-	text.Debugln("added post install hook to clean up AUR dirs", dirs)
+	text.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
 
 	return func(ctx context.Context) error {
-		cleanAfter(ctx, preper.config.Runtime.CmdBuilder, dirs)
+		cleanAfter(ctx, preper.config.Runtime.CmdBuilder, pkgBuildDirs)
 		return nil
 	}
 }
@@ -109,30 +132,56 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 }
 
 func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[string]*dep.InstallInfo) (map[string]string, error) {
-	aurBases := mapset.NewThreadUnsafeSet[string]()
-	pkgBuildDirs := make(map[string]string, 0)
+	aurBasesToClone := mapset.NewThreadUnsafeSet[string]()
+	pkgBuildDirsByBase := make(map[string]string, len(targets))
 
 	for _, layer := range targets {
-		for pkgName, info := range layer {
+		for _, info := range layer {
 			if info.Source == dep.AUR {
 				pkgBase := *info.AURBase
-				aurBases.Add(pkgBase)
-				pkgBuildDirs[pkgName] = filepath.Join(config.BuildDir, pkgBase)
+				pkgBuildDir := filepath.Join(preper.config.BuildDir, pkgBase)
+				if preper.needToCloneAURBase(info, pkgBuildDir) {
+					aurBasesToClone.Add(pkgBase)
+				}
+				pkgBuildDirsByBase[pkgBase] = pkgBuildDir
 			} else if info.Source == dep.SrcInfo {
-				pkgBuildDirs[pkgName] = *info.SrcinfoPath
+				pkgBase := *info.AURBase
+				pkgBuildDirsByBase[pkgBase] = *info.SrcinfoPath
 			}
 		}
 	}
 
 	if _, errA := download.AURPKGBUILDRepos(ctx,
-		preper.cmdBuilder, aurBases.ToSlice(), config.AURURL, config.BuildDir, false); errA != nil {
+		preper.cmdBuilder, aurBasesToClone.ToSlice(),
+		config.AURURL, config.BuildDir, false); errA != nil {
 		return nil, errA
 	}
 
 	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder,
-		pkgBuildDirs, false, config.MaxConcurrentDownloads); errP != nil {
+		pkgBuildDirsByBase, false, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 
-	return pkgBuildDirs, nil
+	for _, hookFn := range preper.postDownloadHooks {
+		if err := hookFn(ctx, preper.config, os.Stdout, pkgBuildDirsByBase); err != nil {
+			return nil, err
+		}
+	}
+
+	return pkgBuildDirsByBase, nil
+}
+
+func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuildDir string) bool {
+	if preper.config.ReDownload == "all" {
+		return true
+	}
+
+	srcinfoFile := filepath.Join(pkgbuildDir, ".SRCINFO")
+	if pkgbuild, err := gosrc.ParseFile(srcinfoFile); err == nil {
+		if db.VerCmp(pkgbuild.Version(), installInfo.Version) >= 0 {
+			return false
+		}
+	}
+
+	return true
 }

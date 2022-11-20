@@ -23,16 +23,29 @@ type AlpmExecutor struct {
 	syncDB       alpm.IDBList
 	syncDBsCache []alpm.IDB
 	conf         *pacmanconf.Config
+
+	installedRemotePkgs     []alpm.IPackage
+	installedRemotePkgNames []string
+	installedSyncPkgNames   []string
 }
 
 func NewExecutor(pacmanConf *pacmanconf.Config) (*AlpmExecutor, error) {
-	ae := &AlpmExecutor{conf: pacmanConf}
+	ae := &AlpmExecutor{
+		handle:                  nil,
+		localDB:                 nil,
+		syncDB:                  nil,
+		syncDBsCache:            []alpm.IDB{},
+		conf:                    pacmanConf,
+		installedRemotePkgs:     nil,
+		installedRemotePkgNames: nil,
+		installedSyncPkgNames:   nil,
+	}
 
-	err := ae.RefreshHandle()
-	if err != nil {
+	if err := ae.RefreshHandle(); err != nil {
 		return nil, err
 	}
 
+	var err error
 	ae.localDB, err = ae.handle.LocalDB()
 	if err != nil {
 		return nil, err

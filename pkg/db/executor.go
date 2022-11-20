@@ -30,6 +30,9 @@ type Executor interface {
 	AlpmArchitectures() ([]string, error)
 	BiggestPackages() []IPackage
 	Cleanup()
+	InstalledRemotePackageNames() []string
+	InstalledRemotePackages() []IPackage
+	InstalledSyncPackageNames() []string
 	IsCorrectVersionInstalled(string, string) bool
 	LastBuildTime() time.Time
 	LocalPackage(string) IPackage

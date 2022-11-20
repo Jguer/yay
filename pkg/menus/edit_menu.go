@@ -2,19 +2,20 @@
 package menus
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/settings"
-	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
@@ -82,19 +83,20 @@ func editor(editorConfig, editorFlags string, noConfirm bool) (editor string, ar
 	}
 }
 
-func editPkgbuilds(buildDir string, bases []dep.Base, editorConfig,
+func editPkgbuilds(pkgbuildDirs map[string]string, bases []string, editorConfig,
 	editorFlags string, srcinfos map[string]*gosrc.Srcinfo, noConfirm bool,
 ) error {
 	pkgbuilds := make([]string, 0, len(bases))
 
-	for _, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(buildDir, pkg)
+	for _, pkg := range bases {
+		dir := pkgbuildDirs[pkg]
 		pkgbuilds = append(pkgbuilds, filepath.Join(dir, "PKGBUILD"))
 
-		for _, splitPkg := range srcinfos[pkg].SplitPackages() {
-			if splitPkg.Install != "" {
-				pkgbuilds = append(pkgbuilds, filepath.Join(dir, splitPkg.Install))
+		if srcinfos != nil {
+			for _, splitPkg := range srcinfos[pkg].SplitPackages() {
+				if splitPkg.Install != "" {
+					pkgbuilds = append(pkgbuilds, filepath.Join(dir, splitPkg.Install))
+				}
 			}
 		}
 	}
@@ -113,21 +115,56 @@ func editPkgbuilds(buildDir string, bases []dep.Base, editorConfig,
 	return nil
 }
 
-func Edit(editMenuOption bool, buildDir string, bases []dep.Base, editorConfig,
-	editorFlags string, installed stringset.StringSet, srcinfos map[string]*gosrc.Srcinfo,
+func Edit(w io.Writer, editMenuOption bool, pkgbuildDirs map[string]string, editorConfig,
+	editorFlags string, installed mapset.Set[string], srcinfos map[string]*gosrc.Srcinfo,
 	noConfirm bool, editDefaultAnswer string,
 ) error {
 	if !editMenuOption {
 		return nil
 	}
 
-	toEdit, errMenu := selectionMenu(buildDir, bases,
+	bases := make([]string, 0, len(pkgbuildDirs))
+	for pkg := range pkgbuildDirs {
+		bases = append(bases, pkg)
+	}
+
+	toEdit, errMenu := selectionMenu(w, pkgbuildDirs, bases,
 		installed, gotext.Get("PKGBUILDs to edit?"), noConfirm, editDefaultAnswer, nil)
 	if errMenu != nil || len(toEdit) == 0 {
 		return errMenu
 	}
 
-	if errEdit := editPkgbuilds(buildDir, toEdit, editorConfig, editorFlags, srcinfos, noConfirm); errEdit != nil {
+	if errEdit := editPkgbuilds(pkgbuildDirs, toEdit, editorConfig, editorFlags, srcinfos, noConfirm); errEdit != nil {
+		return errEdit
+	}
+
+	fmt.Println()
+
+	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
+		return settings.ErrUserAbort{}
+	}
+
+	return nil
+}
+
+func EditFn(ctx context.Context, config *settings.Configuration, w io.Writer,
+	pkgbuildDirsByBase map[string]string,
+) error {
+	bases := make([]string, 0, len(pkgbuildDirsByBase))
+	for pkg := range pkgbuildDirsByBase {
+		bases = append(bases, pkg)
+	}
+
+	toEdit, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases,
+		mapset.NewThreadUnsafeSet[string](),
+		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, config.AnswerEdit, nil)
+	if errMenu != nil || len(toEdit) == 0 {
+		return errMenu
+	}
+
+	// TOFIX: remove or use srcinfo data
+	if errEdit := editPkgbuilds(pkgbuildDirsByBase,
+		toEdit, config.Editor, config.EditorFlags, nil, settings.NoConfirm); errEdit != nil {
 		return errEdit
 	}
 

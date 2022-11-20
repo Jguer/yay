@@ -99,7 +99,7 @@ func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, d
 	installedBases := make(stringset.StringSet)
 	inAURBases := make(stringset.StringSet)
 
-	remotePackages, _ := query.GetRemotePackages(dbExecutor)
+	remotePackages := dbExecutor.InstalledRemotePackages()
 
 	files, err := os.ReadDir(config.BuildDir)
 	if err != nil {
@@ -194,10 +194,11 @@ func isGitRepository(dir string) bool {
 	return !os.IsNotExist(err)
 }
 
-func cleanAfter(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs []string) {
+func cleanAfter(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string) {
 	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
-	for i, dir := range pkgbuildDirs {
+	i := 0
+	for _, dir := range pkgbuildDirs {
 		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(pkgbuildDirs), text.Cyan(dir)))
 
 		_, stderr, err := cmdBuilder.Capture(
@@ -212,5 +213,7 @@ func cleanAfter(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs []
 				ctx, dir, "clean", "-fx", "--exclude='*.pkg.*'")); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
+
+		i++
 	}
 }

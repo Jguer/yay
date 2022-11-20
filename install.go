@@ -12,6 +12,7 @@ import (
 
 	alpm "github.com/Jguer/go-alpm/v2"
 	gosrc "github.com/Morganamilo/go-srcinfo"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/completion"
@@ -109,12 +110,10 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errRefresh
 	}
 
-	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
-	if err != nil {
-		return err
-	}
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
+	localNames := dbExecutor.InstalledSyncPackageNames()
 
-	remoteNamesCache := stringset.FromSlice(remoteNames)
+	remoteNamesCache := mapset.NewThreadUnsafeSet(remoteNames...)
 	localNamesCache := stringset.FromSlice(localNames)
 
 	requestTargets := cmdArgs.Copy().Targets
@@ -197,17 +196,17 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	do.Print()
 	fmt.Println()
 
+	pkgbuildDirs := make(map[string]string, len(do.Aur))
+
+	for _, base := range do.Aur {
+		dir := filepath.Join(config.BuildDir, base.Pkgbase())
+		if isGitRepository(dir) {
+			pkgbuildDirs[base.Pkgbase()] = dir
+		}
+	}
+
 	if config.CleanAfter {
 		defer func() {
-			pkgbuildDirs := make([]string, 0, len(do.Aur))
-
-			for _, base := range do.Aur {
-				dir := filepath.Join(config.BuildDir, base.Pkgbase())
-				if isGitRepository(dir) {
-					pkgbuildDirs = append(pkgbuildDirs, dir)
-				}
-			}
-
 			cleanAfter(ctx, config.Runtime.CmdBuilder, pkgbuildDirs)
 		}()
 	}
@@ -230,8 +229,8 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		}
 	}
 
-	if errCleanMenu := menus.Clean(config.CleanMenu,
-		config.BuildDir, do.Aur,
+	if errCleanMenu := menus.Clean(os.Stdout, config.CleanMenu,
+		pkgbuildDirs,
 		remoteNamesCache, settings.NoConfirm, config.AnswerClean); errCleanMenu != nil {
 		if errors.As(errCleanMenu, &settings.ErrUserAbort{}) {
 			return errCleanMenu
@@ -261,8 +260,8 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errA
 	}
 
-	if errDiffMenu := menus.Diff(ctx, config.Runtime.CmdBuilder, config.BuildDir,
-		config.DiffMenu, do.Aur, remoteNamesCache,
+	if errDiffMenu := menus.Diff(ctx, config.Runtime.CmdBuilder, os.Stdout, pkgbuildDirs,
+		config.DiffMenu, remoteNamesCache,
 		cloned, settings.NoConfirm, config.AnswerDiff); errDiffMenu != nil {
 		if errors.As(errDiffMenu, &settings.ErrUserAbort{}) {
 			return errDiffMenu
@@ -280,7 +279,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return err
 	}
 
-	if errEditMenu := menus.Edit(config.EditMenu, config.BuildDir, do.Aur,
+	if errEditMenu := menus.Edit(os.Stdout, config.EditMenu, pkgbuildDirs,
 		config.Editor, config.EditorFlags, remoteNamesCache, srcinfos,
 		settings.NoConfirm, config.AnswerEdit); errEditMenu != nil {
 		if errors.As(errEditMenu, &settings.ErrUserAbort{}) {
@@ -315,7 +314,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		exp := make([]string, 0)
 
 		for _, pkg := range do.Repo {
-			if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Get(pkg.Name()) {
+			if !dp.Explicit.Get(pkg.Name()) && !localNamesCache.Get(pkg.Name()) && !remoteNamesCache.Contains(pkg.Name()) {
 				deps = append(deps, pkg.Name())
 
 				continue
@@ -630,10 +629,8 @@ func buildInstallPkgbuilds(
 	settings.NoConfirm = true
 
 	// remotenames: names of all non repo packages on the system
-	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
-	if err != nil {
-		return err
-	}
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
+	localNames := dbExecutor.InstalledSyncPackageNames()
 
 	// cache as a stringset. maybe make it return a string set in the first
 	// place
@@ -688,7 +685,7 @@ func buildInstallPkgbuilds(
 		}
 
 		// pkgver bump
-		if err = config.Runtime.CmdBuilder.Show(
+		if err := config.Runtime.CmdBuilder.Show(
 			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
 			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
@@ -727,7 +724,7 @@ func buildInstallPkgbuilds(
 			}
 
 			if installed {
-				err = config.Runtime.CmdBuilder.Show(
+				err := config.Runtime.CmdBuilder.Show(
 					config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 						dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
@@ -741,7 +738,7 @@ func buildInstallPkgbuilds(
 		}
 
 		if built {
-			err = config.Runtime.CmdBuilder.Show(
+			err := config.Runtime.CmdBuilder.Show(
 				config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 					dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
@@ -816,7 +813,7 @@ func buildInstallPkgbuilds(
 
 	settings.NoConfirm = oldConfirm
 
-	return err
+	return nil
 }
 
 func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchives []string) error {

@@ -73,11 +73,7 @@ func biggestPackages(dbExecutor db.Executor) {
 func localStatistics(ctx context.Context, dbExecutor db.Executor) error {
 	info := statistics(dbExecutor)
 
-	_, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
-	if err != nil {
-		return err
-	}
-
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	text.Infoln(gotext.Get("Yay version v%s", yayVersion))
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 	text.Infoln(gotext.Get("Total installed packages: %s", text.Cyan(strconv.Itoa(info.Totaln))))
@@ -124,11 +120,8 @@ func printUpdateList(ctx context.Context, cmdArgs *parser.Arguments,
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
 
-	localNames, remoteNames, err := query.GetPackageNamesBySource(dbExecutor)
-	if err != nil {
-		os.Stdout = old
-		return err
-	}
+	remoteNames := dbExecutor.InstalledRemotePackageNames()
+	localNames := dbExecutor.InstalledSyncPackageNames()
 
 	aurUp, repoUp, err := upList(ctx, nil, warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
