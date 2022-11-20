@@ -182,6 +182,10 @@ func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder, w io.Writer,
 }
 
 func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error {
+	if len(pkgbuildDirsByBase) == 0 {
+		return nil // no work to do
+	}
+
 	bases := make([]string, 0, len(pkgbuildDirsByBase))
 	for base := range pkgbuildDirsByBase {
 		bases = append(bases, base)

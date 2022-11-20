@@ -130,7 +130,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			if pkg := g.dbExecutor.SyncPackage(target.Name); pkg != nil {
 				dbName := pkg.DB().Name()
 				graph.AddNode(pkg.Name())
-				g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
+				g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
 					Color:      colorMap[Explicit],
 					Background: bgColorMap[Sync],
 					Value: &InstallInfo{
@@ -142,6 +142,25 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 				})
 
 				continue
+			}
+
+			groupPackages := g.dbExecutor.PackagesFromGroup(target.Name)
+			if len(groupPackages) > 0 {
+				dbName := groupPackages[0].DB().Name()
+				graph.AddNode(target.Name)
+				g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
+					Color:      colorMap[Explicit],
+					Background: bgColorMap[Sync],
+					Value: &InstallInfo{
+						Source:     Sync,
+						Reason:     Explicit,
+						Version:    "",
+						SyncDBName: &dbName,
+					},
+				})
+
+				continue
+
 			}
 
 			fallthrough
