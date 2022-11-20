@@ -11,7 +11,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
-	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -49,42 +48,6 @@ func installLocalPKGBUILD(
 		}
 	}
 
-	topoSorted := graph.TopoSortedLayerMap()
-
-	preparer := &Preparer{
-		dbExecutor: dbExecutor,
-		cmdBuilder: config.Runtime.CmdBuilder,
-		config:     config,
-	}
-	installer := &Installer{dbExecutor: dbExecutor}
-
-	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, topoSorted)
-	if err != nil {
-		return err
-	}
-
-	if cleanFunc := preparer.ShouldCleanMakeDeps(); cleanFunc != nil {
-		installer.AddPostInstallHook(cleanFunc)
-	}
-
-	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(pkgBuildDirs); cleanAURDirsFunc != nil {
-		installer.AddPostInstallHook(cleanAURDirsFunc)
-	}
-
-	srcinfoOp := srcinfoOperator{dbExecutor: dbExecutor}
-
-	srcinfos, err := srcinfoOp.Run(pkgBuildDirs)
-	if err != nil {
-		return err
-	}
-
-	if err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs, srcinfos); err != nil {
-		if errHook := installer.RunPostInstallHooks(ctx); errHook != nil {
-			text.Errorln(errHook)
-		}
-
-		return err
-	}
-
-	return installer.RunPostInstallHooks(ctx)
+	opService := NewOperationService(ctx, config, dbExecutor)
+	return opService.Run(ctx, cmdArgs, graph.TopoSortedLayerMap())
 }
