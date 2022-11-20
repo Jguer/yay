@@ -11,13 +11,12 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 // pgpKeySet maps a PGP key with a list of PKGBUILDs that require it.
 // This is similar to stringSet, used throughout the code.
-type pgpKeySet map[string][]dep.Base
+type pgpKeySet map[string][]string
 
 func (set pgpKeySet) toSlice() []string {
 	slice := make([]string, 0, len(set))
@@ -28,7 +27,7 @@ func (set pgpKeySet) toSlice() []string {
 	return slice
 }
 
-func (set pgpKeySet) set(key string, p dep.Base) {
+func (set pgpKeySet) set(key, p string) {
 	// Using ToUpper to make sure keys with a different case will be
 	// considered the same.
 	upperKey := strings.ToUpper(key)
@@ -44,9 +43,9 @@ func (set pgpKeySet) get(key string) bool {
 
 // CheckPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func CheckPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo,
+func CheckPgpKeys(pkgbuildDirsByBase map[string]string, srcinfos map[string]*gosrc.Srcinfo,
 	gpgBin, gpgFlags string, noConfirm bool,
-) error {
+) ([]string, error) {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
@@ -54,43 +53,42 @@ func CheckPgpKeys(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo,
 	args := append(strings.Fields(gpgFlags), "--list-keys")
 
 	// Mapping all the keys.
-	for _, base := range bases {
-		pkg := base.Pkgbase()
+	for pkg := range pkgbuildDirsByBase {
 		srcinfo := srcinfos[pkg]
 
 		for _, key := range srcinfo.ValidPGPKeys {
 			// If key already marked as problematic, indicate the current
 			// PKGBUILD requires it.
 			if problematic.get(key) {
-				problematic.set(key, base)
+				problematic.set(key, pkg)
 				continue
 			}
 
 			cmd := exec.Command(gpgBin, append(args, key)...)
 			if err := cmd.Run(); err != nil {
-				problematic.set(key, base)
+				problematic.set(key, pkg)
 			}
 		}
 	}
 
 	// No key issues!
 	if len(problematic) == 0 {
-		return nil
+		return []string{}, nil
 	}
 
 	str, err := formatKeysToImport(problematic)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	fmt.Println()
 	fmt.Println(str)
 
 	if text.ContinueTask(os.Stdin, gotext.Get("Import?"), true, noConfirm) {
-		return importKeys(problematic.toSlice(), gpgBin, gpgFlags)
+		return problematic.toSlice(), importKeys(problematic.toSlice(), gpgBin, gpgFlags)
 	}
 
-	return nil
+	return problematic.toSlice(), nil
 }
 
 // importKeys tries to import the list of keys specified in its argument.
@@ -122,7 +120,7 @@ func formatKeysToImport(keys pgpKeySet) (string, error) {
 	for key, bases := range keys {
 		pkglist := ""
 		for _, base := range bases {
-			pkglist += base.String() + "  "
+			pkglist += base + "  "
 		}
 
 		pkglist = strings.TrimRight(pkglist, " ")

@@ -160,7 +160,6 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 				})
 
 				continue
-
 			}
 
 			fallthrough

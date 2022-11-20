@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Jguer/yay/v11/pkg/completion"
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/settings"
@@ -55,8 +56,9 @@ func syncInstall(ctx context.Context,
 	preparer := NewPreparer(dbExecutor, config.Runtime.CmdBuilder, config)
 	installer := &Installer{dbExecutor: dbExecutor}
 
-	if errP := preparer.Present(os.Stdout, topoSorted); errP != nil {
-		return errP
+	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, topoSorted)
+	if err != nil {
+		return err
 	}
 
 	cleanFunc := preparer.ShouldCleanMakeDeps()
@@ -64,16 +66,23 @@ func syncInstall(ctx context.Context,
 		installer.AddPostInstallHook(cleanFunc)
 	}
 
-	pkgBuildDirs, err := preparer.PrepareWorkspace(ctx, topoSorted)
-	if err != nil {
-		return err
-	}
-
 	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(pkgBuildDirs); cleanAURDirsFunc != nil {
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
-	err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs)
+	srcinfoOp := srcinfoOperator{dbExecutor: dbExecutor}
+
+	srcinfos, err := srcinfoOp.Run(pkgBuildDirs)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		_ = completion.Update(ctx, config.Runtime.HTTPClient, dbExecutor,
+			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+	}()
+
+	err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs, srcinfos)
 	if err != nil {
 		if errHook := installer.RunPostInstallHooks(ctx); errHook != nil {
 			text.Errorln(errHook)

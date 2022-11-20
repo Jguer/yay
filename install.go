@@ -75,7 +75,6 @@ func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error 
 // Install handles package installs.
 func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders bool) error {
 	var (
-		incompatible    stringset.StringSet
 		do              *dep.Order
 		srcinfos        map[string]*gosrc.Srcinfo
 		noDeps          = cmdArgs.ExistsDouble("d", "nodeps")
@@ -270,11 +269,11 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		text.Errorln(errDiffMenu)
 	}
 
-	if errM := mergePkgbuilds(ctx, do.Aur); errM != nil {
+	if errM := mergePkgbuilds(ctx, pkgbuildDirs); errM != nil {
 		return errM
 	}
 
-	srcinfos, err = parseSrcinfoFiles(do.Aur, true)
+	srcinfos, err = parseSrcinfoFiles(pkgbuildDirs, true)
 	if err != nil {
 		return err
 	}
@@ -289,13 +288,12 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		text.Errorln(errEditMenu)
 	}
 
-	incompatible, err = getIncompatible(do.Aur, srcinfos, dbExecutor)
-	if err != nil {
-		return err
+	if errI := confirmIncompatibleInstall(srcinfos, dbExecutor); errI != nil {
+		return errI
 	}
 
 	if config.PGPFetch {
-		if errCPK := pgp.CheckPgpKeys(do.Aur, srcinfos, config.GpgBin, config.GpgFlags, settings.NoConfirm); errCPK != nil {
+		if _, errCPK := pgp.CheckPgpKeys(pkgbuildDirs, srcinfos, config.GpgBin, config.GpgFlags, settings.NoConfirm); errCPK != nil {
 			return errCPK
 		}
 	}
@@ -341,19 +339,14 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
 	}()
 
-	pkgBuildDirs := make(map[string]string, len(do.Aur))
-	for _, base := range do.Aur {
-		pkgBuildDirs[base.Pkgbase()] = filepath.Join(config.BuildDir, base.Pkgbase())
-	}
-
 	if errP := downloadPKGBUILDSourceFanout(ctx,
 		config.Runtime.CmdBuilder,
-		pkgBuildDirs,
-		len(incompatible) > 0, config.MaxConcurrentDownloads); errP != nil {
+		pkgbuildDirs,
+		true, config.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 
-	if errB := buildInstallPkgbuilds(ctx, cmdArgs, dbExecutor, dp, do, srcinfos, incompatible, conflicts, noDeps, noCheck); errB != nil {
+	if errB := buildInstallPkgbuilds(ctx, cmdArgs, dbExecutor, dp, do, srcinfos, true, conflicts, noDeps, noCheck); errB != nil {
 		return errB
 	}
 
@@ -461,42 +454,39 @@ func earlyRefresh(ctx context.Context, cmdArgs *parser.Arguments) error {
 		arguments, config.Runtime.Mode, settings.NoConfirm))
 }
 
-func getIncompatible(bases []dep.Base, srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) (stringset.StringSet, error) {
-	incompatible := make(stringset.StringSet)
-	basesMap := make(map[string]dep.Base)
+func confirmIncompatibleInstall(srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) error {
+	incompatible := []string{}
 
 	alpmArch, err := dbExecutor.AlpmArchitectures()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 nextpkg:
-	for _, base := range bases {
-		for _, arch := range srcinfos[base.Pkgbase()].Arch {
+	for base, srcinfo := range srcinfos {
+		for _, arch := range srcinfo.Arch {
 			if db.ArchIsSupported(alpmArch, arch) {
 				continue nextpkg
 			}
 		}
-
-		incompatible.Set(base.Pkgbase())
-		basesMap[base.Pkgbase()] = base
+		incompatible = append(incompatible, base)
 	}
 
 	if len(incompatible) > 0 {
 		text.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
 
-		for pkg := range incompatible {
-			fmt.Print("  " + text.Cyan(basesMap[pkg].String()))
+		for _, pkg := range incompatible {
+			fmt.Print("  " + text.Cyan(pkg))
 		}
 
 		fmt.Println()
 
 		if !text.ContinueTask(os.Stdin, gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
-			return nil, &settings.ErrUserAbort{}
+			return &settings.ErrUserAbort{}
 		}
 	}
 
-	return incompatible, nil
+	return nil
 }
 
 func parsePackageList(ctx context.Context, dir string) (pkgdests map[string]string, pkgVersion string, err error) {
@@ -532,26 +522,25 @@ func parsePackageList(ctx context.Context, dir string) (pkgdests map[string]stri
 	return pkgdests, pkgVersion, nil
 }
 
-func parseSrcinfoFiles(bases []dep.Base, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
+func parseSrcinfoFiles(pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
 	srcinfos := make(map[string]*gosrc.Srcinfo)
 
-	for k, base := range bases {
-		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
-
-		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(bases), text.Cyan(base.String())))
+	k := 0
+	for base, dir := range pkgBuildDirs {
+		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(pkgBuildDirs), text.Cyan(base)))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			if !errIsFatal {
-				text.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base.String(), err))
+				text.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base, err))
 				continue
 			}
 
-			return nil, errors.New(gotext.Get("failed to parse %s: %s", base.String(), err))
+			return nil, errors.New(gotext.Get("failed to parse %s: %s", base, err))
 		}
 
-		srcinfos[pkg] = pkgbuild
+		srcinfos[base] = pkgbuild
+		k++
 	}
 
 	return srcinfos, nil
@@ -583,27 +572,27 @@ func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.St
 	return toSkip
 }
 
-func gitMerge(ctx context.Context, path, name string) error {
+func gitMerge(ctx context.Context, dir string) error {
 	_, stderr, err := config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
-			filepath.Join(path, name), "reset", "--hard", "HEAD"))
+			dir, "reset", "--hard", "HEAD"))
 	if err != nil {
-		return errors.New(gotext.Get("error resetting %s: %s", name, stderr))
+		return errors.New(gotext.Get("error resetting %s: %s", dir, stderr))
 	}
 
 	_, stderr, err = config.Runtime.CmdBuilder.Capture(
 		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
-			filepath.Join(path, name), "merge", "--no-edit", "--ff"))
+			dir, "merge", "--no-edit", "--ff"))
 	if err != nil {
-		return errors.New(gotext.Get("error merging %s: %s", name, stderr))
+		return errors.New(gotext.Get("error merging %s: %s", dir, stderr))
 	}
 
 	return nil
 }
 
-func mergePkgbuilds(ctx context.Context, bases []dep.Base) error {
-	for _, base := range bases {
-		err := gitMerge(ctx, config.BuildDir, base.Pkgbase())
+func mergePkgbuilds(ctx context.Context, pkgbuildDirs map[string]string) error {
+	for _, dir := range pkgbuildDirs {
+		err := gitMerge(ctx, dir)
 		if err != nil {
 			return err
 		}
@@ -619,7 +608,7 @@ func buildInstallPkgbuilds(
 	dp *dep.Pool,
 	do *dep.Order,
 	srcinfos map[string]*gosrc.Srcinfo,
-	incompatible stringset.StringSet,
+	incompatible bool,
 	conflicts stringset.MapStringSet, noDeps, noCheck bool,
 ) error {
 	deps := make([]string, 0)
@@ -680,7 +669,7 @@ func buildInstallPkgbuilds(
 
 		args := []string{"--nobuild", "-fC"}
 
-		if incompatible.Get(pkg) {
+		if incompatible {
 			args = append(args, "--ignorearch")
 		}
 
@@ -749,7 +738,7 @@ func buildInstallPkgbuilds(
 		} else {
 			args := []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 
-			if incompatible.Get(pkg) {
+			if incompatible {
 				args = append(args, "--ignorearch")
 			}
 
