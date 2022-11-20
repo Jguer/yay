@@ -58,7 +58,7 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, config *set
 }
 
 func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostInstallHookFunc {
-	if !preper.config.CleanAfter {
+	if !preper.config.CleanAfter || len(pkgBuildDirs) == 0 {
 		return nil
 	}
 
