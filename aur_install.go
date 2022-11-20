@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
@@ -12,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
 
+	gosrc "github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 )
@@ -48,10 +50,11 @@ func (installer *Installer) Install(ctx context.Context,
 	cmdArgs *parser.Arguments,
 	targets []map[string]*dep.InstallInfo,
 	pkgBuildDirs map[string]string,
+	srcinfos map[string]*gosrc.Srcinfo,
 ) error {
 	// Reorganize targets into layers of dependencies
 	for i := len(targets) - 1; i >= 0; i-- {
-		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs)
+		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, srcinfos)
 		if err != nil {
 			// rollback
 			return err
@@ -62,7 +65,10 @@ func (installer *Installer) Install(ctx context.Context,
 }
 
 func (installer *Installer) handleLayer(ctx context.Context,
-	cmdArgs *parser.Arguments, layer map[string]*dep.InstallInfo, pkgBuildDirs map[string]string,
+	cmdArgs *parser.Arguments,
+	layer map[string]*dep.InstallInfo,
+	pkgBuildDirs map[string]string,
+	srcinfos map[string]*gosrc.Srcinfo,
 ) error {
 	// Install layer
 	nameToBaseMap := make(map[string]string, 0)
@@ -107,7 +113,8 @@ func (installer *Installer) handleLayer(ctx context.Context,
 		return ErrInstallRepoPkgs
 	}
 
-	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp, nameToBaseMap, pkgBuildDirs, false)
+	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp,
+		nameToBaseMap, pkgBuildDirs, true, srcinfos)
 
 	return errAur
 }
@@ -117,11 +124,22 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	aurDepNames, aurExpNames mapset.Set[string],
 	nameToBase, pkgBuildDirsByBase map[string]string,
 	installIncompatible bool,
+	srcinfos map[string]*gosrc.Srcinfo,
 ) error {
+	all := aurDepNames.Union(aurExpNames).ToSlice()
+	if len(all) == 0 {
+		return nil
+	}
+
 	deps, exps := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
 	pkgArchives := make([]string, 0, len(exps)+len(deps))
 
-	for _, name := range aurDepNames.Union(aurExpNames).ToSlice() {
+	var (
+		mux sync.Mutex
+		wg  sync.WaitGroup
+	)
+
+	for _, name := range all {
 		base := nameToBase[name]
 		dir := pkgBuildDirsByBase[base]
 		args := []string{"--nobuild", "-fC"}
@@ -169,7 +187,13 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		if hasDebug {
 			deps = append(deps, name+"-debug")
 		}
+
+		srcinfo := srcinfos[base]
+		wg.Add(1)
+		go config.Runtime.VCSStore.Update(ctx, name, srcinfo.Source, &mux, &wg)
 	}
+
+	wg.Wait()
 
 	if err := installPkgArchive(ctx, cmdArgs, pkgArchives); err != nil {
 		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)

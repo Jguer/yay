@@ -21,13 +21,14 @@ import (
 	"github.com/leonelquinteros/gotext"
 )
 
-type PostDownloadHookFunc func(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error
+type PreparerHookFunc func(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error
 
 type Preparer struct {
 	dbExecutor        db.Executor
 	cmdBuilder        exe.ICmdBuilder
 	config            *settings.Configuration
-	postDownloadHooks []PostDownloadHookFunc
+	postDownloadHooks []PreparerHookFunc
+	postMergeHooks    []PreparerHookFunc
 
 	makeDeps []string
 }
@@ -37,7 +38,8 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, config *set
 		dbExecutor:        dbExecutor,
 		cmdBuilder:        cmdBuilder,
 		config:            config,
-		postDownloadHooks: []PostDownloadHookFunc{},
+		postDownloadHooks: []PreparerHookFunc{},
+		postMergeHooks:    []PreparerHookFunc{},
 	}
 
 	if config.CleanMenu {
@@ -45,11 +47,11 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, config *set
 	}
 
 	if config.DiffMenu {
-		preper.postDownloadHooks = append(preper.postDownloadHooks, menus.DiffFn)
+		preper.postMergeHooks = append(preper.postMergeHooks, menus.DiffFn)
 	}
 
 	if config.EditMenu {
-		preper.postDownloadHooks = append(preper.postDownloadHooks, menus.EditFn)
+		preper.postMergeHooks = append(preper.postMergeHooks, menus.EditFn)
 	}
 
 	return preper
@@ -91,7 +93,20 @@ func (preper *Preparer) ShouldCleanMakeDeps() PostInstallHookFunc {
 	}
 }
 
-func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallInfo) error {
+func (preper *Preparer) Run(ctx context.Context,
+	w io.Writer, targets []map[string]*dep.InstallInfo,
+) (pkgbuildDirsByBase map[string]string, err error) {
+	preper.Present(w, targets)
+
+	pkgBuildDirs, err := preper.PrepareWorkspace(ctx, targets)
+	if err != nil {
+		return nil, err
+	}
+
+	return pkgBuildDirs, nil
+}
+
+func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallInfo) {
 	pkgsBySourceAndReason := map[string]map[string][]string{}
 
 	for _, layer := range targets {
@@ -127,8 +142,6 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 				strings.Join(pkgs, ", "))
 		}
 	}
-
-	return nil
 }
 
 func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[string]*dep.InstallInfo) (map[string]string, error) {
@@ -168,6 +181,16 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 		}
 	}
 
+	if err := mergePkgbuilds(ctx, pkgBuildDirsByBase); err != nil {
+		return nil, err
+	}
+
+	for _, hookFn := range preper.postMergeHooks {
+		if err := hookFn(ctx, preper.config, os.Stdout, pkgBuildDirsByBase); err != nil {
+			return nil, err
+		}
+	}
+
 	return pkgBuildDirsByBase, nil
 }
 
@@ -179,6 +202,9 @@ func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuil
 	srcinfoFile := filepath.Join(pkgbuildDir, ".SRCINFO")
 	if pkgbuild, err := gosrc.ParseFile(srcinfoFile); err == nil {
 		if db.VerCmp(pkgbuild.Version(), installInfo.Version) >= 0 {
+			text.OperationInfoln(
+				gotext.Get("PKGBUILD up to date, skipping download: %s",
+					text.Cyan(*installInfo.AURBase)))
 			return false
 		}
 	}

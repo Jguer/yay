@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -33,11 +34,14 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 	toSkip := pkgbuildsToSkip(bases, stringset.FromSlice(remoteNames))
 
 	targets := make([]string, 0, len(bases))
+	pkgBuildDirsByBase := make(map[string]string, len(bases))
 
 	for _, base := range bases {
 		if !toSkip.Get(base.Pkgbase()) {
 			targets = append(targets, base.Pkgbase())
 		}
+
+		pkgBuildDirsByBase[base.Pkgbase()] = filepath.Join(config.BuildDir, base.Pkgbase())
 	}
 
 	toSkipSlice := toSkip.ToSlice()
@@ -52,7 +56,7 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 		return err
 	}
 
-	srcinfos, err := parseSrcinfoFiles(bases, false)
+	srcinfos, err := parseSrcinfoFiles(pkgBuildDirsByBase, false)
 	if err != nil {
 		return err
 	}

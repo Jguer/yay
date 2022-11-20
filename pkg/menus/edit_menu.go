@@ -150,6 +150,10 @@ func Edit(w io.Writer, editMenuOption bool, pkgbuildDirs map[string]string, edit
 func EditFn(ctx context.Context, config *settings.Configuration, w io.Writer,
 	pkgbuildDirsByBase map[string]string,
 ) error {
+	if len(pkgbuildDirsByBase) == 0 {
+		return nil // no work to do
+	}
+
 	bases := make([]string, 0, len(pkgbuildDirsByBase))
 	for pkg := range pkgbuildDirsByBase {
 		bases = append(bases, pkg)

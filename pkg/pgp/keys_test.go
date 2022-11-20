@@ -4,21 +4,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path"
 	"regexp"
-	"sort"
-	"strings"
 	"testing"
 	"time"
 
-	aur "github.com/Jguer/aur"
 	gosrc "github.com/Morganamilo/go-srcinfo"
-	"github.com/bradleyjkemp/cupaloy"
-
-	"github.com/Jguer/yay/v11/pkg/dep"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -40,10 +35,6 @@ func init() {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	})
-}
-
-func newPkg(basename string) *aur.Pkg {
-	return &aur.Pkg{Name: basename, PackageBase: basename}
 }
 
 func getPgpKey(key string) string {
@@ -159,40 +150,44 @@ func TestCheckPgpKeys(t *testing.T) {
 
 	casetests := []struct {
 		name      string
-		pkgs      dep.Base
+		pkgs      map[string]string
 		srcinfos  map[string]*gosrc.Srcinfo
 		wantError bool
+		expected  []string
 	}{
 		// cower: single package, one valid key not yet in the keyring.
 		// 487EACC08557AD082088DABA1EB2638FF56C0C53: Dave Reisner.
 		{
 			name:      " one valid key not yet in the keyring",
-			pkgs:      dep.Base{newPkg("cower")},
+			pkgs:      map[string]string{"cower": ""},
 			srcinfos:  map[string]*gosrc.Srcinfo{"cower": makeSrcinfo("cower", "487EACC08557AD082088DABA1EB2638FF56C0C53")},
 			wantError: false,
+			expected:  []string{"487EACC08557AD082088DABA1EB2638FF56C0C53"},
 		},
 		// libc++: single package, two valid keys not yet in the keyring.
 		// 11E521D646982372EB577A1F8F0871F202119294: Tom Stellard.
 		// B6C8F98282B944E3B0D5C2530FC3042E345AD05D: Hans Wennborg.
 		{
 			name: "two valid keys not yet in the keyring",
-			pkgs: dep.Base{newPkg("libc++")},
+			pkgs: map[string]string{"libc++": ""},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"libc++": makeSrcinfo("libc++", "11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D"),
 			},
 			wantError: false,
+			expected:  []string{"11E521D646982372EB577A1F8F0871F202119294", "B6C8F98282B944E3B0D5C2530FC3042E345AD05D"},
 		},
 		// Two dummy packages requiring the same key.
 		// ABAF11C65A2970B130ABE3C479BE3E4300411886: Linus Torvalds.
 		{
 			name: "Two dummy packages requiring the same key",
-			pkgs: dep.Base{newPkg("dummy-1"), newPkg("dummy-2")},
+			pkgs: map[string]string{"dummy-1": "", "dummy-2": ""},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"dummy-1": makeSrcinfo("dummy-1",
 					"ABAF11C65A2970B130ABE3C479BE3E4300411886"),
 				"dummy-2": makeSrcinfo("dummy-2", "ABAF11C65A2970B130ABE3C479BE3E4300411886"),
 			},
 			wantError: false,
+			expected:  []string{"ABAF11C65A2970B130ABE3C479BE3E4300411886"},
 		},
 		// dummy package: single package, two valid keys, one of them already
 		// in the keyring.
@@ -200,26 +195,28 @@ func TestCheckPgpKeys(t *testing.T) {
 		// C52048C0C0748FEE227D47A2702353E0F7E48EDB: Thomas Dickey.
 		{
 			name: "one already in keyring",
-			pkgs: dep.Base{newPkg("dummy-3")},
+			pkgs: map[string]string{"dummy-3": ""},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"dummy-3": makeSrcinfo("dummy-3", "11E521D646982372EB577A1F8F0871F202119294", "C52048C0C0748FEE227D47A2702353E0F7E48EDB"),
 			},
 			wantError: false,
+			expected:  []string{"C52048C0C0748FEE227D47A2702353E0F7E48EDB"},
 		},
 		// Two dummy packages with existing keys.
 		{
 			name: "two existing",
-			pkgs: dep.Base{newPkg("dummy-4"), newPkg("dummy-5")},
+			pkgs: map[string]string{"dummy-4": "", "dummy-5": ""},
 			srcinfos: map[string]*gosrc.Srcinfo{
 				"dummy-4": makeSrcinfo("dummy-4", "11E521D646982372EB577A1F8F0871F202119294"),
 				"dummy-5": makeSrcinfo("dummy-5", "C52048C0C0748FEE227D47A2702353E0F7E48EDB"),
 			},
 			wantError: false,
+			expected:  []string{},
 		},
 		// Dummy package with invalid key, should fail.
 		{
 			name:      "one invalid",
-			pkgs:      dep.Base{newPkg("dummy-7")},
+			pkgs:      map[string]string{"dummy-7": ""},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-7": makeSrcinfo("dummy-7", "THIS-SHOULD-FAIL")},
 			wantError: true,
 		},
@@ -227,40 +224,27 @@ func TestCheckPgpKeys(t *testing.T) {
 		// A314827C4E4250A204CE6E13284FC34C8E4B1A25: Thomas Bächler.
 		{
 			name:      "one invalid, one valid",
-			pkgs:      dep.Base{newPkg("dummy-8")},
+			pkgs:      map[string]string{"dummy-8": ""},
 			srcinfos:  map[string]*gosrc.Srcinfo{"dummy-8": makeSrcinfo("dummy-8", "A314827C4E4250A204CE6E13284FC34C8E4B1A25", "THIS-SHOULD-FAIL")},
 			wantError: true,
+			expected:  []string{},
 		},
 	}
 
 	for _, tt := range casetests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			rescueStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			err := CheckPgpKeys([]dep.Base{tt.pkgs}, tt.srcinfos, "gpg",
+			problematic, err := CheckPgpKeys(tt.pkgs, tt.srcinfos, "gpg",
 				fmt.Sprintf("--homedir %s --keyserver 127.0.0.1", keyringDir), true)
-			if !tt.wantError {
-				if err != nil {
-					t.Fatalf("Got error %q, want no error", err)
-				}
 
-				w.Close()
-				out, _ := io.ReadAll(r)
-				os.Stdout = rescueStdout
-
-				splitLines := strings.Split(string(out), "\n")
-				sort.Strings(splitLines)
-
-				cupaloy.SnapshotT(t, strings.Join(splitLines, "\n"))
+			if tt.wantError {
+				require.Error(t, err)
 				return
 			}
-			// Here, we want to see the error.
-			if err == nil {
-				t.Fatalf("Got no error; want error")
-			}
+
+			require.NoError(t, err)
+
+			assert.ElementsMatch(t, tt.expected, problematic, fmt.Sprintf("%#v", problematic))
 		})
 	}
 }

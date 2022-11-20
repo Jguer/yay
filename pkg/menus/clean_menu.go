@@ -25,6 +25,10 @@ func anyExistInCache(pkgbuildDirs map[string]string) bool {
 }
 
 func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error {
+	if len(pkgbuildDirsByBase) == 0 {
+		return nil // no work to do
+	}
+
 	if !anyExistInCache(pkgbuildDirsByBase) {
 		return nil
 	}

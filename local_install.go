@@ -58,24 +58,27 @@ func installLocalPKGBUILD(
 	}
 	installer := &Installer{dbExecutor: dbExecutor}
 
-	if errP := preparer.Present(os.Stdout, topoSorted); errP != nil {
-		return errP
+	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, topoSorted)
+	if err != nil {
+		return err
 	}
 
 	if cleanFunc := preparer.ShouldCleanMakeDeps(); cleanFunc != nil {
 		installer.AddPostInstallHook(cleanFunc)
 	}
 
-	pkgBuildDirs, err := preparer.PrepareWorkspace(ctx, topoSorted)
-	if err != nil {
-		return err
-	}
-
 	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(pkgBuildDirs); cleanAURDirsFunc != nil {
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
-	if err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs); err != nil {
+	srcinfoOp := srcinfoOperator{dbExecutor: dbExecutor}
+
+	srcinfos, err := srcinfoOp.Run(pkgBuildDirs)
+	if err != nil {
+		return err
+	}
+
+	if err = installer.Install(ctx, cmdArgs, topoSorted, pkgBuildDirs, srcinfos); err != nil {
 		if errHook := installer.RunPostInstallHooks(ctx); errHook != nil {
 			text.Errorln(errHook)
 		}
