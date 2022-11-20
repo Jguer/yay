@@ -2,6 +2,7 @@
 package menus
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -91,9 +92,11 @@ func editPkgbuilds(pkgbuildDirs map[string]string, bases []string, editorConfig,
 		dir := pkgbuildDirs[pkg]
 		pkgbuilds = append(pkgbuilds, filepath.Join(dir, "PKGBUILD"))
 
-		for _, splitPkg := range srcinfos[pkg].SplitPackages() {
-			if splitPkg.Install != "" {
-				pkgbuilds = append(pkgbuilds, filepath.Join(dir, splitPkg.Install))
+		if srcinfos != nil {
+			for _, splitPkg := range srcinfos[pkg].SplitPackages() {
+				if splitPkg.Install != "" {
+					pkgbuilds = append(pkgbuilds, filepath.Join(dir, splitPkg.Install))
+				}
 			}
 		}
 	}
@@ -132,6 +135,36 @@ func Edit(w io.Writer, editMenuOption bool, pkgbuildDirs map[string]string, edit
 	}
 
 	if errEdit := editPkgbuilds(pkgbuildDirs, toEdit, editorConfig, editorFlags, srcinfos, noConfirm); errEdit != nil {
+		return errEdit
+	}
+
+	fmt.Println()
+
+	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
+		return settings.ErrUserAbort{}
+	}
+
+	return nil
+}
+
+func EditFn(ctx context.Context, config *settings.Configuration, w io.Writer,
+	pkgbuildDirsByBase map[string]string,
+) error {
+	bases := make([]string, 0, len(pkgbuildDirsByBase))
+	for pkg := range pkgbuildDirsByBase {
+		bases = append(bases, pkg)
+	}
+
+	toEdit, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases,
+		mapset.NewThreadUnsafeSet[string](),
+		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, config.AnswerEdit, nil)
+	if errMenu != nil || len(toEdit) == 0 {
+		return errMenu
+	}
+
+	// TOFIX: remove or use srcinfo data
+	if errEdit := editPkgbuilds(pkgbuildDirsByBase,
+		toEdit, config.Editor, config.EditorFlags, nil, settings.NoConfirm); errEdit != nil {
 		return errEdit
 	}
 

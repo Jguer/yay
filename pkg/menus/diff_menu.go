@@ -23,7 +23,7 @@ const (
 )
 
 func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder,
-	pkgbuildDirs map[string]string, bases []string, cloned map[string]bool,
+	pkgbuildDirs map[string]string, bases []string,
 ) error {
 	var errMulti multierror.MultiError
 
@@ -37,9 +37,7 @@ func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 			continue
 		}
 
-		if cloned[pkg] {
-			start = gitEmptyTree
-		} else {
+		if start != gitEmptyTree {
 			hasDiff, err := gitHasDiff(ctx, cmdBuilder, dir)
 			if err != nil {
 				errMulti.Add(err)
@@ -166,7 +164,7 @@ func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder, w io.Writer,
 		return errMenu
 	}
 
-	if errD := showPkgbuildDiffs(ctx, cmdBuilder, pkgbuildDirs, toDiff, cloned); errD != nil {
+	if errD := showPkgbuildDiffs(ctx, cmdBuilder, pkgbuildDirs, toDiff); errD != nil {
 		return errD
 	}
 
@@ -177,6 +175,35 @@ func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder, w io.Writer,
 	}
 
 	if errUpd := updatePkgbuildSeenRef(ctx, cmdBuilder, pkgbuildDirs, toDiff); errUpd != nil {
+		return errUpd
+	}
+
+	return nil
+}
+
+func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error {
+	bases := make([]string, 0, len(pkgbuildDirsByBase))
+	for base := range pkgbuildDirsByBase {
+		bases = append(bases, base)
+	}
+
+	toDiff, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, mapset.NewThreadUnsafeSet[string](), gotext.Get("Diffs to show?"),
+		settings.NoConfirm, config.AnswerDiff, nil)
+	if errMenu != nil || len(toDiff) == 0 {
+		return errMenu
+	}
+
+	if errD := showPkgbuildDiffs(ctx, config.Runtime.CmdBuilder, pkgbuildDirsByBase, toDiff); errD != nil {
+		return errD
+	}
+
+	fmt.Println()
+
+	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
+		return settings.ErrUserAbort{}
+	}
+
+	if errUpd := updatePkgbuildSeenRef(ctx, config.Runtime.CmdBuilder, pkgbuildDirsByBase, toDiff); errUpd != nil {
 		return errUpd
 	}
 
