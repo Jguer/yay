@@ -56,10 +56,9 @@ func syncInstall(ctx context.Context,
 }
 
 type OperationService struct {
-	ctx               context.Context
-	config            *settings.Configuration
-	dbExecutor        db.Executor
-	updateCompletions bool
+	ctx        context.Context
+	config     *settings.Configuration
+	dbExecutor db.Executor
 }
 
 func NewOperationService(ctx context.Context, config *settings.Configuration, dbExecutor db.Executor) *OperationService {
