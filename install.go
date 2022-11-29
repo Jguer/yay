@@ -199,9 +199,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 
 	for _, base := range do.Aur {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
-		if isGitRepository(dir) {
-			pkgbuildDirs[base.Pkgbase()] = dir
-		}
+		pkgbuildDirs[base.Pkgbase()] = dir
 	}
 
 	if config.CleanAfter {
