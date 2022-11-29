@@ -784,8 +784,14 @@ func buildInstallPkgbuilds(
 		)
 
 		for _, pkg := range base {
+			if srcinfo == nil {
+				text.Errorln(gotext.Get("could not find srcinfo for: %s", pkg.Name))
+				break
+			}
+
 			wg.Add(1)
 
+			text.Debugln("checking vcs store for:", pkg.Name)
 			go config.Runtime.VCSStore.Update(ctx, pkg.Name, srcinfo.Source, &mux, &wg)
 		}
 
