@@ -199,9 +199,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 
 	for _, base := range do.Aur {
 		dir := filepath.Join(config.BuildDir, base.Pkgbase())
-		if isGitRepository(dir) {
-			pkgbuildDirs[base.Pkgbase()] = dir
-		}
+		pkgbuildDirs[base.Pkgbase()] = dir
 	}
 
 	if config.CleanAfter {
@@ -645,6 +643,7 @@ func buildInstallPkgbuilds(
 		}
 
 		if !satisfied || !config.BatchInstall {
+			text.Debugln("non batch installing archives:", pkgArchives)
 			errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
 			errReason := setInstallReason(ctx, cmdArgs, deps, exp)
 
@@ -775,6 +774,7 @@ func buildInstallPkgbuilds(
 				}
 			}
 		}
+		text.Debugln("deps:", deps, "exp:", exp, "pkgArchives:", pkgArchives)
 
 		var (
 			mux sync.Mutex
@@ -782,14 +782,21 @@ func buildInstallPkgbuilds(
 		)
 
 		for _, pkg := range base {
+			if srcinfo == nil {
+				text.Errorln(gotext.Get("could not find srcinfo for: %s", pkg.Name))
+				break
+			}
+
 			wg.Add(1)
 
+			text.Debugln("checking vcs store for:", pkg.Name)
 			go config.Runtime.VCSStore.Update(ctx, pkg.Name, srcinfo.Source, &mux, &wg)
 		}
 
 		wg.Wait()
 	}
 
+	text.Debugln("installing archives:", pkgArchives)
 	errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
 	if errArchive != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
@@ -806,6 +813,10 @@ func buildInstallPkgbuilds(
 }
 
 func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchives []string) error {
+	if len(pkgArchives) == 0 {
+		return nil
+	}
+
 	arguments := cmdArgs.Copy()
 	arguments.ClearTargets()
 	arguments.Op = "U"
@@ -819,10 +830,6 @@ func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchiv
 	arguments.DelArg("w", "downloadonly")
 	arguments.DelArg("asdeps", "asdep")
 	arguments.DelArg("asexplicit", "asexp")
-
-	if len(pkgArchives) == 0 {
-		return nil
-	}
 
 	arguments.AddTarget(pkgArchives...)
 
@@ -857,7 +864,7 @@ func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.Strin
 	pkgdest, ok := pkgdests[name]
 	if !ok {
 		if optional {
-			return deps, exp, newPkgArchives, nil
+			return deps, exp, pkgArchives, nil
 		}
 
 		return deps, exp, pkgArchives, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
