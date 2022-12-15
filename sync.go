@@ -79,7 +79,7 @@ func (o *OperationService) Run(ctx context.Context,
 		return nil
 	}
 	preparer := NewPreparer(o.dbExecutor, config.Runtime.CmdBuilder, config)
-	installer := NewInstaller(o.dbExecutor)
+	installer := NewInstaller(o.dbExecutor, config.Runtime.CmdBuilder, config.Runtime.VCSStore)
 
 	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, targets)
 	if err != nil {
