@@ -40,8 +40,8 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			wantShow: []string{
 				"/usr/bin/makepkg --nobuild -fC --ignorearch",
 				"/usr/bin/makepkg -cf --noconfirm --noextract --noprepare --holdver --ignorearch",
-				"/usr/bin/sudo pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
-				"/usr/bin/sudo pacman -D -q --asexplicit --config  -- yay",
+				"pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"pacman -D -q --asexplicit --config  -- yay",
 			},
 			wantCapture: []string{"/usr/bin/makepkg --packagelist"},
 		},
@@ -52,8 +52,8 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			wantShow: []string{
 				"/usr/bin/makepkg --nobuild -fC --ignorearch",
 				"/usr/bin/makepkg -c --nobuild --noextract --ignorearch",
-				"/usr/bin/sudo pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
-				"/usr/bin/sudo pacman -D -q --asexplicit --config  -- yay",
+				"pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"pacman -D -q --asexplicit --config  -- yay",
 			},
 			wantCapture: []string{"/usr/bin/makepkg --packagelist"},
 		},
@@ -143,8 +143,8 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				show := call.Args[0].(*exec.Cmd).String()
 				show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 
-				// options are in a different order on different systems
-				assert.ElementsMatch(td, strings.Split(tc.wantShow[i], ""), strings.Split(show, ""), show)
+				// options are in a different order on different systems and on CI root user is used
+				assert.Subset(td, strings.Split(show, " "), strings.Split(tc.wantShow[i], " "), show)
 			}
 
 			for i, call := range mockRunner.CaptureCalls {
