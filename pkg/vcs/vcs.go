@@ -17,6 +17,15 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
+type Store interface {
+	Update(ctx context.Context, pkgName string,
+		sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup,
+	)
+	Save() error
+	RemovePackage(pkgs []string)
+	Load() error
+}
+
 // InfoStore is a collection of OriginInfoByURL by Package.
 // Containing a map of last commit SHAs of a repo.
 type InfoStore struct {

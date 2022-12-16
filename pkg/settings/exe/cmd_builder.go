@@ -50,6 +50,17 @@ type CmdBuilder struct {
 	Runner           Runner
 }
 
+func NewDefaultBuilder() *CmdBuilder {
+	return &CmdBuilder{
+		GitBin:          "git",
+		MakepkgBin:      "makepkg",
+		SudoBin:         "sudo",
+		PacmanBin:       "pacman",
+		Runner:          &OSRunner{},
+		SudoLoopEnabled: false,
+	}
+}
+
 func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
 	args := make([]string, len(c.GitFlags), len(c.GitFlags)+len(extraArgs))
 	copy(args, c.GitFlags)

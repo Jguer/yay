@@ -58,14 +58,14 @@ func syncInstall(ctx context.Context,
 
 type OperationService struct {
 	ctx        context.Context
-	config     *settings.Configuration
+	cfg        *settings.Configuration
 	dbExecutor db.Executor
 }
 
-func NewOperationService(ctx context.Context, config *settings.Configuration, dbExecutor db.Executor) *OperationService {
+func NewOperationService(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) *OperationService {
 	return &OperationService{
 		ctx:        ctx,
-		config:     config,
+		cfg:        cfg,
 		dbExecutor: dbExecutor,
 	}
 }
@@ -79,7 +79,7 @@ func (o *OperationService) Run(ctx context.Context,
 		return nil
 	}
 	preparer := NewPreparer(o.dbExecutor, config.Runtime.CmdBuilder, config)
-	installer := NewInstaller(o.dbExecutor, config.Runtime.CmdBuilder, config.Runtime.VCSStore)
+	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode)
 
 	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, targets)
 	if err != nil {

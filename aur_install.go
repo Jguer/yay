@@ -27,17 +27,19 @@ type (
 		postInstallHooks  []PostInstallHookFunc
 		failedAndIngnored map[string]error
 		exeCmd            exe.ICmdBuilder
-		vcsStore          *vcs.InfoStore
+		vcsStore          vcs.Store
+		targetMode        parser.TargetMode
 	}
 )
 
-func NewInstaller(dbExecutor db.Executor, exeCmd exe.ICmdBuilder, vcsStore *vcs.InfoStore) *Installer {
+func NewInstaller(dbExecutor db.Executor, exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode) *Installer {
 	return &Installer{
 		dbExecutor:        dbExecutor,
 		postInstallHooks:  []PostInstallHookFunc{},
 		failedAndIngnored: map[string]error{},
 		exeCmd:            exeCmd,
 		vcsStore:          vcsStore,
+		targetMode:        targetMode,
 	}
 }
 
@@ -210,11 +212,11 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 	wg.Wait()
 
-	if err := installPkgArchive(ctx, cmdArgs, pkgArchives); err != nil {
+	if err := installPkgArchive(ctx, installer.exeCmd, installer.targetMode, installer.vcsStore, cmdArgs, pkgArchives); err != nil {
 		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)
 	}
 
-	if err := setInstallReason(ctx, cmdArgs, deps, exps); err != nil {
+	if err := setInstallReason(ctx, installer.exeCmd, installer.targetMode, cmdArgs, deps, exps); err != nil {
 		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)
 	}
 
@@ -237,7 +239,7 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		return nil, err
 	}
 
-	pkgdests, pkgVersion, errList := parsePackageList(ctx, dir)
+	pkgdests, pkgVersion, errList := parsePackageList(ctx, installer.exeCmd, dir)
 	if errList != nil {
 		return nil, errList
 	}
@@ -349,11 +351,11 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
 		arguments, config.Runtime.Mode, settings.NoConfirm))
 
-	if errD := asdeps(ctx, cmdArgs, syncDeps.ToSlice()); errD != nil {
+	if errD := asdeps(ctx, installer.exeCmd, installer.targetMode, cmdArgs, syncDeps.ToSlice()); errD != nil {
 		return errD
 	}
 
-	if errE := asexp(ctx, cmdArgs, syncExp.ToSlice()); errE != nil {
+	if errE := asexp(ctx, installer.exeCmd, installer.targetMode, cmdArgs, syncExp.ToSlice()); errE != nil {
 		return errE
 	}
 
