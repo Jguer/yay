@@ -142,7 +142,9 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			for i, call := range mockRunner.ShowCalls {
 				show := call.Args[0].(*exec.Cmd).String()
 				show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
-				assert.Equal(td, tc.wantShow[i], show)
+
+				// options are in a different order on different systems
+				assert.ElementsMatch(td, strings.Split(tc.wantShow[i], ""), strings.Split(show, ""), show)
 			}
 
 			for i, call := range mockRunner.CaptureCalls {
