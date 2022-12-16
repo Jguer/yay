@@ -27,14 +27,28 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 	type testCase struct {
 		desc        string
 		isInstalled bool
+		isBuilt     bool
 		wantShow    []string
 		wantCapture []string
 	}
 
 	testCases := []testCase{
 		{
-			desc:        "not installed",
+			desc:        "not installed and not built",
 			isInstalled: false,
+			isBuilt:     false,
+			wantShow: []string{
+				"/usr/bin/makepkg --nobuild -fC --ignorearch",
+				"/usr/bin/makepkg -cf --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"/usr/bin/sudo pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"/usr/bin/sudo pacman -D -q --asexplicit --config  -- yay",
+			},
+			wantCapture: []string{"/usr/bin/makepkg --packagelist"},
+		},
+		{
+			desc:        "not installed and built",
+			isInstalled: false,
+			isBuilt:     true,
 			wantShow: []string{
 				"/usr/bin/makepkg --nobuild -fC --ignorearch",
 				"/usr/bin/makepkg -c --nobuild --noextract --ignorearch",
@@ -46,6 +60,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 		{
 			desc:        "installed",
 			isInstalled: true,
+			isBuilt:     false,
 			wantShow: []string{
 				"/usr/bin/makepkg --nobuild -fC --ignorearch",
 				"/usr/bin/makepkg -c --nobuild --noextract --ignorearch",
@@ -64,17 +79,32 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				return pkgTar, "", nil
 			}
 
+			i := 0
+			showOverride := func(cmd *exec.Cmd) error {
+				i++
+				if i == 2 {
+					if !tc.isBuilt {
+						f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+						require.NoError(td, err)
+						require.NoError(td, f.Close())
+					}
+				}
+				return nil
+			}
+
 			// create a mock file
-			f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
-			require.NoError(td, err)
-			require.NoError(td, f.Close())
+			if tc.isBuilt {
+				f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+				require.NoError(td, err)
+				require.NoError(td, f.Close())
+			}
 
 			isCorrectInstalledOverride := func(string, string) bool {
 				return tc.isInstalled
 			}
 
 			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFunc: isCorrectInstalledOverride}
-			mockRunner := &exe.MockRunner{CaptureFn: captureOverride}
+			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
 			cmdBuilder := exe.NewDefaultBuilder()
 			cmdBuilder.Runner = mockRunner
 

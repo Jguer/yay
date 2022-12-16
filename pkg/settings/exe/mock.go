@@ -22,6 +22,7 @@ type MockBuilder struct {
 type MockRunner struct {
 	ShowCalls    []Call
 	CaptureCalls []Call
+	ShowFn       func(cmd *exec.Cmd) error
 	CaptureFn    func(cmd *exec.Cmd) (stdout string, stderr string, err error)
 }
 
@@ -93,11 +94,16 @@ func (m *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 }
 
 func (m *MockRunner) Show(cmd *exec.Cmd) error {
+	var err error
+	if m.ShowFn != nil {
+		err = m.ShowFn(cmd)
+	}
+
 	m.ShowCalls = append(m.ShowCalls, Call{
 		Args: []interface{}{
 			cmd,
 		},
 	})
 
-	return nil
+	return err
 }
