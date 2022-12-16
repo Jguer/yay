@@ -24,6 +24,17 @@ func ptrString(s string) *string {
 
 func TestInstaller_InstallNeeded(t *testing.T) {
 	t.Parallel()
+
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
 	type testCase struct {
 		desc        string
 		isInstalled bool
@@ -38,34 +49,34 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			isInstalled: false,
 			isBuilt:     false,
 			wantShow: []string{
-				"/usr/bin/makepkg --nobuild -fC --ignorearch",
-				"/usr/bin/makepkg -cf --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -fC --ignorearch",
+				"makepkg -cf --noconfirm --noextract --noprepare --holdver --ignorearch",
 				"pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
 			},
-			wantCapture: []string{"/usr/bin/makepkg --packagelist"},
+			wantCapture: []string{"makepkg --packagelist"},
 		},
 		{
 			desc:        "not installed and built",
 			isInstalled: false,
 			isBuilt:     true,
 			wantShow: []string{
-				"/usr/bin/makepkg --nobuild -fC --ignorearch",
-				"/usr/bin/makepkg -c --nobuild --noextract --ignorearch",
+				"makepkg --nobuild -fC --ignorearch",
+				"makepkg -c --nobuild --noextract --ignorearch",
 				"pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
 			},
-			wantCapture: []string{"/usr/bin/makepkg --packagelist"},
+			wantCapture: []string{"makepkg --packagelist"},
 		},
 		{
 			desc:        "installed",
 			isInstalled: true,
 			isBuilt:     false,
 			wantShow: []string{
-				"/usr/bin/makepkg --nobuild -fC --ignorearch",
-				"/usr/bin/makepkg -c --nobuild --noextract --ignorearch",
+				"makepkg --nobuild -fC --ignorearch",
+				"makepkg -c --nobuild --noextract --ignorearch",
 			},
-			wantCapture: []string{"/usr/bin/makepkg --packagelist"},
+			wantCapture: []string{"makepkg --packagelist"},
 		},
 	}
 
@@ -105,7 +116,14 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 
 			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFunc: isCorrectInstalledOverride}
 			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
-			cmdBuilder := exe.NewDefaultBuilder()
+			cmdBuilder := &exe.CmdBuilder{
+				MakepkgBin:      makepkgBin,
+				SudoBin:         "su",
+				PacmanBin:       pacmanBin,
+				Runner:          mockRunner,
+				SudoLoopEnabled: false,
+			}
+
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny)
@@ -142,6 +160,8 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			for i, call := range mockRunner.ShowCalls {
 				show := call.Args[0].(*exec.Cmd).String()
 				show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
+				show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+				show = strings.ReplaceAll(show, pacmanBin, "pacman")
 
 				// options are in a different order on different systems and on CI root user is used
 				assert.Subset(td, strings.Split(show, " "), strings.Split(tc.wantShow[i], " "), show)
@@ -150,7 +170,9 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			for i, call := range mockRunner.CaptureCalls {
 				capture := call.Args[0].(*exec.Cmd).String()
 				capture = strings.ReplaceAll(capture, tmpDir, "/testdir") // replace the temp dir with a static path
-				assert.Equal(td, tc.wantCapture[i], capture)
+				capture = strings.ReplaceAll(capture, makepkgBin, "makepkg")
+				capture = strings.ReplaceAll(capture, pacmanBin, "pacman")
+				assert.Subset(td, strings.Split(capture, " "), strings.Split(tc.wantCapture[i], " "), capture)
 			}
 		})
 	}
