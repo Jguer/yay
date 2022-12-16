@@ -170,7 +170,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		base := nameToBase[name]
 		dir := pkgBuildDirsByBase[base]
 
-		pkgdests, errMake := installer.buildPkg(ctx, dir, base, installIncompatible)
+		pkgdests, errMake := installer.buildPkg(ctx, dir, base, installIncompatible, cmdArgs.ExistsArg("needed"))
 		if errMake != nil {
 			if !lastLayer {
 				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
@@ -178,6 +178,11 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 			installer.failedAndIngnored[name] = errMake
 			text.Errorln(gotext.Get("error making: %s", base), "-", errMake)
+			continue
+		}
+
+		if len(pkgdests) == 0 {
+			text.Warnln(gotext.Get("nothing to install for %s", text.Cyan(base)))
 			continue
 		}
 
@@ -216,7 +221,10 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	return nil
 }
 
-func (installer *Installer) buildPkg(ctx context.Context, dir, base string, installIncompatible bool) (map[string]string, error) {
+func (installer *Installer) buildPkg(ctx context.Context,
+	dir, base string,
+	installIncompatible, needed bool,
+) (map[string]string, error) {
 	args := []string{"--nobuild", "-fC"}
 
 	if installIncompatible {
@@ -229,20 +237,26 @@ func (installer *Installer) buildPkg(ctx context.Context, dir, base string, inst
 		return nil, err
 	}
 
-	pkgdests, _, errList := parsePackageList(ctx, dir)
+	pkgdests, pkgVersion, errList := parsePackageList(ctx, dir)
 	if errList != nil {
 		return nil, errList
 	}
 
-	if pkgIsBuilt(pkgdests) {
+	switch {
+	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion):
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
-		text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base)))
-	} else {
+		pkgdests = map[string]string{}
+		text.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
+	case pkgsAreBuilt(pkgdests):
+		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
+		text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
+	default:
 		args = []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 		if installIncompatible {
 			args = append(args, "--ignorearch")
 		}
 	}
+
 	errMake := installer.exeCmd.Show(
 		installer.exeCmd.BuildMakepkgCmd(ctx,
 			dir, args...))
@@ -253,7 +267,17 @@ func (installer *Installer) buildPkg(ctx context.Context, dir, base string, inst
 	return pkgdests, nil
 }
 
-func pkgIsBuilt(pkgdests map[string]string) bool {
+func (installer *Installer) pkgsAreAlreadyInstalled(pkgdests map[string]string, pkgVersion string) bool {
+	for pkgName := range pkgdests {
+		if !installer.dbExecutor.IsCorrectVersionInstalled(pkgName, pkgVersion) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func pkgsAreBuilt(pkgdests map[string]string) bool {
 	for _, pkgdest := range pkgdests {
 		if _, err := os.Stat(pkgdest); err != nil {
 			text.Debugln("pkgIsBuilt:", pkgdest, "does not exist")
