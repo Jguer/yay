@@ -10,8 +10,10 @@ import (
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/vcs"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -24,14 +26,20 @@ type (
 		dbExecutor        db.Executor
 		postInstallHooks  []PostInstallHookFunc
 		failedAndIngnored map[string]error
+		exeCmd            exe.ICmdBuilder
+		vcsStore          vcs.Store
+		targetMode        parser.TargetMode
 	}
 )
 
-func NewInstaller(dbExecutor db.Executor) *Installer {
+func NewInstaller(dbExecutor db.Executor, exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode) *Installer {
 	return &Installer{
 		dbExecutor:        dbExecutor,
 		postInstallHooks:  []PostInstallHookFunc{},
 		failedAndIngnored: map[string]error{},
+		exeCmd:            exeCmd,
+		vcsStore:          vcsStore,
+		targetMode:        targetMode,
 	}
 }
 
@@ -163,44 +171,20 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	for _, name := range all {
 		base := nameToBase[name]
 		dir := pkgBuildDirsByBase[base]
-		args := []string{"--nobuild", "-fC"}
 
-		if installIncompatible {
-			args = append(args, "--ignorearch")
-		}
-
-		// pkgver bump
-		if err := config.Runtime.CmdBuilder.Show(
-			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
-			if !lastLayer {
-				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), err)
-			}
-
-			installer.failedAndIngnored[name] = err
-			text.Errorln(gotext.Get("error making: %s", base), "-", err)
-			continue
-		}
-
-		pkgdests, _, errList := parsePackageList(ctx, dir)
-		if errList != nil {
-			return errList
-		}
-
-		args = []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
-
-		if installIncompatible {
-			args = append(args, "--ignorearch")
-		}
-
-		if errMake := config.Runtime.CmdBuilder.Show(
-			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
-				dir, args...)); errMake != nil {
+		pkgdests, errMake := installer.buildPkg(ctx, dir, base, installIncompatible, cmdArgs.ExistsArg("needed"))
+		if errMake != nil {
 			if !lastLayer {
 				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
 			}
 
 			installer.failedAndIngnored[name] = errMake
 			text.Errorln(gotext.Get("error making: %s", base), "-", errMake)
+			continue
+		}
+
+		if len(pkgdests) == 0 {
+			text.Warnln(gotext.Get("nothing to install for %s", text.Cyan(base)))
 			continue
 		}
 
@@ -223,20 +207,87 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 		srcinfo := srcinfos[base]
 		wg.Add(1)
-		go config.Runtime.VCSStore.Update(ctx, name, srcinfo.Source, &mux, &wg)
+		go installer.vcsStore.Update(ctx, name, srcinfo.Source, &mux, &wg)
 	}
 
 	wg.Wait()
 
-	if err := installPkgArchive(ctx, cmdArgs, pkgArchives); err != nil {
+	if err := installPkgArchive(ctx, installer.exeCmd, installer.targetMode, installer.vcsStore, cmdArgs, pkgArchives); err != nil {
 		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)
 	}
 
-	if err := setInstallReason(ctx, cmdArgs, deps, exps); err != nil {
+	if err := setInstallReason(ctx, installer.exeCmd, installer.targetMode, cmdArgs, deps, exps); err != nil {
 		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)
 	}
 
 	return nil
+}
+
+func (installer *Installer) buildPkg(ctx context.Context,
+	dir, base string,
+	installIncompatible, needed bool,
+) (map[string]string, error) {
+	args := []string{"--nobuild", "-fC"}
+
+	if installIncompatible {
+		args = append(args, "--ignorearch")
+	}
+
+	// pkgver bump
+	if err := installer.exeCmd.Show(
+		installer.exeCmd.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
+		return nil, err
+	}
+
+	pkgdests, pkgVersion, errList := parsePackageList(ctx, installer.exeCmd, dir)
+	if errList != nil {
+		return nil, errList
+	}
+
+	switch {
+	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion):
+		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
+		pkgdests = map[string]string{}
+		text.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
+	case pkgsAreBuilt(pkgdests):
+		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
+		text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
+	default:
+		args = []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
+		if installIncompatible {
+			args = append(args, "--ignorearch")
+		}
+	}
+
+	errMake := installer.exeCmd.Show(
+		installer.exeCmd.BuildMakepkgCmd(ctx,
+			dir, args...))
+	if errMake != nil {
+		return nil, errMake
+	}
+
+	return pkgdests, nil
+}
+
+func (installer *Installer) pkgsAreAlreadyInstalled(pkgdests map[string]string, pkgVersion string) bool {
+	for pkgName := range pkgdests {
+		if !installer.dbExecutor.IsCorrectVersionInstalled(pkgName, pkgVersion) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func pkgsAreBuilt(pkgdests map[string]string) bool {
+	for _, pkgdest := range pkgdests {
+		if _, err := os.Stat(pkgdest); err != nil {
+			text.Debugln("pkgIsBuilt:", pkgdest, "does not exist")
+			return false
+		}
+	}
+
+	return true
 }
 
 func (*Installer) isDep(cmdArgs *parser.Arguments, aurExpNames mapset.Set[string], name string) bool {
@@ -279,7 +330,7 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 	return pkgArchives, ok, nil
 }
 
-func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Arguments,
+func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Arguments,
 	syncDeps, // repo targets that are deps
 	syncExp mapset.Set[string], // repo targets that are exp
 ) error {
@@ -297,14 +348,14 @@ func (*Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Argum
 	arguments.ClearTargets()
 	arguments.AddTarget(repoTargets...)
 
-	errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
 		arguments, config.Runtime.Mode, settings.NoConfirm))
 
-	if errD := asdeps(ctx, cmdArgs, syncDeps.ToSlice()); errD != nil {
+	if errD := asdeps(ctx, installer.exeCmd, installer.targetMode, cmdArgs, syncDeps.ToSlice()); errD != nil {
 		return errD
 	}
 
-	if errE := asexp(ctx, cmdArgs, syncExp.ToSlice()); errE != nil {
+	if errE := asexp(ctx, installer.exeCmd, installer.targetMode, cmdArgs, syncExp.ToSlice()); errE != nil {
 		return errE
 	}
 

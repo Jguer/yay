@@ -16,6 +16,7 @@ type (
 
 type DBExecutor struct {
 	db.Executor
+	IsCorrectVersionInstalledFunc func(string, string) bool
 }
 
 func (t DBExecutor) AlpmArchitectures() ([]string, error) {
@@ -31,6 +32,9 @@ func (t DBExecutor) Cleanup() {
 }
 
 func (t DBExecutor) IsCorrectVersionInstalled(s, s2 string) bool {
+	if t.IsCorrectVersionInstalledFunc != nil {
+		return t.IsCorrectVersionInstalledFunc(s, s2)
+	}
 	panic("implement me")
 }
 

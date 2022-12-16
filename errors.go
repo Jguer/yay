@@ -2,6 +2,14 @@ package main
 
 import "github.com/leonelquinteros/gotext"
 
+type NoPkgDestsFoundError struct {
+	dir string
+}
+
+func (e *NoPkgDestsFoundError) Error() string {
+	return gotext.Get("could not find any package archives listed in %s", e.dir)
+}
+
 type SetPkgReasonError struct {
 	exp bool // explicit
 }

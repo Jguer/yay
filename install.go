@@ -27,9 +27,14 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
-func setPkgReason(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string, exp bool) error {
+func setPkgReason(ctx context.Context,
+	cmdBuilder exe.ICmdBuilder,
+	mode parser.TargetMode,
+	cmdArgs *parser.Arguments, pkgs []string, exp bool,
+) error {
 	if len(pkgs) == 0 {
 		return nil
 	}
@@ -56,20 +61,26 @@ func setPkgReason(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string,
 		cmdArgs.AddTarget(pkgName)
 	}
 
-	if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
+	if err := cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, mode, settings.NoConfirm)); err != nil {
 		return &SetPkgReasonError{exp: exp}
 	}
 
 	return nil
 }
 
-func asdeps(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
-	return setPkgReason(ctx, cmdArgs, pkgs, false)
+func asdeps(ctx context.Context,
+	cmdBuilder exe.ICmdBuilder,
+	mode parser.TargetMode, cmdArgs *parser.Arguments, pkgs []string,
+) error {
+	return setPkgReason(ctx, cmdBuilder, mode, cmdArgs, pkgs, false)
 }
 
-func asexp(ctx context.Context, cmdArgs *parser.Arguments, pkgs []string) error {
-	return setPkgReason(ctx, cmdArgs, pkgs, true)
+func asexp(ctx context.Context,
+	cmdBuilder exe.ICmdBuilder,
+	mode parser.TargetMode, cmdArgs *parser.Arguments, pkgs []string,
+) error {
+	return setPkgReason(ctx, cmdBuilder, mode, cmdArgs, pkgs, true)
 }
 
 // Install handles package installs.
@@ -323,11 +334,11 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			}
 		}
 
-		if errDeps := asdeps(ctx, cmdArgs, deps); errDeps != nil {
+		if errDeps := asdeps(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, deps); errDeps != nil {
 			return errDeps
 		}
 
-		if errExp := asexp(ctx, cmdArgs, exp); errExp != nil {
+		if errExp := asexp(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, exp); errExp != nil {
 			return errExp
 		}
 	}
@@ -487,9 +498,11 @@ nextpkg:
 	return nil
 }
 
-func parsePackageList(ctx context.Context, dir string) (pkgdests map[string]string, pkgVersion string, err error) {
-	stdout, stderr, err := config.Runtime.CmdBuilder.Capture(
-		config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, "--packagelist"))
+func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
+	dir string,
+) (pkgdests map[string]string, pkgVersion string, err error) {
+	stdout, stderr, err := cmdBuilder.Capture(
+		cmdBuilder.BuildMakepkgCmd(ctx, dir, "--packagelist"))
 	if err != nil {
 		return nil, "", fmt.Errorf("%s %s", stderr, err)
 	}
@@ -515,6 +528,10 @@ func parsePackageList(ctx context.Context, dir string) (pkgdests map[string]stri
 		pkgName := strings.Join(split[:len(split)-3], "-")
 		pkgVersion = strings.Join(split[len(split)-3:len(split)-1], "-")
 		pkgdests[pkgName] = line
+	}
+
+	if len(pkgdests) == 0 {
+		return nil, "", &NoPkgDestsFoundError{dir}
 	}
 
 	return pkgdests, pkgVersion, nil
@@ -644,8 +661,9 @@ func buildInstallPkgbuilds(
 
 		if !satisfied || !config.BatchInstall {
 			text.Debugln("non batch installing archives:", pkgArchives)
-			errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
-			errReason := setInstallReason(ctx, cmdArgs, deps, exp)
+			errArchive := installPkgArchive(ctx, config.Runtime.CmdBuilder,
+				config.Runtime.Mode, config.Runtime.VCSStore, cmdArgs, pkgArchives)
+			errReason := setInstallReason(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, deps, exp)
 
 			deps = make([]string, 0)
 			exp = make([]string, 0)
@@ -678,7 +696,7 @@ func buildInstallPkgbuilds(
 			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
 
-		pkgdests, pkgVersion, errList := parsePackageList(ctx, dir)
+		pkgdests, pkgVersion, errList := parsePackageList(ctx, config.Runtime.CmdBuilder, dir)
 		if errList != nil {
 			return errList
 		}
@@ -797,12 +815,12 @@ func buildInstallPkgbuilds(
 	}
 
 	text.Debugln("installing archives:", pkgArchives)
-	errArchive := installPkgArchive(ctx, cmdArgs, pkgArchives)
+	errArchive := installPkgArchive(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, config.Runtime.VCSStore, cmdArgs, pkgArchives)
 	if errArchive != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
 	}
 
-	errReason := setInstallReason(ctx, cmdArgs, deps, exp)
+	errReason := setInstallReason(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, deps, exp)
 	if errReason != nil {
 		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
 	}
@@ -812,7 +830,13 @@ func buildInstallPkgbuilds(
 	return nil
 }
 
-func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchives []string) error {
+func installPkgArchive(ctx context.Context,
+	cmdBuilder exe.ICmdBuilder,
+	mode parser.TargetMode,
+	vcsStore vcs.Store,
+	cmdArgs *parser.Arguments,
+	pkgArchives []string,
+) error {
 	if len(pkgArchives) == 0 {
 		return nil
 	}
@@ -833,28 +857,31 @@ func installPkgArchive(ctx context.Context, cmdArgs *parser.Arguments, pkgArchiv
 
 	arguments.AddTarget(pkgArchives...)
 
-	if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
+	if errShow := cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
+		arguments, mode, settings.NoConfirm)); errShow != nil {
 		return errShow
 	}
 
-	if errStore := config.Runtime.VCSStore.Save(); errStore != nil {
+	if errStore := vcsStore.Save(); errStore != nil {
 		fmt.Fprintln(os.Stderr, errStore)
 	}
 
 	return nil
 }
 
-func setInstallReason(ctx context.Context, cmdArgs *parser.Arguments, deps, exps []string) error {
+func setInstallReason(ctx context.Context,
+	cmdBuilder exe.ICmdBuilder, mode parser.TargetMode,
+	cmdArgs *parser.Arguments, deps, exps []string,
+) error {
 	if len(deps)+len(exps) == 0 {
 		return nil
 	}
 
-	if errDeps := asdeps(ctx, cmdArgs, deps); errDeps != nil {
+	if errDeps := asdeps(ctx, cmdBuilder, mode, cmdArgs, deps); errDeps != nil {
 		return errDeps
 	}
 
-	return asexp(ctx, cmdArgs, exps)
+	return asexp(ctx, cmdBuilder, mode, cmdArgs, exps)
 }
 
 func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.StringSet,
@@ -875,10 +902,7 @@ func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.Strin
 			return deps, exp, pkgArchives, nil
 		}
 
-		return deps, exp, pkgArchives, errors.New(
-			gotext.Get(
-				"the PKGDEST for %s is listed by makepkg but does not exist: %s",
-				name, pkgdest))
+		return deps, exp, pkgArchives, &FindPkgDestError{pkgDest: pkgdest, name: name}
 	}
 
 	pkgArchives = append(pkgArchives, pkgdest)
