@@ -349,7 +349,7 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 	arguments.AddTarget(repoTargets...)
 
 	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
-		arguments, config.Runtime.Mode, settings.NoConfirm))
+		arguments, installer.targetMode, settings.NoConfirm))
 
 	if errD := asdeps(ctx, installer.exeCmd, installer.targetMode, cmdArgs, syncDeps.ToSlice()); errD != nil {
 		return errD
