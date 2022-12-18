@@ -89,9 +89,13 @@ var colorMap = map[Reason]string{
 	CheckDep: "forestgreen",
 }
 
+type AURCache interface {
+	Get(ctx context.Context, query *metadata.AURQuery) ([]*aurc.Pkg, error)
+}
+
 type Grapher struct {
 	dbExecutor  db.Executor
-	aurCache    *metadata.Client
+	aurCache    AURCache
 	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
 	noConfirm   bool
 	noDeps      bool      // If true, the graph will not include dependencies
@@ -101,7 +105,7 @@ type Grapher struct {
 	providerCache map[string]*aur.Pkg
 }
 
-func NewGrapher(dbExecutor db.Executor, aurCache *metadata.Client,
+func NewGrapher(dbExecutor db.Executor, aurCache AURCache,
 	fullGraph, noConfirm bool, output io.Writer, noDeps bool, noCheckDeps bool,
 ) *Grapher {
 	return &Grapher{
