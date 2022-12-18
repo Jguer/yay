@@ -18,9 +18,15 @@ import (
 )
 
 type Store interface {
+	// ToUpgrade returns a list of packages that need to be updated.
+	ToUpgrade(ctx context.Context) []string
+	// Update updates the VCS info of a package.
 	Update(ctx context.Context, pkgName string, sources []gosrc.ArchString)
+	// Save saves the VCS info to disk.
 	Save() error
+	// RemovePackage removes the VCS info of a package.
 	RemovePackage(pkgs []string)
+	// Load loads the VCS info from disk.
 	Load() error
 }
 

@@ -101,6 +101,138 @@ func (r *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	return stdout, stderr, err
 }
 
+func TestInfoStoreToUpgrade(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		CmdBuilder *exe.CmdBuilder
+	}
+	type args struct {
+		infos OriginInfoByURL
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{
+			name: "simple-has_update",
+			args: args{infos: OriginInfoByURL{
+				"github.com/Jguer/z.git": OriginInfo{
+					Protocols: []string{"https"},
+					Branch:    "0",
+					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+				},
+			}}, fields: fields{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
+					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD"},
+				}},
+			},
+			want: []string{"yay"},
+		},
+		{
+			name: "double-has_update",
+			args: args{infos: OriginInfoByURL{
+				"github.com/Jguer/z.git": OriginInfo{
+					Protocols: []string{"https"},
+					Branch:    "0",
+					SHA:       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				},
+				"github.com/Jguer/a.git": OriginInfo{
+					Protocols: []string{"https"},
+					Branch:    "0",
+					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+				},
+			}}, fields: fields{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
+					Returned: []string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
+					},
+				}},
+			},
+			want: []string{"yay"},
+		},
+		{
+			name: "simple-no_update",
+			args: args{infos: OriginInfoByURL{
+				"github.com/Jguer/z.git": OriginInfo{
+					Protocols: []string{"https"},
+					Branch:    "0",
+					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+				},
+			}}, fields: fields{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
+					Returned: []string{"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD"},
+				}},
+			},
+			want: []string{},
+		},
+		{
+			name: "simple-no_split",
+			args: args{infos: OriginInfoByURL{
+				"github.com/Jguer/z.git": OriginInfo{
+					Protocols: []string{"https"},
+					Branch:    "0",
+					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+				},
+			}}, fields: fields{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
+					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+				}},
+			},
+			want: []string{},
+		},
+		{
+			name: "simple-error",
+			args: args{infos: OriginInfoByURL{
+				"github.com/Jguer/z.git": OriginInfo{
+					Protocols: []string{"https"},
+					Branch:    "0",
+					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+				},
+			}}, fields: fields{
+				CmdBuilder: &exe.CmdBuilder{
+					GitBin: "git", GitFlags: []string{""},
+					Runner: &MockRunner{
+						Returned: []string{"error"},
+					},
+				},
+			},
+			want: []string{},
+		},
+		{
+			name: "simple-no protocol",
+			args: args{infos: OriginInfoByURL{
+				"github.com/Jguer/z.git": OriginInfo{
+					Protocols: []string{},
+					Branch:    "0",
+					SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
+				},
+			}}, fields: fields{
+				CmdBuilder: &exe.CmdBuilder{GitBin: "git", GitFlags: []string{""}, Runner: &MockRunner{
+					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+				}},
+			},
+			want: []string{},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			v := &InfoStore{
+				CmdBuilder: tt.fields.CmdBuilder,
+				OriginsByPackage: map[string]OriginInfoByURL{
+					"yay": tt.args.infos,
+				},
+			}
+			got := v.ToUpgrade(context.Background())
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestInfoStore_NeedsUpdate(t *testing.T) {
 	t.Parallel()
 	type fields struct {

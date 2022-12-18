@@ -15,7 +15,7 @@ func UpDevel(
 	ctx context.Context,
 	remote []db.IPackage, // should be a map
 	aurdata map[string]*query.Pkg,
-	localCache *vcs.InfoStore,
+	localCache vcs.Store,
 ) UpSlice {
 	toUpdate := make([]db.IPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)

@@ -6,7 +6,14 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
-type Mock struct{}
+type Mock struct {
+	OriginsByPackage map[string]OriginInfoByURL
+	ToUpgradeReturn  []string
+}
+
+func (m *Mock) ToUpgrade(ctx context.Context) []string {
+	return m.ToUpgradeReturn
+}
 
 func (m *Mock) Update(ctx context.Context, pkgName string, sources []gosrc.ArchString) {
 }
