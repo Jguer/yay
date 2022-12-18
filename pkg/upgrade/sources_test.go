@@ -2,9 +2,6 @@ package upgrade
 
 import (
 	"context"
-	"fmt"
-	"os/exec"
-	"strconv"
 	"testing"
 	"time"
 
@@ -73,28 +70,6 @@ func Test_upAUR(t *testing.T) {
 			assert.EqualValues(t, tt.want, got)
 		})
 	}
-}
-
-type MockRunner struct {
-	Returned []string
-	Index    int
-	t        *testing.T
-}
-
-func (r *MockRunner) Show(cmd *exec.Cmd) error {
-	return nil
-}
-
-func (r *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
-	i, _ := strconv.Atoi(cmd.Args[len(cmd.Args)-1])
-	if i >= len(r.Returned) {
-		fmt.Println(r.Returned)
-		fmt.Println(cmd.Args)
-		fmt.Println(i)
-	}
-	stdout = r.Returned[i]
-	assert.Contains(r.t, cmd.Args, "ls-remote")
-	return stdout, stderr, err
 }
 
 func Test_upDevel(t *testing.T) {
