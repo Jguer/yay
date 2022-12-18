@@ -18,9 +18,7 @@ import (
 )
 
 type Store interface {
-	Update(ctx context.Context, pkgName string,
-		sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup,
-	)
+	Update(ctx context.Context, pkgName string, sources []gosrc.ArchString)
 	Save() error
 	RemovePackage(pkgs []string)
 	Load() error
@@ -32,6 +30,7 @@ type InfoStore struct {
 	OriginsByPackage map[string]OriginInfoByURL
 	FilePath         string
 	CmdBuilder       exe.GitCmdBuilder
+	mux              sync.Mutex
 }
 
 // OriginInfoByURL stores the OriginInfo of each origin URL provided.
@@ -58,6 +57,7 @@ func NewInfoStore(filePath string, cmdBuilder exe.GitCmdBuilder) *InfoStore {
 		CmdBuilder:       cmdBuilder,
 		FilePath:         filePath,
 		OriginsByPackage: map[string]OriginInfoByURL{},
+		mux:              sync.Mutex{},
 	}
 
 	return infoStore
@@ -99,11 +99,8 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 	return ""
 }
 
-func (v *InfoStore) Update(ctx context.Context, pkgName string,
-	sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup,
-) {
-	defer wg.Done()
-
+func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.ArchString) {
+	var wg sync.WaitGroup
 	info := make(OriginInfoByURL)
 	checkSource := func(source gosrc.ArchString) {
 		defer wg.Done()
@@ -118,7 +115,7 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string,
 			return
 		}
 
-		mux.Lock()
+		v.mux.Lock()
 		info[url] = OriginInfo{
 			protocols,
 			branch,
@@ -132,7 +129,7 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string,
 		if err := v.Save(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
-		mux.Unlock()
+		v.mux.Unlock()
 	}
 
 	for _, source := range sources {
@@ -140,6 +137,8 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string,
 
 		go checkSource(source)
 	}
+
+	wg.Wait()
 }
 
 // parseSource returns the git url, default branch and protocols it supports.

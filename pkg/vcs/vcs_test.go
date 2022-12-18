@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"sync"
 	"testing"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -275,11 +274,8 @@ func TestInfoStore_Update(t *testing.T) {
 				FilePath:         filePath,
 				CmdBuilder:       tt.fields.CmdBuilder,
 			}
-			var mux sync.Mutex
-			var wg sync.WaitGroup
-			wg.Add(1)
-			v.Update(context.TODO(), tt.args.pkgName, tt.args.sources, &mux, &wg)
-			wg.Wait()
+
+			v.Update(context.TODO(), tt.args.pkgName, tt.args.sources)
 			assert.Len(t, tt.fields.OriginsByPackage, 1)
 
 			marshalledinfo, err := json.MarshalIndent(tt.fields.OriginsByPackage, "", "\t")

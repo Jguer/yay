@@ -19,11 +19,6 @@ import (
 
 // createDevelDB forces yay to create a DB of the existing development packages.
 func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecutor db.Executor) error {
-	var (
-		mux sync.Mutex
-		wg  sync.WaitGroup
-	)
-
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	info, err := query.AURInfoPrint(ctx, config.Runtime.AURClient, remoteNames, config.RequestSplitN)
 	if err != nil {
@@ -61,11 +56,15 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 		return err
 	}
 
+	var wg sync.WaitGroup
 	for i := range srcinfos {
 		for iP := range srcinfos[i].Packages {
 			wg.Add(1)
 
-			go config.Runtime.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source, &mux, &wg)
+			go func(i string, iP int) {
+				config.Runtime.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
+				wg.Done()
+			}(i, iP)
 		}
 	}
 
