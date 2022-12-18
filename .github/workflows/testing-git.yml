@@ -9,25 +9,30 @@ on:
 
 jobs:
   build:
-    name: Lint and test yay
+    name: Lint and test yay (-git)
     runs-on: ubuntu-latest
     container:
       image: jguer/yay-builder:latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/cache@v1
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - uses: actions/cache@v3
+        with:
+          path: /home/runner/work/yay/yay/pacman-git
+          key: ${{ runner.os }}-pacman-${{ hashFiles('/home/runner/work/yay/yay/pacman-git/PKGBUILD') }}
+          restore-keys: |
+            ${{ runner.os }}-pacman-
       - name: checkout pacman-git
         run: |
-          git clone https://aur.archlinux.org/pacman-git
+          git -C ./pacman-git pull || git clone https://aur.archlinux.org/pacman-git
           useradd github
           echo 'github ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
           chmod -R 777 pacman-git
-          su github -c 'cd pacman-git; yes | makepkg -si --nocheck'
+          su github -c 'cd pacman-git; yes | makepkg -i --nocheck'
       - name: Run Build and Tests with pacman-git
         run: make test
