@@ -24,7 +24,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: /home/runner/work/yay/yay/pacman-git
-          key: ${{ runner.os }}-pacman-${{ hashFiles('/home/runner/work/yay/yay/pacman-git/**/*') }}
+          key: ${{ runner.os }}-pacman-${{ hashFiles('/home/runner/work/yay/yay/pacman-git/PKGBUILD') }}
           restore-keys: |
             ${{ runner.os }}-pacman-
       - name: checkout pacman-git
@@ -33,6 +33,6 @@ jobs:
           useradd github
           echo 'github ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
           chmod -R 777 pacman-git
-          su github -c 'cd pacman-git; yes | makepkg -si --nocheck'
+          su github -c 'cd pacman-git; yes | makepkg -i --nocheck'
       - name: Run Build and Tests with pacman-git
         run: make test
