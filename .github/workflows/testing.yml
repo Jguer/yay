@@ -14,9 +14,8 @@ jobs:
     container:
       image: jguer/yay-builder:latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/cache@v1
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
