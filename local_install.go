@@ -6,6 +6,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
@@ -27,12 +28,13 @@ func installLocalPKGBUILD(
 	dbExecutor db.Executor,
 ) error {
 	aurCache := config.Runtime.AURCache
+	noCheck := strings.Contains(config.MFlags, "--nocheck")
 
 	if len(cmdArgs.Targets) < 1 {
 		return errors.New(gotext.Get("no target directories specified"))
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
+	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout, cmdArgs.ExistsDouble("d", "nodeps"), noCheck)
 	graph := topo.New[string, *dep.InstallInfo]()
 	for _, target := range cmdArgs.Targets {
 		var errG error

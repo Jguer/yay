@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Jguer/yay/v11/pkg/completion"
 	"github.com/Jguer/yay/v11/pkg/db"
@@ -23,6 +24,11 @@ func syncInstall(ctx context.Context,
 ) error {
 	aurCache := config.Runtime.AURCache
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
+	noDeps := cmdArgs.ExistsArg("d", "nodeps")
+	noCheck := strings.Contains(config.MFlags, "--nocheck")
+	if noDeps {
+		config.Runtime.CmdBuilder.AddMakepkgFlag("-d")
+	}
 
 	if refreshArg && config.Runtime.Mode.AtLeastRepo() {
 		if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
@@ -36,7 +42,7 @@ func syncInstall(ctx context.Context,
 		}
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout)
+	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout, noDeps, noCheck)
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {

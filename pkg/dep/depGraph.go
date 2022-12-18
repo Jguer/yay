@@ -90,17 +90,19 @@ var colorMap = map[Reason]string{
 }
 
 type Grapher struct {
-	dbExecutor db.Executor
-	aurCache   *metadata.Client
-	fullGraph  bool // If true, the graph will include all dependencies including already installed ones or repo
-	noConfirm  bool
-	w          io.Writer // output writer
+	dbExecutor  db.Executor
+	aurCache    *metadata.Client
+	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
+	noConfirm   bool
+	noDeps      bool      // If true, the graph will not include dependencies
+	noCheckDeps bool      // If true, the graph will not include dependencies
+	w           io.Writer // output writer
 
 	providerCache map[string]*aur.Pkg
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache *metadata.Client,
-	fullGraph, noConfirm bool, output io.Writer,
+	fullGraph, noConfirm bool, output io.Writer, noDeps bool, noCheckDeps bool,
 ) *Grapher {
 	return &Grapher{
 		dbExecutor:    dbExecutor,
@@ -108,6 +110,8 @@ func NewGrapher(dbExecutor db.Executor, aurCache *metadata.Client,
 		fullGraph:     fullGraph,
 		noConfirm:     noConfirm,
 		w:             output,
+		noDeps:        noDeps,
+		noCheckDeps:   noCheckDeps,
 		providerCache: make(map[string]*aurc.Pkg, 5),
 	}
 }
@@ -226,11 +230,11 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 		g.addNodes(ctx, graph, pkg.Name, pkg.MakeDepends, MakeDep)
 	}
 
-	if !false && len(pkg.Depends) > 0 {
+	if !g.noDeps && len(pkg.Depends) > 0 {
 		g.addNodes(ctx, graph, pkg.Name, pkg.Depends, Dep)
 	}
 
-	if !false && len(pkg.CheckDepends) > 0 {
+	if !g.noCheckDeps && !g.noDeps && len(pkg.CheckDepends) > 0 {
 		g.addNodes(ctx, graph, pkg.Name, pkg.CheckDepends, CheckDep)
 	}
 }
