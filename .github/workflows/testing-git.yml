@@ -24,8 +24,6 @@ jobs:
             ${{ runner.os }}-go-
       - name: checkout pacman-git
         run: |
-          pacman -Sy --overwrite=* --noconfirm archlinux-keyring
-          pacman -Su --overwrite=* --noconfirm sudo base-devel
           git clone https://aur.archlinux.org/pacman-git
           useradd github
           chmod -R 777 pacman-git
