@@ -6,7 +6,6 @@ import (
 	"os"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/Jguer/aur"
@@ -156,19 +155,7 @@ func (dp *Pool) findProvides(ctx context.Context, pkgs stringset.StringSet) erro
 			results []query.Pkg
 		)
 
-		// Hack for a bigger search result, if the user wants
-		// java-envronment we can search for just java instead and get
-		// more hits.
-		pkg, _, _ = splitDep(pkg) // openimagedenoise-git > ispc-git #1234
-		words := strings.Split(pkg, "-")
-
-		for i := range words {
-			results, err = dp.aurClient.Search(ctx, strings.Join(words[:i+1], "-"), aur.None)
-			if err == nil {
-				break
-			}
-		}
-
+		results, err = dp.aurClient.Search(ctx, pkg, aur.Provides)
 		if err != nil {
 			return
 		}
@@ -188,6 +175,8 @@ func (dp *Pool) findProvides(ctx context.Context, pkgs stringset.StringSet) erro
 		}
 
 		wg.Add(1)
+
+		text.Debugln("AUR RPC Search:", pkg)
 
 		go doSearch(pkg)
 	}
