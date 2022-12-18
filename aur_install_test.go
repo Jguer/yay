@@ -116,7 +116,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				return tc.isInstalled
 			}
 
-			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFunc: isCorrectInstalledOverride}
+			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFn: isCorrectInstalledOverride}
 			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
 			cmdBuilder := &exe.CmdBuilder{
 				MakepkgBin:      makepkgBin,
@@ -391,7 +391,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 				return false
 			}
 
-			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFunc: isCorrectInstalledOverride}
+			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFn: isCorrectInstalledOverride}
 			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
 			cmdBuilder := &exe.CmdBuilder{
 				MakepkgBin:       makepkgBin,
@@ -548,7 +548,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 				return false
 			}
 
-			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFunc: isCorrectInstalledOverride}
+			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFn: isCorrectInstalledOverride}
 			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
 			cmdBuilder := &exe.CmdBuilder{
 				MakepkgBin:      makepkgBin,
@@ -706,7 +706,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 				return false
 			}
 
-			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFunc: isCorrectInstalledOverride}
+			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFn: isCorrectInstalledOverride}
 			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
 			cmdBuilder := &exe.CmdBuilder{
 				MakepkgBin:       makepkgBin,
