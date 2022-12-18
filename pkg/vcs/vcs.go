@@ -18,11 +18,15 @@ import (
 )
 
 type Store interface {
-	Update(ctx context.Context, pkgName string,
-		sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup,
-	)
+	// ToUpgrade returns a list of packages that need to be updated.
+	ToUpgrade(ctx context.Context) []string
+	// Update updates the VCS info of a package.
+	Update(ctx context.Context, pkgName string, sources []gosrc.ArchString)
+	// Save saves the VCS info to disk.
 	Save() error
+	// RemovePackage removes the VCS info of a package.
 	RemovePackage(pkgs []string)
+	// Load loads the VCS info from disk.
 	Load() error
 }
 
@@ -32,6 +36,7 @@ type InfoStore struct {
 	OriginsByPackage map[string]OriginInfoByURL
 	FilePath         string
 	CmdBuilder       exe.GitCmdBuilder
+	mux              sync.Mutex
 }
 
 // OriginInfoByURL stores the OriginInfo of each origin URL provided.
@@ -58,6 +63,7 @@ func NewInfoStore(filePath string, cmdBuilder exe.GitCmdBuilder) *InfoStore {
 		CmdBuilder:       cmdBuilder,
 		FilePath:         filePath,
 		OriginsByPackage: map[string]OriginInfoByURL{},
+		mux:              sync.Mutex{},
 	}
 
 	return infoStore
@@ -99,11 +105,8 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 	return ""
 }
 
-func (v *InfoStore) Update(ctx context.Context, pkgName string,
-	sources []gosrc.ArchString, mux sync.Locker, wg *sync.WaitGroup,
-) {
-	defer wg.Done()
-
+func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.ArchString) {
+	var wg sync.WaitGroup
 	info := make(OriginInfoByURL)
 	checkSource := func(source gosrc.ArchString) {
 		defer wg.Done()
@@ -118,7 +121,7 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string,
 			return
 		}
 
-		mux.Lock()
+		v.mux.Lock()
 		info[url] = OriginInfo{
 			protocols,
 			branch,
@@ -132,7 +135,7 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string,
 		if err := v.Save(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
-		mux.Unlock()
+		v.mux.Unlock()
 	}
 
 	for _, source := range sources {
@@ -140,6 +143,8 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string,
 
 		go checkSource(source)
 	}
+
+	wg.Wait()
 }
 
 // parseSource returns the git url, default branch and protocols it supports.
@@ -193,7 +198,18 @@ func parseSource(source string) (url, branch string, protocols []string) {
 	return url, branch, protocols
 }
 
-func (v *InfoStore) NeedsUpdate(ctx context.Context, infos OriginInfoByURL) bool {
+func (v *InfoStore) ToUpgrade(ctx context.Context) []string {
+	pkgs := make([]string, 0, len(v.OriginsByPackage))
+	for pkgName, infos := range v.OriginsByPackage {
+		if v.needsUpdate(ctx, infos) {
+			pkgs = append(pkgs, pkgName)
+		}
+	}
+
+	return pkgs
+}
+
+func (v *InfoStore) needsUpdate(ctx context.Context, infos OriginInfoByURL) bool {
 	// used to signal we have gone through all sources and found nothing
 	finished := make(chan struct{})
 	alive := 0
@@ -279,7 +295,7 @@ func (v *InfoStore) RemovePackage(pkgs []string) {
 }
 
 // LoadStore reads a json file and populates a InfoStore structure.
-func (v InfoStore) Load() error {
+func (v *InfoStore) Load() error {
 	vfile, err := os.Open(v.FilePath)
 	if !os.IsNotExist(err) && err != nil {
 		return fmt.Errorf("failed to open vcs file '%s': %s", v.FilePath, err)

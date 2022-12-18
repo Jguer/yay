@@ -2,9 +2,6 @@ package upgrade
 
 import (
 	"context"
-	"fmt"
-	"os/exec"
-	"strconv"
 	"testing"
 	"time"
 
@@ -14,7 +11,6 @@ import (
 	alpm "github.com/Jguer/go-alpm/v2"
 
 	"github.com/Jguer/yay/v11/pkg/db/mock"
-	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
@@ -76,42 +72,13 @@ func Test_upAUR(t *testing.T) {
 	}
 }
 
-type MockRunner struct {
-	Returned []string
-	Index    int
-	t        *testing.T
-}
-
-func (r *MockRunner) Show(cmd *exec.Cmd) error {
-	return nil
-}
-
-func (r *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
-	i, _ := strconv.Atoi(cmd.Args[len(cmd.Args)-1])
-	if i >= len(r.Returned) {
-		fmt.Println(r.Returned)
-		fmt.Println(cmd.Args)
-		fmt.Println(i)
-	}
-	stdout = r.Returned[i]
-	assert.Contains(r.t, cmd.Args, "ls-remote")
-	return stdout, stderr, err
-}
-
 func Test_upDevel(t *testing.T) {
 	t.Parallel()
-	returnValue := []string{
-		"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
-		"7f4c277ce7149665d1c79b76ca8fbb832a65a03b	HEAD",
-		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD",
-		"cccccccccccccccccccccccccccccccccccccccc	HEAD",
-		"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD",
-	}
 
 	type args struct {
 		remote  []alpm.IPackage
 		aurdata map[string]*aur.Pkg
-		cached  vcs.InfoStore
+		cached  vcs.Store
 	}
 	tests := []struct {
 		name     string
@@ -122,13 +89,7 @@ func Test_upDevel(t *testing.T) {
 		{
 			name: "No Updates",
 			args: args{
-				cached: vcs.InfoStore{
-					CmdBuilder: &exe.CmdBuilder{
-						Runner: &MockRunner{
-							Returned: returnValue,
-						},
-					},
-				},
+				cached: &vcs.Mock{},
 				remote: []alpm.IPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
 					&mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
@@ -145,47 +106,8 @@ func Test_upDevel(t *testing.T) {
 			name:     "Simple Update",
 			finalLen: 3,
 			args: args{
-				cached: vcs.InfoStore{
-					CmdBuilder: &exe.CmdBuilder{
-						Runner: &MockRunner{
-							Returned: returnValue,
-						},
-					},
-					OriginsByPackage: map[string]vcs.OriginInfoByURL{
-						"hello": {
-							"github.com/Jguer/z.git": vcs.OriginInfo{
-								Protocols: []string{"https"},
-								Branch:    "0",
-								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
-							},
-						},
-						"hello-non-existent": {
-							"github.com/Jguer/y.git": vcs.OriginInfo{
-								Protocols: []string{"https"},
-								Branch:    "0",
-								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
-							},
-						},
-						"hello2": {
-							"github.com/Jguer/a.git": vcs.OriginInfo{
-								Protocols: []string{"https"},
-								Branch:    "1",
-								SHA:       "7f4c277ce7149665d1c79b76ca8fbb832a65a03b",
-							},
-						},
-						"hello4": {
-							"github.com/Jguer/b.git": vcs.OriginInfo{
-								Protocols: []string{"https"},
-								Branch:    "2",
-								SHA:       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-							},
-							"github.com/Jguer/c.git": vcs.OriginInfo{
-								Protocols: []string{"https"},
-								Branch:    "3",
-								SHA:       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-							},
-						},
-					},
+				cached: &vcs.Mock{
+					ToUpgradeReturn: []string{"hello", "hello4"},
 				},
 				remote: []alpm.IPackage{
 					&mock.Package{PName: "hello", PVersion: "2.0.0"},
@@ -219,22 +141,7 @@ func Test_upDevel(t *testing.T) {
 			name:     "No update returned",
 			finalLen: 1,
 			args: args{
-				cached: vcs.InfoStore{
-					CmdBuilder: &exe.CmdBuilder{
-						Runner: &MockRunner{
-							Returned: returnValue,
-						},
-					},
-					OriginsByPackage: map[string]vcs.OriginInfoByURL{
-						"hello": {
-							"github.com/Jguer/d.git": vcs.OriginInfo{
-								Protocols: []string{"https"},
-								Branch:    "4",
-								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
-							},
-						},
-					},
-				},
+				cached:  &vcs.Mock{ToUpgradeReturn: []string{}},
 				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
 				aurdata: map[string]*aur.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
@@ -244,21 +151,8 @@ func Test_upDevel(t *testing.T) {
 			name:     "No update returned - ignored",
 			finalLen: 1,
 			args: args{
-				cached: vcs.InfoStore{
-					CmdBuilder: &exe.CmdBuilder{
-						Runner: &MockRunner{
-							Returned: returnValue,
-						},
-					},
-					OriginsByPackage: map[string]vcs.OriginInfoByURL{
-						"hello": {
-							"github.com/Jguer/e.git": vcs.OriginInfo{
-								Protocols: []string{"https"},
-								Branch:    "3",
-								SHA:       "991c5b4146fd27f4aacf4e3111258a848934aaa1",
-							},
-						},
-					},
+				cached: &vcs.Mock{
+					ToUpgradeReturn: []string{"hello"},
 				},
 				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true}},
 				aurdata: map[string]*aur.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
@@ -270,10 +164,8 @@ func Test_upDevel(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			tt.args.cached.CmdBuilder.(*exe.CmdBuilder).Runner.(*MockRunner).t = t
-			got := UpDevel(context.TODO(), tt.args.remote, tt.args.aurdata, &tt.args.cached)
+			got := UpDevel(context.TODO(), tt.args.remote, tt.args.aurdata, tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
-			assert.Equal(t, tt.finalLen, len(tt.args.cached.OriginsByPackage))
 		})
 	}
 }
