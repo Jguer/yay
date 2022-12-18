@@ -23,8 +23,8 @@ jobs:
             ${{ runner.os }}-go-
       - uses: actions/cache@v3
         with:
-          path: ./pacman-git
-          key: ${{ runner.os }}-pacman-${{ hashFiles('./pacman-git/**/*') }}
+          path: /home/runner/work/yay/yay/pacman-git
+          key: ${{ runner.os }}-pacman-${{ hashFiles('/home/runner/work/yay/yay/pacman-git/**/*') }}
           restore-keys: |
             ${{ runner.os }}-pacman-
       - name: checkout pacman-git
