@@ -26,8 +26,8 @@ jobs:
         run: |
           git clone https://aur.archlinux.org/pacman-git
           useradd github
-          chmod -R 777 pacman-git
           echo 'github ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chmod -R 777 pacman-git
           su github -c 'cd pacman-git; yes | makepkg -si --nocheck'
       - name: Run Build and Tests with pacman-git
         run: make test
