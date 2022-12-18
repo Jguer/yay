@@ -192,7 +192,18 @@ func parseSource(source string) (url, branch string, protocols []string) {
 	return url, branch, protocols
 }
 
-func (v *InfoStore) NeedsUpdate(ctx context.Context, infos OriginInfoByURL) bool {
+func (v *InfoStore) ToUpgrade(ctx context.Context) []string {
+	pkgs := make([]string, 0, len(v.OriginsByPackage))
+	for pkgName, infos := range v.OriginsByPackage {
+		if v.needsUpdate(ctx, infos) {
+			pkgs = append(pkgs, pkgName)
+		}
+	}
+
+	return pkgs
+}
+
+func (v *InfoStore) needsUpdate(ctx context.Context, infos OriginInfoByURL) bool {
 	// used to signal we have gone through all sources and found nothing
 	finished := make(chan struct{})
 	alive := 0
@@ -278,7 +289,7 @@ func (v *InfoStore) RemovePackage(pkgs []string) {
 }
 
 // LoadStore reads a json file and populates a InfoStore structure.
-func (v InfoStore) Load() error {
+func (v *InfoStore) Load() error {
 	vfile, err := os.Open(v.FilePath)
 	if !os.IsNotExist(err) && err != nil {
 		return fmt.Errorf("failed to open vcs file '%s': %s", v.FilePath, err)

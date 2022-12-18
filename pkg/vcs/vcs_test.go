@@ -224,7 +224,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 			v := &InfoStore{
 				CmdBuilder: tt.fields.CmdBuilder,
 			}
-			got := v.NeedsUpdate(context.TODO(), tt.args.infos)
+			got := v.needsUpdate(context.TODO(), tt.args.infos)
 			assert.Equal(t, tt.want, got)
 		})
 	}
