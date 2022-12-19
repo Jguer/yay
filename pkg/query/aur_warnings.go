@@ -25,7 +25,7 @@ func (warnings *AURWarnings) Print() {
 	normalMissing, debugMissing := filterDebugPkgs(warnings.Missing)
 
 	if len(normalMissing) > 0 {
-		text.Warn(gotext.Get("Missing AUR Packages:"))
+		text.Warn(gotext.Get("Packages not in AUR:"))
 		printRange(normalMissing)
 	}
 
@@ -35,7 +35,7 @@ func (warnings *AURWarnings) Print() {
 	}
 
 	if len(warnings.Orphans) > 0 {
-		text.Warn(gotext.Get("Orphaned AUR Packages:"))
+		text.Warn(gotext.Get("Orphan (unmaintained) AUR Packages:"))
 		printRange(warnings.Orphans)
 	}
 
