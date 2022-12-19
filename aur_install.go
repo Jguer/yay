@@ -163,10 +163,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	deps, exps := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
 	pkgArchives := make([]string, 0, len(exps)+len(deps))
 
-	var (
-		mux sync.Mutex
-		wg  sync.WaitGroup
-	)
+	var wg sync.WaitGroup
 
 	for _, name := range all {
 		base := nameToBase[name]
@@ -207,7 +204,10 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 		srcinfo := srcinfos[base]
 		wg.Add(1)
-		go installer.vcsStore.Update(ctx, name, srcinfo.Source, &mux, &wg)
+		go func(name string) {
+			installer.vcsStore.Update(ctx, name, srcinfo.Source)
+			wg.Done()
+		}(name)
 	}
 
 	wg.Wait()

@@ -88,7 +88,7 @@ func (p *Package) Conflicts() alpm.DependList {
 
 // Depends returns the package's dependency list.
 func (p *Package) Depends() alpm.DependList {
-	panic("not implemented") // TODO: Implement
+	return alpm.DependList{}
 }
 
 // Depends returns the package's optional dependency list.

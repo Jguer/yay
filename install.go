@@ -794,10 +794,7 @@ func buildInstallPkgbuilds(
 		}
 		text.Debugln("deps:", deps, "exp:", exp, "pkgArchives:", pkgArchives)
 
-		var (
-			mux sync.Mutex
-			wg  sync.WaitGroup
-		)
+		var wg sync.WaitGroup
 
 		for _, pkg := range base {
 			if srcinfo == nil {
@@ -808,7 +805,10 @@ func buildInstallPkgbuilds(
 			wg.Add(1)
 
 			text.Debugln("checking vcs store for:", pkg.Name)
-			go config.Runtime.VCSStore.Update(ctx, pkg.Name, srcinfo.Source, &mux, &wg)
+			go func(name string) {
+				config.Runtime.VCSStore.Update(ctx, name, srcinfo.Source)
+				wg.Done()
+			}(pkg.Name)
 		}
 
 		wg.Wait()

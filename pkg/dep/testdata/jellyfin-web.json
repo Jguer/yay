@@ -1,0 +1,3 @@
+[
+{"ID":1176790,"Name":"jellyfin-web","PackageBaseID":138631,"PackageBase":"jellyfin","Version":"10.8.8-1","Description":"Jellyfin web client","URL":"https://github.com/jellyfin/jellyfin","NumVotes":84,"Popularity":1.272964,"OutOfDate":null,"Maintainer":"z3ntu","Submitter":"z3ntu","FirstSubmitted":1547053171,"LastModified":1669830147,"URLPath":"/cgit/aur.git/snapshot/jellyfin-web.tar.gz","MakeDepends":["dotnet-sdk-6.0","nodejs","npm","git"],"License":["GPL2"]}
+]
