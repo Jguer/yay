@@ -154,9 +154,10 @@ func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, d
 			}
 		}
 
-		err = os.RemoveAll(filepath.Join(config.BuildDir, file.Name()))
+		dir := filepath.Join(config.BuildDir, file.Name())
+		err = os.RemoveAll(dir)
 		if err != nil {
-			return nil
+			text.Warnln(gotext.Get("Unable to remove %s: %s", dir, err))
 		}
 	}
 
