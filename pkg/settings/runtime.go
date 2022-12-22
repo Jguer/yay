@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Jguer/yay/v11/pkg/db"
@@ -15,6 +16,10 @@ import (
 	"github.com/Morganamilo/go-pacmanconf"
 )
 
+type AURCache interface {
+	Get(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error)
+}
+
 type Runtime struct {
 	Mode           parser.TargetMode
 	QueryBuilder   query.Builder
@@ -28,6 +33,6 @@ type Runtime struct {
 	HTTPClient     *http.Client
 	AURClient      *aur.Client
 	VoteClient     *vote.Client
-	AURCache       *metadata.Client
+	AURCache       AURCache
 	DBExecutor     db.Executor
 }

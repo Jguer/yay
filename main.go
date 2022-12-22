@@ -141,7 +141,7 @@ func main() {
 		dbExecutor.Cleanup()
 	}()
 
-	if err = handleCmd(ctx, cmdArgs, db.Executor(dbExecutor)); err != nil {
+	if err = handleCmd(ctx, config, cmdArgs, db.Executor(dbExecutor)); err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
 		}
