@@ -84,7 +84,7 @@ func (o *OperationService) Run(ctx context.Context,
 		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
 		return nil
 	}
-	preparer := NewPreparer(o.dbExecutor, config.Runtime.CmdBuilder, config)
+	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
 	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode)
 
 	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, targets)
@@ -102,7 +102,7 @@ func (o *OperationService) Run(ctx context.Context,
 	}
 
 	srcinfoOp := srcinfoOperator{dbExecutor: o.dbExecutor}
-	srcinfos, err := srcinfoOp.Run(pkgBuildDirs)
+	srcinfos, err := srcinfoOp.Run(ctx, pkgBuildDirs)
 	if err != nil {
 		return err
 	}

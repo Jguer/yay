@@ -278,7 +278,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		text.Errorln(errDiffMenu)
 	}
 
-	if errM := mergePkgbuilds(ctx, pkgbuildDirs); errM != nil {
+	if errM := mergePkgbuilds(ctx, config.Runtime.CmdBuilder, pkgbuildDirs); errM != nil {
 		return errM
 	}
 
@@ -302,7 +302,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	}
 
 	if config.PGPFetch {
-		if _, errCPK := pgp.CheckPgpKeys(pkgbuildDirs, srcinfos, config.GpgBin, config.GpgFlags, settings.NoConfirm); errCPK != nil {
+		if _, errCPK := pgp.CheckPgpKeys(ctx, pkgbuildDirs, srcinfos, config.Runtime.CmdBuilder, settings.NoConfirm); errCPK != nil {
 			return errCPK
 		}
 	}
@@ -587,16 +587,16 @@ func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.St
 	return toSkip
 }
 
-func gitMerge(ctx context.Context, dir string) error {
-	_, stderr, err := config.Runtime.CmdBuilder.Capture(
-		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
+func gitMerge(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) error {
+	_, stderr, err := cmdBuilder.Capture(
+		cmdBuilder.BuildGitCmd(ctx,
 			dir, "reset", "--hard", "HEAD"))
 	if err != nil {
 		return errors.New(gotext.Get("error resetting %s: %s", dir, stderr))
 	}
 
-	_, stderr, err = config.Runtime.CmdBuilder.Capture(
-		config.Runtime.CmdBuilder.BuildGitCmd(ctx,
+	_, stderr, err = cmdBuilder.Capture(
+		cmdBuilder.BuildGitCmd(ctx,
 			dir, "merge", "--no-edit", "--ff"))
 	if err != nil {
 		return errors.New(gotext.Get("error merging %s: %s", dir, stderr))
@@ -605,9 +605,9 @@ func gitMerge(ctx context.Context, dir string) error {
 	return nil
 }
 
-func mergePkgbuilds(ctx context.Context, pkgbuildDirs map[string]string) error {
+func mergePkgbuilds(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string) error {
 	for _, dir := range pkgbuildDirs {
-		err := gitMerge(ctx, dir)
+		err := gitMerge(ctx, cmdBuilder, dir)
 		if err != nil {
 			return err
 		}

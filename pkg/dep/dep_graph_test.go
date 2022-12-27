@@ -9,6 +9,7 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/db/mock"
+	mockaur "github.com/Jguer/yay/v11/pkg/dep/mock"
 	aur "github.com/Jguer/yay/v11/pkg/query"
 
 	"github.com/Jguer/aur/metadata"
@@ -19,21 +20,7 @@ func ptrString(s string) *string {
 	return &s
 }
 
-type getFunc func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error)
-
-type MockAUR struct {
-	GetFn getFunc
-}
-
-func (m *MockAUR) Get(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
-	if m.GetFn != nil {
-		return m.GetFn(ctx, query)
-	}
-
-	panic("implement me")
-}
-
-func getFromFile(t *testing.T, filePath string) getFunc {
+func getFromFile(t *testing.T, filePath string) mockaur.GetFunc {
 	f, err := os.Open(filePath)
 	require.NoError(t, err)
 
@@ -85,7 +72,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 		},
 	}
 
-	mockAUR := &MockAUR{GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
 		if query.Needles[0] == "jellyfin" {
 			jfinFn := getFromFile(t, "testdata/jellyfin.json")
 			return jfinFn(ctx, query)

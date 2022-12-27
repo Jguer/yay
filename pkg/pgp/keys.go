@@ -2,6 +2,7 @@ package pgp
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -11,6 +12,7 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
@@ -41,16 +43,19 @@ func (set pgpKeySet) get(key string) bool {
 	return exists
 }
 
+type GPGCmdBuilder interface {
+	exe.Runner
+	BuildGPGCmd(ctx context.Context, extraArgs ...string) *exec.Cmd
+}
+
 // CheckPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func CheckPgpKeys(pkgbuildDirsByBase map[string]string, srcinfos map[string]*gosrc.Srcinfo,
-	gpgBin, gpgFlags string, noConfirm bool,
+func CheckPgpKeys(ctx context.Context, pkgbuildDirsByBase map[string]string, srcinfos map[string]*gosrc.Srcinfo,
+	cmdBuilder GPGCmdBuilder, noConfirm bool,
 ) ([]string, error) {
 	// Let's check the keys individually, and then we can offer to import
 	// the problematic ones.
 	problematic := make(pgpKeySet)
-
-	args := append(strings.Fields(gpgFlags), "--list-keys")
 
 	// Mapping all the keys.
 	for pkg := range pkgbuildDirsByBase {
@@ -64,8 +69,7 @@ func CheckPgpKeys(pkgbuildDirsByBase map[string]string, srcinfos map[string]*gos
 				continue
 			}
 
-			cmd := exec.Command(gpgBin, append(args, key)...)
-			if err := cmd.Run(); err != nil {
+			if err := cmdBuilder.Show(cmdBuilder.BuildGPGCmd(ctx, "--list-keys", key)); err != nil {
 				problematic.set(key, pkg)
 			}
 		}
@@ -85,21 +89,17 @@ func CheckPgpKeys(pkgbuildDirsByBase map[string]string, srcinfos map[string]*gos
 	fmt.Println(str)
 
 	if text.ContinueTask(os.Stdin, gotext.Get("Import?"), true, noConfirm) {
-		return problematic.toSlice(), importKeys(problematic.toSlice(), gpgBin, gpgFlags)
+		return problematic.toSlice(), importKeys(ctx, cmdBuilder, problematic.toSlice())
 	}
 
 	return problematic.toSlice(), nil
 }
 
 // importKeys tries to import the list of keys specified in its argument.
-func importKeys(keys []string, gpgBin, gpgFlags string) error {
-	args := append(strings.Fields(gpgFlags), "--recv-keys")
-	cmd := exec.Command(gpgBin, append(args, keys...)...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-
+func importKeys(ctx context.Context, cmdBuilder GPGCmdBuilder, keys []string) error {
 	text.OperationInfoln(gotext.Get("Importing keys with gpg..."))
 
-	if err := cmd.Run(); err != nil {
+	if err := cmdBuilder.Show(cmdBuilder.BuildGPGCmd(ctx, append([]string{"--recv-keys"}, keys...)...)); err != nil {
 		return errors.New(gotext.Get("problem importing keys"))
 	}
 
