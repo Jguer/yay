@@ -418,19 +418,20 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 		return err
 	}
 
-	arguments := cmdArgs.CopyGlobal()
-	arguments.AddTarget(targets...)
+	// modify the arguments to pass for the install
+	cmdArgs.Op = "S"
+	cmdArgs.Targets = targets
 
-	if len(arguments.Targets) == 0 {
+	if len(cmdArgs.Targets) == 0 {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
 
 	if config.NewInstallEngine {
-		return syncInstall(ctx, config, arguments, dbExecutor)
+		return syncInstall(ctx, config, cmdArgs, dbExecutor)
 	}
 
-	return install(ctx, arguments, dbExecutor, true)
+	return install(ctx, cmdArgs, dbExecutor, true)
 }
 
 func syncList(ctx context.Context, httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
