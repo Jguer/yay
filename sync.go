@@ -101,15 +101,19 @@ func (o *OperationService) Run(ctx context.Context,
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
-	srcinfoOp := srcinfoOperator{dbExecutor: o.dbExecutor}
+	srcinfoOp := srcinfoOperator{
+		dbExecutor: o.dbExecutor,
+		cfg:        o.cfg,
+		cmdBuilder: installer.exeCmd,
+	}
 	srcinfos, err := srcinfoOp.Run(ctx, pkgBuildDirs)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		_ = completion.Update(ctx, config.Runtime.HTTPClient, o.dbExecutor,
-			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		_ = completion.Update(ctx, o.cfg.Runtime.HTTPClient, o.dbExecutor,
+			o.cfg.AURURL, o.cfg.Runtime.CompletionPath, o.cfg.CompletionInterval, false)
 	}()
 
 	err = installer.Install(ctx, cmdArgs, targets, pkgBuildDirs, srcinfos)

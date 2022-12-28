@@ -28,7 +28,7 @@ type Runtime struct {
 	CompletionPath string
 	ConfigPath     string
 	PacmanConf     *pacmanconf.Config
-	VCSStore       *vcs.InfoStore
+	VCSStore       vcs.Store
 	CmdBuilder     exe.ICmdBuilder
 	HTTPClient     *http.Client
 	AURClient      *aur.Client

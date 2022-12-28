@@ -379,7 +379,7 @@ func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Ex
 	return nil
 }
 
-func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vcs.InfoStore) error {
+func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache vcs.Store) error {
 	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err == nil {

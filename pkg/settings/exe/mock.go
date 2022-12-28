@@ -2,6 +2,7 @@ package exe
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
@@ -10,6 +11,11 @@ import (
 type Call struct {
 	Res  []interface{}
 	Args []interface{}
+	Dir  string
+}
+
+func (c *Call) String() string {
+	return fmt.Sprintf("%+v", c.Args)
 }
 
 type MockBuilder struct {
@@ -84,6 +90,7 @@ func (m *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 		Args: []interface{}{
 			cmd,
 		},
+		Dir: cmd.Dir,
 	})
 
 	if m.CaptureFn != nil {
@@ -103,6 +110,7 @@ func (m *MockRunner) Show(cmd *exec.Cmd) error {
 		Args: []interface{}{
 			cmd,
 		},
+		Dir: cmd.Dir,
 	})
 
 	return err

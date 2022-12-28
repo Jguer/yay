@@ -710,7 +710,7 @@ func buildInstallPkgbuilds(
 			for _, split := range base {
 				pkgdest, ok := pkgdests[split.Name]
 				if !ok {
-					return errors.New(gotext.Get("could not find PKGDEST for: %s", split.Name))
+					return &PkgDestNotInListError{split.Name}
 				}
 
 				if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
@@ -894,7 +894,7 @@ func doAddTarget(dp *dep.Pool, localNamesCache, remoteNamesCache stringset.Strin
 			return deps, exp, pkgArchives, nil
 		}
 
-		return deps, exp, pkgArchives, errors.New(gotext.Get("could not find PKGDEST for: %s", name))
+		return deps, exp, pkgArchives, &PkgDestNotInListError{name}
 	}
 
 	if _, errStat := os.Stat(pkgdest); os.IsNotExist(errStat) {
