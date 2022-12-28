@@ -197,7 +197,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 				tt.fields.noDeps, tt.fields.noCheckDeps)
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap()
+			layers := got.TopoSortedLayerMap(nil)
 			require.EqualValues(t, tt.want, layers, layers)
 		})
 	}

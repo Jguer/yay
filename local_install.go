@@ -10,6 +10,7 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
+	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/topo"
@@ -51,5 +52,16 @@ func installLocalPKGBUILD(
 	}
 
 	opService := NewOperationService(ctx, config, dbExecutor)
-	return opService.Run(ctx, cmdArgs, graph.TopoSortedLayerMap())
+	multiErr := &multierror.MultiError{}
+	targets := graph.TopoSortedLayerMap(func(name string, ii *dep.InstallInfo) error {
+		if ii.Source == dep.Missing {
+			multiErr.Add(errors.New(gotext.Get("could not find %s%s", name, ii.Version)))
+		}
+		return nil
+	})
+
+	if err := multiErr.Return(); err != nil {
+		return err
+	}
+	return opService.Run(ctx, cmdArgs, targets)
 }

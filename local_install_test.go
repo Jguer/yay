@@ -162,3 +162,120 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
+
+func TestIntegrationLocalInstallMissingDep(t *testing.T) {
+	wantErr := "could not find dotnet-sdk>=6"
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	gitBin := t.TempDir() + "/git"
+	tmpDir := t.TempDir()
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(gitBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	tars := []string{
+		tmpDir + "/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
+		tmpDir + "/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
+		tmpDir + "/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst",
+	}
+
+	wantShow := []string{}
+	wantCapture := []string{}
+
+	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+		return strings.Join(tars, "\n"), "", nil
+	}
+
+	once := sync.Once{}
+
+	showOverride := func(cmd *exec.Cmd) error {
+		once.Do(func() {
+			for _, tar := range tars {
+				f, err := os.OpenFile(tar, os.O_RDONLY|os.O_CREATE, 0o666)
+				require.NoError(t, err)
+				require.NoError(t, f.Close())
+			}
+		})
+		return nil
+	}
+
+	mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:       makepkgBin,
+		SudoBin:          "su",
+		PacmanBin:        pacmanBin,
+		PacmanConfigPath: "/etc/pacman.conf",
+		GitBin:           "git",
+		Runner:           mockRunner,
+		SudoLoopEnabled:  false,
+	}
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddArg("B")
+	cmdArgs.AddArg("i")
+	cmdArgs.AddTarget("testdata/jfin")
+	db := &mock.DBExecutor{
+		AlpmArchitecturesFn: func() ([]string, error) {
+			return []string{"x86_64"}, nil
+		},
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "dotnet-sdk>=6", "dotnet-sdk<7", "dotnet-runtime>=6", "dotnet-runtime<7", "jellyfin-server=10.8.4", "jellyfin-web=10.8.4":
+				return false
+			}
+
+			return true
+		},
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "dotnet-runtime>=6", "dotnet-runtime<7":
+				return &mock.Package{
+					PName:    "dotnet-runtime-6.0",
+					PBase:    "dotnet-runtime-6.0",
+					PVersion: "6.0.100-1",
+					PDB:      mock.NewDB("community"),
+				}
+			}
+
+			return nil
+		},
+	}
+
+	config := &settings.Configuration{
+		Runtime: &settings.Runtime{
+			CmdBuilder: cmdBuilder,
+			VCSStore:   &vcs.Mock{},
+			AURCache: &mockaur.MockAUR{
+				GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
+					return []*aur.Pkg{}, nil
+				},
+			},
+		},
+	}
+
+	err = handleCmd(context.Background(), config, cmdArgs, db)
+	require.Error(t, err)
+	require.EqualError(t, err, wantErr)
+
+	require.Len(t, mockRunner.ShowCalls, len(wantShow))
+	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
+
+	for i, call := range mockRunner.ShowCalls {
+		show := call.Args[0].(*exec.Cmd).String()
+		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
+		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+		show = strings.ReplaceAll(show, pacmanBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "pacman")
+
+		// options are in a different order on different systems and on CI root user is used
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+	}
+}

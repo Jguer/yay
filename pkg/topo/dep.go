@@ -17,6 +17,8 @@ type NodeInfo[V any] struct {
 	Value      V
 }
 
+type CheckFn[T comparable, V any] func(T, V) error
+
 type Graph[T comparable, V any] struct {
 	alias   AliasMap[T] // alias -> aliased
 	aliases DepMap[T]   // aliased -> alias
@@ -234,7 +236,7 @@ func (g *Graph[T, V]) TopoSortedLayers() [][]T {
 }
 
 // TopoSortedLayerMap returns a slice of all of the graph nodes in topological sort order with their node info.
-func (g *Graph[T, V]) TopoSortedLayerMap() []map[T]V {
+func (g *Graph[T, V]) TopoSortedLayerMap(checkFn CheckFn[T, V]) []map[T]V {
 	layers := []map[T]V{}
 
 	// Copy the graph
@@ -249,6 +251,11 @@ func (g *Graph[T, V]) TopoSortedLayerMap() []map[T]V {
 		layers = append(layers, leaves)
 
 		for leafNode := range leaves {
+			if checkFn != nil {
+				if err := checkFn(leafNode, leaves[leafNode]); err != nil {
+					return nil
+				}
+			}
 			shrinkingGraph.remove(leafNode)
 		}
 	}

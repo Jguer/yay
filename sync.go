@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -59,7 +60,18 @@ func syncInstall(ctx context.Context,
 	}
 
 	opService := NewOperationService(ctx, config, dbExecutor)
-	return opService.Run(ctx, cmdArgs, graph.TopoSortedLayerMap())
+	multiErr := &multierror.MultiError{}
+	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
+		if ii.Source == dep.Missing {
+			multiErr.Add(errors.New(gotext.Get("could not find %s%s", s, ii.Version)))
+		}
+		return nil
+	})
+
+	if err := multiErr.Return(); err != nil {
+		return err
+	}
+	return opService.Run(ctx, cmdArgs, targets)
 }
 
 type OperationService struct {
