@@ -36,10 +36,10 @@ type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
 
-	useAURCache       bool
 	sortBy            string
 	searchBy          string
 	targetMode        parser.TargetMode
+	useAURCache       bool
 	bottomUp          bool
 	singleLineResults bool
 
