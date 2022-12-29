@@ -300,7 +300,7 @@ func (g *Grapher) addNodes(
 	depType Reason,
 ) {
 	for _, depString := range deps {
-		depName, _, _ := splitDep(depString)
+		depName, mod, ver := splitDep(depString)
 
 		if g.dbExecutor.LocalSatisfierExists(depString) {
 			if g.fullGraph {
@@ -403,7 +403,16 @@ func (g *Grapher) addNodes(
 		}
 
 		// no dep found. add as missing
-		graph.SetNodeInfo(depString, &topo.NodeInfo[*InstallInfo]{Color: colorMap[depType], Background: bgColorMap[Missing]})
+		graph.AddNode(depName)
+		graph.SetNodeInfo(depName, &topo.NodeInfo[*InstallInfo]{
+			Color:      colorMap[depType],
+			Background: bgColorMap[Missing],
+			Value: &InstallInfo{
+				Source:  Missing,
+				Reason:  depType,
+				Version: fmt.Sprintf("%s%s", mod, ver),
+			},
+		})
 	}
 }
 

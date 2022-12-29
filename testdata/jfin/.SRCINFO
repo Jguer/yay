@@ -1,0 +1,43 @@
+pkgbase = jellyfin
+	pkgdesc = The Free Software Media System
+	pkgver = 10.8.4
+	pkgrel = 1
+	url = https://github.com/jellyfin/jellyfin
+	arch = i686
+	arch = x86_64
+	arch = armv6h
+	license = GPL2
+	makedepends = dotnet-sdk>=6
+	makedepends = dotnet-sdk<7
+	makedepends = nodejs
+	makedepends = npm
+	makedepends = git
+	source = jellyfin-10.8.4.tar.gz::https://github.com/jellyfin/jellyfin/archive/v10.8.4.tar.gz
+	source = jellyfin-web-10.8.4.tar.gz::https://github.com/jellyfin/jellyfin-web/archive/v10.8.4.tar.gz
+	source = jellyfin.conf
+	source = jellyfin.service
+	source = jellyfin.sysusers
+	source = jellyfin.tmpfiles
+	sha512sums = cf472f36a759a7eb3724dac79d3bd2d6c9c58fc375293ad6eb8b5ce1ea1a8f6dd296cc36113b80b1c705a99eafb2bd9ffd9381fd52fa19aa12018d50656c9bde
+	sha512sums = 21983940689475de7f9d37a1016fb2dd740986ac27ffa2e0eac0bc9c84d68ac557fdc8afb64ca70b867af2d1e438293b98d5c155da402d3e985ab831042ba176
+	sha512sums = 2aa97a1a7a8a447171b59be3e93183e09cbbc32c816843cc47c6777b9aec48bd9c1d9d354f166e0b000ad8d2e94e6e4b0559aa52e5c159abbc103ed2c5afa3f0
+	sha512sums = 99d02080b1b92e731250f39ddd13ceca7129d69d0c05e0939620cbc3f499a9574668c63fa889704a4905560888131e980d7ab1fbcc5837b04d33ce26daa9d42b
+	sha512sums = 6fc2638e6ec4b1ee0240e17815c91107b694e5fde72c1bc7956c83067bbeacb632de899b86837e47a0ec04288131b15c20746373b45e0669c8976069a55d627a
+	sha512sums = 45a62b62d97b9a83289d4dfde684163b1bcf340c1921fb958e5a701812c61b392901841940c67e5fa5148783277d5b4dc65ba01d3a22e8f855ea62154ad9be33
+
+pkgname = jellyfin
+	depends = jellyfin-web=10.8.4
+	depends = jellyfin-server=10.8.4
+
+pkgname = jellyfin-web
+	pkgdesc = Jellyfin web client
+
+pkgname = jellyfin-server
+	pkgdesc = Jellyfin server component
+	depends = dotnet-runtime>=6
+	depends = dotnet-runtime<7
+	depends = aspnet-runtime>=6
+	depends = aspnet-runtime<7
+	depends = ffmpeg
+	depends = sqlite
+	backup = etc/conf.d/jellyfin

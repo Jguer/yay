@@ -28,6 +28,10 @@ const (
 	Minimal
 )
 
+type AURCache interface {
+	Get(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error)
+}
+
 type SourceQueryBuilder struct {
 	repoQuery
 	aurQuery
@@ -40,12 +44,12 @@ type SourceQueryBuilder struct {
 	singleLineResults bool
 
 	aurClient aur.ClientInterface
-	aurCache  *metadata.Client
+	aurCache  AURCache
 }
 
 func NewSourceQueryBuilder(
 	aurClient aur.ClientInterface,
-	aurCache *metadata.Client,
+	aurCache AURCache,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -193,7 +197,7 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
-	aurClient aur.ClientInterface, aurMetadata *metadata.Client,
+	aurClient aur.ClientInterface, aurMetadata AURCache,
 	pkgS []string, searchBy string, newEngine bool,
 ) ([]aur.Pkg, error) {
 	var (

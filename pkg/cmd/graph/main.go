@@ -74,7 +74,7 @@ func graphPackage(
 	fmt.Fprintln(os.Stdout, graph.String())
 	fmt.Fprintln(os.Stdout, "\nlayers\n", graph.TopoSortedLayers())
 	fmt.Fprintln(os.Stdout, "\ninverted order\n", graph.TopoSorted())
-	fmt.Fprintln(os.Stdout, "\nlayers map\n", graph.TopoSortedLayerMap())
+	fmt.Fprintln(os.Stdout, "\nlayers map\n", graph.TopoSortedLayerMap(nil))
 
 	return nil
 }

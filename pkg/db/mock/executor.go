@@ -21,9 +21,13 @@ type DBExecutor struct {
 	PackagesFromGroupFn         func(string) []IPackage
 	LocalSatisfierExistsFn      func(string) bool
 	SyncSatisfierFn             func(string) IPackage
+	AlpmArchitecturesFn         func() ([]string, error)
 }
 
 func (t *DBExecutor) AlpmArchitectures() ([]string, error) {
+	if t.AlpmArchitecturesFn != nil {
+		return t.AlpmArchitecturesFn()
+	}
 	panic("implement me")
 }
 

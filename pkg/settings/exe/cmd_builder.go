@@ -28,6 +28,7 @@ type GitCmdBuilder interface {
 type ICmdBuilder interface {
 	Runner
 	BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
+	BuildGPGCmd(ctx context.Context, extraArgs ...string) *exec.Cmd
 	BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
 	BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 	AddMakepkgFlag(string)
@@ -38,6 +39,8 @@ type ICmdBuilder interface {
 type CmdBuilder struct {
 	GitBin           string
 	GitFlags         []string
+	GPGBin           string
+	GPGFlags         []string
 	MakepkgFlags     []string
 	MakepkgConfPath  string
 	MakepkgBin       string
@@ -48,6 +51,21 @@ type CmdBuilder struct {
 	PacmanConfigPath string
 	PacmanDBPath     string
 	Runner           Runner
+}
+
+func (c *CmdBuilder) BuildGPGCmd(ctx context.Context, extraArgs ...string) *exec.Cmd {
+	args := make([]string, len(c.GPGFlags), len(c.GPGFlags)+len(extraArgs))
+	copy(args, c.GPGFlags)
+
+	if len(extraArgs) > 0 {
+		args = append(args, extraArgs...)
+	}
+
+	cmd := exec.CommandContext(ctx, c.GPGBin, args...)
+
+	cmd = c.deElevateCommand(ctx, cmd)
+
+	return cmd
 }
 
 func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {

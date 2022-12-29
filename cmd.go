@@ -149,13 +149,13 @@ getpkgbuild specific options:
     -p --print            Print pkgbuild of packages`)
 }
 
-func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleCmd(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp(ctx, cmdArgs)
 	}
 
-	if config.SudoLoop && cmdArgs.NeedRoot(config.Runtime.Mode) {
-		config.Runtime.CmdBuilder.SudoLoop()
+	if cfg.SudoLoop && cmdArgs.NeedRoot(cfg.Runtime.Mode) {
+		cfg.Runtime.CmdBuilder.SudoLoop()
 	}
 
 	switch cmdArgs.Op {
@@ -164,30 +164,30 @@ func handleCmd(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 
 		return nil
 	case "D", "database":
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case "F", "files":
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case "Q", "query":
 		return handleQuery(ctx, cmdArgs, dbExecutor)
 	case "R", "remove":
-		return handleRemove(ctx, cmdArgs, config.Runtime.VCSStore)
+		return handleRemove(ctx, cmdArgs, cfg.Runtime.VCSStore)
 	case "S", "sync":
 		return handleSync(ctx, cmdArgs, dbExecutor)
 	case "T", "deptest":
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case "U", "upgrade":
-		return handleUpgrade(ctx, config, cmdArgs)
+		return handleUpgrade(ctx, cfg, cmdArgs)
 	case "B", "build":
-		return handleBuild(ctx, config, dbExecutor, cmdArgs)
+		return handleBuild(ctx, cfg, dbExecutor, cmdArgs)
 	case "G", "getpkgbuild":
 		return handleGetpkgbuild(ctx, cmdArgs, dbExecutor)
 	case "P", "show":
 		return handlePrint(ctx, cmdArgs, dbExecutor)
 	case "Y", "yay":
-		return handleYay(ctx, cmdArgs, dbExecutor, config.Runtime.QueryBuilder)
+		return handleYay(ctx, cmdArgs, dbExecutor, cfg.Runtime.QueryBuilder)
 	case "W", "web":
 		return handleWeb(ctx, cmdArgs)
 	}
@@ -379,7 +379,7 @@ func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Ex
 	return nil
 }
 
-func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache *vcs.InfoStore) error {
+func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache vcs.Store) error {
 	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err == nil {

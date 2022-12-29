@@ -26,31 +26,31 @@ type PreparerHookFunc func(ctx context.Context, config *settings.Configuration, 
 type Preparer struct {
 	dbExecutor        db.Executor
 	cmdBuilder        exe.ICmdBuilder
-	config            *settings.Configuration
+	cfg               *settings.Configuration
 	postDownloadHooks []PreparerHookFunc
 	postMergeHooks    []PreparerHookFunc
 
 	makeDeps []string
 }
 
-func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, config *settings.Configuration) *Preparer {
+func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, cfg *settings.Configuration) *Preparer {
 	preper := &Preparer{
 		dbExecutor:        dbExecutor,
 		cmdBuilder:        cmdBuilder,
-		config:            config,
+		cfg:               cfg,
 		postDownloadHooks: []PreparerHookFunc{},
 		postMergeHooks:    []PreparerHookFunc{},
 	}
 
-	if config.CleanMenu {
+	if cfg.CleanMenu {
 		preper.postDownloadHooks = append(preper.postDownloadHooks, menus.CleanFn)
 	}
 
-	if config.DiffMenu {
+	if cfg.DiffMenu {
 		preper.postMergeHooks = append(preper.postMergeHooks, menus.DiffFn)
 	}
 
-	if config.EditMenu {
+	if cfg.EditMenu {
 		preper.postMergeHooks = append(preper.postMergeHooks, menus.EditFn)
 	}
 
@@ -58,14 +58,14 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, config *set
 }
 
 func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostInstallHookFunc {
-	if !preper.config.CleanAfter || len(pkgBuildDirs) == 0 {
+	if !preper.cfg.CleanAfter || len(pkgBuildDirs) == 0 {
 		return nil
 	}
 
 	text.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
 
 	return func(ctx context.Context) error {
-		cleanAfter(ctx, preper.config.Runtime.CmdBuilder, pkgBuildDirs)
+		cleanAfter(ctx, preper.cfg.Runtime.CmdBuilder, pkgBuildDirs)
 		return nil
 	}
 }
@@ -75,7 +75,7 @@ func (preper *Preparer) ShouldCleanMakeDeps() PostInstallHookFunc {
 		return nil
 	}
 
-	switch preper.config.RemoveMake {
+	switch preper.cfg.RemoveMake {
 	case "yes":
 		break
 	case "no":
@@ -89,7 +89,7 @@ func (preper *Preparer) ShouldCleanMakeDeps() PostInstallHookFunc {
 	text.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
 
 	return func(ctx context.Context) error {
-		return removeMake(ctx, preper.config.Runtime.CmdBuilder, preper.makeDeps)
+		return removeMake(ctx, preper.cfg.Runtime.CmdBuilder, preper.makeDeps)
 	}
 }
 
@@ -152,7 +152,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 		for _, info := range layer {
 			if info.Source == dep.AUR {
 				pkgBase := *info.AURBase
-				pkgBuildDir := filepath.Join(preper.config.BuildDir, pkgBase)
+				pkgBuildDir := filepath.Join(preper.cfg.BuildDir, pkgBase)
 				if preper.needToCloneAURBase(info, pkgBuildDir) {
 					aurBasesToClone.Add(pkgBase)
 				}
@@ -166,27 +166,27 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 
 	if _, errA := download.AURPKGBUILDRepos(ctx,
 		preper.cmdBuilder, aurBasesToClone.ToSlice(),
-		config.AURURL, config.BuildDir, false); errA != nil {
+		preper.cfg.AURURL, preper.cfg.BuildDir, false); errA != nil {
 		return nil, errA
 	}
 
-	if errP := downloadPKGBUILDSourceFanout(ctx, config.Runtime.CmdBuilder,
-		pkgBuildDirsByBase, false, config.MaxConcurrentDownloads); errP != nil {
+	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
+		pkgBuildDirsByBase, false, preper.cfg.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 
 	for _, hookFn := range preper.postDownloadHooks {
-		if err := hookFn(ctx, preper.config, os.Stdout, pkgBuildDirsByBase); err != nil {
+		if err := hookFn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := mergePkgbuilds(ctx, pkgBuildDirsByBase); err != nil {
+	if err := mergePkgbuilds(ctx, preper.cmdBuilder, pkgBuildDirsByBase); err != nil {
 		return nil, err
 	}
 
 	for _, hookFn := range preper.postMergeHooks {
-		if err := hookFn(ctx, preper.config, os.Stdout, pkgBuildDirsByBase); err != nil {
+		if err := hookFn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase); err != nil {
 			return nil, err
 		}
 	}
@@ -195,7 +195,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 }
 
 func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuildDir string) bool {
-	if preper.config.ReDownload == "all" {
+	if preper.cfg.ReDownload == "all" {
 		return true
 	}
 

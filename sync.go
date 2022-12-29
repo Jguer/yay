@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -59,7 +60,18 @@ func syncInstall(ctx context.Context,
 	}
 
 	opService := NewOperationService(ctx, config, dbExecutor)
-	return opService.Run(ctx, cmdArgs, graph.TopoSortedLayerMap())
+	multiErr := &multierror.MultiError{}
+	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
+		if ii.Source == dep.Missing {
+			multiErr.Add(errors.New(gotext.Get("could not find %s%s", s, ii.Version)))
+		}
+		return nil
+	})
+
+	if err := multiErr.Return(); err != nil {
+		return err
+	}
+	return opService.Run(ctx, cmdArgs, targets)
 }
 
 type OperationService struct {
@@ -84,7 +96,7 @@ func (o *OperationService) Run(ctx context.Context,
 		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
 		return nil
 	}
-	preparer := NewPreparer(o.dbExecutor, config.Runtime.CmdBuilder, config)
+	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
 	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode)
 
 	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, targets)
@@ -101,15 +113,19 @@ func (o *OperationService) Run(ctx context.Context,
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
-	srcinfoOp := srcinfoOperator{dbExecutor: o.dbExecutor}
-	srcinfos, err := srcinfoOp.Run(pkgBuildDirs)
+	srcinfoOp := srcinfoOperator{
+		dbExecutor: o.dbExecutor,
+		cfg:        o.cfg,
+		cmdBuilder: installer.exeCmd,
+	}
+	srcinfos, err := srcinfoOp.Run(ctx, pkgBuildDirs)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		_ = completion.Update(ctx, config.Runtime.HTTPClient, o.dbExecutor,
-			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		_ = completion.Update(ctx, o.cfg.Runtime.HTTPClient, o.dbExecutor,
+			o.cfg.AURURL, o.cfg.Runtime.CompletionPath, o.cfg.CompletionInterval, false)
 	}()
 
 	err = installer.Install(ctx, cmdArgs, targets, pkgBuildDirs, srcinfos)
