@@ -53,9 +53,10 @@ func (b Base) String() string {
 	return str
 }
 
-func GetBases(pkgs []*aur.Pkg) []Base {
+func GetBases(pkgs []aur.Pkg) []Base {
 	basesMap := make(map[string]Base)
-	for _, pkg := range pkgs {
+	for i := range pkgs {
+		pkg := &pkgs[i]
 		basesMap[pkg.PackageBase] = append(basesMap[pkg.PackageBase], pkg)
 	}
 

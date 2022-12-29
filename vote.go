@@ -35,12 +35,12 @@ func handlePackageVote(ctx context.Context,
 		return nil
 	}
 
-	for _, info := range infos {
+	for i := range infos {
 		var err error
 		if upvote {
-			err = voteClient.Vote(ctx, info.PackageBase)
+			err = voteClient.Vote(ctx, infos[i].PackageBase)
 		} else {
-			err = voteClient.Unvote(ctx, info.PackageBase)
+			err = voteClient.Unvote(ctx, infos[i].PackageBase)
 		}
 
 		if err != nil {
@@ -50,7 +50,7 @@ func handlePackageVote(ctx context.Context,
 						err.Error()))
 			}
 
-			return &ErrAURVote{inner: err, pkgName: info.Name}
+			return &ErrAURVote{inner: err, pkgName: infos[i].Name}
 		}
 	}
 

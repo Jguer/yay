@@ -223,8 +223,9 @@ func (dp *Pool) cacheAURPackages(ctx context.Context, _pkgs stringset.StringSet,
 		return err
 	}
 
-	for _, pkg := range info {
+	for i := range info {
 		// Dump everything in cache just in case we need it later
+		pkg := &info[i]
 		dp.AurCache[pkg.Name] = pkg
 	}
 

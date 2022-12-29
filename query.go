@@ -35,7 +35,7 @@ func syncSearch(ctx context.Context, pkgS []string,
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
 func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) error {
 	var (
-		info    []*aur.Pkg
+		info    []aur.Pkg
 		err     error
 		missing = false
 	)
@@ -77,8 +77,8 @@ func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbE
 	}
 
 	if len(info) != 0 {
-		for _, pkg := range info {
-			PrintInfo(pkg, cmdArgs.ExistsDouble("i"))
+		for i := range info {
+			PrintInfo(&info[i], cmdArgs.ExistsDouble("i"))
 		}
 	}
 

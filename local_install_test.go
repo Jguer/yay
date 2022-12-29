@@ -138,8 +138,8 @@ func TestIntegrationLocalInstall(t *testing.T) {
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
-					return []*aur.Pkg{}, nil
+				GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
+					return []aur.Pkg{}, nil
 				},
 			},
 		},
@@ -254,8 +254,8 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
-					return []*aur.Pkg{}, nil
+				GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
+					return []aur.Pkg{}, nil
 				},
 			},
 		},
