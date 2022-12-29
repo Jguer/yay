@@ -90,7 +90,7 @@ var colorMap = map[Reason]string{
 }
 
 type AURCache interface {
-	Get(ctx context.Context, query *metadata.AURQuery) ([]*aurc.Pkg, error)
+	Get(ctx context.Context, query *metadata.AURQuery) ([]aurc.Pkg, error)
 }
 
 type Grapher struct {
@@ -358,9 +358,9 @@ func (g *Grapher) addNodes(
 			continue
 		}
 
-		var aurPkgs []*aur.Pkg
+		var aurPkgs []aur.Pkg
 		if cachedProvidePkg, ok := g.providerCache[depName]; ok {
-			aurPkgs = []*aur.Pkg{cachedProvidePkg}
+			aurPkgs = []aur.Pkg{*cachedProvidePkg}
 		} else {
 			var errMeta error
 			aurPkgs, errMeta = g.aurCache.Get(ctx,
@@ -377,8 +377,8 @@ func (g *Grapher) addNodes(
 		if len(aurPkgs) != 0 { // Check AUR
 			pkg := aurPkgs[0]
 			if len(aurPkgs) > 1 {
-				pkg = provideMenu(g.w, depName, aurPkgs, g.noConfirm)
-				g.providerCache[depName] = pkg
+				chosen := provideMenu(g.w, depName, aurPkgs, g.noConfirm)
+				g.providerCache[depName] = chosen
 			}
 
 			if err := graph.DependOn(pkg.Name, parentPkgName); err != nil {
@@ -397,7 +397,7 @@ func (g *Grapher) addNodes(
 						Version: pkg.Version,
 					},
 				})
-			g.addDepNodes(ctx, pkg, graph)
+			g.addDepNodes(ctx, &pkg, graph)
 
 			continue
 		}
@@ -416,10 +416,10 @@ func (g *Grapher) addNodes(
 	}
 }
 
-func provideMenu(w io.Writer, dep string, options []*aur.Pkg, noConfirm bool) *aur.Pkg {
+func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *aur.Pkg {
 	size := len(options)
 	if size == 1 {
-		return options[0]
+		return &options[0]
 	}
 
 	str := text.Bold(gotext.Get("There are %d providers available for %s:", size, dep))
@@ -428,8 +428,8 @@ func provideMenu(w io.Writer, dep string, options []*aur.Pkg, noConfirm bool) *a
 	size = 1
 	str += text.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
 
-	for _, pkg := range options {
-		str += fmt.Sprintf("%d) %s ", size, pkg.Name)
+	for i := range options {
+		str += fmt.Sprintf("%d) %s ", size, options[i].Name)
 		size++
 	}
 
@@ -441,7 +441,7 @@ func provideMenu(w io.Writer, dep string, options []*aur.Pkg, noConfirm bool) *a
 		if noConfirm {
 			fmt.Fprintln(w, "1")
 
-			return options[0]
+			return &options[0]
 		}
 
 		numberBuf, err := text.GetInput("", false)
@@ -452,7 +452,7 @@ func provideMenu(w io.Writer, dep string, options []*aur.Pkg, noConfirm bool) *a
 		}
 
 		if numberBuf == "" {
-			return options[0]
+			return &options[0]
 		}
 
 		num, err := strconv.Atoi(numberBuf)
@@ -468,7 +468,7 @@ func provideMenu(w io.Writer, dep string, options []*aur.Pkg, noConfirm bool) *a
 			continue
 		}
 
-		return options[num-1]
+		return &options[num-1]
 	}
 
 	return nil

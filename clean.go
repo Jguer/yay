@@ -126,8 +126,8 @@ func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, d
 			return errInfo
 		}
 
-		for _, pkg := range info {
-			inAURBases.Set(pkg.PackageBase)
+		for i := range info {
+			inAURBases.Set(info[i].PackageBase)
 		}
 	}
 

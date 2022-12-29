@@ -29,7 +29,7 @@ const (
 )
 
 type AURCache interface {
-	Get(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error)
+	Get(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error)
 }
 
 type SourceQueryBuilder struct {
@@ -215,8 +215,8 @@ func queryAUR(ctx context.Context,
 				Contains: true,
 			})
 
-			for _, pkg := range q {
-				r = append(r, *pkg)
+			for i := range q {
+				r = append(r, q[i])
 			}
 
 			if errM == nil {

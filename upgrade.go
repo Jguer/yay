@@ -73,7 +73,7 @@ func upList(ctx context.Context, aurCache settings.AURCache,
 	if config.Runtime.Mode.AtLeastAUR() {
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
-		var _aurdata []*aur.Pkg
+		var _aurdata []aur.Pkg
 		if aurCache != nil {
 			_aurdata, err = aurCache.Get(ctx, &metadata.AURQuery{Needles: remoteNames, By: aur.Name})
 		} else {
@@ -83,7 +83,8 @@ func upList(ctx context.Context, aurCache settings.AURCache,
 		errs.Add(err)
 
 		if err == nil {
-			for _, pkg := range _aurdata {
+			for i := range _aurdata {
+				pkg := &_aurdata[i]
 				aurdata[pkg.Name] = pkg
 			}
 

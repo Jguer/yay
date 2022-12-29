@@ -27,11 +27,11 @@ func getFromFile(t *testing.T, filePath string) mockaur.GetFunc {
 	fBytes, err := io.ReadAll(f)
 	require.NoError(t, err)
 
-	pkgs := []*aur.Pkg{}
+	pkgs := []aur.Pkg{}
 	err = json.Unmarshal(fBytes, &pkgs)
 	require.NoError(t, err)
 
-	return func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
+	return func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
 		return pkgs, nil
 	}
 }
@@ -72,7 +72,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 		},
 	}
 
-	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error) {
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
 		if query.Needles[0] == "jellyfin" {
 			jfinFn := getFromFile(t, "testdata/jellyfin.json")
 			return jfinFn(ctx, query)

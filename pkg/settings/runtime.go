@@ -17,7 +17,7 @@ import (
 )
 
 type AURCache interface {
-	Get(ctx context.Context, query *metadata.AURQuery) ([]*aur.Pkg, error)
+	Get(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error)
 }
 
 type Runtime struct {
