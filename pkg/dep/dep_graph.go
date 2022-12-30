@@ -379,6 +379,7 @@ func (g *Grapher) addNodes(
 			if len(aurPkgs) > 1 {
 				chosen := provideMenu(g.w, depName, aurPkgs, g.noConfirm)
 				g.providerCache[depName] = chosen
+				pkg = *chosen
 			}
 
 			if err := graph.DependOn(pkg.Name, parentPkgName); err != nil {

@@ -350,6 +350,8 @@ func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
 	return &exe.CmdBuilder{
 		GitBin:           c.GitBin,
 		GitFlags:         strings.Fields(c.GitFlags),
+		GPGBin:           c.GpgBin,
+		GPGFlags:         strings.Fields(c.GpgFlags),
 		MakepkgFlags:     strings.Fields(c.MFlags),
 		MakepkgConfPath:  c.MakepkgConf,
 		MakepkgBin:       c.MakepkgBin,

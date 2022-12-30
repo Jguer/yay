@@ -77,6 +77,8 @@ func getSearchBy(value string) aur.By {
 		return aur.Name
 	case "maintainer":
 		return aur.Maintainer
+	case "submitter":
+		return aur.Submitter
 	case "depends":
 		return aur.Depends
 	case "makedepends":
@@ -85,6 +87,18 @@ func getSearchBy(value string) aur.By {
 		return aur.OptDepends
 	case "checkdepends":
 		return aur.CheckDepends
+	case "provides":
+		return aur.Provides
+	case "conflicts":
+		return aur.Conflicts
+	case "replaces":
+		return aur.Replaces
+	case "groups":
+		return aur.Groups
+	case "keywords":
+		return aur.Keywords
+	case "comaintainers":
+		return aur.CoMaintainers
 	default:
 		return aur.NameDesc
 	}
