@@ -610,6 +610,16 @@ func (a *Arguments) parseLongOption(arg, param string) (usedNext bool, err error
 }
 
 func (a *Arguments) parseStdin() error {
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		return err
+	}
+
+	// Ensure data is piped
+	if (fi.Mode() & os.ModeCharDevice) != 0 {
+		return errors.New(gotext.Get("argument '-' specified without input on stdin"))
+	}
+
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(bufio.ScanLines)
 

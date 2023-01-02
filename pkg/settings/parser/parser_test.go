@@ -1,9 +1,11 @@
 package parser
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOption_Add(t *testing.T) {
@@ -329,4 +331,40 @@ func Test_isArg(t *testing.T) {
 
 	got = isArg("dbpath")
 	assert.True(t, got)
+}
+
+func TestArguments_ParseStdin(t *testing.T) {
+	input := []byte("yay")
+
+	r, w, err := os.Pipe()
+	require.NoError(t, err)
+
+	_, err = w.Write(input)
+	require.NoError(t, err)
+	w.Close()
+
+	// Restore stdin after the test.
+	defer func(o *os.File) { os.Stdin = o }(os.Stdin)
+	os.Stdin = r
+
+	args := MakeArguments()
+	err = args.parseStdin()
+	assert.NoError(t, err)
+
+	expectedTargets := []string{string(input)}
+	assert.ElementsMatch(t, args.Targets, expectedTargets)
+}
+
+func TestArguments_ParseStdin_broken_pipe(t *testing.T) {
+	r, _, err := os.Pipe()
+	require.NoError(t, err)
+	r.Close() // Close early to break pipe
+
+	// Restore stdin after the test.
+	defer func(o *os.File) { os.Stdin = o }(os.Stdin)
+	os.Stdin = r
+
+	args := MakeArguments()
+	err = args.parseStdin()
+	assert.Error(t, err)
 }
