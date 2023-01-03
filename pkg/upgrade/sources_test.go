@@ -164,7 +164,7 @@ func Test_upDevel(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := UpDevel(context.TODO(), tt.args.remote, tt.args.aurdata, tt.args.cached)
+			got := UpDevel(context.Background(), tt.args.remote, tt.args.aurdata, tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
 		})
 	}

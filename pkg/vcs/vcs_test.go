@@ -356,7 +356,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 			v := &InfoStore{
 				CmdBuilder: tt.fields.CmdBuilder,
 			}
-			got := v.needsUpdate(context.TODO(), tt.args.infos)
+			got := v.needsUpdate(context.Background(), tt.args.infos)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -407,7 +407,7 @@ func TestInfoStore_Update(t *testing.T) {
 				CmdBuilder:       tt.fields.CmdBuilder,
 			}
 
-			v.Update(context.TODO(), tt.args.pkgName, tt.args.sources)
+			v.Update(context.Background(), tt.args.pkgName, tt.args.sources)
 			assert.Len(t, tt.fields.OriginsByPackage, 1)
 
 			marshalledinfo, err := json.MarshalIndent(tt.fields.OriginsByPackage, "", "\t")

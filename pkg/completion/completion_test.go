@@ -59,7 +59,7 @@ func Test_createAURList(t *testing.T) {
 		returnErr:        nil,
 	}
 	out := &bytes.Buffer{}
-	err := createAURList(context.TODO(), doer, "https://aur.archlinux.org", out)
+	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out)
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
@@ -76,7 +76,7 @@ func Test_createAURListHTTPError(t *testing.T) {
 	}
 
 	out := &bytes.Buffer{}
-	err := createAURList(context.TODO(), doer, "https://aur.archlinux.org", out)
+	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "Not available")
 }
 
@@ -91,6 +91,6 @@ func Test_createAURListStatusError(t *testing.T) {
 	}
 
 	out := &bytes.Buffer{}
-	err := createAURList(context.TODO(), doer, "https://aur.archlinux.org", out)
+	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out)
 	assert.EqualError(t, err, "invalid status code: 503")
 }

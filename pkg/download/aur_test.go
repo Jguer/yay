@@ -98,7 +98,7 @@ func TestAURPKGBUILDRepo(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	newCloned, err := AURPKGBUILDRepo(context.TODO(), cmdBuilder, "https://aur.archlinux.org", "yay-bin", "/tmp/doesnt-exist", false)
+	newCloned, err := AURPKGBUILDRepo(context.Background(), cmdBuilder, "https://aur.archlinux.org", "yay-bin", "/tmp/doesnt-exist", false)
 	assert.NoError(t, err)
 	assert.Equal(t, true, newCloned)
 }
@@ -132,7 +132,7 @@ func TestAURPKGBUILDRepoExistsPerms(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	cloned, err := AURPKGBUILDRepo(context.TODO(), cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
+	cloned, err := AURPKGBUILDRepo(context.Background(), cmdBuilder, "https://aur.archlinux.org", "yay-bin", dir, false)
 	assert.NoError(t, err)
 	assert.Equal(t, false, cloned)
 }
@@ -155,7 +155,7 @@ func TestAURPKGBUILDRepos(t *testing.T) {
 			GitFlags: []string{},
 		},
 	}
-	cloned, err := AURPKGBUILDRepos(context.TODO(), cmdBuilder, targets, "https://aur.archlinux.org", dir, false)
+	cloned, err := AURPKGBUILDRepos(context.Background(), cmdBuilder, targets, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, map[string]bool{"yay": true, "yay-bin": false, "yay-git": true}, cloned)
