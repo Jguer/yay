@@ -530,7 +530,7 @@ func archStringToString(alpmArches []string, archString []gosrc.ArchString) []st
 
 func AddUpgradeToGraph(pkg *db.Upgrade, graph *topo.Graph[string, *InstallInfo]) {
 	source := Sync
-	if pkg.Repository == "aur" {
+	if pkg.Repository == "aur" || pkg.Repository == "devel" {
 		source = AUR
 	}
 
