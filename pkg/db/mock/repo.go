@@ -60,30 +60,30 @@ func (p *Package) Reason() alpm.PkgReason {
 }
 
 func (p *Package) FileName() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 func (p *Package) Base64Signature() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 func (p *Package) Validation() alpm.Validation {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Architecture returns the package target Architecture.
 func (p *Package) Architecture() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Backup returns a list of package backups.
 func (p *Package) Backup() alpm.BackupList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Conflicts returns the conflicts of the package as a DependList.
 func (p *Package) Conflicts() alpm.DependList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Depends returns the package's dependency list.
@@ -93,57 +93,57 @@ func (p *Package) Depends() alpm.DependList {
 
 // Depends returns the package's optional dependency list.
 func (p *Package) OptionalDepends() alpm.DependList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Depends returns the package's check dependency list.
 func (p *Package) CheckDepends() alpm.DependList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Depends returns the package's make dependency list.
 func (p *Package) MakeDepends() alpm.DependList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Files returns the file list of the package.
 func (p *Package) Files() []alpm.File {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // ContainsFile checks if the path is in the package filelist.
 func (p *Package) ContainsFile(path string) (alpm.File, error) {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Groups returns the groups the package belongs to.
 func (p *Package) Groups() alpm.StringList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // InstallDate returns the package install date.
 func (p *Package) InstallDate() time.Time {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Licenses returns the package license list.
 func (p *Package) Licenses() alpm.StringList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // SHA256Sum returns package SHA256Sum.
 func (p *Package) SHA256Sum() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // MD5Sum returns package MD5Sum.
 func (p *Package) MD5Sum() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Packager returns package packager name.
 func (p *Package) Packager() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Provides returns DependList of packages provides by package.
@@ -153,38 +153,38 @@ func (p *Package) Provides() alpm.DependList {
 
 // Origin returns package origin.
 func (p *Package) Origin() alpm.PkgFrom {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // Replaces returns a DependList with the packages this package replaces.
 func (p *Package) Replaces() alpm.DependList {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // URL returns the upstream URL of the package.
 func (p *Package) URL() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // ComputeRequiredBy returns the names of reverse dependencies of a package.
 func (p *Package) ComputeRequiredBy() []string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // ComputeOptionalFor returns the names of packages that optionally
 // require the given package.
 func (p *Package) ComputeOptionalFor() []string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 // SyncNewVersion checks if there is a new version of the
 // package in a given DBlist.
 func (p *Package) SyncNewVersion(l alpm.IDBList) alpm.IPackage {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 func (p *Package) Type() string {
-	panic("not implemented") // TODO: Implement
+	panic("not implemented")
 }
 
 type DB struct {
