@@ -9,11 +9,7 @@ jobs:
     strategy:
       matrix:
         arch:
-          [
-            "linux/amd64 x86_64",
-            "linux/arm/v7 armv7h",
-            "linux/arm64 aarch64",
-          ]
+          ["linux/amd64 x86_64", "linux/arm/v7 armv7h", "linux/arm64 aarch64"]
     name: Build ${{ matrix.arch }}
     runs-on: ubuntu-latest
     steps:

@@ -1,11 +1,6 @@
 name: Test against pacman
 on:
   pull_request:
-    paths-ignore:
-      - "doc/**"
-      - "**/*.po"
-      - "README.md"
-      - ".gitignore"
 
 jobs:
   build:
