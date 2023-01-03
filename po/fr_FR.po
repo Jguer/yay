@@ -2,14 +2,14 @@
 # Translators:
 # J G, 2021
 # Oliver Conzen, 2021
-# Sylvain Bx, 2022
 # Galiley, 2022
 # Khoyo - <khoyobegenn@gmail.com>, 2022
 # Mr Strik3, 2022
+# Sylvain Bx, 2023
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Mr Strik3, 2022\n"
+"Last-Translator: Sylvain Bx, 2023\n"
 "Language-Team: French (France) (https://www.transifex.com/yay-1/teams/123732/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -97,6 +97,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
+"%s : veuillez définir les variables d'environnement AUR_USERNAME et "
+"AUR_PASSWORD pour voter"
 
 #: pkg/download/unified.go:187
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -132,7 +134,7 @@ msgstr "URL AUR"
 
 #: pkg/dep/depGraph.go:71
 msgid "AUR"
-msgstr ""
+msgstr "AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -144,7 +146,7 @@ msgstr "Évitez d'utiliser yay en tant que root ou via sudo."
 
 #: pkg/dep/depGraph.go:59
 msgid "Check Dependency"
-msgstr ""
+msgstr "Vérifier la dépendance"
 
 #: print.go:34
 msgid "Check Deps"
@@ -200,7 +202,7 @@ msgstr "Afficher les diffs ?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr ""
+msgstr "Désactiver le paramètre 'fourni' par défaut"
 
 #: clean.go:72
 msgid "Do you want to remove ALL AUR packages from cache?"
@@ -225,7 +227,7 @@ msgstr "Erreur durant la recherche AUR : %s\n"
 
 #: pkg/dep/depGraph.go:56
 msgid "Explicit"
-msgstr ""
+msgstr "Explicite"
 
 #: print.go:85
 msgid "Explicitly installed packages: %s"
@@ -285,7 +287,7 @@ msgstr "Licences"
 
 #: pkg/dep/depGraph.go:73
 msgid "Local"
-msgstr ""
+msgstr "Local"
 
 #: print.go:37
 msgid "Maintainer"
@@ -293,7 +295,7 @@ msgstr "Mainteneur"
 
 #: pkg/dep/depGraph.go:58
 msgid "Make Dependency"
-msgstr ""
+msgstr "Dépendance de construction"
 
 #: print.go:33
 msgid "Make Deps"
@@ -431,7 +433,7 @@ msgstr "URL de l'instantané"
 
 #: pkg/dep/depGraph.go:72
 msgid "Sync"
-msgstr ""
+msgstr "Synchroniser"
 
 #: print.go:94
 msgid "Ten biggest packages:"
@@ -476,7 +478,7 @@ msgstr "Impossible de trouver les paquets suivants :"
 
 #: vote.go:21
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr ""
+msgstr "Impossible de traiter le vote pour le paquet :%s. Erreur :%s"
 
 #: print.go:25
 msgid "Version"
@@ -524,7 +526,7 @@ msgstr "impossible de trouver PKGDEST pour : %s"
 
 #: errors.go:12
 msgid "dependency"
-msgstr ""
+msgstr "dépendance"
 
 #: pkg/vcs/vcs.go:70
 msgid "devel check for package failed: '%s' encountered an error"
@@ -576,10 +578,11 @@ msgstr "erreur lors de la réinitialisation %s : %s"
 #: errors.go:15
 msgid "error updating package install reason to %s"
 msgstr ""
+"erreur lors de la mise à jour de la raison d'installation du paquet vers %s"
 
 #: errors.go:10
 msgid "explicit"
-msgstr ""
+msgstr "explicite"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
@@ -599,7 +602,7 @@ msgstr "échec lors de la lecture %s : %s"
 
 #: local_install.go:43
 msgid "failed to parse .SRCINFO"
-msgstr ""
+msgstr "impossible d'analyser le .SRCINFO"
 
 #: pkg/settings/config.go:340
 msgid "failed to read config file '%s': %s"
@@ -607,7 +610,7 @@ msgstr "échec lors de la lecture du fichier de configuration '%s' : %s"
 
 #: pkg/cmd/graph/main.go:45 pkg/settings/config.go:306
 msgid "failed to retrieve aur Cache"
-msgstr ""
+msgstr "impossible de récupérer le cache AUR"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
@@ -645,7 +648,7 @@ msgstr "aucune requête n'a été exécutée"
 
 #: local_install.go:33
 msgid "no target directories specified"
-msgstr ""
+msgstr "pas de répertoire cible spécifié"
 
 #: pkg/text/text.go:69
 msgid "no"
@@ -657,7 +660,7 @@ msgstr "une seule opération peut être réalisée à la fois"
 
 #: pkg/cmd/graph/main.go:66
 msgid "only one target is allowed"
-msgstr ""
+msgstr "une seule cible est autorisée"
 
 #: print.go:186
 msgid "package '%s' was not found"
