@@ -135,7 +135,7 @@ func TestPrintNewsFeed(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			err := PrintNewsFeed(context.TODO(), &http.Client{}, tt.args.cutOffDate, tt.args.bottomUp, tt.args.all, tt.args.quiet)
+			err := PrintNewsFeed(context.Background(), &http.Client{}, tt.args.cutOffDate, tt.args.bottomUp, tt.args.all, tt.args.quiet)
 			assert.NoError(t, err)
 
 			w.Close()
@@ -164,7 +164,7 @@ func TestPrintNewsFeedSameDay(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	err := PrintNewsFeed(context.TODO(), &http.Client{}, lastNewsTime, true, false, false)
+	err := PrintNewsFeed(context.Background(), &http.Client{}, lastNewsTime, true, false, false)
 	assert.NoError(t, err)
 
 	w.Close()

@@ -20,7 +20,7 @@ func RetrievePacmanConfig(cmdArgs *parser.Arguments, pacmanConfigPath string) (*
 	if err != nil {
 		cmdErr := err
 		if stderr != "" {
-			cmdErr = fmt.Errorf("%s\n%s", err, stderr)
+			cmdErr = fmt.Errorf("%w\n%s", err, stderr)
 		}
 
 		return nil, false, cmdErr

@@ -17,7 +17,8 @@ import (
 
 // yay -Gp.
 func printPkgbuilds(dbExecutor download.DBSearcher, httpClient *http.Client, targets []string,
-	mode parser.TargetMode, aurURL string) error {
+	mode parser.TargetMode, aurURL string,
+) error {
 	pkgbuilds, err := download.PKGBUILDs(dbExecutor, httpClient, targets, aurURL, mode)
 	if err != nil {
 		text.Errorln(err)
@@ -49,7 +50,8 @@ func printPkgbuilds(dbExecutor download.DBSearcher, httpClient *http.Client, tar
 
 // yay -G.
 func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher,
-	config *settings.Configuration, targets []string, force bool) error {
+	config *settings.Configuration, targets []string, force bool,
+) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err

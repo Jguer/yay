@@ -219,7 +219,7 @@ func TestABSPKGBUILDRepo(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	newClone, err := ABSPKGBUILDRepo(context.TODO(), cmdBuilder, "core", "linux", "/tmp/doesnt-exist", false)
+	newClone, err := ABSPKGBUILDRepo(context.Background(), cmdBuilder, "core", "linux", "/tmp/doesnt-exist", false)
 	assert.NoError(t, err)
 	assert.Equal(t, true, newClone)
 }
@@ -253,7 +253,7 @@ func TestABSPKGBUILDRepoExistsPerms(t *testing.T) {
 			GitFlags: []string{"--no-replace-objects"},
 		},
 	}
-	newClone, err := ABSPKGBUILDRepo(context.TODO(), cmdBuilder, "core", "linux", dir, false)
+	newClone, err := ABSPKGBUILDRepo(context.Background(), cmdBuilder, "core", "linux", dir, false)
 	assert.NoError(t, err)
 	assert.Equal(t, false, newClone)
 }

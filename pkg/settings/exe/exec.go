@@ -1,6 +1,7 @@
 package exe
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -27,7 +28,8 @@ func (r *OSRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	stdout = strings.TrimSpace(string(outbuf))
 
 	if err != nil {
-		if exitErr, isExitError := err.(*exec.ExitError); isExitError {
+		exitErr := &exec.ExitError{}
+		if errors.As(err, &exitErr) {
 			stderr = strings.TrimSpace(string(exitErr.Stderr))
 		}
 	}

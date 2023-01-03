@@ -38,7 +38,7 @@ func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
-	cloned, err := PKGBUILDRepos(context.TODO(), searcher,
+	cloned, err := PKGBUILDRepos(context.Background(), searcher,
 		cmdBuilder,
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
@@ -67,7 +67,7 @@ func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
-	cloned, err := PKGBUILDRepos(context.TODO(), searcher,
+	cloned, err := PKGBUILDRepos(context.Background(), searcher,
 		cmdBuilder,
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
@@ -96,7 +96,7 @@ func TestPKGBUILDReposClone(t *testing.T) {
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
-	cloned, err := PKGBUILDRepos(context.TODO(), searcher,
+	cloned, err := PKGBUILDRepos(context.Background(), searcher,
 		cmdBuilder,
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
@@ -125,7 +125,7 @@ func TestPKGBUILDReposNotFound(t *testing.T) {
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
-	cloned, err := PKGBUILDRepos(context.TODO(), searcher,
+	cloned, err := PKGBUILDRepos(context.Background(), searcher,
 		cmdBuilder,
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
@@ -154,7 +154,7 @@ func TestPKGBUILDReposRepoMode(t *testing.T) {
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
-	cloned, err := PKGBUILDRepos(context.TODO(), searcher,
+	cloned, err := PKGBUILDRepos(context.Background(), searcher,
 		cmdBuilder,
 		targets, parser.ModeRepo, "https://aur.archlinux.org", dir, false)
 

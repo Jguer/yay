@@ -3,6 +3,7 @@ package vcs
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -81,7 +82,8 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 
 		stdout, _, err := v.CmdBuilder.Capture(cmd)
 		if err != nil {
-			if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 128 {
+			exitError := &exec.ExitError{}
+			if ok := errors.As(err, &exitError); ok && exitError.ExitCode() == 128 {
 				text.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()))
 				return ""
 			}
@@ -298,7 +300,7 @@ func (v *InfoStore) RemovePackage(pkgs []string) {
 func (v *InfoStore) Load() error {
 	vfile, err := os.Open(v.FilePath)
 	if !os.IsNotExist(err) && err != nil {
-		return fmt.Errorf("failed to open vcs file '%s': %s", v.FilePath, err)
+		return fmt.Errorf("failed to open vcs file '%s': %w", v.FilePath, err)
 	}
 
 	defer vfile.Close()
@@ -306,7 +308,7 @@ func (v *InfoStore) Load() error {
 	if !os.IsNotExist(err) {
 		decoder := json.NewDecoder(vfile)
 		if err = decoder.Decode(&v.OriginsByPackage); err != nil {
-			return fmt.Errorf("failed to read vcs '%s': %s", v.FilePath, err)
+			return fmt.Errorf("failed to read vcs '%s': %w", v.FilePath, err)
 		}
 	}
 

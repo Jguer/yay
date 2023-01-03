@@ -76,7 +76,7 @@ func gitHasDiff(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) (bo
 		stdout, stderr, err := cmdBuilder.Capture(
 			cmdBuilder.BuildGitCmd(ctx, dir, "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
 		if err != nil {
-			return false, fmt.Errorf("%s%s", stderr, err)
+			return false, fmt.Errorf("%s%w", stderr, err)
 		}
 
 		lines := strings.Split(stdout, "\n")
@@ -108,7 +108,7 @@ func getLastSeenHash(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string
 			cmdBuilder.BuildGitCmd(ctx,
 				dir, "rev-parse", gitDiffRefName))
 		if err != nil {
-			return "", fmt.Errorf("%s %s", stderr, err)
+			return "", fmt.Errorf("%s %w", stderr, err)
 		}
 
 		lines := strings.Split(stdout, "\n")
@@ -126,7 +126,7 @@ func gitUpdateSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir strin
 		cmdBuilder.BuildGitCmd(ctx,
 			dir, "update-ref", gitDiffRefName, "HEAD"))
 	if err != nil {
-		return fmt.Errorf("%s %s", stderr, err)
+		return fmt.Errorf("%s %w", stderr, err)
 	}
 
 	return nil

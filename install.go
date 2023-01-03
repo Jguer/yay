@@ -504,7 +504,7 @@ func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	stdout, stderr, err := cmdBuilder.Capture(
 		cmdBuilder.BuildMakepkgCmd(ctx, dir, "--packagelist"))
 	if err != nil {
-		return nil, "", fmt.Errorf("%s %s", stderr, err)
+		return nil, "", fmt.Errorf("%s %w", stderr, err)
 	}
 
 	lines := strings.Split(stdout, "\n")

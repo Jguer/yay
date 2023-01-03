@@ -71,7 +71,8 @@ func Max(a, b int) int {
 // of course the implementation is up to the caller, this function mearley parses
 // the input and organizes it.
 func ParseNumberMenu(input string) (include, exclude IntRanges,
-	otherInclude, otherExclude stringset.StringSet) {
+	otherInclude, otherExclude stringset.StringSet,
+) {
 	include = make(IntRanges, 0)
 	exclude = make(IntRanges, 0)
 	otherInclude = make(stringset.StringSet)
