@@ -49,7 +49,8 @@ func AURPKGBUILDRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder, aurURL, 
 func AURPKGBUILDRepos(
 	ctx context.Context,
 	cmdBuilder exe.GitCmdBuilder,
-	targets []string, aurURL, dest string, force bool) (map[string]bool, error) {
+	targets []string, aurURL, dest string, force bool,
+) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
 
 	var (

@@ -26,7 +26,8 @@ type DBSearcher interface {
 }
 
 func downloadGitRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
-	pkgURL, pkgName, dest string, force bool, gitArgs ...string) (bool, error) {
+	pkgURL, pkgName, dest string, force bool, gitArgs ...string,
+) (bool, error) {
 	finalDir := filepath.Join(dest, pkgName)
 	newClone := true
 
@@ -79,7 +80,8 @@ func getURLName(pkg db.IPackage) string {
 }
 
 func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
-	aurURL string, mode parser.TargetMode) (map[string][]byte, error) {
+	aurURL string, mode parser.TargetMode,
+) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
 	var (
@@ -133,7 +135,8 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 
 func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher,
 	cmdBuilder exe.GitCmdBuilder,
-	targets []string, mode parser.TargetMode, aurURL, dest string, force bool) (map[string]bool, error) {
+	targets []string, mode parser.TargetMode, aurURL, dest string, force bool,
+) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
 
 	var (

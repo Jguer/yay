@@ -2,6 +2,7 @@ package main // import "github.com/Jguer/yay"
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/exec"
 	"runtime/debug"
@@ -146,7 +147,8 @@ func main() {
 			text.Errorln(str)
 		}
 
-		if exitError, ok := err.(*exec.ExitError); ok {
+		exitError := &exec.ExitError{}
+		if errors.As(err, &exitError) {
 			// mirror pacman exit code when applicable
 			ret = exitError.ExitCode()
 			return
