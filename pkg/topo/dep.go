@@ -6,9 +6,8 @@ import (
 )
 
 type (
-	AliasMap[T comparable] map[T]T
-	NodeSet[T comparable]  map[T]bool
-	DepMap[T comparable]   map[T]NodeSet[T]
+	NodeSet[T comparable] map[T]bool
+	DepMap[T comparable]  map[T]NodeSet[T]
 )
 
 type NodeInfo[V any] struct {
@@ -20,9 +19,7 @@ type NodeInfo[V any] struct {
 type CheckFn[T comparable, V any] func(T, V) error
 
 type Graph[T comparable, V any] struct {
-	alias   AliasMap[T] // alias -> aliased
-	aliases DepMap[T]   // aliased -> alias
-	nodes   NodeSet[T]
+	nodes NodeSet[T]
 
 	// node info map
 	nodeInfo map[T]*NodeInfo[V]
@@ -31,7 +28,6 @@ type Graph[T comparable, V any] struct {
 	dependencies DepMap[T]
 	// `dependents` tracks parent -> children.
 	dependents DepMap[T]
-	// Keep track of the nodes of the graph themselves.
 }
 
 func New[T comparable, V any]() *Graph[T, V] {
@@ -39,62 +35,22 @@ func New[T comparable, V any]() *Graph[T, V] {
 		nodes:        make(NodeSet[T]),
 		dependencies: make(DepMap[T]),
 		dependents:   make(DepMap[T]),
-		alias:        make(AliasMap[T]),
-		aliases:      make(DepMap[T]),
 		nodeInfo:     make(map[T]*NodeInfo[V]),
 	}
 }
 
-func (g *Graph[T, V]) Len() int {
-	return len(g.nodes)
-}
-
 func (g *Graph[T, V]) Exists(node T) bool {
-	// check aliases
-	node = g.getAlias(node)
-
 	_, ok := g.nodes[node]
 
 	return ok
 }
 
-func (g *Graph[T, V]) Alias(node, alias T) error {
-	if alias == node {
-		return nil
-	}
-
-	// add node
-	g.nodes[node] = true
-
-	// add alias
-	if _, ok := g.alias[alias]; ok {
-		return ErrConflictingAlias
-	}
-
-	g.alias[alias] = node
-	g.aliases.addNodeToNodeset(node, alias)
-
-	return nil
-}
-
 func (g *Graph[T, V]) AddNode(node T) {
-	node = g.getAlias(node)
-
 	g.nodes[node] = true
-}
-
-func (g *Graph[T, V]) getAlias(node T) T {
-	if aliasNode, ok := g.alias[node]; ok {
-		return aliasNode
-	}
-
-	return node
 }
 
 func (g *Graph[T, V]) ForEach(f CheckFn[T, V]) error {
 	for node := range g.nodes {
-		node = g.getAlias(node)
-
 		if err := f(node, g.nodeInfo[node].Value); err != nil {
 			return err
 		}
@@ -104,29 +60,14 @@ func (g *Graph[T, V]) ForEach(f CheckFn[T, V]) error {
 }
 
 func (g *Graph[T, V]) SetNodeInfo(node T, nodeInfo *NodeInfo[V]) {
-	g.nodeInfo[g.getAlias(node)] = nodeInfo
+	g.nodeInfo[node] = nodeInfo
 }
 
 func (g *Graph[T, V]) GetNodeInfo(node T) *NodeInfo[V] {
-	return g.nodeInfo[g.getAlias(node)]
-}
-
-// Retrieve aliases of a node.
-func (g *Graph[T, V]) GetAliases(node T) []T {
-	size := len(g.aliases[node])
-	aliases := make([]T, 0, size)
-
-	for alias := range g.aliases[node] {
-		aliases = append(aliases, alias)
-	}
-
-	return aliases
+	return g.nodeInfo[node]
 }
 
 func (g *Graph[T, V]) DependOn(child, parent T) error {
-	child = g.getAlias(child)
-	parent = g.getAlias(parent)
-
 	if child == parent {
 		return ErrSelfReferential
 	}
@@ -194,20 +135,8 @@ func (g *Graph[T, V]) HasDependent(parent, child T) bool {
 	return ok
 }
 
-func (g *Graph[T, V]) Leaves() []T {
-	leaves := make([]T, 0)
-
-	for node := range g.nodes {
-		if _, ok := g.dependencies[node]; !ok {
-			leaves = append(leaves, node)
-		}
-	}
-
-	return leaves
-}
-
-// LeavesMap returns a map of leaves with the node as key and the node info value as value.
-func (g *Graph[T, V]) LeavesMap() map[T]V {
+// leavesMap returns a map of leaves with the node as key and the node info value as value.
+func (g *Graph[T, V]) leavesMap() map[T]V {
 	leaves := make(map[T]V, 0)
 
 	for node := range g.nodes {
@@ -224,29 +153,6 @@ func (g *Graph[T, V]) LeavesMap() map[T]V {
 	return leaves
 }
 
-// TopoSortedLayers returns a slice of all of the graph nodes in topological sort order.
-func (g *Graph[T, V]) TopoSortedLayers() [][]T {
-	layers := [][]T{}
-
-	// Copy the graph
-	shrinkingGraph := g.clone()
-
-	for {
-		leaves := shrinkingGraph.Leaves()
-		if len(leaves) == 0 {
-			break
-		}
-
-		layers = append(layers, leaves)
-
-		for _, leafNode := range leaves {
-			shrinkingGraph.remove(leafNode)
-		}
-	}
-
-	return layers
-}
-
 // TopoSortedLayerMap returns a slice of all of the graph nodes in topological sort order with their node info.
 func (g *Graph[T, V]) TopoSortedLayerMap(checkFn CheckFn[T, V]) []map[T]V {
 	layers := []map[T]V{}
@@ -255,7 +161,7 @@ func (g *Graph[T, V]) TopoSortedLayerMap(checkFn CheckFn[T, V]) []map[T]V {
 	shrinkingGraph := g.clone()
 
 	for {
-		leaves := shrinkingGraph.LeavesMap()
+		leaves := shrinkingGraph.leavesMap()
 		if len(leaves) == 0 {
 			break
 		}
@@ -303,24 +209,6 @@ func (g *Graph[T, V]) remove(node T) {
 
 	// Finally, remove the node itself.
 	delete(g.nodes, node)
-}
-
-// TopoSorted returns all the nodes in the graph is topological sort order.
-func (g *Graph[T, V]) TopoSorted() []T {
-	nodeCount := 0
-	layers := g.TopoSortedLayers()
-
-	for _, layer := range layers {
-		nodeCount += len(layer)
-	}
-
-	allNodes := make([]T, 0, nodeCount)
-
-	for _, layer := range layers {
-		allNodes = append(allNodes, layer...)
-	}
-
-	return allNodes
 }
 
 func (g *Graph[T, V]) Dependencies(child T) NodeSet[T] {
