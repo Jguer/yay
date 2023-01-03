@@ -25,10 +25,10 @@ linters-settings:
       - condition
       - return
     ignored-numbers:
-      - '0'
-      - '1'
-      - '2'
-      - '3'
+      - "0"
+      - "1"
+      - "2"
+      - "3"
     ignored-functions:
       - strings.SplitN
   govet:
@@ -51,6 +51,7 @@ linters:
     - depguard
     - dogsled
     - dupl
+    - errorlint
     - errcheck
     - exportloopref
     # - funlen # TOFIX
@@ -80,7 +81,8 @@ linters:
     - whitespace
 
 run:
-  go: '1.18'
+  go: "1.18"
+  timeout: "10m"
 
 issues:
   exclude-rules:
@@ -96,6 +98,7 @@ issues:
         - dupl
         - gocritic
         - gochecknoinits
+        - errorlint
 
   exclude:
     - G204

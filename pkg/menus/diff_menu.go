@@ -76,7 +76,7 @@ func gitHasDiff(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) (bo
 		stdout, stderr, err := cmdBuilder.Capture(
 			cmdBuilder.BuildGitCmd(ctx, dir, "rev-parse", gitDiffRefName, "HEAD@{upstream}"))
 		if err != nil {
-			return false, fmt.Errorf("%s%s", stderr, err)
+			return false, fmt.Errorf("%s%w", stderr, err)
 		}
 
 		lines := strings.Split(stdout, "\n")
