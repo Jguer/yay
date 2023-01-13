@@ -1,5 +1,5 @@
 #compdef yay
-# vim:fdm=marker foldlevel=0 tabstop=2 shiftwidth=2 filetype=zsh
+# vim:tabstop=2 shiftwidth=2 filetype=zsh
 
 typeset -A opt_args
 setopt extendedglob
@@ -512,18 +512,17 @@ _pacman_zsh_comp() {
 				"$_pacman_opts_query_modifiers[@]" \
 				'*:package file:_files -g "*.pkg.tar*~*.sig(.,@)"'
 			;;
-		T*)
-			_pacman_action_deptest
-			;;
 		Q*)
 			_pacman_action_query
 			;;
 		P*)
 			 _arguments -s : \
+				'-P' \
 				"$_pacman_opts_print_modifiers[@]"
 			;;
 		W*)
 			 _arguments -s : \
+				'-W' \
 				"$_pacman_opts_web_modifiers[@]"
 			;;
 		R*)
@@ -556,10 +555,7 @@ _pacman_zsh_comp() {
 			_pacman_action_sync
 			;;
 		T*)
-			 _arguments -s : \
-				'-T' \
-				"$_pacman_opts_common[@]" \
-				":packages:_pacman_all_packages"
+			_pacman_action_deptest
 			;;
 		U*)
 			_pacman_action_upgrade
@@ -569,10 +565,12 @@ _pacman_zsh_comp() {
 			;;
 		Y*)
 			_arguments -s : \
+				'-Y' \
 				"$_pacman_opts_yay_modifiers[@]"
 			;;
 		G*)
 			_arguments -s : \
+				'-G' \
 				"$_pacman_opts_getpkgbuild_modifiers[@]"
 			;;
 
