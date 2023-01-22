@@ -115,21 +115,21 @@ func (c *Configuration) Save(configPath string) error {
 func (c *Configuration) expandEnv() {
 	c.AURURL = os.ExpandEnv(c.AURURL)
 	c.AURRPCURL = os.ExpandEnv(c.AURRPCURL)
-	c.BuildDir = os.ExpandEnv(c.BuildDir)
-	c.Editor = os.ExpandEnv(c.Editor)
+	c.BuildDir = expandEnvOrHome(c.BuildDir)
+	c.Editor = expandEnvOrHome(c.Editor)
 	c.EditorFlags = os.ExpandEnv(c.EditorFlags)
-	c.MakepkgBin = os.ExpandEnv(c.MakepkgBin)
-	c.MakepkgConf = os.ExpandEnv(c.MakepkgConf)
-	c.PacmanBin = os.ExpandEnv(c.PacmanBin)
-	c.PacmanConf = os.ExpandEnv(c.PacmanConf)
+	c.MakepkgBin = expandEnvOrHome(c.MakepkgBin)
+	c.MakepkgConf = expandEnvOrHome(c.MakepkgConf)
+	c.PacmanBin = expandEnvOrHome(c.PacmanBin)
+	c.PacmanConf = expandEnvOrHome(c.PacmanConf)
 	c.GpgFlags = os.ExpandEnv(c.GpgFlags)
 	c.MFlags = os.ExpandEnv(c.MFlags)
 	c.GitFlags = os.ExpandEnv(c.GitFlags)
 	c.SortBy = os.ExpandEnv(c.SortBy)
 	c.SearchBy = os.ExpandEnv(c.SearchBy)
-	c.GitBin = os.ExpandEnv(c.GitBin)
-	c.GpgBin = os.ExpandEnv(c.GpgBin)
-	c.SudoBin = os.ExpandEnv(c.SudoBin)
+	c.GitBin = expandEnvOrHome(c.GitBin)
+	c.GpgBin = expandEnvOrHome(c.GpgBin)
+	c.SudoBin = expandEnvOrHome(c.SudoBin)
 	c.SudoFlags = os.ExpandEnv(c.SudoFlags)
 	c.ReDownload = os.ExpandEnv(c.ReDownload)
 	c.ReBuild = os.ExpandEnv(c.ReBuild)
@@ -138,6 +138,15 @@ func (c *Configuration) expandEnv() {
 	c.AnswerEdit = os.ExpandEnv(c.AnswerEdit)
 	c.AnswerUpgrade = os.ExpandEnv(c.AnswerUpgrade)
 	c.RemoveMake = os.ExpandEnv(c.RemoveMake)
+}
+
+func expandEnvOrHome(path string) string {
+	path = os.ExpandEnv(path)
+	if strings.HasPrefix(path, "~/") {
+		path = filepath.Join(os.Getenv("HOME"), path[2:])
+	}
+
+	return path
 }
 
 func (c *Configuration) String() string {
