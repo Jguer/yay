@@ -75,6 +75,39 @@ func TestNewConfigAURDEST(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Test tilde expansion in AURDEST
+func TestNewConfigAURDESTTildeExpansion(t *testing.T) {
+	configDir := t.TempDir()
+	err := os.MkdirAll(filepath.Join(configDir, "yay"), 0o755)
+	assert.NoError(t, err)
+
+	t.Setenv("XDG_CONFIG_HOME", configDir)
+
+	homeDir := t.TempDir()
+	cacheDir := t.TempDir()
+
+	config := map[string]string{"BuildDir": filepath.Join(cacheDir, "test-other-dir")}
+	t.Setenv("AURDEST", "~/test-build-dir")
+	t.Setenv("HOME", homeDir)
+
+	f, err := os.Create(filepath.Join(configDir, "yay", "config.json"))
+	assert.NoError(t, err)
+
+	defer f.Close()
+
+	configJSON, _ := json.Marshal(config)
+	_, err = f.WriteString(string(configJSON))
+	assert.NoError(t, err)
+
+	newConfig, err := NewConfig("v1.0.0")
+	assert.NoError(t, err)
+
+	assert.Equal(t, filepath.Join(homeDir, "test-build-dir"), newConfig.BuildDir)
+
+	_, err = os.Stat(filepath.Join(homeDir, "test-build-dir"))
+	assert.NoError(t, err)
+}
+
 // GIVEN default config
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should stay as "sudo" (given sudo exists)
