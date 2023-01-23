@@ -99,6 +99,8 @@ func TestIntegrationLocalInstall(t *testing.T) {
 	cmdArgs.AddArg("B")
 	cmdArgs.AddArg("i")
 	cmdArgs.AddTarget("testdata/jfin")
+	settings.NoConfirm = true
+	defer func() { settings.NoConfirm = false }()
 	db := &mock.DBExecutor{
 		AlpmArchitecturesFn: func() ([]string, error) {
 			return []string{"x86_64"}, nil
@@ -223,6 +225,8 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 	cmdArgs.AddArg("B")
 	cmdArgs.AddArg("i")
 	cmdArgs.AddTarget("testdata/jfin")
+	settings.NoConfirm = true
+	defer func() { settings.NoConfirm = false }()
 	db := &mock.DBExecutor{
 		AlpmArchitecturesFn: func() ([]string, error) {
 			return []string{"x86_64"}, nil
