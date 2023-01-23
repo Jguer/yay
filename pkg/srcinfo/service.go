@@ -79,18 +79,21 @@ func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.
 			continue
 		}
 
+		// TODO: high complexity - refactor
 		for i := range srcinfo.Packages {
-			if _, ok := targets[i][srcinfo.Packages[i].Pkgname]; !ok {
-				text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
-				continue
-			}
-			if _, ok := ignore[srcinfo.Packages[i].Pkgname]; ok {
-				text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
-				continue
-			}
+			for j := range targets {
+				if _, ok := targets[j][srcinfo.Packages[i].Pkgname]; !ok {
+					text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
+					continue
+				}
+				if _, ok := ignore[srcinfo.Packages[i].Pkgname]; ok {
+					text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
+					continue
+				}
 
-			text.Debugln("updating VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
-			s.vcsStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
+				text.Debugln("updating VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
+				s.vcsStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
+			}
 		}
 	}
 
