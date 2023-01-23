@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
@@ -15,7 +14,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 
-	gosrc "github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 )
@@ -23,33 +21,33 @@ import (
 type (
 	PostInstallHookFunc func(ctx context.Context) error
 	Installer           struct {
-		dbExecutor        db.Executor
-		postInstallHooks  []PostInstallHookFunc
-		failedAndIngnored map[string]error
-		exeCmd            exe.ICmdBuilder
-		vcsStore          vcs.Store
-		targetMode        parser.TargetMode
+		dbExecutor       db.Executor
+		postInstallHooks []PostInstallHookFunc
+		failedAndIgnored map[string]error
+		exeCmd           exe.ICmdBuilder
+		vcsStore         vcs.Store
+		targetMode       parser.TargetMode
 	}
 )
 
 func NewInstaller(dbExecutor db.Executor, exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode) *Installer {
 	return &Installer{
-		dbExecutor:        dbExecutor,
-		postInstallHooks:  []PostInstallHookFunc{},
-		failedAndIngnored: map[string]error{},
-		exeCmd:            exeCmd,
-		vcsStore:          vcsStore,
-		targetMode:        targetMode,
+		dbExecutor:       dbExecutor,
+		postInstallHooks: []PostInstallHookFunc{},
+		failedAndIgnored: map[string]error{},
+		exeCmd:           exeCmd,
+		vcsStore:         vcsStore,
+		targetMode:       targetMode,
 	}
 }
 
 func (installer *Installer) CompileFailedAndIgnored() error {
-	if len(installer.failedAndIngnored) == 0 {
+	if len(installer.failedAndIgnored) == 0 {
 		return nil
 	}
 
 	return &FailedIgnoredPkgError{
-		pkgErrors: installer.failedAndIngnored,
+		pkgErrors: installer.failedAndIgnored,
 	}
 }
 
@@ -77,11 +75,10 @@ func (installer *Installer) Install(ctx context.Context,
 	cmdArgs *parser.Arguments,
 	targets []map[string]*dep.InstallInfo,
 	pkgBuildDirs map[string]string,
-	srcinfos map[string]*gosrc.Srcinfo,
 ) error {
 	// Reorganize targets into layers of dependencies
 	for i := len(targets) - 1; i >= 0; i-- {
-		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, srcinfos, i == 0)
+		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, i == 0)
 		if err != nil {
 			// rollback
 			return err
@@ -95,7 +92,6 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	cmdArgs *parser.Arguments,
 	layer map[string]*dep.InstallInfo,
 	pkgBuildDirs map[string]string,
-	srcinfos map[string]*gosrc.Srcinfo,
 	lastLayer bool,
 ) error {
 	// Install layer
@@ -142,7 +138,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	}
 
 	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp,
-		nameToBaseMap, pkgBuildDirs, true, srcinfos, lastLayer)
+		nameToBaseMap, pkgBuildDirs, true, lastLayer)
 
 	return errAur
 }
@@ -152,7 +148,6 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	aurDepNames, aurExpNames mapset.Set[string],
 	nameToBase, pkgBuildDirsByBase map[string]string,
 	installIncompatible bool,
-	srcinfos map[string]*gosrc.Srcinfo,
 	lastLayer bool,
 ) error {
 	all := aurDepNames.Union(aurExpNames).ToSlice()
@@ -162,8 +157,6 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 	deps, exps := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
 	pkgArchives := make([]string, 0, len(exps)+len(deps))
-
-	var wg sync.WaitGroup
 
 	for _, name := range all {
 		base := nameToBase[name]
@@ -175,7 +168,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
 			}
 
-			installer.failedAndIngnored[name] = errMake
+			installer.failedAndIgnored[name] = errMake
 			text.Errorln(gotext.Get("error making: %s", base), "-", errMake)
 			continue
 		}
@@ -201,16 +194,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		if hasDebug {
 			deps = append(deps, name+"-debug")
 		}
-
-		srcinfo := srcinfos[base]
-		wg.Add(1)
-		go func(name string) {
-			installer.vcsStore.Update(ctx, name, srcinfo.Source)
-			wg.Done()
-		}(name)
 	}
-
-	wg.Wait()
 
 	if err := installPkgArchive(ctx, installer.exeCmd, installer.targetMode, installer.vcsStore, cmdArgs, pkgArchives); err != nil {
 		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)

@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -138,8 +137,6 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				"yay": tmpDir,
 			}
 
-			srcInfos := map[string]*gosrc.Srcinfo{"yay": {}}
-
 			targets := []map[string]*dep.InstallInfo{
 				{
 					"yay": {
@@ -152,7 +149,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				},
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, srcInfos)
+			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs)
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -414,9 +411,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 				"jellyfin": tmpDirJfin,
 			}
 
-			srcInfos := map[string]*gosrc.Srcinfo{"yay": {}, "jellyfin": {}}
-
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, srcInfos)
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs)
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -570,8 +565,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 				"yay": tmpDir,
 			}
 
-			srcInfos := map[string]*gosrc.Srcinfo{"yay": {}}
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, srcInfos)
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs)
 			if tc.lastLayer {
 				require.NoError(td, errI) // last layer error
 			} else {
@@ -728,9 +722,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 				"jellyfin": tmpDir,
 			}
 
-			srcInfos := map[string]*gosrc.Srcinfo{"jellyfin": {}}
-
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, srcInfos)
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs)
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))

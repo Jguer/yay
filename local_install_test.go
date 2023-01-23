@@ -134,6 +134,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 	}
 
 	config := &settings.Configuration{
+		RemoveMake: "no",
 		Runtime: &settings.Runtime{
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
