@@ -3,6 +3,7 @@ package vcs
 import (
 	"context"
 
+	"github.com/Jguer/go-alpm/v2"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -27,9 +28,12 @@ func (m *Mock) Save() error {
 	return nil
 }
 
-func (m *Mock) RemovePackage(pkgs []string) {
+func (m *Mock) RemovePackages(pkgs []string) {
 }
 
 func (m *Mock) Load() error {
 	return nil
+}
+
+func (m *Mock) CleanOrphans(pkgs map[string]alpm.IPackage) {
 }

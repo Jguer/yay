@@ -383,7 +383,7 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache vcs
 	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
 	if err == nil {
-		localCache.RemovePackage(cmdArgs.Targets)
+		localCache.RemovePackages(cmdArgs.Targets)
 	}
 
 	return err

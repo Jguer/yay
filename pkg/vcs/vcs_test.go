@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 )
 
@@ -468,8 +469,55 @@ func TestInfoStore_Remove(t *testing.T) {
 				OriginsByPackage: tt.fields.OriginsByPackage,
 				FilePath:         filePath,
 			}
-			v.RemovePackage(tt.args.pkgs)
+			v.RemovePackages(tt.args.pkgs)
 			assert.Len(t, tt.fields.OriginsByPackage, 2)
+		})
+	}
+
+	require.NoError(t, os.Remove(filePath))
+}
+
+func TestInfoStore_CleanOrphans(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		OriginsByPackage map[string]OriginInfoByURL
+	}
+	type args struct {
+		pkgs map[string]db.IPackage
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{
+			name: "simple",
+			args: args{pkgs: map[string]db.IPackage{"a": nil, "b": nil, "d": nil}},
+			fields: fields{
+				OriginsByPackage: map[string]OriginInfoByURL{
+					"a": {},
+					"b": {},
+					"c": {},
+					"d": {},
+				},
+			},
+		},
+	}
+
+	file, err := os.CreateTemp("/tmp", "yay-vcs-*-test")
+	filePath := file.Name()
+	require.NoError(t, err)
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			v := &InfoStore{
+				OriginsByPackage: tt.fields.OriginsByPackage,
+				FilePath:         filePath,
+			}
+			v.CleanOrphans(tt.args.pkgs)
+			assert.Len(t, tt.fields.OriginsByPackage, 3)
 		})
 	}
 

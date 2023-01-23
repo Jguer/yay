@@ -14,6 +14,7 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/go-alpm/v2"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
@@ -23,12 +24,14 @@ type Store interface {
 	ToUpgrade(ctx context.Context, pkgName string) bool
 	// Update updates the VCS info of a package.
 	Update(ctx context.Context, pkgName string, sources []gosrc.ArchString)
-	// Save saves the VCS info to disk.
-	Save() error
-	// RemovePackage removes the VCS info of a package.
-	RemovePackage(pkgs []string)
+	// RemovePackages removes the VCS info of the packages given as arg if they exist.
+	RemovePackages(pkgs []string)
+	// Clean orphaned VCS info.
+	CleanOrphans(pkgs map[string]alpm.IPackage)
 	// Load loads the VCS info from disk.
 	Load() error
+	// Save saves the VCS info to disk.
+	Save() error
 }
 
 // InfoStore is a collection of OriginInfoByURL by Package.
@@ -275,7 +278,7 @@ func (v *InfoStore) Save() error {
 }
 
 // RemovePackage removes package from VCS information.
-func (v *InfoStore) RemovePackage(pkgs []string) {
+func (v *InfoStore) RemovePackages(pkgs []string) {
 	updated := false
 
 	for _, pkgName := range pkgs {
@@ -310,4 +313,17 @@ func (v *InfoStore) Load() error {
 	}
 
 	return nil
+}
+
+func (v *InfoStore) CleanOrphans(pkgs map[string]alpm.IPackage) {
+	missing := make([]string, 0)
+
+	for pkgName := range v.OriginsByPackage {
+		if _, ok := pkgs[pkgName]; !ok {
+			text.Debugln("removing orphaned vcs package:", pkgName)
+			missing = append(missing, pkgName)
+		}
+	}
+
+	v.RemovePackages(missing)
 }

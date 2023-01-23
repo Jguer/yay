@@ -103,6 +103,7 @@ func upList(ctx context.Context, aurCache settings.AURCache,
 				go func() {
 					develUp = upgrade.UpDevel(ctx, remote, aurdata, config.Runtime.VCSStore)
 
+					config.Runtime.VCSStore.CleanOrphans(remote)
 					wg.Done()
 				}()
 			}

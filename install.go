@@ -648,7 +648,7 @@ func buildInstallPkgbuilds(
 
 			if errArchive != nil || errReason != nil {
 				if i != 0 {
-					go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[i-1].String()})
+					go config.Runtime.VCSStore.RemovePackages([]string{do.Aur[i-1].String()})
 				}
 
 				if errArchive != nil {
@@ -794,12 +794,12 @@ func buildInstallPkgbuilds(
 	text.Debugln("installing archives:", pkgArchives)
 	errArchive := installPkgArchive(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, config.Runtime.VCSStore, cmdArgs, pkgArchives)
 	if errArchive != nil {
-		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
+		go config.Runtime.VCSStore.RemovePackages([]string{do.Aur[len(do.Aur)-1].String()})
 	}
 
 	errReason := setInstallReason(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, deps, exp)
 	if errReason != nil {
-		go config.Runtime.VCSStore.RemovePackage([]string{do.Aur[len(do.Aur)-1].String()})
+		go config.Runtime.VCSStore.RemovePackages([]string{do.Aur[len(do.Aur)-1].String()})
 	}
 
 	settings.NoConfirm = oldConfirm

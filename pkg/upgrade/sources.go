@@ -44,7 +44,7 @@ func UpDevel(
 		}
 	}
 
-	localCache.RemovePackage(toRemove)
+	localCache.RemovePackages(toRemove)
 
 	return toUpgrade
 }
