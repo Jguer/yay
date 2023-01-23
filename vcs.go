@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/download"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/srcinfo"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 )
@@ -51,7 +52,7 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 		return err
 	}
 
-	srcinfos, err := parseSrcinfoFiles(pkgBuildDirsByBase, false)
+	srcinfos, err := srcinfo.ParseSrcinfoFiles(pkgBuildDirsByBase, false)
 	if err != nil {
 		return err
 	}

@@ -25,6 +25,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/srcinfo"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
@@ -282,7 +283,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errM
 	}
 
-	srcinfos, err = parseSrcinfoFiles(pkgbuildDirs, true)
+	srcinfos, err = srcinfo.ParseSrcinfoFiles(pkgbuildDirs, true)
 	if err != nil {
 		return err
 	}
@@ -537,30 +538,6 @@ func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	return pkgdests, pkgVersion, nil
 }
 
-func parseSrcinfoFiles(pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
-	srcinfos := make(map[string]*gosrc.Srcinfo)
-
-	k := 0
-	for base, dir := range pkgBuildDirs {
-		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(pkgBuildDirs), text.Cyan(base)))
-
-		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
-		if err != nil {
-			if !errIsFatal {
-				text.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base, err))
-				continue
-			}
-
-			return nil, errors.New(gotext.Get("failed to parse %s: %s", base, err))
-		}
-
-		srcinfos[base] = pkgbuild
-		k++
-	}
-
-	return srcinfos, nil
-}
-
 func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.StringSet {
 	toSkip := make(stringset.StringSet)
 
@@ -682,7 +659,7 @@ func buildInstallPkgbuilds(
 			}
 		}
 
-		srcinfo := srcinfos[pkg]
+		srcInfo := srcinfos[pkg]
 
 		args := []string{"--nobuild", "-fC"}
 
@@ -797,7 +774,7 @@ func buildInstallPkgbuilds(
 		var wg sync.WaitGroup
 
 		for _, pkg := range base {
-			if srcinfo == nil {
+			if srcInfo == nil {
 				text.Errorln(gotext.Get("could not find srcinfo for: %s", pkg.Name))
 				break
 			}
@@ -806,7 +783,7 @@ func buildInstallPkgbuilds(
 
 			text.Debugln("checking vcs store for:", pkg.Name)
 			go func(name string) {
-				config.Runtime.VCSStore.Update(ctx, name, srcinfo.Source)
+				config.Runtime.VCSStore.Update(ctx, name, srcInfo.Source)
 				wg.Done()
 			}(pkg.Name)
 		}

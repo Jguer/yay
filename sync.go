@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/srcinfo"
 	"github.com/Jguer/yay/v11/pkg/text"
 
 	"github.com/leonelquinteros/gotext"
@@ -99,9 +100,9 @@ func (o *OperationService) Run(ctx context.Context,
 	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
 	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode)
 
-	pkgBuildDirs, err := preparer.Run(ctx, os.Stdout, targets)
-	if err != nil {
-		return err
+	pkgBuildDirs, errInstall := preparer.Run(ctx, os.Stdout, targets)
+	if errInstall != nil {
+		return errInstall
 	}
 
 	cleanFunc := preparer.ShouldCleanMakeDeps()
@@ -113,28 +114,34 @@ func (o *OperationService) Run(ctx context.Context,
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
-	srcinfoOp := srcinfoOperator{
-		dbExecutor: o.dbExecutor,
-		cfg:        o.cfg,
-		cmdBuilder: installer.exeCmd,
-	}
-	srcinfos, err := srcinfoOp.Run(ctx, pkgBuildDirs)
-	if err != nil {
-		return err
-	}
-
 	go func() {
-		_ = completion.Update(ctx, o.cfg.Runtime.HTTPClient, o.dbExecutor,
+		errComp := completion.Update(ctx, o.cfg.Runtime.HTTPClient, o.dbExecutor,
 			o.cfg.AURURL, o.cfg.Runtime.CompletionPath, o.cfg.CompletionInterval, false)
+		if errComp != nil {
+			text.Warnln(errComp)
+		}
 	}()
 
-	err = installer.Install(ctx, cmdArgs, targets, pkgBuildDirs, srcinfos)
-	if err != nil {
-		if errHook := installer.RunPostInstallHooks(ctx); errHook != nil {
-			text.Errorln(errHook)
-		}
+	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, pkgBuildDirs)
+	if errInstall != nil {
+		return errInstall
+	}
 
-		return err
+	incompatible, errInstall := srcInfo.IncompatiblePkgs(ctx)
+	if errInstall != nil {
+		return errInstall
+	}
+
+	if errIncompatible := confirmIncompatible(incompatible); errIncompatible != nil {
+		return errIncompatible
+	}
+
+	if errPGP := srcInfo.CheckPGPKeys(ctx); errPGP != nil {
+		return errPGP
+	}
+
+	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs); errInstall != nil {
+		return errInstall
 	}
 
 	var multiErr multierror.MultiError
@@ -148,4 +155,22 @@ func (o *OperationService) Run(ctx context.Context,
 	}
 
 	return multiErr.Return()
+}
+
+func confirmIncompatible(incompatible []string) error {
+	if len(incompatible) > 0 {
+		text.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
+
+		for _, pkg := range incompatible {
+			fmt.Print("  " + text.Cyan(pkg))
+		}
+
+		fmt.Println()
+
+		if !text.ContinueTask(os.Stdin, gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
+			return &settings.ErrUserAbort{}
+		}
+	}
+
+	return nil
 }
