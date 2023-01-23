@@ -252,6 +252,7 @@ func (s *MixedSourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges
 	)
 
 	for i := 0; i <= s.Len(); i++ {
+		// FIXME: this is probably broken
 		target := i - 1
 		if s.bottomUp {
 			target = lenRes - i

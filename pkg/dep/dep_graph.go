@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/intrange"
 	aur "github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
@@ -195,6 +196,38 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	return graph, nil
 }
 
+func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
+	final := make([]aurc.Pkg, 0, len(pkgs))
+	for i := range pkgs {
+		fmt.Fprintln(os.Stdout, text.Magenta(strconv.Itoa(i+1)+" ")+text.Bold(pkgs[i].Name)+
+			" "+text.Cyan(pkgs[i].Version))
+		fmt.Fprintln(os.Stdout, "    "+pkgs[i].Description)
+	}
+	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
+
+	numberBuf, err := text.GetInput("", g.noConfirm)
+	if err != nil {
+		return nil, err
+	}
+
+	include, exclude, _, otherExclude := intrange.ParseNumberMenu(numberBuf)
+	isInclude := len(exclude) == 0 && len(otherExclude) == 0
+
+	for i := 1; i <= len(pkgs); i++ {
+		target := i - 1
+
+		if isInclude && !include.Get(i) {
+			final = append(final, pkgs[target])
+		}
+
+		if !isInclude && (exclude.Get(i)) {
+			final = append(final, pkgs[target])
+		}
+	}
+
+	return final, nil
+}
+
 func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string, *InstallInfo], pkgBuildDir string,
 	pkgbuild *gosrc.Srcinfo,
 ) (*topo.Graph[string, *InstallInfo], error) {
@@ -205,6 +238,14 @@ func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string
 	aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(aurPkgs) > 1 {
+		var errPick error
+		aurPkgs, errPick = g.pickSrcInfoPkgs(aurPkgs)
+		if errPick != nil {
+			return nil, errPick
+		}
 	}
 
 	for i := range aurPkgs {
@@ -485,6 +526,14 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]au
 
 	alpmArch = append(alpmArch, "") // srcinfo assumes no value as ""
 
+	getDesc := func(pkg *gosrc.Package) string {
+		if pkg.Pkgdesc != "" {
+			return pkg.Pkgdesc
+		}
+
+		return srcInfo.Pkgdesc
+	}
+
 	for i := range srcInfo.Packages {
 		pkg := &srcInfo.Packages[i]
 
@@ -494,7 +543,7 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]au
 			PackageBaseID: 0,
 			PackageBase:   srcInfo.Pkgbase,
 			Version:       srcInfo.Version(),
-			Description:   pkg.Pkgdesc,
+			Description:   getDesc(pkg),
 			URL:           pkg.URL,
 			Depends: append(archStringToString(alpmArch, pkg.Depends),
 				archStringToString(alpmArch, srcInfo.Package.Depends)...),
