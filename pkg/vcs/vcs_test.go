@@ -113,7 +113,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   []string
+		want   bool
 	}{
 		{
 			name: "simple-has_update",
@@ -128,7 +128,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	HEAD"},
 				}},
 			},
-			want: []string{"yay"},
+			want: true,
 		},
 		{
 			name: "double-has_update",
@@ -151,7 +151,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 					},
 				}},
 			},
-			want: []string{"yay"},
+			want: true,
 		},
 		{
 			name: "simple-no_update",
@@ -166,7 +166,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 					Returned: []string{"991c5b4146fd27f4aacf4e3111258a848934aaa1	HEAD"},
 				}},
 			},
-			want: []string{},
+			want: false,
 		},
 		{
 			name: "simple-no_split",
@@ -181,7 +181,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
 				}},
 			},
-			want: []string{},
+			want: false,
 		},
 		{
 			name: "simple-error",
@@ -199,7 +199,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 					},
 				},
 			},
-			want: []string{},
+			want: false,
 		},
 		{
 			name: "simple-no protocol",
@@ -214,7 +214,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 					Returned: []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
 				}},
 			},
-			want: []string{},
+			want: false,
 		},
 	}
 	for _, tt := range tests {
@@ -227,7 +227,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 					"yay": tt.args.infos,
 				},
 			}
-			got := v.ToUpgrade(context.Background())
+			got := v.ToUpgrade(context.Background(), "yay")
 			assert.Equal(t, tt.want, got)
 		})
 	}

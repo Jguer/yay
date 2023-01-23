@@ -11,8 +11,13 @@ type Mock struct {
 	ToUpgradeReturn  []string
 }
 
-func (m *Mock) ToUpgrade(ctx context.Context) []string {
-	return m.ToUpgradeReturn
+func (m *Mock) ToUpgrade(ctx context.Context, pkgName string) bool {
+	for _, pkg := range m.ToUpgradeReturn {
+		if pkg == pkgName {
+			return true
+		}
+	}
+	return false
 }
 
 func (m *Mock) Update(ctx context.Context, pkgName string, sources []gosrc.ArchString) {

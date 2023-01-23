@@ -13,31 +13,25 @@ import (
 
 func UpDevel(
 	ctx context.Context,
-	remote []db.IPackage, // should be a map
+	remote map[string]db.IPackage,
 	aurdata map[string]*query.Pkg,
 	localCache vcs.Store,
 ) UpSlice {
-	toUpdate := make([]db.IPackage, 0, len(aurdata))
 	toRemove := make([]string, 0)
+	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"devel"}}
 
-	for _, pkgName := range localCache.ToUpgrade(ctx) {
-		if _, ok := aurdata[pkgName]; ok {
-			for _, pkg := range remote {
-				if pkg.Name() == pkgName {
-					toUpdate = append(toUpdate, pkg)
-				}
+	for pkgName, pkg := range remote {
+		if localCache.ToUpgrade(ctx, pkgName) {
+			if _, ok := aurdata[pkgName]; !ok {
+				text.Warnln(gotext.Get("ignoring package devel upgrade (no AUR info found):"), pkgName)
+				continue
 			}
-		} else {
-			toRemove = append(toRemove, pkgName)
-		}
-	}
 
-	toUpgrade := UpSlice{Up: make([]Upgrade, 0, len(toUpdate)), Repos: []string{"devel"}}
+			if pkg.ShouldIgnore() {
+				printIgnoringPackage(pkg, "latest-commit")
+				continue
+			}
 
-	for _, pkg := range toUpdate {
-		if pkg.ShouldIgnore() {
-			printIgnoringPackage(pkg, "latest-commit")
-		} else {
 			toUpgrade.Up = append(toUpgrade.Up,
 				Upgrade{
 					Name:          pkg.Name(),
@@ -66,11 +60,11 @@ func printIgnoringPackage(pkg db.IPackage, newPkgVersion string) {
 
 // UpAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func UpAUR(remote []db.IPackage, aurdata map[string]*query.Pkg, timeUpdate bool) UpSlice {
+func UpAUR(remote map[string]db.IPackage, aurdata map[string]*query.Pkg, timeUpdate bool) UpSlice {
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"aur"}}
 
-	for _, pkg := range remote {
-		aurPkg, ok := aurdata[pkg.Name()]
+	for name, pkg := range remote {
+		aurPkg, ok := aurdata[name]
 		if !ok {
 			continue
 		}

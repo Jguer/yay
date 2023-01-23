@@ -18,7 +18,7 @@ func Test_upAUR(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		remote     []alpm.IPackage
+		remote     map[string]alpm.IPackage
 		aurdata    map[string]*aur.Pkg
 		timeUpdate bool
 	}
@@ -30,10 +30,10 @@ func Test_upAUR(t *testing.T) {
 		{
 			name: "No Updates",
 			args: args{
-				remote: []alpm.IPackage{
-					&mock.Package{PName: "hello", PVersion: "2.0.0"},
-					&mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
-					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
+				remote: map[string]alpm.IPackage{
+					"hello":     &mock.Package{PName: "hello", PVersion: "2.0.0"},
+					"local_pkg": &mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
+					"ignored":   &mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
 				},
 				aurdata: map[string]*aur.Pkg{
 					"hello":   {Version: "2.0.0", Name: "hello"},
@@ -46,7 +46,9 @@ func Test_upAUR(t *testing.T) {
 		{
 			name: "Simple Update",
 			args: args{
-				remote:     []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
+				remote: map[string]alpm.IPackage{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0"},
+				},
 				aurdata:    map[string]*aur.Pkg{"hello": {Version: "2.1.0", Name: "hello"}},
 				timeUpdate: false,
 			},
@@ -55,7 +57,9 @@ func Test_upAUR(t *testing.T) {
 		{
 			name: "Time Update",
 			args: args{
-				remote:     []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PBuildDate: time.Now()}},
+				remote: map[string]alpm.IPackage{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0", PBuildDate: time.Now()},
+				},
 				aurdata:    map[string]*aur.Pkg{"hello": {Version: "2.0.0", Name: "hello", LastModified: int(time.Now().AddDate(0, 0, 2).Unix())}},
 				timeUpdate: true,
 			},
@@ -66,6 +70,7 @@ func Test_upAUR(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := UpAUR(tt.args.remote, tt.args.aurdata, tt.args.timeUpdate)
 			assert.EqualValues(t, tt.want, got)
 		})
@@ -76,7 +81,7 @@ func Test_upDevel(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		remote  []alpm.IPackage
+		remote  map[string]alpm.IPackage
 		aurdata map[string]*aur.Pkg
 		cached  vcs.Store
 	}
@@ -90,10 +95,10 @@ func Test_upDevel(t *testing.T) {
 			name: "No Updates",
 			args: args{
 				cached: &vcs.Mock{},
-				remote: []alpm.IPackage{
-					&mock.Package{PName: "hello", PVersion: "2.0.0"},
-					&mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
-					&mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
+				remote: map[string]alpm.IPackage{
+					"hello":     &mock.Package{PName: "hello", PVersion: "2.0.0"},
+					"local_pkg": &mock.Package{PName: "local_pkg", PVersion: "1.1.0"},
+					"ignored":   &mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
 				},
 				aurdata: map[string]*aur.Pkg{
 					"hello":   {Version: "2.0.0", Name: "hello"},
@@ -109,10 +114,10 @@ func Test_upDevel(t *testing.T) {
 				cached: &vcs.Mock{
 					ToUpgradeReturn: []string{"hello", "hello4"},
 				},
-				remote: []alpm.IPackage{
-					&mock.Package{PName: "hello", PVersion: "2.0.0"},
-					&mock.Package{PName: "hello2", PVersion: "3.0.0"},
-					&mock.Package{PName: "hello4", PVersion: "4.0.0"},
+				remote: map[string]alpm.IPackage{
+					"hello":  &mock.Package{PName: "hello", PVersion: "2.0.0"},
+					"hello2": &mock.Package{PName: "hello2", PVersion: "3.0.0"},
+					"hello4": &mock.Package{PName: "hello4", PVersion: "4.0.0"},
 				},
 				aurdata: map[string]*aur.Pkg{
 					"hello":  {Version: "2.0.0", Name: "hello"},
@@ -141,8 +146,10 @@ func Test_upDevel(t *testing.T) {
 			name:     "No update returned",
 			finalLen: 1,
 			args: args{
-				cached:  &vcs.Mock{ToUpgradeReturn: []string{}},
-				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0"}},
+				cached: &vcs.Mock{ToUpgradeReturn: []string{}},
+				remote: map[string]alpm.IPackage{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0"},
+				},
 				aurdata: map[string]*aur.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
 			want: UpSlice{Repos: []string{"devel"}},
@@ -154,7 +161,9 @@ func Test_upDevel(t *testing.T) {
 				cached: &vcs.Mock{
 					ToUpgradeReturn: []string{"hello"},
 				},
-				remote:  []alpm.IPackage{&mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true}},
+				remote: map[string]alpm.IPackage{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0", PShouldIgnore: true},
+				},
 				aurdata: map[string]*aur.Pkg{"hello": {Version: "2.0.0", Name: "hello"}},
 			},
 			want: UpSlice{Repos: []string{"devel"}},

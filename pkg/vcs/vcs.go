@@ -19,8 +19,8 @@ import (
 )
 
 type Store interface {
-	// ToUpgrade returns a list of packages that need to be updated.
-	ToUpgrade(ctx context.Context) []string
+	// ToUpgrade returns true if the package needs to be updated.
+	ToUpgrade(ctx context.Context, pkgName string) bool
 	// Update updates the VCS info of a package.
 	Update(ctx context.Context, pkgName string, sources []gosrc.ArchString)
 	// Save saves the VCS info to disk.
@@ -200,15 +200,12 @@ func parseSource(source string) (url, branch string, protocols []string) {
 	return url, branch, protocols
 }
 
-func (v *InfoStore) ToUpgrade(ctx context.Context) []string {
-	pkgs := make([]string, 0, len(v.OriginsByPackage))
-	for pkgName, infos := range v.OriginsByPackage {
-		if v.needsUpdate(ctx, infos) {
-			pkgs = append(pkgs, pkgName)
-		}
+func (v *InfoStore) ToUpgrade(ctx context.Context, pkgName string) bool {
+	if infos, ok := v.OriginsByPackage[pkgName]; ok {
+		return v.needsUpdate(ctx, infos)
 	}
 
-	return pkgs
+	return false
 }
 
 func (v *InfoStore) needsUpdate(ctx context.Context, infos OriginInfoByURL) bool {
