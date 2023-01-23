@@ -3,12 +3,14 @@ package srcinfo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"path/filepath"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/pgp"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
@@ -16,6 +18,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
+// TODO: add tests
 type Service struct {
 	dbExecutor db.Executor
 	cfg        *settings.Configuration
@@ -29,7 +32,7 @@ type Service struct {
 func NewService(dbExecutor db.Executor, cfg *settings.Configuration,
 	cmdBuilder exe.ICmdBuilder, vcsStore vcs.Store, pkgBuildDirs map[string]string,
 ) (*Service, error) {
-	srcinfos, err := ParseSrcinfoFiles(pkgBuildDirs, true)
+	srcinfos, err := ParseSrcinfoFilesByBase(pkgBuildDirs, true)
 	if err != nil {
 		panic(err)
 	}
@@ -69,25 +72,32 @@ func (s *Service) CheckPGPKeys(ctx context.Context) error {
 	return errCPK
 }
 
-func (s *Service) UpdateVCSStore(ctx context.Context,
-	srcinfos map[string]*gosrc.Srcinfo, ignore map[string]any,
+func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.InstallInfo, ignore map[string]error,
 ) error {
-	for _, srcinfo := range srcinfos {
+	for _, srcinfo := range s.srcInfos {
 		if srcinfo.Source == nil {
 			continue
 		}
 
-		if _, ok := ignore[srcinfo.Pkgname]; ok {
-			continue
-		}
+		for i := range srcinfo.Packages {
+			if _, ok := targets[i][srcinfo.Packages[i].Pkgname]; !ok {
+				text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
+				continue
+			}
+			if _, ok := ignore[srcinfo.Packages[i].Pkgname]; ok {
+				text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
+				continue
+			}
 
-		s.vcsStore.Update(ctx, srcinfo.Pkgname, srcinfo.Source)
+			text.Debugln("updating VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
+			s.vcsStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
+		}
 	}
 
 	return nil
 }
 
-func ParseSrcinfoFiles(pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
+func ParseSrcinfoFilesByBase(pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
 	srcinfos := make(map[string]*gosrc.Srcinfo)
 
 	k := 0

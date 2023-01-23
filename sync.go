@@ -150,6 +150,10 @@ func (o *OperationService) Run(ctx context.Context,
 		multiErr.Add(err)
 	}
 
+	if err := srcInfo.UpdateVCSStore(ctx, targets, installer.failedAndIgnored); err != nil {
+		text.Warnln(err)
+	}
+
 	if err := installer.RunPostInstallHooks(ctx); err != nil {
 		multiErr.Add(err)
 	}

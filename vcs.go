@@ -52,7 +52,7 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 		return err
 	}
 
-	srcinfos, err := srcinfo.ParseSrcinfoFiles(pkgBuildDirsByBase, false)
+	srcinfos, err := srcinfo.ParseSrcinfoFilesByBase(pkgBuildDirsByBase, false)
 	if err != nil {
 		return err
 	}

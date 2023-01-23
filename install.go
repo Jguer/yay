@@ -283,7 +283,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errM
 	}
 
-	srcinfos, err = srcinfo.ParseSrcinfoFiles(pkgbuildDirs, true)
+	srcinfos, err = srcinfo.ParseSrcinfoFilesByBase(pkgbuildDirs, true)
 	if err != nil {
 		return err
 	}
