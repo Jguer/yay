@@ -31,7 +31,7 @@ type Executor interface {
 	BiggestPackages() []IPackage
 	Cleanup()
 	InstalledRemotePackageNames() []string
-	InstalledRemotePackages() []IPackage
+	InstalledRemotePackages() map[string]IPackage
 	InstalledSyncPackageNames() []string
 	IsCorrectVersionInstalled(string, string) bool
 	LastBuildTime() time.Time

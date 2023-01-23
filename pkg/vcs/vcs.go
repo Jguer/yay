@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Jguer/go-alpm/v2"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
@@ -19,16 +20,18 @@ import (
 )
 
 type Store interface {
-	// ToUpgrade returns a list of packages that need to be updated.
-	ToUpgrade(ctx context.Context) []string
+	// ToUpgrade returns true if the package needs to be updated.
+	ToUpgrade(ctx context.Context, pkgName string) bool
 	// Update updates the VCS info of a package.
 	Update(ctx context.Context, pkgName string, sources []gosrc.ArchString)
-	// Save saves the VCS info to disk.
-	Save() error
-	// RemovePackage removes the VCS info of a package.
-	RemovePackage(pkgs []string)
+	// RemovePackages removes the VCS info of the packages given as arg if they exist.
+	RemovePackages(pkgs []string)
+	// Clean orphaned VCS info.
+	CleanOrphans(pkgs map[string]alpm.IPackage)
 	// Load loads the VCS info from disk.
 	Load() error
+	// Save saves the VCS info to disk.
+	Save() error
 }
 
 // InfoStore is a collection of OriginInfoByURL by Package.
@@ -200,15 +203,12 @@ func parseSource(source string) (url, branch string, protocols []string) {
 	return url, branch, protocols
 }
 
-func (v *InfoStore) ToUpgrade(ctx context.Context) []string {
-	pkgs := make([]string, 0, len(v.OriginsByPackage))
-	for pkgName, infos := range v.OriginsByPackage {
-		if v.needsUpdate(ctx, infos) {
-			pkgs = append(pkgs, pkgName)
-		}
+func (v *InfoStore) ToUpgrade(ctx context.Context, pkgName string) bool {
+	if infos, ok := v.OriginsByPackage[pkgName]; ok {
+		return v.needsUpdate(ctx, infos)
 	}
 
-	return pkgs
+	return false
 }
 
 func (v *InfoStore) needsUpdate(ctx context.Context, infos OriginInfoByURL) bool {
@@ -278,7 +278,7 @@ func (v *InfoStore) Save() error {
 }
 
 // RemovePackage removes package from VCS information.
-func (v *InfoStore) RemovePackage(pkgs []string) {
+func (v *InfoStore) RemovePackages(pkgs []string) {
 	updated := false
 
 	for _, pkgName := range pkgs {
@@ -313,4 +313,17 @@ func (v *InfoStore) Load() error {
 	}
 
 	return nil
+}
+
+func (v *InfoStore) CleanOrphans(pkgs map[string]alpm.IPackage) {
+	missing := make([]string, 0)
+
+	for pkgName := range v.OriginsByPackage {
+		if _, ok := pkgs[pkgName]; !ok {
+			text.Debugln("removing orphaned vcs package:", pkgName)
+			missing = append(missing, pkgName)
+		}
+	}
+
+	v.RemovePackages(missing)
 }

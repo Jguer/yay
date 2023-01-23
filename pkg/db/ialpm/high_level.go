@@ -1,7 +1,8 @@
 package ialpm
 
 import (
-	"github.com/Jguer/yay/v11/pkg/db"
+	alpm "github.com/Jguer/go-alpm/v2"
+
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
@@ -12,8 +13,8 @@ func (ae *AlpmExecutor) getPackageNamesBySource() {
 		if ae.SyncPackage(pkgName) != nil {
 			ae.installedSyncPkgNames = append(ae.installedSyncPkgNames, pkgName)
 		} else {
-			ae.installedRemotePkgs = append(ae.installedRemotePkgs, localpkg)
 			ae.installedRemotePkgNames = append(ae.installedRemotePkgNames, pkgName)
+			ae.installedRemotePkgMap[pkgName] = localpkg
 		}
 	}
 
@@ -21,12 +22,12 @@ func (ae *AlpmExecutor) getPackageNamesBySource() {
 		"sync_len", len(ae.installedSyncPkgNames), "remote_len", len(ae.installedRemotePkgNames))
 }
 
-func (ae *AlpmExecutor) InstalledRemotePackages() []db.IPackage {
-	if ae.installedRemotePkgs == nil {
+func (ae *AlpmExecutor) InstalledRemotePackages() map[string]alpm.IPackage {
+	if ae.installedRemotePkgMap == nil {
 		ae.getPackageNamesBySource()
 	}
 
-	return ae.installedRemotePkgs
+	return ae.installedRemotePkgMap
 }
 
 func (ae *AlpmExecutor) InstalledRemotePackageNames() []string {

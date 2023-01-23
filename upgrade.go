@@ -103,6 +103,7 @@ func upList(ctx context.Context, aurCache settings.AURCache,
 				go func() {
 					develUp = upgrade.UpDevel(ctx, remote, aurdata, config.Runtime.VCSStore)
 
+					config.Runtime.VCSStore.CleanOrphans(remote)
 					wg.Done()
 				}()
 			}
@@ -137,10 +138,10 @@ func upList(ctx context.Context, aurCache settings.AURCache,
 }
 
 func printLocalNewerThanAUR(
-	remote []alpm.IPackage, aurdata map[string]*aur.Pkg,
+	remote map[string]alpm.IPackage, aurdata map[string]*aur.Pkg,
 ) {
-	for _, pkg := range remote {
-		aurPkg, ok := aurdata[pkg.Name()]
+	for name, pkg := range remote {
+		aurPkg, ok := aurdata[name]
 		if !ok {
 			continue
 		}
@@ -149,7 +150,7 @@ func printLocalNewerThanAUR(
 
 		if !isDevelPackage(pkg) && db.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
 			text.Warnln(gotext.Get("%s: local (%s) is newer than AUR (%s)",
-				text.Cyan(pkg.Name()),
+				text.Cyan(name),
 				left, right,
 			))
 		}

@@ -24,8 +24,8 @@ type AlpmExecutor struct {
 	syncDBsCache []alpm.IDB
 	conf         *pacmanconf.Config
 
-	installedRemotePkgs     []alpm.IPackage
 	installedRemotePkgNames []string
+	installedRemotePkgMap   map[string]alpm.IPackage
 	installedSyncPkgNames   []string
 }
 
@@ -36,8 +36,8 @@ func NewExecutor(pacmanConf *pacmanconf.Config) (*AlpmExecutor, error) {
 		syncDB:                  nil,
 		syncDBsCache:            []alpm.IDB{},
 		conf:                    pacmanConf,
-		installedRemotePkgs:     nil,
 		installedRemotePkgNames: nil,
+		installedRemotePkgMap:   map[string]alpm.IPackage{},
 		installedSyncPkgNames:   nil,
 	}
 
