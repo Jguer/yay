@@ -271,16 +271,19 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	for i := range allUp.Up {
 		u := &allUp.Up[i]
 		if isInclude && otherExclude.Get(u.Repository) {
+			text.Debugln("pruning", u.Name)
 			graph.Prune(u.Name)
 			ignore.Set(u.Name)
 		}
 
 		if isInclude && exclude.Get(allUpLen-i) {
+			text.Debugln("pruning", u.Name)
 			graph.Prune(u.Name)
 			continue
 		}
 
 		if !isInclude && !(include.Get(allUpLen-i) || otherInclude.Get(u.Repository)) {
+			text.Debugln("pruning", u.Name)
 			graph.Prune(u.Name)
 			continue
 		}
