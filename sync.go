@@ -58,7 +58,7 @@ func syncInstall(ctx context.Context,
 			os.Stdout, grapher, aurCache, config.Runtime.AURClient,
 			dbExecutor, config.Runtime.VCSStore, config.Runtime, config)
 
-		graph, _, errSysUp = upService.sysupgradeTargetsV2(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		graph, _, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errSysUp != nil {
 			return errSysUp
 		}

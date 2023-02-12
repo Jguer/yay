@@ -3,6 +3,8 @@ package topo
 import (
 	"fmt"
 	"strings"
+
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 type (
@@ -185,15 +187,48 @@ func (g *Graph[T, V]) TopoSortedLayerMap(checkFn CheckFn[T, V]) []map[T]V {
 	return layers
 }
 
-func (dm DepMap[T]) removeFromDepmap(key, node T) {
+// returns if it was the last
+func (dm DepMap[T]) removeFromDepmap(key, node T) bool {
 	if nodes := dm[key]; len(nodes) == 1 {
 		// The only element in the nodeset must be `node`, so we
 		// can delete the entry entirely.
 		delete(dm, key)
+		return true
 	} else {
 		// Otherwise, remove the single node from the nodeset.
 		delete(nodes, node)
+		return false
 	}
+}
+
+// Prune removes the node,
+// its dependencies if there are no other dependents
+// and its dependents
+func (g *Graph[T, V]) Prune(node T) {
+	// Remove edges from things that depend on `node`.
+	for dependent := range g.dependents[node] {
+		last := g.dependencies.removeFromDepmap(dependent, node)
+		text.Debugln("pruning dependent", dependent, last)
+		if last {
+			g.Prune(dependent)
+		}
+	}
+
+	delete(g.dependents, node)
+
+	// Remove all edges from node to the things it depends on.
+	for dependency := range g.dependencies[node] {
+		last := g.dependents.removeFromDepmap(dependency, node)
+		text.Debugln("pruning dependency", dependency, last)
+		if last {
+			g.Prune(dependency)
+		}
+	}
+
+	delete(g.dependencies, node)
+
+	// Finally, remove the node itself.
+	delete(g.nodes, node)
 }
 
 func (g *Graph[T, V]) remove(node T) {

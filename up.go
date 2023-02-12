@@ -224,7 +224,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 	return aurUp, repoUp
 }
 
-func (u *UpgradeService) sysupgradeTargetsV2(ctx context.Context,
+func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool,
 ) (*topo.Graph[string, *dep.InstallInfo], stringset.StringSet, error) {
@@ -257,6 +257,7 @@ func (u *UpgradeService) sysupgradeTargetsV2(ctx context.Context,
 	allUp.Print()
 
 	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
+	text.Warnln(gotext.Get("May cause partial upgrades and break systems"))
 
 	numbers, err := text.GetInput(u.cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
@@ -266,27 +267,24 @@ func (u *UpgradeService) sysupgradeTargetsV2(ctx context.Context,
 	// upgrade menu asks you which packages to NOT upgrade so in this case
 	// exclude and include are kind of swapped
 	exclude, include, otherExclude, otherInclude := intrange.ParseNumberMenu(numbers)
-	text.Debugln("Include:", include, "Exclude:", exclude, "OtherInclude:", otherInclude, "OtherExclude:", otherExclude)
-
 	isInclude := len(include) == 0 && len(otherInclude) == 0
 
 	for i := range allUp.Up {
 		u := &allUp.Up[i]
 		if isInclude && otherExclude.Get(u.Repository) {
+			graph.Prune(u.Name)
 			ignore.Set(u.Name)
 		}
 
-		if isInclude && !exclude.Get(i) {
-			dep.AddUpgradeToGraph(u, graph)
+		if isInclude && exclude.Get(allUpLen-i) {
+			graph.Prune(u.Name)
 			continue
 		}
 
-		if !isInclude && (include.Get(i) || otherInclude.Get(u.Repository)) {
-			dep.AddUpgradeToGraph(u, graph)
+		if !isInclude && !(include.Get(allUpLen-i) || otherInclude.Get(u.Repository)) {
+			graph.Prune(u.Name)
 			continue
 		}
-
-		ignore.Set(u.Name)
 	}
 
 	return graph, ignore, err
