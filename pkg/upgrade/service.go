@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 
 	"github.com/Jguer/aur"
@@ -264,7 +265,7 @@ func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
 	text.Warnln(gotext.Get("May cause partial upgrades and break systems"))
 
-	numbers, err := text.GetInput(u.cfg.AnswerUpgrade, settings.NoConfirm)
+	numbers, err := text.GetInput(os.Stdin, u.cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
 		return err
 	}

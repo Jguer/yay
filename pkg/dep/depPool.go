@@ -516,7 +516,7 @@ func providerMenu(dep string, providers providers, noConfirm bool) *query.Pkg {
 			return providers.Pkgs[0]
 		}
 
-		numberBuf, err := text.GetInput("", false)
+		numberBuf, err := text.GetInput(os.Stdin, "", false)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 

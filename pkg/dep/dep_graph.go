@@ -216,7 +216,7 @@ func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
 	}
 	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
 
-	numberBuf, err := text.GetInput("", g.noConfirm)
+	numberBuf, err := text.GetInput(os.Stdin, "", g.noConfirm)
 	if err != nil {
 		return nil, err
 	}
@@ -528,7 +528,7 @@ func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *au
 			return &options[0]
 		}
 
-		numberBuf, err := text.GetInput("", false)
+		numberBuf, err := text.GetInput(os.Stdin, "", false)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 

@@ -203,7 +203,7 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 				break
 			}
 
-			numberBuf, err := text.GetInput("", false)
+			numberBuf, err := text.GetInput(os.Stdin, "", false)
 			if err != nil {
 				text.Errorln(err)
 				break

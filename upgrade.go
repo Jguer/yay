@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -210,7 +211,7 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 
 	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name):")
 
-	numbers, err := text.GetInput(config.AnswerUpgrade, settings.NoConfirm)
+	numbers, err := text.GetInput(os.Stdin, config.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
 		return nil, nil, err
 	}

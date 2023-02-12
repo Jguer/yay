@@ -61,7 +61,7 @@ func editor(editorConfig, editorFlags string, noConfirm bool) (editor string, ar
 		for {
 			text.Infoln(gotext.Get("Edit PKGBUILD with?"))
 
-			editorInput, err := text.GetInput("", noConfirm)
+			editorInput, err := text.GetInput(os.Stdin, "", noConfirm)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				continue

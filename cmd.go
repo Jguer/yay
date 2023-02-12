@@ -406,7 +406,7 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 
 	text.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
 
-	numberBuf, err := text.GetInput("", false)
+	numberBuf, err := text.GetInput(os.Stdin, "", false)
 	if err != nil {
 		return err
 	}
