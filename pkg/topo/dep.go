@@ -91,6 +91,18 @@ func (g *Graph[T, V]) getAlias(node T) T {
 	return node
 }
 
+func (g *Graph[T, V]) ForEach(f CheckFn[T, V]) error {
+	for node := range g.nodes {
+		node = g.getAlias(node)
+
+		if err := f(node, g.nodeInfo[node].Value); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (g *Graph[T, V]) SetNodeInfo(node T, nodeInfo *NodeInfo[V]) {
 	g.nodeInfo[g.getAlias(node)] = nodeInfo
 }

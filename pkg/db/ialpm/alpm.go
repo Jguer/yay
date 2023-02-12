@@ -14,7 +14,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/Jguer/yay/v11/pkg/upgrade"
 )
 
 type AlpmExecutor struct {
@@ -407,18 +406,19 @@ func (ae *AlpmExecutor) PackageGroups(pkg alpm.IPackage) []string {
 
 // upRepo gathers local packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error) {
+func (ae *AlpmExecutor) SyncUpgrades(enableDowngrade bool) (
+	map[string]db.SyncUpgrade, error,
+) {
+	ups := map[string]db.SyncUpgrade{}
 	var errReturn error
-
-	slice := []db.Upgrade{}
 
 	localDB, errDB := ae.handle.LocalDB()
 	if errDB != nil {
-		return slice, errDB
+		return ups, errDB
 	}
 
 	if err := ae.handle.TransInit(alpm.TransFlagNoLock); err != nil {
-		return slice, err
+		return ups, err
 	}
 
 	defer func() {
@@ -426,7 +426,7 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error)
 	}()
 
 	if err := ae.handle.SyncSysupgrade(enableDowngrade); err != nil {
-		return slice, err
+		return ups, err
 	}
 
 	_ = ae.handle.TransGetAdd().ForEach(func(pkg alpm.IPackage) error {
@@ -438,18 +438,16 @@ func (ae *AlpmExecutor) RepoUpgrades(enableDowngrade bool) ([]db.Upgrade, error)
 			reason = localPkg.Reason()
 		}
 
-		slice = append(slice, upgrade.Upgrade{
-			Name:          pkg.Name(),
-			Base:          pkg.Base(),
-			Repository:    pkg.DB().Name(),
-			LocalVersion:  localVer,
-			RemoteVersion: pkg.Version(),
-			Reason:        reason,
-		})
+		ups[pkg.Name()] = db.SyncUpgrade{
+			Package:      pkg,
+			Reason:       reason,
+			LocalVersion: localVer,
+		}
+
 		return nil
 	})
 
-	return slice, errReturn
+	return ups, errReturn
 }
 
 func (ae *AlpmExecutor) BiggestPackages() []alpm.IPackage {

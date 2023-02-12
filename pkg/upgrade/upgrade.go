@@ -10,7 +10,7 @@ import (
 )
 
 // Filter decides if specific package should be included in theincluded in the  results.
-type Filter func(Upgrade) bool
+type Filter func(*Upgrade) bool
 
 // Upgrade type describes a system upgrade.
 type Upgrade = db.Upgrade

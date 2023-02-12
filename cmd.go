@@ -205,16 +205,16 @@ func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {
 	case deps && explicit:
 		return nil, errors.New(gotext.Get("invalid option: '--deps' and '--explicit' may not be used together"))
 	case deps:
-		return func(pkg upgrade.Upgrade) bool {
+		return func(pkg *upgrade.Upgrade) bool {
 			return pkg.Reason == alpm.PkgReasonDepend
 		}, nil
 	case explicit:
-		return func(pkg upgrade.Upgrade) bool {
+		return func(pkg *upgrade.Upgrade) bool {
 			return pkg.Reason == alpm.PkgReasonExplicit
 		}, nil
 	}
 
-	return func(pkg upgrade.Upgrade) bool {
+	return func(pkg *upgrade.Upgrade) bool {
 		return true
 	}, nil
 }

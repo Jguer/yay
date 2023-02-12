@@ -97,7 +97,7 @@ func (t DBExecutor) RefreshHandle() error {
 	panic("implement me")
 }
 
-func (t DBExecutor) RepoUpgrades(b bool) ([]Upgrade, error) {
+func (t DBExecutor) SyncUpgrades(b bool) (map[string]db.SyncUpgrade, error) {
 	panic("implement me")
 }
 
