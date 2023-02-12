@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"sort"
 
 	"github.com/Jguer/aur"
@@ -24,7 +23,8 @@ import (
 )
 
 type UpgradeService struct {
-	w          io.Writer
+	input      io.Reader
+	output     io.Writer
 	grapher    *dep.Grapher
 	aurCache   settings.AURCache
 	aurClient  aur.ClientInterface
@@ -35,13 +35,14 @@ type UpgradeService struct {
 	noConfirm  bool
 }
 
-func NewUpgradeService(w io.Writer, grapher *dep.Grapher, aurCache settings.AURCache,
+func NewUpgradeService(input io.Reader, output io.Writer, grapher *dep.Grapher, aurCache settings.AURCache,
 	aurClient aur.ClientInterface, dbExecutor db.Executor,
 	vcsStore vcs.Store, runtime *settings.Runtime, cfg *settings.Configuration,
 	noConfirm bool,
 ) *UpgradeService {
 	return &UpgradeService{
-		w:          w,
+		input:      input,
+		output:     output,
 		grapher:    grapher,
 		aurCache:   aurCache,
 		aurClient:  aurClient,
@@ -259,13 +260,13 @@ func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 	allUp := UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
 
-	fmt.Fprintf(u.w, "%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
+	fmt.Fprintf(u.output, "%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
 	allUp.Print()
 
 	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
 	text.Warnln(gotext.Get("May cause partial upgrades and break systems"))
 
-	numbers, err := text.GetInput(os.Stdin, u.cfg.AnswerUpgrade, settings.NoConfirm)
+	numbers, err := text.GetInput(u.input, u.cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
 		return err
 	}
