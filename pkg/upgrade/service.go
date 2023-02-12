@@ -15,7 +15,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings"
-	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 	"github.com/Jguer/yay/v11/pkg/vcs"
@@ -32,11 +31,13 @@ type UpgradeService struct {
 	vcsStore   vcs.Store
 	runtime    *settings.Runtime
 	cfg        *settings.Configuration
+	noConfirm  bool
 }
 
 func NewUpgradeService(w io.Writer, grapher *dep.Grapher, aurCache settings.AURCache,
 	aurClient aur.ClientInterface, dbExecutor db.Executor,
 	vcsStore vcs.Store, runtime *settings.Runtime, cfg *settings.Configuration,
+	noConfirm bool,
 ) *UpgradeService {
 	return &UpgradeService{
 		w:          w,
@@ -47,6 +48,7 @@ func NewUpgradeService(w io.Writer, grapher *dep.Grapher, aurCache settings.AURC
 		vcsStore:   vcsStore,
 		runtime:    runtime,
 		cfg:        cfg,
+		noConfirm:  noConfirm,
 	}
 }
 
@@ -226,25 +228,29 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool,
-) (*topo.Graph[string, *dep.InstallInfo], stringset.StringSet, error) {
+) (*topo.Graph[string, *dep.InstallInfo], error) {
 	warnings := query.NewWarnings()
 
 	err := u.upGraph(ctx, graph, warnings, enableDowngrade,
 		func(*Upgrade) bool { return true })
 	if err != nil {
-		return graph, nil, err
+		return graph, err
 	}
 
 	warnings.Print()
 
-	ignore := make(stringset.StringSet)
-
-	allUpLen := graph.Len()
-	if allUpLen == 0 {
-		return graph, ignore, nil
+	if graph.Len() == 0 {
+		return graph, nil
 	}
 
-	// TODO: refactor print to not use UpSlice
+	errUp := u.userExcludeUpgrades(graph)
+	return graph, errUp
+}
+
+// userExcludeUpgrades asks the user which packages to exclude from the upgrade and
+// removes them from the graph
+func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) error {
+	allUpLen := graph.Len()
 	aurUp, repoUp := u.graphToUpSlice(graph)
 
 	sort.Sort(repoUp)
@@ -260,7 +266,7 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 
 	numbers, err := text.GetInput(u.cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 
 	// upgrade menu asks you which packages to NOT upgrade so in this case
@@ -273,7 +279,6 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 		if isInclude && otherExclude.Get(u.Repository) {
 			text.Debugln("pruning", u.Name)
 			graph.Prune(u.Name)
-			ignore.Set(u.Name)
 		}
 
 		if isInclude && exclude.Get(allUpLen-i) {
@@ -289,5 +294,5 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 		}
 	}
 
-	return graph, ignore, err
+	return nil
 }
