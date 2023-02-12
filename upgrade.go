@@ -17,7 +17,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/upgrade"
 
 	aur "github.com/Jguer/aur"
-	"github.com/Jguer/aur/metadata"
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 )
@@ -35,7 +34,7 @@ func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(ctx context.Context, aurCache settings.AURCache,
+func upList(ctx context.Context,
 	warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
 	filter upgrade.Filter,
 ) (aurUp, repoUp upgrade.UpSlice, err error) {
@@ -72,11 +71,7 @@ func upList(ctx context.Context, aurCache settings.AURCache,
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []aur.Pkg
-		if aurCache != nil {
-			_aurdata, err = aurCache.Get(ctx, &metadata.AURQuery{Needles: remoteNames, By: aur.Name})
-		} else {
-			_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
-		}
+		_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
 
 		errs.Add(err)
 
@@ -267,7 +262,7 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 ) (stringset.StringSet, []string, error) {
 	warnings := query.NewWarnings()
 
-	aurUp, repoUp, err := upList(ctx, nil, warnings, dbExecutor, enableDowngrade,
+	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade,
 		func(*upgrade.Upgrade) bool { return true })
 	if err != nil {
 		return nil, nil, err

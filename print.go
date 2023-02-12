@@ -100,7 +100,7 @@ func printNumberOfUpdates(ctx context.Context, dbExecutor db.Executor, enableDow
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(ctx, nil, warnings, dbExecutor, enableDowngrade, filter)
+	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 
 	if err != nil {
@@ -123,7 +123,7 @@ func printUpdateList(ctx context.Context, cmdArgs *parser.Arguments,
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	localNames := dbExecutor.InstalledSyncPackageNames()
 
-	aurUp, repoUp, err := upList(ctx, nil, warnings, dbExecutor, enableDowngrade, filter)
+	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 
 	if err != nil {
