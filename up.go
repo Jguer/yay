@@ -142,6 +142,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			Source:       dep.AUR,
 			AURBase:      &aurPkg.PackageBase,
 			Upgrade:      true,
+			Version:      up.RemoteVersion,
 			LocalVersion: up.LocalVersion,
 		})
 	}
@@ -263,43 +264,29 @@ func (u *UpgradeService) sysupgradeTargetsV2(ctx context.Context,
 	}
 
 	// upgrade menu asks you which packages to NOT upgrade so in this case
-	// include and exclude are kind of swapped
-	include, exclude, otherInclude, otherExclude := intrange.ParseNumberMenu(numbers)
+	// exclude and include are kind of swapped
+	exclude, include, otherExclude, otherInclude := intrange.ParseNumberMenu(numbers)
+	text.Debugln("Include:", include, "Exclude:", exclude, "OtherInclude:", otherInclude, "OtherExclude:", otherExclude)
 
-	isInclude := len(exclude) == 0 && len(otherExclude) == 0
+	isInclude := len(include) == 0 && len(otherInclude) == 0
 
-	for i := range repoUp.Up {
-		pkg := &repoUp.Up[i]
-		if isInclude && otherInclude.Get(pkg.Repository) {
-			ignore.Set(pkg.Name)
+	for i := range allUp.Up {
+		u := &allUp.Up[i]
+		if isInclude && otherExclude.Get(u.Repository) {
+			ignore.Set(u.Name)
 		}
 
-		if isInclude && !include.Get(len(repoUp.Up)-i+len(aurUp.Up)) {
-			dep.AddUpgradeToGraph(pkg, graph)
+		if isInclude && !exclude.Get(i) {
+			dep.AddUpgradeToGraph(u, graph)
 			continue
 		}
 
-		if !isInclude && (exclude.Get(len(repoUp.Up)-i+len(aurUp.Up)) || otherExclude.Get(pkg.Repository)) {
-			dep.AddUpgradeToGraph(pkg, graph)
+		if !isInclude && (include.Get(i) || otherInclude.Get(u.Repository)) {
+			dep.AddUpgradeToGraph(u, graph)
 			continue
 		}
 
-		ignore.Set(pkg.Name)
-	}
-
-	for i := range aurUp.Up {
-		pkg := &aurUp.Up[i]
-		if isInclude && otherInclude.Get(pkg.Repository) {
-			continue
-		}
-
-		if isInclude && !include.Get(len(aurUp.Up)-i) {
-			dep.AddUpgradeToGraph(pkg, graph)
-		}
-
-		if !isInclude && (exclude.Get(len(aurUp.Up)-i) || otherExclude.Get(pkg.Repository)) {
-			dep.AddUpgradeToGraph(pkg, graph)
-		}
+		ignore.Set(u.Name)
 	}
 
 	return graph, ignore, err
