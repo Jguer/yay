@@ -39,6 +39,10 @@ func New[T comparable, V any]() *Graph[T, V] {
 	}
 }
 
+func (g *Graph[T, V]) Len() int {
+	return len(g.nodes)
+}
+
 func (g *Graph[T, V]) Exists(node T) bool {
 	_, ok := g.nodes[node]
 
