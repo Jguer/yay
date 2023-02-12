@@ -70,13 +70,6 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
 
 	if u.runtime.Mode.AtLeastAUR() {
-		if u.cfg.Devel {
-			text.OperationInfoln(gotext.Get("Checking development packages..."))
-
-			develUp = UpDevel(ctx, remote, aurdata, u.vcsStore)
-
-			u.vcsStore.CleanOrphans(remote)
-		}
 
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
@@ -96,6 +89,14 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			}
 
 			aurUp = UpAUR(remote, aurdata, u.cfg.TimeUpdate)
+		}
+
+		if u.cfg.Devel {
+			text.OperationInfoln(gotext.Get("Checking development packages..."))
+
+			develUp = UpDevel(ctx, remote, aurdata, u.vcsStore)
+
+			u.vcsStore.CleanOrphans(remote)
 		}
 	}
 
