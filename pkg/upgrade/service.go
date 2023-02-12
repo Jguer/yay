@@ -1,4 +1,4 @@
-package main
+package upgrade
 
 import (
 	"context"
@@ -18,7 +18,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
-	"github.com/Jguer/yay/v11/pkg/upgrade"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
@@ -54,13 +53,13 @@ func NewUpgradeService(w io.Writer, grapher *dep.Grapher, aurCache settings.AURC
 // upGraph adds packages to upgrade to the graph.
 func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, *dep.InstallInfo],
 	warnings *query.AURWarnings, enableDowngrade bool,
-	filter upgrade.Filter,
+	filter Filter,
 ) (err error) {
 	var (
-		develUp upgrade.UpSlice
+		develUp UpSlice
 		errs    multierror.MultiError
 		aurdata = make(map[string]*aur.Pkg)
-		aurUp   upgrade.UpSlice
+		aurUp   UpSlice
 	)
 
 	remote := u.dbExecutor.InstalledRemotePackages()
@@ -70,7 +69,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 		if u.cfg.Devel {
 			text.OperationInfoln(gotext.Get("Checking development packages..."))
 
-			develUp = upgrade.UpDevel(ctx, remote, aurdata, u.vcsStore)
+			develUp = UpDevel(ctx, remote, aurdata, u.vcsStore)
 
 			u.vcsStore.CleanOrphans(remote)
 		}
@@ -92,7 +91,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 				aurdata[pkg.Name] = pkg
 			}
 
-			aurUp = upgrade.UpAUR(remote, aurdata, u.cfg.TimeUpdate)
+			aurUp = UpAUR(remote, aurdata, u.cfg.TimeUpdate)
 		}
 	}
 
@@ -185,9 +184,9 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	return errs.Return()
 }
 
-func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallInfo]) (aurUp, repoUp upgrade.UpSlice) {
-	aurUp = upgrade.UpSlice{Up: make([]upgrade.Upgrade, 0, graph.Len())}
-	repoUp = upgrade.UpSlice{Up: make([]upgrade.Upgrade, 0, graph.Len()), Repos: u.dbExecutor.Repos()}
+func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallInfo]) (aurUp, repoUp UpSlice) {
+	aurUp = UpSlice{Up: make([]Upgrade, 0, graph.Len())}
+	repoUp = UpSlice{Up: make([]Upgrade, 0, graph.Len()), Repos: u.dbExecutor.Repos()}
 
 	graph.ForEach(func(name string, info *dep.InstallInfo) error {
 		alpmReason := alpm.PkgReasonExplicit
@@ -200,7 +199,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 			if info.Devel {
 				aurRepo = "devel"
 			}
-			aurUp.Up = append(aurUp.Up, upgrade.Upgrade{
+			aurUp.Up = append(aurUp.Up, Upgrade{
 				Name:          name,
 				RemoteVersion: info.Version,
 				Repository:    aurRepo,
@@ -209,7 +208,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				Reason:        alpmReason,
 			})
 		} else if info.Source == dep.Sync {
-			repoUp.Up = append(repoUp.Up, upgrade.Upgrade{
+			repoUp.Up = append(repoUp.Up, Upgrade{
 				Name:          name,
 				RemoteVersion: info.Version,
 				Repository:    *info.SyncDBName,
@@ -231,7 +230,7 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	warnings := query.NewWarnings()
 
 	err := u.upGraph(ctx, graph, warnings, enableDowngrade,
-		func(*upgrade.Upgrade) bool { return true })
+		func(*Upgrade) bool { return true })
 	if err != nil {
 		return graph, nil, err
 	}
@@ -245,13 +244,13 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 		return graph, ignore, nil
 	}
 
-	// TODO: refactor print to not use upgrade.UpSlice
+	// TODO: refactor print to not use UpSlice
 	aurUp, repoUp := u.graphToUpSlice(graph)
 
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
 
-	allUp := upgrade.UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
+	allUp := UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
 
 	fmt.Fprintf(u.w, "%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
 	allUp.Print()
