@@ -26,9 +26,50 @@ func ptrString(s string) *string {
 }
 
 func TestUpgradeService_GraphUpgrades(t *testing.T) {
+	linuxDepInfo := &dep.InstallInfo{
+		Reason:       dep.Explicit,
+		Source:       dep.Sync,
+		AURBase:      nil,
+		LocalVersion: "4.5.0-1",
+		Version:      "5.0.0-1",
+		SyncDBName:   ptrString("core"),
+		Upgrade:      true,
+		Devel:        false,
+	}
+
+	exampleDepInfoDevel := &dep.InstallInfo{
+		Source:       dep.AUR,
+		Reason:       dep.Dep,
+		AURBase:      ptrString("example"),
+		LocalVersion: "2.2.1.r32.41baa362-1",
+		Version:      "",
+		Upgrade:      true,
+		Devel:        true,
+	}
+
+	exampleDepInfoAUR := &dep.InstallInfo{
+		Source:       dep.AUR,
+		Reason:       dep.Dep,
+		AURBase:      ptrString("example"),
+		LocalVersion: "2.2.1.r32.41baa362-1",
+		Version:      "2.2.1.r69.g8a10460-1",
+		Upgrade:      true,
+		Devel:        false,
+	}
+
+	yayDepInfo := &dep.InstallInfo{
+		Reason:       dep.Explicit,
+		Source:       dep.AUR,
+		AURBase:      ptrString("yay"),
+		LocalVersion: "10.2.3",
+		Version:      "10.2.4",
+		Upgrade:      true,
+		Devel:        false,
+	}
+
 	dbExe := &mock.DBExecutor{
 		InstalledRemotePackageNamesFn: func() []string {
-			return []string{"yay"}
+			return []string{"yay", "example-git"}
 		},
 		InstalledRemotePackagesFn: func() map[string]mock.IPackage {
 			mapRemote := make(map[string]mock.IPackage)
@@ -37,6 +78,13 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				PBase:    "yay",
 				PVersion: "10.2.3",
 				PReason:  alpm.PkgReasonExplicit,
+			}
+
+			mapRemote["example-git"] = &mock.Package{
+				PName:    "example-git",
+				PBase:    "example",
+				PVersion: "2.2.1.r32.41baa362-1",
+				PReason:  alpm.PkgReasonDepend,
 			}
 
 			return mapRemote
@@ -59,12 +107,15 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		},
 		ReposFn: func() []string { return []string{"core"} },
 	}
-	vcsStore := &vcs.Mock{}
+	vcsStore := &vcs.Mock{
+		ToUpgradeReturn: []string{"example-git"},
+	}
 
 	mockAUR := &mockaur.MockAUR{
 		GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
 			return []aur.Pkg{
 				{Name: "yay", Version: "10.2.4", PackageBase: "yay"},
+				{Name: "example-git", Version: "2.2.1.r69.g8a10460-1", PackageBase: "example"},
 			}, nil
 		},
 	}
@@ -79,6 +130,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		input     io.Reader
 		output    io.Writer
 		noConfirm bool
+		devel     bool
 	}
 	type args struct {
 		graph           *topo.Graph[string, *dep.InstallInfo]
@@ -103,24 +155,31 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				graph:           nil,
 				enableDowngrade: false,
 			},
-			mustExist: map[string]*dep.InstallInfo{"yay": {
-				Reason:       dep.Explicit,
-				Source:       dep.AUR,
-				AURBase:      ptrString("yay"),
-				LocalVersion: "10.2.3",
-				Version:      "10.2.4",
-				Upgrade:      true,
-				Devel:        false,
-			}, "linux": {
-				Reason:       dep.Explicit,
-				Source:       dep.Sync,
-				AURBase:      nil,
-				LocalVersion: "4.5.0-1",
-				Version:      "5.0.0-1",
-				SyncDBName:   ptrString("core"),
-				Upgrade:      true,
-				Devel:        false,
-			}},
+			mustExist: map[string]*dep.InstallInfo{
+				"yay":         yayDepInfo,
+				"linux":       linuxDepInfo,
+				"example-git": exampleDepInfoAUR,
+			},
+			mustNotExist: map[string]bool{},
+			wantErr:      false,
+		},
+		{
+			name: "no input devel",
+			fields: fields{
+				input:     strings.NewReader("\n"),
+				output:    io.Discard,
+				noConfirm: false,
+				devel:     true,
+			},
+			args: args{
+				graph:           nil,
+				enableDowngrade: false,
+			},
+			mustExist: map[string]*dep.InstallInfo{
+				"yay":         yayDepInfo,
+				"linux":       linuxDepInfo,
+				"example-git": exampleDepInfoDevel,
+			},
 			mustNotExist: map[string]bool{},
 			wantErr:      false,
 		},
@@ -136,16 +195,8 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				enableDowngrade: false,
 			},
 			mustExist: map[string]*dep.InstallInfo{
-				"linux": {
-					Reason:       dep.Explicit,
-					Source:       dep.Sync,
-					AURBase:      nil,
-					LocalVersion: "4.5.0-1",
-					Version:      "5.0.0-1",
-					SyncDBName:   ptrString("core"),
-					Upgrade:      true,
-					Devel:        false,
-				},
+				"linux":       linuxDepInfo,
+				"example-git": exampleDepInfoAUR,
 			},
 			mustNotExist: map[string]bool{"yay": true},
 			wantErr:      false,
@@ -153,7 +204,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		{
 			name: "exclude linux",
 			fields: fields{
-				input:     strings.NewReader("2\n"),
+				input:     strings.NewReader("3\n"),
 				output:    io.Discard,
 				noConfirm: false,
 			},
@@ -162,15 +213,8 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				enableDowngrade: false,
 			},
 			mustExist: map[string]*dep.InstallInfo{
-				"yay": {
-					Reason:       dep.Explicit,
-					Source:       dep.AUR,
-					AURBase:      ptrString("yay"),
-					LocalVersion: "10.2.3",
-					Version:      "10.2.4",
-					Upgrade:      true,
-					Devel:        false,
-				},
+				"yay":         yayDepInfo,
+				"example-git": exampleDepInfoAUR,
 			},
 			mustNotExist: map[string]bool{"linux": true},
 			wantErr:      false,
@@ -178,7 +222,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		{
 			name: "only linux",
 			fields: fields{
-				input:     strings.NewReader("^2\n"),
+				input:     strings.NewReader("^3\n"),
 				output:    io.Discard,
 				noConfirm: false,
 			},
@@ -187,23 +231,15 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				enableDowngrade: false,
 			},
 			mustExist: map[string]*dep.InstallInfo{
-				"linux": {
-					Reason:       dep.Explicit,
-					Source:       dep.Sync,
-					AURBase:      nil,
-					LocalVersion: "4.5.0-1",
-					Version:      "5.0.0-1",
-					SyncDBName:   ptrString("core"),
-					Upgrade:      true,
-					Devel:        false,
-				},
+				"linux": linuxDepInfo,
 			},
-			mustNotExist: map[string]bool{"yay": true},
+			mustNotExist: map[string]bool{"yay": true, "example-git": true},
 			wantErr:      false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfg.Devel = tt.fields.devel
 			u := &UpgradeService{
 				input:      tt.fields.input,
 				output:     tt.fields.output,
