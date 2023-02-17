@@ -70,7 +70,6 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
 
 	if u.runtime.Mode.AtLeastAUR() {
-
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []aur.Pkg
@@ -232,6 +231,10 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool,
 ) (*topo.Graph[string, *dep.InstallInfo], error) {
+	if graph == nil {
+		graph = topo.New[string, *dep.InstallInfo]()
+	}
+
 	warnings := query.NewWarnings()
 
 	err := u.upGraph(ctx, graph, warnings, enableDowngrade,
