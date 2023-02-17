@@ -295,6 +295,7 @@ func NewConfig(version string) (*Configuration, error) {
 		AURClient:      nil,
 		VoteClient:     voteClient,
 		QueryBuilder:   nil,
+		Logger:         text.NewLogger(os.Stdout, os.Stdin, newConfig.Debug, "runtime"),
 	}
 
 	var errAURCache error

@@ -205,16 +205,16 @@ func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {
 	case deps && explicit:
 		return nil, errors.New(gotext.Get("invalid option: '--deps' and '--explicit' may not be used together"))
 	case deps:
-		return func(pkg upgrade.Upgrade) bool {
+		return func(pkg *upgrade.Upgrade) bool {
 			return pkg.Reason == alpm.PkgReasonDepend
 		}, nil
 	case explicit:
-		return func(pkg upgrade.Upgrade) bool {
+		return func(pkg *upgrade.Upgrade) bool {
 			return pkg.Reason == alpm.PkgReasonExplicit
 		}, nil
 	}
 
-	return func(pkg upgrade.Upgrade) bool {
+	return func(pkg *upgrade.Upgrade) bool {
 		return true
 	}, nil
 }
@@ -406,7 +406,7 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 
 	text.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
 
-	numberBuf, err := text.GetInput("", false)
+	numberBuf, err := text.GetInput(os.Stdin, "", false)
 	if err != nil {
 		return err
 	}

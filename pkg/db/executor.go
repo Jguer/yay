@@ -26,6 +26,12 @@ type Upgrade struct {
 	Reason        alpm.PkgReason
 }
 
+type SyncUpgrade struct {
+	Package      alpm.IPackage
+	LocalVersion string
+	Reason       alpm.PkgReason
+}
+
 type Executor interface {
 	AlpmArchitectures() ([]string, error)
 	BiggestPackages() []IPackage
@@ -45,7 +51,8 @@ type Executor interface {
 	PackageProvides(IPackage) []Depend
 	PackagesFromGroup(string) []IPackage
 	RefreshHandle() error
-	RepoUpgrades(bool) ([]Upgrade, error)
+	SyncUpgrades(enableDowngrade bool) (
+		map[string]SyncUpgrade, error)
 	Repos() []string
 	SatisfierFromDB(string, string) IPackage
 	SyncPackage(string) IPackage

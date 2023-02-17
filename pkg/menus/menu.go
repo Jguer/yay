@@ -46,7 +46,7 @@ func selectionMenu(w io.Writer, pkgbuildDirs map[string]string, bases []string, 
 	text.Infoln(message)
 	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 
-	selectInput, err := text.GetInput(defaultAnswer, noConfirm)
+	selectInput, err := text.GetInput(os.Stdin, defaultAnswer, noConfirm)
 	if err != nil {
 		return nil, err
 	}

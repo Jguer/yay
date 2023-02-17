@@ -3,10 +3,10 @@ package text
 import (
 	"bufio"
 	"fmt"
-	"os"
+	"io"
 )
 
-func GetInput(defaultValue string, noConfirm bool) (string, error) {
+func (l *Logger) GetInput(defaultValue string, noConfirm bool) (string, error) {
 	Info()
 
 	if defaultValue != "" || noConfirm {
@@ -14,7 +14,7 @@ func GetInput(defaultValue string, noConfirm bool) (string, error) {
 		return defaultValue, nil
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(l.r)
 
 	buf, overflow, err := reader.ReadLine()
 	if err != nil {
@@ -26,4 +26,8 @@ func GetInput(defaultValue string, noConfirm bool) (string, error) {
 	}
 
 	return string(buf), nil
+}
+
+func GetInput(r io.Reader, defaultValue string, noConfirm bool) (string, error) {
+	return globalLogger.GetInput(defaultValue, noConfirm)
 }

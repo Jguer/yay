@@ -21,12 +21,16 @@ import (
 )
 
 type InstallInfo struct {
-	Source      Source
-	Reason      Reason
-	Version     string
-	SrcinfoPath *string
-	AURBase     *string
-	SyncDBName  *string
+	Source       Source
+	Reason       Reason
+	Version      string
+	LocalVersion string
+	SrcinfoPath  *string
+	AURBase      *string
+	SyncDBName   *string
+
+	Upgrade bool
+	Devel   bool
 }
 
 func (i *InstallInfo) String() string {
@@ -150,6 +154,13 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 					},
 				})
 
+				g.GraphSyncPkg(ctx, graph, pkg, &InstallInfo{
+					Source:     Sync,
+					Reason:     Explicit,
+					Version:    pkg.Version(),
+					SyncDBName: &dbName,
+				})
+
 				continue
 			}
 
@@ -205,7 +216,7 @@ func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
 	}
 	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
 
-	numberBuf, err := text.GetInput("", g.noConfirm)
+	numberBuf, err := text.GetInput(os.Stdin, "", g.noConfirm)
 	if err != nil {
 		return nil, err
 	}
@@ -284,6 +295,44 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 	}
 }
 
+func (g *Grapher) GraphSyncPkg(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo],
+	pkg alpm.IPackage, instalInfo *InstallInfo,
+) *topo.Graph[string, *InstallInfo] {
+	if graph == nil {
+		graph = topo.New[string, *InstallInfo]()
+	}
+
+	graph.AddNode(pkg.Name())
+	g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
+		Color:      colorMap[Explicit],
+		Background: bgColorMap[Sync],
+		Value:      instalInfo,
+	})
+
+	return graph
+}
+
+func (g *Grapher) GraphAURTarget(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo],
+	pkg *aurc.Pkg, instalInfo *InstallInfo,
+) *topo.Graph[string, *InstallInfo] {
+	if graph == nil {
+		graph = topo.New[string, *InstallInfo]()
+	}
+
+	graph.AddNode(pkg.Name)
+	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
+		Color:      colorMap[Explicit],
+		Background: bgColorMap[AUR],
+		Value:      instalInfo,
+	})
+
+	g.addDepNodes(ctx, pkg, graph)
+
+	return graph
+}
+
 func (g *Grapher) GraphFromAURCache(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo],
 	targets []string,
@@ -302,19 +351,12 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 
 		pkg := provideMenu(g.w, target, aurPkgs, g.noConfirm)
 
-		graph.AddNode(pkg.Name)
-		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
-			Color:      colorMap[Explicit],
-			Background: bgColorMap[AUR],
-			Value: &InstallInfo{
-				Source:  AUR,
-				Reason:  Explicit,
-				AURBase: &pkg.PackageBase,
-				Version: pkg.Version,
-			},
+		graph = g.GraphAURTarget(ctx, graph, pkg, &InstallInfo{
+			AURBase: &pkg.PackageBase,
+			Reason:  Explicit,
+			Source:  AUR,
+			Version: pkg.Version,
 		})
-
-		g.addDepNodes(ctx, pkg, graph)
 	}
 
 	return graph, nil
@@ -486,7 +528,7 @@ func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *au
 			return &options[0]
 		}
 
-		numberBuf, err := text.GetInput("", false)
+		numberBuf, err := text.GetInput(os.Stdin, "", false)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 
@@ -575,29 +617,4 @@ func archStringToString(alpmArches []string, archString []gosrc.ArchString) []st
 	}
 
 	return pkgs
-}
-
-func AddUpgradeToGraph(pkg *db.Upgrade, graph *topo.Graph[string, *InstallInfo]) {
-	source := Sync
-	if pkg.Repository == "aur" || pkg.Repository == "devel" {
-		source = AUR
-	}
-
-	reason := Explicit
-	if pkg.Reason == alpm.PkgReasonDepend {
-		reason = Dep
-	}
-
-	graph.AddNode(pkg.Name)
-	graph.SetNodeInfo(pkg.Name, &topo.NodeInfo[*InstallInfo]{
-		Color:      colorMap[reason],
-		Background: bgColorMap[source],
-		Value: &InstallInfo{
-			Source:     source,
-			Reason:     reason,
-			Version:    pkg.RemoteVersion,
-			AURBase:    &pkg.Base,
-			SyncDBName: &pkg.Repository,
-		},
-	})
 }

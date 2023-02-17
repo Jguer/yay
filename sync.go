@@ -15,6 +15,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/srcinfo"
 	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v11/pkg/upgrade"
 
 	"github.com/leonelquinteros/gotext"
 )
@@ -54,7 +55,11 @@ func syncInstall(ctx context.Context,
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		var errSysUp error
 
-		graph, _, errSysUp = sysupgradeTargetsV2(ctx, aurCache, dbExecutor, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		upService := upgrade.NewUpgradeService(
+			grapher, aurCache, config.Runtime.AURClient,
+			dbExecutor, config.Runtime.VCSStore, config.Runtime, config, settings.NoConfirm, config.Runtime.Logger.Child("upgrade"))
+
+		graph, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errSysUp != nil {
 			return errSysUp
 		}

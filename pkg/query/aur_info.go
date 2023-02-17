@@ -41,9 +41,7 @@ func AURInfo(ctx context.Context, aurClient aur.ClientInterface, names []string,
 		}
 
 		mux.Lock()
-		for i := range tempInfo {
-			info = append(info, tempInfo[i])
-		}
+		info = append(info, tempInfo...)
 		mux.Unlock()
 	}
 

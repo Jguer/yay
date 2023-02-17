@@ -21,61 +21,55 @@ const (
 var (
 	cachedColumnCount = -1
 	DebugMode         = false
+	globalLogger      = NewLogger(os.Stdout, os.Stdin, DebugMode, "global")
 )
 
 func Debugln(a ...interface{}) {
-	if !DebugMode {
-		return
-	}
-
-	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(yellow("[DEBUG]"))}, a...)...)
-	fmt.Fprint(os.Stdout, ResetCode)
+	globalLogger.Debugln(a...)
 }
 
 func OperationInfoln(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{Bold(Cyan(opSymbol + " ")), boldCode}, a...)...)
-	fmt.Fprintln(os.Stdout, ResetCode)
+	globalLogger.OperationInfoln(a...)
 }
 
 func OperationInfo(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{Bold(Cyan(opSymbol + " ")), boldCode}, a...)...)
-	fmt.Fprint(os.Stdout, ResetCode)
+	globalLogger.OperationInfo(a...)
 }
 
 func SprintOperationInfo(a ...interface{}) string {
-	return fmt.Sprint(append([]interface{}{Bold(Cyan(opSymbol + " ")), boldCode}, a...)...) + ResetCode
+	return globalLogger.SprintOperationInfo(a...)
 }
 
 func Info(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{Bold(Green(arrow + " "))}, a...)...)
+	globalLogger.Info(a...)
 }
 
 func Infoln(a ...interface{}) {
-	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(Green(arrow))}, a...)...)
+	globalLogger.Infoln(a...)
 }
 
 func SprintWarn(a ...interface{}) string {
-	return fmt.Sprint(append([]interface{}{Bold(yellow(smallArrow + " "))}, a...)...)
+	return globalLogger.SprintWarn(a...)
 }
 
 func Warn(a ...interface{}) {
-	fmt.Fprint(os.Stdout, append([]interface{}{Bold(yellow(smallArrow + " "))}, a...)...)
+	globalLogger.Warn(a...)
 }
 
 func Warnln(a ...interface{}) {
-	fmt.Fprintln(os.Stdout, append([]interface{}{Bold(yellow(smallArrow))}, a...)...)
+	globalLogger.Warnln(a...)
 }
 
 func SprintError(a ...interface{}) string {
-	return fmt.Sprint(append([]interface{}{Bold(Red(smallArrow + " "))}, a...)...)
+	return globalLogger.SprintError(a...)
 }
 
 func Error(a ...interface{}) {
-	fmt.Fprint(os.Stderr, append([]interface{}{Bold(Red(smallArrow + " "))}, a...)...)
+	globalLogger.Error(a...)
 }
 
 func Errorln(a ...interface{}) {
-	fmt.Fprintln(os.Stderr, append([]interface{}{Bold(Red(smallArrow))}, a...)...)
+	globalLogger.Errorln(a...)
 }
 
 func getColumnCount() int {
