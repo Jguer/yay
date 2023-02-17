@@ -8,6 +8,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 
 	"github.com/Jguer/aur"
@@ -35,4 +36,5 @@ type Runtime struct {
 	VoteClient     *vote.Client
 	AURCache       AURCache
 	DBExecutor     db.Executor
+	Logger         *text.Logger
 }
