@@ -7,6 +7,9 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/Jguer/aur/metadata"
 	"github.com/Jguer/go-alpm/v2"
+	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/leonelquinteros/gotext"
+
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/intrange"
@@ -16,8 +19,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 	"github.com/Jguer/yay/v11/pkg/vcs"
-	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/leonelquinteros/gotext"
 )
 
 type UpgradeService struct {
@@ -96,14 +97,15 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	}
 
 	names := mapset.NewThreadUnsafeSet[string]()
-	for _, up := range develUp.Up {
+	for i := range develUp.Up {
+		up := &develUp.Up[i]
 		// check if deps are satisfied for aur packages
 		reason := dep.Explicit
 		if up.Reason == alpm.PkgReasonDepend {
 			reason = dep.Dep
 		}
 
-		if filter != nil && !filter(&up) {
+		if filter != nil && !filter(up) {
 			continue
 		}
 
@@ -119,7 +121,8 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 		names.Add(up.Name)
 	}
 
-	for _, up := range aurUp.Up {
+	for i := range aurUp.Up {
+		up := &aurUp.Up[i]
 		// add devel packages if they are not already in the list
 		if names.Contains(up.Name) {
 			continue
@@ -131,7 +134,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			reason = dep.Dep
 		}
 
-		if filter != nil && !filter(&up) {
+		if filter != nil && !filter(up) {
 			continue
 		}
 
@@ -188,7 +191,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 	aurUp = UpSlice{Up: make([]Upgrade, 0, graph.Len())}
 	repoUp = UpSlice{Up: make([]Upgrade, 0, graph.Len()), Repos: u.dbExecutor.Repos()}
 
-	graph.ForEach(func(name string, info *dep.InstallInfo) error {
+	_ = graph.ForEach(func(name string, info *dep.InstallInfo) error {
 		alpmReason := alpm.PkgReasonExplicit
 		if info.Reason == dep.Dep {
 			alpmReason = alpm.PkgReasonDepend

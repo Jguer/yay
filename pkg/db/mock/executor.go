@@ -111,46 +111,46 @@ func (t *DBExecutor) PackagesFromGroup(s string) []IPackage {
 	panic("implement me")
 }
 
-func (t DBExecutor) RefreshHandle() error {
+func (t *DBExecutor) RefreshHandle() error {
 	panic("implement me")
 }
 
-func (t DBExecutor) SyncUpgrades(b bool) (map[string]db.SyncUpgrade, error) {
+func (t *DBExecutor) SyncUpgrades(b bool) (map[string]db.SyncUpgrade, error) {
 	if t.SyncUpgradesFn != nil {
 		return t.SyncUpgradesFn(b)
 	}
 	panic("implement me")
 }
 
-func (t DBExecutor) Repos() []string {
+func (t *DBExecutor) Repos() []string {
 	if t.ReposFn != nil {
 		return t.ReposFn()
 	}
 	panic("implement me")
 }
 
-func (t DBExecutor) SatisfierFromDB(s, s2 string) IPackage {
+func (t *DBExecutor) SatisfierFromDB(s, s2 string) IPackage {
 	panic("implement me")
 }
 
-func (t DBExecutor) SyncPackage(s string) IPackage {
+func (t *DBExecutor) SyncPackage(s string) IPackage {
 	if t.SyncPackageFn != nil {
 		return t.SyncPackageFn(s)
 	}
 	panic("implement me")
 }
 
-func (t DBExecutor) SyncPackages(s ...string) []IPackage {
+func (t *DBExecutor) SyncPackages(s ...string) []IPackage {
 	panic("implement me")
 }
 
-func (t DBExecutor) SyncSatisfier(s string) IPackage {
+func (t *DBExecutor) SyncSatisfier(s string) IPackage {
 	if t.SyncSatisfierFn != nil {
 		return t.SyncSatisfierFn(s)
 	}
 	panic("implement me")
 }
 
-func (t DBExecutor) SyncSatisfierExists(s string) bool {
+func (t *DBExecutor) SyncSatisfierExists(s string) bool {
 	panic("implement me")
 }

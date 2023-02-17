@@ -25,9 +25,10 @@ import (
 func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 	tmp := list[:0]
 
-	for _, pkg := range list {
-		if filter(&pkg) {
-			tmp = append(tmp, pkg)
+	for i := range list {
+		up := &list[i]
+		if filter(up) {
+			tmp = append(tmp, *up)
 		}
 	}
 
@@ -128,7 +129,7 @@ func upList(ctx context.Context,
 		Repos: dbExecutor.Repos(),
 	}
 	for _, up := range syncUpgrades {
-		upgrade := db.Upgrade{
+		dbUp := db.Upgrade{
 			Name:          up.Package.Name(),
 			RemoteVersion: up.Package.Version(),
 			Repository:    up.Package.DB().Name(),
@@ -136,11 +137,11 @@ func upList(ctx context.Context,
 			LocalVersion:  up.LocalVersion,
 			Reason:        up.Reason,
 		}
-		if filter != nil && !filter(&upgrade) {
+		if filter != nil && !filter(&dbUp) {
 			continue
 		}
 
-		repoUp.Up = append(repoUp.Up, upgrade)
+		repoUp.Up = append(repoUp.Up, dbUp)
 	}
 
 	aurUp.Up = filterUpdateList(aurUp.Up, filter)

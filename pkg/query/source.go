@@ -215,9 +215,7 @@ func queryAUR(ctx context.Context,
 				Contains: true,
 			})
 
-			for i := range q {
-				r = append(r, q[i])
-			}
+			r = append(r, q...)
 
 			if errM == nil {
 				return r, nil

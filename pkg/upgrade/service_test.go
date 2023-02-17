@@ -9,6 +9,8 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/Jguer/aur/metadata"
 	"github.com/Jguer/go-alpm/v2"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/db/mock"
 	"github.com/Jguer/yay/v11/pkg/dep"
@@ -17,7 +19,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 	"github.com/Jguer/yay/v11/pkg/vcs"
-	"github.com/stretchr/testify/assert"
 
 	mockaur "github.com/Jguer/yay/v11/pkg/dep/mock"
 )
