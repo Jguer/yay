@@ -122,9 +122,6 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			}, nil
 		},
 	}
-	grapher := dep.NewGrapher(dbExe, mockAUR,
-		false, true, io.Discard, false, false)
-
 	type fields struct {
 		input     io.Reader
 		output    io.Writer
@@ -253,6 +250,9 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			grapher := dep.NewGrapher(dbExe, mockAUR,
+				false, true, io.Discard, false, false)
+
 			cfg := &settings.Configuration{
 				Runtime: &settings.Runtime{Mode: parser.ModeAny},
 				Devel:   tt.fields.devel,
