@@ -117,6 +117,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			Upgrade:      true,
 			Devel:        true,
 			LocalVersion: up.LocalVersion,
+			Version:      up.RemoteVersion,
 		})
 		names.Add(up.Name)
 	}
