@@ -14,6 +14,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 	"github.com/stretchr/testify/assert"
@@ -256,8 +257,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg.Devel = tt.fields.devel
 			u := &UpgradeService{
-				input:      tt.fields.input,
-				output:     tt.fields.output,
+				log:        text.NewLogger(tt.fields.output, tt.fields.input, true, "test"),
 				grapher:    grapher,
 				aurCache:   mockAUR,
 				dbExecutor: dbExe,

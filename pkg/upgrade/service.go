@@ -2,8 +2,6 @@ package upgrade
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"sort"
 
 	"github.com/Jguer/aur"
@@ -23,8 +21,6 @@ import (
 )
 
 type UpgradeService struct {
-	input      io.Reader
-	output     io.Writer
 	grapher    *dep.Grapher
 	aurCache   settings.AURCache
 	aurClient  aur.ClientInterface
@@ -32,17 +28,16 @@ type UpgradeService struct {
 	vcsStore   vcs.Store
 	runtime    *settings.Runtime
 	cfg        *settings.Configuration
+	log        *text.Logger
 	noConfirm  bool
 }
 
-func NewUpgradeService(input io.Reader, output io.Writer, grapher *dep.Grapher, aurCache settings.AURCache,
+func NewUpgradeService(grapher *dep.Grapher, aurCache settings.AURCache,
 	aurClient aur.ClientInterface, dbExecutor db.Executor,
 	vcsStore vcs.Store, runtime *settings.Runtime, cfg *settings.Configuration,
-	noConfirm bool,
+	noConfirm bool, logger *text.Logger,
 ) *UpgradeService {
 	return &UpgradeService{
-		input:      input,
-		output:     output,
 		grapher:    grapher,
 		aurCache:   aurCache,
 		aurClient:  aurClient,
@@ -51,6 +46,7 @@ func NewUpgradeService(input io.Reader, output io.Writer, grapher *dep.Grapher, 
 		runtime:    runtime,
 		cfg:        cfg,
 		noConfirm:  noConfirm,
+		log:        logger,
 	}
 }
 
@@ -70,7 +66,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
 
 	if u.runtime.Mode.AtLeastAUR() {
-		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
+		u.log.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []aur.Pkg
 		if u.aurCache != nil {
@@ -91,7 +87,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 		}
 
 		if u.cfg.Devel {
-			text.OperationInfoln(gotext.Get("Checking development packages..."))
+			u.log.OperationInfoln(gotext.Get("Checking development packages..."))
 
 			develUp = UpDevel(ctx, remote, aurdata, u.vcsStore)
 
@@ -151,7 +147,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	}
 
 	if u.cfg.Runtime.Mode.AtLeastRepo() {
-		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
+		u.log.OperationInfoln(gotext.Get("Searching databases for updates..."))
 
 		syncUpgrades, err := u.dbExecutor.SyncUpgrades(enableDowngrade)
 		for _, up := range syncUpgrades {
@@ -264,13 +260,13 @@ func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 	allUp := UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
 
-	fmt.Fprintf(u.output, "%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
-	allUp.Print()
+	u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
+	allUp.Print(u.log)
 
-	text.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
-	text.Warnln(gotext.Get("May cause partial upgrades and break systems"))
+	u.log.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
+	u.log.Warnln(gotext.Get("May cause partial upgrades and break systems"))
 
-	numbers, err := text.GetInput(u.input, u.cfg.AnswerUpgrade, settings.NoConfirm)
+	numbers, err := u.log.GetInput(u.cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
 		return err
 	}
@@ -281,21 +277,21 @@ func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	isInclude := len(include) == 0 && len(otherInclude) == 0
 
 	for i := range allUp.Up {
-		u := &allUp.Up[i]
-		if isInclude && otherExclude.Get(u.Repository) {
-			text.Debugln("pruning", u.Name)
-			graph.Prune(u.Name)
+		up := &allUp.Up[i]
+		if isInclude && otherExclude.Get(up.Repository) {
+			u.log.Debugln("pruning", up.Name)
+			graph.Prune(up.Name)
 		}
 
 		if isInclude && exclude.Get(allUpLen-i) {
-			text.Debugln("pruning", u.Name)
-			graph.Prune(u.Name)
+			u.log.Debugln("pruning", up.Name)
+			graph.Prune(up.Name)
 			continue
 		}
 
-		if !isInclude && !(include.Get(allUpLen-i) || otherInclude.Get(u.Repository)) {
-			text.Debugln("pruning", u.Name)
-			graph.Prune(u.Name)
+		if !isInclude && !(include.Get(allUpLen-i) || otherInclude.Get(up.Repository)) {
+			u.log.Debugln("pruning", up.Name)
+			graph.Prune(up.Name)
 			continue
 		}
 	}

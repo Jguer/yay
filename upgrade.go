@@ -207,7 +207,7 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 	allUp := upgrade.UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
 
 	fmt.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
-	allUp.Print()
+	allUp.Print(config.Runtime.Logger)
 
 	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name):")
 

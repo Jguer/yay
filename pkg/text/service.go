@@ -9,17 +9,20 @@ type Logger struct {
 	name  string
 	debug bool
 	w     io.Writer
+	r     io.Reader
 }
 
-func NewLogger(w io.Writer, debug bool, name string) *Logger {
+func NewLogger(w io.Writer, r io.Reader, debug bool, name string) *Logger {
 	return &Logger{
-		w:    w,
-		name: name,
+		w:     w,
+		name:  name,
+		debug: debug,
+		r:     r,
 	}
 }
 
 func (l *Logger) Child(name string) *Logger {
-	return NewLogger(l.w, l.debug, name)
+	return NewLogger(l.w, l.r, l.debug, name)
 }
 
 func (l *Logger) Debugln(a ...any) {

@@ -100,7 +100,7 @@ func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
 }
 
 // Print prints the details of the packages to upgrade.
-func (u UpSlice) Print() {
+func (u UpSlice) Print(logger *text.Logger) {
 	longestName, longestVersion := 0, 0
 
 	for k := range u.Up {
@@ -120,10 +120,10 @@ func (u UpSlice) Print() {
 		upgrade := &u.Up[k]
 		left, right := GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 
-		fmt.Print(text.Magenta(fmt.Sprintf(numberPadding, len(u.Up)-k)))
+		logger.Printf(text.Magenta(fmt.Sprintf(numberPadding, len(u.Up)-k)))
 
-		fmt.Printf(namePadding, StylizedNameWithRepository(upgrade))
+		logger.Printf(namePadding, StylizedNameWithRepository(upgrade))
 
-		fmt.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
+		logger.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
 	}
 }

@@ -21,7 +21,7 @@ const (
 var (
 	cachedColumnCount = -1
 	DebugMode         = false
-	globalLogger      = NewLogger(os.Stdout, DebugMode, "global")
+	globalLogger      = NewLogger(os.Stdout, os.Stdin, DebugMode, "global")
 )
 
 func Debugln(a ...interface{}) {
