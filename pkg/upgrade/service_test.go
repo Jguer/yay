@@ -28,6 +28,7 @@ func ptrString(s string) *string {
 }
 
 func TestUpgradeService_GraphUpgrades(t *testing.T) {
+	t.Parallel()
 	linuxDepInfo := &dep.InstallInfo{
 		Reason:       dep.Explicit,
 		Source:       dep.Sync,
@@ -44,7 +45,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		Reason:       dep.Dep,
 		AURBase:      ptrString("example"),
 		LocalVersion: "2.2.1.r32.41baa362-1",
-		Version:      "",
+		Version:      "latest-commit",
 		Upgrade:      true,
 		Devel:        true,
 	}
@@ -123,10 +124,6 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	}
 	grapher := dep.NewGrapher(dbExe, mockAUR,
 		false, true, io.Discard, false, false)
-
-	cfg := &settings.Configuration{
-		Runtime: &settings.Runtime{Mode: parser.ModeAny},
-	}
 
 	type fields struct {
 		input     io.Reader
@@ -256,7 +253,11 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cfg.Devel = tt.fields.devel
+			cfg := &settings.Configuration{
+				Runtime: &settings.Runtime{Mode: parser.ModeAny},
+				Devel:   tt.fields.devel,
+			}
+
 			u := &UpgradeService{
 				log:        text.NewLogger(tt.fields.output, tt.fields.input, true, "test"),
 				grapher:    grapher,
