@@ -236,6 +236,21 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			mustNotExist: map[string]bool{"yay": true, "example-git": true},
 			wantErr:      false,
 		},
+		{
+			name: "exclude all",
+			fields: fields{
+				input:     strings.NewReader("1-3\n"),
+				output:    io.Discard,
+				noConfirm: false,
+			},
+			args: args{
+				graph:           nil,
+				enableDowngrade: false,
+			},
+			mustExist:    map[string]*dep.InstallInfo{},
+			mustNotExist: map[string]bool{"yay": true, "example-git": true, "linux": true},
+			wantErr:      false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
