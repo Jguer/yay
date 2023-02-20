@@ -400,8 +400,10 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 
 	if len(missingNeedles) != 0 {
 		g.logger.Debugln("deps to find", missingNeedles)
+		// provider search is more demanding than a simple search
+		// try to find name match if possible and then try to find provides.
 		aurPkgs, errCache := g.aurClient.Get(ctx, &aurc.Query{
-			By: aurc.Provides, Needles: missingNeedles, Contains: true,
+			By: aurc.Name, Needles: missingNeedles, Contains: false,
 		})
 		if errCache != nil {
 			text.Errorln(errCache)
