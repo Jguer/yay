@@ -3,6 +3,7 @@ package dep
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"testing"
@@ -89,7 +90,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 			return jfinServerFn(ctx, query)
 		}
 
-		panic("implement me")
+		panic(fmt.Sprintf("implement me %v", query.Needles))
 	}}
 
 	type fields struct {
@@ -195,7 +196,8 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(tt.fields.dbExecutor,
 				tt.fields.aurCache, false, true,
-				tt.fields.noDeps, tt.fields.noCheckDeps, text.NewLogger(io.Discard, &os.File{}, true, "test"))
+				tt.fields.noDeps, tt.fields.noCheckDeps, false,
+				text.NewLogger(io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayerMap(nil)

@@ -35,7 +35,7 @@ func installLocalPKGBUILD(
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
-		cmdArgs.ExistsDouble("d", "nodeps"), noCheck,
+		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		config.Runtime.Logger.Child("grapher"))
 	graph := topo.New[string, *dep.InstallInfo]()
 	for _, target := range cmdArgs.Targets {

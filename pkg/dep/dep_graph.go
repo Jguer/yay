@@ -93,19 +93,20 @@ var colorMap = map[Reason]string{
 }
 
 type Grapher struct {
+	logger        *text.Logger
+	providerCache map[string][]aur.Pkg
+
 	dbExecutor  db.Executor
 	aurClient   aurc.QueryClient
 	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
-	noConfirm   bool
+	noConfirm   bool // If true, the graph will not prompt for confirmation
 	noDeps      bool // If true, the graph will not include dependencies
-	noCheckDeps bool // If true, the graph will not include dependencies
-
-	logger        *text.Logger
-	providerCache map[string][]aur.Pkg
+	noCheckDeps bool // If true, the graph will not include check dependencies
+	needed      bool // If true, the graph will only include packages that are not installed
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
-	fullGraph, noConfirm bool, noDeps bool, noCheckDeps bool,
+	fullGraph, noConfirm, noDeps, noCheckDeps, needed bool,
 	logger *text.Logger,
 ) *Grapher {
 	return &Grapher{
@@ -115,6 +116,7 @@ func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 		noConfirm:     noConfirm,
 		noDeps:        noDeps,
 		noCheckDeps:   noCheckDeps,
+		needed:        needed,
 		providerCache: make(map[string][]aurc.Pkg, 5),
 		logger:        logger,
 	}
@@ -358,24 +360,38 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			aurPkgs = cachedProvidePkg
 		} else {
 			var errA error
-			aurPkgs, errA = g.aurClient.Get(ctx, &aurc.Query{By: aurc.Name, Needles: []string{target}})
+			aurPkgs, errA = g.aurClient.Get(ctx, &aurc.Query{By: aurc.Provides, Needles: []string{target}, Contains: true})
 			if errA != nil {
 				g.logger.Errorln(gotext.Get("Failed to find AUR package for"), target, ":", errA)
 			}
 		}
 
 		if len(aurPkgs) == 0 {
-			g.logger.Errorln(gotext.Get("No AUR package found for"), target)
+			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", target)
 
 			continue
 		}
 
-		pkg := &aurPkgs[0]
-		graph = g.GraphAURTarget(ctx, graph, pkg, &InstallInfo{
-			AURBase: &pkg.PackageBase,
+		aurPkg := &aurPkgs[0]
+		if len(aurPkgs) > 1 {
+			chosen := g.provideMenu(target, aurPkgs)
+			aurPkg = chosen
+			g.providerCache[target] = []aurc.Pkg{*aurPkg}
+		}
+
+		if g.needed {
+			if pkg := g.dbExecutor.LocalPackage(aurPkg.Name); pkg != nil {
+				if db.VerCmp(pkg.Version(), aurPkg.Version) >= 0 {
+					g.logger.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(pkg.Name()+"-"+pkg.Version())))
+				}
+			}
+		}
+
+		graph = g.GraphAURTarget(ctx, graph, aurPkg, &InstallInfo{
+			AURBase: &aurPkg.PackageBase,
 			Reason:  Explicit,
 			Source:  AUR,
-			Version: pkg.Version,
+			Version: aurPkg.Version,
 		})
 	}
 
@@ -392,9 +408,10 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 	}
 
 	missingNeedles := make([]string, 0, deps.Cardinality())
-	for _, target := range deps.ToSlice() {
-		if _, ok := g.providerCache[target]; !ok {
-			missingNeedles = append(missingNeedles, target)
+	for _, depString := range deps.ToSlice() {
+		if _, ok := g.providerCache[depString]; !ok {
+			depName, _, _ := splitDep(depString)
+			missingNeedles = append(missingNeedles, depName)
 		}
 	}
 
@@ -446,7 +463,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		}
 
 		if len(aurPkgs) == 0 {
-			g.logger.Errorln(gotext.Get("No AUR package found for"), depString)
+			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", depString)
 
 			continue
 		}

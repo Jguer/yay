@@ -169,7 +169,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 }
 
 func TestIntegrationLocalInstallMissingDep(t *testing.T) {
-	wantErr := "could not find dotnet-sdk>=6"
+	wantErr := "could not find dotnet-sdk<7"
 	makepkgBin := t.TempDir() + "/makepkg"
 	pacmanBin := t.TempDir() + "/pacman"
 	gitBin := t.TempDir() + "/git"
