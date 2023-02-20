@@ -3,7 +3,6 @@ package dep
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/Jguer/yay/v11/pkg/db"
@@ -205,13 +204,13 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
 	final := make([]aurc.Pkg, 0, len(pkgs))
 	for i := range pkgs {
-		g.logger.Println(text.Magenta(strconv.Itoa(i+1)+" ")+text.Bold(pkgs[i].Name)+
-			" "+text.Cyan(pkgs[i].Version))
-		g.logger.Println("    "+pkgs[i].Description)
+		g.logger.Println(text.Magenta(strconv.Itoa(i+1)+" ") + text.Bold(pkgs[i].Name) +
+			" " + text.Cyan(pkgs[i].Version))
+		g.logger.Println("    " + pkgs[i].Description)
 	}
 	g.logger.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
 
-	numberBuf, err := g.logger.GetInput(os.Stdin, "", g.noConfirm)
+	numberBuf, err := g.logger.GetInput("", g.noConfirm)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +302,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 		Color:      colorMap[Explicit],
 		Background: bgColorMap[Sync],
 		Value:      instalInfo,
-	}), true, "test"
+	})
 
 	return graph
 }
