@@ -45,7 +45,9 @@ func handleCmd() error {
 		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm, os.Stdout, cmdArgs.ExistsDouble("d", "nodeps"), false)
+	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm,
+		cmdArgs.ExistsDouble("d", "nodeps"), false, false,
+		config.Runtime.Logger.Child("grapher"))
 
 	return graphPackage(context.Background(), grapher, cmdArgs.Targets)
 }
@@ -66,7 +68,7 @@ func graphPackage(
 		return errors.New(gotext.Get("only one target is allowed"))
 	}
 
-	graph, err := grapher.GraphFromAURCache(ctx, nil, []string{targets[0]})
+	graph, err := grapher.GraphFromAUR(ctx, nil, []string{targets[0]})
 	if err != nil {
 		return err
 	}

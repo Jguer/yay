@@ -134,7 +134,7 @@ func Test_aurQuery_printSearch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &strings.Builder{}
-			executor := &mock.DBExecutor{}
+			executor := &mock.DBExecutor{LocalPackageFn: func(string) mock.IPackage { return nil }}
 			text.UseColor = tt.useColor
 
 			// Fire
@@ -236,7 +236,7 @@ func Test_repoQuery_printSearch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &strings.Builder{}
-			executor := &mock.DBExecutor{}
+			executor := &mock.DBExecutor{LocalPackageFn: func(string) mock.IPackage { return nil }}
 			text.UseColor = tt.useColor
 
 			// Fire

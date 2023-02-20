@@ -3,20 +3,19 @@ package dep
 import (
 	"context"
 	"fmt"
-	"io"
-	"os"
 	"strconv"
+
+	aurc "github.com/Jguer/aur"
+	alpm "github.com/Jguer/go-alpm/v2"
+	gosrc "github.com/Morganamilo/go-srcinfo"
+	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/intrange"
 	aur "github.com/Jguer/yay/v11/pkg/query"
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/topo"
-
-	aurc "github.com/Jguer/aur"
-	alpm "github.com/Jguer/go-alpm/v2"
-	gosrc "github.com/Morganamilo/go-srcinfo"
-	"github.com/leonelquinteros/gotext"
 )
 
 type InstallInfo struct {
@@ -94,29 +93,32 @@ var colorMap = map[Reason]string{
 }
 
 type Grapher struct {
-	dbExecutor  db.Executor
-	aurCache    aurc.QueryClient
-	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
-	noConfirm   bool
-	noDeps      bool      // If true, the graph will not include dependencies
-	noCheckDeps bool      // If true, the graph will not include dependencies
-	w           io.Writer // output writer
+	logger        *text.Logger
+	providerCache map[string][]aur.Pkg
 
-	providerCache map[string]*aur.Pkg
+	dbExecutor  db.Executor
+	aurClient   aurc.QueryClient
+	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
+	noConfirm   bool // If true, the graph will not prompt for confirmation
+	noDeps      bool // If true, the graph will not include dependencies
+	noCheckDeps bool // If true, the graph will not include check dependencies
+	needed      bool // If true, the graph will only include packages that are not installed
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
-	fullGraph, noConfirm bool, output io.Writer, noDeps bool, noCheckDeps bool,
+	fullGraph, noConfirm, noDeps, noCheckDeps, needed bool,
+	logger *text.Logger,
 ) *Grapher {
 	return &Grapher{
 		dbExecutor:    dbExecutor,
-		aurCache:      aurCache,
+		aurClient:     aurCache,
 		fullGraph:     fullGraph,
 		noConfirm:     noConfirm,
-		w:             output,
 		noDeps:        noDeps,
 		noCheckDeps:   noCheckDeps,
-		providerCache: make(map[string]*aurc.Pkg, 5),
+		needed:        needed,
+		providerCache: make(map[string][]aurc.Pkg, 5),
+		logger:        logger,
 	}
 }
 
@@ -127,11 +129,10 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		graph = topo.New[string, *InstallInfo]()
 	}
 
+	aurTargets := make([]string, 0, len(targets))
+
 	for _, targetString := range targets {
-		var (
-			err    error
-			target = ToTarget(targetString)
-		)
+		target := ToTarget(targetString)
 
 		switch target.DB {
 		case "": // unspecified db
@@ -179,7 +180,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 
 			fallthrough
 		case "aur":
-			graph, err = g.GraphFromAURCache(ctx, graph, []string{target.Name})
+			aurTargets = append(aurTargets, target.Name)
 		default:
 			graph.AddNode(target.Name)
 			g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
@@ -193,10 +194,12 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 				},
 			})
 		}
+	}
 
-		if err != nil {
-			return nil, err
-		}
+	var errA error
+	graph, errA = g.GraphFromAUR(ctx, graph, aurTargets)
+	if errA != nil {
+		return nil, errA
 	}
 
 	return graph, nil
@@ -205,13 +208,13 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
 	final := make([]aurc.Pkg, 0, len(pkgs))
 	for i := range pkgs {
-		fmt.Fprintln(os.Stdout, text.Magenta(strconv.Itoa(i+1)+" ")+text.Bold(pkgs[i].Name)+
-			" "+text.Cyan(pkgs[i].Version))
-		fmt.Fprintln(os.Stdout, "    "+pkgs[i].Description)
+		g.logger.Println(text.Magenta(strconv.Itoa(i+1)+" ") + text.Bold(pkgs[i].Name) +
+			" " + text.Cyan(pkgs[i].Version))
+		g.logger.Println("    " + pkgs[i].Description)
 	}
-	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
+	g.logger.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
 
-	numberBuf, err := text.GetInput(os.Stdin, "", g.noConfirm)
+	numberBuf, err := g.logger.GetInput("", g.noConfirm)
 	if err != nil {
 		return nil, err
 	}
@@ -328,7 +331,7 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 	return graph
 }
 
-func (g *Grapher) GraphFromAURCache(ctx context.Context,
+func (g *Grapher) GraphFromAUR(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo],
 	targets []string,
 ) (*topo.Graph[string, *InstallInfo], error) {
@@ -336,25 +339,148 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 		graph = topo.New[string, *InstallInfo]()
 	}
 
+	if len(targets) == 0 {
+		return graph, nil
+	}
+
+	aurPkgs, errCache := g.aurClient.Get(ctx, &aurc.Query{By: aurc.Name, Needles: targets})
+	if errCache != nil {
+		text.Errorln(errCache)
+	}
+
+	for i := range aurPkgs {
+		pkg := &aurPkgs[i]
+		if _, ok := g.providerCache[pkg.Name]; !ok {
+			g.providerCache[pkg.Name] = []aurc.Pkg{*pkg}
+		}
+	}
+
 	for _, target := range targets {
-		aurPkgs, _ := g.aurCache.Get(ctx, &aurc.Query{By: aurc.Name, Needles: []string{target}})
+		if cachedProvidePkg, ok := g.providerCache[target]; ok {
+			aurPkgs = cachedProvidePkg
+		} else {
+			var errA error
+			aurPkgs, errA = g.aurClient.Get(ctx, &aurc.Query{By: aurc.Provides, Needles: []string{target}, Contains: true})
+			if errA != nil {
+				g.logger.Errorln(gotext.Get("Failed to find AUR package for"), target, ":", errA)
+			}
+		}
+
 		if len(aurPkgs) == 0 {
-			text.Errorln("No AUR package found for", target)
+			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", target)
 
 			continue
 		}
 
-		pkg := provideMenu(g.w, target, aurPkgs, g.noConfirm)
+		aurPkg := &aurPkgs[0]
+		if len(aurPkgs) > 1 {
+			chosen := g.provideMenu(target, aurPkgs)
+			aurPkg = chosen
+			g.providerCache[target] = []aurc.Pkg{*aurPkg}
+		}
 
-		graph = g.GraphAURTarget(ctx, graph, pkg, &InstallInfo{
-			AURBase: &pkg.PackageBase,
+		if g.needed {
+			if pkg := g.dbExecutor.LocalPackage(aurPkg.Name); pkg != nil {
+				if db.VerCmp(pkg.Version(), aurPkg.Version) >= 0 {
+					g.logger.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(pkg.Name()+"-"+pkg.Version())))
+					continue
+				}
+			}
+		}
+
+		graph = g.GraphAURTarget(ctx, graph, aurPkg, &InstallInfo{
+			AURBase: &aurPkg.PackageBase,
 			Reason:  Explicit,
 			Source:  AUR,
-			Version: pkg.Version,
+			Version: aurPkg.Version,
 		})
 	}
 
 	return graph, nil
+}
+
+// Removes found deps from the deps mapset and returns the found deps.
+func (g *Grapher) findDepsFromAUR(ctx context.Context,
+	deps mapset.Set[string],
+) []aurc.Pkg {
+	pkgsToAdd := make([]aurc.Pkg, 0, deps.Cardinality())
+	if deps.Cardinality() == 0 {
+		return []aurc.Pkg{}
+	}
+
+	missingNeedles := make([]string, 0, deps.Cardinality())
+	for _, depString := range deps.ToSlice() {
+		if _, ok := g.providerCache[depString]; !ok {
+			depName, _, _ := splitDep(depString)
+			missingNeedles = append(missingNeedles, depName)
+		}
+	}
+
+	if len(missingNeedles) != 0 {
+		g.logger.Debugln("deps to find", missingNeedles)
+		// provider search is more demanding than a simple search
+		// try to find name match if possible and then try to find provides.
+		aurPkgs, errCache := g.aurClient.Get(ctx, &aurc.Query{
+			By: aurc.Name, Needles: missingNeedles, Contains: false,
+		})
+		if errCache != nil {
+			text.Errorln(errCache)
+		}
+
+		for i := range aurPkgs {
+			pkg := &aurPkgs[i]
+			for _, val := range pkg.Provides {
+				if deps.Contains(val) {
+					g.providerCache[val] = append(g.providerCache[val], *pkg)
+				}
+			}
+
+			if deps.Contains(pkg.Name) {
+				g.providerCache[pkg.Name] = append(g.providerCache[pkg.Name], *pkg)
+			}
+		}
+	}
+
+	for _, depString := range deps.ToSlice() {
+		var aurPkgs []aurc.Pkg
+		depName, _, _ := splitDep(depString)
+
+		if cachedProvidePkg, ok := g.providerCache[depString]; ok {
+			aurPkgs = cachedProvidePkg
+		} else {
+			var errA error
+			aurPkgs, errA = g.aurClient.Get(ctx, &aurc.Query{By: aurc.Provides, Needles: []string{depName}, Contains: true})
+			if errA != nil {
+				g.logger.Errorln(gotext.Get("Failed to find AUR package for"), depString, ":", errA)
+			}
+		}
+
+		// remove packages that don't satisfy the dependency
+		for i := 0; i < len(aurPkgs); i++ {
+			if !satisfiesAur(depString, &aurPkgs[i]) {
+				aurPkgs = append(aurPkgs[:i], aurPkgs[i+1:]...)
+				i--
+			}
+		}
+
+		if len(aurPkgs) == 0 {
+			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", depString)
+
+			continue
+		}
+
+		pkg := aurPkgs[0]
+		if len(aurPkgs) > 1 {
+			chosen := g.provideMenu(depString, aurPkgs)
+			pkg = *chosen
+		}
+
+		g.providerCache[depString] = []aurc.Pkg{pkg}
+		deps.Remove(depString)
+		pkgsToAdd = append(pkgsToAdd, pkg)
+	}
+
+	return pkgsToAdd
 }
 
 func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo],
@@ -377,110 +503,106 @@ func (g *Grapher) addNodes(
 	deps []string,
 	depType Reason,
 ) {
-	for _, depString := range deps {
-		depName, mod, ver := splitDep(depString)
-
-		if g.dbExecutor.LocalSatisfierExists(depString) {
-			if g.fullGraph {
-				g.ValidateAndSetNodeInfo(
-					graph,
-					depName,
-					&topo.NodeInfo[*InstallInfo]{Color: colorMap[depType], Background: bgColorMap[Local]})
-
-				if err := graph.DependOn(depName, parentPkgName); err != nil {
-					text.Warnln(depName, parentPkgName, err)
-				}
-			}
-
+	targetsToFind := mapset.NewThreadUnsafeSet(deps...)
+	// Check if in graph already
+	for _, depString := range targetsToFind.ToSlice() {
+		if !graph.Exists(depString) {
 			continue
 		}
 
-		if graph.Exists(depName) {
-			if err := graph.DependOn(depName, parentPkgName); err != nil {
-				text.Warnln(depName, parentPkgName, err)
-			}
+		if err := graph.DependOn(depString, parentPkgName); err != nil {
+			g.logger.Warnln(depString, parentPkgName, err)
+		}
 
+		targetsToFind.Remove(depString)
+	}
+
+	// Check installed
+	for _, depString := range targetsToFind.ToSlice() {
+		depName, _, _ := splitDep(depString)
+		if !g.dbExecutor.LocalSatisfierExists(depString) {
 			continue
 		}
 
-		// Check ALPM
-		if alpmPkg := g.dbExecutor.SyncSatisfier(depString); alpmPkg != nil {
-			if err := graph.DependOn(alpmPkg.Name(), parentPkgName); err != nil {
-				text.Warnln("repo dep warn:", depName, parentPkgName, err)
-			}
-
-			dbName := alpmPkg.DB().Name()
+		if g.fullGraph {
 			g.ValidateAndSetNodeInfo(
 				graph,
-				alpmPkg.Name(),
-				&topo.NodeInfo[*InstallInfo]{
-					Color:      colorMap[depType],
-					Background: bgColorMap[Sync],
-					Value: &InstallInfo{
-						Source:     Sync,
-						Reason:     depType,
-						Version:    alpmPkg.Version(),
-						SyncDBName: &dbName,
-					},
-				})
+				depName,
+				&topo.NodeInfo[*InstallInfo]{Color: colorMap[depType], Background: bgColorMap[Local]})
 
-			if newDeps := alpmPkg.Depends().Slice(); len(newDeps) != 0 && g.fullGraph {
-				newDepsSlice := make([]string, 0, len(newDeps))
-				for _, newDep := range newDeps {
-					newDepsSlice = append(newDepsSlice, newDep.Name)
-				}
-
-				g.addNodes(ctx, graph, alpmPkg.Name(), newDepsSlice, Dep)
+			if err := graph.DependOn(depName, parentPkgName); err != nil {
+				g.logger.Warnln(depName, parentPkgName, err)
 			}
+		}
 
+		targetsToFind.Remove(depString)
+	}
+
+	// Check Sync
+	for _, depString := range targetsToFind.ToSlice() {
+		alpmPkg := g.dbExecutor.SyncSatisfier(depString)
+		if alpmPkg == nil {
 			continue
 		}
 
-		var aurPkgs []aur.Pkg
-		if cachedProvidePkg, ok := g.providerCache[depName]; ok {
-			aurPkgs = []aur.Pkg{*cachedProvidePkg}
-		} else {
-			var errMeta error
-			aurPkgs, errMeta = g.aurCache.Get(ctx,
-				&aurc.Query{
-					Needles:  []string{depName},
-					By:       aurc.None,
-					Contains: false,
-				})
-			if errMeta != nil {
-				text.Warnln("AUR cache error:", errMeta)
-			}
+		if err := graph.DependOn(alpmPkg.Name(), parentPkgName); err != nil {
+			g.logger.Warnln("repo dep warn:", depString, parentPkgName, err)
 		}
 
-		if len(aurPkgs) != 0 { // Check AUR
-			pkg := aurPkgs[0]
-			if len(aurPkgs) > 1 {
-				chosen := provideMenu(g.w, depName, aurPkgs, g.noConfirm)
-				g.providerCache[depName] = chosen
-				pkg = *chosen
+		dbName := alpmPkg.DB().Name()
+		g.ValidateAndSetNodeInfo(
+			graph,
+			alpmPkg.Name(),
+			&topo.NodeInfo[*InstallInfo]{
+				Color:      colorMap[depType],
+				Background: bgColorMap[Sync],
+				Value: &InstallInfo{
+					Source:     Sync,
+					Reason:     depType,
+					Version:    alpmPkg.Version(),
+					SyncDBName: &dbName,
+				},
+			})
+
+		if newDeps := alpmPkg.Depends().Slice(); len(newDeps) != 0 && g.fullGraph {
+			newDepsSlice := make([]string, 0, len(newDeps))
+			for _, newDep := range newDeps {
+				newDepsSlice = append(newDepsSlice, newDep.Name)
 			}
 
-			if err := graph.DependOn(pkg.Name, parentPkgName); err != nil {
-				text.Warnln("aur dep warn:", pkg.Name, parentPkgName, err)
-			}
-
-			graph.SetNodeInfo(
-				pkg.Name,
-				&topo.NodeInfo[*InstallInfo]{
-					Color:      colorMap[depType],
-					Background: bgColorMap[AUR],
-					Value: &InstallInfo{
-						Source:  AUR,
-						Reason:  depType,
-						AURBase: &pkg.PackageBase,
-						Version: pkg.Version,
-					},
-				})
-			g.addDepNodes(ctx, &pkg, graph)
-
-			continue
+			g.addNodes(ctx, graph, alpmPkg.Name(), newDepsSlice, Dep)
 		}
 
+		targetsToFind.Remove(depString)
+	}
+
+	// Check AUR
+	pkgsToAdd := g.findDepsFromAUR(ctx, targetsToFind)
+	for i := range pkgsToAdd {
+		aurPkg := &pkgsToAdd[i]
+		if err := graph.DependOn(aurPkg.Name, parentPkgName); err != nil {
+			g.logger.Warnln("aur dep warn:", aurPkg.Name, parentPkgName, err)
+		}
+
+		graph.SetNodeInfo(
+			aurPkg.Name,
+			&topo.NodeInfo[*InstallInfo]{
+				Color:      colorMap[depType],
+				Background: bgColorMap[AUR],
+				Value: &InstallInfo{
+					Source:  AUR,
+					Reason:  depType,
+					AURBase: &aurPkg.PackageBase,
+					Version: aurPkg.Version,
+				},
+			})
+
+		g.addDepNodes(ctx, aurPkg, graph)
+	}
+
+	// Add missing to graph
+	for _, depString := range targetsToFind.ToSlice() {
+		depName, mod, ver := splitDep(depString)
 		// no dep found. add as missing
 		graph.AddNode(depName)
 		graph.SetNodeInfo(depName, &topo.NodeInfo[*InstallInfo]{
@@ -495,7 +617,7 @@ func (g *Grapher) addNodes(
 	}
 }
 
-func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *aur.Pkg {
+func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 	size := len(options)
 	if size == 1 {
 		return &options[0]
@@ -505,27 +627,27 @@ func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *au
 	str += "\n"
 
 	size = 1
-	str += text.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
+	str += g.logger.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
 
 	for i := range options {
 		str += fmt.Sprintf("%d) %s ", size, options[i].Name)
 		size++
 	}
 
-	text.OperationInfoln(str)
+	g.logger.OperationInfoln(str)
 
 	for {
-		fmt.Fprintln(w, gotext.Get("\nEnter a number (default=1): "))
+		g.logger.Println(gotext.Get("\nEnter a number (default=1): "))
 
-		if noConfirm {
-			fmt.Fprintln(w, "1")
+		if g.noConfirm {
+			g.logger.Println("1")
 
 			return &options[0]
 		}
 
-		numberBuf, err := text.GetInput(os.Stdin, "", false)
+		numberBuf, err := g.logger.GetInput("", false)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			g.logger.Errorln(err)
 
 			break
 		}
@@ -536,13 +658,14 @@ func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *au
 
 		num, err := strconv.Atoi(numberBuf)
 		if err != nil {
-			text.Errorln(gotext.Get("invalid number: %s", numberBuf))
+			g.logger.Errorln(gotext.Get("invalid number: %s", numberBuf))
 
 			continue
 		}
 
 		if num < 1 || num >= size {
-			text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size-1))
+			g.logger.Errorln(gotext.Get("invalid value: %d is not between %d and %d",
+				num, 1, size-1))
 
 			continue
 		}

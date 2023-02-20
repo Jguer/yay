@@ -3,6 +3,7 @@ package dep
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"testing"
@@ -14,6 +15,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v11/pkg/dep/mock"
 	aur "github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 func ptrString(s string) *string {
@@ -88,7 +90,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 			return jfinServerFn(ctx, query)
 		}
 
-		panic("implement me")
+		panic(fmt.Sprintf("implement me %v", query.Needles))
 	}}
 
 	type fields struct {
@@ -193,8 +195,9 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(tt.fields.dbExecutor,
-				tt.fields.aurCache, false, true, os.Stdout,
-				tt.fields.noDeps, tt.fields.noCheckDeps)
+				tt.fields.aurCache, false, true,
+				tt.fields.noDeps, tt.fields.noCheckDeps, false,
+				text.NewLogger(io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayerMap(nil)

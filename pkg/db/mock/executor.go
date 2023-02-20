@@ -16,6 +16,7 @@ type (
 
 type DBExecutor struct {
 	db.Executor
+	LocalPackageFn                func(string) IPackage
 	IsCorrectVersionInstalledFn   func(string, string) bool
 	SyncPackageFn                 func(string) IPackage
 	PackagesFromGroupFn           func(string) []IPackage
@@ -69,7 +70,11 @@ func (t *DBExecutor) LastBuildTime() time.Time {
 }
 
 func (t *DBExecutor) LocalPackage(s string) IPackage {
-	return nil
+	if t.LocalPackageFn != nil {
+		return t.LocalPackageFn(s)
+	}
+
+	panic("implement me")
 }
 
 func (t *DBExecutor) LocalPackages() []IPackage {

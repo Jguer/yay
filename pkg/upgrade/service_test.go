@@ -250,7 +250,8 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			grapher := dep.NewGrapher(dbExe, mockAUR,
-				false, true, io.Discard, false, false)
+				false, true, false, false, false, text.NewLogger(tt.fields.output,
+					tt.fields.input, true, "test"))
 
 			cfg := &settings.Configuration{
 				Runtime: &settings.Runtime{Mode: parser.ModeAny},
@@ -258,7 +259,8 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			}
 
 			u := &UpgradeService{
-				log:        text.NewLogger(tt.fields.output, tt.fields.input, true, "test"),
+				log: text.NewLogger(tt.fields.output,
+					tt.fields.input, true, "test"),
 				grapher:    grapher,
 				aurCache:   mockAUR,
 				dbExecutor: dbExe,
