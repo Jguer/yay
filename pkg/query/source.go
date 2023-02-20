@@ -16,7 +16,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
 
-	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/aur/rpc"
 )
 
 type SearchVerbosity int
@@ -27,10 +27,6 @@ const (
 	Detailed
 	Minimal
 )
-
-type AURCache interface {
-	Get(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error)
-}
 
 type SourceQueryBuilder struct {
 	repoQuery
@@ -43,13 +39,13 @@ type SourceQueryBuilder struct {
 	bottomUp          bool
 	singleLineResults bool
 
-	aurClient aur.ClientInterface
-	aurCache  AURCache
+	aurClient rpc.ClientInterface
+	aurCache  aur.QueryClient
 }
 
 func NewSourceQueryBuilder(
-	aurClient aur.ClientInterface,
-	aurCache AURCache,
+	aurClient rpc.ClientInterface,
+	aurCache aur.QueryClient,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -197,7 +193,7 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
-	aurClient aur.ClientInterface, aurMetadata AURCache,
+	aurClient rpc.ClientInterface, aurMetadata aur.QueryClient,
 	pkgS []string, searchBy string, newEngine bool,
 ) ([]aur.Pkg, error) {
 	var (
@@ -209,7 +205,7 @@ func queryAUR(ctx context.Context,
 		var r []aur.Pkg
 
 		if aurMetadata != nil && newEngine {
-			q, errM := aurMetadata.Get(ctx, &metadata.AURQuery{
+			q, errM := aurMetadata.Get(ctx, &aur.Query{
 				Needles:  []string{word},
 				By:       by,
 				Contains: true,

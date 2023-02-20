@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	aur "github.com/Jguer/aur"
-	"github.com/Jguer/aur/metadata"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -141,7 +140,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
+				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
 			},
@@ -259,7 +258,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
+				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
 			},

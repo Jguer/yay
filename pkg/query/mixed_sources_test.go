@@ -5,9 +5,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Jguer/aur/rpc"
+
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 
-	"github.com/Jguer/aur"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,7 +31,7 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			client, err := aur.NewClient(aur.WithHTTPClient(&mockDoer{}))
+			client, err := rpc.NewClient(rpc.WithHTTPClient(&mockDoer{}))
 			queryBuilder := NewMixedSourceQueryBuilder(client, "votes", parser.ModeAny, "", tc.bottomUp, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}

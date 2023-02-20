@@ -14,7 +14,6 @@ import (
 	"github.com/Jguer/yay/v11/pkg/topo"
 
 	aurc "github.com/Jguer/aur"
-	"github.com/Jguer/aur/metadata"
 	alpm "github.com/Jguer/go-alpm/v2"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
@@ -94,13 +93,9 @@ var colorMap = map[Reason]string{
 	CheckDep: "forestgreen",
 }
 
-type AURCache interface {
-	Get(ctx context.Context, query *metadata.AURQuery) ([]aurc.Pkg, error)
-}
-
 type Grapher struct {
 	dbExecutor  db.Executor
-	aurCache    AURCache
+	aurCache    aurc.QueryClient
 	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
 	noConfirm   bool
 	noDeps      bool      // If true, the graph will not include dependencies
@@ -110,7 +105,7 @@ type Grapher struct {
 	providerCache map[string]*aur.Pkg
 }
 
-func NewGrapher(dbExecutor db.Executor, aurCache AURCache,
+func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 	fullGraph, noConfirm bool, output io.Writer, noDeps bool, noCheckDeps bool,
 ) *Grapher {
 	return &Grapher{
@@ -342,7 +337,7 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 	}
 
 	for _, target := range targets {
-		aurPkgs, _ := g.aurCache.Get(ctx, &metadata.AURQuery{By: aurc.Name, Needles: []string{target}})
+		aurPkgs, _ := g.aurCache.Get(ctx, &aurc.Query{By: aurc.Name, Needles: []string{target}})
 		if len(aurPkgs) == 0 {
 			text.Errorln("No AUR package found for", target)
 
@@ -447,7 +442,7 @@ func (g *Grapher) addNodes(
 		} else {
 			var errMeta error
 			aurPkgs, errMeta = g.aurCache.Get(ctx,
-				&metadata.AURQuery{
+				&aurc.Query{
 					Needles:  []string{depName},
 					By:       aurc.None,
 					Contains: false,

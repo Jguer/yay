@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/aur/metadata"
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/stretchr/testify/assert"
 
@@ -115,7 +114,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	}
 
 	mockAUR := &mockaur.MockAUR{
-		GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 			return []aur.Pkg{
 				{Name: "yay", Version: "10.2.4", PackageBase: "yay"},
 				{Name: "example-git", Version: "2.2.1.r69.g8a10460-1", PackageBase: "example"},

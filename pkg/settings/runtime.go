@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/Jguer/yay/v11/pkg/db"
@@ -12,14 +11,10 @@ import (
 	"github.com/Jguer/yay/v11/pkg/vcs"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/aur/rpc"
 	"github.com/Jguer/votar/pkg/vote"
 	"github.com/Morganamilo/go-pacmanconf"
 )
-
-type AURCache interface {
-	Get(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error)
-}
 
 type Runtime struct {
 	Mode           parser.TargetMode
@@ -32,9 +27,9 @@ type Runtime struct {
 	VCSStore       vcs.Store
 	CmdBuilder     exe.ICmdBuilder
 	HTTPClient     *http.Client
-	AURClient      *aur.Client
+	AURClient      *rpc.Client
 	VoteClient     *vote.Client
-	AURCache       AURCache
+	AURCache       aur.QueryClient
 	DBExecutor     db.Executor
 	Logger         *text.Logger
 }

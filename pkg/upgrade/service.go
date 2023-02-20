@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/aur/rpc"
 	"github.com/Jguer/go-alpm/v2"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
@@ -23,8 +23,8 @@ import (
 
 type UpgradeService struct {
 	grapher    *dep.Grapher
-	aurCache   settings.AURCache
-	aurClient  aur.ClientInterface
+	aurCache   aur.QueryClient
+	aurClient  rpc.ClientInterface
 	dbExecutor db.Executor
 	vcsStore   vcs.Store
 	runtime    *settings.Runtime
@@ -33,8 +33,8 @@ type UpgradeService struct {
 	noConfirm  bool
 }
 
-func NewUpgradeService(grapher *dep.Grapher, aurCache settings.AURCache,
-	aurClient aur.ClientInterface, dbExecutor db.Executor,
+func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
+	aurClient rpc.ClientInterface, dbExecutor db.Executor,
 	vcsStore vcs.Store, runtime *settings.Runtime, cfg *settings.Configuration,
 	noConfirm bool, logger *text.Logger,
 ) *UpgradeService {
@@ -71,7 +71,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 
 		var _aurdata []aur.Pkg
 		if u.aurCache != nil {
-			_aurdata, err = u.aurCache.Get(ctx, &metadata.AURQuery{Needles: remoteNames, By: aur.Name})
+			_aurdata, err = u.aurCache.Get(ctx, &aur.Query{Needles: remoteNames, By: aur.Name})
 		} else {
 			_aurdata, err = query.AURInfo(ctx, u.aurClient, remoteNames, warnings, u.cfg.RequestSplitN)
 		}

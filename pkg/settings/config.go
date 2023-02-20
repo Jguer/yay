@@ -16,8 +16,8 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 
-	"github.com/Jguer/aur"
 	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/aur/rpc"
 	"github.com/Jguer/votar/pkg/vote"
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
@@ -317,9 +317,9 @@ func NewConfig(version string) (*Configuration, error) {
 	}
 
 	var errAUR error
-	newConfig.Runtime.AURClient, errAUR = aur.NewClient(
-		aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
-		aur.WithRequestEditorFn(userAgentFn))
+	newConfig.Runtime.AURClient, errAUR = rpc.NewClient(
+		rpc.WithHTTPClient(newConfig.Runtime.HTTPClient),
+		rpc.WithRequestEditorFn(userAgentFn))
 
 	if errAUR != nil {
 		return nil, errAUR

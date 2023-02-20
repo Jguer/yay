@@ -7,13 +7,13 @@ import (
 	"os"
 	"testing"
 
+	aurc "github.com/Jguer/aur"
+	"github.com/stretchr/testify/require"
+
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v11/pkg/dep/mock"
 	aur "github.com/Jguer/yay/v11/pkg/query"
-
-	"github.com/Jguer/aur/metadata"
-	"github.com/stretchr/testify/require"
 )
 
 func ptrString(s string) *string {
@@ -31,7 +31,7 @@ func getFromFile(t *testing.T, filePath string) mockaur.GetFunc {
 	err = json.Unmarshal(fBytes, &pkgs)
 	require.NoError(t, err)
 
-	return func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
+	return func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
 		return pkgs, nil
 	}
 }
@@ -72,7 +72,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 		},
 	}
 
-	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *metadata.AURQuery) ([]aur.Pkg, error) {
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
 		if query.Needles[0] == "jellyfin" {
 			jfinFn := getFromFile(t, "testdata/jellyfin.json")
 			return jfinFn(ctx, query)
@@ -93,7 +93,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 
 	type fields struct {
 		dbExecutor  db.Executor
-		aurCache    AURCache
+		aurCache    aurc.QueryClient
 		noDeps      bool
 		noCheckDeps bool
 	}
