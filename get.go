@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Jguer/aur"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/download"
@@ -16,10 +17,10 @@ import (
 )
 
 // yay -Gp.
-func printPkgbuilds(dbExecutor download.DBSearcher, httpClient *http.Client, targets []string,
+func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient, httpClient *http.Client, targets []string,
 	mode parser.TargetMode, aurURL string,
 ) error {
-	pkgbuilds, err := download.PKGBUILDs(dbExecutor, httpClient, targets, aurURL, mode)
+	pkgbuilds, err := download.PKGBUILDs(dbExecutor, aurClient, httpClient, targets, aurURL, mode)
 	if err != nil {
 		text.Errorln(err)
 	}
@@ -40,7 +41,7 @@ func printPkgbuilds(dbExecutor download.DBSearcher, httpClient *http.Client, tar
 			}
 		}
 
-		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
+		text.Warnln(gotext.Get("Unable to find the following packages:"), " ", strings.Join(missing, ", "))
 
 		return fmt.Errorf("")
 	}
@@ -49,7 +50,7 @@ func printPkgbuilds(dbExecutor download.DBSearcher, httpClient *http.Client, tar
 }
 
 // yay -G.
-func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher,
+func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient aur.QueryClient,
 	config *settings.Configuration, targets []string, force bool,
 ) error {
 	wd, err := os.Getwd()
@@ -57,7 +58,7 @@ func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher,
 		return err
 	}
 
-	cloned, errD := download.PKGBUILDRepos(ctx, dbExecutor,
+	cloned, errD := download.PKGBUILDRepos(ctx, dbExecutor, aurClient,
 		config.Runtime.CmdBuilder, targets, config.Runtime.Mode, config.AURURL, wd, force)
 	if errD != nil {
 		text.Errorln(errD)
@@ -72,7 +73,7 @@ func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher,
 			}
 		}
 
-		text.Warnln(gotext.Get("Unable to find the following packages:"), strings.Join(missing, ", "))
+		text.Warnln(gotext.Get("Unable to find the following packages:"), " ", strings.Join(missing, ", "))
 
 		err = fmt.Errorf("")
 	}

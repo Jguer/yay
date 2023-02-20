@@ -9,6 +9,8 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/aur"
+
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
@@ -79,7 +81,7 @@ func getURLName(pkg db.IPackage) string {
 	return name
 }
 
-func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
+func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *http.Client, targets []string,
 	aurURL string, mode parser.TargetMode,
 ) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
@@ -94,7 +96,7 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 
 	for _, target := range targets {
 		// Probably replaceable by something in query.
-		dbName, name, aur, toSkip := getPackageUsableName(dbExecutor, target, mode)
+		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, target, mode)
 		if toSkip {
 			continue
 		}
@@ -125,7 +127,7 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 
 			<-sem
 			wg.Done()
-		}(target, dbName, name, aur)
+		}(target, dbName, name, isAUR)
 	}
 
 	wg.Wait()
@@ -133,7 +135,7 @@ func PKGBUILDs(dbExecutor DBSearcher, httpClient *http.Client, targets []string,
 	return pkgbuilds, errs.Return()
 }
 
-func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher,
+func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.QueryClient,
 	cmdBuilder exe.GitCmdBuilder,
 	targets []string, mode parser.TargetMode, aurURL, dest string, force bool,
 ) (map[string]bool, error) {
@@ -149,7 +151,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher,
 
 	for _, target := range targets {
 		// Probably replaceable by something in query.
-		dbName, name, aur, toSkip := getPackageUsableName(dbExecutor, target, mode)
+		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, target, mode)
 		if toSkip {
 			continue
 		}
@@ -194,7 +196,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher,
 			<-sem
 
 			wg.Done()
-		}(target, dbName, name, aur)
+		}(target, dbName, name, isAUR)
 	}
 
 	wg.Wait()
@@ -203,34 +205,47 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher,
 }
 
 // TODO: replace with dep.ResolveTargets.
-func getPackageUsableName(dbExecutor DBSearcher, target string, mode parser.TargetMode) (dbname, pkgname string, aur, toSkip bool) {
-	aur = true
-
+func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
+	target string, mode parser.TargetMode,
+) (dbname, pkgname string, isAUR, toSkip bool) {
 	dbName, name := text.SplitDBFromName(target)
 	if dbName != "aur" && mode.AtLeastRepo() {
 		var pkg db.IPackage
 		if dbName != "" {
 			pkg = dbExecutor.SatisfierFromDB(name, dbName)
-			if pkg == nil {
-				// if the user precised a db but the package is not in the db
-				// then it is missing
-				// Mode does not allow AUR packages
-				return dbName, name, aur, true
-			}
 		} else {
 			pkg = dbExecutor.SyncPackage(name)
 		}
 
 		if pkg != nil {
-			aur = false
 			name = getURLName(pkg)
 			dbName = pkg.DB().Name()
+			return dbName, name, false, false
+		}
+
+		// If the package is not found in the database and it was expected to be
+		if pkg == nil && dbName != "" {
+			return dbName, name, true, true
 		}
 	}
 
-	if aur && mode == parser.ModeRepo {
-		return dbName, name, aur, true
+	if mode == parser.ModeRepo {
+		return dbName, name, true, true
 	}
 
-	return dbName, name, aur, false
+	pkgs, err := aurClient.Get(context.Background(), &aur.Query{
+		By:       aur.Name,
+		Contains: false,
+		Needles:  []string{name},
+	})
+	if err != nil {
+		text.Warnln(err)
+		return dbName, name, true, true
+	}
+
+	if len(pkgs) == 0 {
+		return dbName, name, true, true
+	}
+
+	return "aur", name, true, false
 }

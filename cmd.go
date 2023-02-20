@@ -323,10 +323,12 @@ func handleWeb(ctx context.Context, cmdArgs *parser.Arguments) error {
 
 func handleGetpkgbuild(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
-		return printPkgbuilds(dbExecutor, config.Runtime.HTTPClient, cmdArgs.Targets, config.Runtime.Mode, config.AURURL)
+		return printPkgbuilds(dbExecutor, config.Runtime.AURCache,
+			config.Runtime.HTTPClient, cmdArgs.Targets, config.Runtime.Mode, config.AURURL)
 	}
 
-	return getPkgbuilds(ctx, dbExecutor, config, cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
+	return getPkgbuilds(ctx, dbExecutor, config.Runtime.AURCache, config,
+		cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }
 
 func handleUpgrade(ctx context.Context,
