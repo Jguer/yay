@@ -1,5 +1,5 @@
-github.com/Jguer/aur v1.2.0 h1:hWg0JcGQ9WkPlnElr3tZ6dW+GfD/wZTr9kym5GFY3OE=
-github.com/Jguer/aur v1.2.0/go.mod h1:x4iPZX1qZoQtPiYgFepVO/6kbz7zwFkep8gz5tzga64=
+github.com/Jguer/aur v1.2.1 h1:7ViPn4EN10iMAhtUSugxytloCynyVI12HzfhnGG1xGE=
+github.com/Jguer/aur v1.2.1/go.mod h1:Dahvb6L1yr0rR7svyYSDwaRJoQMeyvJblwJ3QH/7CUs=
 github.com/Jguer/go-alpm/v2 v2.1.2 h1:CGTIxzuEpT9Q3a7IBrx0E6acoYoaHX2Z93UOApPDhgU=
 github.com/Jguer/go-alpm/v2 v2.1.2/go.mod h1:uLQcTMNM904dRiGU+/JDtDdd7Nd8mVbEVaHjhmziT7w=
 github.com/Jguer/votar v1.0.0 h1:drPYpV5Py5BeAQS8xezmT6uCEfLzotNjLf5yfmlHKTg=
@@ -32,6 +32,8 @@ github.com/itchyny/timefmt-go v0.1.5 h1:G0INE2la8S6ru/ZI5JecgyzbbJNs5lG1RcBqa7Jm
 github.com/itchyny/timefmt-go v0.1.5/go.mod h1:nEP7L+2YmAbT2kZ2HfSs1d8Xtw9LY8D2stDBckWakZ8=
 github.com/leonelquinteros/gotext v1.5.1 h1:vmddRn3gHp67YFjZLZE2AZsgYMT4IBTJhua4yfe7/4Q=
 github.com/leonelquinteros/gotext v1.5.1/go.mod h1:/A4Y7BvIsf5JHO60E43ZQDVkV3qO+7eP8HjeqD6ChIA=
+github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
+github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 h1:W6apQkHrMkS0Muv8G/TipAy/FJl/rCYT0+EuS8+Z0z4=
 github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32/go.mod h1:9wM+0iRr9ahx58uYLpLIr5fm8diHn0JbqRycJi6w0Ms=
 github.com/ohler55/ojg v1.17.5 h1:SY6/cdhVzsLinNFIBRNSWhJgihvEWco5Y0TJe46XJ1Y=
