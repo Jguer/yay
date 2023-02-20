@@ -383,6 +383,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			if pkg := g.dbExecutor.LocalPackage(aurPkg.Name); pkg != nil {
 				if db.VerCmp(pkg.Version(), aurPkg.Version) >= 0 {
 					g.logger.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(pkg.Name()+"-"+pkg.Version())))
+					continue
 				}
 			}
 		}

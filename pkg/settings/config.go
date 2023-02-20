@@ -235,10 +235,10 @@ func DefaultConfig(version string) *Configuration {
 		UseAsk:                 false,
 		CombinedUpgrade:        false,
 		SeparateSources:        true,
-		NewInstallEngine:       false,
+		NewInstallEngine:       true,
 		Version:                version,
 		Debug:                  false,
-		UseRPC:                 false,
+		UseRPC:                 true,
 	}
 }
 
