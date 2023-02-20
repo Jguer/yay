@@ -205,13 +205,13 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
 	final := make([]aurc.Pkg, 0, len(pkgs))
 	for i := range pkgs {
-		fmt.Fprintln(os.Stdout, text.Magenta(strconv.Itoa(i+1)+" ")+text.Bold(pkgs[i].Name)+
+		g.logger.Println(text.Magenta(strconv.Itoa(i+1)+" ")+text.Bold(pkgs[i].Name)+
 			" "+text.Cyan(pkgs[i].Version))
-		fmt.Fprintln(os.Stdout, "    "+pkgs[i].Description)
+		g.logger.Println("    "+pkgs[i].Description)
 	}
-	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
+	g.logger.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\"):")
 
-	numberBuf, err := text.GetInput(os.Stdin, "", g.noConfirm)
+	numberBuf, err := g.logger.GetInput(os.Stdin, "", g.noConfirm)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +303,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 		Color:      colorMap[Explicit],
 		Background: bgColorMap[Sync],
 		Value:      instalInfo,
-	})
+	}), true, "test"
 
 	return graph
 }
@@ -339,7 +339,7 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 	for _, target := range targets {
 		aurPkgs, _ := g.aurCache.Get(ctx, &aurc.Query{By: aurc.Name, Needles: []string{target}})
 		if len(aurPkgs) == 0 {
-			text.Errorln("No AUR package found for", target)
+			g.logger.Errorln("No AUR package found for", target)
 
 			continue
 		}
@@ -388,7 +388,7 @@ func (g *Grapher) addNodes(
 					&topo.NodeInfo[*InstallInfo]{Color: colorMap[depType], Background: bgColorMap[Local]})
 
 				if err := graph.DependOn(depName, parentPkgName); err != nil {
-					text.Warnln(depName, parentPkgName, err)
+					g.logger.Warnln(depName, parentPkgName, err)
 				}
 			}
 
@@ -397,7 +397,7 @@ func (g *Grapher) addNodes(
 
 		if graph.Exists(depName) {
 			if err := graph.DependOn(depName, parentPkgName); err != nil {
-				text.Warnln(depName, parentPkgName, err)
+				g.logger.Warnln(depName, parentPkgName, err)
 			}
 
 			continue
@@ -406,7 +406,7 @@ func (g *Grapher) addNodes(
 		// Check ALPM
 		if alpmPkg := g.dbExecutor.SyncSatisfier(depString); alpmPkg != nil {
 			if err := graph.DependOn(alpmPkg.Name(), parentPkgName); err != nil {
-				text.Warnln("repo dep warn:", depName, parentPkgName, err)
+				g.logger.Warnln("repo dep warn:", depName, parentPkgName, err)
 			}
 
 			dbName := alpmPkg.DB().Name()
@@ -448,7 +448,7 @@ func (g *Grapher) addNodes(
 					Contains: false,
 				})
 			if errMeta != nil {
-				text.Warnln("AUR cache error:", errMeta)
+				g.logger.Warnln("AUR cache error:", errMeta)
 			}
 		}
 
@@ -461,7 +461,7 @@ func (g *Grapher) addNodes(
 			}
 
 			if err := graph.DependOn(pkg.Name, parentPkgName); err != nil {
-				text.Warnln("aur dep warn:", pkg.Name, parentPkgName, err)
+				g.logger.Warnln("aur dep warn:", pkg.Name, parentPkgName, err)
 			}
 
 			graph.SetNodeInfo(
@@ -512,7 +512,7 @@ func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 		size++
 	}
 
-	text.OperationInfoln(str)
+	g.logger.OperationInfoln(str)
 
 	for {
 		g.logger.Println(gotext.Get("\nEnter a number (default=1): "))
