@@ -8,6 +8,7 @@ import (
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
+	"github.com/hashicorp/go-multierror"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/db"
@@ -193,7 +194,7 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
-	aurClient rpc.ClientInterface, aurMetadata aur.QueryClient,
+	rpcClient rpc.ClientInterface, aurClient aur.QueryClient,
 	pkgS []string, searchBy string, newEngine bool,
 ) ([]aur.Pkg, error) {
 	var (
@@ -201,32 +202,22 @@ func queryAUR(ctx context.Context,
 		by  = getSearchBy(searchBy)
 	)
 
+	queryClient := aurClient
+	if !newEngine {
+		queryClient = rpcClient
+	}
+
 	for _, word := range pkgS {
-		var r []aur.Pkg
-
-		if aurMetadata != nil && newEngine {
-			q, errM := aurMetadata.Get(ctx, &aur.Query{
-				Needles:  []string{word},
-				By:       by,
-				Contains: true,
-			})
-
-			r = append(r, q...)
-
-			if errM == nil {
-				return r, nil
-			}
-
-			text.Warnln("AUR Metadata search failed:", err)
+		r, errM := queryClient.Get(ctx, &aur.Query{
+			Needles:  []string{word},
+			By:       by,
+			Contains: true,
+		})
+		if errM == nil {
+			return r, nil
 		}
-		// if one of the search terms returns a result we start filtering by it
-		if aurClient != nil {
-			text.Debugln("AUR RPC:", by, word)
 
-			if r, err = aurClient.Search(ctx, word, by); err == nil {
-				return r, nil
-			}
-		}
+		err = multierror.Append(err, errM)
 	}
 
 	return nil, err

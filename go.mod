@@ -31,9 +31,10 @@ require (
 	github.com/ohler55/ojg v1.17.5 // indirect
 )
 
+require github.com/hashicorp/go-multierror v1.1.1
+
 require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 )
 
