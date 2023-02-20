@@ -39,19 +39,24 @@ type MixedSourceQueryBuilder struct {
 	queryMap          map[string]map[string]interface{}
 	bottomUp          bool
 	singleLineResults bool
+	newEngine         bool
 
-	aurClient rpc.ClientInterface
+	aurClient aur.QueryClient
+	rpcClient rpc.ClientInterface
 }
 
 func NewMixedSourceQueryBuilder(
-	aurClient rpc.ClientInterface,
+	rpcClient rpc.ClientInterface,
+	aurClient aur.QueryClient,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
 	bottomUp,
 	singleLineResults bool,
+	newEngine bool,
 ) *MixedSourceQueryBuilder {
 	return &MixedSourceQueryBuilder{
+		rpcClient:         rpcClient,
 		aurClient:         aurClient,
 		bottomUp:          bottomUp,
 		sortBy:            sortBy,
@@ -60,6 +65,7 @@ func NewMixedSourceQueryBuilder(
 		singleLineResults: singleLineResults,
 		queryMap:          map[string]map[string]interface{}{},
 		results:           make([]abstractResult, 0, 100),
+		newEngine:         newEngine,
 	}
 }
 
@@ -146,7 +152,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 
 	if s.targetMode.AtLeastAUR() {
 		var aurResults aurQuery
-		aurResults, aurErr = queryAUR(ctx, s.aurClient, nil, pkgS, s.searchBy, false)
+		aurResults, aurErr = queryAUR(ctx, s.rpcClient, s.aurClient, pkgS, s.searchBy, false)
 		dbName := sourceAUR
 
 		for i := range aurResults {
