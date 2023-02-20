@@ -3,7 +3,6 @@ package dep
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"strconv"
 
@@ -98,25 +97,26 @@ type Grapher struct {
 	aurCache    aurc.QueryClient
 	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
 	noConfirm   bool
-	noDeps      bool      // If true, the graph will not include dependencies
-	noCheckDeps bool      // If true, the graph will not include dependencies
-	w           io.Writer // output writer
+	noDeps      bool // If true, the graph will not include dependencies
+	noCheckDeps bool // If true, the graph will not include dependencies
 
-	providerCache map[string]*aur.Pkg
+	logger        *text.Logger
+	providerCache map[string][]aur.Pkg
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
-	fullGraph, noConfirm bool, output io.Writer, noDeps bool, noCheckDeps bool,
+	fullGraph, noConfirm bool, noDeps bool, noCheckDeps bool,
+	logger *text.Logger,
 ) *Grapher {
 	return &Grapher{
 		dbExecutor:    dbExecutor,
 		aurCache:      aurCache,
 		fullGraph:     fullGraph,
 		noConfirm:     noConfirm,
-		w:             output,
 		noDeps:        noDeps,
 		noCheckDeps:   noCheckDeps,
-		providerCache: make(map[string]*aurc.Pkg, 5),
+		providerCache: make(map[string][]aurc.Pkg, 5),
+		logger:        logger,
 	}
 }
 
@@ -344,7 +344,7 @@ func (g *Grapher) GraphFromAURCache(ctx context.Context,
 			continue
 		}
 
-		pkg := provideMenu(g.w, target, aurPkgs, g.noConfirm)
+		pkg := g.provideMenu(target, aurPkgs)
 
 		graph = g.GraphAURTarget(ctx, graph, pkg, &InstallInfo{
 			AURBase: &pkg.PackageBase,
@@ -438,7 +438,7 @@ func (g *Grapher) addNodes(
 
 		var aurPkgs []aur.Pkg
 		if cachedProvidePkg, ok := g.providerCache[depName]; ok {
-			aurPkgs = []aur.Pkg{*cachedProvidePkg}
+			aurPkgs = cachedProvidePkg
 		} else {
 			var errMeta error
 			aurPkgs, errMeta = g.aurCache.Get(ctx,
@@ -455,9 +455,9 @@ func (g *Grapher) addNodes(
 		if len(aurPkgs) != 0 { // Check AUR
 			pkg := aurPkgs[0]
 			if len(aurPkgs) > 1 {
-				chosen := provideMenu(g.w, depName, aurPkgs, g.noConfirm)
-				g.providerCache[depName] = chosen
+				chosen := g.provideMenu(depName, aurPkgs)
 				pkg = *chosen
+				g.providerCache[depName] = []aurc.Pkg{pkg}
 			}
 
 			if err := graph.DependOn(pkg.Name, parentPkgName); err != nil {
@@ -495,7 +495,7 @@ func (g *Grapher) addNodes(
 	}
 }
 
-func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *aur.Pkg {
+func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 	size := len(options)
 	if size == 1 {
 		return &options[0]
@@ -505,7 +505,7 @@ func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *au
 	str += "\n"
 
 	size = 1
-	str += text.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
+	str += g.logger.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
 
 	for i := range options {
 		str += fmt.Sprintf("%d) %s ", size, options[i].Name)
@@ -515,17 +515,17 @@ func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *au
 	text.OperationInfoln(str)
 
 	for {
-		fmt.Fprintln(w, gotext.Get("\nEnter a number (default=1): "))
+		g.logger.Println(gotext.Get("\nEnter a number (default=1): "))
 
-		if noConfirm {
-			fmt.Fprintln(w, "1")
+		if g.noConfirm {
+			g.logger.Println("1")
 
 			return &options[0]
 		}
 
-		numberBuf, err := text.GetInput(os.Stdin, "", false)
+		numberBuf, err := g.logger.GetInput("", false)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			g.logger.Errorln(err)
 
 			break
 		}
@@ -536,13 +536,14 @@ func provideMenu(w io.Writer, dep string, options []aur.Pkg, noConfirm bool) *au
 
 		num, err := strconv.Atoi(numberBuf)
 		if err != nil {
-			text.Errorln(gotext.Get("invalid number: %s", numberBuf))
+			g.logger.Errorln(gotext.Get("invalid number: %s", numberBuf))
 
 			continue
 		}
 
 		if num < 1 || num >= size {
-			text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size-1))
+			g.logger.Errorln(gotext.Get("invalid value: %d is not between %d and %d",
+				num, 1, size-1))
 
 			continue
 		}

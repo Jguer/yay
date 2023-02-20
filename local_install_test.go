@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 )
 
@@ -137,6 +139,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 	config := &settings.Configuration{
 		RemoveMake: "no",
 		Runtime: &settings.Runtime{
+			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -255,6 +258,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 
 	config := &settings.Configuration{
 		Runtime: &settings.Runtime{
+			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{

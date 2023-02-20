@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -35,7 +34,9 @@ func installLocalPKGBUILD(
 		return errors.New(gotext.Get("no target directories specified"))
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm, os.Stdout, cmdArgs.ExistsDouble("d", "nodeps"), noCheck)
+	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
+		cmdArgs.ExistsDouble("d", "nodeps"), noCheck,
+		config.Runtime.Logger.Child("grapher"))
 	graph := topo.New[string, *dep.InstallInfo]()
 	for _, target := range cmdArgs.Targets {
 		var errG error
