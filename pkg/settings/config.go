@@ -16,11 +16,10 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 
-	"github.com/Jguer/aur"
 	"github.com/Jguer/aur/metadata"
+	"github.com/Jguer/aur/rpc"
 	"github.com/Jguer/votar/pkg/vote"
 	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
 )
 
 // HideMenus indicates if pacman's provider menus must be hidden.
@@ -79,6 +78,7 @@ type Configuration struct {
 	SeparateSources        bool     `json:"separatesources"`
 	NewInstallEngine       bool     `json:"newinstallengine"`
 	Debug                  bool     `json:"debug"`
+	UseRPC                 bool     `json:"rpc"`
 }
 
 // SaveConfig writes yay config to file.
@@ -238,6 +238,7 @@ func DefaultConfig(version string) *Configuration {
 		NewInstallEngine:       false,
 		Version:                version,
 		Debug:                  false,
+		UseRPC:                 false,
 	}
 }
 
@@ -310,19 +311,23 @@ func NewConfig(version string) (*Configuration, error) {
 		metadata.WithCacheFilePath(filepath.Join(newConfig.BuildDir, "aur.json")),
 		metadata.WithRequestEditorFn(userAgentFn),
 		metadata.WithBaseURL(newConfig.AURURL),
-		metadata.WithDebugLogger(text.Debugln),
+		metadata.WithDebugLogger(newConfig.Runtime.Logger.Child("aur").Debugln),
 	)
 	if errAURCache != nil {
-		return nil, errors.Wrap(errAURCache, gotext.Get("failed to retrieve aur Cache"))
+		return nil, fmt.Errorf(gotext.Get("failed to retrieve aur Cache")+": %w", errAURCache)
 	}
 
 	var errAUR error
-	newConfig.Runtime.AURClient, errAUR = aur.NewClient(
-		aur.WithHTTPClient(newConfig.Runtime.HTTPClient),
-		aur.WithRequestEditorFn(userAgentFn))
-
+	newConfig.Runtime.AURClient, errAUR = rpc.NewClient(
+		rpc.WithHTTPClient(newConfig.Runtime.HTTPClient),
+		rpc.WithRequestEditorFn(userAgentFn),
+		rpc.WithLogFn(newConfig.Runtime.Logger.Child("rpc").Debugln))
 	if errAUR != nil {
 		return nil, errAUR
+	}
+
+	if newConfig.UseRPC {
+		newConfig.Runtime.AURCache = newConfig.Runtime.AURClient
 	}
 
 	newConfig.Runtime.VCSStore = vcs.NewInfoStore(

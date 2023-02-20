@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Jguer/aur"
+	"github.com/Jguer/aur/rpc"
 	"github.com/Jguer/votar/pkg/vote"
 	"github.com/leonelquinteros/gotext"
 
@@ -22,7 +22,7 @@ func (e *ErrAURVote) Error() string {
 }
 
 func handlePackageVote(ctx context.Context,
-	targets []string, aurClient aur.ClientInterface,
+	targets []string, aurClient rpc.ClientInterface,
 	voteClient *vote.Client, splitN int, upvote bool,
 ) error {
 	infos, err := query.AURInfoPrint(ctx, aurClient, targets, splitN)

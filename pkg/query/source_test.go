@@ -8,11 +8,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Jguer/aur/rpc"
+
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/db/mock"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 
-	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -105,7 +106,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			client, err := aur.NewClient(aur.WithHTTPClient(&mockDoer{}))
+			client, err := rpc.NewClient(rpc.WithHTTPClient(&mockDoer{}))
 			require.NoError(t, err)
 
 			queryBuilder := NewSourceQueryBuilder(client, nil, "votes", parser.ModeAny, "", tc.bottomUp, false, false)

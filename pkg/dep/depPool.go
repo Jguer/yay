@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/Jguer/aur"
+	"github.com/Jguer/aur/rpc"
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 
@@ -29,10 +30,10 @@ type Pool struct {
 	Groups       []string
 	AlpmExecutor db.Executor
 	Warnings     *query.AURWarnings
-	aurClient    aur.ClientInterface
+	aurClient    rpc.ClientInterface
 }
 
-func newPool(dbExecutor db.Executor, aurClient aur.ClientInterface) *Pool {
+func newPool(dbExecutor db.Executor, aurClient rpc.ClientInterface) *Pool {
 	dp := &Pool{
 		Targets:      []Target{},
 		Explicit:     map[string]struct{}{},
@@ -348,7 +349,7 @@ func (dp *Pool) ResolveRepoDependency(pkg db.IPackage, noDeps bool) {
 func GetPool(ctx context.Context, pkgs []string,
 	warnings *query.AURWarnings,
 	dbExecutor db.Executor,
-	aurClient aur.ClientInterface,
+	aurClient rpc.ClientInterface,
 	mode parser.TargetMode,
 	ignoreProviders, noConfirm, provides bool,
 	rebuild string, splitN int, noDeps bool, noCheckDeps bool, assumeInstalled []string,

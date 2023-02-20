@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Jguer/aur"
+	"github.com/Jguer/aur/rpc"
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/adrg/strutil"
 	"github.com/adrg/strutil/metrics"
@@ -39,11 +40,11 @@ type MixedSourceQueryBuilder struct {
 	bottomUp          bool
 	singleLineResults bool
 
-	aurClient aur.ClientInterface
+	aurClient rpc.ClientInterface
 }
 
 func NewMixedSourceQueryBuilder(
-	aurClient aur.ClientInterface,
+	aurClient rpc.ClientInterface,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
