@@ -66,7 +66,7 @@ func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbE
 		arguments.AddTarget(repoS...)
 
 		err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+			arguments, config.Runtime.Mode, settings.NoConfirm))
 		if err != nil {
 			return err
 		}

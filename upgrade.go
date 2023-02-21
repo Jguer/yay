@@ -86,7 +86,7 @@ func upList(ctx context.Context,
 			wg.Add(1)
 
 			go func() {
-				aurUp = upgrade.UpAUR(remote, aurdata, config.TimeUpdate)
+				aurUp = upgrade.UpAUR(remote, aurdata, config.TimeUpdate, enableDowngrade)
 
 				wg.Done()
 			}()
