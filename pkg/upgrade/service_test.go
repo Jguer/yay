@@ -27,7 +27,6 @@ func ptrString(s string) *string {
 }
 
 func TestUpgradeService_GraphUpgrades(t *testing.T) {
-	t.Parallel()
 	linuxDepInfo := &dep.InstallInfo{
 		Reason:       dep.Explicit,
 		Source:       dep.Sync,
