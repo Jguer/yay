@@ -60,7 +60,7 @@ func printIgnoringPackage(pkg db.IPackage, newPkgVersion string) {
 
 // UpAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func UpAUR(remote map[string]db.IPackage, aurdata map[string]*query.Pkg, timeUpdate bool) UpSlice {
+func UpAUR(remote map[string]db.IPackage, aurdata map[string]*query.Pkg, timeUpdate, enableDowngrade bool) UpSlice {
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"aur"}}
 
 	for name, pkg := range remote {
@@ -70,7 +70,7 @@ func UpAUR(remote map[string]db.IPackage, aurdata map[string]*query.Pkg, timeUpd
 		}
 
 		if (timeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
-			(db.VerCmp(pkg.Version(), aurPkg.Version) < 0) {
+			(db.VerCmp(pkg.Version(), aurPkg.Version) < 0) || enableDowngrade {
 			if pkg.ShouldIgnore() {
 				printIgnoringPackage(pkg, aurPkg.Version)
 			} else {
