@@ -7,7 +7,6 @@ import (
 )
 
 func TestGetVersionDiff(t *testing.T) {
-	t.Parallel()
 	text.UseColor = true
 
 	type versionPair struct {
