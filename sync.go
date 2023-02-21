@@ -104,7 +104,9 @@ func (o *OperationService) Run(ctx context.Context,
 		return nil
 	}
 	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
-	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode)
+	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder,
+		o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode,
+		cmdArgs.ExistsArg("w", "downloadonly"))
 
 	pkgBuildDirs, errInstall := preparer.Run(ctx, os.Stdout, targets)
 	if errInstall != nil {
@@ -156,8 +158,10 @@ func (o *OperationService) Run(ctx context.Context,
 		multiErr.Add(err)
 	}
 
-	if err := srcInfo.UpdateVCSStore(ctx, targets, installer.failedAndIgnored); err != nil {
-		text.Warnln(err)
+	if !cmdArgs.ExistsArg("w", "downloadonly") {
+		if err := srcInfo.UpdateVCSStore(ctx, targets, installer.failedAndIgnored); err != nil {
+			text.Warnln(err)
+		}
 	}
 
 	if err := installer.RunPostInstallHooks(ctx); err != nil {

@@ -27,10 +27,14 @@ type (
 		exeCmd           exe.ICmdBuilder
 		vcsStore         vcs.Store
 		targetMode       parser.TargetMode
+		downloadOnly     bool
 	}
 )
 
-func NewInstaller(dbExecutor db.Executor, exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode) *Installer {
+func NewInstaller(dbExecutor db.Executor,
+	exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode,
+	downloadOnly bool,
+) *Installer {
 	return &Installer{
 		dbExecutor:       dbExecutor,
 		postInstallHooks: []PostInstallHookFunc{},
@@ -38,6 +42,7 @@ func NewInstaller(dbExecutor db.Executor, exeCmd exe.ICmdBuilder, vcsStore vcs.S
 		exeCmd:           exeCmd,
 		vcsStore:         vcsStore,
 		targetMode:       targetMode,
+		downloadOnly:     downloadOnly,
 	}
 }
 
@@ -229,7 +234,7 @@ func (installer *Installer) buildPkg(ctx context.Context,
 	}
 
 	switch {
-	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion):
+	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion) || installer.downloadOnly:
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
 		pkgdests = map[string]string{}
 		text.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
@@ -248,6 +253,10 @@ func (installer *Installer) buildPkg(ctx context.Context,
 			dir, args...))
 	if errMake != nil {
 		return nil, errMake
+	}
+
+	if installer.downloadOnly {
+		return map[string]string{}, nil
 	}
 
 	return pkgdests, nil
