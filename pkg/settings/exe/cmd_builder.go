@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
@@ -19,6 +20,11 @@ import (
 )
 
 const SudoLoopDuration = 241
+
+var gitDenyList = mapset.NewThreadUnsafeSet(
+	"GIT_WORK_TREE",
+	"GIT_DIR",
+)
 
 type GitCmdBuilder interface {
 	Runner
@@ -68,6 +74,21 @@ func (c *CmdBuilder) BuildGPGCmd(ctx context.Context, extraArgs ...string) *exec
 	return cmd
 }
 
+func gitFilteredEnv() []string {
+	var env []string
+
+	for _, envVar := range os.Environ() {
+		envKey := strings.SplitN(envVar, "=", 2)[0]
+		if !gitDenyList.Contains(envKey) {
+			env = append(env, envVar)
+		}
+	}
+
+	env = append(env, "GIT_TERMINAL_PROMPT=0")
+
+	return env
+}
+
 func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
 	args := make([]string, len(c.GitFlags), len(c.GitFlags)+len(extraArgs))
 	copy(args, c.GitFlags)
@@ -82,7 +103,7 @@ func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...s
 
 	cmd := exec.CommandContext(ctx, c.GitBin, args...)
 
-	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	cmd.Env = gitFilteredEnv()
 
 	cmd = c.deElevateCommand(ctx, cmd)
 
