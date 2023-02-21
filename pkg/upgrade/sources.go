@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"context"
+	"time"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -20,8 +21,10 @@ func UpDevel(
 	toRemove := make([]string, 0)
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"devel"}}
 
+	ctxTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	for pkgName, pkg := range remote {
-		if localCache.ToUpgrade(ctx, pkgName) {
+		if localCache.ToUpgrade(ctxTimeout, pkgName) {
 			if _, ok := aurdata[pkgName]; !ok {
 				text.Warnln(gotext.Get("ignoring package devel upgrade (no AUR info found):"), pkgName)
 				continue
