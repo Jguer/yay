@@ -169,13 +169,9 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 // filter AUR results to remove strings that don't contain all of the search terms.
 func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 	aurPkgs := make([]aur.Pkg, 0, len(results))
-	IsSymbol := func(r rune) bool {
-		return unicode.IsSymbol(r)
-	}
-
 	matchesSearchTerms := func(pkg *aur.Pkg, terms []string) bool {
 		for _, pkgN := range terms {
-			if strings.IndexFunc(pkgN, IsSymbol) != -1 {
+			if strings.IndexFunc(pkgN, unicode.IsSymbol) != -1 {
 				return true
 			}
 			name := strings.ToLower(pkg.Name)
