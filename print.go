@@ -130,6 +130,10 @@ func printUpdateList(ctx context.Context, cmdArgs *parser.Arguments,
 		return err
 	}
 
+	if (len(aurUp.Up) + len(repoUp.Up)) == 0 {
+		return fmt.Errorf("")
+	}
+
 	noTargets := len(targets) == 0
 
 	if !cmdArgs.ExistsArg("m", "foreign") {
