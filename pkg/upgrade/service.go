@@ -74,7 +74,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 				aurdata[pkg.Name] = pkg
 			}
 
-			aurUp = UpAUR(remote, aurdata, u.cfg.TimeUpdate)
+			aurUp = UpAUR(remote, aurdata, u.cfg.TimeUpdate, enableDowngrade)
 		}
 
 		if u.cfg.Devel {

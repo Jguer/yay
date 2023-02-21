@@ -71,7 +71,7 @@ func Test_upAUR(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := UpAUR(tt.args.remote, tt.args.aurdata, tt.args.timeUpdate)
+			got := UpAUR(tt.args.remote, tt.args.aurdata, tt.args.timeUpdate, false)
 			assert.EqualValues(t, tt.want, got)
 		})
 	}
