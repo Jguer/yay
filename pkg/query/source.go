@@ -5,6 +5,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
@@ -168,9 +169,11 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 // filter AUR results to remove strings that don't contain all of the search terms.
 func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 	aurPkgs := make([]aur.Pkg, 0, len(results))
-
 	matchesSearchTerms := func(pkg *aur.Pkg, terms []string) bool {
 		for _, pkgN := range terms {
+			if strings.IndexFunc(pkgN, unicode.IsSymbol) != -1 {
+				return true
+			}
 			name := strings.ToLower(pkg.Name)
 			desc := strings.ToLower(pkg.Description)
 			targ := strings.ToLower(pkgN)
