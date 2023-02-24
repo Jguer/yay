@@ -40,13 +40,14 @@ Before you begin, make sure you have the `base-devel` package group installed.
 pacman -S --needed git base-devel
 git clone https://aur.archlinux.org/yay.git
 cd yay
-makepkg -si
+make
+sudo make install
 ```
 
 If you want to do all of this at once, we can chain the commands like so:
 
 ```sh
-pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && make && sudo make install
 ```
 
 ### Binary
