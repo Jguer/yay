@@ -466,6 +466,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 
 	srcinfo, err := os.ReadFile("testdata/jfin/.SRCINFO")
 	require.NoError(t, err)
+	assert.True(t, strings.HasPrefix(string(srcinfo), "pkgbase = jellyfin"), string(srcinfo))
 
 	targetDir := t.TempDir()
 	f, err = os.OpenFile(filepath.Join(targetDir, "PKGBUILD"), os.O_RDONLY|os.O_CREATE, 0o755)
@@ -502,9 +503,10 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 	}
 
 	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
-		fmt.Println(cmd.Args)
-		if cmd.Args[1] == "--printsrcinfo" {
-			return string(srcinfo), "", nil
+		for _, arg := range cmd.Args {
+			if arg == "--printsrcinfo" {
+				return string(srcinfo), "", nil
+			}
 		}
 		return strings.Join(tars, "\n"), "", nil
 	}
@@ -575,6 +577,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 
 	config := &settings.Configuration{
 		RemoveMake: "no",
+		Debug:      false,
 		Runtime: &settings.Runtime{
 			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
 			CmdBuilder: cmdBuilder,

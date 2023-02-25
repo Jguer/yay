@@ -30,21 +30,23 @@ var (
 func srcinfoExists(ctx context.Context,
 	cmdBuilder exe.ICmdBuilder, targetDir string,
 ) error {
-	if _, err := os.Stat(filepath.Join(targetDir, ".SRCINFO")); err == nil {
-		if _, err := os.Stat(filepath.Join(targetDir, "PKGBUILD")); err == nil {
+	srcInfoDir := filepath.Join(targetDir, ".SRCINFO")
+	pkgbuildDir := filepath.Join(targetDir, "PKGBUILD")
+	if _, err := os.Stat(srcInfoDir); err == nil {
+		if _, err := os.Stat(pkgbuildDir); err == nil {
 			return nil
 		}
 	}
 
-	if _, err := os.Stat(filepath.Join(targetDir, "PKGBUILD")); err == nil {
+	if _, err := os.Stat(pkgbuildDir); err == nil {
 		// run makepkg to generate .SRCINFO
 		srcinfo, stderr, err := cmdBuilder.Capture(cmdBuilder.BuildMakepkgCmd(ctx, targetDir, "--printsrcinfo"))
 		if err != nil {
-			return fmt.Errorf("unable to generate SRCINFO: %w - %s", err, stderr)
+			return fmt.Errorf("unable to generate .SRCINFO: %w - %s", err, stderr)
 		}
 
-		if err := os.WriteFile(filepath.Join(targetDir, ".SRCINFO"), []byte(srcinfo), 0o600); err != nil {
-			return fmt.Errorf("unable to write SRCINFO: %w", err)
+		if err := os.WriteFile(srcInfoDir, []byte(srcinfo), 0o600); err != nil {
+			return fmt.Errorf("unable to write .SRCINFO: %w", err)
 		}
 
 		return nil
@@ -70,18 +72,18 @@ func installLocalPKGBUILD(
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		config.Runtime.Logger.Child("grapher"))
 	graph := topo.New[string, *dep.InstallInfo]()
-	for _, target := range cmdArgs.Targets {
-		if err := srcinfoExists(ctx, config.Runtime.CmdBuilder, target); err != nil {
+	for _, targetDir := range cmdArgs.Targets {
+		if err := srcinfoExists(ctx, config.Runtime.CmdBuilder, targetDir); err != nil {
 			return err
 		}
 
-		pkgbuild, err := gosrc.ParseFile(filepath.Join(target, ".SRCINFO"))
+		pkgbuild, err := gosrc.ParseFile(filepath.Join(targetDir, ".SRCINFO"))
 		if err != nil {
 			return errors.Wrap(err, gotext.Get("failed to parse .SRCINFO"))
 		}
 
 		var errG error
-		graph, errG = grapher.GraphFromSrcInfo(ctx, graph, target, pkgbuild)
+		graph, errG = grapher.GraphFromSrcInfo(ctx, graph, targetDir, pkgbuild)
 		if errG != nil {
 			return errG
 		}
