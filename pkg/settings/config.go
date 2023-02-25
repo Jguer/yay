@@ -239,6 +239,9 @@ func DefaultConfig(version string) *Configuration {
 		Version:                version,
 		Debug:                  false,
 		UseRPC:                 true,
+		Runtime: &Runtime{
+			Logger: text.GlobalLogger,
+		},
 	}
 }
 

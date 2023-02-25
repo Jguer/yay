@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/text"
 
 	"github.com/leonelquinteros/gotext"
 )
@@ -51,7 +50,7 @@ func (c *Configuration) RunMigrations(migrations []configMigration, configPath s
 	for _, migration := range migrations {
 		if db.VerCmp(migration.TargetVersion(), c.Version) > 0 {
 			if migration.Do(c) {
-				text.Infoln("Config migration executed (",
+				c.Runtime.Logger.Infoln("Config migration executed (",
 					migration.TargetVersion(), "):", migration)
 
 				saveConfig = true
