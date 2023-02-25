@@ -239,6 +239,9 @@ func DefaultConfig(version string) *Configuration {
 		Version:                version,
 		Debug:                  false,
 		UseRPC:                 true,
+		Runtime: &Runtime{
+			Logger: text.GlobalLogger,
+		},
 	}
 }
 
@@ -331,7 +334,8 @@ func NewConfig(version string) (*Configuration, error) {
 	}
 
 	newConfig.Runtime.VCSStore = vcs.NewInfoStore(
-		filepath.Join(cacheHome, vcsFileName), newConfig.Runtime.CmdBuilder)
+		filepath.Join(cacheHome, vcsFileName), newConfig.Runtime.CmdBuilder,
+		newConfig.Runtime.Logger.Child("vcs"))
 
 	err := newConfig.Runtime.VCSStore.Load()
 

@@ -96,12 +96,13 @@ func main() {
 	if config.SeparateSources {
 		config.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
 			config.Runtime.AURClient, config.Runtime.AURCache,
-			config.SortBy,
+			config.Runtime.Logger.Child("querybuilder"), config.SortBy,
 			config.Runtime.Mode, config.SearchBy, config.BottomUp,
 			config.SingleLineResults, config.NewInstallEngine)
 	} else {
 		config.Runtime.QueryBuilder = query.NewMixedSourceQueryBuilder(
-			config.Runtime.AURClient, config.Runtime.AURCache, config.SortBy,
+			config.Runtime.AURClient, config.Runtime.AURCache,
+			config.Runtime.Logger.Child("mixed.querybuilder"), config.SortBy,
 			config.Runtime.Mode, config.SearchBy,
 			config.BottomUp, config.SingleLineResults, config.NewInstallEngine)
 	}

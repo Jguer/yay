@@ -2,11 +2,15 @@ package settings
 
 import (
 	"encoding/json"
+	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 func TestMigrationNothingToDo(t *testing.T) {
@@ -21,7 +25,10 @@ func TestMigrationNothingToDo(t *testing.T) {
 	config := Configuration{
 		Version: "99.0.0",
 		// Create runtime with runtimeVersion
-		Runtime: &Runtime{Version: "20.0.0"},
+		Runtime: &Runtime{
+			Version: "20.0.0",
+			Logger:  text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+		},
 	}
 
 	// Run Migration
@@ -42,7 +49,12 @@ func TestMigrationNothingToDo(t *testing.T) {
 
 func TestProvidesMigrationDo(t *testing.T) {
 	migration := &configProviderMigration{}
-	config := Configuration{Provides: true}
+	config := Configuration{
+		Provides: true,
+		Runtime: &Runtime{
+			Logger: text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+		},
+	}
 
 	assert.True(t, migration.Do(&config))
 
@@ -120,7 +132,10 @@ func TestProvidesMigration(t *testing.T) {
 				Version:  tc.testConfig.Version,
 				Provides: tc.testConfig.Provides,
 				// Create runtime with runtimeVersion
-				Runtime: &Runtime{Version: tc.testConfig.Runtime.Version},
+				Runtime: &Runtime{
+					Logger:  text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+					Version: tc.testConfig.Runtime.Version,
+				},
 			}
 
 			// Run Migration
