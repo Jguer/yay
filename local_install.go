@@ -4,6 +4,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -11,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/multierror"
 	"github.com/Jguer/yay/v11/pkg/settings"
+	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/topo"
 
@@ -19,7 +22,38 @@ import (
 	"github.com/pkg/errors"
 )
 
-var ErrInstallRepoPkgs = errors.New(gotext.Get("error installing repo packages"))
+var (
+	ErrInstallRepoPkgs = errors.New(gotext.Get("error installing repo packages"))
+	ErrNoBuildFiles    = errors.New(gotext.Get("cannot find PKGBUILD and .SRCINFO in directory"))
+)
+
+func srcinfoExists(ctx context.Context,
+	cmdBuilder exe.ICmdBuilder, targetDir string,
+) error {
+	srcInfoDir := filepath.Join(targetDir, ".SRCINFO")
+	pkgbuildDir := filepath.Join(targetDir, "PKGBUILD")
+	if _, err := os.Stat(srcInfoDir); err == nil {
+		if _, err := os.Stat(pkgbuildDir); err == nil {
+			return nil
+		}
+	}
+
+	if _, err := os.Stat(pkgbuildDir); err == nil {
+		// run makepkg to generate .SRCINFO
+		srcinfo, stderr, err := cmdBuilder.Capture(cmdBuilder.BuildMakepkgCmd(ctx, targetDir, "--printsrcinfo"))
+		if err != nil {
+			return fmt.Errorf("unable to generate .SRCINFO: %w - %s", err, stderr)
+		}
+
+		if err := os.WriteFile(srcInfoDir, []byte(srcinfo), 0o600); err != nil {
+			return fmt.Errorf("unable to write .SRCINFO: %w", err)
+		}
+
+		return nil
+	}
+
+	return fmt.Errorf("%w: %s", ErrNoBuildFiles, targetDir)
+}
 
 func installLocalPKGBUILD(
 	ctx context.Context,
@@ -38,17 +72,20 @@ func installLocalPKGBUILD(
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		config.Runtime.Logger.Child("grapher"))
 	graph := topo.New[string, *dep.InstallInfo]()
-	for _, target := range cmdArgs.Targets {
-		var errG error
+	for _, targetDir := range cmdArgs.Targets {
+		if err := srcinfoExists(ctx, config.Runtime.CmdBuilder, targetDir); err != nil {
+			return err
+		}
 
-		pkgbuild, err := gosrc.ParseFile(filepath.Join(target, ".SRCINFO"))
+		pkgbuild, err := gosrc.ParseFile(filepath.Join(targetDir, ".SRCINFO"))
 		if err != nil {
 			return errors.Wrap(err, gotext.Get("failed to parse .SRCINFO"))
 		}
 
-		graph, errG = grapher.GraphFromSrcInfo(ctx, graph, target, pkgbuild)
+		var errG error
+		graph, errG = grapher.GraphFromSrcInfo(ctx, graph, targetDir, pkgbuild)
 		if errG != nil {
-			return err
+			return errG
 		}
 	}
 
@@ -56,7 +93,7 @@ func installLocalPKGBUILD(
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(name string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
-			multiErr.Add(errors.New(gotext.Get("could not find %s%s", name, ii.Version)))
+			multiErr.Add(fmt.Errorf("%w: %s %s", ErrPackagesNotFound, name, ii.Version))
 		}
 		return nil
 	})

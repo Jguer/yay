@@ -67,7 +67,7 @@ func main() {
 	}
 
 	if config.Debug {
-		text.DebugMode = true
+		text.GlobalLogger.Debug = true
 	}
 
 	if errS := config.RunMigrations(
