@@ -29,5 +29,5 @@ func (l *Logger) GetInput(defaultValue string, noConfirm bool) (string, error) {
 }
 
 func GetInput(r io.Reader, defaultValue string, noConfirm bool) (string, error) {
-	return globalLogger.GetInput(defaultValue, noConfirm)
+	return GlobalLogger.GetInput(defaultValue, noConfirm)
 }

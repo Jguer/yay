@@ -300,7 +300,7 @@ func (dp *Pool) CheckMissing(noDeps, noCheckDeps bool) error {
 		return nil
 	}
 
-	text.Errorln(gotext.Get("Could not find all required packages:"))
+	text.Errorln(gotext.Get("could not find all required packages:"))
 
 	for dep, trees := range missing.Missing {
 		for _, tree := range trees {

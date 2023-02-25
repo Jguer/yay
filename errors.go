@@ -1,6 +1,12 @@
 package main
 
-import "github.com/leonelquinteros/gotext"
+import (
+	"errors"
+
+	"github.com/leonelquinteros/gotext"
+)
+
+var ErrPackagesNotFound = errors.New(gotext.Get("could not find all required packages"))
 
 type NoPkgDestsFoundError struct {
 	dir string

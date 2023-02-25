@@ -20,56 +20,55 @@ const (
 
 var (
 	cachedColumnCount = -1
-	DebugMode         = false
-	globalLogger      = NewLogger(os.Stdout, os.Stdin, DebugMode, "global")
+	GlobalLogger      = NewLogger(os.Stdout, os.Stdin, false, "global")
 )
 
 func Debugln(a ...interface{}) {
-	globalLogger.Debugln(a...)
+	GlobalLogger.Debugln(a...)
 }
 
 func OperationInfoln(a ...interface{}) {
-	globalLogger.OperationInfoln(a...)
+	GlobalLogger.OperationInfoln(a...)
 }
 
 func OperationInfo(a ...interface{}) {
-	globalLogger.OperationInfo(a...)
+	GlobalLogger.OperationInfo(a...)
 }
 
 func SprintOperationInfo(a ...interface{}) string {
-	return globalLogger.SprintOperationInfo(a...)
+	return GlobalLogger.SprintOperationInfo(a...)
 }
 
 func Info(a ...interface{}) {
-	globalLogger.Info(a...)
+	GlobalLogger.Info(a...)
 }
 
 func Infoln(a ...interface{}) {
-	globalLogger.Infoln(a...)
+	GlobalLogger.Infoln(a...)
 }
 
 func SprintWarn(a ...interface{}) string {
-	return globalLogger.SprintWarn(a...)
+	return GlobalLogger.SprintWarn(a...)
 }
 
 func Warn(a ...interface{}) {
-	globalLogger.Warn(a...)
+	GlobalLogger.Warn(a...)
 }
 
 func Warnln(a ...interface{}) {
-	globalLogger.Warnln(a...)
+	GlobalLogger.Warnln(a...)
 }
 
 func SprintError(a ...interface{}) string {
-	return globalLogger.SprintError(a...)
+	return GlobalLogger.SprintError(a...)
 }
 
 func Error(a ...interface{}) {
-	globalLogger.Error(a...)
+	GlobalLogger.Error(a...)
 }
 
 func Errorln(a ...interface{}) {
-	globalLogger.Errorln(a...)
+	GlobalLogger.Errorln(a...)
 }
 
 func getColumnCount() int {

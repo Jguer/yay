@@ -170,7 +170,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 }
 
 func TestIntegrationLocalInstallMissingDep(t *testing.T) {
-	wantErr := "could not find dotnet-sdk<7"
+	wantErr := ErrPackagesNotFound
 	makepkgBin := t.TempDir() + "/makepkg"
 	pacmanBin := t.TempDir() + "/pacman"
 	gitBin := t.TempDir() + "/git"
@@ -271,8 +271,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 	}
 
 	err = handleCmd(context.Background(), config, cmdArgs, db)
-	require.Error(t, err)
-	require.EqualError(t, err, wantErr)
+	require.ErrorContains(t, err, wantErr.Error())
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))

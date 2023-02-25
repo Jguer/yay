@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -70,7 +69,7 @@ func syncInstall(ctx context.Context,
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
-			multiErr.Add(errors.New(gotext.Get("could not find %s%s", s, ii.Version)))
+			multiErr.Add(fmt.Errorf("%w: %s %s", ErrPackagesNotFound, s, ii.Version))
 		}
 		return nil
 	})
