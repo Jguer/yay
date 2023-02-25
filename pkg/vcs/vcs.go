@@ -41,6 +41,7 @@ type InfoStore struct {
 	FilePath         string
 	CmdBuilder       exe.GitCmdBuilder
 	mux              sync.Mutex
+	logger           *text.Logger
 }
 
 // OriginInfoByURL stores the OriginInfo of each origin URL provided.
@@ -62,12 +63,15 @@ type OriginInfo struct {
 	SHA       string   `json:"sha"`
 }
 
-func NewInfoStore(filePath string, cmdBuilder exe.GitCmdBuilder) *InfoStore {
+func NewInfoStore(filePath string, cmdBuilder exe.GitCmdBuilder,
+	logger *text.Logger,
+) *InfoStore {
 	infoStore := &InfoStore{
 		CmdBuilder:       cmdBuilder,
 		FilePath:         filePath,
 		OriginsByPackage: map[string]OriginInfoByURL{},
 		mux:              sync.Mutex{},
+		logger:           logger,
 	}
 
 	return infoStore
@@ -87,11 +91,11 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 		if err != nil {
 			exitError := &exec.ExitError{}
 			if ok := errors.As(err, &exitError); ok && exitError.ExitCode() == 128 {
-				text.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()))
+				v.logger.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()))
 				return ""
 			}
 
-			text.Warnln(err)
+			v.logger.Warnln(err)
 
 			return ""
 		}
@@ -135,7 +139,7 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.
 
 		v.OriginsByPackage[pkgName] = info
 
-		text.Warnln(gotext.Get("Found git repo: %s", text.Cyan(url)))
+		v.logger.Warnln(gotext.Get("Found git repo: %s", text.Cyan(url)))
 
 		if err := v.Save(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -320,7 +324,7 @@ func (v *InfoStore) CleanOrphans(pkgs map[string]alpm.IPackage) {
 
 	for pkgName := range v.OriginsByPackage {
 		if _, ok := pkgs[pkgName]; !ok {
-			text.Debugln("removing orphaned vcs package:", pkgName)
+			v.logger.Debugln("removing orphaned vcs package:", pkgName)
 			missing = append(missing, pkgName)
 		}
 	}

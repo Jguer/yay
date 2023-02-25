@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/text"
 )
 
 func TestParsing(t *testing.T) {
@@ -76,7 +79,8 @@ func TestNewInfoStore(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := NewInfoStore(tt.args.filePath, tt.args.cmdBuilder)
+			got := NewInfoStore(tt.args.filePath, tt.args.cmdBuilder,
+				text.NewLogger(io.Discard, strings.NewReader(""), true, "test"))
 			assert.NotNil(t, got)
 			assert.Equal(t, []string{"--a", "--b"}, got.CmdBuilder.(*exe.CmdBuilder).GitFlags)
 			assert.Equal(t, tt.args.cmdBuilder, got.CmdBuilder)
@@ -223,6 +227,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
+				logger:     text.GlobalLogger,
 				CmdBuilder: tt.fields.CmdBuilder,
 				OriginsByPackage: map[string]OriginInfoByURL{
 					"yay": tt.args.infos,
@@ -355,6 +360,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
+				logger:     text.GlobalLogger,
 				CmdBuilder: tt.fields.CmdBuilder,
 			}
 			got := v.needsUpdate(context.Background(), tt.args.infos)
@@ -404,6 +410,7 @@ func TestInfoStore_Update(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
+				logger:           text.GlobalLogger,
 				FilePath:         filePath,
 				CmdBuilder:       tt.fields.CmdBuilder,
 			}
@@ -467,6 +474,7 @@ func TestInfoStore_Remove(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
+				logger:           text.GlobalLogger,
 				FilePath:         filePath,
 			}
 			v.RemovePackages(tt.args.pkgs)
@@ -515,6 +523,7 @@ func TestInfoStore_CleanOrphans(t *testing.T) {
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
 				FilePath:         filePath,
+				logger:           text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
 			}
 			v.CleanOrphans(tt.args.pkgs)
 			assert.Len(t, tt.fields.OriginsByPackage, 3)
