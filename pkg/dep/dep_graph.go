@@ -345,7 +345,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 	aurPkgs, errCache := g.aurClient.Get(ctx, &aurc.Query{By: aurc.Name, Needles: targets})
 	if errCache != nil {
-		text.Errorln(errCache)
+		g.logger.Errorln(errCache)
 	}
 
 	for i := range aurPkgs {
@@ -424,7 +424,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 			By: aurc.Name, Needles: missingNeedles, Contains: false,
 		})
 		if errCache != nil {
-			text.Errorln(errCache)
+			g.logger.Errorln(errCache)
 		}
 
 		for i := range aurPkgs {

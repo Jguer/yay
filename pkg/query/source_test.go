@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/db/mock"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/stretchr/testify/assert"
@@ -109,7 +110,9 @@ func TestSourceQueryBuilder(t *testing.T) {
 			client, err := rpc.NewClient(rpc.WithHTTPClient(&mockDoer{}))
 			require.NoError(t, err)
 
-			queryBuilder := NewSourceQueryBuilder(client, nil, "votes", parser.ModeAny, "", tc.bottomUp, false, false)
+			queryBuilder := NewSourceQueryBuilder(client, client,
+				text.NewLogger(io.Discard, bytes.NewBufferString(""), false, "test"),
+				"votes", parser.ModeAny, "", tc.bottomUp, false, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 

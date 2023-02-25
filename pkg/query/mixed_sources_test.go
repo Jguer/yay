@@ -8,6 +8,7 @@ import (
 	"github.com/Jguer/aur/rpc"
 
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,7 +33,11 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			client, err := rpc.NewClient(rpc.WithHTTPClient(&mockDoer{}))
-			queryBuilder := NewMixedSourceQueryBuilder(client, client, "votes", parser.ModeAny, "", tc.bottomUp, false, false)
+
+			w := &strings.Builder{}
+			queryBuilder := NewMixedSourceQueryBuilder(client, client,
+				text.NewLogger(w, strings.NewReader(""), false, "test"),
+				"votes", parser.ModeAny, "", tc.bottomUp, false, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 
@@ -51,11 +56,10 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 				assert.Equal(t, "linux", queryBuilder.results[0].name)
 			}
 
-			w := &strings.Builder{}
 			queryBuilder.Results(w, mockStore, Detailed)
 
 			wString := w.String()
-			require.GreaterOrEqual(t, len(wString), 1)
+			require.GreaterOrEqual(t, len(wString), 1, wString)
 			assert.Equal(t, tc.want, wString)
 		})
 	}

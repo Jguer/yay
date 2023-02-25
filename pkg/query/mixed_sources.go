@@ -43,11 +43,13 @@ type MixedSourceQueryBuilder struct {
 
 	aurClient aur.QueryClient
 	rpcClient rpc.ClientInterface
+	logger    *text.Logger
 }
 
 func NewMixedSourceQueryBuilder(
 	rpcClient rpc.ClientInterface,
 	aurClient aur.QueryClient,
+	logger *text.Logger,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -58,6 +60,7 @@ func NewMixedSourceQueryBuilder(
 	return &MixedSourceQueryBuilder{
 		rpcClient:         rpcClient,
 		aurClient:         aurClient,
+		logger:            logger,
 		bottomUp:          bottomUp,
 		sortBy:            sortBy,
 		targetMode:        targetMode,
@@ -205,10 +208,10 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 	s.results = sortableResults.results
 
 	if aurErr != nil {
-		text.Errorln(ErrAURSearch{inner: aurErr})
+		s.logger.Errorln(ErrAURSearch{inner: aurErr})
 
 		if len(repoResults) != 0 {
-			text.Warnln(gotext.Get("Showing repo packages only"))
+			s.logger.Warnln(gotext.Get("Showing repo packages only"))
 		}
 	}
 }

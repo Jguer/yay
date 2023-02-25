@@ -43,11 +43,13 @@ type SourceQueryBuilder struct {
 
 	aurClient rpc.ClientInterface
 	aurCache  aur.QueryClient
+	logger    *text.Logger
 }
 
 func NewSourceQueryBuilder(
 	aurClient rpc.ClientInterface,
 	aurCache aur.QueryClient,
+	logger *text.Logger,
 	sortBy string,
 	targetMode parser.TargetMode,
 	searchBy string,
@@ -58,6 +60,7 @@ func NewSourceQueryBuilder(
 	return &SourceQueryBuilder{
 		aurClient:         aurClient,
 		aurCache:          aurCache,
+		logger:            logger,
 		repoQuery:         []alpm.IPackage{},
 		aurQuery:          []aur.Pkg{},
 		bottomUp:          bottomUp,
@@ -93,8 +96,8 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context,
 	}
 
 	if aurErr != nil && len(s.repoQuery) != 0 {
-		text.Errorln(ErrAURSearch{inner: aurErr})
-		text.Warnln(gotext.Get("Showing repo packages only"))
+		s.logger.Errorln(ErrAURSearch{inner: aurErr})
+		s.logger.Warnln(gotext.Get("Showing repo packages only"))
 	}
 }
 
