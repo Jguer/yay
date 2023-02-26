@@ -14,6 +14,7 @@ import (
 	"github.com/Jguer/yay/v11/pkg/menus"
 	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/text"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -70,7 +71,7 @@ func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostI
 	}
 }
 
-func (preper *Preparer) ShouldCleanMakeDeps() PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanMakeDeps(cmdArgs *parser.Arguments) PostInstallHookFunc {
 	if len(preper.makeDeps) == 0 {
 		return nil
 	}
@@ -89,7 +90,7 @@ func (preper *Preparer) ShouldCleanMakeDeps() PostInstallHookFunc {
 	text.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
 
 	return func(ctx context.Context) error {
-		return removeMake(ctx, preper.cfg.Runtime.CmdBuilder, preper.makeDeps)
+		return removeMake(ctx, preper.cfg.Runtime.CmdBuilder, preper.makeDeps, cmdArgs)
 	}
 }
 

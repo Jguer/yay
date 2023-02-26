@@ -112,7 +112,7 @@ func (o *OperationService) Run(ctx context.Context,
 		return errInstall
 	}
 
-	cleanFunc := preparer.ShouldCleanMakeDeps()
+	cleanFunc := preparer.ShouldCleanMakeDeps(cmdArgs)
 	if cleanFunc != nil {
 		installer.AddPostInstallHook(cleanFunc)
 	}

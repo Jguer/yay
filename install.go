@@ -224,7 +224,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		switch config.RemoveMake {
 		case "yes":
 			defer func() {
-				err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake())
+				err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake(), cmdArgs)
 			}()
 
 		case "no":
@@ -232,7 +232,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		default:
 			if text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
 				defer func() {
-					err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake())
+					err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake(), cmdArgs)
 				}()
 			}
 		}
@@ -383,8 +383,8 @@ func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor,
 	return requestTargets, nil
 }
 
-func removeMake(ctx context.Context, cmdBuilder exe.ICmdBuilder, makeDeps []string) error {
-	removeArguments := parser.MakeArguments()
+func removeMake(ctx context.Context, cmdBuilder exe.ICmdBuilder, makeDeps []string, cmdArgs *parser.Arguments) error {
+	removeArguments := cmdArgs.CopyGlobal()
 
 	err := removeArguments.AddArg("R", "u")
 	if err != nil {
