@@ -506,11 +506,12 @@ func (g *Grapher) addNodes(
 	targetsToFind := mapset.NewThreadUnsafeSet(deps...)
 	// Check if in graph already
 	for _, depString := range targetsToFind.ToSlice() {
-		if !graph.Exists(depString) {
+		depName, _, _ := splitDep(depString)
+		if !graph.Exists(depName) {
 			continue
 		}
 
-		if err := graph.DependOn(depString, parentPkgName); err != nil {
+		if err := graph.DependOn(depName, parentPkgName); err != nil {
 			g.logger.Warnln(depString, parentPkgName, err)
 		}
 
