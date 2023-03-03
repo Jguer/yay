@@ -488,8 +488,8 @@ func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo]
 ) {
 	info := graph.GetNodeInfo(node)
 	if info != nil && info.Value != nil {
-		if info.Value.Reason < nodeInfo.Value.Reason {
-			return // refuse to downgrade reason from explicit to dep
+		if info.Value.Reason <= nodeInfo.Value.Reason {
+			return // refuse to downgrade reason
 		}
 	}
 

@@ -77,6 +77,7 @@ func syncInstall(ctx context.Context,
 	if err := multiErr.Return(); err != nil {
 		return err
 	}
+
 	return opService.Run(ctx, cmdArgs, targets)
 }
 
