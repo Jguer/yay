@@ -28,12 +28,13 @@ type (
 		vcsStore         vcs.Store
 		targetMode       parser.TargetMode
 		downloadOnly     bool
+		log              *text.Logger
 	}
 )
 
 func NewInstaller(dbExecutor db.Executor,
 	exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode,
-	downloadOnly bool,
+	downloadOnly bool, logger *text.Logger,
 ) *Installer {
 	return &Installer{
 		dbExecutor:       dbExecutor,
@@ -43,6 +44,7 @@ func NewInstaller(dbExecutor db.Executor,
 		vcsStore:         vcsStore,
 		targetMode:       targetMode,
 		downloadOnly:     downloadOnly,
+		log:              logger,
 	}
 }
 
@@ -82,15 +84,36 @@ func (installer *Installer) Install(ctx context.Context,
 	pkgBuildDirs map[string]string,
 ) error {
 	// Reorganize targets into layers of dependencies
+	var errMulti multierror.MultiError
 	for i := len(targets) - 1; i >= 0; i-- {
-		err := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, i == 0)
-		if err != nil {
-			// rollback
-			return err
+		lastLayer := i == 0
+		errI := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, lastLayer)
+		if errI == nil && lastLayer {
+			// success after rollups
+			return nil
+		}
+
+		if errI != nil {
+			errMulti.Add(errI)
+			if lastLayer {
+				break
+			}
+
+			// rollup
+			installer.log.Warnln(gotext.Get("Failed to install layer, rolling up to next layer."), "error:", errI)
+			targets[i-1] = mergeLayers(targets[i-1], targets[i])
 		}
 	}
 
-	return nil
+	return errMulti.Return()
+}
+
+func mergeLayers(layer1, layer2 map[string]*dep.InstallInfo) map[string]*dep.InstallInfo {
+	for name, info := range layer2 {
+		layer1[name] = info
+	}
+
+	return layer1
 }
 
 func (installer *Installer) handleLayer(ctx context.Context,

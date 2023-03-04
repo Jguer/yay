@@ -106,7 +106,7 @@ func (o *OperationService) Run(ctx context.Context,
 	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
 	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder,
 		o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode,
-		cmdArgs.ExistsArg("w", "downloadonly"))
+		cmdArgs.ExistsArg("w", "downloadonly"), o.cfg.Runtime.Logger.Child("installer"))
 
 	pkgBuildDirs, errInstall := preparer.Run(ctx, os.Stdout, targets)
 	if errInstall != nil {
