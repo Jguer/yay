@@ -165,7 +165,8 @@ func (installer *Installer) handleLayer(ctx context.Context,
 		}
 	}
 
-	text.Debugln("syncDeps", syncDeps, "SyncExp", syncExp, "aurDeps", aurDeps, "aurExp", aurExp)
+	text.Debugln("syncDeps", syncDeps, "SyncExp", syncExp,
+		"aurDeps", aurDeps, "aurExp", aurExp, "upgrade", upgradeSync)
 
 	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp, excluded, upgradeSync)
 	if errShow != nil {
