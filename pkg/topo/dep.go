@@ -204,13 +204,14 @@ func (dm DepMap[T]) removeFromDepmap(key, node T) bool {
 // Prune removes the node,
 // its dependencies if there are no other dependents
 // and its dependents
-func (g *Graph[T, V]) Prune(node T) {
+func (g *Graph[T, V]) Prune(node T) []T {
+	pruned := []T{node}
 	// Remove edges from things that depend on `node`.
 	for dependent := range g.dependents[node] {
 		last := g.dependencies.removeFromDepmap(dependent, node)
 		text.Debugln("pruning dependent", dependent, last)
 		if last {
-			g.Prune(dependent)
+			pruned = append(pruned, g.Prune(dependent)...)
 		}
 	}
 
@@ -221,7 +222,7 @@ func (g *Graph[T, V]) Prune(node T) {
 		last := g.dependents.removeFromDepmap(dependency, node)
 		text.Debugln("pruning dependency", dependency, last)
 		if last {
-			g.Prune(dependency)
+			pruned = append(pruned, g.Prune(dependency)...)
 		}
 	}
 
@@ -229,6 +230,7 @@ func (g *Graph[T, V]) Prune(node T) {
 
 	// Finally, remove the node itself.
 	delete(g.nodes, node)
+	return pruned
 }
 
 func (g *Graph[T, V]) remove(node T) {

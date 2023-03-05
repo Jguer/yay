@@ -174,7 +174,7 @@ func handleCmd(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 	case "R", "remove":
 		return handleRemove(ctx, cmdArgs, cfg.Runtime.VCSStore)
 	case "S", "sync":
-		return handleSync(ctx, cmdArgs, dbExecutor)
+		return handleSync(ctx, cfg, cmdArgs, dbExecutor)
 	case "T", "deptest":
 		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
@@ -349,33 +349,33 @@ func handleBuild(ctx context.Context,
 	return nil
 }
 
-func handleSync(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleSync(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	targets := cmdArgs.Targets
 
 	switch {
 	case cmdArgs.ExistsArg("s", "search"):
-		return syncSearch(ctx, targets, dbExecutor, config.Runtime.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
+		return syncSearch(ctx, targets, dbExecutor, cfg.Runtime.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
 	case cmdArgs.ExistsArg("p", "print", "print-format"):
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case cmdArgs.ExistsArg("c", "clean"):
 		return syncClean(ctx, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("l", "list"):
-		return syncList(ctx, config.Runtime.HTTPClient, cmdArgs, dbExecutor)
+		return syncList(ctx, cfg.Runtime.HTTPClient, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("g", "groups"):
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case cmdArgs.ExistsArg("i", "info"):
 		return syncInfo(ctx, cmdArgs, targets, dbExecutor)
 	case cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0:
-		if config.NewInstallEngine {
-			return syncInstall(ctx, config, cmdArgs, dbExecutor)
+		if cfg.NewInstallEngine {
+			return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
 		}
 
 		return install(ctx, cmdArgs, dbExecutor, false)
 	case cmdArgs.ExistsArg("y", "refresh"):
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	}
 
 	return nil

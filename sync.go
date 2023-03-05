@@ -20,20 +20,20 @@ import (
 )
 
 func syncInstall(ctx context.Context,
-	config *settings.Configuration,
+	cfg *settings.Configuration,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache := config.Runtime.AURCache
+	aurCache := cfg.Runtime.AURCache
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	noDeps := cmdArgs.ExistsArg("d", "nodeps")
-	noCheck := strings.Contains(config.MFlags, "--nocheck")
+	noCheck := strings.Contains(cfg.MFlags, "--nocheck")
 	if noDeps {
-		config.Runtime.CmdBuilder.AddMakepkgFlag("-d")
+		cfg.Runtime.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
-	if refreshArg && config.Runtime.Mode.AtLeastRepo() {
-		if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
+	if refreshArg && cfg.Runtime.Mode.AtLeastRepo() {
+		if errR := earlyRefresh(ctx, cfg, cfg.Runtime.CmdBuilder, cmdArgs); errR != nil {
 			return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 		}
 
@@ -45,27 +45,28 @@ func syncInstall(ctx context.Context,
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
-		noDeps, noCheck, cmdArgs.ExistsArg("needed"), config.Runtime.Logger.Child("grapher"))
+		noDeps, noCheck, cmdArgs.ExistsArg("needed"), cfg.Runtime.Logger.Child("grapher"))
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {
 		return err
 	}
 
+	excluded := []string{}
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		var errSysUp error
 
 		upService := upgrade.NewUpgradeService(
-			grapher, aurCache, dbExecutor, config.Runtime.VCSStore,
-			config.Runtime, config, settings.NoConfirm, config.Runtime.Logger.Child("upgrade"))
+			grapher, aurCache, dbExecutor, cfg.Runtime.VCSStore,
+			cfg.Runtime, cfg, settings.NoConfirm, cfg.Runtime.Logger.Child("upgrade"))
 
-		graph, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		excluded, graph, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errSysUp != nil {
 			return errSysUp
 		}
 	}
 
-	opService := NewOperationService(ctx, config, dbExecutor)
+	opService := NewOperationService(ctx, cfg, dbExecutor)
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
@@ -77,7 +78,8 @@ func syncInstall(ctx context.Context,
 	if err := multiErr.Return(); err != nil {
 		return err
 	}
-	return opService.Run(ctx, cmdArgs, targets)
+
+	return opService.Run(ctx, cmdArgs, targets, excluded)
 }
 
 type OperationService struct {
@@ -96,7 +98,7 @@ func NewOperationService(ctx context.Context, cfg *settings.Configuration, dbExe
 
 func (o *OperationService) Run(ctx context.Context,
 	cmdArgs *parser.Arguments,
-	targets []map[string]*dep.InstallInfo,
+	targets []map[string]*dep.InstallInfo, excluded []string,
 ) error {
 	if len(targets) == 0 {
 		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
@@ -105,7 +107,7 @@ func (o *OperationService) Run(ctx context.Context,
 	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
 	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder,
 		o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode,
-		cmdArgs.ExistsArg("w", "downloadonly"))
+		cmdArgs.ExistsArg("w", "downloadonly"), o.cfg.Runtime.Logger.Child("installer"))
 
 	pkgBuildDirs, errInstall := preparer.Run(ctx, os.Stdout, targets)
 	if errInstall != nil {
@@ -147,7 +149,7 @@ func (o *OperationService) Run(ctx context.Context,
 		return errPGP
 	}
 
-	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs); errInstall != nil {
+	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs, excluded); errInstall != nil {
 		return errInstall
 	}
 

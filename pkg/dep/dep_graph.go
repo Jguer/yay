@@ -488,8 +488,8 @@ func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo]
 ) {
 	info := graph.GetNodeInfo(node)
 	if info != nil && info.Value != nil {
-		if info.Value.Reason < nodeInfo.Value.Reason {
-			return // refuse to downgrade reason from explicit to dep
+		if info.Value.Reason <= nodeInfo.Value.Reason {
+			return // refuse to downgrade reason
 		}
 	}
 
@@ -506,11 +506,12 @@ func (g *Grapher) addNodes(
 	targetsToFind := mapset.NewThreadUnsafeSet(deps...)
 	// Check if in graph already
 	for _, depString := range targetsToFind.ToSlice() {
-		if !graph.Exists(depString) {
+		depName, _, _ := splitDep(depString)
+		if !graph.Exists(depName) {
 			continue
 		}
 
-		if err := graph.DependOn(depString, parentPkgName); err != nil {
+		if err := graph.DependOn(depName, parentPkgName); err != nil {
 			g.logger.Warnln(depString, parentPkgName, err)
 		}
 

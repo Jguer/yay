@@ -220,7 +220,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool,
-) (*topo.Graph[string, *dep.InstallInfo], error) {
+) ([]string, *topo.Graph[string, *dep.InstallInfo], error) {
 	if graph == nil {
 		graph = topo.New[string, *dep.InstallInfo]()
 	}
@@ -228,20 +228,20 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	err := u.upGraph(ctx, graph, enableDowngrade,
 		func(*Upgrade) bool { return true })
 	if err != nil {
-		return graph, err
+		return []string{}, graph, err
 	}
 
 	if graph.Len() == 0 {
-		return graph, nil
+		return []string{}, graph, nil
 	}
 
-	errUp := u.userExcludeUpgrades(graph)
-	return graph, errUp
+	excluded, errUp := u.userExcludeUpgrades(graph)
+	return excluded, graph, errUp
 }
 
 // userExcludeUpgrades asks the user which packages to exclude from the upgrade and
 // removes them from the graph
-func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) error {
+func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) ([]string, error) {
 	allUpLen := graph.Len()
 	aurUp, repoUp := u.graphToUpSlice(graph)
 
@@ -258,7 +258,7 @@ func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 	numbers, err := u.log.GetInput(u.cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// upgrade menu asks you which packages to NOT upgrade so in this case
@@ -266,25 +266,26 @@ func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	exclude, include, otherExclude, otherInclude := intrange.ParseNumberMenu(numbers)
 	isInclude := len(include) == 0 && len(otherInclude) == 0
 
+	excluded := make([]string, 0)
 	for i := range allUp.Up {
 		up := &allUp.Up[i]
 		if isInclude && otherExclude.Get(up.Repository) {
 			u.log.Debugln("pruning", up.Name)
-			graph.Prune(up.Name)
+			excluded = append(excluded, graph.Prune(up.Name)...)
 		}
 
 		if isInclude && exclude.Get(allUpLen-i) {
 			u.log.Debugln("pruning", up.Name)
-			graph.Prune(up.Name)
+			excluded = append(excluded, graph.Prune(up.Name)...)
 			continue
 		}
 
 		if !isInclude && !(include.Get(allUpLen-i) || otherInclude.Get(up.Repository)) {
 			u.log.Debugln("pruning", up.Name)
-			graph.Prune(up.Name)
+			excluded = append(excluded, graph.Prune(up.Name)...)
 			continue
 		}
 	}
 
-	return nil
+	return excluded, nil
 }

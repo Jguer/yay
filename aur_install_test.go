@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -16,8 +17,11 @@ import (
 	"github.com/Jguer/yay/v11/pkg/dep"
 	"github.com/Jguer/yay/v11/pkg/settings/exe"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v11/pkg/text"
 	"github.com/Jguer/yay/v11/pkg/vcs"
 )
+
+var testLogger = text.NewLogger(io.Discard, strings.NewReader(""), true, "test")
 
 func ptrString(s string) *string {
 	return &s
@@ -127,7 +131,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -149,7 +153,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				},
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs)
+			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{})
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -401,7 +405,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -411,7 +415,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 				"jellyfin": tmpDirJfin,
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs)
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{})
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -454,7 +458,7 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 
 	cmdBuilder.Runner = mockRunner
 
-	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false)
+	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
 
 	called := false
 	hook := func(ctx context.Context) error {
@@ -482,17 +486,23 @@ func TestInstaller_CompileFailed(t *testing.T) {
 	require.NoError(t, f.Close())
 
 	type testCase struct {
-		desc      string
-		targets   []map[string]*dep.InstallInfo
-		lastLayer bool
+		desc           string
+		targets        []map[string]*dep.InstallInfo
+		wantErrInstall bool
+		wantErrCompile bool
+		failBuild      bool
+		failPkgInstall bool
 	}
 
 	tmpDir := t.TempDir()
 
 	testCases := []testCase{
 		{
-			desc:      "last layer",
-			lastLayer: true,
+			desc:           "one layer",
+			wantErrInstall: false,
+			wantErrCompile: true,
+			failBuild:      true,
+			failPkgInstall: false,
 			targets: []map[string]*dep.InstallInfo{
 				{
 					"yay": {
@@ -506,10 +516,33 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			},
 		},
 		{
-			desc:      "not last layer",
-			lastLayer: false,
+			desc:           "one layer -- fail install",
+			wantErrInstall: true,
+			wantErrCompile: false,
+			failBuild:      false,
+			failPkgInstall: true,
 			targets: []map[string]*dep.InstallInfo{
-				{"bob": {}},
+				{
+					"yay": {
+						Source:      dep.AUR,
+						Reason:      dep.Explicit,
+						Version:     "91.0.0-1",
+						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
+						AURBase:     ptrString("yay"),
+					},
+				},
+			},
+		},
+		{
+			desc:           "two layers",
+			wantErrInstall: false,
+			wantErrCompile: true,
+			failBuild:      true,
+			failPkgInstall: false,
+			targets: []map[string]*dep.InstallInfo{
+				{"bob": {
+					AURBase: ptrString("yay"),
+				}},
 				{
 					"yay": {
 						Source:      dep.AUR,
@@ -533,7 +566,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			}
 
 			showOverride := func(cmd *exec.Cmd) error {
-				if strings.Contains(cmd.String(), "makepkg -cf --noconfirm") && cmd.Dir == tmpDir {
+				if tc.failBuild && strings.Contains(cmd.String(), "makepkg -cf --noconfirm") && cmd.Dir == tmpDir {
 					return errors.New("makepkg failed")
 				}
 				return nil
@@ -555,7 +588,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -565,14 +598,14 @@ func TestInstaller_CompileFailed(t *testing.T) {
 				"yay": tmpDir,
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs)
-			if tc.lastLayer {
-				require.NoError(td, errI) // last layer error
-			} else {
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{})
+			if tc.wantErrInstall {
 				require.Error(td, errI)
+			} else {
+				require.NoError(td, errI)
 			}
 			err := installer.CompileFailedAndIgnored()
-			if tc.lastLayer {
+			if tc.wantErrCompile {
 				require.Error(td, err)
 				assert.ErrorContains(td, err, "yay")
 			} else {
@@ -713,7 +746,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("jellyfin")
@@ -722,7 +755,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 				"jellyfin": tmpDir,
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs)
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{})
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -851,7 +884,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, true)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, true, testLogger)
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -872,7 +905,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 				},
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs)
+			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{})
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))

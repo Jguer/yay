@@ -101,5 +101,5 @@ func installLocalPKGBUILD(
 	if err := multiErr.Return(); err != nil {
 		return err
 	}
-	return opService.Run(ctx, cmdArgs, targets)
+	return opService.Run(ctx, cmdArgs, targets, []string{})
 }
