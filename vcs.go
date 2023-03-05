@@ -19,15 +19,15 @@ import (
 )
 
 // createDevelDB forces yay to create a DB of the existing development packages.
-func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecutor db.Executor) error {
+func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) error {
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
-	info, err := query.AURInfoPrint(ctx, config.Runtime.AURClient, remoteNames, config.RequestSplitN)
+	info, err := query.AURInfoPrint(ctx, cfg.Runtime.AURClient, remoteNames, cfg.RequestSplitN)
 	if err != nil {
 		return err
 	}
 
 	bases := dep.GetBases(info)
-	toSkip := pkgbuildsToSkip(bases, stringset.FromSlice(remoteNames))
+	toSkip := pkgbuildsToSkip(cfg, bases, stringset.FromSlice(remoteNames))
 
 	targets := make([]string, 0, len(bases))
 	pkgBuildDirsByBase := make(map[string]string, len(bases))
@@ -37,7 +37,7 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 			targets = append(targets, base.Pkgbase())
 		}
 
-		pkgBuildDirsByBase[base.Pkgbase()] = filepath.Join(config.BuildDir, base.Pkgbase())
+		pkgBuildDirsByBase[base.Pkgbase()] = filepath.Join(cfg.BuildDir, base.Pkgbase())
 	}
 
 	toSkipSlice := toSkip.ToSlice()
@@ -48,7 +48,7 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 	}
 
 	if _, errA := download.AURPKGBUILDRepos(ctx,
-		config.Runtime.CmdBuilder, targets, config.AURURL, config.BuildDir, false); errA != nil {
+		cfg.Runtime.CmdBuilder, targets, cfg.AURURL, cfg.BuildDir, false); errA != nil {
 		return err
 	}
 
@@ -63,7 +63,7 @@ func createDevelDB(ctx context.Context, config *settings.Configuration, dbExecut
 			wg.Add(1)
 
 			go func(i string, iP int) {
-				config.Runtime.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
+				cfg.Runtime.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
 				wg.Done()
 			}(i, iP)
 		}

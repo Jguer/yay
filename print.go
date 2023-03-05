@@ -11,6 +11,7 @@ import (
 
 	"github.com/Jguer/yay/v11/pkg/db"
 	"github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v11/pkg/settings"
 	"github.com/Jguer/yay/v11/pkg/settings/parser"
 	"github.com/Jguer/yay/v11/pkg/stringset"
 	"github.com/Jguer/yay/v11/pkg/text"
@@ -18,7 +19,7 @@ import (
 )
 
 // PrintInfo prints package info like pacman -Si.
-func PrintInfo(a *aur.Pkg, extendedInfo bool) {
+func PrintInfo(config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
 	text.PrintInfoValue(gotext.Get("Repository"), "aur")
 	text.PrintInfoValue(gotext.Get("Name"), a.Name)
 	text.PrintInfoValue(gotext.Get("Keywords"), a.Keywords...)
@@ -70,8 +71,8 @@ func biggestPackages(dbExecutor db.Executor) {
 }
 
 // localStatistics prints installed packages statistics.
-func localStatistics(ctx context.Context, dbExecutor db.Executor) error {
-	info := statistics(dbExecutor)
+func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) error {
+	info := statistics(cfg, dbExecutor)
 
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	text.Infoln(gotext.Get("Yay version v%s", yayVersion))
@@ -85,22 +86,24 @@ func localStatistics(ctx context.Context, dbExecutor db.Executor) error {
 		text.Infoln(gotext.Get("Size of pacman cache %s: %s", path, text.Cyan(text.Human(size))))
 	}
 
-	text.Infoln(gotext.Get("Size of yay cache %s: %s", config.BuildDir, text.Cyan(text.Human(info.yayCache))))
+	text.Infoln(gotext.Get("Size of yay cache %s: %s", cfg.BuildDir, text.Cyan(text.Human(info.yayCache))))
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 	text.Infoln(gotext.Get("Ten biggest packages:"))
 	biggestPackages(dbExecutor)
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 
-	query.AURInfoPrint(ctx, config.Runtime.AURClient, remoteNames, config.RequestSplitN)
+	query.AURInfoPrint(ctx, cfg.Runtime.AURClient, remoteNames, cfg.RequestSplitN)
 
 	return nil
 }
 
-func printNumberOfUpdates(ctx context.Context, dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter) error {
+func printNumberOfUpdates(ctx context.Context, cfg *settings.Configuration,
+	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
+) error {
 	warnings := query.NewWarnings()
 	old := os.Stdout // keep backup of the real stdout
 	os.Stdout = nil
-	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade, filter)
+	aurUp, repoUp, err := upList(ctx, cfg, warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 
 	if err != nil {
@@ -112,7 +115,7 @@ func printNumberOfUpdates(ctx context.Context, dbExecutor db.Executor, enableDow
 	return nil
 }
 
-func printUpdateList(ctx context.Context, cmdArgs *parser.Arguments,
+func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments,
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
 	targets := stringset.FromSlice(cmdArgs.Targets)
@@ -123,7 +126,7 @@ func printUpdateList(ctx context.Context, cmdArgs *parser.Arguments,
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	localNames := dbExecutor.InstalledSyncPackageNames()
 
-	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade, filter)
+	aurUp, repoUp, err := upList(ctx, cfg, warnings, dbExecutor, enableDowngrade, filter)
 	os.Stdout = old // restoring the real stdout
 
 	if err != nil {

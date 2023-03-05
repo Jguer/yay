@@ -85,12 +85,14 @@ func asexp(ctx context.Context,
 }
 
 // Install handles package installs.
-func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders bool) error {
+func install(ctx context.Context, cfg *settings.Configuration,
+	cmdArgs *parser.Arguments, dbExecutor db.Executor, ignoreProviders bool,
+) error {
 	var (
 		do              *dep.Order
 		srcinfos        map[string]*gosrc.Srcinfo
 		noDeps          = cmdArgs.ExistsDouble("d", "nodeps")
-		noCheck         = strings.Contains(config.MFlags, "--nocheck")
+		noCheck         = strings.Contains(cfg.MFlags, "--nocheck")
 		assumeInstalled = cmdArgs.GetArgs("assume-installed")
 		sysupgradeArg   = cmdArgs.ExistsArg("u", "sysupgrade")
 		refreshArg      = cmdArgs.ExistsArg("y", "refresh")
@@ -98,19 +100,19 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	)
 
 	if noDeps {
-		config.Runtime.CmdBuilder.AddMakepkgFlag("-d")
+		cfg.Runtime.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
-	if config.Runtime.Mode.AtLeastRepo() {
-		if config.CombinedUpgrade {
+	if cfg.Runtime.Mode.AtLeastRepo() {
+		if cfg.CombinedUpgrade {
 			if refreshArg {
-				if errR := earlyRefresh(ctx, config, config.Runtime.CmdBuilder, cmdArgs); errR != nil {
+				if errR := earlyRefresh(ctx, cfg, cfg.Runtime.CmdBuilder, cmdArgs); errR != nil {
 					return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 				}
 				cmdArgs.DelArg("y", "refresh")
 			}
 		} else if refreshArg || sysupgradeArg || len(cmdArgs.Targets) > 0 {
-			if errP := earlyPacmanCall(ctx, cmdArgs, dbExecutor); errP != nil {
+			if errP := earlyPacmanCall(ctx, cfg, cmdArgs, dbExecutor); errP != nil {
 				return errP
 			}
 		}
@@ -137,7 +139,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	arguments.Op = "S"
 	arguments.ClearTargets()
 
-	if config.Runtime.Mode == parser.ModeAUR {
+	if cfg.Runtime.Mode == parser.ModeAUR {
 		arguments.DelArg("u", "sysupgrade")
 	}
 
@@ -145,7 +147,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	if sysupgradeArg {
 		var errSysUp error
 
-		requestTargets, errSysUp = addUpgradeTargetsToArgs(ctx, dbExecutor, cmdArgs, requestTargets, arguments)
+		requestTargets, errSysUp = addUpgradeTargetsToArgs(ctx, cfg, dbExecutor, cmdArgs, requestTargets, arguments)
 		if errSysUp != nil {
 			return errSysUp
 		}
@@ -154,8 +156,8 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	targets := stringset.FromSlice(cmdArgs.Targets)
 
 	dp, err := dep.GetPool(ctx, requestTargets,
-		warnings, dbExecutor, config.Runtime.AURClient, config.Runtime.Mode,
-		ignoreProviders, settings.NoConfirm, config.Provides, config.ReBuild, config.RequestSplitN, noDeps, noCheck, assumeInstalled)
+		warnings, dbExecutor, cfg.Runtime.AURClient, cfg.Runtime.Mode,
+		ignoreProviders, settings.NoConfirm, cfg.Provides, cfg.ReBuild, cfg.RequestSplitN, noDeps, noCheck, assumeInstalled)
 	if err != nil {
 		return err
 	}
@@ -165,7 +167,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	}
 
 	if len(dp.Aur) == 0 {
-		if !config.CombinedUpgrade {
+		if !cfg.CombinedUpgrade {
 			if sysupgradeArg {
 				fmt.Println(gotext.Get(" there is nothing to do"))
 			}
@@ -180,11 +182,11 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			cmdArgs.CreateOrAppendOption("ignore", arguments.GetArgs("ignore")...)
 		}
 
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	}
 
-	conflicts, errCC := dp.CheckConflicts(config.UseAsk, settings.NoConfirm, noDeps)
+	conflicts, errCC := dp.CheckConflicts(cfg.UseAsk, settings.NoConfirm, noDeps)
 	if errCC != nil {
 		return errCC
 	}
@@ -200,7 +202,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	}
 
 	if len(do.Aur) == 0 && len(arguments.Targets) == 0 &&
-		(!cmdArgs.ExistsArg("u", "sysupgrade") || config.Runtime.Mode == parser.ModeAUR) {
+		(!cmdArgs.ExistsArg("u", "sysupgrade") || cfg.Runtime.Mode == parser.ModeAUR) {
 		fmt.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
@@ -211,21 +213,21 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	pkgbuildDirs := make(map[string]string, len(do.Aur))
 
 	for _, base := range do.Aur {
-		dir := filepath.Join(config.BuildDir, base.Pkgbase())
+		dir := filepath.Join(cfg.BuildDir, base.Pkgbase())
 		pkgbuildDirs[base.Pkgbase()] = dir
 	}
 
-	if config.CleanAfter {
+	if cfg.CleanAfter {
 		defer func() {
-			cleanAfter(ctx, config.Runtime.CmdBuilder, pkgbuildDirs)
+			cleanAfter(ctx, cfg, cfg.Runtime.CmdBuilder, pkgbuildDirs)
 		}()
 	}
 
 	if do.HasMake() {
-		switch config.RemoveMake {
+		switch cfg.RemoveMake {
 		case "yes":
 			defer func() {
-				err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake(), cmdArgs)
+				err = removeMake(ctx, cfg, cfg.Runtime.CmdBuilder, do.GetMake(), cmdArgs)
 			}()
 
 		case "no":
@@ -233,15 +235,15 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		default:
 			if text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
 				defer func() {
-					err = removeMake(ctx, config.Runtime.CmdBuilder, do.GetMake(), cmdArgs)
+					err = removeMake(ctx, cfg, cfg.Runtime.CmdBuilder, do.GetMake(), cmdArgs)
 				}()
 			}
 		}
 	}
 
-	if errCleanMenu := menus.Clean(os.Stdout, config.CleanMenu,
+	if errCleanMenu := menus.Clean(os.Stdout, cfg.CleanMenu,
 		pkgbuildDirs,
-		remoteNamesCache, settings.NoConfirm, config.AnswerClean); errCleanMenu != nil {
+		remoteNamesCache, settings.NoConfirm, cfg.AnswerClean); errCleanMenu != nil {
 		if errors.As(errCleanMenu, &settings.ErrUserAbort{}) {
 			return errCleanMenu
 		}
@@ -249,7 +251,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		text.Errorln(errCleanMenu)
 	}
 
-	toSkip := pkgbuildsToSkip(do.Aur, targets)
+	toSkip := pkgbuildsToSkip(cfg, do.Aur, targets)
 	toClone := make([]string, 0, len(do.Aur))
 
 	for _, base := range do.Aur {
@@ -265,14 +267,14 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	}
 
 	cloned, errA := download.AURPKGBUILDRepos(ctx,
-		config.Runtime.CmdBuilder, toClone, config.AURURL, config.BuildDir, false)
+		cfg.Runtime.CmdBuilder, toClone, cfg.AURURL, cfg.BuildDir, false)
 	if errA != nil {
 		return errA
 	}
 
-	if errDiffMenu := menus.Diff(ctx, config.Runtime.CmdBuilder, os.Stdout, pkgbuildDirs,
-		config.DiffMenu, remoteNamesCache,
-		cloned, settings.NoConfirm, config.AnswerDiff); errDiffMenu != nil {
+	if errDiffMenu := menus.Diff(ctx, cfg.Runtime.CmdBuilder, os.Stdout, pkgbuildDirs,
+		cfg.DiffMenu, remoteNamesCache,
+		cloned, settings.NoConfirm, cfg.AnswerDiff); errDiffMenu != nil {
 		if errors.As(errDiffMenu, &settings.ErrUserAbort{}) {
 			return errDiffMenu
 		}
@@ -280,7 +282,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		text.Errorln(errDiffMenu)
 	}
 
-	if errM := mergePkgbuilds(ctx, config.Runtime.CmdBuilder, pkgbuildDirs); errM != nil {
+	if errM := mergePkgbuilds(ctx, cfg.Runtime.CmdBuilder, pkgbuildDirs); errM != nil {
 		return errM
 	}
 
@@ -289,9 +291,9 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return err
 	}
 
-	if errEditMenu := menus.Edit(os.Stdout, config.EditMenu, pkgbuildDirs,
-		config.Editor, config.EditorFlags, remoteNamesCache, srcinfos,
-		settings.NoConfirm, config.AnswerEdit); errEditMenu != nil {
+	if errEditMenu := menus.Edit(os.Stdout, cfg.EditMenu, pkgbuildDirs,
+		cfg.Editor, cfg.EditorFlags, remoteNamesCache, srcinfos,
+		settings.NoConfirm, cfg.AnswerEdit); errEditMenu != nil {
 		if errors.As(errEditMenu, &settings.ErrUserAbort{}) {
 			return errEditMenu
 		}
@@ -303,19 +305,19 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 		return errI
 	}
 
-	if config.PGPFetch {
-		if _, errCPK := pgp.CheckPgpKeys(ctx, pkgbuildDirs, srcinfos, config.Runtime.CmdBuilder, settings.NoConfirm); errCPK != nil {
+	if cfg.PGPFetch {
+		if _, errCPK := pgp.CheckPgpKeys(ctx, pkgbuildDirs, srcinfos, cfg.Runtime.CmdBuilder, settings.NoConfirm); errCPK != nil {
 			return errCPK
 		}
 	}
 
-	if !config.CombinedUpgrade {
+	if !cfg.CombinedUpgrade {
 		arguments.DelArg("u", "sysupgrade")
 	}
 
 	if len(arguments.Targets) > 0 || arguments.ExistsArg("u") {
-		if errShow := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			arguments, config.Runtime.Mode, settings.NoConfirm)); errShow != nil {
+		if errShow := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			arguments, cfg.Runtime.Mode, settings.NoConfirm)); errShow != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 
@@ -336,38 +338,39 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 			}
 		}
 
-		if errDeps := asdeps(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, deps); errDeps != nil {
+		if errDeps := asdeps(ctx, cfg.Runtime.CmdBuilder, cfg.Runtime.Mode, cmdArgs, deps); errDeps != nil {
 			return errDeps
 		}
 
-		if errExp := asexp(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, exp); errExp != nil {
+		if errExp := asexp(ctx, cfg.Runtime.CmdBuilder, cfg.Runtime.Mode, cmdArgs, exp); errExp != nil {
 			return errExp
 		}
 	}
 
 	go func() {
-		_ = completion.Update(ctx, config.Runtime.HTTPClient, dbExecutor,
-			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		_ = completion.Update(ctx, cfg.Runtime.HTTPClient, dbExecutor,
+			cfg.AURURL, cfg.Runtime.CompletionPath, cfg.CompletionInterval, false)
 	}()
 
 	if errP := downloadPKGBUILDSourceFanout(ctx,
-		config.Runtime.CmdBuilder,
+		cfg.Runtime.CmdBuilder,
 		pkgbuildDirs,
-		true, config.MaxConcurrentDownloads); errP != nil {
+		true, cfg.MaxConcurrentDownloads); errP != nil {
 		text.Errorln(errP)
 	}
 
-	if errB := buildInstallPkgbuilds(ctx, cmdArgs, dbExecutor, dp, do, srcinfos, true, conflicts, noDeps, noCheck); errB != nil {
+	if errB := buildInstallPkgbuilds(ctx, cfg, cmdArgs, dbExecutor, dp, do,
+		srcinfos, true, conflicts, noDeps, noCheck); errB != nil {
 		return errB
 	}
 
 	return nil
 }
 
-func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor,
+func addUpgradeTargetsToArgs(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor,
 	cmdArgs *parser.Arguments, requestTargets []string, arguments *parser.Arguments,
 ) ([]string, error) {
-	ignore, targets, errUp := sysupgradeTargets(ctx, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
+	ignore, targets, errUp := sysupgradeTargets(ctx, cfg, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"))
 	if errUp != nil {
 		return nil, errUp
 	}
@@ -384,7 +387,9 @@ func addUpgradeTargetsToArgs(ctx context.Context, dbExecutor db.Executor,
 	return requestTargets, nil
 }
 
-func removeMake(ctx context.Context, cmdBuilder exe.ICmdBuilder, makeDeps []string, cmdArgs *parser.Arguments) error {
+func removeMake(ctx context.Context, config *settings.Configuration,
+	cmdBuilder exe.ICmdBuilder, makeDeps []string, cmdArgs *parser.Arguments,
+) error {
 	removeArguments := cmdArgs.CopyGlobal()
 
 	err := removeArguments.AddArg("R", "u")
@@ -422,14 +427,16 @@ func inRepos(dbExecutor db.Executor, pkg string) bool {
 	return exists || len(dbExecutor.PackagesFromGroup(target.Name)) > 0
 }
 
-func earlyPacmanCall(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func earlyPacmanCall(ctx context.Context, cfg *settings.Configuration,
+	cmdArgs *parser.Arguments, dbExecutor db.Executor,
+) error {
 	arguments := cmdArgs.Copy()
 	arguments.Op = "S"
 	targets := cmdArgs.Targets
 	cmdArgs.ClearTargets()
 	arguments.ClearTargets()
 
-	if config.Runtime.Mode == parser.ModeRepo {
+	if cfg.Runtime.Mode == parser.ModeRepo {
 		arguments.Targets = targets
 	} else {
 		// separate aur and repo targets
@@ -443,8 +450,8 @@ func earlyPacmanCall(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor 
 	}
 
 	if cmdArgs.ExistsArg("y", "refresh") || cmdArgs.ExistsArg("u", "sysupgrade") || len(arguments.Targets) > 0 {
-		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			arguments, config.Runtime.Mode, settings.NoConfirm)); err != nil {
+		if err := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			arguments, cfg.Runtime.Mode, settings.NoConfirm)); err != nil {
 			return errors.New(gotext.Get("error installing repo packages"))
 		}
 	}
@@ -538,7 +545,7 @@ func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	return pkgdests, pkgVersion, nil
 }
 
-func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.StringSet {
+func pkgbuildsToSkip(cfg *settings.Configuration, bases []dep.Base, targets stringset.StringSet) stringset.StringSet {
 	toSkip := make(stringset.StringSet)
 
 	for _, base := range bases {
@@ -547,11 +554,11 @@ func pkgbuildsToSkip(bases []dep.Base, targets stringset.StringSet) stringset.St
 			isTarget = isTarget || targets.Get(pkg.Name)
 		}
 
-		if (config.ReDownload == "yes" && isTarget) || config.ReDownload == "all" {
+		if (cfg.ReDownload == "yes" && isTarget) || cfg.ReDownload == "all" {
 			continue
 		}
 
-		dir := filepath.Join(config.BuildDir, base.Pkgbase(), ".SRCINFO")
+		dir := filepath.Join(cfg.BuildDir, base.Pkgbase(), ".SRCINFO")
 		pkgbuild, err := gosrc.ParseFile(dir)
 
 		if err == nil {
@@ -595,6 +602,7 @@ func mergePkgbuilds(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDir
 
 func buildInstallPkgbuilds(
 	ctx context.Context,
+	cfg *settings.Configuration,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 	dp *dep.Pool,
@@ -620,7 +628,7 @@ func buildInstallPkgbuilds(
 
 	for i, base := range do.Aur {
 		pkg := base.Pkgbase()
-		dir := filepath.Join(config.BuildDir, pkg)
+		dir := filepath.Join(cfg.BuildDir, pkg)
 		built := true
 
 		satisfied := true
@@ -636,11 +644,11 @@ func buildInstallPkgbuilds(
 			}
 		}
 
-		if !satisfied || !config.BatchInstall {
+		if !satisfied || !cfg.BatchInstall {
 			text.Debugln("non batch installing archives:", pkgArchives)
-			errArchive := installPkgArchive(ctx, config.Runtime.CmdBuilder,
-				config.Runtime.Mode, config.Runtime.VCSStore, cmdArgs, pkgArchives)
-			errReason := setInstallReason(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, deps, exp)
+			errArchive := installPkgArchive(ctx, cfg.Runtime.CmdBuilder,
+				cfg.Runtime.Mode, cfg.Runtime.VCSStore, cmdArgs, pkgArchives)
+			errReason := setInstallReason(ctx, cfg.Runtime.CmdBuilder, cfg.Runtime.Mode, cmdArgs, deps, exp)
 
 			deps = make([]string, 0)
 			exp = make([]string, 0)
@@ -648,7 +656,7 @@ func buildInstallPkgbuilds(
 
 			if errArchive != nil || errReason != nil {
 				if i != 0 {
-					go config.Runtime.VCSStore.RemovePackages([]string{do.Aur[i-1].String()})
+					go cfg.Runtime.VCSStore.RemovePackages([]string{do.Aur[i-1].String()})
 				}
 
 				if errArchive != nil {
@@ -668,12 +676,12 @@ func buildInstallPkgbuilds(
 		}
 
 		// pkgver bump
-		if err := config.Runtime.CmdBuilder.Show(
-			config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
+		if err := cfg.Runtime.CmdBuilder.Show(
+			cfg.Runtime.CmdBuilder.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
 			return errors.New(gotext.Get("error making: %s", base.String()))
 		}
 
-		pkgdests, pkgVersion, errList := parsePackageList(ctx, config.Runtime.CmdBuilder, dir)
+		pkgdests, pkgVersion, errList := parsePackageList(ctx, cfg.Runtime.CmdBuilder, dir)
 		if errList != nil {
 			return errList
 		}
@@ -683,7 +691,7 @@ func buildInstallPkgbuilds(
 			isExplicit = isExplicit || dp.Explicit.Get(b.Name)
 		}
 
-		if config.ReBuild == "no" || (config.ReBuild == "yes" && !isExplicit) {
+		if cfg.ReBuild == "no" || (cfg.ReBuild == "yes" && !isExplicit) {
 			for _, split := range base {
 				pkgdest, ok := pkgdests[split.Name]
 				if !ok {
@@ -707,8 +715,8 @@ func buildInstallPkgbuilds(
 			}
 
 			if installed {
-				err := config.Runtime.CmdBuilder.Show(
-					config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
+				err := cfg.Runtime.CmdBuilder.Show(
+					cfg.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 						dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 				if err != nil {
 					return errors.New(gotext.Get("error making: %s", err))
@@ -721,8 +729,8 @@ func buildInstallPkgbuilds(
 		}
 
 		if built {
-			err := config.Runtime.CmdBuilder.Show(
-				config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
+			err := cfg.Runtime.CmdBuilder.Show(
+				cfg.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 					dir, "-c", "--nobuild", "--noextract", "--ignorearch"))
 			if err != nil {
 				return errors.New(gotext.Get("error making: %s", err))
@@ -736,15 +744,15 @@ func buildInstallPkgbuilds(
 				args = append(args, "--ignorearch")
 			}
 
-			if errMake := config.Runtime.CmdBuilder.Show(
-				config.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
+			if errMake := cfg.Runtime.CmdBuilder.Show(
+				cfg.Runtime.CmdBuilder.BuildMakepkgCmd(ctx,
 					dir, args...)); errMake != nil {
 				return errors.New(gotext.Get("error making: %s", base.String()))
 			}
 		}
 
 		// conflicts have been checked so answer y for them
-		if config.UseAsk && cmdArgs.ExistsArg("ask") {
+		if cfg.UseAsk && cmdArgs.ExistsArg("ask") {
 			ask, _ := strconv.Atoi(cmdArgs.Options["ask"].First())
 			uask := alpm.QuestionType(ask) | alpm.QuestionTypeConflictPkg
 			cmdArgs.Options["ask"].Set(fmt.Sprint(uask))
@@ -783,7 +791,7 @@ func buildInstallPkgbuilds(
 
 			text.Debugln("checking vcs store for:", pkg.Name)
 			go func(name string) {
-				config.Runtime.VCSStore.Update(ctx, name, srcInfo.Source)
+				cfg.Runtime.VCSStore.Update(ctx, name, srcInfo.Source)
 				wg.Done()
 			}(pkg.Name)
 		}
@@ -792,14 +800,14 @@ func buildInstallPkgbuilds(
 	}
 
 	text.Debugln("installing archives:", pkgArchives)
-	errArchive := installPkgArchive(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, config.Runtime.VCSStore, cmdArgs, pkgArchives)
+	errArchive := installPkgArchive(ctx, cfg.Runtime.CmdBuilder, cfg.Runtime.Mode, cfg.Runtime.VCSStore, cmdArgs, pkgArchives)
 	if errArchive != nil {
-		go config.Runtime.VCSStore.RemovePackages([]string{do.Aur[len(do.Aur)-1].String()})
+		go cfg.Runtime.VCSStore.RemovePackages([]string{do.Aur[len(do.Aur)-1].String()})
 	}
 
-	errReason := setInstallReason(ctx, config.Runtime.CmdBuilder, config.Runtime.Mode, cmdArgs, deps, exp)
+	errReason := setInstallReason(ctx, cfg.Runtime.CmdBuilder, cfg.Runtime.Mode, cmdArgs, deps, exp)
 	if errReason != nil {
-		go config.Runtime.VCSStore.RemovePackages([]string{do.Aur[len(do.Aur)-1].String()})
+		go cfg.Runtime.VCSStore.RemovePackages([]string{do.Aur[len(do.Aur)-1].String()})
 	}
 
 	settings.NoConfirm = oldConfirm

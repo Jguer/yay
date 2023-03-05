@@ -18,17 +18,19 @@ import (
 )
 
 // CleanDependencies removes all dangling dependencies in system.
-func cleanDependencies(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor, removeOptional bool) error {
+func cleanDependencies(ctx context.Context, cfg *settings.Configuration,
+	cmdArgs *parser.Arguments, dbExecutor db.Executor, removeOptional bool,
+) error {
 	hanging := hangingPackages(removeOptional, dbExecutor)
 	if len(hanging) != 0 {
-		return cleanRemove(ctx, cmdArgs, hanging)
+		return cleanRemove(ctx, cfg, cmdArgs, hanging)
 	}
 
 	return nil
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice.
-func cleanRemove(ctx context.Context, cmdArgs *parser.Arguments, pkgNames []string) error {
+func cleanRemove(ctx context.Context, config *settings.Configuration, cmdArgs *parser.Arguments, pkgNames []string) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}
@@ -42,13 +44,13 @@ func cleanRemove(ctx context.Context, cmdArgs *parser.Arguments, pkgNames []stri
 			arguments, config.Runtime.Mode, settings.NoConfirm))
 }
 
-func syncClean(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func syncClean(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	keepInstalled := false
 	keepCurrent := false
 
 	_, removeAll, _ := cmdArgs.GetArg("c", "clean")
 
-	for _, v := range config.Runtime.PacmanConf.CleanMethod {
+	for _, v := range cfg.Runtime.PacmanConf.CleanMethod {
 		if v == "KeepInstalled" {
 			keepInstalled = true
 		} else if v == "KeepCurrent" {
@@ -56,14 +58,14 @@ func syncClean(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		}
 	}
 
-	if config.Runtime.Mode.AtLeastRepo() {
-		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
+	if cfg.Runtime.Mode.AtLeastRepo() {
+		if err := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm)); err != nil {
 			return err
 		}
 	}
 
-	if !config.Runtime.Mode.AtLeastAUR() {
+	if !cfg.Runtime.Mode.AtLeastAUR() {
 		return nil
 	}
 
@@ -74,10 +76,10 @@ func syncClean(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 		question = gotext.Get("Do you want to remove all other AUR packages from cache?")
 	}
 
-	fmt.Println(gotext.Get("\nBuild directory:"), config.BuildDir)
+	fmt.Println(gotext.Get("\nBuild directory:"), cfg.BuildDir)
 
 	if text.ContinueTask(os.Stdin, question, true, settings.NoConfirm) {
-		if err := cleanAUR(ctx, keepInstalled, keepCurrent, removeAll, dbExecutor); err != nil {
+		if err := cleanAUR(ctx, cfg, keepInstalled, keepCurrent, removeAll, dbExecutor); err != nil {
 			return err
 		}
 	}
@@ -87,13 +89,15 @@ func syncClean(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Exe
 	}
 
 	if text.ContinueTask(os.Stdin, gotext.Get("Do you want to remove ALL untracked AUR files?"), true, settings.NoConfirm) {
-		return cleanUntracked(ctx)
+		return cleanUntracked(ctx, cfg)
 	}
 
 	return nil
 }
 
-func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, dbExecutor db.Executor) error {
+func cleanAUR(ctx context.Context, config *settings.Configuration,
+	keepInstalled, keepCurrent, removeAll bool, dbExecutor db.Executor,
+) error {
 	fmt.Println(gotext.Get("removing AUR packages from cache..."))
 
 	installedBases := make(stringset.StringSet)
@@ -164,10 +168,10 @@ func cleanAUR(ctx context.Context, keepInstalled, keepCurrent, removeAll bool, d
 	return nil
 }
 
-func cleanUntracked(ctx context.Context) error {
+func cleanUntracked(ctx context.Context, cfg *settings.Configuration) error {
 	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
-	files, err := os.ReadDir(config.BuildDir)
+	files, err := os.ReadDir(cfg.BuildDir)
 	if err != nil {
 		return err
 	}
@@ -177,9 +181,9 @@ func cleanUntracked(ctx context.Context) error {
 			continue
 		}
 
-		dir := filepath.Join(config.BuildDir, file.Name())
+		dir := filepath.Join(cfg.BuildDir, file.Name())
 		if isGitRepository(dir) {
-			if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fx")); err != nil {
+			if err := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fx")); err != nil {
 				text.Warnln(gotext.Get("Unable to clean:"), dir)
 
 				return err
@@ -195,7 +199,9 @@ func isGitRepository(dir string) bool {
 	return !os.IsNotExist(err)
 }
 
-func cleanAfter(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string) {
+func cleanAfter(ctx context.Context, config *settings.Configuration,
+	cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string,
+) {
 	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
 
 	i := 0
