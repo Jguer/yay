@@ -33,15 +33,17 @@ func syncSearch(ctx context.Context, pkgS []string,
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor) error {
+func syncInfo(ctx context.Context, cfg *settings.Configuration,
+	cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor,
+) error {
 	var (
 		info    []aur.Pkg
 		err     error
 		missing = false
 	)
 
-	pkgS = query.RemoveInvalidTargets(pkgS, config.Runtime.Mode)
-	aurS, repoS := packageSlices(pkgS, dbExecutor)
+	pkgS = query.RemoveInvalidTargets(pkgS, cfg.Runtime.Mode)
+	aurS, repoS := packageSlices(pkgS, cfg, dbExecutor)
 
 	if len(aurS) != 0 {
 		noDB := make([]string, 0, len(aurS))
@@ -51,7 +53,7 @@ func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbE
 			noDB = append(noDB, name)
 		}
 
-		info, err = query.AURInfoPrint(ctx, config.Runtime.AURClient, noDB, config.RequestSplitN)
+		info, err = query.AURInfoPrint(ctx, cfg.Runtime.AURClient, noDB, cfg.RequestSplitN)
 		if err != nil {
 			missing = true
 
@@ -65,8 +67,8 @@ func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbE
 		arguments.ClearTargets()
 		arguments.AddTarget(repoS...)
 
-		err = config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			arguments, config.Runtime.Mode, settings.NoConfirm))
+		err = cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			arguments, cfg.Runtime.Mode, settings.NoConfirm))
 		if err != nil {
 			return err
 		}
@@ -78,7 +80,7 @@ func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbE
 
 	if len(info) != 0 {
 		for i := range info {
-			PrintInfo(&info[i], cmdArgs.ExistsDouble("i"))
+			PrintInfo(cfg, &info[i], cmdArgs.ExistsDouble("i"))
 		}
 	}
 
@@ -90,7 +92,7 @@ func syncInfo(ctx context.Context, cmdArgs *parser.Arguments, pkgS []string, dbE
 }
 
 // PackageSlices separates an input slice into aur and repo slices.
-func packageSlices(toCheck []string, dbExecutor db.Executor) (aurNames, repoNames []string) {
+func packageSlices(toCheck []string, config *settings.Configuration, dbExecutor db.Executor) (aurNames, repoNames []string) {
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
 
@@ -203,7 +205,7 @@ func getFolderSize(path string) (size int64) {
 }
 
 // Statistics returns statistics about packages installed in system.
-func statistics(dbExecutor db.Executor) (res struct {
+func statistics(cfg *settings.Configuration, dbExecutor db.Executor) (res struct {
 	Totaln       int
 	Expln        int
 	TotalSize    int64
@@ -221,11 +223,11 @@ func statistics(dbExecutor db.Executor) (res struct {
 	}
 
 	res.pacmanCaches = make(map[string]int64)
-	for _, path := range config.Runtime.PacmanConf.CacheDir {
+	for _, path := range cfg.Runtime.PacmanConf.CacheDir {
 		res.pacmanCaches[path] = getFolderSize(path)
 	}
 
-	res.yayCache = getFolderSize(config.BuildDir)
+	res.yayCache = getFolderSize(cfg.BuildDir)
 
 	return
 }

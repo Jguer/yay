@@ -36,7 +36,7 @@ func filterUpdateList(list []db.Upgrade, filter upgrade.Filter) []db.Upgrade {
 }
 
 // upList returns lists of packages to upgrade from each source.
-func upList(ctx context.Context,
+func upList(ctx context.Context, cfg *settings.Configuration,
 	warnings *query.AURWarnings, dbExecutor db.Executor, enableDowngrade bool,
 	filter upgrade.Filter,
 ) (aurUp, repoUp upgrade.UpSlice, err error) {
@@ -58,7 +58,7 @@ func upList(ctx context.Context,
 		}
 	}
 
-	if config.Runtime.Mode.AtLeastRepo() {
+	if cfg.Runtime.Mode.AtLeastRepo() {
 		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 
@@ -69,11 +69,11 @@ func upList(ctx context.Context,
 		}()
 	}
 
-	if config.Runtime.Mode.AtLeastAUR() {
+	if cfg.Runtime.Mode.AtLeastAUR() {
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []aur.Pkg
-		_aurdata, err = query.AURInfo(ctx, config.Runtime.AURClient, remoteNames, warnings, config.RequestSplitN)
+		_aurdata, err = query.AURInfo(ctx, cfg.Runtime.AURClient, remoteNames, warnings, cfg.RequestSplitN)
 
 		errs.Add(err)
 
@@ -86,19 +86,19 @@ func upList(ctx context.Context,
 			wg.Add(1)
 
 			go func() {
-				aurUp = upgrade.UpAUR(remote, aurdata, config.TimeUpdate, enableDowngrade)
+				aurUp = upgrade.UpAUR(remote, aurdata, cfg.TimeUpdate, enableDowngrade)
 
 				wg.Done()
 			}()
 
-			if config.Devel {
+			if cfg.Devel {
 				text.OperationInfoln(gotext.Get("Checking development packages..."))
 				wg.Add(1)
 
 				go func() {
-					develUp = upgrade.UpDevel(ctx, remote, aurdata, config.Runtime.VCSStore)
+					develUp = upgrade.UpDevel(ctx, remote, aurdata, cfg.Runtime.VCSStore)
 
-					config.Runtime.VCSStore.CleanOrphans(remote)
+					cfg.Runtime.VCSStore.CleanOrphans(remote)
 					wg.Done()
 				}()
 			}
@@ -185,7 +185,7 @@ func isDevelPackage(pkg alpm.IPackage) bool {
 }
 
 // upgradePkgsMenu handles updating the cache and installing updates.
-func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []string, error) {
+func upgradePkgsMenu(cfg *settings.Configuration, aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []string, error) {
 	ignore := make(stringset.StringSet)
 	targets := []string{}
 
@@ -194,7 +194,7 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 		return ignore, nil, nil
 	}
 
-	if !config.UpgradeMenu {
+	if !cfg.UpgradeMenu {
 		for _, pkg := range aurUp.Up {
 			targets = append(targets, pkg.Repository+"/"+pkg.Name)
 		}
@@ -208,11 +208,11 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 	allUp := upgrade.UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
 
 	fmt.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade.")))
-	allUp.Print(config.Runtime.Logger)
+	allUp.Print(cfg.Runtime.Logger)
 
 	text.Infoln(gotext.Get("Packages to exclude") + " (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name):")
 
-	numbers, err := text.GetInput(os.Stdin, config.AnswerUpgrade, settings.NoConfirm)
+	numbers, err := text.GetInput(os.Stdin, cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -259,12 +259,12 @@ func upgradePkgsMenu(aurUp, repoUp upgrade.UpSlice) (stringset.StringSet, []stri
 }
 
 // Targets for sys upgrade.
-func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
+func sysupgradeTargets(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor,
 	enableDowngrade bool,
 ) (stringset.StringSet, []string, error) {
 	warnings := query.NewWarnings()
 
-	aurUp, repoUp, err := upList(ctx, warnings, dbExecutor, enableDowngrade,
+	aurUp, repoUp, err := upList(ctx, cfg, warnings, dbExecutor, enableDowngrade,
 		func(*upgrade.Upgrade) bool { return true })
 	if err != nil {
 		return nil, nil, err
@@ -272,5 +272,5 @@ func sysupgradeTargets(ctx context.Context, dbExecutor db.Executor,
 
 	warnings.Print()
 
-	return upgradePkgsMenu(aurUp, repoUp)
+	return upgradePkgsMenu(cfg, aurUp, repoUp)
 }

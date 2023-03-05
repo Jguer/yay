@@ -66,7 +66,7 @@ func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostI
 	text.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
 
 	return func(ctx context.Context) error {
-		cleanAfter(ctx, preper.cfg.Runtime.CmdBuilder, pkgBuildDirs)
+		cleanAfter(ctx, preper.cfg, preper.cfg.Runtime.CmdBuilder, pkgBuildDirs)
 		return nil
 	}
 }
@@ -90,7 +90,7 @@ func (preper *Preparer) ShouldCleanMakeDeps(cmdArgs *parser.Arguments) PostInsta
 	text.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
 
 	return func(ctx context.Context) error {
-		return removeMake(ctx, preper.cfg.Runtime.CmdBuilder, preper.makeDeps, cmdArgs)
+		return removeMake(ctx, preper.cfg, preper.cfg.Runtime.CmdBuilder, preper.makeDeps, cmdArgs)
 	}
 }
 

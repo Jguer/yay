@@ -17,6 +17,11 @@ import (
 	"github.com/Jguer/yay/v11/pkg/text"
 )
 
+var (
+	yayVersion = "11.3.0"            // To be set by compiler.
+	localePath = "/usr/share/locale" // To be set by compiler.
+)
+
 func initGotext() {
 	if envLocalePath := os.Getenv("LOCALE_PATH"); envLocalePath != "" {
 		localePath = envLocalePath
@@ -55,7 +60,7 @@ func main() {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
-	config, err = settings.NewConfig(yayVersion)
+	cfg, err := settings.NewConfig(yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -66,18 +71,18 @@ func main() {
 		return
 	}
 
-	if config.Debug {
+	if cfg.Debug {
 		text.GlobalLogger.Debug = true
 	}
 
-	if errS := config.RunMigrations(
-		settings.DefaultMigrations(), config.Runtime.ConfigPath); errS != nil {
+	if errS := cfg.RunMigrations(
+		settings.DefaultMigrations(), cfg.Runtime.ConfigPath); errS != nil {
 		text.Errorln(errS)
 	}
 
 	cmdArgs := parser.MakeArguments()
 
-	if err = config.ParseCommandLine(cmdArgs); err != nil {
+	if err = cfg.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
 		}
@@ -87,29 +92,29 @@ func main() {
 		return
 	}
 
-	if config.Runtime.SaveConfig {
-		if errS := config.Save(config.Runtime.ConfigPath); errS != nil {
+	if cfg.Runtime.SaveConfig {
+		if errS := cfg.Save(cfg.Runtime.ConfigPath); errS != nil {
 			text.Errorln(errS)
 		}
 	}
 
-	if config.SeparateSources {
-		config.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
-			config.Runtime.AURClient, config.Runtime.AURCache,
-			config.Runtime.Logger.Child("querybuilder"), config.SortBy,
-			config.Runtime.Mode, config.SearchBy, config.BottomUp,
-			config.SingleLineResults, config.NewInstallEngine)
+	if cfg.SeparateSources {
+		cfg.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
+			cfg.Runtime.AURClient, cfg.Runtime.AURCache,
+			cfg.Runtime.Logger.Child("querybuilder"), cfg.SortBy,
+			cfg.Runtime.Mode, cfg.SearchBy, cfg.BottomUp,
+			cfg.SingleLineResults, cfg.NewInstallEngine)
 	} else {
-		config.Runtime.QueryBuilder = query.NewMixedSourceQueryBuilder(
-			config.Runtime.AURClient, config.Runtime.AURCache,
-			config.Runtime.Logger.Child("mixed.querybuilder"), config.SortBy,
-			config.Runtime.Mode, config.SearchBy,
-			config.BottomUp, config.SingleLineResults, config.NewInstallEngine)
+		cfg.Runtime.QueryBuilder = query.NewMixedSourceQueryBuilder(
+			cfg.Runtime.AURClient, cfg.Runtime.AURCache,
+			cfg.Runtime.Logger.Child("mixed.querybuilder"), cfg.SortBy,
+			cfg.Runtime.Mode, cfg.SearchBy,
+			cfg.BottomUp, cfg.SingleLineResults, cfg.NewInstallEngine)
 	}
 
 	var useColor bool
 
-	config.Runtime.PacmanConf, useColor, err = settings.RetrievePacmanConfig(cmdArgs, config.PacmanConf)
+	cfg.Runtime.PacmanConf, useColor, err = settings.RetrievePacmanConfig(cmdArgs, cfg.PacmanConf)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -120,11 +125,11 @@ func main() {
 		return
 	}
 
-	config.Runtime.CmdBuilder.SetPacmanDBPath(config.Runtime.PacmanConf.DBPath)
+	cfg.Runtime.CmdBuilder.SetPacmanDBPath(cfg.Runtime.PacmanConf.DBPath)
 
 	text.UseColor = useColor
 
-	dbExecutor, err := ialpm.NewExecutor(config.Runtime.PacmanConf)
+	dbExecutor, err := ialpm.NewExecutor(cfg.Runtime.PacmanConf)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -144,7 +149,7 @@ func main() {
 		dbExecutor.Cleanup()
 	}()
 
-	if err = handleCmd(ctx, config, cmdArgs, db.Executor(dbExecutor)); err != nil {
+	if err = handleCmd(ctx, cfg, cmdArgs, db.Executor(dbExecutor)); err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
 		}

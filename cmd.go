@@ -151,7 +151,7 @@ getpkgbuild specific options:
 
 func handleCmd(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("h", "help") {
-		return handleHelp(ctx, cmdArgs)
+		return handleHelp(ctx, cfg, cmdArgs)
 	}
 
 	if cfg.SudoLoop && cmdArgs.NeedRoot(cfg.Runtime.Mode) {
@@ -170,9 +170,9 @@ func handleCmd(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case "Q", "query":
-		return handleQuery(ctx, cmdArgs, dbExecutor)
+		return handleQuery(ctx, cfg, cmdArgs, dbExecutor)
 	case "R", "remove":
-		return handleRemove(ctx, cmdArgs, cfg.Runtime.VCSStore)
+		return handleRemove(ctx, cfg, cmdArgs, cfg.Runtime.VCSStore)
 	case "S", "sync":
 		return handleSync(ctx, cfg, cmdArgs, dbExecutor)
 	case "T", "deptest":
@@ -183,13 +183,13 @@ func handleCmd(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 	case "B", "build":
 		return handleBuild(ctx, cfg, dbExecutor, cmdArgs)
 	case "G", "getpkgbuild":
-		return handleGetpkgbuild(ctx, cmdArgs, dbExecutor)
+		return handleGetpkgbuild(ctx, cfg, cmdArgs, dbExecutor)
 	case "P", "show":
-		return handlePrint(ctx, cmdArgs, dbExecutor)
+		return handlePrint(ctx, cfg, cmdArgs, dbExecutor)
 	case "Y", "yay":
-		return handleYay(ctx, cmdArgs, dbExecutor, cfg.Runtime.QueryBuilder)
+		return handleYay(ctx, cfg, cmdArgs, dbExecutor, cfg.Runtime.QueryBuilder)
 	case "W", "web":
-		return handleWeb(ctx, cmdArgs)
+		return handleWeb(ctx, cfg, cmdArgs)
 	}
 
 	return errors.New(gotext.Get("unhandled operation"))
@@ -219,18 +219,19 @@ func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {
 	}, nil
 }
 
-func handleQuery(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleQuery(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("u", "upgrades") {
 		filter, err := getFilter(cmdArgs)
 		if err != nil {
 			return err
 		}
 
-		return printUpdateList(ctx, cmdArgs, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
+		return printUpdateList(ctx, cfg, cmdArgs, dbExecutor,
+			cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	}
 
-	if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm)); err != nil {
+	if err := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, cfg.Runtime.Mode, settings.NoConfirm)); err != nil {
 		if str := err.Error(); strings.Contains(str, "exit status") {
 			// yay -Qdt should not output anything in case of error
 			return fmt.Errorf("")
@@ -242,22 +243,22 @@ func handleQuery(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 	return nil
 }
 
-func handleHelp(ctx context.Context, cmdArgs *parser.Arguments) error {
+func handleHelp(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments) error {
 	switch cmdArgs.Op {
 	case "Y", "yay", "G", "getpkgbuild", "P", "show", "W", "web", "B", "build":
 		usage()
 		return nil
 	}
 
-	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+	return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 }
 
 func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
-func handlePrint(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handlePrint(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.DefaultConfig(yayVersion)
@@ -265,7 +266,7 @@ func handlePrint(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 
 		return nil
 	case cmdArgs.ExistsArg("g", "currentconfig"):
-		fmt.Printf("%v", config)
+		fmt.Printf("%v", cfg)
 
 		return nil
 	case cmdArgs.ExistsArg("n", "numberupgrades"):
@@ -274,60 +275,62 @@ func handlePrint(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.E
 			return err
 		}
 
-		return printNumberOfUpdates(ctx, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
+		return printNumberOfUpdates(ctx, cfg, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
 
-		return news.PrintNewsFeed(ctx, config.Runtime.HTTPClient, dbExecutor.LastBuildTime(), config.BottomUp, double, quiet)
+		return news.PrintNewsFeed(ctx, cfg.Runtime.HTTPClient, dbExecutor.LastBuildTime(), cfg.BottomUp, double, quiet)
 	case cmdArgs.ExistsDouble("c", "complete"):
-		return completion.Show(ctx, config.Runtime.HTTPClient, dbExecutor,
-			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, true)
+		return completion.Show(ctx, cfg.Runtime.HTTPClient, dbExecutor,
+			cfg.AURURL, cfg.Runtime.CompletionPath, cfg.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
-		return completion.Show(ctx, config.Runtime.HTTPClient, dbExecutor,
-			config.AURURL, config.Runtime.CompletionPath, config.CompletionInterval, false)
+		return completion.Show(ctx, cfg.Runtime.HTTPClient, dbExecutor,
+			cfg.AURURL, cfg.Runtime.CompletionPath, cfg.CompletionInterval, false)
 	case cmdArgs.ExistsArg("s", "stats"):
-		return localStatistics(ctx, dbExecutor)
+		return localStatistics(ctx, cfg, dbExecutor)
 	}
 
 	return nil
 }
 
-func handleYay(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Executor, queryBuilder query.Builder) error {
+func handleYay(ctx context.Context, cfg *settings.Configuration,
+	cmdArgs *parser.Arguments, dbExecutor db.Executor, queryBuilder query.Builder,
+) error {
 	switch {
 	case cmdArgs.ExistsArg("gendb"):
-		return createDevelDB(ctx, config, dbExecutor)
+		return createDevelDB(ctx, cfg, dbExecutor)
 	case cmdArgs.ExistsDouble("c"):
-		return cleanDependencies(ctx, cmdArgs, dbExecutor, true)
+		return cleanDependencies(ctx, cfg, cmdArgs, dbExecutor, true)
 	case cmdArgs.ExistsArg("c", "clean"):
-		return cleanDependencies(ctx, cmdArgs, dbExecutor, false)
+		return cleanDependencies(ctx, cfg, cmdArgs, dbExecutor, false)
 	case len(cmdArgs.Targets) > 0:
-		return displayNumberMenu(ctx, cmdArgs.Targets, dbExecutor, queryBuilder, cmdArgs)
+		return displayNumberMenu(ctx, cfg, cmdArgs.Targets, dbExecutor, queryBuilder, cmdArgs)
 	}
 
 	return nil
 }
 
-func handleWeb(ctx context.Context, cmdArgs *parser.Arguments) error {
+func handleWeb(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments) error {
 	switch {
 	case cmdArgs.ExistsArg("v", "vote"):
-		return handlePackageVote(ctx, cmdArgs.Targets, config.Runtime.AURClient,
-			config.Runtime.VoteClient, config.RequestSplitN, true)
+		return handlePackageVote(ctx, cmdArgs.Targets, cfg.Runtime.AURClient,
+			cfg.Runtime.VoteClient, cfg.RequestSplitN, true)
 	case cmdArgs.ExistsArg("u", "unvote"):
-		return handlePackageVote(ctx, cmdArgs.Targets, config.Runtime.AURClient,
-			config.Runtime.VoteClient, config.RequestSplitN, false)
+		return handlePackageVote(ctx, cmdArgs.Targets, cfg.Runtime.AURClient,
+			cfg.Runtime.VoteClient, cfg.RequestSplitN, false)
 	}
 
 	return nil
 }
 
-func handleGetpkgbuild(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
+func handleGetpkgbuild(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
-		return printPkgbuilds(dbExecutor, config.Runtime.AURCache,
-			config.Runtime.HTTPClient, cmdArgs.Targets, config.Runtime.Mode, config.AURURL)
+		return printPkgbuilds(dbExecutor, cfg.Runtime.AURCache,
+			cfg.Runtime.HTTPClient, cmdArgs.Targets, cfg.Runtime.Mode, cfg.AURURL)
 	}
 
-	return getPkgbuilds(ctx, dbExecutor, config.Runtime.AURCache, config,
+	return getPkgbuilds(ctx, dbExecutor, cfg.Runtime.AURCache, cfg,
 		cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }
 
@@ -359,20 +362,20 @@ func handleSync(ctx context.Context, cfg *settings.Configuration, cmdArgs *parse
 		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case cmdArgs.ExistsArg("c", "clean"):
-		return syncClean(ctx, cmdArgs, dbExecutor)
+		return syncClean(ctx, cfg, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("l", "list"):
-		return syncList(ctx, cfg.Runtime.HTTPClient, cmdArgs, dbExecutor)
+		return syncList(ctx, cfg, cfg.Runtime.HTTPClient, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("g", "groups"):
 		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	case cmdArgs.ExistsArg("i", "info"):
-		return syncInfo(ctx, cmdArgs, targets, dbExecutor)
+		return syncInfo(ctx, cfg, cmdArgs, targets, dbExecutor)
 	case cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0:
 		if cfg.NewInstallEngine {
 			return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
 		}
 
-		return install(ctx, cmdArgs, dbExecutor, false)
+		return install(ctx, cfg, cmdArgs, dbExecutor, false)
 	case cmdArgs.ExistsArg("y", "refresh"):
 		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
@@ -381,9 +384,9 @@ func handleSync(ctx context.Context, cfg *settings.Configuration, cmdArgs *parse
 	return nil
 }
 
-func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache vcs.Store) error {
-	err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+func handleRemove(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, localCache vcs.Store) error {
+	err := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+		cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	if err == nil {
 		localCache.RemovePackages(cmdArgs.Targets)
 	}
@@ -392,7 +395,7 @@ func handleRemove(ctx context.Context, cmdArgs *parser.Arguments, localCache vcs
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executor,
+func displayNumberMenu(ctx context.Context, cfg *settings.Configuration, pkgS []string, dbExecutor db.Executor,
 	queryBuilder query.Builder, cmdArgs *parser.Arguments,
 ) error {
 	queryBuilder.Execute(ctx, dbExecutor, pkgS)
@@ -429,25 +432,27 @@ func displayNumberMenu(ctx context.Context, pkgS []string, dbExecutor db.Executo
 		return nil
 	}
 
-	if config.NewInstallEngine {
-		return syncInstall(ctx, config, cmdArgs, dbExecutor)
+	if cfg.NewInstallEngine {
+		return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
 	}
 
-	return install(ctx, cmdArgs, dbExecutor, true)
+	return install(ctx, cfg, cmdArgs, dbExecutor, true)
 }
 
-func syncList(ctx context.Context, httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func syncList(ctx context.Context, cfg *settings.Configuration,
+	httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.Executor,
+) error {
 	aur := false
 
 	for i := len(cmdArgs.Targets) - 1; i >= 0; i-- {
-		if cmdArgs.Targets[i] == "aur" && config.Runtime.Mode.AtLeastAUR() {
+		if cmdArgs.Targets[i] == "aur" && cfg.Runtime.Mode.AtLeastAUR() {
 			cmdArgs.Targets = append(cmdArgs.Targets[:i], cmdArgs.Targets[i+1:]...)
 			aur = true
 		}
 	}
 
-	if config.Runtime.Mode.AtLeastAUR() && (len(cmdArgs.Targets) == 0 || aur) {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, config.AURURL+"/packages.gz", http.NoBody)
+	if cfg.Runtime.Mode.AtLeastAUR() && (len(cmdArgs.Targets) == 0 || aur) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.AURURL+"/packages.gz", http.NoBody)
 		if err != nil {
 			return err
 		}
@@ -478,9 +483,9 @@ func syncList(ctx context.Context, httpClient *http.Client, cmdArgs *parser.Argu
 		}
 	}
 
-	if config.Runtime.Mode.AtLeastRepo() && (len(cmdArgs.Targets) != 0 || !aur) {
-		return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, config.Runtime.Mode, settings.NoConfirm))
+	if cfg.Runtime.Mode.AtLeastRepo() && (len(cmdArgs.Targets) != 0 || !aur) {
+		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
+			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm))
 	}
 
 	return nil
