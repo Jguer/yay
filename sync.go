@@ -20,20 +20,20 @@ import (
 )
 
 func syncInstall(ctx context.Context,
-	config *settings.Configuration,
+	cfg *settings.Configuration,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache := config.Runtime.AURCache
+	aurCache := cfg.Runtime.AURCache
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	noDeps := cmdArgs.ExistsArg("d", "nodeps")
-	noCheck := strings.Contains(config.MFlags, "--nocheck")
+	noCheck := strings.Contains(cfg.MFlags, "--nocheck")
 	if noDeps {
-		config.Runtime.CmdBuilder.AddMakepkgFlag("-d")
+		cfg.Runtime.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
-	if refreshArg && config.Runtime.Mode.AtLeastRepo() {
-		if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
+	if refreshArg && cfg.Runtime.Mode.AtLeastRepo() {
+		if errR := earlyRefresh(ctx, cfg, cfg.Runtime.CmdBuilder, cmdArgs); errR != nil {
 			return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 		}
 
@@ -45,7 +45,7 @@ func syncInstall(ctx context.Context,
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
-		noDeps, noCheck, cmdArgs.ExistsArg("needed"), config.Runtime.Logger.Child("grapher"))
+		noDeps, noCheck, cmdArgs.ExistsArg("needed"), cfg.Runtime.Logger.Child("grapher"))
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {
@@ -57,8 +57,8 @@ func syncInstall(ctx context.Context,
 		var errSysUp error
 
 		upService := upgrade.NewUpgradeService(
-			grapher, aurCache, dbExecutor, config.Runtime.VCSStore,
-			config.Runtime, config, settings.NoConfirm, config.Runtime.Logger.Child("upgrade"))
+			grapher, aurCache, dbExecutor, cfg.Runtime.VCSStore,
+			cfg.Runtime, cfg, settings.NoConfirm, cfg.Runtime.Logger.Child("upgrade"))
 
 		excluded, graph, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errSysUp != nil {
@@ -66,7 +66,7 @@ func syncInstall(ctx context.Context,
 		}
 	}
 
-	opService := NewOperationService(ctx, config, dbExecutor)
+	opService := NewOperationService(ctx, cfg, dbExecutor)
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {

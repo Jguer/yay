@@ -104,7 +104,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 	if config.Runtime.Mode.AtLeastRepo() {
 		if config.CombinedUpgrade {
 			if refreshArg {
-				if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
+				if errR := earlyRefresh(ctx, config, config.Runtime.CmdBuilder, cmdArgs); errR != nil {
 					return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 				}
 				cmdArgs.DelArg("y", "refresh")
@@ -452,7 +452,7 @@ func earlyPacmanCall(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor 
 	return nil
 }
 
-func earlyRefresh(ctx context.Context, cmdArgs *parser.Arguments) error {
+func earlyRefresh(ctx context.Context, cfg *settings.Configuration, cmdBuilder exe.ICmdBuilder, cmdArgs *parser.Arguments) error {
 	arguments := cmdArgs.Copy()
 	arguments.DelArg("u", "sysupgrade")
 	arguments.DelArg("s", "search")
@@ -460,8 +460,8 @@ func earlyRefresh(ctx context.Context, cmdArgs *parser.Arguments) error {
 	arguments.DelArg("l", "list")
 	arguments.ClearTargets()
 
-	return config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-		arguments, config.Runtime.Mode, settings.NoConfirm))
+	return cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
+		arguments, cfg.Runtime.Mode, settings.NoConfirm))
 }
 
 func confirmIncompatibleInstall(srcinfos map[string]*gosrc.Srcinfo, dbExecutor db.Executor) error {

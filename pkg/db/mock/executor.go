@@ -26,6 +26,7 @@ type DBExecutor struct {
 	InstalledRemotePackageNamesFn func() []string
 	InstalledRemotePackagesFn     func() map[string]IPackage
 	SyncUpgradesFn                func(bool) (map[string]db.SyncUpgrade, error)
+	RefreshHandleFn               func() error
 	ReposFn                       func() []string
 }
 
@@ -117,6 +118,9 @@ func (t *DBExecutor) PackagesFromGroup(s string) []IPackage {
 }
 
 func (t *DBExecutor) RefreshHandle() error {
+	if t.RefreshHandleFn != nil {
+		return t.RefreshHandleFn()
+	}
 	panic("implement me")
 }
 
