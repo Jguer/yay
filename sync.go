@@ -52,6 +52,7 @@ func syncInstall(ctx context.Context,
 		return err
 	}
 
+	excluded := []string{}
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		var errSysUp error
 
@@ -59,7 +60,7 @@ func syncInstall(ctx context.Context,
 			grapher, aurCache, dbExecutor, config.Runtime.VCSStore,
 			config.Runtime, config, settings.NoConfirm, config.Runtime.Logger.Child("upgrade"))
 
-		graph, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		excluded, graph, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
 		if errSysUp != nil {
 			return errSysUp
 		}
@@ -78,7 +79,7 @@ func syncInstall(ctx context.Context,
 		return err
 	}
 
-	return opService.Run(ctx, cmdArgs, targets)
+	return opService.Run(ctx, cmdArgs, targets, excluded)
 }
 
 type OperationService struct {
@@ -97,7 +98,7 @@ func NewOperationService(ctx context.Context, cfg *settings.Configuration, dbExe
 
 func (o *OperationService) Run(ctx context.Context,
 	cmdArgs *parser.Arguments,
-	targets []map[string]*dep.InstallInfo,
+	targets []map[string]*dep.InstallInfo, excluded []string,
 ) error {
 	if len(targets) == 0 {
 		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
@@ -148,7 +149,7 @@ func (o *OperationService) Run(ctx context.Context,
 		return errPGP
 	}
 
-	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs); errInstall != nil {
+	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs, excluded); errInstall != nil {
 		return errInstall
 	}
 

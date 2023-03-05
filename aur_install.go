@@ -82,12 +82,13 @@ func (installer *Installer) Install(ctx context.Context,
 	cmdArgs *parser.Arguments,
 	targets []map[string]*dep.InstallInfo,
 	pkgBuildDirs map[string]string,
+	excluded []string,
 ) error {
 	// Reorganize targets into layers of dependencies
 	var errMulti multierror.MultiError
 	for i := len(targets) - 1; i >= 0; i-- {
 		lastLayer := i == 0
-		errI := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, lastLayer)
+		errI := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, lastLayer, excluded)
 		if errI == nil && lastLayer {
 			// success after rollups
 			return nil
@@ -121,12 +122,14 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	layer map[string]*dep.InstallInfo,
 	pkgBuildDirs map[string]string,
 	lastLayer bool,
+	excluded []string,
 ) error {
 	// Install layer
 	nameToBaseMap := make(map[string]string, 0)
 	syncDeps, syncExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 	aurDeps, aurExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 
+	upgradeSync := false
 	for name, info := range layer {
 		switch info.Source {
 		case dep.AUR, dep.SrcInfo:
@@ -143,6 +146,10 @@ func (installer *Installer) handleLayer(ctx context.Context,
 				aurDeps.Add(name)
 			}
 		case dep.Sync:
+			if info.Upgrade {
+				upgradeSync = true
+				continue // do not add to targets, let pacman handle it
+			}
 			compositePkgName := fmt.Sprintf("%s/%s", *info.SyncDBName, name)
 
 			switch info.Reason {
@@ -160,7 +167,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 
 	text.Debugln("syncDeps", syncDeps, "SyncExp", syncExp, "aurDeps", aurDeps, "aurExp", aurExp)
 
-	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp)
+	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp, excluded, upgradeSync)
 	if errShow != nil {
 		return ErrInstallRepoPkgs
 	}
@@ -349,9 +356,11 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Arguments,
 	syncDeps, // repo targets that are deps
 	syncExp mapset.Set[string], // repo targets that are exp
+	excluded []string,
+	upgrade bool, // run even without targets
 ) error {
 	repoTargets := syncDeps.Union(syncExp).ToSlice()
-	if len(repoTargets) == 0 {
+	if len(repoTargets) == 0 && !upgrade {
 		return nil
 	}
 
@@ -359,10 +368,12 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 	arguments.DelArg("asdeps", "asdep")
 	arguments.DelArg("asexplicit", "asexp")
 	arguments.DelArg("i", "install")
-	arguments.DelArg("u", "upgrade")
 	arguments.Op = "S"
 	arguments.ClearTargets()
 	arguments.AddTarget(repoTargets...)
+	if len(excluded) > 0 {
+		arguments.CreateOrAppendOption("ignore", excluded...)
+	}
 
 	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
 		arguments, installer.targetMode, settings.NoConfirm))

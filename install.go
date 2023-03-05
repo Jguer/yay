@@ -107,6 +107,7 @@ func install(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor db.Execu
 				if errR := earlyRefresh(ctx, cmdArgs); errR != nil {
 					return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 				}
+				cmdArgs.DelArg("y", "refresh")
 			}
 		} else if refreshArg || sysupgradeArg || len(cmdArgs.Targets) > 0 {
 			if errP := earlyPacmanCall(ctx, cmdArgs, dbExecutor); errP != nil {
@@ -453,7 +454,6 @@ func earlyPacmanCall(ctx context.Context, cmdArgs *parser.Arguments, dbExecutor 
 
 func earlyRefresh(ctx context.Context, cmdArgs *parser.Arguments) error {
 	arguments := cmdArgs.Copy()
-	cmdArgs.DelArg("y", "refresh")
 	arguments.DelArg("u", "sysupgrade")
 	arguments.DelArg("s", "search")
 	arguments.DelArg("i", "info")

@@ -136,6 +136,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		args         args
 		mustExist    map[string]*dep.InstallInfo
 		mustNotExist map[string]bool
+		wantExclude  []string
 		wantErr      bool
 	}{
 		{
@@ -156,6 +157,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			},
 			mustNotExist: map[string]bool{},
 			wantErr:      false,
+			wantExclude:  []string{},
 		},
 		{
 			name: "no input devel",
@@ -176,6 +178,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			},
 			mustNotExist: map[string]bool{},
 			wantErr:      false,
+			wantExclude:  []string{},
 		},
 		{
 			name: "exclude yay",
@@ -194,6 +197,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			},
 			mustNotExist: map[string]bool{"yay": true},
 			wantErr:      false,
+			wantExclude:  []string{"yay"},
 		},
 		{
 			name: "exclude linux",
@@ -212,6 +216,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			},
 			mustNotExist: map[string]bool{"linux": true},
 			wantErr:      false,
+			wantExclude:  []string{"linux"},
 		},
 		{
 			name: "only linux",
@@ -229,6 +234,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			},
 			mustNotExist: map[string]bool{"yay": true, "example-git": true},
 			wantErr:      false,
+			wantExclude:  []string{"yay", "example-git"},
 		},
 		{
 			name: "exclude all",
@@ -244,6 +250,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			mustExist:    map[string]*dep.InstallInfo{},
 			mustNotExist: map[string]bool{"yay": true, "example-git": true, "linux": true},
 			wantErr:      false,
+			wantExclude:  []string{"yay", "example-git", "linux"},
 		},
 	}
 	for _, tt := range tests {
@@ -269,7 +276,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				noConfirm:  tt.fields.noConfirm,
 			}
 
-			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade)
+			excluded, got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -283,6 +290,8 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 			for node := range tt.mustNotExist {
 				assert.False(t, got.Exists(node), node)
 			}
+
+			assert.ElementsMatch(t, tt.wantExclude, excluded)
 		})
 	}
 }
