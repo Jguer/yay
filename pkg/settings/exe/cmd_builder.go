@@ -57,6 +57,7 @@ type CmdBuilder struct {
 	PacmanConfigPath string
 	PacmanDBPath     string
 	Runner           Runner
+	Log              *text.Logger
 }
 
 func (c *CmdBuilder) BuildGPGCmd(ctx context.Context, extraArgs ...string) *exec.Cmd {
@@ -217,7 +218,7 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 	argArr = append(argArr, args.Targets...)
 
 	if needsRoot {
-		waitLock(c.PacmanDBPath)
+		c.waitLock(c.PacmanDBPath)
 
 		if os.Geteuid() != 0 {
 			return c.buildPrivilegeElevatorCommand(ctx, argArr)
@@ -228,14 +229,14 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 }
 
 // waitLock will lock yay checking the status of db.lck until it does not exist.
-func waitLock(dbPath string) {
+func (c *CmdBuilder) waitLock(dbPath string) {
 	lockDBPath := filepath.Join(dbPath, "db.lck")
 	if _, err := os.Stat(lockDBPath); err != nil {
 		return
 	}
 
-	text.Warnln(gotext.Get("%s is present.", lockDBPath))
-	text.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
+	c.Log.Warnln(gotext.Get("%s is present.", lockDBPath))
+	c.Log.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
 
 	for {
 		time.Sleep(3 * time.Second)
@@ -265,7 +266,7 @@ func (c *CmdBuilder) updateSudo() {
 	for {
 		err := c.Show(exec.Command(c.SudoBin, "-v"))
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			c.Log.Errorln(err)
 		} else {
 			break
 		}

@@ -71,7 +71,9 @@ func TestNewInfoStore(t *testing.T) {
 			name: "normal",
 			args: args{
 				"/tmp/a.json",
-				&exe.CmdBuilder{GitBin: "git", GitFlags: []string{"--a", "--b"}, Runner: &exe.OSRunner{}},
+				&exe.CmdBuilder{GitBin: "git", GitFlags: []string{"--a", "--b"}, Runner: &exe.OSRunner{
+					Log: text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
+				}},
 			},
 		},
 	}
