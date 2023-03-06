@@ -363,7 +363,7 @@ func (c *Configuration) load(configPath string) {
 
 func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
 	if runner == nil {
-		runner = &exe.OSRunner{}
+		runner = &exe.OSRunner{Log: c.Runtime.Logger.Child("runner")}
 	}
 
 	return &exe.CmdBuilder{
@@ -381,5 +381,6 @@ func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
 		PacmanConfigPath: c.PacmanConf,
 		PacmanDBPath:     "",
 		Runner:           runner,
+		Log:              c.Runtime.Logger.Child("cmd_builder"),
 	}
 }

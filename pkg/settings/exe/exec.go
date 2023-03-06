@@ -15,19 +15,21 @@ type Runner interface {
 	Show(cmd *exec.Cmd) error
 }
 
-type OSRunner struct{}
+type OSRunner struct {
+	Log *text.Logger
+}
 
 func (r *OSRunner) Show(cmd *exec.Cmd) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Pdeathsig: syscall.SIGTERM,
 	}
-	text.Debugln("running", cmd.String())
+	r.Log.Debugln("running", cmd.String())
 	return cmd.Run()
 }
 
 func (r *OSRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
-	text.Debugln("capturing", cmd.String())
+	r.Log.Debugln("capturing", cmd.String())
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Pdeathsig: syscall.SIGTERM,
 	}

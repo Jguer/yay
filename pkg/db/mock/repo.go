@@ -82,27 +82,27 @@ func (p *Package) Backup() alpm.BackupList {
 }
 
 // Conflicts returns the conflicts of the package as a DependList.
-func (p *Package) Conflicts() alpm.DependList {
+func (p *Package) Conflicts() alpm.IDependList {
 	panic("not implemented")
 }
 
 // Depends returns the package's dependency list.
-func (p *Package) Depends() alpm.DependList {
+func (p *Package) Depends() alpm.IDependList {
 	return alpm.DependList{}
 }
 
 // Depends returns the package's optional dependency list.
-func (p *Package) OptionalDepends() alpm.DependList {
+func (p *Package) OptionalDepends() alpm.IDependList {
 	panic("not implemented")
 }
 
 // Depends returns the package's check dependency list.
-func (p *Package) CheckDepends() alpm.DependList {
+func (p *Package) CheckDepends() alpm.IDependList {
 	panic("not implemented")
 }
 
 // Depends returns the package's make dependency list.
-func (p *Package) MakeDepends() alpm.DependList {
+func (p *Package) MakeDepends() alpm.IDependList {
 	panic("not implemented")
 }
 
@@ -147,7 +147,7 @@ func (p *Package) Packager() string {
 }
 
 // Provides returns DependList of packages provides by package.
-func (p *Package) Provides() alpm.DependList {
+func (p *Package) Provides() alpm.IDependList {
 	return alpm.DependList{}
 }
 
@@ -157,7 +157,7 @@ func (p *Package) Origin() alpm.PkgFrom {
 }
 
 // Replaces returns a DependList with the packages this package replaces.
-func (p *Package) Replaces() alpm.DependList {
+func (p *Package) Replaces() alpm.IDependList {
 	panic("not implemented")
 }
 
