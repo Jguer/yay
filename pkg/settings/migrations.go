@@ -3,7 +3,7 @@ package settings
 import (
 	"fmt"
 
-	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/db"
 
 	"github.com/leonelquinteros/gotext"
 )

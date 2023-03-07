@@ -6,7 +6,7 @@ import (
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
 )
 
 func TestPacmanConf(t *testing.T) {

@@ -11,10 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Jguer/yay/v11/pkg/settings/exe"
-	"github.com/Jguer/yay/v11/pkg/settings/parser"
-	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/Jguer/yay/v11/pkg/vcs"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/vcs"
 
 	"github.com/Jguer/aur/metadata"
 	"github.com/Jguer/aur/rpc"

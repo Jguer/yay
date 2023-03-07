@@ -9,13 +9,13 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/pgp"
-	"github.com/Jguer/yay/v11/pkg/settings"
-	"github.com/Jguer/yay/v11/pkg/settings/exe"
-	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/Jguer/yay/v11/pkg/vcs"
+	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/pgp"
+	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
 // TODO: add tests

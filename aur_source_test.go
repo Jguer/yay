@@ -10,8 +10,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v11/pkg/multierror"
-	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
 )
 
 type TestMakepkgBuilder struct {

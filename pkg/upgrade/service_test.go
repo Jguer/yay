@@ -10,16 +10,16 @@ import (
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/db/mock"
-	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/settings"
-	"github.com/Jguer/yay/v11/pkg/settings/parser"
-	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/Jguer/yay/v11/pkg/topo"
-	"github.com/Jguer/yay/v11/pkg/vcs"
+	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/db/mock"
+	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/topo"
+	"github.com/Jguer/yay/v12/pkg/vcs"
 
-	mockaur "github.com/Jguer/yay/v11/pkg/dep/mock"
+	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 )
 
 func ptrString(s string) *string {

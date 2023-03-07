@@ -12,9 +12,9 @@ import (
 
 	"github.com/Jguer/aur"
 
-	mockaur "github.com/Jguer/yay/v11/pkg/dep/mock"
-	"github.com/Jguer/yay/v11/pkg/settings/exe"
-	"github.com/Jguer/yay/v11/pkg/settings/parser"
+	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
 )
 
 // GIVEN 2 aur packages and 1 in repo

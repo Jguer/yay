@@ -9,7 +9,7 @@ import (
 	"github.com/Jguer/votar/pkg/vote"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/query"
 )
 
 type ErrAURVote struct {

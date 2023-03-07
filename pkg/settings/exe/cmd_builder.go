@@ -15,8 +15,8 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/settings/parser"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 const SudoLoopDuration = 241

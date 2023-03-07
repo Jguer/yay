@@ -11,11 +11,11 @@ import (
 	aurc "github.com/Jguer/aur"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/db/mock"
-	mockaur "github.com/Jguer/yay/v11/pkg/dep/mock"
-	aur "github.com/Jguer/yay/v11/pkg/query"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/db/mock"
+	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	aur "github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func ptrString(s string) *string {

@@ -12,17 +12,17 @@ import (
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/completion"
-	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/download"
-	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/news"
-	"github.com/Jguer/yay/v11/pkg/query"
-	"github.com/Jguer/yay/v11/pkg/settings"
-	"github.com/Jguer/yay/v11/pkg/settings/parser"
-	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/Jguer/yay/v11/pkg/upgrade"
-	"github.com/Jguer/yay/v11/pkg/vcs"
+	"github.com/Jguer/yay/v12/pkg/completion"
+	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/download"
+	"github.com/Jguer/yay/v12/pkg/intrange"
+	"github.com/Jguer/yay/v12/pkg/news"
+	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/upgrade"
+	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
 func usage() {

@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Jguer/yay/v11/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
 )
 
 func makeSrcinfo(pkgbase string, pgpkeys ...string) *gosrc.Srcinfo {

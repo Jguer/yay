@@ -9,14 +9,14 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/dep"
-	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/multierror"
-	"github.com/Jguer/yay/v11/pkg/settings"
-	"github.com/Jguer/yay/v11/pkg/text"
-	"github.com/Jguer/yay/v11/pkg/topo"
-	"github.com/Jguer/yay/v11/pkg/vcs"
+	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/intrange"
+	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/topo"
+	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
 type UpgradeService struct {
