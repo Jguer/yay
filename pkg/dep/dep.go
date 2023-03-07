@@ -3,9 +3,9 @@ package dep
 import (
 	"strings"
 
-	"github.com/Jguer/yay/v11/pkg/db"
-	aur "github.com/Jguer/yay/v11/pkg/query"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/db"
+	aur "github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type providers struct {

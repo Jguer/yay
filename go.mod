@@ -1,4 +1,4 @@
-module github.com/Jguer/yay/v11
+module github.com/Jguer/yay/v12
 
 require (
 	github.com/Jguer/aur v1.2.3

@@ -3,7 +3,7 @@ package mock
 import (
 	"time"
 
-	"github.com/Jguer/yay/v11/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/db"
 
 	"github.com/Jguer/go-alpm/v2"
 )

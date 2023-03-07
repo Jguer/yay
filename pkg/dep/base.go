@@ -1,8 +1,8 @@
 package dep
 
 import (
-	aur "github.com/Jguer/yay/v11/pkg/query"
-	"github.com/Jguer/yay/v11/pkg/stringset"
+	aur "github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/stringset"
 )
 
 // Base is an AUR base package.

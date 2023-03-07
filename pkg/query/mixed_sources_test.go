@@ -7,8 +7,8 @@ import (
 
 	"github.com/Jguer/aur/rpc"
 
-	"github.com/Jguer/yay/v11/pkg/settings/parser"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

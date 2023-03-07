@@ -8,9 +8,9 @@ import (
 	"github.com/Jguer/aur/rpc"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/multierror"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/intrange"
+	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type Pkg = aur.Pkg

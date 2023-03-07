@@ -3,7 +3,7 @@ package upgrade
 import (
 	"testing"
 
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func TestGetVersionDiff(t *testing.T) {

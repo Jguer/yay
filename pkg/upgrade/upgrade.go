@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"unicode"
 
-	"github.com/Jguer/yay/v11/pkg/db"
-	"github.com/Jguer/yay/v11/pkg/intrange"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/intrange"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 // Filter decides if specific package should be included in theincluded in the  results.

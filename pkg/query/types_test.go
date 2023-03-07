@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v11/pkg/db/mock"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/db/mock"
+	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/Jguer/aur"
 )

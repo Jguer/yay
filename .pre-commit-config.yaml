@@ -6,7 +6,7 @@ repos:
     hooks:
       - id: go-fmt
       - id: go-imports
-        args: [-local=github.com/Jguer/yay/v11/]
+        args: [-local=github.com/Jguer/yay/v12/]
       - id: golangci-lint
       - id: go-unit-tests
       - id: go-build

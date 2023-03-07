@@ -9,8 +9,8 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v11/pkg/stringset"
-	"github.com/Jguer/yay/v11/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/stringset"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func (dp *Pool) checkInnerConflict(name, conflict string, conflicts stringset.MapStringSet) {
