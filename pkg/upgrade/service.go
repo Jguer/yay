@@ -241,6 +241,9 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 // removes them from the graph
 func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) ([]string, error) {
 	allUpLen := graph.Len()
+	if allUpLen == 0 {
+		return []string{}, nil
+	}
 	aurUp, repoUp := u.graphToUpSlice(graph)
 
 	sort.Sort(repoUp)
