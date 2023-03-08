@@ -97,24 +97,6 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 	return nil
 }
 
-func printNumberOfUpdates(ctx context.Context, cfg *settings.Configuration,
-	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
-) error {
-	warnings := query.NewWarnings()
-	old := os.Stdout // keep backup of the real stdout
-	os.Stdout = nil
-	aurUp, repoUp, err := upList(ctx, cfg, warnings, dbExecutor, enableDowngrade, filter)
-	os.Stdout = old // restoring the real stdout
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(len(aurUp.Up) + len(repoUp.Up))
-
-	return nil
-}
-
 func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments,
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
