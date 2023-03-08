@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
 	aur "github.com/Jguer/aur"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/upgrade"
 )
@@ -100,74 +100,58 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments,
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
-	targets := stringset.FromSlice(cmdArgs.Targets)
-	warnings := query.NewWarnings()
-	old := os.Stdout // keep backup of the real stdout
-	os.Stdout = nil
+	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
+	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURCache, false, settings.NoConfirm,
+		false, false, cmdArgs.ExistsArg("needed"), cfg.Runtime.Logger.Child("grapher"))
 
-	remoteNames := dbExecutor.InstalledRemotePackageNames()
-	localNames := dbExecutor.InstalledSyncPackageNames()
+	upService := upgrade.NewUpgradeService(
+		grapher, cfg.Runtime.AURCache, dbExecutor, cfg.Runtime.VCSStore,
+		cfg.Runtime, cfg, settings.NoConfirm, cfg.Runtime.Logger.Child("upgrade"))
 
-	aurUp, repoUp, err := upList(ctx, cfg, warnings, dbExecutor, enableDowngrade, filter)
-	os.Stdout = old // restoring the real stdout
-
-	if err != nil {
-		return err
+	graph, errSysUp := upService.GraphUpgrades(ctx, nil,
+		enableDowngrade, filter)
+	if errSysUp != nil {
+		return errSysUp
 	}
 
-	if (len(aurUp.Up) + len(repoUp.Up)) == 0 {
+	if graph.Len() == 0 {
 		return fmt.Errorf("")
 	}
 
-	noTargets := len(targets) == 0
+	noTargets := targets.Cardinality() == 0
+	foreignFilter := cmdArgs.ExistsArg("m", "foreign")
+	nativeFilter := cmdArgs.ExistsArg("m", "native")
+	quietMode := cmdArgs.ExistsArg("q", "quiet")
 
-	if !cmdArgs.ExistsArg("m", "foreign") {
-		for _, pkg := range repoUp.Up {
-			if noTargets || targets.Get(pkg.Name) {
-				if cmdArgs.ExistsArg("q", "quiet") {
-					fmt.Printf("%s\n", pkg.Name)
-				} else {
-					fmt.Printf("%s %s -> %s\n", text.Bold(pkg.Name), text.Green(pkg.LocalVersion), text.Green(pkg.RemoteVersion))
-				}
-
-				delete(targets, pkg.Name)
+	_ = graph.ForEach(func(pkgName string, ii *dep.InstallInfo) error {
+		if noTargets || targets.Contains(pkgName) {
+			if ii.Source == dep.Sync && foreignFilter {
+				return nil
+			} else if ii.Source == dep.AUR && nativeFilter {
+				return nil
 			}
-		}
-	}
 
-	if !cmdArgs.ExistsArg("n", "native") {
-		for _, pkg := range aurUp.Up {
-			if noTargets || targets.Get(pkg.Name) {
-				if cmdArgs.ExistsArg("q", "quiet") {
-					fmt.Printf("%s\n", pkg.Name)
-				} else {
-					fmt.Printf("%s %s -> %s\n", text.Bold(pkg.Name), text.Green(pkg.LocalVersion), text.Green(pkg.RemoteVersion))
-				}
-
-				delete(targets, pkg.Name)
+			if quietMode {
+				fmt.Printf("%s\n", pkgName)
+			} else {
+				fmt.Printf("%s %s -> %s\n", text.Bold(pkgName), text.Green(ii.LocalVersion),
+					text.Green(ii.Version))
 			}
+
+			targets.Remove(pkgName)
 		}
-	}
+
+		return nil
+	})
 
 	missing := false
-
-outer:
-	for pkg := range targets {
-		for _, name := range localNames {
-			if name == pkg {
-				continue outer
-			}
+	targets.Each(func(pkgName string) bool {
+		if dbExecutor.LocalPackage(pkgName) == nil {
+			cfg.Runtime.Logger.Errorln(gotext.Get("package '%s' was not found", pkgName))
+			missing = true
 		}
-
-		for _, name := range remoteNames {
-			if name == pkg {
-				continue outer
-			}
-		}
-
-		text.Errorln(gotext.Get("package '%s' was not found", pkg))
-		missing = true
-	}
+		return false
+	})
 
 	if missing {
 		return fmt.Errorf("")

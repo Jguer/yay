@@ -219,29 +219,27 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 
 func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	graph *topo.Graph[string, *dep.InstallInfo],
-	enableDowngrade bool,
-) ([]string, *topo.Graph[string, *dep.InstallInfo], error) {
+	enableDowngrade bool, filter Filter,
+) (*topo.Graph[string, *dep.InstallInfo], error) {
 	if graph == nil {
 		graph = topo.New[string, *dep.InstallInfo]()
 	}
 
-	err := u.upGraph(ctx, graph, enableDowngrade,
-		func(*Upgrade) bool { return true })
+	err := u.upGraph(ctx, graph, enableDowngrade, filter)
 	if err != nil {
-		return []string{}, graph, err
+		return graph, err
 	}
 
 	if graph.Len() == 0 {
-		return []string{}, graph, nil
+		return graph, nil
 	}
 
-	excluded, errUp := u.userExcludeUpgrades(graph)
-	return excluded, graph, errUp
+	return graph, nil
 }
 
 // userExcludeUpgrades asks the user which packages to exclude from the upgrade and
 // removes them from the graph
-func (u *UpgradeService) userExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) ([]string, error) {
+func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) ([]string, error) {
 	allUpLen := graph.Len()
 	aurUp, repoUp := u.graphToUpSlice(graph)
 

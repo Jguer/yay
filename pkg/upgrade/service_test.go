@@ -9,6 +9,7 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
@@ -276,11 +277,14 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				noConfirm:  tt.fields.noConfirm,
 			}
 
-			excluded, got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade)
+			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
+			excluded, err := u.UserExcludeUpgrades(got)
+			require.NoError(t, err)
 
 			for node, info := range tt.mustExist {
 				assert.True(t, got.Exists(node), node)
