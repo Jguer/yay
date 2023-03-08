@@ -86,7 +86,7 @@ func upList(ctx context.Context, cfg *settings.Configuration,
 			wg.Add(1)
 
 			go func() {
-				aurUp = upgrade.UpAUR(remote, aurdata, cfg.TimeUpdate, enableDowngrade)
+				aurUp = upgrade.UpAUR(cfg.Runtime.Logger, remote, aurdata, cfg.TimeUpdate, enableDowngrade)
 
 				wg.Done()
 			}()
@@ -96,7 +96,7 @@ func upList(ctx context.Context, cfg *settings.Configuration,
 				wg.Add(1)
 
 				go func() {
-					develUp = upgrade.UpDevel(ctx, remote, aurdata, cfg.Runtime.VCSStore)
+					develUp = upgrade.UpDevel(ctx, cfg.Runtime.Logger, remote, aurdata, cfg.Runtime.VCSStore)
 
 					cfg.Runtime.VCSStore.CleanOrphans(remote)
 					wg.Done()

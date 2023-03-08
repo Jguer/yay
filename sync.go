@@ -60,7 +60,13 @@ func syncInstall(ctx context.Context,
 			grapher, aurCache, dbExecutor, cfg.Runtime.VCSStore,
 			cfg.Runtime, cfg, settings.NoConfirm, cfg.Runtime.Logger.Child("upgrade"))
 
-		excluded, graph, errSysUp = upService.GraphUpgrades(ctx, graph, cmdArgs.ExistsDouble("u", "sysupgrade"))
+		graph, errSysUp = upService.GraphUpgrades(ctx,
+			graph, cmdArgs.ExistsDouble("u", "sysupgrade"),
+			func(*upgrade.Upgrade) bool { return true })
+		if errSysUp != nil {
+			return errSysUp
+		}
+		excluded, errSysUp = upService.UserExcludeUpgrades(graph)
 		if errSysUp != nil {
 			return errSysUp
 		}

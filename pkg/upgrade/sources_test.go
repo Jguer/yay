@@ -2,6 +2,8 @@ package upgrade
 
 import (
 	"context"
+	"io"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,6 +13,7 @@ import (
 	alpm "github.com/Jguer/go-alpm/v2"
 
 	"github.com/Jguer/yay/v12/pkg/db/mock"
+	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
@@ -71,7 +74,8 @@ func Test_upAUR(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := UpAUR(tt.args.remote, tt.args.aurdata, tt.args.timeUpdate, false)
+			got := UpAUR(text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+				tt.args.remote, tt.args.aurdata, tt.args.timeUpdate, false)
 			assert.EqualValues(t, tt.want, got)
 		})
 	}
@@ -173,7 +177,9 @@ func Test_upDevel(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := UpDevel(context.Background(), tt.args.remote, tt.args.aurdata, tt.args.cached)
+			got := UpDevel(context.Background(),
+				text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+				tt.args.remote, tt.args.aurdata, tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
 		})
 	}
