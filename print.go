@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 	"strconv"
 
 	aur "github.com/Jguer/aur"
@@ -100,13 +102,19 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments,
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
+	quietMode := cmdArgs.ExistsArg("q", "quiet")
+	logger := cfg.Runtime.Logger.Child("update-list")
+	if quietMode { // TODO: handle quiet mode in a better way
+		logger = text.NewLogger(io.Discard, os.Stdin, cfg.Debug, "update-list")
+	}
+
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
 	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURCache, false, settings.NoConfirm,
-		false, false, cmdArgs.ExistsArg("needed"), cfg.Runtime.Logger.Child("grapher"))
+		false, false, cmdArgs.ExistsArg("needed"), logger.Child("grapher"))
 
 	upService := upgrade.NewUpgradeService(
 		grapher, cfg.Runtime.AURCache, dbExecutor, cfg.Runtime.VCSStore,
-		cfg.Runtime, cfg, settings.NoConfirm, cfg.Runtime.Logger.Child("upgrade"))
+		cfg.Runtime, cfg, settings.NoConfirm, logger.Child("upgrade"))
 
 	graph, errSysUp := upService.GraphUpgrades(ctx, nil,
 		enableDowngrade, filter)
@@ -120,8 +128,7 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 
 	noTargets := targets.Cardinality() == 0
 	foreignFilter := cmdArgs.ExistsArg("m", "foreign")
-	nativeFilter := cmdArgs.ExistsArg("m", "native")
-	quietMode := cmdArgs.ExistsArg("q", "quiet")
+	nativeFilter := cmdArgs.ExistsArg("n", "native")
 
 	_ = graph.ForEach(func(pkgName string, ii *dep.InstallInfo) error {
 		if noTargets || targets.Contains(pkgName) {

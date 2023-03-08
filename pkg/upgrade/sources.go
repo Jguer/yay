@@ -14,6 +14,7 @@ import (
 
 func UpDevel(
 	ctx context.Context,
+	log *text.Logger,
 	remote map[string]db.IPackage,
 	aurdata map[string]*query.Pkg,
 	localCache vcs.Store,
@@ -31,7 +32,7 @@ func UpDevel(
 			}
 
 			if pkg.ShouldIgnore() {
-				printIgnoringPackage(pkg, "latest-commit")
+				printIgnoringPackage(log, pkg, "latest-commit")
 				continue
 			}
 
@@ -52,10 +53,10 @@ func UpDevel(
 	return toUpgrade
 }
 
-func printIgnoringPackage(pkg db.IPackage, newPkgVersion string) {
+func printIgnoringPackage(logger *text.Logger, pkg db.IPackage, newPkgVersion string) {
 	left, right := GetVersionDiff(pkg.Version(), newPkgVersion)
 
-	text.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
+	logger.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
 		text.Cyan(pkg.Name()),
 		left, right,
 	))
@@ -63,7 +64,9 @@ func printIgnoringPackage(pkg db.IPackage, newPkgVersion string) {
 
 // UpAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
-func UpAUR(remote map[string]db.IPackage, aurdata map[string]*query.Pkg, timeUpdate, enableDowngrade bool) UpSlice {
+func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*query.Pkg,
+	timeUpdate, enableDowngrade bool,
+) UpSlice {
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"aur"}}
 
 	for name, pkg := range remote {
@@ -75,7 +78,7 @@ func UpAUR(remote map[string]db.IPackage, aurdata map[string]*query.Pkg, timeUpd
 		if (timeUpdate && (int64(aurPkg.LastModified) > pkg.BuildDate().Unix())) ||
 			(db.VerCmp(pkg.Version(), aurPkg.Version) < 0) || enableDowngrade {
 			if pkg.ShouldIgnore() {
-				printIgnoringPackage(pkg, aurPkg.Version)
+				printIgnoringPackage(log, pkg, aurPkg.Version)
 			} else {
 				toUpgrade.Up = append(toUpgrade.Up,
 					Upgrade{
