@@ -1,4 +1,4 @@
-.TH "YAY" "8" "2019\-10\-21" "Yay v9.4+" "Yay Manual"
+.TH "YAY" "8" "2019\-10\-21" "Yay v12.0+" "Yay Manual"
 .nh
 .ad l
 .SH NAME
@@ -19,10 +19,15 @@ This manpage only covers options unique to Yay. For other options see
 \fBpacman(8)\fR.
 
 .SH YAY OPERATIONS
+
 .TP
 .B \-Y, \-\-yay
 Perform yay specific operations. This is the default if no other operation is
 selected.
+
+.TP
+.B \-B, \-\-build
+Build a PKGBUILD in a given directory.
 
 .TP
 .B \-P, \-\-show
@@ -31,6 +36,10 @@ Perform yay specific print operations.
 .TP
 .B \-G, \-\-getpkgbuild
 Downloads PKGBUILD from ABS or AUR. The ABS can only be used for Arch Linux repositories.
+
+.TP
+.B \-W, \-\-web
+Web related operations such as voting for AUR packages.
 
 .RE
 If no arguments are provided 'yay \-Syu' will be performed.
@@ -84,15 +93,11 @@ used when migrating to Yay from another AUR helper.
 .B \-c, \-\-clean
 Remove unneeded dependencies.
 
-.SH SHOW OPTIONS (APPLY TO \-P AND \-\-SHOW)
+.SH SHOW OPTIONS (APPLY TO \-P AND \-\-show)
 .TP
 .B \-c, \-\-complete
 Print a list of all AUR and repo packages. This allows shell completion
 and is not intended to be used directly by the user.
-
-.TP
-.B \-f, \-\-fish
-During complete adjust the output for the fish shell.
 
 .TP
 .B \-d, \-\-defaultconfig
@@ -103,18 +108,10 @@ Print default yay configuration.
 Print current yay configuration.
 
 .TP
-.B \-n, \-\-numberupgrades
-Deprecated, use \fByay -Qu\fR and \fBwc -l\fR instead\%.
-
-.TP
 .B \-s, \-\-stats
 Displays information about installed packages and system health. If there are
 orphaned, or out\-of\-date packages, or packages that no longer exist on the
 AUR; warnings will be displayed.
-
-.TP
-.B \-u, \-\-upgrades
-Deprecated, use \fByay -Qu\fR instead\%.
 
 .TP
 .B \-w, \-\-news
@@ -126,7 +123,12 @@ available news.
 .B \-q, \-\-quiet
 Only show titles when printing news.
 
-.SH GETPKGBUILD OPTIONS (APPLY TO \-G AND \-\-GETPKGBUILD)
+.SH BUILD OPTIONS (APPLY TO \-B AND \-\-build)
+.TP
+.B \-i, \-\-install
+Build and install a PKGBUILD in a given directory
+
+.SH GETPKGBUILD OPTIONS (APPLY TO \-G AND \-\-getpkgbuild)
 .TP
 .B \-f, \-\-force
 Force download for ABS packages that already exist in the current directory. This
@@ -136,7 +138,7 @@ ensures directories are not accidentally overwritten.
 .B \-p, \-\-print
 Prints the PKGBUILD of the given packages to stdout.
 
-.SH WEB OPTIONS (APPLY TO \-W AND \-\-WEB)
+.SH WEB OPTIONS (APPLY TO \-W AND \-\-web)
 
 .TP
 Web related operations such as voting for AUR packages.
@@ -644,6 +646,6 @@ See the arch wiki at https://wiki.archlinux.org/index.php/Arch_User_Repository f
 Please report bugs to our GitHub page https://github.com/Jguer/yay
 
 .SH AUTHORS
-Jguer <joaogg3@gmail.com>
+Jguer <joguer@proton.me>
 .br
 Morgan <morganamilo@archlinux.org>

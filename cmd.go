@@ -269,24 +269,14 @@ func handlePrint(ctx context.Context, cfg *settings.Configuration, cmdArgs *pars
 		fmt.Printf("%v", cfg)
 
 		return nil
-	case cmdArgs.ExistsArg("n", "numberupgrades"):
-		filter, err := getFilter(cmdArgs)
-		if err != nil {
-			return err
-		}
-
-		return printNumberOfUpdates(ctx, cfg, dbExecutor, cmdArgs.ExistsDouble("u", "sysupgrade"), filter)
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
 
 		return news.PrintNewsFeed(ctx, cfg.Runtime.HTTPClient, dbExecutor.LastBuildTime(), cfg.BottomUp, double, quiet)
-	case cmdArgs.ExistsDouble("c", "complete"):
-		return completion.Show(ctx, cfg.Runtime.HTTPClient, dbExecutor,
-			cfg.AURURL, cfg.Runtime.CompletionPath, cfg.CompletionInterval, true)
 	case cmdArgs.ExistsArg("c", "complete"):
 		return completion.Show(ctx, cfg.Runtime.HTTPClient, dbExecutor,
-			cfg.AURURL, cfg.Runtime.CompletionPath, cfg.CompletionInterval, false)
+			cfg.AURURL, cfg.Runtime.CompletionPath, cfg.CompletionInterval, cmdArgs.ExistsDouble("c", "complete"))
 	case cmdArgs.ExistsArg("s", "stats"):
 		return localStatistics(ctx, cfg, dbExecutor)
 	}
