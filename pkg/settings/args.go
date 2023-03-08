@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func (c *Configuration) ParseCommandLine(a *parser.Arguments) error {
@@ -56,6 +57,10 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.CleanAfter = true
 	case "noafterclean", "nocleanafter":
 		c.CleanAfter = false
+	case "debug":
+		c.Debug = true
+		c.Runtime.Logger.Debug = true
+		text.GlobalLogger.Debug = true
 	case "devel":
 		c.Devel = true
 	case "nodevel":
