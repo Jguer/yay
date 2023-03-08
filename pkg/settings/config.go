@@ -314,7 +314,7 @@ func NewConfig(version string) (*Configuration, error) {
 		metadata.WithCacheFilePath(filepath.Join(newConfig.BuildDir, "aur.json")),
 		metadata.WithRequestEditorFn(userAgentFn),
 		metadata.WithBaseURL(newConfig.AURURL),
-		metadata.WithDebugLogger(newConfig.Runtime.Logger.Child("aur").Debugln),
+		metadata.WithDebugLogger(newConfig.Runtime.Logger.Debugln),
 	)
 	if errAURCache != nil {
 		return nil, fmt.Errorf(gotext.Get("failed to retrieve aur Cache")+": %w", errAURCache)
@@ -324,7 +324,7 @@ func NewConfig(version string) (*Configuration, error) {
 	newConfig.Runtime.AURClient, errAUR = rpc.NewClient(
 		rpc.WithHTTPClient(newConfig.Runtime.HTTPClient),
 		rpc.WithRequestEditorFn(userAgentFn),
-		rpc.WithLogFn(newConfig.Runtime.Logger.Child("rpc").Debugln))
+		rpc.WithLogFn(newConfig.Runtime.Logger.Debugln))
 	if errAUR != nil {
 		return nil, errAUR
 	}
