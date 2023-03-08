@@ -634,43 +634,43 @@ func (a *Arguments) Parse() error {
 	args := os.Args[1:]
 	usedNext := false
 
-	if len(args) < 1 {
-		if _, err := a.parseShortOption("-Syu", ""); err != nil {
-			return err
+	for k, arg := range args {
+		var nextArg string
+
+		if usedNext {
+			usedNext = false
+			continue
 		}
-	} else {
-		for k, arg := range args {
-			var nextArg string
 
-			if usedNext {
-				usedNext = false
-				continue
-			}
+		if k+1 < len(args) {
+			nextArg = args[k+1]
+		}
 
-			if k+1 < len(args) {
-				nextArg = args[k+1]
-			}
+		var err error
+		switch {
+		case a.ExistsArg("--"):
+			a.AddTarget(arg)
+		case strings.HasPrefix(arg, "--"):
+			usedNext, err = a.parseLongOption(arg, nextArg)
+		case strings.HasPrefix(arg, "-"):
+			usedNext, err = a.parseShortOption(arg, nextArg)
+		default:
+			a.AddTarget(arg)
+		}
 
-			var err error
-			switch {
-			case a.ExistsArg("--"):
-				a.AddTarget(arg)
-			case strings.HasPrefix(arg, "--"):
-				usedNext, err = a.parseLongOption(arg, nextArg)
-			case strings.HasPrefix(arg, "-"):
-				usedNext, err = a.parseShortOption(arg, nextArg)
-			default:
-				a.AddTarget(arg)
-			}
-
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
 		}
 	}
 
 	if a.Op == "" {
-		a.Op = "Y"
+		if len(a.Targets) > 0 {
+			a.Op = "Y"
+		} else {
+			if _, err := a.parseShortOption("-Syu", ""); err != nil {
+				return err
+			}
+		}
 	}
 
 	if a.ExistsArg("-") {

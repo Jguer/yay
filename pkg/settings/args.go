@@ -60,6 +60,7 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "debug":
 		c.Debug = true
 		text.GlobalLogger.Debug = true
+		return false
 	case "devel":
 		c.Devel = true
 	case "nodevel":
