@@ -2,10 +2,8 @@ package settings
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,11 +12,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/Jguer/yay/v12/pkg/vcs"
 
-	"github.com/Jguer/aur/metadata"
-	"github.com/Jguer/aur/rpc"
-	"github.com/Jguer/votar/pkg/vote"
 	"github.com/leonelquinteros/gotext"
 )
 
@@ -79,11 +73,17 @@ type Configuration struct {
 	NewInstallEngine       bool     `json:"newinstallengine"`
 	Debug                  bool     `json:"debug"`
 	UseRPC                 bool     `json:"rpc"`
+
+	CompletionPath string `json:"-"`
+	VCSFilePath    string `json:"-"`
+	// ConfigPath     string `json:"-"`
+	SaveConfig bool              `json:"-"`
+	Mode       parser.TargetMode `json:"-"`
 }
 
 // SaveConfig writes yay config to file.
-func (c *Configuration) Save(configPath string) error {
-	c.Version = c.Runtime.Version
+func (c *Configuration) Save(configPath, version string) error {
+	c.Version = version
 
 	marshalledinfo, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
@@ -242,10 +242,11 @@ func DefaultConfig(version string) *Configuration {
 		Runtime: &Runtime{
 			Logger: text.GlobalLogger,
 		},
+		Mode: parser.ModeAny,
 	}
 }
 
-func NewConfig(version string) (*Configuration, error) {
+func NewConfig(configPath, version string) (*Configuration, error) {
 	newConfig := DefaultConfig(version)
 
 	cacheHome, errCache := getCacheHome()
@@ -254,8 +255,8 @@ func NewConfig(version string) (*Configuration, error) {
 	}
 
 	newConfig.BuildDir = cacheHome
-
-	configPath := getConfigPath()
+	newConfig.CompletionPath = filepath.Join(cacheHome, completionFileName)
+	newConfig.VCSFilePath = filepath.Join(cacheHome, vcsFileName)
 	newConfig.load(configPath)
 
 	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
@@ -275,71 +276,7 @@ func NewConfig(version string) (*Configuration, error) {
 		return nil, errPE
 	}
 
-	userAgent := fmt.Sprintf("Yay/%s", version)
-
-	voteClient, errVote := vote.NewClient(vote.WithUserAgent(userAgent))
-	if errVote != nil {
-		return nil, errVote
-	}
-
-	voteClient.SetCredentials(
-		os.Getenv("AUR_USERNAME"),
-		os.Getenv("AUR_PASSWORD"))
-
-	newConfig.Runtime = &Runtime{
-		ConfigPath:     configPath,
-		Version:        version,
-		Mode:           parser.ModeAny,
-		SaveConfig:     false,
-		CompletionPath: filepath.Join(cacheHome, completionFileName),
-		CmdBuilder:     newConfig.CmdBuilder(nil),
-		PacmanConf:     nil,
-		VCSStore:       nil,
-		HTTPClient:     &http.Client{},
-		AURClient:      nil,
-		VoteClient:     voteClient,
-		QueryBuilder:   nil,
-		Logger:         text.NewLogger(os.Stdout, os.Stdin, newConfig.Debug, "runtime"),
-	}
-
-	var errAURCache error
-
-	userAgentFn := func(ctx context.Context, req *http.Request) error {
-		req.Header.Set("User-Agent", userAgent)
-		return nil
-	}
-
-	newConfig.Runtime.AURCache, errAURCache = metadata.New(
-		metadata.WithHTTPClient(newConfig.Runtime.HTTPClient),
-		metadata.WithCacheFilePath(filepath.Join(newConfig.BuildDir, "aur.json")),
-		metadata.WithRequestEditorFn(userAgentFn),
-		metadata.WithBaseURL(newConfig.AURURL),
-		metadata.WithDebugLogger(newConfig.Runtime.Logger.Debugln),
-	)
-	if errAURCache != nil {
-		return nil, fmt.Errorf(gotext.Get("failed to retrieve aur Cache")+": %w", errAURCache)
-	}
-
-	var errAUR error
-	newConfig.Runtime.AURClient, errAUR = rpc.NewClient(
-		rpc.WithHTTPClient(newConfig.Runtime.HTTPClient),
-		rpc.WithRequestEditorFn(userAgentFn),
-		rpc.WithLogFn(newConfig.Runtime.Logger.Debugln))
-	if errAUR != nil {
-		return nil, errAUR
-	}
-
-	if newConfig.UseRPC {
-		newConfig.Runtime.AURCache = newConfig.Runtime.AURClient
-	}
-
-	newConfig.Runtime.VCSStore = vcs.NewInfoStore(
-		filepath.Join(cacheHome, vcsFileName), newConfig.Runtime.CmdBuilder,
-		newConfig.Runtime.Logger.Child("vcs"))
-
-	err := newConfig.Runtime.VCSStore.Load()
-
-	return newConfig, err
+	return newConfig, nil
 }
 
 func (c *Configuration) load(configPath string) {

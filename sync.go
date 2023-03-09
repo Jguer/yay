@@ -32,7 +32,7 @@ func syncInstall(ctx context.Context,
 		cfg.Runtime.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
-	if refreshArg && cfg.Runtime.Mode.AtLeastRepo() {
+	if refreshArg && cfg.Mode.AtLeastRepo() {
 		if errR := earlyRefresh(ctx, cfg, cfg.Runtime.CmdBuilder, cmdArgs); errR != nil {
 			return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 		}
@@ -112,7 +112,7 @@ func (o *OperationService) Run(ctx context.Context,
 	}
 	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
 	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder,
-		o.cfg.Runtime.VCSStore, o.cfg.Runtime.Mode,
+		o.cfg.Runtime.VCSStore, o.cfg.Mode,
 		cmdArgs.ExistsArg("w", "downloadonly"), o.cfg.Runtime.Logger.Child("installer"))
 
 	pkgBuildDirs, errInstall := preparer.Run(ctx, os.Stdout, targets)
@@ -131,7 +131,7 @@ func (o *OperationService) Run(ctx context.Context,
 
 	go func() {
 		errComp := completion.Update(ctx, o.cfg.Runtime.HTTPClient, o.dbExecutor,
-			o.cfg.AURURL, o.cfg.Runtime.CompletionPath, o.cfg.CompletionInterval, false)
+			o.cfg.AURURL, o.cfg.CompletionPath, o.cfg.CompletionInterval, false)
 		if errComp != nil {
 			text.Warnln(errComp)
 		}

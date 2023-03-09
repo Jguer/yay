@@ -26,13 +26,12 @@ func TestMigrationNothingToDo(t *testing.T) {
 		Version: "99.0.0",
 		// Create runtime with runtimeVersion
 		Runtime: &Runtime{
-			Version: "20.0.0",
-			Logger:  text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+			Logger: text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
 		},
 	}
 
 	// Run Migration
-	err = config.RunMigrations(DefaultMigrations(), testFilePath)
+	err = config.RunMigrations(DefaultMigrations(), testFilePath, "20.0.0")
 	require.NoError(t, err)
 
 	// Check file contents if wantSave otherwise check file empty
@@ -68,6 +67,7 @@ func TestProvidesMigration(t *testing.T) {
 	type testCase struct {
 		desc       string
 		testConfig *Configuration
+		newVersion string
 		wantSave   bool
 	}
 
@@ -76,46 +76,46 @@ func TestProvidesMigration(t *testing.T) {
 			desc: "to upgrade",
 			testConfig: &Configuration{
 				Version:  "11.0.1",
-				Runtime:  &Runtime{Version: "11.2.1"},
 				Provides: true,
 			},
-			wantSave: true,
+			newVersion: "11.2.1",
+			wantSave:   true,
 		},
 		{
 			desc: "to upgrade-git",
 			testConfig: &Configuration{
 				Version:  "11.2.0.r7.g6f60892",
-				Runtime:  &Runtime{Version: "11.2.1"},
 				Provides: true,
 			},
-			wantSave: true,
+			newVersion: "11.2.1",
+			wantSave:   true,
 		},
 		{
 			desc: "to not upgrade",
 			testConfig: &Configuration{
 				Version:  "11.2.0",
-				Runtime:  &Runtime{Version: "11.2.1"},
 				Provides: false,
 			},
-			wantSave: false,
+			newVersion: "11.2.1",
+			wantSave:   false,
 		},
 		{
 			desc: "to not upgrade - target version",
 			testConfig: &Configuration{
 				Version:  "11.2.1",
-				Runtime:  &Runtime{Version: "11.2.1"},
 				Provides: true,
 			},
-			wantSave: false,
+			newVersion: "11.2.1",
+			wantSave:   false,
 		},
 		{
 			desc: "to not upgrade - new version",
 			testConfig: &Configuration{
 				Version:  "11.3.0",
-				Runtime:  &Runtime{Version: "11.3.0"},
 				Provides: true,
 			},
-			wantSave: false,
+			newVersion: "11.3.0",
+			wantSave:   false,
 		},
 	}
 
@@ -133,15 +133,14 @@ func TestProvidesMigration(t *testing.T) {
 				Provides: tc.testConfig.Provides,
 				// Create runtime with runtimeVersion
 				Runtime: &Runtime{
-					Logger:  text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
-					Version: tc.testConfig.Runtime.Version,
+					Logger: text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
 				},
 			}
 
 			// Run Migration
 			err = tcConfig.RunMigrations(
 				[]configMigration{&configProviderMigration{}},
-				testFilePath)
+				testFilePath, tc.newVersion)
 
 			require.NoError(t, err)
 
@@ -155,7 +154,7 @@ func TestProvidesMigration(t *testing.T) {
 			err = decoder.Decode(&newConfig)
 			if tc.wantSave {
 				require.NoError(t, err)
-				assert.Equal(t, tc.testConfig.Runtime.Version, newConfig.Version)
+				assert.Equal(t, tc.newVersion, newConfig.Version)
 				assert.Equal(t, false, newConfig.Provides)
 			} else {
 				require.Error(t, err)

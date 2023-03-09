@@ -60,7 +60,9 @@ func main() {
 		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
-	cfg, err := settings.NewConfig(yayVersion)
+	configPath := settings.GetConfigPath()
+	// Parse config
+	cfg, err := settings.NewConfig(configPath, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -76,12 +78,13 @@ func main() {
 	}
 
 	if errS := cfg.RunMigrations(
-		settings.DefaultMigrations(), cfg.Runtime.ConfigPath); errS != nil {
+		settings.DefaultMigrations(), configPath, yayVersion); errS != nil {
 		text.Errorln(errS)
 	}
 
 	cmdArgs := parser.MakeArguments()
 
+	// Parse command line
 	if err = cfg.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -92,23 +95,37 @@ func main() {
 		return
 	}
 
-	if cfg.Runtime.SaveConfig {
-		if errS := cfg.Save(cfg.Runtime.ConfigPath); errS != nil {
+	if cfg.SaveConfig {
+		if errS := cfg.Save(configPath, yayVersion); errS != nil {
 			text.Errorln(errS)
 		}
 	}
+
+	// Build runtime
+	runtime, err := settings.BuildRuntime(cfg, cmdArgs, yayVersion)
+	if err != nil {
+		if str := err.Error(); str != "" {
+			text.Errorln(str)
+		}
+
+		ret = 1
+
+		return
+	}
+
+	cfg.Runtime = runtime
 
 	if cfg.SeparateSources {
 		cfg.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
 			cfg.Runtime.AURClient, cfg.Runtime.AURCache,
 			cfg.Runtime.Logger.Child("querybuilder"), cfg.SortBy,
-			cfg.Runtime.Mode, cfg.SearchBy, cfg.BottomUp,
+			cfg.Mode, cfg.SearchBy, cfg.BottomUp,
 			cfg.SingleLineResults, cfg.NewInstallEngine)
 	} else {
 		cfg.Runtime.QueryBuilder = query.NewMixedSourceQueryBuilder(
 			cfg.Runtime.AURClient, cfg.Runtime.AURCache,
 			cfg.Runtime.Logger.Child("mixed.querybuilder"), cfg.SortBy,
-			cfg.Runtime.Mode, cfg.SearchBy,
+			cfg.Mode, cfg.SearchBy,
 			cfg.BottomUp, cfg.SingleLineResults, cfg.NewInstallEngine)
 	}
 

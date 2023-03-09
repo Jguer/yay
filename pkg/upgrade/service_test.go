@@ -262,8 +262,8 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 					tt.fields.input, true, "test"))
 
 			cfg := &settings.Configuration{
-				Runtime: &settings.Runtime{Mode: parser.ModeAny},
-				Devel:   tt.fields.devel,
+				Runtime: &settings.Runtime{},
+				Devel:   tt.fields.devel, Mode: parser.ModeAny,
 			}
 
 			u := &UpgradeService{
@@ -383,8 +383,9 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 					tt.fields.input, true, "test"))
 
 			cfg := &settings.Configuration{
-				Runtime: &settings.Runtime{Mode: parser.ModeAny},
+				Runtime: &settings.Runtime{},
 				Devel:   tt.fields.devel,
+				Mode:    parser.ModeAny,
 			}
 
 			u := &UpgradeService{

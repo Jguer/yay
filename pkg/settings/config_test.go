@@ -33,7 +33,7 @@ func TestNewConfig(t *testing.T) {
 	_, err = f.WriteString(string(configJSON))
 	assert.NoError(t, err)
 
-	newConfig, err := NewConfig("v1.0.0")
+	newConfig, err := NewConfig(GetConfigPath(), "v1.0.0")
 	assert.NoError(t, err)
 
 	assert.Equal(t, filepath.Join(cacheDir, "test-build-dir"), newConfig.BuildDir)
@@ -66,7 +66,7 @@ func TestNewConfigAURDEST(t *testing.T) {
 	_, err = f.WriteString(string(configJSON))
 	assert.NoError(t, err)
 
-	newConfig, err := NewConfig("v1.0.0")
+	newConfig, err := NewConfig(GetConfigPath(), "v1.0.0")
 	assert.NoError(t, err)
 
 	assert.Equal(t, filepath.Join(cacheDir, "test-build-dir"), newConfig.BuildDir)
@@ -99,7 +99,7 @@ func TestNewConfigAURDESTTildeExpansion(t *testing.T) {
 	_, err = f.WriteString(string(configJSON))
 	assert.NoError(t, err)
 
-	newConfig, err := NewConfig("v1.0.0")
+	newConfig, err := NewConfig(GetConfigPath(), "v1.0.0")
 	assert.NoError(t, err)
 
 	assert.Equal(t, filepath.Join(homeDir, "test-build-dir"), newConfig.BuildDir)

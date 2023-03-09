@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/leonelquinteros/gotext"
 )
@@ -44,13 +45,15 @@ func DefaultMigrations() []configMigration {
 	}
 }
 
-func (c *Configuration) RunMigrations(migrations []configMigration, configPath string) error {
+func (c *Configuration) RunMigrations(migrations []configMigration,
+	configPath, newVersion string,
+) error {
 	saveConfig := false
 
 	for _, migration := range migrations {
 		if db.VerCmp(migration.TargetVersion(), c.Version) > 0 {
 			if migration.Do(c) {
-				c.Runtime.Logger.Infoln("Config migration executed (",
+				text.Infoln("Config migration executed (",
 					migration.TargetVersion(), "):", migration)
 
 				saveConfig = true
@@ -59,7 +62,7 @@ func (c *Configuration) RunMigrations(migrations []configMigration, configPath s
 	}
 
 	if saveConfig {
-		return c.Save(configPath)
+		return c.Save(configPath, newVersion)
 	}
 
 	return nil

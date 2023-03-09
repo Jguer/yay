@@ -12,7 +12,7 @@ const (
 	systemdCache       string = "/var/cache/yay" // systemd should handle cache creation
 )
 
-func getConfigPath() string {
+func GetConfigPath() string {
 	if configHome := os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
 		configDir := filepath.Join(configHome, "yay")
 		if err := initDir(configDir); err == nil {

@@ -29,19 +29,19 @@ func (c *Configuration) extractYayOptions(a *parser.Arguments) {
 	}
 
 	c.AURURL = strings.TrimRight(c.AURURL, "/")
-	c.Runtime.AURClient.BaseURL = c.AURURL + "/rpc?"
 
 	// if AurRPCURL is set, use that for /rpc calls
-	if c.AURRPCURL != "" {
-		if !strings.HasSuffix(c.AURRPCURL, "?") {
-			if strings.HasSuffix(c.AURRPCURL, "/rpc") {
-				c.AURRPCURL += "?"
-			} else {
-				c.AURRPCURL = strings.TrimRight(c.AURRPCURL, "/") + "/rpc?"
-			}
-		}
+	if c.AURRPCURL == "" {
+		c.AURRPCURL = c.AURURL + "/rpc?"
+		return
+	}
 
-		c.Runtime.AURClient.BaseURL = c.AURRPCURL
+	if !strings.HasSuffix(c.AURRPCURL, "?") {
+		if strings.HasSuffix(c.AURRPCURL, "/rpc") {
+			c.AURRPCURL += "?"
+		} else {
+			c.AURRPCURL = strings.TrimRight(c.AURRPCURL, "/") + "/rpc?"
+		}
 	}
 }
 
@@ -52,14 +52,13 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "aurrpcurl":
 		c.AURRPCURL = value
 	case "save":
-		c.Runtime.SaveConfig = true
+		c.SaveConfig = true
 	case "afterclean", "cleanafter":
 		c.CleanAfter = true
 	case "noafterclean", "nocleanafter":
 		c.CleanAfter = false
 	case "debug":
 		c.Debug = true
-		c.Runtime.Logger.Debug = true
 		text.GlobalLogger.Debug = true
 	case "devel":
 		c.Devel = true
@@ -194,9 +193,9 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "nocombinedupgrade":
 		c.CombinedUpgrade = false
 	case "a", "aur":
-		c.Runtime.Mode = parser.ModeAUR
+		c.Mode = parser.ModeAUR
 	case "repo":
-		c.Runtime.Mode = parser.ModeRepo
+		c.Mode = parser.ModeRepo
 	case "removemake":
 		c.RemoveMake = "yes"
 	case "noremovemake":

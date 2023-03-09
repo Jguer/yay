@@ -59,7 +59,7 @@ func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient
 	}
 
 	cloned, errD := download.PKGBUILDRepos(ctx, dbExecutor, aurClient,
-		config.Runtime.CmdBuilder, targets, config.Runtime.Mode, config.AURURL, wd, force)
+		config.Runtime.CmdBuilder, targets, config.Mode, config.AURURL, wd, force)
 	if errD != nil {
 		text.Errorln(errD)
 	}
