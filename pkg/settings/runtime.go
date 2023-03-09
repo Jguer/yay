@@ -76,6 +76,7 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 
 	aurClient, errAUR := rpc.NewClient(
 		rpc.WithHTTPClient(httpClient),
+		rpc.WithBaseURL(cfg.AURRPCURL),
 		rpc.WithRequestEditorFn(userAgentFn),
 		rpc.WithLogFn(logger.Debugln))
 	if errAUR != nil {
