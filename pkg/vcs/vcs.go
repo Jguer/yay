@@ -139,7 +139,7 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.
 
 		v.OriginsByPackage[pkgName] = info
 
-		v.logger.Warnln(gotext.Get("Found git repo: %s", text.Cyan(url)))
+		v.logger.Debugln(gotext.Get("Found git repo: %s", text.Cyan(url)))
 
 		if err := v.Save(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
