@@ -24,14 +24,13 @@ type UpgradeService struct {
 	aurCache   aur.QueryClient
 	dbExecutor db.Executor
 	vcsStore   vcs.Store
-	runtime    *settings.Runtime
 	cfg        *settings.Configuration
 	log        *text.Logger
 	noConfirm  bool
 }
 
 func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
-	dbExecutor db.Executor, vcsStore vcs.Store, runtime *settings.Runtime,
+	dbExecutor db.Executor, vcsStore vcs.Store,
 	cfg *settings.Configuration, noConfirm bool, logger *text.Logger,
 ) *UpgradeService {
 	return &UpgradeService{
@@ -39,7 +38,6 @@ func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
 		aurCache:   aurCache,
 		dbExecutor: dbExecutor,
 		vcsStore:   vcsStore,
-		runtime:    runtime,
 		cfg:        cfg,
 		noConfirm:  noConfirm,
 		log:        logger,

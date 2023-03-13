@@ -114,7 +114,7 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 
 	upService := upgrade.NewUpgradeService(
 		grapher, cfg.Runtime.AURCache, dbExecutor, cfg.Runtime.VCSStore,
-		cfg.Runtime, cfg, settings.NoConfirm, logger.Child("upgrade"))
+		cfg, settings.NoConfirm, logger.Child("upgrade"))
 
 	graph, errSysUp := upService.GraphUpgrades(ctx, nil,
 		enableDowngrade, filter)

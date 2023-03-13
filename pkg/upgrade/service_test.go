@@ -262,8 +262,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 					tt.fields.input, true, "test"))
 
 			cfg := &settings.Configuration{
-				Runtime: &settings.Runtime{},
-				Devel:   tt.fields.devel, Mode: parser.ModeAny,
+				Devel: tt.fields.devel, Mode: parser.ModeAny,
 			}
 
 			u := &UpgradeService{
@@ -273,7 +272,6 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				aurCache:   mockAUR,
 				dbExecutor: dbExe,
 				vcsStore:   vcsStore,
-				runtime:    cfg.Runtime,
 				cfg:        cfg,
 				noConfirm:  tt.fields.noConfirm,
 			}
@@ -383,9 +381,8 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 					tt.fields.input, true, "test"))
 
 			cfg := &settings.Configuration{
-				Runtime: &settings.Runtime{},
-				Devel:   tt.fields.devel,
-				Mode:    parser.ModeAny,
+				Devel: tt.fields.devel,
+				Mode:  parser.ModeAny,
 			}
 
 			u := &UpgradeService{
@@ -395,7 +392,6 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 				aurCache:   mockAUR,
 				dbExecutor: dbExe,
 				vcsStore:   vcsStore,
-				runtime:    cfg.Runtime,
 				cfg:        cfg,
 				noConfirm:  tt.fields.noConfirm,
 			}
