@@ -91,7 +91,7 @@ func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.
 					continue
 				}
 
-				text.Debugln("updating VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
+				text.Debugln("checking VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
 				s.vcsStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
 			}
 		}
