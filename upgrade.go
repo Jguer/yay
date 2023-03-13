@@ -58,7 +58,7 @@ func upList(ctx context.Context, cfg *settings.Configuration,
 		}
 	}
 
-	if cfg.Runtime.Mode.AtLeastRepo() {
+	if cfg.Mode.AtLeastRepo() {
 		text.OperationInfoln(gotext.Get("Searching databases for updates..."))
 		wg.Add(1)
 
@@ -69,7 +69,7 @@ func upList(ctx context.Context, cfg *settings.Configuration,
 		}()
 	}
 
-	if cfg.Runtime.Mode.AtLeastAUR() {
+	if cfg.Mode.AtLeastAUR() {
 		text.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		var _aurdata []aur.Pkg

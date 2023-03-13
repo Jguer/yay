@@ -18,7 +18,7 @@ import (
 )
 
 func handleCmd() error {
-	config, err := settings.NewConfig("")
+	config, err := settings.NewConfig(settings.GetConfigPath(), "")
 	if err != nil {
 		return err
 	}

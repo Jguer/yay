@@ -24,14 +24,13 @@ type UpgradeService struct {
 	aurCache   aur.QueryClient
 	dbExecutor db.Executor
 	vcsStore   vcs.Store
-	runtime    *settings.Runtime
 	cfg        *settings.Configuration
 	log        *text.Logger
 	noConfirm  bool
 }
 
 func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
-	dbExecutor db.Executor, vcsStore vcs.Store, runtime *settings.Runtime,
+	dbExecutor db.Executor, vcsStore vcs.Store,
 	cfg *settings.Configuration, noConfirm bool, logger *text.Logger,
 ) *UpgradeService {
 	return &UpgradeService{
@@ -39,7 +38,6 @@ func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
 		aurCache:   aurCache,
 		dbExecutor: dbExecutor,
 		vcsStore:   vcsStore,
-		runtime:    runtime,
 		cfg:        cfg,
 		noConfirm:  noConfirm,
 		log:        logger,
@@ -61,7 +59,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	remote := u.dbExecutor.InstalledRemotePackages()
 	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
 
-	if u.runtime.Mode.AtLeastAUR() {
+	if u.cfg.Mode.AtLeastAUR() {
 		u.log.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		_aurdata, err := u.aurCache.Get(ctx, &aur.Query{Needles: remoteNames, By: aur.Name})
@@ -140,7 +138,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 		})
 	}
 
-	if u.cfg.Runtime.Mode.AtLeastRepo() {
+	if u.cfg.Mode.AtLeastRepo() {
 		u.log.OperationInfoln(gotext.Get("Searching databases for updates..."))
 
 		syncUpgrades, err := u.dbExecutor.SyncUpgrades(enableDowngrade)

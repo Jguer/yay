@@ -42,7 +42,7 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 		missing = false
 	)
 
-	pkgS = query.RemoveInvalidTargets(pkgS, cfg.Runtime.Mode)
+	pkgS = query.RemoveInvalidTargets(pkgS, cfg.Mode)
 	aurS, repoS := packageSlices(pkgS, cfg, dbExecutor)
 
 	if len(aurS) != 0 {
@@ -68,7 +68,7 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 		arguments.AddTarget(repoS...)
 
 		err = cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			arguments, cfg.Runtime.Mode, settings.NoConfirm))
+			arguments, cfg.Mode, settings.NoConfirm))
 		if err != nil {
 			return err
 		}
@@ -96,10 +96,10 @@ func packageSlices(toCheck []string, config *settings.Configuration, dbExecutor 
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
 
-		if dbName == "aur" || config.Runtime.Mode == parser.ModeAUR {
+		if dbName == "aur" || config.Mode == parser.ModeAUR {
 			aurNames = append(aurNames, _pkg)
 			continue
-		} else if dbName != "" || config.Runtime.Mode == parser.ModeRepo {
+		} else if dbName != "" || config.Mode == parser.ModeRepo {
 			repoNames = append(repoNames, _pkg)
 			continue
 		}

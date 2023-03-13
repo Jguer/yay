@@ -41,7 +41,7 @@ func cleanRemove(ctx context.Context, config *settings.Configuration, cmdArgs *p
 
 	return config.Runtime.CmdBuilder.Show(
 		config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			arguments, config.Runtime.Mode, settings.NoConfirm))
+			arguments, config.Mode, settings.NoConfirm))
 }
 
 func syncClean(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
@@ -58,14 +58,14 @@ func syncClean(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 		}
 	}
 
-	if cfg.Runtime.Mode.AtLeastRepo() {
+	if cfg.Mode.AtLeastRepo() {
 		if err := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, cfg.Runtime.Mode, settings.NoConfirm)); err != nil {
+			cmdArgs, cfg.Mode, settings.NoConfirm)); err != nil {
 			return err
 		}
 	}
 
-	if !cfg.Runtime.Mode.AtLeastAUR() {
+	if !cfg.Mode.AtLeastAUR() {
 		return nil
 	}
 
