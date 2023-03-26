@@ -130,11 +130,11 @@ msgstr "AUR"
 
 #: pkg/menus/edit_menu.go:59
 msgid "Add %s or %s to your environment variables"
-msgstr "%s나 %s를 환경 변수에 추가해 주세요"
+msgstr "%s 또는 %s를 환경 변수에 추가합니다"
 
 #: main.go:54
 msgid "Avoid running yay as root/sudo."
-msgstr "root나 sudo로 yay를 실행하지 마십시오."
+msgstr "root / sudo로 yay를 실행하지 마십시오."
 
 #: pkg/dep/dep_graph.go:59
 msgid "Check Dependency"
