@@ -36,7 +36,7 @@ msgstr " [설치됨]"
 
 #: cmd.go:425 install.go:168 install.go:202 vote.go:34
 msgid " there is nothing to do"
-msgstr " 할 작업이 없습니다"
+msgstr "할 작업이 없음"
 
 #: pkg/menus/menu.go:47
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
@@ -130,11 +130,11 @@ msgstr "AUR"
 
 #: pkg/menus/edit_menu.go:59
 msgid "Add %s or %s to your environment variables"
-msgstr "%s나 %s를 환경 변수에 추가해 주세요"
+msgstr "%s 또는 %s를 환경 변수에 추가합니다"
 
 #: main.go:54
 msgid "Avoid running yay as root/sudo."
-msgstr "root나 sudo로 yay를 실행하지 마십시오."
+msgstr "root / sudo로 yay를 실행하지 마십시오."
 
 #: pkg/dep/dep_graph.go:59
 msgid "Check Dependency"
@@ -335,11 +335,11 @@ msgstr "가져와야 할 PGP 키:"
 
 #: install.go:261 vcs.go:45
 msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
-msgstr "PKGBUILD가 최신임, 건너뜁니다 (%d/%d): %s"
+msgstr "PKGBUILD 최신 상태로 유지, 건너뛰는 중 (%d/%d): %s"
 
 #: preparer.go:206
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD가 최신 상태이므로, 다운로드 건너뛰기:"
+msgstr "PKGBUILD 최신 상태로 유지, 다운로드 건너뛰는 중: %s"
 
 #: pkg/menus/edit_menu.go:132 pkg/menus/edit_menu.go:164
 msgid "PKGBUILDs to edit?"
@@ -569,7 +569,7 @@ msgstr "%s 병합하는 중 오류: %s"
 
 #: pkg/download/unified.go:56
 msgid "error reading %s"
-msgstr "%s를 읽는 중 오류"
+msgstr "%s 읽는 중 오류"
 
 #: install.go:107 sync.go:35
 msgid "error refreshing databases"
@@ -617,7 +617,7 @@ msgstr "AUR 캐시를 검색하지 못했습니다"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
-msgstr "입력이 너무 긺"
+msgstr "너무 긴 입력"
 
 #: pkg/db/ialpm/alpm.go:219 pkg/dep/depPool.go:531 pkg/dep/dep_graph.go:451
 msgid "invalid number: %s"
