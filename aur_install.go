@@ -342,12 +342,12 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 
 	pkgArchives = append(pkgArchives, pkgdest)
 
-	debugName := pkgdest + "-debug"
+	debugName := name + "-debug"
 
 	pkgdestDebug, ok := pkgdests[debugName]
 	if ok {
 		if _, errStat := os.Stat(pkgdestDebug); errStat == nil {
-			pkgArchives = append(pkgArchives, debugName)
+			pkgArchives = append(pkgArchives, pkgdestDebug)
 		}
 	}
 
