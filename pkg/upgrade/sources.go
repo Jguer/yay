@@ -22,7 +22,7 @@ func UpDevel(
 	toRemove := make([]string, 0)
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"devel"}}
 
-	ctxTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctxTimeout, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 	for pkgName, pkg := range remote {
 		if localCache.ToUpgrade(ctxTimeout, pkgName) {
