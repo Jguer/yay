@@ -87,15 +87,15 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 
 		cmd := v.CmdBuilder.BuildGitCmd(ctxTimeout, "", "ls-remote", protocol+"://"+url, branch)
 
-		stdout, _, err := v.CmdBuilder.Capture(cmd)
+		stdout, stderr, err := v.CmdBuilder.Capture(cmd)
 		if err != nil {
 			exitError := &exec.ExitError{}
 			if ok := errors.As(err, &exitError); ok && exitError.ExitCode() == 128 {
-				v.logger.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()))
+				v.logger.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()), ": ", stderr)
 				return ""
 			}
 
-			v.logger.Warnln(err)
+			v.logger.Warnln(gotext.Get("devel check for package failed: '%s' encountered an error", cmd.String()), ": ", err)
 
 			return ""
 		}
