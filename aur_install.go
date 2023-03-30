@@ -348,6 +348,8 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 	if ok {
 		if _, errStat := os.Stat(pkgdestDebug); errStat == nil {
 			pkgArchives = append(pkgArchives, pkgdestDebug)
+		} else {
+			ok = false
 		}
 	}
 
