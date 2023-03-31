@@ -268,9 +268,15 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	excluded := make([]string, 0)
 	for i := range allUp.Up {
 		up := &allUp.Up[i]
+		// choices do not apply to non-installed packages
+		if up.LocalVersion == "" {
+			continue
+		}
+
 		if isInclude && otherExclude.Get(up.Repository) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
+			continue
 		}
 
 		if isInclude && exclude.Get(allUpLen-i) {
