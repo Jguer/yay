@@ -16,18 +16,22 @@ type (
 
 type DBExecutor struct {
 	db.Executor
-	LocalPackageFn                func(string) IPackage
-	IsCorrectVersionInstalledFn   func(string, string) bool
-	SyncPackageFn                 func(string) IPackage
-	PackagesFromGroupFn           func(string) []IPackage
-	LocalSatisfierExistsFn        func(string) bool
-	SyncSatisfierFn               func(string) IPackage
 	AlpmArchitecturesFn           func() ([]string, error)
 	InstalledRemotePackageNamesFn func() []string
 	InstalledRemotePackagesFn     func() map[string]IPackage
-	SyncUpgradesFn                func(bool) (map[string]db.SyncUpgrade, error)
+	IsCorrectVersionInstalledFn   func(string, string) bool
+	LocalPackageFn                func(string) IPackage
+	LocalPackagesFn               func() []IPackage
+	LocalSatisfierExistsFn        func(string) bool
+	PackageDependsFn              func(IPackage) []Depend
+	PackageOptionalDependsFn      func(alpm.IPackage) []alpm.Depend
+	PackageProvidesFn             func(IPackage) []Depend
+	PackagesFromGroupFn           func(string) []IPackage
 	RefreshHandleFn               func() error
 	ReposFn                       func() []string
+	SyncPackageFn                 func(string) IPackage
+	SyncSatisfierFn               func(string) IPackage
+	SyncUpgradesFn                func(bool) (map[string]db.SyncUpgrade, error)
 }
 
 func (t *DBExecutor) InstalledRemotePackageNames() []string {
@@ -79,6 +83,10 @@ func (t *DBExecutor) LocalPackage(s string) IPackage {
 }
 
 func (t *DBExecutor) LocalPackages() []IPackage {
+	if t.LocalPackagesFn != nil {
+		return t.LocalPackagesFn()
+	}
+
 	panic("implement me")
 }
 
@@ -94,6 +102,10 @@ func (t *DBExecutor) PackageConflicts(iPackage IPackage) []Depend {
 }
 
 func (t *DBExecutor) PackageDepends(iPackage IPackage) []Depend {
+	if t.PackageDependsFn != nil {
+		return t.PackageDependsFn(iPackage)
+	}
+
 	panic("implement me")
 }
 
@@ -102,10 +114,18 @@ func (t *DBExecutor) PackageGroups(iPackage IPackage) []string {
 }
 
 func (t *DBExecutor) PackageOptionalDepends(iPackage IPackage) []Depend {
+	if t.PackageOptionalDependsFn != nil {
+		return t.PackageOptionalDependsFn(iPackage)
+	}
+
 	panic("implement me")
 }
 
 func (t *DBExecutor) PackageProvides(iPackage IPackage) []Depend {
+	if t.PackageProvidesFn != nil {
+		return t.PackageProvidesFn(iPackage)
+	}
+
 	panic("implement me")
 }
 
