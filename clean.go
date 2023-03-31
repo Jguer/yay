@@ -31,7 +31,9 @@ func cleanDependencies(ctx context.Context, cfg *settings.Configuration,
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice.
-func cleanRemove(ctx context.Context, cfg *settings.Configuration, cmdBuilder exe.ICmdBuilder, cmdArgs *parser.Arguments, pkgNames []string) error {
+func cleanRemove(ctx context.Context, cfg *settings.Configuration,
+	cmdBuilder exe.ICmdBuilder, cmdArgs *parser.Arguments, pkgNames []string,
+) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}
