@@ -19,6 +19,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/news"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/upgrade"
@@ -149,7 +150,9 @@ getpkgbuild specific options:
     -p --print            Print pkgbuild of packages`)
 }
 
-func handleCmd(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleCmd(ctx context.Context, cfg *settings.Configuration,
+	cmdArgs *parser.Arguments, dbExecutor db.Executor,
+) error {
 	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp(ctx, cfg, cmdArgs)
 	}
@@ -187,7 +190,8 @@ func handleCmd(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 	case "P", "show":
 		return handlePrint(ctx, cfg, cmdArgs, dbExecutor)
 	case "Y", "yay":
-		return handleYay(ctx, cfg, cmdArgs, dbExecutor, cfg.Runtime.QueryBuilder)
+		return handleYay(ctx, cfg, cmdArgs, cfg.Runtime.CmdBuilder,
+			dbExecutor, cfg.Runtime.QueryBuilder)
 	case "W", "web":
 		return handleWeb(ctx, cfg, cmdArgs)
 	}
@@ -285,15 +289,16 @@ func handlePrint(ctx context.Context, cfg *settings.Configuration, cmdArgs *pars
 }
 
 func handleYay(ctx context.Context, cfg *settings.Configuration,
-	cmdArgs *parser.Arguments, dbExecutor db.Executor, queryBuilder query.Builder,
+	cmdArgs *parser.Arguments, cmdBuilder exe.ICmdBuilder,
+	dbExecutor db.Executor, queryBuilder query.Builder,
 ) error {
 	switch {
 	case cmdArgs.ExistsArg("gendb"):
 		return createDevelDB(ctx, cfg, dbExecutor)
 	case cmdArgs.ExistsDouble("c"):
-		return cleanDependencies(ctx, cfg, cmdArgs, dbExecutor, true)
+		return cleanDependencies(ctx, cfg, cmdBuilder, cmdArgs, dbExecutor, true)
 	case cmdArgs.ExistsArg("c", "clean"):
-		return cleanDependencies(ctx, cfg, cmdArgs, dbExecutor, false)
+		return cleanDependencies(ctx, cfg, cmdBuilder, cmdArgs, dbExecutor, false)
 	case len(cmdArgs.Targets) > 0:
 		return displayNumberMenu(ctx, cfg, cmdArgs.Targets, dbExecutor, queryBuilder, cmdArgs)
 	}

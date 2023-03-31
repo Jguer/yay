@@ -19,29 +19,34 @@ import (
 
 // CleanDependencies removes all dangling dependencies in system.
 func cleanDependencies(ctx context.Context, cfg *settings.Configuration,
-	cmdArgs *parser.Arguments, dbExecutor db.Executor, removeOptional bool,
+	cmdBuilder exe.ICmdBuilder, cmdArgs *parser.Arguments, dbExecutor db.Executor,
+	removeOptional bool,
 ) error {
 	hanging := hangingPackages(removeOptional, dbExecutor)
 	if len(hanging) != 0 {
-		return cleanRemove(ctx, cfg, cmdArgs, hanging)
+		return cleanRemove(ctx, cfg, cmdBuilder, cmdArgs, hanging)
 	}
 
 	return nil
 }
 
 // CleanRemove sends a full removal command to pacman with the pkgName slice.
-func cleanRemove(ctx context.Context, config *settings.Configuration, cmdArgs *parser.Arguments, pkgNames []string) error {
+func cleanRemove(ctx context.Context, cfg *settings.Configuration,
+	cmdBuilder exe.ICmdBuilder, cmdArgs *parser.Arguments, pkgNames []string,
+) error {
 	if len(pkgNames) == 0 {
 		return nil
 	}
 
 	arguments := cmdArgs.CopyGlobal()
-	_ = arguments.AddArg("R")
+	if err := arguments.AddArg("R", "s", "u"); err != nil {
+		return err
+	}
 	arguments.AddTarget(pkgNames...)
 
-	return config.Runtime.CmdBuilder.Show(
-		config.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			arguments, config.Mode, settings.NoConfirm))
+	return cmdBuilder.Show(
+		cmdBuilder.BuildPacmanCmd(ctx,
+			arguments, cfg.Mode, settings.NoConfirm))
 }
 
 func syncClean(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {

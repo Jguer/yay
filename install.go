@@ -392,7 +392,7 @@ func removeMake(ctx context.Context, config *settings.Configuration,
 ) error {
 	removeArguments := cmdArgs.CopyGlobal()
 
-	err := removeArguments.AddArg("R", "u")
+	err := removeArguments.AddArg("R", "s", "u")
 	if err != nil {
 		return err
 	}
