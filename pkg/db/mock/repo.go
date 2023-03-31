@@ -15,8 +15,9 @@ func (d DependList) Slice() []alpm.Depend {
 }
 
 func (d DependList) ForEach(f func(*alpm.Depend) error) error {
-	for _, dep := range d.Depends {
-		err := f(&dep)
+	for i := range d.Depends {
+		dep := &d.Depends[i]
+		err := f(dep)
 		if err != nil {
 			return err
 		}
