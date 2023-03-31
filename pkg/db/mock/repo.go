@@ -6,6 +6,25 @@ import (
 	alpm "github.com/Jguer/go-alpm/v2"
 )
 
+type DependList struct {
+	Depends []Depend
+}
+
+func (d DependList) Slice() []alpm.Depend {
+	return d.Depends
+}
+
+func (d DependList) ForEach(f func(*alpm.Depend) error) error {
+	for _, dep := range d.Depends {
+		err := f(&dep)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type Package struct {
 	PBase         string
 	PBuildDate    time.Time
@@ -17,6 +36,7 @@ type Package struct {
 	PSize         int64
 	PVersion      string
 	PReason       alpm.PkgReason
+	PDepends      alpm.IDependList
 }
 
 func (p *Package) Base() string {
@@ -88,6 +108,9 @@ func (p *Package) Conflicts() alpm.IDependList {
 
 // Depends returns the package's dependency list.
 func (p *Package) Depends() alpm.IDependList {
+	if p.PDepends != nil {
+		return p.PDepends
+	}
 	return alpm.DependList{}
 }
 
