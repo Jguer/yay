@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
@@ -31,7 +32,7 @@ type Builder interface {
 	GetTargets(include, exclude intrange.IntRanges, otherExclude stringset.StringSet) ([]string, error)
 }
 
-type MixedSourceQueryBuilder struct {
+type SourceQueryBuilder struct {
 	results           []abstractResult
 	sortBy            string
 	searchBy          string
@@ -45,7 +46,7 @@ type MixedSourceQueryBuilder struct {
 	logger    *text.Logger
 }
 
-func NewMixedSourceQueryBuilder(
+func NewSourceQueryBuilder(
 	aurClient aur.QueryClient,
 	logger *text.Logger,
 	sortBy string,
@@ -54,8 +55,8 @@ func NewMixedSourceQueryBuilder(
 	bottomUp,
 	singleLineResults bool,
 	separateSources bool,
-) *MixedSourceQueryBuilder {
-	return &MixedSourceQueryBuilder{
+) *SourceQueryBuilder {
+	return &SourceQueryBuilder{
 		aurClient:         aurClient,
 		logger:            logger,
 		bottomUp:          bottomUp,
@@ -152,7 +153,6 @@ func (a *abstractResults) separateSourceScore(source string, score float64) floa
 		return v
 	}
 
-	fmt.Println(source)
 	h := fnv.New32a()
 	h.Write([]byte(source))
 	sourceScore := float64(int(h.Sum32())%9 + 2)
@@ -171,9 +171,7 @@ func (a *abstractResults) Less(i, j int) bool {
 	pkgB := a.results[j]
 
 	simA := a.calculateMetric(&pkgA)
-	fmt.Println(pkgA.name, simA)
 	simB := a.calculateMetric(&pkgB)
-	fmt.Println(pkgB.name, simB)
 
 	if a.bottomUp {
 		return simA < simB
@@ -182,7 +180,7 @@ func (a *abstractResults) Less(i, j int) bool {
 	return simA > simB
 }
 
-func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string) {
+func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string) {
 	var aurErr error
 
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
@@ -202,13 +200,17 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 	}
 
 	if s.targetMode.AtLeastAUR() {
-		var aurResults aurQuery
+		var aurResults []aur.Pkg
 		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
 		dbName := sourceAUR
 
 		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
 				s.queryMap[dbName] = map[string]interface{}{}
+			}
+
+			if !matchesSearch(&aurResults[i], pkgS) {
+				continue
 			}
 
 			s.queryMap[dbName][aurResults[i].Name] = aurResults[i]
@@ -264,7 +266,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 	}
 }
 
-func (s *MixedSourceQueryBuilder) Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error {
+func (s *SourceQueryBuilder) Results(w io.Writer, dbExecutor db.Executor, verboseSearch SearchVerbosity) error {
 	for i := range s.results {
 		if verboseSearch == Minimal {
 			_, _ = fmt.Fprintln(w, s.results[i].name)
@@ -296,11 +298,11 @@ func (s *MixedSourceQueryBuilder) Results(w io.Writer, dbExecutor db.Executor, v
 	return nil
 }
 
-func (s *MixedSourceQueryBuilder) Len() int {
+func (s *SourceQueryBuilder) Len() int {
 	return len(s.results)
 }
 
-func (s *MixedSourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
+func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 	otherExclude stringset.StringSet,
 ) ([]string, error) {
 	var (
@@ -321,4 +323,21 @@ func (s *MixedSourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges
 	}
 
 	return targets, nil
+}
+
+func matchesSearch(pkg *aur.Pkg, terms []string) bool {
+	for _, pkgN := range terms {
+		if strings.IndexFunc(pkgN, unicode.IsSymbol) != -1 {
+			return true
+		}
+		name := strings.ToLower(pkg.Name)
+		desc := strings.ToLower(pkg.Description)
+		targ := strings.ToLower(pkgN)
+
+		if !(strings.Contains(name, targ) || strings.Contains(desc, targ)) {
+			return false
+		}
+	}
+
+	return true
 }
