@@ -35,9 +35,9 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 			client, err := rpc.NewClient(rpc.WithHTTPClient(&mockDoer{}))
 
 			w := &strings.Builder{}
-			queryBuilder := NewMixedSourceQueryBuilder(client, client,
+			queryBuilder := NewMixedSourceQueryBuilder(client,
 				text.NewLogger(w, strings.NewReader(""), false, "test"),
-				"votes", parser.ModeAny, "", tc.bottomUp, false, false)
+				"votes", parser.ModeAny, "", tc.bottomUp, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 

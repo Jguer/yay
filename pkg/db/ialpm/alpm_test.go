@@ -1,11 +1,15 @@
 package ialpm
 
 import (
+	"io"
+	"strings"
 	"testing"
 
 	alpm "github.com/Jguer/go-alpm/v2"
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func TestAlpmExecutor(t *testing.T) {
@@ -41,7 +45,7 @@ func TestAlpmExecutor(t *testing.T) {
 		},
 	}
 
-	aExec, err := NewExecutor(pacmanConf)
+	aExec, err := NewExecutor(pacmanConf, text.NewLogger(io.Discard, strings.NewReader(""), false, "test"))
 	assert.NoError(t, err)
 
 	assert.NotNil(t, aExec.conf)

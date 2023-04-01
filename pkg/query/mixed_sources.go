@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/aur/rpc"
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/adrg/strutil"
 	"github.com/adrg/strutil/metrics"
@@ -39,15 +38,12 @@ type MixedSourceQueryBuilder struct {
 	queryMap          map[string]map[string]interface{}
 	bottomUp          bool
 	singleLineResults bool
-	newEngine         bool
 
 	aurClient aur.QueryClient
-	rpcClient rpc.ClientInterface
 	logger    *text.Logger
 }
 
 func NewMixedSourceQueryBuilder(
-	rpcClient rpc.ClientInterface,
 	aurClient aur.QueryClient,
 	logger *text.Logger,
 	sortBy string,
@@ -55,10 +51,8 @@ func NewMixedSourceQueryBuilder(
 	searchBy string,
 	bottomUp,
 	singleLineResults bool,
-	newEngine bool,
 ) *MixedSourceQueryBuilder {
 	return &MixedSourceQueryBuilder{
-		rpcClient:         rpcClient,
 		aurClient:         aurClient,
 		logger:            logger,
 		bottomUp:          bottomUp,
@@ -68,7 +62,6 @@ func NewMixedSourceQueryBuilder(
 		singleLineResults: singleLineResults,
 		queryMap:          map[string]map[string]interface{}{},
 		results:           make([]abstractResult, 0, 100),
-		newEngine:         newEngine,
 	}
 }
 
@@ -155,7 +148,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 
 	if s.targetMode.AtLeastAUR() {
 		var aurResults aurQuery
-		aurResults, aurErr = queryAUR(ctx, s.rpcClient, s.aurClient, pkgS, s.searchBy, false)
+		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
 		dbName := sourceAUR
 
 		for i := range aurResults {

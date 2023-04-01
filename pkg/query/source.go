@@ -17,8 +17,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/text"
-
-	"github.com/Jguer/aur/rpc"
 )
 
 type SearchVerbosity int
@@ -37,17 +35,14 @@ type SourceQueryBuilder struct {
 	sortBy            string
 	searchBy          string
 	targetMode        parser.TargetMode
-	useAURCache       bool
 	bottomUp          bool
 	singleLineResults bool
 
-	aurClient rpc.ClientInterface
-	aurCache  aur.QueryClient
-	logger    *text.Logger
+	aurCache aur.QueryClient
+	logger   *text.Logger
 }
 
 func NewSourceQueryBuilder(
-	aurClient rpc.ClientInterface,
 	aurCache aur.QueryClient,
 	logger *text.Logger,
 	sortBy string,
@@ -55,10 +50,8 @@ func NewSourceQueryBuilder(
 	searchBy string,
 	bottomUp,
 	singleLineResults bool,
-	useAURCache bool,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
-		aurClient:         aurClient,
 		aurCache:          aurCache,
 		logger:            logger,
 		repoQuery:         []alpm.IPackage{},
@@ -68,7 +61,6 @@ func NewSourceQueryBuilder(
 		targetMode:        targetMode,
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
-		useAURCache:       useAURCache,
 	}
 }
 
@@ -81,7 +73,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context,
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
 	if s.targetMode.AtLeastAUR() {
-		s.aurQuery, aurErr = queryAUR(ctx, s.aurClient, s.aurCache, pkgS, s.searchBy, s.useAURCache)
+		s.aurQuery, aurErr = queryAUR(ctx, s.aurCache, pkgS, s.searchBy)
 		s.aurQuery = filterAURResults(pkgS, s.aurQuery)
 
 		sort.Sort(aurSortable{aurQuery: s.aurQuery, sortBy: s.sortBy, bottomUp: s.bottomUp})
@@ -200,21 +192,16 @@ func filterAURResults(pkgS []string, results []aur.Pkg) []aur.Pkg {
 
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
-	rpcClient rpc.ClientInterface, aurClient aur.QueryClient,
-	pkgS []string, searchBy string, newEngine bool,
+	aurClient aur.QueryClient,
+	pkgS []string, searchBy string,
 ) ([]aur.Pkg, error) {
 	var (
 		err error
 		by  = getSearchBy(searchBy)
 	)
 
-	queryClient := aurClient
-	if !newEngine {
-		queryClient = rpcClient
-	}
-
 	for _, word := range pkgS {
-		r, errM := queryClient.Get(ctx, &aur.Query{
+		r, errM := aurClient.Get(ctx, &aur.Query{
 			Needles:  []string{word},
 			By:       by,
 			Contains: true,

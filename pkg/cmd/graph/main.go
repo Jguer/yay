@@ -33,7 +33,7 @@ func handleCmd() error {
 		return err
 	}
 
-	dbExecutor, err := ialpm.NewExecutor(pacmanConf)
+	dbExecutor, err := ialpm.NewExecutor(pacmanConf, text.GlobalLogger)
 	if err != nil {
 		return err
 	}

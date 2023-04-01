@@ -2,8 +2,6 @@ package ialpm
 
 import (
 	alpm "github.com/Jguer/go-alpm/v2"
-
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively.
@@ -18,7 +16,7 @@ func (ae *AlpmExecutor) getPackageNamesBySource() {
 		}
 	}
 
-	text.Debugln("populating db executor package caches.",
+	ae.log.Debugln("populating db executor package caches.",
 		"sync_len", len(ae.installedSyncPkgNames), "remote_len", len(ae.installedRemotePkgNames))
 }
 
