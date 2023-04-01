@@ -89,6 +89,10 @@ func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
 		return v
 	}
 
+	if strings.EqualFold(pkg.name, a.search) {
+		return 1.0
+	}
+
 	sim := strutil.Similarity(pkg.name, a.search, a.metric)
 
 	for _, prov := range pkg.provides {
@@ -105,10 +109,10 @@ func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
 	// slightly overweight sync sources by always giving them max popularity
 	popularity := 1.0
 	if pkg.source == sourceAUR {
-		popularity = float64(pkg.votes) / float64(pkg.votes+60)
+		popularity = 1 - (30 / (30 + float64(pkg.votes)))
 	}
 
-	sim = sim*0.6 + simDesc*0.2 + popularity*0.2
+	sim = sim*0.5 + simDesc*0.2 + popularity*0.3
 
 	a.distanceCache[pkg.name] = sim
 
@@ -134,7 +138,7 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 
 	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
 
-	metric := &metrics.JaroWinkler{
+	metric := &metrics.Hamming{
 		CaseSensitive: false,
 	}
 
