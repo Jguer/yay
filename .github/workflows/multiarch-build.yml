@@ -112,6 +112,6 @@ jobs:
           asset_name: yay_${{ steps.tags.outputs.version }}_aarch64.tar.gz
           asset_content_type: application/tar+gzip
       - name: Release Notary Action
-        uses: docker://aevea/release-notary:0.9.3
+        uses: docker://aevea/release-notary:latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
