@@ -40,7 +40,7 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 			w := &strings.Builder{}
 			queryBuilder := NewMixedSourceQueryBuilder(client,
 				text.NewLogger(w, strings.NewReader(""), false, "test"),
-				"votes", parser.ModeAny, "", tc.bottomUp, false)
+				"votes", parser.ModeAny, "", tc.bottomUp, false, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 

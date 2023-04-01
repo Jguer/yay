@@ -110,24 +110,23 @@ func TestSourceQueryBuilder(t *testing.T) {
 			client, err := rpc.NewClient(rpc.WithHTTPClient(&mockDoer{}))
 			require.NoError(t, err)
 
-			queryBuilder := NewSourceQueryBuilder(client,
+			queryBuilder := NewMixedSourceQueryBuilder(client,
 				text.NewLogger(io.Discard, bytes.NewBufferString(""), false, "test"),
-				"votes", parser.ModeAny, "", tc.bottomUp, false)
+				"votes", parser.ModeAny, "", tc.bottomUp, false, true)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
 
 			queryBuilder.Execute(context.Background(), mockStore, search)
-			assert.Len(t, queryBuilder.aurQuery, 1)
-			assert.Len(t, queryBuilder.repoQuery, 2)
 			assert.Equal(t, 3, queryBuilder.Len())
-			assert.Equal(t, "linux-ck", queryBuilder.aurQuery[0].Name)
 
 			if tc.bottomUp {
-				assert.Equal(t, "linux-zen", queryBuilder.repoQuery[0].Name())
-				assert.Equal(t, "linux", queryBuilder.repoQuery[1].Name())
+				assert.Equal(t, "linux-ck", queryBuilder.results[0].name)
+				assert.Equal(t, "linux-zen", queryBuilder.results[1].name)
+				assert.Equal(t, "linux", queryBuilder.results[2].name)
 			} else {
-				assert.Equal(t, "linux-zen", queryBuilder.repoQuery[1].Name())
-				assert.Equal(t, "linux", queryBuilder.repoQuery[0].Name())
+				assert.Equal(t, "linux-ck", queryBuilder.results[2].name)
+				assert.Equal(t, "linux-zen", queryBuilder.results[1].name)
+				assert.Equal(t, "linux", queryBuilder.results[0].name)
 			}
 
 			w := &strings.Builder{}

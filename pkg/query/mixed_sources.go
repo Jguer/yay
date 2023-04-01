@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"fmt"
+	"hash/fnv"
 	"io"
 	"sort"
 	"strconv"
@@ -38,6 +39,7 @@ type MixedSourceQueryBuilder struct {
 	queryMap          map[string]map[string]interface{}
 	bottomUp          bool
 	singleLineResults bool
+	separateSources   bool
 
 	aurClient aur.QueryClient
 	logger    *text.Logger
@@ -51,6 +53,7 @@ func NewMixedSourceQueryBuilder(
 	searchBy string,
 	bottomUp,
 	singleLineResults bool,
+	separateSources bool,
 ) *MixedSourceQueryBuilder {
 	return &MixedSourceQueryBuilder{
 		aurClient:         aurClient,
@@ -60,6 +63,7 @@ func NewMixedSourceQueryBuilder(
 		targetMode:        targetMode,
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
+		separateSources:   separateSources,
 		queryMap:          map[string]map[string]interface{}{},
 		results:           make([]abstractResult, 0, 100),
 	}
@@ -74,11 +78,14 @@ type abstractResult struct {
 }
 
 type abstractResults struct {
-	results       []abstractResult
-	search        string
-	distanceCache map[string]float64
-	bottomUp      bool
-	metric        strutil.StringMetric
+	results         []abstractResult
+	search          string
+	bottomUp        bool
+	metric          strutil.StringMetric
+	separateSources bool
+
+	distanceCache       map[string]float64
+	separateSourceCache map[string]float64
 }
 
 func (a *abstractResults) Len() int      { return len(a.results) }
@@ -98,7 +105,7 @@ func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
 	for _, prov := range pkg.provides {
 		// If the package provides search, it's a perfect match
 		// AUR packages don't populate provides
-		candidate := strutil.Similarity(prov, a.search, a.metric)
+		candidate := strutil.Similarity(prov, a.search, a.metric) * 0.80
 		if candidate > sim {
 			sim = candidate
 		}
@@ -119,12 +126,54 @@ func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
 	return sim
 }
 
+func (a *abstractResults) separateSourceScore(source string, score float64) float64 {
+	if !a.separateSources {
+		return 0
+	}
+
+	if score == 1.0 {
+		return 50
+	}
+
+	switch source {
+	case sourceAUR:
+		return 0
+	case "core":
+		return 40
+	case "extra":
+		return 30
+	case "community":
+		return 20
+	case "multilib":
+		return 10
+	}
+
+	if v, ok := a.separateSourceCache[source]; ok {
+		return v
+	}
+
+	fmt.Println(source)
+	h := fnv.New32a()
+	h.Write([]byte(source))
+	sourceScore := float64(int(h.Sum32())%9 + 2)
+	a.separateSourceCache[source] = sourceScore
+
+	return sourceScore
+}
+
+func (a *abstractResults) calculateMetric(pkg *abstractResult) float64 {
+	score := a.GetMetric(pkg)
+	return a.separateSourceScore(pkg.source, score) + score
+}
+
 func (a *abstractResults) Less(i, j int) bool {
 	pkgA := a.results[i]
 	pkgB := a.results[j]
 
-	simA := a.GetMetric(&pkgA)
-	simB := a.GetMetric(&pkgB)
+	simA := a.calculateMetric(&pkgA)
+	fmt.Println(pkgA.name, simA)
+	simB := a.calculateMetric(&pkgB)
+	fmt.Println(pkgB.name, simB)
 
 	if a.bottomUp {
 		return simA < simB
@@ -143,11 +192,13 @@ func (s *MixedSourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Exe
 	}
 
 	sortableResults := &abstractResults{
-		results:       []abstractResult{},
-		search:        strings.Join(pkgS, ""),
-		distanceCache: map[string]float64{},
-		bottomUp:      s.bottomUp,
-		metric:        metric,
+		results:             []abstractResult{},
+		search:              strings.Join(pkgS, ""),
+		distanceCache:       map[string]float64{},
+		bottomUp:            s.bottomUp,
+		metric:              metric,
+		separateSources:     s.separateSources,
+		separateSourceCache: map[string]float64{},
 	}
 
 	if s.targetMode.AtLeastAUR() {
@@ -259,7 +310,6 @@ func (s *MixedSourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges
 	)
 
 	for i := 0; i <= s.Len(); i++ {
-		// FIXME: this is probably broken
 		target := i - 1
 		if s.bottomUp {
 			target = lenRes - i

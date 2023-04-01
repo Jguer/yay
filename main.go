@@ -115,19 +115,11 @@ func main() {
 
 	cfg.Runtime = runtime
 
-	if cfg.SeparateSources {
-		cfg.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
-			cfg.Runtime.AURCache,
-			cfg.Runtime.Logger.Child("querybuilder"), cfg.SortBy,
-			cfg.Mode, cfg.SearchBy, cfg.BottomUp,
-			cfg.SingleLineResults)
-	} else {
-		cfg.Runtime.QueryBuilder = query.NewMixedSourceQueryBuilder(
-			cfg.Runtime.AURCache,
-			cfg.Runtime.Logger.Child("mixed.querybuilder"), cfg.SortBy,
-			cfg.Mode, cfg.SearchBy,
-			cfg.BottomUp, cfg.SingleLineResults)
-	}
+	cfg.Runtime.QueryBuilder = query.NewMixedSourceQueryBuilder(
+		cfg.Runtime.AURCache,
+		cfg.Runtime.Logger.Child("mixed.querybuilder"), cfg.SortBy,
+		cfg.Mode, cfg.SearchBy,
+		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
 
 	var useColor bool
 
