@@ -146,7 +146,7 @@ func main() {
 
 	text.UseColor = useColor
 
-	dbExecutor, err := ialpm.NewExecutor(cfg.Runtime.PacmanConf)
+	dbExecutor, err := ialpm.NewExecutor(cfg.Runtime.PacmanConf, runtime.Logger.Child("db"))
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)

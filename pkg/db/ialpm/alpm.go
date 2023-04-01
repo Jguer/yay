@@ -22,19 +22,21 @@ type AlpmExecutor struct {
 	syncDB       alpm.IDBList
 	syncDBsCache []alpm.IDB
 	conf         *pacmanconf.Config
+	log          *text.Logger
 
 	installedRemotePkgNames []string
 	installedRemotePkgMap   map[string]alpm.IPackage
 	installedSyncPkgNames   []string
 }
 
-func NewExecutor(pacmanConf *pacmanconf.Config) (*AlpmExecutor, error) {
+func NewExecutor(pacmanConf *pacmanconf.Config, logger *text.Logger) (*AlpmExecutor, error) {
 	ae := &AlpmExecutor{
 		handle:                  nil,
 		localDB:                 nil,
 		syncDB:                  nil,
 		syncDBsCache:            []alpm.IDB{},
 		conf:                    pacmanConf,
+		log:                     logger,
 		installedRemotePkgNames: nil,
 		installedRemotePkgMap:   map[string]alpm.IPackage{},
 		installedSyncPkgNames:   nil,
@@ -141,12 +143,14 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle *alpm.Handle) error
 	return alpmHandle.SetCheckSpace(pacmanConf.CheckSpace)
 }
 
-func logCallback(level alpm.LogLevel, str string) {
-	switch level {
-	case alpm.LogWarning:
-		text.Warn(str)
-	case alpm.LogError:
-		text.Error(str)
+func (ae *AlpmExecutor) logCallback() func(level alpm.LogLevel, str string) {
+	return func(level alpm.LogLevel, str string) {
+		switch level {
+		case alpm.LogWarning:
+			ae.log.Warn(str)
+		case alpm.LogError:
+			ae.log.Error(str)
+		}
 	}
 }
 
@@ -184,28 +188,28 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 			if dbName != thisDB {
 				dbName = thisDB
 				str += "\n"
-				str += text.SprintOperationInfo(gotext.Get("Repository"), " ", dbName, "\n    ")
+				str += ae.log.SprintOperationInfo(gotext.Get("Repository"), " ", dbName, "\n    ")
 			}
 			str += fmt.Sprintf("%d) %s ", size, pkg.Name())
 			size++
 			return nil
 		})
 
-		text.OperationInfoln(str)
+		ae.log.OperationInfoln(str)
 
 		for {
-			fmt.Println(gotext.Get("\nEnter a number (default=1): "))
+			ae.log.Println(gotext.Get("\nEnter a number (default=1): "))
 
 			// TODO: reenable noconfirm
 			if settings.NoConfirm {
-				fmt.Println()
+				ae.log.Println()
 
 				break
 			}
 
-			numberBuf, err := text.GetInput(os.Stdin, "", false)
+			numberBuf, err := ae.log.GetInput("", false)
 			if err != nil {
-				text.Errorln(err)
+				ae.log.Errorln(err)
 				break
 			}
 
@@ -215,12 +219,12 @@ func (ae *AlpmExecutor) questionCallback() func(question alpm.QuestionAny) {
 
 			num, err := strconv.Atoi(numberBuf)
 			if err != nil {
-				text.Errorln(gotext.Get("invalid number: %s", numberBuf))
+				ae.log.Errorln(gotext.Get("invalid number: %s", numberBuf))
 				continue
 			}
 
 			if num < 1 || num > size {
-				text.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size))
+				ae.log.Errorln(gotext.Get("invalid value: %d is not between %d and %d", num, 1, size))
 				continue
 			}
 
@@ -248,7 +252,7 @@ func (ae *AlpmExecutor) RefreshHandle() error {
 	}
 
 	alpmSetQuestionCallback(alpmHandle, ae.questionCallback())
-	alpmSetLogCallback(alpmHandle, logCallback)
+	alpmSetLogCallback(alpmHandle, ae.logCallback())
 	ae.handle = alpmHandle
 	ae.syncDBsCache = nil
 

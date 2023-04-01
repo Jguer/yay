@@ -136,7 +136,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 
 		switch target.DB {
 		case "": // unspecified db
-			if pkg := g.dbExecutor.SyncPackage(target.Name); pkg != nil {
+			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
 				dbName := pkg.DB().Name()
 				graph.AddNode(pkg.Name())
 				g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
