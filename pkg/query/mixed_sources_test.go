@@ -23,10 +23,13 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 	}
 
 	testCases := []testCase{
-		{desc: "bottomup", bottomUp: true, want: "\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n"},
+		{
+			desc: "bottomup", bottomUp: true,
+			want: "\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
+		},
 		{
 			desc: "topdown", bottomUp: false,
-			want: "\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+			want: "\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
 		},
 	}
 
@@ -47,12 +50,12 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 			assert.Equal(t, 3, queryBuilder.Len())
 
 			if tc.bottomUp {
-				assert.Equal(t, "linux-ck", queryBuilder.results[0].name)
-				assert.Equal(t, "linux-zen", queryBuilder.results[1].name)
+				assert.Equal(t, "linux-zen", queryBuilder.results[0].name)
+				assert.Equal(t, "linux-ck", queryBuilder.results[1].name)
 				assert.Equal(t, "linux", queryBuilder.results[2].name)
 			} else {
-				assert.Equal(t, "linux-ck", queryBuilder.results[2].name)
-				assert.Equal(t, "linux-zen", queryBuilder.results[1].name)
+				assert.Equal(t, "linux-zen", queryBuilder.results[2].name)
+				assert.Equal(t, "linux-ck", queryBuilder.results[1].name)
 				assert.Equal(t, "linux", queryBuilder.results[0].name)
 			}
 
