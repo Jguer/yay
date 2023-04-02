@@ -395,7 +395,7 @@ func displayNumberMenu(ctx context.Context, cfg *settings.Configuration, pkgS []
 ) error {
 	queryBuilder.Execute(ctx, dbExecutor, pkgS)
 
-	if err := queryBuilder.Results(os.Stdout, dbExecutor, query.NumberMenu); err != nil {
+	if err := queryBuilder.Results(dbExecutor, query.NumberMenu); err != nil {
 		return err
 	}
 

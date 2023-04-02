@@ -29,7 +29,7 @@ func syncSearch(ctx context.Context, pkgS []string,
 		searchMode = query.Detailed
 	}
 
-	return queryBuilder.Results(os.Stdout, dbExecutor, searchMode)
+	return queryBuilder.Results(dbExecutor, searchMode)
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.

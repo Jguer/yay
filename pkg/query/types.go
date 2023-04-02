@@ -2,7 +2,6 @@ package query
 
 import (
 	"fmt"
-	"io"
 	"strconv"
 
 	"github.com/Jguer/aur"
@@ -12,64 +11,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
-
-type (
-	aurQuery  []aur.Pkg       // Query is a collection of Results.
-	repoQuery []alpm.IPackage // Query holds the results of a repository search.
-)
-
-type aurSortable struct {
-	aurQuery
-	sortBy   string
-	bottomUp bool
-}
-
-func (r repoQuery) Reverse() {
-	for i, j := 0, len(r)-1; i < j; i, j = i+1, j-1 {
-		r[i], r[j] = r[j], r[i]
-	}
-}
-
-func (r repoQuery) Less(i, j int) bool {
-	return text.LessRunes([]rune(r[i].Name()), []rune(r[j].Name()))
-}
-
-func (q aurSortable) Len() int {
-	return len(q.aurQuery)
-}
-
-func (q aurSortable) Less(i, j int) bool {
-	var result bool
-
-	switch q.sortBy {
-	case "votes":
-		result = q.aurQuery[i].NumVotes > q.aurQuery[j].NumVotes
-	case "popularity":
-		result = q.aurQuery[i].Popularity > q.aurQuery[j].Popularity
-	case "name":
-		result = text.LessRunes([]rune(q.aurQuery[i].Name), []rune(q.aurQuery[j].Name))
-	case "base":
-		result = text.LessRunes([]rune(q.aurQuery[i].PackageBase), []rune(q.aurQuery[j].PackageBase))
-	case "submitted":
-		result = q.aurQuery[i].FirstSubmitted < q.aurQuery[j].FirstSubmitted
-	case "modified":
-		result = q.aurQuery[i].LastModified < q.aurQuery[j].LastModified
-	case "id":
-		result = q.aurQuery[i].ID < q.aurQuery[j].ID
-	case "baseid":
-		result = q.aurQuery[i].PackageBaseID < q.aurQuery[j].PackageBaseID
-	}
-
-	if q.bottomUp {
-		return !result
-	}
-
-	return result
-}
-
-func (q aurSortable) Swap(i, j int) {
-	q.aurQuery[i], q.aurQuery[j] = q.aurQuery[j], q.aurQuery[i]
-}
 
 func getSearchBy(value string) aur.By {
 	switch value {
@@ -101,36 +42,6 @@ func getSearchBy(value string) aur.By {
 		return aur.CoMaintainers
 	default:
 		return aur.NameDesc
-	}
-}
-
-// PrintSearch handles printing search results in a given format.
-func (q aurQuery) printSearch(
-	w io.Writer,
-	start int,
-	dbExecutor db.Executor,
-	searchMode SearchVerbosity,
-	bottomUp,
-	singleLineResults bool,
-) {
-	for i := range q {
-		if searchMode == Minimal {
-			_, _ = fmt.Fprintln(w, q[i].Name)
-			continue
-		}
-
-		var toprint string
-
-		if searchMode == NumberMenu {
-			if bottomUp {
-				toprint += text.Magenta(strconv.Itoa(len(q)+start-i-1) + " ")
-			} else {
-				toprint += text.Magenta(strconv.Itoa(start+i) + " ")
-			}
-		}
-
-		toprint += aurPkgSearchString(&q[i], dbExecutor, singleLineResults)
-		_, _ = fmt.Fprintln(w, toprint)
 	}
 }
 
@@ -169,29 +80,6 @@ func aurPkgSearchString(
 	toPrint += pkg.Description
 
 	return toPrint
-}
-
-// PrintSearch receives a RepoSearch type and outputs pretty text.
-func (r repoQuery) printSearch(w io.Writer, dbExecutor db.Executor, searchMode SearchVerbosity, bottomUp, singleLineResults bool) {
-	for i, res := range r {
-		if searchMode == Minimal {
-			_, _ = fmt.Fprintln(w, res.Name())
-			continue
-		}
-
-		var toprint string
-
-		if searchMode == NumberMenu {
-			if bottomUp {
-				toprint += text.Magenta(strconv.Itoa(len(r)-i) + " ")
-			} else {
-				toprint += text.Magenta(strconv.Itoa(i+1) + " ")
-			}
-		}
-
-		toprint += syncPkgSearchString(res, dbExecutor, singleLineResults)
-		_, _ = fmt.Fprintln(w, toprint)
-	}
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
