@@ -129,12 +129,24 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
 		dbName := sourceAUR
 
+		isRegex := false
+		// Check if the search is a regex by checking if pkgS it contains a special character
+		for _, c := range pkgS[0] {
+			if !unicode.IsLetter(c) && !unicode.IsNumber(c) {
+				isRegex = true
+				break
+			}
+		}
+
 		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
 				s.queryMap[dbName] = map[string]interface{}{}
 			}
 
-			if !matchesSearch(&aurResults[i], pkgS) {
+			by := getSearchBy(s.searchBy)
+
+			if (by == aur.NameDesc || by == aur.None || by == aur.Name) && !isRegex &&
+				!matchesSearch(&aurResults[i], pkgS) {
 				continue
 			}
 
