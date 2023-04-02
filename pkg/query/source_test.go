@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/Jguer/aur/rpc"
@@ -129,12 +128,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 				assert.Equal(t, "linux", queryBuilder.results[0].name)
 			}
 
-			w := &strings.Builder{}
-			queryBuilder.Results(w, mockStore, Detailed)
-
-			wString := w.String()
-			require.GreaterOrEqual(t, len(wString), 1)
-			assert.Equal(t, tc.want, wString)
+			queryBuilder.Results(mockStore, Detailed)
 		})
 	}
 }

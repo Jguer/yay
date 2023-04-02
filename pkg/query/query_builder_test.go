@@ -59,7 +59,7 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 				assert.Equal(t, "linux", queryBuilder.results[0].name)
 			}
 
-			queryBuilder.Results(w, mockStore, Detailed)
+			queryBuilder.Results(mockStore, Detailed)
 
 			wString := w.String()
 			require.GreaterOrEqual(t, len(wString), 1, wString)
