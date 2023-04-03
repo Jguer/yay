@@ -724,3 +724,4 @@ msgstr "okänd-version"
 #: pkg/text/text.go:68
 msgid "yes"
 msgstr "ja"
+
