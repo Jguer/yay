@@ -73,14 +73,14 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			}
 
 			aurUp = UpAUR(u.log, remote, aurdata, u.cfg.TimeUpdate, enableDowngrade)
-		}
 
-		if u.cfg.Devel {
-			u.log.OperationInfoln(gotext.Get("Checking development packages..."))
+			if u.cfg.Devel {
+				u.log.OperationInfoln(gotext.Get("Checking development packages..."))
 
-			develUp = UpDevel(ctx, u.log, remote, aurdata, u.vcsStore)
+				develUp = UpDevel(ctx, u.log, remote, aurdata, u.vcsStore)
 
-			u.vcsStore.CleanOrphans(remote)
+				u.vcsStore.CleanOrphans(remote)
+			}
 		}
 	}
 

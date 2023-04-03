@@ -21,9 +21,10 @@ func Test_upAUR(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		remote     map[string]alpm.IPackage
-		aurdata    map[string]*aur.Pkg
-		timeUpdate bool
+		remote          map[string]alpm.IPackage
+		aurdata         map[string]*aur.Pkg
+		timeUpdate      bool
+		enableDowngrade bool
 	}
 	tests := []struct {
 		name string
@@ -58,6 +59,53 @@ func Test_upAUR(t *testing.T) {
 			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"}}},
 		},
 		{
+			name: "Downgrade",
+			args: args{
+				remote: map[string]alpm.IPackage{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0"},
+				},
+				aurdata:         map[string]*aur.Pkg{"hello": {Version: "1.0.0", Name: "hello"}},
+				timeUpdate:      false,
+				enableDowngrade: true,
+			},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "1.0.0"}}},
+		},
+		{
+			name: "Downgrade Disabled",
+			args: args{
+				remote: map[string]alpm.IPackage{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0"},
+				},
+				aurdata:         map[string]*aur.Pkg{"hello": {Version: "1.0.0", Name: "hello"}},
+				timeUpdate:      false,
+				enableDowngrade: false,
+			},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{}},
+		},
+		{
+			name: "Mixed Updates Downgrades",
+			args: args{
+				enableDowngrade: true,
+				remote: map[string]alpm.IPackage{
+					"up":      &mock.Package{PName: "up", PVersion: "2.0.0"},
+					"same":    &mock.Package{PName: "same", PVersion: "3.0.0"},
+					"down":    &mock.Package{PName: "down", PVersion: "1.1.0"},
+					"ignored": &mock.Package{PName: "ignored", PVersion: "1.0.0", PShouldIgnore: true},
+				},
+				aurdata: map[string]*aur.Pkg{
+					"up":      {Version: "2.1.0", Name: "up"},
+					"same":    {Version: "3.0.0", Name: "same"},
+					"down":    {Version: "1.0.0", Name: "down"},
+					"ignored": {Version: "2.0.0", Name: "ignored"},
+				},
+				timeUpdate: false,
+			},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{
+				{Name: "up", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0"},
+				{Name: "down", Repository: "aur", LocalVersion: "1.1.0", RemoteVersion: "1.0.0"},
+			}},
+		},
+		{
 			name: "Time Update",
 			args: args{
 				remote: map[string]alpm.IPackage{
@@ -75,7 +123,7 @@ func Test_upAUR(t *testing.T) {
 			t.Parallel()
 
 			got := UpAUR(text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
-				tt.args.remote, tt.args.aurdata, tt.args.timeUpdate, false)
+				tt.args.remote, tt.args.aurdata, tt.args.timeUpdate, tt.args.enableDowngrade)
 			assert.EqualValues(t, tt.want, got)
 		})
 	}
