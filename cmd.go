@@ -44,12 +44,14 @@ operations:
     yay {-U --upgrade}     [options] <file(s)>
 
 New operations:
-    yay {-Y --yay}         [options] [package(s)]
-    yay {-P --show}        [options]
+    yay {-B --build}       [options] [dir]
     yay {-G --getpkgbuild} [options] [package(s)]
+    yay {-P --show}        [options]
+    yay {-W --web}         [options] [package(s)]
+    yay {-Y --yay}         [options] [package(s)]
 
-If no arguments are provided 'yay -Syu' will be performed
-If no operation is provided -Y will be assumed
+If no operation is specified 'yay -Syu' will be performed
+If no operation and no targets are provided -Y will be assumed
 
 New options:
        --repo             Assume targets are from the repositories
@@ -121,10 +123,6 @@ Permanent configuration options:
     --nopgpfetch          Don't prompt to import PGP keys
     --useask              Automatically resolve conflicts using pacman's ask flag
     --nouseask            Confirm conflicts manually during the install
-    --combinedupgrade     Refresh then perform the repo and AUR upgrade together
-    --nocombinedupgrade   Perform the repo upgrade and AUR upgrade separately
-    --batchinstall        Build multiple AUR packages then install them together
-    --nobatchinstall      Build and install each AUR package one by one
 
     --sudo                <file>  sudo command to use
     --sudoflags           <flags> Pass arguments to sudo
@@ -248,12 +246,13 @@ func handleQuery(ctx context.Context, cfg *settings.Configuration, cmdArgs *pars
 }
 
 func handleHelp(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments) error {
+	usage()
 	switch cmdArgs.Op {
 	case "Y", "yay", "G", "getpkgbuild", "P", "show", "W", "web", "B", "build":
-		usage()
 		return nil
 	}
 
+	cfg.Runtime.Logger.Println("\npacman operation specific options:")
 	return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, cfg.Mode, settings.NoConfirm))
 }
