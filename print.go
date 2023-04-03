@@ -103,10 +103,9 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
 	quietMode := cmdArgs.ExistsArg("q", "quiet")
-	logger := cfg.Runtime.Logger.Child("update-list")
-	if quietMode { // TODO: handle quiet mode in a better way
-		logger = text.NewLogger(io.Discard, os.Stdin, cfg.Debug, "update-list")
-	}
+	// TODO: handle quiet mode in a better way
+	logger := text.NewLogger(io.Discard, os.Stdin, cfg.Debug, "update-list")
+	dbExecutor.SetLogger(logger.Child("db"))
 
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
 	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURCache, false, settings.NoConfirm,
@@ -141,8 +140,8 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 			if quietMode {
 				fmt.Printf("%s\n", pkgName)
 			} else {
-				fmt.Printf("%s %s -> %s\n", text.Bold(pkgName), text.Green(ii.LocalVersion),
-					text.Green(ii.Version))
+				fmt.Printf("%s %s -> %s\n", text.Bold(pkgName), text.Bold(text.Green(ii.LocalVersion)),
+					text.Bold(text.Green(ii.Version)))
 			}
 
 			targets.Remove(pkgName)
