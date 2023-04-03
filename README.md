@@ -19,6 +19,7 @@ Yet Another Yogurt - An AUR Helper Written in Go
 - Narrow search (`yay linux header` will first search `linux` and then narrow on `header`)
 - Find matching package providers during search and allow selection
 - Remove make dependencies at the end of the build process
+- Build local PKGBUILDs with AUR dependencies
 - Un/Vote for packages
 
 [![asciicast](https://asciinema.org/a/399431.svg)](https://asciinema.org/a/399431)
@@ -91,16 +92,17 @@ pacman -S --needed git base-devel yay
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `yay`                             | Alias to `yay -Syu`.                                                                                       |
 | `yay <Search Term>`               | Present package-installation selection menu.                                                               |
-| `yay -Y --combinedupgrade --save` | Make combined upgrade the default mode.                                                                    |
-| `yay -Ps`                         | Print system statistics.                                                                                   |
-| `yay -Yc`                         | Clean unneeded dependencies.                                                                               |
-| `yay -G <AUR Package>`            | Download PKGBUILD from ABS or AUR.                                                                         |
+| `yay -Bi <dir>`                   | Install dependencies and build a local PKGBUILD.                                                           |
+| `yay -G <AUR Package>`            | Download PKGBUILD from ABS or AUR. (yay v12.0+)                                                            |
 | `yay -Gp <AUR Package>`           | Print to stdout PKGBUILD from ABS or AUR.                                                                  |
-| `yay -Y --gendb`                  | Generate development package database used for devel update.                                               |
+| `yay -Ps`                         | Print system statistics.                                                                                   |
 | `yay -Syu --devel`                | Perform system upgrade, but also check for development package updates.                                    |
 | `yay -Syu --timeupdate`           | Perform system upgrade and use PKGBUILD modification time (not version number) to determine update.        |
-| `yay -Wv <AUR Package>`           | Vote for package (Requires setting `AUR_USERNAME` and `AUR_PASSWORD` environment variables). (yay v11.3+)  |
 | `yay -Wu <AUR Package>`           | Unvote for package (Requires setting `AUR_USERNAME` and `AUR_PASSWORD` environment variables) (yay v11.3+) |
+| `yay -Wv <AUR Package>`           | Vote for package (Requires setting `AUR_USERNAME` and `AUR_PASSWORD` environment variables). (yay v11.3+)  |
+| `yay -Y --combinedupgrade --save` | Make combined upgrade the default mode.                                                                    |
+| `yay -Y --gendb`                  | Generate development package database used for devel update.                                               |
+| `yay -Yc`                         | Clean unneeded dependencies.                                                                               |
 
 ## Frequently Asked Questions
 
