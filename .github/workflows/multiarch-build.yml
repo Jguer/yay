@@ -113,5 +113,7 @@ jobs:
           asset_content_type: application/tar+gzip
       - name: Release Notary Action
         uses: docker://aevea/release-notary:latest
+        run: release-notary publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: Jguer/yay
