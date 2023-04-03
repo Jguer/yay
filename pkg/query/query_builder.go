@@ -129,23 +129,13 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
 		dbName := sourceAUR
 
-		isRegex := false
-		// Check if the search is a regex by checking if pkgS it contains a special character
-		for _, c := range pkgS[0] {
-			if !unicode.IsLetter(c) && !unicode.IsNumber(c) {
-				isRegex = true
-				break
-			}
-		}
-
 		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
 				s.queryMap[dbName] = map[string]interface{}{}
 			}
 
 			by := getSearchBy(s.searchBy)
-
-			if (by == aur.NameDesc || by == aur.None || by == aur.Name) && !isRegex &&
+			if (by == aur.NameDesc || by == aur.None || by == aur.Name) &&
 				!matchesSearch(&aurResults[i], pkgS) {
 				continue
 			}
@@ -263,10 +253,15 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 }
 
 func matchesSearch(pkg *aur.Pkg, terms []string) bool {
+	if len(terms) <= 1 {
+		return true
+	}
+
 	for _, pkgN := range terms {
 		if strings.IndexFunc(pkgN, unicode.IsSymbol) != -1 {
 			return true
 		}
+
 		name := strings.ToLower(pkg.Name)
 		desc := strings.ToLower(pkg.Description)
 		targ := strings.ToLower(pkgN)
