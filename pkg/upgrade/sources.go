@@ -27,7 +27,7 @@ func UpDevel(
 	for pkgName, pkg := range remote {
 		if localCache.ToUpgrade(ctxTimeout, pkgName) {
 			if _, ok := aurdata[pkgName]; !ok {
-				text.Warnln(gotext.Get("ignoring package devel upgrade (no AUR info found):"), pkgName)
+				log.Warnln(gotext.Get("ignoring package devel upgrade (no AUR info found):"), pkgName)
 				continue
 			}
 
@@ -53,11 +53,12 @@ func UpDevel(
 	return toUpgrade
 }
 
-func printIgnoringPackage(logger *text.Logger, pkg db.IPackage, newPkgVersion string) {
+func printIgnoringPackage(log *text.Logger, pkg db.IPackage, newPkgVersion string) {
 	left, right := GetVersionDiff(pkg.Version(), newPkgVersion)
 
-	logger.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
-		text.Cyan(pkg.Name()),
+	pkgName := pkg.Name()
+	log.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",
+		text.Cyan(pkgName),
 		left, right,
 	))
 }

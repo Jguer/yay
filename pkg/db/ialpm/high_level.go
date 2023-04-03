@@ -2,6 +2,8 @@ package ialpm
 
 import (
 	alpm "github.com/Jguer/go-alpm/v2"
+
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively.
@@ -42,4 +44,8 @@ func (ae *AlpmExecutor) InstalledSyncPackageNames() []string {
 	}
 
 	return ae.installedSyncPkgNames
+}
+
+func (ae *AlpmExecutor) SetLogger(logger *text.Logger) {
+	ae.log = logger
 }

@@ -4,6 +4,8 @@ import (
 	"time"
 
 	alpm "github.com/Jguer/go-alpm/v2"
+
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type (
@@ -59,4 +61,6 @@ type Executor interface {
 	SyncPackages(...string) []IPackage
 	SyncSatisfier(string) IPackage
 	SyncSatisfierExists(string) bool
+
+	SetLogger(logger *text.Logger)
 }
