@@ -35,6 +35,7 @@ func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer, p
 
 	skipFunc := func(pkg string) bool {
 		dir := pkgbuildDirsByBase[pkg]
+		// TOFIX: new install engine dir will always exist, check if unclean instead
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			return true
 		}
