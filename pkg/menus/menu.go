@@ -26,6 +26,7 @@ func pkgbuildNumberMenu(w io.Writer, pkgbuildDirs map[string]string, bases []str
 			toPrint += text.Bold(text.Green(gotext.Get(" (Installed)")))
 		}
 
+		// TODO: remove or refactor to check if git dir is unclean
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
 			toPrint += text.Bold(text.Green(gotext.Get(" (Build Files Exist)")))
 		}

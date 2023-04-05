@@ -22,37 +22,60 @@ import (
 	"github.com/leonelquinteros/gotext"
 )
 
-type PreparerHookFunc func(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error
+type HookType string
+
+const (
+	// PreDownloadSourcesHook is called before sourcing a package
+	PreDownloadSourcesHook HookType = "pre-download-sources"
+)
+
+type HookFn func(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error
+
+type Hook struct {
+	Name   string
+	Hookfn HookFn
+	Type   HookType
+}
 
 type Preparer struct {
-	dbExecutor        db.Executor
-	cmdBuilder        exe.ICmdBuilder
-	cfg               *settings.Configuration
-	postDownloadHooks []PreparerHookFunc
-	postMergeHooks    []PreparerHookFunc
+	dbExecutor db.Executor
+	cmdBuilder exe.ICmdBuilder
+	cfg        *settings.Configuration
+	hooks      []Hook
 
 	makeDeps []string
 }
 
 func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, cfg *settings.Configuration) *Preparer {
 	preper := &Preparer{
-		dbExecutor:        dbExecutor,
-		cmdBuilder:        cmdBuilder,
-		cfg:               cfg,
-		postDownloadHooks: []PreparerHookFunc{},
-		postMergeHooks:    []PreparerHookFunc{},
+		dbExecutor: dbExecutor,
+		cmdBuilder: cmdBuilder,
+		cfg:        cfg,
+		hooks:      []Hook{},
 	}
 
 	if cfg.CleanMenu {
-		preper.postDownloadHooks = append(preper.postDownloadHooks, menus.CleanFn)
+		preper.hooks = append(preper.hooks, Hook{
+			Name:   "clean",
+			Hookfn: menus.CleanFn,
+			Type:   PreDownloadSourcesHook,
+		})
 	}
 
 	if cfg.DiffMenu {
-		preper.postMergeHooks = append(preper.postMergeHooks, menus.DiffFn)
+		preper.hooks = append(preper.hooks, Hook{
+			Name:   "diff",
+			Hookfn: menus.DiffFn,
+			Type:   PreDownloadSourcesHook,
+		})
 	}
 
 	if cfg.EditMenu {
-		preper.postMergeHooks = append(preper.postMergeHooks, menus.EditFn)
+		preper.hooks = append(preper.hooks, Hook{
+			Name:   "edit",
+			Hookfn: menus.EditFn,
+			Type:   PreDownloadSourcesHook,
+		})
 	}
 
 	return preper
@@ -171,25 +194,21 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 		return nil, errA
 	}
 
-	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
-		pkgBuildDirsByBase, false, preper.cfg.MaxConcurrentDownloads); errP != nil {
-		text.Errorln(errP)
-	}
-
-	for _, hookFn := range preper.postDownloadHooks {
-		if err := hookFn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase); err != nil {
-			return nil, err
-		}
-	}
-
 	if err := mergePkgbuilds(ctx, preper.cmdBuilder, pkgBuildDirsByBase); err != nil {
 		return nil, err
 	}
 
-	for _, hookFn := range preper.postMergeHooks {
-		if err := hookFn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase); err != nil {
-			return nil, err
+	for _, hookFn := range preper.hooks {
+		if hookFn.Type == PreDownloadSourcesHook {
+			if err := hookFn.Hookfn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase); err != nil {
+				return nil, err
+			}
 		}
+	}
+
+	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
+		pkgBuildDirsByBase, false, preper.cfg.MaxConcurrentDownloads); errP != nil {
+		text.Errorln(errP)
 	}
 
 	return pkgBuildDirsByBase, nil

@@ -35,6 +35,7 @@ func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer, p
 
 	skipFunc := func(pkg string) bool {
 		dir := pkgbuildDirsByBase[pkg]
+		// TOFIX: new install engine dir will always exist, check if unclean instead
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			return true
 		}
@@ -59,7 +60,7 @@ func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer, p
 		dir := pkgbuildDirsByBase[base]
 		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
 
-		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "reset", "--hard", "HEAD")); err != nil {
+		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "reset", "--hard", "origin/HEAD")); err != nil {
 			text.Warnln(gotext.Get("Unable to clean:"), dir)
 
 			return err
