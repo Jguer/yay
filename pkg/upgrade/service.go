@@ -253,7 +253,7 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	allUp.Print(u.log)
 
 	u.log.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
-	u.log.Warnln(gotext.Get("May cause partial upgrades and break systems"))
+	u.log.Warnln(gotext.Get("Excluding packages may cause partial upgrades and break systems"))
 
 	numbers, err := u.log.GetInput(u.cfg.AnswerUpgrade, settings.NoConfirm)
 	if err != nil {

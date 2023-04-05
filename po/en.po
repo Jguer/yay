@@ -7,7 +7,7 @@ msgstr ""
 "Language: \n"
 "X-Generator: xgotext\n"
 
-#: pkg/menus/menu.go:30
+#: pkg/menus/menu.go:31
 msgid " (Build Files Exist)"
 msgstr ""
 
@@ -34,7 +34,7 @@ msgstr ""
 msgid " there is nothing to do"
 msgstr ""
 
-#: pkg/menus/menu.go:47
+#: pkg/menus/menu.go:48
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
 
@@ -51,9 +51,9 @@ msgstr ""
 msgid "%s is present."
 msgstr ""
 
-#: pkg/dep/dep_graph.go:385
 #: aur_install.go:271
 #: install.go:725
+#: pkg/dep/dep_graph.go:385
 msgid "%s is up to date -- skipping"
 msgstr ""
 
@@ -144,8 +144,8 @@ msgstr ""
 msgid "Check Deps"
 msgstr ""
 
-#: pkg/upgrade/service.go:78
 #: upgrade.go:95
+#: pkg/upgrade/service.go:78
 msgid "Checking development packages..."
 msgstr ""
 
@@ -169,8 +169,8 @@ msgstr ""
 msgid "Conflicts With"
 msgstr ""
 
-#: pkg/menus/clean_menu.go:60
-#: pkg/menus/clean_menu.go:107
+#: pkg/menus/clean_menu.go:61
+#: pkg/menus/clean_menu.go:108
 msgid "Deleting (%d/%d): %s"
 msgstr ""
 
@@ -213,6 +213,10 @@ msgstr ""
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
+msgstr ""
+
+#: pkg/upgrade/service.go:256
+msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 
 #: pkg/dep/dep_graph.go:59
@@ -304,10 +308,6 @@ msgstr ""
 msgid "Make Deps"
 msgstr ""
 
-#: pkg/upgrade/service.go:256
-msgid "May cause partial upgrades and break systems"
-msgstr ""
-
 #: pkg/query/aur_warnings.go:33
 msgid "Missing AUR Debug Packages:"
 msgstr ""
@@ -351,7 +351,7 @@ msgstr ""
 msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
 msgstr ""
 
-#: preparer.go:207
+#: preparer.go:226
 msgid "PKGBUILD up to date, skipping download: %s"
 msgstr ""
 
@@ -376,13 +376,13 @@ msgstr ""
 msgid "Packages not in AUR:"
 msgstr ""
 
-#: pkg/menus/clean_menu.go:52
-#: pkg/menus/clean_menu.go:99
+#: pkg/menus/clean_menu.go:53
+#: pkg/menus/clean_menu.go:100
 msgid "Packages to cleanBuild?"
 msgstr ""
 
-#: pkg/dep/dep_graph.go:215
 #: upgrade.go:213
+#: pkg/dep/dep_graph.go:215
 msgid "Packages to exclude"
 msgstr ""
 
@@ -394,8 +394,8 @@ msgstr ""
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr ""
 
-#: pkg/upgrade/service.go:252
 #: upgrade.go:210
+#: pkg/upgrade/service.go:252
 msgid "Packages to upgrade."
 msgstr ""
 
@@ -419,7 +419,7 @@ msgid "Querying AUR..."
 msgstr ""
 
 #: install.go:236
-#: preparer.go:85
+#: preparer.go:108
 msgid "Remove make dependencies after install?"
 msgstr ""
 
@@ -428,8 +428,8 @@ msgstr ""
 msgid "Repository AUR"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:191
 #: print.go:25
+#: pkg/db/ialpm/alpm.go:191
 msgid "Repository"
 msgstr ""
 
@@ -437,13 +437,13 @@ msgstr ""
 msgid "SRCINFO"
 msgstr ""
 
-#: pkg/upgrade/service.go:63
 #: upgrade.go:73
+#: pkg/upgrade/service.go:63
 msgid "Searching AUR for updates..."
 msgstr ""
 
-#: pkg/upgrade/service.go:142
 #: upgrade.go:62
+#: pkg/upgrade/service.go:142
 msgid "Searching databases for updates..."
 msgstr ""
 
@@ -476,9 +476,9 @@ msgstr ""
 msgid "The following packages are not compatible with your architecture:"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:179
 #: pkg/dep/depPool.go:499
 #: pkg/dep/dep_graph.go:627
+#: pkg/db/ialpm/alpm.go:179
 msgid "There are %d providers available for %s:"
 msgstr ""
 
@@ -503,9 +503,9 @@ msgstr ""
 msgid "URL"
 msgstr ""
 
-#: pkg/menus/clean_menu.go:63
-#: pkg/menus/clean_menu.go:69
 #: clean.go:192
+#: pkg/menus/clean_menu.go:64
+#: pkg/menus/clean_menu.go:70
 msgid "Unable to clean:"
 msgstr ""
 
@@ -534,7 +534,7 @@ msgstr ""
 msgid "Yay version v%s"
 msgstr ""
 
-#: pkg/menus/menu.go:47
+#: pkg/menus/menu.go:48
 msgid "[N]one"
 msgstr ""
 
@@ -542,9 +542,9 @@ msgstr ""
 msgid "\nBuild directory:"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:201
 #: pkg/dep/depPool.go:513
 #: pkg/dep/dep_graph.go:641
+#: pkg/db/ialpm/alpm.go:201
 msgid "\nEnter a number (default=1): "
 msgstr ""
 
@@ -687,9 +687,9 @@ msgstr ""
 msgid "input too long"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:222
 #: pkg/dep/depPool.go:533
 #: pkg/dep/dep_graph.go:662
+#: pkg/db/ialpm/alpm.go:222
 msgid "invalid number: %s"
 msgstr ""
 
@@ -705,9 +705,9 @@ msgstr ""
 msgid "invalid repository"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:227
 #: pkg/dep/depPool.go:538
 #: pkg/dep/dep_graph.go:668
+#: pkg/db/ialpm/alpm.go:227
 msgid "invalid value: %d is not between %d and %d"
 msgstr ""
 
@@ -735,7 +735,7 @@ msgstr ""
 msgid "only one operation may be used at a time"
 msgstr ""
 
-#: print.go:156
+#: print.go:158
 msgid "package '%s' was not found"
 msgstr ""
 
