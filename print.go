@@ -103,17 +103,19 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
 	quietMode := cmdArgs.ExistsArg("q", "quiet")
+
 	// TODO: handle quiet mode in a better way
 	logger := text.NewLogger(io.Discard, os.Stdin, cfg.Debug, "update-list")
 	dbExecutor.SetLogger(logger.Child("db"))
+	settings.NoConfirm = true
 
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
-	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURCache, false, settings.NoConfirm,
+	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURCache, false, true,
 		false, false, cmdArgs.ExistsArg("needed"), logger.Child("grapher"))
 
 	upService := upgrade.NewUpgradeService(
 		grapher, cfg.Runtime.AURCache, dbExecutor, cfg.Runtime.VCSStore,
-		cfg, settings.NoConfirm, logger.Child("upgrade"))
+		cfg, true, logger.Child("upgrade"))
 
 	graph, errSysUp := upService.GraphUpgrades(ctx, nil,
 		enableDowngrade, filter)
