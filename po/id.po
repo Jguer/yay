@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Last-Translator: Linerly ., 2023\n"
-"Language-Team: Indonesian (https://www.transifex.com/yay-1/teams/123732/id/)\n"
+"Language-Team: Indonesian (https://app.transifex.com/yay-1/teams/123732/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,11 +30,11 @@ msgstr "(Sasaran"
 msgid " (Wanted by: "
 msgstr "(Dibutuhkan oleh:"
 
-#: cmd.go:470
+#: cmd.go:472
 msgid " [Installed]"
 msgstr "[Terpasang]"
 
-#: cmd.go:425 install.go:168 install.go:202 vote.go:34
+#: cmd.go:425 install.go:172 install.go:206 vote.go:34
 msgid " there is nothing to do"
 msgstr "tidak ada yang dapat dilakukan"
 
@@ -44,7 +44,7 @@ msgstr ""
 "%s [A]Semua [Ab]Batalkan [I]Terpasang [No]BelumTerpasang atau (1 2 3, 1-3, "
 "^4)"
 
-#: aur_install.go:254 install.go:754
+#: aur_install.go:274 install.go:739
 msgid "%s already made -- skipping build"
 msgstr "%s sudah dibuat -- melewatkan pembangunan"
 
@@ -52,15 +52,15 @@ msgstr "%s sudah dibuat -- melewatkan pembangunan"
 msgid "%s is not set"
 msgstr "%s tidak diatur"
 
-#: pkg/settings/exe/cmd_builder.go:198
+#: pkg/settings/exe/cmd_builder.go:238
 msgid "%s is present."
 msgstr "%s sudah ada."
 
-#: aur_install.go:251 install.go:740
+#: pkg/dep/dep_graph.go:385 aur_install.go:271 install.go:725
 msgid "%s is up to date -- skipping"
 msgstr "%s sudah yang terbaru -- melewatkan"
 
-#: install.go:655
+#: install.go:640
 msgid "%s not satisfied, flushing install queue"
 msgstr "tidak puas, membilas antrean pembilasan antrean pemasangan"
 
@@ -80,11 +80,11 @@ msgstr "%s: tidak dapat menggunakan target dengan --aur -- melewatkan"
 msgid "%s: can't use target with option --repo -- skipping"
 msgstr "%s: tidak dapat menggunakan target dengan opsi --repo -- melewatkan"
 
-#: pkg/upgrade/sources.go:61
+#: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: mengabaikan peningkatan paket (%s => %s)"
 
-#: upgrade.go:150
+#: upgrade.go:165
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr "%s: lokal (%s) lebih baru dari yang AUR (%s)"
 
@@ -96,39 +96,39 @@ msgstr ""
 "%s: mohon tetapkan variabel lingkungan AUR_USERNAME dan AUR_PASSWORD untuk "
 "pemungutan suara"
 
-#: pkg/download/unified.go:187
+#: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr "(%d/%d) PKGBUILD terunduh dari ABS: %s"
 
-#: pkg/download/aur.go:83 pkg/download/unified.go:183
+#: pkg/download/aur.go:84 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) PKGBUILD terunduh: %s"
 
-#: install.go:545
+#: pkg/srcinfo/service.go:108
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Menguraikan SRCINFO: %s"
 
-#: pkg/query/types.go:145 pkg/query/types.go:199
+#: pkg/query/types.go:70 pkg/query/types.go:101
 msgid "(Installed)"
 msgstr "(Terpasang)"
 
-#: pkg/query/types.go:143 pkg/query/types.go:197
+#: pkg/query/types.go:68 pkg/query/types.go:99
 msgid "(Installed: %s)"
 msgstr "(Terpasang: %s)"
 
-#: pkg/query/types.go:134
+#: pkg/query/types.go:59
 msgid "(Orphaned)"
 msgstr "(Tertinggal)"
 
-#: pkg/query/types.go:138
+#: pkg/query/types.go:63
 msgid "(Out-of-date: %s)"
 msgstr "(Kedaluwarsa: %s)"
 
-#: print.go:28
+#: print.go:31
 msgid "AUR URL"
 msgstr "URL AUR"
 
-#: pkg/dep/dep_graph.go:71
+#: pkg/dep/dep_graph.go:74
 msgid "AUR"
 msgstr "AUR"
 
@@ -136,19 +136,19 @@ msgstr "AUR"
 msgid "Add %s or %s to your environment variables"
 msgstr "Tambahkan %s atau %s ke variabel lingkungan Anda"
 
-#: main.go:54
+#: main.go:60
 msgid "Avoid running yay as root/sudo."
 msgstr "Hindari menjalankan yay sebagai root/sudo."
 
-#: pkg/dep/dep_graph.go:59
+#: pkg/dep/dep_graph.go:62
 msgid "Check Dependency"
 msgstr "Periksa Ketergantungan"
 
-#: print.go:34
+#: print.go:37
 msgid "Check Deps"
 msgstr "Periksa Ketergantungan"
 
-#: upgrade.go:99
+#: pkg/upgrade/service.go:78 upgrade.go:95
 msgid "Checking development packages..."
 msgstr "Memeriksa paket-paket pengembangan..."
 
@@ -160,7 +160,7 @@ msgstr "Memeriksa untuk konflik..."
 msgid "Checking for inner conflicts..."
 msgstr "Memeriksa untuk konflik dalam..."
 
-#: clean.go:202
+#: clean.go:214
 msgid "Cleaning (%d/%d): %s"
 msgstr "Membersihkan (%d/%d): %s"
 
@@ -168,27 +168,23 @@ msgstr "Membersihkan (%d/%d): %s"
 msgid "Conflicting packages will have to be confirmed manually"
 msgstr "Paket yang berkonflik harus dikonfirmasi secara manual"
 
-#: print.go:36
+#: print.go:39
 msgid "Conflicts With"
 msgstr "Berkonflik Dengan"
-
-#: pkg/dep/depCheck.go:303
-msgid "Could not find all required packages:"
-msgstr "Tidak dapat menemukan paket-paket yang dibutuhkan: "
 
 #: pkg/menus/clean_menu.go:60 pkg/menus/clean_menu.go:107
 msgid "Deleting (%d/%d): %s"
 msgstr "Menghapus (%d/%d): %s"
 
-#: pkg/dep/dep_graph.go:57
+#: pkg/dep/dep_graph.go:60
 msgid "Dependency"
 msgstr "Ketergantungan"
 
-#: print.go:32
+#: print.go:35
 msgid "Depends On"
 msgstr "Tergantung Pada"
 
-#: print.go:26
+#: print.go:29
 msgid "Description"
 msgstr "Deskripsi"
 
@@ -200,15 +196,15 @@ msgstr "Tampilkan perbedaan?"
 msgid "Disable 'provides' setting by default"
 msgstr "Nonaktifkan pengaturan 'menyediakan' secara bawaan"
 
-#: clean.go:72
+#: clean.go:79
 msgid "Do you want to remove ALL AUR packages from cache?"
 msgstr "Apakah Anda ingin menghapus SEMUA paket AUR dari cache?"
 
-#: clean.go:89
+#: clean.go:96
 msgid "Do you want to remove ALL untracked AUR files?"
 msgstr "Apakah Anda ingin menghapus SEMUA file AUR yang tidak dilacak?"
 
-#: clean.go:74
+#: clean.go:81
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "Apakah Anda ingin menghapus semua paket AUR lainnya dari cache?"
 
@@ -220,20 +216,28 @@ msgstr "Edit PKGBUILD dengan?"
 msgid "Error during AUR search: %s\n"
 msgstr "Terjadi kesalahan melakukan pencarian AUR: %s\n"
 
-#: pkg/dep/dep_graph.go:56
+#: pkg/dep/dep_graph.go:59
 msgid "Explicit"
 msgstr "Eksplisit"
 
-#: print.go:81
+#: print.go:84
 msgid "Explicitly installed packages: %s"
 msgstr "Paket yang terpasang secara eksplisit: %s"
 
-#: errors.go:49
+#: pkg/dep/dep_graph.go:365 pkg/dep/dep_graph.go:454
+msgid "Failed to find AUR package for"
+msgstr "Gagal mencari paket AUR untuk"
+
+#: aur_install.go:104
+msgid "Failed to install layer, rolling up to next layer."
+msgstr "Gagal memasang lapisan, menggulirkan ke lapisan berikutnya."
+
+#: errors.go:55
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr "Gagal memasang paket berikut. Intervensi manual dibutuhkan:"
 
-#: print.go:40
+#: print.go:43
 msgid "First Submitted"
 msgstr "Pengiriman Pertama"
 
@@ -241,23 +245,23 @@ msgstr "Pengiriman Pertama"
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Paket AUR Yang Ditandai Sebagai Kedaluwarsa:"
 
-#: print.go:80
+#: print.go:83
 msgid "Foreign installed packages: %s"
 msgstr "Total paket-paket asing yang terpasang: %s"
 
-#: pkg/vcs/vcs.go:133
+#: pkg/vcs/vcs.go:142
 msgid "Found git repo: %s"
 msgstr "Ditemukan repositori git: %s"
 
-#: vcs.go:72
+#: vcs.go:73
 msgid "GenDB finished. No packages were installed"
 msgstr "GenDB selesai. Tidak ada paket yang terpasang"
 
-#: print.go:29
+#: print.go:32
 msgid "Groups"
 msgstr "Grup"
 
-#: pkg/pgp/keys.go:87
+#: pkg/pgp/keys.go:91
 msgid "Import?"
 msgstr "Impor?"
 
@@ -273,63 +277,67 @@ msgstr "Konflik dalam paket ditemukan:"
 msgid "Installing %s will remove:"
 msgstr "Memasang %s akan menghapus:"
 
-#: print.go:24
+#: print.go:27
 msgid "Keywords"
 msgstr "Kata Kunci"
 
-#: print.go:41
+#: print.go:44
 msgid "Last Modified"
 msgstr "Terakhir Diubah"
 
-#: print.go:30
+#: print.go:33
 msgid "Licenses"
 msgstr "Lisensi"
 
-#: pkg/dep/dep_graph.go:73
+#: pkg/dep/dep_graph.go:76
 msgid "Local"
 msgstr "Lokal"
 
-#: print.go:37
+#: print.go:40
 msgid "Maintainer"
 msgstr "Pemelihara"
 
-#: pkg/dep/dep_graph.go:58
+#: pkg/dep/dep_graph.go:61
 msgid "Make Dependency"
 msgstr "Ketergantungan Make"
 
-#: print.go:33
+#: print.go:36
 msgid "Make Deps"
 msgstr "Dependensi Make"
+
+#: pkg/upgrade/service.go:256
+msgid "May cause partial upgrades and break systems"
+msgstr "Dapat mengakibatkan pembaruan parsial dan merusak sistem"
 
 #: pkg/query/aur_warnings.go:33
 msgid "Missing AUR Debug Packages:"
 msgstr "Paket Debug AUR Yang Tidak Ditemukan:"
 
-#: pkg/query/aur_warnings.go:28
-msgid "Missing AUR Packages:"
-msgstr "Paket AUR Yang Tidak Ditemukan:"
-
-#: pkg/dep/dep_graph.go:75
+#: pkg/dep/dep_graph.go:78
 msgid "Missing"
 msgstr "Tidak Ditemukan"
 
-#: print.go:23
+#: print.go:26
 msgid "Name"
 msgstr "Nama"
 
-#: pkg/text/print.go:124
+#: pkg/dep/dep_graph.go:370 pkg/dep/dep_graph.go:467
+msgid "No AUR package found for"
+msgstr "Tidak ada paket AUR yang ditemukan untuk"
+
+#: pkg/text/print.go:117
 msgid "None"
 msgstr "Tidak Ada"
 
-#: print.go:35
+#: print.go:38
 msgid "Optional Deps"
 msgstr "Dependensi Opsional"
 
 #: pkg/query/aur_warnings.go:38
-msgid "Orphaned AUR Packages:"
-msgstr "Paket AUR Yang Ditinggalkan:"
+msgid "Orphan (unmaintained) AUR Packages:"
+msgstr "Paket AUR Tersendiri (tidak dipelihara):"
 
-#: print.go:44 print.go:46
+#: print.go:47 print.go:49
 msgid "Out-of-date"
 msgstr "Kedaluwarsa"
 
@@ -337,11 +345,11 @@ msgstr "Kedaluwarsa"
 msgid "PGP keys need importing:"
 msgstr "Kunci-kunci PGP membutuhkan pengimporan:"
 
-#: install.go:261 vcs.go:45
+#: install.go:265 vcs.go:46
 msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
 msgstr "PKGBUILD sudah yang terbaru, Melewatkan (%d/%d): %s"
 
-#: preparer.go:206
+#: preparer.go:207
 msgid "PKGBUILD up to date, skipping download: %s"
 msgstr "PKGBUILD sudah terbaru, melewati pengunduhan: %s"
 
@@ -349,11 +357,11 @@ msgstr "PKGBUILD sudah terbaru, melewati pengunduhan: %s"
 msgid "PKGBUILDs to edit?"
 msgstr "PKGBUILD apa saja untuk diedit?"
 
-#: print.go:51
+#: print.go:54
 msgid "Package Base ID"
 msgstr "ID Basis Paket"
 
-#: print.go:52
+#: print.go:55
 msgid "Package Base"
 msgstr "Basis Paket"
 
@@ -361,25 +369,33 @@ msgstr "Basis Paket"
 msgid "Package conflicts found:"
 msgstr "Konflik paket ditemukan:"
 
+#: pkg/query/aur_warnings.go:28
+msgid "Packages not in AUR:"
+msgstr "Paket yang tidak ada di AUR:"
+
 #: pkg/menus/clean_menu.go:52 pkg/menus/clean_menu.go:99
 msgid "Packages to cleanBuild?"
 msgstr "Paket-paket di bangunBersih?"
 
-#: upgrade.go:198 upgrade.go:295
+#: pkg/dep/dep_graph.go:215 upgrade.go:213
+msgid "Packages to exclude"
+msgstr "Paket untuk tidak disertakan"
+
+#: pkg/upgrade/service.go:255
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 "Paket-paket yang tidak disertakan: (mis: \"1 2 3\", \"1-3\", \"^4\", atau "
 "nama repositori)"
 
-#: cmd.go:407
+#: cmd.go:406
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Paket-paket untuk dipasang (mis: 1 2 3, 1-3, atau ^4)"
 
-#: upgrade.go:195 upgrade.go:292
+#: pkg/upgrade/service.go:252 upgrade.go:210
 msgid "Packages to upgrade."
 msgstr "Paket untuk ditingkatkan."
 
-#: print.go:39
+#: print.go:42
 msgid "Popularity"
 msgstr "Popularitas"
 
@@ -388,95 +404,95 @@ msgstr "Popularitas"
 msgid "Proceed with install?"
 msgstr "Lanjutkan dengan pemasangan?"
 
-#: print.go:31
+#: print.go:34
 msgid "Provides"
 msgstr "Menyediakan"
 
-#: pkg/query/aur_info.go:90
+#: pkg/query/aur_info.go:89
 msgid "Querying AUR..."
 msgstr "Mencari di AUR..."
 
-#: install.go:232 preparer.go:84
+#: install.go:236 preparer.go:85
 msgid "Remove make dependencies after install?"
 msgstr "Hapus dependensi make setelah pemasangan?"
 
-#: pkg/dep/depPool.go:501 pkg/dep/dep_graph.go:420
+#: pkg/dep/depPool.go:503 pkg/dep/dep_graph.go:631
 msgid "Repository AUR"
 msgstr "Repositori AUR"
 
-#: print.go:22 pkg/db/ialpm/alpm.go:188
+#: pkg/db/ialpm/alpm.go:191 print.go:25
 msgid "Repository"
 msgstr "Repositori"
 
-#: pkg/dep/dep_graph.go:74
+#: pkg/dep/dep_graph.go:77
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: upgrade.go:74
+#: pkg/upgrade/service.go:63 upgrade.go:73
 msgid "Searching AUR for updates..."
 msgstr "Mencari AUR untuk pembaruan..."
 
-#: upgrade.go:63
+#: pkg/upgrade/service.go:142 upgrade.go:62
 msgid "Searching databases for updates..."
 msgstr "Mencari basis data untuk pembaruan..."
 
-#: pkg/query/mixed_sources.go:204 pkg/query/source.go:99
+#: pkg/query/query_builder.go:191
 msgid "Showing repo packages only"
 msgstr "Menampilkan paket-paket repositori saja"
 
-#: print.go:85
+#: print.go:88
 msgid "Size of pacman cache %s: %s"
 msgstr "Ukuran cache pacman %s: %s"
 
-#: print.go:88
+#: print.go:91
 msgid "Size of yay cache %s: %s"
 msgstr "Ukuran cache yay%s: %s"
 
-#: print.go:53
+#: print.go:56
 msgid "Snapshot URL"
 msgstr "URL Snapshot"
 
-#: pkg/dep/dep_graph.go:72
+#: pkg/dep/dep_graph.go:75
 msgid "Sync"
 msgstr "Sinkron"
 
-#: print.go:90
+#: print.go:93
 msgid "Ten biggest packages:"
 msgstr "Sepuluh paket terbesar:"
 
-#: install.go:485
+#: install.go:493 sync.go:183
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Paket-paket berikut ini tidak kompatibel dengan arsitektur Anda:"
 
-#: pkg/db/ialpm/alpm.go:176 pkg/dep/depPool.go:497 pkg/dep/dep_graph.go:416
+#: pkg/db/ialpm/alpm.go:179 pkg/dep/depPool.go:499 pkg/dep/dep_graph.go:627
 msgid "There are %d providers available for %s:"
 msgstr "Tersedia %d penyedia untuk %s:"
 
-#: pkg/settings/exe/cmd_builder.go:199
+#: pkg/settings/exe/cmd_builder.go:239
 msgid "There may be another Pacman instance running. Waiting..."
 msgstr "Mungkin ada instansi Pacman yang lain. Menunggu..."
 
-#: print.go:82
+#: print.go:85
 msgid "Total Size occupied by packages: %s"
 msgstr "Total Ukuran ditempati oleh paket-paket: %s"
 
-#: print.go:79
+#: print.go:82
 msgid "Total installed packages: %s"
 msgstr "Total paket-paket terpasang: %s"
 
-#: install.go:493
+#: install.go:501 sync.go:191
 msgid "Try to build them anyway?"
 msgstr "Coba membangun saja?"
 
-#: print.go:27
+#: print.go:30
 msgid "URL"
 msgstr "URL"
 
-#: clean.go:182 pkg/menus/clean_menu.go:63 pkg/menus/clean_menu.go:69
+#: pkg/menus/clean_menu.go:63 pkg/menus/clean_menu.go:69 clean.go:192
 msgid "Unable to clean:"
 msgstr "Tidak dapat membersihkan:"
 
-#: get.go:42 get.go:73
+#: get.go:44 get.go:76
 msgid "Unable to find the following packages:"
 msgstr "Tidak dapat mencari paket-paket berikut ini:"
 
@@ -484,15 +500,19 @@ msgstr "Tidak dapat mencari paket-paket berikut ini:"
 msgid "Unable to handle package vote for: %s. err: %s"
 msgstr "Tidak dapat menangani pemungutan suara paket untuk: %s. kesalahan: %s"
 
-#: print.go:25
+#: clean.go:169
+msgid "Unable to remove %s: %s"
+msgstr "Tidak dapat menghapus %s: %s"
+
+#: print.go:28
 msgid "Version"
 msgstr "Versi"
 
-#: print.go:38
+#: print.go:41
 msgid "Votes"
 msgstr "Suara"
 
-#: print.go:77
+#: print.go:80
 msgid "Yay version v%s"
 msgstr "Yay versi v%s"
 
@@ -500,7 +520,7 @@ msgstr "Yay versi v%s"
 msgid "[N]one"
 msgstr "[T]idak Ada"
 
-#: clean.go:77
+#: clean.go:84
 msgid ""
 "\n"
 "Build directory:"
@@ -508,7 +528,7 @@ msgstr ""
 "\n"
 "Direktori pembangunan:"
 
-#: pkg/db/ialpm/alpm.go:198 pkg/dep/depPool.go:511 pkg/dep/dep_graph.go:430
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/depPool.go:513 pkg/dep/dep_graph.go:641
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -520,27 +540,43 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "membatalkan karena pengguna"
 
-#: install.go:522
+#: pkg/settings/parser/parser.go:620
+msgid "argument '-' specified without input on stdin"
+msgstr "argumen '-' ditentukan tanpa masukan pada stdin"
+
+#: local_install.go:27
+msgid "cannot find PKGBUILD and .SRCINFO in directory"
+msgstr "tidak dapat menemukan PKGBUILD dan .SRCINFO di direktori"
+
+#: install.go:530
 msgid "cannot find package name: %v"
 msgstr "tidak dapat menemukan nama paket: %v"
 
-#: errors.go:41 install.go:713 install.go:897
+#: errors.go:47
 msgid "could not find PKGDEST for: %s"
 msgstr "tidak dapat menemukan PKGDEST untuk: %s"
 
-#: errors.go:10
+#: errors.go:9
+msgid "could not find all required packages"
+msgstr "tidak dapat menemukan semua paket yang dibutuhkan"
+
+#: pkg/dep/depCheck.go:303
+msgid "could not find all required packages:"
+msgstr "tidak dapat menemukan semua paket yang ditemukan:"
+
+#: errors.go:16
 msgid "could not find any package archives listed in %s"
 msgstr "tidak dapat mencari paket arsip apa pun yang terdaftar di %s"
 
-#: install.go:801
+#: install.go:786
 msgid "could not find srcinfo for: %s"
 msgstr "tidak dapat mencari srcinfo untuk: %s"
 
-#: errors.go:20
+#: errors.go:26
 msgid "dependency"
 msgstr "ketergantungan"
 
-#: pkg/vcs/vcs.go:85
+#: pkg/vcs/vcs.go:94 pkg/vcs/vcs.go:98
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "pemeriksaan devel untuk paket gagal: '%s' mengalami sebuah kesalahan"
 
@@ -556,40 +592,40 @@ msgstr "terjadi kesalahan mengunduh sumber-sumber: %s"
 msgid "error fetching %s: %s"
 msgstr "terjadi kesalahan mendapatkan %s: %s"
 
-#: install.go:317 install.go:446 local_install.go:22
+#: install.go:321 install.go:455 local_install.go:26
 msgid "error installing repo packages"
 msgstr "terjadi kesalahan memasang paket-paket repositori"
 
-#: aur_install.go:216 aur_install.go:220
+#: aur_install.go:236 aur_install.go:240
 msgid "error installing:"
 msgstr "terjadi kesalahan memasang:"
 
-#: aur_install.go:175 aur_install.go:179 install.go:696 install.go:737
-#: install.go:751 install.go:765
+#: aur_install.go:204 aur_install.go:208 install.go:681 install.go:722
+#: install.go:736 install.go:750
 msgid "error making: %s"
 msgstr "terjadi kesalahan membuat: %s"
 
-#: install.go:602
+#: install.go:586
 msgid "error merging %s: %s"
 msgstr "terjadi kesalahan menggabungkan %s: %s"
 
-#: pkg/download/unified.go:56
+#: pkg/download/unified.go:59
 msgid "error reading %s"
 msgstr "terjadi kesalahan membaca %s"
 
-#: install.go:107 sync.go:35
+#: install.go:110 sync.go:37
 msgid "error refreshing databases"
 msgstr "terjadi kesalahan memuat ulang basis data"
 
-#: clean.go:208 install.go:595
+#: clean.go:220 install.go:579
 msgid "error resetting %s: %s"
 msgstr "terjadi kesalahan mengatur ulang %s: %s"
 
-#: errors.go:23
+#: errors.go:29
 msgid "error updating package install reason to %s"
 msgstr "terjadi kesalahan memperbarui alasan pemasangan paket ke %s"
 
-#: errors.go:18
+#: errors.go:24
 msgid "explicit"
 msgstr "eksplisit"
 
@@ -597,35 +633,40 @@ msgstr "eksplisit"
 msgid "failed to create directory '%s': %s"
 msgstr "gagal untuk membuat direktori '%s': %s"
 
-#: pkg/settings/config.go:330
+#: pkg/settings/config.go:286
 msgid "failed to open config file '%s': %s"
 msgstr "gagal untuk membuka file konfigurasi '%s': %s"
 
-#: install.go:550
+#: pkg/srcinfo/service.go:113
 msgid "failed to parse %s -- skipping: %s"
 msgstr "gagal untuk menguraikan %s -- melewatkan: %s"
 
-#: install.go:554
+#: pkg/srcinfo/service.go:117
 msgid "failed to parse %s: %s"
 msgstr "gagal untuk menguraikan %s: %s"
 
-#: local_install.go:44
+#: local_install.go:82
 msgid "failed to parse .SRCINFO"
 msgstr "gagal mengurai .SRCINFO"
 
-#: pkg/settings/config.go:340
+#: pkg/settings/config.go:296
 msgid "failed to read config file '%s': %s"
 msgstr "gagal untuk membaca file konfigurasi '%s': %s"
 
-#: pkg/cmd/graph/main.go:45 pkg/settings/config.go:306
+#: pkg/settings/runtime.go:74
 msgid "failed to retrieve aur Cache"
 msgstr "gagal mendapatkan Cache aur"
+
+#: pkg/upgrade/sources.go:30
+msgid "ignoring package devel upgrade (no AUR info found):"
+msgstr ""
+"mengabaikan pembaruan paket devel (tidak ada info AUR yang ditemukan):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
 msgstr "input terlalu panjang"
 
-#: pkg/db/ialpm/alpm.go:219 pkg/dep/depPool.go:531 pkg/dep/dep_graph.go:451
+#: pkg/db/ialpm/alpm.go:222 pkg/dep/depPool.go:533 pkg/dep/dep_graph.go:662
 msgid "invalid number: %s"
 msgstr "Nomor tidak valid: %s"
 
@@ -633,7 +674,7 @@ msgstr "Nomor tidak valid: %s"
 msgid "invalid option '%s'"
 msgstr "opsi '%s' tidak valid"
 
-#: cmd.go:206
+#: cmd.go:208
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "opsi tidak valid: '--deps' dan '--explicit' tidak boleh digunakan bersama"
@@ -642,7 +683,7 @@ msgstr ""
 msgid "invalid repository"
 msgstr "repositori tidak valid"
 
-#: pkg/db/ialpm/alpm.go:224 pkg/dep/depPool.go:536 pkg/dep/dep_graph.go:457
+#: pkg/db/ialpm/alpm.go:227 pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:668
 msgid "invalid value: %d is not between %d and %d"
 msgstr "nilai tidak valid: %d tidak di antara %d dan %d"
 
@@ -654,7 +695,7 @@ msgstr "tidak ada kunci-kunci untuk diimpor"
 msgid "no query was executed"
 msgstr "tidak ada pencarian yang dilakukan"
 
-#: local_install.go:34
+#: local_install.go:68
 msgid "no target directories specified"
 msgstr "tidak ada sasaran direktori yang ditetapkan"
 
@@ -662,7 +703,7 @@ msgstr "tidak ada sasaran direktori yang ditetapkan"
 msgid "no"
 msgstr "tidak"
 
-#: aur_install.go:184
+#: aur_install.go:213
 msgid "nothing to install for %s"
 msgstr "tidka ada yang untuk dipasang untuk %s"
 
@@ -670,11 +711,7 @@ msgstr "tidka ada yang untuk dipasang untuk %s"
 msgid "only one operation may be used at a time"
 msgstr "hanya satu operasi yang dapat digunakan"
 
-#: pkg/cmd/graph/main.go:66
-msgid "only one target is allowed"
-msgstr "hanya satu target yang diperbolehkan"
-
-#: print.go:179
+#: print.go:156
 msgid "package '%s' was not found"
 msgstr "paket '%s' tidak ditemukan"
 
@@ -694,31 +731,31 @@ msgstr "paket tidak ditemukan di repositori"
 msgid "problem importing keys"
 msgstr "terjadi masalah mengimpor kunci-kunci"
 
-#: clean.go:97
+#: clean.go:106
 msgid "removing AUR packages from cache..."
 msgstr "menghapus paket-paket AUR dari cache..."
 
-#: clean.go:167 clean.go:198
+#: clean.go:177 clean.go:210
 msgid "removing untracked AUR files from cache..."
 msgstr "menghapus file AUR yang tidak dilacak dari cache..."
 
-#: errors.go:31
+#: errors.go:37
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "PKGDEST untuk %s didaftarkan oleh makepkg tetapi tidak ada: %s"
 
-#: sync.go:84
+#: sync.go:110
 msgid "there is nothing to do"
 msgstr "tidak ada yang dapat dilakukan"
 
-#: pkg/db/ialpm/alpm.go:244
+#: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
 msgstr "tidak dapat CreateHandle: %s"
 
-#: cmd.go:195
+#: cmd.go:197
 msgid "unhandled operation"
 msgstr "operasi tidak diproses"
 
-#: cmd.go:467
+#: cmd.go:469
 msgid "unknown-version"
 msgstr "versi-tidak-diketahui"
 
