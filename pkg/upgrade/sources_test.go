@@ -124,7 +124,9 @@ func Test_upAUR(t *testing.T) {
 
 			got := UpAUR(text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
 				tt.args.remote, tt.args.aurdata, tt.args.timeUpdate, tt.args.enableDowngrade)
-			assert.EqualValues(t, tt.want, got)
+			assert.ElementsMatch(t, tt.want.Repos, got.Repos)
+			assert.ElementsMatch(t, tt.want.Up, got.Up)
+			assert.Equal(t, tt.want.Len(), got.Len())
 		})
 	}
 }
