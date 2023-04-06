@@ -15,7 +15,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
-#: pkg/menus/menu.go:30
+#: pkg/menus/menu.go:31
 msgid " (Build Files Exist)"
 msgstr " (Byggfiler finns)"
 
@@ -39,13 +39,13 @@ msgstr " [Installerad]"
 msgid " there is nothing to do"
 msgstr " inget behöver göras"
 
-#: pkg/menus/menu.go:47
+#: pkg/menus/menu.go:48
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s [A]lla [Ab]Avbryt [I]nstallerade [No]EjInstallerade eller (1 2 3, 1-3, "
 "^4)"
 
-#: aur_install.go:274 install.go:739
+#: aur_install.go:274 install.go:741
 msgid "%s already made -- skipping build"
 msgstr "%s redan byggt -- hoppar över bygge"
 
@@ -57,11 +57,11 @@ msgstr "%s är inte inställd"
 msgid "%s is present."
 msgstr "%s finns."
 
-#: pkg/dep/dep_graph.go:385 aur_install.go:271 install.go:725
+#: pkg/dep/dep_graph.go:385 aur_install.go:271 install.go:727
 msgid "%s is up to date -- skipping"
 msgstr "%s är ajour -- hoppar över"
 
-#: install.go:640
+#: install.go:642
 msgid "%s not satisfied, flushing install queue"
 msgstr "%s ej tillfredsställd, rensar installationskö"
 
@@ -172,7 +172,7 @@ msgstr "Paket som krockar måste bekräftas manuellt"
 msgid "Conflicts With"
 msgstr "Krockar med"
 
-#: pkg/menus/clean_menu.go:60 pkg/menus/clean_menu.go:107
+#: pkg/menus/clean_menu.go:61 pkg/menus/clean_menu.go:108
 msgid "Deleting (%d/%d): %s"
 msgstr "Tar bort (%d/%d): %s"
 
@@ -215,6 +215,12 @@ msgstr "Redigera PKGBUILD med?"
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
 msgstr "Fel vid AUR-sökning: %s\n"
+
+#: pkg/upgrade/service.go:256
+msgid "Excluding packages may cause partial upgrades and break systems"
+msgstr ""
+"Exkluderar paket som kan orsaka partiella uppgraderingar och ha sönder "
+"system"
 
 #: pkg/dep/dep_graph.go:59
 msgid "Explicit"
@@ -305,10 +311,6 @@ msgstr "Byggberoende"
 msgid "Make Deps"
 msgstr "Byggberoenden"
 
-#: pkg/upgrade/service.go:256
-msgid "May cause partial upgrades and break systems"
-msgstr "Kan orsaka partiella uppgraderingar och ha sönder system"
-
 #: pkg/query/aur_warnings.go:33
 msgid "Missing AUR Debug Packages:"
 msgstr "Saknar AUR-felsökningspaket:"
@@ -349,7 +351,7 @@ msgstr "PGP-nycklar kräver import:"
 msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
 msgstr "PKGBUILD ajour, Hoppar över (%d/%d): %s"
 
-#: preparer.go:207
+#: preparer.go:226
 msgid "PKGBUILD up to date, skipping download: %s"
 msgstr "PKGBUILD uppdaterad, hoppar över nedladdning: %s"
 
@@ -373,7 +375,7 @@ msgstr "Paketkonflikter funna:"
 msgid "Packages not in AUR:"
 msgstr "Paket som inte finns i AUR:"
 
-#: pkg/menus/clean_menu.go:52 pkg/menus/clean_menu.go:99
+#: pkg/menus/clean_menu.go:53 pkg/menus/clean_menu.go:100
 msgid "Packages to cleanBuild?"
 msgstr "Bygg paket rent (cleanBuild)?"
 
@@ -389,9 +391,13 @@ msgstr "Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller förråds
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Paket att installera (t.ex: 1 2 3, 1-3 eller ^4)"
 
-#: pkg/upgrade/service.go:252 upgrade.go:210
+#: upgrade.go:210
 msgid "Packages to upgrade."
 msgstr "Paket att uppgradera."
+
+#: pkg/upgrade/service.go:252
+msgid "Packages to upgrade/install."
+msgstr "Paket att uppgradera/installera."
 
 #: print.go:42
 msgid "Popularity"
@@ -410,7 +416,7 @@ msgstr "Tillhandahåller"
 msgid "Querying AUR..."
 msgstr "Frågar AUR..."
 
-#: install.go:236 preparer.go:85
+#: install.go:236 preparer.go:108
 msgid "Remove make dependencies after install?"
 msgstr "Ta bort byggberoenden efter installation?"
 
@@ -458,7 +464,7 @@ msgstr "Synk"
 msgid "Ten biggest packages:"
 msgstr "Tio största paketen:"
 
-#: install.go:493 sync.go:183
+#: install.go:495 sync.go:183
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Följande paket stöds inte av din arkitektur:"
 
@@ -478,7 +484,7 @@ msgstr "Total paketstorlek: %s"
 msgid "Total installed packages: %s"
 msgstr "Antal installerade paket: %s"
 
-#: install.go:501 sync.go:191
+#: install.go:503 sync.go:191
 msgid "Try to build them anyway?"
 msgstr "Försök att bygga dem ändå?"
 
@@ -486,7 +492,7 @@ msgstr "Försök att bygga dem ändå?"
 msgid "URL"
 msgstr "URL"
 
-#: pkg/menus/clean_menu.go:63 pkg/menus/clean_menu.go:69 clean.go:192
+#: clean.go:192 pkg/menus/clean_menu.go:64 pkg/menus/clean_menu.go:70
 msgid "Unable to clean:"
 msgstr "Kunde inte rensa:"
 
@@ -514,7 +520,7 @@ msgstr "Röster"
 msgid "Yay version v%s"
 msgstr "Yay-version v%s"
 
-#: pkg/menus/menu.go:47
+#: pkg/menus/menu.go:48
 msgid "[N]one"
 msgstr "[N]Inga"
 
@@ -546,7 +552,7 @@ msgstr "argument '-' specificerat utan indata på stdin"
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
 msgstr "kan inte hitta PKGBUILD eller .SRCINFO i katalog"
 
-#: install.go:530
+#: install.go:532
 msgid "cannot find package name: %v"
 msgstr "kunde inte hitta paketet: %v"
 
@@ -566,7 +572,7 @@ msgstr "kunde inte hitta alla paket som krävs:"
 msgid "could not find any package archives listed in %s"
 msgstr "kunde inte hitta några paketarkiv listade i %s"
 
-#: install.go:786
+#: install.go:788
 msgid "could not find srcinfo for: %s"
 msgstr "kunde inte hitta srcinfo för: %s"
 
@@ -598,12 +604,12 @@ msgstr "fel vid installation av paket"
 msgid "error installing:"
 msgstr "fel vid installation:"
 
-#: aur_install.go:204 aur_install.go:208 install.go:681 install.go:722
-#: install.go:736 install.go:750
+#: aur_install.go:204 aur_install.go:208 install.go:683 install.go:724
+#: install.go:738 install.go:752
 msgid "error making: %s"
 msgstr "fel vid bygge: %s"
 
-#: install.go:586
+#: install.go:588
 msgid "error merging %s: %s"
 msgstr "fel vid sammanslagning av %s: %s"
 
@@ -615,7 +621,7 @@ msgstr "fel vid läsning av %s"
 msgid "error refreshing databases"
 msgstr "fel vid uppdatering av databaserna"
 
-#: clean.go:220 install.go:579
+#: clean.go:220 install.go:581
 msgid "error resetting %s: %s"
 msgstr "fel vid återställning av %s: %s"
 
@@ -709,7 +715,7 @@ msgstr "inget att installera för %s"
 msgid "only one operation may be used at a time"
 msgstr "bara en operation går att utföra åt gången"
 
-#: print.go:156
+#: print.go:158
 msgid "package '%s' was not found"
 msgstr "paketet '%s' kunde inte hittas"
 
