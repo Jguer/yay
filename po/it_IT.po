@@ -148,7 +148,7 @@ msgstr "Controllo dipendenza"
 
 #: print.go:37
 msgid "Check Deps"
-msgstr "Controlla le dipendenze"
+msgstr "Controllo dipendenze"
 
 #: pkg/upgrade/service.go:78 upgrade.go:95
 msgid "Checking development packages..."
