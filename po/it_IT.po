@@ -314,7 +314,7 @@ msgstr "Dipendenza Make"
 
 #: print.go:36
 msgid "Make Deps"
-msgstr "Make Deps"
+msgstr "Make dipendenze"
 
 #: pkg/query/aur_warnings.go:33
 msgid "Missing AUR Debug Packages:"
