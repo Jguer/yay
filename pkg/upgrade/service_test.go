@@ -14,6 +14,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -341,15 +342,17 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				Devel: tt.fields.devel, Mode: parser.ModeAny,
 			}
 
+			logger := text.NewLogger(tt.fields.output,
+				tt.fields.input, true, "test")
 			u := &UpgradeService{
-				log: text.NewLogger(tt.fields.output,
-					tt.fields.input, true, "test"),
-				grapher:    grapher,
-				aurCache:   mockAUR,
-				dbExecutor: dbExe,
-				vcsStore:   vcsStore,
-				cfg:        cfg,
-				noConfirm:  tt.fields.noConfirm,
+				log:         logger,
+				grapher:     grapher,
+				aurCache:    mockAUR,
+				dbExecutor:  dbExe,
+				vcsStore:    vcsStore,
+				cfg:         cfg,
+				noConfirm:   tt.fields.noConfirm,
+				AURWarnings: query.NewWarnings(logger),
 			}
 
 			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
@@ -461,15 +464,17 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 				Mode:  parser.ModeAny,
 			}
 
+			logger := text.NewLogger(tt.fields.output,
+				tt.fields.input, true, "test")
 			u := &UpgradeService{
-				log: text.NewLogger(tt.fields.output,
-					tt.fields.input, true, "test"),
-				grapher:    grapher,
-				aurCache:   mockAUR,
-				dbExecutor: dbExe,
-				vcsStore:   vcsStore,
-				cfg:        cfg,
-				noConfirm:  tt.fields.noConfirm,
+				log:         logger,
+				grapher:     grapher,
+				aurCache:    mockAUR,
+				dbExecutor:  dbExe,
+				vcsStore:    vcsStore,
+				cfg:         cfg,
+				noConfirm:   tt.fields.noConfirm,
+				AURWarnings: query.NewWarnings(logger),
 			}
 
 			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
@@ -493,4 +498,100 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 			assert.ElementsMatch(t, tt.wantExclude, excluded)
 		})
 	}
+}
+
+func TestUpgradeService_Warnings(t *testing.T) {
+	t.Parallel()
+	dbExe := &mock.DBExecutor{
+		InstalledRemotePackageNamesFn: func() []string {
+			return []string{"orphan", "outdated", "missing", "orphan-ignored"}
+		},
+		InstalledRemotePackagesFn: func() map[string]mock.IPackage {
+			mapRemote := make(map[string]mock.IPackage)
+			mapRemote["orphan"] = &mock.Package{
+				PName:    "orphan",
+				PBase:    "orphan",
+				PVersion: "10.2.3",
+				PReason:  alpm.PkgReasonExplicit,
+			}
+
+			mapRemote["outdated"] = &mock.Package{
+				PName:    "outdated",
+				PBase:    "outdated",
+				PVersion: "10.2.3",
+				PReason:  alpm.PkgReasonExplicit,
+			}
+
+			mapRemote["missing"] = &mock.Package{
+				PName:    "missing",
+				PBase:    "missing",
+				PVersion: "10.2.3",
+				PReason:  alpm.PkgReasonExplicit,
+			}
+
+			mapRemote["orphan-ignored"] = &mock.Package{
+				PName:         "orphan-ignored",
+				PBase:         "orphan-ignored",
+				PVersion:      "10.2.3",
+				PReason:       alpm.PkgReasonExplicit,
+				PShouldIgnore: true,
+			}
+
+			return mapRemote
+		},
+		LocalSatisfierExistsFn: func(string) bool { return false },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			return nil
+		},
+		SyncUpgradesFn: func(bool) (map[string]db.SyncUpgrade, error) {
+			mapUpgrades := make(map[string]db.SyncUpgrade)
+			return mapUpgrades, nil
+		},
+		ReposFn: func() []string { return []string{"core"} },
+	}
+	vcsStore := &vcs.Mock{
+		ToUpgradeReturn: []string{},
+	}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{
+				{
+					Name: "outdated", Version: "10.2.4", PackageBase: "orphan",
+					OutOfDate: 100, Maintainer: "bob",
+				},
+				{
+					Name: "orphan", Version: "10.2.4", PackageBase: "orphan",
+					Maintainer: "",
+				},
+			}, nil
+		},
+	}
+
+	logger := text.NewLogger(io.Discard,
+		strings.NewReader("\n"), true, "test")
+	grapher := dep.NewGrapher(dbExe, mockAUR,
+		false, true, false, false, false, logger)
+
+	cfg := &settings.Configuration{
+		Devel: false, Mode: parser.ModeAUR,
+	}
+
+	u := &UpgradeService{
+		log:         logger,
+		grapher:     grapher,
+		aurCache:    mockAUR,
+		dbExecutor:  dbExe,
+		vcsStore:    vcsStore,
+		cfg:         cfg,
+		noConfirm:   true,
+		AURWarnings: query.NewWarnings(logger),
+	}
+
+	_, err := u.GraphUpgrades(context.Background(), nil, false, func(*Upgrade) bool { return true })
+	require.NoError(t, err)
+
+	assert.Equal(t, []string{"missing"}, u.AURWarnings.Missing)
+	assert.Equal(t, []string{"outdated"}, u.AURWarnings.OutOfDate)
+	assert.Equal(t, []string{"orphan"}, u.AURWarnings.Orphans)
 }

@@ -30,7 +30,10 @@ func NewWarnings(logger *text.Logger) *AURWarnings {
 
 func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.IPackage, aurPkg *aur.Pkg) {
 	name := aurPkg.Name
-	pkg := remote[name]
+	pkg, ok := remote[name]
+	if !ok {
+		return
+	}
 
 	if aurPkg.Maintainer == "" && !pkg.ShouldIgnore() {
 		warnings.Orphans = append(warnings.Orphans, name)
