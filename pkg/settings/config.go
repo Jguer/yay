@@ -233,7 +233,7 @@ func DefaultConfig(version string) *Configuration {
 		DiffMenu:               true,
 		EditMenu:               false,
 		UseAsk:                 false,
-		CombinedUpgrade:        false,
+		CombinedUpgrade:        true,
 		SeparateSources:        true,
 		NewInstallEngine:       true,
 		Version:                version,
