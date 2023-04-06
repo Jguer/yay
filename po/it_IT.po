@@ -366,11 +366,11 @@ msgstr "Quali PKGBUILD modificare?"
 
 #: print.go:54
 msgid "Package Base ID"
-msgstr "ID Pacchetto Base"
+msgstr "ID pacchetto base"
 
 #: print.go:55
 msgid "Package Base"
-msgstr "Pacchetto Base"
+msgstr "Pacchetto base"
 
 #: pkg/dep/depCheck.go:170
 msgid "Package conflicts found:"
