@@ -132,6 +132,10 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	nativeFilter := cmdArgs.ExistsArg("n", "native")
 
 	_ = graph.ForEach(func(pkgName string, ii *dep.InstallInfo) error {
+		if !ii.Upgrade {
+			return nil
+		}
+
 		if noTargets || targets.Contains(pkgName) {
 			if ii.Source == dep.Sync && foreignFilter {
 				return nil
