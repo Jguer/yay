@@ -632,6 +632,7 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			makepkgBin := t.TempDir() + "/makepkg"
