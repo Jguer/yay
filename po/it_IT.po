@@ -266,7 +266,7 @@ msgstr "Trovato repository git: %s"
 
 #: vcs.go:73
 msgid "GenDB finished. No packages were installed"
-msgstr "GenDB terminato. Nessun pacchetto è stato installato."
+msgstr "GenDB terminato. Nessun pacchetto è stato installato"
 
 #: print.go:32
 msgid "Groups"
