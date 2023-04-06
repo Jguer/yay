@@ -461,7 +461,9 @@ func earlyPacmanCall(ctx context.Context, cfg *settings.Configuration,
 
 func earlyRefresh(ctx context.Context, cfg *settings.Configuration, cmdBuilder exe.ICmdBuilder, cmdArgs *parser.Arguments) error {
 	arguments := cmdArgs.Copy()
-	arguments.DelArg("u", "sysupgrade")
+	if cfg.CombinedUpgrade {
+		arguments.DelArg("u", "sysupgrade")
+	}
 	arguments.DelArg("s", "search")
 	arguments.DelArg("i", "info")
 	arguments.DelArg("l", "list")

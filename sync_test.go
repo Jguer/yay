@@ -610,3 +610,121 @@ func sanitizeCall(s, tmpDir, makepkg, pacman, git string) string {
 
 	return s
 }
+
+func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name            string
+		combinedUpgrade bool
+		want            []string
+	}{
+		{
+			name:            "combined upgrade",
+			combinedUpgrade: true,
+			want:            []string{"pacman -S -y -u --config /etc/pacman.conf --"},
+		},
+		{
+			name:            "no combined upgrade",
+			combinedUpgrade: false,
+			want:            []string{"pacman -S -y --config /etc/pacman.conf --"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			makepkgBin := t.TempDir() + "/makepkg"
+			pacmanBin := t.TempDir() + "/pacman"
+			gitBin := t.TempDir() + "/git"
+			f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+			require.NoError(t, err)
+			require.NoError(t, f.Close())
+
+			f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+			require.NoError(t, err)
+			require.NoError(t, f.Close())
+
+			f, err = os.OpenFile(gitBin, os.O_RDONLY|os.O_CREATE, 0o755)
+			require.NoError(t, err)
+			require.NoError(t, f.Close())
+
+			captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+				return "", "", nil
+			}
+
+			showOverride := func(cmd *exec.Cmd) error {
+				return nil
+			}
+
+			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+			cmdBuilder := &exe.CmdBuilder{
+				MakepkgBin:       makepkgBin,
+				SudoBin:          "su",
+				PacmanBin:        pacmanBin,
+				PacmanConfigPath: "/etc/pacman.conf",
+				GitBin:           "git",
+				Runner:           mockRunner,
+				SudoLoopEnabled:  false,
+			}
+
+			cmdArgs := parser.MakeArguments()
+			cmdArgs.AddArg("S")
+			cmdArgs.AddArg("y")
+			cmdArgs.AddArg("u")
+
+			db := &mock.DBExecutor{
+				AlpmArchitecturesFn: func() ([]string, error) {
+					return []string{"x86_64"}, nil
+				},
+				RefreshHandleFn: func() error {
+					return nil
+				},
+				ReposFn: func() []string {
+					return []string{"core"}
+				},
+				InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
+					return map[string]alpm.IPackage{}
+				},
+				InstalledRemotePackageNamesFn: func() []string {
+					return []string{}
+				},
+				SyncUpgradesFn: func(
+					bool,
+				) (map[string]db.SyncUpgrade, error) {
+					return map[string]db.SyncUpgrade{}, nil
+				},
+			}
+
+			cfg := &settings.Configuration{
+				NewInstallEngine: true,
+				RemoveMake:       "no",
+				CombinedUpgrade:  false,
+				Runtime: &settings.Runtime{
+					Logger:     text.NewLogger(io.Discard, strings.NewReader("1\n"), true, "test"),
+					CmdBuilder: cmdBuilder,
+					VCSStore:   &vcs.Mock{},
+					AURCache: &mockaur.MockAUR{
+						GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+							return []aur.Pkg{}, nil
+						},
+					},
+				},
+			}
+
+			err = handleCmd(context.Background(), cfg, cmdArgs, db)
+			require.NoError(t, err)
+
+			require.Len(t, mockRunner.ShowCalls, len(tc.want))
+			require.Len(t, mockRunner.CaptureCalls, 0)
+
+			for i, call := range mockRunner.ShowCalls {
+				show := call.Args[0].(*exec.Cmd).String()
+				show = strings.ReplaceAll(show, pacmanBin, "pacman")
+
+				// options are in a different order on different systems and on CI root user is used
+				assert.Subset(t, strings.Split(show, " "), strings.Split(tc.want[i], " "), fmt.Sprintf("%d - %s", i, show))
+			}
+		})
+	}
+}

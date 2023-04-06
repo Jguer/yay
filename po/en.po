@@ -39,7 +39,7 @@ msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
 
 #: aur_install.go:274
-#: install.go:739
+#: install.go:741
 msgid "%s already made -- skipping build"
 msgstr ""
 
@@ -51,13 +51,13 @@ msgstr ""
 msgid "%s is present."
 msgstr ""
 
-#: aur_install.go:271
-#: install.go:725
 #: pkg/dep/dep_graph.go:385
+#: aur_install.go:271
+#: install.go:727
 msgid "%s is up to date -- skipping"
 msgstr ""
 
-#: install.go:640
+#: install.go:642
 msgid "%s not satisfied, flushing install queue"
 msgstr ""
 
@@ -144,8 +144,8 @@ msgstr ""
 msgid "Check Deps"
 msgstr ""
 
-#: upgrade.go:95
 #: pkg/upgrade/service.go:78
+#: upgrade.go:95
 msgid "Checking development packages..."
 msgstr ""
 
@@ -381,8 +381,8 @@ msgstr ""
 msgid "Packages to cleanBuild?"
 msgstr ""
 
-#: upgrade.go:213
 #: pkg/dep/dep_graph.go:215
+#: upgrade.go:213
 msgid "Packages to exclude"
 msgstr ""
 
@@ -395,8 +395,11 @@ msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr ""
 
 #: upgrade.go:210
-#: pkg/upgrade/service.go:252
 msgid "Packages to upgrade."
+msgstr ""
+
+#: pkg/upgrade/service.go:252
+msgid "Packages to upgrade/install."
 msgstr ""
 
 #: print.go:42
@@ -428,8 +431,8 @@ msgstr ""
 msgid "Repository AUR"
 msgstr ""
 
-#: print.go:25
 #: pkg/db/ialpm/alpm.go:191
+#: print.go:25
 msgid "Repository"
 msgstr ""
 
@@ -437,13 +440,13 @@ msgstr ""
 msgid "SRCINFO"
 msgstr ""
 
-#: upgrade.go:73
 #: pkg/upgrade/service.go:63
+#: upgrade.go:73
 msgid "Searching AUR for updates..."
 msgstr ""
 
-#: upgrade.go:62
 #: pkg/upgrade/service.go:142
+#: upgrade.go:62
 msgid "Searching databases for updates..."
 msgstr ""
 
@@ -471,14 +474,14 @@ msgstr ""
 msgid "Ten biggest packages:"
 msgstr ""
 
-#: install.go:493
+#: install.go:495
 #: sync.go:183
 msgid "The following packages are not compatible with your architecture:"
 msgstr ""
 
+#: pkg/db/ialpm/alpm.go:179
 #: pkg/dep/depPool.go:499
 #: pkg/dep/dep_graph.go:627
-#: pkg/db/ialpm/alpm.go:179
 msgid "There are %d providers available for %s:"
 msgstr ""
 
@@ -494,7 +497,7 @@ msgstr ""
 msgid "Total installed packages: %s"
 msgstr ""
 
-#: install.go:501
+#: install.go:503
 #: sync.go:191
 msgid "Try to build them anyway?"
 msgstr ""
@@ -542,9 +545,9 @@ msgstr ""
 msgid "\nBuild directory:"
 msgstr ""
 
+#: pkg/db/ialpm/alpm.go:201
 #: pkg/dep/depPool.go:513
 #: pkg/dep/dep_graph.go:641
-#: pkg/db/ialpm/alpm.go:201
 msgid "\nEnter a number (default=1): "
 msgstr ""
 
@@ -560,7 +563,7 @@ msgstr ""
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
 msgstr ""
 
-#: install.go:530
+#: install.go:532
 msgid "cannot find package name: %v"
 msgstr ""
 
@@ -580,7 +583,7 @@ msgstr ""
 msgid "could not find any package archives listed in %s"
 msgstr ""
 
-#: install.go:786
+#: install.go:788
 msgid "could not find srcinfo for: %s"
 msgstr ""
 
@@ -618,14 +621,14 @@ msgstr ""
 
 #: aur_install.go:204
 #: aur_install.go:208
-#: install.go:681
-#: install.go:722
-#: install.go:736
-#: install.go:750
+#: install.go:683
+#: install.go:724
+#: install.go:738
+#: install.go:752
 msgid "error making: %s"
 msgstr ""
 
-#: install.go:586
+#: install.go:588
 msgid "error merging %s: %s"
 msgstr ""
 
@@ -639,7 +642,7 @@ msgid "error refreshing databases"
 msgstr ""
 
 #: clean.go:220
-#: install.go:579
+#: install.go:581
 msgid "error resetting %s: %s"
 msgstr ""
 
@@ -687,9 +690,9 @@ msgstr ""
 msgid "input too long"
 msgstr ""
 
+#: pkg/db/ialpm/alpm.go:222
 #: pkg/dep/depPool.go:533
 #: pkg/dep/dep_graph.go:662
-#: pkg/db/ialpm/alpm.go:222
 msgid "invalid number: %s"
 msgstr ""
 
@@ -705,9 +708,9 @@ msgstr ""
 msgid "invalid repository"
 msgstr ""
 
+#: pkg/db/ialpm/alpm.go:227
 #: pkg/dep/depPool.go:538
 #: pkg/dep/dep_graph.go:668
-#: pkg/db/ialpm/alpm.go:227
 msgid "invalid value: %d is not between %d and %d"
 msgstr ""
 
