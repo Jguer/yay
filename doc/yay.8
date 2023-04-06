@@ -23,7 +23,7 @@ This manpage only covers options unique to Yay. For other options see
 .TP
 .B \-Y, \-\-yay
 Perform yay specific operations. This is the default if no other operation is
-selected.
+selected and targets are defined.
 
 .TP
 .B \-B, \-\-build
@@ -42,9 +42,9 @@ Downloads PKGBUILD from ABS or AUR. The ABS can only be used for Arch Linux repo
 Web related operations such as voting for AUR packages.
 
 .RE
-If no arguments are provided 'yay \-Syu' will be performed.
+If no operation is specified 'yay \-Syu' will be performed
 
-If no operation is selected \-Y will be assumed.
+If no operation is specified and targets are provided \-Y will be assumed
 
 .SH EXTENDED PACMAN OPERATIONS
 .TP
