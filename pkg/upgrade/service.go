@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/topo"
@@ -27,6 +28,8 @@ type UpgradeService struct {
 	cfg        *settings.Configuration
 	log        *text.Logger
 	noConfirm  bool
+
+	AURWarnings *query.AURWarnings
 }
 
 func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
@@ -34,13 +37,14 @@ func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
 	cfg *settings.Configuration, noConfirm bool, logger *text.Logger,
 ) *UpgradeService {
 	return &UpgradeService{
-		grapher:    grapher,
-		aurCache:   aurCache,
-		dbExecutor: dbExecutor,
-		vcsStore:   vcsStore,
-		cfg:        cfg,
-		noConfirm:  noConfirm,
-		log:        logger,
+		grapher:     grapher,
+		aurCache:    aurCache,
+		dbExecutor:  dbExecutor,
+		vcsStore:    vcsStore,
+		cfg:         cfg,
+		noConfirm:   noConfirm,
+		log:         logger,
+		AURWarnings: query.NewWarnings(logger.Child("warnings")),
 	}
 }
 
@@ -70,7 +74,10 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			for i := range _aurdata {
 				pkg := &_aurdata[i]
 				aurdata[pkg.Name] = pkg
+				u.AURWarnings.AddToWarnings(remote, pkg)
 			}
+
+			u.AURWarnings.CalculateMissing(remoteNames, remote, aurdata)
 
 			aurUp = UpAUR(u.log, remote, aurdata, u.cfg.TimeUpdate, enableDowngrade)
 

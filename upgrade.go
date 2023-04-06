@@ -262,7 +262,7 @@ func upgradePkgsMenu(cfg *settings.Configuration, aurUp, repoUp upgrade.UpSlice)
 func sysupgradeTargets(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor,
 	enableDowngrade bool,
 ) (stringset.StringSet, []string, error) {
-	warnings := query.NewWarnings()
+	warnings := query.NewWarnings(cfg.Runtime.Logger)
 
 	aurUp, repoUp, err := upList(ctx, cfg, warnings, dbExecutor, enableDowngrade,
 		func(*upgrade.Upgrade) bool { return true })

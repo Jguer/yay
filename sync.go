@@ -66,6 +66,9 @@ func syncInstall(ctx context.Context,
 		if errSysUp != nil {
 			return errSysUp
 		}
+
+		upService.AURWarnings.Print()
+
 		excluded, errSysUp = upService.UserExcludeUpgrades(graph)
 		if errSysUp != nil {
 			return errSysUp

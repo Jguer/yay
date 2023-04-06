@@ -96,7 +96,7 @@ func install(ctx context.Context, cfg *settings.Configuration,
 		assumeInstalled = cmdArgs.GetArgs("assume-installed")
 		sysupgradeArg   = cmdArgs.ExistsArg("u", "sysupgrade")
 		refreshArg      = cmdArgs.ExistsArg("y", "refresh")
-		warnings        = query.NewWarnings()
+		warnings        = query.NewWarnings(cfg.Runtime.Logger)
 	)
 
 	if noDeps {
