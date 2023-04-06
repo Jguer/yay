@@ -139,7 +139,7 @@ msgstr "Ortam değişkenlerinize %s veya %s seçeneklerini ekleyin"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Yay'ı kök/sudo olarak çalıştırmaktan kaçının"
+msgstr "Yay'ı root/sudo olarak çalıştırmaktan kaçının"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Check Dependency"
