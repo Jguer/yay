@@ -51,7 +51,7 @@ New operations:
     yay {-Y --yay}         [options] [package(s)]
 
 If no operation is specified 'yay -Syu' will be performed
-If no operation and no targets are provided -Y will be assumed
+If no operation is specified and targets are provided -Y will be assumed
 
 New options:
        --repo             Assume targets are from the repositories
