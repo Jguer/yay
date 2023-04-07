@@ -43,7 +43,7 @@ msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s [A]Todos [Ab]ortar [I]nstalado [No]Não instalado or (1 2 3, 1-3, ^4)"
 
-#: aur_install.go:274 install.go:739
+#: aur_install.go:274 install.go:741
 msgid "%s already made -- skipping build"
 msgstr "%s já efetuado -- a ignorar compilação"
 
@@ -55,11 +55,11 @@ msgstr "%s não está definido"
 msgid "%s is present."
 msgstr "%s está presente."
 
-#: aur_install.go:271 install.go:725 pkg/dep/dep_graph.go:385
+#: pkg/dep/dep_graph.go:385 aur_install.go:271 install.go:727
 msgid "%s is up to date -- skipping"
 msgstr "%s está atualizado -- a ignorar"
 
-#: install.go:640
+#: install.go:642
 msgid "%s not satisfied, flushing install queue"
 msgstr "%s não encontrado, a limpar fila de instalação"
 
@@ -148,7 +148,7 @@ msgstr "Verificar dependências"
 msgid "Check Deps"
 msgstr "Dependências de verificação"
 
-#: upgrade.go:95 pkg/upgrade/service.go:78
+#: pkg/upgrade/service.go:78 upgrade.go:95
 msgid "Checking development packages..."
 msgstr "A verificar pacotes de desenvolvimento..."
 
@@ -379,7 +379,7 @@ msgstr "Pacotes que não estão no AUR:"
 msgid "Packages to cleanBuild?"
 msgstr "Pacotes a compilar a limpo?"
 
-#: upgrade.go:213 pkg/dep/dep_graph.go:215
+#: pkg/dep/dep_graph.go:215 upgrade.go:213
 msgid "Packages to exclude"
 msgstr "Pacotes a excluir"
 
@@ -391,9 +391,13 @@ msgstr "Pacotes a excluir:  (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Pacotes a instalar (eg: 1 2 3, 1-3 or ^4)"
 
-#: upgrade.go:210 pkg/upgrade/service.go:252
+#: upgrade.go:210
 msgid "Packages to upgrade."
 msgstr "Pacotes a atualizar."
+
+#: pkg/upgrade/service.go:252
+msgid "Packages to upgrade/install."
+msgstr "Pacotes a atualizar/instalar."
 
 #: print.go:42
 msgid "Popularity"
@@ -420,7 +424,7 @@ msgstr "Remover as dependências de make pós-instalação?"
 msgid "Repository AUR"
 msgstr "Repositório AUR"
 
-#: print.go:25 pkg/db/ialpm/alpm.go:191
+#: pkg/db/ialpm/alpm.go:191 print.go:25
 msgid "Repository"
 msgstr "Repositório"
 
@@ -428,11 +432,11 @@ msgstr "Repositório"
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: upgrade.go:73 pkg/upgrade/service.go:63
+#: pkg/upgrade/service.go:63 upgrade.go:73
 msgid "Searching AUR for updates..."
 msgstr "A procurar atualizações na AUR..."
 
-#: upgrade.go:62 pkg/upgrade/service.go:142
+#: pkg/upgrade/service.go:142 upgrade.go:62
 msgid "Searching databases for updates..."
 msgstr "A procurar atualizações nos repositórios..."
 
@@ -460,11 +464,11 @@ msgstr "Sincronizar"
 msgid "Ten biggest packages:"
 msgstr "Dez maiores pacotes:"
 
-#: install.go:493 sync.go:183
+#: install.go:495 sync.go:183
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Os seguintes pacotes não são compatíveis com a sua arquitetura:"
 
-#: pkg/dep/depPool.go:499 pkg/dep/dep_graph.go:627 pkg/db/ialpm/alpm.go:179
+#: pkg/db/ialpm/alpm.go:179 pkg/dep/depPool.go:499 pkg/dep/dep_graph.go:627
 msgid "There are %d providers available for %s:"
 msgstr "Existem %d provedores disponíveis para %s:"
 
@@ -480,7 +484,7 @@ msgstr "Tamanho total ocupado por pacotes: %s"
 msgid "Total installed packages: %s"
 msgstr "Total instalado de pacotes: %s"
 
-#: install.go:501 sync.go:191
+#: install.go:503 sync.go:191
 msgid "Try to build them anyway?"
 msgstr "Tentar compilar mesmo assim?"
 
@@ -528,7 +532,7 @@ msgstr ""
 "\n"
 "Diretório de compilação:"
 
-#: pkg/dep/depPool.go:513 pkg/dep/dep_graph.go:641 pkg/db/ialpm/alpm.go:201
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/depPool.go:513 pkg/dep/dep_graph.go:641
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -548,7 +552,7 @@ msgstr "argumento '-' especificado sem entrada em stdin"
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
 msgstr "não foi possível localizar PKGBUILD e .SRCINFO no diretório"
 
-#: install.go:530
+#: install.go:532
 msgid "cannot find package name: %v"
 msgstr "nome de pacote não encontrado: %v"
 
@@ -568,7 +572,7 @@ msgstr "não foi possível localizar todos os pacotes necessários:"
 msgid "could not find any package archives listed in %s"
 msgstr "não foi possível localizar nenhum arquivo de pacotes listados em %s"
 
-#: install.go:786
+#: install.go:788
 msgid "could not find srcinfo for: %s"
 msgstr "não foi possível localizar srcinfo para: %s"
 
@@ -601,12 +605,12 @@ msgstr "erro ao instalar pacotes de repositório"
 msgid "error installing:"
 msgstr "erro ao instalar:"
 
-#: aur_install.go:204 aur_install.go:208 install.go:681 install.go:722
-#: install.go:736 install.go:750
+#: aur_install.go:204 aur_install.go:208 install.go:683 install.go:724
+#: install.go:738 install.go:752
 msgid "error making: %s"
 msgstr "erro ao compilar: %s"
 
-#: install.go:586
+#: install.go:588
 msgid "error merging %s: %s"
 msgstr "erro ao fundir %s: %s"
 
@@ -618,7 +622,7 @@ msgstr "erro ao ler %s"
 msgid "error refreshing databases"
 msgstr "erro ao recarregar base de dados"
 
-#: clean.go:220 install.go:579
+#: clean.go:220 install.go:581
 msgid "error resetting %s: %s"
 msgstr "erro ao repor %s: %s"
 
@@ -668,7 +672,7 @@ msgstr ""
 msgid "input too long"
 msgstr "input demasiado longo"
 
-#: pkg/dep/depPool.go:533 pkg/dep/dep_graph.go:662 pkg/db/ialpm/alpm.go:222
+#: pkg/db/ialpm/alpm.go:222 pkg/dep/depPool.go:533 pkg/dep/dep_graph.go:662
 msgid "invalid number: %s"
 msgstr "número inválido: %s"
 
@@ -685,7 +689,7 @@ msgstr ""
 msgid "invalid repository"
 msgstr "repositório inválido"
 
-#: pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:668 pkg/db/ialpm/alpm.go:227
+#: pkg/db/ialpm/alpm.go:227 pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:668
 msgid "invalid value: %d is not between %d and %d"
 msgstr "valor inválido: %d não está entre %d e %d"
 
