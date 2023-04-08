@@ -418,7 +418,6 @@ func displayNumberMenu(ctx context.Context, cfg *settings.Configuration, pkgS []
 	}
 
 	// modify the arguments to pass for the install
-	cmdArgs.Op = "S"
 	cmdArgs.Targets = targets
 
 	if len(cmdArgs.Targets) == 0 {

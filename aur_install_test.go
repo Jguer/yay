@@ -153,7 +153,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				},
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{})
+			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{}, false)
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -415,7 +415,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 				"jellyfin": tmpDirJfin,
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{})
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{}, false)
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -598,7 +598,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 				"yay": tmpDir,
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{})
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{}, false)
 			if tc.wantErrInstall {
 				require.Error(td, errI)
 			} else {
@@ -755,7 +755,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 				"jellyfin": tmpDir,
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{})
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{}, false)
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
@@ -905,7 +905,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 				},
 			}
 
-			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{})
+			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{}, false)
 			require.NoError(td, errI)
 
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))

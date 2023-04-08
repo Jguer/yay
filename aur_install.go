@@ -29,6 +29,8 @@ type (
 		targetMode       parser.TargetMode
 		downloadOnly     bool
 		log              *text.Logger
+
+		manualConfirmRequired bool
 	}
 )
 
@@ -37,14 +39,15 @@ func NewInstaller(dbExecutor db.Executor,
 	downloadOnly bool, logger *text.Logger,
 ) *Installer {
 	return &Installer{
-		dbExecutor:       dbExecutor,
-		postInstallHooks: []PostInstallHookFunc{},
-		failedAndIgnored: map[string]error{},
-		exeCmd:           exeCmd,
-		vcsStore:         vcsStore,
-		targetMode:       targetMode,
-		downloadOnly:     downloadOnly,
-		log:              logger,
+		dbExecutor:            dbExecutor,
+		postInstallHooks:      []PostInstallHookFunc{},
+		failedAndIgnored:      map[string]error{},
+		exeCmd:                exeCmd,
+		vcsStore:              vcsStore,
+		targetMode:            targetMode,
+		downloadOnly:          downloadOnly,
+		log:                   logger,
+		manualConfirmRequired: true,
 	}
 }
 
@@ -83,7 +86,10 @@ func (installer *Installer) Install(ctx context.Context,
 	targets []map[string]*dep.InstallInfo,
 	pkgBuildDirs map[string]string,
 	excluded []string,
+	manualConfirmRequired bool,
 ) error {
+	installer.log.Debugln("manualConfirmRequired:", manualConfirmRequired)
+	installer.manualConfirmRequired = manualConfirmRequired
 	// Reorganize targets into layers of dependencies
 	var errMulti multierror.MultiError
 	for i := len(targets) - 1; i >= 0; i-- {
@@ -115,6 +121,10 @@ func mergeLayers(layer1, layer2 map[string]*dep.InstallInfo) map[string]*dep.Ins
 	}
 
 	return layer1
+}
+
+func (installer *Installer) appendNoConfirm() bool {
+	return !installer.manualConfirmRequired || settings.NoConfirm
 }
 
 func (installer *Installer) handleLayer(ctx context.Context,
@@ -165,16 +175,17 @@ func (installer *Installer) handleLayer(ctx context.Context,
 		}
 	}
 
-	text.Debugln("syncDeps", syncDeps, "SyncExp", syncExp,
+	installer.log.Debugln("syncDeps", syncDeps, "SyncExp", syncExp,
 		"aurDeps", aurDeps, "aurExp", aurExp, "upgrade", upgradeSync)
 
-	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp, excluded, upgradeSync)
+	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp,
+		excluded, upgradeSync, installer.appendNoConfirm())
 	if errShow != nil {
 		return ErrInstallRepoPkgs
 	}
 
 	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp,
-		nameToBaseMap, pkgBuildDirs, true, lastLayer)
+		nameToBaseMap, pkgBuildDirs, true, lastLayer, installer.appendNoConfirm())
 
 	return errAur
 }
@@ -185,6 +196,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	nameToBase, pkgBuildDirsByBase map[string]string,
 	installIncompatible bool,
 	lastLayer bool,
+	noConfirm bool,
 ) error {
 	all := aurDepNames.Union(aurExpNames).ToSlice()
 	if len(all) == 0 {
@@ -232,7 +244,8 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		}
 	}
 
-	if err := installPkgArchive(ctx, installer.exeCmd, installer.targetMode, installer.vcsStore, cmdArgs, pkgArchives); err != nil {
+	if err := installPkgArchive(ctx, installer.exeCmd, installer.targetMode,
+		installer.vcsStore, cmdArgs, pkgArchives, noConfirm); err != nil {
 		return fmt.Errorf("%s - %w", fmt.Sprintf(gotext.Get("error installing:")+" %v", pkgArchives), err)
 	}
 
@@ -361,6 +374,7 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 	syncExp mapset.Set[string], // repo targets that are exp
 	excluded []string,
 	upgrade bool, // run even without targets
+	noConfirm bool,
 ) error {
 	repoTargets := syncDeps.Union(syncExp).ToSlice()
 	if len(repoTargets) == 0 && !upgrade {
@@ -379,7 +393,7 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 	}
 
 	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
-		arguments, installer.targetMode, settings.NoConfirm))
+		arguments, installer.targetMode, noConfirm))
 
 	if errD := asdeps(ctx, installer.exeCmd, installer.targetMode, cmdArgs, syncDeps.ToSlice()); errD != nil {
 		return errD

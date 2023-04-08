@@ -649,7 +649,7 @@ func buildInstallPkgbuilds(
 		if !satisfied || !cfg.BatchInstall {
 			text.Debugln("non batch installing archives:", pkgArchives)
 			errArchive := installPkgArchive(ctx, cfg.Runtime.CmdBuilder,
-				cfg.Mode, cfg.Runtime.VCSStore, cmdArgs, pkgArchives)
+				cfg.Mode, cfg.Runtime.VCSStore, cmdArgs, pkgArchives, settings.NoConfirm)
 			errReason := setInstallReason(ctx, cfg.Runtime.CmdBuilder, cfg.Mode, cmdArgs, deps, exp)
 
 			deps = make([]string, 0)
@@ -802,7 +802,8 @@ func buildInstallPkgbuilds(
 	}
 
 	text.Debugln("installing archives:", pkgArchives)
-	errArchive := installPkgArchive(ctx, cfg.Runtime.CmdBuilder, cfg.Mode, cfg.Runtime.VCSStore, cmdArgs, pkgArchives)
+	errArchive := installPkgArchive(ctx, cfg.Runtime.CmdBuilder, cfg.Mode, cfg.Runtime.VCSStore,
+		cmdArgs, pkgArchives, settings.NoConfirm)
 	if errArchive != nil {
 		go cfg.Runtime.VCSStore.RemovePackages([]string{do.Aur[len(do.Aur)-1].String()})
 	}
@@ -823,6 +824,7 @@ func installPkgArchive(ctx context.Context,
 	vcsStore vcs.Store,
 	cmdArgs *parser.Arguments,
 	pkgArchives []string,
+	noConfirm bool,
 ) error {
 	if len(pkgArchives) == 0 {
 		return nil
@@ -845,7 +847,7 @@ func installPkgArchive(ctx context.Context,
 	arguments.AddTarget(pkgArchives...)
 
 	if errShow := cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
-		arguments, mode, settings.NoConfirm)); errShow != nil {
+		arguments, mode, noConfirm)); errShow != nil {
 		return errShow
 	}
 
