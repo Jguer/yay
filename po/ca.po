@@ -229,7 +229,7 @@ msgstr "Paquets instal·lats explícitament: %s"
 
 #: pkg/dep/dep_graph.go:365 pkg/dep/dep_graph.go:454
 msgid "Failed to find AUR package for"
-msgstr "No s'ha pogut trobar el paquet AUR per a"
+msgstr "No s'ha pogut trobar el paquet de l'AUR per a"
 
 #: aur_install.go:104
 msgid "Failed to install layer, rolling up to next layer."
