@@ -638,7 +638,7 @@ msgstr "no s'ha pogut crear el directori %s: %s"
 
 #: pkg/settings/config.go:286
 msgid "failed to open config file '%s': %s"
-msgstr "no s'ha pogut obrir el fitxer de configuració %s: %s"
+msgstr "ha fallat obrir el fitxer de configuració %s: %s"
 
 #: pkg/srcinfo/service.go:113
 msgid "failed to parse %s -- skipping: %s"
@@ -654,7 +654,7 @@ msgstr "ha fallat analitzar .SRCINFO"
 
 #: pkg/settings/config.go:296
 msgid "failed to read config file '%s': %s"
-msgstr "no s'ha pogut llegir el fitxer de configuració %s: %s"
+msgstr "ha fallat llegir el fitxer de configuració %s: %s"
 
 #: pkg/settings/runtime.go:74
 msgid "failed to retrieve aur Cache"
