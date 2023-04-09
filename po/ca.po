@@ -233,7 +233,7 @@ msgstr "No s'ha pogut trobar el paquet AUR per a"
 
 #: aur_install.go:104
 msgid "Failed to install layer, rolling up to next layer."
-msgstr "No s'ha pogut instal·lar la capa. Es passa a la següent."
+msgstr "Ha fallat instal·lar la capa. Es passa a la següent."
 
 #: errors.go:55
 msgid ""
