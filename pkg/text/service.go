@@ -13,7 +13,7 @@ type Logger struct {
 	r      io.Reader
 }
 
-func NewLogger(stdout io.Writer, stderr io.Writer, r io.Reader, debug bool, name string) *Logger {
+func NewLogger(stdout, stderr io.Writer, r io.Reader, debug bool, name string) *Logger {
 	return &Logger{
 		Debug:  debug,
 		name:   name,
