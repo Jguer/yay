@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,7 +19,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
@@ -140,7 +138,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 	config := &settings.Configuration{
 		RemoveMake: "no",
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
+			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -259,7 +257,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 
 	config := &settings.Configuration{
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
+			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -417,7 +415,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 	config := &settings.Configuration{
 		RemoveMake: "no",
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
+			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -578,7 +576,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		RemoveMake: "no",
 		Debug:      false,
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
+			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -714,7 +712,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 	config := &settings.Configuration{
 		RemoveMake: "no",
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
+			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{

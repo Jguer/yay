@@ -72,7 +72,7 @@ func TestNewInfoStore(t *testing.T) {
 			args: args{
 				"/tmp/a.json",
 				&exe.CmdBuilder{GitBin: "git", GitFlags: []string{"--a", "--b"}, Runner: &exe.OSRunner{
-					Log: text.NewLogger(io.Discard, strings.NewReader(""), true, "test"),
+					Log: text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), true, "test"),
 				}},
 			},
 		},
@@ -82,7 +82,7 @@ func TestNewInfoStore(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewInfoStore(tt.args.filePath, tt.args.cmdBuilder,
-				text.NewLogger(io.Discard, strings.NewReader(""), true, "test"))
+				text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), true, "test"))
 			assert.NotNil(t, got)
 			assert.Equal(t, []string{"--a", "--b"}, got.CmdBuilder.(*exe.CmdBuilder).GitFlags)
 			assert.Equal(t, tt.args.cmdBuilder, got.CmdBuilder)
@@ -525,7 +525,7 @@ func TestInfoStore_CleanOrphans(t *testing.T) {
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
 				FilePath:         filePath,
-				logger:           text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+				logger:           text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), false, "test"),
 			}
 			v.CleanOrphans(tt.args.pkgs)
 			assert.Len(t, tt.fields.OriginsByPackage, 3)

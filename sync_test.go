@@ -107,7 +107,7 @@ func TestSyncUpgrade(t *testing.T) {
 		NewInstallEngine: true,
 		RemoveMake:       "no",
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader("\n"), true, "test"),
+			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -221,7 +221,7 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 		NewInstallEngine: true,
 		RemoveMake:       "no",
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader("1\n"), true, "test"),
+			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -352,7 +352,7 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 		NewInstallEngine: true,
 		RemoveMake:       "no",
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader("1\n"), true, "test"),
+			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -517,7 +517,7 @@ pkgname = python-vosk
 		RemoveMake:       "no",
 		BuildDir:         tmpDir,
 		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, strings.NewReader("\n\n\n\n"), true, "test"),
+			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n\n\n\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			AURCache: &mockaur.MockAUR{
@@ -702,7 +702,7 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 				RemoveMake:       "no",
 				CombinedUpgrade:  false,
 				Runtime: &settings.Runtime{
-					Logger:     text.NewLogger(io.Discard, strings.NewReader("1\n"), true, "test"),
+					Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
 					CmdBuilder: cmdBuilder,
 					VCSStore:   &vcs.Mock{},
 					AURCache: &mockaur.MockAUR{

@@ -26,7 +26,7 @@ func TestMigrationNothingToDo(t *testing.T) {
 		Version: "99.0.0",
 		// Create runtime with runtimeVersion
 		Runtime: &Runtime{
-			Logger: text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+			Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
 		},
 	}
 
@@ -51,7 +51,7 @@ func TestProvidesMigrationDo(t *testing.T) {
 	config := Configuration{
 		Provides: true,
 		Runtime: &Runtime{
-			Logger: text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+			Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
 		},
 	}
 
@@ -133,7 +133,7 @@ func TestProvidesMigration(t *testing.T) {
 				Provides: tc.testConfig.Provides,
 				// Create runtime with runtimeVersion
 				Runtime: &Runtime{
-					Logger: text.NewLogger(io.Discard, strings.NewReader(""), false, "test"),
+					Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
 				},
 			}
 

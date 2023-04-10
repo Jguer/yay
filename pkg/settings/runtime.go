@@ -37,7 +37,7 @@ type Runtime struct {
 }
 
 func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
-	logger := text.NewLogger(os.Stdout, os.Stdin, cfg.Debug, "runtime")
+	logger := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime")
 	cmdBuilder := cfg.CmdBuilder(nil)
 
 	httpClient := &http.Client{
@@ -105,7 +105,7 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 		VoteClient:   voteClient,
 		AURCache:     aurCache,
 		DBExecutor:   nil,
-		Logger:       text.NewLogger(os.Stdout, os.Stdin, cfg.Debug, "runtime"),
+		Logger:       text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime"),
 	}
 
 	return runtime, nil

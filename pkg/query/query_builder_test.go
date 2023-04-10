@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"io"
 	"strings"
 	"testing"
 
@@ -39,7 +40,7 @@ func TestMixedSourceQueryBuilder(t *testing.T) {
 
 			w := &strings.Builder{}
 			queryBuilder := NewSourceQueryBuilder(client,
-				text.NewLogger(w, strings.NewReader(""), false, "test"),
+				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				"votes", parser.ModeAny, "", tc.bottomUp, false, false)
 			search := []string{"linux"}
 			mockStore := &mockDB{}
