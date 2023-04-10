@@ -240,6 +240,7 @@ func DefaultConfig(version string) *Configuration {
 		Version:                version,
 		Debug:                  false,
 		UseRPC:                 true,
+		DoubleConfirm:          true,
 		Runtime: &Runtime{
 			Logger: text.GlobalLogger,
 		},
