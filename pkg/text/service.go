@@ -6,23 +6,25 @@ import (
 )
 
 type Logger struct {
-	name  string
-	Debug bool
-	w     io.Writer
-	r     io.Reader
+	name   string
+	Debug  bool
+	stdout io.Writer
+	stderr io.Writer
+	r      io.Reader
 }
 
-func NewLogger(w io.Writer, r io.Reader, debug bool, name string) *Logger {
+func NewLogger(stdout, stderr io.Writer, r io.Reader, debug bool, name string) *Logger {
 	return &Logger{
-		w:     w,
-		name:  name,
-		Debug: debug,
-		r:     r,
+		Debug:  debug,
+		name:   name,
+		r:      r,
+		stderr: stderr,
+		stdout: stdout,
 	}
 }
 
 func (l *Logger) Child(name string) *Logger {
-	return NewLogger(l.w, l.r, l.Debug, name)
+	return NewLogger(l.stdout, l.stderr, l.r, l.Debug, name)
 }
 
 func (l *Logger) Debugln(a ...any) {
@@ -68,11 +70,11 @@ func (l *Logger) SprintWarn(a ...any) string {
 }
 
 func (l *Logger) Error(a ...any) {
-	l.Print(l.SprintError(a...))
+	fmt.Fprint(l.stderr, l.SprintError(a...))
 }
 
 func (l *Logger) Errorln(a ...any) {
-	l.Println(l.SprintError(a...))
+	fmt.Fprintln(l.stderr, l.SprintError(a...))
 }
 
 func (l *Logger) SprintError(a ...any) string {
@@ -80,13 +82,13 @@ func (l *Logger) SprintError(a ...any) string {
 }
 
 func (l *Logger) Printf(format string, a ...any) {
-	fmt.Fprintf(l.w, format, a...)
+	fmt.Fprintf(l.stdout, format, a...)
 }
 
 func (l *Logger) Println(a ...any) {
-	fmt.Fprintln(l.w, a...)
+	fmt.Fprintln(l.stdout, a...)
 }
 
 func (l *Logger) Print(a ...any) {
-	fmt.Fprint(l.w, a...)
+	fmt.Fprint(l.stdout, a...)
 }

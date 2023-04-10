@@ -105,7 +105,7 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	quietMode := cmdArgs.ExistsArg("q", "quiet")
 
 	// TODO: handle quiet mode in a better way
-	logger := text.NewLogger(io.Discard, os.Stdin, cfg.Debug, "update-list")
+	logger := text.NewLogger(io.Discard, os.Stderr, os.Stdin, cfg.Debug, "update-list")
 	dbExecutor.SetLogger(logger.Child("db"))
 	settings.NoConfirm = true
 

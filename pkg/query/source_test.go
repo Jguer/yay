@@ -110,7 +110,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			require.NoError(t, err)
 
 			queryBuilder := NewSourceQueryBuilder(client,
-				text.NewLogger(io.Discard, bytes.NewBufferString(""), false, "test"),
+				text.NewLogger(io.Discard, io.Discard, bytes.NewBufferString(""), false, "test"),
 				"votes", parser.ModeAny, "", tc.bottomUp, false, true)
 			search := []string{"linux"}
 			mockStore := &mockDB{}

@@ -3,6 +3,7 @@ package upgrade
 import (
 	"context"
 	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -335,14 +336,14 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			grapher := dep.NewGrapher(dbExe, mockAUR,
-				false, true, false, false, false, text.NewLogger(tt.fields.output,
+				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
 
 			cfg := &settings.Configuration{
 				Devel: tt.fields.devel, Mode: parser.ModeAny,
 			}
 
-			logger := text.NewLogger(tt.fields.output,
+			logger := text.NewLogger(tt.fields.output, os.Stderr,
 				tt.fields.input, true, "test")
 			u := &UpgradeService{
 				log:         logger,
@@ -456,7 +457,7 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			grapher := dep.NewGrapher(dbExe, mockAUR,
-				false, true, false, false, false, text.NewLogger(tt.fields.output,
+				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
 
 			cfg := &settings.Configuration{
@@ -464,7 +465,7 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 				Mode:  parser.ModeAny,
 			}
 
-			logger := text.NewLogger(tt.fields.output,
+			logger := text.NewLogger(tt.fields.output, os.Stderr,
 				tt.fields.input, true, "test")
 			u := &UpgradeService{
 				log:         logger,
@@ -568,7 +569,7 @@ func TestUpgradeService_Warnings(t *testing.T) {
 		},
 	}
 
-	logger := text.NewLogger(io.Discard,
+	logger := text.NewLogger(io.Discard, os.Stderr,
 		strings.NewReader("\n"), true, "test")
 	grapher := dep.NewGrapher(dbExe, mockAUR,
 		false, true, false, false, false, logger)

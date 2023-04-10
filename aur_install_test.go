@@ -21,7 +21,9 @@ import (
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
-var testLogger = text.NewLogger(io.Discard, strings.NewReader(""), true, "test")
+func NewTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
 
 func ptrString(s string) *string {
 	return &s
@@ -131,7 +133,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -405,7 +407,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -458,7 +460,7 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 
 	cmdBuilder.Runner = mockRunner
 
-	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
+	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
 
 	called := false
 	hook := func(ctx context.Context) error {
@@ -588,7 +590,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -746,7 +748,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, testLogger)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("jellyfin")
@@ -884,7 +886,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, true, testLogger)
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, true, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")

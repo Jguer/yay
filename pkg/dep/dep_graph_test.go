@@ -197,7 +197,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 			g := NewGrapher(tt.fields.dbExecutor,
 				tt.fields.aurCache, false, true,
 				tt.fields.noDeps, tt.fields.noCheckDeps, false,
-				text.NewLogger(io.Discard, &os.File{}, true, "test"))
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayerMap(nil)
