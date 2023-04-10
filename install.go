@@ -291,7 +291,7 @@ func install(ctx context.Context, cfg *settings.Configuration,
 		return err
 	}
 
-	if errEditMenu := menus.Edit(os.Stdout, cfg.EditMenu, pkgbuildDirs,
+	if errEditMenu := menus.Edit(os.Stdout, cfg.Runtime.Logger, cfg.EditMenu, pkgbuildDirs,
 		cfg.Editor, cfg.EditorFlags, remoteNamesCache, srcinfos,
 		settings.NoConfirm, cfg.AnswerEdit); errEditMenu != nil {
 		if errors.As(errEditMenu, &settings.ErrUserAbort{}) {
