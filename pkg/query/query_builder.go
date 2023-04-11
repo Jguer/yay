@@ -238,7 +238,7 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 		lenRes    = len(s.results)
 	)
 
-	for i := 0; i <= s.Len(); i++ {
+	for i := 1; i <= s.Len(); i++ {
 		target := i - 1
 		if s.bottomUp {
 			target = lenRes - i
