@@ -23,6 +23,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
+const cutOffExtra = 2
+
 type UpgradeService struct {
 	grapher    *dep.Grapher
 	aurCache   aur.QueryClient
@@ -191,16 +193,19 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 	repoUp = UpSlice{Up: make([]Upgrade, 0, graph.Len()), Repos: u.dbExecutor.Repos()}
 
 	_ = graph.ForEach(func(name string, info *dep.InstallInfo) error {
-		alpmReason := alpm.PkgReasonExplicit
-		if info.Reason == dep.Dep {
-			alpmReason = alpm.PkgReasonDepend
+		alpmReason := alpm.PkgReasonDepend
+		if info.Reason == dep.Explicit {
+			alpmReason = alpm.PkgReasonExplicit
 		}
 
 		parents := graph.ImmediateDependencies(name)
 		extra := ""
-		if len(parents) > 0 && !info.Upgrade {
-			cutOff := int(math.Min(3, float64(len(parents))))
-			extra = fmt.Sprintf(" (required by %s)", strings.Join(parents.Slice()[:cutOff], ", "))
+		if len(parents) > 0 && !info.Upgrade && info.Reason == dep.MakeDep {
+			reducedParents := parents.Slice()[:int(math.Min(cutOffExtra, float64(len(parents))))]
+			if len(parents) > cutOffExtra {
+				reducedParents = append(reducedParents, "...")
+			}
+			extra = fmt.Sprintf(" (%s of %s)", dep.ReasonNames[info.Reason], strings.Join(reducedParents, ", "))
 		}
 
 		if info.Source == dep.AUR {
