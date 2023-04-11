@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 
 	aur "github.com/Jguer/aur"
@@ -53,15 +52,16 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 			noDB = append(noDB, name)
 		}
 
-		info, err = query.AURInfoPrint(ctx, cfg.Runtime.AURClient, noDB, cfg.RequestSplitN)
+		info, err = cfg.Runtime.AURCache.Get(ctx, &aur.Query{
+			Needles: noDB,
+		})
 		if err != nil {
 			missing = true
 
-			fmt.Fprintln(os.Stderr, err)
+			cfg.Runtime.Logger.Errorln(err)
 		}
 	}
 
-	// Repo always goes first
 	if len(repoS) != 0 {
 		arguments := cmdArgs.Copy()
 		arguments.ClearTargets()
