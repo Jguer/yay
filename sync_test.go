@@ -513,6 +513,7 @@ pkgname = python-vosk
 	}
 
 	cfg := &settings.Configuration{
+		DoubleConfirm:    true,
 		NewInstallEngine: true,
 		RemoveMake:       "no",
 		BuildDir:         tmpDir,

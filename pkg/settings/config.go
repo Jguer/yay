@@ -73,6 +73,7 @@ type Configuration struct {
 	NewInstallEngine       bool     `json:"newinstallengine"`
 	Debug                  bool     `json:"debug"`
 	UseRPC                 bool     `json:"rpc"`
+	DoubleConfirm          bool     `json:"doubleconfirm"` // confirm install before and after build
 
 	CompletionPath string `json:"-"`
 	VCSFilePath    string `json:"-"`
@@ -239,6 +240,7 @@ func DefaultConfig(version string) *Configuration {
 		Version:                version,
 		Debug:                  false,
 		UseRPC:                 true,
+		DoubleConfirm:          true,
 		Runtime: &Runtime{
 			Logger: text.GlobalLogger,
 		},

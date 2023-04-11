@@ -123,8 +123,7 @@ func (o *OperationService) Run(ctx context.Context,
 		return errInstall
 	}
 
-	cleanFunc := preparer.ShouldCleanMakeDeps(cmdArgs)
-	if cleanFunc != nil {
+	if cleanFunc := preparer.ShouldCleanMakeDeps(cmdArgs); cleanFunc != nil {
 		installer.AddPostInstallHook(cleanFunc)
 	}
 
@@ -158,7 +157,8 @@ func (o *OperationService) Run(ctx context.Context,
 		return errPGP
 	}
 
-	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs, excluded); errInstall != nil {
+	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs,
+		excluded, o.manualConfirmRequired(cmdArgs)); errInstall != nil {
 		return errInstall
 	}
 
@@ -179,6 +179,10 @@ func (o *OperationService) Run(ctx context.Context,
 	}
 
 	return multiErr.Return()
+}
+
+func (o *OperationService) manualConfirmRequired(cmdArgs *parser.Arguments) bool {
+	return (!cmdArgs.ExistsArg("u", "sysupgrade") && cmdArgs.Op != "Y") || o.cfg.DoubleConfirm
 }
 
 func confirmIncompatible(incompatible []string) error {
