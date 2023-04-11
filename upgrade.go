@@ -159,7 +159,7 @@ func printLocalNewerThanAUR(
 			continue
 		}
 
-		left, right := upgrade.GetVersionDiff(pkg.Version(), aurPkg.Version)
+		left, right := query.GetVersionDiff(pkg.Version(), aurPkg.Version)
 
 		if !isDevelPackage(pkg) && db.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
 			text.Warnln(gotext.Get("%s: local (%s) is newer than AUR (%s)",

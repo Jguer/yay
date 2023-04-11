@@ -3,6 +3,7 @@ package upgrade
 import (
 	"testing"
 
+	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -57,7 +58,7 @@ func TestGetVersionDiff(t *testing.T) {
 	}
 
 	for i, pair := range in {
-		o, n := GetVersionDiff(pair.Old, pair.New)
+		o, n := query.GetVersionDiff(pair.Old, pair.New)
 
 		if o != out[i].Old || n != out[i].New {
 			t.Errorf("Test %-2d failed for update: expected (%s => %s) got (%s => %s) %d %d %d %d",

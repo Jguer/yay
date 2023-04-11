@@ -54,7 +54,7 @@ func UpDevel(
 }
 
 func printIgnoringPackage(log *text.Logger, pkg db.IPackage, newPkgVersion string) {
-	left, right := GetVersionDiff(pkg.Version(), newPkgVersion)
+	left, right := query.GetVersionDiff(pkg.Version(), newPkgVersion)
 
 	pkgName := pkg.Name()
 	log.Warnln(gotext.Get("%s: ignoring package upgrade (%s => %s)",

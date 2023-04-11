@@ -3,10 +3,10 @@ package upgrade
 import (
 	"fmt"
 	"strings"
-	"unicode"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/intrange"
+	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -51,55 +51,6 @@ func (u UpSlice) Less(i, j int) bool {
 	return text.LessRunes(iRunes, jRunes)
 }
 
-func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
-	if oldVersion == newVersion {
-		return oldVersion + text.Red(""), newVersion + text.Green("")
-	}
-
-	diffPosition := 0
-
-	checkWords := func(str string, index int, words ...string) bool {
-		for _, word := range words {
-			wordLength := len(word)
-
-			nextIndex := index + 1
-			if (index < len(str)-wordLength) &&
-				(str[nextIndex:(nextIndex+wordLength)] == word) {
-				return true
-			}
-		}
-
-		return false
-	}
-
-	for index, char := range oldVersion {
-		charIsSpecial := !(unicode.IsLetter(char) || unicode.IsNumber(char))
-
-		if (index >= len(newVersion)) || (char != rune(newVersion[index])) {
-			if charIsSpecial {
-				diffPosition = index
-			}
-
-			break
-		}
-
-		if charIsSpecial ||
-			(((index == len(oldVersion)-1) || (index == len(newVersion)-1)) &&
-				((len(oldVersion) != len(newVersion)) ||
-					(oldVersion[index] == newVersion[index]))) ||
-			checkWords(oldVersion, index, "rc", "pre", "alpha", "beta") {
-			diffPosition = index + 1
-		}
-	}
-
-	samePart := oldVersion[0:diffPosition]
-
-	left = samePart + text.Red(oldVersion[diffPosition:])
-	right = samePart + text.Green(newVersion[diffPosition:])
-
-	return left, right
-}
-
 // Print prints the details of the packages to upgrade.
 func (u UpSlice) Print(logger *text.Logger) {
 	longestName, longestVersion := 0, 0
@@ -107,7 +58,7 @@ func (u UpSlice) Print(logger *text.Logger) {
 	for k := range u.Up {
 		upgrade := &u.Up[k]
 		packNameLen := len(StylizedNameWithRepository(upgrade))
-		packVersion, _ := GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
+		packVersion, _ := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 		packVersionLen := len(packVersion)
 		longestName = intrange.Max(packNameLen, longestName)
 		longestVersion = intrange.Max(packVersionLen, longestVersion)
@@ -121,7 +72,7 @@ func (u UpSlice) Print(logger *text.Logger) {
 
 	for k := range u.Up {
 		upgrade := &u.Up[k]
-		left, right := GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
+		left, right := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 
 		logger.Printf(text.Magenta(fmt.Sprintf(numberPadding, lenUp-k)))
 

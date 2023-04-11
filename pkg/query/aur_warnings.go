@@ -8,15 +8,17 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
 
+	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type AURWarnings struct {
-	Orphans   []string
-	OutOfDate []string
-	Missing   []string
-	Ignore    stringset.StringSet
+	Orphans    []string
+	OutOfDate  []string
+	Missing    []string
+	LocalNewer []string
+	Ignore     stringset.StringSet
 
 	log *text.Logger
 }
@@ -41,6 +43,17 @@ func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.IPackage, aurP
 
 	if aurPkg.OutOfDate != 0 && !pkg.ShouldIgnore() {
 		warnings.OutOfDate = append(warnings.OutOfDate, name)
+	}
+
+	if !pkg.ShouldIgnore() && !isDevelPackage(pkg) && db.VerCmp(pkg.Version(), aurPkg.Version) > 0 {
+		left, right := GetVersionDiff(pkg.Version(), aurPkg.Version)
+
+		newerMsg := gotext.Get("%s: local (%s) is newer than AUR (%s)",
+			text.Cyan(name),
+			left, right,
+		)
+
+		warnings.LocalNewer = append(warnings.LocalNewer, newerMsg)
 	}
 }
 
@@ -69,6 +82,12 @@ func (warnings *AURWarnings) Print() {
 
 	if len(warnings.OutOfDate) > 0 {
 		warnings.log.Warnln(gotext.Get("Flagged Out Of Date AUR Packages:"), formatNames(warnings.OutOfDate))
+	}
+
+	if len(warnings.LocalNewer) > 0 {
+		for _, newer := range warnings.LocalNewer {
+			warnings.log.Warnln(newer)
+		}
 	}
 }
 
