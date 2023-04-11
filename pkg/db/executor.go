@@ -26,6 +26,7 @@ type Upgrade struct {
 	LocalVersion  string
 	RemoteVersion string
 	Reason        alpm.PkgReason
+	Extra         string // Extra information to be displayed
 }
 
 type SyncUpgrade struct {

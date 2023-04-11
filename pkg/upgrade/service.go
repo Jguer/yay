@@ -2,7 +2,10 @@ package upgrade
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"sort"
+	"strings"
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
@@ -19,6 +22,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/topo"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
+
+const cutOffExtra = 2
 
 type UpgradeService struct {
 	grapher    *dep.Grapher
@@ -188,9 +193,19 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 	repoUp = UpSlice{Up: make([]Upgrade, 0, graph.Len()), Repos: u.dbExecutor.Repos()}
 
 	_ = graph.ForEach(func(name string, info *dep.InstallInfo) error {
-		alpmReason := alpm.PkgReasonExplicit
-		if info.Reason == dep.Dep {
-			alpmReason = alpm.PkgReasonDepend
+		alpmReason := alpm.PkgReasonDepend
+		if info.Reason == dep.Explicit {
+			alpmReason = alpm.PkgReasonExplicit
+		}
+
+		parents := graph.ImmediateDependencies(name)
+		extra := ""
+		if len(parents) > 0 && !info.Upgrade && info.Reason == dep.MakeDep {
+			reducedParents := parents.Slice()[:int(math.Min(cutOffExtra, float64(len(parents))))]
+			if len(parents) > cutOffExtra {
+				reducedParents = append(reducedParents, "...")
+			}
+			extra = fmt.Sprintf(" (%s of %s)", dep.ReasonNames[info.Reason], strings.Join(reducedParents, ", "))
 		}
 
 		if info.Source == dep.AUR {
@@ -205,6 +220,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				Base:          *info.AURBase,
 				LocalVersion:  info.LocalVersion,
 				Reason:        alpmReason,
+				Extra:         extra,
 			})
 		} else if info.Source == dep.Sync {
 			repoUp.Up = append(repoUp.Up, Upgrade{
@@ -214,6 +230,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				Base:          "",
 				LocalVersion:  info.LocalVersion,
 				Reason:        alpmReason,
+				Extra:         extra,
 			})
 		}
 		return nil

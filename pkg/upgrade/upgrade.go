@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -112,18 +113,23 @@ func (u UpSlice) Print(logger *text.Logger) {
 		longestVersion = intrange.Max(packVersionLen, longestVersion)
 	}
 
+	lenUp := len(u.Up)
+	longestNumber := len(fmt.Sprintf("%v", lenUp))
 	namePadding := fmt.Sprintf("%%-%ds  ", longestName)
 	versionPadding := fmt.Sprintf("%%-%ds", longestVersion)
-	numberPadding := fmt.Sprintf("%%%dd  ", len(fmt.Sprintf("%v", len(u.Up))))
+	numberPadding := fmt.Sprintf("%%%dd  ", longestNumber)
 
 	for k := range u.Up {
 		upgrade := &u.Up[k]
 		left, right := GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 
-		logger.Printf(text.Magenta(fmt.Sprintf(numberPadding, len(u.Up)-k)))
+		logger.Printf(text.Magenta(fmt.Sprintf(numberPadding, lenUp-k)))
 
 		logger.Printf(namePadding, StylizedNameWithRepository(upgrade))
 
 		logger.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
+		if upgrade.Extra != "" {
+			logger.Println(strings.Repeat(" ", longestNumber), upgrade.Extra)
+		}
 	}
 }
