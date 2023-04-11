@@ -2,7 +2,10 @@ package upgrade
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"sort"
+	"strings"
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
@@ -193,6 +196,13 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 			alpmReason = alpm.PkgReasonDepend
 		}
 
+		parents := graph.ImmediateDependencies(name)
+		extra := ""
+		if len(parents) > 0 && !info.Upgrade {
+			cutOff := int(math.Min(3, float64(len(parents))))
+			extra = fmt.Sprintf(" (required by %s)", strings.Join(parents.Slice()[:cutOff], ", "))
+		}
+
 		if info.Source == dep.AUR {
 			aurRepo := "aur"
 			if info.Devel {
@@ -205,6 +215,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				Base:          *info.AURBase,
 				LocalVersion:  info.LocalVersion,
 				Reason:        alpmReason,
+				Extra:         extra,
 			})
 		} else if info.Source == dep.Sync {
 			repoUp.Up = append(repoUp.Up, Upgrade{
@@ -214,6 +225,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				Base:          "",
 				LocalVersion:  info.LocalVersion,
 				Reason:        alpmReason,
+				Extra:         extra,
 			})
 		}
 		return nil

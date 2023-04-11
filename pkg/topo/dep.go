@@ -12,6 +12,16 @@ type (
 	DepMap[T comparable]  map[T]NodeSet[T]
 )
 
+func (n NodeSet[T]) Slice() []T {
+	var slice []T
+
+	for node := range n {
+		slice = append(slice, node)
+	}
+
+	return slice
+}
+
 type NodeInfo[V any] struct {
 	Color      string
 	Background string
@@ -253,10 +263,10 @@ func (g *Graph[T, V]) remove(node T) {
 }
 
 func (g *Graph[T, V]) Dependencies(child T) NodeSet[T] {
-	return g.buildTransitive(child, g.immediateDependencies)
+	return g.buildTransitive(child, g.ImmediateDependencies)
 }
 
-func (g *Graph[T, V]) immediateDependencies(node T) NodeSet[T] {
+func (g *Graph[T, V]) ImmediateDependencies(node T) NodeSet[T] {
 	return g.dependencies[node]
 }
 
