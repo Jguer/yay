@@ -181,5 +181,8 @@ func (t *DBExecutor) SyncSatisfier(s string) IPackage {
 }
 
 func (t *DBExecutor) SyncSatisfierExists(s string) bool {
+	if t.SyncSatisfierFn != nil {
+		return t.SyncSatisfierFn(s) != nil
+	}
 	panic("implement me")
 }

@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Jguer/aur"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -100,17 +100,17 @@ func syncClean(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 	return nil
 }
 
-func cleanAUR(ctx context.Context, config *settings.Configuration,
+func cleanAUR(ctx context.Context, cfg *settings.Configuration,
 	keepInstalled, keepCurrent, removeAll bool, dbExecutor db.Executor,
 ) error {
-	fmt.Println(gotext.Get("removing AUR packages from cache..."))
+	cfg.Runtime.Logger.Println(gotext.Get("removing AUR packages from cache..."))
 
 	installedBases := make(stringset.StringSet)
 	inAURBases := make(stringset.StringSet)
 
 	remotePackages := dbExecutor.InstalledRemotePackages()
 
-	files, err := os.ReadDir(config.BuildDir)
+	files, err := os.ReadDir(cfg.BuildDir)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,9 @@ func cleanAUR(ctx context.Context, config *settings.Configuration,
 	// Querying the AUR is slow and needs internet so don't do it if we
 	// don't need to.
 	if keepCurrent {
-		info, errInfo := query.AURInfo(ctx, config.Runtime.AURClient, cachedPackages, query.NewWarnings(nil), config.RequestSplitN)
+		info, errInfo := cfg.Runtime.AURCache.Get(ctx, &aur.Query{
+			Needles: cachedPackages,
+		})
 		if errInfo != nil {
 			return errInfo
 		}
@@ -163,10 +165,10 @@ func cleanAUR(ctx context.Context, config *settings.Configuration,
 			}
 		}
 
-		dir := filepath.Join(config.BuildDir, file.Name())
-		err = os.RemoveAll(dir)
-		if err != nil {
-			text.Warnln(gotext.Get("Unable to remove %s: %s", dir, err))
+		dir := filepath.Join(cfg.BuildDir, file.Name())
+		cfg.Runtime.Logger.Debugln("removing", dir)
+		if err = os.RemoveAll(dir); err != nil {
+			cfg.Runtime.Logger.Warnln(gotext.Get("Unable to remove %s: %s", dir, err))
 		}
 	}
 
@@ -174,7 +176,7 @@ func cleanAUR(ctx context.Context, config *settings.Configuration,
 }
 
 func cleanUntracked(ctx context.Context, cfg *settings.Configuration) error {
-	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
+	cfg.Runtime.Logger.Println(gotext.Get("removing untracked AUR files from cache..."))
 
 	files, err := os.ReadDir(cfg.BuildDir)
 	if err != nil {
@@ -187,9 +189,10 @@ func cleanUntracked(ctx context.Context, cfg *settings.Configuration) error {
 		}
 
 		dir := filepath.Join(cfg.BuildDir, file.Name())
+		cfg.Runtime.Logger.Debugln("cleaning", dir)
 		if isGitRepository(dir) {
 			if err := cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fx")); err != nil {
-				text.Warnln(gotext.Get("Unable to clean:"), dir)
+				cfg.Runtime.Logger.Warnln(gotext.Get("Unable to clean:"), dir)
 
 				return err
 			}
