@@ -73,6 +73,40 @@ pacman -S --needed git base-devel yay
 
 ⚠️ distributions sometimes lag updating yay on their repositories.
 
+#### Steam Deck
+
+In Steam Deck we will have some additional issues: Errors with `GPG Keys` and `system read-only protection`, to do the installation without a lot of headaches just run:
+
+```sh
+# Allow writing over file system (steam os block)
+sudo steamos-readonly disable
+
+# Ensure we have the keys updated
+sudo pacman-key --init
+sudo pacman-key --populate archlinux
+
+# Install git and base-devel dependencies
+sudo pacman -S --needed git base-devel
+# Ensure that dependencies get installed correctly (this may be not necessary in some cases)
+sudo pacman -S git base-devel
+# When prompted, select all options
+
+# INSTALL FROM SOURCE
+# git clone https://aur.archlinux.org/yay.git
+# cd yay
+# makepkg -si
+
+# OR INSTALL FROM BINARY (fastest)
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
+makepkg -si
+
+
+# Disable again the write file system permissions
+sudo steamos-readonly disable
+```
+
+
 ## First Use
 
 #### Development packages upgrade
