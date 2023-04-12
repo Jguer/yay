@@ -273,7 +273,7 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	allUp := UpSlice{}
 	
 	if u.cfg.CombinedUpgrade {
-		allUp := UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
+		allUp = UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
 	} else {
 		allUp = UpSlice{Up: aurUp.Up, Repos: aurUp.Repos}
 	}
