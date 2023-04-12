@@ -270,9 +270,14 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
-
-	allUp := UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
-
+	allUp := UpSlice{}
+	
+	if u.cfg.CombinedUpgrade {
+		allUp := UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
+	} else {
+		allUp = UpSlice{Up: aurUp.Up, Repos: aurUp.Repos}
+	}
+	
 	u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade/install.")))
 	allUp.Print(u.log)
 
