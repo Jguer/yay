@@ -80,7 +80,7 @@ msgstr "%s: 대상에 --repo 옵션을 사용할 수 없음 -- 건너뛰는 중"
 
 #: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: 패키지 업그레이드 무시 (%s => %s)"
+msgstr "%s: 패키지 업그레이드 무시하는 중 (%s => %s)"
 
 #: upgrade.go:165
 msgid "%s: local (%s) is newer than AUR (%s)"
