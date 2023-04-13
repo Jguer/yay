@@ -44,7 +44,7 @@ msgstr "%s [A]모두 [Ab]중단 [I]설치됨 [No]설치되지 않음 또는 (1 2
 
 #: aur_install.go:274 install.go:741
 msgid "%s already made -- skipping build"
-msgstr "%s 이미 빌드됨 -- 빌드를 건너뜁니다"
+msgstr "%s 이미 빌드됨 -- 빌드 건너뛰는 중"
 
 #: pkg/menus/edit_menu.go:58
 msgid "%s is not set"
