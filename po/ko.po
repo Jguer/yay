@@ -158,7 +158,7 @@ msgstr "내부 충돌 확인하는 중..."
 
 #: clean.go:214
 msgid "Cleaning (%d/%d): %s"
-msgstr "비우는 중 (%d/%d): %s"
+msgstr "지우는 중 (%d/%d): %s"
 
 #: pkg/dep/depCheck.go:200
 msgid "Conflicting packages will have to be confirmed manually"
