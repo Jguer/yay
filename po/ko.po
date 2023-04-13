@@ -102,7 +102,7 @@ msgstr "(%d/%d) PKGBUILD 다운로드됨: %s"
 
 #: pkg/srcinfo/service.go:108
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) SRCINFO 분석 중: %s"
+msgstr "(%d/%d) SRCINFO 분석하는 중: %s"
 
 #: pkg/query/types.go:70 pkg/query/types.go:101
 msgid "(Installed)"
