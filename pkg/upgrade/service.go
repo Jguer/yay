@@ -201,6 +201,9 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 		parents := graph.ImmediateDependencies(name)
 		extra := ""
 		if len(parents) > 0 && !info.Upgrade && info.Reason == dep.MakeDep {
+			if !u.cfg.CombinedUpgrade {
+				return nil
+			}
 			reducedParents := parents.Slice()[:int(math.Min(cutOffExtra, float64(len(parents))))]
 			if len(parents) > cutOffExtra {
 				reducedParents = append(reducedParents, "...")
@@ -277,6 +280,8 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	} else {
 		allUp = UpSlice{Up: aurUp.Up, Repos: aurUp.Repos}
 	}
+	
+	allUpLen = allUp.Len()
 	
 	u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade/install.")))
 	allUp.Print(u.log)
