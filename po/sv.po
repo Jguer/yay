@@ -600,7 +600,7 @@ msgstr "fel vid hämtning av %s: %s"
 
 #: install.go:321 install.go:455 local_install.go:26
 msgid "error installing repo packages"
-msgstr "fel vid installation av paket"
+msgstr "fel vid installation av centralkatalogspaket"
 
 #: aur_install.go:236 aur_install.go:240
 msgid "error installing:"
