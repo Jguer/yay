@@ -444,7 +444,7 @@ msgstr "Söker efter uppdateringar i databaserna..."
 
 #: pkg/query/query_builder.go:191
 msgid "Showing repo packages only"
-msgstr "Visa endast centralkatalogspaket"
+msgstr "Visar endast centralkatalogspaket"
 
 #: print.go:88
 msgid "Size of pacman cache %s: %s"
