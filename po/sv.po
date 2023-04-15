@@ -730,7 +730,7 @@ msgstr "paketet hittades inte i AUR"
 
 #: pkg/download/abs.go:22
 msgid "package not found in repos"
-msgstr "paketet hittades inte i förråd"
+msgstr "paketet hittades inte i centralkatalogerna"
 
 #: pkg/pgp/keys.go:103
 msgid "problem importing keys"
