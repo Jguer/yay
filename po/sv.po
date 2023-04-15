@@ -257,7 +257,7 @@ msgstr "Okända installerade paket: %s"
 
 #: pkg/vcs/vcs.go:142
 msgid "Found git repo: %s"
-msgstr "Hittade gitförråd: %s"
+msgstr "Hittade git-arkiv: %s"
 
 #: vcs.go:73
 msgid "GenDB finished. No packages were installed"
