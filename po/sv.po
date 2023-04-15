@@ -76,11 +76,11 @@ msgstr "%s: Inga ändringar -- hoppar över"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: kan inte använda mål med växlen --aur -- hoppar över"
+msgstr "%s: kan inte använda mål med växeln --aur -- hoppar över"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: kan inte använda mål med växlen --repo -- hoppar över"
+msgstr "%s: kan inte använda mål med växeln --repo -- hoppar över"
 
 #: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
