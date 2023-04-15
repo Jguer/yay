@@ -3,10 +3,11 @@
 # J G, 2021
 # drPytho, 2023
 # Luna Jernberg <bittin@cafe8bitar.se>, 2023
+# August Wikerfors, 2023
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Luna Jernberg <bittin@cafe8bitar.se>, 2023\n"
+"Last-Translator: August Wikerfors, 2023\n"
 "Language-Team: Swedish (https://app.transifex.com/yay-1/teams/123732/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -219,8 +220,7 @@ msgstr "Fel vid AUR-sökning: %s\n"
 #: pkg/upgrade/service.go:256
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Exkluderar paket som kan orsaka partiella uppgraderingar och ha sönder "
-"system"
+"Att exkludera paket kan orsaka partiella uppgraderingar och ha sönder system"
 
 #: pkg/dep/dep_graph.go:59
 msgid "Explicit"
