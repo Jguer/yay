@@ -143,7 +143,7 @@ msgstr "Undvik att köra yay som root/sudo."
 
 #: pkg/dep/dep_graph.go:62
 msgid "Check Dependency"
-msgstr "Kontrollera beroende"
+msgstr "Kontrollberoende"
 
 #: print.go:37
 msgid "Check Deps"
