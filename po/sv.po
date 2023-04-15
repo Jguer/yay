@@ -224,7 +224,7 @@ msgstr ""
 
 #: pkg/dep/dep_graph.go:59
 msgid "Explicit"
-msgstr "Tydligt"
+msgstr "Uttryckligen"
 
 #: print.go:84
 msgid "Explicitly installed packages: %s"
