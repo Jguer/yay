@@ -127,7 +127,7 @@ msgstr "(Föråldrade: %s)"
 
 #: print.go:31
 msgid "AUR URL"
-msgstr "AUR URL"
+msgstr "AUR-webbadress"
 
 #: pkg/dep/dep_graph.go:74
 msgid "AUR"
