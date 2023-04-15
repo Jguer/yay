@@ -424,7 +424,7 @@ msgstr "Ta bort byggberoenden efter installation?"
 
 #: pkg/dep/depPool.go:503 pkg/dep/dep_graph.go:631
 msgid "Repository AUR"
-msgstr "AUR-förråd"
+msgstr "Centralkatalog AUR"
 
 #: pkg/db/ialpm/alpm.go:191 print.go:25
 msgid "Repository"
