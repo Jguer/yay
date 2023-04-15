@@ -686,7 +686,7 @@ msgstr ""
 
 #: pkg/download/abs.go:21
 msgid "invalid repository"
-msgstr "ogiltigt förråd"
+msgstr "ogiltig centralkatalog"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:668
 msgid "invalid value: %d is not between %d and %d"
