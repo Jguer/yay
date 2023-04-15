@@ -492,7 +492,7 @@ msgstr "Försök att bygga dem ändå?"
 
 #: print.go:30
 msgid "URL"
-msgstr "URL"
+msgstr "Webbadress"
 
 #: clean.go:192 pkg/menus/clean_menu.go:64 pkg/menus/clean_menu.go:70
 msgid "Unable to clean:"
