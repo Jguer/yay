@@ -1,7 +1,6 @@
 # 
 # Translators:
 # J G, 2021
-# drPytho, 2023
 # Luna Jernberg <bittin@cafe8bitar.se>, 2023
 # August Wikerfors, 2023
 # 
@@ -95,7 +94,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"Vänligen sätt miljövariablerna AUR_USERNAME och AUR_PASSWORD för att rösta"
+"%s: vänligen ställ miljövariablerna AUR_USERNAME och AUR_PASSWORD för att "
+"rösta"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
