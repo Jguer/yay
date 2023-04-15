@@ -631,7 +631,7 @@ msgstr "fel vid uppdatering av paketinstallations anledning till %s"
 
 #: errors.go:24
 msgid "explicit"
-msgstr "tydligt"
+msgstr "uttryckligen"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
