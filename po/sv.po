@@ -385,7 +385,9 @@ msgstr "Paket att exkludera"
 
 #: pkg/upgrade/service.go:255
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller förrådsnamn)"
+msgstr ""
+"Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller "
+"centralkatalogsnamn)"
 
 #: cmd.go:406
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
