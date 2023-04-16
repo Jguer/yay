@@ -582,7 +582,7 @@ msgstr "konnte nicht alle erforderlichen Pakete finden:"
 
 #: errors.go:16
 msgid "could not find any package archives listed in %s"
-msgstr "konnte keine Paketarchive finden gelistet in %s"
+msgstr "konnte keine Paketarchive finden ist nicht aufgeführt in %s"
 
 #: install.go:788
 msgid "could not find srcinfo for: %s"
