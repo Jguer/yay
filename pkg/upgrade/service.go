@@ -262,8 +262,7 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 // userExcludeUpgrades asks the user which packages to exclude from the upgrade and
 // removes them from the graph
 func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) ([]string, error) {
-	allUpLen := graph.Len()
-	if allUpLen == 0 {
+	if graph.Len() == 0 {
 		return []string{}, nil
 	}
 	aurUp, repoUp := u.graphToUpSlice(graph)
@@ -271,12 +270,35 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	sort.Sort(repoUp)
 	sort.Sort(aurUp)
 
-	allUp := UpSlice{Up: append(repoUp.Up, aurUp.Up...), Repos: append(repoUp.Repos, aurUp.Repos...)}
+	allUp := UpSlice{Repos: append(repoUp.Repos, aurUp.Repos...)}
+	for _, up := range repoUp.Up {
+		if up.LocalVersion == "" && up.Reason != alpm.PkgReasonExplicit {
+			allUp.PulledDeps = append(allUp.PulledDeps, up)
+		} else {
+			allUp.Up = append(allUp.Up, up)
+		}
+	}
 
-	u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")), allUpLen, text.Bold(gotext.Get("Packages to upgrade/install.")))
+	for _, up := range aurUp.Up {
+		if up.LocalVersion == "" && up.Reason != alpm.PkgReasonExplicit {
+			allUp.PulledDeps = append(allUp.PulledDeps, up)
+		} else {
+			allUp.Up = append(allUp.Up, up)
+		}
+	}
+
+	if len(allUp.PulledDeps) > 0 {
+		u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")),
+			len(allUp.PulledDeps), text.Bold(gotext.Get("%s will also be installed for this operation",
+				gotext.GetN("dependency", "dependencies", len(allUp.PulledDeps)))))
+		allUp.PrintDeps(u.log)
+	}
+
+	u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")),
+		len(allUp.Up), text.Bold(gotext.Get("%s to upgrade/install.", gotext.GetN("package", "packages", len(allUp.Up)))))
 	allUp.Print(u.log)
 
-	u.log.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
+	u.log.Infoln(gotext.Get("%s to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)", gotext.GetN("package", "packages", len(allUp.Up))))
 	u.log.Warnln(gotext.Get("Excluding packages may cause partial upgrades and break systems"))
 
 	numbers, err := u.log.GetInput(u.cfg.AnswerUpgrade, settings.NoConfirm)
@@ -292,10 +314,6 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	excluded := make([]string, 0)
 	for i := range allUp.Up {
 		up := &allUp.Up[i]
-		// choices do not apply to non-installed packages
-		if up.LocalVersion == "" {
-			continue
-		}
 
 		if isInclude && otherExclude.Get(up.Repository) {
 			u.log.Debugln("pruning", up.Name)
@@ -303,13 +321,13 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 			continue
 		}
 
-		if isInclude && exclude.Get(allUpLen-i) {
+		if isInclude && exclude.Get(len(allUp.Up)-i) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
 			continue
 		}
 
-		if !isInclude && !(include.Get(allUpLen-i) || otherInclude.Get(up.Repository)) {
+		if !isInclude && !(include.Get(len(allUp.Up)-i) || otherInclude.Get(up.Repository)) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
 			continue

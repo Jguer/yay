@@ -211,12 +211,12 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 		}
 
 		pkg := s.queryMap[s.results[i].source][s.results[i].name]
-		if s.results[i].source == sourceAUR {
-			aurPkg := pkg.(aur.Pkg)
-			toPrint += aurPkgSearchString(&aurPkg, dbExecutor, s.singleLineResults)
-		} else {
-			syncPkg := pkg.(alpm.IPackage)
-			toPrint += syncPkgSearchString(syncPkg, dbExecutor, s.singleLineResults)
+
+		switch pPkg := pkg.(type) {
+		case aur.Pkg:
+			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults)
+		case alpm.IPackage:
+			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults)
 		}
 
 		s.logger.Println(toPrint)
