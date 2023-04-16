@@ -227,8 +227,8 @@ msgstr "Fehler während AUR-Suche: %s\n"
 #: pkg/upgrade/service.go:256
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Das Ausschließen von Paketen kann zu teilweisen Upgrades führen und Systeme "
-"beschädigen."
+"Das Ausschließen von Paketen kann zu teilweisen Aktualisierungen führen und "
+"Systeme beschädigen."
 
 #: pkg/dep/dep_graph.go:59
 msgid "Explicit"
