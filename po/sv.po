@@ -1,12 +1,12 @@
 # 
 # Translators:
 # J G, 2021
-# drPytho, 2023
 # Luna Jernberg <bittin@cafe8bitar.se>, 2023
+# August Wikerfors, 2023
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Luna Jernberg <bittin@cafe8bitar.se>, 2023\n"
+"Last-Translator: August Wikerfors, 2023\n"
 "Language-Team: Swedish (https://app.transifex.com/yay-1/teams/123732/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -75,11 +75,11 @@ msgstr "%s: Inga ändringar -- hoppar över"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: kan inte använda mål med växlen --aur -- hoppar över"
+msgstr "%s: kan inte använda mål med växeln --aur -- hoppar över"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: kan inte använda mål med växlen --repo -- hoppar över"
+msgstr "%s: kan inte använda mål med växeln --repo -- hoppar över"
 
 #: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
@@ -94,7 +94,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"Vänligen sätt miljövariablerna AUR_USERNAME och AUR_PASSWORD för att rösta"
+"%s: vänligen ställ in miljövariablerna AUR_USERNAME och AUR_PASSWORD för att"
+" rösta"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -126,7 +127,7 @@ msgstr "(Föråldrade: %s)"
 
 #: print.go:31
 msgid "AUR URL"
-msgstr "AUR URL"
+msgstr "AUR-webbadress"
 
 #: pkg/dep/dep_graph.go:74
 msgid "AUR"
@@ -142,7 +143,7 @@ msgstr "Undvik att köra yay som root/sudo."
 
 #: pkg/dep/dep_graph.go:62
 msgid "Check Dependency"
-msgstr "Kontrollera beroende"
+msgstr "Kontrollberoende"
 
 #: print.go:37
 msgid "Check Deps"
@@ -219,12 +220,11 @@ msgstr "Fel vid AUR-sökning: %s\n"
 #: pkg/upgrade/service.go:256
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Exkluderar paket som kan orsaka partiella uppgraderingar och ha sönder "
-"system"
+"Att exkludera paket kan orsaka partiella uppgraderingar och ha sönder system"
 
 #: pkg/dep/dep_graph.go:59
 msgid "Explicit"
-msgstr "Tydligt"
+msgstr "Uttryckligen"
 
 #: print.go:84
 msgid "Explicitly installed packages: %s"
@@ -257,7 +257,7 @@ msgstr "Okända installerade paket: %s"
 
 #: pkg/vcs/vcs.go:142
 msgid "Found git repo: %s"
-msgstr "Hittade gitförråd: %s"
+msgstr "Hittade git-arkiv: %s"
 
 #: vcs.go:73
 msgid "GenDB finished. No packages were installed"
@@ -385,7 +385,9 @@ msgstr "Paket att exkludera"
 
 #: pkg/upgrade/service.go:255
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller förrådsnamn)"
+msgstr ""
+"Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller "
+"centralkatalogsnamn)"
 
 #: cmd.go:406
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -422,11 +424,11 @@ msgstr "Ta bort byggberoenden efter installation?"
 
 #: pkg/dep/depPool.go:503 pkg/dep/dep_graph.go:631
 msgid "Repository AUR"
-msgstr "AUR-förråd"
+msgstr "Centralkatalog AUR"
 
 #: pkg/db/ialpm/alpm.go:191 print.go:25
 msgid "Repository"
-msgstr "Förråd"
+msgstr "Centralkatalog"
 
 #: pkg/dep/dep_graph.go:77
 msgid "SRCINFO"
@@ -442,7 +444,7 @@ msgstr "Söker efter uppdateringar i databaserna..."
 
 #: pkg/query/query_builder.go:191
 msgid "Showing repo packages only"
-msgstr "Visa endast förrådspaket"
+msgstr "Visar endast centralkatalogspaket"
 
 #: print.go:88
 msgid "Size of pacman cache %s: %s"
@@ -490,7 +492,7 @@ msgstr "Försök att bygga dem ändå?"
 
 #: print.go:30
 msgid "URL"
-msgstr "URL"
+msgstr "Webbadress"
 
 #: clean.go:192 pkg/menus/clean_menu.go:64 pkg/menus/clean_menu.go:70
 msgid "Unable to clean:"
@@ -598,7 +600,7 @@ msgstr "fel vid hämtning av %s: %s"
 
 #: install.go:321 install.go:455 local_install.go:26
 msgid "error installing repo packages"
-msgstr "fel vid installation av paket"
+msgstr "fel vid installation av centralkatalogspaket"
 
 #: aur_install.go:236 aur_install.go:240
 msgid "error installing:"
@@ -631,7 +633,7 @@ msgstr "fel vid uppdatering av paketinstallations anledning till %s"
 
 #: errors.go:24
 msgid "explicit"
-msgstr "tydligt"
+msgstr "uttryckligen"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
@@ -680,12 +682,11 @@ msgstr "ogiltig växel '%s'"
 #: cmd.go:208
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"ogiltigt alternativ: '--deps' och ''--explicit' kan inte användas "
-"tillsammans"
+"ogiltigt alternativ: '--deps' och '--explicit' kan inte användas tillsammans"
 
 #: pkg/download/abs.go:21
 msgid "invalid repository"
-msgstr "ogiltigt förråd"
+msgstr "ogiltig centralkatalog"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:668
 msgid "invalid value: %d is not between %d and %d"
@@ -729,7 +730,7 @@ msgstr "paketet hittades inte i AUR"
 
 #: pkg/download/abs.go:22
 msgid "package not found in repos"
-msgstr "paketet hittades inte i förråd"
+msgstr "paketet hittades inte i centralkatalogerna"
 
 #: pkg/pgp/keys.go:103
 msgid "problem importing keys"
