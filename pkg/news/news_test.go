@@ -121,7 +121,7 @@ func TestPrintNewsFeed(t *testing.T) {
 		{name: "latest-quiet", args: args{bottomUp: true, cutOffDate: lastNewsTime, all: false, quiet: true}, wantErr: false},
 		{name: "latest-quiet-topdown", args: args{bottomUp: false, cutOffDate: lastNewsTime, all: false, quiet: true}, wantErr: false},
 	}
-	os.Setenv("TZ", "UTC")
+	t.Setenv("TZ", "UTC")
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
