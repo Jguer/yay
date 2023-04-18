@@ -18,8 +18,8 @@ func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
 
 	checkWords := func(str string, index int, words ...string) bool {
 		// Make sure the word is not part of a longer word
-		ongoingWord := !(unicode.IsLetter(rune(str[index])))
-		if !ongoingWord {
+		ongoingWord := unicode.IsLetter(rune(str[index]))
+		if ongoingWord {
 			return false
 		}
 
