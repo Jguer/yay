@@ -52,11 +52,14 @@ func TestVersionDiff(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			originalUseColor := text.UseColor
+			text.UseColor = true
 			left, right := GetVersionDiff(tc.a, tc.b)
 			gotDiff := left + " " + right
 			if gotDiff != tc.wantDiff {
 				t.Errorf("VersionDiff(%s, %s) = %s, want %s", tc.a, tc.b, gotDiff, tc.wantDiff)
 			}
+			text.UseColor = originalUseColor
 		})
 	}
 }
