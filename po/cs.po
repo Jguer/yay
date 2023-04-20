@@ -2,11 +2,13 @@
 # Translators:
 # Fjuro Fjuro, 2022
 # walken, 2023
+# Matej Borsky, 2023
+# Matyáš Černý, 2023
 # 
 msgid ""
 msgstr ""
-"Last-Translator: walken, 2023\n"
-"Language-Team: Czech (https://www.transifex.com/yay-1/teams/123732/cs/)\n"
+"Last-Translator: Matyáš Černý, 2023\n"
+"Language-Team: Czech (https://app.transifex.com/yay-1/teams/123732/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -14,11 +16,11 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 "X-Generator: xgotext\n"
 
-#: pkg/menus/menu.go:32
+#: pkg/menus/menu.go:31
 msgid " (Build Files Exist)"
 msgstr "(Soubory sestavení existují)"
 
-#: pkg/menus/menu.go:28
+#: pkg/menus/menu.go:26
 msgid " (Installed)"
 msgstr "(Nainstalováno)"
 
@@ -30,11 +32,11 @@ msgstr "(Cíl"
 msgid " (Wanted by: "
 msgstr "(Požaduje:"
 
-#: cmd.go:470
+#: cmd.go:472
 msgid " [Installed]"
 msgstr "[Nainstalováno]"
 
-#: cmd.go:425 install.go:159 install.go:193 vote.go:34
+#: cmd.go:425 install.go:172 install.go:206 vote.go:34
 msgid " there is nothing to do"
 msgstr "není co dělat"
 
@@ -44,47 +46,47 @@ msgstr ""
 "%s [A]Vše [Ab]Zrušit [I]Nainstalováno [No]Nenainstalováno nebo (1 2 3, 1-3, "
 "^4)"
 
-#: install.go:751
+#: aur_install.go:274 install.go:741
 msgid "%s already made -- skipping build"
 msgstr "%sjiž existuje -- přeskakuji sestavení"
 
-#: pkg/menus/edit_menu.go:57
+#: pkg/menus/edit_menu.go:58
 msgid "%s is not set"
 msgstr "%s není nastaven"
 
-#: pkg/settings/exe/cmd_builder.go:198
+#: pkg/settings/exe/cmd_builder.go:238
 msgid "%s is present."
 msgstr "%s je přítomný"
 
-#: install.go:737
+#: pkg/dep/dep_graph.go:385 aur_install.go:271 install.go:727
 msgid "%s is up to date -- skipping"
 msgstr "%s je aktualizován -- přeskakuji"
 
-#: install.go:654
+#: install.go:642
 msgid "%s not satisfied, flushing install queue"
 msgstr "%s není uspokojen, vymazávání fronty instalací"
 
-#: pkg/pgp/keys.go:129
+#: pkg/pgp/keys.go:127
 msgid "%s, required by: %s"
 msgstr "%s, vyžadován balíčkem %s"
 
-#: pkg/menus/diff_menu.go:51
+#: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
 msgstr "%s: Žádné změny -- přeskakuji"
 
-#: pkg/query/filter.go:52
+#: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
 msgstr "%s: nelze použít cíl s možností --aur -- přeskakuji"
 
-#: pkg/query/filter.go:47
+#: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
 msgstr "%s: nelze použít cíl s možností --repo -- přeskakuji"
 
-#: pkg/upgrade/sources.go:85
+#: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: ignoruji aktualizaci balíčku (%s => %s)"
 
-#: upgrade.go:149
+#: upgrade.go:165
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr "%s: místní (%s) je novější než AUR (%s) "
 
@@ -93,60 +95,61 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
+"prosím nastavte proměnné prostředí AUR_USERNAME a AUR_PASSWORD pro hodnocení"
 
-#: pkg/download/unified.go:187
+#: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr "(%d/%d) Stažen PKGBUILD z ABS: %s"
 
-#: pkg/download/aur.go:83 pkg/download/unified.go:183
+#: pkg/download/aur.go:84 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) Stažen PKGBUILD: %s"
 
-#: install.go:543
+#: pkg/srcinfo/service.go:108
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Parsování SRCINFO: %s"
 
-#: pkg/query/types.go:145 pkg/query/types.go:199
+#: pkg/query/types.go:70 pkg/query/types.go:101
 msgid "(Installed)"
 msgstr "(Nainstalováno)"
 
-#: pkg/query/types.go:143 pkg/query/types.go:197
+#: pkg/query/types.go:68 pkg/query/types.go:99
 msgid "(Installed: %s)"
 msgstr "(Nainstalováno: %s)"
 
-#: pkg/query/types.go:134
+#: pkg/query/types.go:59
 msgid "(Orphaned)"
 msgstr "(Osamocené)"
 
-#: pkg/query/types.go:138
+#: pkg/query/types.go:63
 msgid "(Out-of-date: %s)"
 msgstr "(Zastaralé: %s)"
 
-#: print.go:28
+#: print.go:31
 msgid "AUR URL"
 msgstr "URL AUR"
 
-#: pkg/dep/depGraph.go:71
+#: pkg/dep/dep_graph.go:74
 msgid "AUR"
 msgstr "AUR"
 
-#: pkg/menus/edit_menu.go:58
+#: pkg/menus/edit_menu.go:59
 msgid "Add %s or %s to your environment variables"
 msgstr "Přidejte %s nebo %s do svých proměnných prostředí "
 
-#: main.go:54
+#: main.go:60
 msgid "Avoid running yay as root/sudo."
 msgstr "Vyhněte se spuštění yay jako root/sudo."
 
-#: pkg/dep/depGraph.go:59
+#: pkg/dep/dep_graph.go:62
 msgid "Check Dependency"
-msgstr ""
+msgstr "Zkontrolovat závislost"
 
-#: print.go:34
+#: print.go:37
 msgid "Check Deps"
 msgstr "Zkontrolovat závislosti"
 
-#: upgrade.go:98
+#: pkg/upgrade/service.go:78 upgrade.go:95
 msgid "Checking development packages..."
 msgstr "Kontrola vývojových balíčků..."
 
@@ -158,7 +161,7 @@ msgstr "Kontrola konfliktů..."
 msgid "Checking for inner conflicts..."
 msgstr "Kontrola vnitřních konfliktů..."
 
-#: clean.go:201
+#: clean.go:214
 msgid "Cleaning (%d/%d): %s"
 msgstr "Čištění (%d/%d): %s"
 
@@ -166,51 +169,47 @@ msgstr "Čištění (%d/%d): %s"
 msgid "Conflicting packages will have to be confirmed manually"
 msgstr "Konfliktní balíčky budou muset být ručně potvrzeny"
 
-#: print.go:36
+#: print.go:39
 msgid "Conflicts With"
 msgstr "Konflikt s"
 
-#: pkg/dep/depCheck.go:303
-msgid "Could not find all required packages:"
-msgstr "Nepodařilo se nalézt požadované balíčky:"
-
-#: pkg/menus/clean_menu.go:52
+#: pkg/menus/clean_menu.go:61 pkg/menus/clean_menu.go:108
 msgid "Deleting (%d/%d): %s"
 msgstr "Mazání (%d/%d): %s"
 
-#: pkg/dep/depGraph.go:57
+#: pkg/dep/dep_graph.go:60
 msgid "Dependency"
 msgstr "Závislost"
 
-#: print.go:32
+#: print.go:35
 msgid "Depends On"
 msgstr "Závisí na"
 
-#: print.go:26
+#: print.go:29
 msgid "Description"
 msgstr "Popis"
 
-#: pkg/menus/diff_menu.go:159
+#: pkg/menus/diff_menu.go:161 pkg/menus/diff_menu.go:194
 msgid "Diffs to show?"
 msgstr "Zobrazit rozdíly?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr ""
+msgstr "Zákaz nastavení 'provides' jako výchozí"
 
-#: clean.go:72
+#: clean.go:79
 msgid "Do you want to remove ALL AUR packages from cache?"
 msgstr "Chcete odstranit VŠECHNY balíčky AUR z mezipaměti?"
 
-#: clean.go:89
+#: clean.go:96
 msgid "Do you want to remove ALL untracked AUR files?"
 msgstr "Chcete odstranit VŠECHNY nesledované soubory AUR?"
 
-#: clean.go:74
+#: clean.go:81
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "Chcete odstranit všechny ostatní balíčky AUR z mezipaměti?"
 
-#: pkg/menus/edit_menu.go:61
+#: pkg/menus/edit_menu.go:62
 msgid "Edit PKGBUILD with?"
 msgstr "Upravit PKGBUILD pomocí?"
 
@@ -218,15 +217,33 @@ msgstr "Upravit PKGBUILD pomocí?"
 msgid "Error during AUR search: %s\n"
 msgstr "Chyby při hledání v AUR: %s\n"
 
-#: pkg/dep/depGraph.go:56
-msgid "Explicit"
+#: pkg/upgrade/service.go:256
+msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
+"Vyjímání balíčků může způsobovat částečné aktualizace a rozbíjet systémy."
 
-#: print.go:85
+#: pkg/dep/dep_graph.go:59
+msgid "Explicit"
+msgstr "Explicitní"
+
+#: print.go:84
 msgid "Explicitly installed packages: %s"
 msgstr "Explicitně nainstalované balíčky: %s"
 
-#: print.go:40
+#: pkg/dep/dep_graph.go:365 pkg/dep/dep_graph.go:454
+msgid "Failed to find AUR package for"
+msgstr "Chyba hledání balíčku AUR:"
+
+#: aur_install.go:104
+msgid "Failed to install layer, rolling up to next layer."
+msgstr "Chyba instalace vrstvy, zabaluji k další vrstvě."
+
+#: errors.go:55
+msgid ""
+"Failed to install the following packages. Manual intervention is required:"
+msgstr "Selhala instalace těchto balíčků. Ruční zásah je vyžadován."
+
+#: print.go:43
 msgid "First Submitted"
 msgstr "První odeslané"
 
@@ -234,11 +251,11 @@ msgstr "První odeslané"
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Označené zastaralé balíčky AUR:"
 
-#: print.go:84
+#: print.go:83
 msgid "Foreign installed packages: %s"
 msgstr "Neznámé nainstalované balíčky: %s"
 
-#: pkg/vcs/vcs.go:121
+#: pkg/vcs/vcs.go:142
 msgid "Found git repo: %s"
 msgstr "Nalezen repozitář git: %s"
 
@@ -246,15 +263,15 @@ msgstr "Nalezen repozitář git: %s"
 msgid "GenDB finished. No packages were installed"
 msgstr "GenDB dokončena. Nebyly nainstalovány žádné balíčky"
 
-#: print.go:29
+#: print.go:32
 msgid "Groups"
 msgstr "Skupiny"
 
-#: pkg/pgp/keys.go:89
+#: pkg/pgp/keys.go:91
 msgid "Import?"
 msgstr "Importovat?"
 
-#: pkg/pgp/keys.go:102
+#: pkg/pgp/keys.go:100
 msgid "Importing keys with gpg..."
 msgstr "Importování klíčů pomocí gpg..."
 
@@ -266,31 +283,31 @@ msgstr "Nalezeny vnitřní konflikty:"
 msgid "Installing %s will remove:"
 msgstr "Instalací %s odstraníte:"
 
-#: print.go:24
+#: print.go:27
 msgid "Keywords"
 msgstr "Klíčová slova"
 
-#: print.go:41
+#: print.go:44
 msgid "Last Modified"
 msgstr "Naposledy upraveno"
 
-#: print.go:30
+#: print.go:33
 msgid "Licenses"
 msgstr "Licence"
 
-#: pkg/dep/depGraph.go:73
+#: pkg/dep/dep_graph.go:76
 msgid "Local"
-msgstr ""
+msgstr "Místní"
 
-#: print.go:37
+#: print.go:40
 msgid "Maintainer"
 msgstr "Správce"
 
-#: pkg/dep/depGraph.go:58
+#: pkg/dep/dep_graph.go:61
 msgid "Make Dependency"
-msgstr ""
+msgstr "Závislosti pro sestavení"
 
-#: print.go:33
+#: print.go:36
 msgid "Make Deps"
 msgstr "Vytvořit závislosti"
 
@@ -298,51 +315,55 @@ msgstr "Vytvořit závislosti"
 msgid "Missing AUR Debug Packages:"
 msgstr "Chybějící ladicí balíčky AUR:"
 
-#: pkg/query/aur_warnings.go:28
-msgid "Missing AUR Packages:"
-msgstr "Chybějící balíčky AUR:"
-
-#: pkg/dep/depGraph.go:75
+#: pkg/dep/dep_graph.go:78
 msgid "Missing"
-msgstr ""
+msgstr "Chybějící"
 
-#: print.go:23
+#: print.go:26
 msgid "Name"
 msgstr "Název"
 
-#: pkg/text/print.go:124
+#: pkg/dep/dep_graph.go:370 pkg/dep/dep_graph.go:467
+msgid "No AUR package found for"
+msgstr "AUR balíček nenalezen pro"
+
+#: pkg/text/print.go:117
 msgid "None"
 msgstr "Žádné"
 
-#: print.go:35
+#: print.go:38
 msgid "Optional Deps"
 msgstr "Volitelné závislosti"
 
 #: pkg/query/aur_warnings.go:38
-msgid "Orphaned AUR Packages:"
-msgstr "Osamocené balíčky AUR:"
+msgid "Orphan (unmaintained) AUR Packages:"
+msgstr "Osamocené (neudržované) balíčky AUR:"
 
-#: print.go:44 print.go:46
+#: print.go:47 print.go:49
 msgid "Out-of-date"
 msgstr "Zastaralé"
 
-#: pkg/pgp/keys.go:120
+#: pkg/pgp/keys.go:118
 msgid "PGP keys need importing:"
 msgstr "Je třeba importovat klíče PGP:"
 
-#: install.go:254 vcs.go:50
+#: install.go:265 vcs.go:46
 msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
 msgstr "PKGBUILD je aktuální, přeskakuji (%d/%d): %s"
 
-#: pkg/menus/edit_menu.go:125
+#: preparer.go:226
+msgid "PKGBUILD up to date, skipping download: %s"
+msgstr "PKGBUILD je aktuální, přeskakuji: %s"
+
+#: pkg/menus/edit_menu.go:132 pkg/menus/edit_menu.go:164
 msgid "PKGBUILDs to edit?"
 msgstr "PKGBUILDy k upravení?"
 
-#: print.go:51
+#: print.go:54
 msgid "Package Base ID"
 msgstr "Základní ID aplikace"
 
-#: print.go:52
+#: print.go:55
 msgid "Package Base"
 msgstr "Základ aplikace"
 
@@ -350,135 +371,152 @@ msgstr "Základ aplikace"
 msgid "Package conflicts found:"
 msgstr "Nalezeny konflikty balíčků:"
 
-#: pkg/menus/clean_menu.go:44
+#: pkg/query/aur_warnings.go:28
+msgid "Packages not in AUR:"
+msgstr "Balíčky mimo AUR:"
+
+#: pkg/menus/clean_menu.go:53 pkg/menus/clean_menu.go:100
 msgid "Packages to cleanBuild?"
 msgstr "Balíčky ke cleanBuild?"
 
-#: upgrade.go:197 upgrade.go:294
+#: pkg/dep/dep_graph.go:215 upgrade.go:213
+msgid "Packages to exclude"
+msgstr "Balíčky k vyjmutí."
+
+#: pkg/upgrade/service.go:255
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "Balíčky k vyloučení: (např.: \"1 2 3\", \"1-3\", \"^4\" nebo název repozitáře)"
 
-#: cmd.go:407
+#: cmd.go:406
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Balíčky k instalaci (např.: 1 2 3, 1-3 nebo ^4)"
 
-#: upgrade.go:194 upgrade.go:291
+#: upgrade.go:210
 msgid "Packages to upgrade."
 msgstr "Balíčky k aktualizaci"
 
-#: print.go:39
+#: pkg/upgrade/service.go:252
+msgid "Packages to upgrade/install."
+msgstr "Balíčky k aktualizaci/instalaci."
+
+#: print.go:42
 msgid "Popularity"
 msgstr "Popularita"
 
-#: pkg/menus/diff_menu.go:171 pkg/menus/edit_menu.go:136
+#: pkg/menus/diff_menu.go:173 pkg/menus/diff_menu.go:206
+#: pkg/menus/edit_menu.go:143 pkg/menus/edit_menu.go:177
 msgid "Proceed with install?"
 msgstr "Pokračovat v instalaci?"
 
-#: print.go:31
+#: print.go:34
 msgid "Provides"
 msgstr "Poskytuje"
 
-#: pkg/query/aur_info.go:90
+#: pkg/query/aur_info.go:89
 msgid "Querying AUR..."
 msgstr "Prohledávání AUR..."
 
-#: install.go:225 preparer.go:59
+#: install.go:236 preparer.go:108
 msgid "Remove make dependencies after install?"
 msgstr "Odstranit vytvořené závislosti po instalaci?"
 
-#: pkg/dep/depGraph.go:394 pkg/dep/depPool.go:512
+#: pkg/dep/depPool.go:503 pkg/dep/dep_graph.go:631
 msgid "Repository AUR"
 msgstr "Repozitář AUR"
 
-#: print.go:22 pkg/db/ialpm/alpm.go:175
+#: pkg/db/ialpm/alpm.go:191 print.go:25
 msgid "Repository"
 msgstr "Repozitář"
 
-#: pkg/dep/depGraph.go:74
+#: pkg/dep/dep_graph.go:77
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: upgrade.go:73
+#: pkg/upgrade/service.go:63 upgrade.go:73
 msgid "Searching AUR for updates..."
 msgstr "Prohledávání AUR pro aktualizace..."
 
-#: upgrade.go:62
+#: pkg/upgrade/service.go:142 upgrade.go:62
 msgid "Searching databases for updates..."
 msgstr "Prohledávání databází k aktualizaci..."
 
-#: pkg/query/mixed_sources.go:204 pkg/query/source.go:95
+#: pkg/query/query_builder.go:191
 msgid "Showing repo packages only"
 msgstr "Zobrazování pouze balíčků repozitáře"
 
-#: print.go:89
+#: print.go:88
 msgid "Size of pacman cache %s: %s"
 msgstr "Velikost mezipaměti pacman %s: %s"
 
-#: print.go:92
+#: print.go:91
 msgid "Size of yay cache %s: %s"
 msgstr "Velikost mezipaměti yay %s: %s"
 
-#: print.go:53
+#: print.go:56
 msgid "Snapshot URL"
 msgstr "URL snapshotu"
 
-#: pkg/dep/depGraph.go:72
+#: pkg/dep/dep_graph.go:75
 msgid "Sync"
-msgstr ""
+msgstr "Synchronizace"
 
-#: print.go:94
+#: print.go:93
 msgid "Ten biggest packages:"
 msgstr "Deset největších balíčků"
 
-#: install.go:487
+#: install.go:495 sync.go:183
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Následující balíčky nejsou kompatibilní s vaší architekturou:"
 
-#: pkg/db/ialpm/alpm.go:163 pkg/dep/depGraph.go:390 pkg/dep/depPool.go:508
+#: pkg/db/ialpm/alpm.go:179 pkg/dep/depPool.go:499 pkg/dep/dep_graph.go:627
 msgid "There are %d providers available for %s:"
 msgstr "Pro %s je dostupných %d poskytovatelů:"
 
-#: pkg/settings/exe/cmd_builder.go:199
+#: pkg/settings/exe/cmd_builder.go:239
 msgid "There may be another Pacman instance running. Waiting..."
 msgstr "Možná běží další instance Pacman. Čekání..."
 
-#: print.go:86
+#: print.go:85
 msgid "Total Size occupied by packages: %s"
 msgstr "Celková velikost zabraná balíčky: %s"
 
-#: print.go:83
+#: print.go:82
 msgid "Total installed packages: %s"
 msgstr "Celkem nainstalovaných balíčků: %s"
 
-#: install.go:495
+#: install.go:503 sync.go:191
 msgid "Try to build them anyway?"
 msgstr "Pokusit se je přesto sestavit?"
 
-#: print.go:27
+#: print.go:30
 msgid "URL"
 msgstr "URL"
 
-#: clean.go:182
+#: clean.go:192 pkg/menus/clean_menu.go:64 pkg/menus/clean_menu.go:70
 msgid "Unable to clean:"
 msgstr "Nepodařilo se vyčistit:"
 
-#: get.go:42 get.go:73
+#: get.go:44 get.go:76
 msgid "Unable to find the following packages:"
 msgstr "Nepodařilo se nalézt následující balíčky:"
 
 #: vote.go:21
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr ""
+msgstr "Nelze hlasovat pro balíček: %s. chyba: %s"
 
-#: print.go:25
+#: clean.go:169
+msgid "Unable to remove %s: %s"
+msgstr "Nelze odebrat %s:%s"
+
+#: print.go:28
 msgid "Version"
 msgstr "Verze"
 
-#: print.go:38
+#: print.go:41
 msgid "Votes"
 msgstr "Hlasy"
 
-#: print.go:81
+#: print.go:80
 msgid "Yay version v%s"
 msgstr "Verze yay v%s"
 
@@ -486,7 +524,7 @@ msgstr "Verze yay v%s"
 msgid "[N]one"
 msgstr "[N]Žádné"
 
-#: clean.go:77
+#: clean.go:84
 msgid ""
 "\n"
 "Build directory:"
@@ -494,7 +532,7 @@ msgstr ""
 "\n"
 "Adresář sestavení:"
 
-#: pkg/db/ialpm/alpm.go:185 pkg/dep/depGraph.go:404 pkg/dep/depPool.go:522
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/depPool.go:513 pkg/dep/dep_graph.go:641
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -506,23 +544,47 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "rušení kvůli uživateli"
 
-#: install.go:522
+#: pkg/settings/parser/parser.go:620
+msgid "argument '-' specified without input on stdin"
+msgstr "argument '-' použit bez vstupu na stdin"
+
+#: local_install.go:27
+msgid "cannot find PKGBUILD and .SRCINFO in directory"
+msgstr "PKGBUILD a .SRCINFO nebyly nalezeny ve složce"
+
+#: install.go:532
 msgid "cannot find package name: %v"
 msgstr "nepodařilo se nalézt název balíčku: %v"
 
-#: errors.go:33 install.go:710 install.go:877
+#: errors.go:47
 msgid "could not find PKGDEST for: %s"
 msgstr "nepodařilo se nalézt PKGDEST pro: %s"
 
-#: errors.go:12
+#: errors.go:9
+msgid "could not find all required packages"
+msgstr "Nepodařilo se nalézt všechny požadované balíčky"
+
+#: pkg/dep/depCheck.go:303
+msgid "could not find all required packages:"
+msgstr "Nepodařilo se nalézt všechny požadované balíčky:"
+
+#: errors.go:16
+msgid "could not find any package archives listed in %s"
+msgstr "nenalezeny žádné archivy balíčků v %s"
+
+#: install.go:788
+msgid "could not find srcinfo for: %s"
+msgstr "nepodařilo se nalézt srcinfo pro: %s"
+
+#: errors.go:26
 msgid "dependency"
 msgstr "závislost"
 
-#: pkg/vcs/vcs.go:70
+#: pkg/vcs/vcs.go:94 pkg/vcs/vcs.go:98
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "kontrola devel balíčku selhala: '%s' narazil na chybu"
 
-#: pkg/menus/edit_menu.go:109
+#: pkg/menus/edit_menu.go:111
 msgid "editor did not exit successfully, aborting: %s"
 msgstr "editor nebyl úspěšně ukončen, rušení: %s"
 
@@ -534,76 +596,80 @@ msgstr "chyba při stahování zdrojů: %s"
 msgid "error fetching %s: %s"
 msgstr "chyba při načítání %s: %s"
 
-#: install.go:311 install.go:445 local_install.go:22
+#: install.go:321 install.go:455 local_install.go:26
 msgid "error installing repo packages"
 msgstr "chyba při instalaci balíčků repozitáře"
 
-#: aur_install.go:175 aur_install.go:179
+#: aur_install.go:236 aur_install.go:240
 msgid "error installing:"
 msgstr "chyba při instalaci:"
 
-#: aur_install.go:136 aur_install.go:153 install.go:693 install.go:734
-#: install.go:748 install.go:762
+#: aur_install.go:204 aur_install.go:208 install.go:683 install.go:724
+#: install.go:738 install.go:752
 msgid "error making: %s"
 msgstr "chyba při vytváření: %s"
 
-#: install.go:599
+#: install.go:588
 msgid "error merging %s: %s"
 msgstr "chyba při slučování %s: %s"
 
-#: pkg/download/unified.go:56
+#: pkg/download/unified.go:59
 msgid "error reading %s"
 msgstr "chyba při čtení %s"
 
-#: install.go:96 sync.go:27
+#: install.go:110 sync.go:37
 msgid "error refreshing databases"
 msgstr "chyba při obnovování databází"
 
-#: clean.go:207 install.go:592
+#: clean.go:220 install.go:581
 msgid "error resetting %s: %s"
 msgstr "chyba při resetování %s: %s"
 
-#: errors.go:15
+#: errors.go:29
 msgid "error updating package install reason to %s"
-msgstr ""
+msgstr "chyba při aktualizaci důvodu instalace balíčku na"
 
-#: errors.go:10
+#: errors.go:24
 msgid "explicit"
-msgstr ""
+msgstr "explicitní"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
 msgstr "nepodařilo se vytvořit adresář '%s': %s"
 
-#: pkg/settings/config.go:330
+#: pkg/settings/config.go:286
 msgid "failed to open config file '%s': %s"
 msgstr "nepodařilo se otevřít konfigurační soubor '%s': %s"
 
-#: install.go:548
+#: pkg/srcinfo/service.go:113
 msgid "failed to parse %s -- skipping: %s"
 msgstr "nepodařilo se parsovat %s -- přeskakuji: %s"
 
-#: install.go:552
+#: pkg/srcinfo/service.go:117
 msgid "failed to parse %s: %s"
 msgstr "nepodařilo se parsovat %s: %s"
 
-#: local_install.go:43
+#: local_install.go:82
 msgid "failed to parse .SRCINFO"
 msgstr "nepodařilo se parsovat .SRCINFO"
 
-#: pkg/settings/config.go:340
+#: pkg/settings/config.go:296
 msgid "failed to read config file '%s': %s"
 msgstr "nepodařilo se přečíst konfigurační soubor '%s': %s"
 
-#: pkg/cmd/graph/main.go:45 pkg/settings/config.go:306
+#: pkg/settings/runtime.go:74
 msgid "failed to retrieve aur Cache"
 msgstr "nepodařilo se získat aur Cache"
+
+#: pkg/upgrade/sources.go:30
+msgid "ignoring package devel upgrade (no AUR info found):"
+msgstr "ignoruji vývojovou aktualizaci balíčku (AUR informace nenalezeny)"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
 msgstr "vstup příliš dlouhý"
 
-#: pkg/db/ialpm/alpm.go:206 pkg/dep/depGraph.go:425 pkg/dep/depPool.go:542
+#: pkg/db/ialpm/alpm.go:222 pkg/dep/depPool.go:533 pkg/dep/dep_graph.go:662
 msgid "invalid number: %s"
 msgstr "neplatné číslo: %s"
 
@@ -611,7 +677,7 @@ msgstr "neplatné číslo: %s"
 msgid "invalid option '%s'"
 msgstr "neplatná možnost '%s'"
 
-#: cmd.go:206
+#: cmd.go:208
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "neplatná možnost: '--deps' a '--explicit' nemohou být použity současně"
@@ -620,11 +686,11 @@ msgstr ""
 msgid "invalid repository"
 msgstr "neplatný repozitář"
 
-#: pkg/db/ialpm/alpm.go:211 pkg/dep/depGraph.go:431 pkg/dep/depPool.go:547
+#: pkg/db/ialpm/alpm.go:227 pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:668
 msgid "invalid value: %d is not between %d and %d"
 msgstr "neplatná hodnota: %d není mezi %d a %d"
 
-#: pkg/pgp/keys.go:115
+#: pkg/pgp/keys.go:113
 msgid "no keys to import"
 msgstr "žádné klíče k importování"
 
@@ -632,7 +698,7 @@ msgstr "žádné klíče k importování"
 msgid "no query was executed"
 msgstr "nebyl vykonán žádný dotaz"
 
-#: local_install.go:33
+#: local_install.go:68
 msgid "no target directories specified"
 msgstr "nebyly specifikovány cílové adresáře"
 
@@ -640,15 +706,15 @@ msgstr "nebyly specifikovány cílové adresáře"
 msgid "no"
 msgstr "ne"
 
+#: aur_install.go:213
+msgid "nothing to install for %s"
+msgstr "nic k nainstalování pro %s"
+
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
 msgstr "naráz může být použita pouze jedna operace"
 
-#: pkg/cmd/graph/main.go:66
-msgid "only one target is allowed"
-msgstr ""
-
-#: print.go:186
+#: print.go:158
 msgid "package '%s' was not found"
 msgstr "balíček '%s' nebyl nalezen"
 
@@ -664,31 +730,35 @@ msgstr "balíček nenalezen v AUR"
 msgid "package not found in repos"
 msgstr "balíček nenalezen v repozitářích"
 
-#: pkg/pgp/keys.go:105
+#: pkg/pgp/keys.go:103
 msgid "problem importing keys"
 msgstr "problém při importování klíčů"
 
-#: clean.go:97
+#: clean.go:106
 msgid "removing AUR packages from cache..."
 msgstr "odstraňování balíčků AUR z mezipaměti..."
 
-#: clean.go:167 clean.go:198
+#: clean.go:177 clean.go:210
 msgid "removing untracked AUR files from cache..."
 msgstr "odstraňování nesledovaných souborů AUR z mezipaměti..."
 
-#: errors.go:23 install.go:886
+#: errors.go:37
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "PKGDEST pro %s je v seznamu makepkg ale neexistuje: %s"
 
-#: pkg/db/ialpm/alpm.go:231
+#: sync.go:110
+msgid "there is nothing to do"
+msgstr "není co dělat"
+
+#: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
 msgstr "nepodařilo se CreateHandle: %s"
 
-#: cmd.go:195
+#: cmd.go:197
 msgid "unhandled operation"
 msgstr "neznámá operace"
 
-#: cmd.go:467
+#: cmd.go:469
 msgid "unknown-version"
 msgstr "neznámá-verze"
 
