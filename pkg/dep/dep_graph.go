@@ -319,14 +319,18 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 		graph = topo.New[string, *InstallInfo]()
 	}
 
+	exists := graph.Exists(pkg.Name)
+
 	graph.AddNode(pkg.Name)
 	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
-		Color:      colorMap[Explicit],
+		Color:      colorMap[instalInfo.Reason],
 		Background: bgColorMap[AUR],
 		Value:      instalInfo,
 	})
 
-	g.addDepNodes(ctx, pkg, graph)
+	if !exists {
+		g.addDepNodes(ctx, pkg, graph)
+	}
 
 	return graph
 }
@@ -488,8 +492,12 @@ func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo]
 ) {
 	info := graph.GetNodeInfo(node)
 	if info != nil && info.Value != nil {
-		if info.Value.Reason <= nodeInfo.Value.Reason {
+		if info.Value.Reason < nodeInfo.Value.Reason {
 			return // refuse to downgrade reason
+		}
+
+		if info.Value.Upgrade {
+			return // refuse to overwrite an upgrade
 		}
 	}
 
