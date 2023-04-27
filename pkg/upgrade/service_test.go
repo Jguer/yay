@@ -58,7 +58,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		SyncDBName:   ptrString("core"),
 		Version:      "3.0.1-2",
 		LocalVersion: "",
-		Upgrade:      false,
+		Upgrade:      true,
 		Devel:        false,
 	}
 
@@ -595,4 +595,193 @@ func TestUpgradeService_Warnings(t *testing.T) {
 	assert.Equal(t, []string{"missing"}, u.AURWarnings.Missing)
 	assert.Equal(t, []string{"outdated"}, u.AURWarnings.OutOfDate)
 	assert.Equal(t, []string{"orphan"}, u.AURWarnings.Orphans)
+}
+
+func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
+	t.Parallel()
+	zfsDKMSInfo := &dep.InstallInfo{
+		Reason:       dep.Explicit,
+		Source:       dep.AUR,
+		AURBase:      ptrString("zfs-dkms"),
+		LocalVersion: "2.1.10-1",
+		Version:      "2.1.11-1",
+		Upgrade:      true,
+		Devel:        false,
+	}
+
+	zfsUtilsInfo := &dep.InstallInfo{
+		Reason:       dep.Dep,
+		Source:       dep.AUR,
+		AURBase:      ptrString("zfs-utils"),
+		LocalVersion: "2.1.10-1",
+		Version:      "2.1.11-1",
+		Upgrade:      true,
+		Devel:        false,
+	}
+
+	vcsStore := &vcs.Mock{ToUpgradeReturn: []string{}}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			if len(query.Needles) == 2 {
+				return []aur.Pkg{
+					{
+						Name: "zfs-dkms", Version: "2.1.11-1",
+						PackageBase: "zfs-dkms", Depends: []string{"zfs-utils=2.1.11"},
+					},
+					{Name: "zfs-utils", Version: "2.1.11-1", PackageBase: "zfs-utils"},
+				}, nil
+			}
+			if len(query.Needles) == 1 {
+				return []aur.Pkg{
+					{Name: "zfs-utils", Version: "2.1.11-1", PackageBase: "zfs-utils"},
+				}, nil
+			}
+			panic("not implemented")
+		},
+	}
+	type fields struct {
+		input     io.Reader
+		output    io.Writer
+		noConfirm bool
+		devel     bool
+	}
+	type args struct {
+		graph           *topo.Graph[string, *dep.InstallInfo]
+		enableDowngrade bool
+	}
+	tests := []struct {
+		name           string
+		fields         fields
+		args           args
+		mustExist      map[string]*dep.InstallInfo
+		mustNotExist   map[string]bool
+		wantExclude    []string
+		wantErr        bool
+		remotePackages []string
+	}{
+		{
+			name: "no input",
+			fields: fields{
+				input:     strings.NewReader("\n"),
+				output:    io.Discard,
+				noConfirm: false,
+			},
+			args: args{
+				graph:           nil,
+				enableDowngrade: false,
+			},
+			mustExist: map[string]*dep.InstallInfo{
+				"zfs-dkms":  zfsDKMSInfo,
+				"zfs-utils": zfsUtilsInfo,
+			},
+			remotePackages: []string{"zfs-utils", "zfs-dkms"},
+			mustNotExist:   map[string]bool{},
+			wantErr:        false,
+			wantExclude:    []string{},
+		},
+		{
+			name: "no input - inverted order",
+			fields: fields{
+				input:     strings.NewReader("\n"),
+				output:    io.Discard,
+				noConfirm: false,
+			},
+			args: args{
+				graph:           nil,
+				enableDowngrade: false,
+			},
+			mustExist: map[string]*dep.InstallInfo{
+				"zfs-dkms":  zfsDKMSInfo,
+				"zfs-utils": zfsUtilsInfo,
+			},
+			remotePackages: []string{"zfs-dkms", "zfs-utils"},
+			mustNotExist:   map[string]bool{},
+			wantErr:        false,
+			wantExclude:    []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			dbExe := &mock.DBExecutor{
+				InstalledRemotePackageNamesFn: func() []string {
+					return tt.remotePackages
+				},
+				InstalledRemotePackagesFn: func() map[string]mock.IPackage {
+					mapRemote := make(map[string]mock.IPackage)
+					mapRemote["zfs-dkms"] = &mock.Package{
+						PName:    "zfs-dkms",
+						PBase:    "zfs-dkms",
+						PVersion: "2.1.10-1",
+						PReason:  alpm.PkgReasonExplicit,
+						PDepends: mock.DependList{Depends: []alpm.Depend{
+							{Name: "zfs-utils", Version: "2.1.10-1"},
+						}},
+					}
+
+					mapRemote["zfs-utils"] = &mock.Package{
+						PName:    "zfs-utils",
+						PBase:    "zfs-utils",
+						PVersion: "2.1.10-1",
+						PReason:  alpm.PkgReasonDepend,
+					}
+
+					return mapRemote
+				},
+				LocalSatisfierExistsFn: func(string) bool { return false },
+				SyncSatisfierFn: func(s string) mock.IPackage {
+					return nil
+				},
+				SyncUpgradesFn: func(bool) (map[string]db.SyncUpgrade, error) {
+					mapUpgrades := make(map[string]db.SyncUpgrade)
+					return mapUpgrades, nil
+				},
+				ReposFn: func() []string { return []string{"core"} },
+			}
+
+			grapher := dep.NewGrapher(dbExe, mockAUR,
+				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
+					tt.fields.input, true, "test"))
+
+			cfg := &settings.Configuration{
+				Devel: tt.fields.devel, Mode: parser.ModeAny,
+			}
+
+			logger := text.NewLogger(tt.fields.output, os.Stderr,
+				tt.fields.input, true, "test")
+			u := &UpgradeService{
+				log:         logger,
+				grapher:     grapher,
+				aurCache:    mockAUR,
+				dbExecutor:  dbExe,
+				vcsStore:    vcsStore,
+				cfg:         cfg,
+				noConfirm:   tt.fields.noConfirm,
+				AURWarnings: query.NewWarnings(logger),
+			}
+
+			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			excluded, err := u.UserExcludeUpgrades(got)
+			require.NoError(t, err)
+
+			for node, info := range tt.mustExist {
+				assert.True(t, got.Exists(node), node)
+				assert.Equal(t, info, got.GetNodeInfo(node).Value)
+			}
+
+			for node := range tt.mustNotExist {
+				assert.False(t, got.Exists(node), node)
+			}
+
+			assert.ElementsMatch(t, tt.wantExclude, excluded)
+		})
+	}
 }
