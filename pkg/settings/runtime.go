@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -68,6 +69,7 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 		metadata.WithCacheFilePath(filepath.Join(cfg.BuildDir, "aur.json")),
 		metadata.WithRequestEditorFn(userAgentFn),
 		metadata.WithBaseURL(cfg.AURURL),
+		metadata.WithCustomCacheValidity(100000*time.Hour),
 		metadata.WithDebugLogger(logger.Debugln),
 	)
 	if errAURCache != nil {

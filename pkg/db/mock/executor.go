@@ -30,6 +30,7 @@ type DBExecutor struct {
 	RefreshHandleFn               func() error
 	ReposFn                       func() []string
 	SyncPackageFn                 func(string) IPackage
+	SyncPackagesFn                func(...string) []IPackage
 	SyncSatisfierFn               func(string) IPackage
 	SyncUpgradesFn                func(bool) (map[string]db.SyncUpgrade, error)
 }
@@ -170,6 +171,9 @@ func (t *DBExecutor) SyncPackage(s string) IPackage {
 }
 
 func (t *DBExecutor) SyncPackages(s ...string) []IPackage {
+	if t.SyncPackagesFn != nil {
+		return t.SyncPackagesFn(s...)
+	}
 	panic("implement me")
 }
 

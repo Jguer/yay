@@ -281,7 +281,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		{
 			name: "exclude linux",
 			fields: fields{
-				input:     strings.NewReader("4\n"),
+				input:     strings.NewReader("3\n"),
 				output:    io.Discard,
 				noConfirm: false,
 			},
@@ -301,7 +301,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		{
 			name: "only linux",
 			fields: fields{
-				input:     strings.NewReader("^4\n"),
+				input:     strings.NewReader("^3\n"),
 				output:    io.Discard,
 				noConfirm: false,
 			},
@@ -642,7 +642,6 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 	}
 	type fields struct {
 		input     io.Reader
-		output    io.Writer
 		noConfirm bool
 		devel     bool
 	}
@@ -664,7 +663,6 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 			name: "no input",
 			fields: fields{
 				input:     strings.NewReader("\n"),
-				output:    io.Discard,
 				noConfirm: false,
 			},
 			args: args{
@@ -684,7 +682,6 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 			name: "no input - inverted order",
 			fields: fields{
 				input:     strings.NewReader("\n"),
-				output:    io.Discard,
 				noConfirm: false,
 			},
 			args: args{
@@ -742,16 +739,15 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 				ReposFn: func() []string { return []string{"core"} },
 			}
 
+			logger := text.NewLogger(io.Discard, os.Stderr,
+				tt.fields.input, true, "test")
 			grapher := dep.NewGrapher(dbExe, mockAUR,
-				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
-					tt.fields.input, true, "test"))
+				false, true, false, false, false, logger)
 
 			cfg := &settings.Configuration{
 				Devel: tt.fields.devel, Mode: parser.ModeAny,
 			}
 
-			logger := text.NewLogger(tt.fields.output, os.Stderr,
-				tt.fields.input, true, "test")
 			u := &UpgradeService{
 				log:         logger,
 				grapher:     grapher,

@@ -22,8 +22,9 @@ func StylizedNameWithRepository(u *Upgrade) string {
 
 // upSlice is a slice of Upgrades.
 type UpSlice struct {
-	Up    []Upgrade
-	Repos []string
+	Up         []Upgrade
+	Repos      []string
+	PulledDeps []Upgrade
 }
 
 func (u UpSlice) Len() int      { return len(u.Up) }
@@ -83,4 +84,35 @@ func (u UpSlice) Print(logger *text.Logger) {
 			logger.Println(strings.Repeat(" ", longestNumber), upgrade.Extra)
 		}
 	}
+}
+
+func (u UpSlice) PrintDeps(logger *text.Logger) {
+	longestName, longestVersion := 0, 0
+
+	for k := range u.PulledDeps {
+		upgrade := &u.PulledDeps[k]
+		packNameLen := len(StylizedNameWithRepository(upgrade))
+		packVersion, _ := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
+		packVersionLen := len(packVersion)
+		longestName = intrange.Max(packNameLen, longestName)
+		longestVersion = intrange.Max(packVersionLen, longestVersion)
+	}
+
+	lenUp := len(u.PulledDeps)
+	longestNumber := len(fmt.Sprintf("%v", lenUp))
+	namePadding := fmt.Sprintf("  %s%%-%ds  ", strings.Repeat(" ", longestNumber), longestName)
+	versionPadding := fmt.Sprintf("%%-%ds", longestVersion)
+
+	for k := range u.PulledDeps {
+		upgrade := &u.PulledDeps[k]
+		left, right := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
+
+		logger.Printf(namePadding, StylizedNameWithRepository(upgrade))
+		logger.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
+		if upgrade.Extra != "" {
+			logger.Println(strings.Repeat(" ", longestNumber), strings.ToLower(upgrade.Extra))
+		}
+	}
+
+	logger.Println()
 }

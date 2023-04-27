@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	alpm "github.com/Jguer/go-alpm/v2"
@@ -403,9 +402,9 @@ func displayNumberMenu(ctx context.Context, cfg *settings.Configuration, pkgS []
 		return nil
 	}
 
-	text.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
+	cfg.Runtime.Logger.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
 
-	numberBuf, err := text.GetInput(os.Stdin, "", false)
+	numberBuf, err := cfg.Runtime.Logger.GetInput("", false)
 	if err != nil {
 		return err
 	}
