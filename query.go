@@ -54,6 +54,7 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 
 		info, err = cfg.Runtime.AURCache.Get(ctx, &aur.Query{
 			Needles: noDB,
+			By:      aur.Name,
 		})
 		if err != nil {
 			missing = true
