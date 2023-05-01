@@ -27,6 +27,7 @@ type InstallInfo struct {
 	AURBase      *string
 	SyncDBName   *string
 
+	IsGroup bool
 	Upgrade bool
 	Devel   bool
 }
@@ -161,6 +162,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 						Reason:     Explicit,
 						Version:    "",
 						SyncDBName: &dbName,
+						IsGroup:    true,
 					},
 				})
 
