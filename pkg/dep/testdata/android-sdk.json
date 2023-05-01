@@ -1,0 +1,3 @@
+[
+{"ID":1055234,"Name":"android-sdk","PackageBaseID":13751,"PackageBase":"android-sdk","Version":"26.1.1-2","Description":"Google Android SDK","URL":"https://developer.android.com/studio/releases/sdk-tools.html","NumVotes":1487,"Popularity":0.802316,"OutOfDate":null,"Maintainer":"dreamingincode","Submitter":null,"FirstSubmitted":1194895596,"LastModified":1647982720,"URLPath":"/cgit/aur.git/snapshot/android-sdk.tar.gz","Depends":["java-environment","libxtst","fontconfig","freetype2","lib32-gcc-libs","lib32-glibc","libx11","libxext","libxrender","zlib","gcc-libs"],"OptDepends":["android-emulator","android-sdk-platform-tools","android-udev"],"License":["custom"],"Keywords":["android","development"]}
+]

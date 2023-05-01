@@ -38,6 +38,7 @@ type Package struct {
 	PVersion      string
 	PReason       alpm.PkgReason
 	PDepends      alpm.IDependList
+	PProvides     alpm.IDependList
 }
 
 func (p *Package) Base() string {
@@ -172,7 +173,10 @@ func (p *Package) Packager() string {
 
 // Provides returns DependList of packages provides by package.
 func (p *Package) Provides() alpm.IDependList {
-	return alpm.DependList{}
+	if p.PProvides == nil {
+		return alpm.DependList{}
+	}
+	return p.PProvides
 }
 
 // Origin returns package origin.
