@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Jguer/go-alpm/v2"
+
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type (
-	NodeSet[T comparable] map[T]bool
-	DepMap[T comparable]  map[T]NodeSet[T]
+	NodeSet[T comparable]     map[T]bool
+	ProvidesMap[T comparable] map[T]*DependencyInfo[T]
+	DepMap[T comparable]      map[T]NodeSet[T]
 )
 
 func (n NodeSet[T]) Slice() []T {
@@ -28,6 +31,11 @@ type NodeInfo[V any] struct {
 	Value      V
 }
 
+type DependencyInfo[T comparable] struct {
+	Provider T
+	alpm.Depend
+}
+
 type CheckFn[T comparable, V any] func(T, V) error
 
 type Graph[T comparable, V any] struct {
@@ -35,6 +43,9 @@ type Graph[T comparable, V any] struct {
 
 	// node info map
 	nodeInfo map[T]*NodeInfo[V]
+
+	// `provides` tracks provides -> node.
+	provides ProvidesMap[T]
 
 	// `dependencies` tracks child -> parents.
 	dependencies DepMap[T]
@@ -48,6 +59,7 @@ func New[T comparable, V any]() *Graph[T, V] {
 		dependencies: make(DepMap[T]),
 		dependents:   make(DepMap[T]),
 		nodeInfo:     make(map[T]*NodeInfo[V]),
+		provides:     make(ProvidesMap[T]),
 	}
 }
 
@@ -63,6 +75,23 @@ func (g *Graph[T, V]) Exists(node T) bool {
 
 func (g *Graph[T, V]) AddNode(node T) {
 	g.nodes[node] = true
+}
+
+func (g *Graph[T, V]) ProvidesExists(provides T) bool {
+	_, ok := g.provides[provides]
+
+	return ok
+}
+
+func (g *Graph[T, V]) GetProviderNode(provides T) *DependencyInfo[T] {
+	return g.provides[provides]
+}
+
+func (g *Graph[T, V]) Provides(provides T, depInfo *alpm.Depend, node T) {
+	g.provides[provides] = &DependencyInfo[T]{
+		Provider: node,
+		Depend:   *depInfo,
+	}
 }
 
 func (g *Graph[T, V]) ForEach(f CheckFn[T, V]) error {

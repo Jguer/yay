@@ -138,17 +138,6 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		case "": // unspecified db
 			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
 				dbName := pkg.DB().Name()
-				graph.AddNode(pkg.Name())
-				g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
-					Color:      colorMap[Explicit],
-					Background: bgColorMap[Sync],
-					Value: &InstallInfo{
-						Source:     Sync,
-						Reason:     Explicit,
-						Version:    pkg.Version(),
-						SyncDBName: &dbName,
-					},
-				})
 
 				g.GraphSyncPkg(ctx, graph, pkg, &InstallInfo{
 					Source:     Sync,
@@ -302,6 +291,12 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	}
 
 	graph.AddNode(pkg.Name())
+	_ = pkg.Provides().ForEach(func(p *alpm.Depend) error {
+		g.logger.Debugln(pkg.Name() + " provides: " + p.String())
+		graph.Provides(p.Name, p, pkg.Name())
+		return nil
+	})
+
 	g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
 		Color:      colorMap[Explicit],
 		Background: bgColorMap[Sync],
@@ -322,6 +317,16 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 	exists := graph.Exists(pkg.Name)
 
 	graph.AddNode(pkg.Name)
+
+	for i := range pkg.Provides {
+		depName, mod, version := splitDep(pkg.Provides[i])
+		graph.Provides(depName, &alpm.Depend{
+			Name:    depName,
+			Version: version,
+			Mod:     aurDepModToAlpmDep(mod),
+		}, pkg.Name)
+	}
+
 	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 		Color:      colorMap[instalInfo.Reason],
 		Background: bgColorMap[AUR],
@@ -515,15 +520,27 @@ func (g *Grapher) addNodes(
 	// Check if in graph already
 	for _, depString := range targetsToFind.ToSlice() {
 		depName, _, _ := splitDep(depString)
-		if !graph.Exists(depName) {
+		if !graph.Exists(depName) && !graph.ProvidesExists(depName) {
 			continue
 		}
 
-		if err := graph.DependOn(depName, parentPkgName); err != nil {
-			g.logger.Warnln(depString, parentPkgName, err)
+		if graph.Exists(depName) {
+			if err := graph.DependOn(depName, parentPkgName); err != nil {
+				g.logger.Warnln(depString, parentPkgName, err)
+			}
+
+			targetsToFind.Remove(depString)
 		}
 
-		targetsToFind.Remove(depString)
+		if p := graph.GetProviderNode(depName); p != nil {
+			if provideSatisfies(p.String(), depString, p.Version) {
+				if err := graph.DependOn(p.Provider, parentPkgName); err != nil {
+					g.logger.Warnln(p.Provider, parentPkgName, err)
+				}
+
+				targetsToFind.Remove(depString)
+			}
+		}
 	}
 
 	// Check installed
@@ -744,4 +761,20 @@ func archStringToString(alpmArches []string, archString []gosrc.ArchString) []st
 	}
 
 	return pkgs
+}
+
+func aurDepModToAlpmDep(mod string) alpm.DepMod {
+	switch mod {
+	case "=":
+		return alpm.DepModEq
+	case ">=":
+		return alpm.DepModGE
+	case "<=":
+		return alpm.DepModLE
+	case ">":
+		return alpm.DepModGT
+	case "<":
+		return alpm.DepModLT
+	}
+	return alpm.DepModAny
 }
