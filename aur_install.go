@@ -136,7 +136,8 @@ func (installer *Installer) handleLayer(ctx context.Context,
 ) error {
 	// Install layer
 	nameToBaseMap := make(map[string]string, 0)
-	syncDeps, syncExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
+	syncDeps, syncExp, syncGroups := mapset.NewThreadUnsafeSet[string](),
+		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 	aurDeps, aurExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 
 	upgradeSync := false
@@ -162,6 +163,11 @@ func (installer *Installer) handleLayer(ctx context.Context,
 			}
 			compositePkgName := fmt.Sprintf("%s/%s", *info.SyncDBName, name)
 
+			if info.IsGroup {
+				syncGroups.Add(compositePkgName)
+				continue
+			}
+
 			switch info.Reason {
 			case dep.Explicit:
 				if cmdArgs.ExistsArg("asdeps", "asdep") {
@@ -178,7 +184,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	installer.log.Debugln("syncDeps", syncDeps, "SyncExp", syncExp,
 		"aurDeps", aurDeps, "aurExp", aurExp, "upgrade", upgradeSync)
 
-	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp,
+	errShow := installer.installSyncPackages(ctx, cmdArgs, syncDeps, syncExp, syncGroups,
 		excluded, upgradeSync, installer.appendNoConfirm())
 	if errShow != nil {
 		return ErrInstallRepoPkgs
@@ -372,11 +378,12 @@ func (installer *Installer) getNewTargets(pkgdests map[string]string, name strin
 func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *parser.Arguments,
 	syncDeps, // repo targets that are deps
 	syncExp mapset.Set[string], // repo targets that are exp
+	syncGroups mapset.Set[string], // repo targets that are groups
 	excluded []string,
 	upgrade bool, // run even without targets
 	noConfirm bool,
 ) error {
-	repoTargets := syncDeps.Union(syncExp).ToSlice()
+	repoTargets := syncDeps.Union(syncExp).Union(syncGroups).ToSlice()
 	if len(repoTargets) == 0 && !upgrade {
 		return nil
 	}

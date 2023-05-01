@@ -934,3 +934,104 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 		})
 	}
 }
+
+func TestInstaller_InstallGroup(t *testing.T) {
+	t.Parallel()
+
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	type testCase struct {
+		desc        string
+		wantShow    []string
+		wantCapture []string
+	}
+
+	testCases := []testCase{
+		{
+			desc: "group",
+			wantShow: []string{
+				"pacman -S --noconfirm --config  -- community/kubernetes-tools",
+			},
+			wantCapture: []string{},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.desc, func(td *testing.T) {
+			tmpDir := td.TempDir()
+
+			captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+				return "", "", nil
+			}
+
+			showOverride := func(cmd *exec.Cmd) error {
+				return nil
+			}
+
+			mockDB := &mock.DBExecutor{}
+			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+			cmdBuilder := &exe.CmdBuilder{
+				MakepkgBin:      makepkgBin,
+				SudoBin:         "su",
+				PacmanBin:       pacmanBin,
+				Runner:          mockRunner,
+				SudoLoopEnabled: false,
+			}
+
+			cmdBuilder.Runner = mockRunner
+
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, true, NewTestLogger())
+
+			cmdArgs := parser.MakeArguments()
+			cmdArgs.AddTarget("kubernetes-tools")
+
+			pkgBuildDirs := map[string]string{}
+
+			targets := []map[string]*dep.InstallInfo{
+				{
+					"kubernetes-tools": {
+						Source:     dep.Sync,
+						Reason:     dep.Explicit,
+						Version:    "",
+						IsGroup:    true,
+						SyncDBName: ptrString("community"),
+					},
+				},
+			}
+
+			errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{}, false)
+			require.NoError(td, errI)
+
+			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
+			require.Len(td, mockRunner.CaptureCalls, len(tc.wantCapture))
+			require.Empty(td, installer.failedAndIgnored)
+
+			for i, call := range mockRunner.ShowCalls {
+				show := call.Args[0].(*exec.Cmd).String()
+				show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
+				show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+				show = strings.ReplaceAll(show, pacmanBin, "pacman")
+
+				// options are in a different order on different systems and on CI root user is used
+				assert.Subset(td, strings.Split(show, " "), strings.Split(tc.wantShow[i], " "), show)
+			}
+
+			for i, call := range mockRunner.CaptureCalls {
+				capture := call.Args[0].(*exec.Cmd).String()
+				capture = strings.ReplaceAll(capture, tmpDir, "/testdir") // replace the temp dir with a static path
+				capture = strings.ReplaceAll(capture, makepkgBin, "makepkg")
+				capture = strings.ReplaceAll(capture, pacmanBin, "pacman")
+				assert.Subset(td, strings.Split(capture, " "), strings.Split(tc.wantCapture[i], " "), capture)
+			}
+		})
+	}
+}
