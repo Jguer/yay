@@ -373,7 +373,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			var errA error
 			aurPkgs, errA = g.aurClient.Get(ctx, &aurc.Query{By: aurc.Provides, Needles: []string{target}, Contains: true})
 			if errA != nil {
-				g.logger.Errorln(gotext.Get("Failed to find AUR package for"), target, ":", errA)
+				g.logger.Errorln(gotext.Get("Failed to find AUR package for"), " ", target, ":", errA)
 			}
 		}
 
