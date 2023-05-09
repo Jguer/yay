@@ -107,7 +107,10 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	// TODO: handle quiet mode in a better way
 	logger := text.NewLogger(io.Discard, os.Stderr, os.Stdin, cfg.Debug, "update-list")
 	dbExecutor.SetLogger(logger.Child("db"))
+	oldNoConfirm := settings.NoConfirm
 	settings.NoConfirm = true
+	// restoring global NoConfirm to make tests work properly
+	defer func() { settings.NoConfirm = oldNoConfirm }()
 
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
 	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURCache, false, true,

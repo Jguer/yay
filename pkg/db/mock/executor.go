@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/Jguer/go-alpm/v2"
 )
@@ -33,6 +34,7 @@ type DBExecutor struct {
 	SyncPackagesFn                func(...string) []IPackage
 	SyncSatisfierFn               func(string) IPackage
 	SyncUpgradesFn                func(bool) (map[string]db.SyncUpgrade, error)
+	SetLoggerFn                   func(*text.Logger)
 }
 
 func (t *DBExecutor) InstalledRemotePackageNames() []string {
@@ -187,6 +189,14 @@ func (t *DBExecutor) SyncSatisfier(s string) IPackage {
 func (t *DBExecutor) SyncSatisfierExists(s string) bool {
 	if t.SyncSatisfierFn != nil {
 		return t.SyncSatisfierFn(s) != nil
+	}
+	panic("implement me")
+}
+
+func (t *DBExecutor) SetLogger(logger *text.Logger) {
+	if t.SetLoggerFn != nil {
+		t.SetLoggerFn(logger)
+		return
 	}
 	panic("implement me")
 }
