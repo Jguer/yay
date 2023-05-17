@@ -133,7 +133,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -407,7 +407,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -460,7 +460,7 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 
 	cmdBuilder.Runner = mockRunner
 
-	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
+	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
 
 	called := false
 	hook := func(ctx context.Context) error {
@@ -590,7 +590,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -748,7 +748,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("jellyfin")
@@ -886,7 +886,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, true, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", true, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -989,7 +989,7 @@ func TestInstaller_InstallGroup(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, true, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", true, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("kubernetes-tools")
@@ -1014,6 +1014,212 @@ func TestInstaller_InstallGroup(t *testing.T) {
 			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
 			require.Len(td, mockRunner.CaptureCalls, len(tc.wantCapture))
 			require.Empty(td, installer.failedAndIgnored)
+
+			for i, call := range mockRunner.ShowCalls {
+				show := call.Args[0].(*exec.Cmd).String()
+				show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
+				show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+				show = strings.ReplaceAll(show, pacmanBin, "pacman")
+
+				// options are in a different order on different systems and on CI root user is used
+				assert.Subset(td, strings.Split(show, " "), strings.Split(tc.wantShow[i], " "), show)
+			}
+
+			for i, call := range mockRunner.CaptureCalls {
+				capture := call.Args[0].(*exec.Cmd).String()
+				capture = strings.ReplaceAll(capture, tmpDir, "/testdir") // replace the temp dir with a static path
+				capture = strings.ReplaceAll(capture, makepkgBin, "makepkg")
+				capture = strings.ReplaceAll(capture, pacmanBin, "pacman")
+				assert.Subset(td, strings.Split(capture, " "), strings.Split(tc.wantCapture[i], " "), capture)
+			}
+		})
+	}
+}
+
+func TestInstaller_InstallRebuild(t *testing.T) {
+	t.Parallel()
+
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	type testCase struct {
+		desc          string
+		reBuildOption string
+		isInstalled   bool
+		isBuilt       bool
+		wantShow      []string
+		wantCapture   []string
+		targets       []map[string]*dep.InstallInfo
+	}
+
+	tmpDir := t.TempDir()
+
+	testCases := []testCase{
+		{
+			desc:          "--norebuild(default) when built and not installed",
+			reBuildOption: "no",
+			isBuilt:       true,
+			isInstalled:   false,
+			wantShow: []string{
+				"makepkg --nobuild -fC --ignorearch",
+				"makepkg -c --nobuild --noextract --ignorearch",
+				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"pacman -D -q --asexplicit --config  -- yay",
+			},
+			wantCapture: []string{"makepkg --packagelist"},
+			targets: []map[string]*dep.InstallInfo{
+				{
+					"yay": {
+						Source:      dep.AUR,
+						Reason:      dep.Explicit,
+						Version:     "91.0.0-1",
+						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
+						AURBase:     ptrString("yay"),
+					},
+				},
+			},
+		},
+		{
+			desc:          "--rebuild when built and not installed",
+			reBuildOption: "yes",
+			isBuilt:       true,
+			isInstalled:   false,
+			wantShow: []string{
+				"makepkg --nobuild -fC --ignorearch",
+				"makepkg -cf --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"pacman -D -q --asexplicit --config  -- yay",
+			},
+			wantCapture: []string{"makepkg --packagelist"},
+			targets: []map[string]*dep.InstallInfo{
+				{
+					"yay": {
+						Source:      dep.AUR,
+						Reason:      dep.Explicit,
+						Version:     "91.0.0-1",
+						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
+						AURBase:     ptrString("yay"),
+					},
+				},
+			},
+		},
+		{
+			desc:          "--rebuild when built and installed",
+			reBuildOption: "yes",
+			isInstalled:   true,
+			isBuilt:       true,
+			wantShow: []string{
+				"makepkg --nobuild -fC --ignorearch",
+				"makepkg -cf --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"pacman -D -q --asexplicit --config  -- yay",
+			},
+			wantCapture: []string{"makepkg --packagelist"},
+			targets: []map[string]*dep.InstallInfo{
+				{
+					"yay": {
+						Source:      dep.AUR,
+						Reason:      dep.Explicit,
+						Version:     "91.0.0-1",
+						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
+						AURBase:     ptrString("yay"),
+					},
+				},
+			},
+		},
+		{
+			desc:          "--rebuild when built and installed previously as dep",
+			reBuildOption: "yes",
+			isInstalled:   true,
+			isBuilt:       true,
+			wantShow: []string{
+				"makepkg --nobuild -fC --ignorearch",
+				"makepkg -cf --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"pacman -D -q --asdeps --config  -- yay",
+			},
+			wantCapture: []string{"makepkg --packagelist"},
+			targets: []map[string]*dep.InstallInfo{
+				{
+					"yay": {
+						Source:      dep.AUR,
+						Reason:      dep.Dep,
+						Version:     "91.0.0-1",
+						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
+						AURBase:     ptrString("yay"),
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.desc, func(td *testing.T) {
+			tmpDir := td.TempDir()
+			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
+
+			captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+				return pkgTar, "", nil
+			}
+
+			i := 0
+			showOverride := func(cmd *exec.Cmd) error {
+				i++
+				if i == 2 {
+					if !tc.isBuilt {
+						f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+						require.NoError(td, err)
+						require.NoError(td, f.Close())
+					}
+				}
+				return nil
+			}
+
+			// create a mock file
+			if tc.isBuilt {
+				f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+				require.NoError(td, err)
+				require.NoError(td, f.Close())
+			}
+
+			isCorrectInstalledOverride := func(string, string) bool {
+				return tc.isInstalled
+			}
+
+			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFn: isCorrectInstalledOverride}
+			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+			cmdBuilder := &exe.CmdBuilder{
+				MakepkgBin:      makepkgBin,
+				SudoBin:         "su",
+				PacmanBin:       pacmanBin,
+				Runner:          mockRunner,
+				SudoLoopEnabled: false,
+			}
+
+			cmdBuilder.Runner = mockRunner
+
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, tc.reBuildOption, false, NewTestLogger())
+
+			cmdArgs := parser.MakeArguments()
+			cmdArgs.AddTarget("yay")
+
+			pkgBuildDirs := map[string]string{
+				"yay": tmpDir,
+			}
+
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{}, false)
+			require.NoError(td, errI)
+
+			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
+			require.Len(td, mockRunner.CaptureCalls, len(tc.wantCapture))
 
 			for i, call := range mockRunner.ShowCalls {
 				show := call.Args[0].(*exec.Cmd).String()
