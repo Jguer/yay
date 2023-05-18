@@ -270,6 +270,12 @@ func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string
 	return graph, nil
 }
 
+func (g *Grapher) AddDepsForPkgs(ctx context.Context, pkgs []*aur.Pkg, graph *topo.Graph[string, *InstallInfo]) {
+	for _, pkg := range pkgs {
+		g.addDepNodes(ctx, pkg, graph)
+	}
+}
+
 func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Graph[string, *InstallInfo]) {
 	if len(pkg.MakeDepends) > 0 {
 		g.addNodes(ctx, graph, pkg.Name, pkg.MakeDepends, MakeDep)
@@ -316,8 +322,6 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 		graph = topo.New[string, *InstallInfo]()
 	}
 
-	exists := graph.Exists(pkg.Name)
-
 	graph.AddNode(pkg.Name)
 
 	for i := range pkg.Provides {
@@ -334,10 +338,6 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 		Background: bgColorMap[AUR],
 		Value:      instalInfo,
 	})
-
-	if !exists {
-		g.addDepNodes(ctx, pkg, graph)
-	}
 
 	return graph
 }
@@ -365,6 +365,8 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			g.providerCache[pkg.Name] = []aurc.Pkg{*pkg}
 		}
 	}
+
+	aurPkgsAdded := []*aurc.Pkg{}
 
 	for _, target := range targets {
 		if cachedProvidePkg, ok := g.providerCache[target]; ok {
@@ -405,7 +407,10 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			Source:  AUR,
 			Version: aurPkg.Version,
 		})
+		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
 	}
+
+	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
 	return graph, nil
 }

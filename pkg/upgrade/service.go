@@ -96,6 +96,8 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 		}
 	}
 
+	aurPkgsAdded := []*aur.Pkg{}
+
 	names := mapset.NewThreadUnsafeSet[string]()
 	for i := range develUp.Up {
 		up := &develUp.Up[i]
@@ -120,6 +122,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			Version:      up.RemoteVersion,
 		})
 		names.Add(up.Name)
+		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
 	}
 
 	for i := range aurUp.Up {
@@ -148,7 +151,10 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			Version:      up.RemoteVersion,
 			LocalVersion: up.LocalVersion,
 		})
+		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
 	}
+
+	u.grapher.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
 	if u.cfg.Mode.AtLeastRepo() {
 		u.log.OperationInfoln(gotext.Get("Searching databases for updates..."))
