@@ -20,3 +20,11 @@ jobs:
         run: /app/bin/golangci-lint run ./...
       - name: Run Build and Tests
         run: make test
+      - name: Run Integration Tests
+        continue-on-error: true
+        run: |
+          useradd -m yay &&
+          chown -R yay:yay . &&
+          cp -r ~/go/ /home/yay/go/ &&
+          chown -R yay:yay /home/yay/go/ &&
+          su yay -c "make test-integration"

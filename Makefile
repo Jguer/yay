@@ -53,6 +53,10 @@ test_lint: test lint
 test:
 	$(GO) test -race -covermode=atomic $(FLAGS) ./...
 
+.PHONY: test-integration
+test-integration:
+	$(GO) test -tags=integration $(FLAGS) ./...
+
 .PHONY: build
 build: $(BIN)
 
