@@ -22,4 +22,7 @@ jobs:
         run: make test
       - name: Run Integration Tests
         continue-on-error: true
-        run: make test-integration
+        run: |
+          useradd -m yay &&
+          chown -R yay:yay /github/home &&
+          su - yay -c make test-integration

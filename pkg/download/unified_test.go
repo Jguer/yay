@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,6 +19,7 @@ import (
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 // GIVEN 2 aur packages and 1 in repo
@@ -34,6 +36,8 @@ func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 		},
 	}
 
+	testLogger := text.NewLogger(os.Stdout, os.Stderr, strings.NewReader(""), true, "test")
+
 	os.MkdirAll(filepath.Join(dir, "yay", ".git"), 0o777)
 
 	targets := []string{"core/yay", "yay-bin", "yay-git"}
@@ -45,6 +49,7 @@ func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 			Runner:   cmdRunner,
 			GitBin:   "/usr/local/bin/git",
 			GitFlags: []string{},
+			Log:      testLogger,
 		},
 	}
 	searcher := &testDBSearcher{

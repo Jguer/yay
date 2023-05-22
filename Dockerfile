@@ -1,5 +1,5 @@
 FROM docker.io/jguer/yay-builder:latest
-LABEL maintainer="Jguer,joaogg3 at google mail"
+LABEL maintainer="Jguer,docker@jguer.space"
 
 ARG VERSION
 ARG PREFIX

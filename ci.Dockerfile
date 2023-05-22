@@ -1,4 +1,5 @@
 FROM docker.io/jguer/yay-builder:latest
+LABEL maintainer="Jguer,docker@jguer.space"
 
 ENV GO111MODULE=on
 WORKDIR /app

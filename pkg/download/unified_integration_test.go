@@ -6,6 +6,8 @@ package download
 import (
 	"context"
 	"net/http"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,11 +29,14 @@ func TestIntegrationPKGBUILDReposDefinedDBClone(t *testing.T) {
 		},
 	}
 	targets := []string{"core/linux", "yay-bin", "yay-git"}
-	cmdRunner := &exe.OSRunner{Log: text.GlobalLogger}
+
+	testLogger := text.NewLogger(os.Stdout, os.Stderr, strings.NewReader(""), true, "test")
+	cmdRunner := &exe.OSRunner{Log: testLogger}
 	cmdBuilder := &exe.CmdBuilder{
 		Runner:   cmdRunner,
 		GitBin:   "git",
 		GitFlags: []string{},
+		Log:      testLogger,
 	}
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"linux": "core"},
@@ -53,12 +58,15 @@ func TestIntegrationPKGBUILDReposNotExist(t *testing.T) {
 		},
 	}
 	targets := []string{"core/yay", "yay-bin", "yay-git"}
-	cmdRunner := &exe.OSRunner{Log: text.GlobalLogger}
+	testLogger := text.NewLogger(os.Stdout, os.Stderr, strings.NewReader(""), true, "test")
+	cmdRunner := &exe.OSRunner{Log: testLogger}
 	cmdBuilder := &exe.CmdBuilder{
 		Runner:   cmdRunner,
 		GitBin:   "git",
 		GitFlags: []string{},
+		Log:      testLogger,
 	}
+
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
