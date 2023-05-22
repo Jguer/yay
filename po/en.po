@@ -61,10 +61,6 @@ msgstr ""
 msgid "%s not satisfied, flushing install queue"
 msgstr ""
 
-#: pkg/upgrade/service.go:301
-msgid "%s to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-
 #: pkg/upgrade/service.go:298
 msgid "%s to upgrade/install."
 msgstr ""
@@ -157,8 +153,8 @@ msgstr ""
 msgid "Check Deps"
 msgstr ""
 
-#: pkg/upgrade/service.go:90
 #: upgrade.go:95
+#: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
 msgstr ""
 
@@ -399,6 +395,10 @@ msgstr ""
 msgid "Packages to exclude"
 msgstr ""
 
+#: pkg/upgrade/service.go:301
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr ""
+
 #: cmd.go:405
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr ""
@@ -436,8 +436,8 @@ msgstr ""
 msgid "Repository AUR"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:191
 #: print.go:25
+#: pkg/db/ialpm/alpm.go:191
 msgid "Repository"
 msgstr ""
 
@@ -445,13 +445,13 @@ msgstr ""
 msgid "SRCINFO"
 msgstr ""
 
-#: pkg/upgrade/service.go:72
 #: upgrade.go:73
+#: pkg/upgrade/service.go:72
 msgid "Searching AUR for updates..."
 msgstr ""
 
-#: pkg/upgrade/service.go:154
 #: upgrade.go:62
+#: pkg/upgrade/service.go:154
 msgid "Searching databases for updates..."
 msgstr ""
 
@@ -592,12 +592,10 @@ msgstr ""
 msgid "could not find srcinfo for: %s"
 msgstr ""
 
-#: pkg/upgrade/service.go:293
 #: errors.go:26
+#: pkg/upgrade/service.go:293
 msgid "dependency"
-msgid_plural "dependencies"
-msgstr[0] ""
-msgstr[1] ""
+msgstr ""
 
 #: pkg/vcs/vcs.go:96
 #: pkg/vcs/vcs.go:100
@@ -712,7 +710,7 @@ msgstr ""
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 
-#: pkg/download/abs.go:22
+#: pkg/download/abs.go:21
 msgid "invalid repository"
 msgstr ""
 
@@ -758,12 +756,11 @@ msgstr ""
 msgid "package not found in AUR"
 msgstr ""
 
-#: pkg/download/abs.go:23
+#: pkg/download/abs.go:22
 msgid "package not found in repos"
 msgstr ""
 
 #: pkg/upgrade/service.go:298
-#: pkg/upgrade/service.go:301
 msgid "package"
 msgid_plural "packages"
 msgstr[0] ""
