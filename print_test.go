@@ -1,3 +1,6 @@
+//go:build !integration
+// +build !integration
+
 package main
 
 import (
@@ -27,7 +30,7 @@ import (
 func TestPrintUpdateList(t *testing.T) {
 	// The current method of capturing os.Stdout hinders parallelization.
 	// Setting of global settings.NoConfirm in printUpdateList also hinders parallelization.
-	//t.Parallel()
+	// t.Parallel()
 	pacmanBin := t.TempDir() + "/pacman"
 	f, err := os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
 	require.NoError(t, err)

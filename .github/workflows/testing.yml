@@ -20,3 +20,6 @@ jobs:
         run: /app/bin/golangci-lint run ./...
       - name: Run Build and Tests
         run: make test
+      - name: Run Integration Tests
+        continue-on-error: true
+        run: make test-integration
