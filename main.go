@@ -161,6 +161,10 @@ func main() {
 	if err = handleCmd(ctx, cfg, cmdArgs, db.Executor(dbExecutor)); err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
+			if cmdArgs.ExistsArg("c") && cmdArgs.ExistsArg("y") && cmdArgs.Op == "S" {
+				// Remove after 2023-10-01
+				text.Errorln("Did you mean 'yay -Yc'?")
+			}
 		}
 
 		exitError := &exec.ExitError{}
