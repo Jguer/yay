@@ -14,7 +14,6 @@ import (
 
 const (
 	MaxConcurrentFetch = 20
-	_urlPackagePath    = "https://gitlab.archlinux.org/archlinux/packaging/packages/0ad/-/raw/main/PKGBUILD"
 	absPackageURL      = "https://gitlab.archlinux.org/archlinux/packaging/packages"
 )
 
