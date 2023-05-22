@@ -47,12 +47,12 @@ func Test_getPackageURL(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "community package",
+			name: "extra package",
 			args: args{
-				db:      "community",
+				db:      "extra",
 				pkgName: "kitty",
 			},
-			want:    "https://github.com/archlinux/svntogit-community/raw/packages/kitty/trunk/PKGBUILD",
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/kitty/-/raw/main/PKGBUILD",
 			wantErr: false,
 		},
 		{
@@ -61,27 +61,24 @@ func Test_getPackageURL(t *testing.T) {
 				db:      "core",
 				pkgName: "linux",
 			},
-			want:    "https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/PKGBUILD",
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/PKGBUILD",
 			wantErr: false,
 		},
 		{
 			name: "personal repo package",
 			args: args{
 				db:      "sweswe",
-				pkgName: "linux",
+				pkgName: "zabix",
 			},
-			want:    "",
-			wantErr: true,
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/zabix/-/raw/main/PKGBUILD",
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := getPackageURL(tt.args.db, tt.args.pkgName)
-			if tt.wantErr {
-				assert.ErrorIs(t, err, ErrInvalidRepository)
-			}
+			got := getPackagePKGBUILDURL(tt.args.pkgName)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -110,7 +107,7 @@ func TestGetABSPkgbuild(t *testing.T) {
 				body:    gitExtrasPKGBUILD,
 				status:  200,
 				pkgName: "git-extras",
-				wantURL: "https://github.com/archlinux/svntogit-packages/raw/packages/git-extras/trunk/PKGBUILD",
+				wantURL: "https://gitlab.archlinux.org/archlinux/packaging/packages/git-extras/-/raw/main/PKGBUILD",
 			},
 			want:    gitExtrasPKGBUILD,
 			wantErr: false,
@@ -122,7 +119,7 @@ func TestGetABSPkgbuild(t *testing.T) {
 				body:    "",
 				status:  404,
 				pkgName: "git-git",
-				wantURL: "https://github.com/archlinux/svntogit-packages/raw/packages/git-git/trunk/PKGBUILD",
+				wantURL: "https://gitlab.archlinux.org/archlinux/packaging/packages/git-git/-/raw/main/PKGBUILD",
 			},
 			want:    "",
 			wantErr: true,
@@ -154,7 +151,7 @@ func Test_getPackageRepoURL(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		db string
+		pkgName string
 	}
 	tests := []struct {
 		name    string
@@ -163,32 +160,29 @@ func Test_getPackageRepoURL(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "community package",
-			args:    args{db: "community"},
-			want:    "https://github.com/archlinux/svntogit-community.git",
+			name:    "extra package",
+			args:    args{pkgName: "zoxide"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/zoxide.git",
 			wantErr: false,
 		},
 		{
 			name:    "core package",
-			args:    args{db: "core"},
-			want:    "https://github.com/archlinux/svntogit-packages.git",
+			args:    args{pkgName: "linux"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/linux.git",
 			wantErr: false,
 		},
 		{
 			name:    "personal repo package",
-			args:    args{db: "sweswe"},
-			want:    "",
-			wantErr: true,
+			args:    args{pkgName: "sweswe"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/sweswe.git",
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := getPackageRepoURL(tt.args.db)
-			if tt.wantErr {
-				assert.ErrorIs(t, err, ErrInvalidRepository)
-			}
+			got := getPackageRepoURL(tt.args.pkgName)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -200,13 +194,13 @@ func Test_getPackageRepoURL(t *testing.T) {
 func TestABSPKGBUILDRepo(t *testing.T) {
 	t.Parallel()
 	cmdRunner := &testRunner{}
-	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux"
+	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch https://gitlab.archlinux.org/archlinux/packaging/packages/linux.git linux"
 	if os.Getuid() == 0 {
 		ld := "systemd-run"
 		if path, _ := exec.LookPath(ld); path != "" {
 			ld = path
 		}
-		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch -b packages/linux https://github.com/archlinux/svntogit-packages.git linux", ld)
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch https://gitlab.archlinux.org/archlinux/packaging/packages/linux.git linux", ld)
 	}
 
 	cmdBuilder := &testGitBuilder{
