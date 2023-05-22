@@ -134,6 +134,7 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	foreignFilter := cmdArgs.ExistsArg("m", "foreign")
 	nativeFilter := cmdArgs.ExistsArg("n", "native")
 
+	noUpdates := true
 	_ = graph.ForEach(func(pkgName string, ii *dep.InstallInfo) error {
 		if !ii.Upgrade {
 			return nil
@@ -154,6 +155,7 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 			}
 
 			targets.Remove(pkgName)
+			noUpdates = false
 		}
 
 		return nil
@@ -168,7 +170,7 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 		return false
 	})
 
-	if missing {
+	if missing || noUpdates {
 		return fmt.Errorf("")
 	}
 

@@ -33,76 +33,8 @@ func TestPrintUpdateList(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, f.Close())
 
-	testCases := []struct {
-		name     string
-		args     []string
-		targets  []string
-		wantPkgs []string
-		wantErr  bool
-	}{
-		{
-			name:    "Qu",
-			args:    []string{"Q", "u"},
-			targets: []string{},
-			wantPkgs: []string{
-				fmt.Sprintf("%s %s -> %s",
-					text.Bold("linux"),
-					text.Bold(text.Green("4.3.0")),
-					text.Bold(text.Green("5.10.0")),
-				),
-				fmt.Sprintf("%s %s -> %s",
-					text.Bold("go"),
-					text.Bold(text.Green("2:1.20.3-1")),
-					text.Bold(text.Green("2:1.20.4-1")),
-				),
-				fmt.Sprintf("%s %s -> %s",
-					text.Bold("vosk-api"),
-					text.Bold(text.Green("0.3.43-1")),
-					text.Bold(text.Green("0.3.45-1")),
-				),
-			},
-		},
-		{
-			name:     "Quq",
-			args:     []string{"Q", "u", "q"},
-			targets:  []string{},
-			wantPkgs: []string{"linux", "go", "vosk-api"},
-		},
-		{
-			name:     "Quq linux",
-			args:     []string{"Q", "u", "q"},
-			targets:  []string{"linux"},
-			wantPkgs: []string{"linux"},
-		},
-		{
-			name:     "Qunq",
-			args:     []string{"Q", "u", "n", "q"},
-			targets:  []string{},
-			wantPkgs: []string{"linux", "go"},
-		},
-		{
-			name:     "Qumq",
-			args:     []string{"Q", "u", "m", "q"},
-			targets:  []string{},
-			wantPkgs: []string{"vosk-api"},
-		},
-		{
-			name:     "Quq no-update-pkg",
-			args:     []string{"Q", "u", "q"},
-			targets:  []string{"no-update-pkg"},
-			wantPkgs: []string{},
-		},
-		{
-			name:     "Quq non-existent-pkg",
-			args:     []string{"Q", "u", "q"},
-			targets:  []string{"non-existent-pkg"},
-			wantPkgs: []string{},
-			wantErr:  true,
-		},
-	}
-
-	dbName := mock.NewDB("core")
-	db := &mock.DBExecutor{
+	mockDBName := mock.NewDB("core")
+	mockDB := &mock.DBExecutor{
 		AlpmArchitecturesFn: func() ([]string, error) {
 			return []string{"x86_64"}, nil
 		},
@@ -133,7 +65,7 @@ func TestPrintUpdateList(t *testing.T) {
 					Package: &mock.Package{
 						PName:    "linux",
 						PVersion: "5.10.0",
-						PDB:      dbName,
+						PDB:      mockDBName,
 					},
 					LocalVersion: "4.3.0",
 					Reason:       alpm.PkgReasonExplicit,
@@ -142,7 +74,7 @@ func TestPrintUpdateList(t *testing.T) {
 					Package: &mock.Package{
 						PName:    "go",
 						PVersion: "2:1.20.4-1",
-						PDB:      dbName,
+						PDB:      mockDBName,
 					},
 					LocalVersion: "2:1.20.3-1",
 					Reason:       alpm.PkgReasonExplicit,
@@ -154,9 +86,43 @@ func TestPrintUpdateList(t *testing.T) {
 				return &mock.Package{
 					PName:    "no-update-pkg",
 					PVersion: "3.3.3",
-					PDB:      dbName,
+					PDB:      mockDBName,
 				}
 			}
+			return nil
+		},
+		SetLoggerFn: func(logger *text.Logger) {},
+	}
+
+	mockDBNoUpdates := &mock.DBExecutor{
+		AlpmArchitecturesFn: func() ([]string, error) {
+			return []string{"x86_64"}, nil
+		},
+		RefreshHandleFn: func() error {
+			return nil
+		},
+		ReposFn: func() []string {
+			return []string{"core"}
+		},
+		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
+			return map[string]alpm.IPackage{
+				"vosk-api": &mock.Package{
+					PName:    "vosk-api",
+					PVersion: "0.3.43-1",
+					PBase:    "vosk-api",
+					PReason:  alpm.PkgReasonExplicit,
+				},
+			}
+		},
+		InstalledRemotePackageNamesFn: func() []string {
+			return []string{"vosk-api"}
+		},
+		SyncUpgradesFn: func(
+			bool,
+		) (map[string]db.SyncUpgrade, error) {
+			return map[string]db.SyncUpgrade{}, nil
+		},
+		LocalPackageFn: func(s string) mock.IPackage {
 			return nil
 		},
 		SetLoggerFn: func(logger *text.Logger) {},
@@ -171,6 +137,124 @@ func TestPrintUpdateList(t *testing.T) {
 					Version:     "0.3.45-1",
 				},
 			}, nil
+		},
+	}
+
+	mockAURNoUpdates := &mockaur.MockAUR{
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{
+				{
+					Name:        "vosk-api",
+					PackageBase: "vosk-api",
+					Version:     "0.3.43-1",
+				},
+			}, nil
+		},
+	}
+
+	type mockData struct {
+		db       *mock.DBExecutor
+		aurCache *mockaur.MockAUR
+	}
+
+	testCases := []struct {
+		name     string
+		mockData mockData
+		args     []string
+		targets  []string
+		wantPkgs []string
+		wantErr  bool
+	}{
+		{
+			name:     "Qu",
+			mockData: mockData{mockDB, mockAUR},
+			args:     []string{"Q", "u"},
+			targets:  []string{},
+			wantPkgs: []string{
+				fmt.Sprintf("%s %s -> %s",
+					text.Bold("linux"),
+					text.Bold(text.Green("4.3.0")),
+					text.Bold(text.Green("5.10.0")),
+				),
+				fmt.Sprintf("%s %s -> %s",
+					text.Bold("go"),
+					text.Bold(text.Green("2:1.20.3-1")),
+					text.Bold(text.Green("2:1.20.4-1")),
+				),
+				fmt.Sprintf("%s %s -> %s",
+					text.Bold("vosk-api"),
+					text.Bold(text.Green("0.3.43-1")),
+					text.Bold(text.Green("0.3.45-1")),
+				),
+			},
+		},
+		{
+			name:     "Quq",
+			mockData: mockData{mockDB, mockAUR},
+			args:     []string{"Q", "u", "q"},
+			targets:  []string{},
+			wantPkgs: []string{"linux", "go", "vosk-api"},
+		},
+		{
+			name:     "Quq linux",
+			mockData: mockData{mockDB, mockAUR},
+			args:     []string{"Q", "u", "q"},
+			targets:  []string{"linux"},
+			wantPkgs: []string{"linux"},
+		},
+		{
+			name:     "Qunq",
+			mockData: mockData{mockDB, mockAUR},
+			args:     []string{"Q", "u", "n", "q"},
+			targets:  []string{},
+			wantPkgs: []string{"linux", "go"},
+		},
+		{
+			name:     "Qumq",
+			mockData: mockData{mockDB, mockAUR},
+			args:     []string{"Q", "u", "m", "q"},
+			targets:  []string{},
+			wantPkgs: []string{"vosk-api"},
+		},
+		{
+			name:     "Quq no-update-pkg",
+			mockData: mockData{mockDB, mockAUR},
+			args:     []string{"Q", "u", "q"},
+			targets:  []string{"no-update-pkg"},
+			wantPkgs: []string{},
+			wantErr:  true,
+		},
+		{
+			name:     "Quq non-existent-pkg",
+			mockData: mockData{mockDB, mockAUR},
+			args:     []string{"Q", "u", "q"},
+			targets:  []string{"non-existent-pkg"},
+			wantPkgs: []string{},
+			wantErr:  true,
+		},
+		{
+			name:     "Qu no-updates-any",
+			mockData: mockData{mockDBNoUpdates, mockAURNoUpdates},
+			args:     []string{"Q", "u"},
+			targets:  []string{},
+			wantPkgs: []string{},
+			wantErr:  true,
+		},
+		{
+			name:     "Qun no-updates-native",
+			mockData: mockData{mockDBNoUpdates, mockAUR},
+			args:     []string{"Q", "u", "n"},
+			targets:  []string{},
+			wantPkgs: []string{},
+			wantErr:  true,
+		},
+		{
+			name:     "Qum no-updates-foreign",
+			mockData: mockData{mockDB, mockAURNoUpdates},
+			args:     []string{"Q", "u", "m"},
+			targets:  []string{},
+			wantPkgs: []string{},
+			wantErr:  true,
 		},
 	}
 
@@ -191,7 +275,7 @@ func TestPrintUpdateList(t *testing.T) {
 					Logger:     NewTestLogger(),
 					CmdBuilder: cmdBuilder,
 					VCSStore:   &vcs.Mock{},
-					AURCache:   mockAUR,
+					AURCache:   tc.mockData.aurCache,
 				},
 			}
 
@@ -203,7 +287,7 @@ func TestPrintUpdateList(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			err = handleCmd(context.Background(), cfg, cmdArgs, db)
+			err = handleCmd(context.Background(), cfg, cmdArgs, tc.mockData.db)
 
 			w.Close()
 			out, _ := io.ReadAll(r)
@@ -212,7 +296,6 @@ func TestPrintUpdateList(t *testing.T) {
 			if tc.wantErr {
 				require.Error(t, err)
 				assert.EqualError(t, err, "")
-				return
 			} else {
 				require.NoError(t, err)
 			}
