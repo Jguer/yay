@@ -24,5 +24,7 @@ jobs:
         continue-on-error: true
         run: |
           useradd -m yay &&
-          chown -R yay:yay /github/home &&
-          su - yay -c make test-integration
+          chown -R yay:yay . &&
+          cp -r ~/go/ /home/yay/go/ &&
+          chown -R yay:yay /home/yay/go/ &&
+          su yay -c "make test-integration"
