@@ -289,7 +289,7 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 	if len(allUp.PulledDeps) > 0 {
 		u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")),
-			len(allUp.PulledDeps), text.Bold(gotext.Get("%s will also be installed for this operation",
+			len(allUp.PulledDeps), text.Bold(gotext.Get("%s will also be installed for this operation.",
 				gotext.GetN("dependency", "dependencies", len(allUp.PulledDeps)))))
 		allUp.PrintDeps(u.log)
 	}
