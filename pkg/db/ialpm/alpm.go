@@ -38,7 +38,7 @@ func NewExecutor(pacmanConf *pacmanconf.Config, logger *text.Logger) (*AlpmExecu
 		conf:                    pacmanConf,
 		log:                     logger,
 		installedRemotePkgNames: nil,
-		installedRemotePkgMap:   map[string]alpm.IPackage{},
+		installedRemotePkgMap:   nil,
 		installedSyncPkgNames:   nil,
 	}
 

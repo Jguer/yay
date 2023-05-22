@@ -8,6 +8,9 @@ import (
 
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively.
 func (ae *AlpmExecutor) getPackageNamesBySource() {
+	if ae.installedRemotePkgMap == nil {
+		ae.installedRemotePkgMap = map[string]alpm.IPackage{}
+	}
 	for _, localpkg := range ae.LocalPackages() {
 		pkgName := localpkg.Name()
 		if ae.SyncPackage(pkgName) != nil {
