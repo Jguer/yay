@@ -211,8 +211,8 @@ func TestPKGBUILDFull(t *testing.T) {
 		Reply(200).
 		BodyString("example_yay-bin")
 
-	gock.New("https://github.com/").
-		Get("/archlinux/svntogit-packages/raw/packages/yay/trunk/PKGBUILD").
+	gock.New("https://gitlab.archlinux.org/").
+		Get("archlinux/packaging/packages/yay/-/raw/main/PKGBUILD").
 		Reply(200).
 		BodyString("example_yay")
 
