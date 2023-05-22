@@ -35,7 +35,6 @@ type Configuration struct {
 	PacmanBin              string   `json:"pacmanbin"`
 	PacmanConf             string   `json:"pacmanconf"`
 	ReDownload             string   `json:"redownload"`
-	ReBuild                string   `json:"rebuild"`
 	AnswerClean            string   `json:"answerclean"`
 	AnswerDiff             string   `json:"answerdiff"`
 	AnswerEdit             string   `json:"answeredit"`
@@ -78,8 +77,9 @@ type Configuration struct {
 	CompletionPath string `json:"-"`
 	VCSFilePath    string `json:"-"`
 	// ConfigPath     string `json:"-"`
-	SaveConfig bool              `json:"-"`
-	Mode       parser.TargetMode `json:"-"`
+	SaveConfig bool               `json:"-"`
+	Mode       parser.TargetMode  `json:"-"`
+	ReBuild    parser.RebuildMode `json:"rebuild"`
 }
 
 // SaveConfig writes yay config to file.
@@ -133,7 +133,7 @@ func (c *Configuration) expandEnv() {
 	c.SudoBin = expandEnvOrHome(c.SudoBin)
 	c.SudoFlags = os.ExpandEnv(c.SudoFlags)
 	c.ReDownload = os.ExpandEnv(c.ReDownload)
-	c.ReBuild = os.ExpandEnv(c.ReBuild)
+	c.ReBuild = parser.RebuildMode(os.ExpandEnv(string(c.ReBuild)))
 	c.AnswerClean = os.ExpandEnv(c.AnswerClean)
 	c.AnswerDiff = os.ExpandEnv(c.AnswerDiff)
 	c.AnswerEdit = os.ExpandEnv(c.AnswerEdit)

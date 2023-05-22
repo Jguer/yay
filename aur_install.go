@@ -27,7 +27,7 @@ type (
 		exeCmd           exe.ICmdBuilder
 		vcsStore         vcs.Store
 		targetMode       parser.TargetMode
-		reBuild          string
+		rebuildMode      parser.RebuildMode
 		origTargets      mapset.Set[string]
 		downloadOnly     bool
 		log              *text.Logger
@@ -38,7 +38,7 @@ type (
 
 func NewInstaller(dbExecutor db.Executor,
 	exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode,
-	reBuild string, downloadOnly bool, logger *text.Logger,
+	rebuildMode parser.RebuildMode, downloadOnly bool, logger *text.Logger,
 ) *Installer {
 	return &Installer{
 		dbExecutor:            dbExecutor,
@@ -47,7 +47,7 @@ func NewInstaller(dbExecutor db.Executor,
 		exeCmd:                exeCmd,
 		vcsStore:              vcsStore,
 		targetMode:            targetMode,
-		reBuild:               reBuild,
+		rebuildMode:           rebuildMode,
 		downloadOnly:          downloadOnly,
 		log:                   logger,
 		manualConfirmRequired: true,
@@ -275,7 +275,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 func (installer *Installer) buildPkg(ctx context.Context,
 	dir, base string,
-	installIncompatible, needed bool, isTarget bool,
+	installIncompatible, needed, isTarget bool,
 ) (map[string]string, error) {
 	args := []string{"--nobuild", "-fC"}
 
@@ -299,9 +299,7 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
 		pkgdests = map[string]string{}
 		text.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
-	case (installer.reBuild == "no" ||
-		installer.reBuild == "" || // tmp hack for tests because "" is default ReBuild value in tests' Configurations
-		(installer.reBuild == "yes" && !isTarget)) && pkgsAreBuilt(pkgdests):
+	case installer.skipAlreadyBuiltPkg(isTarget, pkgdests):
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
 		text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
 	default:
@@ -344,6 +342,20 @@ func pkgsAreBuilt(pkgdests map[string]string) bool {
 	}
 
 	return true
+}
+
+func (installer *Installer) skipAlreadyBuiltPkg(isTarget bool, pkgdests map[string]string) bool {
+	switch installer.rebuildMode {
+	case parser.RebuildModeNo:
+		return pkgsAreBuilt(pkgdests)
+	case parser.RebuildModeYes:
+		return !isTarget && pkgsAreBuilt(pkgdests)
+	//case parser.RebuildModeTree: // TODO
+	//case parser.RebuildModeAll: // TODO
+	default:
+		// same as RebuildModeNo
+		return pkgsAreBuilt(pkgdests)
+	}
 }
 
 func (*Installer) isDep(cmdArgs *parser.Arguments, aurExpNames mapset.Set[string], name string) bool {

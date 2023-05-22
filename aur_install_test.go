@@ -133,7 +133,8 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				parser.RebuildModeNo, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -407,7 +408,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, parser.RebuildModeNo, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -460,7 +461,8 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 
 	cmdBuilder.Runner = mockRunner
 
-	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
+	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+		parser.RebuildModeNo, false, NewTestLogger())
 
 	called := false
 	hook := func(ctx context.Context) error {
@@ -590,7 +592,8 @@ func TestInstaller_CompileFailed(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				parser.RebuildModeNo, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -748,7 +751,8 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				parser.RebuildModeNo, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("jellyfin")
@@ -886,7 +890,8 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", true, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				parser.RebuildModeNo, true, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -989,7 +994,8 @@ func TestInstaller_InstallGroup(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, "no", true, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				parser.RebuildModeNo, true, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("kubernetes-tools")
@@ -1051,7 +1057,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 
 	type testCase struct {
 		desc          string
-		reBuildOption string
+		rebuildOption parser.RebuildMode
 		isInstalled   bool
 		isBuilt       bool
 		wantShow      []string
@@ -1064,7 +1070,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 	testCases := []testCase{
 		{
 			desc:          "--norebuild(default) when built and not installed",
-			reBuildOption: "no",
+			rebuildOption: parser.RebuildModeNo,
 			isBuilt:       true,
 			isInstalled:   false,
 			wantShow: []string{
@@ -1088,7 +1094,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 		},
 		{
 			desc:          "--rebuild when built and not installed",
-			reBuildOption: "yes",
+			rebuildOption: parser.RebuildModeYes,
 			isBuilt:       true,
 			isInstalled:   false,
 			wantShow: []string{
@@ -1112,7 +1118,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 		},
 		{
 			desc:          "--rebuild when built and installed",
-			reBuildOption: "yes",
+			rebuildOption: parser.RebuildModeYes,
 			isInstalled:   true,
 			isBuilt:       true,
 			wantShow: []string{
@@ -1136,7 +1142,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 		},
 		{
 			desc:          "--rebuild when built and installed previously as dep",
-			reBuildOption: "yes",
+			rebuildOption: parser.RebuildModeYes,
 			isInstalled:   true,
 			isBuilt:       true,
 			wantShow: []string{
@@ -1206,7 +1212,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, tc.reBuildOption, false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				tc.rebuildOption, false, NewTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")

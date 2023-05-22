@@ -157,7 +157,7 @@ func install(ctx context.Context, cfg *settings.Configuration,
 
 	dp, err := dep.GetPool(ctx, requestTargets,
 		warnings, dbExecutor, cfg.Runtime.AURClient, cfg.Mode,
-		ignoreProviders, settings.NoConfirm, cfg.Provides, cfg.ReBuild, cfg.RequestSplitN, noDeps, noCheck, assumeInstalled)
+		ignoreProviders, settings.NoConfirm, cfg.Provides, string(cfg.ReBuild), cfg.RequestSplitN, noDeps, noCheck, assumeInstalled)
 	if err != nil {
 		return err
 	}

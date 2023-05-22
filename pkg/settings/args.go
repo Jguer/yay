@@ -97,13 +97,13 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "noredownload":
 		c.ReDownload = "no"
 	case "rebuild":
-		c.ReBuild = "yes"
+		c.ReBuild = parser.RebuildModeYes
 	case "rebuildall":
-		c.ReBuild = "all"
+		c.ReBuild = parser.RebuildModeAll
 	case "rebuildtree":
-		c.ReBuild = "tree"
+		c.ReBuild = parser.RebuildModeTree
 	case "norebuild":
-		c.ReBuild = "no"
+		c.ReBuild = parser.RebuildModeNo
 	case "batchinstall":
 		c.BatchInstall = true
 	case "nobatchinstall":
