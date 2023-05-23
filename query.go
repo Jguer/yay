@@ -81,7 +81,7 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 
 	if len(info) != 0 {
 		for i := range info {
-			PrintInfo(cfg, &info[i], cmdArgs.ExistsDouble("i"))
+			printInfo(cfg, &info[i], cmdArgs.ExistsDouble("i"))
 		}
 	}
 

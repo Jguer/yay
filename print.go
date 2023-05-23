@@ -20,8 +20,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/upgrade"
 )
 
-// PrintInfo prints package info like pacman -Si.
-func PrintInfo(config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
+// printInfo prints package info like pacman -Si.
+func printInfo(config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
 	text.PrintInfoValue(gotext.Get("Repository"), "aur")
 	text.PrintInfoValue(gotext.Get("Name"), a.Name)
 	text.PrintInfoValue(gotext.Get("Keywords"), a.Keywords...)
