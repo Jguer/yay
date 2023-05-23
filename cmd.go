@@ -364,11 +364,7 @@ func handleSync(ctx context.Context, cfg *settings.Configuration, cmdArgs *parse
 	case cmdArgs.ExistsArg("i", "info"):
 		return syncInfo(ctx, cfg, cmdArgs, targets, dbExecutor)
 	case cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0:
-		if cfg.NewInstallEngine {
-			return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
-		}
-
-		return install(ctx, cfg, cmdArgs, dbExecutor, false)
+		return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("y", "refresh"):
 		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, cfg.Mode, settings.NoConfirm))
@@ -424,11 +420,7 @@ func displayNumberMenu(ctx context.Context, cfg *settings.Configuration, pkgS []
 		return nil
 	}
 
-	if cfg.NewInstallEngine {
-		return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
-	}
-
-	return install(ctx, cfg, cmdArgs, dbExecutor, true)
+	return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
 }
 
 func syncList(ctx context.Context, cfg *settings.Configuration,

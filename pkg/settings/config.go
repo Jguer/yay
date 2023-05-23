@@ -69,7 +69,6 @@ type Configuration struct {
 	BatchInstall           bool     `json:"batchinstall"`
 	SingleLineResults      bool     `json:"singlelineresults"`
 	SeparateSources        bool     `json:"separatesources"`
-	NewInstallEngine       bool     `json:"newinstallengine"`
 	Debug                  bool     `json:"debug"`
 	UseRPC                 bool     `json:"rpc"`
 	DoubleConfirm          bool     `json:"doubleconfirm"` // confirm install before and after build
@@ -236,7 +235,6 @@ func DefaultConfig(version string) *Configuration {
 		UseAsk:                 false,
 		CombinedUpgrade:        true,
 		SeparateSources:        true,
-		NewInstallEngine:       true,
 		Version:                version,
 		Debug:                  false,
 		UseRPC:                 true,
