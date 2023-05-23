@@ -38,21 +38,31 @@ type Hook struct {
 }
 
 type Preparer struct {
-	dbExecutor db.Executor
-	cmdBuilder exe.ICmdBuilder
-	cfg        *settings.Configuration
-	hooks      []Hook
+	dbExecutor      db.Executor
+	cmdBuilder      exe.ICmdBuilder
+	cfg             *settings.Configuration
+	hooks           []Hook
+	downloadSources bool
 
 	makeDeps []string
 }
 
-func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder, cfg *settings.Configuration) *Preparer {
-	preper := &Preparer{
-		dbExecutor: dbExecutor,
-		cmdBuilder: cmdBuilder,
-		cfg:        cfg,
-		hooks:      []Hook{},
+func NewPreparerWithoutHooks(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
+	cfg *settings.Configuration, downloadSources bool,
+) *Preparer {
+	return &Preparer{
+		dbExecutor:      dbExecutor,
+		cmdBuilder:      cmdBuilder,
+		cfg:             cfg,
+		hooks:           []Hook{},
+		downloadSources: downloadSources,
 	}
+}
+
+func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
+	cfg *settings.Configuration,
+) *Preparer {
+	preper := NewPreparerWithoutHooks(dbExecutor, cmdBuilder, cfg, true)
 
 	if cfg.CleanMenu {
 		preper.hooks = append(preper.hooks, Hook{
@@ -192,6 +202,10 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 		preper.cmdBuilder, aurBasesToClone.ToSlice(),
 		preper.cfg.AURURL, preper.cfg.BuildDir, false); errA != nil {
 		return nil, errA
+	}
+
+	if !preper.downloadSources {
+		return pkgBuildDirsByBase, nil
 	}
 
 	if err := mergePkgbuilds(ctx, preper.cmdBuilder, pkgBuildDirsByBase); err != nil {

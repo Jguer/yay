@@ -8,15 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
@@ -147,32 +143,6 @@ func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	}
 
 	return pkgdests, pkgVersion, nil
-}
-
-func pkgbuildsToSkip(cfg *settings.Configuration, bases []dep.Base, targets stringset.StringSet) stringset.StringSet {
-	toSkip := make(stringset.StringSet)
-
-	for _, base := range bases {
-		isTarget := false
-		for _, pkg := range base {
-			isTarget = isTarget || targets.Get(pkg.Name)
-		}
-
-		if (cfg.ReDownload == "yes" && isTarget) || cfg.ReDownload == "all" {
-			continue
-		}
-
-		dir := filepath.Join(cfg.BuildDir, base.Pkgbase(), ".SRCINFO")
-		pkgbuild, err := gosrc.ParseFile(dir)
-
-		if err == nil {
-			if db.VerCmp(pkgbuild.Version(), base.Version()) >= 0 {
-				toSkip.Set(base.Pkgbase())
-			}
-		}
-	}
-
-	return toSkip
 }
 
 func gitMerge(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) error {

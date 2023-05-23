@@ -2,53 +2,53 @@ package main
 
 import (
 	"context"
-	"path/filepath"
-	"strings"
+	"os"
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/aur"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/download"
-	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/srcinfo"
-	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
+
+func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {
+	installInfo := make([]map[string]*dep.InstallInfo, 1)
+	installInfo[0] = map[string]*dep.InstallInfo{}
+
+	for i := range info {
+		pkg := &info[i]
+		installInfo[0][pkg.Name] = &dep.InstallInfo{
+			AURBase: &pkg.PackageBase,
+			Source:  dep.AUR,
+		}
+	}
+
+	return installInfo
+}
 
 // createDevelDB forces yay to create a DB of the existing development packages.
 func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) error {
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
-	info, err := query.AURInfoPrint(ctx, cfg.Runtime.AURClient, remoteNames, cfg.RequestSplitN)
+
+	cfg.Runtime.QueryBuilder.Execute(ctx, dbExecutor, remoteNames)
+	info, err := cfg.Runtime.AURCache.Get(ctx, &aur.Query{
+		Needles:  remoteNames,
+		By:       aur.Name,
+		Contains: false,
+	})
 	if err != nil {
 		return err
 	}
 
-	bases := dep.GetBases(info)
-	toSkip := pkgbuildsToSkip(cfg, bases, stringset.FromSlice(remoteNames))
+	preper := NewPreparerWithoutHooks(dbExecutor, cfg.Runtime.CmdBuilder, cfg, false)
 
-	targets := make([]string, 0, len(bases))
-	pkgBuildDirsByBase := make(map[string]string, len(bases))
-
-	for _, base := range bases {
-		if !toSkip.Get(base.Pkgbase()) {
-			targets = append(targets, base.Pkgbase())
-		}
-
-		pkgBuildDirsByBase[base.Pkgbase()] = filepath.Join(cfg.BuildDir, base.Pkgbase())
-	}
-
-	toSkipSlice := toSkip.ToSlice()
-	if len(toSkipSlice) != 0 {
-		text.OperationInfoln(
-			gotext.Get("PKGBUILD up to date, Skipping (%d/%d): %s",
-				len(toSkipSlice), len(bases), text.Cyan(strings.Join(toSkipSlice, ", "))))
-	}
-
-	if _, errA := download.AURPKGBUILDRepos(ctx,
-		cfg.Runtime.CmdBuilder, targets, cfg.AURURL, cfg.BuildDir, false); errA != nil {
+	mapInfo := infoToInstallInfo(info)
+	pkgBuildDirsByBase, err := preper.Run(ctx, os.Stdout, mapInfo)
+	if err != nil {
 		return err
 	}
 
