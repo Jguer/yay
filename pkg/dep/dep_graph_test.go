@@ -322,3 +322,348 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 		})
 	}
 }
+
+func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncPackageFn:       func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "ceph-bin", "ceph-libs-bin":
+				return nil
+			case "ceph", "ceph-libs", "ceph-libs=17.2.6-2":
+				return nil
+			}
+
+			panic("implement me " + s)
+		},
+
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "ceph-libs", "ceph-libs=17.2.6-2":
+				return false
+			case "dep1", "dep2", "dep3", "makedep1", "makedep2", "checkdep1":
+				return true
+			}
+
+			panic("implement me " + s)
+		},
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		mockPkgs := map[string]aur.Pkg{
+			"ceph-bin": {
+				Name:        "ceph-bin",
+				PackageBase: "ceph-bin",
+				Version:     "17.2.6-2",
+				Depends:     []string{"ceph-libs=17.2.6-2", "dep1"},
+				Provides:    []string{"ceph=17.2.6-2"},
+			},
+			"ceph-libs-bin": {
+				Name:        "ceph-libs-bin",
+				PackageBase: "ceph-bin",
+				Version:     "17.2.6-2",
+				Depends:     []string{"dep1", "dep2"},
+				Provides:    []string{"ceph-libs=17.2.6-2"},
+			},
+			"ceph": {
+				Name:         "ceph",
+				PackageBase:  "ceph",
+				Version:      "17.2.6-2",
+				Depends:      []string{"ceph-libs=17.2.6-2", "dep1"},
+				MakeDepends:  []string{"makedep1"},
+				CheckDepends: []string{"checkdep1"},
+				Provides:     []string{"ceph=17.2.6-2"},
+			},
+			"ceph-libs": {
+				Name:         "ceph-libs",
+				PackageBase:  "ceph",
+				Version:      "17.2.6-2",
+				Depends:      []string{"dep1", "dep2", "dep3"},
+				MakeDepends:  []string{"makedep1", "makedep2"},
+				CheckDepends: []string{"checkdep1"},
+				Provides:     []string{"ceph-libs=17.2.6-2"},
+			},
+		}
+
+		pkgs := []aur.Pkg{}
+		for _, needle := range query.Needles {
+			if pkg, ok := mockPkgs[needle]; ok {
+				pkgs = append(pkgs, pkg)
+			} else {
+				panic(fmt.Sprintf("implement me %v", needle))
+			}
+		}
+
+		return pkgs, nil
+	}}
+
+	installInfos := map[string]*InstallInfo{
+		"ceph-bin exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "17.2.6-2",
+			AURBase: ptrString("ceph-bin"),
+		},
+		"ceph-libs-bin exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "17.2.6-2",
+			AURBase: ptrString("ceph-bin"),
+		},
+		"ceph exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "17.2.6-2",
+			AURBase: ptrString("ceph"),
+		},
+		"ceph-libs exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "17.2.6-2",
+			AURBase: ptrString("ceph"),
+		},
+		"ceph-libs dep": {
+			Source:  AUR,
+			Reason:  Dep,
+			Version: "17.2.6-2",
+			AURBase: ptrString("ceph"),
+		},
+	}
+
+	tests := []struct {
+		name       string
+		targets    []string
+		wantLayers []map[string]*InstallInfo
+		wantErr    bool
+	}{
+		{
+			name:    "ceph-bin ceph-libs-bin",
+			targets: []string{"ceph-bin", "ceph-libs-bin"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph-bin": installInfos["ceph-bin exp"]},
+				{"ceph-libs-bin": installInfos["ceph-libs-bin exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "ceph-libs-bin ceph-bin (reversed order)",
+			targets: []string{"ceph-libs-bin", "ceph-bin"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph-bin": installInfos["ceph-bin exp"]},
+				{"ceph-libs-bin": installInfos["ceph-libs-bin exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "ceph",
+			targets: []string{"ceph"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph": installInfos["ceph exp"]},
+				{"ceph-libs": installInfos["ceph-libs dep"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "ceph-bin",
+			targets: []string{"ceph-bin"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph-bin": installInfos["ceph-bin exp"]},
+				{"ceph-libs": installInfos["ceph-libs dep"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "ceph-bin ceph-libs",
+			targets: []string{"ceph-bin", "ceph-libs"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph-bin": installInfos["ceph-bin exp"]},
+				{"ceph-libs": installInfos["ceph-libs exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "ceph-libs ceph-bin (reversed order)",
+			targets: []string{"ceph-libs", "ceph-bin"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph-bin": installInfos["ceph-bin exp"]},
+				{"ceph-libs": installInfos["ceph-libs exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "ceph ceph-libs-bin",
+			targets: []string{"ceph", "ceph-libs-bin"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph": installInfos["ceph exp"]},
+				{"ceph-libs-bin": installInfos["ceph-libs-bin exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "ceph-libs-bin ceph (reversed order)",
+			targets: []string{"ceph-libs-bin", "ceph"},
+			wantLayers: []map[string]*InstallInfo{
+				{"ceph": installInfos["ceph exp"]},
+				{"ceph-libs-bin": installInfos["ceph-libs-bin exp"]},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewGrapher(mockDB, mockAUR,
+				false, true, false, false, false,
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			require.NoError(t, err)
+			layers := got.TopoSortedLayerMap(nil)
+			require.EqualValues(t, tt.wantLayers, layers, layers)
+		})
+	}
+}
+
+func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncPackageFn:       func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "gourou", "libzip-git":
+				return nil
+			case "libzip":
+				return &mock.Package{
+					PName:    "libzip",
+					PVersion: "1.9.2-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			}
+
+			panic("implement me " + s)
+		},
+
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "gourou", "libzip", "libzip-git":
+				return false
+			case "dep1", "dep2":
+				return true
+			}
+
+			panic("implement me " + s)
+		},
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		mockPkgs := map[string]aur.Pkg{
+			"gourou": {
+				Name:        "gourou",
+				PackageBase: "gourou",
+				Version:     "0.8.1",
+				Depends:     []string{"libzip"},
+			},
+			"libzip-git": {
+				Name:        "libzip-git",
+				PackageBase: "libzip-git",
+				Version:     "1.9.2.r159.gb3ac716c-1",
+				Depends:     []string{"dep1", "dep2"},
+				Provides:    []string{"libzip=1.9.2.r159.gb3ac716c"},
+			},
+		}
+
+		pkgs := []aur.Pkg{}
+		for _, needle := range query.Needles {
+			if pkg, ok := mockPkgs[needle]; ok {
+				pkgs = append(pkgs, pkg)
+			} else {
+				panic(fmt.Sprintf("implement me %v", needle))
+			}
+		}
+
+		return pkgs, nil
+	}}
+
+	installInfos := map[string]*InstallInfo{
+		"gourou exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "0.8.1",
+			AURBase: ptrString("gourou"),
+		},
+		"libzip dep": {
+			Source:     Sync,
+			Reason:     Dep,
+			Version:    "1.9.2-1",
+			SyncDBName: ptrString("extra"),
+		},
+		"libzip exp": {
+			Source:     Sync,
+			Reason:     Explicit,
+			Version:    "1.9.2-1",
+			SyncDBName: ptrString("extra"),
+		},
+		"libzip-git exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "1.9.2.r159.gb3ac716c-1",
+			AURBase: ptrString("libzip-git"),
+		},
+	}
+
+	tests := []struct {
+		name       string
+		targets    []string
+		wantLayers []map[string]*InstallInfo
+		wantErr    bool
+	}{
+		{
+			name:    "gourou",
+			targets: []string{"gourou"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gourou": installInfos["gourou exp"]},
+				{"libzip": installInfos["libzip dep"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "gourou libzip",
+			targets: []string{"gourou", "libzip"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gourou": installInfos["gourou exp"]},
+				{"libzip": installInfos["libzip exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "gourou libzip-git",
+			targets: []string{"gourou", "libzip-git"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gourou": installInfos["gourou exp"]},
+				{"libzip-git": installInfos["libzip-git exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "libzip-git gourou (reversed order)",
+			targets: []string{"libzip-git", "gourou"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gourou": installInfos["gourou exp"]},
+				{"libzip-git": installInfos["libzip-git exp"]},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewGrapher(mockDB, mockAUR,
+				false, true, false, false, false,
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			require.NoError(t, err)
+			layers := got.TopoSortedLayerMap(nil)
+			require.EqualValues(t, tt.wantLayers, layers, layers)
+		})
+	}
+}
