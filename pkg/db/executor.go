@@ -47,7 +47,6 @@ type Executor interface {
 	LocalPackage(string) IPackage
 	LocalPackages() []IPackage
 	LocalSatisfierExists(string) bool
-	PackageConflicts(IPackage) []Depend
 	PackageDepends(IPackage) []Depend
 	PackageGroups(IPackage) []string
 	PackageOptionalDepends(IPackage) []Depend
