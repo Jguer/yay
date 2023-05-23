@@ -27,6 +27,8 @@ type (
 		exeCmd           exe.ICmdBuilder
 		vcsStore         vcs.Store
 		targetMode       parser.TargetMode
+		rebuildMode      parser.RebuildMode
+		origTargets      mapset.Set[string]
 		downloadOnly     bool
 		log              *text.Logger
 
@@ -36,7 +38,7 @@ type (
 
 func NewInstaller(dbExecutor db.Executor,
 	exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode,
-	downloadOnly bool, logger *text.Logger,
+	rebuildMode parser.RebuildMode, downloadOnly bool, logger *text.Logger,
 ) *Installer {
 	return &Installer{
 		dbExecutor:            dbExecutor,
@@ -45,6 +47,7 @@ func NewInstaller(dbExecutor db.Executor,
 		exeCmd:                exeCmd,
 		vcsStore:              vcsStore,
 		targetMode:            targetMode,
+		rebuildMode:           rebuildMode,
 		downloadOnly:          downloadOnly,
 		log:                   logger,
 		manualConfirmRequired: true,
@@ -90,6 +93,13 @@ func (installer *Installer) Install(ctx context.Context,
 ) error {
 	installer.log.Debugln("manualConfirmRequired:", manualConfirmRequired)
 	installer.manualConfirmRequired = manualConfirmRequired
+
+	installer.origTargets = mapset.NewThreadUnsafeSet[string]()
+	for _, targetString := range cmdArgs.Targets {
+		installer.origTargets.Add(dep.ToTarget(targetString).Name)
+	}
+	installer.log.Debugln("origTargets:", installer.origTargets)
+
 	// Reorganize targets into layers of dependencies
 	var errMulti multierror.MultiError
 	for i := len(targets) - 1; i >= 0; i-- {
@@ -216,7 +226,8 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		base := nameToBase[name]
 		dir := pkgBuildDirsByBase[base]
 
-		pkgdests, errMake := installer.buildPkg(ctx, dir, base, installIncompatible, cmdArgs.ExistsArg("needed"))
+		pkgdests, errMake := installer.buildPkg(ctx, dir, base,
+			installIncompatible, cmdArgs.ExistsArg("needed"), installer.origTargets.Contains(name))
 		if errMake != nil {
 			if !lastLayer {
 				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
@@ -264,7 +275,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 func (installer *Installer) buildPkg(ctx context.Context,
 	dir, base string,
-	installIncompatible, needed bool,
+	installIncompatible, needed, isTarget bool,
 ) (map[string]string, error) {
 	args := []string{"--nobuild", "-fC"}
 
@@ -288,7 +299,7 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
 		pkgdests = map[string]string{}
 		text.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
-	case pkgsAreBuilt(pkgdests):
+	case installer.skipAlreadyBuiltPkg(isTarget, pkgdests):
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
 		text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
 	default:
@@ -331,6 +342,20 @@ func pkgsAreBuilt(pkgdests map[string]string) bool {
 	}
 
 	return true
+}
+
+func (installer *Installer) skipAlreadyBuiltPkg(isTarget bool, pkgdests map[string]string) bool {
+	switch installer.rebuildMode {
+	case parser.RebuildModeNo:
+		return pkgsAreBuilt(pkgdests)
+	case parser.RebuildModeYes:
+		return !isTarget && pkgsAreBuilt(pkgdests)
+	// case parser.RebuildModeTree: // TODO
+	// case parser.RebuildModeAll: // TODO
+	default:
+		// same as RebuildModeNo
+		return pkgsAreBuilt(pkgdests)
+	}
 }
 
 func (*Installer) isDep(cmdArgs *parser.Arguments, aurExpNames mapset.Set[string], name string) bool {
