@@ -8,10 +8,10 @@ require (
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.2
-	github.com/stretchr/testify v1.8.2
-	golang.org/x/sys v0.6.0
-	golang.org/x/term v0.6.0
-	golang.org/x/text v0.8.0 // indirect
+	github.com/stretchr/testify v1.8.3
+	golang.org/x/sys v0.8.0
+	golang.org/x/term v0.8.0
+	golang.org/x/text v0.9.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
 
@@ -25,10 +25,10 @@ require (
 )
 
 require (
-	github.com/deckarep/golang-set/v2 v2.2.0
+	github.com/deckarep/golang-set/v2 v2.3.0
 	github.com/itchyny/gojq v0.12.12 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
-	github.com/ohler55/ojg v1.17.5 // indirect
+	github.com/ohler55/ojg v1.18.5 // indirect
 )
 
 require github.com/hashicorp/go-multierror v1.1.1
@@ -36,6 +36,7 @@ require github.com/hashicorp/go-multierror v1.1.1
 require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 )
 
 go 1.19
