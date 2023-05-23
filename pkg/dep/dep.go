@@ -5,40 +5,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	aur "github.com/Jguer/yay/v12/pkg/query"
-	"github.com/Jguer/yay/v12/pkg/text"
 )
-
-type providers struct {
-	lookfor string
-	Pkgs    []*aur.Pkg
-}
-
-func makeProviders(name string) providers {
-	return providers{
-		name,
-		make([]*aur.Pkg, 0),
-	}
-}
-
-func (q providers) Len() int {
-	return len(q.Pkgs)
-}
-
-func (q providers) Less(i, j int) bool {
-	if q.lookfor == q.Pkgs[i].Name {
-		return true
-	}
-
-	if q.lookfor == q.Pkgs[j].Name {
-		return false
-	}
-
-	return text.LessRunes([]rune(q.Pkgs[i].Name), []rune(q.Pkgs[j].Name))
-}
-
-func (q providers) Swap(i, j int) {
-	q.Pkgs[i], q.Pkgs[j] = q.Pkgs[j], q.Pkgs[i]
-}
 
 func splitDep(dep string) (pkg, mod, ver string) {
 	split := strings.FieldsFunc(dep, func(c rune) bool {
@@ -112,20 +79,6 @@ func satisfiesAur(dep string, pkg *aur.Pkg) bool {
 
 	for _, provide := range pkg.Provides {
 		if provideSatisfies(provide, dep, pkg.Version) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func satisfiesRepo(dep string, pkg db.IPackage, dbExecutor db.Executor) bool {
-	if pkgSatisfies(pkg.Name(), pkg.Version(), dep) {
-		return true
-	}
-
-	for _, provided := range dbExecutor.PackageProvides(pkg) {
-		if provideSatisfies(provided.String(), dep, pkg.Version()) {
 			return true
 		}
 	}
