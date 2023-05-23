@@ -24,7 +24,7 @@ func syncInstall(ctx context.Context,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache := cfg.Runtime.AURCache
+	aurCache := cfg.Runtime.AURClient
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	noDeps := cmdArgs.ExistsArg("d", "nodeps")
 	noCheck := strings.Contains(cfg.MFlags, "--nocheck")

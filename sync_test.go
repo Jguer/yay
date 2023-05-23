@@ -112,7 +112,7 @@ func TestSyncUpgrade(t *testing.T) {
 			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
@@ -225,7 +225,7 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
@@ -355,7 +355,7 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
@@ -520,7 +520,7 @@ pkgname = python-vosk
 			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n\n\n\n"), true, "test"),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{
 						{
@@ -704,7 +704,7 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 					Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
 					CmdBuilder: cmdBuilder,
 					VCSStore:   &vcs.Mock{},
-					AURCache: &mockaur.MockAUR{
+					AURClient: &mockaur.MockAUR{
 						GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 							return []aur.Pkg{}, nil
 						},

@@ -308,10 +308,10 @@ func handleWeb(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 	switch {
 	case cmdArgs.ExistsArg("v", "vote"):
 		return handlePackageVote(ctx, cmdArgs.Targets, cfg.Runtime.AURClient,
-			cfg.Runtime.VoteClient, cfg.RequestSplitN, true)
+			cfg.Runtime.VoteClient, true)
 	case cmdArgs.ExistsArg("u", "unvote"):
 		return handlePackageVote(ctx, cmdArgs.Targets, cfg.Runtime.AURClient,
-			cfg.Runtime.VoteClient, cfg.RequestSplitN, false)
+			cfg.Runtime.VoteClient, false)
 	}
 
 	return nil
@@ -319,11 +319,11 @@ func handleWeb(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 
 func handleGetpkgbuild(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
-		return printPkgbuilds(dbExecutor, cfg.Runtime.AURCache,
+		return printPkgbuilds(dbExecutor, cfg.Runtime.AURClient,
 			cfg.Runtime.HTTPClient, cmdArgs.Targets, cfg.Mode, cfg.AURURL)
 	}
 
-	return getPkgbuilds(ctx, dbExecutor, cfg.Runtime.AURCache, cfg,
+	return getPkgbuilds(ctx, dbExecutor, cfg.Runtime.AURClient, cfg,
 		cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }
 

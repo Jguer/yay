@@ -35,7 +35,7 @@ func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor 
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 
 	cfg.Runtime.QueryBuilder.Execute(ctx, dbExecutor, remoteNames)
-	info, err := cfg.Runtime.AURCache.Get(ctx, &aur.Query{
+	info, err := cfg.Runtime.AURClient.Get(ctx, &aur.Query{
 		Needles:  remoteNames,
 		By:       aur.Name,
 		Contains: false,

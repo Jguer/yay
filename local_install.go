@@ -61,7 +61,7 @@ func installLocalPKGBUILD(
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache := config.Runtime.AURCache
+	aurCache := config.Runtime.AURClient
 	noCheck := strings.Contains(config.MFlags, "--nocheck")
 
 	if len(cmdArgs.Targets) < 1 {

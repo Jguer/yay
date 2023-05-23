@@ -52,7 +52,7 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 			noDB = append(noDB, name)
 		}
 
-		info, err = cfg.Runtime.AURCache.Get(ctx, &aur.Query{
+		info, err = cfg.Runtime.AURClient.Get(ctx, &aur.Query{
 			Needles: noDB,
 			By:      aur.Name,
 		})

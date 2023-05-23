@@ -130,7 +130,7 @@ func cleanAUR(ctx context.Context, cfg *settings.Configuration,
 	// Querying the AUR is slow and needs internet so don't do it if we
 	// don't need to.
 	if keepCurrent {
-		info, errInfo := cfg.Runtime.AURCache.Get(ctx, &aur.Query{
+		info, errInfo := cfg.Runtime.AURClient.Get(ctx, &aur.Query{
 			Needles: cachedPackages,
 		})
 		if errInfo != nil {

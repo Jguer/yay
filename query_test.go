@@ -128,7 +128,7 @@ func TestSyncInfo(t *testing.T) {
 			cfg := &settings.Configuration{
 				Runtime: &settings.Runtime{
 					CmdBuilder: cmdBuilder,
-					AURCache:   mockAUR,
+					AURClient:  mockAUR,
 					Logger:     NewTestLogger(),
 				},
 			}
@@ -269,7 +269,7 @@ func TestSyncSearchAURDB(t *testing.T) {
 			cfg := &settings.Configuration{
 				Runtime: &settings.Runtime{
 					CmdBuilder: cmdBuilder,
-					AURCache:   mockAUR,
+					AURClient:  mockAUR,
 					QueryBuilder: query.NewSourceQueryBuilder(mockAUR, NewTestLogger(), "votes", parser.ModeAny, "name",
 						tc.bottomUp, tc.singleLine, tc.mixed),
 					Logger: NewTestLogger(),

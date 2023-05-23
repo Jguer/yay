@@ -116,7 +116,7 @@ func main() {
 	cfg.Runtime = runtime
 
 	cfg.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
-		cfg.Runtime.AURCache,
+		cfg.Runtime.AURClient,
 		cfg.Runtime.Logger.Child("mixed.querybuilder"), cfg.SortBy,
 		cfg.Mode, cfg.SearchBy,
 		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)

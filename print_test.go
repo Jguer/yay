@@ -277,7 +277,7 @@ func TestPrintUpdateList(t *testing.T) {
 					Logger:     NewTestLogger(),
 					CmdBuilder: cmdBuilder,
 					VCSStore:   &vcs.Mock{},
-					AURCache:   tc.mockData.aurCache,
+					AURClient:  tc.mockData.aurCache,
 				},
 			}
 
