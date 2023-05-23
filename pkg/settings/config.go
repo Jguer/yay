@@ -60,7 +60,6 @@ type Configuration struct {
 	CleanAfter             bool     `json:"cleanAfter"`
 	Provides               bool     `json:"provides"`
 	PGPFetch               bool     `json:"pgpfetch"`
-	UpgradeMenu            bool     `json:"upgrademenu"`
 	CleanMenu              bool     `json:"cleanmenu"`
 	DiffMenu               bool     `json:"diffmenu"`
 	EditMenu               bool     `json:"editmenu"`
@@ -228,7 +227,6 @@ func DefaultConfig(version string) *Configuration {
 		AnswerUpgrade:          "",
 		RemoveMake:             "ask",
 		Provides:               true,
-		UpgradeMenu:            true,
 		CleanMenu:              true,
 		DiffMenu:               true,
 		EditMenu:               false,
