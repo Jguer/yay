@@ -12,6 +12,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
+type Pkg = aur.Pkg
+
 func getSearchBy(value string) aur.By {
 	switch value {
 	case "name":

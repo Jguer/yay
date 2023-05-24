@@ -272,13 +272,12 @@ func TestPrintUpdateList(t *testing.T) {
 			}
 
 			cfg := &settings.Configuration{
-				NewInstallEngine: true,
-				RemoveMake:       "no",
+				RemoveMake: "no",
 				Runtime: &settings.Runtime{
 					Logger:     NewTestLogger(),
 					CmdBuilder: cmdBuilder,
 					VCSStore:   &vcs.Mock{},
-					AURCache:   tc.mockData.aurCache,
+					AURClient:  tc.mockData.aurCache,
 				},
 			}
 

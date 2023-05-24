@@ -144,7 +144,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
@@ -263,7 +263,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
@@ -421,7 +421,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
@@ -582,7 +582,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},
@@ -718,7 +718,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 			Logger:     NewTestLogger(),
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
-			AURCache: &mockaur.MockAUR{
+			AURClient: &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return []aur.Pkg{}, nil
 				},

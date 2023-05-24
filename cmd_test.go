@@ -104,15 +104,14 @@ func TestYogurtMenuAURDB(t *testing.T) {
 	}
 	logger := text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test")
 	cfg := &settings.Configuration{
-		NewInstallEngine: true,
-		RemoveMake:       "no",
+		RemoveMake: "no",
 		Runtime: &settings.Runtime{
 			Logger:     logger,
 			CmdBuilder: cmdBuilder,
 			VCSStore:   &vcs.Mock{},
 			QueryBuilder: query.NewSourceQueryBuilder(aurCache, logger, "votes", parser.ModeAny, "name",
 				true, false, true),
-			AURCache: aurCache,
+			AURClient: aurCache,
 		},
 	}
 

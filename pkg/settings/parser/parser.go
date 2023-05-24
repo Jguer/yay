@@ -425,8 +425,6 @@ func isArg(arg string) bool {
 	case "noprovides":
 	case "pgpfetch":
 	case "nopgpfetch":
-	case "upgrademenu":
-	case "noupgrademenu":
 	case "cleanmenu":
 	case "nocleanmenu":
 	case "diffmenu":

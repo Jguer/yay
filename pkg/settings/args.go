@@ -169,10 +169,6 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.PGPFetch = true
 	case "nopgpfetch":
 		c.PGPFetch = false
-	case "upgrademenu":
-		c.UpgradeMenu = true
-	case "noupgrademenu":
-		c.UpgradeMenu = false
 	case "cleanmenu":
 		c.CleanMenu = true
 	case "nocleanmenu":

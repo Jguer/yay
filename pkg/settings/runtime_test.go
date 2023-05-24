@@ -39,9 +39,8 @@ func TestBuildRuntime(t *testing.T) {
 	assert.NotNil(t, runtime.VCSStore)
 	assert.NotNil(t, runtime.CmdBuilder)
 	assert.NotNil(t, runtime.HTTPClient)
-	assert.NotNil(t, runtime.AURClient)
 	assert.NotNil(t, runtime.VoteClient)
-	assert.NotNil(t, runtime.AURCache)
+	assert.NotNil(t, runtime.AURClient)
 	assert.Nil(t, runtime.DBExecutor)
 	assert.NotNil(t, runtime.Logger)
 }

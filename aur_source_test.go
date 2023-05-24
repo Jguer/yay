@@ -102,7 +102,7 @@ func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 				test: t,
 			}
 
-			err := downloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, false, maxConcurrentDownloads)
+			err := downloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, true, maxConcurrentDownloads)
 			assert.NoError(t, err)
 			assert.Equal(t, 5, int(cmdBuilder.passes))
 		})

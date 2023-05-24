@@ -20,8 +20,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/upgrade"
 )
 
-// PrintInfo prints package info like pacman -Si.
-func PrintInfo(config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
+// printInfo prints package info like pacman -Si.
+func printInfo(config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
 	text.PrintInfoValue(gotext.Get("Repository"), "aur")
 	text.PrintInfoValue(gotext.Get("Name"), a.Name)
 	text.PrintInfoValue(gotext.Get("Keywords"), a.Keywords...)
@@ -77,6 +77,7 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 	info := statistics(cfg, dbExecutor)
 
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
+	remote := dbExecutor.InstalledRemotePackages()
 	text.Infoln(gotext.Get("Yay version v%s", yayVersion))
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 	text.Infoln(gotext.Get("Total installed packages: %s", text.Cyan(strconv.Itoa(info.Totaln))))
@@ -94,7 +95,20 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 	biggestPackages(dbExecutor)
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 
-	query.AURInfoPrint(ctx, cfg.Runtime.AURClient, remoteNames, cfg.RequestSplitN)
+	aurData, err := cfg.Runtime.AURClient.Get(ctx, &aur.Query{
+		Needles: remoteNames,
+		By:      aur.Name,
+	})
+	if err != nil {
+		return err
+	}
+
+	warnings := query.NewWarnings(cfg.Runtime.Logger.Child("print"))
+	for i := range aurData {
+		warnings.AddToWarnings(remote, &aurData[i])
+	}
+
+	warnings.Print()
 
 	return nil
 }
@@ -113,11 +127,11 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	defer func() { settings.NoConfirm = oldNoConfirm }()
 
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
-	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURCache, false, true,
+	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURClient, false, true,
 		false, false, cmdArgs.ExistsArg("needed"), logger.Child("grapher"))
 
 	upService := upgrade.NewUpgradeService(
-		grapher, cfg.Runtime.AURCache, dbExecutor, cfg.Runtime.VCSStore,
+		grapher, cfg.Runtime.AURClient, dbExecutor, cfg.Runtime.VCSStore,
 		cfg, true, logger.Child("upgrade"))
 
 	graph, errSysUp := upService.GraphUpgrades(ctx, nil,

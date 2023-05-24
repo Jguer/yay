@@ -5,11 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Jguer/aur/rpc"
+	"github.com/Jguer/aur"
 	"github.com/Jguer/votar/pkg/vote"
 	"github.com/leonelquinteros/gotext"
-
-	"github.com/Jguer/yay/v12/pkg/query"
 )
 
 type ErrAURVote struct {
@@ -22,10 +20,13 @@ func (e *ErrAURVote) Error() string {
 }
 
 func handlePackageVote(ctx context.Context,
-	targets []string, aurClient rpc.ClientInterface,
-	voteClient *vote.Client, splitN int, upvote bool,
+	targets []string, aurClient aur.QueryClient,
+	voteClient *vote.Client, upvote bool,
 ) error {
-	infos, err := query.AURInfoPrint(ctx, aurClient, targets, splitN)
+	infos, err := aurClient.Get(ctx, &aur.Query{
+		Needles: targets,
+		By:      aur.Name,
+	})
 	if err != nil {
 		return err
 	}

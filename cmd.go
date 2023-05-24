@@ -91,11 +91,9 @@ Permanent configuration options:
     --cleanmenu           Give the option to clean build PKGBUILDS
     --diffmenu            Give the option to show diffs for build files
     --editmenu            Give the option to edit/view PKGBUILDS
-    --upgrademenu         Show a detailed list of updates with the option to skip any
     --nocleanmenu         Don't clean build PKGBUILDS
     --nodiffmenu          Don't show diffs for build files
     --noeditmenu          Don't edit/view PKGBUILDS
-    --noupgrademenu       Don't show the upgrade menu
     --askremovemake       Ask to remove makedepends after install
     --removemake          Remove makedepends after install
     --noremovemake        Don't remove makedepends after install
@@ -308,10 +306,10 @@ func handleWeb(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 	switch {
 	case cmdArgs.ExistsArg("v", "vote"):
 		return handlePackageVote(ctx, cmdArgs.Targets, cfg.Runtime.AURClient,
-			cfg.Runtime.VoteClient, cfg.RequestSplitN, true)
+			cfg.Runtime.VoteClient, true)
 	case cmdArgs.ExistsArg("u", "unvote"):
 		return handlePackageVote(ctx, cmdArgs.Targets, cfg.Runtime.AURClient,
-			cfg.Runtime.VoteClient, cfg.RequestSplitN, false)
+			cfg.Runtime.VoteClient, false)
 	}
 
 	return nil
@@ -319,11 +317,11 @@ func handleWeb(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser
 
 func handleGetpkgbuild(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
-		return printPkgbuilds(dbExecutor, cfg.Runtime.AURCache,
+		return printPkgbuilds(dbExecutor, cfg.Runtime.AURClient,
 			cfg.Runtime.HTTPClient, cmdArgs.Targets, cfg.Mode, cfg.AURURL)
 	}
 
-	return getPkgbuilds(ctx, dbExecutor, cfg.Runtime.AURCache, cfg,
+	return getPkgbuilds(ctx, dbExecutor, cfg.Runtime.AURClient, cfg,
 		cmdArgs.Targets, cmdArgs.ExistsArg("f", "force"))
 }
 
@@ -364,11 +362,7 @@ func handleSync(ctx context.Context, cfg *settings.Configuration, cmdArgs *parse
 	case cmdArgs.ExistsArg("i", "info"):
 		return syncInfo(ctx, cfg, cmdArgs, targets, dbExecutor)
 	case cmdArgs.ExistsArg("u", "sysupgrade") || len(cmdArgs.Targets) > 0:
-		if cfg.NewInstallEngine {
-			return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
-		}
-
-		return install(ctx, cfg, cmdArgs, dbExecutor, false)
+		return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("y", "refresh"):
 		return cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, cfg.Mode, settings.NoConfirm))
@@ -424,11 +418,7 @@ func displayNumberMenu(ctx context.Context, cfg *settings.Configuration, pkgS []
 		return nil
 	}
 
-	if cfg.NewInstallEngine {
-		return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
-	}
-
-	return install(ctx, cfg, cmdArgs, dbExecutor, true)
+	return syncInstall(ctx, cfg, cmdArgs, dbExecutor)
 }
 
 func syncList(ctx context.Context, cfg *settings.Configuration,

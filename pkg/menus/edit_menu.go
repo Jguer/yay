@@ -4,7 +4,6 @@ package menus
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -109,38 +108,6 @@ func editPkgbuilds(log *text.Logger, pkgbuildDirs map[string]string, bases []str
 		if err := editcmd.Run(); err != nil {
 			return errors.New(gotext.Get("editor did not exit successfully, aborting: %s", err))
 		}
-	}
-
-	return nil
-}
-
-func Edit(w io.Writer, log *text.Logger, editMenuOption bool, pkgbuildDirs map[string]string, editorConfig,
-	editorFlags string, installed mapset.Set[string], srcinfos map[string]*gosrc.Srcinfo,
-	noConfirm bool, editDefaultAnswer string,
-) error {
-	if !editMenuOption {
-		return nil
-	}
-
-	bases := make([]string, 0, len(pkgbuildDirs))
-	for pkg := range pkgbuildDirs {
-		bases = append(bases, pkg)
-	}
-
-	toEdit, errMenu := selectionMenu(w, pkgbuildDirs, bases,
-		installed, gotext.Get("PKGBUILDs to edit?"), noConfirm, editDefaultAnswer, nil)
-	if errMenu != nil || len(toEdit) == 0 {
-		return errMenu
-	}
-
-	if errEdit := editPkgbuilds(log, pkgbuildDirs, toEdit, editorConfig, editorFlags, srcinfos, noConfirm); errEdit != nil {
-		return errEdit
-	}
-
-	fmt.Println()
-
-	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
-		return settings.ErrUserAbort{}
 	}
 
 	return nil

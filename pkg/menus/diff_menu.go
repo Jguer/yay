@@ -145,42 +145,6 @@ func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgb
 	return errMulti.Return()
 }
 
-func Diff(ctx context.Context, cmdBuilder exe.ICmdBuilder, w io.Writer,
-	pkgbuildDirs map[string]string, diffMenuOption bool,
-	installed mapset.Set[string], cloned map[string]bool, noConfirm bool, diffDefaultAnswer string,
-) error {
-	if !diffMenuOption {
-		return nil
-	}
-
-	bases := make([]string, 0, len(pkgbuildDirs))
-	for base := range pkgbuildDirs {
-		bases = append(bases, base)
-	}
-
-	toDiff, errMenu := selectionMenu(w, pkgbuildDirs, bases, installed, gotext.Get("Diffs to show?"),
-		noConfirm, diffDefaultAnswer, nil)
-	if errMenu != nil || len(toDiff) == 0 {
-		return errMenu
-	}
-
-	if errD := showPkgbuildDiffs(ctx, cmdBuilder, pkgbuildDirs, toDiff); errD != nil {
-		return errD
-	}
-
-	fmt.Println()
-
-	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
-		return settings.ErrUserAbort{}
-	}
-
-	if errUpd := updatePkgbuildSeenRef(ctx, cmdBuilder, pkgbuildDirs, toDiff); errUpd != nil {
-		return errUpd
-	}
-
-	return nil
-}
-
 func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error {
 	if len(pkgbuildDirsByBase) == 0 {
 		return nil // no work to do

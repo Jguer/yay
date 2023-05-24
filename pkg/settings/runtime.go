@@ -29,9 +29,8 @@ type Runtime struct {
 	VCSStore     vcs.Store
 	CmdBuilder   exe.ICmdBuilder
 	HTTPClient   *http.Client
-	AURClient    *rpc.Client
 	VoteClient   *vote.Client
-	AURCache     aur.QueryClient
+	AURClient    aur.QueryClient
 	DBExecutor   db.Executor
 	Logger       *text.Logger
 }
@@ -101,9 +100,8 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 		VCSStore:     vcsStore,
 		CmdBuilder:   cmdBuilder,
 		HTTPClient:   &http.Client{},
-		AURClient:    aurClient,
 		VoteClient:   voteClient,
-		AURCache:     aurCache,
+		AURClient:    aurCache,
 		DBExecutor:   nil,
 		Logger:       text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime"),
 	}

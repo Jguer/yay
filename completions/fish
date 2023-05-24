@@ -216,11 +216,9 @@ complete -c $progname -n "not $noopt" -l noanswerupgrade -d 'Unset the answer fo
 complete -c $progname -n "not $noopt" -l cleanmenu -d 'Give the option to clean build PKGBUILDS' -f
 complete -c $progname -n "not $noopt" -l diffmenu -d 'Give the option to show diffs for build files' -f
 complete -c $progname -n "not $noopt" -l editmenu -d 'Give the option to edit/view PKGBUILDS' -f
-complete -c $progname -n "not $noopt" -l upgrademenu -d 'Show a detailed list of updates with the option to skip any' -f
 complete -c $progname -n "not $noopt" -l nocleanmenu -d 'Do not clean build PKGBUILDS' -f
 complete -c $progname -n "not $noopt" -l nodiffmenu -d 'Do not show diffs for build files' -f
 complete -c $progname -n "not $noopt" -l noeditmenu -d 'Do not edit/view PKGBUILDS' -f
-complete -c $progname -n "not $noopt" -l noupgrademenu -d 'Do not show the upgrade menu' -f
 complete -c $progname -n "not $noopt" -l askremovemake -d 'Ask to remove make deps after install' -f
 complete -c $progname -n "not $noopt" -l removemake -d 'Remove make deps after install' -f
 complete -c $progname -n "not $noopt" -l noremovemake -d 'Do not remove make deps after install' -f

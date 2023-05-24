@@ -82,7 +82,7 @@ packages.
 Displays a list of packages matching the search terms and prompts the user on
 which packages to install (yogurt mode).
 
-The first search term is used to query the different sources and 
+The first search term is used to query the different sources and
 the following search terms are used to narrow the search results
 through exact matching.
 
@@ -311,17 +311,6 @@ before building.
 recommended to edit pkgbuild variables unless you know what you are doing.
 
 .TP
-.B \-\-upgrademenu
-Show a detailed list of updates in a similar format to VerbosePkgLists.
-Upgrades can also be skipped using numbers, number ranges or repo names.
-Additionally ^ can be used to invert the selection.
-
-\fBWarning\fR: It is not recommended to skip updates from the repositories as
-this can lead to partial upgrades. This feature is intended to easily skip AUR
-updates on the fly that may be broken or have a long compile time. Ultimately
-it is up to the user what upgrades they skip.
-
-.TP
 .B \-\-nocleanmenu
 Do not show the clean menu.
 
@@ -332,10 +321,6 @@ Do not show the diff menu.
 .TP
 .B \-\-noeditmenu
 Do not show the edit menu.
-
-.TP
-.B \-\-noupgrademenu
-Do not show the upgrade menu.
 
 .TP
 .B \-\-askremovemake

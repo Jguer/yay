@@ -398,11 +398,6 @@ func (ae *AlpmExecutor) PackageProvides(pkg alpm.IPackage) []alpm.Depend {
 	return alpmPackage.Provides().Slice()
 }
 
-func (ae *AlpmExecutor) PackageConflicts(pkg alpm.IPackage) []alpm.Depend {
-	alpmPackage := pkg.(*alpm.Package)
-	return alpmPackage.Conflicts().Slice()
-}
-
 func (ae *AlpmExecutor) PackageGroups(pkg alpm.IPackage) []string {
 	alpmPackage := pkg.(*alpm.Package)
 	return alpmPackage.Groups().Slice()
