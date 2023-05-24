@@ -68,10 +68,7 @@ func installLocalPKGBUILD(
 		return errors.New(gotext.Get("no target directories specified"))
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
-		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
-		config.Runtime.Logger.Child("grapher"))
-	graph := topo.New[string, *dep.InstallInfo]()
+	srcInfos := map[string]*gosrc.Srcinfo{}
 	for _, targetDir := range cmdArgs.Targets {
 		if err := srcinfoExists(ctx, config.Runtime.CmdBuilder, targetDir); err != nil {
 			return err
@@ -82,11 +79,16 @@ func installLocalPKGBUILD(
 			return errors.Wrap(err, gotext.Get("failed to parse .SRCINFO"))
 		}
 
-		var errG error
-		graph, errG = grapher.GraphFromSrcInfo(ctx, graph, targetDir, pkgbuild)
-		if errG != nil {
-			return errG
-		}
+		srcInfos[targetDir] = pkgbuild
+	}
+
+	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
+		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
+		config.Runtime.Logger.Child("grapher"))
+	graph := topo.New[string, *dep.InstallInfo]()
+	graph, err := grapher.GraphFromSrcInfos(ctx, graph, srcInfos)
+	if err != nil {
+		return err
 	}
 
 	opService := NewOperationService(ctx, config, dbExecutor)

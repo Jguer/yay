@@ -56,10 +56,12 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"makepkg --nobuild -fC --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
+		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
 		"makepkg --nobuild -fC --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
-		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin jellyfin-web",
+		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
 	}
 
 	wantCapture := []string{
@@ -487,10 +489,12 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"makepkg --nobuild -fC --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
+		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
 		"makepkg --nobuild -fC --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
-		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin jellyfin-web",
+		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
 	}
 
 	wantCapture := []string{
@@ -735,6 +739,269 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 	for i, call := range mockRunner.ShowCalls {
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
+		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+		show = strings.ReplaceAll(show, pacmanBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "pacman")
+
+		// options are in a different order on different systems and on CI root user is used
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+	}
+}
+
+func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	gitBin := t.TempDir() + "/git"
+	tmpDir := t.TempDir()
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(gitBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	tars := []string{
+		tmpDir + "/ceph-bin-17.2.6-2-x86_64.pkg.tar.zst",
+		tmpDir + "/ceph-libs-bin-17.2.6-2-x86_64.pkg.tar.zst",
+	}
+
+	wantShow := []string{
+		"makepkg --verifysource -Ccf",
+		"makepkg --nobuild -fC --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+		"pacman -U --config /etc/pacman.conf -- /testdir/ceph-libs-bin-17.2.6-2-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- ceph-libs-bin",
+		"makepkg --nobuild -fC --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+		"pacman -U --config /etc/pacman.conf -- /testdir/ceph-bin-17.2.6-2-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- ceph-bin",
+	}
+
+	wantCapture := []string{
+		"git -C testdata/cephbin git reset --hard HEAD",
+		"git -C testdata/cephbin git merge --no-edit --ff",
+		"makepkg --packagelist",
+		"makepkg --packagelist",
+	}
+
+	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+		return strings.Join(tars, "\n"), "", nil
+	}
+
+	once := sync.Once{}
+
+	showOverride := func(cmd *exec.Cmd) error {
+		once.Do(func() {
+			for _, tar := range tars {
+				f, err := os.OpenFile(tar, os.O_RDONLY|os.O_CREATE, 0o666)
+				require.NoError(t, err)
+				require.NoError(t, f.Close())
+			}
+		})
+		return nil
+	}
+
+	mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:       makepkgBin,
+		SudoBin:          "su",
+		PacmanBin:        pacmanBin,
+		PacmanConfigPath: "/etc/pacman.conf",
+		GitBin:           "git",
+		Runner:           mockRunner,
+		SudoLoopEnabled:  false,
+	}
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddArg("B")
+	cmdArgs.AddArg("i")
+	cmdArgs.AddTarget("testdata/cephbin")
+	settings.NoConfirm = true
+	defer func() { settings.NoConfirm = false }()
+	db := &mock.DBExecutor{
+		AlpmArchitecturesFn: func() ([]string, error) {
+			return []string{"x86_64"}, nil
+		},
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "ceph=17.2.6-2", "ceph-libs=17.2.6-2":
+				return false
+			}
+
+			return true
+		},
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			return nil
+		},
+	}
+
+	config := &settings.Configuration{
+		RemoveMake: "no",
+		Runtime: &settings.Runtime{
+			Logger:     NewTestLogger(),
+			CmdBuilder: cmdBuilder,
+			VCSStore:   &vcs.Mock{},
+			AURClient: &mockaur.MockAUR{
+				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+					return []aur.Pkg{}, nil
+				},
+			},
+		},
+	}
+
+	err = handleCmd(context.Background(), config, cmdArgs, db)
+	require.NoError(t, err)
+
+	require.Len(t, mockRunner.ShowCalls, len(wantShow))
+	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
+
+	for i, call := range mockRunner.ShowCalls {
+		show := call.Args[0].(*exec.Cmd).String()
+		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
+		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+		show = strings.ReplaceAll(show, pacmanBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "pacman")
+
+		// options are in a different order on different systems and on CI root user is used
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+	}
+}
+
+func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	gitBin := t.TempDir() + "/git"
+	tmpDir1 := t.TempDir()
+	tmpDir2 := t.TempDir()
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(gitBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	pkgsTars := []string{
+		tmpDir1 + "/libzip-git-1.9.2.r166.gd2c47d0f-1-x86_64.pkg.tar.zst",
+		tmpDir2 + "/gourou-0.8.1-4-x86_64.pkg.tar.zst",
+	}
+
+	wantShow := []string{
+		"makepkg --verifysource -Ccf",
+		"makepkg --verifysource -Ccf",
+		"makepkg --nobuild -fC --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+		"pacman -U --config /etc/pacman.conf -- /testdir1/libzip-git-1.9.2.r166.gd2c47d0f-1-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- libzip-git",
+		"makepkg --nobuild -fC --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+		"pacman -U --config /etc/pacman.conf -- /testdir2/gourou-0.8.1-4-x86_64.pkg.tar.zst",
+		"pacman -D -q --asexplicit --config /etc/pacman.conf -- gourou",
+	}
+
+	wantCapture := []string{
+		"git -C testdata/gourou git reset --hard HEAD",
+		"git -C testdata/gourou git merge --no-edit --ff",
+		"git -C testdata/libzip-git git reset --hard HEAD",
+		"git -C testdata/libzip-git git merge --no-edit --ff",
+		"makepkg --packagelist",
+		"makepkg --packagelist",
+	}
+
+	captureCounter := 0
+	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+		captureCounter++
+		switch captureCounter {
+		case 5:
+			return pkgsTars[0] + "\n", "", nil
+		case 6:
+			return pkgsTars[1] + "\n", "", nil
+		default:
+			return "", "", nil
+		}
+	}
+
+	once := sync.Once{}
+
+	showOverride := func(cmd *exec.Cmd) error {
+		once.Do(func() {
+			for _, tar := range pkgsTars {
+				f, err := os.OpenFile(tar, os.O_RDONLY|os.O_CREATE, 0o666)
+				require.NoError(t, err)
+				require.NoError(t, f.Close())
+			}
+		})
+		return nil
+	}
+
+	mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:       makepkgBin,
+		SudoBin:          "su",
+		PacmanBin:        pacmanBin,
+		PacmanConfigPath: "/etc/pacman.conf",
+		GitBin:           "git",
+		Runner:           mockRunner,
+		SudoLoopEnabled:  false,
+	}
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddArg("B")
+	cmdArgs.AddArg("i")
+	cmdArgs.AddTarget("testdata/gourou")
+	cmdArgs.AddTarget("testdata/libzip-git")
+	settings.NoConfirm = true
+	defer func() { settings.NoConfirm = false }()
+	db := &mock.DBExecutor{
+		AlpmArchitecturesFn: func() ([]string, error) {
+			return []string{"x86_64"}, nil
+		},
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "gourou", "libzip", "libzip-git":
+				return false
+			}
+
+			return true
+		},
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			return nil
+		},
+	}
+
+	config := &settings.Configuration{
+		RemoveMake: "no",
+		Runtime: &settings.Runtime{
+			Logger:     NewTestLogger(),
+			CmdBuilder: cmdBuilder,
+			VCSStore:   &vcs.Mock{},
+			AURClient: &mockaur.MockAUR{
+				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+					return []aur.Pkg{}, nil
+				},
+			},
+		},
+	}
+
+	err = handleCmd(context.Background(), config, cmdArgs, db)
+	require.NoError(t, err)
+
+	require.Len(t, mockRunner.ShowCalls, len(wantShow))
+	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
+
+	for i, call := range mockRunner.ShowCalls {
+		show := call.Args[0].(*exec.Cmd).String()
+		show = strings.ReplaceAll(show, tmpDir1, "/testdir1") // replace the temp dir with a static path
+		show = strings.ReplaceAll(show, tmpDir2, "/testdir2") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
 		show = strings.ReplaceAll(show, gitBin, "pacman")

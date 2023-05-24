@@ -196,8 +196,8 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	return graph, nil
 }
 
-func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
-	final := make([]aurc.Pkg, 0, len(pkgs))
+func (g *Grapher) pickSrcInfoPkgs(pkgs []*aurc.Pkg) ([]*aurc.Pkg, error) {
+	final := make([]*aurc.Pkg, 0, len(pkgs))
 	for i := range pkgs {
 		g.logger.Println(text.Magenta(strconv.Itoa(i+1)+" ") + text.Bold(pkgs[i].Name) +
 			" " + text.Cyan(pkgs[i].Version))
@@ -228,44 +228,66 @@ func (g *Grapher) pickSrcInfoPkgs(pkgs []aurc.Pkg) ([]aurc.Pkg, error) {
 	return final, nil
 }
 
-func (g *Grapher) GraphFromSrcInfo(ctx context.Context, graph *topo.Graph[string, *InstallInfo], pkgBuildDir string,
-	pkgbuild *gosrc.Srcinfo,
+func (g *Grapher) addAurPkgProvides(pkg *aurc.Pkg, graph *topo.Graph[string, *InstallInfo]) {
+	for i := range pkg.Provides {
+		depName, mod, version := splitDep(pkg.Provides[i])
+		g.logger.Debugln(pkg.String() + " provides: " + depName)
+		graph.Provides(depName, &alpm.Depend{
+			Name:    depName,
+			Version: version,
+			Mod:     aurDepModToAlpmDep(mod),
+		}, pkg.Name)
+	}
+}
+
+func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[string, *InstallInfo],
+	srcInfos map[string]*gosrc.Srcinfo,
 ) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
 		graph = topo.New[string, *InstallInfo]()
 	}
 
-	aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
-	if err != nil {
-		return nil, err
-	}
+	aurPkgsAdded := []*aurc.Pkg{}
+	for pkgBuildDir, pkgbuild := range srcInfos {
+		pkgBuildDir := pkgBuildDir
 
-	if len(aurPkgs) > 1 {
-		var errPick error
-		aurPkgs, errPick = g.pickSrcInfoPkgs(aurPkgs)
-		if errPick != nil {
-			return nil, errPick
+		aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
+		if err != nil {
+			return nil, err
 		}
+
+		if len(aurPkgs) > 1 {
+			var errPick error
+			aurPkgs, errPick = g.pickSrcInfoPkgs(aurPkgs)
+			if errPick != nil {
+				return nil, errPick
+			}
+		}
+
+		for _, pkg := range aurPkgs {
+			pkg := pkg
+
+			graph.AddNode(pkg.Name)
+
+			g.addAurPkgProvides(pkg, graph)
+
+			g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
+				Color:      colorMap[Explicit],
+				Background: bgColorMap[AUR],
+				Value: &InstallInfo{
+					Source:      SrcInfo,
+					Reason:      Explicit,
+					SrcinfoPath: &pkgBuildDir,
+					AURBase:     &pkg.PackageBase,
+					Version:     pkg.Version,
+				},
+			})
+		}
+
+		aurPkgsAdded = append(aurPkgsAdded, aurPkgs...)
 	}
 
-	for i := range aurPkgs {
-		pkg := &aurPkgs[i]
-
-		graph.AddNode(pkg.Name)
-		g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
-			Color:      colorMap[Explicit],
-			Background: bgColorMap[AUR],
-			Value: &InstallInfo{
-				Source:      SrcInfo,
-				Reason:      Explicit,
-				SrcinfoPath: &pkgBuildDir,
-				AURBase:     &pkg.PackageBase,
-				Version:     pkg.Version,
-			},
-		})
-
-		g.addDepNodes(ctx, pkg, graph)
-	}
+	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
 	return graph, nil
 }
@@ -324,14 +346,7 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 
 	graph.AddNode(pkg.Name)
 
-	for i := range pkg.Provides {
-		depName, mod, version := splitDep(pkg.Provides[i])
-		graph.Provides(depName, &alpm.Depend{
-			Name:    depName,
-			Version: version,
-			Mod:     aurDepModToAlpmDep(mod),
-		}, pkg.Name)
-	}
+	g.addAurPkgProvides(pkg, graph)
 
 	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 		Color:      colorMap[instalInfo.Reason],
@@ -709,8 +724,8 @@ func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 	return nil
 }
 
-func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]aur.Pkg, error) {
-	pkgs := make([]aur.Pkg, 0, 1)
+func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*aur.Pkg, error) {
+	pkgs := make([]*aur.Pkg, 0, 1)
 
 	alpmArch, err := dbExecutor.AlpmArchitectures()
 	if err != nil {
@@ -730,7 +745,7 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]au
 	for i := range srcInfo.Packages {
 		pkg := &srcInfo.Packages[i]
 
-		pkgs = append(pkgs, aur.Pkg{
+		pkgs = append(pkgs, &aur.Pkg{
 			ID:            0,
 			Name:          pkg.Pkgname,
 			PackageBaseID: 0,

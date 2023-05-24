@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"sync"
 
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 )
@@ -19,17 +20,20 @@ func (c *Call) String() string {
 }
 
 type MockBuilder struct {
-	Runner               Runner
-	BuildMakepkgCmdCalls []Call
-	BuildMakepkgCmdFn    func(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
-	BuildPacmanCmdFn     func(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
+	Runner                 Runner
+	BuildMakepkgCmdCallsMu sync.Mutex
+	BuildMakepkgCmdCalls   []Call
+	BuildMakepkgCmdFn      func(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
+	BuildPacmanCmdFn       func(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 }
 
 type MockRunner struct {
-	ShowCalls    []Call
-	CaptureCalls []Call
-	ShowFn       func(cmd *exec.Cmd) error
-	CaptureFn    func(cmd *exec.Cmd) (stdout string, stderr string, err error)
+	ShowCallsMu    sync.Mutex
+	ShowCalls      []Call
+	CaptureCallsMu sync.Mutex
+	CaptureCalls   []Call
+	ShowFn         func(cmd *exec.Cmd) error
+	CaptureFn      func(cmd *exec.Cmd) (stdout string, stderr string, err error)
 }
 
 func (m *MockBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
@@ -40,6 +44,7 @@ func (m *MockBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs
 		res = exec.CommandContext(ctx, "makepkg", extraArgs...)
 	}
 
+	m.BuildMakepkgCmdCallsMu.Lock()
 	m.BuildMakepkgCmdCalls = append(m.BuildMakepkgCmdCalls, Call{
 		Res: []interface{}{res},
 		Args: []interface{}{
@@ -48,6 +53,7 @@ func (m *MockBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs
 			extraArgs,
 		},
 	})
+	m.BuildMakepkgCmdCallsMu.Unlock()
 
 	return res
 }
@@ -86,12 +92,14 @@ func (m *MockBuilder) Show(cmd *exec.Cmd) error {
 }
 
 func (m *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
+	m.CaptureCallsMu.Lock()
 	m.CaptureCalls = append(m.CaptureCalls, Call{
 		Args: []interface{}{
 			cmd,
 		},
 		Dir: cmd.Dir,
 	})
+	m.CaptureCallsMu.Unlock()
 
 	if m.CaptureFn != nil {
 		return m.CaptureFn(cmd)
@@ -106,12 +114,14 @@ func (m *MockRunner) Show(cmd *exec.Cmd) error {
 		err = m.ShowFn(cmd)
 	}
 
+	m.ShowCallsMu.Lock()
 	m.ShowCalls = append(m.ShowCalls, Call{
 		Args: []interface{}{
 			cmd,
 		},
 		Dir: cmd.Dir,
 	})
+	m.ShowCallsMu.Unlock()
 
 	return err
 }
