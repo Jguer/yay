@@ -138,6 +138,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 
 			return nil
 		},
+		LocalPackageFn: func(s string) mock.IPackage { return nil },
 	}
 
 	config := &settings.Configuration{
@@ -258,6 +259,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 
 			return nil
 		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
 	}
 
 	config := &settings.Configuration{
@@ -557,6 +559,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 
 			return true
 		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
 		SyncSatisfierFn: func(s string) mock.IPackage {
 			switch s {
 			case "dotnet-runtime>=6", "dotnet-runtime<7":
@@ -838,6 +841,7 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		SyncSatisfierFn: func(s string) mock.IPackage {
 			return nil
 		},
+		LocalPackageFn: func(s string) mock.IPackage { return nil },
 	}
 
 	config := &settings.Configuration{
@@ -976,6 +980,7 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		SyncSatisfierFn: func(s string) mock.IPackage {
 			return nil
 		},
+		LocalPackageFn: func(s string) mock.IPackage { return nil },
 	}
 
 	config := &settings.Configuration{
