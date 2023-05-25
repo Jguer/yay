@@ -76,6 +76,51 @@ func Test_getPackageURL(t *testing.T) {
 			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/zabix/-/raw/main/PKGBUILD",
 			wantErr: false,
 		},
+		{
+			name: "special name +",
+			args: args{
+				db:      "core",
+				pkgName: "my+package",
+			},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/my-package/-/raw/main/PKGBUILD",
+			wantErr: false,
+		},
+		{
+			name: "special name %",
+			args: args{
+				db:      "core",
+				pkgName: "my%package",
+			},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/my-package/-/raw/main/PKGBUILD",
+			wantErr: false,
+		},
+		{
+			name: "special name _-",
+			args: args{
+				db:      "core",
+				pkgName: "my_-package",
+			},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/my-package/-/raw/main/PKGBUILD",
+			wantErr: false,
+		},
+		{
+			name: "special name ++",
+			args: args{
+				db:      "core",
+				pkgName: "my++package",
+			},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/mypluspluspackage/-/raw/main/PKGBUILD",
+			wantErr: false,
+		},
+		{
+			name: "special name tree",
+			args: args{
+				db:      "sweswe",
+				pkgName: "tree",
+			},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/unix-tree/-/raw/main/PKGBUILD",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -178,6 +223,36 @@ func Test_getPackageRepoURL(t *testing.T) {
 			name:    "personal repo package",
 			args:    args{pkgName: "sweswe"},
 			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/sweswe.git",
+			wantErr: false,
+		},
+		{
+			name:    "special name +",
+			args:    args{pkgName: "my+package"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/my-package.git",
+			wantErr: false,
+		},
+		{
+			name:    "special name %",
+			args:    args{pkgName: "my%package"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/my-package.git",
+			wantErr: false,
+		},
+		{
+			name:    "special name _-",
+			args:    args{pkgName: "my_-package"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/my-package.git",
+			wantErr: false,
+		},
+		{
+			name:    "special name ++",
+			args:    args{pkgName: "my++package"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/mypluspluspackage.git",
+			wantErr: false,
+		},
+		{
+			name:    "special name tree",
+			args:    args{pkgName: "tree"},
+			want:    "https://gitlab.archlinux.org/archlinux/packaging/packages/unix-tree.git",
 			wantErr: false,
 		},
 	}
