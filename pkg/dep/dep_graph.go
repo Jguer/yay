@@ -652,7 +652,9 @@ func (g *Grapher) addNodes(
 	for _, depString := range targetsToFind.ToSlice() {
 		depName, mod, ver := splitDep(depString)
 		// no dep found. add as missing
-		graph.AddNode(depName)
+		if err := graph.DependOn(depName, parentPkgName); err != nil {
+			g.logger.Warnln("missing dep warn:", depString, parentPkgName, err)
+		}
 		graph.SetNodeInfo(depName, &topo.NodeInfo[*InstallInfo]{
 			Color:      colorMap[depType],
 			Background: bgColorMap[Missing],
