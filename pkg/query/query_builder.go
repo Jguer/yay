@@ -22,6 +22,15 @@ import (
 
 const sourceAUR = "aur"
 
+type SearchVerbosity int
+
+// Verbosity settings for search.
+const (
+	NumberMenu SearchVerbosity = iota
+	Detailed
+	Minimal
+)
+
 type Builder interface {
 	Len() int
 	Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string)
@@ -94,14 +103,28 @@ func (a *abstractResults) Less(i, j int) bool {
 	pkgA := a.results[i]
 	pkgB := a.results[j]
 
-	simA := a.calculateMetric(&pkgA)
-	simB := a.calculateMetric(&pkgB)
+	var cmpResult bool
 
-	if a.bottomUp {
-		return simA < simB
+	switch a.sortBy {
+	case "name":
+		cmpResult = !text.LessRunes([]rune(pkgA.name), []rune(pkgB.name))
+		if a.separateSources {
+			cmpSources := strings.Compare(pkgA.source, pkgB.source)
+			if cmpSources != 0 {
+				cmpResult = cmpSources > 0
+			}
+		}
+	default:
+		simA := a.calculateMetric(&pkgA)
+		simB := a.calculateMetric(&pkgB)
+		cmpResult = simA > simB
 	}
 
-	return simA > simB
+	if a.bottomUp {
+		cmpResult = !cmpResult
+	}
+
+	return cmpResult
 }
 
 func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string) {
