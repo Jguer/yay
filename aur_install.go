@@ -426,6 +426,9 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 
 	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
 		arguments, installer.targetMode, noConfirm))
+	if errShow != nil {
+		return errShow
+	}
 
 	if errD := asdeps(ctx, installer.exeCmd, installer.targetMode, cmdArgs, syncDeps.ToSlice()); errD != nil {
 		return errD
@@ -435,5 +438,5 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 		return errE
 	}
 
-	return errShow
+	return nil
 }
