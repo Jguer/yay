@@ -440,6 +440,7 @@ func isArg(arg string) bool {
 	case "removemake":
 	case "noremovemake":
 	case "askremovemake":
+	case "askyesremovemake":
 	case "complete":
 	case "stats":
 	case "news":

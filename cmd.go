@@ -95,6 +95,7 @@ Permanent configuration options:
     --nodiffmenu          Don't show diffs for build files
     --noeditmenu          Don't edit/view PKGBUILDS
     --askremovemake       Ask to remove makedepends after install
+    --askyesremovemake    Ask to remove makedepends after install("Y" as default)
     --removemake          Remove makedepends after install
     --noremovemake        Don't remove makedepends after install
 
