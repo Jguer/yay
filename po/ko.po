@@ -16,7 +16,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:31
 msgid " (Build Files Exist)"
-msgstr "(빌드 파일 있음)"
+msgstr "(빌드 파일 존재)"
 
 #: pkg/menus/menu.go:26
 msgid " (Installed)"
