@@ -255,7 +255,7 @@ msgstr "플래그가 지정된 오래된 AUR 패키지:"
 
 #: print.go:83
 msgid "Foreign installed packages: %s"
-msgstr "설치된 외부 패키지: %s"
+msgstr "외부에서 설치된 패키지: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
