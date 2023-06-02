@@ -30,11 +30,11 @@ msgstr " (대상"
 msgid " (Wanted by: "
 msgstr " (필요로 하는 패키지: "
 
-#: cmd.go:472
+#: cmd.go:470
 msgid " [Installed]"
 msgstr " [설치됨]"
 
-#: cmd.go:425 install.go:172 install.go:206 vote.go:34
+#: cmd.go:423 install.go:172 install.go:206 vote.go:34
 msgid " there is nothing to do"
 msgstr "할 작업 없음"
 
@@ -42,11 +42,11 @@ msgstr "할 작업 없음"
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr "%s [A]모두 [Ab]중단 [I]설치됨 [No]설치되지 않음 또는 (1 2 3, 1-3, ^4)"
 
-#: aur_install.go:274 install.go:741
+#: aur_install.go:293 install.go:741
 msgid "%s already made -- skipping build"
 msgstr "%s 이미 빌드됨 -- 빌드 건너뛰는 중"
 
-#: pkg/menus/edit_menu.go:58
+#: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
 msgstr "%s가 설정되지 않았습니다"
 
@@ -54,13 +54,21 @@ msgstr "%s가 설정되지 않았습니다"
 msgid "%s is present."
 msgstr "%s가 존재합니다."
 
-#: pkg/dep/dep_graph.go:385 aur_install.go:271 install.go:727
+#: pkg/dep/dep_graph.go:396 aur_install.go:290 install.go:727
 msgid "%s is up to date -- skipping"
 msgstr "%s 최신 버전임 -- 건너뛰는 중"
 
 #: install.go:642
 msgid "%s not satisfied, flushing install queue"
 msgstr "%s 충족되지 않음, 설치 대기열 비움"
+
+#: pkg/upgrade/service.go:298
+msgid "%s to upgrade/install."
+msgstr "%s 업그레이드/설치합니다."
+
+#: pkg/upgrade/service.go:292
+msgid "%s will also be installed for this operation."
+msgstr "이 작업에는 %s도 설치됩니다."
 
 #: pkg/pgp/keys.go:127
 msgid "%s, required by: %s"
@@ -78,11 +86,11 @@ msgstr "%s: 대상에 --aur 옵션을 사용할 수 없음 -- 건너뛰는 중"
 msgid "%s: can't use target with option --repo -- skipping"
 msgstr "%s: 대상에 --repo 옵션을 사용할 수 없음 -- 건너뛰는 중"
 
-#: pkg/upgrade/sources.go:60
+#: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: 패키지 업그레이드 무시하는 중 (%s => %s)"
 
-#: upgrade.go:165
+#: pkg/query/aur_warnings.go:51 upgrade.go:165
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr "%s: 로컬 (%s) 버전이 AUR (%s)보다 높음"
 
@@ -124,11 +132,11 @@ msgstr "(오래된 패키지: %s)"
 msgid "AUR URL"
 msgstr "AUR URL"
 
-#: pkg/dep/dep_graph.go:74
+#: pkg/dep/dep_graph.go:75
 msgid "AUR"
 msgstr "AUR"
 
-#: pkg/menus/edit_menu.go:59
+#: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
 msgstr "%s 또는 %s를 환경 변수에 추가합니다"
 
@@ -136,7 +144,7 @@ msgstr "%s 또는 %s를 환경 변수에 추가합니다"
 msgid "Avoid running yay as root/sudo."
 msgstr "root / sudo로 yay를 실행하지 마십시오."
 
-#: pkg/dep/dep_graph.go:62
+#: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
 msgstr "종속성 확인"
 
@@ -144,7 +152,7 @@ msgstr "종속성 확인"
 msgid "Check Deps"
 msgstr "종속성 확인"
 
-#: pkg/upgrade/service.go:78 upgrade.go:95
+#: upgrade.go:95 pkg/upgrade/service.go:90
 msgid "Checking development packages..."
 msgstr "개발 패키지 확인하는 중..."
 
@@ -156,7 +164,7 @@ msgstr "충돌 확인하는 중..."
 msgid "Checking for inner conflicts..."
 msgstr "내부 충돌 확인하는 중..."
 
-#: clean.go:214
+#: clean.go:217
 msgid "Cleaning (%d/%d): %s"
 msgstr "지우는 중 (%d/%d): %s"
 
@@ -172,7 +180,7 @@ msgstr "충돌하는 패키지"
 msgid "Deleting (%d/%d): %s"
 msgstr "삭제하는 중 (%d/%d): %s"
 
-#: pkg/dep/dep_graph.go:60
+#: pkg/dep/dep_graph.go:61
 msgid "Dependency"
 msgstr "종속성"
 
@@ -204,7 +212,7 @@ msgstr "추척되지 않은 AUR 파일을 모두 제거하시겠습니까?"
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "캐시의 다른 AUR 패키지를 모두 제거하시겠습니까?"
 
-#: pkg/menus/edit_menu.go:62
+#: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
 msgstr "PKGBUILD를 무엇으로 편집할까요?"
 
@@ -212,11 +220,11 @@ msgstr "PKGBUILD를 무엇으로 편집할까요?"
 msgid "Error during AUR search: %s\n"
 msgstr "AUR 검색 중 오류: %s\n"
 
-#: pkg/upgrade/service.go:256
+#: pkg/upgrade/service.go:302
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr "패키지를 제외하면 부분 업그레이드가 발생하고 시스템이 중단될 수 있습니다"
 
-#: pkg/dep/dep_graph.go:59
+#: pkg/dep/dep_graph.go:60
 msgid "Explicit"
 msgstr "명시적"
 
@@ -224,11 +232,11 @@ msgstr "명시적"
 msgid "Explicitly installed packages: %s"
 msgstr "명시적으로 설치된 패키지: %s"
 
-#: pkg/dep/dep_graph.go:365 pkg/dep/dep_graph.go:454
+#: pkg/dep/dep_graph.go:376 pkg/dep/dep_graph.go:465
 msgid "Failed to find AUR package for"
 msgstr "다음에 대한 AUR 패키지를 찾지 못함"
 
-#: aur_install.go:104
+#: aur_install.go:110
 msgid "Failed to install layer, rolling up to next layer."
 msgstr "레이어를 설치하지 못하여, 다음 레이어로 롤업합니다."
 
@@ -241,7 +249,7 @@ msgstr "다음 패키지를 설치하지 못했습니다. 수동 개입이 필�
 msgid "First Submitted"
 msgstr "최초 작성"
 
-#: pkg/query/aur_warnings.go:43
+#: pkg/query/aur_warnings.go:84
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "플래그가 지정된 오래된 AUR 패키지:"
 
@@ -249,7 +257,7 @@ msgstr "플래그가 지정된 오래된 AUR 패키지:"
 msgid "Foreign installed packages: %s"
 msgstr "설치된 외부 패키지: %s"
 
-#: pkg/vcs/vcs.go:142
+#: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
 msgstr "git 저장소 찾음: %s"
 
@@ -289,7 +297,7 @@ msgstr "마지막 수정"
 msgid "Licenses"
 msgstr "라이선스"
 
-#: pkg/dep/dep_graph.go:76
+#: pkg/dep/dep_graph.go:77
 msgid "Local"
 msgstr "로컬"
 
@@ -297,7 +305,7 @@ msgstr "로컬"
 msgid "Maintainer"
 msgstr "관리자"
 
-#: pkg/dep/dep_graph.go:61
+#: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
 msgstr "종속성 만들기"
 
@@ -305,11 +313,11 @@ msgstr "종속성 만들기"
 msgid "Make Deps"
 msgstr "종속성 만들기"
 
-#: pkg/query/aur_warnings.go:33
+#: pkg/query/aur_warnings.go:76
 msgid "Missing AUR Debug Packages:"
 msgstr "빠진 AUR 디버그 패키지:"
 
-#: pkg/dep/dep_graph.go:78
+#: pkg/dep/dep_graph.go:79
 msgid "Missing"
 msgstr "누락됨"
 
@@ -317,7 +325,7 @@ msgstr "누락됨"
 msgid "Name"
 msgstr "이름"
 
-#: pkg/dep/dep_graph.go:370 pkg/dep/dep_graph.go:467
+#: pkg/dep/dep_graph.go:381 pkg/dep/dep_graph.go:478
 msgid "No AUR package found for"
 msgstr "다음에 대한 AUR 패키지를 찾을 수 없음"
 
@@ -329,7 +337,7 @@ msgstr "없음"
 msgid "Optional Deps"
 msgstr "선택적 종속성"
 
-#: pkg/query/aur_warnings.go:38
+#: pkg/query/aur_warnings.go:80
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "고립 (유지 관리되지 않는) AUR 패키지:"
 
@@ -349,7 +357,7 @@ msgstr "PKGBUILD 최신 버전임, 건너뛰는 중 (%d/%d): %s"
 msgid "PKGBUILD up to date, skipping download: %s"
 msgstr "PKGBUILD 최신 버전임, 다운로드 건너뛰는 중: %s"
 
-#: pkg/menus/edit_menu.go:132 pkg/menus/edit_menu.go:164
+#: pkg/menus/edit_menu.go:131 pkg/menus/edit_menu.go:163
 msgid "PKGBUILDs to edit?"
 msgstr "PKGBUILD를 편집할까요?"
 
@@ -365,7 +373,7 @@ msgstr "패키지 베이스"
 msgid "Package conflicts found:"
 msgstr "패키지 충돌 발견됨:"
 
-#: pkg/query/aur_warnings.go:28
+#: pkg/query/aur_warnings.go:72
 msgid "Packages not in AUR:"
 msgstr "AUR에 없는 패키지:"
 
@@ -373,15 +381,15 @@ msgstr "AUR에 없는 패키지:"
 msgid "Packages to cleanBuild?"
 msgstr "cleanBuild할 패키지는 무엇인가요?"
 
-#: pkg/dep/dep_graph.go:215 upgrade.go:213
+#: pkg/dep/dep_graph.go:206 upgrade.go:213
 msgid "Packages to exclude"
 msgstr "제외할 패키지"
 
-#: pkg/upgrade/service.go:255
+#: pkg/upgrade/service.go:301
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "제외할 패키지: (예: \"1 2 3\", \"1-3\", \"^4\" 혹은 저장소 이름)"
 
-#: cmd.go:406
+#: cmd.go:405
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "설치할 패키지: (예: 1 2 3, 1-3 혹은 ^4)"
 
@@ -389,16 +397,12 @@ msgstr "설치할 패키지: (예: 1 2 3, 1-3 혹은 ^4)"
 msgid "Packages to upgrade."
 msgstr "업그레이드할 패키지."
 
-#: pkg/upgrade/service.go:252
-msgid "Packages to upgrade/install."
-msgstr "업그레이드/설치할 패키지."
-
 #: print.go:42
 msgid "Popularity"
 msgstr "인기도"
 
 #: pkg/menus/diff_menu.go:173 pkg/menus/diff_menu.go:206
-#: pkg/menus/edit_menu.go:143 pkg/menus/edit_menu.go:177
+#: pkg/menus/edit_menu.go:142 pkg/menus/edit_menu.go:176
 msgid "Proceed with install?"
 msgstr "설치를 진행할까요?"
 
@@ -414,23 +418,23 @@ msgstr "AUR 쿼리 중..."
 msgid "Remove make dependencies after install?"
 msgstr "설치 후 make 종속성을 제거하시겠습니까?"
 
-#: pkg/dep/depPool.go:503 pkg/dep/dep_graph.go:631
+#: pkg/dep/depPool.go:503 pkg/dep/dep_graph.go:658
 msgid "Repository AUR"
 msgstr "저장소 AUR"
 
-#: pkg/db/ialpm/alpm.go:191 print.go:25
+#: print.go:25 pkg/db/ialpm/alpm.go:191
 msgid "Repository"
 msgstr "저장소"
 
-#: pkg/dep/dep_graph.go:77
+#: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:63 upgrade.go:73
+#: upgrade.go:73 pkg/upgrade/service.go:72
 msgid "Searching AUR for updates..."
 msgstr "AUR에서 업데이트 검색하는 중..."
 
-#: pkg/upgrade/service.go:142 upgrade.go:62
+#: upgrade.go:62 pkg/upgrade/service.go:154
 msgid "Searching databases for updates..."
 msgstr "데이터베이스에서 업데이트 검색하는 중..."
 
@@ -450,7 +454,7 @@ msgstr "yay 캐시 %s의 크기: %s"
 msgid "Snapshot URL"
 msgstr "스냅숏 URL"
 
-#: pkg/dep/dep_graph.go:75
+#: pkg/dep/dep_graph.go:76
 msgid "Sync"
 msgstr "동기화"
 
@@ -458,11 +462,11 @@ msgstr "동기화"
 msgid "Ten biggest packages:"
 msgstr "가장 큰 10개 패키지:"
 
-#: install.go:495 sync.go:183
+#: install.go:495 sync.go:190
 msgid "The following packages are not compatible with your architecture:"
 msgstr "다음 패키지는 이 컴퓨터의 아키텍처와 호환되지 않음:"
 
-#: pkg/db/ialpm/alpm.go:179 pkg/dep/depPool.go:499 pkg/dep/dep_graph.go:627
+#: pkg/dep/depPool.go:499 pkg/dep/dep_graph.go:654 pkg/db/ialpm/alpm.go:179
 msgid "There are %d providers available for %s:"
 msgstr "%s에 사용할 수 있는 %d개 공급자가 있습니다:"
 
@@ -478,7 +482,7 @@ msgstr "패키지가 차지하는 전체 크기: %s"
 msgid "Total installed packages: %s"
 msgstr "설치된 전체 패키지: %s"
 
-#: install.go:503 sync.go:191
+#: install.go:503 sync.go:198
 msgid "Try to build them anyway?"
 msgstr "그래도 빌드할까요?"
 
@@ -486,7 +490,7 @@ msgstr "그래도 빌드할까요?"
 msgid "URL"
 msgstr "URL"
 
-#: clean.go:192 pkg/menus/clean_menu.go:64 pkg/menus/clean_menu.go:70
+#: pkg/menus/clean_menu.go:64 pkg/menus/clean_menu.go:70 clean.go:195
 msgid "Unable to clean:"
 msgstr "비울 수 없음:"
 
@@ -498,7 +502,7 @@ msgstr "다음 패키지를 찾을 수 없음:"
 msgid "Unable to handle package vote for: %s. err: %s"
 msgstr "다음의 패키지 투표를 처리할 수 없습니다: %s. 오류: %s"
 
-#: clean.go:169
+#: clean.go:171
 msgid "Unable to remove %s: %s"
 msgstr "%s 제거할 수 없음: %s"
 
@@ -526,7 +530,7 @@ msgstr ""
 "\n"
 "빌드 디렉터리:"
 
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/depPool.go:513 pkg/dep/dep_graph.go:641
+#: pkg/dep/depPool.go:513 pkg/dep/dep_graph.go:668 pkg/db/ialpm/alpm.go:201
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -570,15 +574,15 @@ msgstr "%s에 나열된 패키지 아카이브를 찾을 수 없습니다"
 msgid "could not find srcinfo for: %s"
 msgstr "다음에 대한 srcinfo를 찾을 수 없음: %s"
 
-#: errors.go:26
+#: errors.go:26 pkg/upgrade/service.go:293
 msgid "dependency"
 msgstr "종속성"
 
-#: pkg/vcs/vcs.go:94 pkg/vcs/vcs.go:98
+#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "패키지에 대한 devel 확인 실패함: '%s'에 하나의 오류가 발생했습니다"
 
-#: pkg/menus/edit_menu.go:111
+#: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
 msgstr "편집기가 제대로 종료되지 않음, 중단하는 중: %s"
 
@@ -594,11 +598,11 @@ msgstr "%s를 가져오는 중 오류: %s"
 msgid "error installing repo packages"
 msgstr "저장소 패키지하는 설치 중 오류"
 
-#: aur_install.go:236 aur_install.go:240
+#: aur_install.go:255 aur_install.go:259
 msgid "error installing:"
 msgstr "설치 중 오류:"
 
-#: aur_install.go:204 aur_install.go:208 install.go:683 install.go:724
+#: aur_install.go:222 aur_install.go:226 install.go:683 install.go:724
 #: install.go:738 install.go:752
 msgid "error making: %s"
 msgstr "빌드 중 오류: %s"
@@ -615,7 +619,7 @@ msgstr "%s 읽는 중 오류"
 msgid "error refreshing databases"
 msgstr "데이터베이스 갱신하는 중 오류"
 
-#: clean.go:220 install.go:581
+#: clean.go:223 install.go:581
 msgid "error resetting %s: %s"
 msgstr "%s 재설정하는 중 오류: %s"
 
@@ -631,7 +635,7 @@ msgstr "명시적"
 msgid "failed to create directory '%s': %s"
 msgstr "'%s' 디렉터리 만들기 실패함: %s"
 
-#: pkg/settings/config.go:286
+#: pkg/settings/config.go:288
 msgid "failed to open config file '%s': %s"
 msgstr " '%s' 구성 파일 열기 실패함: %s"
 
@@ -647,7 +651,7 @@ msgstr "%s 분석 실패함: %s"
 msgid "failed to parse .SRCINFO"
 msgstr ".SRCINFO를 분석하지 못했습니다"
 
-#: pkg/settings/config.go:296
+#: pkg/settings/config.go:298
 msgid "failed to read config file '%s': %s"
 msgstr "'%s' 구성 파일 읽기 실패함: %s"
 
@@ -655,7 +659,7 @@ msgstr "'%s' 구성 파일 읽기 실패함: %s"
 msgid "failed to retrieve aur Cache"
 msgstr "AUR 캐시를 검색하지 못했습니다"
 
-#: pkg/upgrade/sources.go:30
+#: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr "패키지 개발 업그레이드 무시하는 중 (AUR 정보를 찾을 수 없음):"
 
@@ -663,7 +667,7 @@ msgstr "패키지 개발 업그레이드 무시하는 중 (AUR 정보를 찾을 
 msgid "input too long"
 msgstr "너무 긴 입력"
 
-#: pkg/db/ialpm/alpm.go:222 pkg/dep/depPool.go:533 pkg/dep/dep_graph.go:662
+#: pkg/dep/depPool.go:533 pkg/dep/dep_graph.go:689 pkg/db/ialpm/alpm.go:222
 msgid "invalid number: %s"
 msgstr "잘못된 숫자: %s"
 
@@ -671,7 +675,7 @@ msgstr "잘못된 숫자: %s"
 msgid "invalid option '%s'"
 msgstr "잘못된 옵션 '%s'"
 
-#: cmd.go:208
+#: cmd.go:207
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr "잘못된 옵션: '--deps'와 '--explicit'는 함께 사용할 수 없습니다"
 
@@ -679,7 +683,7 @@ msgstr "잘못된 옵션: '--deps'와 '--explicit'는 함께 사용할 수 없�
 msgid "invalid repository"
 msgstr "잘못된 저장소"
 
-#: pkg/db/ialpm/alpm.go:227 pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:668
+#: pkg/dep/depPool.go:538 pkg/dep/dep_graph.go:695 pkg/db/ialpm/alpm.go:227
 msgid "invalid value: %d is not between %d and %d"
 msgstr "잘못된 값: %d가 %d와 %d 사이에 있지 않음"
 
@@ -699,7 +703,7 @@ msgstr "지정된 대상 디렉터리가 없습니다"
 msgid "no"
 msgstr "아니오"
 
-#: aur_install.go:213
+#: aur_install.go:231
 msgid "nothing to install for %s"
 msgstr "%s 용으로 설치할 항목 없음"
 
@@ -707,9 +711,9 @@ msgstr "%s 용으로 설치할 항목 없음"
 msgid "only one operation may be used at a time"
 msgstr "한번에 한 작업만 쓸 수 있음"
 
-#: print.go:158
+#: print.go:167
 msgid "package '%s' was not found"
-msgstr "패키지 '%s'를 찾지 못했습니다"
+msgstr "'%s' 패키지를 찾지 못했습니다"
 
 #: pkg/dep/depCheck.go:197
 msgid "package conflicts can not be resolved with noconfirm, aborting"
@@ -723,6 +727,11 @@ msgstr "AUR에서 패키지를 찾을 수 없습니다"
 msgid "package not found in repos"
 msgstr "저장소에서 패키지를 찾을 수 없습니다"
 
+#: pkg/upgrade/service.go:298
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "패키지"
+
 #: pkg/pgp/keys.go:103
 msgid "problem importing keys"
 msgstr "키 가져오는 중 오류"
@@ -731,7 +740,7 @@ msgstr "키 가져오는 중 오류"
 msgid "removing AUR packages from cache..."
 msgstr "캐시에서 AUR 패키지 제거하는 중..."
 
-#: clean.go:177 clean.go:210
+#: clean.go:179 clean.go:213
 msgid "removing untracked AUR files from cache..."
 msgstr "캐시에서 추적되지 않은 AUR 패키지 제거하는 중..."
 
@@ -739,7 +748,7 @@ msgstr "캐시에서 추적되지 않은 AUR 패키지 제거하는 중..."
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "makepkg에 등록된 %s의 PKGDEST가 존재하지 않음: %s"
 
-#: sync.go:110
+#: sync.go:113
 msgid "there is nothing to do"
 msgstr "할 작업 없음"
 
@@ -747,11 +756,11 @@ msgstr "할 작업 없음"
 msgid "unable to CreateHandle: %s"
 msgstr "CreateHandle 만들 수 없음: %s"
 
-#: cmd.go:197
+#: cmd.go:196
 msgid "unhandled operation"
 msgstr "핸들되지 않은 작업"
 
-#: cmd.go:469
+#: cmd.go:467
 msgid "unknown-version"
 msgstr "알 수 없는 버전"
 
