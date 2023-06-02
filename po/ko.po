@@ -28,7 +28,7 @@ msgstr " (대상"
 
 #: pkg/dep/depCheck.go:312
 msgid " (Wanted by: "
-msgstr " (필요로 하는 패키지: "
+msgstr " (필요한 패키지: "
 
 #: cmd.go:470
 msgid " [Installed]"
