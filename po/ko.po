@@ -40,7 +40,7 @@ msgstr " 할 작업 없음"
 
 #: pkg/menus/menu.go:48
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
-msgstr "%s [A]모두 [Ab]중단 [I]설치됨 [No]설치되지 않음 또는 (1 2 3, 1-3, ^4)"
+msgstr "%s [A]모두 [Ab]중단 [I]설치됨 [No]설치안함 / (1 2 3, 1-3, ^4)"
 
 #: aur_install.go:293 install.go:741
 msgid "%s already made -- skipping build"
