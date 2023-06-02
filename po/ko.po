@@ -48,7 +48,7 @@ msgstr "%s 이미 빌드됨 -- 빌드 건너뛰는 중"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s가 설정되지 않았습니다"
+msgstr "%s 지정되지 않음"
 
 #: pkg/settings/exe/cmd_builder.go:238
 msgid "%s is present."
