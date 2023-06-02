@@ -80,11 +80,11 @@ msgstr "%s: 변경사항 없음 -- 건너뛰는 중"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: 대상에 --aur 옵션을 사용할 수 없음 -- 건너뛰는 중"
+msgstr "%s: 대상에 --aur 옵션 사용할 수 없음 -- 건너뛰는 중"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: 대상에 --repo 옵션을 사용할 수 없음 -- 건너뛰는 중"
+msgstr "%s: 대상에 --repo 옵션 사용할 수 없음 -- 건너뛰는 중"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
