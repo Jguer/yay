@@ -7,15 +7,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 )
 
-type SearchVerbosity int
-
-// Verbosity settings for search.
-const (
-	NumberMenu SearchVerbosity = iota
-	Detailed
-	Minimal
-)
-
 // queryAUR searches AUR and narrows based on subarguments.
 func queryAUR(ctx context.Context,
 	aurClient aur.QueryClient,
