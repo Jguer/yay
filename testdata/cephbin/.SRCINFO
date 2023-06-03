@@ -1,0 +1,29 @@
+pkgbase = ceph-bin
+	pkgdesc = Distributed, fault-tolerant storage platform delivering object, block, and file system
+	pkgver = 17.2.6
+	pkgrel = 2
+	url = https://ceph.com/
+	arch = x86_64
+	license = GPL
+	noextract = ceph-17.2.6-2.tar.zst
+	noextract = ceph-libs-17.2.6-2.tar.zst
+	options = emptydirs
+	source = ceph-17.2.6-2.tar.zst::https://github.com/bazaah/aur-ceph/releases/download/v17.2.6-2/ceph_linux_x86_64.tar.zstd
+	source = ceph-libs-17.2.6-2.tar.zst::https://github.com/bazaah/aur-ceph/releases/download/v17.2.6-2/ceph_libs_linux_x86_64.tar.zstd
+	sha512sums = db38d454ef9fda99fbe9a0954ccb4a8a7b66537f5cb1998dd552161049a6750a82a218d6e95f2bbc2a501637bf13f2f2d0fd6a12b367733cd294364722ba236c
+	sha512sums = 2218b8d81ce8b94daa63ebd7674bd6d8e3da047ad46bbde1e1666eaa10d429a329ad1e6fa43d9f9d07ba5ce06b57dcc442ca3269eb482bffbb1c25d247d2ba1b
+	sha512sums = 029f5fd11f30800a78fdc1e4c6541c413be498b284271ef93886268fd47002f6505df698c64a8118f1c2dcef22081c4fcc79e6047db7202d66f2e3e132830742
+
+pkgname = ceph-bin
+	depends = ceph-libs=17.2.6-2
+	depends = dep1
+	depends = dep2
+	provides = ceph=17.2.6-2
+	conflicts = ceph
+
+pkgname = ceph-libs-bin
+	depends = dep1
+	depends = curl
+	provides = ceph-libs=17.2.6-2
+	conflicts = ceph-libs
+
