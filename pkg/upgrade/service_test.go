@@ -382,6 +382,188 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	}
 }
 
+func TestUpgradeService_GraphUpgradesMissingDep(t *testing.T) {
+	t.Parallel()
+	newDepMissingInfo := &dep.InstallInfo{
+		Source:  dep.Missing,
+		Reason:  dep.Dep,
+		Version: "",
+	}
+
+	exampleDepInfoAUR := &dep.InstallInfo{
+		Source:       dep.AUR,
+		Reason:       dep.Dep,
+		AURBase:      ptrString("example"),
+		LocalVersion: "2.2.1.r32.41baa362-1",
+		Version:      "2.2.1.r69.g8a10460-1",
+		Upgrade:      true,
+		Devel:        false,
+	}
+
+	yayDepInfo := &dep.InstallInfo{
+		Reason:       dep.Explicit,
+		Source:       dep.AUR,
+		AURBase:      ptrString("yay"),
+		LocalVersion: "10.2.3",
+		Version:      "10.2.4",
+		Upgrade:      true,
+		Devel:        false,
+	}
+
+	dbExe := &mock.DBExecutor{
+		InstalledRemotePackageNamesFn: func() []string {
+			return []string{"yay", "example-git"}
+		},
+		InstalledRemotePackagesFn: func() map[string]mock.IPackage {
+			mapRemote := make(map[string]mock.IPackage)
+			mapRemote["yay"] = &mock.Package{
+				PName:    "yay",
+				PBase:    "yay",
+				PVersion: "10.2.3",
+				PReason:  alpm.PkgReasonExplicit,
+			}
+
+			mapRemote["example-git"] = &mock.Package{
+				PName:    "example-git",
+				PBase:    "example",
+				PVersion: "2.2.1.r32.41baa362-1",
+				PReason:  alpm.PkgReasonDepend,
+			}
+
+			return mapRemote
+		},
+		LocalSatisfierExistsFn: func(string) bool { return false },
+		SyncSatisfierFn:        func(s string) mock.IPackage { return nil },
+		SyncUpgradesFn: func(bool) (map[string]db.SyncUpgrade, error) {
+			return map[string]db.SyncUpgrade{}, nil
+		},
+		ReposFn: func() []string { return nil },
+	}
+	vcsStore := &vcs.Mock{
+		ToUpgradeReturn: []string{"example-git"},
+	}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{
+				{
+					Name:        "yay",
+					Version:     "10.2.4",
+					PackageBase: "yay",
+				},
+				{
+					Name:        "example-git",
+					Version:     "2.2.1.r69.g8a10460-1",
+					PackageBase: "example",
+					Depends:     []string{"new-dep-missing"},
+				},
+			}, nil
+		},
+	}
+	type fields struct {
+		input     io.Reader
+		output    io.Writer
+		noConfirm bool
+		devel     bool
+	}
+	type args struct {
+		graph           *topo.Graph[string, *dep.InstallInfo]
+		enableDowngrade bool
+	}
+	tests := []struct {
+		name         string
+		fields       fields
+		args         args
+		mustExist    map[string]*dep.InstallInfo
+		mustNotExist map[string]bool
+		wantExclude  []string
+		wantErr      bool
+	}{
+		{
+			name: "no input",
+			fields: fields{
+				input:     strings.NewReader("\n"),
+				output:    io.Discard,
+				noConfirm: false,
+			},
+			args: args{
+				graph:           nil,
+				enableDowngrade: false,
+			},
+			mustExist: map[string]*dep.InstallInfo{
+				"yay":             yayDepInfo,
+				"example-git":     exampleDepInfoAUR,
+				"new-dep-missing": newDepMissingInfo,
+			},
+			mustNotExist: map[string]bool{},
+			wantErr:      false,
+			wantExclude:  []string{},
+		},
+		{
+			name: "exclude example-git(with missing dep)",
+			fields: fields{
+				input:     strings.NewReader("2\n"),
+				output:    io.Discard,
+				noConfirm: false,
+			},
+			args: args{
+				graph:           nil,
+				enableDowngrade: false,
+			},
+			mustExist: map[string]*dep.InstallInfo{
+				"yay": yayDepInfo,
+			},
+			mustNotExist: map[string]bool{"example-git": true, "new-dep-missing": true},
+			wantErr:      false,
+			wantExclude:  []string{"example-git", "new-dep-missing"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			grapher := dep.NewGrapher(dbExe, mockAUR,
+				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
+					tt.fields.input, true, "test"))
+
+			cfg := &settings.Configuration{
+				Devel: tt.fields.devel, Mode: parser.ModeAny,
+			}
+
+			logger := text.NewLogger(tt.fields.output, os.Stderr,
+				tt.fields.input, true, "test")
+			u := &UpgradeService{
+				log:         logger,
+				grapher:     grapher,
+				aurCache:    mockAUR,
+				dbExecutor:  dbExe,
+				vcsStore:    vcsStore,
+				cfg:         cfg,
+				noConfirm:   tt.fields.noConfirm,
+				AURWarnings: query.NewWarnings(logger),
+			}
+
+			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			excluded, err := u.UserExcludeUpgrades(got)
+			require.NoError(t, err)
+
+			for node, info := range tt.mustExist {
+				assert.True(t, got.Exists(node), node)
+				assert.Equal(t, info, got.GetNodeInfo(node).Value)
+			}
+
+			for node := range tt.mustNotExist {
+				assert.False(t, got.Exists(node), node)
+			}
+
+			assert.ElementsMatch(t, tt.wantExclude, excluded)
+		})
+	}
+}
+
 func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 	t.Parallel()
 	dbExe := &mock.DBExecutor{
