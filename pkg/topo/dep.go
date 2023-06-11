@@ -124,10 +124,6 @@ func (g *Graph[T, V]) DependOn(child, parent T) error {
 	g.AddNode(parent)
 	g.AddNode(child)
 
-	// Add nodes.
-	g.nodes[parent] = true
-	g.nodes[child] = true
-
 	// Add edges.
 	g.dependents.addNodeToNodeset(parent, child)
 	g.dependencies.addNodeToNodeset(child, parent)
