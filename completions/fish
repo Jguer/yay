@@ -220,6 +220,7 @@ complete -c $progname -n "not $noopt" -l nocleanmenu -d 'Do not clean build PKGB
 complete -c $progname -n "not $noopt" -l nodiffmenu -d 'Do not show diffs for build files' -f
 complete -c $progname -n "not $noopt" -l noeditmenu -d 'Do not edit/view PKGBUILDS' -f
 complete -c $progname -n "not $noopt" -l askremovemake -d 'Ask to remove make deps after install' -f
+complete -c $progname -n "not $noopt" -l askyesremovemake -d 'Ask to remove make deps after install(with "Y" as default)' -f
 complete -c $progname -n "not $noopt" -l removemake -d 'Remove make deps after install' -f
 complete -c $progname -n "not $noopt" -l noremovemake -d 'Do not remove make deps after install' -f
 complete -c $progname -n "not $noopt" -l topdown -d 'Shows repository packages first and then aur' -f

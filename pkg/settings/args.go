@@ -199,6 +199,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.RemoveMake = "no"
 	case "askremovemake":
 		c.RemoveMake = "ask"
+	case "askyesremovemake":
+		c.RemoveMake = "askyes"
 	case "separatesources":
 		c.SeparateSources = true
 	case "noseparatesources":

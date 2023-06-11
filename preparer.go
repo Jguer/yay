@@ -115,7 +115,9 @@ func (preper *Preparer) ShouldCleanMakeDeps(cmdArgs *parser.Arguments) PostInsta
 	case "no":
 		return nil
 	default:
-		if !text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"), false, settings.NoConfirm) {
+		isYesDefault := preper.cfg.RemoveMake == "askyes"
+		if !text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"),
+			isYesDefault, settings.NoConfirm) {
 			return nil
 		}
 	}
