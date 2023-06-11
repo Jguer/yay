@@ -140,9 +140,14 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
 				dbName := pkg.DB().Name()
 
+				reason := Explicit
+				if localPkg := g.dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
+					reason = Reason(localPkg.Reason())
+				}
+
 				g.GraphSyncPkg(ctx, graph, pkg, &InstallInfo{
 					Source:     Sync,
-					Reason:     Explicit,
+					Reason:     reason,
 					Version:    pkg.Version(),
 					SyncDBName: &dbName,
 				})
@@ -173,13 +178,18 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		case "aur":
 			aurTargets = append(aurTargets, target.Name)
 		default:
+			reason := Explicit
+			if pkg := g.dbExecutor.LocalPackage(target.Name); pkg != nil {
+				reason = Reason(pkg.Reason())
+			}
+
 			graph.AddNode(target.Name)
 			g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
-				Color:      colorMap[Explicit],
+				Color:      colorMap[reason],
 				Background: bgColorMap[Sync],
 				Value: &InstallInfo{
 					Source:     Sync,
-					Reason:     Explicit,
+					Reason:     reason,
 					Version:    target.Version,
 					SyncDBName: &target.DB,
 				},
@@ -267,16 +277,21 @@ func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[strin
 		for _, pkg := range aurPkgs {
 			pkg := pkg
 
+			reason := Explicit
+			if pkg := g.dbExecutor.LocalPackage(pkg.Name); pkg != nil {
+				reason = Reason(pkg.Reason())
+			}
+
 			graph.AddNode(pkg.Name)
 
 			g.addAurPkgProvides(pkg, graph)
 
 			g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
-				Color:      colorMap[Explicit],
+				Color:      colorMap[reason],
 				Background: bgColorMap[AUR],
 				Value: &InstallInfo{
 					Source:      SrcInfo,
-					Reason:      Explicit,
+					Reason:      reason,
 					SrcinfoPath: &pkgBuildDir,
 					AURBase:     &pkg.PackageBase,
 					Version:     pkg.Version,
@@ -328,7 +343,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	})
 
 	g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
-		Color:      colorMap[Explicit],
+		Color:      colorMap[Reason(pkg.Reason())],
 		Background: bgColorMap[Sync],
 		Value:      instalInfo,
 	})
@@ -407,8 +422,11 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			g.providerCache[target] = []aurc.Pkg{*aurPkg}
 		}
 
-		if g.needed {
-			if pkg := g.dbExecutor.LocalPackage(aurPkg.Name); pkg != nil {
+		reason := Explicit
+		if pkg := g.dbExecutor.LocalPackage(aurPkg.Name); pkg != nil {
+			reason = Reason(pkg.Reason())
+
+			if g.needed {
 				if db.VerCmp(pkg.Version(), aurPkg.Version) >= 0 {
 					g.logger.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(pkg.Name()+"-"+pkg.Version())))
 					continue
@@ -418,7 +436,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 		graph = g.GraphAURTarget(ctx, graph, aurPkg, &InstallInfo{
 			AURBase: &aurPkg.PackageBase,
-			Reason:  Explicit,
+			Reason:  reason,
 			Source:  AUR,
 			Version: aurPkg.Version,
 		})

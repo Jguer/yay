@@ -76,6 +76,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 
 			return true
 		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
 	}
 
 	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
@@ -249,6 +250,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 
 			panic("implement me " + s)
 		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
 	}
 
 	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
@@ -348,6 +350,7 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 
 			panic("implement me " + s)
 		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
 	}
 
 	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
@@ -553,6 +556,7 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 
 			panic("implement me " + s)
 		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
 	}
 
 	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
@@ -650,6 +654,139 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 			wantLayers: []map[string]*InstallInfo{
 				{"gourou": installInfos["gourou exp"]},
 				{"libzip-git": installInfos["libzip-git exp"]},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewGrapher(mockDB, mockAUR,
+				false, true, false, false, false,
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			require.NoError(t, err)
+			layers := got.TopoSortedLayerMap(nil)
+			require.EqualValues(t, tt.wantLayers, layers, layers)
+		})
+	}
+}
+
+func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncPackageFn:       func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "gourou":
+				return nil
+			case "libzip":
+				return &mock.Package{
+					PName:    "libzip",
+					PVersion: "1.9.2-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			}
+
+			panic("implement me " + s)
+		},
+
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "gourou", "libzip":
+				return true
+			}
+
+			panic("implement me " + s)
+		},
+		LocalPackageFn: func(s string) mock.IPackage {
+			switch s {
+			case "libzip":
+				return &mock.Package{
+					PName:    "libzip",
+					PVersion: "1.9.2-1",
+					PDB:      mock.NewDB("extra"),
+					PReason:  alpm.PkgReasonDepend,
+				}
+			case "gourou":
+				return &mock.Package{
+					PName:    "gourou",
+					PVersion: "0.8.1",
+					PDB:      mock.NewDB("aur"),
+					PReason:  alpm.PkgReasonDepend,
+				}
+			}
+			return nil
+		},
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		mockPkgs := map[string]aur.Pkg{
+			"gourou": {
+				Name:        "gourou",
+				PackageBase: "gourou",
+				Version:     "0.8.1",
+				Depends:     []string{"libzip"},
+			},
+		}
+
+		pkgs := []aur.Pkg{}
+		for _, needle := range query.Needles {
+			if pkg, ok := mockPkgs[needle]; ok {
+				pkgs = append(pkgs, pkg)
+			} else {
+				panic(fmt.Sprintf("implement me %v", needle))
+			}
+		}
+
+		return pkgs, nil
+	}}
+
+	installInfos := map[string]*InstallInfo{
+		"gourou dep": {
+			Source:  AUR,
+			Reason:  Dep,
+			Version: "0.8.1",
+			AURBase: ptrString("gourou"),
+		},
+		"libzip dep": {
+			Source:     Sync,
+			Reason:     Dep,
+			Version:    "1.9.2-1",
+			SyncDBName: ptrString("extra"),
+		},
+		// In an ideal world this should be the same as "libzip dep",
+		// but due to the difference in handling cases with specified and
+		// unspecified dbs, this is how it is.
+		"extra/libzip dep": {
+			Source:     Sync,
+			Reason:     Dep,
+			Version:    "",
+			SyncDBName: ptrString("extra"),
+		},
+	}
+
+	tests := []struct {
+		name       string
+		targets    []string
+		wantLayers []map[string]*InstallInfo
+		wantErr    bool
+	}{
+		{
+			name:    "gourou libzip",
+			targets: []string{"gourou", "libzip"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gourou": installInfos["gourou dep"]},
+				{"libzip": installInfos["libzip dep"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "aur/gourou extra/libzip",
+			targets: []string{"aur/gourou", "extra/libzip"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gourou": installInfos["gourou dep"]},
+				{"libzip": installInfos["extra/libzip dep"]},
 			},
 			wantErr: false,
 		},
