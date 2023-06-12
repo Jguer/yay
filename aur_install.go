@@ -428,11 +428,10 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
 		arguments, installer.targetMode, noConfirm))
 
-	if errExit, ok := errShow.(*exec.ExitError); ok && errExit.Exited() {
-		return nil
-	}
-
 	if errShow != nil {
+		if errExit := errShow.(*exec.ExitError); errExit.Exited() {
+			return nil
+		}
 		return errShow
 	}
 
