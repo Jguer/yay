@@ -311,6 +311,22 @@ func (ae *AlpmExecutor) PackagesFromGroup(groupName string) []alpm.IPackage {
 	return groupPackages
 }
 
+func (ae *AlpmExecutor) PackagesFromGroupAndDB(groupName, dbName string) ([]alpm.IPackage, error) {
+	singleDBList, err := ae.handle.SyncDBListByDBName(dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	groupPackages := []alpm.IPackage{}
+	_ = singleDBList.FindGroupPkgs(groupName).ForEach(func(pkg alpm.IPackage) error {
+		groupPackages = append(groupPackages, pkg)
+
+		return nil
+	})
+
+	return groupPackages, nil
+}
+
 func (ae *AlpmExecutor) LocalPackages() []alpm.IPackage {
 	localPackages := []alpm.IPackage{}
 	_ = ae.localDB.PkgCache().ForEach(func(pkg alpm.IPackage) error {
@@ -369,18 +385,27 @@ func (ae *AlpmExecutor) SyncPackage(pkgName string) alpm.IPackage {
 	return nil
 }
 
-func (ae *AlpmExecutor) SatisfierFromDB(pkgName, dbName string) alpm.IPackage {
+func (ae *AlpmExecutor) SyncPackageFromDB(pkgName, dbName string) alpm.IPackage {
 	singleDB, err := ae.handle.SyncDBByName(dbName)
 	if err != nil {
 		return nil
 	}
 
-	foundPkg, err := singleDB.PkgCache().FindSatisfier(pkgName)
+	return singleDB.Pkg(pkgName)
+}
+
+func (ae *AlpmExecutor) SatisfierFromDB(pkgName, dbName string) (alpm.IPackage, error) {
+	singleDBList, err := ae.handle.SyncDBListByDBName(dbName)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return foundPkg
+	foundPkg, err := singleDBList.FindSatisfier(pkgName)
+	if err != nil {
+		return nil, nil
+	}
+
+	return foundPkg, nil
 }
 
 func (ae *AlpmExecutor) PackageDepends(pkg alpm.IPackage) []alpm.Depend {

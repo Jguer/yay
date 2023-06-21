@@ -52,12 +52,14 @@ type Executor interface {
 	PackageOptionalDepends(IPackage) []Depend
 	PackageProvides(IPackage) []Depend
 	PackagesFromGroup(string) []IPackage
+	PackagesFromGroupAndDB(string, string) ([]IPackage, error)
 	RefreshHandle() error
 	SyncUpgrades(enableDowngrade bool) (
 		map[string]SyncUpgrade, error)
 	Repos() []string
-	SatisfierFromDB(string, string) IPackage
+	SatisfierFromDB(string, string) (IPackage, error)
 	SyncPackage(string) IPackage
+	SyncPackageFromDB(string, string) IPackage
 	SyncPackages(...string) []IPackage
 	SyncSatisfier(string) IPackage
 	SyncSatisfierExists(string) bool
