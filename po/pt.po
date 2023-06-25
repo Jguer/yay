@@ -713,7 +713,7 @@ msgstr "operação não implementada"
 
 #: cmd.go:458
 msgid "unknown-version"
-msgstr "versão desconhecida"
+msgstr "versão-desconhecida"
 
 #: pkg/text/text.go:68
 msgid "yes"
