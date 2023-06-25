@@ -674,7 +674,7 @@ msgstr "pacote não encontrado no AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "pacote não encontrado em repositórios"
+msgstr "pacote não encontrado nos repositórios"
 
 #: pkg/upgrade/service.go:304
 msgid "package"
