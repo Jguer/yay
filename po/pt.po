@@ -666,7 +666,7 @@ msgstr "apenas uma operação pode ser utilizada ao mesmo tempo"
 
 #: print.go:181
 msgid "package '%s' was not found"
-msgstr "pacote '%s' não encontrado"
+msgstr "pacote '%s' não foi encontrado"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
