@@ -23,7 +23,9 @@ func anyExistInCache(pkgbuildDirs map[string]string) bool {
 	return false
 }
 
-func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error {
+func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer,
+	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
+) error {
 	if len(pkgbuildDirsByBase) == 0 {
 		return nil // no work to do
 	}
@@ -47,8 +49,7 @@ func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer, p
 		bases = append(bases, pkg)
 	}
 
-	// TOFIX: empty installed slice means installed filter is disabled
-	toClean, errClean := selectionMenu(w, pkgbuildDirsByBase, bases, mapset.NewSet[string](),
+	toClean, errClean := selectionMenu(w, pkgbuildDirsByBase, bases, installed,
 		gotext.Get("Packages to cleanBuild?"),
 		settings.NoConfirm, config.AnswerClean, skipFunc)
 	if errClean != nil {

@@ -90,7 +90,7 @@ func gitHasDiff(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) (bo
 	return true, nil
 }
 
-// Return wether or not we have reviewed a diff yet. It checks for the existence of
+// Return whether or not we have reviewed a diff yet. It checks for the existence of
 // YAY_DIFF_REVIEW in the git ref-list.
 func gitHasLastSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) bool {
 	_, _, err := cmdBuilder.Capture(
@@ -145,7 +145,9 @@ func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgb
 	return errMulti.Return()
 }
 
-func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error {
+func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer,
+	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
+) error {
 	if len(pkgbuildDirsByBase) == 0 {
 		return nil // no work to do
 	}
@@ -155,7 +157,7 @@ func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer, pk
 		bases = append(bases, base)
 	}
 
-	toDiff, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, mapset.NewThreadUnsafeSet[string](), gotext.Get("Diffs to show?"),
+	toDiff, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, installed, gotext.Get("Diffs to show?"),
 		settings.NoConfirm, config.AnswerDiff, nil)
 	if errMenu != nil || len(toDiff) == 0 {
 		return errMenu
