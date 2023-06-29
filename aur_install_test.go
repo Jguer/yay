@@ -1248,3 +1248,91 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 		})
 	}
 }
+
+func TestInstaller_InstallUpgrade(t *testing.T) {
+	t.Parallel()
+
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	type testCase struct {
+		desc       string
+		targetMode parser.TargetMode
+	}
+
+	tmpDir := t.TempDir()
+
+	testCases := []testCase{
+		{
+			desc:       "target any",
+			targetMode: parser.ModeAny,
+		},
+		{
+			desc:       "target repo",
+			targetMode: parser.ModeRepo,
+		},
+		{
+			desc:       "target aur",
+			targetMode: parser.ModeAUR,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.desc, func(td *testing.T) {
+			mockDB := &mock.DBExecutor{}
+			mockRunner := &exe.MockRunner{}
+			cmdBuilder := &exe.CmdBuilder{
+				MakepkgBin:      makepkgBin,
+				SudoBin:         "su",
+				PacmanBin:       pacmanBin,
+				Runner:          mockRunner,
+				SudoLoopEnabled: false,
+			}
+
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, tc.targetMode,
+				parser.RebuildModeNo, false, NewTestLogger())
+
+			cmdArgs := parser.MakeArguments()
+			cmdArgs.AddArg("u", "upgrades") // Make sure both args are removed
+
+			targets := []map[string]*dep.InstallInfo{
+				{
+					"linux": {
+						Source:     dep.Sync,
+						Reason:     dep.Dep,
+						Version:    "17.0.0-1",
+						SyncDBName: ptrString("core"),
+					},
+				},
+			}
+
+			errI := installer.Install(context.Background(), cmdArgs, targets, map[string]string{}, []string{}, false)
+			require.NoError(td, errI)
+
+			require.NotEmpty(td, mockRunner.ShowCalls)
+
+			// The first call is the only call being test
+			call := mockRunner.ShowCalls[0]
+			show := call.Args[0].(*exec.Cmd).String()
+			show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
+			show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+			show = strings.ReplaceAll(show, pacmanBin, "pacman")
+
+			if tc.targetMode == parser.ModeAUR {
+				assert.NotContains(td, show, "--upgrades")
+				assert.NotContains(td, show, "-u")
+			} else {
+				assert.Contains(td, show, "--upgrades")
+				assert.Contains(td, show, "-u")
+			}
+		})
+	}
+}

@@ -420,6 +420,12 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 	arguments.Op = "S"
 	arguments.ClearTargets()
 	arguments.AddTarget(repoTargets...)
+
+	// Don't upgrade all repo packages if only AUR upgrades are specified
+	if installer.targetMode == parser.ModeAUR {
+		arguments.DelArg("u", "upgrades")
+	}
+
 	if len(excluded) > 0 {
 		arguments.CreateOrAppendOption("ignore", excluded...)
 	}
