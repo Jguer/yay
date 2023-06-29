@@ -56,7 +56,7 @@ msgstr "%s 是最新的 -- 跳过"
 
 #: pkg/upgrade/service.go:304
 msgid "%s to upgrade/install."
-msgstr "%s 个要进行升级/安装的。"
+msgstr "%s 个要进行升级/安装的包。"
 
 #: pkg/upgrade/service.go:298
 msgid "%s will also be installed for this operation."
