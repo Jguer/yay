@@ -138,7 +138,8 @@ func TestIntegrationLocalInstall(t *testing.T) {
 
 			return nil
 		},
-		LocalPackageFn: func(s string) mock.IPackage { return nil },
+		LocalPackageFn:                func(s string) mock.IPackage { return nil },
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
 	config := &settings.Configuration{
@@ -417,6 +418,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 
 			return nil
 		},
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
 	config := &settings.Configuration{
@@ -580,6 +582,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 
 			return nil
 		},
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
 	config := &settings.Configuration{
@@ -841,7 +844,8 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		SyncSatisfierFn: func(s string) mock.IPackage {
 			return nil
 		},
-		LocalPackageFn: func(s string) mock.IPackage { return nil },
+		LocalPackageFn:                func(s string) mock.IPackage { return nil },
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
 	config := &settings.Configuration{
@@ -980,7 +984,8 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		SyncSatisfierFn: func(s string) mock.IPackage {
 			return nil
 		},
-		LocalPackageFn: func(s string) mock.IPackage { return nil },
+		LocalPackageFn:                func(s string) mock.IPackage { return nil },
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
 	config := &settings.Configuration{
