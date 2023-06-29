@@ -174,7 +174,7 @@ msgstr "描述"
 
 #: pkg/menus/diff_menu.go:158
 msgid "Diffs to show?"
-msgstr "显示哪些差异？"
+msgstr "显示哪些包的差异？"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
