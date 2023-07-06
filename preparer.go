@@ -29,7 +29,9 @@ const (
 	PreDownloadSourcesHook HookType = "pre-download-sources"
 )
 
-type HookFn func(ctx context.Context, config *settings.Configuration, w io.Writer, pkgbuildDirsByBase map[string]string) error
+type HookFn func(ctx context.Context, config *settings.Configuration, w io.Writer,
+	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
+) error
 
 type Hook struct {
 	Name   string
@@ -214,9 +216,11 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 		return nil, err
 	}
 
+	remoteNames := preper.dbExecutor.InstalledRemotePackageNames()
+	remoteNamesCache := mapset.NewThreadUnsafeSet(remoteNames...)
 	for _, hookFn := range preper.hooks {
 		if hookFn.Type == PreDownloadSourcesHook {
-			if err := hookFn.Hookfn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase); err != nil {
+			if err := hookFn.Hookfn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase, remoteNamesCache); err != nil {
 				return nil, err
 			}
 		}

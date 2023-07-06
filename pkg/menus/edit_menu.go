@@ -114,7 +114,7 @@ func editPkgbuilds(log *text.Logger, pkgbuildDirs map[string]string, bases []str
 }
 
 func EditFn(ctx context.Context, cfg *settings.Configuration, w io.Writer,
-	pkgbuildDirsByBase map[string]string,
+	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {
 		return nil // no work to do
@@ -125,8 +125,7 @@ func EditFn(ctx context.Context, cfg *settings.Configuration, w io.Writer,
 		bases = append(bases, pkg)
 	}
 
-	toEdit, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases,
-		mapset.NewThreadUnsafeSet[string](),
+	toEdit, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, installed,
 		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, cfg.AnswerEdit, nil)
 	if errMenu != nil || len(toEdit) == 0 {
 		return errMenu
