@@ -161,11 +161,10 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 
 		syncUpgrades, err := u.dbExecutor.SyncUpgrades(enableDowngrade)
 		for _, up := range syncUpgrades {
-			dbName := up.Package.DB().Name()
 			if filter != nil && !filter(&db.Upgrade{
 				Name:          up.Package.Name(),
 				RemoteVersion: up.Package.Version(),
-				Repository:    dbName,
+				Repository:    up.Package.DB().Name(),
 				Base:          up.Package.Base(),
 				LocalVersion:  up.LocalVersion,
 				Reason:        up.Reason,
@@ -173,19 +172,8 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 				continue
 			}
 
-			reason := dep.Explicit
-			if up.Reason == alpm.PkgReasonDepend {
-				reason = dep.Dep
-			}
-
-			graph = u.grapher.GraphSyncPkg(ctx, graph, up.Package, &dep.InstallInfo{
-				Source:       dep.Sync,
-				Reason:       reason,
-				Version:      up.Package.Version(),
-				SyncDBName:   &dbName,
-				LocalVersion: up.LocalVersion,
-				Upgrade:      true,
-			})
+			upgradeInfo := up
+			graph = u.grapher.GraphSyncPkg(ctx, graph, up.Package, &upgradeInfo)
 		}
 
 		errs.Add(err)

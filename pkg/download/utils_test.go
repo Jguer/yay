@@ -102,7 +102,7 @@ func (d *testDBSearcher) SyncPackage(name string) db.IPackage {
 	return nil
 }
 
-func (d *testDBSearcher) SatisfierFromDB(name string, db string) db.IPackage {
+func (d *testDBSearcher) SyncPackageFromDB(name string, db string) db.IPackage {
 	if v, ok := d.absPackagesDB[name]; ok && v == db {
 		return &testPackage{
 			name: name,

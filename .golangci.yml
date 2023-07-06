@@ -48,7 +48,6 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - depguard
     - dogsled
     - dupl
     - errorlint

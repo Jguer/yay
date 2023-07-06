@@ -690,6 +690,20 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 
 			panic("implement me " + s)
 		},
+		SatisfierFromDBFn: func(s, s2 string) (mock.IPackage, error) {
+			if s2 == "extra" {
+				switch s {
+				case "libzip":
+					return &mock.Package{
+						PName:    "libzip",
+						PVersion: "1.9.2-1",
+						PDB:      mock.NewDB("extra"),
+					}, nil
+				}
+			}
+
+			panic("implement me " + s2 + "/" + s)
+		},
 
 		LocalSatisfierExistsFn: func(s string) bool {
 			switch s {
@@ -755,15 +769,6 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 			Version:    "1.9.2-1",
 			SyncDBName: ptrString("extra"),
 		},
-		// In an ideal world this should be the same as "libzip dep",
-		// but due to the difference in handling cases with specified and
-		// unspecified dbs, this is how it is.
-		"extra/libzip dep": {
-			Source:     Sync,
-			Reason:     Dep,
-			Version:    "",
-			SyncDBName: ptrString("extra"),
-		},
 	}
 
 	tests := []struct {
@@ -786,7 +791,7 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 			targets: []string{"aur/gourou", "extra/libzip"},
 			wantLayers: []map[string]*InstallInfo{
 				{"gourou": installInfos["gourou dep"]},
-				{"libzip": installInfos["extra/libzip dep"]},
+				{"libzip": installInfos["libzip dep"]},
 			},
 			wantErr: false,
 		},

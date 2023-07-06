@@ -24,7 +24,7 @@ type httpRequestDoer interface {
 
 type DBSearcher interface {
 	SyncPackage(string) db.IPackage
-	SatisfierFromDB(string, string) db.IPackage
+	SyncPackageFromDB(string, string) db.IPackage
 }
 
 func downloadGitRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
@@ -212,7 +212,7 @@ func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
 	if dbName != "aur" && mode.AtLeastRepo() {
 		var pkg db.IPackage
 		if dbName != "" {
-			pkg = dbExecutor.SatisfierFromDB(name, dbName)
+			pkg = dbExecutor.SyncPackageFromDB(name, dbName)
 		} else {
 			pkg = dbExecutor.SyncPackage(name)
 		}

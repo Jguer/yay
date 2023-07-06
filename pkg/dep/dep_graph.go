@@ -138,19 +138,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		switch target.DB {
 		case "": // unspecified db
 			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
-				dbName := pkg.DB().Name()
-
-				reason := Explicit
-				if localPkg := g.dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
-					reason = Reason(localPkg.Reason())
-				}
-
-				g.GraphSyncPkg(ctx, graph, pkg, &InstallInfo{
-					Source:     Sync,
-					Reason:     reason,
-					Version:    pkg.Version(),
-					SyncDBName: &dbName,
-				})
+				g.GraphSyncPkg(ctx, graph, pkg, nil)
 
 				continue
 			}
@@ -158,18 +146,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			groupPackages := g.dbExecutor.PackagesFromGroup(target.Name)
 			if len(groupPackages) > 0 {
 				dbName := groupPackages[0].DB().Name()
-				graph.AddNode(target.Name)
-				g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
-					Color:      colorMap[Explicit],
-					Background: bgColorMap[Sync],
-					Value: &InstallInfo{
-						Source:     Sync,
-						Reason:     Explicit,
-						Version:    "",
-						SyncDBName: &dbName,
-						IsGroup:    true,
-					},
-				})
+				g.GraphSyncGroup(ctx, graph, target.Name, dbName)
 
 				continue
 			}
@@ -178,22 +155,27 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		case "aur":
 			aurTargets = append(aurTargets, target.Name)
 		default:
-			reason := Explicit
-			if pkg := g.dbExecutor.LocalPackage(target.Name); pkg != nil {
-				reason = Reason(pkg.Reason())
+			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
+			if err != nil {
+				return nil, err
+			}
+			if pkg != nil {
+				g.GraphSyncPkg(ctx, graph, pkg, nil)
+
+				continue
 			}
 
-			graph.AddNode(target.Name)
-			g.ValidateAndSetNodeInfo(graph, target.Name, &topo.NodeInfo[*InstallInfo]{
-				Color:      colorMap[reason],
-				Background: bgColorMap[Sync],
-				Value: &InstallInfo{
-					Source:     Sync,
-					Reason:     reason,
-					Version:    target.Version,
-					SyncDBName: &target.DB,
-				},
-			})
+			groupPackages, err := g.dbExecutor.PackagesFromGroupAndDB(target.Name, target.DB)
+			if err != nil {
+				return nil, err
+			}
+			if len(groupPackages) > 0 {
+				g.GraphSyncGroup(ctx, graph, target.Name, target.DB)
+
+				continue
+			}
+
+			g.logger.Errorln(gotext.Get("No package found for"), " ", target)
 		}
 	}
 
@@ -329,7 +311,7 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 
 func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo],
-	pkg alpm.IPackage, instalInfo *InstallInfo,
+	pkg alpm.IPackage, upgradeInfo *db.SyncUpgrade,
 ) *topo.Graph[string, *InstallInfo] {
 	if graph == nil {
 		graph = topo.New[string, *InstallInfo]()
@@ -342,10 +324,53 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 		return nil
 	})
 
+	dbName := pkg.DB().Name()
+	info := &InstallInfo{
+		Source:     Sync,
+		Reason:     Explicit,
+		Version:    pkg.Version(),
+		SyncDBName: &dbName,
+	}
+
+	if upgradeInfo == nil {
+		if localPkg := g.dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
+			info.Reason = Reason(localPkg.Reason())
+		}
+	} else {
+		info.Upgrade = true
+		info.Reason = Reason(upgradeInfo.Reason)
+		info.LocalVersion = upgradeInfo.LocalVersion
+	}
+
 	g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
-		Color:      colorMap[Reason(pkg.Reason())],
+		Color:      colorMap[info.Reason],
+		Background: bgColorMap[info.Source],
+		Value:      info,
+	})
+
+	return graph
+}
+
+func (g *Grapher) GraphSyncGroup(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo],
+	groupName, dbName string,
+) *topo.Graph[string, *InstallInfo] {
+	if graph == nil {
+		graph = topo.New[string, *InstallInfo]()
+	}
+
+	graph.AddNode(groupName)
+
+	g.ValidateAndSetNodeInfo(graph, groupName, &topo.NodeInfo[*InstallInfo]{
+		Color:      colorMap[Explicit],
 		Background: bgColorMap[Sync],
-		Value:      instalInfo,
+		Value: &InstallInfo{
+			Source:     Sync,
+			Reason:     Explicit,
+			Version:    "",
+			SyncDBName: &dbName,
+			IsGroup:    true,
+		},
 	})
 
 	return graph

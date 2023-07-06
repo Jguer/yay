@@ -28,11 +28,13 @@ type DBExecutor struct {
 	PackageOptionalDependsFn      func(alpm.IPackage) []alpm.Depend
 	PackageProvidesFn             func(IPackage) []Depend
 	PackagesFromGroupFn           func(string) []IPackage
+	PackagesFromGroupAndDBFn      func(string, string) ([]IPackage, error)
 	RefreshHandleFn               func() error
 	ReposFn                       func() []string
 	SyncPackageFn                 func(string) IPackage
 	SyncPackagesFn                func(...string) []IPackage
 	SyncSatisfierFn               func(string) IPackage
+	SatisfierFromDBFn             func(string, string) (IPackage, error)
 	SyncUpgradesFn                func(bool) (map[string]db.SyncUpgrade, error)
 	SetLoggerFn                   func(*text.Logger)
 }
@@ -140,6 +142,13 @@ func (t *DBExecutor) PackagesFromGroup(s string) []IPackage {
 	panic("implement me")
 }
 
+func (t *DBExecutor) PackagesFromGroupAndDB(s, s2 string) ([]IPackage, error) {
+	if t.PackagesFromGroupAndDBFn != nil {
+		return t.PackagesFromGroupAndDBFn(s, s2)
+	}
+	panic("implement me")
+}
+
 func (t *DBExecutor) RefreshHandle() error {
 	if t.RefreshHandleFn != nil {
 		return t.RefreshHandleFn()
@@ -161,7 +170,10 @@ func (t *DBExecutor) Repos() []string {
 	panic("implement me")
 }
 
-func (t *DBExecutor) SatisfierFromDB(s, s2 string) IPackage {
+func (t *DBExecutor) SatisfierFromDB(s, s2 string) (IPackage, error) {
+	if t.SatisfierFromDBFn != nil {
+		return t.SatisfierFromDBFn(s, s2)
+	}
 	panic("implement me")
 }
 

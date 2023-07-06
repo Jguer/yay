@@ -2,16 +2,16 @@ module github.com/Jguer/yay/v12
 
 require (
 	github.com/Jguer/aur v1.2.3
-	github.com/Jguer/go-alpm/v2 v2.2.0
+	github.com/Jguer/go-alpm/v2 v2.2.1
 	github.com/Jguer/votar v1.0.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.2
-	github.com/stretchr/testify v1.8.3
-	golang.org/x/sys v0.9.0
-	golang.org/x/term v0.9.0
-	golang.org/x/text v0.10.0 // indirect
+	github.com/stretchr/testify v1.8.4
+	golang.org/x/sys v0.10.0
+	golang.org/x/term v0.10.0
+	golang.org/x/text v0.11.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
 
@@ -28,7 +28,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.3.0
 	github.com/itchyny/gojq v0.12.13 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
-	github.com/ohler55/ojg v1.18.7 // indirect
+	github.com/ohler55/ojg v1.19.1 // indirect
 )
 
 require github.com/hashicorp/go-multierror v1.1.1
