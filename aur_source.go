@@ -32,7 +32,7 @@ func (e *ErrDownloadSource) Unwrap() error {
 func downloadPKGBUILDSource(ctx context.Context,
 	cmdBuilder exe.ICmdBuilder, pkgBuildDir string, installIncompatible bool,
 ) error {
-	args := []string{"--verifysource", "-Ccf"}
+	args := []string{"--verifysource", "--skippgpcheck", "-Ccf"}
 
 	if installIncompatible {
 		args = append(args, "--ignorearch")

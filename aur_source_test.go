@@ -54,7 +54,7 @@ func Test_downloadPKGBUILDSource(t *testing.T) {
 	cmdBuilder := &TestMakepkgBuilder{
 		parentBuilder: &exe.CmdBuilder{MakepkgConfPath: "/etc/not.conf", MakepkgFlags: []string{"--nocheck"}, MakepkgBin: "makepkg"},
 		test:          t,
-		want:          "makepkg --nocheck --config /etc/not.conf --verifysource -Ccf",
+		want:          "makepkg --nocheck --config /etc/not.conf --verifysource --skippgpcheck -Ccf",
 		wantDir:       "/tmp/yay-bin",
 	}
 	err := downloadPKGBUILDSource(context.Background(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
@@ -70,7 +70,7 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 	cmdBuilder := &TestMakepkgBuilder{
 		parentBuilder: &exe.CmdBuilder{MakepkgConfPath: "/etc/not.conf", MakepkgFlags: []string{"--nocheck"}, MakepkgBin: "makepkg"},
 		test:          t,
-		want:          "makepkg --nocheck --config /etc/not.conf --verifysource -Ccf",
+		want:          "makepkg --nocheck --config /etc/not.conf --verifysource --skippgpcheck -Ccf",
 		wantDir:       "/tmp/yay-bin",
 		showError:     &exec.ExitError{},
 	}
