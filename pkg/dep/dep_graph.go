@@ -503,14 +503,17 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 
 		for i := range aurPkgs {
 			pkg := &aurPkgs[i]
+			if deps.Contains(pkg.Name) {
+				g.providerCache[pkg.Name] = append(g.providerCache[pkg.Name], *pkg)
+			}
+
 			for _, val := range pkg.Provides {
+				if val == pkg.Name {
+					continue
+				}
 				if deps.Contains(val) {
 					g.providerCache[val] = append(g.providerCache[val], *pkg)
 				}
-			}
-
-			if deps.Contains(pkg.Name) {
-				g.providerCache[pkg.Name] = append(g.providerCache[pkg.Name], *pkg)
 			}
 		}
 	}
