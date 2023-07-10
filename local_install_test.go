@@ -49,7 +49,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource -Ccf",
+		"makepkg --verifysource --skippgpcheck -Ccf",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
 		"makepkg --nobuild -fC --ignorearch",
@@ -318,7 +318,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource -Ccf",
+		"makepkg --verifysource --skippgpcheck -Ccf",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
 		"makepkg --nobuild -fC --ignorearch",
@@ -486,7 +486,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource -Ccf",
+		"makepkg --verifysource --skippgpcheck -Ccf",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
 		"makepkg --nobuild -fC --ignorearch",
@@ -777,7 +777,7 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource -Ccf",
+		"makepkg --verifysource --skippgpcheck -Ccf",
 		"makepkg --nobuild -fC --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/ceph-libs-bin-17.2.6-2-x86_64.pkg.tar.zst",
@@ -904,8 +904,8 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource -Ccf",
-		"makepkg --verifysource -Ccf",
+		"makepkg --verifysource --skippgpcheck -Ccf",
+		"makepkg --verifysource --skippgpcheck -Ccf",
 		"makepkg --nobuild -fC --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir1/libzip-git-1.9.2.r166.gd2c47d0f-1-x86_64.pkg.tar.zst",
