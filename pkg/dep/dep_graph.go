@@ -12,10 +12,10 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	aur "github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/Jguer/yay/v12/pkg/topo"
 )
 
 type InstallInfo struct {
@@ -123,11 +123,15 @@ func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 	}
 }
 
+func NewGraph() *topo.Graph[string, *InstallInfo] {
+	return topo.New[string, *InstallInfo]()
+}
+
 func (g *Grapher) GraphFromTargets(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo], targets []string,
 ) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
-		graph = topo.New[string, *InstallInfo]()
+		graph = NewGraph()
 	}
 
 	aurTargets := make([]string, 0, len(targets))
@@ -236,7 +240,7 @@ func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[strin
 	srcInfos map[string]*gosrc.Srcinfo,
 ) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
-		graph = topo.New[string, *InstallInfo]()
+		graph = NewGraph()
 	}
 
 	aurPkgsAdded := []*aurc.Pkg{}
@@ -314,7 +318,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	pkg alpm.IPackage, upgradeInfo *db.SyncUpgrade,
 ) *topo.Graph[string, *InstallInfo] {
 	if graph == nil {
-		graph = topo.New[string, *InstallInfo]()
+		graph = NewGraph()
 	}
 
 	graph.AddNode(pkg.Name())
@@ -356,7 +360,7 @@ func (g *Grapher) GraphSyncGroup(ctx context.Context,
 	groupName, dbName string,
 ) *topo.Graph[string, *InstallInfo] {
 	if graph == nil {
-		graph = topo.New[string, *InstallInfo]()
+		graph = NewGraph()
 	}
 
 	graph.AddNode(groupName)
@@ -381,7 +385,7 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 	pkg *aurc.Pkg, instalInfo *InstallInfo,
 ) *topo.Graph[string, *InstallInfo] {
 	if graph == nil {
-		graph = topo.New[string, *InstallInfo]()
+		graph = NewGraph()
 	}
 
 	graph.AddNode(pkg.Name)
@@ -402,7 +406,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 	targets []string,
 ) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
-		graph = topo.New[string, *InstallInfo]()
+		graph = NewGraph()
 	}
 
 	if len(targets) == 0 {

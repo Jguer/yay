@@ -15,7 +15,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/topo"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
@@ -85,7 +84,7 @@ func installLocalPKGBUILD(
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		config.Runtime.Logger.Child("grapher"))
-	graph := topo.New[string, *dep.InstallInfo]()
+	graph := dep.NewGraph()
 	graph, err := grapher.GraphFromSrcInfos(ctx, graph, srcInfos)
 	if err != nil {
 		return err
