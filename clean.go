@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 
 	"github.com/Jguer/aur"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -105,8 +105,8 @@ func cleanAUR(ctx context.Context, cfg *settings.Configuration,
 ) error {
 	cfg.Runtime.Logger.Println(gotext.Get("removing AUR packages from cache..."))
 
-	installedBases := make(stringset.StringSet)
-	inAURBases := make(stringset.StringSet)
+	installedBases := mapset.NewThreadUnsafeSet[string]()
+	inAURBases := mapset.NewThreadUnsafeSet[string]()
 
 	remotePackages := dbExecutor.InstalledRemotePackages()
 
@@ -138,15 +138,15 @@ func cleanAUR(ctx context.Context, cfg *settings.Configuration,
 		}
 
 		for i := range info {
-			inAURBases.Set(info[i].PackageBase)
+			inAURBases.Add(info[i].PackageBase)
 		}
 	}
 
 	for _, pkg := range remotePackages {
 		if pkg.Base() != "" {
-			installedBases.Set(pkg.Base())
+			installedBases.Add(pkg.Base())
 		} else {
-			installedBases.Set(pkg.Name())
+			installedBases.Add(pkg.Name())
 		}
 	}
 
@@ -156,11 +156,11 @@ func cleanAUR(ctx context.Context, cfg *settings.Configuration,
 		}
 
 		if !removeAll {
-			if keepInstalled && installedBases.Get(file.Name()) {
+			if keepInstalled && installedBases.Contains(file.Name()) {
 				continue
 			}
 
-			if keepCurrent && inAURBases.Get(file.Name()) {
+			if keepCurrent && inAURBases.Contains(file.Name()) {
 				continue
 			}
 		}

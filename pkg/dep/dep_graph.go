@@ -203,7 +203,7 @@ func (g *Grapher) pickSrcInfoPkgs(pkgs []*aurc.Pkg) ([]*aurc.Pkg, error) {
 	}
 
 	include, exclude, _, otherExclude := intrange.ParseNumberMenu(numberBuf)
-	isInclude := len(exclude) == 0 && len(otherExclude) == 0
+	isInclude := len(exclude) == 0 && otherExclude.Cardinality() == 0
 
 	for i := 1; i <= len(pkgs); i++ {
 		target := i - 1

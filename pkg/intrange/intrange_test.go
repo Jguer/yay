@@ -6,7 +6,8 @@ package intrange
 import (
 	"testing"
 
-	"github.com/Jguer/yay/v12/pkg/stringset"
+	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseNumberMenu(t *testing.T) {
@@ -14,8 +15,8 @@ func TestParseNumberMenu(t *testing.T) {
 	type result struct {
 		Include      IntRanges
 		Exclude      IntRanges
-		OtherInclude stringset.StringSet
-		OtherExclude stringset.StringSet
+		OtherInclude mapset.Set[string]
+		OtherExclude mapset.Set[string]
 	}
 
 	inputs := []string{
@@ -40,15 +41,15 @@ func TestParseNumberMenu(t *testing.T) {
 			makeIntRange(3, 3),
 			makeIntRange(4, 4),
 			makeIntRange(5, 5),
-		}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
 		{IntRanges{
 			makeIntRange(1, 10),
 			makeIntRange(5, 15),
-		}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
 		{IntRanges{
 			makeIntRange(5, 10),
 			makeIntRange(85, 90),
-		}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
 		{
 			IntRanges{
 				makeIntRange(1, 1),
@@ -61,18 +62,18 @@ func TestParseNumberMenu(t *testing.T) {
 				makeIntRange(38, 40),
 				makeIntRange(123, 123),
 			},
-			make(stringset.StringSet), make(stringset.StringSet),
+			mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string](),
 		},
-		{IntRanges{}, IntRanges{}, stringset.Make("abort", "all", "none"), make(stringset.StringSet)},
-		{IntRanges{}, IntRanges{}, stringset.Make("a-b"), stringset.Make("abort", "a-b")},
-		{IntRanges{}, IntRanges{}, stringset.Make("-9223372036854775809-9223372036854775809"), make(stringset.StringSet)},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("abort", "all", "none"), mapset.NewThreadUnsafeSet[string]()},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("a-b"), mapset.NewThreadUnsafeSet[string]("abort", "a-b")},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("-9223372036854775809-9223372036854775809"), mapset.NewThreadUnsafeSet[string]()},
 		{IntRanges{
 			makeIntRange(1, 1),
 			makeIntRange(2, 2),
 			makeIntRange(3, 3),
 			makeIntRange(4, 4),
 			makeIntRange(5, 5),
-		}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
+		}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
 		{IntRanges{
 			makeIntRange(1, 1),
 			makeIntRange(2, 2),
@@ -82,23 +83,20 @@ func TestParseNumberMenu(t *testing.T) {
 			makeIntRange(6, 6),
 			makeIntRange(7, 7),
 			makeIntRange(8, 8),
-		}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
-		{IntRanges{}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
-		{IntRanges{}, IntRanges{}, make(stringset.StringSet), make(stringset.StringSet)},
-		{IntRanges{}, IntRanges{}, stringset.Make("a", "b", "c", "d", "e"), make(stringset.StringSet)},
+		}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("a", "b", "c", "d", "e"), mapset.NewThreadUnsafeSet[string]()},
 	}
 
 	for n, in := range inputs {
 		res := expected[n]
 		include, exclude, otherInclude, otherExclude := ParseNumberMenu(in)
 
-		if !intRangesEqual(include, res.Include) ||
-			!intRangesEqual(exclude, res.Exclude) ||
-			!stringset.Equal(otherInclude, res.OtherInclude) ||
-			!stringset.Equal(otherExclude, res.OtherExclude) {
-			t.Fatalf("Test %d Failed: Expected: include=%+v exclude=%+v otherInclude=%+v otherExclude=%+v got include=%+v excluive=%+v otherInclude=%+v otherExclude=%+v",
-				n+1, res.Include, res.Exclude, res.OtherInclude, res.OtherExclude, include, exclude, otherInclude, otherExclude)
-		}
+		assert.True(t, intRangesEqual(include, res.Include), "Test %d Failed: Expected: include=%+v got include=%+v", n+1, res.Include, include)
+		assert.True(t, intRangesEqual(exclude, res.Exclude), "Test %d Failed: Expected: exclude=%+v got exclude=%+v", n+1, res.Exclude, exclude)
+		assert.True(t, otherInclude.Equal(res.OtherInclude), "Test %d Failed: Expected: otherInclude=%+v got otherInclude=%+v", n+1, res.OtherInclude, otherInclude)
+		assert.True(t, otherExclude.Equal(res.OtherExclude), "Test %d Failed: Expected: otherExclude=%+v got otherExclude=%+v", n+1, res.OtherExclude, otherExclude)
 	}
 }
 

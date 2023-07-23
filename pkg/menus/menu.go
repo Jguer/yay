@@ -53,13 +53,13 @@ func selectionMenu(w io.Writer, pkgbuildDirs map[string]string, bases []string, 
 	}
 
 	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(selectInput)
-	eIsInclude := len(eExclude) == 0 && len(eOtherExclude) == 0
+	eIsInclude := len(eExclude) == 0 && eOtherExclude.Cardinality() == 0
 
-	if eOtherInclude.Get("abort") || eOtherInclude.Get("ab") {
+	if eOtherInclude.Contains("abort") || eOtherInclude.Contains("ab") {
 		return nil, settings.ErrUserAbort{}
 	}
 
-	if eOtherInclude.Get("n") || eOtherInclude.Get("none") {
+	if eOtherInclude.Contains("n") || eOtherInclude.Contains("none") {
 		return selected, nil
 	}
 
@@ -74,26 +74,26 @@ func selectionMenu(w io.Writer, pkgbuildDirs map[string]string, bases []string, 
 			continue
 		}
 
-		if anyInstalled && (eOtherInclude.Get("i") || eOtherInclude.Get("installed")) {
+		if anyInstalled && (eOtherInclude.Contains("i") || eOtherInclude.Contains("installed")) {
 			selected = append(selected, pkgBase)
 			continue
 		}
 
-		if !anyInstalled && (eOtherInclude.Get("no") || eOtherInclude.Get("notinstalled")) {
+		if !anyInstalled && (eOtherInclude.Contains("no") || eOtherInclude.Contains("notinstalled")) {
 			selected = append(selected, pkgBase)
 			continue
 		}
 
-		if eOtherInclude.Get("a") || eOtherInclude.Get("all") {
+		if eOtherInclude.Contains("a") || eOtherInclude.Contains("all") {
 			selected = append(selected, pkgBase)
 			continue
 		}
 
-		if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Get(pkgBase)) {
+		if eIsInclude && (eInclude.Get(len(bases)-i) || eOtherInclude.Contains(pkgBase)) {
 			selected = append(selected, pkgBase)
 		}
 
-		if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Get(pkgBase)) {
+		if !eIsInclude && (!eExclude.Get(len(bases)-i) && !eOtherExclude.Contains(pkgBase)) {
 			selected = append(selected, pkgBase)
 		}
 	}

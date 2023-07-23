@@ -303,13 +303,13 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	// upgrade menu asks you which packages to NOT upgrade so in this case
 	// exclude and include are kind of swapped
 	exclude, include, otherExclude, otherInclude := intrange.ParseNumberMenu(numbers)
-	isInclude := len(include) == 0 && len(otherInclude) == 0
+	isInclude := len(include) == 0 && otherInclude.Cardinality() == 0
 
 	excluded := make([]string, 0)
 	for i := range allUp.Up {
 		up := &allUp.Up[i]
 
-		if isInclude && otherExclude.Get(up.Repository) {
+		if isInclude && otherExclude.Contains(up.Repository) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
 			continue
@@ -321,7 +321,7 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 			continue
 		}
 
-		if !isInclude && !(include.Get(len(allUp.Up)-i) || otherInclude.Get(up.Repository)) {
+		if !isInclude && !(include.Get(len(allUp.Up)-i) || otherInclude.Contains(up.Repository)) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
 			continue
