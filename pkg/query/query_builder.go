@@ -11,12 +11,12 @@ import (
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/adrg/strutil"
 	"github.com/adrg/strutil/metrics"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -35,7 +35,7 @@ type Builder interface {
 	Len() int
 	Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string)
 	Results(dbExecutor db.Executor, verboseSearch SearchVerbosity) error
-	GetTargets(include, exclude intrange.IntRanges, otherExclude stringset.StringSet) ([]string, error)
+	GetTargets(include, exclude intrange.IntRanges, otherExclude mapset.Set[string]) ([]string, error)
 }
 
 type SourceQueryBuilder struct {
@@ -253,10 +253,10 @@ func (s *SourceQueryBuilder) Len() int {
 }
 
 func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
-	otherExclude stringset.StringSet,
+	otherExclude mapset.Set[string],
 ) ([]string, error) {
 	var (
-		isInclude = len(exclude) == 0 && len(otherExclude) == 0
+		isInclude = len(exclude) == 0 && otherExclude.Cardinality() == 0
 		targets   []string
 		lenRes    = len(s.results)
 	)

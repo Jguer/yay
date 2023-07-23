@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/Jguer/yay/v12/pkg/stringset"
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 // IntRange stores a max and min amount for range.
@@ -71,12 +71,12 @@ func Max(a, b int) int {
 // of course the implementation is up to the caller, this function mearley parses
 // the input and organizes it.
 func ParseNumberMenu(input string) (include, exclude IntRanges,
-	otherInclude, otherExclude stringset.StringSet,
+	otherInclude, otherExclude mapset.Set[string],
 ) {
 	include = make(IntRanges, 0)
 	exclude = make(IntRanges, 0)
-	otherInclude = make(stringset.StringSet)
-	otherExclude = make(stringset.StringSet)
+	otherInclude = mapset.NewThreadUnsafeSet[string]()
+	otherExclude = mapset.NewThreadUnsafeSet[string]()
 
 	words := strings.FieldsFunc(input, func(c rune) bool {
 		return unicode.IsSpace(c) || c == ','
@@ -102,14 +102,14 @@ func ParseNumberMenu(input string) (include, exclude IntRanges,
 
 		num1, err = strconv.Atoi(ranges[0])
 		if err != nil {
-			other.Set(strings.ToLower(word))
+			other.Add(strings.ToLower(word))
 			continue
 		}
 
 		if len(ranges) == 2 {
 			num2, err = strconv.Atoi(ranges[1])
 			if err != nil {
-				other.Set(strings.ToLower(word))
+				other.Add(strings.ToLower(word))
 				continue
 			}
 		} else {
