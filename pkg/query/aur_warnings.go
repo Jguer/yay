@@ -9,7 +9,6 @@ import (
 	"github.com/Jguer/go-alpm/v2"
 
 	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/stringset"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -18,7 +17,6 @@ type AURWarnings struct {
 	OutOfDate  []string
 	Missing    []string
 	LocalNewer []string
-	Ignore     stringset.StringSet
 
 	log *text.Logger
 }
@@ -27,7 +25,7 @@ func NewWarnings(logger *text.Logger) *AURWarnings {
 	if logger == nil {
 		logger = text.GlobalLogger
 	}
-	return &AURWarnings{Ignore: make(stringset.StringSet), log: logger}
+	return &AURWarnings{log: logger}
 }
 
 func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.IPackage, aurPkg *aur.Pkg) {
