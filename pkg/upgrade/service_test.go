@@ -18,11 +18,11 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/Jguer/yay/v12/pkg/topo"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"

@@ -14,12 +14,12 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/Jguer/yay/v12/pkg/topo"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
@@ -238,7 +238,7 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	enableDowngrade bool, filter Filter,
 ) (*topo.Graph[string, *dep.InstallInfo], error) {
 	if graph == nil {
-		graph = topo.New[string, *dep.InstallInfo]()
+		graph = dep.NewGraph()
 	}
 
 	err := u.upGraph(ctx, graph, enableDowngrade, filter)
