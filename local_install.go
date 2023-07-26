@@ -84,8 +84,7 @@ func installLocalPKGBUILD(
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		config.Runtime.Logger.Child("grapher"))
-	graph := dep.NewGraph()
-	graph, err := grapher.GraphFromSrcInfos(ctx, graph, srcInfos)
+	graph, err := grapher.GraphFromSrcInfos(ctx, nil, srcInfos)
 	if err != nil {
 		return err
 	}
