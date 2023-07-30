@@ -9,7 +9,7 @@ on:
       - "**/builder-image.yml"
 
 env:
-  REGISTRY_IMAGE: jguer/yay-builder:latest
+  REGISTRY_IMAGE: jguer/yay-builder
 
 jobs:
   build:
