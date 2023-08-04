@@ -20,20 +20,20 @@ import (
 )
 
 func syncInstall(ctx context.Context,
-	cfg *settings.Configuration,
+	run *settings.Runtime,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache := cfg.Runtime.AURClient
+	aurCache := run.AURClient
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	noDeps := cmdArgs.ExistsArg("d", "nodeps")
-	noCheck := strings.Contains(cfg.MFlags, "--nocheck")
+	noCheck := strings.Contains(run.Cfg.MFlags, "--nocheck")
 	if noDeps {
-		cfg.Runtime.CmdBuilder.AddMakepkgFlag("-d")
+		run.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
-	if refreshArg && cfg.Mode.AtLeastRepo() {
-		if errR := earlyRefresh(ctx, cfg, cfg.Runtime.CmdBuilder, cmdArgs); errR != nil {
+	if refreshArg && run.Cfg.Mode.AtLeastRepo() {
+		if errR := earlyRefresh(ctx, run.Cfg, run.CmdBuilder, cmdArgs); errR != nil {
 			return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 		}
 
@@ -45,7 +45,7 @@ func syncInstall(ctx context.Context,
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
-		noDeps, noCheck, cmdArgs.ExistsArg("needed"), cfg.Runtime.Logger.Child("grapher"))
+		noDeps, noCheck, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {
@@ -57,8 +57,8 @@ func syncInstall(ctx context.Context,
 		var errSysUp error
 
 		upService := upgrade.NewUpgradeService(
-			grapher, aurCache, dbExecutor, cfg.Runtime.VCSStore,
-			cfg, settings.NoConfirm, cfg.Runtime.Logger.Child("upgrade"))
+			grapher, aurCache, dbExecutor, run.VCSStore,
+			run.Cfg, settings.NoConfirm, run.Logger.Child("upgrade"))
 
 		graph, errSysUp = upService.GraphUpgrades(ctx,
 			graph, cmdArgs.ExistsDouble("u", "sysupgrade"),
@@ -75,7 +75,7 @@ func syncInstall(ctx context.Context,
 		}
 	}
 
-	opService := NewOperationService(ctx, cfg, dbExecutor)
+	opService := NewOperationService(ctx, dbExecutor, run)
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
@@ -88,24 +88,29 @@ func syncInstall(ctx context.Context,
 		return err
 	}
 
-	return opService.Run(ctx, cmdArgs, targets, excluded)
+	return opService.Run(ctx, run, cmdArgs, targets, excluded)
 }
 
 type OperationService struct {
 	ctx        context.Context
 	cfg        *settings.Configuration
 	dbExecutor db.Executor
+	logger     *text.Logger
 }
 
-func NewOperationService(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) *OperationService {
+func NewOperationService(ctx context.Context,
+	dbExecutor db.Executor,
+	run *settings.Runtime,
+) *OperationService {
 	return &OperationService{
 		ctx:        ctx,
-		cfg:        cfg,
+		cfg:        run.Cfg,
 		dbExecutor: dbExecutor,
+		logger:     run.Logger.Child("operation"),
 	}
 }
 
-func (o *OperationService) Run(ctx context.Context,
+func (o *OperationService) Run(ctx context.Context, run *settings.Runtime,
 	cmdArgs *parser.Arguments,
 	targets []map[string]*dep.InstallInfo, excluded []string,
 ) error {
@@ -113,33 +118,33 @@ func (o *OperationService) Run(ctx context.Context,
 		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
 		return nil
 	}
-	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
-	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder,
-		o.cfg.Runtime.VCSStore, o.cfg.Mode, o.cfg.ReBuild,
-		cmdArgs.ExistsArg("w", "downloadonly"), o.cfg.Runtime.Logger.Child("installer"))
+	preparer := NewPreparer(o.dbExecutor, run.CmdBuilder, o.cfg)
+	installer := NewInstaller(o.dbExecutor, run.CmdBuilder,
+		run.VCSStore, o.cfg.Mode, o.cfg.ReBuild,
+		cmdArgs.ExistsArg("w", "downloadonly"), run.Logger.Child("installer"))
 
-	pkgBuildDirs, errInstall := preparer.Run(ctx, os.Stdout, targets)
+	pkgBuildDirs, errInstall := preparer.Run(ctx, run, os.Stdout, targets)
 	if errInstall != nil {
 		return errInstall
 	}
 
-	if cleanFunc := preparer.ShouldCleanMakeDeps(cmdArgs); cleanFunc != nil {
+	if cleanFunc := preparer.ShouldCleanMakeDeps(run, cmdArgs); cleanFunc != nil {
 		installer.AddPostInstallHook(cleanFunc)
 	}
 
-	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(pkgBuildDirs); cleanAURDirsFunc != nil {
+	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(run, pkgBuildDirs); cleanAURDirsFunc != nil {
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
 	go func() {
-		errComp := completion.Update(ctx, o.cfg.Runtime.HTTPClient, o.dbExecutor,
+		errComp := completion.Update(ctx, run.HTTPClient, o.dbExecutor,
 			o.cfg.AURURL, o.cfg.CompletionPath, o.cfg.CompletionInterval, false)
 		if errComp != nil {
 			text.Warnln(errComp)
 		}
 	}()
 
-	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, pkgBuildDirs)
+	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg, run.CmdBuilder, run.VCSStore, pkgBuildDirs)
 	if errInstall != nil {
 		return errInstall
 	}

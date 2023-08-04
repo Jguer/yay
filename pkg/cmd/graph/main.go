@@ -18,17 +18,25 @@ import (
 )
 
 func handleCmd() error {
-	config, err := settings.NewConfig(settings.GetConfigPath(), "")
+	cfg, err := settings.NewConfig(settings.GetConfigPath(), "")
 	if err != nil {
 		return err
 	}
 
 	cmdArgs := parser.MakeArguments()
-	if errP := config.ParseCommandLine(cmdArgs); errP != nil {
+	if errP := cfg.ParseCommandLine(cmdArgs); errP != nil {
 		return errP
 	}
 
-	pacmanConf, _, err := settings.RetrievePacmanConfig(cmdArgs, config.PacmanConf)
+	run, err := settings.BuildRuntime(cfg, cmdArgs, "1.0.0")
+	if err != nil {
+		return err
+	}
+
+	// Reload CmdBuilder
+	run.CmdBuilder = run.Cfg.CmdBuilder(nil)
+
+	pacmanConf, _, err := settings.RetrievePacmanConfig(cmdArgs, cfg.PacmanConf)
 	if err != nil {
 		return err
 	}
@@ -40,14 +48,14 @@ func handleCmd() error {
 
 	aurCache, err := metadata.New(
 		metadata.WithCacheFilePath(
-			filepath.Join(config.BuildDir, "aur.json")))
+			filepath.Join(cfg.BuildDir, "aur.json")))
 	if err != nil {
 		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), false, false,
-		config.Runtime.Logger.Child("grapher"))
+		run.Logger.Child("grapher"))
 
 	return graphPackage(context.Background(), grapher, cmdArgs.Targets)
 }

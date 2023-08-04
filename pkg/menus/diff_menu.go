@@ -145,7 +145,7 @@ func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgb
 	return errMulti.Return()
 }
 
-func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer,
+func DiffFn(ctx context.Context, run *settings.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {
@@ -158,12 +158,12 @@ func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer,
 	}
 
 	toDiff, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, installed, gotext.Get("Diffs to show?"),
-		settings.NoConfirm, config.AnswerDiff, nil)
+		settings.NoConfirm, run.Cfg.AnswerDiff, nil)
 	if errMenu != nil || len(toDiff) == 0 {
 		return errMenu
 	}
 
-	if errD := showPkgbuildDiffs(ctx, config.Runtime.CmdBuilder, pkgbuildDirsByBase, toDiff); errD != nil {
+	if errD := showPkgbuildDiffs(ctx, run.CmdBuilder, pkgbuildDirsByBase, toDiff); errD != nil {
 		return errD
 	}
 
@@ -173,7 +173,7 @@ func DiffFn(ctx context.Context, config *settings.Configuration, w io.Writer,
 		return settings.ErrUserAbort{}
 	}
 
-	if errUpd := updatePkgbuildSeenRef(ctx, config.Runtime.CmdBuilder, pkgbuildDirsByBase, toDiff); errUpd != nil {
+	if errUpd := updatePkgbuildSeenRef(ctx, run.CmdBuilder, pkgbuildDirsByBase, toDiff); errUpd != nil {
 		return errUpd
 	}
 

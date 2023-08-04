@@ -5,15 +5,11 @@ package settings
 
 import (
 	"encoding/json"
-	"io"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func TestMigrationNothingToDo(t *testing.T) {
@@ -28,9 +24,6 @@ func TestMigrationNothingToDo(t *testing.T) {
 	config := Configuration{
 		Version: "99.0.0",
 		// Create runtime with runtimeVersion
-		Runtime: &Runtime{
-			Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
-		},
 	}
 
 	// Run Migration
@@ -53,9 +46,6 @@ func TestProvidesMigrationDo(t *testing.T) {
 	migration := &configProviderMigration{}
 	config := Configuration{
 		Provides: true,
-		Runtime: &Runtime{
-			Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
-		},
 	}
 
 	assert.True(t, migration.Do(&config))
@@ -135,9 +125,6 @@ func TestProvidesMigration(t *testing.T) {
 				Version:  tc.testConfig.Version,
 				Provides: tc.testConfig.Provides,
 				// Create runtime with runtimeVersion
-				Runtime: &Runtime{
-					Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
-				},
 			}
 
 			// Run Migration

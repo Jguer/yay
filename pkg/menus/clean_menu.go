@@ -23,7 +23,7 @@ func anyExistInCache(pkgbuildDirs map[string]string) bool {
 	return false
 }
 
-func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer,
+func CleanFn(ctx context.Context, run *settings.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {
@@ -51,7 +51,7 @@ func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer,
 
 	toClean, errClean := selectionMenu(w, pkgbuildDirsByBase, bases, installed,
 		gotext.Get("Packages to cleanBuild?"),
-		settings.NoConfirm, config.AnswerClean, skipFunc)
+		settings.NoConfirm, run.Cfg.AnswerClean, skipFunc)
 	if errClean != nil {
 		return errClean
 	}
@@ -60,13 +60,13 @@ func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer,
 		dir := pkgbuildDirsByBase[base]
 		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
 
-		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "reset", "--hard", "origin/HEAD")); err != nil {
+		if err := run.CmdBuilder.Show(run.CmdBuilder.BuildGitCmd(ctx, dir, "reset", "--hard", "origin/HEAD")); err != nil {
 			text.Warnln(gotext.Get("Unable to clean:"), dir)
 
 			return err
 		}
 
-		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fdx")); err != nil {
+		if err := run.CmdBuilder.Show(run.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fdx")); err != nil {
 			text.Warnln(gotext.Get("Unable to clean:"), dir)
 
 			return err

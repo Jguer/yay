@@ -103,19 +103,19 @@ func TestYogurtMenuAURDB(t *testing.T) {
 		},
 	}
 	logger := text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test")
-	cfg := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     logger,
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			QueryBuilder: query.NewSourceQueryBuilder(aurCache, logger, "votes", parser.ModeAny, "name",
-				true, false, true),
-			AURClient: aurCache,
-		},
-	}
 
-	err = handleCmd(context.Background(), cfg, cmdArgs, db)
+	runtime := &settings.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     logger,
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		QueryBuilder: query.NewSourceQueryBuilder(aurCache, logger, "votes", parser.ModeAny, "name",
+			true, false, true),
+		AURClient: aurCache,
+	}
+	err = handleCmd(context.Background(), runtime, cmdArgs, db)
 	require.NoError(t, err)
 
 	wantCapture := []string{}

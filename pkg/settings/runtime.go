@@ -24,6 +24,7 @@ import (
 )
 
 type Runtime struct {
+	Cfg          *Configuration
 	QueryBuilder query.Builder
 	PacmanConf   *pacmanconf.Config
 	VCSStore     vcs.Store
@@ -95,6 +96,7 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 	}
 
 	runtime := &Runtime{
+		Cfg:          cfg,
 		QueryBuilder: nil,
 		PacmanConf:   nil,
 		VCSStore:     vcsStore,

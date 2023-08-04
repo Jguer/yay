@@ -51,7 +51,7 @@ func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient, h
 
 // yay -G.
 func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient aur.QueryClient,
-	config *settings.Configuration, targets []string, force bool,
+	run *settings.Runtime, targets []string, force bool,
 ) error {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -59,7 +59,7 @@ func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient
 	}
 
 	cloned, errD := download.PKGBUILDRepos(ctx, dbExecutor, aurClient,
-		config.Runtime.CmdBuilder, targets, config.Mode, config.AURURL, wd, force)
+		run.CmdBuilder, targets, run.Cfg.Mode, run.Cfg.AURURL, wd, force)
 	if errD != nil {
 		text.Errorln(errD)
 	}

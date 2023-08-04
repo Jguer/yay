@@ -56,12 +56,12 @@ func srcinfoExists(ctx context.Context,
 
 func installLocalPKGBUILD(
 	ctx context.Context,
-	config *settings.Configuration,
+	run *settings.Runtime,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache := config.Runtime.AURClient
-	noCheck := strings.Contains(config.MFlags, "--nocheck")
+	aurCache := run.AURClient
+	noCheck := strings.Contains(run.Cfg.MFlags, "--nocheck")
 
 	if len(cmdArgs.Targets) < 1 {
 		return errors.New(gotext.Get("no target directories specified"))
@@ -69,7 +69,7 @@ func installLocalPKGBUILD(
 
 	srcInfos := map[string]*gosrc.Srcinfo{}
 	for _, targetDir := range cmdArgs.Targets {
-		if err := srcinfoExists(ctx, config.Runtime.CmdBuilder, targetDir); err != nil {
+		if err := srcinfoExists(ctx, run.CmdBuilder, targetDir); err != nil {
 			return err
 		}
 
@@ -83,13 +83,13 @@ func installLocalPKGBUILD(
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
-		config.Runtime.Logger.Child("grapher"))
+		run.Logger.Child("grapher"))
 	graph, err := grapher.GraphFromSrcInfos(ctx, nil, srcInfos)
 	if err != nil {
 		return err
 	}
 
-	opService := NewOperationService(ctx, config, dbExecutor)
+	opService := NewOperationService(ctx, dbExecutor, run)
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(name string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
@@ -101,5 +101,5 @@ func installLocalPKGBUILD(
 	if err := multiErr.Return(); err != nil {
 		return err
 	}
-	return opService.Run(ctx, cmdArgs, targets, []string{})
+	return opService.Run(ctx, run, cmdArgs, targets, []string{})
 }

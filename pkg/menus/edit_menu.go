@@ -113,7 +113,7 @@ func editPkgbuilds(log *text.Logger, pkgbuildDirs map[string]string, bases []str
 	return nil
 }
 
-func EditFn(ctx context.Context, cfg *settings.Configuration, w io.Writer,
+func EditFn(ctx context.Context, run *settings.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {
@@ -126,18 +126,18 @@ func EditFn(ctx context.Context, cfg *settings.Configuration, w io.Writer,
 	}
 
 	toEdit, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, installed,
-		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, cfg.AnswerEdit, nil)
+		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, run.Cfg.AnswerEdit, nil)
 	if errMenu != nil || len(toEdit) == 0 {
 		return errMenu
 	}
 
 	// TOFIX: remove or use srcinfo data
-	if errEdit := editPkgbuilds(cfg.Runtime.Logger, pkgbuildDirsByBase,
-		toEdit, cfg.Editor, cfg.EditorFlags, nil, settings.NoConfirm); errEdit != nil {
+	if errEdit := editPkgbuilds(run.Logger, pkgbuildDirsByBase,
+		toEdit, run.Cfg.Editor, run.Cfg.EditorFlags, nil, settings.NoConfirm); errEdit != nil {
 		return errEdit
 	}
 
-	cfg.Runtime.Logger.Println()
+	run.Logger.Println()
 
 	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
 		return settings.ErrUserAbort{}

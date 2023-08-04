@@ -271,14 +271,14 @@ func TestPrintUpdateList(t *testing.T) {
 				SudoLoopEnabled:  false,
 			}
 
-			cfg := &settings.Configuration{
-				RemoveMake: "no",
-				Runtime: &settings.Runtime{
-					Logger:     NewTestLogger(),
-					CmdBuilder: cmdBuilder,
-					VCSStore:   &vcs.Mock{},
-					AURClient:  tc.mockData.aurCache,
+			run := &settings.Runtime{
+				Cfg: &settings.Configuration{
+					RemoveMake: "no",
 				},
+				Logger:     NewTestLogger(),
+				CmdBuilder: cmdBuilder,
+				VCSStore:   &vcs.Mock{},
+				AURClient:  tc.mockData.aurCache,
 			}
 
 			cmdArgs := parser.MakeArguments()
@@ -289,7 +289,7 @@ func TestPrintUpdateList(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			err = handleCmd(context.Background(), cfg, cmdArgs, tc.mockData.db)
+			err = handleCmd(context.Background(), run, cmdArgs, tc.mockData.db)
 
 			w.Close()
 			out, _ := io.ReadAll(r)

@@ -101,8 +101,8 @@ func main() {
 		}
 	}
 
-	// Build runtime
-	runtime, err := settings.BuildRuntime(cfg, cmdArgs, yayVersion)
+	// Build run
+	run, err := settings.BuildRuntime(cfg, cmdArgs, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -113,17 +113,18 @@ func main() {
 		return
 	}
 
-	cfg.Runtime = runtime
+	// Reload CmdBuilder
+	run.CmdBuilder = run.Cfg.CmdBuilder(nil)
 
-	cfg.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
-		cfg.Runtime.AURClient,
-		cfg.Runtime.Logger.Child("mixed.querybuilder"), cfg.SortBy,
+	run.QueryBuilder = query.NewSourceQueryBuilder(
+		run.AURClient,
+		run.Logger.Child("mixed.querybuilder"), cfg.SortBy,
 		cfg.Mode, cfg.SearchBy,
 		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
 
 	var useColor bool
 
-	cfg.Runtime.PacmanConf, useColor, err = settings.RetrievePacmanConfig(cmdArgs, cfg.PacmanConf)
+	run.PacmanConf, useColor, err = settings.RetrievePacmanConfig(cmdArgs, cfg.PacmanConf)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -134,11 +135,11 @@ func main() {
 		return
 	}
 
-	cfg.Runtime.CmdBuilder.SetPacmanDBPath(cfg.Runtime.PacmanConf.DBPath)
+	run.CmdBuilder.SetPacmanDBPath(run.PacmanConf.DBPath)
 
 	text.UseColor = useColor
 
-	dbExecutor, err := ialpm.NewExecutor(cfg.Runtime.PacmanConf, runtime.Logger.Child("db"))
+	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -158,7 +159,7 @@ func main() {
 		dbExecutor.Cleanup()
 	}()
 
-	if err = handleCmd(ctx, cfg, cmdArgs, db.Executor(dbExecutor)); err != nil {
+	if err = handleCmd(ctx, run, cmdArgs, db.Executor(dbExecutor)); err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
 			if cmdArgs.ExistsArg("c") && cmdArgs.ExistsArg("y") && cmdArgs.Op == "S" {

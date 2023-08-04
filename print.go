@@ -74,8 +74,8 @@ func biggestPackages(dbExecutor db.Executor) {
 }
 
 // localStatistics prints installed packages statistics.
-func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) error {
-	info := statistics(cfg, dbExecutor)
+func localStatistics(ctx context.Context, run *settings.Runtime, dbExecutor db.Executor) error {
+	info := statistics(run, dbExecutor)
 
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	remote := dbExecutor.InstalledRemotePackages()
@@ -90,13 +90,13 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 		text.Infoln(gotext.Get("Size of pacman cache %s: %s", path, text.Cyan(text.Human(size))))
 	}
 
-	text.Infoln(gotext.Get("Size of yay cache %s: %s", cfg.BuildDir, text.Cyan(text.Human(info.yayCache))))
+	text.Infoln(gotext.Get("Size of yay cache %s: %s", run.Cfg.BuildDir, text.Cyan(text.Human(info.yayCache))))
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 	text.Infoln(gotext.Get("Ten biggest packages:"))
 	biggestPackages(dbExecutor)
 	fmt.Println(text.Bold(text.Cyan("===========================================")))
 
-	aurData, err := cfg.Runtime.AURClient.Get(ctx, &aur.Query{
+	aurData, err := run.AURClient.Get(ctx, &aur.Query{
 		Needles: remoteNames,
 		By:      aur.Name,
 	})
@@ -104,7 +104,7 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 		return err
 	}
 
-	warnings := query.NewWarnings(cfg.Runtime.Logger.Child("print"))
+	warnings := query.NewWarnings(run.Logger.Child("print"))
 	for i := range aurData {
 		warnings.AddToWarnings(remote, &aurData[i])
 	}
@@ -114,13 +114,13 @@ func localStatistics(ctx context.Context, cfg *settings.Configuration, dbExecuto
 	return nil
 }
 
-func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments,
+func printUpdateList(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments,
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
 	quietMode := cmdArgs.ExistsArg("q", "quiet")
 
 	// TODO: handle quiet mode in a better way
-	logger := text.NewLogger(io.Discard, os.Stderr, os.Stdin, cfg.Debug, "update-list")
+	logger := text.NewLogger(io.Discard, os.Stderr, os.Stdin, run.Cfg.Debug, "update-list")
 	dbExecutor.SetLogger(logger.Child("db"))
 	oldNoConfirm := settings.NoConfirm
 	settings.NoConfirm = true
@@ -128,12 +128,12 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	defer func() { settings.NoConfirm = oldNoConfirm }()
 
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
-	grapher := dep.NewGrapher(dbExecutor, cfg.Runtime.AURClient, false, true,
+	grapher := dep.NewGrapher(dbExecutor, run.AURClient, false, true,
 		false, false, cmdArgs.ExistsArg("needed"), logger.Child("grapher"))
 
 	upService := upgrade.NewUpgradeService(
-		grapher, cfg.Runtime.AURClient, dbExecutor, cfg.Runtime.VCSStore,
-		cfg, true, logger.Child("upgrade"))
+		grapher, run.AURClient, dbExecutor, run.VCSStore,
+		run.Cfg, true, logger.Child("upgrade"))
 
 	graph, errSysUp := upService.GraphUpgrades(ctx, nil,
 		enableDowngrade, filter)
@@ -179,7 +179,7 @@ func printUpdateList(ctx context.Context, cfg *settings.Configuration, cmdArgs *
 	missing := false
 	targets.Each(func(pkgName string) bool {
 		if dbExecutor.LocalPackage(pkgName) == nil {
-			cfg.Runtime.Logger.Errorln(gotext.Get("package '%s' was not found", pkgName))
+			run.Logger.Errorln(gotext.Get("package '%s' was not found", pkgName))
 			missing = true
 		}
 		return false

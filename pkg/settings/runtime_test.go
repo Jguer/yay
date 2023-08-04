@@ -10,7 +10,6 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func TestBuildRuntime(t *testing.T) {
@@ -23,7 +22,6 @@ func TestBuildRuntime(t *testing.T) {
 		AURRPCURL:   "https://aur.archlinux.org/rpc",
 		BuildDir:    "/tmp",
 		VCSFilePath: "",
-		Runtime:     &settings.Runtime{Logger: text.NewLogger(nil, nil, nil, false, "")},
 	}
 	cmdArgs := parser.MakeArguments()
 	version := "1.0.0"

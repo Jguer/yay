@@ -24,53 +24,52 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
-	Runtime                *Runtime `json:"-"`
-	AURURL                 string   `json:"aururl"`
-	AURRPCURL              string   `json:"aurrpcurl"`
-	BuildDir               string   `json:"buildDir"`
-	Editor                 string   `json:"editor"`
-	EditorFlags            string   `json:"editorflags"`
-	MakepkgBin             string   `json:"makepkgbin"`
-	MakepkgConf            string   `json:"makepkgconf"`
-	PacmanBin              string   `json:"pacmanbin"`
-	PacmanConf             string   `json:"pacmanconf"`
-	ReDownload             string   `json:"redownload"`
-	AnswerClean            string   `json:"answerclean"`
-	AnswerDiff             string   `json:"answerdiff"`
-	AnswerEdit             string   `json:"answeredit"`
-	AnswerUpgrade          string   `json:"answerupgrade"`
-	GitBin                 string   `json:"gitbin"`
-	GpgBin                 string   `json:"gpgbin"`
-	GpgFlags               string   `json:"gpgflags"`
-	MFlags                 string   `json:"mflags"`
-	SortBy                 string   `json:"sortby"`
-	SearchBy               string   `json:"searchby"`
-	GitFlags               string   `json:"gitflags"`
-	RemoveMake             string   `json:"removemake"`
-	SudoBin                string   `json:"sudobin"`
-	SudoFlags              string   `json:"sudoflags"`
-	Version                string   `json:"version"`
-	RequestSplitN          int      `json:"requestsplitn"`
-	CompletionInterval     int      `json:"completionrefreshtime"`
-	MaxConcurrentDownloads int      `json:"maxconcurrentdownloads"`
-	BottomUp               bool     `json:"bottomup"`
-	SudoLoop               bool     `json:"sudoloop"`
-	TimeUpdate             bool     `json:"timeupdate"`
-	Devel                  bool     `json:"devel"`
-	CleanAfter             bool     `json:"cleanAfter"`
-	Provides               bool     `json:"provides"`
-	PGPFetch               bool     `json:"pgpfetch"`
-	CleanMenu              bool     `json:"cleanmenu"`
-	DiffMenu               bool     `json:"diffmenu"`
-	EditMenu               bool     `json:"editmenu"`
-	CombinedUpgrade        bool     `json:"combinedupgrade"`
-	UseAsk                 bool     `json:"useask"`
-	BatchInstall           bool     `json:"batchinstall"`
-	SingleLineResults      bool     `json:"singlelineresults"`
-	SeparateSources        bool     `json:"separatesources"`
-	Debug                  bool     `json:"debug"`
-	UseRPC                 bool     `json:"rpc"`
-	DoubleConfirm          bool     `json:"doubleconfirm"` // confirm install before and after build
+	AURURL                 string `json:"aururl"`
+	AURRPCURL              string `json:"aurrpcurl"`
+	BuildDir               string `json:"buildDir"`
+	Editor                 string `json:"editor"`
+	EditorFlags            string `json:"editorflags"`
+	MakepkgBin             string `json:"makepkgbin"`
+	MakepkgConf            string `json:"makepkgconf"`
+	PacmanBin              string `json:"pacmanbin"`
+	PacmanConf             string `json:"pacmanconf"`
+	ReDownload             string `json:"redownload"`
+	AnswerClean            string `json:"answerclean"`
+	AnswerDiff             string `json:"answerdiff"`
+	AnswerEdit             string `json:"answeredit"`
+	AnswerUpgrade          string `json:"answerupgrade"`
+	GitBin                 string `json:"gitbin"`
+	GpgBin                 string `json:"gpgbin"`
+	GpgFlags               string `json:"gpgflags"`
+	MFlags                 string `json:"mflags"`
+	SortBy                 string `json:"sortby"`
+	SearchBy               string `json:"searchby"`
+	GitFlags               string `json:"gitflags"`
+	RemoveMake             string `json:"removemake"`
+	SudoBin                string `json:"sudobin"`
+	SudoFlags              string `json:"sudoflags"`
+	Version                string `json:"version"`
+	RequestSplitN          int    `json:"requestsplitn"`
+	CompletionInterval     int    `json:"completionrefreshtime"`
+	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads"`
+	BottomUp               bool   `json:"bottomup"`
+	SudoLoop               bool   `json:"sudoloop"`
+	TimeUpdate             bool   `json:"timeupdate"`
+	Devel                  bool   `json:"devel"`
+	CleanAfter             bool   `json:"cleanAfter"`
+	Provides               bool   `json:"provides"`
+	PGPFetch               bool   `json:"pgpfetch"`
+	CleanMenu              bool   `json:"cleanmenu"`
+	DiffMenu               bool   `json:"diffmenu"`
+	EditMenu               bool   `json:"editmenu"`
+	CombinedUpgrade        bool   `json:"combinedupgrade"`
+	UseAsk                 bool   `json:"useask"`
+	BatchInstall           bool   `json:"batchinstall"`
+	SingleLineResults      bool   `json:"singlelineresults"`
+	SeparateSources        bool   `json:"separatesources"`
+	Debug                  bool   `json:"debug"`
+	UseRPC                 bool   `json:"rpc"`
+	DoubleConfirm          bool   `json:"doubleconfirm"` // confirm install before and after build
 
 	CompletionPath string `json:"-"`
 	VCSFilePath    string `json:"-"`
@@ -237,10 +236,7 @@ func DefaultConfig(version string) *Configuration {
 		Debug:                  false,
 		UseRPC:                 true,
 		DoubleConfirm:          true,
-		Runtime: &Runtime{
-			Logger: text.GlobalLogger,
-		},
-		Mode: parser.ModeAny,
+		Mode:                   parser.ModeAny,
 	}
 }
 
@@ -296,9 +292,10 @@ func (c *Configuration) load(configPath string) {
 	}
 }
 
+// FIXME: Build CmdBuilder in runtime not cfg
 func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
 	if runner == nil {
-		runner = &exe.OSRunner{Log: c.Runtime.Logger.Child("runner")}
+		runner = &exe.OSRunner{Log: text.GlobalLogger.Child("runner")}
 	}
 
 	return &exe.CmdBuilder{
@@ -316,6 +313,6 @@ func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
 		PacmanConfigPath: c.PacmanConf,
 		PacmanDBPath:     "",
 		Runner:           runner,
-		Log:              c.Runtime.Logger.Child("cmd_builder"),
+		Log:              text.GlobalLogger.Child("cmd_builder"),
 	}
 }

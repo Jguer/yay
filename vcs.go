@@ -31,11 +31,11 @@ func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {
 }
 
 // createDevelDB forces yay to create a DB of the existing development packages.
-func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) error {
+func createDevelDB(ctx context.Context, run *settings.Runtime, dbExecutor db.Executor) error {
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 
-	cfg.Runtime.QueryBuilder.Execute(ctx, dbExecutor, remoteNames)
-	info, err := cfg.Runtime.AURClient.Get(ctx, &aur.Query{
+	run.QueryBuilder.Execute(ctx, dbExecutor, remoteNames)
+	info, err := run.AURClient.Get(ctx, &aur.Query{
 		Needles:  remoteNames,
 		By:       aur.Name,
 		Contains: false,
@@ -44,10 +44,10 @@ func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor 
 		return err
 	}
 
-	preper := NewPreparerWithoutHooks(dbExecutor, cfg.Runtime.CmdBuilder, cfg, false)
+	preper := NewPreparerWithoutHooks(dbExecutor, run.CmdBuilder, run.Cfg, false)
 
 	mapInfo := infoToInstallInfo(info)
-	pkgBuildDirsByBase, err := preper.Run(ctx, os.Stdout, mapInfo)
+	pkgBuildDirsByBase, err := preper.Run(ctx, run, os.Stdout, mapInfo)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor 
 			wg.Add(1)
 
 			go func(i string, iP int) {
-				cfg.Runtime.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
+				run.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
 				wg.Done()
 			}(i, iP)
 		}
