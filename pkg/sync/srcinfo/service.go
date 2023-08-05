@@ -32,7 +32,7 @@ type Service struct {
 func NewService(dbExecutor db.Executor, cfg *settings.Configuration, logger *text.Logger,
 	cmdBuilder exe.ICmdBuilder, vcsStore vcs.Store, pkgBuildDirs map[string]string,
 ) (*Service, error) {
-	srcinfos, err := ParseSrcinfoFilesByBase(pkgBuildDirs, true)
+	srcinfos, err := ParseSrcinfoFilesByBase(logger, pkgBuildDirs, true)
 	if err != nil {
 		panic(err)
 	}
@@ -101,12 +101,12 @@ func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.
 	return nil
 }
 
-func ParseSrcinfoFilesByBase(pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
+func ParseSrcinfoFilesByBase(logger *text.Logger, pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
 	srcinfos := make(map[string]*gosrc.Srcinfo)
 
 	k := 0
 	for base, dir := range pkgBuildDirs {
-		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(pkgBuildDirs), text.Cyan(base)))
+		logger.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(pkgBuildDirs), text.Cyan(base)))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {

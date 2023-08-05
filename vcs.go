@@ -12,7 +12,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/sync/srcinfo"
 	"github.com/Jguer/yay/v12/pkg/sync/workdir"
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {
@@ -52,7 +51,7 @@ func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Exec
 		return err
 	}
 
-	srcinfos, err := srcinfo.ParseSrcinfoFilesByBase(pkgBuildDirsByBase, false)
+	srcinfos, err := srcinfo.ParseSrcinfoFilesByBase(run.Logger.Child("srcinfo"), pkgBuildDirsByBase, false)
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,7 @@ func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Exec
 	}
 
 	wg.Wait()
-	text.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
+	run.Logger.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
 
 	return err
 }
