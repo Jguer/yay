@@ -10,7 +10,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/srcinfo"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -31,7 +31,7 @@ func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {
 }
 
 // createDevelDB forces yay to create a DB of the existing development packages.
-func createDevelDB(ctx context.Context, run *settings.Runtime, dbExecutor db.Executor) error {
+func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Executor) error {
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 
 	run.QueryBuilder.Execute(ctx, dbExecutor, remoteNames)

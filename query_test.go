@@ -16,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -126,7 +127,7 @@ func TestSyncInfo(t *testing.T) {
 				SudoLoopEnabled:  false,
 			}
 
-			run := &settings.Runtime{
+			run := &runtime.Runtime{
 				CmdBuilder: cmdBuilder,
 				AURClient:  mockAUR,
 				Logger:     NewTestLogger(),
@@ -267,7 +268,7 @@ func TestSyncSearchAURDB(t *testing.T) {
 				SudoLoopEnabled:  false,
 			}
 
-			run := &settings.Runtime{
+			run := &runtime.Runtime{
 				CmdBuilder: cmdBuilder,
 				AURClient:  mockAUR,
 				QueryBuilder: query.NewSourceQueryBuilder(mockAUR, NewTestLogger(), "votes", parser.ModeAny, "name",

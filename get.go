@@ -11,7 +11,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/download"
-	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -51,7 +51,7 @@ func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient, h
 
 // yay -G.
 func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient aur.QueryClient,
-	run *settings.Runtime, targets []string, force bool,
+	run *runtime.Runtime, targets []string, force bool,
 ) error {
 	wd, err := os.Getwd()
 	if err != nil {

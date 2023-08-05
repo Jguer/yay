@@ -20,6 +20,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -271,7 +272,7 @@ func TestPrintUpdateList(t *testing.T) {
 				SudoLoopEnabled:  false,
 			}
 
-			run := &settings.Runtime{
+			run := &runtime.Runtime{
 				Cfg: &settings.Configuration{
 					RemoveMake: "no",
 				},

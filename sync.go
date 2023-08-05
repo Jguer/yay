@@ -10,6 +10,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/srcinfo"
@@ -20,7 +21,7 @@ import (
 )
 
 func syncInstall(ctx context.Context,
-	run *settings.Runtime,
+	run *runtime.Runtime,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
@@ -100,7 +101,7 @@ type OperationService struct {
 
 func NewOperationService(ctx context.Context,
 	dbExecutor db.Executor,
-	run *settings.Runtime,
+	run *runtime.Runtime,
 ) *OperationService {
 	return &OperationService{
 		ctx:        ctx,
@@ -110,7 +111,7 @@ func NewOperationService(ctx context.Context,
 	}
 }
 
-func (o *OperationService) Run(ctx context.Context, run *settings.Runtime,
+func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	cmdArgs *parser.Arguments,
 	targets []map[string]*dep.InstallInfo, excluded []string,
 ) error {

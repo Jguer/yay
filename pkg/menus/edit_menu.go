@@ -14,6 +14,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -113,7 +114,7 @@ func editPkgbuilds(log *text.Logger, pkgbuildDirs map[string]string, bases []str
 	return nil
 }
 
-func EditFn(ctx context.Context, run *settings.Runtime, w io.Writer,
+func EditFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {

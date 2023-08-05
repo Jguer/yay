@@ -12,6 +12,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -145,7 +146,7 @@ func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgb
 	return errMulti.Return()
 }
 
-func DiffFn(ctx context.Context, run *settings.Runtime, w io.Writer,
+func DiffFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -32,7 +33,7 @@ func syncSearch(ctx context.Context, pkgS []string,
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(ctx context.Context, run *settings.Runtime,
+func syncInfo(ctx context.Context, run *runtime.Runtime,
 	cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor,
 ) error {
 	var (
@@ -220,7 +221,7 @@ func getFolderSize(path string) (size int64) {
 }
 
 // Statistics returns statistics about packages installed in system.
-func statistics(run *settings.Runtime, dbExecutor db.Executor) (res struct {
+func statistics(run *runtime.Runtime, dbExecutor db.Executor) (res struct {
 	Totaln       int
 	Expln        int
 	TotalSize    int64

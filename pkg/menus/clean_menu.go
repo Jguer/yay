@@ -9,6 +9,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -23,7 +24,7 @@ func anyExistInCache(pkgbuildDirs map[string]string) bool {
 	return false
 }
 
-func CleanFn(ctx context.Context, run *settings.Runtime, w io.Writer,
+func CleanFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {

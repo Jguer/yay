@@ -23,6 +23,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -106,7 +107,7 @@ func TestSyncUpgrade(t *testing.T) {
 		},
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
@@ -218,7 +219,7 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 		},
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
@@ -347,7 +348,7 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 		},
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
@@ -510,7 +511,7 @@ pkgname = python-vosk
 		},
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			DoubleConfirm: true,
 			RemoveMake:    "no",
@@ -695,7 +696,7 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 				},
 			}
 
-			run := &settings.Runtime{
+			run := &runtime.Runtime{
 				Cfg: &settings.Configuration{
 					RemoveMake:      "no",
 					CombinedUpgrade: false,

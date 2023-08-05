@@ -19,6 +19,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -104,7 +105,7 @@ func TestYogurtMenuAURDB(t *testing.T) {
 	}
 	logger := text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test")
 
-	runtime := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
@@ -115,7 +116,7 @@ func TestYogurtMenuAURDB(t *testing.T) {
 			true, false, true),
 		AURClient: aurCache,
 	}
-	err = handleCmd(context.Background(), runtime, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	wantCapture := []string{}

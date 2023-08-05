@@ -1,13 +1,14 @@
 //go:build !integration
 // +build !integration
 
-package settings_test
+package runtime_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 )
@@ -27,18 +28,18 @@ func TestBuildRuntime(t *testing.T) {
 	version := "1.0.0"
 
 	// Call the function being tested
-	runtime, err := settings.BuildRuntime(cfg, cmdArgs, version)
+	run, err := runtime.BuildRuntime(cfg, cmdArgs, version)
 
 	// Assert the function's output
-	assert.NotNil(t, runtime)
+	assert.NotNil(t, run)
 	assert.Nil(t, err)
-	assert.Nil(t, runtime.QueryBuilder)
-	assert.Nil(t, runtime.PacmanConf)
-	assert.NotNil(t, runtime.VCSStore)
-	assert.NotNil(t, runtime.CmdBuilder)
-	assert.NotNil(t, runtime.HTTPClient)
-	assert.NotNil(t, runtime.VoteClient)
-	assert.NotNil(t, runtime.AURClient)
-	assert.Nil(t, runtime.DBExecutor)
-	assert.NotNil(t, runtime.Logger)
+	assert.Nil(t, run.QueryBuilder)
+	assert.Nil(t, run.PacmanConf)
+	assert.NotNil(t, run.VCSStore)
+	assert.NotNil(t, run.CmdBuilder)
+	assert.NotNil(t, run.HTTPClient)
+	assert.NotNil(t, run.VoteClient)
+	assert.NotNil(t, run.AURClient)
+	assert.Nil(t, run.DBExecutor)
+	assert.NotNil(t, run.Logger)
 }

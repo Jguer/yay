@@ -12,6 +12,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/download"
 	"github.com/Jguer/yay/v12/pkg/menus"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -29,7 +30,7 @@ const (
 	PreDownloadSourcesHook HookType = "pre-download-sources"
 )
 
-type HookFn func(ctx context.Context, run *settings.Runtime, w io.Writer,
+type HookFn func(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error
 
@@ -93,7 +94,7 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
 	return preper
 }
 
-func (preper *Preparer) ShouldCleanAURDirs(run *settings.Runtime, pkgBuildDirs map[string]string) PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs map[string]string) PostInstallHookFunc {
 	if !preper.cfg.CleanAfter || len(pkgBuildDirs) == 0 {
 		return nil
 	}
@@ -106,7 +107,7 @@ func (preper *Preparer) ShouldCleanAURDirs(run *settings.Runtime, pkgBuildDirs m
 	}
 }
 
-func (preper *Preparer) ShouldCleanMakeDeps(run *settings.Runtime, cmdArgs *parser.Arguments) PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parser.Arguments) PostInstallHookFunc {
 	if len(preper.makeDeps) == 0 {
 		return nil
 	}
@@ -131,7 +132,7 @@ func (preper *Preparer) ShouldCleanMakeDeps(run *settings.Runtime, cmdArgs *pars
 	}
 }
 
-func (preper *Preparer) Run(ctx context.Context, run *settings.Runtime,
+func (preper *Preparer) Run(ctx context.Context, run *runtime.Runtime,
 	w io.Writer, targets []map[string]*dep.InstallInfo,
 ) (pkgbuildDirsByBase map[string]string, err error) {
 	preper.Present(w, targets)
@@ -183,7 +184,7 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 }
 
 func (preper *Preparer) PrepareWorkspace(ctx context.Context,
-	run *settings.Runtime, targets []map[string]*dep.InstallInfo,
+	run *runtime.Runtime, targets []map[string]*dep.InstallInfo,
 ) (map[string]string, error) {
 	aurBasesToClone := mapset.NewThreadUnsafeSet[string]()
 	pkgBuildDirsByBase := make(map[string]string, len(targets))

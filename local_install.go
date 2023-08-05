@@ -12,6 +12,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -56,7 +57,7 @@ func srcinfoExists(ctx context.Context,
 
 func installLocalPKGBUILD(
 	ctx context.Context,
-	run *settings.Runtime,
+	run *runtime.Runtime,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {

@@ -17,6 +17,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/news"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -146,7 +147,7 @@ getpkgbuild specific options:
     -p --print            Print pkgbuild of packages`)
 }
 
-func handleCmd(ctx context.Context, run *settings.Runtime,
+func handleCmd(ctx context.Context, run *runtime.Runtime,
 	cmdArgs *parser.Arguments, dbExecutor db.Executor,
 ) error {
 	if cmdArgs.ExistsArg("h", "help") {
@@ -219,7 +220,7 @@ func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {
 	}, nil
 }
 
-func handleQuery(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleQuery(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	if cmdArgs.ExistsArg("u", "upgrades") {
 		filter, err := getFilter(cmdArgs)
 		if err != nil {
@@ -243,7 +244,7 @@ func handleQuery(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arg
 	return nil
 }
 
-func handleHelp(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments) error {
+func handleHelp(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
 	usage()
 	switch cmdArgs.Op {
 	case "Y", "yay", "G", "getpkgbuild", "P", "show", "W", "web", "B", "build":
@@ -259,7 +260,7 @@ func handleVersion() {
 	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
-func handlePrint(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handlePrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.DefaultConfig(yayVersion)
@@ -285,7 +286,7 @@ func handlePrint(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arg
 	return nil
 }
 
-func handleYay(ctx context.Context, run *settings.Runtime,
+func handleYay(ctx context.Context, run *runtime.Runtime,
 	cmdArgs *parser.Arguments, cmdBuilder exe.ICmdBuilder,
 	dbExecutor db.Executor, queryBuilder query.Builder,
 ) error {
@@ -303,7 +304,7 @@ func handleYay(ctx context.Context, run *settings.Runtime,
 	return nil
 }
 
-func handleWeb(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments) error {
+func handleWeb(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
 	switch {
 	case cmdArgs.ExistsArg("v", "vote"):
 		return handlePackageVote(ctx, cmdArgs.Targets, run.AURClient,
@@ -316,7 +317,7 @@ func handleWeb(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Argum
 	return nil
 }
 
-func handleGetpkgbuild(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
+func handleGetpkgbuild(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
 		return printPkgbuilds(dbExecutor, run.AURClient,
 			run.HTTPClient, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL)
@@ -327,7 +328,7 @@ func handleGetpkgbuild(ctx context.Context, run *settings.Runtime, cmdArgs *pars
 }
 
 func handleUpgrade(ctx context.Context,
-	run *settings.Runtime, cmdArgs *parser.Arguments,
+	run *runtime.Runtime, cmdArgs *parser.Arguments,
 ) error {
 	return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, run.Cfg.Mode, settings.NoConfirm))
@@ -335,7 +336,7 @@ func handleUpgrade(ctx context.Context,
 
 // -B* options
 func handleBuild(ctx context.Context,
-	run *settings.Runtime, dbExecutor db.Executor, cmdArgs *parser.Arguments,
+	run *runtime.Runtime, dbExecutor db.Executor, cmdArgs *parser.Arguments,
 ) error {
 	if cmdArgs.ExistsArg("i", "install") {
 		return installLocalPKGBUILD(ctx, run, cmdArgs, dbExecutor)
@@ -344,7 +345,7 @@ func handleBuild(ctx context.Context,
 	return nil
 }
 
-func handleSync(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func handleSync(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	targets := cmdArgs.Targets
 
 	switch {
@@ -372,7 +373,7 @@ func handleSync(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Argu
 	return nil
 }
 
-func handleRemove(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments, localCache vcs.Store) error {
+func handleRemove(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, localCache vcs.Store) error {
 	err := run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, run.Cfg.Mode, settings.NoConfirm))
 	if err == nil {
@@ -383,7 +384,7 @@ func handleRemove(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Ar
 }
 
 // NumberMenu presents a CLI for selecting packages to install.
-func displayNumberMenu(ctx context.Context, run *settings.Runtime, pkgS []string, dbExecutor db.Executor,
+func displayNumberMenu(ctx context.Context, run *runtime.Runtime, pkgS []string, dbExecutor db.Executor,
 	queryBuilder query.Builder, cmdArgs *parser.Arguments,
 ) error {
 	queryBuilder.Execute(ctx, dbExecutor, pkgS)
@@ -422,7 +423,7 @@ func displayNumberMenu(ctx context.Context, run *settings.Runtime, pkgS []string
 	return syncInstall(ctx, run, cmdArgs, dbExecutor)
 }
 
-func syncList(ctx context.Context, run *settings.Runtime,
+func syncList(ctx context.Context, run *runtime.Runtime,
 	httpClient *http.Client, cmdArgs *parser.Arguments, dbExecutor db.Executor,
 ) error {
 	aur := false

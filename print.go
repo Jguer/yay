@@ -14,6 +14,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -74,7 +75,7 @@ func biggestPackages(dbExecutor db.Executor) {
 }
 
 // localStatistics prints installed packages statistics.
-func localStatistics(ctx context.Context, run *settings.Runtime, dbExecutor db.Executor) error {
+func localStatistics(ctx context.Context, run *runtime.Runtime, dbExecutor db.Executor) error {
 	info := statistics(run, dbExecutor)
 
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
@@ -114,7 +115,7 @@ func localStatistics(ctx context.Context, run *settings.Runtime, dbExecutor db.E
 	return nil
 }
 
-func printUpdateList(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments,
+func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments,
 	dbExecutor db.Executor, enableDowngrade bool, filter upgrade.Filter,
 ) error {
 	quietMode := cmdArgs.ExistsArg("q", "quiet")

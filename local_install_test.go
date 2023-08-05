@@ -19,6 +19,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -142,7 +143,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	runtime := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
@@ -156,7 +157,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		},
 	}
 
-	err = handleCmd(context.Background(), runtime, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
@@ -263,7 +264,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 		LocalPackageFn: func(string) mock.IPackage { return nil },
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg:        &settings.Configuration{},
 		Logger:     NewTestLogger(),
 		CmdBuilder: cmdBuilder,
@@ -420,7 +421,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
@@ -584,7 +585,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 			Debug:      false,
@@ -721,7 +722,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 		},
 	}
 
-	config := &settings.Runtime{
+	config := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 			Debug:      false,
@@ -848,7 +849,7 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	config := &settings.Runtime{
+	config := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
@@ -988,7 +989,7 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	run := &settings.Runtime{
+	run := &runtime.Runtime{
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},

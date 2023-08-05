@@ -8,6 +8,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -28,7 +29,7 @@ func handleCmd() error {
 		return errP
 	}
 
-	run, err := settings.BuildRuntime(cfg, cmdArgs, "1.0.0")
+	run, err := runtime.BuildRuntime(cfg, cmdArgs, "1.0.0")
 	if err != nil {
 		return err
 	}

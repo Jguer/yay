@@ -12,6 +12,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -102,7 +103,7 @@ func main() {
 	}
 
 	// Build run
-	run, err := settings.BuildRuntime(cfg, cmdArgs, yayVersion)
+	run, err := runtime.BuildRuntime(cfg, cmdArgs, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)

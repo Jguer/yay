@@ -11,6 +11,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -49,7 +50,7 @@ func cleanRemove(ctx context.Context, cfg *settings.Configuration,
 			arguments, cfg.Mode, settings.NoConfirm))
 }
 
-func syncClean(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
+func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	keepInstalled := false
 	keepCurrent := false
 
@@ -100,7 +101,7 @@ func syncClean(ctx context.Context, run *settings.Runtime, cmdArgs *parser.Argum
 	return nil
 }
 
-func cleanAUR(ctx context.Context, run *settings.Runtime,
+func cleanAUR(ctx context.Context, run *runtime.Runtime,
 	keepInstalled, keepCurrent, removeAll bool, dbExecutor db.Executor,
 ) error {
 	run.Logger.Println(gotext.Get("removing AUR packages from cache..."))
@@ -175,7 +176,7 @@ func cleanAUR(ctx context.Context, run *settings.Runtime,
 	return nil
 }
 
-func cleanUntracked(ctx context.Context, run *settings.Runtime) error {
+func cleanUntracked(ctx context.Context, run *runtime.Runtime) error {
 	run.Logger.Println(gotext.Get("removing untracked AUR files from cache..."))
 
 	files, err := os.ReadDir(run.Cfg.BuildDir)
@@ -206,7 +207,7 @@ func isGitRepository(dir string) bool {
 	return !os.IsNotExist(err)
 }
 
-func cleanAfter(ctx context.Context, run *settings.Runtime,
+func cleanAfter(ctx context.Context, run *runtime.Runtime,
 	cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string,
 ) {
 	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))

@@ -1,4 +1,4 @@
-package settings
+package runtime
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -24,7 +25,7 @@ import (
 )
 
 type Runtime struct {
-	Cfg          *Configuration
+	Cfg          *settings.Configuration
 	QueryBuilder query.Builder
 	PacmanConf   *pacmanconf.Config
 	VCSStore     vcs.Store
@@ -36,7 +37,7 @@ type Runtime struct {
 	Logger       *text.Logger
 }
 
-func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
+func BuildRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
 	logger := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime")
 	cmdBuilder := cfg.CmdBuilder(nil)
 
@@ -95,7 +96,7 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 		return nil, err
 	}
 
-	runtime := &Runtime{
+	run := &Runtime{
 		Cfg:          cfg,
 		QueryBuilder: nil,
 		PacmanConf:   nil,
@@ -108,5 +109,5 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 		Logger:       text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime"),
 	}
 
-	return runtime, nil
+	return run, nil
 }
