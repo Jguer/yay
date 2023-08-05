@@ -2,6 +2,8 @@ package srcinfo
 
 import (
 	"context"
+	"io"
+	"strings"
 	"testing"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -12,8 +14,13 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
+
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
 
 func TestNewService(t *testing.T) {
 	dbExecutor := &mock.DBExecutor{}
@@ -25,7 +32,7 @@ func TestNewService(t *testing.T) {
 		"cephbin":  "../../../testdata/cephbin",
 	}
 
-	srv, err := NewService(dbExecutor, cfg, cmdBuilder, vcsStore, pkgBuildDirs)
+	srv, err := NewService(dbExecutor, cfg, newTestLogger(), cmdBuilder, vcsStore, pkgBuildDirs)
 	assert.NoError(t, err)
 	assert.NotNil(t, srv)
 	assert.Equal(t, dbExecutor, srv.dbExecutor)

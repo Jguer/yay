@@ -23,12 +23,13 @@ type Service struct {
 	cfg        *settings.Configuration
 	cmdBuilder pgp.GPGCmdBuilder
 	vcsStore   vcs.Store
+	log        *text.Logger
 
 	pkgBuildDirs map[string]string
 	srcInfos     map[string]*gosrc.Srcinfo
 }
 
-func NewService(dbExecutor db.Executor, cfg *settings.Configuration,
+func NewService(dbExecutor db.Executor, cfg *settings.Configuration, logger *text.Logger,
 	cmdBuilder exe.ICmdBuilder, vcsStore vcs.Store, pkgBuildDirs map[string]string,
 ) (*Service, error) {
 	srcinfos, err := ParseSrcinfoFilesByBase(pkgBuildDirs, true)
@@ -42,6 +43,7 @@ func NewService(dbExecutor db.Executor, cfg *settings.Configuration,
 		vcsStore:     vcsStore,
 		pkgBuildDirs: pkgBuildDirs,
 		srcInfos:     srcinfos,
+		log:          logger,
 	}, nil
 }
 
@@ -82,15 +84,15 @@ func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.
 		for i := range srcinfo.Packages {
 			for j := range targets {
 				if _, ok := targets[j][srcinfo.Packages[i].Pkgname]; !ok {
-					text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
+					s.log.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
 					continue
 				}
 				if _, ok := ignore[srcinfo.Packages[i].Pkgname]; ok {
-					text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
+					s.log.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
 					continue
 				}
 
-				text.Debugln("checking VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
+				s.log.Debugln("checking VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
 				s.vcsStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
 			}
 		}

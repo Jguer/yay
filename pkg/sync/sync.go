@@ -44,7 +44,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	targets []map[string]*dep.InstallInfo, excluded []string,
 ) error {
 	if len(targets) == 0 {
-		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
+		o.logger.Println("", gotext.Get("there is nothing to do"))
 		return nil
 	}
 	preparer := workdir.NewPreparer(o.dbExecutor, run.CmdBuilder, o.cfg)
@@ -73,7 +73,8 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		}
 	}()
 
-	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg, run.CmdBuilder, run.VCSStore, pkgBuildDirs)
+	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg,
+		o.logger.Child("srcinfo"), run.CmdBuilder, run.VCSStore, pkgBuildDirs)
 	if errInstall != nil {
 		return errInstall
 	}
