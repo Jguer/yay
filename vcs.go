@@ -11,7 +11,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/runtime"
-	"github.com/Jguer/yay/v12/pkg/srcinfo"
+	"github.com/Jguer/yay/v12/pkg/sync/srcinfo"
 	"github.com/Jguer/yay/v12/pkg/sync/workdir"
 	"github.com/Jguer/yay/v12/pkg/text"
 )

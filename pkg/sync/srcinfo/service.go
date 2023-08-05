@@ -18,7 +18,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
-// TODO: add tests
 type Service struct {
 	dbExecutor db.Executor
 	cfg        *settings.Configuration
