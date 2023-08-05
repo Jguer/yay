@@ -22,10 +22,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ErrInstallRepoPkgs = errors.New(gotext.Get("error installing repo packages"))
-	ErrNoBuildFiles    = errors.New(gotext.Get("cannot find PKGBUILD and .SRCINFO in directory"))
-)
+var ErrNoBuildFiles = errors.New(gotext.Get("cannot find PKGBUILD and .SRCINFO in directory"))
 
 func srcinfoExists(ctx context.Context,
 	cmdBuilder exe.ICmdBuilder, targetDir string,

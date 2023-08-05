@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,8 +24,13 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
+
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
 
 func TestIntegrationLocalInstall(t *testing.T) {
 	makepkgBin := t.TempDir() + "/makepkg"
@@ -147,7 +153,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
-		Logger:     NewTestLogger(),
+		Logger:     newTestLogger(),
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		AURClient: &mockaur.MockAUR{
@@ -266,7 +272,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 
 	run := &runtime.Runtime{
 		Cfg:        &settings.Configuration{},
-		Logger:     NewTestLogger(),
+		Logger:     newTestLogger(),
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		AURClient: &mockaur.MockAUR{
@@ -425,7 +431,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
-		Logger:     NewTestLogger(),
+		Logger:     newTestLogger(),
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		AURClient: &mockaur.MockAUR{
@@ -590,7 +596,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 			RemoveMake: "no",
 			Debug:      false,
 		},
-		Logger:     NewTestLogger(),
+		Logger:     newTestLogger(),
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		AURClient: &mockaur.MockAUR{
@@ -727,7 +733,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 			RemoveMake: "no",
 			Debug:      false,
 		},
-		Logger:     NewTestLogger(),
+		Logger:     newTestLogger(),
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		AURClient: &mockaur.MockAUR{
@@ -853,7 +859,7 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
-		Logger:     NewTestLogger(),
+		Logger:     newTestLogger(),
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		AURClient: &mockaur.MockAUR{
@@ -993,7 +999,7 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		Cfg: &settings.Configuration{
 			RemoveMake: "no",
 		},
-		Logger:     NewTestLogger(),
+		Logger:     newTestLogger(),
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		AURClient: &mockaur.MockAUR{

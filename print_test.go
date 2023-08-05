@@ -276,7 +276,7 @@ func TestPrintUpdateList(t *testing.T) {
 				Cfg: &settings.Configuration{
 					RemoveMake: "no",
 				},
-				Logger:     NewTestLogger(),
+				Logger:     newTestLogger(),
 				CmdBuilder: cmdBuilder,
 				VCSStore:   &vcs.Mock{},
 				AURClient:  tc.mockData.aurCache,

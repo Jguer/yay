@@ -1,4 +1,4 @@
-package main
+package sync
 
 import (
 	"context"
@@ -54,12 +54,12 @@ func NewInstaller(dbExecutor db.Executor,
 	}
 }
 
-func (installer *Installer) CompileFailedAndIgnored() error {
+func (installer *Installer) CompileFailedAndIgnored() (map[string]error, error) {
 	if len(installer.failedAndIgnored) == 0 {
-		return nil
+		return installer.failedAndIgnored, nil
 	}
 
-	return &FailedIgnoredPkgError{
+	return installer.failedAndIgnored, &FailedIgnoredPkgError{
 		pkgErrors: installer.failedAndIgnored,
 	}
 }

@@ -1,4 +1,4 @@
-package main
+package sync
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
-func NewTestLogger() *text.Logger {
+func newTestLogger() *text.Logger {
 	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
 }
 
@@ -134,7 +134,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, NewTestLogger())
+				parser.RebuildModeNo, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -408,7 +408,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, parser.RebuildModeNo, false, NewTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, parser.RebuildModeNo, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -462,7 +462,7 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 	cmdBuilder.Runner = mockRunner
 
 	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-		parser.RebuildModeNo, false, NewTestLogger())
+		parser.RebuildModeNo, false, newTestLogger())
 
 	called := false
 	hook := func(ctx context.Context) error {
@@ -593,7 +593,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, NewTestLogger())
+				parser.RebuildModeNo, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -609,10 +609,11 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			} else {
 				require.NoError(td, errI)
 			}
-			err := installer.CompileFailedAndIgnored()
+			failed, err := installer.CompileFailedAndIgnored()
 			if tc.wantErrCompile {
 				require.Error(td, err)
 				assert.ErrorContains(td, err, "yay")
+				assert.Len(t, failed, len(tc.targets))
 			} else {
 				require.NoError(td, err)
 			}
@@ -752,7 +753,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, NewTestLogger())
+				parser.RebuildModeNo, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("jellyfin")
@@ -891,7 +892,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, true, NewTestLogger())
+				parser.RebuildModeNo, true, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -995,7 +996,7 @@ func TestInstaller_InstallGroup(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, true, NewTestLogger())
+				parser.RebuildModeNo, true, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("kubernetes-tools")
@@ -1213,7 +1214,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				tc.rebuildOption, false, NewTestLogger())
+				tc.rebuildOption, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -1298,7 +1299,7 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 			}
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, tc.targetMode,
-				parser.RebuildModeNo, false, NewTestLogger())
+				parser.RebuildModeNo, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("u", "upgrades") // Make sure both args are removed

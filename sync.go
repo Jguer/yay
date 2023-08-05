@@ -14,6 +14,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/srcinfo"
+	"github.com/Jguer/yay/v12/pkg/sync"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/upgrade"
 
@@ -120,7 +121,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		return nil
 	}
 	preparer := NewPreparer(o.dbExecutor, run.CmdBuilder, o.cfg)
-	installer := NewInstaller(o.dbExecutor, run.CmdBuilder,
+	installer := sync.NewInstaller(o.dbExecutor, run.CmdBuilder,
 		run.VCSStore, o.cfg.Mode, o.cfg.ReBuild,
 		cmdArgs.ExistsArg("w", "downloadonly"), run.Logger.Child("installer"))
 
@@ -170,12 +171,13 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 
 	var multiErr multierror.MultiError
 
-	if err := installer.CompileFailedAndIgnored(); err != nil {
+	failedAndIgnored, err := installer.CompileFailedAndIgnored()
+	if err != nil {
 		multiErr.Add(err)
 	}
 
 	if !cmdArgs.ExistsArg("w", "downloadonly") {
-		if err := srcInfo.UpdateVCSStore(ctx, targets, installer.failedAndIgnored); err != nil {
+		if err := srcInfo.UpdateVCSStore(ctx, targets, failedAndIgnored); err != nil {
 			text.Warnln(err)
 		}
 	}
