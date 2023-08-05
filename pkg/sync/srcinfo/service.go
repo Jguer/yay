@@ -11,9 +11,9 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/pgp"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/sync/srcinfo/pgp"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
@@ -21,7 +21,7 @@ import (
 type Service struct {
 	dbExecutor db.Executor
 	cfg        *settings.Configuration
-	cmdBuilder exe.ICmdBuilder
+	cmdBuilder pgp.GPGCmdBuilder
 	vcsStore   vcs.Store
 
 	pkgBuildDirs map[string]string

@@ -10,8 +10,31 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
+
+func TestNewService(t *testing.T) {
+	dbExecutor := &mock.DBExecutor{}
+	cfg := &settings.Configuration{}
+	cmdBuilder := &exe.MockBuilder{}
+	vcsStore := &vcs.Mock{}
+	pkgBuildDirs := map[string]string{
+		"jellyfin": "../../../testdata/jfin",
+		"cephbin":  "../../../testdata/cephbin",
+	}
+
+	srv, err := NewService(dbExecutor, cfg, cmdBuilder, vcsStore, pkgBuildDirs)
+	assert.NoError(t, err)
+	assert.NotNil(t, srv)
+	assert.Equal(t, dbExecutor, srv.dbExecutor)
+	assert.Equal(t, cfg, srv.cfg)
+	assert.Equal(t, cmdBuilder, srv.cmdBuilder)
+	assert.Equal(t, vcsStore, srv.vcsStore)
+	assert.Equal(t, pkgBuildDirs, srv.pkgBuildDirs)
+	assert.NotNil(t, srv.srcInfos)
+}
 
 func TestService_IncompatiblePkgs(t *testing.T) {
 	srv := &Service{
