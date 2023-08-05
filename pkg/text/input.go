@@ -7,7 +7,7 @@ import (
 )
 
 func (l *Logger) GetInput(defaultValue string, noConfirm bool) (string, error) {
-	Info()
+	l.Info()
 
 	if defaultValue != "" || noConfirm {
 		fmt.Println(defaultValue)

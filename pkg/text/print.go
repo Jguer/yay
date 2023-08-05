@@ -23,10 +23,6 @@ var (
 	GlobalLogger      = NewLogger(os.Stdout, os.Stderr, os.Stdin, false, "global")
 )
 
-func Debugln(a ...interface{}) {
-	GlobalLogger.Debugln(a...)
-}
-
 func OperationInfoln(a ...interface{}) {
 	GlobalLogger.OperationInfoln(a...)
 }
@@ -39,10 +35,6 @@ func SprintOperationInfo(a ...interface{}) string {
 	return GlobalLogger.SprintOperationInfo(a...)
 }
 
-func Info(a ...interface{}) {
-	GlobalLogger.Info(a...)
-}
-
 func Infoln(a ...interface{}) {
 	GlobalLogger.Infoln(a...)
 }
@@ -51,20 +43,12 @@ func SprintWarn(a ...interface{}) string {
 	return GlobalLogger.SprintWarn(a...)
 }
 
-func Warn(a ...interface{}) {
-	GlobalLogger.Warn(a...)
-}
-
 func Warnln(a ...interface{}) {
 	GlobalLogger.Warnln(a...)
 }
 
 func SprintError(a ...interface{}) string {
 	return GlobalLogger.SprintError(a...)
-}
-
-func Error(a ...interface{}) {
-	GlobalLogger.Error(a...)
 }
 
 func Errorln(a ...interface{}) {

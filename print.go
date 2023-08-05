@@ -80,22 +80,22 @@ func localStatistics(ctx context.Context, run *runtime.Runtime, dbExecutor db.Ex
 
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 	remote := dbExecutor.InstalledRemotePackages()
-	text.Infoln(gotext.Get("Yay version v%s", yayVersion))
-	fmt.Println(text.Bold(text.Cyan("===========================================")))
-	text.Infoln(gotext.Get("Total installed packages: %s", text.Cyan(strconv.Itoa(info.Totaln))))
-	text.Infoln(gotext.Get("Foreign installed packages: %s", text.Cyan(strconv.Itoa(len(remoteNames)))))
-	text.Infoln(gotext.Get("Explicitly installed packages: %s", text.Cyan(strconv.Itoa(info.Expln))))
-	text.Infoln(gotext.Get("Total Size occupied by packages: %s", text.Cyan(text.Human(info.TotalSize))))
+	run.Logger.Infoln(gotext.Get("Yay version v%s", yayVersion))
+	run.Logger.Println(text.Bold(text.Cyan("===========================================")))
+	run.Logger.Infoln(gotext.Get("Total installed packages: %s", text.Cyan(strconv.Itoa(info.Totaln))))
+	run.Logger.Infoln(gotext.Get("Foreign installed packages: %s", text.Cyan(strconv.Itoa(len(remoteNames)))))
+	run.Logger.Infoln(gotext.Get("Explicitly installed packages: %s", text.Cyan(strconv.Itoa(info.Expln))))
+	run.Logger.Infoln(gotext.Get("Total Size occupied by packages: %s", text.Cyan(text.Human(info.TotalSize))))
 
 	for path, size := range info.pacmanCaches {
-		text.Infoln(gotext.Get("Size of pacman cache %s: %s", path, text.Cyan(text.Human(size))))
+		run.Logger.Infoln(gotext.Get("Size of pacman cache %s: %s", path, text.Cyan(text.Human(size))))
 	}
 
-	text.Infoln(gotext.Get("Size of yay cache %s: %s", run.Cfg.BuildDir, text.Cyan(text.Human(info.yayCache))))
-	fmt.Println(text.Bold(text.Cyan("===========================================")))
-	text.Infoln(gotext.Get("Ten biggest packages:"))
+	run.Logger.Infoln(gotext.Get("Size of yay cache %s: %s", run.Cfg.BuildDir, text.Cyan(text.Human(info.yayCache))))
+	run.Logger.Println(text.Bold(text.Cyan("===========================================")))
+	run.Logger.Infoln(gotext.Get("Ten biggest packages:"))
 	biggestPackages(dbExecutor)
-	fmt.Println(text.Bold(text.Cyan("===========================================")))
+	run.Logger.Println(text.Bold(text.Cyan("===========================================")))
 
 	aurData, err := run.AURClient.Get(ctx, &aur.Query{
 		Needles: remoteNames,
@@ -105,7 +105,7 @@ func localStatistics(ctx context.Context, run *runtime.Runtime, dbExecutor db.Ex
 		return err
 	}
 
-	warnings := query.NewWarnings(run.Logger.Child("print"))
+	warnings := query.NewWarnings(run.Logger.Child("warnings"))
 	for i := range aurData {
 		warnings.AddToWarnings(remote, &aurData[i])
 	}

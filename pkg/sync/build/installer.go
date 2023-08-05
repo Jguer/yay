@@ -234,12 +234,12 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 			}
 
 			installer.failedAndIgnored[name] = errMake
-			text.Errorln(gotext.Get("error making: %s", base), "-", errMake)
+			installer.log.Errorln(gotext.Get("error making: %s", base), "-", errMake)
 			continue
 		}
 
 		if len(pkgdests) == 0 {
-			text.Warnln(gotext.Get("nothing to install for %s", text.Cyan(base)))
+			installer.log.Warnln(gotext.Get("nothing to install for %s", text.Cyan(base)))
 			continue
 		}
 
@@ -333,10 +333,10 @@ func (installer *Installer) pkgsAreAlreadyInstalled(pkgdests map[string]string, 
 	return true
 }
 
-func pkgsAreBuilt(pkgdests map[string]string) bool {
+func pkgsAreBuilt(logger *text.Logger, pkgdests map[string]string) bool {
 	for _, pkgdest := range pkgdests {
 		if _, err := os.Stat(pkgdest); err != nil {
-			text.Debugln("pkgIsBuilt:", pkgdest, "does not exist")
+			logger.Debugln("pkgIsBuilt:", pkgdest, "does not exist")
 			return false
 		}
 	}
@@ -347,14 +347,14 @@ func pkgsAreBuilt(pkgdests map[string]string) bool {
 func (installer *Installer) skipAlreadyBuiltPkg(isTarget bool, pkgdests map[string]string) bool {
 	switch installer.rebuildMode {
 	case parser.RebuildModeNo:
-		return pkgsAreBuilt(pkgdests)
+		return pkgsAreBuilt(installer.log, pkgdests)
 	case parser.RebuildModeYes:
-		return !isTarget && pkgsAreBuilt(pkgdests)
+		return !isTarget && pkgsAreBuilt(installer.log, pkgdests)
 	// case parser.RebuildModeTree: // TODO
 	// case parser.RebuildModeAll: // TODO
 	default:
 		// same as RebuildModeNo
-		return pkgsAreBuilt(pkgdests)
+		return pkgsAreBuilt(installer.log, pkgdests)
 	}
 }
 
