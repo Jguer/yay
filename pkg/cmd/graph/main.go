@@ -29,20 +29,12 @@ func handleCmd() error {
 		return errP
 	}
 
-	run, err := runtime.BuildRuntime(cfg, cmdArgs, "1.0.0")
+	run, err := runtime.NewRuntime(cfg, cmdArgs, "1.0.0")
 	if err != nil {
 		return err
 	}
 
-	// Reload CmdBuilder
-	run.CmdBuilder = run.Cfg.CmdBuilder(nil)
-
-	pacmanConf, _, err := settings.RetrievePacmanConfig(cmdArgs, cfg.PacmanConf)
-	if err != nil {
-		return err
-	}
-
-	dbExecutor, err := ialpm.NewExecutor(pacmanConf, text.GlobalLogger)
+	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, text.GlobalLogger)
 	if err != nil {
 		return err
 	}

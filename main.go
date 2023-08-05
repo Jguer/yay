@@ -9,9 +9,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
-	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -103,7 +101,7 @@ func main() {
 	}
 
 	// Build run
-	run, err := runtime.BuildRuntime(cfg, cmdArgs, yayVersion)
+	run, err := runtime.NewRuntime(cfg, cmdArgs, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
@@ -113,32 +111,6 @@ func main() {
 
 		return
 	}
-
-	// Reload CmdBuilder
-	run.CmdBuilder = run.Cfg.CmdBuilder(nil)
-
-	run.QueryBuilder = query.NewSourceQueryBuilder(
-		run.AURClient,
-		run.Logger.Child("mixed.querybuilder"), cfg.SortBy,
-		cfg.Mode, cfg.SearchBy,
-		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
-
-	var useColor bool
-
-	run.PacmanConf, useColor, err = settings.RetrievePacmanConfig(cmdArgs, cfg.PacmanConf)
-	if err != nil {
-		if str := err.Error(); str != "" {
-			text.Errorln(str)
-		}
-
-		ret = 1
-
-		return
-	}
-
-	run.CmdBuilder.SetPacmanDBPath(run.PacmanConf.DBPath)
-
-	text.UseColor = useColor
 
 	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))
 	if err != nil {
@@ -160,7 +132,7 @@ func main() {
 		dbExecutor.Cleanup()
 	}()
 
-	if err = handleCmd(ctx, run, cmdArgs, db.Executor(dbExecutor)); err != nil {
+	if err = handleCmd(ctx, run, cmdArgs, dbExecutor); err != nil {
 		if str := err.Error(); str != "" {
 			text.Errorln(str)
 			if cmdArgs.ExistsArg("c") && cmdArgs.ExistsArg("y") && cmdArgs.Op == "S" {

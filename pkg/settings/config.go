@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 
@@ -289,30 +288,5 @@ func (c *Configuration) load(configPath string) {
 			fmt.Fprintln(os.Stderr,
 				gotext.Get("failed to read config file '%s': %s", configPath, err))
 		}
-	}
-}
-
-// FIXME: Build CmdBuilder in runtime not cfg
-func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
-	if runner == nil {
-		runner = &exe.OSRunner{Log: text.GlobalLogger.Child("runner")}
-	}
-
-	return &exe.CmdBuilder{
-		GitBin:           c.GitBin,
-		GitFlags:         strings.Fields(c.GitFlags),
-		GPGBin:           c.GpgBin,
-		GPGFlags:         strings.Fields(c.GpgFlags),
-		MakepkgFlags:     strings.Fields(c.MFlags),
-		MakepkgConfPath:  c.MakepkgConf,
-		MakepkgBin:       c.MakepkgBin,
-		SudoBin:          c.SudoBin,
-		SudoFlags:        strings.Fields(c.SudoFlags),
-		SudoLoopEnabled:  c.SudoLoop,
-		PacmanBin:        c.PacmanBin,
-		PacmanConfigPath: c.PacmanConf,
-		PacmanDBPath:     "",
-		Runner:           runner,
-		Log:              text.GlobalLogger.Child("cmd_builder"),
 	}
 }
