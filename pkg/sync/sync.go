@@ -47,12 +47,12 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		o.logger.Println("", gotext.Get("there is nothing to do"))
 		return nil
 	}
-	preparer := workdir.NewPreparer(o.dbExecutor, run.CmdBuilder, o.cfg)
+	preparer := workdir.NewPreparer(o.dbExecutor, run.CmdBuilder, o.cfg, o.logger.Child("workdir"))
 	installer := build.NewInstaller(o.dbExecutor, run.CmdBuilder,
 		run.VCSStore, o.cfg.Mode, o.cfg.ReBuild,
 		cmdArgs.ExistsArg("w", "downloadonly"), run.Logger.Child("installer"))
 
-	pkgBuildDirs, errInstall := preparer.Run(ctx, run, os.Stdout, targets)
+	pkgBuildDirs, errInstall := preparer.Run(ctx, run, targets)
 	if errInstall != nil {
 		return errInstall
 	}

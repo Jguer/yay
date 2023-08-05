@@ -47,12 +47,13 @@ type Preparer struct {
 	cfg             *settings.Configuration
 	hooks           []Hook
 	downloadSources bool
+	log             *text.Logger
 
 	makeDeps []string
 }
 
 func NewPreparerWithoutHooks(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
-	cfg *settings.Configuration, downloadSources bool,
+	cfg *settings.Configuration, logger *text.Logger, downloadSources bool,
 ) *Preparer {
 	return &Preparer{
 		dbExecutor:      dbExecutor,
@@ -60,13 +61,14 @@ func NewPreparerWithoutHooks(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
 		cfg:             cfg,
 		hooks:           []Hook{},
 		downloadSources: downloadSources,
+		log:             logger,
 	}
 }
 
 func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
-	cfg *settings.Configuration,
+	cfg *settings.Configuration, logger *text.Logger,
 ) *Preparer {
-	preper := NewPreparerWithoutHooks(dbExecutor, cmdBuilder, cfg, true)
+	preper := NewPreparerWithoutHooks(dbExecutor, cmdBuilder, cfg, logger, true)
 
 	if cfg.CleanMenu {
 		preper.hooks = append(preper.hooks, Hook{
@@ -100,7 +102,7 @@ func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs ma
 		return nil
 	}
 
-	text.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
+	preper.log.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
 
 	return func(ctx context.Context) error {
 		cleanAfter(ctx, run, run.CmdBuilder, pkgBuildDirs)
@@ -126,7 +128,7 @@ func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parse
 		}
 	}
 
-	text.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
+	preper.log.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
 
 	return func(ctx context.Context) error {
 		return removeMake(ctx, preper.cfg, run.CmdBuilder, preper.makeDeps, cmdArgs)
@@ -134,9 +136,9 @@ func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parse
 }
 
 func (preper *Preparer) Run(ctx context.Context, run *runtime.Runtime,
-	w io.Writer, targets []map[string]*dep.InstallInfo,
+	targets []map[string]*dep.InstallInfo,
 ) (pkgbuildDirsByBase map[string]string, err error) {
-	preper.Present(w, targets)
+	preper.Present(targets)
 
 	pkgBuildDirs, err := preper.PrepareWorkspace(ctx, run, targets)
 	if err != nil {
@@ -146,7 +148,7 @@ func (preper *Preparer) Run(ctx context.Context, run *runtime.Runtime,
 	return pkgBuildDirs, nil
 }
 
-func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallInfo) {
+func (preper *Preparer) Present(targets []map[string]*dep.InstallInfo) {
 	pkgsBySourceAndReason := map[string]map[string][]string{}
 
 	for _, layer := range targets {
@@ -175,7 +177,7 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 
 	for source, pkgsByReason := range pkgsBySourceAndReason {
 		for reason, pkgs := range pkgsByReason {
-			fmt.Fprintf(w, text.Bold("%s %s (%d):")+" %s\n",
+			preper.log.Printf(text.Bold("%s %s (%d):")+" %s\n",
 				source,
 				reason,
 				len(pkgs),
@@ -232,7 +234,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 
 	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
 		pkgBuildDirsByBase, false, preper.cfg.MaxConcurrentDownloads); errP != nil {
-		text.Errorln(errP)
+		preper.log.Errorln(errP)
 	}
 
 	return pkgBuildDirsByBase, nil
@@ -246,7 +248,7 @@ func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuil
 	srcinfoFile := filepath.Join(pkgbuildDir, ".SRCINFO")
 	if pkgbuild, err := gosrc.ParseFile(srcinfoFile); err == nil {
 		if db.VerCmp(pkgbuild.Version(), installInfo.Version) >= 0 {
-			text.OperationInfoln(
+			preper.log.OperationInfoln(
 				gotext.Get("PKGBUILD up to date, skipping download: %s",
 					text.Cyan(*installInfo.AURBase)))
 			return false

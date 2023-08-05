@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"os"
 	"sync"
 
 	"github.com/Jguer/aur"
@@ -45,10 +44,10 @@ func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Exec
 		return err
 	}
 
-	preper := workdir.NewPreparerWithoutHooks(dbExecutor, run.CmdBuilder, run.Cfg, false)
+	preper := workdir.NewPreparerWithoutHooks(dbExecutor, run.CmdBuilder, run.Cfg, run.Logger.Child("workdir"), false)
 
 	mapInfo := infoToInstallInfo(info)
-	pkgBuildDirsByBase, err := preper.Run(ctx, run, os.Stdout, mapInfo)
+	pkgBuildDirsByBase, err := preper.Run(ctx, run, mapInfo)
 	if err != nil {
 		return err
 	}
