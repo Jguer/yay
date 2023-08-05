@@ -1,4 +1,4 @@
-package main
+package workdir
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/sync"
+	"github.com/Jguer/yay/v12/pkg/sync/build"
 	"github.com/Jguer/yay/v12/pkg/text"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -95,7 +95,7 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
 	return preper
 }
 
-func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs map[string]string) sync.PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs map[string]string) build.PostInstallHookFunc {
 	if !preper.cfg.CleanAfter || len(pkgBuildDirs) == 0 {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs ma
 	}
 }
 
-func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parser.Arguments) sync.PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parser.Arguments) build.PostInstallHookFunc {
 	if len(preper.makeDeps) == 0 {
 		return nil
 	}

@@ -206,29 +206,3 @@ func isGitRepository(dir string) bool {
 	_, err := os.Stat(filepath.Join(dir, ".git"))
 	return !os.IsNotExist(err)
 }
-
-func cleanAfter(ctx context.Context, run *runtime.Runtime,
-	cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string,
-) {
-	fmt.Println(gotext.Get("removing untracked AUR files from cache..."))
-
-	i := 0
-	for _, dir := range pkgbuildDirs {
-		text.OperationInfoln(gotext.Get("Cleaning (%d/%d): %s", i+1, len(pkgbuildDirs), text.Cyan(dir)))
-
-		_, stderr, err := cmdBuilder.Capture(
-			cmdBuilder.BuildGitCmd(
-				ctx, dir, "reset", "--hard", "HEAD"))
-		if err != nil {
-			text.Errorln(gotext.Get("error resetting %s: %s", dir, stderr))
-		}
-
-		if err := run.CmdBuilder.Show(
-			run.CmdBuilder.BuildGitCmd(
-				ctx, dir, "clean", "-fx", "--exclude", "*.pkg.*")); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-
-		i++
-	}
-}

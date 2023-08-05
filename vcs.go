@@ -12,6 +12,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/srcinfo"
+	"github.com/Jguer/yay/v12/pkg/sync/workdir"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -44,7 +45,7 @@ func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Exec
 		return err
 	}
 
-	preper := NewPreparerWithoutHooks(dbExecutor, run.CmdBuilder, run.Cfg, false)
+	preper := workdir.NewPreparerWithoutHooks(dbExecutor, run.CmdBuilder, run.Cfg, false)
 
 	mapInfo := infoToInstallInfo(info)
 	pkgBuildDirsByBase, err := preper.Run(ctx, run, os.Stdout, mapInfo)

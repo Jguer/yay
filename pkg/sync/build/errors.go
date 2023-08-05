@@ -1,4 +1,4 @@
-package sync
+package build
 
 import (
 	"errors"

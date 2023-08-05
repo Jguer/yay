@@ -16,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/sync"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
@@ -87,7 +88,7 @@ func installLocalPKGBUILD(
 		return err
 	}
 
-	opService := NewOperationService(ctx, dbExecutor, run)
+	opService := sync.NewOperationService(ctx, dbExecutor, run)
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(name string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
