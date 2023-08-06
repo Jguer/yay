@@ -81,7 +81,7 @@ linters:
     - whitespace
 
 run:
-  go: "1.18"
+  go: "1.20"
   timeout: "10m"
   forbidigo:
     forbid:
