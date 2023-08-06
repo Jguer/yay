@@ -38,6 +38,7 @@ func initGotext() {
 }
 
 func main() {
+	fallbackLog := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, false, "fallback")
 	var (
 		err error
 		ctx = context.Background()
@@ -46,7 +47,7 @@ func main() {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			text.Errorln(rec)
+			fallbackLog.Errorln(rec)
 			debug.PrintStack()
 		}
 
@@ -56,15 +57,15 @@ func main() {
 	initGotext()
 
 	if os.Geteuid() == 0 {
-		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
+		fallbackLog.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
 	configPath := settings.GetConfigPath()
 	// Parse config
-	cfg, err := settings.NewConfig(configPath, yayVersion)
+	cfg, err := settings.NewConfig(fallbackLog, configPath, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -78,7 +79,7 @@ func main() {
 
 	if errS := cfg.RunMigrations(
 		settings.DefaultMigrations(), configPath, yayVersion); errS != nil {
-		text.Errorln(errS)
+		fallbackLog.Errorln(errS)
 	}
 
 	cmdArgs := parser.MakeArguments()
@@ -86,7 +87,7 @@ func main() {
 	// Parse command line
 	if err = cfg.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -96,7 +97,7 @@ func main() {
 
 	if cfg.SaveConfig {
 		if errS := cfg.Save(configPath, yayVersion); errS != nil {
-			text.Errorln(errS)
+			fallbackLog.Errorln(errS)
 		}
 	}
 
@@ -104,7 +105,7 @@ func main() {
 	run, err := runtime.NewRuntime(cfg, cmdArgs, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -115,7 +116,7 @@ func main() {
 	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))
 	if err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -125,8 +126,7 @@ func main() {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			text.Errorln(rec)
-			debug.PrintStack()
+			fallbackLog.Errorln(rec, string(debug.Stack()))
 		}
 
 		dbExecutor.Cleanup()
@@ -134,10 +134,10 @@ func main() {
 
 	if err = handleCmd(ctx, run, cmdArgs, dbExecutor); err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 			if cmdArgs.ExistsArg("c") && cmdArgs.ExistsArg("y") && cmdArgs.Op == "S" {
 				// Remove after 2023-10-01
-				text.Errorln("Did you mean 'yay -Yc'?")
+				fallbackLog.Errorln("Did you mean 'yay -Yc'?")
 			}
 		}
 

@@ -320,7 +320,7 @@ func handleWeb(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 func handleGetpkgbuild(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
 		return printPkgbuilds(dbExecutor, run.AURClient,
-			run.HTTPClient, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL)
+			run.HTTPClient, run.Logger, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL)
 	}
 
 	return getPkgbuilds(ctx, dbExecutor, run.AURClient, run,

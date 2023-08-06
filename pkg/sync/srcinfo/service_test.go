@@ -79,6 +79,7 @@ func TestService_IncompatiblePkgs(t *testing.T) {
 
 func TestService_CheckPGPKeys(t *testing.T) {
 	srv := &Service{
+		log: newTestLogger(),
 		pkgBuildDirs: map[string]string{
 			"pkg1": "/path/to/pkg1",
 			"pkg2": "/path/to/pkg2",

@@ -17,18 +17,18 @@ import (
 )
 
 // yay -Gp.
-func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient, httpClient *http.Client, targets []string,
+func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient,
+	httpClient *http.Client, logger *text.Logger, targets []string,
 	mode parser.TargetMode, aurURL string,
 ) error {
 	pkgbuilds, err := download.PKGBUILDs(dbExecutor, aurClient, httpClient, targets, aurURL, mode)
 	if err != nil {
-		text.Errorln(err)
+		logger.Errorln(err)
 	}
 
 	if len(pkgbuilds) != 0 {
 		for target, pkgbuild := range pkgbuilds {
-			fmt.Printf("\n\n# %s\n\n", target)
-			fmt.Print(string(pkgbuild))
+			logger.Printf("\n\n# %s\n\n%s", target, string(pkgbuild))
 		}
 	}
 
@@ -41,7 +41,7 @@ func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient, h
 			}
 		}
 
-		text.Warnln(gotext.Get("Unable to find the following packages:"), " ", strings.Join(missing, ", "))
+		logger.Warnln(gotext.Get("Unable to find the following packages:"), " ", strings.Join(missing, ", "))
 
 		return fmt.Errorf("")
 	}
@@ -61,7 +61,7 @@ func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient
 	cloned, errD := download.PKGBUILDRepos(ctx, dbExecutor, aurClient,
 		run.CmdBuilder, targets, run.Cfg.Mode, run.Cfg.AURURL, wd, force)
 	if errD != nil {
-		text.Errorln(errD)
+		run.Logger.Errorln(errD)
 	}
 
 	if len(targets) != len(cloned) {

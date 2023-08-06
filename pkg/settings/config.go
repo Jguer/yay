@@ -239,12 +239,12 @@ func DefaultConfig(version string) *Configuration {
 	}
 }
 
-func NewConfig(configPath, version string) (*Configuration, error) {
+func NewConfig(logger *text.Logger, configPath, version string) (*Configuration, error) {
 	newConfig := DefaultConfig(version)
 
 	cacheHome, errCache := getCacheHome()
-	if errCache != nil {
-		text.Errorln(errCache)
+	if errCache != nil && logger != nil {
+		logger.Errorln(errCache)
 	}
 
 	newConfig.BuildDir = cacheHome

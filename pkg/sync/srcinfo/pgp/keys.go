@@ -50,7 +50,7 @@ type GPGCmdBuilder interface {
 
 // CheckPgpKeys iterates through the keys listed in the PKGBUILDs and if needed,
 // asks the user whether yay should try to import them.
-func CheckPgpKeys(ctx context.Context, pkgbuildDirsByBase map[string]string, srcinfos map[string]*gosrc.Srcinfo,
+func CheckPgpKeys(ctx context.Context, logger *text.Logger, pkgbuildDirsByBase map[string]string, srcinfos map[string]*gosrc.Srcinfo,
 	cmdBuilder GPGCmdBuilder, noConfirm bool,
 ) ([]string, error) {
 	// Let's check the keys individually, and then we can offer to import
@@ -80,7 +80,7 @@ func CheckPgpKeys(ctx context.Context, pkgbuildDirsByBase map[string]string, src
 		return []string{}, nil
 	}
 
-	str, err := formatKeysToImport(problematic)
+	str, err := formatKeysToImport(logger, problematic)
 	if err != nil {
 		return nil, err
 	}
@@ -89,15 +89,15 @@ func CheckPgpKeys(ctx context.Context, pkgbuildDirsByBase map[string]string, src
 	fmt.Println(str)
 
 	if text.ContinueTask(os.Stdin, gotext.Get("Import?"), true, noConfirm) {
-		return problematic.toSlice(), importKeys(ctx, cmdBuilder, problematic.toSlice())
+		return problematic.toSlice(), importKeys(ctx, logger, cmdBuilder, problematic.toSlice())
 	}
 
 	return problematic.toSlice(), nil
 }
 
 // importKeys tries to import the list of keys specified in its argument.
-func importKeys(ctx context.Context, cmdBuilder GPGCmdBuilder, keys []string) error {
-	text.OperationInfoln(gotext.Get("Importing keys with gpg..."))
+func importKeys(ctx context.Context, logger *text.Logger, cmdBuilder GPGCmdBuilder, keys []string) error {
+	logger.OperationInfoln(gotext.Get("Importing keys with gpg..."))
 
 	if err := cmdBuilder.Show(cmdBuilder.BuildGPGCmd(ctx, append([]string{"--recv-keys"}, keys...)...)); err != nil {
 		return errors.New(gotext.Get("problem importing keys"))
@@ -108,14 +108,14 @@ func importKeys(ctx context.Context, cmdBuilder GPGCmdBuilder, keys []string) er
 
 // formatKeysToImport receives a set of keys and returns a string containing the
 // question asking the user wants to import the problematic keys.
-func formatKeysToImport(keys pgpKeySet) (string, error) {
+func formatKeysToImport(logger *text.Logger, keys pgpKeySet) (string, error) {
 	if len(keys) == 0 {
 		return "", errors.New(gotext.Get("no keys to import"))
 	}
 
 	var buffer bytes.Buffer
 
-	buffer.WriteString(text.SprintOperationInfo(gotext.Get("PGP keys need importing:")))
+	buffer.WriteString(logger.SprintOperationInfo(gotext.Get("PGP keys need importing:")))
 
 	for key, bases := range keys {
 		pkglist := ""

@@ -18,8 +18,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func handleCmd() error {
-	cfg, err := settings.NewConfig(settings.GetConfigPath(), "")
+func handleCmd(logger *text.Logger) error {
+	cfg, err := settings.NewConfig(logger, settings.GetConfigPath(), "")
 	if err != nil {
 		return err
 	}
@@ -54,8 +54,9 @@ func handleCmd() error {
 }
 
 func main() {
-	if err := handleCmd(); err != nil {
-		text.Errorln(err)
+	fallbackLog := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, false, "fallback")
+	if err := handleCmd(fallbackLog); err != nil {
+		fallbackLog.Errorln(err)
 		os.Exit(1)
 	}
 }

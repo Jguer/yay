@@ -6,6 +6,7 @@ package pgp
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"sort"
@@ -17,7 +18,12 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
+
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
 
 func makeSrcinfo(pkgbase string, pgpkeys ...string) *gosrc.Srcinfo {
 	srcinfo := gosrc.Srcinfo{}
@@ -228,7 +234,7 @@ func TestCheckPgpKeys(t *testing.T) {
 				GPGFlags: []string{"--homedir /tmp"},
 				Runner:   mockRunner,
 			}
-			problematic, err := CheckPgpKeys(context.Background(), tt.pkgs, tt.srcinfos, &cmdBuilder, true)
+			problematic, err := CheckPgpKeys(context.Background(), newTestLogger(), tt.pkgs, tt.srcinfos, &cmdBuilder, true)
 
 			require.Len(t, mockRunner.ShowCalls, len(tt.wantShow))
 			require.Len(t, mockRunner.CaptureCalls, len(tt.wantCapture))

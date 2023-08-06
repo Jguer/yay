@@ -31,10 +31,6 @@ func OperationInfo(a ...interface{}) {
 	GlobalLogger.OperationInfo(a...)
 }
 
-func SprintOperationInfo(a ...interface{}) string {
-	return GlobalLogger.SprintOperationInfo(a...)
-}
-
 func Infoln(a ...interface{}) {
 	GlobalLogger.Infoln(a...)
 }
@@ -45,14 +41,6 @@ func SprintWarn(a ...interface{}) string {
 
 func Warnln(a ...interface{}) {
 	GlobalLogger.Warnln(a...)
-}
-
-func SprintError(a ...interface{}) string {
-	return GlobalLogger.SprintError(a...)
-}
-
-func Errorln(a ...interface{}) {
-	GlobalLogger.Errorln(a...)
 }
 
 func getColumnCount() int {
