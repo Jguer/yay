@@ -1,4 +1,4 @@
-package main
+package workdir
 
 import (
 	"context"
@@ -12,9 +12,11 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/download"
 	"github.com/Jguer/yay/v12/pkg/menus"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/sync/build"
 	"github.com/Jguer/yay/v12/pkg/text"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
@@ -29,7 +31,7 @@ const (
 	PreDownloadSourcesHook HookType = "pre-download-sources"
 )
 
-type HookFn func(ctx context.Context, config *settings.Configuration, w io.Writer,
+type HookFn func(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error
 
@@ -45,12 +47,13 @@ type Preparer struct {
 	cfg             *settings.Configuration
 	hooks           []Hook
 	downloadSources bool
+	log             *text.Logger
 
 	makeDeps []string
 }
 
 func NewPreparerWithoutHooks(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
-	cfg *settings.Configuration, downloadSources bool,
+	cfg *settings.Configuration, logger *text.Logger, downloadSources bool,
 ) *Preparer {
 	return &Preparer{
 		dbExecutor:      dbExecutor,
@@ -58,13 +61,14 @@ func NewPreparerWithoutHooks(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
 		cfg:             cfg,
 		hooks:           []Hook{},
 		downloadSources: downloadSources,
+		log:             logger,
 	}
 }
 
 func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
-	cfg *settings.Configuration,
+	cfg *settings.Configuration, logger *text.Logger,
 ) *Preparer {
-	preper := NewPreparerWithoutHooks(dbExecutor, cmdBuilder, cfg, true)
+	preper := NewPreparerWithoutHooks(dbExecutor, cmdBuilder, cfg, logger, true)
 
 	if cfg.CleanMenu {
 		preper.hooks = append(preper.hooks, Hook{
@@ -93,20 +97,20 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
 	return preper
 }
 
-func (preper *Preparer) ShouldCleanAURDirs(pkgBuildDirs map[string]string) PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs map[string]string) build.PostInstallHookFunc {
 	if !preper.cfg.CleanAfter || len(pkgBuildDirs) == 0 {
 		return nil
 	}
 
-	text.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
+	preper.log.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
 
 	return func(ctx context.Context) error {
-		cleanAfter(ctx, preper.cfg, preper.cfg.Runtime.CmdBuilder, pkgBuildDirs)
+		cleanAfter(ctx, run, run.CmdBuilder, pkgBuildDirs)
 		return nil
 	}
 }
 
-func (preper *Preparer) ShouldCleanMakeDeps(cmdArgs *parser.Arguments) PostInstallHookFunc {
+func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parser.Arguments) build.PostInstallHookFunc {
 	if len(preper.makeDeps) == 0 {
 		return nil
 	}
@@ -118,25 +122,25 @@ func (preper *Preparer) ShouldCleanMakeDeps(cmdArgs *parser.Arguments) PostInsta
 		return nil
 	default:
 		isYesDefault := preper.cfg.RemoveMake == "askyes"
-		if !text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"),
+		if !preper.log.ContinueTask(gotext.Get("Remove make dependencies after install?"),
 			isYesDefault, settings.NoConfirm) {
 			return nil
 		}
 	}
 
-	text.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
+	preper.log.Debugln("added post install hook to clean up AUR makedeps", preper.makeDeps)
 
 	return func(ctx context.Context) error {
-		return removeMake(ctx, preper.cfg, preper.cfg.Runtime.CmdBuilder, preper.makeDeps, cmdArgs)
+		return removeMake(ctx, preper.cfg, run.CmdBuilder, preper.makeDeps, cmdArgs)
 	}
 }
 
-func (preper *Preparer) Run(ctx context.Context,
-	w io.Writer, targets []map[string]*dep.InstallInfo,
+func (preper *Preparer) Run(ctx context.Context, run *runtime.Runtime,
+	targets []map[string]*dep.InstallInfo,
 ) (pkgbuildDirsByBase map[string]string, err error) {
-	preper.Present(w, targets)
+	preper.Present(targets)
 
-	pkgBuildDirs, err := preper.PrepareWorkspace(ctx, targets)
+	pkgBuildDirs, err := preper.PrepareWorkspace(ctx, run, targets)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +148,7 @@ func (preper *Preparer) Run(ctx context.Context,
 	return pkgBuildDirs, nil
 }
 
-func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallInfo) {
+func (preper *Preparer) Present(targets []map[string]*dep.InstallInfo) {
 	pkgsBySourceAndReason := map[string]map[string][]string{}
 
 	for _, layer := range targets {
@@ -173,7 +177,7 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 
 	for source, pkgsByReason := range pkgsBySourceAndReason {
 		for reason, pkgs := range pkgsByReason {
-			fmt.Fprintf(w, text.Bold("%s %s (%d):")+" %s\n",
+			preper.log.Printf(text.Bold("%s %s (%d):")+" %s\n",
 				source,
 				reason,
 				len(pkgs),
@@ -182,7 +186,9 @@ func (preper *Preparer) Present(w io.Writer, targets []map[string]*dep.InstallIn
 	}
 }
 
-func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[string]*dep.InstallInfo) (map[string]string, error) {
+func (preper *Preparer) PrepareWorkspace(ctx context.Context,
+	run *runtime.Runtime, targets []map[string]*dep.InstallInfo,
+) (map[string]string, error) {
 	aurBasesToClone := mapset.NewThreadUnsafeSet[string]()
 	pkgBuildDirsByBase := make(map[string]string, len(targets))
 
@@ -203,7 +209,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 	}
 
 	if _, errA := download.AURPKGBUILDRepos(ctx,
-		preper.cmdBuilder, aurBasesToClone.ToSlice(),
+		preper.cmdBuilder, preper.log.Child("download"), aurBasesToClone.ToSlice(),
 		preper.cfg.AURURL, preper.cfg.BuildDir, false); errA != nil {
 		return nil, errA
 	}
@@ -220,7 +226,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 	remoteNamesCache := mapset.NewThreadUnsafeSet(remoteNames...)
 	for _, hookFn := range preper.hooks {
 		if hookFn.Type == PreDownloadSourcesHook {
-			if err := hookFn.Hookfn(ctx, preper.cfg, os.Stdout, pkgBuildDirsByBase, remoteNamesCache); err != nil {
+			if err := hookFn.Hookfn(ctx, run, os.Stdout, pkgBuildDirsByBase, remoteNamesCache); err != nil {
 				return nil, err
 			}
 		}
@@ -228,7 +234,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context, targets []map[stri
 
 	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
 		pkgBuildDirsByBase, false, preper.cfg.MaxConcurrentDownloads); errP != nil {
-		text.Errorln(errP)
+		preper.log.Errorln(errP)
 	}
 
 	return pkgBuildDirsByBase, nil
@@ -242,7 +248,7 @@ func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuil
 	srcinfoFile := filepath.Join(pkgbuildDir, ".SRCINFO")
 	if pkgbuild, err := gosrc.ParseFile(srcinfoFile); err == nil {
 		if db.VerCmp(pkgbuild.Version(), installInfo.Version) >= 0 {
-			text.OperationInfoln(
+			preper.log.OperationInfoln(
 				gotext.Get("PKGBUILD up to date, skipping download: %s",
 					text.Cyan(*installInfo.AURBase)))
 			return false

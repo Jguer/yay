@@ -48,7 +48,7 @@ func AURPKGBUILDRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder, aurURL, 
 
 func AURPKGBUILDRepos(
 	ctx context.Context,
-	cmdBuilder exe.GitCmdBuilder,
+	cmdBuilder exe.GitCmdBuilder, logger *text.Logger,
 	targets []string, aurURL, dest string, force bool,
 ) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
@@ -80,7 +80,7 @@ func AURPKGBUILDRepos(
 				mux.Unlock()
 			}
 
-			text.OperationInfoln(
+			logger.OperationInfoln(
 				gotext.Get("(%d/%d) Downloaded PKGBUILD: %s",
 					progress, len(targets), text.Cyan(target)))
 

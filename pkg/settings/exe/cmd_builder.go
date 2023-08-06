@@ -15,6 +15,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -38,7 +39,6 @@ type ICmdBuilder interface {
 	BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
 	BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 	AddMakepkgFlag(string)
-	SetPacmanDBPath(string)
 	SudoLoop()
 }
 
@@ -58,6 +58,26 @@ type CmdBuilder struct {
 	PacmanDBPath     string
 	Runner           Runner
 	Log              *text.Logger
+}
+
+func NewCmdBuilder(cfg *settings.Configuration, runner Runner, logger *text.Logger, dbPath string) *CmdBuilder {
+	return &CmdBuilder{
+		GitBin:           cfg.GitBin,
+		GitFlags:         strings.Fields(cfg.GitFlags),
+		GPGBin:           cfg.GpgBin,
+		GPGFlags:         strings.Fields(cfg.GpgFlags),
+		MakepkgFlags:     strings.Fields(cfg.MFlags),
+		MakepkgConfPath:  cfg.MakepkgConf,
+		MakepkgBin:       cfg.MakepkgBin,
+		SudoBin:          cfg.SudoBin,
+		SudoFlags:        strings.Fields(cfg.SudoFlags),
+		SudoLoopEnabled:  cfg.SudoLoop,
+		PacmanBin:        cfg.PacmanBin,
+		PacmanConfigPath: cfg.PacmanConf,
+		PacmanDBPath:     dbPath,
+		Runner:           runner,
+		Log:              logger,
+	}
 }
 
 func (c *CmdBuilder) BuildGPGCmd(ctx context.Context, extraArgs ...string) *exec.Cmd {
@@ -133,10 +153,6 @@ func (c *CmdBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs 
 	cmd = c.deElevateCommand(ctx, cmd)
 
 	return cmd
-}
-
-func (c *CmdBuilder) SetPacmanDBPath(dbPath string) {
-	c.PacmanDBPath = dbPath
 }
 
 // deElevateCommand, `systemd-run` code based on pikaur.
@@ -242,7 +258,7 @@ func (c *CmdBuilder) waitLock(dbPath string) {
 		time.Sleep(3 * time.Second)
 
 		if _, err := os.Stat(lockDBPath); err != nil {
-			fmt.Println()
+			c.Log.Println()
 
 			return
 		}

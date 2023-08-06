@@ -20,6 +20,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -271,29 +272,28 @@ func TestPrintUpdateList(t *testing.T) {
 				SudoLoopEnabled:  false,
 			}
 
-			cfg := &settings.Configuration{
-				RemoveMake: "no",
-				Runtime: &settings.Runtime{
-					Logger:     NewTestLogger(),
-					CmdBuilder: cmdBuilder,
-					VCSStore:   &vcs.Mock{},
-					AURClient:  tc.mockData.aurCache,
+			r, w, _ := os.Pipe()
+
+			logger := text.NewLogger(w, io.Discard, strings.NewReader(""), true, "test")
+
+			run := &runtime.Runtime{
+				Cfg: &settings.Configuration{
+					RemoveMake: "no",
 				},
+				Logger:     logger,
+				CmdBuilder: cmdBuilder,
+				VCSStore:   &vcs.Mock{},
+				AURClient:  tc.mockData.aurCache,
 			}
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg(tc.args...)
 			cmdArgs.AddTarget(tc.targets...)
 
-			rescueStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			err = handleCmd(context.Background(), cfg, cmdArgs, tc.mockData.db)
+			err = handleCmd(context.Background(), run, cmdArgs, tc.mockData.db)
 
 			w.Close()
 			out, _ := io.ReadAll(r)
-			os.Stdout = rescueStdout
 
 			if tc.wantErr {
 				require.Error(t, err)

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func (c *Configuration) ParseCommandLine(a *parser.Arguments) error {
@@ -14,9 +13,6 @@ func (c *Configuration) ParseCommandLine(a *parser.Arguments) error {
 	}
 
 	c.extractYayOptions(a)
-
-	// Reload CmdBuilder
-	c.Runtime.CmdBuilder = c.CmdBuilder(nil)
 
 	return nil
 }
@@ -59,7 +55,6 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.CleanAfter = false
 	case "debug":
 		c.Debug = true
-		text.GlobalLogger.Debug = true
 		return false
 	case "devel":
 		c.Devel = true

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/dep"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -17,44 +18,45 @@ import (
 	"github.com/pkg/errors"
 )
 
-func handleCmd() error {
-	config, err := settings.NewConfig(settings.GetConfigPath(), "")
+func handleCmd(logger *text.Logger) error {
+	cfg, err := settings.NewConfig(logger, settings.GetConfigPath(), "")
 	if err != nil {
 		return err
 	}
 
 	cmdArgs := parser.MakeArguments()
-	if errP := config.ParseCommandLine(cmdArgs); errP != nil {
+	if errP := cfg.ParseCommandLine(cmdArgs); errP != nil {
 		return errP
 	}
 
-	pacmanConf, _, err := settings.RetrievePacmanConfig(cmdArgs, config.PacmanConf)
+	run, err := runtime.NewRuntime(cfg, cmdArgs, "1.0.0")
 	if err != nil {
 		return err
 	}
 
-	dbExecutor, err := ialpm.NewExecutor(pacmanConf, text.GlobalLogger)
+	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, logger)
 	if err != nil {
 		return err
 	}
 
 	aurCache, err := metadata.New(
 		metadata.WithCacheFilePath(
-			filepath.Join(config.BuildDir, "aur.json")))
+			filepath.Join(cfg.BuildDir, "aur.json")))
 	if err != nil {
 		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), false, false,
-		config.Runtime.Logger.Child("grapher"))
+		run.Logger.Child("grapher"))
 
 	return graphPackage(context.Background(), grapher, cmdArgs.Targets)
 }
 
 func main() {
-	if err := handleCmd(); err != nil {
-		text.Errorln(err)
+	fallbackLog := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, false, "fallback")
+	if err := handleCmd(fallbackLog); err != nil {
+		fallbackLog.Errorln(err)
 		os.Exit(1)
 	}
 }

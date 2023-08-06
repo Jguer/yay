@@ -23,6 +23,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -106,21 +107,20 @@ func TestSyncUpgrade(t *testing.T) {
 		},
 	}
 
-	cfg := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n"), true, "test"),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n"), true, "test"),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
-
-	err = handleCmd(context.Background(), cfg, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	wantCapture := []string{}
@@ -219,21 +219,20 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 		},
 	}
 
-	cfg := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
-
-	err = handleCmd(context.Background(), cfg, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	wantCapture := []string{}
@@ -349,21 +348,21 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 		},
 	}
 
-	cfg := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
 
-	err = handleCmd(context.Background(), cfg, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	wantCapture := []string{}
@@ -512,37 +511,37 @@ pkgname = python-vosk
 		},
 	}
 
-	cfg := &settings.Configuration{
-		DoubleConfirm: true,
-		RemoveMake:    "no",
-		BuildDir:      tmpDir,
-		Runtime: &settings.Runtime{
-			Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n\n\n\n"), true, "test"),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{
-						{
-							Name:        "vosk-api",
-							PackageBase: "vosk-api",
-							Version:     "0.3.45-1",
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			DoubleConfirm: true,
+			RemoveMake:    "no",
+			BuildDir:      tmpDir,
+		},
+		Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n\n\n\n"), true, "test"),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{
+					{
+						Name:        "vosk-api",
+						PackageBase: "vosk-api",
+						Version:     "0.3.45-1",
+					},
+					{
+						Name:        "python-vosk",
+						PackageBase: "vosk-api",
+						Version:     "0.3.45-1",
+						Depends: []string{
+							"vosk-api=0.3.45",
 						},
-						{
-							Name:        "python-vosk",
-							PackageBase: "vosk-api",
-							Version:     "0.3.45-1",
-							Depends: []string{
-								"vosk-api=0.3.45",
-							},
-						},
-					}, nil
-				},
+					},
+				}, nil
 			},
 		},
 	}
 
-	err = handleCmd(context.Background(), cfg, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	wantCapture := []string{
@@ -697,22 +696,22 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 				},
 			}
 
-			cfg := &settings.Configuration{
-				RemoveMake:      "no",
-				CombinedUpgrade: false,
-				Runtime: &settings.Runtime{
-					Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
-					CmdBuilder: cmdBuilder,
-					VCSStore:   &vcs.Mock{},
-					AURClient: &mockaur.MockAUR{
-						GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-							return []aur.Pkg{}, nil
-						},
+			run := &runtime.Runtime{
+				Cfg: &settings.Configuration{
+					RemoveMake:      "no",
+					CombinedUpgrade: false,
+				},
+				Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test"),
+				CmdBuilder: cmdBuilder,
+				VCSStore:   &vcs.Mock{},
+				AURClient: &mockaur.MockAUR{
+					GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+						return []aur.Pkg{}, nil
 					},
 				},
 			}
 
-			err = handleCmd(context.Background(), cfg, cmdArgs, db)
+			err = handleCmd(context.Background(), run, cmdArgs, db)
 			require.NoError(t, err)
 
 			require.Len(t, mockRunner.ShowCalls, len(tc.want))

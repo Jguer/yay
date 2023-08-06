@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v12/pkg/db/mock"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -90,15 +91,13 @@ func TestCleanHanging(t *testing.T) {
 				Runner:           mockRunner,
 				SudoLoopEnabled:  false,
 			}
-			cfg := &settings.Configuration{
-				Runtime: &settings.Runtime{CmdBuilder: cmdBuilder},
-			}
 
+			run := &runtime.Runtime{CmdBuilder: cmdBuilder, Cfg: &settings.Configuration{}}
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg(tc.args...)
 
 			err := handleCmd(context.Background(),
-				cfg, cmdArgs, dbExc,
+				run, cmdArgs, dbExc,
 			)
 
 			require.NoError(t, err)

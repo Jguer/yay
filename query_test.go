@@ -16,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -125,12 +126,12 @@ func TestSyncInfo(t *testing.T) {
 				Runner:           mockRunner,
 				SudoLoopEnabled:  false,
 			}
-			cfg := &settings.Configuration{
-				Runtime: &settings.Runtime{
-					CmdBuilder: cmdBuilder,
-					AURClient:  mockAUR,
-					Logger:     NewTestLogger(),
-				},
+
+			run := &runtime.Runtime{
+				CmdBuilder: cmdBuilder,
+				AURClient:  mockAUR,
+				Logger:     newTestLogger(),
+				Cfg:        &settings.Configuration{},
 			}
 
 			cmdArgs := parser.MakeArguments()
@@ -138,7 +139,7 @@ func TestSyncInfo(t *testing.T) {
 			cmdArgs.AddTarget(tc.targets...)
 
 			err := handleCmd(context.Background(),
-				cfg, cmdArgs, dbExc,
+				run, cmdArgs, dbExc,
 			)
 
 			if tc.wantErr {
@@ -266,14 +267,14 @@ func TestSyncSearchAURDB(t *testing.T) {
 				Runner:           mockRunner,
 				SudoLoopEnabled:  false,
 			}
-			cfg := &settings.Configuration{
-				Runtime: &settings.Runtime{
-					CmdBuilder: cmdBuilder,
-					AURClient:  mockAUR,
-					QueryBuilder: query.NewSourceQueryBuilder(mockAUR, NewTestLogger(), "votes", parser.ModeAny, "name",
-						tc.bottomUp, tc.singleLine, tc.mixed),
-					Logger: NewTestLogger(),
-				},
+
+			run := &runtime.Runtime{
+				CmdBuilder: cmdBuilder,
+				AURClient:  mockAUR,
+				QueryBuilder: query.NewSourceQueryBuilder(mockAUR, newTestLogger(), "votes", parser.ModeAny, "name",
+					tc.bottomUp, tc.singleLine, tc.mixed),
+				Logger: newTestLogger(),
+				Cfg:    &settings.Configuration{},
 			}
 
 			cmdArgs := parser.MakeArguments()
@@ -281,7 +282,7 @@ func TestSyncSearchAURDB(t *testing.T) {
 			cmdArgs.AddTarget(tc.targets...)
 
 			err := handleCmd(context.Background(),
-				cfg, cmdArgs, dbExc,
+				run, cmdArgs, dbExc,
 			)
 
 			if tc.wantErr {

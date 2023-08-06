@@ -36,6 +36,10 @@ type MockRunner struct {
 	CaptureFn      func(cmd *exec.Cmd) (stdout string, stderr string, err error)
 }
 
+func (m *MockBuilder) BuildGPGCmd(ctx context.Context, extraArgs ...string) *exec.Cmd {
+	return exec.CommandContext(ctx, "gpg", extraArgs...)
+}
+
 func (m *MockBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
 	var res *exec.Cmd
 	if m.BuildMakepkgCmdFn != nil {

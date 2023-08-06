@@ -1,16 +1,17 @@
 //go:build !integration
 // +build !integration
 
-package settings_test
+package runtime_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func TestBuildRuntime(t *testing.T) {
@@ -23,24 +24,23 @@ func TestBuildRuntime(t *testing.T) {
 		AURRPCURL:   "https://aur.archlinux.org/rpc",
 		BuildDir:    "/tmp",
 		VCSFilePath: "",
-		Runtime:     &settings.Runtime{Logger: text.NewLogger(nil, nil, nil, false, "")},
+		PacmanConf:  "../../testdata/pacman.conf",
 	}
 	cmdArgs := parser.MakeArguments()
 	version := "1.0.0"
 
 	// Call the function being tested
-	runtime, err := settings.BuildRuntime(cfg, cmdArgs, version)
+	run, err := runtime.NewRuntime(cfg, cmdArgs, version)
+	require.NoError(t, err)
 
 	// Assert the function's output
-	assert.NotNil(t, runtime)
-	assert.Nil(t, err)
-	assert.Nil(t, runtime.QueryBuilder)
-	assert.Nil(t, runtime.PacmanConf)
-	assert.NotNil(t, runtime.VCSStore)
-	assert.NotNil(t, runtime.CmdBuilder)
-	assert.NotNil(t, runtime.HTTPClient)
-	assert.NotNil(t, runtime.VoteClient)
-	assert.NotNil(t, runtime.AURClient)
-	assert.Nil(t, runtime.DBExecutor)
-	assert.NotNil(t, runtime.Logger)
+	assert.NotNil(t, run)
+	assert.NotNil(t, run.QueryBuilder)
+	assert.NotNil(t, run.PacmanConf)
+	assert.NotNil(t, run.VCSStore)
+	assert.NotNil(t, run.CmdBuilder)
+	assert.NotNil(t, run.HTTPClient)
+	assert.NotNil(t, run.VoteClient)
+	assert.NotNil(t, run.AURClient)
+	assert.NotNil(t, run.Logger)
 }

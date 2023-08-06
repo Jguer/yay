@@ -81,8 +81,8 @@ func getURLName(pkg db.IPackage) string {
 	return name
 }
 
-func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *http.Client, targets []string,
-	aurURL string, mode parser.TargetMode,
+func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *http.Client,
+	logger *text.Logger, targets []string, aurURL string, mode parser.TargetMode,
 ) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
@@ -96,7 +96,7 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 
 	for _, target := range targets {
 		// Probably replaceable by something in query.
-		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, target, mode)
+		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, logger, target, mode)
 		if toSkip {
 			continue
 		}
@@ -136,7 +136,7 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 }
 
 func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.QueryClient,
-	cmdBuilder exe.GitCmdBuilder,
+	cmdBuilder exe.GitCmdBuilder, logger *text.Logger,
 	targets []string, mode parser.TargetMode, aurURL, dest string, force bool,
 ) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
@@ -151,7 +151,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 
 	for _, target := range targets {
 		// Probably replaceable by something in query.
-		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, target, mode)
+		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, logger, target, mode)
 		if toSkip {
 			continue
 		}
@@ -184,11 +184,11 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 			}
 
 			if aur {
-				text.OperationInfoln(
+				logger.OperationInfoln(
 					gotext.Get("(%d/%d) Downloaded PKGBUILD: %s",
 						progress, len(targets), text.Cyan(pkgName)))
 			} else {
-				text.OperationInfoln(
+				logger.OperationInfoln(
 					gotext.Get("(%d/%d) Downloaded PKGBUILD from ABS: %s",
 						progress, len(targets), text.Cyan(pkgName)))
 			}
@@ -206,7 +206,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 
 // TODO: replace with dep.ResolveTargets.
 func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
-	target string, mode parser.TargetMode,
+	logger *text.Logger, target string, mode parser.TargetMode,
 ) (dbname, pkgname string, isAUR, toSkip bool) {
 	dbName, name := text.SplitDBFromName(target)
 	if dbName != "aur" && mode.AtLeastRepo() {
@@ -239,7 +239,7 @@ func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
 		Needles:  []string{name},
 	})
 	if err != nil {
-		text.Warnln(err)
+		logger.Warnln(err)
 		return dbName, name, true, true
 	}
 

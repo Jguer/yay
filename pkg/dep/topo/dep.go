@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/Jguer/go-alpm/v2"
-
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type (
@@ -244,7 +242,6 @@ func (g *Graph[T, V]) Prune(node T) []T {
 	// Remove edges from things that depend on `node`.
 	for dependent := range g.dependents[node] {
 		last := g.dependencies.removeFromDepmap(dependent, node)
-		text.Debugln("pruning dependent", dependent, last)
 		if last {
 			pruned = append(pruned, g.Prune(dependent)...)
 		}
@@ -255,7 +252,6 @@ func (g *Graph[T, V]) Prune(node T) []T {
 	// Remove all edges from node to the things it depends on.
 	for dependency := range g.dependencies[node] {
 		last := g.dependents.removeFromDepmap(dependency, node)
-		text.Debugln("pruning dependency", dependency, last)
 		if last {
 			pruned = append(pruned, g.Prune(dependency)...)
 		}

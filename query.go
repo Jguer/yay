@@ -12,6 +12,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -32,7 +33,7 @@ func syncSearch(ctx context.Context, pkgS []string,
 }
 
 // SyncInfo serves as a pacman -Si for repo packages and AUR packages.
-func syncInfo(ctx context.Context, cfg *settings.Configuration,
+func syncInfo(ctx context.Context, run *runtime.Runtime,
 	cmdArgs *parser.Arguments, pkgS []string, dbExecutor db.Executor,
 ) error {
 	var (
@@ -41,8 +42,8 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 		missing = false
 	)
 
-	pkgS = query.RemoveInvalidTargets(pkgS, cfg.Mode)
-	aurS, repoS := packageSlices(pkgS, cfg, dbExecutor)
+	pkgS = query.RemoveInvalidTargets(run.Logger, pkgS, run.Cfg.Mode)
+	aurS, repoS := packageSlices(pkgS, run.Cfg, dbExecutor)
 
 	if len(aurS) != 0 {
 		noDB := make([]string, 0, len(aurS))
@@ -52,14 +53,14 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 			noDB = append(noDB, name)
 		}
 
-		info, err = cfg.Runtime.AURClient.Get(ctx, &aur.Query{
+		info, err = run.AURClient.Get(ctx, &aur.Query{
 			Needles: noDB,
 			By:      aur.Name,
 		})
 		if err != nil {
 			missing = true
 
-			cfg.Runtime.Logger.Errorln(err)
+			run.Logger.Errorln(err)
 		}
 	}
 
@@ -68,8 +69,8 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 		arguments.ClearTargets()
 		arguments.AddTarget(repoS...)
 
-		err = cfg.Runtime.CmdBuilder.Show(cfg.Runtime.CmdBuilder.BuildPacmanCmd(ctx,
-			arguments, cfg.Mode, settings.NoConfirm))
+		err = run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
+			arguments, run.Cfg.Mode, settings.NoConfirm))
 		if err != nil {
 			return err
 		}
@@ -81,7 +82,7 @@ func syncInfo(ctx context.Context, cfg *settings.Configuration,
 
 	if len(info) != 0 {
 		for i := range info {
-			printInfo(cfg, &info[i], cmdArgs.ExistsDouble("i"))
+			printInfo(run.Logger, run.Cfg, &info[i], cmdArgs.ExistsDouble("i"))
 		}
 	}
 
@@ -220,7 +221,7 @@ func getFolderSize(path string) (size int64) {
 }
 
 // Statistics returns statistics about packages installed in system.
-func statistics(cfg *settings.Configuration, dbExecutor db.Executor) (res struct {
+func statistics(run *runtime.Runtime, dbExecutor db.Executor) (res struct {
 	Totaln       int
 	Expln        int
 	TotalSize    int64
@@ -238,11 +239,11 @@ func statistics(cfg *settings.Configuration, dbExecutor db.Executor) (res struct
 	}
 
 	res.pacmanCaches = make(map[string]int64)
-	for _, path := range cfg.Runtime.PacmanConf.CacheDir {
+	for _, path := range run.PacmanConf.CacheDir {
 		res.pacmanCaches[path] = getFolderSize(path)
 	}
 
-	res.yayCache = getFolderSize(cfg.BuildDir)
+	res.yayCache = getFolderSize(run.Cfg.BuildDir)
 
 	return
 }

@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -19,11 +20,17 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
+
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
 
 func TestIntegrationLocalInstall(t *testing.T) {
 	makepkgBin := t.TempDir() + "/makepkg"
@@ -142,21 +149,21 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	config := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     NewTestLogger(),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
 
-	err = handleCmd(context.Background(), config, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
@@ -263,20 +270,19 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 		LocalPackageFn: func(string) mock.IPackage { return nil },
 	}
 
-	config := &settings.Configuration{
-		Runtime: &settings.Runtime{
-			Logger:     NewTestLogger(),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg:        &settings.Configuration{},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
 
-	err = handleCmd(context.Background(), config, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.ErrorContains(t, err, wantErr.Error())
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
@@ -421,21 +427,21 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	config := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     NewTestLogger(),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
 
-	err = handleCmd(context.Background(), config, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow), "show calls: %v", mockRunner.ShowCalls)
@@ -585,22 +591,22 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	config := &settings.Configuration{
-		RemoveMake: "no",
-		Debug:      false,
-		Runtime: &settings.Runtime{
-			Logger:     NewTestLogger(),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+			Debug:      false,
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
 
-	err = handleCmd(context.Background(), config, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
@@ -651,7 +657,6 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 	wantCapture := []string{}
 
 	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
-		fmt.Println(cmd.Args)
 		if cmd.Args[1] == "--printsrcinfo" {
 			return string(srcinfo), "", nil
 		}
@@ -722,16 +727,17 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 		},
 	}
 
-	config := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     NewTestLogger(),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	config := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+			Debug:      false,
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
@@ -848,16 +854,16 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	config := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     NewTestLogger(),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	config := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
@@ -988,21 +994,21 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		InstalledRemotePackageNamesFn: func() []string { return []string{} },
 	}
 
-	config := &settings.Configuration{
-		RemoveMake: "no",
-		Runtime: &settings.Runtime{
-			Logger:     NewTestLogger(),
-			CmdBuilder: cmdBuilder,
-			VCSStore:   &vcs.Mock{},
-			AURClient: &mockaur.MockAUR{
-				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
-					return []aur.Pkg{}, nil
-				},
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
 			},
 		},
 	}
 
-	err = handleCmd(context.Background(), config, cmdArgs, db)
+	err = handleCmd(context.Background(), run, cmdArgs, db)
 	require.NoError(t, err)
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))

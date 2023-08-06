@@ -1,7 +1,7 @@
 //go:build !integration
 // +build !integration
 
-package settings
+package runtime
 
 import (
 	"testing"
@@ -46,7 +46,7 @@ func TestPacmanConf(t *testing.T) {
 		},
 	}
 
-	pacmanConf, color, err := RetrievePacmanConfig(parser.MakeArguments(), "../../testdata/pacman.conf")
+	pacmanConf, color, err := retrievePacmanConfig(parser.MakeArguments(), "../../testdata/pacman.conf")
 	assert.Nil(t, err)
 	assert.NotNil(t, pacmanConf)
 	assert.Equal(t, color, false)

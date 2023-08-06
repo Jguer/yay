@@ -1,4 +1,4 @@
-package settings
+package runtime
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -24,6 +24,7 @@ import (
 )
 
 type Runtime struct {
+	Cfg          *settings.Configuration
 	QueryBuilder query.Builder
 	PacmanConf   *pacmanconf.Config
 	VCSStore     vcs.Store
@@ -31,13 +32,12 @@ type Runtime struct {
 	HTTPClient   *http.Client
 	VoteClient   *vote.Client
 	AURClient    aur.QueryClient
-	DBExecutor   db.Executor
 	Logger       *text.Logger
 }
 
-func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
+func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
 	logger := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime")
-	cmdBuilder := cfg.CmdBuilder(nil)
+	runner := exe.NewOSRunner(logger.Child("runner"))
 
 	httpClient := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -86,6 +86,16 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 		aurCache = aurClient
 	}
 
+	pacmanConf, useColor, err := retrievePacmanConfig(cmdArgs, cfg.PacmanConf)
+	if err != nil {
+		return nil, err
+	}
+
+	// FIXME: get rid of global
+	text.UseColor = useColor
+
+	cmdBuilder := exe.NewCmdBuilder(cfg, runner, logger.Child("cmdbuilder"), pacmanConf.DBPath)
+
 	vcsStore := vcs.NewInfoStore(
 		cfg.VCSFilePath, cmdBuilder,
 		logger.Child("vcs"))
@@ -94,17 +104,23 @@ func BuildRuntime(cfg *Configuration, cmdArgs *parser.Arguments, version string)
 		return nil, err
 	}
 
-	runtime := &Runtime{
-		QueryBuilder: nil,
-		PacmanConf:   nil,
+	queryBuilder := query.NewSourceQueryBuilder(
+		aurClient,
+		logger.Child("mixed.querybuilder"), cfg.SortBy,
+		cfg.Mode, cfg.SearchBy,
+		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
+
+	run := &Runtime{
+		Cfg:          cfg,
+		QueryBuilder: queryBuilder,
+		PacmanConf:   pacmanConf,
 		VCSStore:     vcsStore,
 		CmdBuilder:   cmdBuilder,
 		HTTPClient:   &http.Client{},
 		VoteClient:   voteClient,
 		AURClient:    aurCache,
-		DBExecutor:   nil,
-		Logger:       text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime"),
+		Logger:       logger,
 	}
 
-	return runtime, nil
+	return run, nil
 }

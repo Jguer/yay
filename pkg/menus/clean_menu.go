@@ -9,6 +9,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -23,7 +24,7 @@ func anyExistInCache(pkgbuildDirs map[string]string) bool {
 	return false
 }
 
-func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer,
+func CleanFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {
@@ -49,25 +50,25 @@ func CleanFn(ctx context.Context, config *settings.Configuration, w io.Writer,
 		bases = append(bases, pkg)
 	}
 
-	toClean, errClean := selectionMenu(w, pkgbuildDirsByBase, bases, installed,
+	toClean, errClean := selectionMenu(run.Logger, pkgbuildDirsByBase, bases, installed,
 		gotext.Get("Packages to cleanBuild?"),
-		settings.NoConfirm, config.AnswerClean, skipFunc)
+		settings.NoConfirm, run.Cfg.AnswerClean, skipFunc)
 	if errClean != nil {
 		return errClean
 	}
 
 	for i, base := range toClean {
 		dir := pkgbuildDirsByBase[base]
-		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
+		run.Logger.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
 
-		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "reset", "--hard", "origin/HEAD")); err != nil {
-			text.Warnln(gotext.Get("Unable to clean:"), dir)
+		if err := run.CmdBuilder.Show(run.CmdBuilder.BuildGitCmd(ctx, dir, "reset", "--hard", "origin/HEAD")); err != nil {
+			run.Logger.Warnln(gotext.Get("Unable to clean:"), dir)
 
 			return err
 		}
 
-		if err := config.Runtime.CmdBuilder.Show(config.Runtime.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fdx")); err != nil {
-			text.Warnln(gotext.Get("Unable to clean:"), dir)
+		if err := run.CmdBuilder.Show(run.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fdx")); err != nil {
+			run.Logger.Warnln(gotext.Get("Unable to clean:"), dir)
 
 			return err
 		}

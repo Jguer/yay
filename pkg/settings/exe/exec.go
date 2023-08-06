@@ -19,6 +19,10 @@ type OSRunner struct {
 	Log *text.Logger
 }
 
+func NewOSRunner(log *text.Logger) *OSRunner {
+	return &OSRunner{log}
+}
+
 func (r *OSRunner) Show(cmd *exec.Cmd) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.SysProcAttr = &syscall.SysProcAttr{

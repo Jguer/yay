@@ -14,6 +14,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -59,7 +60,7 @@ func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) 
 		for {
 			log.Infoln(gotext.Get("Edit PKGBUILD with?"))
 
-			editorInput, err := text.GetInput(os.Stdin, "", noConfirm)
+			editorInput, err := log.GetInput("", noConfirm)
 			if err != nil {
 				log.Errorln(err)
 				continue
@@ -113,7 +114,7 @@ func editPkgbuilds(log *text.Logger, pkgbuildDirs map[string]string, bases []str
 	return nil
 }
 
-func EditFn(ctx context.Context, cfg *settings.Configuration, w io.Writer,
+func EditFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	pkgbuildDirsByBase map[string]string, installed mapset.Set[string],
 ) error {
 	if len(pkgbuildDirsByBase) == 0 {
@@ -125,21 +126,21 @@ func EditFn(ctx context.Context, cfg *settings.Configuration, w io.Writer,
 		bases = append(bases, pkg)
 	}
 
-	toEdit, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, installed,
-		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, cfg.AnswerEdit, nil)
+	toEdit, errMenu := selectionMenu(run.Logger, pkgbuildDirsByBase, bases, installed,
+		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, run.Cfg.AnswerEdit, nil)
 	if errMenu != nil || len(toEdit) == 0 {
 		return errMenu
 	}
 
 	// TOFIX: remove or use srcinfo data
-	if errEdit := editPkgbuilds(cfg.Runtime.Logger, pkgbuildDirsByBase,
-		toEdit, cfg.Editor, cfg.EditorFlags, nil, settings.NoConfirm); errEdit != nil {
+	if errEdit := editPkgbuilds(run.Logger, pkgbuildDirsByBase,
+		toEdit, run.Cfg.Editor, run.Cfg.EditorFlags, nil, settings.NoConfirm); errEdit != nil {
 		return errEdit
 	}
 
-	cfg.Runtime.Logger.Println()
+	run.Logger.Println()
 
-	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
+	if !run.Logger.ContinueTask(gotext.Get("Proceed with install?"), true, false) {
 		return settings.ErrUserAbort{}
 	}
 

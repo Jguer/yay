@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 
@@ -24,53 +23,52 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
-	Runtime                *Runtime `json:"-"`
-	AURURL                 string   `json:"aururl"`
-	AURRPCURL              string   `json:"aurrpcurl"`
-	BuildDir               string   `json:"buildDir"`
-	Editor                 string   `json:"editor"`
-	EditorFlags            string   `json:"editorflags"`
-	MakepkgBin             string   `json:"makepkgbin"`
-	MakepkgConf            string   `json:"makepkgconf"`
-	PacmanBin              string   `json:"pacmanbin"`
-	PacmanConf             string   `json:"pacmanconf"`
-	ReDownload             string   `json:"redownload"`
-	AnswerClean            string   `json:"answerclean"`
-	AnswerDiff             string   `json:"answerdiff"`
-	AnswerEdit             string   `json:"answeredit"`
-	AnswerUpgrade          string   `json:"answerupgrade"`
-	GitBin                 string   `json:"gitbin"`
-	GpgBin                 string   `json:"gpgbin"`
-	GpgFlags               string   `json:"gpgflags"`
-	MFlags                 string   `json:"mflags"`
-	SortBy                 string   `json:"sortby"`
-	SearchBy               string   `json:"searchby"`
-	GitFlags               string   `json:"gitflags"`
-	RemoveMake             string   `json:"removemake"`
-	SudoBin                string   `json:"sudobin"`
-	SudoFlags              string   `json:"sudoflags"`
-	Version                string   `json:"version"`
-	RequestSplitN          int      `json:"requestsplitn"`
-	CompletionInterval     int      `json:"completionrefreshtime"`
-	MaxConcurrentDownloads int      `json:"maxconcurrentdownloads"`
-	BottomUp               bool     `json:"bottomup"`
-	SudoLoop               bool     `json:"sudoloop"`
-	TimeUpdate             bool     `json:"timeupdate"`
-	Devel                  bool     `json:"devel"`
-	CleanAfter             bool     `json:"cleanAfter"`
-	Provides               bool     `json:"provides"`
-	PGPFetch               bool     `json:"pgpfetch"`
-	CleanMenu              bool     `json:"cleanmenu"`
-	DiffMenu               bool     `json:"diffmenu"`
-	EditMenu               bool     `json:"editmenu"`
-	CombinedUpgrade        bool     `json:"combinedupgrade"`
-	UseAsk                 bool     `json:"useask"`
-	BatchInstall           bool     `json:"batchinstall"`
-	SingleLineResults      bool     `json:"singlelineresults"`
-	SeparateSources        bool     `json:"separatesources"`
-	Debug                  bool     `json:"debug"`
-	UseRPC                 bool     `json:"rpc"`
-	DoubleConfirm          bool     `json:"doubleconfirm"` // confirm install before and after build
+	AURURL                 string `json:"aururl"`
+	AURRPCURL              string `json:"aurrpcurl"`
+	BuildDir               string `json:"buildDir"`
+	Editor                 string `json:"editor"`
+	EditorFlags            string `json:"editorflags"`
+	MakepkgBin             string `json:"makepkgbin"`
+	MakepkgConf            string `json:"makepkgconf"`
+	PacmanBin              string `json:"pacmanbin"`
+	PacmanConf             string `json:"pacmanconf"`
+	ReDownload             string `json:"redownload"`
+	AnswerClean            string `json:"answerclean"`
+	AnswerDiff             string `json:"answerdiff"`
+	AnswerEdit             string `json:"answeredit"`
+	AnswerUpgrade          string `json:"answerupgrade"`
+	GitBin                 string `json:"gitbin"`
+	GpgBin                 string `json:"gpgbin"`
+	GpgFlags               string `json:"gpgflags"`
+	MFlags                 string `json:"mflags"`
+	SortBy                 string `json:"sortby"`
+	SearchBy               string `json:"searchby"`
+	GitFlags               string `json:"gitflags"`
+	RemoveMake             string `json:"removemake"`
+	SudoBin                string `json:"sudobin"`
+	SudoFlags              string `json:"sudoflags"`
+	Version                string `json:"version"`
+	RequestSplitN          int    `json:"requestsplitn"`
+	CompletionInterval     int    `json:"completionrefreshtime"`
+	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads"`
+	BottomUp               bool   `json:"bottomup"`
+	SudoLoop               bool   `json:"sudoloop"`
+	TimeUpdate             bool   `json:"timeupdate"`
+	Devel                  bool   `json:"devel"`
+	CleanAfter             bool   `json:"cleanAfter"`
+	Provides               bool   `json:"provides"`
+	PGPFetch               bool   `json:"pgpfetch"`
+	CleanMenu              bool   `json:"cleanmenu"`
+	DiffMenu               bool   `json:"diffmenu"`
+	EditMenu               bool   `json:"editmenu"`
+	CombinedUpgrade        bool   `json:"combinedupgrade"`
+	UseAsk                 bool   `json:"useask"`
+	BatchInstall           bool   `json:"batchinstall"`
+	SingleLineResults      bool   `json:"singlelineresults"`
+	SeparateSources        bool   `json:"separatesources"`
+	Debug                  bool   `json:"debug"`
+	UseRPC                 bool   `json:"rpc"`
+	DoubleConfirm          bool   `json:"doubleconfirm"` // confirm install before and after build
 
 	CompletionPath string `json:"-"`
 	VCSFilePath    string `json:"-"`
@@ -237,19 +235,16 @@ func DefaultConfig(version string) *Configuration {
 		Debug:                  false,
 		UseRPC:                 true,
 		DoubleConfirm:          true,
-		Runtime: &Runtime{
-			Logger: text.GlobalLogger,
-		},
-		Mode: parser.ModeAny,
+		Mode:                   parser.ModeAny,
 	}
 }
 
-func NewConfig(configPath, version string) (*Configuration, error) {
+func NewConfig(logger *text.Logger, configPath, version string) (*Configuration, error) {
 	newConfig := DefaultConfig(version)
 
 	cacheHome, errCache := getCacheHome()
-	if errCache != nil {
-		text.Errorln(errCache)
+	if errCache != nil && logger != nil {
+		logger.Errorln(errCache)
 	}
 
 	newConfig.BuildDir = cacheHome
@@ -293,29 +288,5 @@ func (c *Configuration) load(configPath string) {
 			fmt.Fprintln(os.Stderr,
 				gotext.Get("failed to read config file '%s': %s", configPath, err))
 		}
-	}
-}
-
-func (c *Configuration) CmdBuilder(runner exe.Runner) exe.ICmdBuilder {
-	if runner == nil {
-		runner = &exe.OSRunner{Log: c.Runtime.Logger.Child("runner")}
-	}
-
-	return &exe.CmdBuilder{
-		GitBin:           c.GitBin,
-		GitFlags:         strings.Fields(c.GitFlags),
-		GPGBin:           c.GpgBin,
-		GPGFlags:         strings.Fields(c.GpgFlags),
-		MakepkgFlags:     strings.Fields(c.MFlags),
-		MakepkgConfPath:  c.MakepkgConf,
-		MakepkgBin:       c.MakepkgBin,
-		SudoBin:          c.SudoBin,
-		SudoFlags:        strings.Fields(c.SudoFlags),
-		SudoLoopEnabled:  c.SudoLoop,
-		PacmanBin:        c.PacmanBin,
-		PacmanConfigPath: c.PacmanConf,
-		PacmanDBPath:     "",
-		Runner:           runner,
-		Log:              c.Runtime.Logger.Child("cmd_builder"),
 	}
 }

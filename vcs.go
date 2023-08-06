@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"os"
 	"sync"
 
 	"github.com/Jguer/aur"
@@ -10,9 +9,9 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/settings"
-	"github.com/Jguer/yay/v12/pkg/srcinfo"
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/runtime"
+	"github.com/Jguer/yay/v12/pkg/sync/srcinfo"
+	"github.com/Jguer/yay/v12/pkg/sync/workdir"
 )
 
 func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {
@@ -31,11 +30,11 @@ func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {
 }
 
 // createDevelDB forces yay to create a DB of the existing development packages.
-func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) error {
+func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Executor) error {
 	remoteNames := dbExecutor.InstalledRemotePackageNames()
 
-	cfg.Runtime.QueryBuilder.Execute(ctx, dbExecutor, remoteNames)
-	info, err := cfg.Runtime.AURClient.Get(ctx, &aur.Query{
+	run.QueryBuilder.Execute(ctx, dbExecutor, remoteNames)
+	info, err := run.AURClient.Get(ctx, &aur.Query{
 		Needles:  remoteNames,
 		By:       aur.Name,
 		Contains: false,
@@ -44,15 +43,15 @@ func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor 
 		return err
 	}
 
-	preper := NewPreparerWithoutHooks(dbExecutor, cfg.Runtime.CmdBuilder, cfg, false)
+	preper := workdir.NewPreparerWithoutHooks(dbExecutor, run.CmdBuilder, run.Cfg, run.Logger.Child("workdir"), false)
 
 	mapInfo := infoToInstallInfo(info)
-	pkgBuildDirsByBase, err := preper.Run(ctx, os.Stdout, mapInfo)
+	pkgBuildDirsByBase, err := preper.Run(ctx, run, mapInfo)
 	if err != nil {
 		return err
 	}
 
-	srcinfos, err := srcinfo.ParseSrcinfoFilesByBase(pkgBuildDirsByBase, false)
+	srcinfos, err := srcinfo.ParseSrcinfoFilesByBase(run.Logger.Child("srcinfo"), pkgBuildDirsByBase, false)
 	if err != nil {
 		return err
 	}
@@ -63,14 +62,14 @@ func createDevelDB(ctx context.Context, cfg *settings.Configuration, dbExecutor 
 			wg.Add(1)
 
 			go func(i string, iP int) {
-				cfg.Runtime.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
+				run.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
 				wg.Done()
 			}(i, iP)
 		}
 	}
 
 	wg.Wait()
-	text.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
+	run.Logger.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
 
 	return err
 }

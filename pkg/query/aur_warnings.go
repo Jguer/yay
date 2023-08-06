@@ -22,9 +22,6 @@ type AURWarnings struct {
 }
 
 func NewWarnings(logger *text.Logger) *AURWarnings {
-	if logger == nil {
-		logger = text.GlobalLogger
-	}
 	return &AURWarnings{log: logger}
 }
 

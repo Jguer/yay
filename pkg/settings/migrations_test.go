@@ -16,6 +16,10 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
+
 func TestMigrationNothingToDo(t *testing.T) {
 	t.Parallel()
 	// Create temporary file for config
@@ -28,13 +32,10 @@ func TestMigrationNothingToDo(t *testing.T) {
 	config := Configuration{
 		Version: "99.0.0",
 		// Create runtime with runtimeVersion
-		Runtime: &Runtime{
-			Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
-		},
 	}
 
 	// Run Migration
-	err = config.RunMigrations(DefaultMigrations(), testFilePath, "20.0.0")
+	err = config.RunMigrations(newTestLogger(), DefaultMigrations(), testFilePath, "20.0.0")
 	require.NoError(t, err)
 
 	// Check file contents if wantSave otherwise check file empty
@@ -53,9 +54,6 @@ func TestProvidesMigrationDo(t *testing.T) {
 	migration := &configProviderMigration{}
 	config := Configuration{
 		Provides: true,
-		Runtime: &Runtime{
-			Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
-		},
 	}
 
 	assert.True(t, migration.Do(&config))
@@ -135,13 +133,10 @@ func TestProvidesMigration(t *testing.T) {
 				Version:  tc.testConfig.Version,
 				Provides: tc.testConfig.Provides,
 				// Create runtime with runtimeVersion
-				Runtime: &Runtime{
-					Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
-				},
 			}
 
 			// Run Migration
-			err = tcConfig.RunMigrations(
+			err = tcConfig.RunMigrations(newTestLogger(),
 				[]configMigration{&configProviderMigration{}},
 				testFilePath, tc.newVersion)
 

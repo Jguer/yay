@@ -9,9 +9,8 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
-	"github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -39,6 +38,7 @@ func initGotext() {
 }
 
 func main() {
+	fallbackLog := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, false, "fallback")
 	var (
 		err error
 		ctx = context.Background()
@@ -47,7 +47,7 @@ func main() {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			text.Errorln(rec)
+			fallbackLog.Errorln(rec)
 			debug.PrintStack()
 		}
 
@@ -57,15 +57,15 @@ func main() {
 	initGotext()
 
 	if os.Geteuid() == 0 {
-		text.Warnln(gotext.Get("Avoid running yay as root/sudo."))
+		fallbackLog.Warnln(gotext.Get("Avoid running yay as root/sudo."))
 	}
 
 	configPath := settings.GetConfigPath()
 	// Parse config
-	cfg, err := settings.NewConfig(configPath, yayVersion)
+	cfg, err := settings.NewConfig(fallbackLog, configPath, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -73,13 +73,9 @@ func main() {
 		return
 	}
 
-	if cfg.Debug {
-		text.GlobalLogger.Debug = true
-	}
-
-	if errS := cfg.RunMigrations(
+	if errS := cfg.RunMigrations(fallbackLog,
 		settings.DefaultMigrations(), configPath, yayVersion); errS != nil {
-		text.Errorln(errS)
+		fallbackLog.Errorln(errS)
 	}
 
 	cmdArgs := parser.MakeArguments()
@@ -87,7 +83,7 @@ func main() {
 	// Parse command line
 	if err = cfg.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -97,36 +93,15 @@ func main() {
 
 	if cfg.SaveConfig {
 		if errS := cfg.Save(configPath, yayVersion); errS != nil {
-			text.Errorln(errS)
+			fallbackLog.Errorln(errS)
 		}
 	}
 
-	// Build runtime
-	runtime, err := settings.BuildRuntime(cfg, cmdArgs, yayVersion)
+	// Build run
+	run, err := runtime.NewRuntime(cfg, cmdArgs, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
-		}
-
-		ret = 1
-
-		return
-	}
-
-	cfg.Runtime = runtime
-
-	cfg.Runtime.QueryBuilder = query.NewSourceQueryBuilder(
-		cfg.Runtime.AURClient,
-		cfg.Runtime.Logger.Child("mixed.querybuilder"), cfg.SortBy,
-		cfg.Mode, cfg.SearchBy,
-		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
-
-	var useColor bool
-
-	cfg.Runtime.PacmanConf, useColor, err = settings.RetrievePacmanConfig(cmdArgs, cfg.PacmanConf)
-	if err != nil {
-		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -134,14 +109,10 @@ func main() {
 		return
 	}
 
-	cfg.Runtime.CmdBuilder.SetPacmanDBPath(cfg.Runtime.PacmanConf.DBPath)
-
-	text.UseColor = useColor
-
-	dbExecutor, err := ialpm.NewExecutor(cfg.Runtime.PacmanConf, runtime.Logger.Child("db"))
+	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))
 	if err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 		}
 
 		ret = 1
@@ -151,19 +122,18 @@ func main() {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			text.Errorln(rec)
-			debug.PrintStack()
+			fallbackLog.Errorln(rec, string(debug.Stack()))
 		}
 
 		dbExecutor.Cleanup()
 	}()
 
-	if err = handleCmd(ctx, cfg, cmdArgs, db.Executor(dbExecutor)); err != nil {
+	if err = handleCmd(ctx, run, cmdArgs, dbExecutor); err != nil {
 		if str := err.Error(); str != "" {
-			text.Errorln(str)
+			fallbackLog.Errorln(str)
 			if cmdArgs.ExistsArg("c") && cmdArgs.ExistsArg("y") && cmdArgs.Op == "S" {
 				// Remove after 2023-10-01
-				text.Errorln("Did you mean 'yay -Yc'?")
+				fallbackLog.Errorln("Did you mean 'yay -Yc'?")
 			}
 		}
 

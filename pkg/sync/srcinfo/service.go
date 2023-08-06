@@ -11,28 +11,28 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/pgp"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/sync/srcinfo/pgp"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
-// TODO: add tests
 type Service struct {
 	dbExecutor db.Executor
 	cfg        *settings.Configuration
-	cmdBuilder exe.ICmdBuilder
+	cmdBuilder pgp.GPGCmdBuilder
 	vcsStore   vcs.Store
+	log        *text.Logger
 
 	pkgBuildDirs map[string]string
 	srcInfos     map[string]*gosrc.Srcinfo
 }
 
-func NewService(dbExecutor db.Executor, cfg *settings.Configuration,
+func NewService(dbExecutor db.Executor, cfg *settings.Configuration, logger *text.Logger,
 	cmdBuilder exe.ICmdBuilder, vcsStore vcs.Store, pkgBuildDirs map[string]string,
 ) (*Service, error) {
-	srcinfos, err := ParseSrcinfoFilesByBase(pkgBuildDirs, true)
+	srcinfos, err := ParseSrcinfoFilesByBase(logger, pkgBuildDirs, true)
 	if err != nil {
 		panic(err)
 	}
@@ -43,6 +43,7 @@ func NewService(dbExecutor db.Executor, cfg *settings.Configuration,
 		vcsStore:     vcsStore,
 		pkgBuildDirs: pkgBuildDirs,
 		srcInfos:     srcinfos,
+		log:          logger,
 	}, nil
 }
 
@@ -68,7 +69,7 @@ nextpkg:
 }
 
 func (s *Service) CheckPGPKeys(ctx context.Context) error {
-	_, errCPK := pgp.CheckPgpKeys(ctx, s.pkgBuildDirs, s.srcInfos, s.cmdBuilder, settings.NoConfirm)
+	_, errCPK := pgp.CheckPgpKeys(ctx, s.log.Child("pgp"), s.pkgBuildDirs, s.srcInfos, s.cmdBuilder, settings.NoConfirm)
 	return errCPK
 }
 
@@ -83,15 +84,15 @@ func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.
 		for i := range srcinfo.Packages {
 			for j := range targets {
 				if _, ok := targets[j][srcinfo.Packages[i].Pkgname]; !ok {
-					text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
+					s.log.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
 					continue
 				}
 				if _, ok := ignore[srcinfo.Packages[i].Pkgname]; ok {
-					text.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
+					s.log.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
 					continue
 				}
 
-				text.Debugln("checking VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
+				s.log.Debugln("checking VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
 				s.vcsStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
 			}
 		}
@@ -100,17 +101,17 @@ func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.
 	return nil
 }
 
-func ParseSrcinfoFilesByBase(pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
+func ParseSrcinfoFilesByBase(logger *text.Logger, pkgBuildDirs map[string]string, errIsFatal bool) (map[string]*gosrc.Srcinfo, error) {
 	srcinfos := make(map[string]*gosrc.Srcinfo)
 
 	k := 0
 	for base, dir := range pkgBuildDirs {
-		text.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(pkgBuildDirs), text.Cyan(base)))
+		logger.OperationInfoln(gotext.Get("(%d/%d) Parsing SRCINFO: %s", k+1, len(pkgBuildDirs), text.Cyan(base)))
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			if !errIsFatal {
-				text.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base, err))
+				logger.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base, err))
 				continue
 			}
 

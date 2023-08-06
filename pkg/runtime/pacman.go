@@ -1,4 +1,4 @@
-package settings
+package runtime
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"golang.org/x/term"
 )
 
-func RetrievePacmanConfig(cmdArgs *parser.Arguments, pacmanConfigPath string) (*pacmanconf.Config, bool, error) {
+func retrievePacmanConfig(cmdArgs *parser.Arguments, pacmanConfigPath string) (*pacmanconf.Config, bool, error) {
 	root := "/"
 	if value, _, exists := cmdArgs.GetArg("root", "r"); exists {
 		root = value

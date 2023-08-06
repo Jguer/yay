@@ -5,6 +5,12 @@ import (
 	"io"
 )
 
+const (
+	arrow      = "==>"
+	smallArrow = " ->"
+	opSymbol   = "::"
+)
+
 type Logger struct {
 	name   string
 	Debug  bool

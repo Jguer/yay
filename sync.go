@@ -3,37 +3,36 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/Jguer/yay/v12/pkg/completion"
+	"github.com/leonelquinteros/gotext"
+
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/multierror"
+	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/srcinfo"
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v12/pkg/sync"
 	"github.com/Jguer/yay/v12/pkg/upgrade"
-
-	"github.com/leonelquinteros/gotext"
 )
 
 func syncInstall(ctx context.Context,
-	cfg *settings.Configuration,
+	run *runtime.Runtime,
 	cmdArgs *parser.Arguments,
 	dbExecutor db.Executor,
 ) error {
-	aurCache := cfg.Runtime.AURClient
+	aurCache := run.AURClient
 	refreshArg := cmdArgs.ExistsArg("y", "refresh")
 	noDeps := cmdArgs.ExistsArg("d", "nodeps")
-	noCheck := strings.Contains(cfg.MFlags, "--nocheck")
+	noCheck := strings.Contains(run.Cfg.MFlags, "--nocheck")
 	if noDeps {
-		cfg.Runtime.CmdBuilder.AddMakepkgFlag("-d")
+		run.CmdBuilder.AddMakepkgFlag("-d")
 	}
 
-	if refreshArg && cfg.Mode.AtLeastRepo() {
-		if errR := earlyRefresh(ctx, cfg, cfg.Runtime.CmdBuilder, cmdArgs); errR != nil {
+	if refreshArg && run.Cfg.Mode.AtLeastRepo() {
+		if errR := earlyRefresh(ctx, run.Cfg, run.CmdBuilder, cmdArgs); errR != nil {
 			return fmt.Errorf("%s - %w", gotext.Get("error refreshing databases"), errR)
 		}
 
@@ -45,7 +44,7 @@ func syncInstall(ctx context.Context,
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
-		noDeps, noCheck, cmdArgs.ExistsArg("needed"), cfg.Runtime.Logger.Child("grapher"))
+		noDeps, noCheck, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {
@@ -57,8 +56,8 @@ func syncInstall(ctx context.Context,
 		var errSysUp error
 
 		upService := upgrade.NewUpgradeService(
-			grapher, aurCache, dbExecutor, cfg.Runtime.VCSStore,
-			cfg, settings.NoConfirm, cfg.Runtime.Logger.Child("upgrade"))
+			grapher, aurCache, dbExecutor, run.VCSStore,
+			run.Cfg, settings.NoConfirm, run.Logger.Child("upgrade"))
 
 		graph, errSysUp = upService.GraphUpgrades(ctx,
 			graph, cmdArgs.ExistsDouble("u", "sysupgrade"),
@@ -75,7 +74,7 @@ func syncInstall(ctx context.Context,
 		}
 	}
 
-	opService := NewOperationService(ctx, cfg, dbExecutor)
+	opService := sync.NewOperationService(ctx, dbExecutor, run)
 	multiErr := &multierror.MultiError{}
 	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
@@ -88,117 +87,19 @@ func syncInstall(ctx context.Context,
 		return err
 	}
 
-	return opService.Run(ctx, cmdArgs, targets, excluded)
+	return opService.Run(ctx, run, cmdArgs, targets, excluded)
 }
 
-type OperationService struct {
-	ctx        context.Context
-	cfg        *settings.Configuration
-	dbExecutor db.Executor
-}
-
-func NewOperationService(ctx context.Context, cfg *settings.Configuration, dbExecutor db.Executor) *OperationService {
-	return &OperationService{
-		ctx:        ctx,
-		cfg:        cfg,
-		dbExecutor: dbExecutor,
+func earlyRefresh(ctx context.Context, cfg *settings.Configuration, cmdBuilder exe.ICmdBuilder, cmdArgs *parser.Arguments) error {
+	arguments := cmdArgs.Copy()
+	if cfg.CombinedUpgrade {
+		arguments.DelArg("u", "sysupgrade")
 	}
-}
+	arguments.DelArg("s", "search")
+	arguments.DelArg("i", "info")
+	arguments.DelArg("l", "list")
+	arguments.ClearTargets()
 
-func (o *OperationService) Run(ctx context.Context,
-	cmdArgs *parser.Arguments,
-	targets []map[string]*dep.InstallInfo, excluded []string,
-) error {
-	if len(targets) == 0 {
-		fmt.Fprintln(os.Stdout, "", gotext.Get("there is nothing to do"))
-		return nil
-	}
-	preparer := NewPreparer(o.dbExecutor, o.cfg.Runtime.CmdBuilder, o.cfg)
-	installer := NewInstaller(o.dbExecutor, o.cfg.Runtime.CmdBuilder,
-		o.cfg.Runtime.VCSStore, o.cfg.Mode, o.cfg.ReBuild,
-		cmdArgs.ExistsArg("w", "downloadonly"), o.cfg.Runtime.Logger.Child("installer"))
-
-	pkgBuildDirs, errInstall := preparer.Run(ctx, os.Stdout, targets)
-	if errInstall != nil {
-		return errInstall
-	}
-
-	if cleanFunc := preparer.ShouldCleanMakeDeps(cmdArgs); cleanFunc != nil {
-		installer.AddPostInstallHook(cleanFunc)
-	}
-
-	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(pkgBuildDirs); cleanAURDirsFunc != nil {
-		installer.AddPostInstallHook(cleanAURDirsFunc)
-	}
-
-	go func() {
-		errComp := completion.Update(ctx, o.cfg.Runtime.HTTPClient, o.dbExecutor,
-			o.cfg.AURURL, o.cfg.CompletionPath, o.cfg.CompletionInterval, false)
-		if errComp != nil {
-			text.Warnln(errComp)
-		}
-	}()
-
-	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg, o.cfg.Runtime.CmdBuilder, o.cfg.Runtime.VCSStore, pkgBuildDirs)
-	if errInstall != nil {
-		return errInstall
-	}
-
-	incompatible, errInstall := srcInfo.IncompatiblePkgs(ctx)
-	if errInstall != nil {
-		return errInstall
-	}
-
-	if errIncompatible := confirmIncompatible(incompatible); errIncompatible != nil {
-		return errIncompatible
-	}
-
-	if errPGP := srcInfo.CheckPGPKeys(ctx); errPGP != nil {
-		return errPGP
-	}
-
-	if errInstall := installer.Install(ctx, cmdArgs, targets, pkgBuildDirs,
-		excluded, o.manualConfirmRequired(cmdArgs)); errInstall != nil {
-		return errInstall
-	}
-
-	var multiErr multierror.MultiError
-
-	if err := installer.CompileFailedAndIgnored(); err != nil {
-		multiErr.Add(err)
-	}
-
-	if !cmdArgs.ExistsArg("w", "downloadonly") {
-		if err := srcInfo.UpdateVCSStore(ctx, targets, installer.failedAndIgnored); err != nil {
-			text.Warnln(err)
-		}
-	}
-
-	if err := installer.RunPostInstallHooks(ctx); err != nil {
-		multiErr.Add(err)
-	}
-
-	return multiErr.Return()
-}
-
-func (o *OperationService) manualConfirmRequired(cmdArgs *parser.Arguments) bool {
-	return (!cmdArgs.ExistsArg("u", "sysupgrade") && cmdArgs.Op != "Y") || o.cfg.DoubleConfirm
-}
-
-func confirmIncompatible(incompatible []string) error {
-	if len(incompatible) > 0 {
-		text.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
-
-		for _, pkg := range incompatible {
-			fmt.Print("  " + text.Cyan(pkg))
-		}
-
-		fmt.Println()
-
-		if !text.ContinueTask(os.Stdin, gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
-			return &settings.ErrUserAbort{}
-		}
-	}
-
-	return nil
+	return cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
+		arguments, cfg.Mode, settings.NoConfirm))
 }

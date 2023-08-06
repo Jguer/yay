@@ -1,4 +1,4 @@
-package main
+package build
 
 import (
 	"context"
@@ -54,12 +54,12 @@ func NewInstaller(dbExecutor db.Executor,
 	}
 }
 
-func (installer *Installer) CompileFailedAndIgnored() error {
+func (installer *Installer) CompileFailedAndIgnored() (map[string]error, error) {
 	if len(installer.failedAndIgnored) == 0 {
-		return nil
+		return installer.failedAndIgnored, nil
 	}
 
-	return &FailedIgnoredPkgError{
+	return installer.failedAndIgnored, &FailedIgnoredPkgError{
 		pkgErrors: installer.failedAndIgnored,
 	}
 }
@@ -234,12 +234,12 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 			}
 
 			installer.failedAndIgnored[name] = errMake
-			text.Errorln(gotext.Get("error making: %s", base), "-", errMake)
+			installer.log.Errorln(gotext.Get("error making: %s", base), "-", errMake)
 			continue
 		}
 
 		if len(pkgdests) == 0 {
-			text.Warnln(gotext.Get("nothing to install for %s", text.Cyan(base)))
+			installer.log.Warnln(gotext.Get("nothing to install for %s", text.Cyan(base)))
 			continue
 		}
 
@@ -298,10 +298,10 @@ func (installer *Installer) buildPkg(ctx context.Context,
 	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion) || installer.downloadOnly:
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
 		pkgdests = map[string]string{}
-		text.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
+		installer.log.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
 	case installer.skipAlreadyBuiltPkg(isTarget, pkgdests):
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
-		text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
+		installer.log.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
 	default:
 		args = []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 		if installIncompatible {
@@ -333,10 +333,10 @@ func (installer *Installer) pkgsAreAlreadyInstalled(pkgdests map[string]string, 
 	return true
 }
 
-func pkgsAreBuilt(pkgdests map[string]string) bool {
+func pkgsAreBuilt(logger *text.Logger, pkgdests map[string]string) bool {
 	for _, pkgdest := range pkgdests {
 		if _, err := os.Stat(pkgdest); err != nil {
-			text.Debugln("pkgIsBuilt:", pkgdest, "does not exist")
+			logger.Debugln("pkgIsBuilt:", pkgdest, "does not exist")
 			return false
 		}
 	}
@@ -347,14 +347,14 @@ func pkgsAreBuilt(pkgdests map[string]string) bool {
 func (installer *Installer) skipAlreadyBuiltPkg(isTarget bool, pkgdests map[string]string) bool {
 	switch installer.rebuildMode {
 	case parser.RebuildModeNo:
-		return pkgsAreBuilt(pkgdests)
+		return pkgsAreBuilt(installer.log, pkgdests)
 	case parser.RebuildModeYes:
-		return !isTarget && pkgsAreBuilt(pkgdests)
+		return !isTarget && pkgsAreBuilt(installer.log, pkgdests)
 	// case parser.RebuildModeTree: // TODO
 	// case parser.RebuildModeAll: // TODO
 	default:
 		// same as RebuildModeNo
-		return pkgsAreBuilt(pkgdests)
+		return pkgsAreBuilt(installer.log, pkgdests)
 	}
 }
 
