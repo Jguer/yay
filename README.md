@@ -126,7 +126,7 @@ pacman -S --needed git base-devel yay
   `yay -{OPERATION} --aur`
   `yay -{OPERATION} --repo`
 
-- **An `Out Of Date AUR Packages` message is displayed. Why doesn't Yay update them?**
+- **A `Flagged Out Of Date AUR Packages` message is displayed. Why doesn't Yay update them?**
 
   This message does not mean that updated AUR packages are available. It means
   the packages have been flagged out of date on the AUR, but
