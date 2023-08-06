@@ -111,17 +111,6 @@ pacman -S --needed git base-devel yay
   Make sure you have the `Color` option in your `/etc/pacman.conf`
   (see issue [#123](https://github.com/Jguer/yay/issues/123)).
 
-- **Yay is not prompting to skip packages during system upgrade.**
-
-  The default behavior was changed after
-  [v8.918](https://github.com/Jguer/yay/releases/tag/v8.918)
-  (see [3bdb534](https://github.com/Jguer/yay/commit/3bdb5343218d99d40f8a449b887348611f6bdbfc)
-  and issue [#554](https://github.com/Jguer/yay/issues/554)).
-  To restore the package-skip behavior use `--combinedupgrade` (make
-  it permanent by appending `--save`). Note: skipping packages will leave your
-  system in a
-  [partially-upgraded state](https://wiki.archlinux.org/index.php/System_maintenance#Partial_upgrades_are_unsupported).
-
 - **Sometimes diffs are printed to the terminal, and other times they are paged via less. How do I fix this?**
 
   Yay uses `git diff` to display diffs, which by default tells less not to
@@ -158,21 +147,6 @@ pacman -S --needed git base-devel yay
 - **I want to help out!**
 
   Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
-
-- **What settings do you use?**
-
-  ```sh
-  yay -Y --devel --combinedupgrade --batchinstall --save
-  ```
-
-  Pacman conf options:
-
-  ```conf
-  UseSyslog
-  Color
-  CheckSpace
-  VerbosePkgLists
-  ```
 
 ## Support
 
