@@ -122,7 +122,7 @@ func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parse
 		return nil
 	default:
 		isYesDefault := preper.cfg.RemoveMake == "askyes"
-		if !text.ContinueTask(os.Stdin, gotext.Get("Remove make dependencies after install?"),
+		if !preper.log.ContinueTask(gotext.Get("Remove make dependencies after install?"),
 			isYesDefault, settings.NoConfirm) {
 			return nil
 		}

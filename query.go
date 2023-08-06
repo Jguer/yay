@@ -82,7 +82,7 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 
 	if len(info) != 0 {
 		for i := range info {
-			printInfo(run.Cfg, &info[i], cmdArgs.ExistsDouble("i"))
+			printInfo(run.Logger, run.Cfg, &info[i], cmdArgs.ExistsDouble("i"))
 		}
 	}
 

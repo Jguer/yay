@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	mapset "github.com/deckarep/golang-set/v2"
@@ -168,9 +167,9 @@ func DiffFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 		return errD
 	}
 
-	fmt.Println()
+	run.Logger.Println()
 
-	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
+	if !run.Logger.ContinueTask(gotext.Get("Proceed with install?"), true, false) {
 		return settings.ErrUserAbort{}
 	}
 

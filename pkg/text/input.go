@@ -2,15 +2,13 @@ package text
 
 import (
 	"bufio"
-	"fmt"
-	"io"
 )
 
 func (l *Logger) GetInput(defaultValue string, noConfirm bool) (string, error) {
 	l.Info()
 
 	if defaultValue != "" || noConfirm {
-		fmt.Println(defaultValue)
+		l.Println(defaultValue)
 		return defaultValue, nil
 	}
 
@@ -26,8 +24,4 @@ func (l *Logger) GetInput(defaultValue string, noConfirm bool) (string, error) {
 	}
 
 	return string(buf), nil
-}
-
-func GetInput(r io.Reader, defaultValue string, noConfirm bool) (string, error) {
-	return GlobalLogger.GetInput(defaultValue, noConfirm)
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -15,7 +14,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 // CleanDependencies removes all dangling dependencies in system.
@@ -82,9 +80,9 @@ func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 		question = gotext.Get("Do you want to remove all other AUR packages from cache?")
 	}
 
-	fmt.Println(gotext.Get("\nBuild directory:"), run.Cfg.BuildDir)
+	run.Logger.Println(gotext.Get("\nBuild directory:"), run.Cfg.BuildDir)
 
-	if text.ContinueTask(os.Stdin, question, true, settings.NoConfirm) {
+	if run.Logger.ContinueTask(question, true, settings.NoConfirm) {
 		if err := cleanAUR(ctx, run, keepInstalled, keepCurrent, removeAll, dbExecutor); err != nil {
 			return err
 		}
@@ -94,7 +92,7 @@ func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 		return nil
 	}
 
-	if text.ContinueTask(os.Stdin, gotext.Get("Do you want to remove ALL untracked AUR files?"), true, settings.NoConfirm) {
+	if run.Logger.ContinueTask(gotext.Get("Do you want to remove ALL untracked AUR files?"), true, settings.NoConfirm) {
 		return cleanUntracked(ctx, run)
 	}
 

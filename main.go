@@ -73,10 +73,6 @@ func main() {
 		return
 	}
 
-	if cfg.Debug {
-		text.GlobalLogger.Debug = true
-	}
-
 	if errS := cfg.RunMigrations(fallbackLog,
 		settings.DefaultMigrations(), configPath, yayVersion); errS != nil {
 		fallbackLog.Errorln(errS)

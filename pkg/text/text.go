@@ -2,7 +2,6 @@ package text
 
 import (
 	"fmt"
-	"io"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -55,7 +54,7 @@ func LessRunes(iRunes, jRunes []rune) bool {
 
 // ContinueTask prompts if user wants to continue task.
 // If NoConfirm is set the action will continue without user input.
-func ContinueTask(input io.Reader, s string, preset, noConfirm bool) bool {
+func (l *Logger) ContinueTask(s string, preset, noConfirm bool) bool {
 	if noConfirm {
 		return preset
 	}
@@ -88,9 +87,9 @@ func ContinueTask(input io.Reader, s string, preset, noConfirm bool) bool {
 		postFix = fmt.Sprintf(" [%s/%s] ", y, strings.ToUpper(n))
 	}
 
-	GlobalLogger.OperationInfo(Bold(s), Bold(postFix))
+	l.OperationInfo(Bold(s), Bold(postFix))
 
-	if _, err := fmt.Fscanln(input, &response); err != nil {
+	if _, err := fmt.Fscanln(l.r, &response); err != nil {
 		return preset
 	}
 

@@ -24,6 +24,10 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
+
 func TestParsing(t *testing.T) {
 	t.Parallel()
 	type source struct {
@@ -232,7 +236,7 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
-				logger:     text.GlobalLogger,
+				logger:     newTestLogger(),
 				CmdBuilder: tt.fields.CmdBuilder,
 				OriginsByPackage: map[string]OriginInfoByURL{
 					"yay": tt.args.infos,
@@ -365,7 +369,7 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
-				logger:     text.GlobalLogger,
+				logger:     newTestLogger(),
 				CmdBuilder: tt.fields.CmdBuilder,
 			}
 			got := v.needsUpdate(context.Background(), tt.args.infos)
@@ -415,7 +419,7 @@ func TestInfoStore_Update(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
-				logger:           text.GlobalLogger,
+				logger:           newTestLogger(),
 				FilePath:         filePath,
 				CmdBuilder:       tt.fields.CmdBuilder,
 			}
@@ -479,7 +483,7 @@ func TestInfoStore_Remove(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
 				OriginsByPackage: tt.fields.OriginsByPackage,
-				logger:           text.GlobalLogger,
+				logger:           newTestLogger(),
 				FilePath:         filePath,
 			}
 			v.RemovePackages(tt.args.pkgs)

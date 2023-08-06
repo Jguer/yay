@@ -4,6 +4,7 @@
 package text
 
 import (
+	"io"
 	"os"
 	"path"
 	"strings"
@@ -74,7 +75,8 @@ func TestContinueTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// create io.Reader with value of input
 			in := strings.NewReader(tt.args.input)
-			got := ContinueTask(in, tt.args.s, tt.args.preset, tt.args.noConfirm)
+			logger := NewLogger(io.Discard, io.Discard, in, false, "test")
+			got := logger.ContinueTask(tt.args.s, tt.args.preset, tt.args.noConfirm)
 			require.Equal(t, tt.want, got)
 		})
 	}
@@ -120,7 +122,8 @@ msgstr "да"
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := strings.NewReader(tt.args.input)
-			got := ContinueTask(in, tt.args.s, tt.args.preset, tt.args.noConfirm)
+			logger := NewLogger(io.Discard, io.Discard, in, false, "test")
+			got := logger.ContinueTask(tt.args.s, tt.args.preset, tt.args.noConfirm)
 			require.Equal(t, tt.want, got)
 		})
 	}
@@ -168,7 +171,8 @@ msgstr "ja"
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := strings.NewReader(tt.args.input)
-			got := ContinueTask(in, tt.args.s, tt.args.preset, tt.args.noConfirm)
+			logger := NewLogger(io.Discard, io.Discard, in, false, "test")
+			got := logger.ContinueTask(tt.args.s, tt.args.preset, tt.args.noConfirm)
 			require.Equal(t, tt.want, got)
 		})
 	}

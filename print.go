@@ -6,10 +6,14 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
+	"syscall"
+	"unicode"
 
 	aur "github.com/Jguer/aur"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
+	"golang.org/x/sys/unix"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
@@ -22,40 +26,40 @@ import (
 )
 
 // printInfo prints package info like pacman -Si.
-func printInfo(config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
-	text.PrintInfoValue(gotext.Get("Repository"), "aur")
-	text.PrintInfoValue(gotext.Get("Name"), a.Name)
-	text.PrintInfoValue(gotext.Get("Version"), a.Version)
-	text.PrintInfoValue(gotext.Get("Description"), a.Description)
-	text.PrintInfoValue(gotext.Get("URL"), a.URL)
-	text.PrintInfoValue(gotext.Get("Licenses"), a.License...)
-	text.PrintInfoValue(gotext.Get("Groups"), a.Groups...)
-	text.PrintInfoValue(gotext.Get("Provides"), a.Provides...)
-	text.PrintInfoValue(gotext.Get("Depends On"), a.Depends...)
-	text.PrintInfoValue(gotext.Get("Optional Deps"), a.OptDepends...)
-	text.PrintInfoValue(gotext.Get("Make Deps"), a.MakeDepends...)
-	text.PrintInfoValue(gotext.Get("Check Deps"), a.CheckDepends...)
-	text.PrintInfoValue(gotext.Get("Conflicts With"), a.Conflicts...)
-	text.PrintInfoValue(gotext.Get("Replaces"), a.Replaces...)
-	text.PrintInfoValue(gotext.Get("AUR URL"), config.AURURL+"/packages/"+a.Name)
-	text.PrintInfoValue(gotext.Get("First Submitted"), text.FormatTimeQuery(a.FirstSubmitted))
-	text.PrintInfoValue(gotext.Get("Keywords"), a.Keywords...)
-	text.PrintInfoValue(gotext.Get("Last Modified"), text.FormatTimeQuery(a.LastModified))
-	text.PrintInfoValue(gotext.Get("Maintainer"), a.Maintainer)
-	text.PrintInfoValue(gotext.Get("Popularity"), fmt.Sprintf("%f", a.Popularity))
-	text.PrintInfoValue(gotext.Get("Votes"), fmt.Sprintf("%d", a.NumVotes))
+func printInfo(logger *text.Logger, config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
+	printInfoValue(logger, gotext.Get("Repository"), "aur")
+	printInfoValue(logger, gotext.Get("Name"), a.Name)
+	printInfoValue(logger, gotext.Get("Version"), a.Version)
+	printInfoValue(logger, gotext.Get("Description"), a.Description)
+	printInfoValue(logger, gotext.Get("URL"), a.URL)
+	printInfoValue(logger, gotext.Get("Licenses"), a.License...)
+	printInfoValue(logger, gotext.Get("Groups"), a.Groups...)
+	printInfoValue(logger, gotext.Get("Provides"), a.Provides...)
+	printInfoValue(logger, gotext.Get("Depends On"), a.Depends...)
+	printInfoValue(logger, gotext.Get("Optional Deps"), a.OptDepends...)
+	printInfoValue(logger, gotext.Get("Make Deps"), a.MakeDepends...)
+	printInfoValue(logger, gotext.Get("Check Deps"), a.CheckDepends...)
+	printInfoValue(logger, gotext.Get("Conflicts With"), a.Conflicts...)
+	printInfoValue(logger, gotext.Get("Replaces"), a.Replaces...)
+	printInfoValue(logger, gotext.Get("AUR URL"), config.AURURL+"/packages/"+a.Name)
+	printInfoValue(logger, gotext.Get("First Submitted"), text.FormatTimeQuery(a.FirstSubmitted))
+	printInfoValue(logger, gotext.Get("Keywords"), a.Keywords...)
+	printInfoValue(logger, gotext.Get("Last Modified"), text.FormatTimeQuery(a.LastModified))
+	printInfoValue(logger, gotext.Get("Maintainer"), a.Maintainer)
+	printInfoValue(logger, gotext.Get("Popularity"), fmt.Sprintf("%f", a.Popularity))
+	printInfoValue(logger, gotext.Get("Votes"), fmt.Sprintf("%d", a.NumVotes))
 
 	if a.OutOfDate != 0 {
-		text.PrintInfoValue(gotext.Get("Out-of-date"), text.FormatTimeQuery(a.OutOfDate))
+		printInfoValue(logger, gotext.Get("Out-of-date"), text.FormatTimeQuery(a.OutOfDate))
 	} else {
-		text.PrintInfoValue(gotext.Get("Out-of-date"), "No")
+		printInfoValue(logger, gotext.Get("Out-of-date"), "No")
 	}
 
 	if extendedInfo {
-		text.PrintInfoValue("ID", fmt.Sprintf("%d", a.ID))
-		text.PrintInfoValue(gotext.Get("Package Base ID"), fmt.Sprintf("%d", a.PackageBaseID))
-		text.PrintInfoValue(gotext.Get("Package Base"), a.PackageBase)
-		text.PrintInfoValue(gotext.Get("Snapshot URL"), config.AURURL+a.URLPath)
+		printInfoValue(logger, "ID", fmt.Sprintf("%d", a.ID))
+		printInfoValue(logger, gotext.Get("Package Base ID"), fmt.Sprintf("%d", a.PackageBaseID))
+		printInfoValue(logger, gotext.Get("Package Base"), a.PackageBase)
+		printInfoValue(logger, gotext.Get("Snapshot URL"), config.AURURL+a.URLPath)
 	}
 
 	fmt.Println()
@@ -191,4 +195,73 @@ func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.
 	}
 
 	return nil
+}
+
+func printInfoValue(logger *text.Logger, key string, values ...string) {
+	const (
+		keyLength  = 32
+		delimCount = 2
+	)
+
+	specialWordsCount := 0
+
+	for _, runeValue := range key {
+		// CJK handling: the character 'ー' is Katakana
+		// but if use unicode.Katakana, it will return false
+		if unicode.IsOneOf([]*unicode.RangeTable{
+			unicode.Han,
+			unicode.Hiragana,
+			unicode.Katakana,
+			unicode.Hangul,
+		}, runeValue) || runeValue == 'ー' {
+			specialWordsCount++
+		}
+	}
+
+	keyTextCount := specialWordsCount - keyLength + delimCount
+	str := fmt.Sprintf(text.Bold("%-*s: "), keyTextCount, key)
+
+	if len(values) == 0 || (len(values) == 1 && values[0] == "") {
+		logger.Printf("%s%s\n", str, gotext.Get("None"))
+		return
+	}
+
+	maxCols := getColumnCount()
+	cols := keyLength + len(values[0])
+	str += values[0]
+
+	for _, value := range values[1:] {
+		if maxCols > keyLength && cols+len(value)+delimCount >= maxCols {
+			cols = keyLength
+			str += "\n" + strings.Repeat(" ", keyLength)
+		} else if cols != keyLength {
+			str += strings.Repeat(" ", delimCount)
+			cols += delimCount
+		}
+
+		str += value
+		cols += len(value)
+	}
+
+	logger.Println(str)
+}
+
+var cachedColumnCount = -1
+
+func getColumnCount() int {
+	if cachedColumnCount > 0 {
+		return cachedColumnCount
+	}
+
+	if count, err := strconv.Atoi(os.Getenv("COLUMNS")); err == nil {
+		cachedColumnCount = count
+		return cachedColumnCount
+	}
+
+	if ws, err := unix.IoctlGetWinsize(syscall.Stdout, unix.TIOCGWINSZ); err == nil {
+		cachedColumnCount = int(ws.Col)
+		return cachedColumnCount
+	}
+
+	return 80
 }

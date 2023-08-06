@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -85,10 +83,9 @@ func CheckPgpKeys(ctx context.Context, logger *text.Logger, pkgbuildDirsByBase m
 		return nil, err
 	}
 
-	fmt.Println()
-	fmt.Println(str)
+	logger.Println("\n", str)
 
-	if text.ContinueTask(os.Stdin, gotext.Get("Import?"), true, noConfirm) {
+	if logger.ContinueTask(gotext.Get("Import?"), true, noConfirm) {
 		return problematic.toSlice(), importKeys(ctx, logger, cmdBuilder, problematic.toSlice())
 	}
 

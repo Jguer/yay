@@ -60,7 +60,7 @@ func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) 
 		for {
 			log.Infoln(gotext.Get("Edit PKGBUILD with?"))
 
-			editorInput, err := text.GetInput(os.Stdin, "", noConfirm)
+			editorInput, err := log.GetInput("", noConfirm)
 			if err != nil {
 				log.Errorln(err)
 				continue
@@ -140,7 +140,7 @@ func EditFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 
 	run.Logger.Println()
 
-	if !text.ContinueTask(os.Stdin, gotext.Get("Proceed with install?"), true, false) {
+	if !run.Logger.ContinueTask(gotext.Get("Proceed with install?"), true, false) {
 		return settings.ErrUserAbort{}
 	}
 

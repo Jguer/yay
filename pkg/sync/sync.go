@@ -2,8 +2,6 @@ package sync
 
 import (
 	"context"
-	"fmt"
-	"os"
 
 	"github.com/Jguer/yay/v12/pkg/completion"
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -126,12 +124,12 @@ func confirmIncompatible(logger *text.Logger, incompatible []string) error {
 		logger.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
 
 		for _, pkg := range incompatible {
-			fmt.Print("  " + text.Cyan(pkg))
+			logger.Print("  " + text.Cyan(pkg))
 		}
 
-		fmt.Println()
+		logger.Println()
 
-		if !text.ContinueTask(os.Stdin, gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
+		if !logger.ContinueTask(gotext.Get("Try to build them anyway?"), true, settings.NoConfirm) {
 			return &settings.ErrUserAbort{}
 		}
 	}
