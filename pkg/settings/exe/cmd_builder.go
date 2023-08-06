@@ -258,7 +258,7 @@ func (c *CmdBuilder) waitLock(dbPath string) {
 		time.Sleep(3 * time.Second)
 
 		if _, err := os.Stat(lockDBPath); err != nil {
-			fmt.Println()
+			c.Log.Println()
 
 			return
 		}

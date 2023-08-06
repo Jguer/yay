@@ -26,8 +26,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
-func usage() {
-	fmt.Println(`Usage:
+func usage(logger *text.Logger) {
+	logger.Println(`Usage:
     yay
     yay <operation> [...]
     yay <package(s)>
@@ -160,8 +160,7 @@ func handleCmd(ctx context.Context, run *runtime.Runtime,
 
 	switch cmdArgs.Op {
 	case "V", "version":
-		handleVersion()
-
+		handleVersion(run.Logger)
 		return nil
 	case "D", "database":
 		return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
@@ -245,7 +244,7 @@ func handleQuery(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argu
 }
 
 func handleHelp(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
-	usage()
+	usage(run.Logger)
 	switch cmdArgs.Op {
 	case "Y", "yay", "G", "getpkgbuild", "P", "show", "W", "web", "B", "build":
 		return nil
@@ -256,26 +255,27 @@ func handleHelp(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argum
 		cmdArgs, run.Cfg.Mode, settings.NoConfirm))
 }
 
-func handleVersion() {
-	fmt.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
+func handleVersion(logger *text.Logger) {
+	logger.Printf("yay v%s - libalpm v%s\n", yayVersion, alpm.Version())
 }
 
 func handlePrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {
 	switch {
 	case cmdArgs.ExistsArg("d", "defaultconfig"):
 		tmpConfig := settings.DefaultConfig(yayVersion)
-		fmt.Printf("%v", tmpConfig)
+		run.Logger.Printf("%v", tmpConfig)
 
 		return nil
 	case cmdArgs.ExistsArg("g", "currentconfig"):
-		fmt.Printf("%v", run.Cfg)
+		run.Logger.Printf("%v", run.Cfg)
 
 		return nil
 	case cmdArgs.ExistsArg("w", "news"):
 		double := cmdArgs.ExistsDouble("w", "news")
 		quiet := cmdArgs.ExistsArg("q", "quiet")
 
-		return news.PrintNewsFeed(ctx, run.HTTPClient, dbExecutor.LastBuildTime(), run.Cfg.BottomUp, double, quiet)
+		return news.PrintNewsFeed(ctx, run.HTTPClient, run.Logger,
+			dbExecutor.LastBuildTime(), run.Cfg.BottomUp, double, quiet)
 	case cmdArgs.ExistsArg("c", "complete"):
 		return completion.Show(ctx, run.HTTPClient, dbExecutor,
 			run.Cfg.AURURL, run.Cfg.CompletionPath, run.Cfg.CompletionInterval, cmdArgs.ExistsDouble("c", "complete"))
@@ -307,10 +307,10 @@ func handleYay(ctx context.Context, run *runtime.Runtime,
 func handleWeb(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
 	switch {
 	case cmdArgs.ExistsArg("v", "vote"):
-		return handlePackageVote(ctx, cmdArgs.Targets, run.AURClient,
+		return handlePackageVote(ctx, cmdArgs.Targets, run.AURClient, run.Logger,
 			run.VoteClient, true)
 	case cmdArgs.ExistsArg("u", "unvote"):
-		return handlePackageVote(ctx, cmdArgs.Targets, run.AURClient,
+		return handlePackageVote(ctx, cmdArgs.Targets, run.AURClient, run.Logger,
 			run.VoteClient, false)
 	}
 
@@ -416,7 +416,7 @@ func displayNumberMenu(ctx context.Context, run *runtime.Runtime, pkgS []string,
 	cmdArgs.Targets = targets
 
 	if len(cmdArgs.Targets) == 0 {
-		fmt.Println(gotext.Get(" there is nothing to do"))
+		run.Logger.Println(gotext.Get(" there is nothing to do"))
 		return nil
 	}
 
@@ -454,15 +454,15 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 		for scanner.Scan() {
 			name := scanner.Text()
 			if cmdArgs.ExistsArg("q", "quiet") {
-				fmt.Println(name)
+				run.Logger.Println(name)
 			} else {
-				fmt.Printf("%s %s %s", text.Magenta("aur"), text.Bold(name), text.Bold(text.Green(gotext.Get("unknown-version"))))
+				run.Logger.Printf("%s %s %s", text.Magenta("aur"), text.Bold(name), text.Bold(text.Green(gotext.Get("unknown-version"))))
 
 				if dbExecutor.LocalPackage(name) != nil {
-					fmt.Print(text.Bold(text.Blue(gotext.Get(" [Installed]"))))
+					run.Logger.Print(text.Bold(text.Blue(gotext.Get(" [Installed]"))))
 				}
 
-				fmt.Println()
+				run.Logger.Println()
 			}
 		}
 	}

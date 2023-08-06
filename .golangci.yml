@@ -47,6 +47,7 @@ linters:
   # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
   disable-all: true
   enable:
+    - forbidigo
     - bodyclose
     - dogsled
     - dupl
@@ -82,6 +83,10 @@ linters:
 run:
   go: "1.18"
   timeout: "10m"
+  forbidigo:
+    forbid:
+      - p: ^fmt\.Print.*$
+        msg: Do not commit print statements.
 
 issues:
   exclude-rules:

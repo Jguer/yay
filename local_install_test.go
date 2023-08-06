@@ -657,7 +657,6 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 	wantCapture := []string{}
 
 	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
-		fmt.Println(cmd.Args)
 		if cmd.Args[1] == "--printsrcinfo" {
 			return string(srcinfo), "", nil
 		}

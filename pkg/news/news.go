@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/xml"
-	"fmt"
 	"html"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -23,13 +21,13 @@ type item struct {
 	Creator     string `xml:"dc:creator"`
 }
 
-func (item *item) print(buildTime time.Time, all, quiet bool) {
+func (item *item) printNews(logger *text.Logger, buildTime time.Time, all, quiet bool) {
 	var fd string
 
 	date, err := time.Parse(time.RFC1123Z, item.PubDate)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		logger.Errorln(err)
 	} else {
 		fd = text.FormatTime(int(date.Unix()))
 		if !all && !buildTime.IsZero() {
@@ -39,11 +37,11 @@ func (item *item) print(buildTime time.Time, all, quiet bool) {
 		}
 	}
 
-	fmt.Println(text.Bold(text.Magenta(fd)), text.Bold(strings.TrimSpace(item.Title)))
+	logger.Println(text.Bold(text.Magenta(fd)), text.Bold(strings.TrimSpace(item.Title)))
 
 	if !quiet {
 		desc := strings.TrimSpace(parseNews(item.Description))
-		fmt.Println(desc)
+		logger.Println(desc)
 	}
 }
 
@@ -60,7 +58,9 @@ type rss struct {
 	Channel channel `xml:"channel"`
 }
 
-func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Time, bottomUp, all, quiet bool) error {
+func PrintNewsFeed(ctx context.Context, client *http.Client, logger *text.Logger,
+	cutOffDate time.Time, bottomUp, all, quiet bool,
+) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://archlinux.org/feeds/news", http.NoBody)
 	if err != nil {
 		return err
@@ -87,11 +87,11 @@ func PrintNewsFeed(ctx context.Context, client *http.Client, cutOffDate time.Tim
 
 	if bottomUp {
 		for i := len(rssGot.Channel.Items) - 1; i >= 0; i-- {
-			rssGot.Channel.Items[i].print(cutOffDate, all, quiet)
+			rssGot.Channel.Items[i].printNews(logger, cutOffDate, all, quiet)
 		}
 	} else {
 		for i := 0; i < len(rssGot.Channel.Items); i++ {
-			rssGot.Channel.Items[i].print(cutOffDate, all, quiet)
+			rssGot.Channel.Items[i].printNews(logger, cutOffDate, all, quiet)
 		}
 	}
 

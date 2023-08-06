@@ -8,12 +8,15 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/bradleyjkemp/cupaloy"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
+
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 const lastNews = `
@@ -135,17 +138,16 @@ func TestPrintNewsFeed(t *testing.T) {
 
 			defer gock.Off()
 
-			rescueStdout := os.Stdout
 			r, w, _ := os.Pipe()
-			os.Stdout = w
+			logger := text.NewLogger(w, w, strings.NewReader(""), false, "logger")
 
-			err := PrintNewsFeed(context.Background(), &http.Client{}, tt.args.cutOffDate, tt.args.bottomUp, tt.args.all, tt.args.quiet)
+			err := PrintNewsFeed(context.Background(), &http.Client{}, logger,
+				tt.args.cutOffDate, tt.args.bottomUp, tt.args.all, tt.args.quiet)
 			assert.NoError(t, err)
 
 			w.Close()
 			out, _ := io.ReadAll(r)
 			cupaloy.SnapshotT(t, out)
-			os.Stdout = rescueStdout
 		})
 	}
 }
@@ -164,15 +166,14 @@ func TestPrintNewsFeedSameDay(t *testing.T) {
 
 	defer gock.Off()
 
-	rescueStdout := os.Stdout
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	logger := text.NewLogger(w, w, strings.NewReader(""), false, "logger")
 
-	err := PrintNewsFeed(context.Background(), &http.Client{}, lastNewsTime, true, false, false)
+	err := PrintNewsFeed(context.Background(), &http.Client{}, logger,
+		lastNewsTime, true, false, false)
 	assert.NoError(t, err)
 
 	w.Close()
 	out, _ := io.ReadAll(r)
 	cupaloy.SnapshotT(t, out)
-	os.Stdout = rescueStdout
 }

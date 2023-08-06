@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -433,7 +432,6 @@ func TestInfoStore_Update(t *testing.T) {
 			cupaloy.SnapshotT(t, marshalledinfo)
 
 			v.Load()
-			fmt.Println(v.OriginsByPackage)
 			assert.Len(t, tt.fields.OriginsByPackage, 1)
 
 			marshalledinfo, err = json.MarshalIndent(tt.fields.OriginsByPackage, "", "\t")

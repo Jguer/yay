@@ -62,11 +62,11 @@ func printInfo(logger *text.Logger, config *settings.Configuration, a *aur.Pkg, 
 		printInfoValue(logger, gotext.Get("Snapshot URL"), config.AURURL+a.URLPath)
 	}
 
-	fmt.Println()
+	logger.Println()
 }
 
 // BiggestPackages prints the name of the ten biggest packages in the system.
-func biggestPackages(dbExecutor db.Executor) {
+func biggestPackages(logger *text.Logger, dbExecutor db.Executor) {
 	pkgS := dbExecutor.BiggestPackages()
 
 	if len(pkgS) < 10 {
@@ -74,7 +74,7 @@ func biggestPackages(dbExecutor db.Executor) {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Printf("%s: %s\n", text.Bold(pkgS[i].Name()), text.Cyan(text.Human(pkgS[i].ISize())))
+		logger.Printf("%s: %s\n", text.Bold(pkgS[i].Name()), text.Cyan(text.Human(pkgS[i].ISize())))
 	}
 }
 
@@ -98,7 +98,7 @@ func localStatistics(ctx context.Context, run *runtime.Runtime, dbExecutor db.Ex
 	run.Logger.Infoln(gotext.Get("Size of yay cache %s: %s", run.Cfg.BuildDir, text.Cyan(text.Human(info.yayCache))))
 	run.Logger.Println(text.Bold(text.Cyan("===========================================")))
 	run.Logger.Infoln(gotext.Get("Ten biggest packages:"))
-	biggestPackages(dbExecutor)
+	biggestPackages(run.Logger, dbExecutor)
 	run.Logger.Println(text.Bold(text.Cyan("===========================================")))
 
 	aurData, err := run.AURClient.Get(ctx, &aur.Query{
@@ -168,9 +168,9 @@ func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.
 			}
 
 			if quietMode {
-				fmt.Printf("%s\n", pkgName)
+				run.Logger.Printf("%s\n", pkgName)
 			} else {
-				fmt.Printf("%s %s -> %s\n", text.Bold(pkgName), text.Bold(text.Green(ii.LocalVersion)),
+				run.Logger.Printf("%s %s -> %s\n", text.Bold(pkgName), text.Bold(text.Green(ii.LocalVersion)),
 					text.Bold(text.Green(ii.Version)))
 			}
 
