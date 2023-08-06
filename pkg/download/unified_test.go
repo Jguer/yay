@@ -5,6 +5,7 @@ package download
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -21,6 +22,10 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
+
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
 
 // GIVEN 2 aur packages and 1 in repo
 // GIVEN package in repo is already present
@@ -56,7 +61,7 @@ func TestPKGBUILDReposDefinedDBPull(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, newTestLogger(),
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
@@ -90,7 +95,7 @@ func TestPKGBUILDReposDefinedDBClone(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, newTestLogger(),
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
@@ -124,7 +129,7 @@ func TestPKGBUILDReposClone(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, newTestLogger(),
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
@@ -158,7 +163,7 @@ func TestPKGBUILDReposNotFound(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, newTestLogger(),
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
@@ -192,7 +197,7 @@ func TestPKGBUILDReposRepoMode(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, newTestLogger(),
 		targets, parser.ModeRepo, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
@@ -230,7 +235,7 @@ func TestPKGBUILDFull(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 
-	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{},
+	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{}, newTestLogger(),
 		targets, "https://aur.archlinux.org", parser.ModeAny)
 
 	assert.NoError(t, err)
@@ -268,7 +273,7 @@ func TestPKGBUILDReposMissingAUR(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, newTestLogger(),
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)

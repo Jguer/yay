@@ -130,7 +130,7 @@ func (a *abstractResults) Less(i, j int) bool {
 func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string) {
 	var aurErr error
 
-	pkgS = RemoveInvalidTargets(pkgS, s.targetMode)
+	pkgS = RemoveInvalidTargets(s.logger, pkgS, s.targetMode)
 
 	metric := &metrics.Hamming{
 		CaseSensitive: false,

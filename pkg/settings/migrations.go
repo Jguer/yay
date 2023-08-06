@@ -45,7 +45,7 @@ func DefaultMigrations() []configMigration {
 	}
 }
 
-func (c *Configuration) RunMigrations(migrations []configMigration,
+func (c *Configuration) RunMigrations(logger *text.Logger, migrations []configMigration,
 	configPath, newVersion string,
 ) error {
 	saveConfig := false
@@ -53,7 +53,7 @@ func (c *Configuration) RunMigrations(migrations []configMigration,
 	for _, migration := range migrations {
 		if db.VerCmp(migration.TargetVersion(), c.Version) > 0 {
 			if migration.Do(c) {
-				text.Infoln("Config migration executed (",
+				logger.Infoln("Config migration executed (",
 					migration.TargetVersion(), "):", migration)
 
 				saveConfig = true

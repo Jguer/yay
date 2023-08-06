@@ -2,7 +2,6 @@ package menus
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/leonelquinteros/gotext"
@@ -14,7 +13,9 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 )
 
-func pkgbuildNumberMenu(w io.Writer, pkgbuildDirs map[string]string, bases []string, installed mapset.Set[string]) {
+func pkgbuildNumberMenu(logger *text.Logger, pkgbuildDirs map[string]string,
+	bases []string, installed mapset.Set[string],
+) {
 	toPrint := ""
 
 	for n, pkgBase := range bases {
@@ -34,20 +35,20 @@ func pkgbuildNumberMenu(w io.Writer, pkgbuildDirs map[string]string, bases []str
 		toPrint += "\n"
 	}
 
-	fmt.Fprint(w, toPrint)
+	logger.Print(toPrint)
 }
 
-func selectionMenu(w io.Writer, pkgbuildDirs map[string]string, bases []string, installed mapset.Set[string],
+func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []string, installed mapset.Set[string],
 	message string, noConfirm bool, defaultAnswer string, skipFunc func(string) bool,
 ) ([]string, error) {
 	selected := make([]string, 0)
 
-	pkgbuildNumberMenu(w, pkgbuildDirs, bases, installed)
+	pkgbuildNumberMenu(logger, pkgbuildDirs, bases, installed)
 
-	text.Infoln(message)
-	text.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
+	logger.Infoln(message)
+	logger.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 
-	selectInput, err := text.GetInput(os.Stdin, defaultAnswer, noConfirm)
+	selectInput, err := logger.GetInput(defaultAnswer, noConfirm)
 	if err != nil {
 		return nil, err
 	}

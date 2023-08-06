@@ -42,7 +42,7 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 		missing = false
 	)
 
-	pkgS = query.RemoveInvalidTargets(pkgS, run.Cfg.Mode)
+	pkgS = query.RemoveInvalidTargets(run.Logger, pkgS, run.Cfg.Mode)
 	aurS, repoS := packageSlices(pkgS, run.Cfg, dbExecutor)
 
 	if len(aurS) != 0 {

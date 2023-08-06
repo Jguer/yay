@@ -23,7 +23,7 @@ const (
 	gitDiffRefName = "AUR_SEEN"
 )
 
-func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder,
+func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *text.Logger,
 	pkgbuildDirs map[string]string, bases []string,
 ) error {
 	var errMulti multierror.MultiError
@@ -47,7 +47,7 @@ func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 			}
 
 			if !hasDiff {
-				text.Warnln(gotext.Get("%s: No changes -- skipping", text.Cyan(pkg)))
+				logger.Warnln(gotext.Get("%s: No changes -- skipping", text.Cyan(pkg)))
 
 				continue
 			}
@@ -158,13 +158,13 @@ func DiffFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 		bases = append(bases, base)
 	}
 
-	toDiff, errMenu := selectionMenu(w, pkgbuildDirsByBase, bases, installed, gotext.Get("Diffs to show?"),
+	toDiff, errMenu := selectionMenu(run.Logger, pkgbuildDirsByBase, bases, installed, gotext.Get("Diffs to show?"),
 		settings.NoConfirm, run.Cfg.AnswerDiff, nil)
 	if errMenu != nil || len(toDiff) == 0 {
 		return errMenu
 	}
 
-	if errD := showPkgbuildDiffs(ctx, run.CmdBuilder, pkgbuildDirsByBase, toDiff); errD != nil {
+	if errD := showPkgbuildDiffs(ctx, run.CmdBuilder, run.Logger, pkgbuildDirsByBase, toDiff); errD != nil {
 		return errD
 	}
 

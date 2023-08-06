@@ -69,7 +69,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		errComp := completion.Update(ctx, run.HTTPClient, o.dbExecutor,
 			o.cfg.AURURL, o.cfg.CompletionPath, o.cfg.CompletionInterval, false)
 		if errComp != nil {
-			text.Warnln(errComp)
+			o.logger.Warnln(errComp)
 		}
 	}()
 
@@ -84,7 +84,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		return errInstall
 	}
 
-	if errIncompatible := confirmIncompatible(incompatible); errIncompatible != nil {
+	if errIncompatible := confirmIncompatible(o.logger, incompatible); errIncompatible != nil {
 		return errIncompatible
 	}
 
@@ -106,7 +106,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 
 	if !cmdArgs.ExistsArg("w", "downloadonly") {
 		if err := srcInfo.UpdateVCSStore(ctx, targets, failedAndIgnored); err != nil {
-			text.Warnln(err)
+			o.logger.Warnln(err)
 		}
 	}
 
@@ -121,9 +121,9 @@ func (o *OperationService) manualConfirmRequired(cmdArgs *parser.Arguments) bool
 	return (!cmdArgs.ExistsArg("u", "sysupgrade") && cmdArgs.Op != "Y") || o.cfg.DoubleConfirm
 }
 
-func confirmIncompatible(incompatible []string) error {
+func confirmIncompatible(logger *text.Logger, incompatible []string) error {
 	if len(incompatible) > 0 {
-		text.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
+		logger.Warnln(gotext.Get("The following packages are not compatible with your architecture:"))
 
 		for _, pkg := range incompatible {
 			fmt.Print("  " + text.Cyan(pkg))

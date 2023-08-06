@@ -23,26 +23,6 @@ var (
 	GlobalLogger      = NewLogger(os.Stdout, os.Stderr, os.Stdin, false, "global")
 )
 
-func OperationInfoln(a ...interface{}) {
-	GlobalLogger.OperationInfoln(a...)
-}
-
-func OperationInfo(a ...interface{}) {
-	GlobalLogger.OperationInfo(a...)
-}
-
-func Infoln(a ...interface{}) {
-	GlobalLogger.Infoln(a...)
-}
-
-func SprintWarn(a ...interface{}) string {
-	return GlobalLogger.SprintWarn(a...)
-}
-
-func Warnln(a ...interface{}) {
-	GlobalLogger.Warnln(a...)
-}
-
 func getColumnCount() int {
 	if cachedColumnCount > 0 {
 		return cachedColumnCount

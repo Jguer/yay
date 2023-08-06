@@ -124,7 +124,7 @@ func formatKeysToImport(logger *text.Logger, keys pgpKeySet) (string, error) {
 		}
 
 		pkglist = strings.TrimRight(pkglist, " ")
-		buffer.WriteString("\n" + text.SprintWarn(gotext.Get("%s, required by: %s", text.Cyan(key), text.Cyan(pkglist))))
+		buffer.WriteString("\n" + logger.SprintWarn(gotext.Get("%s, required by: %s", text.Cyan(key), text.Cyan(pkglist))))
 	}
 
 	return buffer.String(), nil

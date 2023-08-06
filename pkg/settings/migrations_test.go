@@ -5,12 +5,20 @@ package settings
 
 import (
 	"encoding/json"
+	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Jguer/yay/v12/pkg/text"
 )
+
+func newTestLogger() *text.Logger {
+	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+}
 
 func TestMigrationNothingToDo(t *testing.T) {
 	t.Parallel()
@@ -27,7 +35,7 @@ func TestMigrationNothingToDo(t *testing.T) {
 	}
 
 	// Run Migration
-	err = config.RunMigrations(DefaultMigrations(), testFilePath, "20.0.0")
+	err = config.RunMigrations(newTestLogger(), DefaultMigrations(), testFilePath, "20.0.0")
 	require.NoError(t, err)
 
 	// Check file contents if wantSave otherwise check file empty
@@ -128,7 +136,7 @@ func TestProvidesMigration(t *testing.T) {
 			}
 
 			// Run Migration
-			err = tcConfig.RunMigrations(
+			err = tcConfig.RunMigrations(newTestLogger(),
 				[]configMigration{&configProviderMigration{}},
 				testFilePath, tc.newVersion)
 

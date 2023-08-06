@@ -88,7 +88,7 @@ func ContinueTask(input io.Reader, s string, preset, noConfirm bool) bool {
 		postFix = fmt.Sprintf(" [%s/%s] ", y, strings.ToUpper(n))
 	}
 
-	OperationInfo(Bold(s), Bold(postFix))
+	GlobalLogger.OperationInfo(Bold(s), Bold(postFix))
 
 	if _, err := fmt.Fscanln(input, &response); err != nil {
 		return preset

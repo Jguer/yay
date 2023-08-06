@@ -50,7 +50,7 @@ func CleanFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 		bases = append(bases, pkg)
 	}
 
-	toClean, errClean := selectionMenu(w, pkgbuildDirsByBase, bases, installed,
+	toClean, errClean := selectionMenu(run.Logger, pkgbuildDirsByBase, bases, installed,
 		gotext.Get("Packages to cleanBuild?"),
 		settings.NoConfirm, run.Cfg.AnswerClean, skipFunc)
 	if errClean != nil {
@@ -59,16 +59,16 @@ func CleanFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 
 	for i, base := range toClean {
 		dir := pkgbuildDirsByBase[base]
-		text.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
+		run.Logger.OperationInfoln(gotext.Get("Deleting (%d/%d): %s", i+1, len(toClean), text.Cyan(dir)))
 
 		if err := run.CmdBuilder.Show(run.CmdBuilder.BuildGitCmd(ctx, dir, "reset", "--hard", "origin/HEAD")); err != nil {
-			text.Warnln(gotext.Get("Unable to clean:"), dir)
+			run.Logger.Warnln(gotext.Get("Unable to clean:"), dir)
 
 			return err
 		}
 
 		if err := run.CmdBuilder.Show(run.CmdBuilder.BuildGitCmd(ctx, dir, "clean", "-fdx")); err != nil {
-			text.Warnln(gotext.Get("Unable to clean:"), dir)
+			run.Logger.Warnln(gotext.Get("Unable to clean:"), dir)
 
 			return err
 		}

@@ -111,7 +111,7 @@ func ParseSrcinfoFilesByBase(logger *text.Logger, pkgBuildDirs map[string]string
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(dir, ".SRCINFO"))
 		if err != nil {
 			if !errIsFatal {
-				text.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base, err))
+				logger.Warnln(gotext.Get("failed to parse %s -- skipping: %s", base, err))
 				continue
 			}
 

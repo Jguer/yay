@@ -158,7 +158,7 @@ func TestAURPKGBUILDRepos(t *testing.T) {
 			GitFlags: []string{},
 		},
 	}
-	cloned, err := AURPKGBUILDRepos(context.Background(), cmdBuilder, targets, "https://aur.archlinux.org", dir, false)
+	cloned, err := AURPKGBUILDRepos(context.Background(), cmdBuilder, newTestLogger(), targets, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, map[string]bool{"yay": true, "yay-bin": false, "yay-git": true}, cloned)

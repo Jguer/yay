@@ -298,10 +298,10 @@ func (installer *Installer) buildPkg(ctx context.Context,
 	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion) || installer.downloadOnly:
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
 		pkgdests = map[string]string{}
-		text.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
+		installer.log.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
 	case installer.skipAlreadyBuiltPkg(isTarget, pkgdests):
 		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
-		text.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
+		installer.log.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
 	default:
 		args = []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 		if installIncompatible {

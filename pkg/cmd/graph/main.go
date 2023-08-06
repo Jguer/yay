@@ -34,7 +34,7 @@ func handleCmd(logger *text.Logger) error {
 		return err
 	}
 
-	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, text.GlobalLogger)
+	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, logger)
 	if err != nil {
 		return err
 	}
