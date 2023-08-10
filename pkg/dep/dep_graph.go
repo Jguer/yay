@@ -3,7 +3,6 @@ package dep
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"strconv"
 
 	aurc "github.com/Jguer/aur"
@@ -102,7 +101,7 @@ var colorMap = map[Reason]string{
 }
 
 type SourceHandler interface {
-	Graph(ctx context.Context, graph *topo.Graph[string, *InstallInfo], targets []Target) (*topo.Graph[string, *InstallInfo], error)
+	Graph(ctx context.Context, graph *topo.Graph[string, *InstallInfo]) error
 	Test(target Target) bool
 }
 
@@ -126,7 +125,7 @@ func NewGrapher(dbExecutor db.Executor, cfg *settings.Configuration, aurCache au
 	fullGraph, noConfirm, noDeps, noCheckDeps, needed bool,
 	logger *text.Logger,
 ) *Grapher {
-	return &Grapher{
+	grapher := &Grapher{
 		dbExecutor:    dbExecutor,
 		cfg:           cfg,
 		aurClient:     aurCache,
@@ -140,6 +139,34 @@ func NewGrapher(dbExecutor db.Executor, cfg *settings.Configuration, aurCache au
 		logger:        logger,
 		handlers:      make(map[string][]SourceHandler),
 	}
+
+	grapher.RegisterSourceHandler(&AllSyncHandler{
+		log:          logger,
+		db:           dbExecutor,
+		foundTargets: []alpm.IPackage{},
+	}, "")
+	grapher.RegisterSourceHandler(&AllSyncGroupHandler{
+		db:           dbExecutor,
+		foundTargets: []Target{},
+	}, "")
+
+	grapher.RegisterSourceHandler(&SRCINFOHandler{
+		log:          logger,
+		db:           dbExecutor,
+		cmdBuilder:   cmdBuilder,
+		foundTargets: []string{},
+	}, sourceCacheSRCINFO)
+
+	for _, repo := range grapher.dbExecutor.Repos() {
+		grapher.RegisterSourceHandler(&SyncHandler{
+			log:         logger,
+			db:          dbExecutor,
+			foundPkgs:   []alpm.IPackage{},
+			foundGroups: []Target{},
+		}, repo)
+	}
+
+	return grapher
 }
 
 func NewGraph() *topo.Graph[string, *InstallInfo] {
@@ -158,54 +185,33 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	}
 
 	aurTargets := make([]string, 0, len(targets))
-	srcinfoTargets := make([]string, 0)
 
+	sources := mapset.NewThreadUnsafeSetFromMapKeys[string, []SourceHandler](g.handlers)
+
+nextTarget:
 	for _, targetString := range targets {
 		target := ToTarget(targetString)
 
+		for _, handler := range g.handlers[target.DB] {
+			if handler.Test(target) {
+				continue nextTarget
+			}
+		}
+
+		g.logger.Errorln(gotext.Get("No package found for"), " ", target)
+
 		switch target.DB {
-		case "": // unspecified db
-			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
-				GraphSyncPkg(ctx, g.dbExecutor, graph, g.logger, pkg, nil)
-
-				continue
-			}
-
-			groupPackages := g.dbExecutor.PackagesFromGroup(target.Name)
-			if len(groupPackages) > 0 {
-				dbName := groupPackages[0].DB().Name()
-				g.GraphSyncGroup(ctx, graph, target.Name, dbName)
-
-				continue
-			}
-
-			fallthrough
 		case sourceAUR:
 			aurTargets = append(aurTargets, target.Name)
-		case sourceCacheSRCINFO:
-			srcinfoTargets = append(srcinfoTargets, filepath.Join(g.cfg.BuildDir, target.Name))
 		default:
-			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
-			if err != nil {
-				return nil, err
-			}
-			if pkg != nil {
-				GraphSyncPkg(ctx, g.dbExecutor, graph, g.logger, pkg, nil)
+		}
+	}
 
-				continue
+	for source := range sources.Iter() {
+		for _, handler := range g.handlers[source] {
+			if err := handler.Graph(ctx, graph); err != nil {
+				g.logger.Errorln(gotext.Get("Error graphing targets"), ":", err)
 			}
-
-			groupPackages, err := g.dbExecutor.PackagesFromGroupAndDB(target.Name, target.DB)
-			if err != nil {
-				return nil, err
-			}
-			if len(groupPackages) > 0 {
-				g.GraphSyncGroup(ctx, graph, target.Name, target.DB)
-
-				continue
-			}
-
-			g.logger.Errorln(gotext.Get("No package found for"), " ", target)
 		}
 	}
 
@@ -213,11 +219,6 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	graph, errA = g.GraphFromAUR(ctx, graph, aurTargets)
 	if errA != nil {
 		return nil, errA
-	}
-
-	graph, errS := g.GraphFromSrcInfoDirs(ctx, graph, srcinfoTargets)
-	if errS != nil {
-		return nil, errS
 	}
 
 	return graph, nil
@@ -255,10 +256,10 @@ func (g *Grapher) pickSrcInfoPkgs(pkgs []*aurc.Pkg) ([]*aurc.Pkg, error) {
 	return final, nil
 }
 
-func (g *Grapher) addAurPkgProvides(pkg *aurc.Pkg, graph *topo.Graph[string, *InstallInfo]) {
+func addAurPkgProvides(logger *text.Logger, pkg *aurc.Pkg, graph *topo.Graph[string, *InstallInfo]) {
 	for i := range pkg.Provides {
 		depName, mod, version := splitDep(pkg.Provides[i])
-		g.logger.Debugln(pkg.String() + " provides: " + depName)
+		logger.Debugln(pkg.String() + " provides: " + depName)
 		graph.Provides(depName, &alpm.Depend{
 			Name:    depName,
 			Version: version,
@@ -285,73 +286,6 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 	if !g.noCheckDeps && !g.noDeps && len(pkg.CheckDepends) > 0 {
 		g.addNodes(ctx, graph, pkg.Name, pkg.CheckDepends, CheckDep)
 	}
-}
-
-func GraphSyncPkg(ctx context.Context, dbExecutor db.Executor,
-	graph *topo.Graph[string, *InstallInfo], logger *text.Logger,
-	pkg alpm.IPackage, upgradeInfo *db.SyncUpgrade,
-) *topo.Graph[string, *InstallInfo] {
-	if graph == nil {
-		graph = NewGraph()
-	}
-
-	graph.AddNode(pkg.Name())
-	_ = pkg.Provides().ForEach(func(p *alpm.Depend) error {
-		logger.Debugln(pkg.Name() + " provides: " + p.String())
-		graph.Provides(p.Name, p, pkg.Name())
-		return nil
-	})
-
-	dbName := pkg.DB().Name()
-	info := &InstallInfo{
-		Source:     Sync,
-		Reason:     Explicit,
-		Version:    pkg.Version(),
-		SyncDBName: &dbName,
-	}
-
-	if upgradeInfo == nil {
-		if localPkg := dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
-			info.Reason = Reason(localPkg.Reason())
-		}
-	} else {
-		info.Upgrade = true
-		info.Reason = Reason(upgradeInfo.Reason)
-		info.LocalVersion = upgradeInfo.LocalVersion
-	}
-
-	validateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
-		Color:      colorMap[info.Reason],
-		Background: bgColorMap[info.Source],
-		Value:      info,
-	})
-
-	return graph
-}
-
-func (g *Grapher) GraphSyncGroup(ctx context.Context,
-	graph *topo.Graph[string, *InstallInfo],
-	groupName, dbName string,
-) *topo.Graph[string, *InstallInfo] {
-	if graph == nil {
-		graph = NewGraph()
-	}
-
-	graph.AddNode(groupName)
-
-	validateAndSetNodeInfo(graph, groupName, &topo.NodeInfo[*InstallInfo]{
-		Color:      colorMap[Explicit],
-		Background: bgColorMap[Sync],
-		Value: &InstallInfo{
-			Source:     Sync,
-			Reason:     Explicit,
-			Version:    "",
-			SyncDBName: &dbName,
-			IsGroup:    true,
-		},
-	})
-
-	return graph
 }
 
 func (g *Grapher) GraphAURTarget(ctx context.Context,

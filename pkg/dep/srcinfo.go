@@ -11,13 +11,41 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 var ErrNoBuildFiles = errors.New(gotext.Get("cannot find PKGBUILD and .SRCINFO in directory"))
 
-func (g *Grapher) GraphFromSrcInfoDirs(ctx context.Context, graph *topo.Graph[string, *InstallInfo],
+var _ SourceHandler = &SRCINFOHandler{}
+
+type SRCINFOHandler struct {
+	cfg          *settings.Configuration
+	log          *text.Logger
+	db           db.Executor
+	cmdBuilder   exe.ICmdBuilder
+	foundTargets []string
+}
+
+func (g *SRCINFOHandler) Test(target Target) bool {
+	path := filepath.Join(g.cfg.BuildDir, target.Name)
+	if _, err := os.Stat(path); err == nil {
+		g.foundTargets = append(g.foundTargets, path)
+		return true
+	}
+
+	return false
+}
+
+func (g *SRCINFOHandler) Graph(ctx context.Context, graph *topo.Graph[string, *InstallInfo]) error {
+	_, err := g.GraphFromSrcInfoDirs(ctx, graph, g.foundTargets)
+	return err
+}
+
+func (g *SRCINFOHandler) GraphFromSrcInfoDirs(ctx context.Context, graph *topo.Graph[string, *InstallInfo],
 	srcInfosDirs []string,
 ) (*topo.Graph[string, *InstallInfo], error) {
 	if graph == nil {
@@ -42,7 +70,7 @@ func (g *Grapher) GraphFromSrcInfoDirs(ctx context.Context, graph *topo.Graph[st
 	for pkgBuildDir, pkgbuild := range srcInfos {
 		pkgBuildDir := pkgBuildDir
 
-		aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
+		aurPkgs, err := makeAURPKGFromSrcinfo(g.db, pkgbuild)
 		if err != nil {
 			return nil, err
 		}
@@ -59,13 +87,13 @@ func (g *Grapher) GraphFromSrcInfoDirs(ctx context.Context, graph *topo.Graph[st
 			pkg := pkg
 
 			reason := Explicit
-			if pkg := g.dbExecutor.LocalPackage(pkg.Name); pkg != nil {
+			if pkg := g.db.LocalPackage(pkg.Name); pkg != nil {
 				reason = Reason(pkg.Reason())
 			}
 
 			graph.AddNode(pkg.Name)
 
-			g.addAurPkgProvides(pkg, graph)
+			addAurPkgProvides(g.log, pkg, graph)
 
 			validateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 				Color:      colorMap[reason],
