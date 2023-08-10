@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v12/pkg/db/mock"
+	"github.com/Jguer/yay/v12/pkg/dep"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
@@ -743,7 +744,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 	}
 
 	err = handleCmd(context.Background(), config, cmdArgs, db)
-	require.ErrorIs(t, err, ErrNoBuildFiles)
+	require.ErrorIs(t, err, dep.ErrNoBuildFiles)
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))

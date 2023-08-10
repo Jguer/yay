@@ -173,7 +173,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			}
 
 			upgradeInfo := up
-			graph = u.grapher.GraphSyncPkg(ctx, graph, up.Package, &upgradeInfo)
+			graph = dep.GraphSyncPkg(ctx, u.dbExecutor, graph, u.log, up.Package, &upgradeInfo)
 		}
 
 		errs.Add(err)

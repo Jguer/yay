@@ -15,7 +15,13 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	aur "github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/text"
+)
+
+const (
+	sourceAUR          = "aur"
+	sourceCacheSRCINFO = "srcinfo"
 )
 
 type InstallInfo struct {
@@ -93,26 +99,34 @@ var colorMap = map[Reason]string{
 	CheckDep: "forestgreen",
 }
 
+type SourceHandler interface {
+	Graph(ctx context.Context, graph *topo.Graph[string, *InstallInfo], targets []Target) (*topo.Graph[string, *InstallInfo], error)
+	Test(target Target) bool
+}
+
 type Grapher struct {
 	logger        *text.Logger
 	providerCache map[string][]aur.Pkg
 
 	dbExecutor  db.Executor
 	aurClient   aurc.QueryClient
+	cmdBuilder  exe.ICmdBuilder
 	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
 	noConfirm   bool // If true, the graph will not prompt for confirmation
 	noDeps      bool // If true, the graph will not include dependencies
 	noCheckDeps bool // If true, the graph will not include check dependencies
 	needed      bool // If true, the graph will only include packages that are not installed
+	handlers    map[string][]SourceHandler
 }
 
-func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
+func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient, cmdBuilder exe.ICmdBuilder,
 	fullGraph, noConfirm, noDeps, noCheckDeps, needed bool,
 	logger *text.Logger,
 ) *Grapher {
 	return &Grapher{
 		dbExecutor:    dbExecutor,
 		aurClient:     aurCache,
+		cmdBuilder:    cmdBuilder,
 		fullGraph:     fullGraph,
 		noConfirm:     noConfirm,
 		noDeps:        noDeps,
@@ -120,11 +134,16 @@ func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 		needed:        needed,
 		providerCache: make(map[string][]aurc.Pkg, 5),
 		logger:        logger,
+		handlers:      make(map[string][]SourceHandler),
 	}
 }
 
 func NewGraph() *topo.Graph[string, *InstallInfo] {
 	return topo.New[string, *InstallInfo]()
+}
+
+func (g *Grapher) RegisterSourceHandler(handler SourceHandler, source string) {
+	g.handlers[source] = append(g.handlers[source], handler)
 }
 
 func (g *Grapher) GraphFromTargets(ctx context.Context,
@@ -135,6 +154,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	}
 
 	aurTargets := make([]string, 0, len(targets))
+	srcinfoTargets := make([]string, 0)
 
 	for _, targetString := range targets {
 		target := ToTarget(targetString)
@@ -142,7 +162,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		switch target.DB {
 		case "": // unspecified db
 			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
-				g.GraphSyncPkg(ctx, graph, pkg, nil)
+				GraphSyncPkg(ctx, g.dbExecutor, graph, g.logger, pkg, nil)
 
 				continue
 			}
@@ -156,15 +176,17 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			}
 
 			fallthrough
-		case "aur":
+		case sourceAUR:
 			aurTargets = append(aurTargets, target.Name)
+		case sourceCacheSRCINFO:
+			srcinfoTargets = append(srcinfoTargets, target.Name)
 		default:
 			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
 			if err != nil {
 				return nil, err
 			}
 			if pkg != nil {
-				g.GraphSyncPkg(ctx, graph, pkg, nil)
+				GraphSyncPkg(ctx, g.dbExecutor, graph, g.logger, pkg, nil)
 
 				continue
 			}
@@ -187,6 +209,11 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	graph, errA = g.GraphFromAUR(ctx, graph, aurTargets)
 	if errA != nil {
 		return nil, errA
+	}
+
+	graph, errS := g.GraphFromSrcInfoDirs(ctx, graph, srcinfoTargets)
+	if errS != nil {
+		return nil, errS
 	}
 
 	return graph, nil
@@ -236,63 +263,6 @@ func (g *Grapher) addAurPkgProvides(pkg *aurc.Pkg, graph *topo.Graph[string, *In
 	}
 }
 
-func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[string, *InstallInfo],
-	srcInfos map[string]*gosrc.Srcinfo,
-) (*topo.Graph[string, *InstallInfo], error) {
-	if graph == nil {
-		graph = NewGraph()
-	}
-
-	aurPkgsAdded := []*aurc.Pkg{}
-	for pkgBuildDir, pkgbuild := range srcInfos {
-		pkgBuildDir := pkgBuildDir
-
-		aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(aurPkgs) > 1 {
-			var errPick error
-			aurPkgs, errPick = g.pickSrcInfoPkgs(aurPkgs)
-			if errPick != nil {
-				return nil, errPick
-			}
-		}
-
-		for _, pkg := range aurPkgs {
-			pkg := pkg
-
-			reason := Explicit
-			if pkg := g.dbExecutor.LocalPackage(pkg.Name); pkg != nil {
-				reason = Reason(pkg.Reason())
-			}
-
-			graph.AddNode(pkg.Name)
-
-			g.addAurPkgProvides(pkg, graph)
-
-			g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
-				Color:      colorMap[reason],
-				Background: bgColorMap[AUR],
-				Value: &InstallInfo{
-					Source:      SrcInfo,
-					Reason:      reason,
-					SrcinfoPath: &pkgBuildDir,
-					AURBase:     &pkg.PackageBase,
-					Version:     pkg.Version,
-				},
-			})
-		}
-
-		aurPkgsAdded = append(aurPkgsAdded, aurPkgs...)
-	}
-
-	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
-
-	return graph, nil
-}
-
 func (g *Grapher) AddDepsForPkgs(ctx context.Context, pkgs []*aur.Pkg, graph *topo.Graph[string, *InstallInfo]) {
 	for _, pkg := range pkgs {
 		g.addDepNodes(ctx, pkg, graph)
@@ -313,8 +283,8 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 	}
 }
 
-func (g *Grapher) GraphSyncPkg(ctx context.Context,
-	graph *topo.Graph[string, *InstallInfo],
+func GraphSyncPkg(ctx context.Context, dbExecutor db.Executor,
+	graph *topo.Graph[string, *InstallInfo], logger *text.Logger,
 	pkg alpm.IPackage, upgradeInfo *db.SyncUpgrade,
 ) *topo.Graph[string, *InstallInfo] {
 	if graph == nil {
@@ -323,7 +293,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 
 	graph.AddNode(pkg.Name())
 	_ = pkg.Provides().ForEach(func(p *alpm.Depend) error {
-		g.logger.Debugln(pkg.Name() + " provides: " + p.String())
+		logger.Debugln(pkg.Name() + " provides: " + p.String())
 		graph.Provides(p.Name, p, pkg.Name())
 		return nil
 	})
@@ -337,7 +307,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	}
 
 	if upgradeInfo == nil {
-		if localPkg := g.dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
+		if localPkg := dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
 			info.Reason = Reason(localPkg.Reason())
 		}
 	} else {
@@ -346,7 +316,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 		info.LocalVersion = upgradeInfo.LocalVersion
 	}
 
-	g.ValidateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
+	validateAndSetNodeInfo(graph, pkg.Name(), &topo.NodeInfo[*InstallInfo]{
 		Color:      colorMap[info.Reason],
 		Background: bgColorMap[info.Source],
 		Value:      info,
@@ -365,7 +335,7 @@ func (g *Grapher) GraphSyncGroup(ctx context.Context,
 
 	graph.AddNode(groupName)
 
-	g.ValidateAndSetNodeInfo(graph, groupName, &topo.NodeInfo[*InstallInfo]{
+	validateAndSetNodeInfo(graph, groupName, &topo.NodeInfo[*InstallInfo]{
 		Color:      colorMap[Explicit],
 		Background: bgColorMap[Sync],
 		Value: &InstallInfo{
@@ -392,7 +362,7 @@ func (g *Grapher) GraphAURTarget(ctx context.Context,
 
 	g.addAurPkgProvides(pkg, graph)
 
-	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
+	validateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 		Color:      colorMap[instalInfo.Reason],
 		Background: bgColorMap[AUR],
 		Value:      instalInfo,
@@ -564,7 +534,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 	return pkgsToAdd
 }
 
-func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo],
+func validateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo],
 	node string, nodeInfo *topo.NodeInfo[*InstallInfo],
 ) {
 	info := graph.GetNodeInfo(node)
@@ -623,7 +593,7 @@ func (g *Grapher) addNodes(
 		}
 
 		if g.fullGraph {
-			g.ValidateAndSetNodeInfo(
+			validateAndSetNodeInfo(
 				graph,
 				depName,
 				&topo.NodeInfo[*InstallInfo]{Color: colorMap[depType], Background: bgColorMap[Local]})
@@ -648,7 +618,7 @@ func (g *Grapher) addNodes(
 		}
 
 		dbName := alpmPkg.DB().Name()
-		g.ValidateAndSetNodeInfo(
+		validateAndSetNodeInfo(
 			graph,
 			alpmPkg.Name(),
 			&topo.NodeInfo[*InstallInfo]{
