@@ -46,7 +46,7 @@ func handleCmd(logger *text.Logger) error {
 		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, run.CmdBuilder, true, settings.NoConfirm,
+	grapher := dep.NewGrapher(dbExecutor, cfg, aurCache, run.CmdBuilder, true, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), false, false,
 		run.Logger.Child("grapher"))
 

@@ -3,6 +3,7 @@ package dep
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strconv"
 
 	aurc "github.com/Jguer/aur"
@@ -15,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	aur "github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -107,6 +109,7 @@ type SourceHandler interface {
 type Grapher struct {
 	logger        *text.Logger
 	providerCache map[string][]aur.Pkg
+	cfg           *settings.Configuration
 
 	dbExecutor  db.Executor
 	aurClient   aurc.QueryClient
@@ -119,12 +122,13 @@ type Grapher struct {
 	handlers    map[string][]SourceHandler
 }
 
-func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient, cmdBuilder exe.ICmdBuilder,
+func NewGrapher(dbExecutor db.Executor, cfg *settings.Configuration, aurCache aurc.QueryClient, cmdBuilder exe.ICmdBuilder,
 	fullGraph, noConfirm, noDeps, noCheckDeps, needed bool,
 	logger *text.Logger,
 ) *Grapher {
 	return &Grapher{
 		dbExecutor:    dbExecutor,
+		cfg:           cfg,
 		aurClient:     aurCache,
 		cmdBuilder:    cmdBuilder,
 		fullGraph:     fullGraph,
@@ -179,7 +183,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		case sourceAUR:
 			aurTargets = append(aurTargets, target.Name)
 		case sourceCacheSRCINFO:
-			srcinfoTargets = append(srcinfoTargets, target.Name)
+			srcinfoTargets = append(srcinfoTargets, filepath.Join(g.cfg.BuildDir, target.Name))
 		default:
 			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
 			if err != nil {

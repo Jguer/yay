@@ -339,7 +339,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			grapher := dep.NewGrapher(dbExe, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
+			grapher := dep.NewGrapher(dbExe, &settings.Configuration{}, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
 				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
 
@@ -521,7 +521,7 @@ func TestUpgradeService_GraphUpgradesMissingDep(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			grapher := dep.NewGrapher(dbExe, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
+			grapher := dep.NewGrapher(dbExe, &settings.Configuration{}, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
 				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
 
@@ -642,7 +642,7 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			grapher := dep.NewGrapher(dbExe, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
+			grapher := dep.NewGrapher(dbExe, &settings.Configuration{}, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
 				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
 
@@ -757,7 +757,7 @@ func TestUpgradeService_Warnings(t *testing.T) {
 
 	logger := text.NewLogger(io.Discard, os.Stderr,
 		strings.NewReader("\n"), true, "test")
-	grapher := dep.NewGrapher(dbExe, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
+	grapher := dep.NewGrapher(dbExe, &settings.Configuration{}, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
 		false, true, false, false, false, logger)
 
 	cfg := &settings.Configuration{
@@ -927,7 +927,7 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 
 			logger := text.NewLogger(io.Discard, os.Stderr,
 				tt.fields.input, true, "test")
-			grapher := dep.NewGrapher(dbExe, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
+			grapher := dep.NewGrapher(dbExe, &settings.Configuration{}, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
 				false, true, false, false, false, logger)
 
 			cfg := &settings.Configuration{

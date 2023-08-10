@@ -19,6 +19,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	aur "github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -200,7 +201,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewGrapher(tt.fields.dbExecutor,
+			g := NewGrapher(tt.fields.dbExecutor, &settings.Configuration{},
 				tt.fields.aurCache, &exe.MockBuilder{Runner: &exe.MockRunner{}}, false, true,
 				tt.fields.noDeps, tt.fields.noCheckDeps, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
@@ -314,7 +315,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewGrapher(tt.fields.dbExecutor,
+			g := NewGrapher(tt.fields.dbExecutor, &settings.Configuration{},
 				tt.fields.aurCache, &exe.MockBuilder{Runner: &exe.MockRunner{}}, false, true,
 				tt.fields.noDeps, tt.fields.noCheckDeps, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
@@ -517,7 +518,7 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewGrapher(mockDB, mockAUR,
+			g := NewGrapher(mockDB, &settings.Configuration{}, mockAUR,
 				&exe.MockBuilder{Runner: &exe.MockRunner{}}, false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
@@ -662,7 +663,7 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewGrapher(mockDB, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
+			g := NewGrapher(mockDB, &settings.Configuration{}, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
 				false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
@@ -800,7 +801,7 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewGrapher(mockDB, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
+			g := NewGrapher(mockDB, &settings.Configuration{}, mockAUR, &exe.MockBuilder{Runner: &exe.MockRunner{}},
 				false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)

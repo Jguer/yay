@@ -26,7 +26,7 @@ func installLocalPKGBUILD(
 	dbExecutor db.Executor,
 ) error {
 	noCheck := strings.Contains(run.Cfg.MFlags, "--nocheck")
-	grapher := dep.NewGrapher(dbExecutor, run.AURClient, run.CmdBuilder, false, settings.NoConfirm,
+	grapher := dep.NewGrapher(dbExecutor, run.Cfg, run.AURClient, run.CmdBuilder, false, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		run.Logger.Child("grapher"))
 

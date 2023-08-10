@@ -133,7 +133,7 @@ func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.
 	defer func() { settings.NoConfirm = oldNoConfirm }()
 
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
-	grapher := dep.NewGrapher(dbExecutor, run.AURClient, run.CmdBuilder, false, true,
+	grapher := dep.NewGrapher(dbExecutor, run.Cfg, run.AURClient, run.CmdBuilder, false, true,
 		false, false, cmdArgs.ExistsArg("needed"), logger.Child("grapher"))
 
 	upService := upgrade.NewUpgradeService(
