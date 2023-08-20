@@ -515,7 +515,7 @@ msgstr "필요한 패키지를 모두 찾을 수 없음"
 
 #: errors.go:16
 msgid "could not find any package archives listed in %s"
-msgstr "%s에 나열된 패키지 아카이브를 찾을 수 없습니다"
+msgstr "%s에 나열된 패키지 아카이브를 찾을 수 없음"
 
 #: errors.go:26 pkg/upgrade/service.go:299
 msgid "dependency"
