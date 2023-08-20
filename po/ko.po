@@ -535,7 +535,7 @@ msgstr "소스 다운로드 중 오류: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "%s를 가져오는 중 오류: %s"
+msgstr "%s 가져오는 중 오류: %s"
 
 #: local_install.go:26
 msgid "error installing repo packages"
