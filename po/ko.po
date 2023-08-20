@@ -130,7 +130,7 @@ msgstr "%s 또는 %s를 환경 변수에 추가합니다"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "root / sudo로 yay를 실행하지 마십시오."
+msgstr "root/sudo로 yay를 실행하지 마세요."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
