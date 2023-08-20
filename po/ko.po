@@ -323,7 +323,7 @@ msgstr "PKGBUILD 최신 버전임, 다운로드 건너뛰는 중: %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILD를 편집할까요?"
+msgstr "PKGBUILD를 편집하시겠습니까?"
 
 #: print.go:54
 msgid "Package Base ID"
