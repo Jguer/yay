@@ -1,11 +1,11 @@
 # 
 # Translators:
 # J G, 2021
-# Junghee Lee <daemul72@gmail.com>, 2023
+# JungHee Lee <daemul72@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Junghee Lee <daemul72@gmail.com>, 2023\n"
+"Last-Translator: JungHee Lee <daemul72@gmail.com>, 2023\n"
 "Language-Team: Korean (https://app.transifex.com/yay-1/teams/123732/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -52,7 +52,7 @@ msgstr "%s 최신 버전임 -- 건너뛰는 중"
 
 #: pkg/upgrade/service.go:304
 msgid "%s to upgrade/install."
-msgstr "%s 업그레이드/설치합니다."
+msgstr "업그레이드/설치하려면 %s 선택합니다."
 
 #: pkg/upgrade/service.go:298
 msgid "%s will also be installed for this operation."
