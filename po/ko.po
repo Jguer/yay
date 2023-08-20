@@ -643,7 +643,7 @@ msgstr "지정된 대상 디렉터리가 없습니다"
 
 #: pkg/text/text.go:69
 msgid "no"
-msgstr "아니오"
+msgstr "아니요"
 
 #: aur_install.go:242
 msgid "nothing to install for %s"
