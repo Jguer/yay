@@ -223,7 +223,7 @@ msgstr "다음 패키지를 설치하지 못했습니다. 수동 개입이 필�
 
 #: print.go:43
 msgid "First Submitted"
-msgstr "처음 작성됨"
+msgstr "처음 제출됨"
 
 #: pkg/query/aur_warnings.go:84
 msgid "Flagged Out Of Date AUR Packages:"
