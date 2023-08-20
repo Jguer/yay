@@ -227,7 +227,7 @@ msgstr "처음 제출됨"
 
 #: pkg/query/aur_warnings.go:84
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "플래그가 지정된 오래된 AUR 패키지:"
+msgstr "오래된 AUR 패키지로 플래그 지정됨:"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
