@@ -190,7 +190,7 @@ msgstr "캐시의 다른 AUR 패키지를 모두 제거하시겠습니까?"
 
 #: pkg/menus/edit_menu.go:60
 msgid "Edit PKGBUILD with?"
-msgstr "PKGBUILD를 무엇으로 편집할까요?"
+msgstr "다음으로 PKGBUILD를 편집하시겠습니까?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
