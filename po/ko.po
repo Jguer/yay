@@ -491,7 +491,7 @@ msgstr ""
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "사용자에 의한 중단"
+msgstr "사용자로 인해 중단됨"
 
 #: pkg/settings/parser/parser.go:619
 msgid "argument '-' specified without input on stdin"
