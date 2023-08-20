@@ -271,7 +271,7 @@ msgstr "로컬"
 
 #: print.go:40
 msgid "Maintainer"
-msgstr "관리자"
+msgstr "유지관리자"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
