@@ -114,7 +114,7 @@ msgstr "(고립됨)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(오래된 패키지: %s)"
+msgstr "(오래됨: %s)"
 
 #: print.go:31
 msgid "AUR URL"
