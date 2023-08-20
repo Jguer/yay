@@ -146,7 +146,7 @@ msgstr "개발 패키지 확인하는 중..."
 
 #: clean.go:217
 msgid "Cleaning (%d/%d): %s"
-msgstr "지우는 중 (%d/%d): %s"
+msgstr "비우는 중 (%d/%d): %s"
 
 #: print.go:39
 msgid "Conflicts With"
