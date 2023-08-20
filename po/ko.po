@@ -692,7 +692,7 @@ msgstr "할 작업 없음"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "CreateHandle 만들 수 없음: %s"
+msgstr "CreateHandle 할 수 없음: %s"
 
 #: cmd.go:195
 msgid "unhandled operation"
