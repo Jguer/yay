@@ -170,7 +170,7 @@ msgstr "설명"
 
 #: pkg/menus/diff_menu.go:158
 msgid "Diffs to show?"
-msgstr "변경사항(Diff)을 표시할까요?"
+msgstr "표시할 차이점(Diff)이 있나요?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
