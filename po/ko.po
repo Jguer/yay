@@ -283,7 +283,7 @@ msgstr "종속성 만들기"
 
 #: pkg/query/aur_warnings.go:76
 msgid "Missing AUR Debug Packages:"
-msgstr "빠진 AUR 디버그 패키지:"
+msgstr "누락된 AUR 디버그 패키지:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
