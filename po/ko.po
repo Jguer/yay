@@ -198,7 +198,7 @@ msgstr "AUR 검색 중 오류: %s\n"
 
 #: pkg/upgrade/service.go:308
 msgid "Excluding packages may cause partial upgrades and break systems"
-msgstr "패키지를 제외하면 부분 업그레이드가 발생하고 시스템이 중단될 수 있습니다"
+msgstr "패키지를 제외하면 부분 업그레이드 및 시스템 중단이 발생할 수 있습니다."
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
