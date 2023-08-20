@@ -56,7 +56,7 @@ msgstr "업그레이드/설치하려면 %s 선택합니다."
 
 #: pkg/upgrade/service.go:298
 msgid "%s will also be installed for this operation."
-msgstr "이 작업에는 %s도 설치됩니다."
+msgstr "이 작업을 위해 %s 또한 설치됩니다."
 
 #: pkg/pgp/keys.go:127
 msgid "%s, required by: %s"
