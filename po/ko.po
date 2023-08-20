@@ -359,7 +359,7 @@ msgstr "인기순"
 
 #: pkg/menus/diff_menu.go:170 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "설치를 진행할까요?"
+msgstr "설치를 계속 진행하시겠습니까?"
 
 #: print.go:34
 msgid "Provides"
