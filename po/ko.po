@@ -539,7 +539,7 @@ msgstr "%s 가져오는 중 오류: %s"
 
 #: local_install.go:26
 msgid "error installing repo packages"
-msgstr "저장소 패키지하는 설치 중 오류"
+msgstr "저장소 패키지 설치 중 오류"
 
 #: aur_install.go:266 aur_install.go:270
 msgid "error installing:"
