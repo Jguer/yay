@@ -531,7 +531,7 @@ msgstr "편집기가 제대로 종료되지 않음, 중단하는 중: %s"
 
 #: aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "소스 다운로드하는 중 오류: %s"
+msgstr "소스 다운로드 중 오류: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
