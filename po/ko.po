@@ -311,7 +311,7 @@ msgstr "고립 (유지 관리되지 않는) AUR 패키지:"
 
 #: print.go:47 print.go:49
 msgid "Out-of-date"
-msgstr "오래된 패키지"
+msgstr "오래됨"
 
 #: pkg/pgp/keys.go:118
 msgid "PGP keys need importing:"
