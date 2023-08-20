@@ -259,7 +259,7 @@ msgstr "키워드"
 
 #: print.go:44
 msgid "Last Modified"
-msgstr "마지막 수정"
+msgstr "마지막 수정됨"
 
 #: print.go:33
 msgid "Licenses"
