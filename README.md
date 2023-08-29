@@ -62,6 +62,12 @@ cd yay-bin
 makepkg -si
 ```
 
+If you want to do all of this at once, we can chain the commands like so:
+
+```sh
+pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si
+```
+
 ### Other distributions
 
 If you're using Manjaro or [another distribution that packages `yay`](https://repology.org/project/yay/versions)
