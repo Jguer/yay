@@ -277,7 +277,11 @@ func (installer *Installer) buildPkg(ctx context.Context,
 	dir, base string,
 	installIncompatible, needed, isTarget bool,
 ) (map[string]string, error) {
-	args := []string{"--nobuild", "-fC"}
+	args := []string{"--nobuild", "-f"}
+
+	if installer.exeCmd.GetCleanBuild() {
+		args = append(args, "-C")
+	}
 
 	if installIncompatible {
 		args = append(args, "--ignorearch")
@@ -296,17 +300,21 @@ func (installer *Installer) buildPkg(ctx context.Context,
 
 	switch {
 	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion) || installer.downloadOnly:
-		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
+		args = []string{"--nobuild", "--noextract", "--ignorearch"}
 		pkgdests = map[string]string{}
 		installer.log.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
 	case installer.skipAlreadyBuiltPkg(isTarget, pkgdests):
-		args = []string{"-c", "--nobuild", "--noextract", "--ignorearch"}
+		args = []string{"--nobuild", "--noextract", "--ignorearch"}
 		installer.log.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
 	default:
-		args = []string{"-cf", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
+		args = []string{"-f", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
 		if installIncompatible {
 			args = append(args, "--ignorearch")
 		}
+	}
+
+	if installer.exeCmd.GetCleanBuild() {
+		args = append(args, "-c")
 	}
 
 	errMake := installer.exeCmd.Show(

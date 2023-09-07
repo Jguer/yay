@@ -39,10 +39,12 @@ type ICmdBuilder interface {
 	BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
 	BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 	AddMakepkgFlag(string)
+	GetCleanBuild() bool
 	SudoLoop()
 }
 
 type CmdBuilder struct {
+	CleanBuild       bool
 	GitBin           string
 	GitFlags         []string
 	GPGBin           string
@@ -62,6 +64,7 @@ type CmdBuilder struct {
 
 func NewCmdBuilder(cfg *settings.Configuration, runner Runner, logger *text.Logger, dbPath string) *CmdBuilder {
 	return &CmdBuilder{
+		CleanBuild:       cfg.CleanBuild,
 		GitBin:           cfg.GitBin,
 		GitFlags:         strings.Fields(cfg.GitFlags),
 		GPGBin:           cfg.GpgBin,
@@ -295,4 +298,8 @@ func (c *CmdBuilder) Show(cmd *exec.Cmd) error {
 
 func (c *CmdBuilder) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	return c.Runner.Capture(cmd)
+}
+
+func (c *CmdBuilder) GetCleanBuild() bool {
+	return c.CleanBuild
 }

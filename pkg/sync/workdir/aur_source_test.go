@@ -33,6 +33,10 @@ func (z *TestMakepkgBuilder) BuildMakepkgCmd(ctx context.Context, dir string, ex
 		assert.Contains(z.test, cmd.String(), z.want)
 	}
 
+	if !z.GetCleanBuild() {
+		assert.NotContains(z.test, cmd.String(), "-Cc")
+	}
+
 	if z.wantDir != "" {
 		assert.Equal(z.test, z.wantDir, cmd.Dir)
 	}
@@ -46,20 +50,54 @@ func (z *TestMakepkgBuilder) Show(cmd *exec.Cmd) error {
 	return z.showError
 }
 
+func (z *TestMakepkgBuilder) GetCleanBuild() bool {
+	return z.parentBuilder.CleanBuild
+}
+
 // GIVEN 1 package
 // WHEN downloadPKGBUILDSource is called
 // THEN 1 call should be made to makepkg with the specified parameters and dir
 func Test_downloadPKGBUILDSource(t *testing.T) {
 	t.Parallel()
-	cmdBuilder := &TestMakepkgBuilder{
-		parentBuilder: &exe.CmdBuilder{MakepkgConfPath: "/etc/not.conf", MakepkgFlags: []string{"--nocheck"}, MakepkgBin: "makepkg"},
-		test:          t,
-		want:          "makepkg --nocheck --config /etc/not.conf --verifysource --skippgpcheck -Ccf",
-		wantDir:       "/tmp/yay-bin",
+
+	type testCase struct {
+		desc       string
+		cleanBuild bool
+		want       string
 	}
-	err := downloadPKGBUILDSource(context.Background(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
-	assert.NoError(t, err)
-	assert.Equal(t, 1, int(cmdBuilder.passes))
+
+	testCases := []testCase{
+		{
+			desc:       "cleanbuild",
+			cleanBuild: true,
+			want:       "makepkg --nocheck --config /etc/not.conf --verifysource --skippgpcheck -f -Cc",
+		},
+		{
+			desc:       "nocleanbuild",
+			cleanBuild: false,
+			want:       "makepkg --nocheck --config /etc/not.conf --verifysource --skippgpcheck -f",
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.desc, func(td *testing.T) {
+			cmdBuilder := &TestMakepkgBuilder{
+				parentBuilder: &exe.CmdBuilder{
+					MakepkgConfPath: "/etc/not.conf",
+					MakepkgFlags:    []string{"--nocheck"},
+					MakepkgBin:      "makepkg",
+					CleanBuild:      tc.cleanBuild,
+				},
+				test:    t,
+				want:    tc.want,
+				wantDir: "/tmp/yay-bin",
+			}
+			err := downloadPKGBUILDSource(context.Background(), cmdBuilder, filepath.Join("/tmp", "yay-bin"), false)
+			assert.NoError(t, err)
+			assert.Equal(t, 1, int(cmdBuilder.passes))
+		})
+	}
 }
 
 // GIVEN 1 package
@@ -68,9 +106,9 @@ func Test_downloadPKGBUILDSource(t *testing.T) {
 func Test_downloadPKGBUILDSourceError(t *testing.T) {
 	t.Parallel()
 	cmdBuilder := &TestMakepkgBuilder{
-		parentBuilder: &exe.CmdBuilder{MakepkgConfPath: "/etc/not.conf", MakepkgFlags: []string{"--nocheck"}, MakepkgBin: "makepkg"},
+		parentBuilder: &exe.CmdBuilder{MakepkgConfPath: "/etc/not.conf", MakepkgFlags: []string{"--nocheck"}, MakepkgBin: "makepkg", CleanBuild: true},
 		test:          t,
-		want:          "makepkg --nocheck --config /etc/not.conf --verifysource --skippgpcheck -Ccf",
+		want:          "makepkg --nocheck --config /etc/not.conf --verifysource --skippgpcheck -f -Cc",
 		wantDir:       "/tmp/yay-bin",
 		showError:     &exec.ExitError{},
 	}
@@ -98,6 +136,7 @@ func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 				parentBuilder: &exe.CmdBuilder{
 					MakepkgConfPath: "/etc/not.conf",
 					MakepkgFlags:    []string{"--nocheck"}, MakepkgBin: "makepkg",
+					CleanBuild: true,
 				},
 				test: t,
 			}
@@ -118,6 +157,7 @@ func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 		parentBuilder: &exe.CmdBuilder{
 			MakepkgConfPath: "/etc/not.conf",
 			MakepkgFlags:    []string{"--nocheck"}, MakepkgBin: "makepkg",
+			CleanBuild: true,
 		},
 		test: t,
 	}
@@ -138,6 +178,7 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 		parentBuilder: &exe.CmdBuilder{
 			MakepkgConfPath: "/etc/not.conf",
 			MakepkgFlags:    []string{"--nocheck"}, MakepkgBin: "makepkg",
+			CleanBuild: true,
 		},
 		test:      t,
 		showError: &exec.ExitError{},

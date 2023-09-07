@@ -25,6 +25,7 @@ type MockBuilder struct {
 	BuildMakepkgCmdCalls   []Call
 	BuildMakepkgCmdFn      func(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
 	BuildPacmanCmdFn       func(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
+	GetCleanBuildFn        func() bool
 }
 
 type MockRunner struct {
@@ -93,6 +94,10 @@ func (m *MockBuilder) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) 
 
 func (m *MockBuilder) Show(cmd *exec.Cmd) error {
 	return m.Runner.Show(cmd)
+}
+
+func (m *MockBuilder) GetCleanBuild() bool {
+	return true
 }
 
 func (m *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {

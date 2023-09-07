@@ -102,6 +102,7 @@ Permanent configuration options:
 
     --cleanafter          Remove package sources after successful install
     --nocleanafter        Do not remove package sources after successful build
+    --nocleanbuild        Do not remove pkg/ and src/ after building packages
     --bottomup            Shows AUR's packages first and then repository's
     --topdown             Shows repository's packages first and then AUR's
     --singlelineresults   List each search result on its own line

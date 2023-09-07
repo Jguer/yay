@@ -86,6 +86,7 @@ _pacman_opts_common=(
 	'--nodevel[Disable development version checking]'
 	'--cleanafter[Clean package sources after successful build]'
 	'--nocleanafter[Disable package sources cleaning after successful build]'
+	'--nocleanbuild[Do not remove pkg/ and src/ after building packages]'
 	'--timeupdate[Check packages modification date and version]'
 	'--notimeupdate[Check only package version change]'
 	'--redownload[Always download pkgbuilds of targets]'

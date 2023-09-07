@@ -56,16 +56,16 @@ func TestIntegrationLocalInstall(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource --skippgpcheck -Ccf",
+		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
@@ -104,6 +104,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
+		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -233,6 +234,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
+		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -324,14 +326,14 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource --skippgpcheck -Ccf",
+		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 	}
 
@@ -368,6 +370,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
+		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -492,16 +495,16 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource --skippgpcheck -Ccf",
+		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
@@ -546,6 +549,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
+		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -684,6 +688,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
+		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -783,12 +788,12 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource --skippgpcheck -Ccf",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --verifysource --skippgpcheck -f -Cc",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/ceph-libs-bin-17.2.6-2-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- ceph-libs-bin",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/ceph-bin-17.2.6-2-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- ceph-bin",
@@ -826,6 +831,7 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
+		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -910,13 +916,13 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 	}
 
 	wantShow := []string{
-		"makepkg --verifysource --skippgpcheck -Ccf",
-		"makepkg --verifysource --skippgpcheck -Ccf",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --verifysource --skippgpcheck -f -Cc",
+		"makepkg --verifysource --skippgpcheck -f -Cc",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir1/libzip-git-1.9.2.r166.gd2c47d0f-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- libzip-git",
-		"makepkg --nobuild -fC --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir2/gourou-0.8.1-4-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- gourou",
@@ -965,6 +971,7 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
+		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
