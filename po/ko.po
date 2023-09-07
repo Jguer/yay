@@ -1,11 +1,11 @@
 # 
 # Translators:
 # J G, 2021
-# Junghee Lee <daemul72@gmail.com>, 2023
+# JungHee Lee <daemul72@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Junghee Lee <daemul72@gmail.com>, 2023\n"
+"Last-Translator: JungHee Lee <daemul72@gmail.com>, 2023\n"
 "Language-Team: Korean (https://app.transifex.com/yay-1/teams/123732/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -52,11 +52,11 @@ msgstr "%s 최신 버전임 -- 건너뛰는 중"
 
 #: pkg/upgrade/service.go:304
 msgid "%s to upgrade/install."
-msgstr "%s 업그레이드/설치합니다."
+msgstr "업그레이드/설치하려면 %s 선택합니다."
 
 #: pkg/upgrade/service.go:298
 msgid "%s will also be installed for this operation."
-msgstr "이 작업에는 %s도 설치됩니다."
+msgstr "이 작업을 위해 %s 또한 설치됩니다."
 
 #: pkg/pgp/keys.go:127
 msgid "%s, required by: %s"
@@ -114,7 +114,7 @@ msgstr "(고립됨)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(오래된 패키지: %s)"
+msgstr "(오래됨: %s)"
 
 #: print.go:31
 msgid "AUR URL"
@@ -130,7 +130,7 @@ msgstr "%s 또는 %s를 환경 변수에 추가합니다"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "root / sudo로 yay를 실행하지 마십시오."
+msgstr "root/sudo로 yay를 실행하지 마세요."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
@@ -146,7 +146,7 @@ msgstr "개발 패키지 확인하는 중..."
 
 #: clean.go:217
 msgid "Cleaning (%d/%d): %s"
-msgstr "지우는 중 (%d/%d): %s"
+msgstr "비우는 중 (%d/%d): %s"
 
 #: print.go:39
 msgid "Conflicts With"
@@ -170,7 +170,7 @@ msgstr "설명"
 
 #: pkg/menus/diff_menu.go:158
 msgid "Diffs to show?"
-msgstr "변경사항(Diff)을 표시할까요?"
+msgstr "표시할 차이점(Diff)이 있나요?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
@@ -190,7 +190,7 @@ msgstr "캐시의 다른 AUR 패키지를 모두 제거하시겠습니까?"
 
 #: pkg/menus/edit_menu.go:60
 msgid "Edit PKGBUILD with?"
-msgstr "PKGBUILD를 무엇으로 편집할까요?"
+msgstr "다음으로 PKGBUILD를 편집하시겠습니까?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
@@ -198,7 +198,7 @@ msgstr "AUR 검색 중 오류: %s\n"
 
 #: pkg/upgrade/service.go:308
 msgid "Excluding packages may cause partial upgrades and break systems"
-msgstr "패키지를 제외하면 부분 업그레이드가 발생하고 시스템이 중단될 수 있습니다"
+msgstr "패키지를 제외하면 부분 업그레이드 및 시스템 중단이 발생할 수 있습니다."
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
@@ -223,15 +223,15 @@ msgstr "다음 패키지를 설치하지 못했습니다. 수동 개입이 필�
 
 #: print.go:43
 msgid "First Submitted"
-msgstr "최초 작성"
+msgstr "처음 제출됨"
 
 #: pkg/query/aur_warnings.go:84
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "플래그가 지정된 오래된 AUR 패키지:"
+msgstr "오래된 AUR 패키지로 플래그 지정됨:"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr "외부에서 설치된 패키지: %s"
+msgstr "외부 설치된 패키지: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
@@ -259,7 +259,7 @@ msgstr "키워드"
 
 #: print.go:44
 msgid "Last Modified"
-msgstr "마지막 수정"
+msgstr "마지막 수정됨"
 
 #: print.go:33
 msgid "Licenses"
@@ -271,7 +271,7 @@ msgstr "로컬"
 
 #: print.go:40
 msgid "Maintainer"
-msgstr "관리자"
+msgstr "유지관리자"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
@@ -283,7 +283,7 @@ msgstr "종속성 만들기"
 
 #: pkg/query/aur_warnings.go:76
 msgid "Missing AUR Debug Packages:"
-msgstr "빠진 AUR 디버그 패키지:"
+msgstr "누락된 AUR 디버그 패키지:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
@@ -311,7 +311,7 @@ msgstr "고립 (유지 관리되지 않는) AUR 패키지:"
 
 #: print.go:47 print.go:49
 msgid "Out-of-date"
-msgstr "오래된 패키지"
+msgstr "오래됨"
 
 #: pkg/pgp/keys.go:118
 msgid "PGP keys need importing:"
@@ -323,7 +323,7 @@ msgstr "PKGBUILD 최신 버전임, 다운로드 건너뛰는 중: %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILD를 편집할까요?"
+msgstr "PKGBUILD를 편집하시겠습니까?"
 
 #: print.go:54
 msgid "Package Base ID"
@@ -355,11 +355,11 @@ msgstr "설치할 패키지: (예: 1 2 3, 1-3 혹은 ^4)"
 
 #: print.go:42
 msgid "Popularity"
-msgstr "인기도"
+msgstr "인기순"
 
 #: pkg/menus/diff_menu.go:170 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "설치를 진행할까요?"
+msgstr "설치를 계속 진행하시겠습니까?"
 
 #: print.go:34
 msgid "Provides"
@@ -491,7 +491,7 @@ msgstr ""
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "사용자에 의한 중단"
+msgstr "사용자로 인해 중단됨"
 
 #: pkg/settings/parser/parser.go:619
 msgid "argument '-' specified without input on stdin"
@@ -515,7 +515,7 @@ msgstr "필요한 패키지를 모두 찾을 수 없음"
 
 #: errors.go:16
 msgid "could not find any package archives listed in %s"
-msgstr "%s에 나열된 패키지 아카이브를 찾을 수 없습니다"
+msgstr "%s에 나열된 패키지 아카이브를 찾을 수 없음"
 
 #: errors.go:26 pkg/upgrade/service.go:299
 msgid "dependency"
@@ -531,15 +531,15 @@ msgstr "편집기가 제대로 종료되지 않음, 중단하는 중: %s"
 
 #: aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "소스 다운로드하는 중 오류: %s"
+msgstr "소스 다운로드 중 오류: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "%s를 가져오는 중 오류: %s"
+msgstr "%s 가져오는 중 오류: %s"
 
 #: local_install.go:26
 msgid "error installing repo packages"
-msgstr "저장소 패키지하는 설치 중 오류"
+msgstr "저장소 패키지 설치 중 오류"
 
 #: aur_install.go:266 aur_install.go:270
 msgid "error installing:"
@@ -643,7 +643,7 @@ msgstr "지정된 대상 디렉터리가 없습니다"
 
 #: pkg/text/text.go:69
 msgid "no"
-msgstr "아니오"
+msgstr "아니요"
 
 #: aur_install.go:242
 msgid "nothing to install for %s"
@@ -692,7 +692,7 @@ msgstr "할 작업 없음"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "CreateHandle 만들 수 없음: %s"
+msgstr "CreateHandle 할 수 없음: %s"
 
 #: cmd.go:195
 msgid "unhandled operation"
