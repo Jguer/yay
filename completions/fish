@@ -231,7 +231,7 @@ complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg developme
 complete -c $progname -n "not $noopt" -l nodevel -d 'Disable development version checking' -f
 complete -c $progname -n "not $noopt" -l cleanafter -d 'Clean package sources after successful build' -f
 complete -c $progname -n "not $noopt" -l nocleanafter -d 'Disable package sources cleaning' -f
-complete -c $progname -n "not $noopt" -l nocleanbuild -d 'Do not remove pkg/ and src/ directories after building packages' -f
+complete -c $progname -n "not $noopt" -l nocleanbuild -d 'Do not remove pkg/ and src/ after building packages' -f
 complete -c $progname -n "not $noopt" -l timeupdate -d 'Check package modification date and version' -f
 complete -c $progname -n "not $noopt" -l notimeupdate -d 'Check only package version change' -f
 complete -c $progname -n "not $noopt" -l redownload -d 'Redownload PKGBUILD of package even if up-to-date' -f
