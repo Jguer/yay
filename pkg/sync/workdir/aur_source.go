@@ -34,7 +34,7 @@ func downloadPKGBUILDSource(ctx context.Context,
 ) error {
 	args := []string{"--verifysource", "--skippgpcheck", "-f"}
 
-	if cmdBuilder.GetCleanBuild() {
+	if !cmdBuilder.GetKeepSrc() {
 		args = append(args, "-Cc")
 	}
 

@@ -128,7 +128,6 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 				SudoBin:         "su",
 				PacmanBin:       pacmanBin,
 				Runner:          mockRunner,
-				CleanBuild:      true,
 				SudoLoopEnabled: false,
 			}
 
@@ -404,7 +403,6 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 				PacmanBin:        pacmanBin,
 				PacmanConfigPath: "/etc/pacman.conf",
 				Runner:           mockRunner,
-				CleanBuild:       true,
 				SudoLoopEnabled:  false,
 			}
 
@@ -458,7 +456,6 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 		PacmanBin:        "pacman",
 		PacmanConfigPath: "/etc/pacman.conf",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -590,7 +587,6 @@ func TestInstaller_CompileFailed(t *testing.T) {
 				SudoBin:         "su",
 				PacmanBin:       pacmanBin,
 				Runner:          mockRunner,
-				CleanBuild:      true,
 				SudoLoopEnabled: false,
 			}
 
@@ -751,7 +747,6 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 				PacmanBin:        pacmanBin,
 				PacmanConfigPath: "/etc/pacman.conf",
 				Runner:           mockRunner,
-				CleanBuild:       true,
 				SudoLoopEnabled:  false,
 			}
 
@@ -891,7 +886,6 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 				SudoBin:         "su",
 				PacmanBin:       pacmanBin,
 				Runner:          mockRunner,
-				CleanBuild:      true,
 				SudoLoopEnabled: false,
 			}
 
@@ -996,7 +990,6 @@ func TestInstaller_InstallGroup(t *testing.T) {
 				SudoBin:         "su",
 				PacmanBin:       pacmanBin,
 				Runner:          mockRunner,
-				CleanBuild:      true,
 				SudoLoopEnabled: false,
 			}
 
@@ -1215,7 +1208,6 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 				SudoBin:         "su",
 				PacmanBin:       pacmanBin,
 				Runner:          mockRunner,
-				CleanBuild:      true,
 				SudoLoopEnabled: false,
 			}
 
@@ -1303,7 +1295,6 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 				SudoBin:         "su",
 				PacmanBin:       pacmanBin,
 				Runner:          mockRunner,
-				CleanBuild:      true,
 				SudoLoopEnabled: false,
 			}
 
@@ -1347,7 +1338,7 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 	}
 }
 
-func TestInstaller_NoCleanBuild(t *testing.T) {
+func TestInstaller_KeepSrc(t *testing.T) {
 	t.Parallel()
 
 	makepkgBin := t.TempDir() + "/makepkg"
@@ -1370,7 +1361,7 @@ func TestInstaller_NoCleanBuild(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			desc: "--nocleanbuild",
+			desc: "--keepsrc",
 			wantShow: []string{
 				"makepkg --nobuild -f --ignorearch",
 				"makepkg --nobuild --noextract --ignorearch",
@@ -1412,8 +1403,8 @@ func TestInstaller_NoCleanBuild(t *testing.T) {
 				MakepkgBin:      makepkgBin,
 				SudoBin:         "su",
 				PacmanBin:       pacmanBin,
+				KeepSrc:         true,
 				Runner:          mockRunner,
-				CleanBuild:      false,
 				SudoLoopEnabled: false,
 			}
 

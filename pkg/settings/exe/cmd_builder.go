@@ -39,12 +39,11 @@ type ICmdBuilder interface {
 	BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
 	BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 	AddMakepkgFlag(string)
-	GetCleanBuild() bool
+	GetKeepSrc() bool
 	SudoLoop()
 }
 
 type CmdBuilder struct {
-	CleanBuild       bool
 	GitBin           string
 	GitFlags         []string
 	GPGBin           string
@@ -58,13 +57,13 @@ type CmdBuilder struct {
 	PacmanBin        string
 	PacmanConfigPath string
 	PacmanDBPath     string
+	KeepSrc          bool
 	Runner           Runner
 	Log              *text.Logger
 }
 
 func NewCmdBuilder(cfg *settings.Configuration, runner Runner, logger *text.Logger, dbPath string) *CmdBuilder {
 	return &CmdBuilder{
-		CleanBuild:       cfg.CleanBuild,
 		GitBin:           cfg.GitBin,
 		GitFlags:         strings.Fields(cfg.GitFlags),
 		GPGBin:           cfg.GpgBin,
@@ -78,6 +77,7 @@ func NewCmdBuilder(cfg *settings.Configuration, runner Runner, logger *text.Logg
 		PacmanBin:        cfg.PacmanBin,
 		PacmanConfigPath: cfg.PacmanConf,
 		PacmanDBPath:     dbPath,
+		KeepSrc:          cfg.KeepSrc,
 		Runner:           runner,
 		Log:              logger,
 	}
@@ -300,6 +300,6 @@ func (c *CmdBuilder) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	return c.Runner.Capture(cmd)
 }
 
-func (c *CmdBuilder) GetCleanBuild() bool {
-	return c.CleanBuild
+func (c *CmdBuilder) GetKeepSrc() bool {
+	return c.KeepSrc
 }

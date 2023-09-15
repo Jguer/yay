@@ -279,7 +279,7 @@ func (installer *Installer) buildPkg(ctx context.Context,
 ) (map[string]string, error) {
 	args := []string{"--nobuild", "-f"}
 
-	if installer.exeCmd.GetCleanBuild() {
+	if !installer.exeCmd.GetKeepSrc() {
 		args = append(args, "-C")
 	}
 
@@ -313,7 +313,7 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		}
 	}
 
-	if installer.exeCmd.GetCleanBuild() {
+	if !installer.exeCmd.GetKeepSrc() {
 		args = append(args, "-c")
 	}
 

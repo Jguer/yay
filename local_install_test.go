@@ -104,7 +104,6 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -234,7 +233,6 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -370,7 +368,6 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -549,7 +546,6 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -688,7 +684,6 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -831,7 +826,6 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -971,7 +965,6 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 

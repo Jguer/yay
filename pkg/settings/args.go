@@ -53,8 +53,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.CleanAfter = true
 	case "noafterclean", "nocleanafter":
 		c.CleanAfter = false
-	case "nocleanbuild":
-		c.CleanBuild = false
+	case "keepsrc":
+		c.KeepSrc = true
 	case "debug":
 		c.Debug = true
 		return false

@@ -378,7 +378,7 @@ func isArg(arg string) bool {
 	case "save":
 	case "afterclean", "cleanafter":
 	case "noafterclean", "nocleanafter":
-	case "nocleanbuild":
+	case "keepsrc":
 	case "devel":
 	case "nodevel":
 	case "timeupdate":

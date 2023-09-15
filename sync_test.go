@@ -64,7 +64,6 @@ func TestSyncUpgrade(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -177,7 +176,6 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -289,7 +287,6 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -463,7 +460,6 @@ pkgname = python-vosk
 		PacmanConfigPath: "/etc/pacman.conf",
 		GitBin:           "git",
 		Runner:           mockRunner,
-		CleanBuild:       true,
 		SudoLoopEnabled:  false,
 	}
 
@@ -669,7 +665,6 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 				PacmanConfigPath: "/etc/pacman.conf",
 				GitBin:           "git",
 				Runner:           mockRunner,
-				CleanBuild:       true,
 				SudoLoopEnabled:  false,
 			}
 
