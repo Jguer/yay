@@ -17,6 +17,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Lint
+        env:
+          GOFLAGS: -buildvcs=false
         run: /app/bin/golangci-lint run ./...
       - name: Run Build and Tests
         run: make test

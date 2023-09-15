@@ -42,7 +42,7 @@ func TestIntegrationPKGBUILDReposDefinedDBClone(t *testing.T) {
 		absPackagesDB: map[string]string{"linux": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, testLogger.Child("test"),
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
 	assert.NoError(t, err)
@@ -71,7 +71,7 @@ func TestIntegrationPKGBUILDReposNotExist(t *testing.T) {
 		absPackagesDB: map[string]string{"yay": "core"},
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
-		cmdBuilder,
+		cmdBuilder, testLogger.Child("test"),
 		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
 
 	assert.Error(t, err)
@@ -88,12 +88,13 @@ func TestIntegrationPKGBUILDFull(t *testing.T) {
 		},
 	}
 
+	testLogger := text.NewLogger(os.Stdout, os.Stderr, strings.NewReader(""), true, "test")
 	targets := []string{"core/linux", "aur/yay-bin", "yay-git"}
 	searcher := &testDBSearcher{
 		absPackagesDB: map[string]string{"linux": "core"},
 	}
 
-	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{},
+	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{}, testLogger.Child("test"),
 		targets, "https://aur.archlinux.org", parser.ModeAny)
 
 	assert.NoError(t, err)
