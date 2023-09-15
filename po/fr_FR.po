@@ -1,4 +1,4 @@
-# 
+#
 # Translators:
 # J G, 2021
 # Oliver Conzen, 2021
@@ -9,7 +9,7 @@
 # Mélanie Chauvel <perso@hack-libre.org>, 2023
 # Maxime Demolin, 2023
 # Mathias Brugger, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Last-Translator: Mathias Brugger, 2023\n"
@@ -247,7 +247,7 @@ msgstr "Paquets AUR marqués comme obsolètes :"
 
 #: print.go:84
 msgid "Foreign installed packages: %s"
-msgstr "Paquets étrangers installés :"
+msgstr "Paquets étrangers installés : %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"

@@ -1,10 +1,10 @@
-# 
+#
 # Translators:
 # J G, 2021
 # makvasm, 2021
 # antsif.a, 2022
 # Demir Yerli, 2022
-# 
+#
 msgid ""
 msgstr ""
 "Last-Translator: Demir Yerli, 2022\n"
@@ -373,11 +373,11 @@ msgstr "Показываются только пакеты из репозито
 
 #: print.go:89
 msgid "Size of pacman cache %s: %s"
-msgstr "Размер кэша \"pacman\""
+msgstr "Размер кэша \"pacman\" %s: %s"
 
 #: print.go:92
 msgid "Size of yay cache %s: %s"
-msgstr "Размер кэша \"yay\""
+msgstr "Размер кэша \"yay\" %s: %s"
 
 #: print.go:53
 msgid "Snapshot URL"
