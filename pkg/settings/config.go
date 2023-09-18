@@ -56,6 +56,7 @@ type Configuration struct {
 	TimeUpdate             bool   `json:"timeupdate"`
 	Devel                  bool   `json:"devel"`
 	CleanAfter             bool   `json:"cleanAfter"`
+	KeepSrc                bool   `json:"keepSrc"`
 	Provides               bool   `json:"provides"`
 	PGPFetch               bool   `json:"pgpfetch"`
 	CleanMenu              bool   `json:"cleanmenu"`
@@ -193,6 +194,7 @@ func DefaultConfig(version string) *Configuration {
 		AURURL:                 "https://aur.archlinux.org",
 		BuildDir:               os.ExpandEnv("$HOME/.cache/yay"),
 		CleanAfter:             false,
+		KeepSrc:                false,
 		Editor:                 "",
 		EditorFlags:            "",
 		Devel:                  false,

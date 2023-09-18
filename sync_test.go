@@ -552,11 +552,11 @@ pkgname = python-vosk
 	}
 	wantShow := []string{
 		"pacman -S -y --config /etc/pacman.conf --",
-		"makepkg --verifysource --skippgpcheck -Ccf", "makepkg --nobuild -fC --ignorearch",
+		"makepkg --verifysource --skippgpcheck -f -Cc", "makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/vosk-api-0.3.45-1-x86_64.pkg.tar.zst",
-		"makepkg --nobuild -fC --ignorearch", "makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -fC --ignorearch", "makepkg -c --nobuild --noextract --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch", "makepkg -c --nobuild --noextract --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch", "makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/vosk-api-0.3.45-1-x86_64.pkg.tar.zst /testdir/python-vosk-0.3.45-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- vosk-api",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- python-vosk",

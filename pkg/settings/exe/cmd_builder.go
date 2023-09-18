@@ -39,6 +39,7 @@ type ICmdBuilder interface {
 	BuildMakepkgCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd
 	BuildPacmanCmd(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd
 	AddMakepkgFlag(string)
+	GetKeepSrc() bool
 	SudoLoop()
 }
 
@@ -56,6 +57,7 @@ type CmdBuilder struct {
 	PacmanBin        string
 	PacmanConfigPath string
 	PacmanDBPath     string
+	KeepSrc          bool
 	Runner           Runner
 	Log              *text.Logger
 }
@@ -75,6 +77,7 @@ func NewCmdBuilder(cfg *settings.Configuration, runner Runner, logger *text.Logg
 		PacmanBin:        cfg.PacmanBin,
 		PacmanConfigPath: cfg.PacmanConf,
 		PacmanDBPath:     dbPath,
+		KeepSrc:          cfg.KeepSrc,
 		Runner:           runner,
 		Log:              logger,
 	}
@@ -295,4 +298,8 @@ func (c *CmdBuilder) Show(cmd *exec.Cmd) error {
 
 func (c *CmdBuilder) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	return c.Runner.Capture(cmd)
+}
+
+func (c *CmdBuilder) GetKeepSrc() bool {
+	return c.KeepSrc
 }
