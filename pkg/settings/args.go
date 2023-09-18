@@ -42,30 +42,35 @@ func (c *Configuration) extractYayOptions(a *parser.Arguments) {
 }
 
 func (c *Configuration) handleOption(option, value string) bool {
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		boolValue = true
+	}
+
 	switch option {
 	case "aururl":
 		c.AURURL = value
 	case "aurrpcurl":
 		c.AURRPCURL = value
 	case "save":
-		c.SaveConfig = true
+		c.SaveConfig = boolValue
 	case "afterclean", "cleanafter":
-		c.CleanAfter = true
-	case "noafterclean", "nocleanafter":
-		c.CleanAfter = false
+		c.CleanAfter = boolValue
+	case "noafterclean", "nocleanafter": // DEPRECATED
+		c.CleanAfter = !boolValue
 	case "keepsrc":
-		c.KeepSrc = true
+		c.KeepSrc = boolValue
 	case "debug":
-		c.Debug = true
-		return false
+		c.Debug = boolValue
+		return !boolValue
 	case "devel":
-		c.Devel = true
-	case "nodevel":
-		c.Devel = false
+		c.Devel = boolValue
+	case "nodevel": // DEPRECATED
+		c.Devel = !boolValue
 	case "timeupdate":
-		c.TimeUpdate = true
-	case "notimeupdate":
-		c.TimeUpdate = false
+		c.TimeUpdate = boolValue
+	case "notimeupdate": // DEPRECATED
+		c.TimeUpdate = !boolValue
 	case "topdown":
 		c.BottomUp = false
 	case "bottomup":
@@ -84,7 +89,7 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "searchby":
 		c.SearchBy = value
 	case "noconfirm":
-		NoConfirm = true
+		NoConfirm = boolValue
 	case "config":
 		c.PacmanConf = value
 	case "redownload":
@@ -102,9 +107,9 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "norebuild":
 		c.ReBuild = parser.RebuildModeNo
 	case "batchinstall":
-		c.BatchInstall = true
-	case "nobatchinstall":
-		c.BatchInstall = false
+		c.BatchInstall = boolValue
+	case "nobatchinstall": // DEPRECATED
+		c.BatchInstall = !boolValue
 	case "answerclean":
 		c.AnswerClean = value
 	case "noanswerclean":
@@ -155,37 +160,37 @@ func (c *Configuration) handleOption(option, value string) bool {
 			c.RequestSplitN = n
 		}
 	case "sudoloop":
-		c.SudoLoop = true
-	case "nosudoloop":
-		c.SudoLoop = false
+		c.SudoLoop = boolValue
+	case "nosudoloop": // DEPRECATED
+		c.SudoLoop = !boolValue
 	case "provides":
-		c.Provides = true
-	case "noprovides":
-		c.Provides = false
+		c.Provides = boolValue
+	case "noprovides": // DEPRECATED
+		c.Provides = !boolValue
 	case "pgpfetch":
-		c.PGPFetch = true
-	case "nopgpfetch":
-		c.PGPFetch = false
+		c.PGPFetch = boolValue
+	case "nopgpfetch": // DEPRECATED
+		c.PGPFetch = !boolValue
 	case "cleanmenu":
-		c.CleanMenu = true
-	case "nocleanmenu":
-		c.CleanMenu = false
+		c.CleanMenu = boolValue
+	case "nocleanmenu": // DEPRECATED
+		c.CleanMenu = !boolValue
 	case "diffmenu":
-		c.DiffMenu = true
-	case "nodiffmenu":
-		c.DiffMenu = false
+		c.DiffMenu = boolValue
+	case "nodiffmenu": // DEPRECATED
+		c.DiffMenu = !boolValue
 	case "editmenu":
-		c.EditMenu = true
-	case "noeditmenu":
-		c.EditMenu = false
+		c.EditMenu = boolValue
+	case "noeditmenu": // DEPRECATED
+		c.EditMenu = !boolValue
 	case "useask":
-		c.UseAsk = true
-	case "nouseask":
-		c.UseAsk = false
+		c.UseAsk = boolValue
+	case "nouseask": // DEPRECATED
+		c.UseAsk = !boolValue
 	case "combinedupgrade":
-		c.CombinedUpgrade = true
-	case "nocombinedupgrade":
-		c.CombinedUpgrade = false
+		c.CombinedUpgrade = boolValue
+	case "nocombinedupgrade": // DEPRECATED
+		c.CombinedUpgrade = !boolValue
 	case "a", "aur":
 		c.Mode = parser.ModeAUR
 	case "repo":
@@ -199,9 +204,9 @@ func (c *Configuration) handleOption(option, value string) bool {
 	case "askyesremovemake":
 		c.RemoveMake = "askyes"
 	case "separatesources":
-		c.SeparateSources = true
-	case "noseparatesources":
-		c.SeparateSources = false
+		c.SeparateSources = boolValue
+	case "noseparatesources": // DEPRECATED
+		c.SeparateSources = !boolValue
 	default:
 		return false
 	}
