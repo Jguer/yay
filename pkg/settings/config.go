@@ -208,7 +208,7 @@ func DefaultConfig(version string) *Configuration {
 		GitFlags:               "",
 		BottomUp:               true,
 		CompletionInterval:     7,
-		MaxConcurrentDownloads: 0,
+		MaxConcurrentDownloads: 1,
 		SortBy:                 "votes",
 		SearchBy:               "name-desc",
 		SudoLoop:               false,
