@@ -4,16 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 
-	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 
-	"github.com/Jguer/aur/metadata"
 	"github.com/leonelquinteros/gotext"
 	"github.com/pkg/errors"
 )
@@ -34,23 +31,7 @@ func handleCmd(logger *text.Logger) error {
 		return err
 	}
 
-	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, logger)
-	if err != nil {
-		return err
-	}
-
-	aurCache, err := metadata.New(
-		metadata.WithCacheFilePath(
-			filepath.Join(cfg.BuildDir, "aur.json")))
-	if err != nil {
-		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
-	}
-
-	grapher := dep.NewGrapher(dbExecutor, cfg, aurCache, run.CmdBuilder, true, settings.NoConfirm,
-		cmdArgs.ExistsDouble("d", "nodeps"), false, false,
-		run.Logger.Child("grapher"))
-
-	return graphPackage(context.Background(), grapher, cmdArgs.Targets)
+	return graphPackage(context.Background(), run.Grapher, cmdArgs.Targets)
 }
 
 func main() {
@@ -70,7 +51,7 @@ func graphPackage(
 		return errors.New(gotext.Get("only one target is allowed"))
 	}
 
-	graph, err := grapher.GraphFromAUR(ctx, nil, []string{targets[0]})
+	graph, err := grapher.GraphFromTargets(ctx, nil, []string{targets[0]})
 	if err != nil {
 		return err
 	}

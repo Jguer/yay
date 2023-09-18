@@ -18,7 +18,6 @@ func UpDevel(
 	aurdata map[string]*query.Pkg,
 	localCache vcs.Store,
 ) UpSlice {
-	toRemove := make([]string, 0)
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"devel"}}
 
 	for pkgName, pkg := range remote {
@@ -44,8 +43,6 @@ func UpDevel(
 				})
 		}
 	}
-
-	localCache.RemovePackages(toRemove)
 
 	return toUpgrade
 }

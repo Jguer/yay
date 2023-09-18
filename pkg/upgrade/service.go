@@ -9,14 +9,12 @@ import (
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/go-alpm/v2"
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -51,135 +49,6 @@ func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
 		log:         logger,
 		AURWarnings: query.NewWarnings(logger.Child("warnings")),
 	}
-}
-
-// upGraph adds packages to upgrade to the graph.
-func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, *dep.InstallInfo],
-	enableDowngrade bool,
-	filter Filter,
-) (err error) {
-	var (
-		develUp UpSlice
-		errs    multierror.MultiError
-		aurdata = make(map[string]*aur.Pkg)
-		aurUp   UpSlice
-	)
-
-	remote := u.dbExecutor.InstalledRemotePackages()
-	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
-
-	if u.cfg.Mode.AtLeastAUR() {
-		u.log.OperationInfoln(gotext.Get("Searching AUR for updates..."))
-
-		_aurdata, err := u.aurCache.Get(ctx, &aur.Query{Needles: remoteNames, By: aur.Name})
-
-		errs.Add(err)
-
-		if err == nil {
-			for i := range _aurdata {
-				pkg := &_aurdata[i]
-				aurdata[pkg.Name] = pkg
-				u.AURWarnings.AddToWarnings(remote, pkg)
-			}
-
-			u.AURWarnings.CalculateMissing(remoteNames, remote, aurdata)
-
-			aurUp = UpAUR(u.log, remote, aurdata, u.cfg.TimeUpdate, enableDowngrade)
-
-			if u.cfg.Devel {
-				u.log.OperationInfoln(gotext.Get("Checking development packages..."))
-
-				develUp = UpDevel(ctx, u.log, remote, aurdata, u.vcsStore)
-
-				u.vcsStore.CleanOrphans(remote)
-			}
-		}
-	}
-
-	aurPkgsAdded := []*aur.Pkg{}
-
-	names := mapset.NewThreadUnsafeSet[string]()
-	for i := range develUp.Up {
-		up := &develUp.Up[i]
-		// check if deps are satisfied for aur packages
-		reason := dep.Explicit
-		if up.Reason == alpm.PkgReasonDepend {
-			reason = dep.Dep
-		}
-
-		if filter != nil && !filter(up) {
-			continue
-		}
-
-		aurPkg := aurdata[up.Name]
-		graph = u.grapher.GraphAURTarget(ctx, graph, aurPkg, &dep.InstallInfo{
-			Reason:       reason,
-			Source:       dep.AUR,
-			AURBase:      &aurPkg.PackageBase,
-			Upgrade:      true,
-			Devel:        true,
-			LocalVersion: up.LocalVersion,
-			Version:      up.RemoteVersion,
-		})
-		names.Add(up.Name)
-		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
-	}
-
-	for i := range aurUp.Up {
-		up := &aurUp.Up[i]
-		// add devel packages if they are not already in the list
-		if names.Contains(up.Name) {
-			continue
-		}
-
-		// check if deps are satisfied for aur packages
-		reason := dep.Explicit
-		if up.Reason == alpm.PkgReasonDepend {
-			reason = dep.Dep
-		}
-
-		if filter != nil && !filter(up) {
-			continue
-		}
-
-		aurPkg := aurdata[up.Name]
-		graph = u.grapher.GraphAURTarget(ctx, graph, aurPkg, &dep.InstallInfo{
-			Reason:       reason,
-			Source:       dep.AUR,
-			AURBase:      &aurPkg.PackageBase,
-			Upgrade:      true,
-			Version:      up.RemoteVersion,
-			LocalVersion: up.LocalVersion,
-		})
-		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
-	}
-
-	u.grapher.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
-
-	if u.cfg.Mode.AtLeastRepo() {
-		u.log.OperationInfoln(gotext.Get("Searching databases for updates..."))
-
-		syncUpgrades, err := u.dbExecutor.SyncUpgrades(enableDowngrade)
-		for _, up := range syncUpgrades {
-			if filter != nil && !filter(&db.Upgrade{
-				Name:          up.Package.Name(),
-				RemoteVersion: up.Package.Version(),
-				Repository:    up.Package.DB().Name(),
-				Base:          up.Package.Base(),
-				LocalVersion:  up.LocalVersion,
-				Reason:        up.Reason,
-			}) {
-				continue
-			}
-
-			upgradeInfo := up
-			graph = dep.GraphSyncPkg(ctx, u.dbExecutor, graph, u.log, up.Package, &upgradeInfo)
-		}
-
-		errs.Add(err)
-	}
-
-	return errs.Return()
 }
 
 func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallInfo]) (aurUp, repoUp UpSlice) {
@@ -237,17 +106,9 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	graph *topo.Graph[string, *dep.InstallInfo],
 	enableDowngrade bool, filter Filter,
 ) (*topo.Graph[string, *dep.InstallInfo], error) {
-	if graph == nil {
-		graph = dep.NewGraph()
-	}
-
-	err := u.upGraph(ctx, graph, enableDowngrade, filter)
+	graph, err := u.grapher.GraphUpgrades(ctx, graph, enableDowngrade)
 	if err != nil {
 		return graph, err
-	}
-
-	if graph.Len() == 0 {
-		return graph, nil
 	}
 
 	return graph, nil

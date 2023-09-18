@@ -9,7 +9,6 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -109,26 +108,15 @@ func main() {
 		return
 	}
 
-	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))
-	if err != nil {
-		if str := err.Error(); str != "" {
-			fallbackLog.Errorln(str)
-		}
-
-		ret = 1
-
-		return
-	}
-
 	defer func() {
 		if rec := recover(); rec != nil {
 			fallbackLog.Errorln(rec, string(debug.Stack()))
 		}
 
-		dbExecutor.Cleanup()
+		run.DB.Cleanup()
 	}()
 
-	if err = handleCmd(ctx, run, cmdArgs, dbExecutor); err != nil {
+	if err = handleCmd(ctx, run, cmdArgs, run.DB); err != nil {
 		if str := err.Error(); str != "" {
 			fallbackLog.Errorln(str)
 			if cmdArgs.ExistsArg("c") && cmdArgs.ExistsArg("y") && cmdArgs.Op == "S" {

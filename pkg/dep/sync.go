@@ -32,7 +32,7 @@ func (h *AllSyncHandler) Test(target Target) bool {
 
 func (h *AllSyncHandler) Graph(ctx context.Context, graph *topo.Graph[string, *InstallInfo]) error {
 	for _, pkg := range h.foundTargets {
-		GraphSyncPkg(ctx, h.db, graph, h.log, pkg, nil)
+		graphSyncPkg(ctx, h.db, graph, h.log, pkg, nil)
 	}
 	return nil
 }
@@ -72,7 +72,7 @@ func (h *SyncHandler) Test(target Target) bool {
 
 func (h *SyncHandler) Graph(ctx context.Context, graph *topo.Graph[string, *InstallInfo]) error {
 	for _, pkg := range h.foundPkgs {
-		GraphSyncPkg(ctx, h.db, graph, h.log, pkg, nil)
+		graphSyncPkg(ctx, h.db, graph, h.log, pkg, nil)
 	}
 
 	for _, target := range h.foundGroups {
@@ -104,7 +104,7 @@ func (h *AllSyncGroupHandler) Graph(ctx context.Context, graph *topo.Graph[strin
 	return nil
 }
 
-func GraphSyncPkg(ctx context.Context, dbExecutor db.Executor,
+func graphSyncPkg(ctx context.Context, dbExecutor db.Executor,
 	graph *topo.Graph[string, *InstallInfo], logger *text.Logger,
 	pkg alpm.IPackage, upgradeInfo *db.SyncUpgrade,
 ) *topo.Graph[string, *InstallInfo] {

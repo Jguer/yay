@@ -9,6 +9,11 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/go-alpm/v2"
+
+	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/db/ialpm"
+	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
@@ -25,6 +30,7 @@ import (
 
 type Runtime struct {
 	Cfg          *settings.Configuration
+	DB           db.Executor
 	QueryBuilder query.Builder
 	PacmanConf   *pacmanconf.Config
 	VCSStore     vcs.Store
@@ -33,6 +39,7 @@ type Runtime struct {
 	VoteClient   *vote.Client
 	AURClient    aur.QueryClient
 	Logger       *text.Logger
+	Grapher      *dep.Grapher
 }
 
 func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
@@ -91,6 +98,11 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		return nil, err
 	}
 
+	dbExecutor, err := ialpm.NewExecutor(pacmanConf, logger.Child("db"))
+	if err != nil {
+		return nil, err
+	}
+
 	// FIXME: get rid of global
 	text.UseColor = useColor
 
@@ -110,8 +122,11 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		cfg.Mode, cfg.SearchBy,
 		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
 
+	grapher := dep.NewGrapher(logger.Child("grapher"))
+
 	run := &Runtime{
 		Cfg:          cfg,
+		DB:           dbExecutor,
 		QueryBuilder: queryBuilder,
 		PacmanConf:   pacmanConf,
 		VCSStore:     vcsStore,
@@ -120,7 +135,44 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		VoteClient:   voteClient,
 		AURClient:    aurCache,
 		Logger:       logger,
+		Grapher:      grapher,
 	}
 
 	return run, nil
+}
+
+func RegisterHandlers(grapher *dep.Grapher) {
+	grapher.RegisterSourceHandler(&AllSyncHandler{
+		log:          logger,
+		db:           dbExecutor,
+		foundTargets: []alpm.IPackage{},
+	}, "")
+	grapher.RegisterSourceHandler(&AllSyncGroupHandler{
+		db:           dbExecutor,
+		foundTargets: []Target{},
+	}, "")
+
+	grapher.RegisterSourceHandler(&SRCINFOHandler{
+		log:          logger,
+		db:           dbExecutor,
+		cmdBuilder:   cmdBuilder,
+		foundTargets: []string{},
+	}, sourceCacheSRCINFO)
+
+	aurHandler := &AURHandler{
+		log: logger,
+		db:  dbExecutor,
+	}
+	grapher.RegisterSourceHandler(aurHandler, "")
+
+	for _, repo := range grapher.dbExecutor.Repos() {
+		grapher.RegisterSourceHandler(&SyncHandler{
+			log:         logger,
+			db:          dbExecutor,
+			foundPkgs:   []alpm.IPackage{},
+			foundGroups: []Target{},
+		}, repo)
+	}
+
+	grapher.RegisterSourceHandler(aurHandler, "aur")
 }
