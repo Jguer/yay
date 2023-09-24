@@ -5,21 +5,24 @@ import (
 	"strings"
 
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v12/pkg/text"
+
+	"github.com/leonelquinteros/gotext"
 )
 
-func (c *Configuration) ParseCommandLine(a *parser.Arguments) error {
+func (c *Configuration) ParseCommandLine(a *parser.Arguments, logger *text.Logger) error {
 	if err := a.Parse(); err != nil {
 		return err
 	}
 
-	c.extractYayOptions(a)
+	c.extractYayOptions(a, logger)
 
 	return nil
 }
 
-func (c *Configuration) extractYayOptions(a *parser.Arguments) {
+func (c *Configuration) extractYayOptions(a *parser.Arguments, logger *text.Logger) {
 	for option, value := range a.Options {
-		if c.handleOption(option, value.First()) {
+		if c.handleOption(option, value.First(), logger) {
 			a.DelArg(option)
 		}
 	}
@@ -41,7 +44,7 @@ func (c *Configuration) extractYayOptions(a *parser.Arguments) {
 	}
 }
 
-func (c *Configuration) handleOption(option, value string) bool {
+func (c *Configuration) handleOption(option, value string, logger *text.Logger) bool {
 	boolValue, err := strconv.ParseBool(value)
 	if err != nil {
 		boolValue = true
@@ -56,7 +59,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.SaveConfig = boolValue
 	case "afterclean", "cleanafter":
 		c.CleanAfter = boolValue
-	case "noafterclean", "nocleanafter": // DEPRECATED
+	case "noafterclean", "nocleanafter":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--cleanafter=false' instead", option))
 		c.CleanAfter = !boolValue
 	case "keepsrc":
 		c.KeepSrc = boolValue
@@ -65,11 +69,13 @@ func (c *Configuration) handleOption(option, value string) bool {
 		return !boolValue
 	case "devel":
 		c.Devel = boolValue
-	case "nodevel": // DEPRECATED
+	case "nodevel":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--devel=false' instead", option))
 		c.Devel = !boolValue
 	case "timeupdate":
 		c.TimeUpdate = boolValue
-	case "notimeupdate": // DEPRECATED
+	case "notimeupdate":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--timeupdate=false' instead", option))
 		c.TimeUpdate = !boolValue
 	case "topdown":
 		c.BottomUp = false
@@ -108,7 +114,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.ReBuild = parser.RebuildModeNo
 	case "batchinstall":
 		c.BatchInstall = boolValue
-	case "nobatchinstall": // DEPRECATED
+	case "nobatchinstall":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--batchinstall=false' instead", option))
 		c.BatchInstall = !boolValue
 	case "answerclean":
 		c.AnswerClean = value
@@ -161,35 +168,43 @@ func (c *Configuration) handleOption(option, value string) bool {
 		}
 	case "sudoloop":
 		c.SudoLoop = boolValue
-	case "nosudoloop": // DEPRECATED
+	case "nosudoloop":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--sudoloop=false' instead", option))
 		c.SudoLoop = !boolValue
 	case "provides":
 		c.Provides = boolValue
-	case "noprovides": // DEPRECATED
+	case "noprovides":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--provides=false' instead", option))
 		c.Provides = !boolValue
 	case "pgpfetch":
 		c.PGPFetch = boolValue
-	case "nopgpfetch": // DEPRECATED
+	case "nopgpfetch":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--pgpfetch=false' instead", option))
 		c.PGPFetch = !boolValue
 	case "cleanmenu":
 		c.CleanMenu = boolValue
-	case "nocleanmenu": // DEPRECATED
+	case "nocleanmenu":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--cleanmenu=false' instead", option))
 		c.CleanMenu = !boolValue
 	case "diffmenu":
 		c.DiffMenu = boolValue
-	case "nodiffmenu": // DEPRECATED
+	case "nodiffmenu":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--diffmenu=false' instead", option))
 		c.DiffMenu = !boolValue
 	case "editmenu":
 		c.EditMenu = boolValue
-	case "noeditmenu": // DEPRECATED
+	case "noeditmenu":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--editmenu=false' instead", option))
 		c.EditMenu = !boolValue
 	case "useask":
 		c.UseAsk = boolValue
-	case "nouseask": // DEPRECATED
+	case "nouseask":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--useask=false' instead", option))
 		c.UseAsk = !boolValue
 	case "combinedupgrade":
 		c.CombinedUpgrade = boolValue
-	case "nocombinedupgrade": // DEPRECATED
+	case "nocombinedupgrade":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--combinedupgrade=false' instead", option))
 		c.CombinedUpgrade = !boolValue
 	case "a", "aur":
 		c.Mode = parser.ModeAUR
@@ -205,7 +220,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.RemoveMake = "askyes"
 	case "separatesources":
 		c.SeparateSources = boolValue
-	case "noseparatesources": // DEPRECATED
+	case "noseparatesources":
+		logger.Warnln(gotext.Get("'--%s' is deprecated. Use '--separatesources=false' instead", option))
 		c.SeparateSources = !boolValue
 	default:
 		return false
