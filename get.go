@@ -26,10 +26,8 @@ func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient,
 		logger.Errorln(err)
 	}
 
-	if len(pkgbuilds) != 0 {
-		for target, pkgbuild := range pkgbuilds {
-			logger.Printf("\n\n# %s\n\n%s", target, string(pkgbuild))
-		}
+	for target, pkgbuild := range pkgbuilds {
+		logger.Printf("\n\n# %s\n\n%s", target, string(pkgbuild))
 	}
 
 	if len(pkgbuilds) != len(targets) {
