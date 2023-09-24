@@ -293,6 +293,9 @@ Unset the answer for the upgrade menu.
 Show the clean menu. This menu gives you the chance to fully delete the
 downloaded build files from Yay's cache before redownloading a fresh copy.
 
+If 'cleanmenu' is enabled in the configuration file, you can temporarily disable it by
+using '--cleanmenu=false' on the command line
+
 .TP
 .B \-\-diffmenu
 Show the diff menu. This menu gives you the option to view diffs from
@@ -311,15 +314,15 @@ before building.
 recommended to edit pkgbuild variables unless you know what you are doing.
 
 .TP
-.B \-\-nocleanmenu
+.B \-\-nocleanmenu *Deprecated*
 Do not show the clean menu.
 
 .TP
-.B \-\-nodiffmenu
+.B \-\-nodiffmenu *Deprecated*
 Do not show the diff menu.
 
 .TP
-.B \-\-noeditmenu
+.B \-\-noeditmenu *Deprecated*
 Do not show the edit menu.
 
 .TP
@@ -368,8 +371,11 @@ checked almost instantly and not require the original pkgbuild to be downloaded.
 The slower pacaur-like devel checks can be implemented manually by piping
 a list of packages into yay (see \fBexamples\fR).
 
+If 'devel' is enabled in the configuration file, you can temporarily disable it by
+using '--devel=false' on the command line
+
 .TP
-.B \-\-nodevel
+.B \-\-nodevel *Deprecated*
 Do not check for development packages updates during sysupgrade.
 
 .TP
@@ -381,7 +387,7 @@ This allows VCS packages to easily pull an update
 instead of having to reclone the entire repo.
 
 .TP
-.B \-\-nocleanafter
+.B \-\-nocleanafter *Deprecated*
 Do not remove package sources after successful Install.
 
 .TP
@@ -394,7 +400,7 @@ During sysupgrade also compare the build time of installed packages against
 the last modification time of each package's AUR page.
 
 .TP
-.B \-\-notimeupdate
+.B \-\-notimeupdate *Deprecated*
 Do not consider build times during sysupgrade.
 
 .TP
@@ -402,7 +408,7 @@ Do not consider build times during sysupgrade.
 Separate query results by source, AUR and sync
 
 .TP
-.B \-\-noseparatesources
+.B \-\-noseparatesources *Deprecated*
 Do not separate query results by source for searching
 
 .TP
@@ -426,7 +432,7 @@ providers are found a menu will appear prompting you to pick one. This
 increases dependency resolve time although this should not be noticeable.
 
 .TP
-.B \-\-noprovides
+.B \-\-noprovides *Deprecated*
 Do not look for matching providers when searching for AUR packages.
 Yay will never show its provider menu but Pacman will still show its
 provider menu for repo packages.
@@ -437,7 +443,7 @@ Prompt to import unknown PGP keys from the \fBvalidpgpkeys\fR field of each
 PKGBUILD.
 
 .TP
-.B \-\-nopgpfetch
+.B \-\-nopgpfetch *Deprecated*
 Do not prompt to import unknown PGP keys. This is likely to cause a build
 failure unless using options such as \fB\-\-skippgpcheck\fR or a customized
 gpg config\%.
@@ -450,7 +456,7 @@ a conflict, causing a package to be removed without the user's confirmation.
 However, this is very unlikely.
 
 .TP
-.B \-\-nouseask
+.B \-\-nouseask *Deprecated*
 Manually resolve package conflicts during the install. Packages which do not
 conflict will not need to be confined manually.
 
@@ -466,7 +472,7 @@ the user's responsibility to either resolve the reason Yay exited or run
 a sysupgrade through pacman directly.
 
 .TP
-.B \-\-nocombinedupgrade
+.B \-\-nocombinedupgrade *Deprecated*
 During sysupgrade, Pacman \-Syu will be called, then the AUR upgrade will
 start. This means the upgrade menu and pkgbuild review will be performed
 after the sysupgrade has finished.
@@ -479,7 +485,7 @@ are built or a package in the build queue is needed as a dependency to build
 another package, install all the packages in the install queue.
 
 .TP
-.B \-\-nobatchinstall
+.B \-\-nobatchinstall *Deprecated*
 Always install AUR packages immediately after building them.
 
 .TP
@@ -536,7 +542,7 @@ Loop sudo calls in the background to prevent sudo from timing out during long
 builds.
 
 .TP
-.B \-\-nosudoloop
+.B \-\-nosudoloop *Deprecated*
 Do not loop sudo calls in the background.
 
 .SH EXAMPLES
