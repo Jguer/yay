@@ -80,10 +80,8 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 		missing = true
 	}
 
-	if len(info) != 0 {
-		for i := range info {
-			printInfo(run.Logger, run.Cfg, &info[i], cmdArgs.ExistsDouble("i"))
-		}
+	for i := range info {
+		printInfo(run.Logger, run.Cfg, &info[i], cmdArgs.ExistsDouble("i"))
 	}
 
 	if missing {
