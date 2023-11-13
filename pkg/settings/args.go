@@ -208,7 +208,7 @@ func (c *Configuration) handleOption(option, value string, logger *text.Logger) 
 		c.CombinedUpgrade = !boolValue
 	case "a", "aur":
 		c.Mode = parser.ModeAUR
-	case "repo":
+	case "z", "repo":
 		c.Mode = parser.ModeRepo
 	case "removemake":
 		c.RemoveMake = "yes"
