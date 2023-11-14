@@ -1,64 +1,64 @@
-# 
+#
 # Translators:
 # Yaron Shahrabani <sh.yaron@gmail.com>, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>, 2023\n"
 "Language-Team: Hebrew (https://app.transifex.com/yay-1/teams/123732/he/)\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: he\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % "
+"1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
 "X-Generator: xgotext\n"
 
-#: pkg/menus/menu.go:31
+#: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
 msgstr " (קיימים קובצי בנייה)"
 
-#: pkg/menus/menu.go:26
+#: pkg/menus/menu.go:27
 msgid " (Installed)"
 msgstr " (מותקנת)"
 
-#: cmd.go:461
+#: cmd.go:463
 msgid " [Installed]"
 msgstr " [מותקנת]"
 
-#: cmd.go:418 vote.go:35
+#: cmd.go:420 vote.go:36
 msgid " there is nothing to do"
 msgstr "אין מטרות לביצוע"
 
-#: pkg/menus/menu.go:48
+#: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
-msgstr ""
-"%s [A]-הכול [Ab]-ביטול [I]-מותקנות [No]-לא מותקנות או (1 2 3, 1-3, ‎^4)"
+msgstr "%s [A]-הכול [Ab]-ביטול [I]-מותקנות [No]-לא מותקנות או (1 2 3, 1-3, ‎^4)"
 
-#: aur_install.go:304
+#: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
 msgstr "%s כבר נבנתה -- לא תיבנה שוב"
 
-#: pkg/menus/edit_menu.go:56
+#: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
 msgstr "%s לא מוגדר"
 
-#: pkg/settings/exe/cmd_builder.go:238
+#: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
 msgstr "%s קיימת."
 
-#: pkg/dep/dep_graph.go:431 aur_install.go:301
+#: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
 msgstr "%s עדכנית -- מדלגים"
 
-#: pkg/upgrade/service.go:304
+#: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
 msgstr "%s לשדרוג/התקנה."
 
-#: pkg/upgrade/service.go:298
+#: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
 msgstr "גם %s תותקן לשם הפעולה הזאת."
 
-#: pkg/pgp/keys.go:127
+#: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
 msgstr "%s, נדרשה ע״י: %s"
 
@@ -78,25 +78,81 @@ msgstr "%s: אי אפשר להשתמש ביעד עם האפשרות ‎--repo --
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: מתעלמים משדרוג חבילה (%s => %s)"
 
-#: pkg/query/aur_warnings.go:51
+#: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr "%s: מקומית (%s) חדשה יותר מ־AUR (%s)"
 
-#: vote.go:50
+#: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
-"voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
 msgstr "%s: נא להגדיר את משתני הסביבה AUR_USERNAME ו־AUR_PASSWORD כדי להצביע"
+
+#: pkg/settings/args.go:118
+msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:63
+msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:187
+msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:207
+msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:73
+msgid "'--%s' is deprecated. Use '--devel=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:192
+msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:197
+msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:182
+msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:177
+msgid "'--%s' is deprecated. Use '--provides=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:224
+msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:172
+msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:78
+msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
+msgstr ""
+
+#: pkg/settings/args.go:202
+msgid "'--%s' is deprecated. Use '--useask=false' instead"
+msgstr ""
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr "(%d/%d) PKGBUILD ירד מ־ABS: %s"
 
-#: pkg/download/aur.go:84 pkg/download/unified.go:188
+#: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) PKGBUILD שירד: %s"
 
-#: pkg/srcinfo/service.go:108
+#: pkg/download/aur.go:82
+#, fuzzy
+msgid "(%d/%d) Failed to download PKGBUILD: %s"
+msgstr "(%d/%d) PKGBUILD שירד: %s"
+
+#: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) מתבצע פענוח של SRCINFO: %s"
 
@@ -116,7 +172,7 @@ msgstr "(יתומה)"
 msgid "(Out-of-date: %s)"
 msgstr "(לא עדכנית: %s)"
 
-#: print.go:31
+#: print.go:44
 msgid "AUR URL"
 msgstr "כתובת AUR"
 
@@ -124,7 +180,7 @@ msgstr "כתובת AUR"
 msgid "AUR"
 msgstr "AUR"
 
-#: pkg/menus/edit_menu.go:57
+#: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
 msgstr "יש להוסיף %s או %s למשתני הסביבה שלך"
 
@@ -136,7 +192,7 @@ msgstr "כדאי להימנע מהפעלה תחת root/sudo."
 msgid "Check Dependency"
 msgstr "בדיקת תלות"
 
-#: print.go:37
+#: print.go:41
 msgid "Check Deps"
 msgstr "בדיקת תלויות"
 
@@ -144,15 +200,15 @@ msgstr "בדיקת תלויות"
 msgid "Checking development packages..."
 msgstr "חבילות הפיתוח נבדקות…"
 
-#: clean.go:217
+#: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
 msgstr "מתבצע ניקיון (%d/%d): %s"
 
-#: print.go:39
+#: print.go:42
 msgid "Conflicts With"
 msgstr "סותר את"
 
-#: pkg/menus/clean_menu.go:60
+#: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
 msgstr "מתבצעת מחיקה (%d/%d): %s"
 
@@ -160,15 +216,15 @@ msgstr "מתבצעת מחיקה (%d/%d): %s"
 msgid "Dependency"
 msgstr "תלות"
 
-#: print.go:35
+#: print.go:38
 msgid "Depends On"
 msgstr "תלויה ב־"
 
-#: print.go:29
+#: print.go:33
 msgid "Description"
 msgstr "תיאור"
 
-#: pkg/menus/diff_menu.go:158
+#: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
 msgstr "הבדלים להצגה?"
 
@@ -176,19 +232,19 @@ msgstr "הבדלים להצגה?"
 msgid "Disable 'provides' setting by default"
 msgstr "להשבית את הגדרת ‚provides’ (מספקת) כברירת מחדל"
 
-#: clean.go:79
+#: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
 msgstr "להסיר את כל חבילות ה־AUR מהמטמון?"
 
-#: clean.go:96
+#: clean.go:95
 msgid "Do you want to remove ALL untracked AUR files?"
 msgstr "להסיר את כל קובצי ה־AUR שאינם במעקב?"
 
-#: clean.go:81
+#: clean.go:80
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "להסיר את כל חבילות ה־AUR האחרות מהמטמון?"
 
-#: pkg/menus/edit_menu.go:60
+#: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
 msgstr "לערוך את PKGBUILD עם?"
 
@@ -196,7 +252,7 @@ msgstr "לערוך את PKGBUILD עם?"
 msgid "Error during AUR search: %s\n"
 msgstr "שגיאה בחיפוש AUR: %s\n"
 
-#: pkg/upgrade/service.go:308
+#: pkg/upgrade/service.go:296
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr "החרגת חבילות עשויה להוביל לשדרוג חלקי ולפגוע במערכות"
 
@@ -204,32 +260,32 @@ msgstr "החרגת חבילות עשויה להוביל לשדרוג חלקי ו
 msgid "Explicit"
 msgstr "מפורש"
 
-#: print.go:85
+#: print.go:91
 msgid "Explicitly installed packages: %s"
 msgstr "חבילות שהותקנו מפורשות: %s"
 
-#: pkg/dep/dep_graph.go:408 pkg/dep/dep_graph.go:506
+#: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
 msgstr "נכשל האיתור בחבילת AUR עבור"
 
-#: aur_install.go:120
+#: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
 msgstr "התקנת השכבה נכשלה, מתבצעת התקדמות לשכבה הבאה."
 
-#: errors.go:55
+#: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr "התקנת החבילות הבאות נכשלה. נדרשת התערבות ידנית:"
 
-#: print.go:43
+#: print.go:45
 msgid "First Submitted"
 msgstr "הוגשה לראשונה"
 
-#: pkg/query/aur_warnings.go:84
+#: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "חבילות AUR שסומנו כלא עדכניות:"
 
-#: print.go:84
+#: print.go:90
 msgid "Foreign installed packages: %s"
 msgstr "חבילות זרות מותקנות: %s"
 
@@ -237,31 +293,31 @@ msgstr "חבילות זרות מותקנות: %s"
 msgid "Found git repo: %s"
 msgstr "נמצא מאגר git: %s"
 
-#: vcs.go:73
+#: vcs.go:72
 msgid "GenDB finished. No packages were installed"
 msgstr "יצירת מסד הנתונים (GenDB) הסתיימה. לא הותקנו חבילות"
 
-#: print.go:32
+#: print.go:36
 msgid "Groups"
 msgstr "קבוצות"
 
-#: pkg/pgp/keys.go:91
+#: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
 msgstr "לייבא?"
 
-#: pkg/pgp/keys.go:100
+#: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
 msgstr "מתבצע ייבוא מפתחות עם gpg…"
 
-#: print.go:27
+#: print.go:46
 msgid "Keywords"
 msgstr "מילות מפתח"
 
-#: print.go:44
+#: print.go:47
 msgid "Last Modified"
 msgstr "שינוי אחרון"
 
-#: print.go:33
+#: print.go:35
 msgid "Licenses"
 msgstr "רישיונות"
 
@@ -269,7 +325,7 @@ msgstr "רישיונות"
 msgid "Local"
 msgstr "מקומי"
 
-#: print.go:40
+#: print.go:48
 msgid "Maintainer"
 msgstr "תחזוקה"
 
@@ -277,11 +333,11 @@ msgstr "תחזוקה"
 msgid "Make Dependency"
 msgstr "תלות בנייה"
 
-#: print.go:36
+#: print.go:40
 msgid "Make Deps"
 msgstr "תלויות בנייה"
 
-#: pkg/query/aur_warnings.go:76
+#: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
 msgstr "חבילות ניפוי שגיאות חסרות ב־AUR:"
 
@@ -289,35 +345,40 @@ msgstr "חבילות ניפוי שגיאות חסרות ב־AUR:"
 msgid "Missing"
 msgstr "חסרות"
 
-#: print.go:26
+#: print.go:31
 msgid "Name"
 msgstr "שם"
 
-#: pkg/dep/dep_graph.go:413 pkg/dep/dep_graph.go:519
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
 msgstr "לא נמצאה חבילת AUR עבור"
 
-#: pkg/text/print.go:117
+#: pkg/dep/dep_graph.go:182
+#, fuzzy
+msgid "No package found for"
+msgstr "לא נמצאה חבילת AUR עבור"
+
+#: print.go:225
 msgid "None"
 msgstr "ללא"
 
-#: print.go:38
+#: print.go:39
 msgid "Optional Deps"
 msgstr "תלויות רשות"
 
-#: pkg/query/aur_warnings.go:80
+#: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "חבילות AUR יתומות (לא מתוחזקות):"
 
-#: print.go:47 print.go:49
+#: print.go:53 print.go:55
 msgid "Out-of-date"
 msgstr "לא עדכניות"
 
-#: pkg/pgp/keys.go:118
+#: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
 msgstr "מפתחות PGP שיש לייבא:"
 
-#: preparer.go:242
+#: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
 msgstr "PKGBUILD עדכני, לא תתבצע הורדה: %s"
 
@@ -325,55 +386,59 @@ msgstr "PKGBUILD עדכני, לא תתבצע הורדה: %s"
 msgid "PKGBUILDs to edit?"
 msgstr "קובצי PKGBUILD לעריכה?"
 
-#: print.go:54
+#: print.go:60
 msgid "Package Base ID"
 msgstr "מזהה בסיס החבילה"
 
-#: print.go:55
+#: print.go:61
 msgid "Package Base"
 msgstr "בסיס חבילה"
 
-#: pkg/query/aur_warnings.go:72
+#: pkg/query/aur_warnings.go:67
 msgid "Packages not in AUR:"
 msgstr "חבילות שאינן ב־AUR:"
 
-#: pkg/menus/clean_menu.go:52
+#: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
 msgstr "חבילות לבנייה מההתחלה (cleanBuild)?"
 
-#: pkg/dep/dep_graph.go:216
+#: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
 msgstr "חבילות להחרגה"
 
-#: pkg/upgrade/service.go:307
+#: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "חבילות שיוחרגו: (למשל: „1 2 3”, „1-3”, „‎^4” או שם המאגר)"
 
-#: cmd.go:400
+#: cmd.go:402
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "חבילות להתקנה (למשל: 1 2 3, 1-3 או ‎^4)"
 
-#: print.go:42
+#: print.go:49
 msgid "Popularity"
 msgstr "פופולריות"
 
-#: pkg/menus/diff_menu.go:170 pkg/menus/edit_menu.go:143
+#: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
 msgstr "להמשיך בהתקנה?"
 
-#: print.go:34
+#: print.go:37
 msgid "Provides"
 msgstr "מספקת"
 
-#: preparer.go:119
+#: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
 msgstr "להסיר תלויות בנייה לאחר ההתקנה?"
 
-#: pkg/dep/dep_graph.go:701
+#: print.go:43
+msgid "Replaces"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "מאגר AUR"
 
-#: print.go:25 pkg/db/ialpm/alpm.go:191
+#: print.go:30 pkg/db/ialpm/alpm.go:191
 msgid "Repository"
 msgstr "מאגר"
 
@@ -393,15 +458,15 @@ msgstr "מתבצע חיפוש אחר עדכונים במסדי הנתונים…
 msgid "Showing repo packages only"
 msgstr "מוצגות חבילות מאגר בלבד"
 
-#: print.go:89
+#: print.go:95
 msgid "Size of pacman cache %s: %s"
 msgstr "גודל המטמון של pacman %s: %s"
 
-#: print.go:92
+#: print.go:98
 msgid "Size of yay cache %s: %s"
 msgstr "גודל המטמון של yay %s: %s"
 
-#: print.go:56
+#: print.go:62
 msgid "Snapshot URL"
 msgstr "כתובת לכידה"
 
@@ -409,71 +474,71 @@ msgstr "כתובת לכידה"
 msgid "Sync"
 msgstr "סנכרון"
 
-#: print.go:94
+#: print.go:100
 msgid "Ten biggest packages:"
 msgstr "עשרת החבילות הגדולות:"
 
-#: sync.go:190
+#: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
 msgstr "החבילות הבאות אינן תואמות לארכיטקטורת המעבד שלך:"
 
-#: pkg/dep/dep_graph.go:697 pkg/db/ialpm/alpm.go:179
+#: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
 msgstr "יש %d ספקים זמינים עבור %s:"
 
-#: pkg/settings/exe/cmd_builder.go:239
+#: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
 msgstr "יכול להיות שעוד מופע של Pacman פעיל. ממתינים…"
 
-#: print.go:86
+#: print.go:92
 msgid "Total Size occupied by packages: %s"
 msgstr "הגודל הכולל שתופסות החבילות: %s"
 
-#: print.go:83
+#: print.go:89
 msgid "Total installed packages: %s"
 msgstr "סך כל החבילות המותקנות: %s"
 
-#: sync.go:198
+#: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
 msgstr "לנסות לבנות אותן בכל מקרה?"
 
-#: print.go:30
+#: print.go:34
 msgid "URL"
 msgstr "כתובת"
 
-#: clean.go:195 pkg/menus/clean_menu.go:63 pkg/menus/clean_menu.go:69
+#: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
 msgstr "לא ניתן לפנות:"
 
-#: get.go:44 get.go:76
+#: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
 msgstr "לא ניתן למצוא את החבילות הבאות:"
 
-#: vote.go:19
+#: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
 msgstr "לא ניתן לטפל בהצבעות חבילה עבור: %s. שגיאה: %s"
 
-#: clean.go:171
+#: clean.go:170
 msgid "Unable to remove %s: %s"
 msgstr "לא ניתן להסיר את %s: %s"
 
-#: print.go:28
+#: print.go:32
 msgid "Version"
 msgstr "גרסה"
 
-#: print.go:41
+#: print.go:50
 msgid "Votes"
 msgstr "הצבעות"
 
-#: print.go:81
+#: print.go:87
 msgid "Yay version v%s"
 msgstr "Yay גרסה ‎v%s"
 
-#: pkg/menus/menu.go:48
+#: pkg/menus/menu.go:49
 msgid "[N]one"
 msgstr "[N]-כלום"
 
-#: clean.go:84
+#: clean.go:83
 msgid ""
 "\n"
 "Build directory:"
@@ -481,7 +546,7 @@ msgstr ""
 "\n"
 "תיקיית בנייה:"
 
-#: pkg/dep/dep_graph.go:711 pkg/db/ialpm/alpm.go:201
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -493,19 +558,19 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "בוטל לבקשת המשתמש"
 
-#: pkg/settings/parser/parser.go:619
+#: pkg/settings/parser/parser.go:620
 msgid "argument '-' specified without input on stdin"
 msgstr "סופק המשתנה ‚-’ ללא שום קלט ל־stdin"
 
-#: local_install.go:27
+#: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
 msgstr "לא ניתן לאתר PKGBUILD ו־‎.SRCINFO בתיקייה"
 
-#: install.go:130
+#: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
 msgstr "לא ניתן למצוא את שם החבילה: %v"
 
-#: errors.go:47
+#: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
 msgstr "לא ניתן למצוא PKGDEST עבור: %s"
 
@@ -513,11 +578,11 @@ msgstr "לא ניתן למצוא PKGDEST עבור: %s"
 msgid "could not find all required packages"
 msgstr "לא ניתן למצוא את כל החבילות הנחוצות"
 
-#: errors.go:16
+#: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
 msgstr "לא ניתן למצוא ארכיוני חבילות כלשהם שמופיעים תחת %s"
 
-#: errors.go:26 pkg/upgrade/service.go:299
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
 msgid "dependency"
 msgstr "תלות"
 
@@ -525,11 +590,11 @@ msgstr "תלות"
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "בדיקת פיתוח לחבילה נכשלה: ‚%s’ נתקל בשגיאה"
 
-#: pkg/menus/edit_menu.go:109
+#: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
 msgstr "העורך לא יצא כמו שצריך, הפעולה מבוטלת: %s"
 
-#: aur_source.go:24
+#: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
 msgstr "שגיאה בהורדת קוד מקור: %s"
 
@@ -537,19 +602,19 @@ msgstr "שגיאה בהורדת קוד מקור: %s"
 msgid "error fetching %s: %s"
 msgstr "שגיאה במשיכת %s: %s"
 
-#: local_install.go:26
+#: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
 msgstr "שגיאה בהתקנת חבילות מאגר"
 
-#: aur_install.go:266 aur_install.go:270
+#: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
 msgstr "שגיאה בהתקנה:"
 
-#: aur_install.go:233 aur_install.go:237
+#: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
 msgstr "שגיאה בבנייה: %s"
 
-#: install.go:160
+#: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
 msgstr "שגיאה במיזוג %s: %s"
 
@@ -557,19 +622,19 @@ msgstr "שגיאה במיזוג %s: %s"
 msgid "error reading %s"
 msgstr "שגיאה בקריאת %s"
 
-#: sync.go:37
+#: sync.go:36
 msgid "error refreshing databases"
 msgstr "שגיאה ברענון מסדי נתונים"
 
-#: clean.go:223 install.go:153
+#: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
 msgstr "שגיאה באיפוס %s: %s"
 
-#: errors.go:29
+#: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
 msgstr "שגיאה בעדכון סיבת התקנת החבילה לכדי %s"
 
-#: errors.go:24
+#: pkg/sync/build/errors.go:48
 msgid "explicit"
 msgstr "מפורש"
 
@@ -577,27 +642,27 @@ msgstr "מפורש"
 msgid "failed to create directory '%s': %s"
 msgstr "יצירת התיקייה ‚%s’ נכשלה: %s"
 
-#: pkg/settings/config.go:284
+#: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
 msgstr "פתיחת קובץ ההגדרות ‚%s’ נכשלה: %s"
 
-#: pkg/srcinfo/service.go:113
+#: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
 msgstr "הפענוח של %s נכשל -- מדלגים: %s"
 
-#: pkg/srcinfo/service.go:117
+#: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
 msgstr "הפענוח של %s נכשל: %s"
 
-#: local_install.go:79
+#: local_install.go:77
 msgid "failed to parse .SRCINFO"
 msgstr "פענוח ה־‎.SRCINFO נכשל"
 
-#: pkg/settings/config.go:294
+#: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
 msgstr "קריאת קובץ ההגדרות ‚%s’ נכשלה: %s"
 
-#: pkg/settings/runtime.go:73
+#: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
 msgstr "משיכת המטמון של ה־aur נכשלה"
 
@@ -609,7 +674,7 @@ msgstr "התעלמות משדרוג חבילת פיתוח (devel - לא נמצא
 msgid "input too long"
 msgstr "הקלט ארוך מדי"
 
-#: pkg/dep/dep_graph.go:732 pkg/db/ialpm/alpm.go:222
+#: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
 msgstr "מס׳ שגוי: %s"
 
@@ -617,7 +682,7 @@ msgstr "מס׳ שגוי: %s"
 msgid "invalid option '%s'"
 msgstr "האפשרות ‚%s’ שגויה"
 
-#: cmd.go:206
+#: cmd.go:207
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr "אפשרות שגויה: אסור להשתמש ב־‚‎--deps' וב־‚‎--explicit’ יחד"
 
@@ -625,11 +690,11 @@ msgstr "אפשרות שגויה: אסור להשתמש ב־‚‎--deps' וב־�
 msgid "invalid repository"
 msgstr "מאגר שגוי"
 
-#: pkg/dep/dep_graph.go:738 pkg/db/ialpm/alpm.go:227
+#: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
 msgstr "ערך שגוי: %d לא בין %d לבין %d"
 
-#: pkg/pgp/keys.go:113
+#: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "אין מפתחות לייבוא"
 
@@ -637,15 +702,15 @@ msgstr "אין מפתחות לייבוא"
 msgid "no query was executed"
 msgstr "לא הופעלה שאילתה"
 
-#: local_install.go:68
+#: local_install.go:66
 msgid "no target directories specified"
 msgstr "לא צוינו תיקיות יעד"
 
-#: pkg/text/text.go:69
+#: pkg/text/input.go:48
 msgid "no"
 msgstr "לא"
 
-#: aur_install.go:242
+#: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
 msgstr "אין מה להתקין עבור %s"
 
@@ -653,7 +718,11 @@ msgstr "אין מה להתקין עבור %s"
 msgid "only one operation may be used at a time"
 msgstr "אפשר להשתמש בפעולה אחת בכל רגע נתון"
 
-#: print.go:181
+#: pkg/cmd/graph/main.go:70
+msgid "only one target is allowed"
+msgstr ""
+
+#: print.go:187
 msgid "package '%s' was not found"
 msgstr "החבילה ‚%s’ נכשלה"
 
@@ -665,7 +734,7 @@ msgstr "החבילה לא נמצאה ב־AUR"
 msgid "package not found in repos"
 msgstr "החבילה לא נמצאה במאגרים"
 
-#: pkg/upgrade/service.go:304
+#: pkg/upgrade/service.go:292
 msgid "package"
 msgid_plural "packages"
 msgstr[0] "חבילה"
@@ -673,23 +742,23 @@ msgstr[1] "חבילות"
 msgstr[2] "חבילות"
 msgstr[3] "חבילות"
 
-#: pkg/pgp/keys.go:103
+#: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
 msgstr "תקלה בייבוא מפתחות"
 
-#: clean.go:106
+#: clean.go:105
 msgid "removing AUR packages from cache..."
 msgstr "חבילות AUR נמחקות מהמטמון…"
 
-#: clean.go:179 clean.go:213
+#: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
 msgstr "קובצי AUR שאינם במעקב נמחקים מהמטמון…"
 
-#: errors.go:37
+#: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "ה־PKGDEST עבור %s מוצג על ידי makepkg אך אינו קיים: %s"
 
-#: sync.go:113
+#: pkg/sync/sync.go:45
 msgid "there is nothing to do"
 msgstr "אין מטרות לביצוע"
 
@@ -697,14 +766,14 @@ msgstr "אין מטרות לביצוע"
 msgid "unable to CreateHandle: %s"
 msgstr "לא ניתן ליצור כינוי (CreateHandle): %s"
 
-#: cmd.go:195
+#: cmd.go:196
 msgid "unhandled operation"
 msgstr "פעולה שלא טופלה"
 
-#: cmd.go:458
+#: cmd.go:460
 msgid "unknown-version"
 msgstr "גרסה-לא-ידועה"
 
-#: pkg/text/text.go:68
+#: pkg/text/input.go:47
 msgid "yes"
 msgstr "כן"
