@@ -63,30 +63,34 @@ func AURPKGBUILDRepos(
 
 	for _, target := range targets {
 		sem <- 1
-
 		wg.Add(1)
 
 		go func(target string) {
+			defer func() {
+				<-sem
+				wg.Done()
+			}()
+
 			newClone, err := AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, target, dest, force)
 
-			progress := 0
-
+			mux.Lock()
+			progress := len(cloned)
 			if err != nil {
 				errs.Add(err)
-			} else {
-				mux.Lock()
-				cloned[target] = newClone
-				progress = len(cloned)
 				mux.Unlock()
+				logger.OperationInfoln(
+					gotext.Get("(%d/%d) Failed to download PKGBUILD: %s",
+						progress, len(targets), text.Cyan(target)))
+				return
 			}
+
+			cloned[target] = newClone
+			progress = len(cloned)
+			mux.Unlock()
 
 			logger.OperationInfoln(
 				gotext.Get("(%d/%d) Downloaded PKGBUILD: %s",
 					progress, len(targets), text.Cyan(target)))
-
-			<-sem
-
-			wg.Done()
 		}(target)
 	}
 
