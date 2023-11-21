@@ -1,4 +1,4 @@
-#
+# 
 # Translators:
 # J G, 2021
 # Otto Micheletti <michelettiotto@gmail.com>, 2021
@@ -6,18 +6,17 @@
 # Zisa, 2022
 # Caio Pereira, 2023
 # Fernando Macedo, 2023
-#
+# Felipe Avelar, 2023
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Fernando Macedo, 2023\n"
-"Language-Team: Portuguese (Brazil) (https://app.transifex.com/yay-1/"
-"teams/123732/pt_BR/)\n"
-"Language: pt_BR\n"
+"Last-Translator: Felipe Avelar, 2023\n"
+"Language-Team: Portuguese (Brazil) (https://app.transifex.com/yay-1/teams/123732/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
-"1000000 == 0 ? 1 : 2;\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 "X-Generator: xgotext\n"
 
 #: pkg/menus/menu.go:32
@@ -93,62 +92,63 @@ msgstr "%s: local (%s) é mais recente que o AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "por favor configure as variáveis de ambiente AUR_USERNAME e AUR_PASSWORD "
 "para votar"
 
 #: pkg/settings/args.go:118
 msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--batchinstall=false' em vez disso"
 
 #: pkg/settings/args.go:63
 msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use  '--cleanafter=false' em vez disso"
 
 #: pkg/settings/args.go:187
 msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--cleanmenu=false' em vez disso"
 
 #: pkg/settings/args.go:207
 msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--combinedupgrade=false' em vez disso"
 
 #: pkg/settings/args.go:73
 msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--devel=false' em vez disso"
 
 #: pkg/settings/args.go:192
 msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--diffmenu=false' em vez disso"
 
 #: pkg/settings/args.go:197
 msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--editmenu=false' em vez disso"
 
 #: pkg/settings/args.go:182
 msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--pgpfetch=false' em vez disso"
 
 #: pkg/settings/args.go:177
 msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--provides=false' em vez disso"
 
 #: pkg/settings/args.go:224
 msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--separatesources=false' em vez disso"
 
 #: pkg/settings/args.go:172
 msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--sudoloop=false' em vez disso"
 
 #: pkg/settings/args.go:78
 msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--timeupdate=false' em vez disso"
 
 #: pkg/settings/args.go:202
 msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
+msgstr "'--%s' está descontinuado. Use '--useask=false' em vez disso"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -159,9 +159,8 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) PKGBUILD transferido: %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) PKGBUILD transferido: %s"
+msgstr "(%d/%d) Falha ao baixar PKGBUILD: %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -367,9 +366,8 @@ msgid "No AUR package found for"
 msgstr "Nenhum pacote AUR localizado para"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "Nenhum pacote AUR localizado para"
+msgstr "Nenhum pacote encontrado para"
 
 #: print.go:225
 msgid "None"
@@ -421,8 +419,7 @@ msgstr "Pacotes a excluir"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Pacotes a excluir: (ex: \"1 2 3\", \"1-3\", \"^4\" ou nome do repositório)"
+msgstr "Pacotes a excluir: (ex: \"1 2 3\", \"1-3\", \"^4\" ou nome do repositório)"
 
 #: cmd.go:402
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -446,7 +443,7 @@ msgstr "Remover dependências make após a instalação?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "Substitui"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
@@ -738,7 +735,7 @@ msgstr "somente uma operação pode ser utilizada de cada vez"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "apenas um destino é permitido"
 
 #: print.go:187
 msgid "package '%s' was not found"
