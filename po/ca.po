@@ -1,15 +1,15 @@
-#
+# 
 # Translators:
 # Davidmp <medipas@gmail.com>, 2023
-#
+# 
 msgid ""
 msgstr ""
 "Last-Translator: Davidmp <medipas@gmail.com>, 2023\n"
 "Language-Team: Catalan (https://app.transifex.com/yay-1/teams/123732/ca/)\n"
-"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ca\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
@@ -83,62 +83,63 @@ msgstr "%s: el paquet local (%s) és més nou que el de l'AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "%s: establiu les variables d'entorn AUR_NOMDUSUARI i AUR_CONTRASENYA per "
 "votar."
 
 #: pkg/settings/args.go:118
 msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --batchinstall=false"
 
 #: pkg/settings/args.go:63
 msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --cleanafter=false"
 
 #: pkg/settings/args.go:187
 msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --cleanmenu=false"
 
 #: pkg/settings/args.go:207
 msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --combinedupgrade=false"
 
 #: pkg/settings/args.go:73
 msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --devel=false"
 
 #: pkg/settings/args.go:192
 msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --diffmenu=false"
 
 #: pkg/settings/args.go:197
 msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --editmenu=false"
 
 #: pkg/settings/args.go:182
 msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --pgpfetch=false"
 
 #: pkg/settings/args.go:177
 msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --provides=false"
 
 #: pkg/settings/args.go:224
 msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --separatesources=false"
 
 #: pkg/settings/args.go:172
 msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --sudoloop=false"
 
 #: pkg/settings/args.go:78
 msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --timeupdate=false"
 
 #: pkg/settings/args.go:202
 msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
+msgstr "--%s està obsolet. Useu --useask=false"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -149,9 +150,8 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) PKGBUILD baixat: %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) PKGBUILD baixat: %s"
+msgstr "(%d/%d) Ha fallat baixar el PKGBUILD: %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -357,9 +357,8 @@ msgid "No AUR package found for"
 msgstr "No s'ha trobat cap paquet d'AUR per a"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "No s'ha trobat cap paquet d'AUR per a"
+msgstr "No s'ha trobat cap paquet per"
 
 #: print.go:225
 msgid "None"
@@ -411,9 +410,7 @@ msgstr "Paquets per excloure"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Paquets per excloure: (p. ex.: \"1 2 3\", \"1-3\", \"^4\" o nom del "
-"repositori)"
+msgstr "Paquets per excloure: (p. ex.: \"1 2 3\", \"1-3\", \"^4\" o nom del repositori)"
 
 #: cmd.go:402
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -433,11 +430,12 @@ msgstr "Proporciona"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Suprimeixo les dependències de construcció després de la instal·lació?"
+msgstr ""
+"Suprimeixo les dependències de construcció després de la instal·lació?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "Reemplaça"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
@@ -728,7 +726,7 @@ msgstr "només es pot usar una operació alhora"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "només es permet una destinació"
 
 #: print.go:187
 msgid "package '%s' was not found"
