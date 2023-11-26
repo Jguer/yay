@@ -555,7 +555,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Diretório de Build:"
+"Diretório de build:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
