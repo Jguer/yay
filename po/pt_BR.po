@@ -547,7 +547,7 @@ msgstr "Versão do Yay v%s"
 
 #: pkg/menus/menu.go:49
 msgid "[N]one"
-msgstr "[N]Nenhum"
+msgstr "[N]enhum"
 
 #: clean.go:83
 msgid ""
