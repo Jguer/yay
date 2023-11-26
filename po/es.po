@@ -708,7 +708,7 @@ msgstr "opción inválida: '--deps' y '--explicit' no deben usarse a la vez"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "repositorio invalido "
+msgstr "repositorio inválido "
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
