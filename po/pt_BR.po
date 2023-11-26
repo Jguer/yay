@@ -236,7 +236,7 @@ msgstr "Descrição"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Exibir Diffs?"
+msgstr "Exibir diffs?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
