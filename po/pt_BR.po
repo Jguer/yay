@@ -291,7 +291,7 @@ msgstr ""
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Primeira Submissão"
+msgstr "Primeira submissão"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
