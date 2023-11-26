@@ -4,7 +4,6 @@
 # Otto Micheletti <michelettiotto@gmail.com>, 2021
 # Harrison Ferreira, 2022
 # Zisa, 2022
-# Caio Pereira, 2023
 # Fernando Macedo, 2023
 # Felipe Avelar, 2023
 # Lucas Miranda <Liddack@outlook.com>, 2023
@@ -96,8 +95,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"por favor configure as variáveis de ambiente AUR_USERNAME e AUR_PASSWORD "
-"para votar"
+"%s: por favor, configure as variáveis de ambiente AUR_USERNAME e "
+"AUR_PASSWORD para votar"
 
 #: pkg/settings/args.go:118
 msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
