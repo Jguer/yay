@@ -176,7 +176,7 @@ msgstr "(Instalado: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Orfão)"
+msgstr "(Órfão)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
