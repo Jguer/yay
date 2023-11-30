@@ -9,14 +9,14 @@ require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.2
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/sys v0.10.0
-	golang.org/x/term v0.10.0
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sys v0.15.0
+	golang.org/x/term v0.15.0
+	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
 
 require (
-	github.com/adrg/strutil v0.3.0
+	github.com/adrg/strutil v0.3.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/pkg/errors v0.9.1
@@ -25,10 +25,10 @@ require (
 )
 
 require (
-	github.com/deckarep/golang-set/v2 v2.3.0
+	github.com/deckarep/golang-set/v2 v2.5.0
 	github.com/itchyny/gojq v0.12.13 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
-	github.com/ohler55/ojg v1.19.1 // indirect
+	github.com/ohler55/ojg v1.20.3 // indirect
 )
 
 require github.com/hashicorp/go-multierror v1.1.1
