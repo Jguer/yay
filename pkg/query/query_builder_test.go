@@ -31,6 +31,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 		targetMode        parser.TargetMode
 		singleLineResults bool
 		searchBy          string
+		showPackageURLs   bool
 		wantResults       []string
 		wantOutput        []string
 	}
@@ -261,6 +262,37 @@ func TestSourceQueryBuilder(t *testing.T) {
 			},
 		},
 		{
+			desc:            "sort-by-name showpackageurls",
+			search:          []string{"linux"},
+			bottomUp:        true,
+			separateSources: true,
+			sortBy:          "name",
+			verbosity:       Detailed,
+			showPackageURLs: true,
+			wantResults:     []string{"linux-ck", "linux", "linux-zen"},
+			wantOutput: []string{
+				"\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n    Package URL: https://aur.archlinux.org/packages/linux-ck\n",
+				"\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n    Package URL: https://archlinux.org/packages/core/any/linux\n",
+				"\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n    Package URL: https://archlinux.org/packages/core/any/linux-zen\n",
+			},
+		},
+		{
+			desc:              "sort-by-name singleline showpackageurls",
+			search:            []string{"linux"},
+			bottomUp:          true,
+			separateSources:   true,
+			sortBy:            "name",
+			verbosity:         Detailed,
+			singleLineResults: true,
+			showPackageURLs:   true,
+			wantResults:       []string{"linux-ck", "linux", "linux-zen"},
+			wantOutput: []string{
+				"\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\tThe Linux-ck kernel and modules with ck's hrtimer patches\tPackage URL: https://aur.archlinux.org/packages/linux-ck\n",
+				"\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\tThe Linux kernel and modules\tPackage URL: https://archlinux.org/packages/core/any/linux\n",
+				"\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\tThe Linux ZEN kernel and modules\tPackage URL: https://archlinux.org/packages/core/any/linux-zen\n",
+			},
+		},
+		{
 			desc:            "sort-by-name search-by-name",
 			search:          []string{"linux-ck"},
 			bottomUp:        true,
@@ -293,20 +325,22 @@ func TestSourceQueryBuilder(t *testing.T) {
 			mockDB := mock.NewDB("core")
 			return []mock.IPackage{
 				&mock.Package{
-					PName:        "linux",
-					PVersion:     "5.16.0",
-					PDescription: "The Linux kernel and modules",
-					PSize:        1,
-					PISize:       1,
-					PDB:          mockDB,
+					PName:         "linux",
+					PVersion:      "5.16.0",
+					PDescription:  "The Linux kernel and modules",
+					PArchitecture: "any",
+					PSize:         1,
+					PISize:        1,
+					PDB:           mockDB,
 				},
 				&mock.Package{
-					PName:        "linux-zen",
-					PVersion:     "5.16.0",
-					PDescription: "The Linux ZEN kernel and modules",
-					PSize:        1,
-					PISize:       1,
-					PDB:          mockDB,
+					PName:         "linux-zen",
+					PVersion:      "5.16.0",
+					PDescription:  "The Linux ZEN kernel and modules",
+					PArchitecture: "any",
+					PSize:         1,
+					PISize:        1,
+					PDB:           mockDB,
 				},
 			}
 		},
@@ -344,7 +378,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, tc.targetMode, tc.searchBy, tc.bottomUp,
-				tc.singleLineResults, tc.separateSources)
+				tc.singleLineResults, tc.separateSources, tc.showPackageURLs)
 
 			queryBuilder.Execute(context.Background(), mockDB, tc.search)
 

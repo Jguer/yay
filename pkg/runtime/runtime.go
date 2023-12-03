@@ -108,7 +108,7 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		aurClient,
 		logger.Child("mixed.querybuilder"), cfg.SortBy,
 		cfg.Mode, cfg.SearchBy,
-		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
+		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources, cfg.ShowPackageURLs)
 
 	run := &Runtime{
 		Cfg:          cfg,
