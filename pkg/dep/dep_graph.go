@@ -749,7 +749,7 @@ func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 		if err != nil {
 			g.logger.Errorln(err)
 
-			break
+			return &options[0]
 		}
 
 		if numberBuf == "" {
@@ -772,8 +772,6 @@ func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 
 		return &options[num-1]
 	}
-
-	return nil
 }
 
 func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*aur.Pkg, error) {
