@@ -2,11 +2,11 @@
 # Translators:
 # Szigeti Péter, 2021
 # Gergő Kasza, 2022
-# summoner001, 2023
+# summoner001, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: summoner001, 2023\n"
+"Last-Translator: summoner001, 2024\n"
 "Language-Team: Hungarian (https://app.transifex.com/yay-1/teams/123732/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -79,7 +79,7 @@ msgstr "%s\\: nem használható a cél --repo -- kihagyás"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s\\: csomagfrissítés figyelmen kívül hagyása (%s => %s)"
+msgstr "%s: csomagfrissítés figyelmen kívül hagyása (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
