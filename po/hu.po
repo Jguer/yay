@@ -346,7 +346,7 @@ msgstr "Függőség készítése"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Make függőségek"
+msgstr "Make Függőségek"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
