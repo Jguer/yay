@@ -129,14 +129,12 @@ msgstr "'--%s' elavult. Használd helyette a '--pgpfetch=false' paramétert"
 
 #: pkg/settings/args.go:177
 msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--provides=false' paramétert"
+msgstr "'--%s' elavult. Használd helyette a '--provides=false' paramétert"
 
 #: pkg/settings/args.go:224
 msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
 msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--separatesources=false' "
-"paramétert"
+"'--%s' elavult. Használd helyette a '--separatesources=false' paramétert"
 
 #: pkg/settings/args.go:172
 msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
