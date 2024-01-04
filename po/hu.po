@@ -350,7 +350,7 @@ msgstr "Make Függőségek"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
-msgstr "Hiányzó AUR Debug csomagok:"
+msgstr "Hiányzó AUR Debug Csomagok:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
