@@ -2,11 +2,11 @@
 # Translators:
 # Szigeti Péter, 2021
 # Gergő Kasza, 2022
-# summoner001, 2023
+# summoner001, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: summoner001, 2023\n"
+"Last-Translator: summoner001, 2024\n"
 "Language-Team: Hungarian (https://app.transifex.com/yay-1/teams/123732/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -79,7 +79,7 @@ msgstr "%s\\: nem használható a cél --repo -- kihagyás"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s\\: csomagfrissítés figyelmen kívül hagyása (%s => %s)"
+msgstr "%s: csomagfrissítés figyelmen kívül hagyása (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
@@ -112,8 +112,7 @@ msgstr ""
 
 #: pkg/settings/args.go:73
 msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--devel=false' paramétert"
+msgstr "'--%s' elavult. Használd helyette a '--devel=false' paramétert"
 
 #: pkg/settings/args.go:192
 msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
@@ -129,19 +128,16 @@ msgstr "'--%s' elavult. Használd helyette a '--pgpfetch=false' paramétert"
 
 #: pkg/settings/args.go:177
 msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--provides=false' paramétert"
+msgstr "'--%s' elavult. Használd helyette a '--provides=false' paramétert"
 
 #: pkg/settings/args.go:224
 msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
 msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--separatesources=false' "
-"paramétert"
+"'--%s' elavult. Használd helyette a '--separatesources=false' paramétert"
 
 #: pkg/settings/args.go:172
 msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--sudoloop=false' paramétert"
+msgstr "'--%s' elavult. Használd helyette a '--sudoloop=false' paramétert"
 
 #: pkg/settings/args.go:78
 msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
@@ -149,8 +145,7 @@ msgstr "'--%s' elavult. Használd helyette a '--timeupdate=false' paramétert"
 
 #: pkg/settings/args.go:202
 msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--useask=false' paramétert"
+msgstr "'--%s' elavult. Használd helyette a '--useask=false' paramétert"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -206,7 +201,7 @@ msgstr "Függőség ellenőrzése"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Ellenőrizze a függőségeket"
+msgstr "Függőségek ellenőrzése"
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
@@ -218,7 +213,7 @@ msgstr "Tisztítás (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Ütközik ezzel"
+msgstr "Ütközik Ezzel"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
@@ -299,7 +294,7 @@ msgstr "Először Beküldve"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Elavultnak jelölt AUR csomagok:"
+msgstr "Elavultnak Jelölt AUR Csomagok:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
@@ -347,15 +342,15 @@ msgstr "Karbantartó"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Függőség készítése"
+msgstr "Make Függőség"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Make függőségek"
+msgstr "Make Függőségek"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
-msgstr "Hiányzó AUR Debug csomagok:"
+msgstr "Hiányzó AUR Debug Csomagok:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
@@ -730,7 +725,7 @@ msgstr "nem"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "nincs mit telepíteni a(z) %s -hoz(-hez)"
+msgstr "nincs mit telepíteni a(z) %s -hoz/hez"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
