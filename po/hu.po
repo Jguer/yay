@@ -112,8 +112,7 @@ msgstr ""
 
 #: pkg/settings/args.go:73
 msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--devel=false' paramétert"
+msgstr "'--%s' elavult. Használd helyette a '--devel=false' paramétert"
 
 #: pkg/settings/args.go:192
 msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
