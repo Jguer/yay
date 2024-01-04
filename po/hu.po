@@ -149,8 +149,7 @@ msgstr "'--%s' elavult. Használd helyette a '--timeupdate=false' paramétert"
 
 #: pkg/settings/args.go:202
 msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
-"'--%s' elavult elavult. Használd helyette a '--useask=false' paramétert"
+msgstr "'--%s' elavult. Használd helyette a '--useask=false' paramétert"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
