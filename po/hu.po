@@ -213,7 +213,7 @@ msgstr "Tisztítás (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Ütközik ezzel"
+msgstr "Ütközik Ezzel"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
