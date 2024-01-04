@@ -725,7 +725,7 @@ msgstr "nem"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "nincs mit telepíteni a(z) %s -hoz(-hez)"
+msgstr "nincs mit telepíteni a(z) %s -hoz/hez"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
