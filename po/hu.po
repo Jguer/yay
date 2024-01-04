@@ -201,7 +201,7 @@ msgstr "Függőség ellenőrzése"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Ellenőrizze a függőségeket"
+msgstr "Függőségek ellenőrzése"
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
