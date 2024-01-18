@@ -1,21 +1,22 @@
-#
+# 
 # Translators:
 # J G, 2022
-# lakejason0 <sunliyuan200402@outlook.com>, 2023
 # Moon Xanadu <xmoonox@gmail.com>, 2023
 # kanna 5, 2023
 # Songer Hy, 2023
 # Celestially H., 2023
-#
+# lakejason0 <sunliyuan200402@outlook.com>, 2023
+# Alex Wang, 2023
+# Xuekai Deng, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Celestially H., 2023\n"
-"Language-Team: Chinese (China) (https://app.transifex.com/yay-1/teams/123732/"
-"zh_CN/)\n"
-"Language: zh_CN\n"
+"Last-Translator: Xuekai Deng, 2024\n"
+"Language-Team: Chinese (China) (https://app.transifex.com/yay-1/teams/123732/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: xgotext\n"
 
@@ -89,60 +90,61 @@ msgstr "%s: 本地 (%s) 比 AUR (%s) 更新"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr "%s: 请设置 AUR_USERNAME 与 AUR_PASSWORD 环境变量以投票"
 
 #: pkg/settings/args.go:118
 msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--batchinstall=false' 替代"
 
 #: pkg/settings/args.go:63
 msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--cleanafter=false' 替代"
 
 #: pkg/settings/args.go:187
 msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--cleanmenu=false' 替代"
 
 #: pkg/settings/args.go:207
 msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--combinedupgrade=false' 替代"
 
 #: pkg/settings/args.go:73
 msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '---devel=false' 替代"
 
 #: pkg/settings/args.go:192
 msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--diffmenu=false' 替代"
 
 #: pkg/settings/args.go:197
 msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--editmenu=false' 替代"
 
 #: pkg/settings/args.go:182
 msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--pgpfetch=false' 替代"
 
 #: pkg/settings/args.go:177
 msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--provides=false' 替代"
 
 #: pkg/settings/args.go:224
 msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--separatesources=false' 替代"
 
 #: pkg/settings/args.go:172
 msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--sudoloop=false' 替代"
 
 #: pkg/settings/args.go:78
 msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--timeupdate=false' 替代"
 
 #: pkg/settings/args.go:202
 msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
+msgstr "'--%s' 已废弃，使用 '--useask=false' 替代"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -153,9 +155,8 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) 下载了 PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) 下载了 PKGBUILD: %s"
+msgstr "(%d/%d) 下载PKGBUILD失败"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -359,9 +360,8 @@ msgid "No AUR package found for"
 msgstr "未找到 AUR 软件包"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "未找到 AUR 软件包"
+msgstr "未找到包"
 
 #: print.go:225
 msgid "None"
@@ -437,7 +437,7 @@ msgstr "安装后删除生成依赖？"
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "替换"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
@@ -725,7 +725,7 @@ msgstr "一次只能使用一项操作"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "仅允许一个目标"
 
 #: print.go:187
 msgid "package '%s' was not found"
