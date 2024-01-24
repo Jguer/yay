@@ -85,6 +85,8 @@ func (c *Configuration) handleOption(option, value string, logger *text.Logger) 
 		c.SingleLineResults = true
 	case "doublelineresults":
 		c.SingleLineResults = false
+	case "showpackageurls":
+		c.ShowPackageURLs = boolValue
 	case "completioninterval":
 		n, err := strconv.Atoi(value)
 		if err == nil {

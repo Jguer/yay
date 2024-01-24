@@ -67,6 +67,7 @@ type Configuration struct {
 	BatchInstall           bool   `json:"batchinstall"`
 	SingleLineResults      bool   `json:"singlelineresults"`
 	SeparateSources        bool   `json:"separatesources"`
+	ShowPackageURLs        bool   `json:"showpackageurls"`
 	Debug                  bool   `json:"debug"`
 	UseRPC                 bool   `json:"rpc"`
 	DoubleConfirm          bool   `json:"doubleconfirm"` // confirm install before and after build

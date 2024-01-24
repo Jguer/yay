@@ -451,6 +451,7 @@ func isArg(arg string) bool {
 	case "singlelineresults":
 	case "doublelineresults":
 	case "separatesources", "noseparatesources":
+	case "showpackageurls":
 	default:
 		return false
 	}
