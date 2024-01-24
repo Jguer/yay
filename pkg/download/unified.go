@@ -45,6 +45,9 @@ func downloadGitRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 
 		cloneArgs := make([]string, 0, len(gitArgs)+4)
 		cloneArgs = append(cloneArgs, "clone", "--no-progress")
+		// significantly increases speed of clone
+		// https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---depthltdepthgt
+		cloneArgs = append(cloneArgs, "--depth", "1")
 		cloneArgs = append(cloneArgs, gitArgs...)
 		cmd := cmdBuilder.BuildGitCmd(ctx, dest, cloneArgs...)
 

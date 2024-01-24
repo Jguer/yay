@@ -88,5 +88,5 @@ func ABSPKGBUILDRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 	pkgURL := getPackageRepoURL(pkgName)
 
 	return downloadGitRepo(ctx, cmdBuilder, pkgURL,
-		pkgName, dest, force, "--single-branch")
+		pkgName, dest, force)
 }

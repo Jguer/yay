@@ -81,13 +81,13 @@ func TestGetAURPkgbuild(t *testing.T) {
 // THEN a clone command should be formed
 func TestAURPKGBUILDRepo(t *testing.T) {
 	t.Parallel()
-	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress https://aur.archlinux.org/yay-bin.git yay-bin"
+	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --depth 1 https://aur.archlinux.org/yay-bin.git yay-bin"
 	if os.Getuid() == 0 {
 		ld := "systemd-run"
 		if path, _ := exec.LookPath(ld); path != "" {
 			ld = path
 		}
-		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress https://aur.archlinux.org/yay-bin.git yay-bin", ld)
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --depth 1 https://aur.archlinux.org/yay-bin.git yay-bin", ld)
 	}
 
 	cmdRunner := &testRunner{}
