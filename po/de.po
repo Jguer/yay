@@ -1,4 +1,4 @@
-#
+# 
 # Translators:
 # Julian Neupert <julian.neupert@gmail.com>, 2021
 # Chris Boesch, 2021
@@ -14,15 +14,15 @@
 # Severin Hamader <severin.hamader@yahoo.de>, 2023
 # Manuel Schneider, 2023
 # Marethyu _, 2023
-#
+# 
 msgid ""
 msgstr ""
 "Last-Translator: Marethyu _, 2023\n"
 "Language-Team: German (https://app.transifex.com/yay-1/teams/123732/de/)\n"
-"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
@@ -98,7 +98,8 @@ msgstr "%s: lokales (%s) ist neuer als das AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "Bitte AUR_USERNAME und AUR_PASSWORD Umgebungsvariablen setzen um abzustimmen"
 
@@ -375,8 +376,7 @@ msgstr "Auszuschließende Pakete"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Pakete zum Ausschließen: (z.B. \"1 2 3\", \"1-3\", \"^4\" oder Repo-Name)"
+msgstr "Pakete zum Ausschließen: (z.B. \"1 2 3\", \"1-3\", \"^4\" oder Repo-Name)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -745,42 +745,3 @@ msgstr "Unbekannte Version"
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "ja"
-
-#~ msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--batchinstall=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--cleanafter=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--cleanmenu=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-#~ msgstr "'--'%s ist veralted. Verwende stattdessen '--combinedupgrade=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--devel=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--devel=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--diffmenu=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--editmenu=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--pgpfetch=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--provides=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--provides=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--separatesources=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--sudoloop=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--timeupdate=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--useask=false' instead"
-#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--useask=false'"
