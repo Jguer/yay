@@ -1,4 +1,4 @@
-# 
+#
 # Translators:
 # Julian Neupert <julian.neupert@gmail.com>, 2021
 # Chris Boesch, 2021
@@ -14,15 +14,15 @@
 # Severin Hamader <severin.hamader@yahoo.de>, 2023
 # Manuel Schneider, 2023
 # Marethyu _, 2023
-# 
+#
 msgid ""
 msgstr ""
 "Last-Translator: Marethyu _, 2023\n"
 "Language-Team: German (https://app.transifex.com/yay-1/teams/123732/de/)\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
@@ -34,11 +34,11 @@ msgstr " (Build-Dateien sind vorhanden)"
 msgid " (Installed)"
 msgstr " (Installiert)"
 
-#: cmd.go:463
+#: cmd.go:453
 msgid " [Installed]"
 msgstr "[Installiert]"
 
-#: cmd.go:420 vote.go:36
+#: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
 msgstr " es gibt nichts zu tun"
 
@@ -98,62 +98,9 @@ msgstr "%s: lokales (%s) ist neuer als das AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
-"voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
 msgstr ""
 "Bitte AUR_USERNAME und AUR_PASSWORD Umgebungsvariablen setzen um abzustimmen"
-
-#: pkg/settings/args.go:118
-msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--batchinstall=false'"
-
-#: pkg/settings/args.go:63
-msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--cleanafter=false'"
-
-#: pkg/settings/args.go:187
-msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--cleanmenu=false'"
-
-#: pkg/settings/args.go:207
-msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr "'--'%s ist veralted. Verwende stattdessen '--combinedupgrade=false'"
-
-#: pkg/settings/args.go:73
-msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--devel=false'"
-
-#: pkg/settings/args.go:192
-msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--diffmenu=false'"
-
-#: pkg/settings/args.go:197
-msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--editmenu=false'"
-
-#: pkg/settings/args.go:182
-msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--pgpfetch=false'"
-
-#: pkg/settings/args.go:177
-msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--provides=false'"
-
-#: pkg/settings/args.go:224
-msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--separatesources=false'"
-
-#: pkg/settings/args.go:172
-msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--sudoloop=false'"
-
-#: pkg/settings/args.go:78
-msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--timeupdate=false'"
-
-#: pkg/settings/args.go:202
-msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr "'--%s' ist veralted. Verwende stattdessen '--useask=false'"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -428,9 +375,10 @@ msgstr "Auszuschließende Pakete"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Pakete zum Ausschließen: (z.B. \"1 2 3\", \"1-3\", \"^4\" oder Repo-Name)"
+msgstr ""
+"Pakete zum Ausschließen: (z.B. \"1 2 3\", \"1-3\", \"^4\" oder Repo-Name)"
 
-#: cmd.go:402
+#: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Zu installierende Pakete: (z.B. 1 2 3, 1-3 oder ^4)"
 
@@ -578,7 +526,7 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "Abbruch durch den Benutzer"
 
-#: pkg/settings/parser/parser.go:620
+#: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
 msgstr "Argument '-' ohne Eingabe in stdin angegeben"
 
@@ -702,7 +650,7 @@ msgstr "Ungültige Nummer: %s"
 msgid "invalid option '%s'"
 msgstr "Ungültige Option '%s'"
 
-#: cmd.go:207
+#: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "Ungültige Option: '--deps' und '--explicit' können nicht zusammen genutzt "
@@ -786,14 +734,53 @@ msgstr "es gibt nichts zu tun"
 msgid "unable to CreateHandle: %s"
 msgstr "Kann CreateHandle nicht erstellen: %s"
 
-#: cmd.go:196
+#: cmd.go:186
 msgid "unhandled operation"
 msgstr "Unbehandelte Operation"
 
-#: cmd.go:460
+#: cmd.go:450
 msgid "unknown-version"
 msgstr "Unbekannte Version"
 
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "ja"
+
+#~ msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--batchinstall=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--cleanafter=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--cleanmenu=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
+#~ msgstr "'--'%s ist veralted. Verwende stattdessen '--combinedupgrade=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--devel=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--devel=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--diffmenu=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--editmenu=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--pgpfetch=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--provides=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--provides=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--separatesources=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--sudoloop=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--timeupdate=false'"
+
+#~ msgid "'--%s' is deprecated. Use '--useask=false' instead"
+#~ msgstr "'--%s' ist veralted. Verwende stattdessen '--useask=false'"
