@@ -81,7 +81,7 @@ func main() {
 	cmdArgs := parser.MakeArguments()
 
 	// Parse command line
-	if err = cfg.ParseCommandLine(cmdArgs, fallbackLog); err != nil {
+	if err = cfg.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
 			fallbackLog.Errorln(str)
 		}

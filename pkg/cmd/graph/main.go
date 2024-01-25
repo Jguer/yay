@@ -25,7 +25,7 @@ func handleCmd(logger *text.Logger) error {
 	}
 
 	cmdArgs := parser.MakeArguments()
-	if errP := cfg.ParseCommandLine(cmdArgs, logger); errP != nil {
+	if errP := cfg.ParseCommandLine(cmdArgs); errP != nil {
 		return errP
 	}
 

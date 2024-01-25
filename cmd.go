@@ -92,16 +92,12 @@ Permanent configuration options:
     --cleanmenu           Give the option to clean build PKGBUILDS
     --diffmenu            Give the option to show diffs for build files
     --editmenu            Give the option to edit/view PKGBUILDS
-    --nocleanmenu         Don't clean build PKGBUILDS
-    --nodiffmenu          Don't show diffs for build files
-    --noeditmenu          Don't edit/view PKGBUILDS
     --askremovemake       Ask to remove makedepends after install
     --askyesremovemake    Ask to remove makedepends after install("Y" as default)
     --removemake          Remove makedepends after install
     --noremovemake        Don't remove makedepends after install
 
     --cleanafter          Remove package sources after successful install
-    --nocleanafter        Do not remove package sources after successful build
     --keepsrc             Keep pkg/ and src/ after building packages
     --bottomup            Shows AUR's packages first and then repository's
     --topdown             Shows repository's packages first and then AUR's
@@ -109,7 +105,6 @@ Permanent configuration options:
     --doublelineresults   List each search result on two lines, like pacman
 
     --devel               Check development packages during sysupgrade
-    --nodevel             Do not check development packages
     --rebuild             Always build target packages
     --rebuildall          Always build all AUR packages
     --norebuild           Skip package build if in cache and up to date
@@ -118,19 +113,14 @@ Permanent configuration options:
     --noredownload        Skip pkgbuild download if in cache and up to date
     --redownloadall       Always download pkgbuilds of all AUR packages
     --provides            Look for matching providers when searching for packages
-    --noprovides          Just look for packages by pkgname
     --pgpfetch            Prompt to import PGP keys from PKGBUILDs
-    --nopgpfetch          Don't prompt to import PGP keys
     --useask              Automatically resolve conflicts using pacman's ask flag
-    --nouseask            Confirm conflicts manually during the install
 
     --sudo                <file>  sudo command to use
     --sudoflags           <flags> Pass arguments to sudo
     --sudoloop            Loop sudo calls in the background to avoid timeout
-    --nosudoloop          Do not loop sudo calls in the background
 
     --timeupdate          Check packages' AUR page for changes during sysupgrade
-    --notimeupdate        Do not check packages' AUR page for changes
 
 show specific options:
     -c --complete         Used for completions
