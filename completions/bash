@@ -69,14 +69,14 @@ _yay() {
   ##yay stuff
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
           noconfirm noprogressbar noscriptlet quiet root verbose
-          makepkg pacman git gpg gpgflags config requestsplitn sudoloop nosudoloop
+          makepkg pacman git gpg gpgflags config requestsplitn sudoloop
           redownload noredownload redownloadall rebuild rebuildall rebuildtree norebuild sortby
           singlelineresults doublelineresults answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
-          noansweredit noanswerupgrade cleanmenu diffmenu editmenu cleanafter nocleanafter keepsrc
-          nocleanmenu nodiffmenu provides noprovides pgpfetch nopgpfetch
-          useask nouseask combinedupgrade nocombinedupgrade aur repo makepkgconf
+          noansweredit noanswerupgrade cleanmenu diffmenu editmenu cleanafter keepsrc
+          provides pgpfetch
+          useask combinedupgrade aur repo makepkgconf
           nomakepkgconf askremovemake askyesremovemake removemake noremovemake completioninterval aururl aurrpcurl
-          searchby batchinstall nobatchinstall'
+          searchby batchinstall'
     'b d h q r v')
   yays=('clean gendb' 'c')
   show=('complete defaultconfig currentconfig stats news' 'c d g s w')

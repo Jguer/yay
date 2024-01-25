@@ -70,9 +70,6 @@ _pacman_opts_common=(
 	'--cleanmenu[Give the option to clean build PKGBUILDS]'
 	'--diffmenu[Give the option to show diffs for build files]'
 	'--editmenu[Give the option to edit/view PKGBUILDS]'
-	"--nocleanmenu[Don't clean build PKGBUILDS]"
-	"--nodiffmenu[Don't show diffs for build files]"
-	"--noeditmenu[Don't edit/view PKGBUILDS]"
 	"--askremovemake[Ask to remove makedepends after install]"
 	"--askyesremovemake[Ask to remove makedepends after install(with "Y" as default)]"
 	"--removemake[Remove makedepends after install]"
@@ -83,35 +80,26 @@ _pacman_opts_common=(
 	'--singlelineresults[List each search result on its own line]'
 	'--doublelineresults[List each search result on two lines, like pacman]'
 	'--devel[Check -git/-svn/-hg development version]'
-	'--nodevel[Disable development version checking]'
 	'--cleanafter[Clean package sources after successful build]'
-	'--nocleanafter[Disable package sources cleaning after successful build]'
 	'--keepsrc[Keep pkg/ and src/ after building packages]'
 	'--timeupdate[Check packages modification date and version]'
-	'--notimeupdate[Check only package version change]'
 	'--redownload[Always download pkgbuilds of targets]'
 	'--redownloadall[Always download pkgbuilds of all AUR packages]'
 	'--noredownload[Skip pkgbuild download if in cache and up to date]'
 	'--rebuild[Always build target packages]'
 	'--rebuildall[Always build all AUR packages]'
 	'--provides[Look for matching providers when searching for packages]'
-	'--noprovides[Just look for packages by pkgname]'
 	'--pgpfetch[Prompt to import PGP keys from PKGBUILDs]'
-	"--nopgpfetch[Don't prompt to import PGP keys]"
 	"--useask[Automatically resolve conflicts using pacman's ask flag]"
-	'--nouseask[Confirm conflicts manually during the install]'
 	'--combinedupgrade[Refresh then perform the repo and AUR upgrade together]'
-	'--nocombinedupgrade[Perform the repo upgrade and AUR upgrade separately]'
 	'--rebuildtree[Always build all AUR packages even if installed]'
 	'--norebuild[Skip package build if in cache and up to date]'
 	'--mflags[Pass arguments to makepkg]:mflags'
 	'--gpgflags[Pass arguments to gpg]:gpgflags'
 	'--sudoloop[Loop sudo calls in the background to avoid timeout]'
-	'--nosudoloop[Do not loop sudo calls in the background]'
 	'--searchby[Search for packages using a specified field]'
 	'--sortby[Sort AUR results by a specific field during search]'
 	'--batchinstall[Build multiple AUR packages then install them together]'
-	'--nobatchinstall[Build and install each AUR package one by one]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
