@@ -1,22 +1,20 @@
-#
+# 
 # Translators:
 # Cardellino, 2021
 # Giulio Terigi, 2022
 # Simone Dotto <simonedotto@protonmail.com>, 2022
 # jheitz223, 2023
 # Vincenzo Reale <vinx.reale@gmail.com>, 2023
-#
+# 
 msgid ""
 msgstr ""
 "Last-Translator: Vincenzo Reale <vinx.reale@gmail.com>, 2023\n"
-"Language-Team: Italian (Italy) (https://app.transifex.com/yay-1/teams/123732/"
-"it_IT/)\n"
-"Language: it_IT\n"
+"Language-Team: Italian (Italy) (https://app.transifex.com/yay-1/teams/123732/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? "
-"1 : 2;\n"
+"Language: it_IT\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 "X-Generator: xgotext\n"
 
 #: pkg/menus/menu.go:32
@@ -90,7 +88,8 @@ msgstr "%s: il pacchetto locale (%s) è più nuovo del pacchetto AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "%s: imposta le variabili d'ambiente AUR_USERNAME e AUR_PASSWORD prima di "
 "votare"
@@ -367,8 +366,7 @@ msgstr "Pacchetti da escludere"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Pacchetti da escludere: (es: \"1 2 3\", \"1-3\", \"^4\" o il nome del repo)"
+msgstr "Pacchetti da escludere: (es: \"1 2 3\", \"1-3\", \"^4\" o il nome del repo)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -595,7 +593,8 @@ msgstr "errore durante il ripristino di %s: %s"
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
 msgstr ""
-"aggiornamento della ragione d'installazione del pacchetto a %s non è riuscito"
+"aggiornamento della ragione d'installazione del pacchetto a %s non è "
+"riuscito"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
@@ -742,42 +741,3 @@ msgstr "versione-sconosciuta"
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "sì"
-
-#~ msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--batchinstall=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--cleanafter=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--cleanmenu=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--combinedupgrade=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--devel=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--devel=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--diffmenu=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--editmenu=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--pgpfetch=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--provides=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--provides=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--separatesources=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--sudoloop=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--timeupdate=false'"
-
-#~ msgid "'--%s' is deprecated. Use '--useask=false' instead"
-#~ msgstr "'--%s' è deprecato. Usa invece '--useask=false'"
