@@ -126,6 +126,7 @@ $(PACKAGE): $(BIN) $(RELEASE_DIR) ${MOFILES}
 
 locale:
 	xgotext -in . -out po
+	mv po/default.pot po/en.po
 	for lang in ${LANGS}; do \
 		test -f po/$$lang.po || msginit --no-translator -l po/$$lang.po -i po/${POTFILE} -o po/$$lang.po; \
 		msgmerge -U po/$$lang.po po/${POTFILE}; \

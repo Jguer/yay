@@ -28,11 +28,11 @@ msgstr " (Файлы сборки существуют)"
 msgid " (Installed)"
 msgstr "(Установлено)"
 
-#: cmd.go:463
+#: cmd.go:453
 msgid " [Installed]"
 msgstr "[Установлено]"
 
-#: cmd.go:420 vote.go:36
+#: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
 msgstr "делать больше нечего"
 
@@ -95,58 +95,6 @@ msgid ""
 msgstr ""
 "%s: пожалуйста, укажите AUR_USERNAME и AUR_PASSWORD переменной среды для "
 "голосования"
-
-#: pkg/settings/args.go:118
-msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:63
-msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:187
-msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:207
-msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:73
-msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:192
-msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:197
-msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:182
-msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:177
-msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:224
-msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:172
-msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:78
-msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:202
-msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -423,7 +371,7 @@ msgstr ""
 "Исключить пакеты: (напр.: \"1 2 3\", \"1-3\", \"^4\" или название "
 "репозитория)"
 
-#: cmd.go:402
+#: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Пакеты для установки: (напр.: 1 2 3, 1-3 or ^4)"
 
@@ -571,7 +519,7 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "прервано пользователем"
 
-#: pkg/settings/parser/parser.go:620
+#: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
 msgstr "аргумент '-' задан без ввода из stdin"
 
@@ -695,7 +643,7 @@ msgstr "неверное число: %s"
 msgid "invalid option '%s'"
 msgstr "неверная опция '%s'"
 
-#: cmd.go:207
+#: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "неверная опция: невозможно использовать опции '--deps' и '--explicit' "
@@ -781,11 +729,11 @@ msgstr "делать больше нечего"
 msgid "unable to CreateHandle: %s"
 msgstr "невозможно выполнить CreateHandle: %s"
 
-#: cmd.go:196
+#: cmd.go:186
 msgid "unhandled operation"
 msgstr "необработанная операция"
 
-#: cmd.go:460
+#: cmd.go:450
 msgid "unknown-version"
 msgstr "неизвестная версия"
 

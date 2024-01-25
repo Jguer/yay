@@ -22,11 +22,11 @@ msgstr " (קיימים קובצי בנייה)"
 msgid " (Installed)"
 msgstr " (מותקנת)"
 
-#: cmd.go:463
+#: cmd.go:453
 msgid " [Installed]"
 msgstr " [מותקנת]"
 
-#: cmd.go:420 vote.go:36
+#: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
 msgstr "אין מטרות לביצוע"
 
@@ -86,58 +86,6 @@ msgstr "%s: מקומית (%s) חדשה יותר מ־AUR (%s)"
 msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
 msgstr "%s: נא להגדיר את משתני הסביבה AUR_USERNAME ו־AUR_PASSWORD כדי להצביע"
-
-#: pkg/settings/args.go:118
-msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:63
-msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:187
-msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:207
-msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:73
-msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:192
-msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:197
-msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:182
-msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:177
-msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:224
-msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:172
-msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:78
-msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:202
-msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -410,7 +358,7 @@ msgstr "חבילות להחרגה"
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "חבילות שיוחרגו: (למשל: „1 2 3”, „1-3”, „‎^4” או שם המאגר)"
 
-#: cmd.go:402
+#: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "חבילות להתקנה (למשל: 1 2 3, 1-3 או ‎^4)"
 
@@ -558,7 +506,7 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "בוטל לבקשת המשתמש"
 
-#: pkg/settings/parser/parser.go:620
+#: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
 msgstr "סופק המשתנה ‚-’ ללא שום קלט ל־stdin"
 
@@ -682,7 +630,7 @@ msgstr "מס׳ שגוי: %s"
 msgid "invalid option '%s'"
 msgstr "האפשרות ‚%s’ שגויה"
 
-#: cmd.go:207
+#: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr "אפשרות שגויה: אסור להשתמש ב־‚‎--deps' וב־‚‎--explicit’ יחד"
 
@@ -766,11 +714,11 @@ msgstr "אין מטרות לביצוע"
 msgid "unable to CreateHandle: %s"
 msgstr "לא ניתן ליצור כינוי (CreateHandle): %s"
 
-#: cmd.go:196
+#: cmd.go:186
 msgid "unhandled operation"
 msgstr "פעולה שלא טופלה"
 
-#: cmd.go:460
+#: cmd.go:450
 msgid "unknown-version"
 msgstr "גרסה-לא-ידועה"
 
