@@ -1,20 +1,18 @@
-#
+# 
 # Translators:
 # J G, 2021
 # Eduardo Ervideira, 2023
 # Hugo Carvalho <hugokarvalho@hotmail.com>, 2023
-#
+# 
 msgid ""
 msgstr ""
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>, 2023\n"
-"Language-Team: Portuguese (https://app.transifex.com/yay-1/teams/123732/"
-"pt/)\n"
-"Language: pt\n"
+"Language-Team: Portuguese (https://app.transifex.com/yay-1/teams/123732/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
-"1000000 == 0 ? 1 : 2;\n"
+"Language: pt\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 "X-Generator: xgotext\n"
 
 #: pkg/menus/menu.go:32
@@ -72,7 +70,8 @@ msgstr "%s: Sem modificações -- a ignorar"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: não é possível utilizar a opção --aur com este pacote -- a ignorar"
+msgstr ""
+"%s: não é possível utilizar a opção --aur com este pacote -- a ignorar"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
@@ -89,7 +88,8 @@ msgstr "%s: local (%s) é mais recente que AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "%s: definir variáveis de ambiente AUR_USERNAME e AUR_PASSWORD para votação"
 
@@ -734,44 +734,3 @@ msgstr "versão-desconhecida"
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "sim"
-
-#~ msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--batchinstall=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use  '--cleanafter=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--cleanmenu=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-#~ msgstr ""
-#~ "'--%s' está descontinuado. Use '--combinedupgrade=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--devel=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--devel=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--diffmenu=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--editmenu=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--pgpfetch=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--provides=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--provides=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-#~ msgstr ""
-#~ "'--%s' está descontinuado. Use '--separatesources=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--sudoloop=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--timeupdate=false' em vez disso"
-
-#~ msgid "'--%s' is deprecated. Use '--useask=false' instead"
-#~ msgstr "'--%s' está descontinuado. Use '--useask=false' em vez disso"
