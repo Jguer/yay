@@ -1,20 +1,19 @@
-#
+# 
 # Translators:
 # Fjuro Fjuro, 2022
-# walken, 2023
-# Matej Borsky, 2023
+# a30a45d5047eb877c4dc397ded846f36_1de9be1, 2023
 # Matyáš Černý, 2023
-#
+# walken, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Matyáš Černý, 2023\n"
+"Last-Translator: walken, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/yay-1/teams/123732/cs/)\n"
-"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
-"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"Language: cs\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 "X-Generator: xgotext\n"
 
 #: pkg/menus/menu.go:32
@@ -56,13 +55,12 @@ msgid "%s is up to date -- skipping"
 msgstr "%s je aktualizován -- přeskakuji"
 
 #: pkg/upgrade/service.go:292
-#, fuzzy
 msgid "%s to upgrade/install."
-msgstr "Balíčky k aktualizaci/instalaci."
+msgstr " %s k povýšení/instalaci."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr ""
+msgstr "%s bude také nainstalován pro tuto operaci. "
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
@@ -90,7 +88,8 @@ msgstr "%s: místní (%s) je novější než AUR (%s) "
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "prosím nastavte proměnné prostředí AUR_USERNAME a AUR_PASSWORD pro hodnocení"
 
@@ -103,9 +102,8 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) Stažen PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Stažen PKGBUILD: %s"
+msgstr "(%d/%d) Nepodařilo se stáhnout PKGBUILD\\: %s "
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -310,9 +308,8 @@ msgid "No AUR package found for"
 msgstr "AUR balíček nenalezen pro"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "AUR balíček nenalezen pro"
+msgstr "Nebyly nalezeny žádné balíčky pro"
 
 #: print.go:225
 msgid "None"
@@ -364,9 +361,7 @@ msgstr "Balíčky k vyjmutí."
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Balíčky k vyloučení: (např.: \"1 2 3\", \"1-3\", \"^4\" nebo název "
-"repozitáře)"
+msgstr "Balíčky k vyloučení: (např.: \"1 2 3\", \"1-3\", \"^4\" nebo název repozitáře)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -390,7 +385,7 @@ msgstr "Odstranit vytvořené závislosti po instalaci?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "Nahrazuje"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
@@ -642,7 +637,8 @@ msgstr "neplatná možnost '%s'"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
-msgstr "neplatná možnost: '--deps' a '--explicit' nemohou být použity současně"
+msgstr ""
+"neplatná možnost: '--deps' a '--explicit' nemohou být použity současně"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
@@ -678,7 +674,7 @@ msgstr "naráz může být použita pouze jedna operace"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "je dovolený pouze jeden cíl"
 
 #: print.go:187
 msgid "package '%s' was not found"
@@ -693,13 +689,12 @@ msgid "package not found in repos"
 msgstr "balíček nenalezen v repozitářích"
 
 #: pkg/upgrade/service.go:292
-#, fuzzy
 msgid "package"
 msgid_plural "packages"
-msgstr[0] "Základ aplikace"
-msgstr[1] "Základ aplikace"
-msgstr[2] "Základ aplikace"
-msgstr[3] "Základ aplikace"
+msgstr[0] "balíček"
+msgstr[1] "balíčky"
+msgstr[2] "balíčky"
+msgstr[3] "balíčky"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
@@ -736,48 +731,3 @@ msgstr "neznámá-verze"
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "ano"
-
-#~ msgid " (Target"
-#~ msgstr "(Cíl"
-
-#~ msgid " (Wanted by: "
-#~ msgstr "(Požaduje:"
-
-#~ msgid "%s not satisfied, flushing install queue"
-#~ msgstr "%s není uspokojen, vymazávání fronty instalací"
-
-#~ msgid "Checking for conflicts..."
-#~ msgstr "Kontrola konfliktů..."
-
-#~ msgid "Checking for inner conflicts..."
-#~ msgstr "Kontrola vnitřních konfliktů..."
-
-#~ msgid "Conflicting packages will have to be confirmed manually"
-#~ msgstr "Konfliktní balíčky budou muset být ručně potvrzeny"
-
-#~ msgid "Inner conflicts found:"
-#~ msgstr "Nalezeny vnitřní konflikty:"
-
-#~ msgid "Installing %s will remove:"
-#~ msgstr "Instalací %s odstraníte:"
-
-#~ msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
-#~ msgstr "PKGBUILD je aktuální, přeskakuji (%d/%d): %s"
-
-#~ msgid "Package conflicts found:"
-#~ msgstr "Nalezeny konflikty balíčků:"
-
-#~ msgid "Packages to upgrade."
-#~ msgstr "Balíčky k aktualizaci"
-
-#~ msgid "Querying AUR..."
-#~ msgstr "Prohledávání AUR..."
-
-#~ msgid "could not find all required packages:"
-#~ msgstr "Nepodařilo se nalézt všechny požadované balíčky:"
-
-#~ msgid "could not find srcinfo for: %s"
-#~ msgstr "nepodařilo se nalézt srcinfo pro: %s"
-
-#~ msgid "package conflicts can not be resolved with noconfirm, aborting"
-#~ msgstr "konflikty balíčků nelze vyřešit pomocí noconfirm, ruším"
