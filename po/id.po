@@ -1,11 +1,11 @@
 # 
 # Translators:
 # Ludovico, 2022
-# Linerly <linerly@proton.me>, 2023
+# Linerly <linerly@proton.me>, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Linerly <linerly@proton.me>, 2023\n"
+"Last-Translator: Linerly <linerly@proton.me>, 2024\n"
 "Language-Team: Indonesian (https://app.transifex.com/yay-1/teams/123732/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -507,7 +507,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Masukkan sebuah nomor (default=1):"
+"Masukkan sebuah nomor (bawaan=1):"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
