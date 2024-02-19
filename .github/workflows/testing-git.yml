@@ -35,7 +35,7 @@ jobs:
           chmod -R 777 pacman-git
           su github -c 'cd pacman-git; yes | makepkg -i --nocheck'
       - name: Run Build and Tests with pacman-git
-        run: /
+        run: |
           pwd
           ls -alh
           make test
