@@ -9,8 +9,8 @@ require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/leonelquinteros/gotext v1.5.2
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/sys v0.16.0
-	golang.org/x/term v0.16.0
+	golang.org/x/sys v0.17.0
+	golang.org/x/term v0.17.0
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
@@ -28,7 +28,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/itchyny/gojq v0.12.14 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
-	github.com/ohler55/ojg v1.21.0 // indirect
+	github.com/ohler55/ojg v1.21.2 // indirect
 )
 
 require github.com/hashicorp/go-multierror v1.1.1

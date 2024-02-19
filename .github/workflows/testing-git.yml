@@ -14,7 +14,7 @@ jobs:
     container:
       image: jguer/yay-builder:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
@@ -35,4 +35,5 @@ jobs:
           chmod -R 777 pacman-git
           su github -c 'cd pacman-git; yes | makepkg -i --nocheck'
       - name: Run Build and Tests with pacman-git
-        run: make test
+        run: |
+          make test
