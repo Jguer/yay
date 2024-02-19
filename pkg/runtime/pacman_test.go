@@ -4,16 +4,22 @@
 package runtime
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 )
 
 func TestPacmanConf(t *testing.T) {
 	t.Parallel()
+	path := "../../testdata/pacman.conf"
+
+	absPath, err := filepath.Abs(path)
+	require.NoError(t, err)
 
 	expectedPacmanConf := &pacmanconf.Config{
 		RootDir: "/", DBPath: "/var/lib/pacman/",
@@ -45,7 +51,7 @@ func TestPacmanConf(t *testing.T) {
 		},
 	}
 
-	pacmanConf, color, err := retrievePacmanConfig(parser.MakeArguments(), "../../testdata/pacman.conf")
+	pacmanConf, color, err := retrievePacmanConfig(parser.MakeArguments(), absPath)
 	assert.Nil(t, err)
 	assert.NotNil(t, pacmanConf)
 	assert.Equal(t, color, false)
