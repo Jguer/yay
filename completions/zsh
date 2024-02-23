@@ -23,7 +23,7 @@ _pacman_opts_commands=(
 
 # options for passing to _arguments: options common to all commands
 _pacman_opts_common=(
-	'--repo[Assume targets are from the repositories]'
+	{-N,--repo}'[Assume targets are from the repositories]'
 	{-a,--aur}'[Assume targets are from the AUR]'
 	'--aururl[Set an alternative AUR URL]:url'
 	'--aurrpcurl[Set an alternative URL for the AUR /rpc endpoint]:url'
