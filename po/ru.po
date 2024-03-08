@@ -509,7 +509,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Введите номер (по умлчанию=1):"
+"Введите номер (по умолчанию=1):"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
