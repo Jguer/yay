@@ -106,7 +106,7 @@ msgstr "(%d/%d) Загружен PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Не удалось скачать PKGBUILD:"
+msgstr "(%d/%d) Не удалось загрузить PKGBUILD:"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
