@@ -44,7 +44,7 @@ func downloadGitRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 		gitArgs = append(gitArgs, pkgURL, pkgName)
 
 		cloneArgs := make([]string, 0, len(gitArgs)+4)
-		cloneArgs = append(cloneArgs, "clone", "--no-progress")
+		cloneArgs = append(cloneArgs, "clone", "--no-progress", "--origin=origin")
 		cloneArgs = append(cloneArgs, gitArgs...)
 		cmd := cmdBuilder.BuildGitCmd(ctx, dest, cloneArgs...)
 
