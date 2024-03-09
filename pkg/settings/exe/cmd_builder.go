@@ -109,6 +109,7 @@ func gitFilteredEnv() []string {
 	}
 
 	env = append(env, "GIT_TERMINAL_PROMPT=0")
+	env = append(env, "GIT_CONFIG_NOSYSTEM=1")
 
 	return env
 }
@@ -152,6 +153,8 @@ func (c *CmdBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs 
 
 	cmd := exec.CommandContext(ctx, c.MakepkgBin, args...)
 	cmd.Dir = dir
+
+	cmd.Env = append(cmd.Env, "GIT_CONFIG_NOSYSTEM=1")
 
 	cmd = c.deElevateCommand(ctx, cmd)
 
