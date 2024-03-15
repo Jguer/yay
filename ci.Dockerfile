@@ -1,4 +1,4 @@
-FROM ghcr.io/jguer/archlinuxarm:base-devel
+FROM docker.io/ljmf00/archlinux:devel
 LABEL maintainer="Jguer,docker@jguer.space"
 
 ENV GO111MODULE=on
