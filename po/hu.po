@@ -606,7 +606,7 @@ msgstr "nem sikerült megnyitni a könyvtárat '%s': %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "nem sikerült elemezni %s -- kihagyás: %s"
+msgstr "nem sikerült elemezni a következőt: %s -- kihagyás: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
