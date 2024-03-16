@@ -348,7 +348,7 @@ msgstr "Csomag alap ID-ja"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Csomag Bázis"
+msgstr "Csomag alap"
 
 #: pkg/query/aur_warnings.go:67
 msgid "Packages not in AUR:"
