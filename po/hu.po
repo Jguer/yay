@@ -272,7 +272,7 @@ msgstr "Kulcsszavak"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Utoljára Módosítva"
+msgstr "Utoljára módosítva"
 
 #: print.go:35
 msgid "Licenses"
