@@ -432,7 +432,7 @@ msgstr "Szinkronizálás"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "Tíz legnagyobb csomag:"
+msgstr "A tíz legnagyobb csomag:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
