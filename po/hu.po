@@ -320,7 +320,7 @@ msgstr "Semmi"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Opcionális Függőségek"
+msgstr "Opcionális függőségek"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
