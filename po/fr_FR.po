@@ -1,26 +1,25 @@
-#
+# 
 # Translators:
 # J G, 2021
 # Oliver Conzen, 2021
 # Galiley, 2022
 # Khoyo - <khoyobegenn@gmail.com>, 2022
 # Mr Strik3, 2022
-# Sylvain Bx, 2023
-# Mélanie Chauvel <perso@hack-libre.org>, 2023
+# Mélanie Chauvel <aria@ariasuni.eu>, 2023
 # Maxime Demolin, 2023
 # Mathias Brugger, 2023
-#
+# Sylvain Bx, 2023
+# Bertrand Junqua, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Mathias Brugger, 2023\n"
-"Language-Team: French (France) (https://app.transifex.com/yay-1/teams/123732/"
-"fr_FR/)\n"
-"Language: fr_FR\n"
+"Last-Translator: Bertrand Junqua, 2024\n"
+"Language-Team: French (France) (https://app.transifex.com/yay-1/teams/123732/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
-"1000000 == 0 ? 1 : 2;\n"
+"Language: fr_FR\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 "X-Generator: xgotext\n"
 
 #: pkg/menus/menu.go:32
@@ -95,7 +94,8 @@ msgstr ""
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "%s : veuillez définir les variables d'environnement AUR_USERNAME et "
 "AUR_PASSWORD pour voter"
@@ -109,9 +109,8 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) PKGBUILD téléchargé : %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) PKGBUILD téléchargé : %s"
+msgstr "(%d/%d) Le téléchargement de PKGBUILD a échoué : %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -253,7 +252,7 @@ msgstr "Paquets AUR marqués comme obsolètes :"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Paquets étrangers installés : %s"
+msgstr "Paquets étrangers installés :"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
@@ -320,9 +319,8 @@ msgid "No AUR package found for"
 msgstr "Pas de paquet AUR trouvé pour"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "Pas de paquet AUR trouvé pour"
+msgstr "Aucun paquet trouvé pour"
 
 #: print.go:225
 msgid "None"
@@ -395,11 +393,12 @@ msgstr "Fournit"
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
 msgstr ""
-"Supprimer les dépendances nécessaires à la compilation après l'installation ?"
+"Supprimer les dépendances nécessaires à la compilation après l'installation "
+"?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "Remplace"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
@@ -447,7 +446,8 @@ msgstr "Dix plus gros paquets :"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr "Les paquets suivants ne sont pas compatibles avec votre architecture :"
+msgstr ""
+"Les paquets suivants ne sont pas compatibles avec votre architecture :"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
@@ -557,7 +557,8 @@ msgstr "dépendance"
 #: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr ""
-"échec du contrôle de développement pour le paquet : %s a rencontré une erreur"
+"échec du contrôle de développement pour le paquet : %s a rencontré une "
+"erreur"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
@@ -694,7 +695,7 @@ msgstr "une seule opération peut être réalisée à la fois"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "une seule cible est autorisée"
 
 #: print.go:187
 msgid "package '%s' was not found"
@@ -729,7 +730,8 @@ msgstr "suppression des fichiers AUR non suivis du cache..."
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr "le fchier PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
+msgstr ""
+"le fchier PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"

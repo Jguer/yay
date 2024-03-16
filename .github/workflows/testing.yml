@@ -18,7 +18,7 @@ jobs:
             ${{ runner.os }}-go-
       - name: Lint
         env:
-          GOFLAGS: -buildvcs=false
+          GOFLAGS: -buildvcs=false -tags=next
         run: /app/bin/golangci-lint run ./...
       - name: Run Build and Tests
         run: make test
