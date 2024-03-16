@@ -652,7 +652,7 @@ msgstr "érvénytelen tároló"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "érvénytelen érték: %d nem %d és %d között van"
+msgstr "érvénytelen érték: %d, az érték nem %d és %d között van"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
