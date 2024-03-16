@@ -730,7 +730,7 @@ msgstr "nem kezelt művelet"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "ismeretlen-verzió"
+msgstr "ismeretlen verzió"
 
 #: pkg/text/input.go:47
 msgid "yes"
