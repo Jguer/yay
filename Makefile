@@ -70,7 +70,7 @@ docker-release-all:
 	make docker-release-aarch64 ARCH=aarch64
 
 docker-release:
-	docker create --name yay-$(ARCH) yay:${ARCH}
+	docker create --name yay-$(ARCH) yay:${ARCH} /bin/sh
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
