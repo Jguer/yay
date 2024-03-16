@@ -558,7 +558,7 @@ msgstr "hiba a forrásfájlok letöltése közben: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "hiba %s letöltése közben: %s"
+msgstr "hiba a(z) %s letöltése közben: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
