@@ -578,7 +578,7 @@ msgstr "hiba a(z) %s beolvasztása közben: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
-msgstr "hiba %s olvasása közben"
+msgstr "hiba a(z) %s olvasása közben"
 
 #: sync.go:36
 msgid "error refreshing databases"
