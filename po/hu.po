@@ -632,7 +632,7 @@ msgstr ""
 
 #: pkg/text/errors.go:8
 msgid "input too long"
-msgstr "bemenet túl hosszú"
+msgstr "a bemenet túl hosszú"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
