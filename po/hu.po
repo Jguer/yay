@@ -90,8 +90,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s: kérjük, állítsd be az AUR_USERNAME és AUR_PASSWORD környezeti változókat"
-" a szavazáshoz"
+"%s: állítsd be az AUR_USERNAME és AUR_PASSWORD környezeti változókat a "
+"szavazáshoz"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
