@@ -688,11 +688,11 @@ msgstr "a(z) '%s' csomag nem található"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "csomag nem található az AUR-ban"
+msgstr "a csomag nem található az AUR-ban"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "csomag nem található a repo-kban"
+msgstr "a csomag nem található a repo-kban"
 
 #: pkg/upgrade/service.go:292
 msgid "package"
