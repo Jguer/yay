@@ -63,7 +63,7 @@ msgstr "%s is telepítve lesz ehhez a művelethez."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
-msgstr "%s, Kell ehhez: %s"
+msgstr "%s, szükséges ehhez: %s"
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
@@ -90,8 +90,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s: kérjük, állítsd be az AUR_USERNAME és AUR_PASSWORD környezeti változókat"
-" a szavazáshoz"
+"%s: állítsd be az AUR_USERNAME és AUR_PASSWORD környezeti változókat a "
+"szavazáshoz"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -159,7 +159,7 @@ msgstr "Tisztítás (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Ütközik Ezzel"
+msgstr "Ütközik ezzel"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
@@ -171,7 +171,7 @@ msgstr "Függőség"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "Függ Tőle"
+msgstr "Függ ettől"
 
 #: print.go:33
 msgid "Description"
@@ -236,11 +236,11 @@ msgstr ""
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Először Beküldve"
+msgstr "Először beküldve"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Elavultnak Jelölt AUR Csomagok:"
+msgstr "Elavultnak jelölt AUR csomagok:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
@@ -272,7 +272,7 @@ msgstr "Kulcsszavak"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Utoljára Módosítva"
+msgstr "Utoljára módosítva"
 
 #: print.go:35
 msgid "Licenses"
@@ -288,15 +288,15 @@ msgstr "Karbantartó"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Make Függőség"
+msgstr "Make függőség"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Make Függőségek"
+msgstr "Make függőségek"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
-msgstr "Hiányzó AUR Debug Csomagok:"
+msgstr "Hiányzó AUR hibakereső csomagok:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
@@ -320,7 +320,7 @@ msgstr "Semmi"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Opcionális Függőségek"
+msgstr "Opcionális függőségek"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
@@ -344,11 +344,11 @@ msgstr "PKGBUILD-ek szerkesztése?"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Csomag Bázis ID-ja"
+msgstr "Csomag alap ID-ja"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Csomag Bázis"
+msgstr "Csomag alap"
 
 #: pkg/query/aur_warnings.go:67
 msgid "Packages not in AUR:"
@@ -364,7 +364,7 @@ msgstr "Kizárandó csomagok"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Kihagyni kívánt csomagok: (pl.: \"1 2 3\", \"1-3\", \"^4\" vagy repo név)"
+msgstr "Kihagyni kívánt csomagok: (pl.: \"1 2 3\", \"1-3\", \"^4\", vagy tároló név)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -384,7 +384,7 @@ msgstr "Szolgáltatók"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Eltávolítod a Make függőségeket a telepítés után?"
+msgstr "Make függőségek törlése a telepítés után?"
 
 #: print.go:43
 msgid "Replaces"
@@ -432,7 +432,7 @@ msgstr "Szinkronizálás"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "Tíz legnagyobb csomag:"
+msgstr "A tíz legnagyobb csomag:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
@@ -537,7 +537,8 @@ msgstr "nem sikerült megtalálni minden szükséges csomagot"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "nem sikerült megtalálni egyetlen csomagarchívumot sem a %s listában"
+msgstr ""
+"nem sikerült megtalálni egyetlen csomagarchívumot sem a(z) %s listában"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
 msgid "dependency"
@@ -557,11 +558,11 @@ msgstr "hiba a forrásfájlok letöltése közben: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "hiba %s letöltése közben: %s"
+msgstr "hiba a(z) %s letöltése közben: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "hiba a repo csomagok telepítése közben"
+msgstr "hiba a tároló csomagok telepítése közben"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
@@ -573,11 +574,11 @@ msgstr "make hiba: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "hiba %s merge-elése közben: %s"
+msgstr "hiba a(z) %s beolvasztása közben: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
-msgstr "hiba %s olvasása közben"
+msgstr "hiba a(z) %s olvasása közben"
 
 #: sync.go:36
 msgid "error refreshing databases"
@@ -589,7 +590,7 @@ msgstr "hiba visszaállítás közben %s: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "hiba történt a csomag frissítése közben a telepítés oka %s"
+msgstr "hiba történt a csomag frissítése közben, a telepítés oka %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
@@ -605,7 +606,7 @@ msgstr "nem sikerült megnyitni a könyvtárat '%s': %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "nem sikerült elemezni %s -- kihagyás: %s"
+msgstr "nem sikerült elemezni a következőt: %s -- kihagyás: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
@@ -626,12 +627,12 @@ msgstr "nem sikerült lekérni az AUR gyorsítótárat"
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr ""
-"figyelmen kívül hagyja a devel csomag frissítését (nem talált AUR-"
+"figyelmen kívül hagyja a fejlesztői csomag frissítését (nem talált AUR-"
 "információt):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
-msgstr "bemenet túl hosszú"
+msgstr "a bemenet túl hosszú"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
@@ -639,7 +640,7 @@ msgstr "érvénytelen szám: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "érvénytelen opció '%s'"
+msgstr "érvénytelen opció: '%s'"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
@@ -651,7 +652,7 @@ msgstr "érvénytelen tároló"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "érvénytelen érték: %d nem %d és %d között van"
+msgstr "érvénytelen érték: %d, az érték nem %d és %d között van"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
@@ -671,7 +672,7 @@ msgstr "nem"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "nincs mit telepíteni a(z) %s -hoz/hez"
+msgstr "nincs mit telepíteni ehhez: %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
@@ -687,11 +688,11 @@ msgstr "a(z) '%s' csomag nem található"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "csomag nem található az AUR-ban"
+msgstr "a csomag nem található az AUR-ban"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "csomag nem található a repo-kban"
+msgstr "a csomag nem található a repo-kban"
 
 #: pkg/upgrade/service.go:292
 msgid "package"
@@ -729,7 +730,7 @@ msgstr "nem kezelt művelet"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "ismeretlen-verzió"
+msgstr "ismeretlen verzió"
 
 #: pkg/text/input.go:47
 msgid "yes"
