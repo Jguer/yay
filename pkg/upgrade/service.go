@@ -3,7 +3,6 @@ package upgrade
 import (
 	"context"
 	"fmt"
-	"math"
 	"sort"
 	"strings"
 
@@ -195,7 +194,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 		parents := graph.ImmediateDependencies(name)
 		extra := ""
 		if len(parents) > 0 && !info.Upgrade && info.Reason == dep.MakeDep {
-			reducedParents := parents.Slice()[:int(math.Min(cutOffExtra, float64(len(parents))))]
+			reducedParents := parents.Slice()[:min(cutOffExtra, len(parents))]
 			if len(parents) > cutOffExtra {
 				reducedParents = append(reducedParents, "...")
 			}
