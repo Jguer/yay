@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -61,8 +60,8 @@ func (u UpSlice) Print(logger *text.Logger) {
 		packNameLen := len(StylizedNameWithRepository(upgrade))
 		packVersion, _ := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 		packVersionLen := len(packVersion)
-		longestName = intrange.Max(packNameLen, longestName)
-		longestVersion = intrange.Max(packVersionLen, longestVersion)
+		longestName = max(packNameLen, longestName)
+		longestVersion = max(packVersionLen, longestVersion)
 	}
 
 	lenUp := len(u.Up)
@@ -94,8 +93,8 @@ func (u UpSlice) PrintDeps(logger *text.Logger) {
 		packNameLen := len(StylizedNameWithRepository(upgrade))
 		packVersion, _ := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 		packVersionLen := len(packVersion)
-		longestName = intrange.Max(packNameLen, longestName)
-		longestVersion = intrange.Max(packVersionLen, longestVersion)
+		longestName = max(packNameLen, longestName)
+		longestVersion = max(packVersionLen, longestVersion)
 	}
 
 	lenUp := len(u.PulledDeps)
