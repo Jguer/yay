@@ -2,7 +2,7 @@ module github.com/Jguer/yay/v12
 
 require (
 	github.com/Jguer/aur v1.2.3
-	github.com/Jguer/go-alpm/v2 v2.2.1
+	github.com/Jguer/go-alpm/v2 v2.2.2
 	github.com/Jguer/votar v1.0.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
