@@ -425,7 +425,7 @@ func isArg(arg string) bool {
 	case "useask":
 	case "combinedupgrade":
 	case "a", "aur":
-	case "repo":
+	case "z", "repo":
 	case "removemake":
 	case "noremovemake":
 	case "askremovemake":
