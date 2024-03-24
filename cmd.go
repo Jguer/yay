@@ -54,7 +54,7 @@ If no operation is specified 'yay -Syu' will be performed
 If no operation is specified and targets are provided -Y will be assumed
 
 New options:
-       --repo             Assume targets are from the repositories
+    -N --repo             Assume targets are from the repositories
     -a --aur              Assume targets are from the AUR
 
 Permanent configuration options:
