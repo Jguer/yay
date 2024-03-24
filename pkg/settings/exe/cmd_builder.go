@@ -26,6 +26,9 @@ var gitDenyList = mapset.NewThreadUnsafeSet(
 	"GIT_WORK_TREE",
 	"GIT_DIR",
 )
+var gitConfigOverrides = map[string]string{
+	"clone.defaultRemoteName": "origin",
+}
 
 type GitCmdBuilder interface {
 	Runner
@@ -113,6 +116,20 @@ func gitFilteredEnv() []string {
 	return env
 }
 
+func gitConfigEnv() []string {
+	var env []string
+
+	count := 0
+	for key, value := range gitConfigOverrides {
+		env = append(env, fmt.Sprintf("GIT_CONFIG_KEY_%d=%s", count, key))
+		env = append(env, fmt.Sprintf("GIT_CONFIG_VALUE_%d=%s", count, value))
+		count++
+	}
+	env = append(env, "GIT_CONFIG_COUNT="+strconv.Itoa(count))
+
+	return env
+}
+
 func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...string) *exec.Cmd {
 	args := make([]string, len(c.GitFlags), len(c.GitFlags)+len(extraArgs))
 	copy(args, c.GitFlags)
@@ -128,6 +145,7 @@ func (c *CmdBuilder) BuildGitCmd(ctx context.Context, dir string, extraArgs ...s
 	cmd := exec.CommandContext(ctx, c.GitBin, args...)
 
 	cmd.Env = gitFilteredEnv()
+	cmd.Env = append(cmd.Env, gitConfigEnv()...)
 
 	cmd = c.deElevateCommand(ctx, cmd)
 
@@ -152,6 +170,8 @@ func (c *CmdBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs 
 
 	cmd := exec.CommandContext(ctx, c.MakepkgBin, args...)
 	cmd.Dir = dir
+
+	cmd.Env = append(cmd.Env, gitConfigEnv()...)
 
 	cmd = c.deElevateCommand(ctx, cmd)
 
