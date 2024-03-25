@@ -24,7 +24,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr "(Les fichiers de compilation existent)"
+msgstr " (Les fichiers de compilation existent)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
@@ -60,11 +60,11 @@ msgstr "%s est à jour -- omission"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "à mettre à jours/installer."
+msgstr "%s à mettre à jour/installer."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "Va aussi être installé pour cette opération."
+msgstr "%s va aussi être installé pour cette opération."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
