@@ -10,10 +10,11 @@
 # Mathias Brugger, 2023
 # Sylvain Bx, 2023
 # Bertrand Junqua, 2024
+# Barsanuphe, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Bertrand Junqua, 2024\n"
+"Last-Translator: Barsanuphe, 2024\n"
 "Language-Team: French (France) (https://app.transifex.com/yay-1/teams/123732/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,7 +25,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr "(Les fichiers de compilation existent)"
+msgstr " (Les fichiers de compilation existent)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
@@ -60,11 +61,11 @@ msgstr "%s est à jour -- omission"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "à mettre à jours/installer."
+msgstr "%s à mettre à jour/installer."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "Va aussi être installé pour cette opération."
+msgstr "%s à installer également pour cette opération."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
