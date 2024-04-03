@@ -679,7 +679,7 @@ msgstr "aucune requête n'a été exécutée"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr "pas de répertoire cible spécifié"
+msgstr "aucun répertoire cible spécifié"
 
 #: pkg/text/input.go:48
 msgid "no"
