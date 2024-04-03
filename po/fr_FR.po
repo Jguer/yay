@@ -116,7 +116,7 @@ msgstr "(%d/%d) Échec du téléchargement du PKGBUILD : %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Lecture de SRCINFO : %s"
+msgstr "(%d/%d) Analyse du SRCINFO : %s"
 
 #: pkg/query/types.go:72 pkg/query/types.go:103
 msgid "(Installed)"
