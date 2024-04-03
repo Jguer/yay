@@ -351,7 +351,7 @@ msgstr "PKGBUILD à jour, téléchargement ignoré : %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILDs à modifier ?"
+msgstr "PKGBUILDs à modifier ?"
 
 #: print.go:60
 msgid "Package Base ID"
