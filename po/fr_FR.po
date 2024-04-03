@@ -734,7 +734,7 @@ msgstr "le PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
-msgstr "il n’y a rien à faire"
+msgstr "il n'y a rien à faire"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
