@@ -74,7 +74,7 @@ msgstr "%s, nécessaire pour : %s"
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
-msgstr "%s : Aucun changement -- omission"
+msgstr "%s : Aucun changement -- ignoré"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
