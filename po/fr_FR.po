@@ -228,7 +228,7 @@ msgstr "Explicite"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "Paquets installés explicitement : %s"
+msgstr "Paquets installés explicitement : %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
