@@ -459,7 +459,7 @@ msgstr ""
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Taille totale occupée par les paquets : %s"
+msgstr "Taille totale occupée par les paquets : %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
