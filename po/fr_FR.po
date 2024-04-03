@@ -475,7 +475,7 @@ msgstr "URL"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
-msgstr "Impossible de nettoyer :"
+msgstr "Impossible de nettoyer :"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
