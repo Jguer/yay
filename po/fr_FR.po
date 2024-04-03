@@ -738,7 +738,7 @@ msgstr "il n'y a rien à faire"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "impossible de créer le répertoire : %s"
+msgstr "impossible de CreateHandle : %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
