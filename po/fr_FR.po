@@ -275,7 +275,7 @@ msgstr "Importer ?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "Import des clés avec gpg..."
+msgstr "Importation des clés avec gpg…"
 
 #: print.go:46
 msgid "Keywords"
