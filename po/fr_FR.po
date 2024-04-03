@@ -2,7 +2,6 @@
 # Translators:
 # J G, 2021
 # Oliver Conzen, 2021
-# Galiley, 2022
 # Khoyo - <khoyobegenn@gmail.com>, 2022
 # Mr Strik3, 2022
 # Mélanie Chauvel <aria@ariasuni.eu>, 2023
@@ -427,11 +426,11 @@ msgstr "Affichage des paquets des dépôts uniquement"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Taille du cache de pacman %s: %s"
+msgstr "Taille du cache de pacman %s : %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Taille du cache de yay %s:%s"
+msgstr "Taille du cache de yay %s : %s"
 
 #: print.go:62
 msgid "Snapshot URL"
