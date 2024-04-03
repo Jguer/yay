@@ -582,7 +582,7 @@ msgstr "erreur lors de l'installation de :"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "erreur lors de la construction : %s"
+msgstr "erreur lors de la compilation de : %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
