@@ -82,11 +82,11 @@ msgstr "%s : la cible est incompatible avec l'option --aur -- ignoré"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s : impossible d'utiliser la cible avec l'option --repo -- omission"
+msgstr "%s : la cible est incompatible avec l'option --repo -- ignoré"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s : mise à jour du paquet ignorée (%s => %s)"
+msgstr "%s : mise à niveau du paquet ignorée (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
