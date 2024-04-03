@@ -746,7 +746,7 @@ msgstr "opération non gérée"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "version inconnue"
+msgstr "version-inconnue"
 
 #: pkg/text/input.go:47
 msgid "yes"
