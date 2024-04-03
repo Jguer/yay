@@ -50,7 +50,7 @@ msgstr "%s déjà créé -- compilation ignorée"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s n'est pas défini"
+msgstr "%s n'est pas définie"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
