@@ -511,7 +511,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Répertoire de compilation :"
+"Répertoire de compilation :"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
