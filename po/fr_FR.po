@@ -611,7 +611,7 @@ msgstr "explicite"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "impossible de créer le répertoire '%s' : %s"
+msgstr "échec de la création du répertoire '%s' : %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
