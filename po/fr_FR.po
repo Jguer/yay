@@ -247,19 +247,19 @@ msgstr ""
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Premier envoi"
+msgstr "Envoyé le"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Paquets AUR marqués comme obsolètes :"
+msgstr "Paquets de l'AUR marqués comme obsolètes :"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Paquets étrangers installés :"
+msgstr "Paquets étrangers installés : %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Dépôt git trouvé : %s"
+msgstr "Dépôt Git trouvé : %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
