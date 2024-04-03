@@ -263,7 +263,7 @@ msgstr "Dépôt Git trouvé : %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "GenDB terminée. Aucun package installé"
+msgstr "GenDB terminé. Aucun paquet n'a été installé"
 
 #: print.go:36
 msgid "Groups"
