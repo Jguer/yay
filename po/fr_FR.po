@@ -124,7 +124,7 @@ msgstr "(Installé)"
 
 #: pkg/query/types.go:70 pkg/query/types.go:101
 msgid "(Installed: %s)"
-msgstr "(Installé : %s)"
+msgstr "(Installé : %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
