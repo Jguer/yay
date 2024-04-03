@@ -99,8 +99,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s : veuillez définir les variables d'environnement AUR_USERNAME et "
-"AUR_PASSWORD pour voter"
+"%s : définissez les variables d'environnement AUR_USERNAME et AUR_PASSWORD "
+"avant de pouvoir voter"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
