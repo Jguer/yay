@@ -487,7 +487,7 @@ msgstr "Impossible de gérer le vote pour : %s. Erreur : %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
-msgstr "Impossible de supprimer %s: %s "
+msgstr "Impossible de supprimer %s : %s"
 
 #: print.go:32
 msgid "Version"
