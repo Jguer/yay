@@ -132,7 +132,7 @@ msgstr "(Orphelin)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(Obsolète : %s)"
+msgstr "(Obsolète : %s)"
 
 #: print.go:44
 msgid "AUR URL"
