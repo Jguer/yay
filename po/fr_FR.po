@@ -214,7 +214,7 @@ msgstr "Modifier le PKGBUILD avec ?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
-msgstr "Erreur durant la recherche AUR : %s\n"
+msgstr "Erreur lors de la recherche dans l'AUR : %s\n"
 
 #: pkg/upgrade/service.go:296
 msgid "Excluding packages may cause partial upgrades and break systems"
