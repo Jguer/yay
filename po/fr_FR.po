@@ -527,8 +527,7 @@ msgstr "abandon dû à l'utilisateur"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr ""
-" argument '-' spécifié sans fournir de donnée via l'entrée standard stdin"
+msgstr "argument '-' spécifié et aucune entrée dans stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
