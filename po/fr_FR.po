@@ -323,7 +323,7 @@ msgstr "Aucun paquet trouvé sur l'AUR correspondant à"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "Aucun paquet trouvé pour"
+msgstr "Aucun paquet trouvé correspondant à"
 
 #: print.go:225
 msgid "None"
