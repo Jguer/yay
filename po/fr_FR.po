@@ -594,7 +594,7 @@ msgstr "erreur lors de la lecture de %s"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "erreur lors de la mise à jour des bases de données"
+msgstr "erreur lors de l'actualisation des bases de données"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
