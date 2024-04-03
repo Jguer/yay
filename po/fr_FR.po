@@ -355,11 +355,11 @@ msgstr "PKGBUILDs à modifier ?"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Package Base ID"
+msgstr "ID du paquet base"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Base des paquets"
+msgstr "Paquet base"
 
 #: pkg/query/aur_warnings.go:67
 msgid "Packages not in AUR:"
