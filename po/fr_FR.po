@@ -467,7 +467,7 @@ msgstr "Nombre de paquets installés : %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Essayer de les compiler quand même ?"
+msgstr "Essayer quand même de les compiler ?"
 
 #: print.go:34
 msgid "URL"
