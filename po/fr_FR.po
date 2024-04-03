@@ -547,7 +547,7 @@ msgstr "impossible de trouver tous les paquets requis"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "impossible de trouver d’archive pour les paquets listés dans %s"
+msgstr "aucune archive de paquet trouvée parmi celles listées dans %s"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
 msgid "dependency"
