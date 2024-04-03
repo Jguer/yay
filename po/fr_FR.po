@@ -395,9 +395,7 @@ msgstr "Fournit"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr ""
-"Supprimer les dépendances nécessaires à la compilation après l'installation "
-"?"
+msgstr "Supprimer les dépendances de compilation après l'installation ?"
 
 #: print.go:43
 msgid "Replaces"
