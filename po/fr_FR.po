@@ -135,7 +135,7 @@ msgstr "(Obsolète : %s)"
 
 #: print.go:44
 msgid "AUR URL"
-msgstr "URL AUR"
+msgstr "URL sur l'AUR"
 
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
