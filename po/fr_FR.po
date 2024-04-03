@@ -307,7 +307,7 @@ msgstr "Dépend. compil."
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
-msgstr "Paquets de débogage AUR manquants :"
+msgstr "Paquets de débogage de l'AUR manquants :"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
