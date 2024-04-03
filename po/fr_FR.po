@@ -70,7 +70,7 @@ msgstr "%s à installer pour effectuer cette opération."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
-msgstr "%s, requis par : %s"
+msgstr "%s, nécessaire pour : %s"
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
