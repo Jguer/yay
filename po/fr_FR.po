@@ -421,7 +421,7 @@ msgstr "Recherche des mises à jour dans les bases de données…"
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "Affichage des paquets des dépôts uniquement"
+msgstr "Affichage des paquets provenant des dépôts uniquement"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
