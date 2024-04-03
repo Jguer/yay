@@ -58,7 +58,7 @@ msgstr "%s existe."
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
-msgstr "%s est à jour -- omission"
+msgstr "%s est à jour -- ignoré"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
