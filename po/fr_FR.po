@@ -562,7 +562,7 @@ msgstr ""
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "l'éditeur de texte n'a pas été quitté correctement, annulation : %s"
+msgstr "l'éditeur ne s'est pas terminé avec succès, abandon : %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
