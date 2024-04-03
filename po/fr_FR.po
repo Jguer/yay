@@ -1,7 +1,6 @@
 # 
 # Translators:
 # J G, 2021
-# Oliver Conzen, 2021
 # Mr Strik3, 2022
 # Mélanie Chauvel <aria@ariasuni.eu>, 2023
 # Maxime Demolin, 2023
@@ -707,7 +706,7 @@ msgstr "paquet introuvable dans l'AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "paquet non trouvé dans les référentiels"
+msgstr "paquet introuvable dans les dépôts"
 
 #: pkg/upgrade/service.go:292
 msgid "package"
