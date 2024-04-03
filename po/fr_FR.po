@@ -172,7 +172,7 @@ msgstr "En conflit avec"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
-msgstr "Suppression (%d/%d) : %s"
+msgstr "Suppression (%d/%d) : %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
