@@ -78,7 +78,7 @@ msgstr "%s : Aucun changement -- ignoré"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s : impossible d'utiliser la cible avec l'option --aur -- omission"
+msgstr "%s : la cible est incompatible avec l'option --aur -- ignoré"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
