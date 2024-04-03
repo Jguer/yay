@@ -442,7 +442,7 @@ msgstr "Sync"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "Dix plus gros paquets :"
+msgstr "Les dix paquets les plus lourds :"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
