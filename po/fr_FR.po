@@ -324,7 +324,7 @@ msgstr "Aucun paquet trouvé correspondant à"
 
 #: print.go:225
 msgid "None"
-msgstr "Aucun"
+msgstr "Aucun(e)"
 
 #: print.go:39
 msgid "Optional Deps"
