@@ -483,7 +483,7 @@ msgstr "Impossible de trouver les paquets suivants :"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "Impossible de traiter le vote pour le paquet :%s. Erreur :%s"
+msgstr "Impossible de gérer le vote pour le paquet : %s. Erreur : %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
