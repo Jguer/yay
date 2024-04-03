@@ -463,7 +463,7 @@ msgstr "Taille totale occupée par les paquets : %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Nombre total de paquets installés :%s"
+msgstr "Nombre de paquets installés : %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
