@@ -446,8 +446,7 @@ msgstr "Les dix paquets les plus lourds :"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr ""
-"Les paquets suivants ne sont pas compatibles avec votre architecture :"
+msgstr "Les paquets suivants sont incompatibles avec votre architecture :"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
