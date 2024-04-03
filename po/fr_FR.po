@@ -658,12 +658,12 @@ msgstr "option '%s' invalide"
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"paramètres incorrects : '--deps' et '--explicit' ne devaient pas être "
-"utilisés ensemble"
+"option invalide : '--deps' et '--explicit' ne peuvent pas être utilisés "
+"ensemble"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "référentiel invalide"
+msgstr "dépôt invalide"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
