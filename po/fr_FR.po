@@ -54,7 +54,7 @@ msgstr "%s n'est pas définie"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
-msgstr "%s est présent."
+msgstr "%s existe."
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
