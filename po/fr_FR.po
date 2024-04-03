@@ -196,11 +196,12 @@ msgstr "Désactiver par défaut le paramètre \"provides\""
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "Voulez-vous supprimer TOUS les paquets AUR du cache ?"
+msgstr "Voulez-vous supprimer TOUS les paquets de l'AUR dans le cache ?"
 
 #: clean.go:95
 msgid "Do you want to remove ALL untracked AUR files?"
-msgstr "Voulez-vous supprimer TOUS les fichiers AUR non suivis ?"
+msgstr ""
+"Voulez-vous supprimer TOUS les fichiers non suivis des paquets de l'AUR ?"
 
 #: clean.go:80
 msgid "Do you want to remove all other AUR packages from cache?"
