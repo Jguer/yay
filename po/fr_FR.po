@@ -519,7 +519,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Entrer un numéro (1 par défaut) : "
+"Saisissez un nombre (valeur par défaut : 1) :"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
