@@ -586,7 +586,7 @@ msgstr "erreur lors de la compilation de : %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "erreur lors de la fusion %s : %s"
+msgstr "erreur lors de la fusion (%s) : %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
