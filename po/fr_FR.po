@@ -536,7 +536,7 @@ msgstr ""
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "impossible de trouver le paquet : %v"
+msgstr "impossible de trouver le nom de paquet : %v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
