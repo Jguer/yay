@@ -192,7 +192,7 @@ msgstr "Diffs à afficher ?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr "Désactiver le paramètre 'fourni' par défaut"
+msgstr "Désactiver par défaut le paramètre \"provides\""
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
