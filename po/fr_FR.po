@@ -730,8 +730,7 @@ msgstr ""
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr ""
-"le fchier PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
+msgstr "le PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
