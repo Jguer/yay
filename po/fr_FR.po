@@ -156,7 +156,7 @@ msgstr "Dépendance de vérification"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Vérification des dépendances"
+msgstr "Dépend. vérif."
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
