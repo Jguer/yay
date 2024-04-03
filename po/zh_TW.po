@@ -1,18 +1,20 @@
-#
+# 
 # Translators:
 # J G, 2022
 # lakejason0 <sunliyuan200402@outlook.com>, 2023
 # 如月飛羽 <flyingfeather1501@gmail.com>, 2023
-#
+# Alex Wang, 2024
+# Celestially H., 2024
+# Xuekai Deng, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: 如月飛羽 <flyingfeather1501@gmail.com>, 2023\n"
-"Language-Team: Chinese (Taiwan) (https://app.transifex.com/yay-1/"
-"teams/123732/zh_TW/)\n"
-"Language: zh_TW\n"
+"Last-Translator: Xuekai Deng, 2024\n"
+"Language-Team: Chinese (Taiwan) (https://app.transifex.com/yay-1/teams/123732/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: xgotext\n"
 
@@ -53,13 +55,12 @@ msgid "%s is up to date -- skipping"
 msgstr "%s 是最新的 -- 跳過"
 
 #: pkg/upgrade/service.go:292
-#, fuzzy
 msgid "%s to upgrade/install."
-msgstr "個要升級/安裝的軟體包。"
+msgstr "%s 个要进行升级/安装的包。"
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr ""
+msgstr "%s 也会为此操作而被安装。"
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
@@ -87,7 +88,8 @@ msgstr "%s: 本機 (%s) 比 AUR (%s) 更新"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr "%s: 請設定 AUR_USERNAME 與 AUR_PASSWORD 環境變數以進行投票"
 
 #: pkg/download/unified.go:192
@@ -99,9 +101,8 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) 下載了 PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) 下載了 PKGBUILD: %s"
+msgstr "(%d/%d) 下载PKGBUILD失败"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -305,9 +306,8 @@ msgid "No AUR package found for"
 msgstr "沒有找到 AUR 軟體包"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "沒有找到 AUR 軟體包"
+msgstr "未找到包"
 
 #: print.go:225
 msgid "None"
@@ -383,7 +383,7 @@ msgstr "安裝後刪除編譯依賴？"
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "替换"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
@@ -671,7 +671,7 @@ msgstr "一次只能使用一項操作"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "只能有一個目標"
 
 #: print.go:187
 msgid "package '%s' was not found"
@@ -686,10 +686,9 @@ msgid "package not found in repos"
 msgstr "軟體源中找不到軟體包"
 
 #: pkg/upgrade/service.go:292
-#, fuzzy
 msgid "package"
 msgid_plural "packages"
-msgstr[0] "軟體包構造"
+msgstr[0] "软件包"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
@@ -726,48 +725,3 @@ msgstr "未知版本"
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "是"
-
-#~ msgid " (Target"
-#~ msgstr " (目標"
-
-#~ msgid " (Wanted by: "
-#~ msgstr " (被這些軟體包依賴: "
-
-#~ msgid "%s not satisfied, flushing install queue"
-#~ msgstr "%s 未滿足，正在重新整理安裝序列"
-
-#~ msgid "Checking for conflicts..."
-#~ msgstr "正在檢查衝突..."
-
-#~ msgid "Checking for inner conflicts..."
-#~ msgstr "正在檢查內部衝突..."
-
-#~ msgid "Conflicting packages will have to be confirmed manually"
-#~ msgstr "必須手動確認衝突的軟體包"
-
-#~ msgid "Inner conflicts found:"
-#~ msgstr "發現內部衝突:"
-
-#~ msgid "Installing %s will remove:"
-#~ msgstr "安裝 %s 將刪除:"
-
-#~ msgid "PKGBUILD up to date, Skipping (%d/%d): %s"
-#~ msgstr "PKGBUILD 是最新的，跳過 (%d/%d): %s"
-
-#~ msgid "Package conflicts found:"
-#~ msgstr "發現軟體包衝突:"
-
-#~ msgid "Packages to upgrade."
-#~ msgstr "個要升級的軟體包。"
-
-#~ msgid "Querying AUR..."
-#~ msgstr "正在查詢 AUR..."
-
-#~ msgid "could not find all required packages:"
-#~ msgstr "找不到所有需要的軟體包:"
-
-#~ msgid "could not find srcinfo for: %s"
-#~ msgstr "找不到 srcinfo: %s"
-
-#~ msgid "package conflicts can not be resolved with noconfirm, aborting"
-#~ msgstr "軟體包衝突無法透過 noconfirm 解決，正在中止"
