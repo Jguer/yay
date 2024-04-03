@@ -598,7 +598,7 @@ msgstr "erreur lors de l'actualisation des bases de données"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "erreur lors de la réinitialisation %s : %s"
+msgstr "erreur lors de la réinitialisation de %s : %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
