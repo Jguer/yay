@@ -283,7 +283,7 @@ msgstr "Mots-clés"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Dernières modifications"
+msgstr "Modifié le"
 
 #: print.go:35
 msgid "Licenses"
