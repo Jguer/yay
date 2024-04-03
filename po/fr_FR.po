@@ -387,7 +387,7 @@ msgstr "Popularité"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Poursuivre l'installation ?"
+msgstr "Procéder à l'installation ?"
 
 #: print.go:37
 msgid "Provides"
