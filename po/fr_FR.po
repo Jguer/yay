@@ -703,7 +703,7 @@ msgstr "le paquet '%s' est introuvable"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "paquet non trouvé dans AUR"
+msgstr "paquet introuvable dans l'AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
