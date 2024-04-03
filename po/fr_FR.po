@@ -531,7 +531,8 @@ msgstr "argument '-' spécifié et aucune entrée dans stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr "impossible de trouver le PKGBUILD and .SRCINFO dans le répertoire"
+msgstr ""
+"impossible de trouver les fichiers PKGBUILD et .SRCINFO dans le répertoire"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
