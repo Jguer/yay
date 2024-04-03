@@ -331,7 +331,7 @@ msgstr "Aucun"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Dépendances optionnelles"
+msgstr "Dépend. opt."
 
 #: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
