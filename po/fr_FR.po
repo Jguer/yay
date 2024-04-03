@@ -148,7 +148,7 @@ msgstr "Ajoutez %s ou %s à vos variables d'environnement"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Évitez d'utiliser yay en tant que root ou via sudo."
+msgstr "Évitez d'exécuter yay en tant que root ou via sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
