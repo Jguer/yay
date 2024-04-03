@@ -699,7 +699,7 @@ msgstr "une seule cible est autorisée"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "paquet '%s' n'a pas été trouvé"
+msgstr "le paquet '%s' est introuvable"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
