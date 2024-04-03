@@ -2,7 +2,6 @@
 # Translators:
 # J G, 2021
 # Oliver Conzen, 2021
-# Khoyo - <khoyobegenn@gmail.com>, 2022
 # Mr Strik3, 2022
 # Mélanie Chauvel <aria@ariasuni.eu>, 2023
 # Maxime Demolin, 2023
@@ -450,7 +449,7 @@ msgstr "Les paquets suivants sont incompatibles avec votre architecture :"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
-msgstr "Il y a %d paquets fournissant %s disponibles :"
+msgstr "Il y a %d paquets pouvant fournir %s :"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
