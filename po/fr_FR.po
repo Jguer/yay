@@ -164,7 +164,7 @@ msgstr "Vérification des paquets de développement…"
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
-msgstr "Nettoyage (%d/%d) : %s"
+msgstr "Nettoyage (%d/%d) : %s"
 
 #: print.go:42
 msgid "Conflicts With"
