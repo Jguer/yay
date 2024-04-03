@@ -479,7 +479,7 @@ msgstr "Impossible de nettoyer :"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "Impossible de trouver les paquets suivants :"
+msgstr "Impossible de trouver les paquets suivants :"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
