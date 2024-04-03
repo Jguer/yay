@@ -160,7 +160,7 @@ msgstr "Dépend. vérif."
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
-msgstr "Vérification des paquets de développement..."
+msgstr "Vérification des paquets de développement…"
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
