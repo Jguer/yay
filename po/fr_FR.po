@@ -619,7 +619,7 @@ msgstr "échec de l'ouverture du fichier de configuration '%s' : %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "échec lors de la lecture %s -- omission : %s"
+msgstr "échec de l'analyse de %s -- ignoré : %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
