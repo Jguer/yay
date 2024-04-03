@@ -335,7 +335,7 @@ msgstr "Dépend. opt."
 
 #: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Paquets AUR orphelins (non maintenus) :"
+msgstr "Paquets de l'AUR orphelins (non maintenus) :"
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
