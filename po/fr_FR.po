@@ -210,7 +210,7 @@ msgstr ""
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
-msgstr "Édition du PKGBUILD avec ?"
+msgstr "Modifier le PKGBUILD avec ?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
