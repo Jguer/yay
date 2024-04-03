@@ -570,7 +570,7 @@ msgstr "erreur lors du téléchargement des sources : %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "erreur lors de la récupération %s : %s"
+msgstr "erreur lors de la récupération de %s : %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
