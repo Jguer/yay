@@ -343,11 +343,11 @@ msgstr "Obsolète"
 
 #: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
-msgstr "Clés PGP dont l'import est nécessaire :"
+msgstr "Des clés PGP doivent être importées :"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD à jour, omission du téléchargement : %s"
+msgstr "PKGBUILD à jour, téléchargement ignoré : %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
