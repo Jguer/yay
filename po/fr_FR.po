@@ -271,7 +271,7 @@ msgstr "Groupes"
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
-msgstr "Import ?"
+msgstr "Importer ?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
