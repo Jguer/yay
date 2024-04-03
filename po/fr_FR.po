@@ -667,7 +667,7 @@ msgstr "dépôt invalide"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "valeur invalide : %d n'est pas entre %d et %d"
+msgstr "valeur invalide : %d n'est pas entre %d et %d"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
