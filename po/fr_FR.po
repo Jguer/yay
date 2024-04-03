@@ -623,7 +623,7 @@ msgstr "échec de l'analyse de %s -- ignoré : %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "échec lors de la lecture %s : %s"
+msgstr "échec de l'analyse de %s : %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
