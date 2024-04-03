@@ -379,7 +379,7 @@ msgstr "Paquets à exclure : (ex. « 1 2 3 », « 1-3 », « ^4 » ou nom
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Paquets à installer (ex. 1 2 3, 1-3 or ^4)"
+msgstr "Paquets à installer (ex. 1 2 3, 1-3 ou ^4)"
 
 #: print.go:49
 msgid "Popularity"
