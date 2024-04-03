@@ -725,7 +725,8 @@ msgstr "suppression des paquets de l'AUR du cache…"
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "suppression des fichiers AUR non suivis du cache..."
+msgstr ""
+"suppression des fichiers non suivis dans les paquets de l'AUR en cache…"
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
