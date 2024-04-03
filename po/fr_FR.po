@@ -219,8 +219,8 @@ msgstr "Erreur lors de la recherche dans l'AUR : %s\n"
 #: pkg/upgrade/service.go:296
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Exclure des paquets peut causer une mise à jour partielle et casser le "
-"système."
+"L'exclusion de paquets peut mener à une mise à niveau partielle de votre "
+"système et pourrait le casser"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
