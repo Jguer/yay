@@ -438,7 +438,7 @@ msgstr "URL de l'instantané"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
-msgstr "Synchroniser"
+msgstr "Sync"
 
 #: print.go:100
 msgid "Ten biggest packages:"
