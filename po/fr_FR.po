@@ -367,7 +367,7 @@ msgstr "Paquets absents de l'AUR :"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Paquets à nettoyer avant compilation (cleanBuild) ?"
+msgstr "Paquets à cleanBuild ?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
