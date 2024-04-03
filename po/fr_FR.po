@@ -615,7 +615,7 @@ msgstr "échec de la création du répertoire '%s' : %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "échec lors de l'ouverture du fichier de configuration '%s' : %s"
+msgstr "échec de l'ouverture du fichier de configuration '%s' : %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
