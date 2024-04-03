@@ -453,7 +453,9 @@ msgstr "Il y a %d paquets pouvant fournir %s :"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr "Il y a probablement une autre instance Pacman en cours. Attente..."
+msgstr ""
+"Il semblerait qu'une autre instance de Pacman soit en cours d'exécution. En "
+"attente…"
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
