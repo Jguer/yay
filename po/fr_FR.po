@@ -2,8 +2,6 @@
 # Translators:
 # J G, 2021
 # Oliver Conzen, 2021
-# Galiley, 2022
-# Khoyo - <khoyobegenn@gmail.com>, 2022
 # Mr Strik3, 2022
 # Mélanie Chauvel <aria@ariasuni.eu>, 2023
 # Maxime Demolin, 2023
@@ -11,10 +9,11 @@
 # Sylvain Bx, 2023
 # Bertrand Junqua, 2024
 # Barsanuphe, 2024
+# Pierre Grasser, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Barsanuphe, 2024\n"
+"Last-Translator: Pierre Grasser, 2024\n"
 "Language-Team: French (France) (https://app.transifex.com/yay-1/teams/123732/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,77 +44,77 @@ msgstr "%s [A]Tous [Ab]Annuler [I]nstallés [No]nInstallés ou (1 2 3, 1-3, ^4)"
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s déjà créé -- compilation évitée"
+msgstr "%s déjà créé -- compilation ignorée"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s n'est pas défini"
+msgstr "%s n'est pas définie"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
-msgstr "%s est présent."
+msgstr "%s existe."
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
-msgstr "%s est à jour -- omission"
+msgstr "%s est à jour -- ignoré"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "%s à mettre à jour/installer."
+msgstr "%s à mettre à jour ou à installer."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "%s à installer également pour cette opération."
+msgstr "%s à installer pour effectuer cette opération."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
-msgstr "%s, requis par : %s"
+msgstr "%s, nécessaire pour : %s"
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
-msgstr "%s : Aucun changement -- omission"
+msgstr "%s : Aucun changement -- ignoré"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s : impossible d'utiliser la cible avec l'option --aur -- omission"
+msgstr "%s : la cible est incompatible avec l'option --aur -- ignoré"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s : impossible d'utiliser la cible avec l'option --repo -- omission"
+msgstr "%s : la cible est incompatible avec l'option --repo -- ignoré"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s : mise à jour du paquet ignorée (%s => %s)"
+msgstr "%s : mise à niveau du paquet ignorée (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr ""
-"%s : le paquet local (%s) est plus récent que le paquet disponible sur AUR "
-"(%s)"
+"%s : le paquet local (%s) est plus récent que le paquet disponible sur l'AUR"
+" (%s)"
 
 #: vote.go:51
 msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s : veuillez définir les variables d'environnement AUR_USERNAME et "
-"AUR_PASSWORD pour voter"
+"%s : définissez les variables d'environnement AUR_USERNAME et AUR_PASSWORD "
+"avant de pouvoir voter"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) Téléchargement du PKGBUILD depuis ABS : %s"
+msgstr "(%d/%d) PKGBUILD téléchargé depuis l'ABS : %s"
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
-msgstr "(%d/%d) PKGBUILD téléchargé : %s"
+msgstr "(%d/%d) PKGBUILD téléchargé : %s"
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Le téléchargement de PKGBUILD a échoué : %s"
+msgstr "(%d/%d) Échec du téléchargement du PKGBUILD : %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Lecture de SRCINFO : %s"
+msgstr "(%d/%d) Analyse du SRCINFO : %s"
 
 #: pkg/query/types.go:72 pkg/query/types.go:103
 msgid "(Installed)"
@@ -123,7 +122,7 @@ msgstr "(Installé)"
 
 #: pkg/query/types.go:70 pkg/query/types.go:101
 msgid "(Installed: %s)"
-msgstr "(Installé : %s)"
+msgstr "(Installé : %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
@@ -131,11 +130,11 @@ msgstr "(Orphelin)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(Obsolète : %s)"
+msgstr "(Obsolète : %s)"
 
 #: print.go:44
 msgid "AUR URL"
-msgstr "URL AUR"
+msgstr "URL sur l'AUR"
 
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
@@ -147,23 +146,23 @@ msgstr "Ajoutez %s ou %s à vos variables d'environnement"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Évitez d'utiliser yay en tant que root ou via sudo."
+msgstr "Évitez d'exécuter yay en tant que root ou via sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Vérifier la dépendance"
+msgstr "Dépendance de vérification"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Vérification des dépendances"
+msgstr "Dépend. vérif."
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
-msgstr "Vérification des paquets de développement..."
+msgstr "Vérification des paquets de développement…"
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
-msgstr "Nettoyage (%d/%d) : %s"
+msgstr "Nettoyage (%d/%d) : %s"
 
 #: print.go:42
 msgid "Conflicts With"
@@ -171,7 +170,7 @@ msgstr "En conflit avec"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
-msgstr "Suppression (%d/%d) : %s"
+msgstr "Suppression (%d/%d) : %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
@@ -187,37 +186,39 @@ msgstr "Description"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Afficher les diffs ?"
+msgstr "Diffs à afficher ?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr "Désactiver le paramètre 'fourni' par défaut"
+msgstr "Désactiver par défaut le paramètre \"provides\""
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "Voulez-vous supprimer TOUS les paquets AUR du cache ?"
+msgstr "Voulez-vous supprimer TOUS les paquets de l'AUR dans le cache ?"
 
 #: clean.go:95
 msgid "Do you want to remove ALL untracked AUR files?"
-msgstr "Voulez-vous supprimer TOUS les fichiers AUR non suivis ?"
+msgstr ""
+"Voulez-vous supprimer TOUS les fichiers non suivis des paquets de l'AUR ?"
 
 #: clean.go:80
 msgid "Do you want to remove all other AUR packages from cache?"
-msgstr "Voulez-vous supprimer tous les autres paquets AUR du cache ?"
+msgstr ""
+"Voulez-vous supprimer tous les autres paquets de l'AUR dans le cache ?"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
-msgstr "Édition du PKGBUILD avec ?"
+msgstr "Modifier le PKGBUILD avec ?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
-msgstr "Erreur durant la recherche AUR : %s\n"
+msgstr "Erreur lors de la recherche dans l'AUR : %s\n"
 
 #: pkg/upgrade/service.go:296
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Exclure des paquets peut causer une mise à jour partielle et casser le "
-"système."
+"L'exclusion de paquets peut mener à une mise à niveau partielle de votre "
+"système et pourrait le casser"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
@@ -225,43 +226,42 @@ msgstr "Explicite"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "Paquets installés explicitement : %s"
+msgstr "Paquets installés explicitement : %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Impossible de trouver un paquet AUR correspondant pour"
+msgstr "Impossible de trouver un paquet sur l'AUR correspondant à"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr ""
-"Impossible d'installer la couche nécessaire, direction la couche suivante."
+msgstr "Échec de l'installation de la couche, passage à la couche suivante."
 
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"Impossible d’installer les paquets suivants. Une intervention manuelle est "
-"requise :"
+"Échec de l'installation des paquets suivants. Une intervention manuelle est "
+"requise :"
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Premier envoi"
+msgstr "Envoyé le"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Paquets AUR marqués comme obsolètes :"
+msgstr "Paquets de l'AUR marqués comme obsolètes :"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Paquets étrangers installés :"
+msgstr "Paquets étrangers installés : %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Dépôt git trouvé : %s"
+msgstr "Dépôt Git trouvé : %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "GenDB terminée. Aucun package installé"
+msgstr "GenDB terminé. Aucun paquet n'a été installé"
 
 #: print.go:36
 msgid "Groups"
@@ -269,11 +269,11 @@ msgstr "Groupes"
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
-msgstr "Import ?"
+msgstr "Importer ?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "Import des clés avec gpg..."
+msgstr "Importation des clés avec gpg…"
 
 #: print.go:46
 msgid "Keywords"
@@ -281,7 +281,7 @@ msgstr "Mots-clés"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Dernières modifications"
+msgstr "Modifié le"
 
 #: print.go:35
 msgid "Licenses"
@@ -297,15 +297,15 @@ msgstr "Mainteneur"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Dépendance de construction"
+msgstr "Dépendance de compilation"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Construction des dépendances"
+msgstr "Dépend. compil."
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
-msgstr "Paquets de débogage AUR manquants :"
+msgstr "Paquets de débogage de l'AUR manquants :"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
@@ -317,11 +317,11 @@ msgstr "Nom"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "Pas de paquet AUR trouvé pour"
+msgstr "Aucun paquet trouvé sur l'AUR correspondant à"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "Aucun paquet trouvé pour"
+msgstr "Aucun paquet trouvé correspondant à"
 
 #: print.go:225
 msgid "None"
@@ -329,11 +329,11 @@ msgstr "Aucun"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Dépendances optionnelles"
+msgstr "Dépend. opt."
 
 #: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Paquets AUR orphelins (non maintenus) :"
+msgstr "Paquets de l'AUR orphelins (non maintenus) :"
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
@@ -341,31 +341,31 @@ msgstr "Obsolète"
 
 #: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
-msgstr "Clés PGP dont l'import est nécessaire :"
+msgstr "Des clés PGP doivent être importées :"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD à jour, omission du téléchargement : %s"
+msgstr "PKGBUILD à jour, téléchargement ignoré : %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILDs à modifier ?"
+msgstr "PKGBUILDs à modifier ?"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Package Base ID"
+msgstr "ID du paquet base"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Base des paquets"
+msgstr "Paquet base"
 
 #: pkg/query/aur_warnings.go:67
 msgid "Packages not in AUR:"
-msgstr "Paquets absents de AUR :"
+msgstr "Paquets absents de l'AUR :"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Paquets à nettoyer avant compilation (cleanBuild) ?"
+msgstr "Paquets à cleanBuild ?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
@@ -373,11 +373,11 @@ msgstr "Paquets à exclure"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Paquets à exclure : (ex. \"1 2 3\", \"1-3\", \"^4\" ou nom du dépôt)"
+msgstr "Paquets à exclure : (ex. « 1 2 3 », « 1-3 », « ^4 » ou noms de dépôt)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Paquets à installer (ex. 1 2 3, 1-3 or ^4)"
+msgstr "Paquets à installer (ex. 1 2 3, 1-3 ou ^4)"
 
 #: print.go:49
 msgid "Popularity"
@@ -385,7 +385,7 @@ msgstr "Popularité"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Poursuivre l'installation ?"
+msgstr "Procéder à l'installation ?"
 
 #: print.go:37
 msgid "Provides"
@@ -393,9 +393,7 @@ msgstr "Fournit"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr ""
-"Supprimer les dépendances nécessaires à la compilation après l'installation "
-"?"
+msgstr "Supprimer les dépendances de compilation après l'installation ?"
 
 #: print.go:43
 msgid "Replaces"
@@ -415,23 +413,23 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:72
 msgid "Searching AUR for updates..."
-msgstr "Recherche des mises à jour AUR..."
+msgstr "Recherche des mises à jour sur l'AUR…"
 
 #: pkg/upgrade/service.go:160
 msgid "Searching databases for updates..."
-msgstr "Recherche de mises à jour dans les bases de données..."
+msgstr "Recherche des mises à jour dans les bases de données…"
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "Affichage des dépôts des paquets uniquement"
+msgstr "Affichage des paquets des dépôts uniquement"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Taille du cache de pacman %s: %s"
+msgstr "Taille du cache de pacman %s : %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Taille du cache de yay %s:%s"
+msgstr "Taille du cache de yay %s : %s"
 
 #: print.go:62
 msgid "Snapshot URL"
@@ -439,36 +437,37 @@ msgstr "URL de l'instantané"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
-msgstr "Synchroniser"
+msgstr "Sync"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "Dix plus gros paquets :"
+msgstr "Les dix paquets les plus lourds :"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr ""
-"Les paquets suivants ne sont pas compatibles avec votre architecture :"
+msgstr "Les paquets suivants sont incompatibles avec votre architecture :"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
-msgstr "Il y a %d paquets fournissant %s disponibles :"
+msgstr "Il y a %d paquets pouvant fournir %s :"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr "Il y a probablement une autre instance Pacman en cours. Attente..."
+msgstr ""
+"Il semblerait qu'une autre instance de Pacman soit en cours d'exécution. En "
+"attente…"
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Taille totale occupée par les paquets : %s"
+msgstr "Taille totale occupée par les paquets : %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Nombre total de paquets installés :%s"
+msgstr "Nombre de paquets installés : %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Essayer de les compiler quand même ?"
+msgstr "Essayer quand même de les compiler ?"
 
 #: print.go:34
 msgid "URL"
@@ -476,19 +475,19 @@ msgstr "URL"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
-msgstr "Impossible de nettoyer :"
+msgstr "Impossible de nettoyer :"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "Impossible de trouver les paquets suivants :"
+msgstr "Impossible de trouver les paquets suivants :"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "Impossible de traiter le vote pour le paquet :%s. Erreur :%s"
+msgstr "Impossible de gérer le vote pour : %s. Erreur : %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
-msgstr "Impossible de supprimer %s: %s "
+msgstr "Impossible de supprimer %s : %s"
 
 #: print.go:32
 msgid "Version"
@@ -512,7 +511,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Répertoire de compilation :"
+"Répertoire de compilation :"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
@@ -520,7 +519,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Entrer un numéro (1 par défaut) : "
+"Saisissez un nombre (valeur par défaut : 1) :"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
@@ -528,20 +527,20 @@ msgstr "abandon dû à l'utilisateur"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr ""
-" argument '-' spécifié sans fournir de donnée via l'entrée standard stdin"
+msgstr "argument '-' spécifié et aucune entrée dans stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr "impossible de trouver le PKGBUILD and .SRCINFO dans le répertoire"
+msgstr ""
+"impossible de trouver les fichiers PKGBUILD et .SRCINFO dans le répertoire"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "impossible de trouver le paquet : %v"
+msgstr "impossible de trouver le nom de paquet : %v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
-msgstr "impossible de trouver PKGDEST pour : %s"
+msgstr "impossible de trouver PKGDEST pour : %s"
 
 #: errors.go:9
 msgid "could not find all required packages"
