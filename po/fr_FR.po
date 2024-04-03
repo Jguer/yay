@@ -152,7 +152,7 @@ msgstr "Évitez d'exécuter yay en tant que root ou via sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Vérifier la dépendance"
+msgstr "Dépendance de vérification"
 
 #: print.go:41
 msgid "Check Deps"
