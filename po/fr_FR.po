@@ -232,19 +232,18 @@ msgstr "Paquets installés explicitement : %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Impossible de trouver un paquet AUR correspondant pour"
+msgstr "Impossible de trouver un paquet sur l'AUR correspondant à"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr ""
-"Impossible d'installer la couche nécessaire, direction la couche suivante."
+msgstr "Échec de l'installation de la couche, passage à la couche suivante."
 
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"Impossible d’installer les paquets suivants. Une intervention manuelle est "
-"requise :"
+"Échec de l'installation des paquets suivants. Une intervention manuelle est "
+"requise :"
 
 #: print.go:45
 msgid "First Submitted"
