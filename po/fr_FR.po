@@ -566,7 +566,7 @@ msgstr "l'éditeur ne s'est pas terminé avec succès, abandon : %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "erreur lors du téléchargement des sources : %s"
+msgstr "erreur lors du téléchargement des sources : %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
