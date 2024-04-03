@@ -721,7 +721,7 @@ msgstr "erreur lors de l'importation des clés"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "suppression des paquets AUR du cache..."
+msgstr "suppression des paquets de l'AUR du cache…"
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
