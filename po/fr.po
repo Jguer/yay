@@ -2,18 +2,16 @@
 # Translators:
 # Benjamin Chenebault, 2023
 # anthony tonitch <d.tonitch@gmail.com>, 2024
-# Pierre Grasser, 2024
 # Edgar Fournival, 2024
-# Mr Strik3, 2024
-# Mélanie Chauvel <aria@ariasuni.eu>, 2024
 # J G, 2024
-# Oliver Conzen, 2024
+# Mélanie Chauvel <aria@ariasuni.eu>, 2024
 # Sylvain Bx, 2024
 # Mathias Brugger, 2024
+# Pierre Grasser, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Mathias Brugger, 2024\n"
+"Last-Translator: Pierre Grasser, 2024\n"
 "Language-Team: French (https://app.transifex.com/yay-1/teams/123732/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,19 +22,19 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr "(Les fichiers de compilation existent)"
+msgstr " (Les fichiers de compilation existent)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
-msgstr "(Installé)"
+msgstr " (Installé)"
 
 #: cmd.go:453
 msgid " [Installed]"
-msgstr "[Installé]"
+msgstr " [Installé]"
 
 #: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
-msgstr "il n'y a rien à faire"
+msgstr " il n'y a rien à faire"
 
 #: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
@@ -44,11 +42,11 @@ msgstr "%s [A]Tous [Ab]Annuler [I]nstallés [No]nInstallés ou (1 2 3, 1-3, ^4)"
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s déjà créé -- compilation évitée"
+msgstr "%s déjà créé -- compilation ignorée"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "La variable %s n'est pas définie"
+msgstr "%s n'est pas définie"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
@@ -60,11 +58,11 @@ msgstr "%s est à jour -- ignoré"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "%s à mettre à niveau ou à installer."
+msgstr "%s à mettre à jour ou à installer."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "%s à installer pour cette opération."
+msgstr "%s à installer pour effectuer cette opération."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
@@ -122,7 +120,7 @@ msgstr "(Installé)"
 
 #: pkg/query/types.go:70 pkg/query/types.go:101
 msgid "(Installed: %s)"
-msgstr "(Installé : %s)"
+msgstr "(Installé : %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
@@ -130,7 +128,7 @@ msgstr "(Orphelin)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(Obsolète : %s)"
+msgstr "(Obsolète : %s)"
 
 #: print.go:44
 msgid "AUR URL"
@@ -146,7 +144,7 @@ msgstr "Ajoutez %s ou %s à vos variables d'environnement"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Évitez d'utiliser yay en tant que root ou via sudo."
+msgstr "Évitez d'exécuter yay en tant que root ou via sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
@@ -234,7 +232,7 @@ msgstr "Impossible de trouver un paquet sur l'AUR correspondant à"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr "Échec de l'installation de la couche, on passe à la couche suivante."
+msgstr "Échec de l'installation de la couche, passage à la couche suivante."
 
 #: pkg/sync/build/errors.go:16
 msgid ""
@@ -245,7 +243,7 @@ msgstr ""
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Date d'envoi"
+msgstr "Envoyé le"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
@@ -421,7 +419,7 @@ msgstr "Recherche des mises à jour dans les bases de données…"
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "Affichage des paquets des dépôts uniquement"
+msgstr "Affichage uniquement des paquets provenant des dépôts"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
@@ -449,7 +447,7 @@ msgstr "Les paquets suivants sont incompatibles avec votre architecture :"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
-msgstr "Il y a %d fournisseurs disponibles pour %s :"
+msgstr "Il y a %d paquets pouvant fournir %s :"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
@@ -463,7 +461,7 @@ msgstr "Taille totale occupée par les paquets : %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Nombre total de paquets installés : %s"
+msgstr "Nombre de paquets installés : %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
@@ -483,7 +481,7 @@ msgstr "Impossible de trouver les paquets suivants :"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "Impossible de gérer le vote pour le paquet : %s. Erreur : %s"
+msgstr "Impossible de gérer le vote pour : %s. Erreur : %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
@@ -536,11 +534,11 @@ msgstr ""
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "impossible de trouver le paquet : %v"
+msgstr "impossible de trouver le nom de paquet : %v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
-msgstr "impossible de trouver PKGDEST pour : %s"
+msgstr "impossible de trouver le PKGDEST pour : %s"
 
 #: errors.go:9
 msgid "could not find all required packages"
@@ -548,7 +546,7 @@ msgstr "impossible de trouver tous les paquets requis"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "impossible de trouver d’archive pour les paquets listés dans %s"
+msgstr "aucune archive de paquet trouvée parmi celles listées dans %s"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
 msgid "dependency"
@@ -557,53 +555,53 @@ msgstr "dépendance"
 #: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr ""
-"échec du contrôle de développement pour le paquet : %s a rencontré une "
+"échec de la vérification du paquet de développement : '%s' a rencontré une "
 "erreur"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "l'éditeur de texte n'a pas été quitté correctement, annulation : %s"
+msgstr "l'éditeur ne s'est pas terminé avec succès, abandon : %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "erreur lors du téléchargement des sources : %s"
+msgstr "erreur lors du téléchargement des sources : %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "erreur lors de la récupération %s : %s"
+msgstr "erreur lors de la récupération de %s : %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "erreur à l'installation des dépôts des paquets"
+msgstr "erreur lors de l'installation des paquets provenant des dépôts"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
-msgstr "erreur à l'installation:"
+msgstr "erreur lors de l'installation de :"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "erreur lors de la construction : %s"
+msgstr "erreur lors de la compilation de : %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "erreur lors de la fusion %s : %s"
+msgstr "erreur lors de la fusion (%s) : %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
-msgstr "erreur lors de la lecture : %s"
+msgstr "erreur lors de la lecture de %s"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "erreur lors de la mise à jour des bases de données"
+msgstr "erreur lors de l'actualisation des bases de données"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "erreur lors de la réinitialisation %s : %s"
+msgstr "erreur lors de la réinitialisation de %s : %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
 msgstr ""
-"erreur lors de la mise à jour de la raison d'installation du paquet vers %s"
+"erreur lors de la modification du motif d'installation du paquet en « %s »"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
@@ -611,37 +609,37 @@ msgstr "explicite"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "impossible de créer le répertoire '%s' : %s"
+msgstr "échec de la création du répertoire '%s' : %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "échec lors de l'ouverture du fichier de configuration '%s' : %s"
+msgstr "échec de l'ouverture du fichier de configuration '%s' : %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "échec lors de la lecture %s -- omission : %s"
+msgstr "échec de l'analyse de %s -- ignoré : %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "échec lors de la lecture %s : %s"
+msgstr "échec de l'analyse de %s : %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
-msgstr "impossible d'analyser le .SRCINFO"
+msgstr "échec de l'analyse du .SRCINFO"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "échec lors de la lecture du fichier de configuration '%s' : %s"
+msgstr "échec de la lecture du fichier de configuration '%s' : %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr "impossible de récupérer le cache AUR"
+msgstr "échec de la récupération du cache AUR"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr ""
-"Yay va ignorer les mise à jours de paquet de développement (Pas d'info AUR "
-"trouvée):"
+"mise à niveau du paquet de développement ignorée (infos à propos de l'AUR "
+"introuvables) :"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
@@ -649,25 +647,25 @@ msgstr "entrée trop longue"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
-msgstr "nombre invalide : %s"
+msgstr "nombre invalide : %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "option invalide '%s'"
+msgstr "option '%s' invalide"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"paramètres incorrects : '--deps' et '--explicit' ne devaient pas être "
-"utilisés ensemble"
+"option invalide : '--deps' et '--explicit' ne peuvent pas être utilisés "
+"ensemble"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "référentiel invalide"
+msgstr "dépôt invalide"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "valeur invalide : %d n'est pas entre %d et %d"
+msgstr "valeur invalide : %d n'est pas entre %d et %d"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
@@ -679,7 +677,7 @@ msgstr "aucune requête n'a été exécutée"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr "pas de répertoire cible spécifié"
+msgstr "aucun répertoire cible spécifié"
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -699,15 +697,15 @@ msgstr "une seule cible est autorisée"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "paquet '%s' n'a pas été trouvé"
+msgstr "le paquet '%s' est introuvable"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "paquet non trouvé dans AUR"
+msgstr "paquet introuvable dans l'AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "paquet non trouvé dans les référentiels"
+msgstr "paquet introuvable dans les dépôts"
 
 #: pkg/upgrade/service.go:292
 msgid "package"
@@ -718,7 +716,7 @@ msgstr[2] "paquets"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
-msgstr "erreur lors de l'import des clés"
+msgstr "erreur lors de l'importation des clés"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
@@ -727,28 +725,27 @@ msgstr "suppression des paquets de l'AUR du cache…"
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
 msgstr ""
-"suppression du cache des fichiers non suivis dans les paquets de l'AUR…"
+"suppression des fichiers non suivis dans les paquets de l'AUR en cache…"
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr ""
-"le fchier PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
+msgstr "le PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
-msgstr "il n’y a rien à faire"
+msgstr "il n'y a rien à faire"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "impossible de créer le répertoire : %s"
+msgstr "impossible de CreateHandle : %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
-msgstr "opération non prise en compte"
+msgstr "opération non gérée"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "version inconnue"
+msgstr "version-inconnue"
 
 #: pkg/text/input.go:47
 msgid "yes"
