@@ -58,7 +58,7 @@ msgstr "%s est à jour -- ignoré"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "%s à mettre à jour ou à installer."
+msgstr "%s à mettre à niveau ou à installer."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
