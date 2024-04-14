@@ -165,7 +165,7 @@ msgstr "Nettoyage (%d/%d) : %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "En conflit avec"
+msgstr "Est en conflit avec"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
