@@ -1,8 +1,7 @@
 package query
 
 import (
-
-    "context"
+	"context"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,7 +18,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
-
 )
 
 const sourceAUR = "aur"
@@ -80,17 +78,16 @@ func NewSourceQueryBuilder(
 
 type abstractResult struct {
 	source      string
-	id 			int
-	base 		string
-	baseid		int
+	id          int
+	base        string
+	baseid      int
 	name        string
 	description string
 	votes       int
 	provides    []string
-	submitted	int
-	modified	int
+	submitted   int
+	modified    int
 	popularity  float64
-
 }
 
 type abstractResults struct {
@@ -137,7 +134,7 @@ func (a *abstractResults) Less(i, j int) bool {
 			}
 		}
 	case "votes":
-        cmpResult = pkgA.votes > pkgB.votes
+		cmpResult = pkgA.votes > pkgB.votes
 	case "submitted":
 		cmpResult = pkgA.submitted > pkgB.submitted
 	case "modified":
@@ -200,7 +197,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 				source:      dbName,
 				id:          aurResults[i].ID,
 				base:        aurResults[i].PackageBase,
-				baseid: 	 aurResults[i].PackageBaseID,
+				baseid:      aurResults[i].PackageBaseID,
 				name:        aurResults[i].Name,
 				description: aurResults[i].Description,
 				provides:    aurResults[i].Provides,
