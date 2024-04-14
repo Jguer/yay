@@ -1,7 +1,8 @@
 package query
 
 import (
-	"context"
+
+    "context"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
+
 )
 
 const sourceAUR = "aur"
@@ -78,10 +80,17 @@ func NewSourceQueryBuilder(
 
 type abstractResult struct {
 	source      string
+	id 			int
+	base 		string
+	baseid		int
 	name        string
 	description string
 	votes       int
 	provides    []string
+	submitted	int
+	modified	int
+	popularity  float64
+
 }
 
 type abstractResults struct {
@@ -106,6 +115,19 @@ func (a *abstractResults) Less(i, j int) bool {
 	var cmpResult bool
 
 	switch a.sortBy {
+	case "id":
+		cmpResult = pkgA.id > pkgB.id
+	case "base":
+		cmpResult = !text.LessRunes([]rune(pkgA.base), []rune(pkgB.base))
+		if a.separateSources {
+			cmpSources := strings.Compare(pkgA.source, pkgB.source)
+			if cmpSources != 0 {
+				cmpResult = cmpSources > 0
+			}
+		}
+
+	case "baseid":
+		cmpResult = pkgA.baseid > pkgB.baseid
 	case "name":
 		cmpResult = !text.LessRunes([]rune(pkgA.name), []rune(pkgB.name))
 		if a.separateSources {
@@ -114,6 +136,15 @@ func (a *abstractResults) Less(i, j int) bool {
 				cmpResult = cmpSources > 0
 			}
 		}
+	case "votes":
+        cmpResult = pkgA.votes > pkgB.votes
+	case "submitted":
+		cmpResult = pkgA.submitted > pkgB.submitted
+	case "modified":
+		cmpResult = pkgA.modified > pkgB.modified
+	case "popularity":
+		cmpResult = pkgA.popularity > pkgB.popularity
+
 	default:
 		simA := a.calculateMetric(&pkgA)
 		simB := a.calculateMetric(&pkgB)
@@ -167,10 +198,16 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 			sortableResults.results = append(sortableResults.results, abstractResult{
 				source:      dbName,
+				id:          aurResults[i].ID,
+				base:        aurResults[i].PackageBase,
+				baseid: 	 aurResults[i].PackageBaseID,
 				name:        aurResults[i].Name,
 				description: aurResults[i].Description,
 				provides:    aurResults[i].Provides,
 				votes:       aurResults[i].NumVotes,
+				submitted:   aurResults[i].FirstSubmitted,
+				modified:    aurResults[i].LastModified,
+				popularity:  aurResults[i].Popularity,
 			})
 		}
 	}
