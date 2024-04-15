@@ -117,7 +117,7 @@ func createAURList(ctx context.Context, client httpRequestDoer, aurURL string, o
 	return nil
 }
 
-// CreatePackageList appends Repo packages to completion cache.
+// createRepoList appends Repo packages to completion cache.
 func createRepoList(dbExecutor PkgSynchronizer, out io.Writer) error {
 	for _, pkg := range dbExecutor.SyncPackages() {
 		_, err := io.WriteString(out, pkg.Name()+"\t"+pkg.DB().Name()+"\n")
