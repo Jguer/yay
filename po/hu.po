@@ -412,7 +412,7 @@ msgstr "Frissítések keresése az adatbázisokban..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "Csak a repo csomagok megjelenítése"
+msgstr "Csak a tároló csomagjainak megjelenítése"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
