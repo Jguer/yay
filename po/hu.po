@@ -537,7 +537,8 @@ msgstr "nem sikerült megtalálni minden szükséges csomagot"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "nem sikerült megtalálni egyetlen csomagarchívumot sem a(z) %s  "
+msgstr ""
+"nem sikerült megtalálni egyetlen csomagarchívumot sem a(z) %s listában"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
 msgid "dependency"
