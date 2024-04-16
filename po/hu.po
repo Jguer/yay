@@ -513,7 +513,7 @@ msgstr ""
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "felhasználó kérésére megszakítva"
+msgstr "a felhasználó kérésére megszakítva"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
