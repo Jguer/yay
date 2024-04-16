@@ -691,7 +691,7 @@ msgstr "a csomag nem található az AUR-ban"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "a csomag nem található a repo-kban"
+msgstr "a csomag nem található a tárolókban"
 
 #: pkg/upgrade/service.go:292
 msgid "package"
