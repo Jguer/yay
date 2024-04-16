@@ -356,7 +356,7 @@ msgstr "A csomag nincs az AUR-ban:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Csomagok a cleanBuild-hez?"
+msgstr "Csomagok a tiszta építéshez?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
