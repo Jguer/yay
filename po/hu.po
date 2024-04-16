@@ -501,7 +501,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Build könyvtár:"
+"Építési könyvtár:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
