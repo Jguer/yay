@@ -197,7 +197,7 @@ msgstr "Biztosan el akarja távolítani az ÖSSZES nem követett AUR fájlt?"
 #: clean.go:80
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr ""
-"Biztosan el akarod távolítani az összes többi AUR csomagot a gyorsítótárból?"
+"Biztosan el akarja távolítani az összes többi AUR csomagot a gyorsítótárból?"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
