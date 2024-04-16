@@ -448,7 +448,7 @@ msgstr "Lehet, hogy már fut a Pacman. Várjon..."
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Csomagok által foglalt összes hely: %s"
+msgstr "Csomagok által elfoglalt összes hely: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
