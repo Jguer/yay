@@ -153,7 +153,7 @@ msgstr "Dépendance de vérification"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Dépend. vérif."
+msgstr "Dépendances vérif."
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
@@ -300,7 +300,7 @@ msgstr "Dépendance de compilation"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Dépend. compil."
+msgstr "Dépendances compil."
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
