@@ -135,7 +135,7 @@ msgstr "AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Állítsd be az %s vagy a %s környezeti változót"
+msgstr "Állítsa be az %s vagy a %s környezeti változót"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
