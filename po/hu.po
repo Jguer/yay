@@ -376,7 +376,7 @@ msgstr "Népszerűség"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Folytatod a telepítést?"
+msgstr "Folytatja a telepítést?"
 
 #: print.go:37
 msgid "Provides"
