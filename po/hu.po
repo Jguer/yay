@@ -509,7 +509,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Írj be egy számot (alapértelmezett=1): "
+"Írjon be egy számot (alapértelmezett=1): "
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
