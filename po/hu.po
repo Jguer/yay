@@ -561,7 +561,7 @@ msgstr "hiba a(z) %s letöltése közben: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "hiba a tároló csomagok telepítése közben"
+msgstr "hiba a tárolóból származó csomagok telepítése közben"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
