@@ -300,7 +300,7 @@ msgstr "Dépendance de création"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Dépendances compil."
+msgstr "Dépendances créat."
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
@@ -392,7 +392,7 @@ msgstr "Fournit"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Supprimer les dépendances de compilation après l'installation ?"
+msgstr "Supprimer les dépendances de création après l'installation ?"
 
 #: print.go:43
 msgid "Replaces"
