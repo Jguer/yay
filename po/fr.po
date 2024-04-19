@@ -295,11 +295,11 @@ msgstr "Mainteneur"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Dépendance de compilation"
+msgstr "Dépendance de création"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Dépendances compil."
+msgstr "Dépendances créat."
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
