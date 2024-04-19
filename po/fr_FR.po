@@ -296,7 +296,7 @@ msgstr "Mainteneur"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Dépendance de compilation"
+msgstr "Dépendance de création"
 
 #: print.go:40
 msgid "Make Deps"
