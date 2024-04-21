@@ -59,11 +59,11 @@ msgstr "%s está actualizado -- ignorando"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "por actualizar/instalar"
+msgstr "%s por actualizar/instalar"
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "también será instalado para esta operación"
+msgstr "%s también será instalado para esta operación"
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
