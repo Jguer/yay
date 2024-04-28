@@ -638,8 +638,7 @@ msgstr "échec de la récupération du cache AUR"
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr ""
-"mise à niveau du paquet de développement ignorée (infos à propos de l'AUR "
-"introuvables) :"
+"mise à jour du paquet de développement ignorée (infos AUR introuvables) :"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
