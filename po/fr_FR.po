@@ -59,7 +59,7 @@ msgstr "%s est à jour -- ignoré"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "%s à mettre à niveau ou à installer."
+msgstr "%s à mettre à jour ou à installer."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
@@ -83,7 +83,7 @@ msgstr "%s : la cible est incompatible avec l'option --repo -- ignoré"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s : mise à niveau du paquet ignorée (%s => %s)"
+msgstr "%s : mise à jour du paquet ignorée (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
