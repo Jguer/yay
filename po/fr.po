@@ -82,7 +82,7 @@ msgstr "%s : la cible est incompatible avec l'option --repo -- ignoré"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s : mise à niveau du paquet ignorée (%s => %s)"
+msgstr "%s : mise à jour du paquet ignorée (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
