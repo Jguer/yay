@@ -38,8 +38,7 @@ building with makepkg:
 We start with updating the package lists and make sure we have the `base-devel` package group installed.
 
 ```sh
-pacman -Sy
-pacman -S --needed git base-devel
+pacman -Sy --needed git base-devel
 git clone https://aur.archlinux.org/yay.git
 cd yay
 makepkg -si
