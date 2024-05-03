@@ -9,10 +9,11 @@
 # brandon galvis, 2023
 # Angel López, 2023
 # C C, 2023
+# Angel Alderete, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: C C, 2023\n"
+"Last-Translator: Angel Alderete, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/yay-1/teams/123732/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -63,7 +64,7 @@ msgstr "%s por actualizar/instalar"
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "%s también será instalado para esta operación"
+msgstr "también será instalado para esta operación"
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
