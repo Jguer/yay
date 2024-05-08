@@ -27,9 +27,27 @@ func gitMerge(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) error
 	return nil
 }
 
+func pkgbuildCanMerge(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) (bool, error) {
+	stdout, stderr, err := cmdBuilder.Capture(
+		cmdBuilder.BuildGitCmd(ctx,
+			dir, "branch", "--show-current"))
+	if err != nil {
+		return false, errors.New(gotext.Get("error showing branch %s: %s", dir, stderr))
+	}
+
+	return stdout != "", nil
+}
+
 func mergePkgbuilds(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string) error {
 	for _, dir := range pkgbuildDirs {
-		err := gitMerge(ctx, cmdBuilder, dir)
+		canMerge, err := pkgbuildCanMerge(ctx, cmdBuilder, dir)
+		if err != nil {
+			return err
+		}
+		if !canMerge {
+			continue
+		}
+		err = gitMerge(ctx, cmdBuilder, dir)
 		if err != nil {
 			return err
 		}
