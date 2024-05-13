@@ -61,7 +61,7 @@ _yay() {
           search unrequired upgrades' 'c e g i k l m n o p s t u')
   remove=('cascade dbonly nodeps assume-installed nosave print recursive unneeded' 'c n p s u')
   sync=('asdeps asexplicit clean dbonly downloadonly overwrite groups ignore ignoregroup
-         info list needed nodeps assume-installed print refresh recursive search sysupgrade'
+         info list needed nodeps assume-installed print refresh recursive search sysupgrade aur repo'
     'c g i l p s u w y a N')
   upgrade=('asdeps asexplicit overwrite needed nodeps assume-installed print recursive' 'p')
   core=('database files help query remove sync upgrade version' 'D F Q R S U V h')
