@@ -244,7 +244,7 @@ msgstr "נמצא מאגר git: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "יצירת מסד הנתונים (GenDB) הסתיימה. לא הותקנו חבילות"
+msgstr "GenDB הסתיים. לא הותקנו חבילות"
 
 #: print.go:36
 msgid "Groups"
