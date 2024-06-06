@@ -325,7 +325,7 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 		}
 
 		// If the user explicitely wants to include a package/repository, exclude everything else
-		if !isInclude && !(include.Get(len(allUp.Up)-i) || otherInclude.Contains(up.Repository)) {
+		if !isInclude && !include.Get(len(allUp.Up)-i) && !otherInclude.Contains(up.Repository) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
 			continue
