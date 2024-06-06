@@ -303,7 +303,7 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	// exclude and include are kind of swapped
 	exclude, include, otherExclude, otherInclude := intrange.ParseNumberMenu(numbers)
 
-	// true if user doesn't want to include specific packages
+	// true if user doesn't want to include specific repositories/packages
 	noIncludes := len(include) == 0 && otherInclude.Cardinality() == 0
 
 	excluded := make([]string, 0)
