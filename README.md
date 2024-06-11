@@ -47,7 +47,7 @@ makepkg -si
 If you want to do all of this at once, we can chain the commands like so:
 
 ```sh
-pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
 ```
 
 ### Binary
