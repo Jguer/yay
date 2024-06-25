@@ -179,7 +179,7 @@ func (c *Configuration) setPrivilegeElevator() error {
 	c.SudoFlags = ""
 	c.SudoLoop = false
 
-	for _, bin := range [...]string{"doas", "pkexec", "su"} {
+	for _, bin := range [...]string{"doas", "run0", "pkexec", "su"} {
 		if _, err := exec.LookPath(bin); err == nil {
 			c.SudoBin = bin
 			return nil // command existing
