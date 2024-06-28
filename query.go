@@ -46,7 +46,13 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 	aurS, repoS := packageSlices(pkgS, run.Cfg, dbExecutor)
 
 	if len(repoS) == 0 && len(aurS) == 0 {
-		aurS = dbExecutor.InstalledRemotePackageNames()
+		if run.Cfg.Mode != parser.ModeRepo {
+			aurS = dbExecutor.InstalledRemotePackageNames()
+		}
+
+		if run.Cfg.Mode != parser.ModeAUR {
+			repoS = dbExecutor.InstalledSyncPackageNames()
+		}
 	}
 
 	if len(aurS) != 0 {
