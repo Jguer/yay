@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/Jguer/aur/metadata"
 	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
 )
 
 func handleCmd(logger *text.Logger) error {
@@ -25,7 +25,7 @@ func handleCmd(logger *text.Logger) error {
 	}
 
 	cmdArgs := parser.MakeArguments()
-	if errP := cfg.ParseCommandLine(cmdArgs, logger); errP != nil {
+	if errP := cfg.ParseCommandLine(cmdArgs); errP != nil {
 		return errP
 	}
 
@@ -43,7 +43,7 @@ func handleCmd(logger *text.Logger) error {
 		metadata.WithCacheFilePath(
 			filepath.Join(cfg.BuildDir, "aur.json")))
 	if err != nil {
-		return errors.Wrap(err, gotext.Get("failed to retrieve aur Cache"))
+		return fmt.Errorf("%s: %w", gotext.Get("failed to retrieve aur Cache"), err)
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm,

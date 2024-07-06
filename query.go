@@ -45,6 +45,16 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 	pkgS = query.RemoveInvalidTargets(run.Logger, pkgS, run.Cfg.Mode)
 	aurS, repoS := packageSlices(pkgS, run.Cfg, dbExecutor)
 
+	if len(repoS) == 0 && len(aurS) == 0 {
+		if run.Cfg.Mode != parser.ModeRepo {
+			aurS = dbExecutor.InstalledRemotePackageNames()
+		}
+
+		if run.Cfg.Mode != parser.ModeAUR {
+			repoS = dbExecutor.InstalledSyncPackageNames()
+		}
+	}
+
 	if len(aurS) != 0 {
 		noDB := make([]string, 0, len(aurS))
 
@@ -64,7 +74,7 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 		}
 	}
 
-	if len(repoS) != 0 {
+	if len(repoS) != 0 || (len(aurS) == 0 && len(repoS) == 0) {
 		arguments := cmdArgs.Copy()
 		arguments.ClearTargets()
 		arguments.AddTarget(repoS...)

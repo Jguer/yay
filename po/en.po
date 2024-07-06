@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Language: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: \n"
 "X-Generator: xgotext\n"
 
 #: pkg/menus/menu.go:32
@@ -15,11 +15,12 @@ msgstr ""
 msgid " (Installed)"
 msgstr ""
 
-#: cmd.go:463
+#: cmd.go:453
 msgid " [Installed]"
 msgstr ""
 
-#: cmd.go:420 vote.go:36
+#: cmd.go:410
+#: vote.go:36
 msgid " there is nothing to do"
 msgstr ""
 
@@ -39,7 +40,8 @@ msgstr ""
 msgid "%s is present."
 msgstr ""
 
-#: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
+#: pkg/dep/dep_graph.go:460
+#: pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
 msgstr ""
 
@@ -76,67 +78,15 @@ msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr ""
 
 #: vote.go:51
-msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
-msgstr ""
-
-#: pkg/settings/args.go:118
-msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:63
-msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:187
-msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:207
-msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:73
-msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:192
-msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:197
-msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:182
-msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:177
-msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:224
-msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:172
-msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:78
-msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:202
-msgid "'--%s' is deprecated. Use '--useask=false' instead"
+msgid "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
 msgstr ""
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr ""
 
-#: pkg/download/aur.go:92 pkg/download/unified.go:188
+#: pkg/download/aur.go:92
+#: pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr ""
 
@@ -148,11 +98,13 @@ msgstr ""
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr ""
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:72
+#: pkg/query/types.go:103
 msgid "(Installed)"
 msgstr ""
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:70
+#: pkg/query/types.go:101
 msgid "(Installed: %s)"
 msgstr ""
 
@@ -256,7 +208,8 @@ msgstr ""
 msgid "Explicitly installed packages: %s"
 msgstr ""
 
-#: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
+#: pkg/dep/dep_graph.go:437
+#: pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
 msgstr ""
 
@@ -265,8 +218,7 @@ msgid "Failed to install layer, rolling up to next layer."
 msgstr ""
 
 #: pkg/sync/build/errors.go:16
-msgid ""
-"Failed to install the following packages. Manual intervention is required:"
+msgid "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
 
 #: print.go:45
@@ -341,7 +293,8 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442
+#: pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
 msgstr ""
 
@@ -361,7 +314,8 @@ msgstr ""
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr ""
 
-#: print.go:53 print.go:55
+#: print.go:53
+#: print.go:55
 msgid "Out-of-date"
 msgstr ""
 
@@ -401,7 +355,7 @@ msgstr ""
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 
-#: cmd.go:402
+#: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr ""
 
@@ -409,7 +363,8 @@ msgstr ""
 msgid "Popularity"
 msgstr ""
 
-#: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
+#: pkg/menus/diff_menu.go:172
+#: pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
 msgstr ""
 
@@ -429,7 +384,8 @@ msgstr ""
 msgid "Repository AUR"
 msgstr ""
 
-#: print.go:30 pkg/db/ialpm/alpm.go:191
+#: print.go:30
+#: pkg/db/ialpm/alpm.go:191
 msgid "Repository"
 msgstr ""
 
@@ -473,7 +429,8 @@ msgstr ""
 msgid "The following packages are not compatible with your architecture:"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
+#: pkg/db/ialpm/alpm.go:179
+#: pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
 msgstr ""
 
@@ -497,11 +454,14 @@ msgstr ""
 msgid "URL"
 msgstr ""
 
-#: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
+#: clean.go:194
+#: pkg/menus/clean_menu.go:65
+#: pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
 msgstr ""
 
-#: get.go:42 get.go:74
+#: get.go:42
+#: get.go:74
 msgid "Unable to find the following packages:"
 msgstr ""
 
@@ -530,22 +490,19 @@ msgid "[N]one"
 msgstr ""
 
 #: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
+msgid "\nBuild directory:"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
+#: pkg/db/ialpm/alpm.go:201
+#: pkg/dep/dep_graph.go:740
+msgid "\nEnter a number (default=1): "
 msgstr ""
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr ""
 
-#: pkg/settings/parser/parser.go:620
+#: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
 msgstr ""
 
@@ -569,11 +526,13 @@ msgstr ""
 msgid "could not find any package archives listed in %s"
 msgstr ""
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:50
+#: pkg/upgrade/service.go:287
 msgid "dependency"
 msgstr ""
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:96
+#: pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr ""
 
@@ -593,11 +552,13 @@ msgstr ""
 msgid "error installing repo packages"
 msgstr ""
 
-#: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
+#: pkg/sync/build/installer.go:266
+#: pkg/sync/build/installer.go:270
 msgid "error installing:"
 msgstr ""
 
-#: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
+#: pkg/sync/build/installer.go:233
+#: pkg/sync/build/installer.go:237
 msgid "error making: %s"
 msgstr ""
 
@@ -613,7 +574,8 @@ msgstr ""
 msgid "error refreshing databases"
 msgstr ""
 
-#: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
+#: pkg/sync/workdir/clean.go:51
+#: pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
 msgstr ""
 
@@ -649,7 +611,8 @@ msgstr ""
 msgid "failed to read config file '%s': %s"
 msgstr ""
 
-#: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
+#: pkg/cmd/graph/main.go:46
+#: pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
 msgstr ""
 
@@ -661,7 +624,8 @@ msgstr ""
 msgid "input too long"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
+#: pkg/db/ialpm/alpm.go:222
+#: pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
 msgstr ""
 
@@ -669,7 +633,7 @@ msgstr ""
 msgid "invalid option '%s'"
 msgstr ""
 
-#: cmd.go:207
+#: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 
@@ -677,7 +641,8 @@ msgstr ""
 msgid "invalid repository"
 msgstr ""
 
-#: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
+#: pkg/db/ialpm/alpm.go:227
+#: pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
 msgstr ""
 
@@ -735,7 +700,8 @@ msgstr ""
 msgid "removing AUR packages from cache..."
 msgstr ""
 
-#: clean.go:178 pkg/sync/workdir/clean.go:41
+#: clean.go:178
+#: pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
 msgstr ""
 
@@ -751,11 +717,11 @@ msgstr ""
 msgid "unable to CreateHandle: %s"
 msgstr ""
 
-#: cmd.go:196
+#: cmd.go:186
 msgid "unhandled operation"
 msgstr ""
 
-#: cmd.go:460
+#: cmd.go:450
 msgid "unknown-version"
 msgstr ""
 

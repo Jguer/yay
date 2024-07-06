@@ -26,8 +26,7 @@ MOFILES := $(POFILES:.po=.mo)
 
 FLAGS ?= -trimpath -mod=readonly -modcacherw
 EXTRA_FLAGS ?= -buildmode=pie
-LDFLAGS := -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}" -linkmode=external
-FLAGS += $(shell pacman -T 'pacman-git' >/dev/null 2>&1 && echo "-tags next")
+LDFLAGS := -X "main.yayVersion=${VERSION}" -X "main.localePath=${SYSTEMLOCALEPATH}" -linkmode=external -compressdwarf=false
 
 RELEASE_DIR := ${PKGNAME}_${VERSION}_${ARCH}
 PACKAGE := $(RELEASE_DIR).tar.gz
@@ -70,7 +69,7 @@ docker-release-all:
 	make docker-release-aarch64 ARCH=aarch64
 
 docker-release:
-	docker create --name yay-$(ARCH) yay:${ARCH}
+	docker create --name yay-$(ARCH) yay:${ARCH} /bin/sh
 	docker cp yay-$(ARCH):/app/${PACKAGE} $(PACKAGE)
 	docker container rm yay-$(ARCH)
 
@@ -83,9 +82,7 @@ docker-build:
 
 .PHONY: lint
 lint:
-	$(GO) vet $(FLAGS) ./...
-	@test -z "$$(gofmt -l $(SOURCES))" || (echo "Files need to be linted. Use make fmt" && false)
-	golangci-lint run ./...
+	GOFLAGS="$(FLAGS)" golangci-lint run ./...
 
 .PHONY: fmt
 fmt:
@@ -126,6 +123,7 @@ $(PACKAGE): $(BIN) $(RELEASE_DIR) ${MOFILES}
 
 locale:
 	xgotext -in . -out po
+	mv po/default.pot po/en.po
 	for lang in ${LANGS}; do \
 		test -f po/$$lang.po || msginit --no-translator -l po/$$lang.po -i po/${POTFILE} -o po/$$lang.po; \
 		msgmerge -U po/$$lang.po po/${POTFILE}; \

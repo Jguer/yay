@@ -4,6 +4,7 @@
 package runtime_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,6 +17,11 @@ import (
 
 func TestBuildRuntime(t *testing.T) {
 	t.Parallel()
+	path := "../../testdata/pacman.conf"
+
+	absPath, err := filepath.Abs(path)
+	require.NoError(t, err)
+
 	// Prepare test inputs
 	cfg := &settings.Configuration{
 		Debug:       true,
@@ -24,7 +30,7 @@ func TestBuildRuntime(t *testing.T) {
 		AURRPCURL:   "https://aur.archlinux.org/rpc",
 		BuildDir:    "/tmp",
 		VCSFilePath: "",
-		PacmanConf:  "../../testdata/pacman.conf",
+		PacmanConf:  absPath,
 	}
 	cmdArgs := parser.MakeArguments()
 	version := "1.0.0"

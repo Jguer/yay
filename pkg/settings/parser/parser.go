@@ -377,12 +377,9 @@ func isArg(arg string) bool {
 	case "aurrpcurl":
 	case "save":
 	case "afterclean", "cleanafter":
-	case "noafterclean", "nocleanafter":
 	case "keepsrc":
 	case "devel":
-	case "nodevel":
 	case "timeupdate":
-	case "notimeupdate":
 	case "topdown":
 	case "bottomup":
 	case "completioninterval":
@@ -396,7 +393,6 @@ func isArg(arg string) bool {
 	case "rebuildtree":
 	case "norebuild":
 	case "batchinstall":
-	case "nobatchinstall":
 	case "answerclean":
 	case "noanswerclean":
 	case "answerdiff":
@@ -421,23 +417,15 @@ func isArg(arg string) bool {
 	case "sudoflags":
 	case "requestsplitn":
 	case "sudoloop":
-	case "nosudoloop":
 	case "provides":
-	case "noprovides":
 	case "pgpfetch":
-	case "nopgpfetch":
 	case "cleanmenu":
-	case "nocleanmenu":
 	case "diffmenu":
-	case "nodiffmenu":
 	case "editmenu":
-	case "noeditmenu":
 	case "useask":
-	case "nouseask":
 	case "combinedupgrade":
-	case "nocombinedupgrade":
 	case "a", "aur":
-	case "repo":
+	case "N", "repo":
 	case "removemake":
 	case "noremovemake":
 	case "askremovemake":
@@ -450,7 +438,7 @@ func isArg(arg string) bool {
 	case "defaultconfig":
 	case "singlelineresults":
 	case "doublelineresults":
-	case "separatesources", "noseparatesources":
+	case "separatesources":
 	case "showpackageurls":
 	default:
 		return false

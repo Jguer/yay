@@ -1,22 +1,27 @@
-#
+# 
 # Translators:
 # J G, 2021
 # makvasm, 2021
 # antsif.a, 2022
 # Demir Yerli, 2022
-#
+# Антон Карасев <uselessfire@gmail.com>, 2023
+# Ravenso BlacK, 2024
+# Victor Golovanenko <drygdryg2014@yandex.ru>, 2024
+# Vladislav Zenkov, 2024
+# falixkamishin falixx, 2024
+# Kira Malinova, 2024
+# Dancheg97 F, 2024
+# Vladislav Grechannik, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Demir Yerli, 2022\n"
-"Language-Team: Russian (Russia) (https://www.transifex.com/yay-1/"
-"teams/123732/ru_RU/)\n"
-"Language: ru_RU\n"
+"Last-Translator: Vladislav Grechannik, 2024\n"
+"Language-Team: Russian (Russia) (https://app.transifex.com/yay-1/teams/123732/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Language: ru_RU\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: xgotext\n"
 
 #: pkg/menus/menu.go:32
@@ -27,19 +32,19 @@ msgstr " (файлы сборки существуют)"
 msgid " (Installed)"
 msgstr " (Установлено)"
 
-#: cmd.go:463
+#: cmd.go:453
 msgid " [Installed]"
 msgstr " [Установлено]"
 
-#: cmd.go:420 vote.go:36
+#: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
 msgstr "делать нечего"
 
 #: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
-"%s [A]Все [Ab]Прервать [I]Установленные [No]Неустановленные или (1 2 3, 1-3, "
-"^4)"
+"%s [A]Все [Ab]Прервать [I]Установленные [No]Неустановленные или (1 2 3, 1-3,"
+" ^4)"
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
@@ -58,13 +63,12 @@ msgid "%s is up to date -- skipping"
 msgstr "%sобновлён до последней версии --- пропуск"
 
 #: pkg/upgrade/service.go:292
-#, fuzzy
 msgid "%s to upgrade/install."
-msgstr "Пакеты для обновления."
+msgstr "обновить/установить."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr ""
+msgstr "также будет установлен для этой операции."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
@@ -92,60 +96,11 @@ msgstr "%s: локальная версия (%s) новее, чем в AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
-
-#: pkg/settings/args.go:118
-msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:63
-msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:187
-msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:207
-msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:73
-msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:192
-msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:197
-msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:182
-msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:177
-msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:224
-msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:172
-msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:78
-msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr ""
-
-#: pkg/settings/args.go:202
-msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr ""
+"пожалуйста, укажите AUR_USERNAME и AUR_PASSWORD в переменных среды для "
+"возможности голосовать"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -156,9 +111,8 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) Скачан PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Скачан PKGBUILD: %s"
+msgstr "(%d/%d) Не удалось загрузить PKGBUILD:"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
@@ -185,9 +139,8 @@ msgid "AUR URL"
 msgstr "AUR URL"
 
 #: pkg/dep/dep_graph.go:75
-#, fuzzy
 msgid "AUR"
-msgstr "URL"
+msgstr "AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -198,9 +151,8 @@ msgid "Avoid running yay as root/sudo."
 msgstr "Не запускайте yay от имени root/sudo."
 
 #: pkg/dep/dep_graph.go:63
-#, fuzzy
 msgid "Check Dependency"
-msgstr "Зависимости проверки"
+msgstr "Проверка зависимости"
 
 #: print.go:41
 msgid "Check Deps"
@@ -223,9 +175,8 @@ msgid "Deleting (%d/%d): %s"
 msgstr "Удаление (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
-#, fuzzy
 msgid "Dependency"
-msgstr "Зависит от"
+msgstr "Зависимость"
 
 #: print.go:38
 msgid "Depends On"
@@ -241,7 +192,7 @@ msgstr "Показать изменения?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr ""
+msgstr "Отключите настройку 'обеспечивает' по умолчанию"
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
@@ -266,28 +217,29 @@ msgstr "Ошибка поиска в AUR: %s\n"
 #: pkg/upgrade/service.go:296
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
+"Исключение пакетов может привести к частичным обновлениям и поломкам системы"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
-msgstr ""
+msgstr "Явно"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
 msgstr "Пакеты, установленные по запросу пользователя: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
-#, fuzzy
 msgid "Failed to find AUR package for"
-msgstr "Пакеты AUR, помеченные как устаревшие:"
+msgstr "Не удалось найти пакет AUR для"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr ""
+msgstr "Ошибка установки слоя, переход на следующий слой."
 
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
+"Не удалось установить следующие пакеты. Необходимо ручное вмешательство:"
 
 #: print.go:45
 msgid "First Submitted"
@@ -335,16 +287,15 @@ msgstr "Лицензии"
 
 #: pkg/dep/dep_graph.go:77
 msgid "Local"
-msgstr ""
+msgstr "Локальный"
 
 #: print.go:48
 msgid "Maintainer"
 msgstr "Сопровождающий"
 
 #: pkg/dep/dep_graph.go:62
-#, fuzzy
 msgid "Make Dependency"
-msgstr "Зависимости сборки"
+msgstr "Зависимость сборки"
 
 #: print.go:40
 msgid "Make Deps"
@@ -356,21 +307,19 @@ msgstr "Отсутствующие в AUR пакеты для отладки:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
-msgstr ""
+msgstr "Отсутствующие"
 
 #: print.go:31
 msgid "Name"
 msgstr "Название"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
-#, fuzzy
 msgid "No AUR package found for"
-msgstr "пакет не найден в репозиториях"
+msgstr "Не найден пакет AUR для"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "пакет не найден в репозиториях"
+msgstr "Не найден пакет для"
 
 #: print.go:225
 msgid "None"
@@ -381,9 +330,8 @@ msgid "Optional Deps"
 msgstr "Факультативные зависимости"
 
 #: pkg/query/aur_warnings.go:75
-#, fuzzy
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Пакеты-сироты AUR без сопровождающего:"
+msgstr "Брошенные (без сопровождающего) пакеты AUR:"
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
@@ -394,9 +342,8 @@ msgid "PGP keys need importing:"
 msgstr "Ключи PGP, требующие импорта:"
 
 #: pkg/sync/workdir/preparer.go:252
-#, fuzzy
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD обновлён, пропуск (%d/%d): %s"
+msgstr "Актуальный PKGBUILD, пропуск загрузки"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
@@ -411,26 +358,22 @@ msgid "Package Base"
 msgstr "Группа пакетов"
 
 #: pkg/query/aur_warnings.go:67
-#, fuzzy
 msgid "Packages not in AUR:"
-msgstr "пакет не найден в AUR"
+msgstr "Пакет не найден в AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
 msgstr "Пакеты, для которых требуется очистить кэш сборки?"
 
 #: pkg/dep/dep_graph.go:202
-#, fuzzy
 msgid "Packages to exclude"
-msgstr "Пакеты для обновления."
+msgstr "Пакеты для исключения"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Пакеты для исключения: (пример: \"1 2 3\", \"1-3\", \"^4\" или имя в "
-"репозитории)"
+msgstr "Пакеты для исключения: (пример: \"1 2 3\", \"1-3\", \"^4\" или имя в репозитории)"
 
-#: cmd.go:402
+#: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Пакеты для установки (пример: 1 2 3, 1-3 или ^4)"
 
@@ -452,7 +395,7 @@ msgstr "Удалить зависимости для сборки после у�
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "Заменяет"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
@@ -464,7 +407,7 @@ msgstr "Репозиторий"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
-msgstr ""
+msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:72
 msgid "Searching AUR for updates..."
@@ -480,11 +423,11 @@ msgstr "Показываются только пакеты из репозито
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Размер кэша \"pacman\" %s: %s"
+msgstr "Размер кэша \"pacman\""
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Размер кэша \"yay\" %s: %s"
+msgstr "Размер кэша \"yay\""
 
 #: print.go:62
 msgid "Snapshot URL"
@@ -492,7 +435,7 @@ msgstr "URL архива"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
-msgstr ""
+msgstr "Синхронизация"
 
 #: print.go:100
 msgid "Ten biggest packages:"
@@ -536,12 +479,11 @@ msgstr "Не удалось найти следующие пакеты:"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr ""
+msgstr "Не удалось обработать голосование за: %s. ошибка: %s"
 
 #: clean.go:170
-#, fuzzy
 msgid "Unable to remove %s: %s"
-msgstr "ошибка при анализе %s: %s"
+msgstr "Не удается удалить %s: %s"
 
 #: print.go:32
 msgid "Version"
@@ -579,13 +521,13 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "прерывание по запросу пользователя"
 
-#: pkg/settings/parser/parser.go:620
+#: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr ""
+msgstr "аргумент '-' задан без ввода из stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr ""
+msgstr "не удалось найти PKGBUILD и .SRCINFO в каталоге"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
@@ -596,18 +538,16 @@ msgid "could not find PKGDEST for: %s"
 msgstr "невозможно найти файл PKGDEST для: %s"
 
 #: errors.go:9
-#, fuzzy
 msgid "could not find all required packages"
-msgstr "Невозможно найти все требуемые пакеты:"
+msgstr "не удалось найти все необходимые пакеты"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr ""
+msgstr "Не удалось найти архивы пакетов в %s"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
-#, fuzzy
 msgid "dependency"
-msgstr "Зависит от"
+msgstr "зависимость"
 
 #: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
@@ -630,9 +570,8 @@ msgid "error installing repo packages"
 msgstr "ошибка установки пакетов из репозиториев"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
-#, fuzzy
 msgid "error installing:"
-msgstr "ошибка установки пакетов из репозиториев"
+msgstr "ошибка установки:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
@@ -655,14 +594,12 @@ msgid "error resetting %s: %s"
 msgstr "ошибка сброса %s: %s"
 
 #: pkg/sync/build/errors.go:53
-#, fuzzy
 msgid "error updating package install reason to %s"
-msgstr ""
-"ошибка при изменении причины установки пакета на \"явно установленный\":"
+msgstr "ошибка изменения причины установки пакета на %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr ""
+msgstr "явно"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
@@ -681,9 +618,8 @@ msgid "failed to parse %s: %s"
 msgstr "ошибка при анализе %s: %s"
 
 #: local_install.go:77
-#, fuzzy
 msgid "failed to parse .SRCINFO"
-msgstr "ошибка при анализе %s: %s"
+msgstr "ошибка при анализе .SRCINFO"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
@@ -691,12 +627,11 @@ msgstr "ошибка чтения файла конфигурации '%s': %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr ""
+msgstr "не удалось получить кэш AUR"
 
 #: pkg/upgrade/sources.go:27
-#, fuzzy
 msgid "ignoring package devel upgrade (no AUR info found):"
-msgstr "%s: пропуск обновления пакета (%s => %s)"
+msgstr "Игнорирование обновления пакета devel (информация об AUR не найдена):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
@@ -710,7 +645,7 @@ msgstr "некорректный номер: %s"
 msgid "invalid option '%s'"
 msgstr "некорректный параметр '%s'"
 
-#: cmd.go:207
+#: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "некорректный параметр:  '--deps' и '--explicit' не могут быть использованы "
@@ -734,7 +669,7 @@ msgstr "запрос не был выполнен"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr ""
+msgstr "не выбраны целевые директории"
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -742,7 +677,7 @@ msgstr "нет"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr ""
+msgstr "нечего установить из %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
@@ -750,7 +685,7 @@ msgstr "только одна операция может быть вызван�
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "разрешена только одна цель"
 
 #: print.go:187
 msgid "package '%s' was not found"
@@ -765,13 +700,12 @@ msgid "package not found in repos"
 msgstr "пакет не найден в репозиториях"
 
 #: pkg/upgrade/service.go:292
-#, fuzzy
 msgid "package"
 msgid_plural "packages"
-msgstr[0] "Группа пакетов"
-msgstr[1] "Группа пакетов"
-msgstr[2] "Группа пакетов"
-msgstr[3] "Группа пакетов"
+msgstr[0] "пакет"
+msgstr[1] "пакеты"
+msgstr[2] "пакеты"
+msgstr[3] "пакеты"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
@@ -790,65 +724,21 @@ msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "файл PKGDEST для %s означен в выводе makepkg, но не существует: %s"
 
 #: pkg/sync/sync.go:45
-#, fuzzy
 msgid "there is nothing to do"
-msgstr "делать нечего"
+msgstr "делать больше нечего"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
 msgstr "невозможно выполнить CreateHandle: %s"
 
-#: cmd.go:196
+#: cmd.go:186
 msgid "unhandled operation"
 msgstr "неизвестная операция"
 
-#: cmd.go:460
+#: cmd.go:450
 msgid "unknown-version"
 msgstr "неизвестная версия"
 
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "да"
-
-#~ msgid " (Target"
-#~ msgstr " (Цель"
-
-#~ msgid " (Wanted by: "
-#~ msgstr " (Требуется пакету: "
-
-#~ msgid "%s not satisfied, flushing install queue"
-#~ msgstr "%s не удовлетворена, очистка очереди установки"
-
-#~ msgid "Checking for conflicts..."
-#~ msgstr "Проверка конфликтов..."
-
-#~ msgid "Checking for inner conflicts..."
-#~ msgstr "Проверка внутренних конфликтов..."
-
-#~ msgid "Conflicting packages will have to be confirmed manually"
-#~ msgstr ""
-#~ "Подтверждение удаления конфликтующих пакетов должно быть выполнено вручную"
-
-#~ msgid "Inner conflicts found:"
-#~ msgstr "Обнаружены внутренние конфликты:"
-
-#~ msgid "Installing %s will remove:"
-#~ msgstr "Установка %s приведёт к удалению:"
-
-#~ msgid "Missing AUR Packages:"
-#~ msgstr "Отсутствующие в AUR пакеты:"
-
-#~ msgid "Package conflicts found:"
-#~ msgstr "Обнаружены конфликты пакетов:"
-
-#~ msgid "Querying AUR..."
-#~ msgstr "Выполнение запроса в AUR..."
-
-#~ msgid "error updating package install reason to dependency"
-#~ msgstr ""
-#~ "ошибка при изменении причины установки пакета на \"установленный как "
-#~ "зависимость\":"
-
-#~ msgid "package conflicts can not be resolved with noconfirm, aborting"
-#~ msgstr ""
-#~ "конфликты пакетов не могут быть разрешены опцией noconfirm, прерывание"

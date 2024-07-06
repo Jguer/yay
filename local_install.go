@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -20,7 +21,6 @@ import (
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
-	"github.com/pkg/errors"
 )
 
 var ErrNoBuildFiles = errors.New(gotext.Get("cannot find PKGBUILD and .SRCINFO in directory"))
@@ -74,7 +74,7 @@ func installLocalPKGBUILD(
 
 		pkgbuild, err := gosrc.ParseFile(filepath.Join(targetDir, ".SRCINFO"))
 		if err != nil {
-			return errors.Wrap(err, gotext.Get("failed to parse .SRCINFO"))
+			return fmt.Errorf("%s: %w", gotext.Get("failed to parse .SRCINFO"), err)
 		}
 
 		srcInfos[targetDir] = pkgbuild

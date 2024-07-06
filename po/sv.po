@@ -23,11 +23,11 @@ msgstr " (Byggfiler finns)"
 msgid " (Installed)"
 msgstr " (Installerad)"
 
-#: cmd.go:463
+#: cmd.go:453
 msgid " [Installed]"
 msgstr " [Installerad]"
 
-#: cmd.go:420 vote.go:36
+#: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
 msgstr " inget behöver göras"
 
@@ -92,58 +92,6 @@ msgid ""
 msgstr ""
 "%s: vänligen ställ in miljövariablerna AUR_USERNAME och AUR_PASSWORD för att"
 " rösta"
-
-#: pkg/settings/args.go:118
-msgid "'--%s' is deprecated. Use '--batchinstall=false' instead"
-msgstr "'--%s' är utfasad. Använd '--batchinstall=false' istället"
-
-#: pkg/settings/args.go:63
-msgid "'--%s' is deprecated. Use '--cleanafter=false' instead"
-msgstr "'--%s' är utfasad. Använd '--cleanafter=false' istället"
-
-#: pkg/settings/args.go:187
-msgid "'--%s' is deprecated. Use '--cleanmenu=false' instead"
-msgstr "'--%s' är utfasad. Använd '--cleanmenu=false' istället"
-
-#: pkg/settings/args.go:207
-msgid "'--%s' is deprecated. Use '--combinedupgrade=false' instead"
-msgstr "'--%s' är utfasad. Använd '-combinedupgrade=false' istället"
-
-#: pkg/settings/args.go:73
-msgid "'--%s' is deprecated. Use '--devel=false' instead"
-msgstr "'--%s' är utfasad. Använd '--devel=false'' istället"
-
-#: pkg/settings/args.go:192
-msgid "'--%s' is deprecated. Use '--diffmenu=false' instead"
-msgstr "'--%s' är utfasad. Använd '--diffmenu=false' istället"
-
-#: pkg/settings/args.go:197
-msgid "'--%s' is deprecated. Use '--editmenu=false' instead"
-msgstr "'--%s' är utfasad. Använd 'editmenu=false' istället"
-
-#: pkg/settings/args.go:182
-msgid "'--%s' is deprecated. Use '--pgpfetch=false' instead"
-msgstr "'--%s' är utfasad. Använd '--pgpfetch=false' istället"
-
-#: pkg/settings/args.go:177
-msgid "'--%s' is deprecated. Use '--provides=false' instead"
-msgstr "'--%s' är utfasad. Använd '--provides=false' istället"
-
-#: pkg/settings/args.go:224
-msgid "'--%s' is deprecated. Use '--separatesources=false' instead"
-msgstr "'--%s' är utfasad. Använd '-separatesources=false' istället"
-
-#: pkg/settings/args.go:172
-msgid "'--%s' is deprecated. Use '--sudoloop=false' instead"
-msgstr "'--%s' är utfasad. Använd '--sudoloop=false' istället"
-
-#: pkg/settings/args.go:78
-msgid "'--%s' is deprecated. Use '--timeupdate=false' instead"
-msgstr "'--%s' är utfasad. Använd '--timeupdate=false' istället"
-
-#: pkg/settings/args.go:202
-msgid "'--%s' is deprecated. Use '--useask=false' instead"
-msgstr "'--%s' är utfasad. Använd '--useask=false' istället"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -417,7 +365,7 @@ msgstr ""
 "Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller "
 "centralkatalogsnamn)"
 
-#: cmd.go:402
+#: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Paket att installera (t.ex: 1 2 3, 1-3 eller ^4)"
 
@@ -565,7 +513,7 @@ msgstr ""
 msgid "aborting due to user"
 msgstr "avbryter på grund av användare"
 
-#: pkg/settings/parser/parser.go:620
+#: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
 msgstr "argument '-' specificerat utan indata på stdin"
 
@@ -689,7 +637,7 @@ msgstr "ogiltigt nummer: %s"
 msgid "invalid option '%s'"
 msgstr "ogiltig växel '%s'"
 
-#: cmd.go:207
+#: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "ogiltigt alternativ: '--deps' och '--explicit' kan inte användas tillsammans"
@@ -772,11 +720,11 @@ msgstr "det finns ingenting att göra"
 msgid "unable to CreateHandle: %s"
 msgstr "misslyckades med att skapa handtag (CreateHandle): %s"
 
-#: cmd.go:196
+#: cmd.go:186
 msgid "unhandled operation"
 msgstr "okänd operation"
 
-#: cmd.go:460
+#: cmd.go:450
 msgid "unknown-version"
 msgstr "okänd-version"
 

@@ -52,10 +52,14 @@ func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.IPackage, aurP
 	}
 }
 
-func (warnings *AURWarnings) CalculateMissing(remoteNames []string, remote map[string]alpm.IPackage, aurData map[string]*aur.Pkg) {
+func (warnings *AURWarnings) CalculateMissing(remoteNames []string,
+	remote map[string]alpm.IPackage, aurData map[string]*aur.Pkg,
+) {
 	for _, name := range remoteNames {
 		if _, ok := aurData[name]; !ok && !remote[name].ShouldIgnore() {
-			warnings.Missing = append(warnings.Missing, name)
+			if _, ok := aurData[strings.TrimSuffix(name, "-debug")]; !ok {
+				warnings.Missing = append(warnings.Missing, name)
+			}
 		}
 	}
 }

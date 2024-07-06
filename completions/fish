@@ -165,7 +165,7 @@ complete -c $progname -n "$webspecific" -s u -l unvote -d 'Unvote for AUR packag
 complete -c $progname -n "$webspecific" -xa "$listall"
 
 # New options
-complete -c $progname -n "not $noopt" -l repo -d 'Assume targets are from the AUR' -f
+complete -c $progname -n "not $noopt" -s N -l repo -d 'Assume targets are from the AUR' -f
 complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the repositories' -f
 
 # Yay options
@@ -216,9 +216,6 @@ complete -c $progname -n "not $noopt" -l noanswerupgrade -d 'Unset the answer fo
 complete -c $progname -n "not $noopt" -l cleanmenu -d 'Give the option to clean build PKGBUILDS' -f
 complete -c $progname -n "not $noopt" -l diffmenu -d 'Give the option to show diffs for build files' -f
 complete -c $progname -n "not $noopt" -l editmenu -d 'Give the option to edit/view PKGBUILDS' -f
-complete -c $progname -n "not $noopt" -l nocleanmenu -d 'Do not clean build PKGBUILDS' -f
-complete -c $progname -n "not $noopt" -l nodiffmenu -d 'Do not show diffs for build files' -f
-complete -c $progname -n "not $noopt" -l noeditmenu -d 'Do not edit/view PKGBUILDS' -f
 complete -c $progname -n "not $noopt" -l askremovemake -d 'Ask to remove make deps after install' -f
 complete -c $progname -n "not $noopt" -l askyesremovemake -d 'Ask to remove make deps after install(with "Y" as default)' -f
 complete -c $progname -n "not $noopt" -l removemake -d 'Remove make deps after install' -f
@@ -229,25 +226,17 @@ complete -c $progname -n "not $noopt" -l singlelineresults -d 'List each search 
 complete -c $progname -n "not $noopt" -l doublelineresults -d 'List each search result on two lines, like pacman' -f
 complete -c $progname -n "not $noopt" -l showpackageurls -d 'Show the URL of each package in the search results' -f
 complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg development version' -f
-complete -c $progname -n "not $noopt" -l nodevel -d 'Disable development version checking' -f
 complete -c $progname -n "not $noopt" -l cleanafter -d 'Clean package sources after successful build' -f
-complete -c $progname -n "not $noopt" -l nocleanafter -d 'Disable package sources cleaning' -f
 complete -c $progname -n "not $noopt" -l keepsrc -d 'Keep pkg/ and src/ after building packages' -f
 complete -c $progname -n "not $noopt" -l timeupdate -d 'Check package modification date and version' -f
-complete -c $progname -n "not $noopt" -l notimeupdate -d 'Check only package version change' -f
 complete -c $progname -n "not $noopt" -l redownload -d 'Redownload PKGBUILD of package even if up-to-date' -f
 complete -c $progname -n "not $noopt" -l redownloadall -d 'Redownload PKGBUILD of package and deps even if up-to-date' -f
 complete -c $progname -n "not $noopt" -l noredownload -d 'Do not redownload up-to-date PKGBUILDs' -f
 complete -c $progname -n "not $noopt" -l provides -d 'Look for matching providers when searching for packages' -f
-complete -c $progname -n "not $noopt" -l noprovides -d 'Just look for packages by pkgname' -f
 complete -c $progname -n "not $noopt" -l pgpfetch -d 'Prompt to import PGP keys from PKGBUILDs' -f
-complete -c $progname -n "not $noopt" -l nopgpfetch -d 'Do not prompt to import PGP keys' -f
 complete -c $progname -n "not $noopt" -l useask -d 'Automatically resolve conflicts using pacmans ask flag' -f
-complete -c $progname -n "not $noopt" -l nouseask -d 'Confirm conflicts manually during the install' -f
 complete -c $progname -n "not $noopt" -l combinedupgrade -d 'Refresh then perform the repo and AUR upgrade together' -f
-complete -c $progname -n "not $noopt" -l nocombinedupgrade -d 'Perform the repo upgrade and AUR upgrade separately' -f
 complete -c $progname -n "not $noopt" -l batchinstall -d 'Build multiple AUR packages then install them together' -f
-complete -c $progname -n "not $noopt" -l nobatchinstall -d 'Build and install each AUR package one by one' -f
 complete -c $progname -n "not $noopt" -l rebuild -d 'Always build target packages' -f
 complete -c $progname -n "not $noopt" -l rebuildall -d 'Always build all AUR packages' -f
 complete -c $progname -n "not $noopt" -l rebuildtree -d 'Always build all AUR packages even if installed' -f
@@ -255,4 +244,3 @@ complete -c $progname -n "not $noopt" -l norebuild -d 'Skip package build if in 
 complete -c $progname -n "not $noopt" -l mflags -d 'Pass the following options to makepkg' -f
 complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options to gpg' -f
 complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the background to avoid timeout' -f
-complete -c $progname -n "not $noopt" -l nosudoloop -d 'Do not loop sudo calls in the background' -f

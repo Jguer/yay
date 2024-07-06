@@ -81,7 +81,7 @@ func main() {
 	cmdArgs := parser.MakeArguments()
 
 	// Parse command line
-	if err = cfg.ParseCommandLine(cmdArgs, fallbackLog); err != nil {
+	if err = cfg.ParseCommandLine(cmdArgs); err != nil {
 		if str := err.Error(); str != "" {
 			fallbackLog.Errorln(str)
 		}
@@ -131,10 +131,6 @@ func main() {
 	if err = handleCmd(ctx, run, cmdArgs, dbExecutor); err != nil {
 		if str := err.Error(); str != "" {
 			fallbackLog.Errorln(str)
-			if cmdArgs.ExistsArg("c") && cmdArgs.ExistsArg("y") && cmdArgs.Op == "S" {
-				// Remove after 2023-10-01
-				fallbackLog.Errorln("Did you mean 'yay -Yc'?")
-			}
 		}
 
 		exitError := &exec.ExitError{}

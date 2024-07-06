@@ -35,7 +35,7 @@ If you are migrating from another AUR helper, you can simply install Yay with th
 The initial installation of Yay can be done by cloning the PKGBUILD and
 building with makepkg:
 
-Before you begin, make sure you have the `base-devel` package group installed.
+We make sure we have the `base-devel` package group installed.
 
 ```sh
 pacman -S --needed git base-devel
@@ -125,7 +125,7 @@ pacman -S --needed git base-devel yay
 
 - **Yay is not asking me to edit PKGBUILDS, and I don't like the diff menu! What can I do?**
 
-  `yay --editmenu --nodiffmenu --save`
+  `yay --editmenu --diffmenu=false --save`
 
 - **How can I tell Yay to act only on AUR packages, or only on repo packages?**
 

@@ -42,24 +42,6 @@ func (rs IntRanges) Get(n int) bool {
 	return false
 }
 
-// Min returns min value between a and b.
-func Min(a, b int) int {
-	if a < b {
-		return a
-	}
-
-	return b
-}
-
-// Max returns max value between a and b.
-func Max(a, b int) int {
-	if a < b {
-		return b
-	}
-
-	return a
-}
-
 // ParseNumberMenu parses input for number menus split by spaces or commas
 // supports individual selection: 1 2 3 4
 // supports range selections: 1-4 10-20
@@ -116,8 +98,8 @@ func ParseNumberMenu(input string) (include, exclude IntRanges,
 			num2 = num1
 		}
 
-		mi := Min(num1, num2)
-		ma := Max(num1, num2)
+		mi := min(num1, num2)
+		ma := max(num1, num2)
 
 		if !invert {
 			include = append(include, makeIntRange(mi, ma))
