@@ -12,10 +12,11 @@
 # Kira Malinova, 2024
 # Dancheg97 F, 2024
 # Vladislav Grechannik, 2024
+# ratijas, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Vladislav Grechannik, 2024\n"
+"Last-Translator: ratijas, 2024\n"
 "Language-Team: Russian (Russia) (https://app.transifex.com/yay-1/teams/123732/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -68,7 +69,7 @@ msgstr "обновить/установить."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "также будет установлен для этой операции."
+msgstr "%s также будет установлен для этой операции."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
