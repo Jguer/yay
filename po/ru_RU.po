@@ -65,7 +65,7 @@ msgstr "%sобновлён до последней версии --- пропус
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "обновить/установить."
+msgstr "%s обновить/установить."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
