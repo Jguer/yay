@@ -179,7 +179,7 @@ msgstr "Leírás"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Diff-ek mutatása?"
+msgstr "Összehasonlítások megjelenítése?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
