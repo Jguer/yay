@@ -456,7 +456,7 @@ msgstr "Összes telepített csomag: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Mégis megpróbálja építeni őket?"
+msgstr "Mégis megpróbálja összeállítani őket?"
 
 #: print.go:34
 msgid "URL"
