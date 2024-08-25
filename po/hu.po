@@ -618,7 +618,7 @@ msgstr "nem sikerült elemezni az .SRCINFO-t"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "sikerült olvasni a config fájlt '%s': %s"
+msgstr "sikerült olvasni a config fájlt „%s”: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
