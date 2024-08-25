@@ -517,7 +517,7 @@ msgstr "a felhasználó kérésére megszakítva"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "'-' argumentum lett megadva az stdin bemenete nélkül"
+msgstr "„-” argumentum lett megadva az stdin bemenete nélkül"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
