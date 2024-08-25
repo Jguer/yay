@@ -288,7 +288,7 @@ msgstr "Karbantartó"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Make függőség"
+msgstr "Fordítási függőség"
 
 #: print.go:40
 msgid "Make Deps"
