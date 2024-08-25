@@ -684,7 +684,7 @@ msgstr "csak egy cél engedélyezett"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "a(z) '%s' csomag nem található"
+msgstr "a(z) „%s” csomag nem található"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
