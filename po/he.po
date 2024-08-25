@@ -380,7 +380,7 @@ msgstr "להסיר תלויות בנייה לאחר ההתקנה?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr "מחליף"
+msgstr "מחליפה"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
