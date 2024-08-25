@@ -17,7 +17,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr " (Build fájlok léteznek)"
+msgstr " (Összeállítási fájlok léteznek)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
