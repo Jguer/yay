@@ -602,7 +602,7 @@ msgstr "nem sikerült létrehozni a könyvtárat „%s”: %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "nem sikerült megnyitni a könyvtárat '%s': %s"
+msgstr "nem sikerült megnyitni a könyvtárat „%s”: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
