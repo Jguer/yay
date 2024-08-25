@@ -644,7 +644,7 @@ msgstr "érvénytelen opció: „%s”"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
-msgstr "érvénytelen opció: '--deps' és '--explicit' nem használható egyszerre"
+msgstr "érvénytelen opció: „--deps” és „--explicit” nem használható egyszerre"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
