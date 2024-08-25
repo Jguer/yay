@@ -308,7 +308,7 @@ msgstr "Név"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "Nem található AUR csomag a következőhöz"
+msgstr "Nem található AUR csomag a következőhöz:"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
