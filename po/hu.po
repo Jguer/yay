@@ -546,7 +546,7 @@ msgstr "függőség"
 
 #: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr "a csomag devel ellenőrzése nem sikerült: '%s' hibát észlelt"
+msgstr "a csomag devel ellenőrzése nem sikerült: „%s” hibát észlelt"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
