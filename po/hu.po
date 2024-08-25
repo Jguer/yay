@@ -222,7 +222,7 @@ msgstr "Kifejezetten telepített csomagok: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Nem sikerült megtalálni a következőhöz tartozó AUR-csomagot"
+msgstr "Nem sikerült megtalálni a következőhöz tartozó AUR-csomagot:"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
