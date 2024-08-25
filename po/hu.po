@@ -39,7 +39,7 @@ msgstr ""
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s már kész -- építés kihagyása"
+msgstr "%s már kész -- összeállítás kihagyása"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
