@@ -525,7 +525,7 @@ msgstr "nem található a PKGBUILD és az .SRCINFO a könyvtárban"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "csomag név nem található: %v"
+msgstr "nem található a csomagnév: %v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
