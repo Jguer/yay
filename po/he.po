@@ -1,11 +1,11 @@
 # 
 # Translators:
-# Yaron Shahrabani <sh.yaron@gmail.com>, 2024
 # lavi landa, 2024
+# Yaron Shahrabani <sh.yaron@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: lavi landa, 2024\n"
+"Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>, 2024\n"
 "Language-Team: Hebrew (https://app.transifex.com/yay-1/teams/123732/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -99,7 +99,7 @@ msgstr "(%d/%d) PKGBUILD שירד: %s"
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) לא הצליח להוריד PKGBUILD: %s"
+msgstr "(%d/%d) הורדת PKGBUILD נכשלה: %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
