@@ -459,6 +459,10 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 	}
 
 	if run.Cfg.Mode.AtLeastRepo() && (len(cmdArgs.Targets) != 0 || !aur) {
+		// --upgrade in Pacman is incompatible with --list. --refresh is unnecessary
+		// and can be provided by the user if they want to refresh the databases.
+		cmdArgs.DelArg("u", "upgrade", "y", "refresh")
+
 		return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, run.Cfg.Mode, settings.NoConfirm))
 	}
