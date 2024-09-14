@@ -31,8 +31,6 @@ linters-settings:
       - "3"
     ignored-functions:
       - strings.SplitN
-  govet:
-    check-shadowing: true
   lll:
     line-length: 140
   misspell:
