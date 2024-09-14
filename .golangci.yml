@@ -51,7 +51,6 @@ linters:
     - dupl
     - errorlint
     - errcheck
-    - exportloopref
     # - funlen # TOFIX
     - gochecknoinits
     # - goconst # TOFIX
