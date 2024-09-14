@@ -1,12 +1,12 @@
-name: Builder image
+name: Builder Image
 
 on:
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 3 * * 1"  # Every Monday at 3 AM
   push:
     paths:
       - "ci.Dockerfile"
-      - "**/builder-image.yml"
+      - ".github/workflows/builder-image.yml"
 
 env:
   REGISTRY_IMAGE: jguer/yay-builder
@@ -15,23 +15,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         platform:
           - linux/amd64
           - linux/arm/v7
           - linux/arm64
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=raw,value=latest
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -52,6 +44,17 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY_IMAGE }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v5
@@ -66,7 +69,8 @@ jobs:
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
+          touch "/tmp/digests/${{ matrix.platform }}"
+          echo "${{ steps.build.outputs.digest }}" > "/tmp/digests/${{ matrix.platform }}"
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
@@ -77,9 +81,8 @@ jobs:
           retention-days: 1
 
   merge:
+    needs: [build]
     runs-on: ubuntu-latest
-    needs:
-      - build
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
@@ -89,14 +92,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=raw,value=latest
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -111,11 +106,23 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY_IMAGE }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: Create and push manifest list
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "${{ steps.meta.outputs.json }}") \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(for file in /tmp/digests/*; do echo -n "${{ env.REGISTRY_IMAGE }}@$(cat $file) "; done)
 
       - name: Inspect image
         run: |
