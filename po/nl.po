@@ -473,7 +473,7 @@ msgstr "Het opruimen is mislukt:"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "Kan de volgende pakketten niet vinden:"
+msgstr "De volgende pakketten zijn niet aangetroffen:"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
