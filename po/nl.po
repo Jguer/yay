@@ -1,9 +1,9 @@
 # 
 # Translators:
 # Pim van den Berg, 2022
+# Jonathan van der Steege <jonakeys@hotmail.com>, 2023
 # Loek Le Blansch <loek@pipeframe.xyz>, 2023
 # Luke Rieff, 2023
-# Jonathan van der Steege <jonakeys@hotmail.com>, 2023
 # Ariejan de Vroom <ariejan@ariejan.net>, 2024
 # Heimen Stoffels <vistausss@fastmail.com>, 2024
 # 
@@ -683,7 +683,7 @@ msgstr "Er mag slechts één actie per keer worden uitgevoerd"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr "slechts één doel is toegestaan"
+msgstr "Er is slechts één doel toegestaan"
 
 #: print.go:187
 msgid "package '%s' was not found"
