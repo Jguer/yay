@@ -529,7 +529,7 @@ msgstr "Er zijn geen PKGBUILD en .SRCINFO aangetroffen in de map"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "Kan pakketnaam niet vinden: %v"
+msgstr "Er is geen pakket met de naam “%v” aangetroffen"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
