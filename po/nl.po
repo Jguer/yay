@@ -667,7 +667,7 @@ msgstr "Er is geen zoekactie uitgevoerd"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr "geen doeldirectories gespecificeerd"
+msgstr "Er zijn geen doelmappen opgegeven"
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -675,7 +675,7 @@ msgstr "nee"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "niets te installeren voor %s"
+msgstr "Er is niets te installeren voor %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
