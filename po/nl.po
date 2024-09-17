@@ -445,7 +445,7 @@ msgstr "De volgende pakketten zijn niet compatibel met uw architectuur:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
-msgstr "Er zijn %d aanbieders beschikbaar voor %s:"
+msgstr "Er zijn %d bronnen die %s aanbieden:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
