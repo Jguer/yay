@@ -581,11 +581,11 @@ msgstr "‘%s’ kan niet worden samengevoegd: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
-msgstr "fout bij lezen %s"
+msgstr "‘%s’ kan niet worden uitgelezen"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "fout bij vernieuwen databases"
+msgstr "De databanken kunnen niet worden vernieuwd"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
