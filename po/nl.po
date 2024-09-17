@@ -521,7 +521,7 @@ msgstr "afbreken vanwege gebruiker"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "'-' als argument gespecificeerd zonder invoer op stdin"
+msgstr "‘-’ als optie ingevoerd zonder invoer op stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
