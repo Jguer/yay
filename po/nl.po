@@ -617,7 +617,7 @@ msgstr "‘%s’ kan niet worden verwerkt: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
-msgstr "parsen van .SRCINFO mislukt"
+msgstr ".SRCINFO kan niet worden verwerkt"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
