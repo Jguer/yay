@@ -705,7 +705,7 @@ msgstr[1] "Pakketten"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
-msgstr "probleem tijdens importeren van sleutels"
+msgstr "De sleutels kunnen niet worden geïmporteerd"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
