@@ -275,7 +275,7 @@ msgstr "Trefwoorden"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Laatst Bewerkt"
+msgstr "Laatst bewerkt op"
 
 #: print.go:35
 msgid "Licenses"
@@ -291,11 +291,11 @@ msgstr "Onderhouder"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Make Afhankelijkheid"
+msgstr "Make-afhankelijkheid"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Maak Afhankelijkheden"
+msgstr "Make-afhankelijkheden"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
