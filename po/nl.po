@@ -239,11 +239,11 @@ msgstr ""
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Eerst Ingezonden"
+msgstr "Eerst ingezonden op"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Gevlagde verouderde AUR-pakketten:"
+msgstr "Verouderde AUR-pakketten:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
