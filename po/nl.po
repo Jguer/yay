@@ -641,7 +641,7 @@ msgstr "Ongeldig getal: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "ongeldige optie '%s'"
+msgstr "Ongeldige optie: ‘%s’"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
