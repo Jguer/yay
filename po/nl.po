@@ -409,7 +409,7 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:72
 msgid "Searching AUR for updates..."
-msgstr "Aan het zoeken in AUR voor updates..."
+msgstr "Bezig met zoeken naar AUR-updates…"
 
 #: pkg/upgrade/service.go:160
 msgid "Searching databases for updates..."
