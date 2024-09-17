@@ -339,7 +339,8 @@ msgstr "Te importeren pgp-sleutels:"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD is up-to-date, download overgeslagen: "
+msgstr ""
+"De PKGBUILD is actueel, dus het downloaden van ‘%s’ wordt overgeslagen."
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
