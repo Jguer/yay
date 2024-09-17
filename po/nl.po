@@ -537,7 +537,7 @@ msgstr "Er is geen PKGDEST aangetroffen voor ‘%s’"
 
 #: errors.go:9
 msgid "could not find all required packages"
-msgstr "kon niet alle vereisde pakketten vinden"
+msgstr "Niet alle vereiste pakketten zijn aangetroffen"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
