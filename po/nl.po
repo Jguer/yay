@@ -695,7 +695,7 @@ msgstr "Het pakket is niet aangetroffen in de AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "pakket niet gevonden in repositories"
+msgstr "Het pakket is niet aangetroffen in de pakketbronnen"
 
 #: pkg/upgrade/service.go:292
 msgid "package"
