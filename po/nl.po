@@ -335,7 +335,7 @@ msgstr "Verouderd"
 
 #: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
-msgstr "PGP-sleutels moeten worden geïmporteerd:"
+msgstr "Te importeren pgp-sleutels:"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
