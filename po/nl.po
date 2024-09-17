@@ -251,11 +251,11 @@ msgstr "Van buitenaf geïnstalleerde pakketten: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Git repo gevonden: %s"
+msgstr "Git-repo aangetroffen: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "GenDB afgerond. Geen pakketten zijn geïnstalleerd"
+msgstr "GenDB is afgerond. Er zijn geen pakketten zijn geïnstalleerd."
 
 #: print.go:36
 msgid "Groups"
