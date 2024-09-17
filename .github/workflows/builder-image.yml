@@ -50,7 +50,7 @@ jobs:
         with:
           images: |
             ${{ env.REGISTRY_IMAGE }}
-            ghcr.io/${{ github.repository_owner }}/${{ env.REGISTRY_IMAGE }}
+            ghcr.io/${{ env.REGISTRY_IMAGE }}
           tags: |
             type=raw,value=latest
             type=sha,format=long
@@ -112,7 +112,7 @@ jobs:
         with:
           images: |
             ${{ env.REGISTRY_IMAGE }}
-            ghcr.io/${{ github.repository_owner }}/${{ env.REGISTRY_IMAGE }}
+            ghcr.io/${{ env.REGISTRY_IMAGE }}
           tags: |
             type=raw,value=latest
             type=sha,format=long
@@ -133,7 +133,7 @@ jobs:
           docker buildx imagetools create $TAGS $DIGESTS
           
           # Push to GitHub Container Registry
-          GHCR_TAGS=$(echo '${{ steps.meta.outputs.tags }}' | sed 's|^|ghcr.io/${{ github.repository_owner }}/${{ env.REGISTRY_IMAGE }}:|g' | xargs -I {} echo "-t {}")
+          GHCR_TAGS=$(echo '${{ steps.meta.outputs.tags }}' | sed 's|^|ghcr.io/${{ env.REGISTRY_IMAGE }}:|g' | xargs -I {} echo "-t {}")
           docker buildx imagetools create $GHCR_TAGS $DIGESTS
 
       - name: Inspect image
