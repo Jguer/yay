@@ -429,7 +429,7 @@ msgstr "Omvang van yay-cache %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
-msgstr "Snapshot-URL"
+msgstr "Momentopname-url"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
