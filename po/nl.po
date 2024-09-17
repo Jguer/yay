@@ -149,7 +149,7 @@ msgstr "Afhankelijkheid controleren"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Controleer Afhankelijkheden"
+msgstr "Afhankelijkheden controleren"
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
