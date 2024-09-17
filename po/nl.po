@@ -687,7 +687,7 @@ msgstr "Er is slechts één doel toegestaan"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "pakket '%s' was niet gevonden"
+msgstr "‘%s’ is niet aangetroffen"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
