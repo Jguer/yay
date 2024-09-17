@@ -323,11 +323,11 @@ msgstr "Geen"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Optionele Afhankelijkheden"
+msgstr "Optionele afhankelijkheden"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Verweesde (niet onderhouden) AUR-paketten:"
+msgstr "Onteigende (niet-onderhouden) AUR-pakketten:"
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
