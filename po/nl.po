@@ -53,11 +53,11 @@ msgstr "%s is aanwezig."
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
-msgstr "%s is up to date -- overslaan"
+msgstr "%s is actueel -- wordt overgeslagen"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "%s Te upgraden/ installeren"
+msgstr "%s te upgraden/ installeren."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
