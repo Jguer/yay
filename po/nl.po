@@ -153,7 +153,7 @@ msgstr "Afhankelijkheden controleren"
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
-msgstr "Ontwikkelpakketten aan het controleren..."
+msgstr "Bezig met controleren van ontwikkelpakketten…"
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
