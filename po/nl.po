@@ -219,7 +219,7 @@ msgstr "Uitdrukkelijk"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "Expliciet geïnstalleerde pakketten: %s"
+msgstr "Uitdrukkelijk geïnstalleerde pakketten: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
