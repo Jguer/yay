@@ -541,7 +541,7 @@ msgstr "Niet alle vereiste pakketten zijn aangetroffen"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "kon geen pakketarchieven vinden binenn %s"
+msgstr "Er zijn geen pakketarchieven aangetroffen in %s"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
 msgid "dependency"
