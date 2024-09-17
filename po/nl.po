@@ -601,7 +601,7 @@ msgstr "Uitdrukkelijk"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "maken directory '%s' mislukt: %s"
+msgstr "‘%s’ kan niet worden aangemaakt: %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
