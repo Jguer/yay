@@ -577,7 +577,7 @@ msgstr "Het maken van de volgende pakketten is mislukt: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "fout bij samenvoegen %s: %s"
+msgstr "‘%s’ kan niet worden samengevoegd: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
