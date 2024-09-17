@@ -481,7 +481,7 @@ msgstr "De stem op ‘%s’ kan niet worden verwerkt. Foutmelding: %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
-msgstr "Kon %sniet verwijderen: %s"
+msgstr "‘%s’ kan niet worden verwijderd: %s"
 
 #: print.go:32
 msgid "Version"
