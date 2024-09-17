@@ -5,10 +5,11 @@
 # Luke Rieff, 2023
 # Jonathan van der Steege <jonakeys@hotmail.com>, 2023
 # Ariejan de Vroom <ariejan@ariejan.net>, 2024
+# Heimen Stoffels <vistausss@fastmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Ariejan de Vroom <ariejan@ariejan.net>, 2024\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>, 2024\n"
 "Language-Team: Dutch (https://app.transifex.com/yay-1/teams/123732/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +20,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr "(Bouwbestanden Bestaan)"
+msgstr "(Bouwbestanden zijn aanwezig)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
