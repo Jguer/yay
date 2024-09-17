@@ -461,11 +461,11 @@ msgstr "Totaalaantal geïnstalleerde pakketten: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Probeer ze toch te bouwen?"
+msgstr "Toch doorgaan met bouwen?"
 
 #: print.go:34
 msgid "URL"
-msgstr "URL"
+msgstr "Url"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
