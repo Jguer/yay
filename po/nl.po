@@ -569,7 +569,7 @@ msgstr "De pakketten kunnen niet worden geïnstalleerd"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
-msgstr "fout bij installeren:"
+msgstr "Het installeren van de volgende pakketten is mislukt:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
