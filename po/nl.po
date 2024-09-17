@@ -721,7 +721,7 @@ msgstr "De PKGDEST van ‘%s’ wordt vermeld door makepkg, maar bestaat niet: %
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
-msgstr "er is niks meer te doen"
+msgstr "Er is niets meer te doen"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
