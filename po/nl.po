@@ -557,7 +557,7 @@ msgstr "De bewerker is niet goed afgesloten - het proces wordt afgebroken: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "fout tijdens downloaden bronnen: %s"
+msgstr "De bronnen kunnen niet worden opgehaald: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
