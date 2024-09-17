@@ -77,7 +77,7 @@ msgstr "%s: kan doel niet gebruiken i.c.m. optie --aur -- wordt overgeslagen"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: kan doel niet gebruiken met optie --repo -- overslaan"
+msgstr "%s: kan doel niet gebruiken i.c.m. optie --repo -- wordt overgeslagen"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
