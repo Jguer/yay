@@ -513,7 +513,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Geef een nummer (standaard=1):"
+"Voer een getal in (standaard=1):"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
