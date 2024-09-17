@@ -525,7 +525,7 @@ msgstr "‘-’ als optie ingevoerd zonder invoer op stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr "kan geen PKGBUILD en .SRCINFO in map vinden"
+msgstr "Er zijn geen PKGBUILD en .SRCINFO aangetroffen in de map"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
