@@ -299,7 +299,7 @@ msgstr "Make-afhankelijkheden"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
-msgstr "Ontbrekende AUR-debug-pakketten:"
+msgstr "Ontbrekende AUR-foutopsporingspakketten:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
