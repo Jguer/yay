@@ -109,7 +109,7 @@ msgstr "(%d/%d) De PKGBUILD kan niet worden gedownload: %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Aan het parsen SRCINFO: %s"
+msgstr "(%d/%d) Bezig met verwerken van SRCINFO: %s"
 
 #: pkg/query/types.go:72 pkg/query/types.go:103
 msgid "(Installed)"
