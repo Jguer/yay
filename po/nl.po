@@ -593,11 +593,11 @@ msgstr "‘%s’ kan niet worden hersteld: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "Updaten van installatie reden voor pakket naar %s is mislukt"
+msgstr "Het bijwerken van de installatiereden naar %s is mislukt"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr "expliciet"
+msgstr "Uitdrukkelijk"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
