@@ -234,8 +234,8 @@ msgstr ""
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"De volgende pakketten konden niet geïnstalleerd worden. Handmatige "
-"interventie is vereisd:"
+"De volgende pakketten konden niet worden geïnstalleerd. Handmatige "
+"interventie is vereist:"
 
 #: print.go:45
 msgid "First Submitted"
