@@ -709,11 +709,11 @@ msgstr "De sleutels kunnen niet worden geïmporteerd"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "verwijderen AUR-pakketten uit de cache..."
+msgstr "Bezig met verwijderen van AUR-pakketten uit cache…"
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "verwijderen niet-gevolgde AUR-bestanden uit de cache..."
+msgstr "Bezig met verwijderen van niet-gevolgde AUR-bestanden uit cache…"
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
