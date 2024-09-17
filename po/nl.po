@@ -360,7 +360,7 @@ msgstr "Pakketten niet in AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Pakketten om te cleanBuild-en?"
+msgstr "Te herbouwen pakketten?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
