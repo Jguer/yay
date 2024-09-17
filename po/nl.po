@@ -637,7 +637,7 @@ msgstr "De invoer is te lang"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
-msgstr "ongeldig nummer: %s"
+msgstr "Ongeldig getal: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
