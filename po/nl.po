@@ -69,7 +69,7 @@ msgstr "%s, benodigd door: %s"
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
-msgstr "%s: Geen wijzigingen -- overslaan "
+msgstr "%s: Geen wijzigingen -- wordt overgeslagen"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
