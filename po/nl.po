@@ -157,7 +157,7 @@ msgstr "Bezig met controleren van ontwikkelpakketten…"
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
-msgstr "Aan het schoonmaken (%d/%d): %s"
+msgstr "Bezig met opruimen… (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
