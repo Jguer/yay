@@ -553,7 +553,7 @@ msgstr "Ontwikkelcontrole van pakket mislukt: fout opgetreden in ‘%s’"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "editor niet succesvol afgesloten, afbreken: %s"
+msgstr "De bewerker is niet goed afgesloten - het proces wordt afgebroken: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
