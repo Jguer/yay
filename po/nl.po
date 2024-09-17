@@ -691,7 +691,7 @@ msgstr "‘%s’ is niet aangetroffen"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "pakket niet gevonden in AUR"
+msgstr "Het pakket is niet aangetroffen in de AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
