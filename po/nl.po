@@ -364,7 +364,7 @@ msgstr "Te herbouwen pakketten?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
-msgstr "Buitengesloten paketten"
+msgstr "Uitgesloten pakketten"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
