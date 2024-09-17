@@ -348,11 +348,11 @@ msgstr "Te bewerken PKGBUILDs?"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Pakket Base ID"
+msgstr "Basis-id van pakket"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Pakket Base"
+msgstr "Pakketbasis"
 
 #: pkg/query/aur_warnings.go:67
 msgid "Packages not in AUR:"
