@@ -401,7 +401,7 @@ msgstr "AUR-repo"
 
 #: print.go:30 pkg/db/ialpm/alpm.go:191
 msgid "Repository"
-msgstr "Repository"
+msgstr "Pakketbron"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
