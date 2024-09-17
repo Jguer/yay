@@ -210,12 +210,12 @@ msgstr "Fout tijdens AUR-zoekactie: %s\n"
 #: pkg/upgrade/service.go:296
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Pakketten uitsluiten kan mogelijk zorgen voor onafgeronde upgrades en/of "
+"Pakketten uitsluiten kan mogelijk leiden tot onafgeronde upgrades en/of "
 "beschadigde systemen"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
-msgstr "Expliciet"
+msgstr "Uitdrukkelijk"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
