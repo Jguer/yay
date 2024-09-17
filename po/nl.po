@@ -477,7 +477,7 @@ msgstr "De volgende pakketten zijn niet aangetroffen:"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "Kon stem voor pakket %s niet verwerken. fout: %s"
+msgstr "De stem op ‘%s’ kan niet worden verwerkt. Foutmelding: %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
