@@ -729,7 +729,7 @@ msgstr "CreateHandle kan niet worden uitgevoerd: %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
-msgstr "niet-afgehandelde bewerking"
+msgstr "Onafgehandelde actie"
 
 #: cmd.go:450
 msgid "unknown-version"
