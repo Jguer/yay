@@ -41,11 +41,11 @@ msgstr ""
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s is al gemaakt -- slaat bouw over"
+msgstr "%s is al gemaakt -- de bouw wordt overgeslagen"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s is niet gezet"
+msgstr "%s is niet ingesteld"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
