@@ -629,7 +629,7 @@ msgstr "De AUR-cache kan niet worden opgehaald"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
-msgstr "pakket devel upgrade genegeerd (geen AUR info gevonden):"
+msgstr "De ontwikkelupgrade is genegeerd (geen AUR-informatie aangetroffen):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
