@@ -227,7 +227,8 @@ msgstr "Er is geen AUR-pakket gevonden voor "
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr "Het installeren van de laag is mislukt, vorige laag wordt hersteld"
+msgstr ""
+"Het installeren van de laag is mislukt - de volgende laag wordt gebruikt"
 
 #: pkg/sync/build/errors.go:16
 msgid ""
