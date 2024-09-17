@@ -725,7 +725,7 @@ msgstr "Er is niets meer te doen"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "kon geen CreateHandle: %s"
+msgstr "CreateHandle kan niet worden uitgevoerd: %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
