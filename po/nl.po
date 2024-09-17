@@ -453,11 +453,11 @@ msgstr "Wellicht is er een ander proces van Pacman bezig. Aan het wachten…"
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Totale Grootte bezet door pakketten: %s"
+msgstr "Totale omvang van pakketten: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Totaal geïnstalleerde pakketten: %s"
+msgstr "Totaalaantal geïnstalleerde pakketten: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
