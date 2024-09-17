@@ -613,7 +613,7 @@ msgstr "‘%s’ kan niet worden verwerkt -- wordt overgeslagen: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "parsen van %s mislukt: %s"
+msgstr "‘%s’ kan niet worden verwerkt: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
