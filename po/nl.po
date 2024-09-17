@@ -633,7 +633,7 @@ msgstr "De ontwikkelupgrade is genegeerd (geen AUR-informatie aangetroffen):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
-msgstr "invoer te lang"
+msgstr "De invoer is te lang"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
