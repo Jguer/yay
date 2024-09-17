@@ -621,7 +621,7 @@ msgstr ".SRCINFO kan niet worden verwerkt"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "lezen configuratiebestand '%s' mislukt: %s"
+msgstr "‘%s’ kan niet worden uitgelezen: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
