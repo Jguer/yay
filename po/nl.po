@@ -505,7 +505,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Bouwdirectory:"
+"Bouwmap:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
