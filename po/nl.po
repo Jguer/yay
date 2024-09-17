@@ -609,7 +609,7 @@ msgstr "‘%s’ kan niet worden geopend: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "parsen van %s mislukt -- overslaan: %s"
+msgstr "‘%s’ kan niet worden verwerkt -- wordt overgeslagen: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
