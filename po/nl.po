@@ -605,7 +605,7 @@ msgstr "‘%s’ kan niet worden aangemaakt: %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "openen configuratiebestand '%s' mislukt: %s"
+msgstr "‘%s’ kan niet worden geopend: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
