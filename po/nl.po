@@ -655,11 +655,11 @@ msgstr "Ongeldige pakketbron"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "ongeldige waarde: %d ligt niet tussen %d en %d"
+msgstr "Ongeldige waarde: %d ligt niet tussen %d en %d"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
-msgstr "geen sleutels om te importeren"
+msgstr "Er zijn geen te importeren sleutels"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
