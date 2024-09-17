@@ -267,11 +267,11 @@ msgstr "Importeren?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "Sleutels met gpg aan het importeren..."
+msgstr "Bezig met importeren van sleutels…"
 
 #: print.go:46
 msgid "Keywords"
-msgstr "Sleutelwoorden"
+msgstr "Trefwoorden"
 
 #: print.go:47
 msgid "Last Modified"
