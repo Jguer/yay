@@ -679,7 +679,7 @@ msgstr "Er is niets te installeren voor %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
-msgstr "slechts één operatie mag per keer gebruikt worden"
+msgstr "Er mag slechts één actie per keer worden uitgevoerd"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
