@@ -81,7 +81,7 @@ msgstr "%s: kan doel niet gebruiken i.c.m. optie --repo -- wordt overgeslagen"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: negeren pakketupgrade (%s => %s)"
+msgstr "%s: pakketupgrade wordt genegeerd (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
