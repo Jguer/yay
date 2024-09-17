@@ -573,7 +573,7 @@ msgstr "Het installeren van de volgende pakketten is mislukt:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "fout bij maken: %s"
+msgstr "Het maken van de volgende pakketten is mislukt: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
