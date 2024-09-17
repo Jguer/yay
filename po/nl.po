@@ -733,7 +733,7 @@ msgstr "Onafgehandelde actie"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "onbekende-versie"
+msgstr "Onbekende versie"
 
 #: pkg/text/input.go:47
 msgid "yes"
