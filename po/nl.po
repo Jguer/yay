@@ -413,7 +413,7 @@ msgstr "Bezig met zoeken naar AUR-updates…"
 
 #: pkg/upgrade/service.go:160
 msgid "Searching databases for updates..."
-msgstr "Aan het zoeken in databases voor updates..."
+msgstr "Bezig met zoeken naar updates in databanken…"
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
