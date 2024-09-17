@@ -344,7 +344,7 @@ msgstr ""
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILDs om te bewerken?"
+msgstr "Te bewerken PKGBUILDs?"
 
 #: print.go:60
 msgid "Package Base ID"
