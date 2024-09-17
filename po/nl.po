@@ -441,7 +441,7 @@ msgstr "Tien grootste pakketten:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr "De volgende pakketten zijn niet compatibel met jouw architectuur:"
+msgstr "De volgende pakketten zijn niet compatibel met uw architectuur:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
