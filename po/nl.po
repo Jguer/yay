@@ -717,7 +717,7 @@ msgstr "Bezig met verwijderen van niet-gevolgde AUR-bestanden uit cache…"
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr "de PKGDEST voor %s is vermeld door makepkg, maar bestaat niet: %s"
+msgstr "De PKGDEST van ‘%s’ wordt vermeld door makepkg, maar bestaat niet: %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
