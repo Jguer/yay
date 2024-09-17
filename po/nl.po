@@ -533,7 +533,7 @@ msgstr "Er is geen pakket met de naam “%v” aangetroffen"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
-msgstr "kon PKGDEST niet vinden voor: %s"
+msgstr "Er is geen PKGDEST aangetroffen voor ‘%s’"
 
 #: errors.go:9
 msgid "could not find all required packages"
