@@ -421,11 +421,11 @@ msgstr "Toont alleen repo-pakketten"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Grootte van pacman-cache %s: %s"
+msgstr "Omvang van pacman-cache %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Grootte van yay-cache %s: %s"
+msgstr "Omvang van yay-cache %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
