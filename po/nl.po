@@ -589,7 +589,7 @@ msgstr "De databanken kunnen niet worden vernieuwd"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "fout bij resetten %s: %s"
+msgstr "‘%s’ kan niet worden hersteld: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
