@@ -145,7 +145,7 @@ msgstr "Voer yay niet uit als root/sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Controleer Afhankelijkheid"
+msgstr "Afhankelijkheid controleren"
 
 #: print.go:41
 msgid "Check Deps"
