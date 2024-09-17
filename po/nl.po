@@ -121,7 +121,7 @@ msgstr "(Geïnstalleerd: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Wees geworden)"
+msgstr "(Onteigend)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
@@ -129,7 +129,7 @@ msgstr "(Verouderd: %s)"
 
 #: print.go:44
 msgid "AUR URL"
-msgstr "AUR URL"
+msgstr "AUR-url"
 
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
