@@ -73,7 +73,7 @@ msgstr "%s: Geen wijzigingen -- wordt overgeslagen"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: kan doel niet gebruiken met optie --aur -- overslaan"
+msgstr "%s: kan doel niet gebruiken i.c.m. optie --aur -- wordt overgeslagen"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
