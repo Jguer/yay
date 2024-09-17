@@ -646,11 +646,12 @@ msgstr "Ongeldige optie: ‘%s’"
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"ongeldige optie: '--deps' en '--explicit' mogen niet samen gebruikt worden"
+"Ongeldige optie: ‘--deps’ en ‘--explicit’ mogen niet gelijktijdig worden "
+"gebruikt"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "ongeldige repository"
+msgstr "Ongeldige pakketbron"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
