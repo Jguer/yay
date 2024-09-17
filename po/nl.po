@@ -181,7 +181,7 @@ msgstr "Beschrijving"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Verschillen te tonen?"
+msgstr "Verschillen tonen?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
