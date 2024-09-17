@@ -165,7 +165,7 @@ msgstr "Botst met"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
-msgstr "Aan het verwijderen (%d/%d): %s"
+msgstr "Bezig met verwijderen… (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
@@ -173,7 +173,7 @@ msgstr "Afhankelijkheid"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "Afhankelijk Van"
+msgstr "Afhankelijk van"
 
 #: print.go:33
 msgid "Description"
