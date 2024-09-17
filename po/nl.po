@@ -565,7 +565,7 @@ msgstr "‘%s’ kan niet worden opgehaald: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "fout tijdens installeren repository-pakketten"
+msgstr "De pakketten kunnen niet worden geïnstalleerd"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
