@@ -161,7 +161,7 @@ msgstr "Bezig met opruimen… (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Conflicteert Met"
+msgstr "Botst met"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
