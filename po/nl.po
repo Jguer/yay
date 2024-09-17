@@ -663,7 +663,7 @@ msgstr "Er zijn geen te importeren sleutels"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
-msgstr "geen zoekacties was uitgevoerd"
+msgstr "Er is geen zoekacties uitgevoerd"
 
 #: local_install.go:66
 msgid "no target directories specified"
