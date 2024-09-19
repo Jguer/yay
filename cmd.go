@@ -130,7 +130,7 @@ show specific options:
     -w --news             Print arch news
 
 yay specific options:
-    -c --clean            Remove unneeded dependencies
+    -c --clean            Remove unneeded dependencies (-cc to ignore optdepends)
        --gendb            Generates development package DB used for updating
 
 getpkgbuild specific options:
