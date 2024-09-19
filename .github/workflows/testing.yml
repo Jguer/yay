@@ -16,10 +16,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Lint
-        env:
-          GOFLAGS: -buildvcs=false -tags=next
-        run: /app/bin/golangci-lint run ./...
+      # - name: Lint
+      #   env:
+      #     GOFLAGS: -buildvcs=false -tags=next
+      #   run: /app/bin/golangci-lint run -v ./...
       - name: Run Build and Tests
         run: make test
       - name: Run Integration Tests

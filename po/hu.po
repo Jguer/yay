@@ -17,7 +17,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr " (Build fájlok léteznek)"
+msgstr " (Összeállítási fájlok léteznek)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
@@ -34,12 +34,12 @@ msgstr " nincs tennivaló"
 #: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
-"%s [A]Minden [Ab]Megszakítás [I]Telepített [No]Nem telepített, vagy (1 2 3, "
+"%s [A]Összes [Ab]Megszakítás [I]Telepített [No]Nem telepített, vagy (1 2 3, "
 "1-3, ^4)"
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s már kész -- építés kihagyása"
+msgstr "%s már kész -- összeállítás kihagyása"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
@@ -135,7 +135,7 @@ msgstr "AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Állítsa be az %s vagy a %s környezeti változót"
+msgstr "Állítsa be a(z) %s vagy a(z) %s környezeti változót"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
@@ -179,11 +179,11 @@ msgstr "Leírás"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Diff-ek mutatása?"
+msgstr "Összehasonlítások megjelenítése?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr "A 'provides' opció alapértelmezett kikapcsolása"
+msgstr "A „provides” opció alapértelmezett kikapcsolása"
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
@@ -222,7 +222,7 @@ msgstr "Kifejezetten telepített csomagok: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Nem sikerült megtalálni a következőhöz tartozó AUR-csomagot"
+msgstr "Nem sikerült megtalálni a következőhöz tartozó AUR-csomagot:"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
@@ -288,11 +288,11 @@ msgstr "Karbantartó"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Make függőség"
+msgstr "Fordítási függőség"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Make függőségek"
+msgstr "Fordítási függőségek"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
@@ -308,11 +308,11 @@ msgstr "Név"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "Nem található AUR csomag a következőhöz"
+msgstr "Nem található AUR csomag a következőhöz:"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "Nem található csomag a következőhöz"
+msgstr "Nem található csomag a következőhöz:"
 
 #: print.go:225
 msgid "None"
@@ -356,7 +356,7 @@ msgstr "A csomag nincs az AUR-ban:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Csomagok a tiszta építéshez?"
+msgstr "Csomagok a tiszta összeállításhoz?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
@@ -384,7 +384,7 @@ msgstr "Szolgáltatók"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Make függőségek törlése a telepítés után?"
+msgstr "Fordítási függőségek törlése a telepítés után?"
 
 #: print.go:43
 msgid "Replaces"
@@ -444,7 +444,7 @@ msgstr "%d szolgáltató áll rendelkezésre ehhez: %s: "
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr "Lehet, hogy már fut a Pacman. Várjon..."
+msgstr "Lehet, hogy már fut a pacman. Várjon..."
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
@@ -456,7 +456,7 @@ msgstr "Összes telepített csomag: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Mégis megpróbálja építeni őket?"
+msgstr "Mégis megpróbálja összeállítani őket?"
 
 #: print.go:34
 msgid "URL"
@@ -501,7 +501,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Építési könyvtár:"
+"Összeállítási könyvtár:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
@@ -517,7 +517,7 @@ msgstr "a felhasználó kérésére megszakítva"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "'-' argumentum lett megadva az stdin bemenete nélkül"
+msgstr "„-” argumentum lett megadva az stdin bemenete nélkül"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
@@ -525,7 +525,7 @@ msgstr "nem található a PKGBUILD és az .SRCINFO a könyvtárban"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "csomag név nem található: %v"
+msgstr "nem található a csomagnév: %v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
@@ -546,7 +546,7 @@ msgstr "függőség"
 
 #: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr "a csomag devel ellenőrzése nem sikerült: '%s' hibát észlelt"
+msgstr "a csomag devel ellenőrzése nem sikerült: „%s” hibát észlelt"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
@@ -598,11 +598,11 @@ msgstr "kifejezett"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "nem sikerült létrehozni a könyvtárat '%s': %s"
+msgstr "nem sikerült létrehozni a könyvtárat „%s”: %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "nem sikerült megnyitni a könyvtárat '%s': %s"
+msgstr "nem sikerült megnyitni a könyvtárat „%s”: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
@@ -618,7 +618,7 @@ msgstr "nem sikerült elemezni az .SRCINFO-t"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "sikerült olvasni a config fájlt '%s': %s"
+msgstr "sikerült olvasni a config fájlt „%s”: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
@@ -640,11 +640,11 @@ msgstr "érvénytelen szám: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "érvénytelen opció: '%s'"
+msgstr "érvénytelen opció: „%s”"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
-msgstr "érvénytelen opció: '--deps' és '--explicit' nem használható egyszerre"
+msgstr "érvénytelen opció: „--deps” és „--explicit” nem használható egyszerre"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
@@ -684,7 +684,7 @@ msgstr "csak egy cél engedélyezett"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "a(z) '%s' csomag nem található"
+msgstr "a(z) „%s” csomag nem található"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
