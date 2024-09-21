@@ -15,6 +15,22 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Összeállítási könyvtár:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Írjon be egy számot (alapértelmezett=1): "
+
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
 msgstr " (Összeállítási fájlok léteznek)"
@@ -53,11 +69,11 @@ msgstr "%s létezik."
 msgid "%s is up to date -- skipping"
 msgstr "%s naprakész -- kihagyás"
 
-#: pkg/upgrade/service.go:292
+#: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
 msgstr "%s a frissítéshez/telepítéshez."
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
 msgstr "%s is telepítve lesz ehhez a művelethez."
 
@@ -109,11 +125,11 @@ msgstr "(%d/%d) Nem sikerült letölteni a PKGBUILD-et: %s"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) SRCINFO vizsgálata: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(Telepítve)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
 msgstr "(Telepítve: %s)"
 
@@ -125,13 +141,13 @@ msgstr "(Árva)"
 msgid "(Out-of-date: %s)"
 msgstr "(Elavult: %s)"
 
-#: print.go:44
-msgid "AUR URL"
-msgstr "AUR URL"
-
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
 msgstr "AUR"
+
+#: print.go:44
+msgid "AUR URL"
+msgstr "AUR URL"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -149,7 +165,7 @@ msgstr "Függőség ellenőrzése"
 msgid "Check Deps"
 msgstr "Függőségek ellenőrzése"
 
-#: pkg/upgrade/service.go:90
+#: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
 msgstr "Fejlesztői csomagok ellenőrzése..."
 
@@ -207,7 +223,7 @@ msgstr "Mivel szerkeszti a PKGBUILD-et?"
 msgid "Error during AUR search: %s\n"
 msgstr "Hiba történt az AUR-ban való keresés közben: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 "A csomagok kizárása részleges frissítéseket és rendszertöréseket okozhat"
@@ -238,7 +254,7 @@ msgstr ""
 msgid "First Submitted"
 msgstr "Először beküldve"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Elavultnak jelölt AUR csomagok:"
 
@@ -294,13 +310,13 @@ msgstr "Fordítási függőség"
 msgid "Make Deps"
 msgstr "Fordítási függőségek"
 
-#: pkg/query/aur_warnings.go:71
-msgid "Missing AUR Debug Packages:"
-msgstr "Hiányzó AUR hibakereső csomagok:"
-
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
 msgstr "Hiányzik"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "Hiányzó AUR hibakereső csomagok:"
 
 #: print.go:31
 msgid "Name"
@@ -322,7 +338,7 @@ msgstr "Semmi"
 msgid "Optional Deps"
 msgstr "Opcionális függőségek"
 
-#: pkg/query/aur_warnings.go:75
+#: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "Árva (nem karbantartott) AUR csomagok:"
 
@@ -342,15 +358,15 @@ msgstr "A PKGBUILD naprakész, a letöltés kihagyása: %s"
 msgid "PKGBUILDs to edit?"
 msgstr "PKGBUILD-ek szerkesztése?"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "Csomag alap ID-ja"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "Csomag alap"
 
-#: pkg/query/aur_warnings.go:67
+#: print.go:60
+msgid "Package Base ID"
+msgstr "Csomag alap ID-ja"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
 msgstr "A csomag nincs az AUR-ban:"
 
@@ -362,9 +378,10 @@ msgstr "Csomagok a tiszta összeállításhoz?"
 msgid "Packages to exclude"
 msgstr "Kizárandó csomagok"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Kihagyni kívánt csomagok: (pl.: \"1 2 3\", \"1-3\", \"^4\", vagy tároló név)"
+msgstr ""
+"Kihagyni kívánt csomagok: (pl.: „1 2 3”, „1-3”, „^4”, vagy tároló név)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -390,23 +407,23 @@ msgstr "Fordítási függőségek törlése a telepítés után?"
 msgid "Replaces"
 msgstr "Cserék"
 
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "Tároló"
+
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "AUR tároló"
-
-#: print.go:30 pkg/db/ialpm/alpm.go:191
-msgid "Repository"
-msgstr "Tároló"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:72
+#: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
 msgstr "Frissítések keresése az AUR-ban..."
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
 msgstr "Frissítések keresése az adatbázisokban..."
 
@@ -495,22 +512,6 @@ msgstr "Yay v%s verzió"
 msgid "[N]one"
 msgstr "[N]semmi"
 
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"Összeállítási könyvtár:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"Írjon be egy számot (alapértelmezett=1): "
-
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "a felhasználó kérésére megszakítva"
@@ -540,11 +541,11 @@ msgid "could not find any package archives listed in %s"
 msgstr ""
 "nem sikerült megtalálni egyetlen csomagarchívumot sem a(z) %s listában"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
 msgstr "függőség"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "a csomag devel ellenőrzése nem sikerült: „%s” hibát észlelt"
 
@@ -654,6 +655,10 @@ msgstr "érvénytelen tároló"
 msgid "invalid value: %d is not between %d and %d"
 msgstr "érvénytelen érték: %d, az érték nem %d és %d között van"
 
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "nem"
+
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "nincs importálandó kulcs"
@@ -665,10 +670,6 @@ msgstr "nem történt lekérdezés"
 #: local_install.go:66
 msgid "no target directories specified"
 msgstr "nincs megadva célkönyvtár"
-
-#: pkg/text/input.go:48
-msgid "no"
-msgstr "nem"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
@@ -682,6 +683,12 @@ msgstr "egyszerre csak egy művelet használható"
 msgid "only one target is allowed"
 msgstr "csak egy cél engedélyezett"
 
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "csomag"
+msgstr[1] "csomagok"
+
 #: print.go:187
 msgid "package '%s' was not found"
 msgstr "a(z) „%s” csomag nem található"
@@ -693,12 +700,6 @@ msgstr "a csomag nem található az AUR-ban"
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
 msgstr "a csomag nem található a tárolókban"
-
-#: pkg/upgrade/service.go:292
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "csomag"
-msgstr[1] "csomagok"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
