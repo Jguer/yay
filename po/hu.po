@@ -385,7 +385,7 @@ msgstr ""
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Telepítendő csomagok (pl.: \"1 2 3\", \"1-3\" vagy \"^4\")"
+msgstr "Telepítendő csomagok (pl.: „1 2 3”, „1-3” vagy „^4”)"
 
 #: print.go:49
 msgid "Popularity"
