@@ -372,6 +372,7 @@ func isArg(arg string) bool {
 	case "y", "refresh":
 	case "x", "regex":
 	case "machinereadable":
+	case "disable-sandbox":
 	// yay options
 	case "aururl":
 	case "aurrpcurl":

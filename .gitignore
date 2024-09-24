@@ -30,3 +30,5 @@ qemu-*
 *.pprof
 
 node_modules/
+xgotext
+.devcontainer/
