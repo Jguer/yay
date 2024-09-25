@@ -401,7 +401,7 @@ msgstr "Szolgáltatók"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Fordítási függőségek törlése a telepítés után?"
+msgstr "Fordítási függőségek eltávolítása a telepítés után?"
 
 #: print.go:43
 msgid "Replaces"
