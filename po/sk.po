@@ -1,23 +1,18 @@
 # 
 # Translators:
-# J G, 2021
-# Paweł Bernaciak, 2022
-# Chair n, 2022
-# A_Salata, 2022
-# SMT Broadcast, 2022
-# Bartłomiej Konecki, 2023
-# Mariusz Bubak, 2023
-# Tadeusz Magura-Witkowski, 2024
+# Matej Mrenica, 2022
+# Peter Cyprich, 2024
+# Michal Fusatý, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Tadeusz Magura-Witkowski, 2024\n"
-"Language-Team: Polish (Poland) (https://app.transifex.com/yay-1/teams/123732/pl_PL/)\n"
+"Last-Translator: Michal Fusatý, 2024\n"
+"Language-Team: Slovak (https://app.transifex.com/yay-1/teams/123732/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: pl_PL\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Language: sk\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
 "X-Generator: xgotext\n"
 
 #: clean.go:83
@@ -26,7 +21,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Folder kompilacji:"
+"Adresár zostavenia:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
@@ -34,117 +29,117 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Wybierz wartość (domyślnie=1): "
+"Zadajte číslo (predvolené=1):"
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr "(Pliki Budowy Istnieją)"
+msgstr "(Súbory na zostavenie existujú)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
-msgstr " (zainstalowano)"
+msgstr "(Nainštalované)"
 
 #: cmd.go:453
 msgid " [Installed]"
-msgstr " [zainstalowano]"
+msgstr "[Nainštalované]"
 
 #: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
-msgstr " nic nie pozostało do zrobienia"
+msgstr "nie je čo robiť"
 
 #: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
-"%s [A]Wszystkie [Ab]Anuluj [I]Zainstalowane [No]Nie zainstalowane lub (1 2 "
-"3, 1-3, ^4)"
+"%s [A]Všetko [Ab]Zrušiť [I]Nainštalované [No]Nenainštalované alebo (1 2 3, "
+"1-3, ^4)"
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s już jest zbudowany - pomijam budowanie"
+msgstr "%s už vytvorené -- preskočenie zostavenia"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s jest nieokreślony"
+msgstr "%s nie je nastavené"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
-msgstr "%s jest już obecny."
+msgstr "%s je prítomný."
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
-msgstr "%s jest aktualny - pomijam"
+msgstr "%s je aktuálny -- preskakujem"
 
 #: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "%s do aktualizacji/instalacji."
+msgstr "%s na aktualizáciu/inštaláciu."
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
-msgstr "%s również zostanie zainstalowanie w ramach operacji."
+msgstr "%sbude tiež nainštalovaný pre túto operáciu."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
-msgstr "%s, wymagane przez: %s"
+msgstr "%s, vyžaduje: %s"
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
-msgstr "%s: Bez zmian - pomijam"
+msgstr "%s Žiadne zmeny -- preskakujem"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: nie jest dostępny z --aur - pomijam"
+msgstr "%snemožno použiť cieľ s voľbou --aur -- preskakujem"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: nie jest dostępny z --repo - pomijam"
+msgstr "%s nemožno použiť cieľ s voľbou --repo -- preskakujem"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: ignoruję aktualizację paczki (%s => %s)"
+msgstr "%s ignorujem aktualizáciu balíčka (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s: wersja lokalna (%s) jest nowsza niż ta z AUR (%s)"
+msgstr "%s lokálne (%s) je novšie ako AUR (%s)"
 
 #: vote.go:51
 msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s: wprowadź proszę zmienne środowiskowe AUR_USERNAME oraz AUR_PASSWORD by "
-"móc głosować"
+"%s prosím nastavte premenné prostredia AUR_USERNAME (používateľské meno AUR)"
+" a AUR_PASSWORD (heslo AUR) pre hlasovanie"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) Pobrano PKGBUILD z ABS-u: %s"
+msgstr "(%d/%d) Stiahnuté PKGBUILD z ABS: %s"
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
-msgstr "(%d/%d) Pobrany PKGBUILD: %s"
+msgstr "(%d/%d) Stiahnuté PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Nie udało się pobrać PKGBUILD: %s"
+msgstr "(%d/%d) Nepodarilo sa stiahnuť PKGBUILD: %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Przetwarzam SRCINFO: %s"
+msgstr "(%d/%d) Analýza SRCINFO: %s"
 
 #: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
-msgstr "(Zainstalowana)"
+msgstr "(Nainštalované)"
 
 #: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
-msgstr "(Zainstalowano: %s)"
+msgstr "(Nainštalované: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Osierocona)"
+msgstr "(Osirotené)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(Nieaktualny od: %s)"
+msgstr "(Zastarané: %s)"
 
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
@@ -156,269 +151,269 @@ msgstr "AUR URL"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Dodaj %s lub %s do zmiennych środowiskowych"
+msgstr "Pridajte %s or %s do vašich premenných prostredia"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Unikaj uruchamiania yay jako root lub z sudo."
+msgstr "Vyhnite sa spúšťaniu yay ako root/sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Sprawdzanie Zależności"
+msgstr "Skontrolovať závislosti"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Sprawdź zależności"
+msgstr "Skontrolovať závislosti"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
-msgstr "Sprawdzanie paczek w wersjach rozwojowych..."
+msgstr "Kontrolujem balíčky vývoja..."
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
-msgstr "Czyszczenie (%d/%d): %s"
+msgstr "Čiestenie (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Koliduje z"
+msgstr "Konflikty s"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
-msgstr "Usuwanie (%d/%d): %s"
+msgstr "Mazanie (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
-msgstr "Zależność"
+msgstr "Závislosť"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "Zależy od"
+msgstr "Závisí na"
 
 #: print.go:33
 msgid "Description"
-msgstr "Opis"
+msgstr "Popis"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Pokazać różnice?"
+msgstr "Rozdiely na zobrazenie?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr "Domyślnie wyłącza ustawienie 'provides'  "
+msgstr "Predvolene zrušiť nastavenie 'provides'"
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "Czy chcesz usunąć WSZYSTKIE paczki AUR z pamięci podręcznej?"
+msgstr "Chcete odstrániť VŠETKY balíky AUR z vyrovnávacej pamäte?"
 
 #: clean.go:95
 msgid "Do you want to remove ALL untracked AUR files?"
-msgstr "Czy chcesz usunąć WSZYSTKIE nieśledzone pliki AUR?"
+msgstr "Chcete odstrániť VŠETKY nesledované súbory AUR?"
 
 #: clean.go:80
 msgid "Do you want to remove all other AUR packages from cache?"
-msgstr "Czy chcesz usunąć wszystkie inne paczki AUR z pamięci podręczniej?"
+msgstr "Chcete odstrániť všetky ostatné balíky AUR z vyrovnávacej pamäte?"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
-msgstr "Edytor PKGBUILD-ów?"
+msgstr "Upraviť PKGBUILD s?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
-msgstr "Błąd podczas wyszukiwania w AUR: %s\n"
+msgstr "Chyba počas vyhľadávania AUR: %s\n"
 
 #: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Wykluczanie pakietów może spowodować częściową aktualizacje i uszkodzenie "
-"systemu"
+"Vynechanie balíčkov môže spôsobiť čiastočné vylepšienia a zničiť systém"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
-msgstr "Jawne"
+msgstr "Explicitne"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "Jawnie zainstalowane paczki: %s"
+msgstr "Explicitne nainštalované balíky: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Nie znaleziono pakietu AUR dla"
+msgstr "Nepodarilo sa nájsť AUR balíček "
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr ""
-"Niepowodzenie zainstalowania warstwy, przewijanie do następnej warstwy"
+msgstr "Nepodarilo sa nainštalovať vrstvu, presúvam sa na ďalšiu vrstvu"
 
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"Nie udało sie zainstalować następujących pakietów. Wymagana interwencja "
-"użytkownika:"
+"Nepodarilo sa nainštalovať nasledovné balíčky. Je potrebná manuálna "
+"interakcia: "
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Zamieszczono po raz pierwszy"
+msgstr "Prvý krát predložené"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Paczki AUR oznaczone jako nieaktualne:"
+msgstr "Balíčky AUR označené ako neaktuálne:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Obce zainstalowane pakiety: %s"
+msgstr "Cudzie nainšťalované balíčky: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Znaleziono repozytorium git: %s"
+msgstr "Nájdený git repozitár: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "Zakończono GenDB. Nie zainstalowano żadnych paczek"
+msgstr "GenDB dokončené. Žiadne balíčky neboli nainštalované"
 
 #: print.go:36
 msgid "Groups"
-msgstr "Grupy"
+msgstr "Skupiny"
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
-msgstr "Zaimportować?"
+msgstr "Importovať?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "Importowanie kluczy przy użyciu gpg..."
+msgstr "Importovanie kľúčov pomocou gpg..."
 
 #: print.go:46
 msgid "Keywords"
-msgstr "Słowa kluczowe"
+msgstr "Kľúčové slová"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Ostatnio zmodyfikowano"
+msgstr "Naposledy upravené"
 
 #: print.go:35
 msgid "Licenses"
-msgstr "Licencje"
+msgstr "Licencie"
 
 #: pkg/dep/dep_graph.go:77
 msgid "Local"
-msgstr "Lokalne"
+msgstr "Lokálne"
 
 #: print.go:48
 msgid "Maintainer"
-msgstr "Opiekun"
+msgstr "Správca"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Zależność Budowania"
+msgstr "Spraviť závislosť"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Zbuduj zależności"
+msgstr "Spraviť závislosť"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
-msgstr "Zaginiony"
+msgstr "Chýbajúce"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Missing AUR Debug Packages:"
-msgstr "Brakujące Debugowe Pakiety AUR:"
+msgstr "Chýbajúce AUR balíčky na ladenie: "
 
 #: print.go:31
 msgid "Name"
-msgstr "Nazwa"
+msgstr "Názov"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "Nie znaleziono pakietu AUR dla"
+msgstr "Nenašiel sa AUR balíček pre "
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "Nie znaleziono pakietu dla"
+msgstr "Nenašiel sa balíček pre "
 
 #: print.go:225
 msgid "None"
-msgstr "Brak"
+msgstr "Žiadne"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Opcjonalne zależności"
+msgstr "Voliteľné závislosti"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Osierocone (nieutrzymywane) pakiety AUR:"
+msgstr "Osirotené (neudržiavané) balíčky AUR: "
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
-msgstr "Nieaktualne"
+msgstr "Zastarané"
 
 #: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
-msgstr "Klucze PGP wymagające zaimportowania:"
+msgstr "PGP kľúče potrebujú importovať:"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD jest aktualny, pomijam pobieranie: %s"
+msgstr "PKGBUILD aktuálne, preskakujem sťahovanie: %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "Edytować PKGBUILD-y?"
+msgstr "PKGBUILDy na editáciu?"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Podstawa Paczki"
+msgstr "Základ balíčka"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "ID Podstawy Paczki"
+msgstr "ID Základu balíčka"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
-msgstr "Pakiety nie występujace w AUR:"
+msgstr "Balíčky, ktoré nie sú v AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Paczki do zbudowania od zera?"
+msgstr "Balíčky, ktoré vybudovať nanovo?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
-msgstr "Pakiety do wykluczenia"
+msgstr "Balíčky, ktoré vynechať"
 
 #: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Wykluczone paczki: (np.: \"1 2 3\", \"1-3\", \"^4\" lub nazwa repozytorium)"
+msgstr ""
+"Balíčky, ktoré vynechať: (napr.: \"1 2 3\", \"1-3\" \"^4\" alebo názov "
+"repozitára)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Paczki do zainstalowania (np.: 1 2 3, 1-3 or ^4)"
+msgstr "Balíčky na inštaláciu (napr: 1 2 3, 1-3 or ^4)"
 
 #: print.go:49
 msgid "Popularity"
-msgstr "Popularność"
+msgstr "Popularita"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Kontynuować instalację?"
+msgstr "Pokračovať s inštaláciou?"
 
 #: print.go:37
 msgid "Provides"
-msgstr "Dostarcza"
+msgstr "Poskytuje"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Usunąć zależności potrzebne do zbudowania po instalacji?"
+msgstr "Odstrániť make závislosti po inštalácií?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr "Zastępuje"
+msgstr "Nahrádza"
 
 #: pkg/db/ialpm/alpm.go:191 print.go:30
 msgid "Repository"
-msgstr "Repozytorium"
+msgstr "Repozitár"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
-msgstr "Repozytorium AUR"
+msgstr "Repozitár AUR"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
@@ -426,59 +421,60 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
-msgstr "Przeszukuję AUR za aktualizacjami..."
+msgstr "Vyhľadávanie aktualizácií v AUR..."
 
 #: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
-msgstr "Przeszukuję bazy danych za aktualizacjami..."
+msgstr "Vyhľadávanie aktualizácií v databázach..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "Pokazuję tylko paczki z repozytoriów"
+msgstr "Zobrazenie iba repo balíčkov"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Rozmiar pamięci podręcznej Pacmana %s: %s"
+msgstr "Veľkosť pacman cache %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Rozmiar pamięci podręcznej yay %s: %s"
+msgstr "Veľkosť yay cache %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
-msgstr "URL Snapshota"
+msgstr "URL Snapshotu"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
-msgstr "Synchronizacja"
+msgstr "Synchronizácia"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "Dziesięć największych paczek:"
+msgstr "Desať najväčších balíčkov:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr "Te paczki nie są kompatybilne z architekturą Twojego systemu:"
+msgstr "Nasledovné balíčky nie sú kompatibilné s vašou architektúrou: "
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
-msgstr "Jest %d możliwych źródeł dla %s:"
+msgstr ""
+"Existuje/existujú %d poskytovateľ/poskytovatelia/poskytovateľov pre %s: "
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr "Prawdopodobnie działa teraz inna instancja Pacmana. Czekam..."
+msgstr "Môže byť spustená ďalšia inštancia Pacmana. Čakanie..."
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Łączny rozmiar zajmowany przez paczki: %s"
+msgstr "Celková veľkosť obsadená balíčkami: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Łączna liczba zainstalowanych paczek: %s"
+msgstr "Celkový počet nainštalovaných balíčkov: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Spróbować je zbudować mimo wszystko?"
+msgstr "Pokúsiť sa ich zostaviť aj tak?"
 
 #: print.go:34
 msgid "URL"
@@ -486,175 +482,175 @@ msgstr "URL"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
-msgstr "Nie można sprzątnąć:"
+msgstr "Nepodarilo sa vyčistiť:"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "Nie udało się znaleźć następujących paczek:"
+msgstr "Nie je možné nájsť nasledujúce balíčky:"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "Nie udało się obsłużyć oceny pakietu dla: %s. err: %s"
+msgstr "Nie je možné spracovať hlasovanie o balíku pre: %s. err: %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
-msgstr "Nie udało się usunąć %s: %s"
+msgstr "Nepodarilo sa odstrániť %s: %s"
 
 #: print.go:32
 msgid "Version"
-msgstr "Wersja"
+msgstr "Verzia"
 
 #: print.go:50
 msgid "Votes"
-msgstr "Głosów"
+msgstr "Hlasy"
 
 #: print.go:87
 msgid "Yay version v%s"
-msgstr "Wersja yay v%s"
+msgstr "Verzia Yay v%s"
 
 #: pkg/menus/menu.go:49
 msgid "[N]one"
-msgstr "[N]ic"
+msgstr "[N]Žiadne"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "przerwane przez użytkownika"
+msgstr "prerušenie kvôli používateľovi"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "argument '-' określony bez danych wejściowych"
+msgstr "argument \"-\" špecifikovaný bez vstupu alebo štandardného vstupu"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr "nie znaleziono PKGBUILD i .SRCINFO w katalogu"
+msgstr "nepodarilo sa nájsť PKGBUILD a .SRCINFO v adresári"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "nie odnalazłem paczki: %v"
+msgstr "nepodarilo sa nájsť názov balíčku: %v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
-msgstr "nie odnalazłem PKGDEST dla: %s"
+msgstr "nemožno nájsť PKGDEST pre: %s"
 
 #: errors.go:9
 msgid "could not find all required packages"
-msgstr "nie znaleziono wszystkich wymaganych pakietów"
+msgstr "nemožno nájsť všetky potrebné balíčky"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "nie udało się znaleźć żadnych archiwów pakietów z listy %s"
+msgstr "nemožno nájst žiadne archívy balíčkov uvedené v %s"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
-msgstr "zależność"
+msgstr "závislosť"
 
 #: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr "błąd sprawdzania wersji rozwojowej: '%s' napotkało na błąd"
+msgstr "nepodarilo sa skontrolovať vývoj pre balíček: '%s' postihla chyba"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "edytor nie zamknął się poprawnie, anuluję: %s"
+msgstr "editor nebol úspešne ukončený, ruším: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "błąd ściągania źródeł: %s"
+msgstr "chyba pri sťahovaní zdrojov: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "błąd podczas ściągania %s: %s"
+msgstr "načítanie chýb %s: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "błąd podczas instalowania paczek z repozytorium"
+msgstr "chyba pri inštalácií balíčkov z repozitára"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
-msgstr "Błąd podczas instalacji:"
+msgstr "chyba pri inštalovaní:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "błąd podczas budowania: %s"
+msgstr "chyba vytvárania: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "błąd podczas scalania %s: %s"
+msgstr "chyba pri zlúčení %s: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
-msgstr "błąd podczas odczytywania %s"
+msgstr "chyba čítania %s"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "błąd odświeżania baz danych"
+msgstr "chyba obnovenia databáz"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "błąd podczas resetowania %s: %s"
+msgstr "chyba resetovania %s: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "błąd podczas ustawiania przyczyny instalacji pakietu na %s"
+msgstr "chyba pri aktualizácii dôvodu inštalácie balíka na %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr "jawne"
+msgstr "explicitné"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "nie udało się stworzyć katalogu '%s': %s"
+msgstr "nepodarilo sa vytvoriť adresár '%s': %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "nie udało się otwarcie pliku konfiguracyjnego '%s': %s"
+msgstr "nepodarilo sa otvoriť konfiguračný súbor '%s': %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "nie udało się przetworzyć %s - pomijam: %s"
+msgstr "nepodarilo sa analyzovať %s -- preskakujem: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "nie udało się przetworzyć %s: %s"
+msgstr "nepodarilo sa analyzovať %s: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
-msgstr "nie udało się przetworzyć .SRCINFO"
+msgstr "nepodarilo sa analyzovať .SRCINFO"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "nie udało się odczytać pliku konfiguracyjnego '%s': %s"
+msgstr "nepodarilo sa prečítať konfiguračný súbor '%s': %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr "Nie udało się pozyskać pamięci podręcznej AUR"
+msgstr "nepodarilo sa získať aur cache"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
-msgstr "ignorowanie aktualizacji wersji rozwojowej (brak informacji w AUR):"
+msgstr "ignorujem aktualizáciu balíčka vývoja (nenašli sa AUR informácie):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
-msgstr "zbyt długie dane wejściowe"
+msgstr "vstup príliš dlhý"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
-msgstr "niepoprawna liczba: %s"
+msgstr "neplatné číslo: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "niepoprawna opcja '%s'"
+msgstr "neplatná možnosť '%s'"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
-msgstr "niepoprawna opcja: '--deps' i '--explicit' nie mogą być razem używane"
+msgstr "neplatná možnosť: '--deps' a '--explicit' nemôže byť použité spolu"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "Nieprawidłowe repozytorium"
+msgstr "neplatný repozitár"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "niepoprawna wartość: %d nie jest pomiędzy %d a %d"
+msgstr "neplatná hodnota: %d nie je mezdi %d a %d"
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -662,80 +658,80 @@ msgstr "nie"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
-msgstr "brak kluczy do zaimportowania"
+msgstr "žiadne kľúče na importovanie"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
-msgstr "nie uruchomiono żadnego polecenia"
+msgstr "nebola vykonaná žiadna požiadavka"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr "Nie określono folderu docelowego"
+msgstr "nie sú špecifikované žiadne adresáre"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "Nic do instalowania dla %s"
+msgstr "nie je čo inštalovať pre %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
-msgstr "tylko jedna operacja może być zadana na raz"
+msgstr "naraz môže byť použitá iba jedna operácia"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr "dozwolony jest tylko jeden cel"
+msgstr "je povolený iba jeden cieľ"
 
 #: pkg/upgrade/service.go:291
 msgid "package"
 msgid_plural "packages"
-msgstr[0] "pakiet"
-msgstr[1] "pakietów"
-msgstr[2] "pakietów"
-msgstr[3] "pakiety"
+msgstr[0] "balíček"
+msgstr[1] "balíčkov"
+msgstr[2] "balíčkov"
+msgstr[3] "balíčky"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "paczka '%s' nie została odnaleziona"
+msgstr "balíček '%s' sa nenašiel"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "Nie znaleziono paczki w AUR"
+msgstr "balíček sa nenašiel v AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "Nie znaleziono paczki w repozytoriach"
+msgstr "balíček sa nenašiel v repozitároch"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
-msgstr "błąd importowania kluczy"
+msgstr "problém s importom kľúčov"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "usuwanie paczek z AUR z pamięci podręcznej..."
+msgstr "odstraňujem balíčky AUR z cache..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "usuwanie nieśledzonych plików z AUR z pamięci podręcznej..."
+msgstr "odstraňujem nesledované AUR balíčky z cache..."
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr "PKGDEST dla %s jest wyszczególniony w makepkg, ale nie istnieje: %s"
+msgstr "PKGDEST pre %s je uvedený v makepkg, ale neexistuje %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
-msgstr "Nie ma nic do zrobienia"
+msgstr "nie je čo urobiť"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "błąd w CreateHandle: %s"
+msgstr "nepodarilo sa CreateHandle: %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
-msgstr "nieobsłużona operacja"
+msgstr "neošetrená operácia"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "nieznana-wersja"
+msgstr "neznáma-verzia"
 
 #: pkg/text/input.go:47
 msgid "yes"
-msgstr "tak"
+msgstr "áno"

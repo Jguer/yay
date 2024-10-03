@@ -302,28 +302,32 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	// upgrade menu asks you which packages to NOT upgrade so in this case
 	// exclude and include are kind of swapped
 	exclude, include, otherExclude, otherInclude := intrange.ParseNumberMenu(numbers)
-	isInclude := len(include) == 0 && otherInclude.Cardinality() == 0
+
+	// true if user doesn't want to include specific repositories/packages
+	noIncludes := len(include) == 0 && otherInclude.Cardinality() == 0
 
 	excluded := make([]string, 0)
 	for i := range allUp.Up {
 		up := &allUp.Up[i]
+		upgradeID := len(allUp.Up) - i
 
-		if isInclude && otherExclude.Contains(up.Repository) {
+		// check if user wants to exclude specific things (true) or include specific things
+		if noIncludes {
+			// exclude repositories mentioned by the user
+			if otherExclude.Contains(up.Repository) {
+				u.log.Debugln("pruning", up.Name)
+				excluded = append(excluded, graph.Prune(up.Name)...)
+			}
+			// exclude packages mentioned by the user
+			if exclude.Get(upgradeID) {
+				u.log.Debugln("pruning", up.Name)
+				excluded = append(excluded, graph.Prune(up.Name)...)
+			}
+
+			// If the user explicitly wants to include a package/repository, exclude everything else
+		} else if !include.Get(upgradeID) && !otherInclude.Contains(up.Repository) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
-			continue
-		}
-
-		if isInclude && exclude.Get(len(allUp.Up)-i) {
-			u.log.Debugln("pruning", up.Name)
-			excluded = append(excluded, graph.Prune(up.Name)...)
-			continue
-		}
-
-		if !isInclude && !(include.Get(len(allUp.Up)-i) || otherInclude.Contains(up.Repository)) {
-			u.log.Debugln("pruning", up.Name)
-			excluded = append(excluded, graph.Prune(up.Name)...)
-			continue
 		}
 	}
 

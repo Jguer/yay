@@ -1,14 +1,15 @@
 # 
 # Translators:
 # Pim van den Berg, 2022
+# Jonathan van der Steege <jonakeys@hotmail.com>, 2023
 # Loek Le Blansch <loek@pipeframe.xyz>, 2023
 # Luke Rieff, 2023
-# Jonathan van der Steege <jonakeys@hotmail.com>, 2023
 # Ariejan de Vroom <ariejan@ariejan.net>, 2024
+# Heimen Stoffels <vistausss@fastmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Ariejan de Vroom <ariejan@ariejan.net>, 2024\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>, 2024\n"
 "Language-Team: Dutch (https://app.transifex.com/yay-1/teams/123732/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +20,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr "(Bouwbestanden Bestaan)"
+msgstr "(Bouwbestanden zijn aanwezig)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
@@ -40,11 +41,11 @@ msgstr ""
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s is al gemaakt -- slaat bouw over"
+msgstr "%s is al gemaakt -- de bouw wordt overgeslagen"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s is niet gezet"
+msgstr "%s is niet ingesteld"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
@@ -52,15 +53,15 @@ msgstr "%s is aanwezig."
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
-msgstr "%s is up to date -- overslaan"
+msgstr "%s is actueel -- wordt overgeslagen"
 
 #: pkg/upgrade/service.go:292
 msgid "%s to upgrade/install."
-msgstr "%s Te upgraden/ installeren"
+msgstr "%s te upgraden/ installeren."
 
 #: pkg/upgrade/service.go:286
 msgid "%s will also be installed for this operation."
-msgstr "%s wordt ook geïnstalleerd voor deze operatie"
+msgstr "%s wordt ook geïnstalleerd bij het uitvoeren van deze actie."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
@@ -68,19 +69,19 @@ msgstr "%s, benodigd door: %s"
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
-msgstr "%s: Geen wijzigingen -- overslaan "
+msgstr "%s: Geen wijzigingen -- wordt overgeslagen"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: kan doel niet gebruiken met optie --aur -- overslaan"
+msgstr "%s: kan doel niet gebruiken i.c.m. optie --aur -- wordt overgeslagen"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: kan doel niet gebruiken met optie --repo -- overslaan"
+msgstr "%s: kan doel niet gebruiken i.c.m. optie --repo -- wordt overgeslagen"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: negeren pakketupgrade (%s => %s)"
+msgstr "%s: pakketupgrade wordt genegeerd (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
@@ -91,8 +92,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s: gebruik alstublieft AUR_USERNAME en AUR_PASSWORD omgevingsvariabelen om "
-"te stemmen"
+"%s: gebruik de omgevingsvariabelen AUR_USERNAME en AUR_PASSWORD om te "
+"stemmen"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -104,11 +105,11 @@ msgstr "(%d/%d) PKGBUILD gedownload: %s"
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Kon PKGBUILD niet downloaden: %s"
+msgstr "(%d/%d) De PKGBUILD kan niet worden gedownload: %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Aan het parsen SRCINFO: %s"
+msgstr "(%d/%d) Bezig met verwerken van SRCINFO: %s"
 
 #: pkg/query/types.go:72 pkg/query/types.go:103
 msgid "(Installed)"
@@ -120,7 +121,7 @@ msgstr "(Geïnstalleerd: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Wees geworden)"
+msgstr "(Onteigend)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
@@ -128,7 +129,7 @@ msgstr "(Verouderd: %s)"
 
 #: print.go:44
 msgid "AUR URL"
-msgstr "AUR URL"
+msgstr "AUR-url"
 
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
@@ -136,35 +137,35 @@ msgstr "AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Voeg %s of %s toe aan je omgevingsvariabelen"
+msgstr "Voeg %s of %s toe aan uw omgevingsvariabelen"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Vermijd yay uit te voeren als root/sudo."
+msgstr "Voer yay niet uit als root/sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Controleer Afhankelijkheid"
+msgstr "Afhankelijkheid controleren"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Controleer Afhankelijkheden"
+msgstr "Afhankelijkheden controleren"
 
 #: pkg/upgrade/service.go:90
 msgid "Checking development packages..."
-msgstr "Ontwikkelpakketten aan het controleren..."
+msgstr "Bezig met controleren van ontwikkelpakketten…"
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
-msgstr "Aan het schoonmaken (%d/%d): %s"
+msgstr "Bezig met opruimen… (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Conflicteert Met"
+msgstr "Botst met"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
-msgstr "Aan het verwijderen (%d/%d): %s"
+msgstr "Bezig met verwijderen… (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
@@ -172,7 +173,7 @@ msgstr "Afhankelijkheid"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "Afhankelijk Van"
+msgstr "Afhankelijk van"
 
 #: print.go:33
 msgid "Description"
@@ -180,27 +181,27 @@ msgstr "Beschrijving"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Verschillen te tonen?"
+msgstr "Verschillen tonen?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr "Schakel 'biedt'-instelling standaard uit"
+msgstr "Schakel de ‘biedt’-instelling standaard uit"
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "Wil je ALLE AUR-pakketten verwijderen uit de cache?"
+msgstr "Wilt u ALLE AUR-pakketten verwijderen uit de cache?"
 
 #: clean.go:95
 msgid "Do you want to remove ALL untracked AUR files?"
-msgstr "Wil je ALLE niet-gevolgde AUR-bestanden verwijderen?"
+msgstr "Wilt u ALLE niet-gevolgde AUR-bestanden verwijderen?"
 
 #: clean.go:80
 msgid "Do you want to remove all other AUR packages from cache?"
-msgstr "Wil je alle andere AUR-pakketten verwijderen uit de cache?"
+msgstr "Wilt u alle andere AUR-pakketten verwijderen uit de cache?"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
-msgstr "Bewerk PKGBUILD met?"
+msgstr "PKGBUILD bewerken met?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
@@ -209,39 +210,40 @@ msgstr "Fout tijdens AUR-zoekactie: %s\n"
 #: pkg/upgrade/service.go:296
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Pakketten uitsluiten kan mogelijk zorgen voor onafgeronde upgrades of stukke"
-" systemen"
+"Pakketten uitsluiten kan mogelijk leiden tot onafgeronde upgrades en/of "
+"beschadigde systemen"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
-msgstr "Expliciet"
+msgstr "Uitdrukkelijk"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "Expliciet geïnstalleerde pakketten: %s"
+msgstr "Uitdrukkelijk geïnstalleerde pakketten: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Kon geen AUR-pakket vinden voor "
+msgstr "Er is geen AUR-pakket gevonden voor "
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr "Het installeren van de laag is mislukt, vorige laag wordt hersteld"
+msgstr ""
+"Het installeren van de laag is mislukt - de volgende laag wordt gebruikt"
 
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"De volgende pakketten konden niet geïnstalleerd worden. Handmatige "
-"interventie is vereisd:"
+"De volgende pakketten konden niet worden geïnstalleerd. Handmatige "
+"interventie is vereist:"
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Eerst Ingezonden"
+msgstr "Eerst ingezonden op"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Gevlagde verouderde AUR-pakketten:"
+msgstr "Verouderde AUR-pakketten:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
@@ -249,11 +251,11 @@ msgstr "Van buitenaf geïnstalleerde pakketten: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Git repo gevonden: %s"
+msgstr "Git-repo aangetroffen: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "GenDB afgerond. Geen pakketten zijn geïnstalleerd"
+msgstr "GenDB is afgerond. Er zijn geen pakketten zijn geïnstalleerd."
 
 #: print.go:36
 msgid "Groups"
@@ -265,15 +267,15 @@ msgstr "Importeren?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "Sleutels met gpg aan het importeren..."
+msgstr "Bezig met importeren van sleutels…"
 
 #: print.go:46
 msgid "Keywords"
-msgstr "Sleutelwoorden"
+msgstr "Trefwoorden"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Laatst Bewerkt"
+msgstr "Laatst bewerkt op"
 
 #: print.go:35
 msgid "Licenses"
@@ -289,15 +291,15 @@ msgstr "Onderhouder"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Make Afhankelijkheid"
+msgstr "Make-afhankelijkheid"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Maak Afhankelijkheden"
+msgstr "Make-afhankelijkheden"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Missing AUR Debug Packages:"
-msgstr "Ontbrekende AUR-debug-pakketten:"
+msgstr "Ontbrekende AUR-foutopsporingspakketten:"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
@@ -321,11 +323,11 @@ msgstr "Geen"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Optionele Afhankelijkheden"
+msgstr "Optionele afhankelijkheden"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Verweesde (niet onderhouden) AUR-paketten:"
+msgstr "Onteigende (niet-onderhouden) AUR-pakketten:"
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
@@ -333,23 +335,24 @@ msgstr "Verouderd"
 
 #: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
-msgstr "PGP-sleutels moeten worden geïmporteerd:"
+msgstr "Te importeren pgp-sleutels:"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD is up-to-date, download overgeslagen: "
+msgstr ""
+"De PKGBUILD is actueel, dus het downloaden van ‘%s’ wordt overgeslagen."
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILDs om te bewerken?"
+msgstr "Te bewerken PKGBUILDs?"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Pakket Base ID"
+msgstr "Basis-id van pakket"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Pakket Base"
+msgstr "Pakketbasis"
 
 #: pkg/query/aur_warnings.go:67
 msgid "Packages not in AUR:"
@@ -357,19 +360,20 @@ msgstr "Pakketten niet in AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Pakketten om te cleanBuild-en?"
+msgstr "Te herbouwen pakketten?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
-msgstr "Buitengesloten paketten"
+msgstr "Uitgesloten pakketten"
 
 #: pkg/upgrade/service.go:295
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Uit te sluiten pakketten: (bijv: \"1 2 3\", \"1-3\", \"^4\" of naam repository)"
+msgstr ""
+"Uit te sluiten pakketten: (bijv. ‘1 2 3’, ‘1-3’, ‘^4’ of pakketbronnaam)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Te installeren pakketten (bijv: 1 2 3, 1-3 of ^4)"
+msgstr "Te installeren pakketten (bijv. 1 2 3, 1-3 of ^4)"
 
 #: print.go:49
 msgid "Popularity"
@@ -377,7 +381,7 @@ msgstr "Populariteit"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Verder gaan met installeren?"
+msgstr "Doorgaan met installeren?"
 
 #: print.go:37
 msgid "Provides"
@@ -385,7 +389,7 @@ msgstr "Biedt"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Verwijder maak-afhankelijkheden na installatie?"
+msgstr "Make-afhankelijkheden verwijderen na installatie?"
 
 #: print.go:43
 msgid "Replaces"
@@ -393,11 +397,11 @@ msgstr "Vervangt"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
-msgstr "Repository AUR"
+msgstr "AUR-repo"
 
 #: print.go:30 pkg/db/ialpm/alpm.go:191
 msgid "Repository"
-msgstr "Repository"
+msgstr "Pakketbron"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
@@ -405,11 +409,11 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:72
 msgid "Searching AUR for updates..."
-msgstr "Aan het zoeken in AUR voor updates..."
+msgstr "Bezig met zoeken naar AUR-updates…"
 
 #: pkg/upgrade/service.go:160
 msgid "Searching databases for updates..."
-msgstr "Aan het zoeken in databases voor updates..."
+msgstr "Bezig met zoeken naar updates in databanken…"
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
@@ -417,15 +421,15 @@ msgstr "Toont alleen repo-pakketten"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Grootte van pacman-cache %s: %s"
+msgstr "Omvang van pacman-cache %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Grootte van yay-cache %s: %s"
+msgstr "Omvang van yay-cache %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
-msgstr "Snapshot-URL"
+msgstr "Momentopname-url"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
@@ -437,48 +441,47 @@ msgstr "Tien grootste pakketten:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr "De volgende pakketten zijn niet compatibel met jouw architectuur:"
+msgstr "De volgende pakketten zijn niet compatibel met uw architectuur:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
-msgstr "Er zijn %d aanbieders beschikbaar voor %s:"
+msgstr "Er zijn %d bronnen die %s aanbieden:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr ""
-"Er is misschien een andere instantie van Pacman bezig. Aan het wachten..."
+msgstr "Wellicht is er een ander proces van Pacman bezig. Aan het wachten…"
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Totale Grootte bezet door pakketten: %s"
+msgstr "Totale omvang van pakketten: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Totaal geïnstalleerde pakketten: %s"
+msgstr "Totaalaantal geïnstalleerde pakketten: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Probeer ze toch te bouwen?"
+msgstr "Toch doorgaan met bouwen?"
 
 #: print.go:34
 msgid "URL"
-msgstr "URL"
+msgstr "Url"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
-msgstr "Niet mogelijk schoon te maken:"
+msgstr "Het opruimen is mislukt:"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "Kan de volgende pakketten niet vinden:"
+msgstr "De volgende pakketten zijn niet aangetroffen:"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "Kon stem voor pakket %s niet verwerken. fout: %s"
+msgstr "De stem op ‘%s’ kan niet worden verwerkt. Foutmelding: %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
-msgstr "Kon %sniet verwijderen: %s"
+msgstr "‘%s’ kan niet worden verwijderd: %s"
 
 #: print.go:32
 msgid "Version"
@@ -502,7 +505,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Bouwdirectory:"
+"Bouwmap:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
@@ -510,7 +513,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Geef een nummer (standaard=1):"
+"Voer een getal in (standaard=1):"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
@@ -518,27 +521,27 @@ msgstr "afbreken vanwege gebruiker"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "'-' als argument gespecificeerd zonder invoer op stdin"
+msgstr "‘-’ als optie ingevoerd zonder invoer op stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr "kan geen PKGBUILD en .SRCINFO in map vinden"
+msgstr "Er zijn geen PKGBUILD en .SRCINFO aangetroffen in de map"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "Kan pakketnaam niet vinden: %v"
+msgstr "Er is geen pakket met de naam “%v” aangetroffen"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
-msgstr "kon PKGDEST niet vinden voor: %s"
+msgstr "Er is geen PKGDEST aangetroffen voor ‘%s’"
 
 #: errors.go:9
 msgid "could not find all required packages"
-msgstr "kon niet alle vereisde pakketten vinden"
+msgstr "Niet alle vereiste pakketten zijn aangetroffen"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "kon geen pakketarchieven vinden binenn %s"
+msgstr "Er zijn geen pakketarchieven aangetroffen in %s"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
 msgid "dependency"
@@ -546,124 +549,125 @@ msgstr "afhankelijkheid"
 
 #: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr "devel controle voor pakket mislukt: fout opgetreden in '%s'"
+msgstr "Ontwikkelcontrole van pakket mislukt: fout opgetreden in ‘%s’"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "editor niet succesvol afgesloten, afbreken: %s"
+msgstr "De bewerker is niet goed afgesloten - het proces wordt afgebroken: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "fout tijdens downloaden bronnen: %s"
+msgstr "De bronnen kunnen niet worden opgehaald: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "fout tijdens verkrijgen %s: %s"
+msgstr "‘%s’ kan niet worden opgehaald: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "fout tijdens installeren repository-pakketten"
+msgstr "De pakketten kunnen niet worden geïnstalleerd"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
-msgstr "fout bij installeren:"
+msgstr "Het installeren van de volgende pakketten is mislukt:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "fout bij maken: %s"
+msgstr "Het maken van de volgende pakketten is mislukt: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "fout bij samenvoegen %s: %s"
+msgstr "‘%s’ kan niet worden samengevoegd: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
-msgstr "fout bij lezen %s"
+msgstr "‘%s’ kan niet worden uitgelezen"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "fout bij vernieuwen databases"
+msgstr "De databanken kunnen niet worden vernieuwd"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "fout bij resetten %s: %s"
+msgstr "‘%s’ kan niet worden hersteld: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "Updaten van installatie reden voor pakket naar %s is mislukt"
+msgstr "Het bijwerken van de installatiereden naar %s is mislukt"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr "expliciet"
+msgstr "Uitdrukkelijk"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "maken directory '%s' mislukt: %s"
+msgstr "‘%s’ kan niet worden aangemaakt: %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "openen configuratiebestand '%s' mislukt: %s"
+msgstr "‘%s’ kan niet worden geopend: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "parsen van %s mislukt -- overslaan: %s"
+msgstr "‘%s’ kan niet worden verwerkt -- wordt overgeslagen: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "parsen van %s mislukt: %s"
+msgstr "‘%s’ kan niet worden verwerkt: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
-msgstr "parsen van .SRCINFO mislukt"
+msgstr ".SRCINFO kan niet worden verwerkt"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "lezen configuratiebestand '%s' mislukt: %s"
+msgstr "‘%s’ kan niet worden uitgelezen: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr "ophalen van aur-Cache mislukt"
+msgstr "De AUR-cache kan niet worden opgehaald"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
-msgstr "pakket devel upgrade genegeerd (geen AUR info gevonden):"
+msgstr "De ontwikkelupgrade is genegeerd (geen AUR-informatie aangetroffen):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
-msgstr "invoer te lang"
+msgstr "De invoer is te lang"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
-msgstr "ongeldig nummer: %s"
+msgstr "Ongeldig getal: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "ongeldige optie '%s'"
+msgstr "Ongeldige optie: ‘%s’"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"ongeldige optie: '--deps' en '--explicit' mogen niet samen gebruikt worden"
+"Ongeldige optie: ‘--deps’ en ‘--explicit’ mogen niet gelijktijdig worden "
+"gebruikt"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "ongeldige repository"
+msgstr "Ongeldige pakketbron"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "ongeldige waarde: %d ligt niet tussen %d en %d"
+msgstr "Ongeldige waarde: %d ligt niet tussen %d en %d"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
-msgstr "geen sleutels om te importeren"
+msgstr "Er zijn geen te importeren sleutels"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
-msgstr "geen zoekacties was uitgevoerd"
+msgstr "Er is geen zoekactie uitgevoerd"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr "geen doeldirectories gespecificeerd"
+msgstr "Er zijn geen doelmappen opgegeven"
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -671,27 +675,27 @@ msgstr "nee"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "niets te installeren voor %s"
+msgstr "Er is niets te installeren voor %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
-msgstr "slechts één operatie mag per keer gebruikt worden"
+msgstr "Er mag slechts één actie per keer worden uitgevoerd"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr "slechts één doel is toegestaan"
+msgstr "Er is slechts één doel toegestaan"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "pakket '%s' was niet gevonden"
+msgstr "‘%s’ is niet aangetroffen"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "pakket niet gevonden in AUR"
+msgstr "Het pakket is niet aangetroffen in de AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "pakket niet gevonden in repositories"
+msgstr "Het pakket is niet aangetroffen in de pakketbronnen"
 
 #: pkg/upgrade/service.go:292
 msgid "package"
@@ -701,35 +705,35 @@ msgstr[1] "Pakketten"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
-msgstr "probleem tijdens importeren van sleutels"
+msgstr "De sleutels kunnen niet worden geïmporteerd"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "verwijderen AUR-pakketten uit de cache..."
+msgstr "Bezig met verwijderen van AUR-pakketten uit cache…"
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "verwijderen niet-gevolgde AUR-bestanden uit de cache..."
+msgstr "Bezig met verwijderen van niet-gevolgde AUR-bestanden uit cache…"
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr "de PKGDEST voor %s is vermeld door makepkg, maar bestaat niet: %s"
+msgstr "De PKGDEST van ‘%s’ wordt vermeld door makepkg, maar bestaat niet: %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
-msgstr "er is niks meer te doen"
+msgstr "Er is niets meer te doen"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "kon geen CreateHandle: %s"
+msgstr "CreateHandle kan niet worden uitgevoerd: %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
-msgstr "niet-afgehandelde bewerking"
+msgstr "Onafgehandelde actie"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "onbekende-versie"
+msgstr "Onbekende versie"
 
 #: pkg/text/input.go:47
 msgid "yes"
