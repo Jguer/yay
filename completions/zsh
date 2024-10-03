@@ -79,6 +79,7 @@ _pacman_opts_common=(
 	'--topdown[Show repository packages first]'
 	'--singlelineresults[List each search result on its own line]'
 	'--doublelineresults[List each search result on two lines, like pacman]'
+	'--showpackageurls[Show the URL of each package in the search results]'
 	'--devel[Check -git/-svn/-hg development version]'
 	'--cleanafter[Clean package sources after successful build]'
 	'--keepsrc[Keep pkg/ and src/ after building packages]'

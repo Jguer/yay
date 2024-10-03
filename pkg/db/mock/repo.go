@@ -27,6 +27,7 @@ func (d DependList) ForEach(f func(*alpm.Depend) error) error {
 }
 
 type Package struct {
+	PArchitecture string
 	PBase         string
 	PBuildDate    time.Time
 	PDB           *DB
@@ -95,7 +96,7 @@ func (p *Package) Validation() alpm.Validation {
 
 // Architecture returns the package target Architecture.
 func (p *Package) Architecture() string {
-	panic("not implemented")
+	return p.PArchitecture
 }
 
 // Backup returns a list of package backups.
