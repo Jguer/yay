@@ -1,12 +1,12 @@
-name: Builder image
+name: Builder Image
 
 on:
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 3 * * 1"  # Every Monday at 3 AM
   push:
     paths:
       - "ci.Dockerfile"
-      - "**/builder-image.yml"
+      - ".github/workflows/builder-image.yml"
 
 env:
   REGISTRY_IMAGE: jguer/yay-builder
@@ -15,95 +15,127 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         platform:
           - linux/amd64
           - linux/arm/v7
           - linux/arm64
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=raw,value=latest
+
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY_IMAGE }}
+            ghcr.io/${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ci.Dockerfile
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: |
-            type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
+          echo -n "$digest" > "/tmp/digests/$(echo "${{ matrix.platform }}" | tr '/' '_')"
+
       - name: Upload digest
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: digests
+          name: digest-${{ matrix.platform == 'linux/amd64' && 'amd64' || matrix.platform == 'linux/arm/v7' && 'armv7' || 'arm64' }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
 
   merge:
+    needs: [build]
     runs-on: ubuntu-latest
-    needs:
-      - build
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: digests
+          pattern: digest-*
+          merge-multiple: true
           path: /tmp/digests
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=raw,value=latest
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY_IMAGE }}
+            ghcr.io/${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: Create and push manifest list
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+          # Extract tags
+          TAGS=$(echo '${{ steps.meta.outputs.tags }}' | xargs -I {} echo "-t {}")
+          
+          # Create a manifest list using the image digests from /tmp/digests/*
+          DIGESTS=$(for file in /tmp/digests/*; do
+            echo -n "${{ env.REGISTRY_IMAGE }}@$(cat $file) "
+          done)
+          
+          # Create the manifest list with the collected tags and digests
+          docker buildx imagetools create $TAGS $DIGESTS
+          
+          # Push to GitHub Container Registry
+          GHCR_TAGS=$(echo '${{ steps.meta.outputs.tags }}' | sed 's|^|ghcr.io/${{ env.REGISTRY_IMAGE }}:|g' | xargs -I {} echo "-t {}")
+          docker buildx imagetools create $GHCR_TAGS $DIGESTS
+
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}

@@ -1,22 +1,23 @@
 # 
 # Translators:
 # J G, 2021
-# Paweł Bernaciak, 2022
-# Chair n, 2022
-# A_Salata, 2022
-# SMT Broadcast, 2022
-# Bartłomiej Konecki, 2023
-# Mariusz Bubak, 2023
+# Oskar <me@medzik.dev>, 2022
+# A_Salata, 2024
+# SMT Broadcast, 2024
+# Chair n, 2024
+# Paweł Bernaciak, 2024
+# Mariusz Bubak, 2024
+# Bartłomiej Konecki, 2024
 # Tadeusz Magura-Witkowski, 2024
 # 
 msgid ""
 msgstr ""
 "Last-Translator: Tadeusz Magura-Witkowski, 2024\n"
-"Language-Team: Polish (Poland) (https://app.transifex.com/yay-1/teams/123732/pl_PL/)\n"
+"Language-Team: Polish (https://app.transifex.com/yay-1/teams/123732/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: pl_PL\n"
+"Language: pl\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: xgotext\n"
 
@@ -76,7 +77,7 @@ msgstr "%s jest aktualny - pomijam"
 
 #: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "%s do aktualizacji/instalacji."
+msgstr "%s by zaktualizować/zainstalować."
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
@@ -116,7 +117,7 @@ msgstr ""
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) Pobrano PKGBUILD z ABS-u: %s"
+msgstr "(%d/%d) Ściągnięto PKGBUILD z ABS-u: %s"
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
@@ -132,7 +133,7 @@ msgstr "(%d/%d) Przetwarzam SRCINFO: %s"
 
 #: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
-msgstr "(Zainstalowana)"
+msgstr "(zainstalowano)"
 
 #: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
@@ -140,7 +141,7 @@ msgstr "(Zainstalowano: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Osierocona)"
+msgstr "(osierocony)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
@@ -510,7 +511,7 @@ msgstr "Głosów"
 
 #: print.go:87
 msgid "Yay version v%s"
-msgstr "Wersja yay v%s"
+msgstr "Wersja yaya v%s"
 
 #: pkg/menus/menu.go:49
 msgid "[N]one"
@@ -594,7 +595,7 @@ msgstr "błąd podczas resetowania %s: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "błąd podczas ustawiania przyczyny instalacji pakietu na %s"
+msgstr "Nie udało się zaktualizować pakietu z przyczyny %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
@@ -650,7 +651,7 @@ msgstr "niepoprawna opcja: '--deps' i '--explicit' nie mogą być razem używane
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "Nieprawidłowe repozytorium"
+msgstr "błędne repozytorium"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
@@ -698,7 +699,7 @@ msgstr "paczka '%s' nie została odnaleziona"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "Nie znaleziono paczki w AUR"
+msgstr "nie znaleziono pakietu w AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"

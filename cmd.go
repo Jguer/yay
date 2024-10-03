@@ -54,7 +54,7 @@ If no operation is specified 'yay -Syu' will be performed
 If no operation is specified and targets are provided -Y will be assumed
 
 New options:
-       --repo             Assume targets are from the repositories
+    -N --repo             Assume targets are from the repositories
     -a --aur              Assume targets are from the AUR
 
 Permanent configuration options:
@@ -130,7 +130,7 @@ show specific options:
     -w --news             Print arch news
 
 yay specific options:
-    -c --clean            Remove unneeded dependencies
+    -c --clean            Remove unneeded dependencies (-cc to ignore optdepends)
        --gendb            Generates development package DB used for updating
 
 getpkgbuild specific options:
