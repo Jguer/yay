@@ -272,13 +272,13 @@ func Test_getPackageRepoURL(t *testing.T) {
 func TestABSPKGBUILDRepo(t *testing.T) {
 	t.Parallel()
 	cmdRunner := &testRunner{}
-	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch https://gitlab.archlinux.org/archlinux/packaging/packages/linux.git linux"
+	want := "/usr/local/bin/git --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --origin=origin --single-branch https://gitlab.archlinux.org/archlinux/packaging/packages/linux.git linux"
 	if os.Getuid() == 0 {
 		ld := "systemd-run"
 		if path, _ := exec.LookPath(ld); path != "" {
 			ld = path
 		}
-		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --single-branch https://gitlab.archlinux.org/archlinux/packaging/packages/linux.git linux", ld)
+		want = fmt.Sprintf("%s --service-type=oneshot --pipe --wait --pty --quiet -p DynamicUser=yes -p CacheDirectory=yay -E HOME=/tmp  --no-replace-objects -C /tmp/doesnt-exist clone --no-progress --origin=origin --single-branch https://gitlab.archlinux.org/archlinux/packaging/packages/linux.git linux", ld)
 	}
 
 	cmdBuilder := &testGitBuilder{
