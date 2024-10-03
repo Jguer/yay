@@ -545,6 +545,7 @@ pkgname = python-vosk
 	require.NoError(t, err)
 
 	wantCapture := []string{
+		"/usr/bin/git -C testdata/vosk-api branch --show-current",
 		"/usr/bin/git -C /testdir/vosk-api reset --hard HEAD",
 		"/usr/bin/git -C /testdir/vosk-api merge --no-edit --ff",
 		"makepkg --packagelist", "makepkg --packagelist",

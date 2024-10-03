@@ -73,6 +73,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 
 	wantCapture := []string{
 		"makepkg --packagelist",
+		"git -C testdata/jfin branch --show-current",
 		"git -C testdata/jfin git reset --hard HEAD",
 		"git -C testdata/jfin git merge --no-edit --ff",
 		"makepkg --packagelist",
@@ -337,6 +338,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 
 	wantCapture := []string{
 		"makepkg --packagelist",
+		"git -C testdata/jfin branch --show-current",
 		"git -C testdata/jfin git reset --hard HEAD",
 		"git -C testdata/jfin git merge --no-edit --ff",
 		"makepkg --packagelist",
@@ -510,6 +512,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 	wantCapture := []string{
 		"makepkg --printsrcinfo",
 		"makepkg --packagelist",
+		"git -C testdata/jfin branch --show-current",
 		"git -C testdata/jfin git reset --hard HEAD",
 		"git -C testdata/jfin git merge --no-edit --ff",
 		"makepkg --packagelist",
@@ -795,6 +798,7 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 	}
 
 	wantCapture := []string{
+		"git -C testdata/cephbin branch --show-current",
 		"git -C testdata/cephbin git reset --hard HEAD",
 		"git -C testdata/cephbin git merge --no-edit --ff",
 		"makepkg --packagelist",
@@ -923,8 +927,10 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 	}
 
 	wantCapture := []string{
+		"git -C testdata/gourou branch --show-current",
 		"git -C testdata/gourou git reset --hard HEAD",
 		"git -C testdata/gourou git merge --no-edit --ff",
+		"git -C testdata/libzip-git branch --show-current",
 		"git -C testdata/libzip-git git reset --hard HEAD",
 		"git -C testdata/libzip-git git merge --no-edit --ff",
 		"makepkg --packagelist",
