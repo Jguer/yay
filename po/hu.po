@@ -477,7 +477,7 @@ msgstr "Mégis megpróbálja összeállítani őket?"
 
 #: print.go:34
 msgid "URL"
-msgstr "URL"
+msgstr "Webcím"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
