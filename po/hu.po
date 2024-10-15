@@ -147,7 +147,7 @@ msgstr "AUR"
 
 #: print.go:44
 msgid "AUR URL"
-msgstr "AUR URL"
+msgstr "AUR webcím"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -441,7 +441,7 @@ msgstr "A yay gyorsítótár mérete %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
-msgstr "Pillanatnyi állapot URL"
+msgstr "Pillanatkép webcím"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
@@ -477,7 +477,7 @@ msgstr "Mégis megpróbálja összeállítani őket?"
 
 #: print.go:34
 msgid "URL"
-msgstr "URL"
+msgstr "Webcím"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
