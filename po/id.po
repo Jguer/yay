@@ -55,7 +55,7 @@ msgstr ""
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s sudah dibuat -- melewatkan pembangunan"
+msgstr "%s sudah dibuat -- mengabaikan proses build"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
