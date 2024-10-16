@@ -2,10 +2,11 @@
 # Translators:
 # Ludovico, 2022
 # Linerly <linerly@proton.me>, 2024
+# Alif Fathur, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Linerly <linerly@proton.me>, 2024\n"
+"Last-Translator: Alif Fathur, 2024\n"
 "Language-Team: Indonesian (https://app.transifex.com/yay-1/teams/123732/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,9 +15,25 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: xgotext\n"
 
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Direktori build:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Masukkan sebuah nomor (bawaan=1):"
+
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr "(File Pembangunan Sudah Ada)"
+msgstr "(File build Sudah Ada)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
@@ -33,16 +50,16 @@ msgstr "tidak ada yang dapat dilakukan"
 #: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
-"%s [A]Semua [Ab]Batalkan [I]Terpasang [No]BelumTerpasang atau (1 2 3, 1-3, "
+"%s [A]Semua [Ab]Batalkan [I]Terpasang [No]Belum terpasang atau (1 2 3, 1-3, "
 "^4)"
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s sudah dibuat -- melewatkan pembangunan"
+msgstr "%s sudah dibuat -- melewatkan proses build"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s tidak diatur"
+msgstr "%s belum diatur"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
@@ -52,11 +69,11 @@ msgstr "%s sudah ada."
 msgid "%s is up to date -- skipping"
 msgstr "%s sudah yang terbaru -- melewatkan"
 
-#: pkg/upgrade/service.go:292
+#: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "%s untuk ditingkatkan/pasang."
+msgstr "%s untuk diupgrade/dipasang."
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
 msgstr "%s juga akan dipasang untuk tindakan ini."
 
@@ -78,7 +95,7 @@ msgstr "%s: tidak dapat menggunakan target dengan opsi --repo -- melewatkan"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: mengabaikan peningkatan paket (%s => %s)"
+msgstr "%s: mengabaikan pengupgradean paket (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
@@ -89,12 +106,12 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s: mohon tetapkan variabel lingkungan AUR_USERNAME dan AUR_PASSWORD untuk "
+"%s: seilahkan atur variabel environment AUR_USERNAME dan AUR_PASSWORD untuk "
 "pemungutan suara"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) PKGBUILD terunduh dari ABS: %s"
+msgstr "(%d/%d) PKGBUILD diunduh dari ABS: %s"
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
@@ -108,33 +125,33 @@ msgstr "(%d/%d) Gagal mengunduh PKGBUILD: %s"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Menguraikan SRCINFO: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(Terpasang)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
 msgstr "(Terpasang: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Tertinggal)"
+msgstr "(Ditinggalkan)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
 msgstr "(Kedaluwarsa: %s)"
 
-#: print.go:44
-msgid "AUR URL"
-msgstr "URL AUR"
-
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
 msgstr "AUR"
 
+#: print.go:44
+msgid "AUR URL"
+msgstr "URL AUR"
+
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Tambahkan %s atau %s ke variabel lingkungan Anda"
+msgstr "Tambahkan %s atau %s ke variabel environment Anda"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
@@ -142,13 +159,13 @@ msgstr "Hindari menjalankan yay sebagai root/sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Periksa Ketergantungan"
+msgstr "Periksa dependensi"
 
 #: print.go:41
 msgid "Check Deps"
 msgstr "Periksa Ketergantungan"
 
-#: pkg/upgrade/service.go:90
+#: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
 msgstr "Memeriksa paket-paket pengembangan..."
 
@@ -204,7 +221,7 @@ msgstr "Edit PKGBUILD dengan?"
 msgid "Error during AUR search: %s\n"
 msgstr "Terjadi kesalahan melakukan pencarian AUR: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 "Tidak menyertakan paket dapat menyebabkan peningkatan parsial dan merusak "
@@ -235,7 +252,7 @@ msgstr "Gagal memasang paket berikut. Intervensi manual dibutuhkan:"
 msgid "First Submitted"
 msgstr "Pengiriman Pertama"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Paket AUR Yang Ditandai Sebagai Kedaluwarsa:"
 
@@ -291,13 +308,13 @@ msgstr "Ketergantungan Make"
 msgid "Make Deps"
 msgstr "Dependensi Make"
 
-#: pkg/query/aur_warnings.go:71
-msgid "Missing AUR Debug Packages:"
-msgstr "Paket Debug AUR Yang Tidak Ditemukan:"
-
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
 msgstr "Tidak Ditemukan"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "Paket Debug AUR Yang Tidak Ditemukan:"
 
 #: print.go:31
 msgid "Name"
@@ -319,7 +336,7 @@ msgstr "Tidak Ada"
 msgid "Optional Deps"
 msgstr "Dependensi Opsional"
 
-#: pkg/query/aur_warnings.go:75
+#: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "Paket AUR Tersendiri (tidak dipelihara):"
 
@@ -339,15 +356,15 @@ msgstr "PKGBUILD sudah terbaru, melewati pengunduhan: %s"
 msgid "PKGBUILDs to edit?"
 msgstr "PKGBUILD apa saja untuk diedit?"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "ID Basis Paket"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "Basis Paket"
 
-#: pkg/query/aur_warnings.go:67
+#: print.go:60
+msgid "Package Base ID"
+msgstr "ID Basis Paket"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
 msgstr "Paket yang tidak ada di AUR:"
 
@@ -359,7 +376,7 @@ msgstr "Paket-paket di bangunBersih?"
 msgid "Packages to exclude"
 msgstr "Paket untuk tidak disertakan"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 "Paket-paket yang tidak disertakan: (mis: \"1 2 3\", \"1-3\", \"^4\", atau "
@@ -375,7 +392,7 @@ msgstr "Popularitas"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Lanjutkan dengan pemasangan?"
+msgstr "Lanjutkan dengan instalasi?"
 
 #: print.go:37
 msgid "Provides"
@@ -389,25 +406,25 @@ msgstr "Hapus dependensi make setelah pemasangan?"
 msgid "Replaces"
 msgstr "Menggantikan"
 
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "Repositori"
+
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "Repositori AUR"
-
-#: print.go:30 pkg/db/ialpm/alpm.go:191
-msgid "Repository"
-msgstr "Repositori"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:72
+#: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
 msgstr "Mencari AUR untuk pembaruan..."
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
-msgstr "Mencari basis data untuk pembaruan..."
+msgstr "Mencari database untuk pembaruan..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
@@ -493,22 +510,6 @@ msgstr "Yay versi v%s"
 msgid "[N]one"
 msgstr "[T]idak Ada"
 
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"Direktori pembangunan:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"Masukkan sebuah nomor (bawaan=1):"
-
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "membatalkan karena pengguna"
@@ -537,11 +538,11 @@ msgstr "tidak dapat menemukan semua paket yang dibutuhkan"
 msgid "could not find any package archives listed in %s"
 msgstr "tidak dapat mencari paket arsip apa pun yang terdaftar di %s"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
 msgstr "ketergantungan"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "pemeriksaan devel untuk paket gagal: '%s' mengalami sebuah kesalahan"
 
@@ -651,6 +652,10 @@ msgstr "repositori tidak valid"
 msgid "invalid value: %d is not between %d and %d"
 msgstr "nilai tidak valid: %d tidak di antara %d dan %d"
 
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "tidak"
+
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "tidak ada kunci-kunci untuk diimpor"
@@ -662,10 +667,6 @@ msgstr "tidak ada pencarian yang dilakukan"
 #: local_install.go:66
 msgid "no target directories specified"
 msgstr "tidak ada sasaran direktori yang ditetapkan"
-
-#: pkg/text/input.go:48
-msgid "no"
-msgstr "tidak"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
@@ -679,6 +680,11 @@ msgstr "hanya satu operasi yang dapat digunakan"
 msgid "only one target is allowed"
 msgstr "hanya satu target yang diperbolehkan"
 
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "paket"
+
 #: print.go:187
 msgid "package '%s' was not found"
 msgstr "paket '%s' tidak ditemukan"
@@ -690,11 +696,6 @@ msgstr "paket tidak ditemukan di AUR"
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
 msgstr "paket tidak ditemukan di repositori"
-
-#: pkg/upgrade/service.go:292
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "paket"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
