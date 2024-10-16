@@ -392,7 +392,7 @@ msgstr "Popularitas"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Lanjutkan dengan pemasangan?"
+msgstr "Lanjutkan dengan instalasi?"
 
 #: print.go:37
 msgid "Provides"
