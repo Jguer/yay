@@ -21,7 +21,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Direktori pembangunan:"
+"Direktori build:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
