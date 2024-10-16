@@ -59,7 +59,7 @@ msgstr "%s sudah dibuat -- melewatkan proses build"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s tidak diatur"
+msgstr "%s belum diatur"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
