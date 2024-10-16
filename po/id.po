@@ -135,7 +135,7 @@ msgstr "(Terpasang: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Tertinggal)"
+msgstr "(Ditinggalkan)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
