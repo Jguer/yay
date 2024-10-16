@@ -424,7 +424,7 @@ msgstr "Mencari AUR untuk pembaruan..."
 
 #: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
-msgstr "Mencari basis data untuk pembaruan..."
+msgstr "Mencari database untuk pembaruan..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
