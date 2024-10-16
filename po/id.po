@@ -151,7 +151,7 @@ msgstr "URL AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Tambahkan %s atau %s ke variabel lingkungan Anda"
+msgstr "Tambahkan %s atau %s ke variabel environment Anda"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
