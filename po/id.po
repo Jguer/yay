@@ -111,7 +111,7 @@ msgstr ""
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) PKGBUILD terunduh dari ABS: %s"
+msgstr "(%d/%d) PKGBUILD diunduh dari ABS: %s"
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
