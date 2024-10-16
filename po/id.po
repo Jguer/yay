@@ -95,7 +95,7 @@ msgstr "%s: tidak dapat menggunakan target dengan opsi --repo -- melewatkan"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: mengabaikan peningkatan paket (%s => %s)"
+msgstr "%s: mengabaikan pengupgradean paket (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
