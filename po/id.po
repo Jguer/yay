@@ -71,7 +71,7 @@ msgstr "%s sudah yang terbaru -- melewatkan"
 
 #: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "%s untuk ditingkatkan/pasang."
+msgstr "%s untuk diupgrade/dipasang."
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
