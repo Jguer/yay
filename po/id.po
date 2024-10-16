@@ -50,7 +50,7 @@ msgstr "tidak ada yang dapat dilakukan"
 #: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
-"%s [A]Semua [Ab]Batalkan [I]Terpasang [No]BelumTerpasang atau (1 2 3, 1-3, "
+"%s [A]Semua [Ab]Batalkan [I]Terpasang [No]Belum terpasang atau (1 2 3, 1-3, "
 "^4)"
 
 #: pkg/sync/build/installer.go:308
