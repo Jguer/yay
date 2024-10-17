@@ -165,8 +165,8 @@ complete -c $progname -n "$webspecific" -s u -l unvote -d 'Unvote for AUR packag
 complete -c $progname -n "$webspecific" -xa "$listall"
 
 # New options
-complete -c $progname -n "not $noopt" -s N -l repo -d 'Assume targets are from the AUR' -f
-complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the repositories' -f
+complete -c $progname -n "not $noopt" -s a -l aur -d 'Assume targets are from the AUR' -f
+complete -c $progname -n "not $noopt" -s N -l repo -d 'Assume targets are from the repositories' -f
 
 # Yay options
 complete -c $progname -n "$yayspecific" -s c -l clean -d 'Remove unneeded dependencies' -f
