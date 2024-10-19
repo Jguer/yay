@@ -370,7 +370,7 @@ msgstr "不在 AUR 中的软件包："
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "清理哪些软件包的构建文件？"
+msgstr "清理哪些包的构建文件？"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
