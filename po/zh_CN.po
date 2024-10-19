@@ -8,10 +8,11 @@
 # lakejason0 <sunliyuan200402@outlook.com>, 2023
 # Alex Wang, 2023
 # Xuekai Deng, 2024
+# CloverGit, 2024
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Xuekai Deng, 2024\n"
+"Last-Translator: CloverGit, 2024\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/yay-1/teams/123732/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,6 +20,22 @@ msgstr ""
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: xgotext\n"
+
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"构建目录:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"输入数字 (默认=1): "
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
@@ -56,11 +73,11 @@ msgstr "%s 存在。"
 msgid "%s is up to date -- skipping"
 msgstr "%s 是最新的 -- 跳过"
 
-#: pkg/upgrade/service.go:292
+#: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
 msgstr "%s 个要进行升级/安装的包。"
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
 msgstr "%s 也会为此操作而被安装。"
 
@@ -110,11 +127,11 @@ msgstr "(%d/%d) 下载PKGBUILD失败"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) 正在解析 SRCINFO: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(已安装)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
 msgstr "(已安装: %s)"
 
@@ -126,13 +143,13 @@ msgstr "(孤儿包)"
 msgid "(Out-of-date: %s)"
 msgstr "(过时的: %s)"
 
-#: print.go:44
-msgid "AUR URL"
-msgstr "AUR URL"
-
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
 msgstr "AUR"
+
+#: print.go:44
+msgid "AUR URL"
+msgstr "AUR URL"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -150,7 +167,7 @@ msgstr "作为检查依赖安装"
 msgid "Check Deps"
 msgstr "检查依赖"
 
-#: pkg/upgrade/service.go:90
+#: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
 msgstr "正在检查开发包..."
 
@@ -172,7 +189,7 @@ msgstr "作为依赖安装"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "依赖于"
+msgstr "依赖以下包"
 
 #: print.go:33
 msgid "Description"
@@ -206,7 +223,7 @@ msgstr "使用什么来编辑 PKGBUILD？"
 msgid "Error during AUR search: %s\n"
 msgstr "搜索 AUR 时出错: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr "排除软件包可能会导致不完整的升级并破坏系统"
 
@@ -235,7 +252,7 @@ msgstr "无法安装以下软件包, 需要手动介入处理:"
 msgid "First Submitted"
 msgstr "首次提交"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "标记为过时的 AUR 软件包:"
 
@@ -291,13 +308,13 @@ msgstr "作为生成依赖安装"
 msgid "Make Deps"
 msgstr "生成依赖"
 
-#: pkg/query/aur_warnings.go:71
-msgid "Missing AUR Debug Packages:"
-msgstr "缺少 AUR 调试包:"
-
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
 msgstr "缺少"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "缺少 AUR 调试包:"
 
 #: print.go:31
 msgid "Name"
@@ -319,7 +336,7 @@ msgstr "没有"
 msgid "Optional Deps"
 msgstr "可选依赖"
 
-#: pkg/query/aur_warnings.go:75
+#: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "孤儿 (无人维护) 的 AUR 软件包："
 
@@ -339,15 +356,15 @@ msgstr "PKGBUILD 是最新的，跳过下载: %s"
 msgid "PKGBUILDs to edit?"
 msgstr "要编辑哪些 PKGBUILD？"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "包基础 ID"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "包基础"
 
-#: pkg/query/aur_warnings.go:67
+#: print.go:60
+msgid "Package Base ID"
+msgstr "包基础 ID"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
 msgstr "不在 AUR 中的软件包："
 
@@ -359,7 +376,7 @@ msgstr "清理哪些软件包的构建文件？"
 msgid "Packages to exclude"
 msgstr "要排除的软件包"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "要排除的包: (示例: \"1 2 3\", \"1-3\", \"^4\" 或软件库名称)"
 
@@ -387,23 +404,23 @@ msgstr "安装后删除生成依赖？"
 msgid "Replaces"
 msgstr "替换"
 
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "软件库"
+
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "AUR 软件库"
-
-#: print.go:30 pkg/db/ialpm/alpm.go:191
-msgid "Repository"
-msgstr "软件库"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:72
+#: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
 msgstr "正在搜索 AUR 以获取更新..."
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
 msgstr "正在搜索数据库以获取更新..."
 
@@ -491,22 +508,6 @@ msgstr "Yay 版本 v%s"
 msgid "[N]one"
 msgstr "[N]没有"
 
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"构建目录:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"输入数字 (默认=1): "
-
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "由于用户而中止"
@@ -535,11 +536,11 @@ msgstr "无法找到所有必需的软件包"
 msgid "could not find any package archives listed in %s"
 msgstr "在 %s 中无法找到任何软件包存档"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
 msgstr "作为依赖安装"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "软件包的开发检查失败: '%s' 遇到了错误"
 
@@ -647,6 +648,10 @@ msgstr "无效软件库"
 msgid "invalid value: %d is not between %d and %d"
 msgstr "无效值: %d 不在 %d 和 %d 之间"
 
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "no"
+
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "没有要导入的密钥"
@@ -658,10 +663,6 @@ msgstr "没有查询被执行"
 #: local_install.go:66
 msgid "no target directories specified"
 msgstr "未指定目标目录"
-
-#: pkg/text/input.go:48
-msgid "no"
-msgstr "no"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
@@ -675,6 +676,11 @@ msgstr "一次只能使用一项操作"
 msgid "only one target is allowed"
 msgstr "仅允许一个目标"
 
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "软件包"
+
 #: print.go:187
 msgid "package '%s' was not found"
 msgstr "找不到软件包 '%s'"
@@ -686,11 +692,6 @@ msgstr "AUR 中找不到软件包"
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
 msgstr "软件库中找不到软件包"
-
-#: pkg/upgrade/service.go:292
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "软件包"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
