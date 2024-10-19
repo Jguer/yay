@@ -398,7 +398,7 @@ msgstr "提供"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "安装后删除生成依赖？"
+msgstr "安装后删除构建依赖？"
 
 #: print.go:43
 msgid "Replaces"
