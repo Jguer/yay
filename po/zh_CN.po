@@ -278,7 +278,7 @@ msgstr "导入？"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "正在用 gpg 导入密钥..."
+msgstr "正在导入 GPG 密钥..."
 
 #: print.go:46
 msgid "Keywords"
