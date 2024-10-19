@@ -418,11 +418,11 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
-msgstr "正在搜索 AUR 以获取更新..."
+msgstr "正在搜索 AUR 更新..."
 
 #: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
-msgstr "正在搜索数据库以获取更新..."
+msgstr "正在搜索数据库更新..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
