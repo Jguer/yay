@@ -322,11 +322,11 @@ msgstr "名称"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "未找到 AUR 软件包"
+msgstr "找不到 AUR 包"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "未找到包"
+msgstr "找不到包"
 
 #: print.go:225
 msgid "None"
