@@ -302,11 +302,11 @@ msgstr "维护者"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "作为生成依赖安装"
+msgstr "作为构建依赖安装"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "生成依赖"
+msgstr "构建依赖"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
