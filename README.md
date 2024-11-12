@@ -30,7 +30,8 @@ Yet Another Yogurt - An AUR Helper Written in Go
 
 If you are migrating from another AUR helper, you can simply install Yay with that helper.
 
-⚠️ We are using `sudo` in these examples, you can switch that out for a different privilege escalation tool.
+> [!WARNING]  
+> We are using `sudo` in these examples, you can switch that out for a different privilege escalation tool.
 
 ### Source
 
@@ -78,8 +79,8 @@ you can simply install yay using pacman (as root):
 ```sh
 pacman -S --needed git base-devel yay
 ```
-
-⚠️ distributions sometimes lag updating yay on their repositories.
+> [!WARNING]  
+> distributions sometimes lag updating yay on their repositories.
 
 ## First Use
 
