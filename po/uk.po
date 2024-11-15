@@ -1,21 +1,37 @@
-#
+# 
 # Translators:
 # Volodymyr Markiv <vov4uk21@gmail.com>, 2021
-# Andrii Lytvyn, 2022
-#
+# Igor Lukyanov, 2023
+# Andrii Lytvyn, 2023
+# null null, 2023
+# Andrii Yermak, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Andrii Lytvyn, 2022\n"
-"Language-Team: Ukrainian (https://www.transifex.com/yay-1/teams/123732/uk/)\n"
-"Language: uk\n"
+"Last-Translator: Andrii Yermak, 2024\n"
+"Language-Team: Ukrainian (https://app.transifex.com/yay-1/teams/123732/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
-"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
-"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
-"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Language: uk\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 "X-Generator: xgotext\n"
+
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Каталог збірки:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Введіть число (типово=1):"
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
@@ -54,14 +70,13 @@ msgstr "%s вже існує."
 msgid "%s is up to date -- skipping"
 msgstr "%s є актуальним -- пропуск"
 
-#: pkg/upgrade/service.go:292
-#, fuzzy
+#: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "Пакунки для оновлення."
+msgstr "%s  для оновлення/встановлення."
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
-msgstr ""
+msgstr "%s також буде встановлено для цієї операції."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
@@ -81,7 +96,7 @@ msgstr "%s: не вдалося застосувати ціль з параме�
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: ігнорування оновлення пакета ( %s => %s)"
+msgstr "%s: ігнорування оновлення пакунка ( %s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
@@ -89,8 +104,11 @@ msgstr "%s: встановлений пакунок (%s) новіший ніж �
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
+"%s: будь ласка встановіть змінні середовища AUR_USERNAME та AUR_PASSWORD для"
+" цього голосування"
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
@@ -101,19 +119,18 @@ msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) Завантажено PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
-#, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Завантажено PKGBUILD: %s"
+msgstr "(%d/%d) Не вдалося завантажити PKGBUILD: %s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Аналіз SRCINFO: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(Встановлено)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
 msgstr "(Встановлено: %s)"
 
@@ -125,14 +142,13 @@ msgstr "(Осиротілий)"
 msgid "(Out-of-date: %s)"
 msgstr "(Застарілий: %s)"
 
+#: pkg/dep/dep_graph.go:75
+msgid "AUR"
+msgstr "AUR"
+
 #: print.go:44
 msgid "AUR URL"
 msgstr "AUR URL"
-
-#: pkg/dep/dep_graph.go:75
-#, fuzzy
-msgid "AUR"
-msgstr "URL"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -140,20 +156,19 @@ msgstr "Додайте %s або %s до змінних середовища"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Не запускайте yay як root/sudo."
+msgstr "Не запускайте yay від імені root/sudo."
 
 #: pkg/dep/dep_graph.go:63
-#, fuzzy
 msgid "Check Dependency"
-msgstr "Залежності Перевірки"
+msgstr "Перевірити залежності"
 
 #: print.go:41
 msgid "Check Deps"
 msgstr "Залежності Перевірки"
 
-#: pkg/upgrade/service.go:90
+#: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
-msgstr "Перевірка пакетів розробки..."
+msgstr "Перевірка пакунків розробки..."
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
@@ -168,9 +183,8 @@ msgid "Deleting (%d/%d): %s"
 msgstr "Видалення (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
-#, fuzzy
 msgid "Dependency"
-msgstr "Залежить Від"
+msgstr "Залежність"
 
 #: print.go:38
 msgid "Depends On"
@@ -186,7 +200,7 @@ msgstr "Показати зміни?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr ""
+msgstr "Вимкнути параметр 'provides' за замовчуванням"
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
@@ -208,43 +222,43 @@ msgstr "Редагувати PKGBUILD за допомогою?"
 msgid "Error during AUR search: %s\n"
 msgstr "Помилка під час пошуку у AUR: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
+"Виключення пакетів може привести до часткового оновлення та зламати систему "
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
-msgstr ""
+msgstr "Явно"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
 msgstr "Явно встановлені пакунки: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
-#, fuzzy
 msgid "Failed to find AUR package for"
-msgstr "Пакунки з AUR, що позначені як застарілі:"
+msgstr "Не вдалося знайти AUR пакет для"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr ""
+msgstr "Не вдалося встановити шар, перекочуємось до наступного шару."
 
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
-msgstr ""
+msgstr "Не вдалося встановити наступні пакети. Необхідне ручне втручання:"
 
 #: print.go:45
 msgid "First Submitted"
 msgstr "Вперше Завантажений"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Пакунки з AUR, що позначені як застарілі:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Сторонні встановлені пакети: %s"
+msgstr "Сторонні встановлені пакунки: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
@@ -280,42 +294,39 @@ msgstr "Ліцензії"
 
 #: pkg/dep/dep_graph.go:77
 msgid "Local"
-msgstr ""
+msgstr "Локальний"
 
 #: print.go:48
 msgid "Maintainer"
 msgstr "Супроводжувач"
 
 #: pkg/dep/dep_graph.go:62
-#, fuzzy
 msgid "Make Dependency"
-msgstr "Залежності Збірки"
+msgstr "Зібрати залежність"
 
 #: print.go:40
 msgid "Make Deps"
 msgstr "Залежності Збірки"
 
-#: pkg/query/aur_warnings.go:71
-msgid "Missing AUR Debug Packages:"
-msgstr "Відсутні пакети налагодження AUR:"
-
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
-msgstr ""
+msgstr "Нестачає"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "Відсутні налагоджувальні пакунки з AUR:"
 
 #: print.go:31
 msgid "Name"
 msgstr "Ім'я"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
-#, fuzzy
 msgid "No AUR package found for"
-msgstr "пакунок не знайдено в репозиторіях"
+msgstr "Не знайдено AUR пакету для"
 
 #: pkg/dep/dep_graph.go:182
-#, fuzzy
 msgid "No package found for"
-msgstr "пакунок не знайдено в репозиторіях"
+msgstr "Пакунок не знайдено для"
 
 #: print.go:225
 msgid "None"
@@ -325,10 +336,9 @@ msgstr "Ні"
 msgid "Optional Deps"
 msgstr "Необов'язкові Залежності"
 
-#: pkg/query/aur_warnings.go:75
-#, fuzzy
+#: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Осиротілі пакунки AUR:"
+msgstr "Сирі (що не супроводжуються) AUR Пакети:"
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
@@ -339,40 +349,37 @@ msgid "PGP keys need importing:"
 msgstr "Необхідно імпортувати ключі PGP:"
 
 #: pkg/sync/workdir/preparer.go:252
-#, fuzzy
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD актуальний, пропуск (%d/%d): %s"
+msgstr "PKGBUILD оновлений, пропускаємо завантаження: %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
 msgstr "Редагувати PKGBUILDs?"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "ID Групи Пакунків"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "Група Пакунків"
 
-#: pkg/query/aur_warnings.go:67
-#, fuzzy
+#: print.go:60
+msgid "Package Base ID"
+msgstr "ID Групи Пакунків"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
-msgstr "пакунок не знайдено в AUR"
+msgstr "Пакети не в AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Пакети для чистої збірки?"
+msgstr "Пакунки для чистої збірки?"
 
 #: pkg/dep/dep_graph.go:202
-#, fuzzy
 msgid "Packages to exclude"
-msgstr "Пакунки для оновлення."
+msgstr "Пакети для виключення"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
-"Пакети, які потрібно виключити: (наприклад, \"1 2 3\", \"1-3\", \"^4\" або "
+"Пакунки, які потрібно виключити: (наприклад, \"1 2 3\", \"1-3\", \"^4\" або "
 "назва репозиторію)"
 
 #: cmd.go:392
@@ -397,25 +404,25 @@ msgstr "Видалити залежності збірки після встан
 
 #: print.go:43
 msgid "Replaces"
-msgstr ""
+msgstr "Замінює"
+
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "Репозиторій"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "Репозиторій AUR"
 
-#: print.go:30 pkg/db/ialpm/alpm.go:191
-msgid "Repository"
-msgstr "Репозиторій"
-
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
-msgstr ""
+msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:72
+#: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
 msgstr "Пошук оновлень у AUR..."
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
 msgstr "Пошук оновлень у базах даних..."
 
@@ -437,15 +444,15 @@ msgstr "URL знімка"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
-msgstr ""
+msgstr "Синхронізувати"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "Десять найбільших пакетів:"
+msgstr "Десять найбільших пакунків:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr "Наступні пакети не сумісні з вашою архітектурою:"
+msgstr "Наступні пакунки не сумісні з вашою архітектурою:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %d providers available for %s:"
@@ -457,11 +464,11 @@ msgstr "Можливо, запущено інший екземпляр Pacman. �
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Загальний розмір, зайнятий пакетами: %s"
+msgstr "Загальний розмір, зайнятий пакунками: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Загальна кількість встановлених пакетів: %s"
+msgstr "Загальна кількість встановлених пакунків: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
@@ -477,16 +484,15 @@ msgstr "Неможливо очистити:"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "Не вдалося знайти такі пакети:"
+msgstr "Не вдалося знайти наступні пакунки:"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr ""
+msgstr "Неможливо обробити голос за пакет: %s. помилка: %s"
 
 #: clean.go:170
-#, fuzzy
 msgid "Unable to remove %s: %s"
-msgstr "не вдалося проаналізувати %s: %s"
+msgstr "Неможливо видалити %s: %s"
 
 #: print.go:32
 msgid "Version"
@@ -504,33 +510,17 @@ msgstr "Версія Yay v%s"
 msgid "[N]one"
 msgstr "[N]Ні"
 
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"Каталог збірки:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"Введіть число (типово=1):"
-
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "зупинка через користувача"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr ""
+msgstr "аргумент '-' вказаний без вводу у stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr ""
+msgstr "не вдалося знайти PKGBUILD та .SRCINFO в директорії"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
@@ -541,20 +531,18 @@ msgid "could not find PKGDEST for: %s"
 msgstr "не вдалося знайти PKGDEST для: %s"
 
 #: errors.go:9
-#, fuzzy
 msgid "could not find all required packages"
-msgstr "Не вдалося знайти всі необхідні пакунки:"
+msgstr "не знайдені всі необхідні пакунки"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr ""
+msgstr "не знайдено жодного пакунку з перелічених у %s"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
-#, fuzzy
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
-msgstr "Залежить Від"
+msgstr "залежність"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "розробницька перевірка пакунку не вдалася: '%s' сталася помилка"
 
@@ -572,12 +560,11 @@ msgstr "помилка отримання %s: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "помалка встановлення пакунку з репозиторіїв"
+msgstr "помилка встановлення пакунку з репозиторіїв"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
-#, fuzzy
 msgid "error installing:"
-msgstr "помалка встановлення пакунку з репозиторіїв"
+msgstr "помилка встановлення:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
@@ -600,13 +587,12 @@ msgid "error resetting %s: %s"
 msgstr "помилка скидання %s: %s"
 
 #: pkg/sync/build/errors.go:53
-#, fuzzy
 msgid "error updating package install reason to %s"
-msgstr "помилка оновлення причини встановлення пакунка на 'явно встановлено'"
+msgstr "помилка оновлення причини встановлення пакунка для %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr ""
+msgstr "явно"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
@@ -625,9 +611,8 @@ msgid "failed to parse %s: %s"
 msgstr "не вдалося проаналізувати %s: %s"
 
 #: local_install.go:77
-#, fuzzy
 msgid "failed to parse .SRCINFO"
-msgstr "не вдалося проаналізувати %s: %s"
+msgstr "не вдалося проаналізувати .SRCINFO"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
@@ -635,12 +620,11 @@ msgstr "не вдалося прочитати конфігураційний ф
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr ""
+msgstr "не вдалося отримати кеш AUR"
 
 #: pkg/upgrade/sources.go:27
-#, fuzzy
 msgid "ignoring package devel upgrade (no AUR info found):"
-msgstr "%s: ігнорування оновлення пакета ( %s => %s)"
+msgstr "ігноруємо оновлення розробки пакунка (нема інформації в AUR):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
@@ -667,6 +651,10 @@ msgstr "недійсний репозиторій"
 msgid "invalid value: %d is not between %d and %d"
 msgstr "некоректне значення: %d не знаходиться між %d та %d"
 
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "ні"
+
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "нема ключів для імпорту"
@@ -677,15 +665,11 @@ msgstr "запит не виконано"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr ""
-
-#: pkg/text/input.go:48
-msgid "no"
-msgstr "ні"
+msgstr "цільова директорія не вказана"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr ""
+msgstr "нема чого встановити для %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
@@ -693,7 +677,15 @@ msgstr "одночасно можна використовувати лише о
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr ""
+msgstr "дозволена лише одна ціль"
+
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "пакунок"
+msgstr[1] "пакунки"
+msgstr[2] "пакунків"
+msgstr[3] "пакунків"
 
 #: print.go:187
 msgid "package '%s' was not found"
@@ -707,22 +699,13 @@ msgstr "пакунок не знайдено в AUR"
 msgid "package not found in repos"
 msgstr "пакунок не знайдено в репозиторіях"
 
-#: pkg/upgrade/service.go:292
-#, fuzzy
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "Група Пакунків"
-msgstr[1] "Група Пакунків"
-msgstr[2] "Група Пакунків"
-msgstr[3] "Група Пакунків"
-
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
 msgstr "проблема імпортування ключів"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "видалення пакетів AUR з кешу..."
+msgstr "видалення пакунків AUR з кешу..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
@@ -733,9 +716,8 @@ msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "PKGDEST для %s перераховано makepkg, але не існує: %s"
 
 #: pkg/sync/sync.go:45
-#, fuzzy
 msgid "there is nothing to do"
-msgstr "тут нічого робити"
+msgstr "нема чого робити"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
@@ -752,43 +734,3 @@ msgstr "невідома версія"
 #: pkg/text/input.go:47
 msgid "yes"
 msgstr "так"
-
-#~ msgid " (Target"
-#~ msgstr "(Ціль"
-
-#~ msgid " (Wanted by: "
-#~ msgstr "(Треба пакунку:"
-
-#~ msgid "%s not satisfied, flushing install queue"
-#~ msgstr "%s не задоволено, очищення черги встановлення"
-
-#~ msgid "Checking for conflicts..."
-#~ msgstr "Перевірка на наявність конфліктів..."
-
-#~ msgid "Checking for inner conflicts..."
-#~ msgstr "Перевірка на внутрішні конфлікти..."
-
-#~ msgid "Conflicting packages will have to be confirmed manually"
-#~ msgstr "Конфліктні пакети потрібно буде підтвердити вручну"
-
-#~ msgid "Inner conflicts found:"
-#~ msgstr "Виявлено внутрішні конфлікти:"
-
-#~ msgid "Installing %s will remove:"
-#~ msgstr "Встановлення %s видалить:"
-
-#~ msgid "Missing AUR Packages:"
-#~ msgstr "Відсутні пакунки з AUR:"
-
-#~ msgid "Package conflicts found:"
-#~ msgstr "Виявлено конфлікти пакунків:"
-
-#~ msgid "Querying AUR..."
-#~ msgstr "Запит AUR..."
-
-#~ msgid "error updating package install reason to dependency"
-#~ msgstr "помилка оновлення причини встановлення пакунка на 'залежність'"
-
-#~ msgid "package conflicts can not be resolved with noconfirm, aborting"
-#~ msgstr ""
-#~ "конфлікти пакетів не можна вирішити за допомогою noconfirm, переривання"
