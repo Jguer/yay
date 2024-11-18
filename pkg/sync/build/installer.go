@@ -219,6 +219,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		return nil
 	}
 
+	builtPkgDests := make(map[string]map[string]string)
 	deps, exps := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
 	pkgArchives := make([]string, 0, len(exps)+len(deps))
 
@@ -226,16 +227,25 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 		base := nameToBase[name]
 		dir := pkgBuildDirsByBase[base]
 
-		pkgdests, errMake := installer.buildPkg(ctx, dir, base,
-			installIncompatible, cmdArgs.ExistsArg("needed"), installer.origTargets.Contains(name))
-		if errMake != nil {
-			if !lastLayer {
-				return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
+		pkgdests, ok := builtPkgDests[base]
+		if ok {
+			installer.log.Debugln("skipping built pkgbase", base, "package", name)
+		} else {
+			var errMake error
+			installer.log.Debugln("building pkgbase", base, "package", name)
+			pkgdests, errMake = installer.buildPkg(ctx, dir, base,
+				installIncompatible, cmdArgs.ExistsArg("needed"), installer.origTargets.Contains(name))
+			if errMake != nil {
+				if !lastLayer {
+					return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
+				}
+
+				installer.failedAndIgnored[name] = errMake
+				installer.log.Errorln(gotext.Get("error making: %s", base), "-", errMake)
+				continue
 			}
 
-			installer.failedAndIgnored[name] = errMake
-			installer.log.Errorln(gotext.Get("error making: %s", base), "-", errMake)
-			continue
+			builtPkgDests[base] = pkgdests
 		}
 
 		if len(pkgdests) == 0 {
