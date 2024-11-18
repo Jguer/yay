@@ -547,7 +547,7 @@ pkgname = python-vosk
 	wantCapture := []string{
 		"/usr/bin/git -C /testdir/vosk-api reset --hard HEAD",
 		"/usr/bin/git -C /testdir/vosk-api merge --no-edit --ff",
-		"makepkg --packagelist", "makepkg --packagelist",
+		"makepkg --packagelist",
 		"makepkg --packagelist",
 	}
 	wantShow := []string{
@@ -555,7 +555,6 @@ pkgname = python-vosk
 		"makepkg --verifysource --skippgpcheck -f -Cc", "makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/vosk-api-0.3.45-1-x86_64.pkg.tar.zst",
-		"makepkg --nobuild -f -C --ignorearch", "makepkg -c --nobuild --noextract --ignorearch",
 		"makepkg --nobuild -f -C --ignorearch", "makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/vosk-api-0.3.45-1-x86_64.pkg.tar.zst /testdir/python-vosk-0.3.45-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- vosk-api",

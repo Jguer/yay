@@ -696,8 +696,6 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 				"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 aspnet-runtime dotnet-sdk-6.0",
 				"makepkg --nobuild -f -C --ignorearch",
 				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -c --nobuild --noextract --ignorearch",
 				"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asdeps --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
 				"makepkg --nobuild -f -C --ignorearch",
@@ -705,7 +703,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 				"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
 			},
-			wantCapture: []string{"makepkg --packagelist", "makepkg --packagelist", "makepkg --packagelist"},
+			wantCapture: []string{"makepkg --packagelist", "makepkg --packagelist"},
 		},
 	}
 

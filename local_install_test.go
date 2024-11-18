@@ -61,8 +61,6 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
 		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -f -C --ignorearch",
-		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
 		"makepkg --nobuild -f -C --ignorearch",
@@ -75,7 +73,6 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		"makepkg --packagelist",
 		"git -C testdata/jfin git reset --hard HEAD",
 		"git -C testdata/jfin git merge --no-edit --ff",
-		"makepkg --packagelist",
 		"makepkg --packagelist",
 	}
 
@@ -331,15 +328,12 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -f -C --ignorearch",
-		"makepkg -c --nobuild --noextract --ignorearch",
 	}
 
 	wantCapture := []string{
 		"makepkg --packagelist",
 		"git -C testdata/jfin git reset --hard HEAD",
 		"git -C testdata/jfin git merge --no-edit --ff",
-		"makepkg --packagelist",
 		"makepkg --packagelist",
 	}
 
@@ -497,8 +491,6 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
 		"makepkg --nobuild -f -C --ignorearch",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -f -C --ignorearch",
-		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
 		"makepkg --nobuild -f -C --ignorearch",
@@ -512,7 +504,6 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		"makepkg --packagelist",
 		"git -C testdata/jfin git reset --hard HEAD",
 		"git -C testdata/jfin git merge --no-edit --ff",
-		"makepkg --packagelist",
 		"makepkg --packagelist",
 	}
 
