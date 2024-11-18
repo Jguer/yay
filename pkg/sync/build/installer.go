@@ -148,13 +148,17 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	nameToBaseMap := make(map[string]string, 0)
 	syncDeps, syncExp, syncGroups := mapset.NewThreadUnsafeSet[string](),
 		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
-	aurDeps, aurExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
+	aurDeps, aurExp, aurOrigTargetBases := mapset.NewThreadUnsafeSet[string](),
+		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 
 	upgradeSync := false
 	for name, info := range layer {
 		switch info.Source {
 		case dep.AUR, dep.SrcInfo:
 			nameToBaseMap[name] = *info.AURBase
+			if installer.origTargets.Contains(name) {
+				aurOrigTargetBases.Add(*info.AURBase)
+			}
 
 			switch info.Reason {
 			case dep.Explicit:
@@ -201,14 +205,15 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	}
 
 	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp,
-		nameToBaseMap, pkgBuildDirs, true, lastLayer, installer.appendNoConfirm())
+		aurOrigTargetBases, nameToBaseMap, pkgBuildDirs, true, lastLayer,
+		installer.appendNoConfirm())
 
 	return errAur
 }
 
 func (installer *Installer) installAURPackages(ctx context.Context,
 	cmdArgs *parser.Arguments,
-	aurDepNames, aurExpNames mapset.Set[string],
+	aurDepNames, aurExpNames, aurOrigTargetBases mapset.Set[string],
 	nameToBase, pkgBuildDirsByBase map[string]string,
 	installIncompatible bool,
 	lastLayer bool,
@@ -234,7 +239,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 			var errMake error
 			installer.log.Debugln("building pkgbase", base, "package", name)
 			pkgdests, errMake = installer.buildPkg(ctx, dir, base,
-				installIncompatible, cmdArgs.ExistsArg("needed"), installer.origTargets.Contains(name))
+				installIncompatible, cmdArgs.ExistsArg("needed"), aurOrigTargetBases.Contains(base))
 			if errMake != nil {
 				if !lastLayer {
 					return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
