@@ -85,13 +85,13 @@ func gitHasDiff(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) (bo
 
 		return lastseen != upstream, nil
 	}
-	// If YAY_DIFF_REVIEW does not exists, we have never reviewed a diff for this package
+	// If AUR_SEEN does not exists, we have never reviewed a diff for this package
 	// and should display it.
 	return true, nil
 }
 
 // Return whether or not we have reviewed a diff yet. It checks for the existence of
-// YAY_DIFF_REVIEW in the git ref-list.
+// AUR_SEEN in the git ref-list.
 func gitHasLastSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) bool {
 	_, _, err := cmdBuilder.Capture(
 		cmdBuilder.BuildGitCmd(ctx,
@@ -100,7 +100,7 @@ func gitHasLastSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir stri
 	return err == nil
 }
 
-// Returns the last reviewed hash. If YAY_DIFF_REVIEW exists it will return this hash.
+// Returns the last reviewed hash. If AUR_SEEN exists it will return this hash.
 // If it does not it will return empty tree as no diff have been reviewed yet.
 func getLastSeenHash(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) (string, error) {
 	if gitHasLastSeenRef(ctx, cmdBuilder, dir) {
@@ -119,7 +119,7 @@ func getLastSeenHash(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string
 	return gitEmptyTree, nil
 }
 
-// Update the YAY_DIFF_REVIEW ref to HEAD. We use this ref to determine which diff were
+// Update the AUR_SEEN ref to HEAD. We use this ref to determine which diff were
 // reviewed by the user.
 func gitUpdateSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) error {
 	_, stderr, err := cmdBuilder.Capture(
