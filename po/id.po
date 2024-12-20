@@ -1,12 +1,12 @@
-#
+# 
 # Translators:
 # Ludovico, 2022
-# Linerly <linerly@proton.me>, 2024
 # Alif Fathur, 2024
-#
+# Linerly <linerly@proton.me>, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Alif Fathur, 2024\n"
+"Last-Translator: Linerly <linerly@proton.me>, 2024\n"
 "Language-Team: Indonesian (https://app.transifex.com/yay-1/teams/123732/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
