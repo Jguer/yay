@@ -1,12 +1,12 @@
-#
+# 
 # Translators:
 # Szigeti Péter, 2021
 # Gergő Kasza, 2022
-# summoner, 2024
-#
+# summoner001, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: summoner, 2024\n"
+"Last-Translator: summoner001, 2024\n"
 "Language-Team: Hungarian (https://app.transifex.com/yay-1/teams/123732/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -457,7 +457,7 @@ msgstr "Az alábbi csomagok nem kompatibilisek a processzor architektúrájával
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "%[1]d szolgáltató áll rendelkezésre ehhez: %[2]s: "
+msgstr "%[1]d szolgáltató érhető el a következőhöz: %[2]d:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
