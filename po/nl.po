@@ -1,4 +1,4 @@
-#
+# 
 # Translators:
 # Pim van den Berg, 2022
 # Jonathan van der Steege <jonakeys@hotmail.com>, 2023
@@ -6,7 +6,7 @@
 # Luke Rieff, 2023
 # Ariejan de Vroom <ariejan@ariejan.net>, 2024
 # Heimen Stoffels <vistausss@fastmail.com>, 2024
-#
+# 
 msgid ""
 msgstr ""
 "Last-Translator: Heimen Stoffels <vistausss@fastmail.com>, 2024\n"
@@ -17,6 +17,22 @@ msgstr ""
 "Language: nl\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
+
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Bouwmap:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Voer een getal in (standaard=1):"
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
@@ -55,11 +71,11 @@ msgstr "%s is aanwezig."
 msgid "%s is up to date -- skipping"
 msgstr "%s is actueel -- wordt overgeslagen"
 
-#: pkg/upgrade/service.go:292
+#: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
 msgstr "%s te upgraden/ installeren."
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
 msgstr "%s wordt ook geïnstalleerd bij het uitvoeren van deze actie."
 
@@ -111,11 +127,11 @@ msgstr "(%d/%d) De PKGBUILD kan niet worden gedownload: %s"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Bezig met verwerken van SRCINFO: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(Geïnstalleerd)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
 msgstr "(Geïnstalleerd: %s)"
 
@@ -127,13 +143,13 @@ msgstr "(Onteigend)"
 msgid "(Out-of-date: %s)"
 msgstr "(Verouderd: %s)"
 
-#: print.go:44
-msgid "AUR URL"
-msgstr "AUR-url"
-
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
 msgstr "AUR"
+
+#: print.go:44
+msgid "AUR URL"
+msgstr "AUR-url"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -151,7 +167,7 @@ msgstr "Afhankelijkheid controleren"
 msgid "Check Deps"
 msgstr "Afhankelijkheden controleren"
 
-#: pkg/upgrade/service.go:90
+#: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
 msgstr "Bezig met controleren van ontwikkelpakketten…"
 
@@ -207,7 +223,7 @@ msgstr "PKGBUILD bewerken met?"
 msgid "Error during AUR search: %s\n"
 msgstr "Fout tijdens AUR-zoekactie: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 "Pakketten uitsluiten kan mogelijk leiden tot onafgeronde upgrades en/of "
@@ -241,7 +257,7 @@ msgstr ""
 msgid "First Submitted"
 msgstr "Eerst ingezonden op"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Verouderde AUR-pakketten:"
 
@@ -297,13 +313,13 @@ msgstr "Make-afhankelijkheid"
 msgid "Make Deps"
 msgstr "Make-afhankelijkheden"
 
-#: pkg/query/aur_warnings.go:71
-msgid "Missing AUR Debug Packages:"
-msgstr "Ontbrekende AUR-foutopsporingspakketten:"
-
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
 msgstr "Ontbrekend"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "Ontbrekende AUR-foutopsporingspakketten:"
 
 #: print.go:31
 msgid "Name"
@@ -325,7 +341,7 @@ msgstr "Geen"
 msgid "Optional Deps"
 msgstr "Optionele afhankelijkheden"
 
-#: pkg/query/aur_warnings.go:75
+#: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "Onteigende (niet-onderhouden) AUR-pakketten:"
 
@@ -346,15 +362,15 @@ msgstr ""
 msgid "PKGBUILDs to edit?"
 msgstr "Te bewerken PKGBUILDs?"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "Basis-id van pakket"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "Pakketbasis"
 
-#: pkg/query/aur_warnings.go:67
+#: print.go:60
+msgid "Package Base ID"
+msgstr "Basis-id van pakket"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
 msgstr "Pakketten niet in AUR:"
 
@@ -366,7 +382,7 @@ msgstr "Te herbouwen pakketten?"
 msgid "Packages to exclude"
 msgstr "Uitgesloten pakketten"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 "Uit te sluiten pakketten: (bijv. ‘1 2 3’, ‘1-3’, ‘^4’ of pakketbronnaam)"
@@ -395,23 +411,23 @@ msgstr "Make-afhankelijkheden verwijderen na installatie?"
 msgid "Replaces"
 msgstr "Vervangt"
 
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "Pakketbron"
+
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "AUR-repo"
-
-#: print.go:30 pkg/db/ialpm/alpm.go:191
-msgid "Repository"
-msgstr "Pakketbron"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:72
+#: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
 msgstr "Bezig met zoeken naar AUR-updates…"
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
 msgstr "Bezig met zoeken naar updates in databanken…"
 
@@ -499,22 +515,6 @@ msgstr "Yay-versie v%s"
 msgid "[N]one"
 msgstr "[G]een"
 
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"Bouwmap:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"Voer een getal in (standaard=1):"
-
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "afbreken vanwege gebruiker"
@@ -543,11 +543,11 @@ msgstr "Niet alle vereiste pakketten zijn aangetroffen"
 msgid "could not find any package archives listed in %s"
 msgstr "Er zijn geen pakketarchieven aangetroffen in %s"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
 msgstr "afhankelijkheid"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "Ontwikkelcontrole van pakket mislukt: fout opgetreden in ‘%s’"
 
@@ -657,6 +657,10 @@ msgstr "Ongeldige pakketbron"
 msgid "invalid value: %d is not between %d and %d"
 msgstr "Ongeldige waarde: %d ligt niet tussen %d en %d"
 
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "nee"
+
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "Er zijn geen te importeren sleutels"
@@ -668,10 +672,6 @@ msgstr "Er is geen zoekactie uitgevoerd"
 #: local_install.go:66
 msgid "no target directories specified"
 msgstr "Er zijn geen doelmappen opgegeven"
-
-#: pkg/text/input.go:48
-msgid "no"
-msgstr "nee"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
@@ -685,6 +685,12 @@ msgstr "Er mag slechts één actie per keer worden uitgevoerd"
 msgid "only one target is allowed"
 msgstr "Er is slechts één doel toegestaan"
 
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "Pakket"
+msgstr[1] "Pakketten"
+
 #: print.go:187
 msgid "package '%s' was not found"
 msgstr "‘%s’ is niet aangetroffen"
@@ -696,12 +702,6 @@ msgstr "Het pakket is niet aangetroffen in de AUR"
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
 msgstr "Het pakket is niet aangetroffen in de pakketbronnen"
-
-#: pkg/upgrade/service.go:292
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "Pakket"
-msgstr[1] "Pakketten"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
