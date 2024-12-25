@@ -1,12 +1,12 @@
-#
+# 
 # Translators:
 # J G, 2021
 # August Wikerfors, 2023
-# Luna Jernberg <bittin@cafe8bitar.se>, 2023
-#
+# Luna Jernberg <droidbittin@gmail.com>, 2024
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Luna Jernberg <bittin@cafe8bitar.se>, 2023\n"
+"Last-Translator: Luna Jernberg <droidbittin@gmail.com>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/yay-1/teams/123732/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,6 +14,22 @@ msgstr ""
 "Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
+
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Byggkatalog:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Ange ett nummer: (standard = 1): "
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
@@ -53,11 +69,11 @@ msgstr "%s finns."
 msgid "%s is up to date -- skipping"
 msgstr "%s är ajour -- hoppar över"
 
-#: pkg/upgrade/service.go:292
+#: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
 msgstr "%s att uppgradera/installera."
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
 msgstr "%s kommer också att installeras för denna operation."
 
@@ -109,11 +125,11 @@ msgstr "(%d/%d) Misslyckades att ladda ner PKGBUILD: %s"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Tolkar SRCINFO: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(Installerad)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
 msgstr "(Installerade: %s)"
 
@@ -125,13 +141,13 @@ msgstr "(Övergiven)"
 msgid "(Out-of-date: %s)"
 msgstr "(Föråldrade: %s)"
 
-#: print.go:44
-msgid "AUR URL"
-msgstr "AUR-webbadress"
-
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
 msgstr "AUR"
+
+#: print.go:44
+msgid "AUR URL"
+msgstr "AUR-webbadress"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -149,7 +165,7 @@ msgstr "Kontrollberoende"
 msgid "Check Deps"
 msgstr "Kontrollberoenden"
 
-#: pkg/upgrade/service.go:90
+#: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
 msgstr "Kontrollerar utvecklingspaket..."
 
@@ -205,7 +221,7 @@ msgstr "Redigera PKGBUILD med?"
 msgid "Error during AUR search: %s\n"
 msgstr "Fel vid AUR-sökning: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 "Att exkludera paket kan orsaka partiella uppgraderingar och ha sönder system"
@@ -235,7 +251,7 @@ msgstr "Misslyckades att bygga följande paket. Manuell intervention krävs:"
 msgid "First Submitted"
 msgstr "Först skapad"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "AUR-paket markerade som föråldrade:"
 
@@ -291,13 +307,13 @@ msgstr "Byggberoende"
 msgid "Make Deps"
 msgstr "Byggberoenden"
 
-#: pkg/query/aur_warnings.go:71
-msgid "Missing AUR Debug Packages:"
-msgstr "Saknar AUR-felsökningspaket:"
-
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
 msgstr "Saknas"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "Saknar AUR-felsökningspaket:"
 
 #: print.go:31
 msgid "Name"
@@ -319,7 +335,7 @@ msgstr "Inga"
 msgid "Optional Deps"
 msgstr "Valfria beroenden"
 
-#: pkg/query/aur_warnings.go:75
+#: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "Föräldralösa (icke underhållna) AUR paket:"
 
@@ -339,15 +355,15 @@ msgstr "PKGBUILD uppdaterad, hoppar över nedladdning: %s"
 msgid "PKGBUILDs to edit?"
 msgstr "Redigera PKGBUILD-filer?"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "Grundpakets-ID"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "Grundpaket"
 
-#: pkg/query/aur_warnings.go:67
+#: print.go:60
+msgid "Package Base ID"
+msgstr "Grundpakets-ID"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
 msgstr "Paket som inte finns i AUR:"
 
@@ -359,7 +375,7 @@ msgstr "Bygg paket rent (cleanBuild)?"
 msgid "Packages to exclude"
 msgstr "Paket att exkludera"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 "Paket att hoppa över: (t.ex: \"1 2 3\", \"1-3\", \"^4\" eller "
@@ -389,23 +405,23 @@ msgstr "Ta bort byggberoenden efter installation?"
 msgid "Replaces"
 msgstr "Ersätter"
 
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "Centralkatalog"
+
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "Centralkatalog AUR"
-
-#: print.go:30 pkg/db/ialpm/alpm.go:191
-msgid "Repository"
-msgstr "Centralkatalog"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:72
+#: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
 msgstr "Söker efter uppdateringar på AUR..."
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
 msgstr "Söker efter uppdateringar i databaserna..."
 
@@ -439,7 +455,7 @@ msgstr "Följande paket stöds inte av din arkitektur:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "Det finns %[1]d tillgängliga tillhandahållare för %[2]s:"
+msgstr "Det finns %[1]d tillhandahållare tillgängliga för %[2]s:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
@@ -493,22 +509,6 @@ msgstr "Yay-version v%s"
 msgid "[N]one"
 msgstr "[N]Inga"
 
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"Byggkatalog:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"Ange ett nummer: (standard = 1): "
-
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "avbryter på grund av användare"
@@ -537,11 +537,11 @@ msgstr "kunde inte hitta alla paket som krävs"
 msgid "could not find any package archives listed in %s"
 msgstr "kunde inte hitta några paketarkiv listade i %s"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
 msgstr "beroende"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "Utvecklings koll för paket misslyckades '%s' stötte på ett fel"
 
@@ -650,6 +650,10 @@ msgstr "ogiltig centralkatalog"
 msgid "invalid value: %d is not between %d and %d"
 msgstr "ogiltigt värde: %d är inte mellan %d och %d"
 
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "nej"
+
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "inga nycklar att importera"
@@ -661,10 +665,6 @@ msgstr "ingen fråga utfördes"
 #: local_install.go:66
 msgid "no target directories specified"
 msgstr "inga målkataloger specificerade"
-
-#: pkg/text/input.go:48
-msgid "no"
-msgstr "nej"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
@@ -678,6 +678,12 @@ msgstr "bara en operation går att utföra åt gången"
 msgid "only one target is allowed"
 msgstr "endast ett mål är tillåtet"
 
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "paket"
+msgstr[1] "paket"
+
 #: print.go:187
 msgid "package '%s' was not found"
 msgstr "paketet '%s' kunde inte hittas"
@@ -689,12 +695,6 @@ msgstr "paketet hittades inte i AUR"
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
 msgstr "paketet hittades inte i centralkatalogerna"
-
-#: pkg/upgrade/service.go:292
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "paket"
-msgstr[1] "paket"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
