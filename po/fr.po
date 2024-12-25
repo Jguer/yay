@@ -463,7 +463,7 @@ msgstr "Les paquets suivants sont incompatibles avec votre architecture :"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "Il existe %[1]d fournisseurs pour %[2]s :"
+msgstr "%[1]d paquets fournissant %[2]s sont disponibles :"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
