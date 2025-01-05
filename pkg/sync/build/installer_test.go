@@ -612,8 +612,18 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			failed, err := installer.CompileFailedAndIgnored()
 			if tc.wantErrCompile {
 				require.Error(td, err)
-				assert.ErrorContains(td, err, "yay")
-				assert.Len(t, failed, len(tc.targets))
+				for key := range failed {
+					assert.ErrorContains(td, err, key)
+				}
+				uniqueBases := make(map[string]struct{})
+				for _, layer := range tc.targets {
+					for _, info := range layer {
+						if info.AURBase != nil {
+							uniqueBases[*info.AURBase] = struct{}{}
+						}
+					}
+				}
+				require.Len(td, failed, len(uniqueBases))
 			} else {
 				require.NoError(td, err)
 			}

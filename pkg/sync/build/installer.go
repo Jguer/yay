@@ -240,6 +240,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 			installer.log.Debugln("building pkgbase", base, "package", name)
 			pkgdests, errMake = installer.buildPkg(ctx, dir, base,
 				installIncompatible, cmdArgs.ExistsArg("needed"), aurOrigTargetBases.Contains(base))
+			builtPkgDests[base] = pkgdests
 			if errMake != nil {
 				if !lastLayer {
 					return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
@@ -249,8 +250,6 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 				installer.log.Errorln(gotext.Get("error making: %s", base), "-", errMake)
 				continue
 			}
-
-			builtPkgDests[base] = pkgdests
 		}
 
 		if len(pkgdests) == 0 {
