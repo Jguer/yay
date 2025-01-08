@@ -150,7 +150,7 @@ pacman -S --needed git base-devel yay
 
 - **I know my `-git` package has updates but yay doesn't offer to update it**
 
-  Yay uses an hash cache for development packages. Normally it is updated at the end of the package install with the message `Found git repo`.
+  Yay uses a hash cache for development packages. Normally it is updated at the end of the package install with the message `Found git repo`.
   If you transition between aur helpers and did not install the devel package using yay at some point, it is possible it never got added to the cache. `yay -Y --gendb` will fix the current version of every devel package and start checking from there.
 
 - **I want to help out!**
