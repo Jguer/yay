@@ -9,11 +9,11 @@
 # Alex Wang, 2023
 # Xuekai Deng, 2024
 # CloverGit, 2024
-# qsdwindows No, 2025
+# qsdwindows No <2687267056@qq.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: qsdwindows No, 2025\n"
+"Last-Translator: qsdwindows No <2687267056@qq.com>, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/yay-1/teams/123732/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -359,7 +359,7 @@ msgstr "要编辑哪些 PKGBUILD？"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "包基础"
+msgstr "基本包"
 
 #: print.go:60
 msgid "Package Base ID"
