@@ -511,7 +511,7 @@ msgstr "[N]没有"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "由于用户而中止"
+msgstr "用户自行终止"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
