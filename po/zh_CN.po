@@ -137,7 +137,7 @@ msgstr "(已安装: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(孤包包)"
+msgstr "(孤包)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
