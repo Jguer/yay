@@ -138,7 +138,7 @@ msgstr "(已安装: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(孤儿包)"
+msgstr "(孤包)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
@@ -339,7 +339,7 @@ msgstr "可选依赖"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "孤儿 (无人维护) 的 AUR 软件包："
+msgstr "孤包 (无人维护) 的 AUR 软件包："
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
