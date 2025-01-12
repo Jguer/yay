@@ -363,7 +363,7 @@ msgstr "基本包"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "包基础 ID"
+msgstr "基本包 ID"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
