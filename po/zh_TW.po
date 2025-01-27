@@ -530,7 +530,7 @@ msgstr "找不到所有需要的套件"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "找不到任何 %s 中列舉的軟體包封存檔"
+msgstr "找不到任何 %s 中列舉的套件封存檔"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
