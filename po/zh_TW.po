@@ -3,7 +3,6 @@
 # J G, 2022
 # lakejason0 <sunliyuan200402@outlook.com>, 2023
 # Kisaragi Hiu <flyingfeather1501@gmail.com>, 2023
-# Celestially H., 2024
 # Oliver Tzeng, 2025
 # 
 msgid ""
@@ -675,7 +674,7 @@ msgstr "只能有一個目標"
 #: pkg/upgrade/service.go:291
 msgid "package"
 msgid_plural "packages"
-msgstr[0] "软件包"
+msgstr[0] "套件"
 
 #: print.go:187
 msgid "package '%s' was not found"
