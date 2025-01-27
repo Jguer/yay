@@ -554,7 +554,7 @@ msgstr "取得 %s 時出錯：%s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "安裝軟體包時出錯"
+msgstr "安裝套件時出錯"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
