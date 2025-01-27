@@ -3,7 +3,6 @@
 # J G, 2022
 # lakejason0 <sunliyuan200402@outlook.com>, 2023
 # Kisaragi Hiu <flyingfeather1501@gmail.com>, 2023
-# Alex Wang, 2024
 # Celestially H., 2024
 # Xuekai Deng, 2024
 # Oliver Tzeng, 2025
@@ -320,11 +319,11 @@ msgstr "名稱"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "沒有找到 AUR 軟體包"
+msgstr "沒有找到 AUR 套件"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "未找到包"
+msgstr "未找到套件"
 
 #: print.go:225
 msgid "None"
