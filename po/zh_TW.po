@@ -562,7 +562,7 @@ msgstr "安裝時出錯："
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "編譯時出錯: %s"
+msgstr "編譯時出錯：%s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
