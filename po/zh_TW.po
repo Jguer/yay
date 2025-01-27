@@ -78,7 +78,7 @@ msgstr "%s 個要升級/安裝的套件。"
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
-msgstr "%s 也会为此操作而被安装。"
+msgstr "%s 也會為此操作被安裝。 "
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
