@@ -518,7 +518,7 @@ msgstr "目錄內找不到 PKGBUILD 與 .SRCINFO 檔案"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "找不到軟體包名稱: %v"
+msgstr "找不到套件名稱：%v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
