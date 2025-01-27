@@ -312,7 +312,7 @@ msgstr "缺少"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Missing AUR Debug Packages:"
-msgstr "缺少 AUR 除錯軟體包:"
+msgstr "缺少 AUR 除錯套件："
 
 #: print.go:31
 msgid "Name"
