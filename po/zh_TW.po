@@ -678,7 +678,7 @@ msgstr[0] "套件"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "找不到軟體包 '%s'"
+msgstr "找不到套件「%s」"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
