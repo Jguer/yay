@@ -502,7 +502,7 @@ msgstr "Yay 版本 v%s"
 
 #: pkg/menus/menu.go:49
 msgid "[N]one"
-msgstr "[N]沒有"
+msgstr "[N]不做任何動作"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
