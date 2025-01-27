@@ -626,7 +626,7 @@ msgstr "輸入太長"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
-msgstr "無效數字: %s"
+msgstr "無效數字：%s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
