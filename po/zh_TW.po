@@ -510,7 +510,7 @@ msgstr "使用者已自行中止 yay"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "指定了引數 '-' 但標準輸入沒有輸入值"
+msgstr "指定了參數 '-' 但沒有輸入值"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
