@@ -654,7 +654,7 @@ msgstr "沒有要匯入的金鑰"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
-msgstr "沒有查詢被執行"
+msgstr "未進行任何查詢"
 
 #: local_install.go:66
 msgid "no target directories specified"
