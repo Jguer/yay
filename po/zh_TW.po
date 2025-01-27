@@ -124,7 +124,7 @@ msgstr "(%d/%d)下載  PKGBUILD 時失敗：%s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) 正在解析 SRCINFO: %s"
+msgstr "(%d/%d) 正在解析 SRCINFO：%s"
 
 #: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
