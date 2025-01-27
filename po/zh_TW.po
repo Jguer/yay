@@ -327,7 +327,7 @@ msgstr "未找到套件"
 
 #: print.go:225
 msgid "None"
-msgstr "沒有"
+msgstr "不做任何動作"
 
 #: print.go:39
 msgid "Optional Deps"
