@@ -506,7 +506,7 @@ msgstr "[N]不做任何動作"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "由於使用者而中止"
+msgstr "使用者已自行中止 yay"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
