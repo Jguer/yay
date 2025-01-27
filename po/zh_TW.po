@@ -702,7 +702,7 @@ msgstr "正在從暫存中刪除未追蹤的 AUR 檔案..."
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr "%s 的 PKGDEST 由 makepkg 列出，但不存在: %s"
+msgstr "%s 的 PKGDEST 由 makepkg 列出，但不存在：%s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
