@@ -710,7 +710,7 @@ msgstr "無事可做"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "無法  CreateHandle: %s"
+msgstr "無法  CreateHandle：%s"
 
 #: cmd.go:186
 msgid "unhandled operation"
