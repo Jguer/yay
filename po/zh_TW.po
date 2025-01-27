@@ -566,7 +566,7 @@ msgstr "編譯時出錯：%s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "合併 %s 時出錯: %s"
+msgstr "合併 %s 時出錯：%s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
