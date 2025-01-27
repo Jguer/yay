@@ -522,7 +522,7 @@ msgstr "找不到套件名稱：%v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
-msgstr "找不到 PKGDEST: %s"
+msgstr "找不到 PKGDEST：%s"
 
 #: errors.go:9
 msgid "could not find all required packages"
