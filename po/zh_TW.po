@@ -367,7 +367,7 @@ msgstr "不在 AUR 裡的套件："
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "清理哪些軟體包的編譯檔案？"
+msgstr "清理哪些套件的編譯檔案？"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
