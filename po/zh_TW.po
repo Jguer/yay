@@ -152,7 +152,7 @@ msgstr "AUR 網址"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "將 %s 或 %s 添加到你的環境變數"
+msgstr "將 %s 或 %s 添加到環境變數中"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
