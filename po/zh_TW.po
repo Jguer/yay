@@ -602,7 +602,7 @@ msgstr "無法解析 %s -- 跳過：%s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "無法解析 %s: %s"
+msgstr "無法解析 %s：%s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
