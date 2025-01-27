@@ -542,7 +542,7 @@ msgstr "開發套件檢查失敗：「%s」 遇到了錯誤"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "編輯器未成功退出，正在中止: %s"
+msgstr "編輯器未成功退出，正在中止：%s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
