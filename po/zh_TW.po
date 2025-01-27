@@ -630,7 +630,7 @@ msgstr "無效數字：%s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "無效選項 '%s'"
+msgstr "無效選項「%s」"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
