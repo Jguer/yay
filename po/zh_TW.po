@@ -618,7 +618,7 @@ msgstr "無法取得 AUR 快取"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
-msgstr "忽略軟體包開發更新 (未找到 AUR 資訊):"
+msgstr "忽略軟體包開發更新 (未找到 AUR 資訊)："
 
 #: pkg/text/errors.go:8
 msgid "input too long"
