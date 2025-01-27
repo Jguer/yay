@@ -335,7 +335,7 @@ msgstr "可選依賴"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "孤立 (不受維護) 的 AUR 軟體包:"
+msgstr "孤立 (不受維護) 的 AUR 套件："
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
