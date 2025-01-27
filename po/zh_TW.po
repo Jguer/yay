@@ -120,7 +120,7 @@ msgstr "(%d/%d) 下載了 PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) 下载PKGBUILD失败"
+msgstr "(%d/%d)下載  PKGBUILD 時失敗：%s"
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
