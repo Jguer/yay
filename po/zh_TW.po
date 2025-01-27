@@ -598,7 +598,7 @@ msgstr "無法開啟設定檔案 '%s'：%s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "無法解析 %s -- 跳過: %s"
+msgstr "無法解析 %s -- 跳過：%s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
