@@ -582,7 +582,7 @@ msgstr "重置 %s 時出錯：%s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "更新軟體包安裝原因至 %s 時出錯"
+msgstr "更新套件安裝原因至 %s 時出錯"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
