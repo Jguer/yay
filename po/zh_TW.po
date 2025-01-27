@@ -590,7 +590,7 @@ msgstr "單獨指定安裝"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "無法建立資料夾 '%s': %s"
+msgstr "無法建立資料夾 '%s'：%s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
