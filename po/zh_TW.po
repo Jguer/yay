@@ -546,11 +546,11 @@ msgstr "編輯器未成功退出，正在中止: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "下載套件檔案時出錯: %s"
+msgstr "下載套件檔案時出錯：%s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "取得 %s 時出錯: %s"
+msgstr "取得 %s 時出錯：%s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
