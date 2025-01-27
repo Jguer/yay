@@ -4,7 +4,6 @@
 # lakejason0 <sunliyuan200402@outlook.com>, 2023
 # Kisaragi Hiu <flyingfeather1501@gmail.com>, 2023
 # Celestially H., 2024
-# Xuekai Deng, 2024
 # Oliver Tzeng, 2025
 # 
 msgid ""
@@ -399,7 +398,7 @@ msgstr "安裝後刪除編譯依賴？"
 
 #: print.go:43
 msgid "Replaces"
-msgstr "替换"
+msgstr "替換"
 
 #: pkg/db/ialpm/alpm.go:191 print.go:30
 msgid "Repository"
