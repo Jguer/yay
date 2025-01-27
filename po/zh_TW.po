@@ -694,7 +694,7 @@ msgstr "匯入金鑰時出錯"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "正在從快取中刪除 AUR 軟體包..."
+msgstr "正在從快取中刪除 AUR 套件..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
