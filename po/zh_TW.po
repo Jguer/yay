@@ -578,7 +578,7 @@ msgstr "重新整理資料庫時出錯"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "重置 %s 時出錯: %s"
+msgstr "重置 %s 時出錯：%s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
