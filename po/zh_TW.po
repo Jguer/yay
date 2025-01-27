@@ -448,7 +448,7 @@ msgstr "前十大的軟體包:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr "以下軟體包不支援您的系統架構:"
+msgstr "以下套件不支援您的系統架構："
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
