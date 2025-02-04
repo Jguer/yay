@@ -1,16 +1,17 @@
-#
+# 
 # Translators:
 # Vladislav Zenkov, 2022
 # Kira Malinova, 2023
 # Victor Golovanenko <drygdryg2014@yandex.ru>, 2023
 # Dancheg97 F, 2023
-# falixkamishin falixx, 2023
+# falixfresh, 2023
 # Ravenso BlacK, 2023
 # Vladislav Grechannik, 2024
-#
+# Vladimir Yerilov, 2025
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Vladislav Grechannik, 2024\n"
+"Last-Translator: Vladimir Yerilov, 2025\n"
 "Language-Team: Russian (https://app.transifex.com/yay-1/teams/123732/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,6 +19,22 @@ msgstr ""
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: xgotext\n"
+
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Каталог сборки:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Введите номер (по умолчанию=1):"
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
@@ -56,11 +73,11 @@ msgstr "%s уже существует."
 msgid "%s is up to date -- skipping"
 msgstr "%s обновлён -- пропуск"
 
-#: pkg/upgrade/service.go:292
+#: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
 msgstr "обновить/установить."
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
 msgstr "также будет установлен для этой операции."
 
@@ -112,11 +129,11 @@ msgstr "(%d/%d) Не удалось загрузить PKGBUILD:"
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Анализ SRCINFO: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(Установлено)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
 msgstr "(Установлено: %s)"
 
@@ -128,13 +145,13 @@ msgstr "(Осиротевший)"
 msgid "(Out-of-date: %s)"
 msgstr "(Устарел: %s)"
 
-#: print.go:44
-msgid "AUR URL"
-msgstr "Ссылка на AUR"
-
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
 msgstr "AUR"
+
+#: print.go:44
+msgid "AUR URL"
+msgstr "Ссылка на AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
@@ -152,7 +169,7 @@ msgstr "Проверка зависимости"
 msgid "Check Deps"
 msgstr "Зависимости, требуемые для проверки"
 
-#: pkg/upgrade/service.go:90
+#: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
 msgstr "Проверка пакетов разработки..."
 
@@ -208,7 +225,7 @@ msgstr "Отредактировать PKGBUILD?"
 msgid "Error during AUR search: %s\n"
 msgstr "Ошибка поиска в AUR: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 "Исключение пакетов может привести к частичному обновлению и сломать систему"
@@ -239,7 +256,7 @@ msgstr ""
 msgid "First Submitted"
 msgstr "Впервые представленный"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Пакеты AUR, помеченные как устаревшие:"
 
@@ -295,13 +312,13 @@ msgstr "Создание зависимости"
 msgid "Make Deps"
 msgstr "Зависимости, требуемые для сборки"
 
-#: pkg/query/aur_warnings.go:71
-msgid "Missing AUR Debug Packages:"
-msgstr "Отсутствующие в AUR пакеты для отладки:"
-
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
 msgstr "Отсутствующие"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "Отсутствующие в AUR пакеты для отладки:"
 
 #: print.go:31
 msgid "Name"
@@ -323,7 +340,7 @@ msgstr "Нет"
 msgid "Optional Deps"
 msgstr "Дополнительные зависимости"
 
-#: pkg/query/aur_warnings.go:75
+#: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "Осиротевшие (неподдерживаемые) пакеты AUR:"
 
@@ -343,15 +360,15 @@ msgstr "PKGBUILD находится в актуальном состоянии, 
 msgid "PKGBUILDs to edit?"
 msgstr "Отредактировать PKGBUILD?"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "Идентификатор пакета"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "Базовый пакет"
 
-#: pkg/query/aur_warnings.go:67
+#: print.go:60
+msgid "Package Base ID"
+msgstr "Идентификатор пакета"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
 msgstr "Пакет не найден в AUR:"
 
@@ -363,7 +380,7 @@ msgstr "Пакеты для чистой сборки?"
 msgid "Packages to exclude"
 msgstr "Пакеты для исключения"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr "Исключить пакеты: (напр.: \"1 2 3\", \"1-3\", \"^4\" или название репозитория)"
 
@@ -391,23 +408,23 @@ msgstr "Удалить зависимости сборки после устан
 msgid "Replaces"
 msgstr "Заменяет"
 
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "Репозиторий"
+
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
 msgstr "Репозиторий AUR"
-
-#: print.go:30 pkg/db/ialpm/alpm.go:191
-msgid "Repository"
-msgstr "Репозиторий"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:72
+#: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
 msgstr "Поиск обновлений пакетов AUR..."
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
 msgstr "Поиск обновлений в базах данных..."
 
@@ -441,7 +458,7 @@ msgstr "Следующие пакеты несовместимы с вашей �
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "Существует %[1]d пакетов которые удволетворяют %[2]s"
+msgstr "%[2]s доступен в %[1]d источниках:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
@@ -495,22 +512,6 @@ msgstr "Версия Yay: v%s"
 msgid "[N]one"
 msgstr "[Н]ет"
 
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"Каталог сборки:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"Введите номер (по умолчанию=1):"
-
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "прервано пользователем"
@@ -539,11 +540,11 @@ msgstr "не удалось найти все необходимые пакет�
 msgid "could not find any package archives listed in %s"
 msgstr "Не удалось найти архивы пакетов в %s"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
 msgstr "зависимости"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "проверка пакета '%s' не завершена из-за ошибки"
 
@@ -653,6 +654,10 @@ msgstr "недействительный репозиторий"
 msgid "invalid value: %d is not between %d and %d"
 msgstr "неверное значение: %d не в промежутке между %d и %d "
 
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "нет"
+
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
 msgstr "нет ключей для импорта"
@@ -664,10 +669,6 @@ msgstr "запрос не был выполнен"
 #: local_install.go:66
 msgid "no target directories specified"
 msgstr "не выбраны целевые директории"
-
-#: pkg/text/input.go:48
-msgid "no"
-msgstr "нет"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
@@ -681,6 +682,14 @@ msgstr "только одна операция может быть вызван�
 msgid "only one target is allowed"
 msgstr "разрешена только одна цель"
 
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "пакет"
+msgstr[1] "пакеты"
+msgstr[2] "пакеты"
+msgstr[3] "пакеты"
+
 #: print.go:187
 msgid "package '%s' was not found"
 msgstr "пакет '%s' не найден"
@@ -692,14 +701,6 @@ msgstr "пакет не найден в AUR"
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
 msgstr "пакет не найден в репозиториях"
-
-#: pkg/upgrade/service.go:292
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "пакет"
-msgstr[1] "пакеты"
-msgstr[2] "пакеты"
-msgstr[3] "пакеты"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
