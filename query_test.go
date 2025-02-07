@@ -84,6 +84,12 @@ func TestSyncInfo(t *testing.T) {
 			wantShow: []string{},
 			wantErr:  true,
 		},
+		{
+			name:     "Si arduino",
+			args:     []string{"S", "i"},
+			targets:  []string{"arduino"},
+			wantShow: []string{"pacman", "-S", "-i", "--config", "/etc/pacman.conf", "--", "arduino-cli"},
+		},
 	}
 
 	dbExc := &mock.DBExecutor{
@@ -94,9 +100,20 @@ func TestSyncInfo(t *testing.T) {
 					PBase: "linux",
 				}
 			}
+			if s == "arduino-cli" {
+				return &mock.Package{
+					PName: "arduino-cli",
+					PBase: "arduino-cli",
+				}
+			}
 			return nil
 		},
 		PackagesFromGroupFn: func(s string) []mock.IPackage {
+			if s == "arduino" {
+				return []mock.IPackage{
+					&mock.Package{PName: "arduino-cli"},
+				}
+			}
 			return nil
 		},
 	}
