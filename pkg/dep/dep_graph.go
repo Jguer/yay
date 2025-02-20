@@ -165,7 +165,6 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			}
 			if pkg != nil {
 				g.GraphSyncPkg(ctx, graph, pkg, nil)
-
 				continue
 			}
 
@@ -537,12 +536,13 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		}
 
 		// remove packages that don't satisfy the dependency
-		for i := 0; i < len(aurPkgs); i++ {
-			if !satisfiesAur(depString, &aurPkgs[i]) {
-				aurPkgs = append(aurPkgs[:i], aurPkgs[i+1:]...)
-				i--
+		satisfyingPkgs := make([]aurc.Pkg, 0, len(aurPkgs))
+		for i := range aurPkgs {
+			if satisfiesAur(depString, &aurPkgs[i]) {
+				satisfyingPkgs = append(satisfyingPkgs, aurPkgs[i])
 			}
 		}
+		aurPkgs = satisfyingPkgs
 
 		if len(aurPkgs) == 0 {
 			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", depString)
@@ -813,10 +813,11 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*a
 				archStringToString(alpmArch, srcInfo.Package.Provides)...),
 			Replaces: append(archStringToString(alpmArch, pkg.Replaces),
 				archStringToString(alpmArch, srcInfo.Package.Replaces)...),
-			OptDepends: []string{},
-			Groups:     pkg.Groups,
-			License:    pkg.License,
-			Keywords:   []string{},
+			OptDepends: append(archStringToString(alpmArch, pkg.OptDepends),
+				archStringToString(alpmArch, srcInfo.Package.OptDepends)...),
+			Groups:   pkg.Groups,
+			License:  pkg.License,
+			Keywords: []string{},
 		})
 	}
 
