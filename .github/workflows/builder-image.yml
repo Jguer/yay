@@ -129,12 +129,15 @@ jobs:
             echo -n "${{ env.REGISTRY_IMAGE }}@$(cat $file) "
           done)
           
-          # Create the manifest list with the collected tags and digests
+          # Create the manifest list with the collected tags and digests for Docker Hub
           docker buildx imagetools create $TAGS $DIGESTS
           
-          # Push to GitHub Container Registry
-          GHCR_TAGS=$(echo '${{ steps.meta.outputs.tags }}' | sed 's|^|ghcr.io/${{ env.REGISTRY_IMAGE }}:|g' | xargs -I {} echo "-t {}")
-          docker buildx imagetools create $GHCR_TAGS $DIGESTS
+          # For GitHub Container Registry, process each tag individually
+          for tag in $(echo '${{ steps.meta.outputs.tags }}' | grep -o '[^[:space:]]*$'); do
+            ghcr_tag="ghcr.io/${{ env.REGISTRY_IMAGE }}:$tag"
+            echo "Creating manifest for $ghcr_tag"
+            docker buildx imagetools create -t $ghcr_tag $DIGESTS
+          done
 
       - name: Inspect image
         run: |
