@@ -47,8 +47,9 @@ func main() {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			fallbackLog.Errorln(rec)
-			debug.PrintStack()
+			fallbackLog.Errorln("Panic occurred:", rec)
+			fallbackLog.Errorln("Stack trace:", string(debug.Stack()))
+			ret = 1
 		}
 
 		os.Exit(ret)
@@ -122,7 +123,8 @@ func main() {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			fallbackLog.Errorln(rec, string(debug.Stack()))
+			fallbackLog.Errorln("Panic occurred in DB operation:", rec)
+			fallbackLog.Errorln("Stack trace:", string(debug.Stack()))
 		}
 
 		dbExecutor.Cleanup()

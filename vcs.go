@@ -61,8 +61,8 @@ func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Exec
 		for iP := range srcinfos[i].Packages {
 			wg.Add(1)
 
-			go func(i string, iP int) {
-				run.VCSStore.Update(ctx, srcinfos[i].Packages[iP].Pkgname, srcinfos[i].Source)
+			go func(baseIndex string, packageIndex int) {
+				run.VCSStore.Update(ctx, srcinfos[baseIndex].Packages[packageIndex].Pkgname, srcinfos[baseIndex].Source)
 				wg.Done()
 			}(i, iP)
 		}
@@ -71,5 +71,5 @@ func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Exec
 	wg.Wait()
 	run.Logger.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
 
-	return err
+	return nil
 }
