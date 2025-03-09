@@ -1,4 +1,4 @@
-FROM docker.io/jguer/yay-builder:latest
+FROM ghcr.io/jguer/yay-builder:latest
 LABEL maintainer="Jguer,docker@jguer.space"
 
 ARG VERSION

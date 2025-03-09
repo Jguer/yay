@@ -7,7 +7,7 @@ jobs:
     name: Lint and test yay
     runs-on: ubuntu-latest
     container:
-      image: jguer/yay-builder:latest
+      image: ghcr.io/jguer/yay-builder:latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/cache@v3
