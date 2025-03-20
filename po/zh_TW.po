@@ -358,7 +358,7 @@ msgstr "套件包基礎"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "套件包構造編號"
+msgstr "套件包基礎編號"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
