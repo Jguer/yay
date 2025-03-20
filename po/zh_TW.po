@@ -538,7 +538,7 @@ msgstr "作為依賴安裝"
 
 #: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr "開發套件檢查失敗：「%s」 遇到了錯誤"
+msgstr "開發套件包檢查失敗：「%s」 遇到了錯誤"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
