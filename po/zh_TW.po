@@ -262,7 +262,7 @@ msgstr "已找到 git 倉庫源: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "GenDB 完成。沒有安裝任何軟體包"
+msgstr "GenDB 完成。沒有安裝任何套件包"
 
 #: print.go:36
 msgid "Groups"
