@@ -354,11 +354,11 @@ msgstr "要編輯哪些 PKGBUILD 檔案？"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "套件構造"
+msgstr "套件包構造"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "套件構造編號"
+msgstr "套件包構造編號"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
