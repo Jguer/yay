@@ -370,7 +370,7 @@ msgstr "清理哪些套件的編譯檔案？"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
-msgstr "要排除的套件"
+msgstr "要排除的套件包"
 
 #: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
