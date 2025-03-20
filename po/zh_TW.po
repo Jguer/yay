@@ -242,7 +242,7 @@ msgstr "層級安裝失敗，將合併到下一個層級。"
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
-msgstr "無法安裝以下軟體包。需要手動處理:"
+msgstr "無法安裝以下的套件包。需要自行手動處理:"
 
 #: print.go:45
 msgid "First Submitted"
