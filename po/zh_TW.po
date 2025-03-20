@@ -687,7 +687,7 @@ msgstr "AUR 中找不到套件包"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "軟體源中找不到套件"
+msgstr "軟體源中找不到套件包"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
