@@ -683,7 +683,7 @@ msgstr "找不到套件「%s」"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "AUR 中找不到套件"
+msgstr "AUR 中找不到套件包"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
