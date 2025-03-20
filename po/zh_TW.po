@@ -422,7 +422,7 @@ msgstr "搜尋資料庫來獲取更新..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "僅顯示軟體源中的軟體包"
+msgstr "僅顯示軟體源中的套件包"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
