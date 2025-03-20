@@ -675,7 +675,7 @@ msgstr "只能有一個目標"
 #: pkg/upgrade/service.go:291
 msgid "package"
 msgid_plural "packages"
-msgstr[0] "套件"
+msgstr[0] "套件包"
 
 #: print.go:187
 msgid "package '%s' was not found"
