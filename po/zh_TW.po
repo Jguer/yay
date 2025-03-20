@@ -322,7 +322,7 @@ msgstr "沒有找到 AUR 套件"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "未找到套件"
+msgstr "未找到套件包"
 
 #: print.go:225
 msgid "None"
