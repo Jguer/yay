@@ -95,7 +95,7 @@ msgstr "%s: 不能將目標與選項 --repo 一起使用 -- 跳過"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: 忽略軟體包升級 (%s => %s)"
+msgstr "%s: 忽略套件包升級 (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
