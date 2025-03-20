@@ -258,7 +258,7 @@ msgstr "已安裝的外部軟體包: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "已找到 git 軟體源: %s"
+msgstr "已找到 git 倉庫源: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
