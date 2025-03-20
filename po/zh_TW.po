@@ -229,11 +229,11 @@ msgstr "單獨指定安裝"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "單獨指定安装的軟體包: %s"
+msgstr "單獨指定安装的套件包: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "尋找 AUR 軟體包時失敗"
+msgstr "尋找 AUR 套件包時失敗"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
