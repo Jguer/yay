@@ -482,7 +482,7 @@ msgstr "找不到下列套件："
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "無法處理軟體包的投票: %s。錯誤: %s"
+msgstr "無法處理套件包的投票: %s。錯誤: %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
