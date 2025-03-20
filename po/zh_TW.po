@@ -318,7 +318,7 @@ msgstr "名稱"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "沒有找到 AUR 套件"
+msgstr "沒有找到 AUR 套件包"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
