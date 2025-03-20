@@ -330,7 +330,7 @@ msgstr "不做任何動作"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "可選依賴"
+msgstr "可選擇的依賴選項"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
