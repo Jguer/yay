@@ -478,7 +478,7 @@ msgstr "無法清理："
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "找不到下列套件："
+msgstr "找不到下列套件包："
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
