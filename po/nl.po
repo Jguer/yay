@@ -100,7 +100,7 @@ msgstr "%s: pakketupgrade wordt genegeerd (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s: lokaal (%s) is nieuwer dan AUR (%s)"
+msgstr "%s: de lokale versie (%s) is nieuwer dan de AUR-versie (%s)"
 
 #: vote.go:51
 msgid ""
