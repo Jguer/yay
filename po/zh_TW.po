@@ -362,7 +362,7 @@ msgstr "套件構造編號"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
-msgstr "不在 AUR 裡的套件："
+msgstr "不在 AUR 裡的套件包："
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
