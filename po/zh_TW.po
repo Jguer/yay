@@ -165,7 +165,7 @@ msgstr "檢查依賴"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
-msgstr "正在檢查開發軟體包..."
+msgstr "正在檢查開發套件包..."
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
