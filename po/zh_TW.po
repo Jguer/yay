@@ -458,11 +458,11 @@ msgstr "可能還有另一個 pacman 程序正在執行。等待中..."
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "套件佔用的空間: %s"
+msgstr "套件包佔用的空間: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "已安裝的套件總數:  %s"
+msgstr "已安裝的套件包總數:  %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
