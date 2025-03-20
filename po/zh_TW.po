@@ -221,7 +221,7 @@ msgstr "搜尋 AUR 時出錯: %s\n"
 
 #: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
-msgstr "排除軟體包可能會造成部分更新而使系統無法正常運作"
+msgstr "排除套件包則會造成部分功能更新而使系統無法正常運作"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
