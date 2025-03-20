@@ -266,7 +266,7 @@ msgstr "GenDB 完成。沒有安裝任何軟體包"
 
 #: print.go:36
 msgid "Groups"
-msgstr "組別"
+msgstr "群組別"
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
