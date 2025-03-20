@@ -442,7 +442,7 @@ msgstr "同步"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "前十大的軟體包:"
+msgstr "前十大的套件包:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
