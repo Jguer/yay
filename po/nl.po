@@ -72,7 +72,7 @@ msgstr "%s is actueel -- wordt overgeslagen"
 
 #: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "%s te upgraden/ installeren."
+msgstr "%s op te waarderen/installeren."
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
