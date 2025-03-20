@@ -250,11 +250,11 @@ msgstr "首次提交"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "標記為過期的 AUR 軟體包:"
+msgstr "標記為過期的 AUR 套件包:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "已安裝的外部軟體包: %s"
+msgstr "已安裝的外部套件包: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
