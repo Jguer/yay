@@ -354,7 +354,7 @@ msgstr "要編輯哪些 PKGBUILD 檔案？"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "套件包構造"
+msgstr "套件包基礎"
 
 #: print.go:60
 msgid "Package Base ID"
