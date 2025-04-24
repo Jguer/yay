@@ -145,7 +145,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	excluded []string,
 ) error {
 	// Install layer
-	nameToBaseMap := make(map[string]string, 0)
+	nameToBaseMap := make(map[string]string, len(layer))
 	syncDeps, syncExp, syncGroups := mapset.NewThreadUnsafeSet[string](),
 		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 	aurDeps, aurExp, aurOrigTargetBases := mapset.NewThreadUnsafeSet[string](),
@@ -225,8 +225,9 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	}
 
 	builtPkgDests := make(map[string]map[string]string)
-	deps, exps := make([]string, 0, aurDepNames.Cardinality()), make([]string, 0, aurExpNames.Cardinality())
-	pkgArchives := make([]string, 0, len(exps)+len(deps))
+	deps := make([]string, 0, aurDepNames.Cardinality())
+	exps := make([]string, 0, aurExpNames.Cardinality())
+	pkgArchives := make([]string, 0, len(all))
 
 	for _, name := range all {
 		base := nameToBase[name]

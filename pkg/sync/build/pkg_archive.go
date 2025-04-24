@@ -134,7 +134,7 @@ func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	}
 
 	lines := strings.Split(stdout, "\n")
-	pkgdests = make(map[string]string)
+	pkgdests = make(map[string]string, len(lines))
 
 	for _, line := range lines {
 		if line == "" {

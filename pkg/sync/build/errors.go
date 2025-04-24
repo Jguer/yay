@@ -2,6 +2,7 @@ package build
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/leonelquinteros/gotext"
 )
@@ -13,13 +14,17 @@ type FailedIgnoredPkgError struct {
 }
 
 func (e *FailedIgnoredPkgError) Error() string {
-	msg := gotext.Get("Failed to install the following packages. Manual intervention is required:")
+	var sb strings.Builder
+	sb.WriteString(gotext.Get("Failed to install the following packages. Manual intervention is required:"))
 
 	for pkg, err := range e.pkgErrors {
-		msg += "\n" + pkg + " - " + err.Error()
+		sb.WriteString("\n")
+		sb.WriteString(pkg)
+		sb.WriteString(" - ")
+		sb.WriteString(err.Error())
 	}
 
-	return msg
+	return sb.String()
 }
 
 type PkgDestNotInListError struct {
