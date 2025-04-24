@@ -245,10 +245,6 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 		return graph, err
 	}
 
-	if graph.Len() == 0 {
-		return graph, nil
-	}
-
 	return graph, nil
 }
 
@@ -305,6 +301,11 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 	// true if user doesn't want to include specific repositories/packages
 	noIncludes := len(include) == 0 && otherInclude.Cardinality() == 0
+
+	// No exclusions or inclusions specified, return early
+	if noIncludes && len(exclude) == 0 && otherExclude.Cardinality() == 0 {
+		return []string{}, nil
+	}
 
 	excluded := make([]string, 0)
 	for i := range allUp.Up {
