@@ -316,7 +316,7 @@ msgstr "Hiányzik"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Missing AUR Debug Packages:"
-msgstr "Hiányzó AUR hibakereső csomagok:"
+msgstr "Hiányzó AUR-hibakereső-csomagok:"
 
 #: print.go:31
 msgid "Name"
