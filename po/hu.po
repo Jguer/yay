@@ -264,7 +264,7 @@ msgstr "Idegen telepített csomagok: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Git tároló találat: %s"
+msgstr "Git-tároló találat: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
