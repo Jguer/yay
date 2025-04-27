@@ -437,7 +437,7 @@ msgstr "A pacman gyorsítótárának mérete %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "A yay gyorsítótár mérete %s: %s"
+msgstr "A yay gyorsítótárának mérete %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
