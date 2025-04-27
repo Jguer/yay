@@ -433,7 +433,7 @@ msgstr "Csak a tároló csomagjainak megjelenítése"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "A pacman gyorsítótár mérete %s: %s"
+msgstr "A pacman gyorsítótárának mérete %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
