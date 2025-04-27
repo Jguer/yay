@@ -441,7 +441,7 @@ msgstr "A yay gyorsítótárának mérete %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
-msgstr "Pillanatkép webcím"
+msgstr "Pillanatkép-webcím"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
