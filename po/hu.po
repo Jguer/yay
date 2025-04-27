@@ -360,7 +360,7 @@ msgstr "PKGBUILD-ek szerkesztése?"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Csomag alap"
+msgstr "Csomag alapja"
 
 #: print.go:60
 msgid "Package Base ID"
