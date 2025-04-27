@@ -623,7 +623,7 @@ msgstr "sikerült olvasni a config fájlt „%s”: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr "nem sikerült lekérni az AUR gyorsítótárat"
+msgstr "nem sikerült lekérni az AUR gyorsítótárát"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
