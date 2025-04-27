@@ -2,11 +2,11 @@
 # Translators:
 # Szigeti Péter, 2021
 # Gergő Kasza, 2022
-# summoner001, 2024
+# summoner001, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: summoner001, 2024\n"
+"Last-Translator: summoner001, 2025\n"
 "Language-Team: Hungarian (https://app.transifex.com/yay-1/teams/123732/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -135,7 +135,7 @@ msgstr "(Telepítve: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Árva)"
+msgstr "(Elárvult)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
