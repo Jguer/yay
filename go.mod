@@ -8,7 +8,7 @@ require (
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/adrg/strutil v0.3.1
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
-	github.com/deckarep/golang-set/v2 v2.7.0
+	github.com/deckarep/golang-set/v2 v2.8.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/leonelquinteros/gotext v1.7.1
 	github.com/stretchr/testify v1.9.0
