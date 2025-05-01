@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/leonelquinteros/gotext v1.7.1
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.38.0
+	golang.org/x/net v0.39.0
 	golang.org/x/sys v0.32.0
 	golang.org/x/term v0.31.0
 	gopkg.in/h2non/gock.v1 v1.1.2
