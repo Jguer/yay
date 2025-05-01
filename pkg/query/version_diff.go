@@ -37,7 +37,7 @@ func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
 	}
 
 	for index, char := range oldVersion {
-		charIsSpecial := !(unicode.IsLetter(char) || unicode.IsNumber(char))
+		charIsSpecial := !unicode.IsLetter(char) && !unicode.IsNumber(char)
 
 		if (index >= len(newVersion)) || (char != rune(newVersion[index])) {
 			if charIsSpecial {

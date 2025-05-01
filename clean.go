@@ -55,9 +55,10 @@ func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 	_, removeAll, _ := cmdArgs.GetArg("c", "clean")
 
 	for _, v := range run.PacmanConf.CleanMethod {
-		if v == "KeepInstalled" {
+		switch v {
+		case "KeepInstalled":
 			keepInstalled = true
-		} else if v == "KeepCurrent" {
+		case "KeepCurrent":
 			keepCurrent = true
 		}
 	}

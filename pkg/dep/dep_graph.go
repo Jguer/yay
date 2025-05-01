@@ -37,7 +37,7 @@ func (i *InstallInfo) String() string {
 }
 
 type (
-	Reason int
+	Reason uint
 	Source int
 )
 
@@ -804,17 +804,17 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*a
 			Description:   getDesc(pkg),
 			URL:           pkg.URL,
 			Depends: append(archStringToString(alpmArch, pkg.Depends),
-				archStringToString(alpmArch, srcInfo.Package.Depends)...),
-			MakeDepends:  archStringToString(alpmArch, srcInfo.PackageBase.MakeDepends),
-			CheckDepends: archStringToString(alpmArch, srcInfo.PackageBase.CheckDepends),
+				archStringToString(alpmArch, srcInfo.Depends)...),
+			MakeDepends:  archStringToString(alpmArch, srcInfo.MakeDepends),
+			CheckDepends: archStringToString(alpmArch, srcInfo.CheckDepends),
 			Conflicts: append(archStringToString(alpmArch, pkg.Conflicts),
-				archStringToString(alpmArch, srcInfo.Package.Conflicts)...),
+				archStringToString(alpmArch, srcInfo.Conflicts)...),
 			Provides: append(archStringToString(alpmArch, pkg.Provides),
-				archStringToString(alpmArch, srcInfo.Package.Provides)...),
+				archStringToString(alpmArch, srcInfo.Provides)...),
 			Replaces: append(archStringToString(alpmArch, pkg.Replaces),
-				archStringToString(alpmArch, srcInfo.Package.Replaces)...),
+				archStringToString(alpmArch, srcInfo.Replaces)...),
 			OptDepends: append(archStringToString(alpmArch, pkg.OptDepends),
-				archStringToString(alpmArch, srcInfo.Package.OptDepends)...),
+				archStringToString(alpmArch, srcInfo.OptDepends)...),
 			Groups:   pkg.Groups,
 			License:  pkg.License,
 			Keywords: []string{},

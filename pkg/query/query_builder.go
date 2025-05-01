@@ -289,7 +289,7 @@ func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 		desc := strings.ToLower(pkg.Description)
 		targ := strings.ToLower(pkgN)
 
-		if !(strings.Contains(name, targ) || strings.Contains(desc, targ)) {
+		if !strings.Contains(name, targ) && !strings.Contains(desc, targ) {
 			return false
 		}
 	}

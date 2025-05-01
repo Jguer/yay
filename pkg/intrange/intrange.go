@@ -17,10 +17,10 @@ type IntRange struct {
 // IntRanges is a slice of IntRange.
 type IntRanges []IntRange
 
-func makeIntRange(min, max int) IntRange {
+func makeIntRange(minVal, maxVal int) IntRange {
 	return IntRange{
-		min,
-		max,
+		min: minVal,
+		max: maxVal,
 	}
 }
 

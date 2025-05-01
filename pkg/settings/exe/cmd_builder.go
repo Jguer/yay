@@ -173,11 +173,12 @@ func (c *CmdBuilder) deElevateCommand(ctx context.Context, cmd *exec.Cmd) *exec.
 
 	if userFound, err := user.Lookup(ogCaller); err == nil {
 		cmd.SysProcAttr = &syscall.SysProcAttr{}
-		uid, _ := strconv.Atoi(userFound.Uid)
-		gid, _ := strconv.Atoi(userFound.Gid)
-		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
-
-		return cmd
+		uid64, errUid := strconv.ParseUint(userFound.Uid, 10, 32)
+		gid64, errGid := strconv.ParseUint(userFound.Gid, 10, 32)
+		if errUid == nil && errGid == nil {
+			cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid64), Gid: uint32(gid64)}
+			return cmd
+		}
 	}
 
 	cmdArgs := []string{

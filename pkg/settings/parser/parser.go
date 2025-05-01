@@ -25,7 +25,7 @@ func (o *Option) Add(args ...string) {
 }
 
 func (o *Option) First() string {
-	if o.Args == nil || len(o.Args) == 0 {
+	if len(o.Args) == 0 {
 		return ""
 	}
 
@@ -565,7 +565,6 @@ func (a *Arguments) parseShortOption(arg, param string) (usedNext bool, err erro
 			break
 		} else {
 			err = a.AddArg(char)
-
 			if err != nil {
 				return
 			}

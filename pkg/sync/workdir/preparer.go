@@ -194,14 +194,15 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 
 	for _, layer := range targets {
 		for _, info := range layer {
-			if info.Source == dep.AUR {
+			switch info.Source {
+			case dep.AUR:
 				pkgBase := *info.AURBase
 				pkgBuildDir := filepath.Join(preper.cfg.BuildDir, pkgBase)
 				if preper.needToCloneAURBase(info, pkgBuildDir) {
 					aurBasesToClone.Add(pkgBase)
 				}
 				pkgBuildDirsByBase[pkgBase] = pkgBuildDir
-			} else if info.Source == dep.SrcInfo {
+			case dep.SrcInfo:
 				pkgBase := *info.AURBase
 				pkgBuildDirsByBase[pkgBase] = *info.SrcinfoPath
 			}

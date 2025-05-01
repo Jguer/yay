@@ -43,7 +43,7 @@ func srcinfoExists(ctx context.Context,
 			return fmt.Errorf("unable to generate .SRCINFO: %w - %s", err, stderr)
 		}
 
-		if len(srcinfo) == 0 {
+		if srcinfo == "" {
 			return fmt.Errorf("generated .SRCINFO is empty, check your PKGBUILD for errors")
 		}
 

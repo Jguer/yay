@@ -64,9 +64,9 @@ func TestParseNumberMenu(t *testing.T) {
 			},
 			mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string](),
 		},
-		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("abort", "all", "none"), mapset.NewThreadUnsafeSet[string]()},
-		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("a-b"), mapset.NewThreadUnsafeSet[string]("abort", "a-b")},
-		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("-9223372036854775809-9223372036854775809"), mapset.NewThreadUnsafeSet[string]()},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet("abort", "all", "none"), mapset.NewThreadUnsafeSet[string]()},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet("a-b"), mapset.NewThreadUnsafeSet("abort", "a-b")},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet("-9223372036854775809-9223372036854775809"), mapset.NewThreadUnsafeSet[string]()},
 		{IntRanges{
 			makeIntRange(1, 1),
 			makeIntRange(2, 2),
@@ -86,7 +86,7 @@ func TestParseNumberMenu(t *testing.T) {
 		}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
 		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
 		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()},
-		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet[string]("a", "b", "c", "d", "e"), mapset.NewThreadUnsafeSet[string]()},
+		{IntRanges{}, IntRanges{}, mapset.NewThreadUnsafeSet("a", "b", "c", "d", "e"), mapset.NewThreadUnsafeSet[string]()},
 	}
 
 	for n, in := range inputs {
