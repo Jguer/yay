@@ -201,7 +201,8 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 			extra = fmt.Sprintf(" (%s of %s)", dep.ReasonNames[info.Reason], strings.Join(reducedParents, ", "))
 		}
 
-		if info.Source == dep.AUR {
+		switch info.Source {
+		case dep.AUR:
 			aurRepo := "aur"
 			if info.Devel {
 				aurRepo = "devel"
@@ -215,7 +216,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				Reason:        alpmReason,
 				Extra:         extra,
 			})
-		} else if info.Source == dep.Sync {
+		case dep.Sync:
 			repoUp.Up = append(repoUp.Up, Upgrade{
 				Name:          name,
 				RemoteVersion: info.Version,

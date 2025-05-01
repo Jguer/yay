@@ -38,9 +38,10 @@ func (u UpSlice) Less(i, j int) bool {
 	}
 
 	for _, db := range u.Repos {
-		if db == u.Up[i].Repository {
+		switch db {
+		case u.Up[i].Repository:
 			return true
-		} else if db == u.Up[j].Repository {
+		case u.Up[j].Repository:
 			return false
 		}
 	}
@@ -52,9 +53,7 @@ func (u UpSlice) Less(i, j int) bool {
 }
 
 // calculateFormatting calculates formatting parameters for printing upgrades
-func calculateFormatting(upgrades []Upgrade) (int, int, int) {
-	longestName, longestVersion := 0, 0
-
+func calculateFormatting(upgrades []Upgrade) (longestName, longestVersion, longestNumber int) {
 	for i := range upgrades {
 		upgrade := &upgrades[i]
 		packNameLen := len(StylizedNameWithRepository(upgrade))
@@ -65,9 +64,9 @@ func calculateFormatting(upgrades []Upgrade) (int, int, int) {
 	}
 
 	lenUp := len(upgrades)
-	longestNumber := len(fmt.Sprintf("%v", lenUp))
+	longestNumber = len(fmt.Sprintf("%v", lenUp))
 
-	return longestName, longestVersion, longestNumber
+	return
 }
 
 // Print prints the details of the packages to upgrade.
