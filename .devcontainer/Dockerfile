@@ -10,8 +10,14 @@ RUN echo "docker ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/docker
 # Create a non-root user and switch to it
 USER docker
 
+# Install xgotext
+RUN go install github.com/leonelquinteros/gotext/cli/xgotext@latest
+
 # Add /app/bin to the PATH
 ENV PATH="/app/bin:$PATH"
+
+# add /home/docker/go/bin to the PATH
+ENV PATH="/home/docker/go/bin:$PATH"
 
 # Set the working directory
 WORKDIR /workspace
