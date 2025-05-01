@@ -1,67 +1,18 @@
-linters-settings:
-  dupl:
-    threshold: 100
-  funlen:
-    lines: 100
-    statements: 50
-  goconst:
-    min-len: 3
-    min-occurrences: 4
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-  gocyclo:
-    min-complexity: 15
-  goimports:
-    local-prefixes: github.com/Jguer/yay/v12
-  gomnd:
-    checks:
-      - argument
-      - case
-      - condition
-      - return
-    ignored-numbers:
-      - "0"
-      - "1"
-      - "2"
-      - "3"
-    ignored-functions:
-      - strings.SplitN
-  lll:
-    line-length: 140
-  misspell:
-    locale: US
-  nolintlint:
-    allow-unused: false # report any unused nolint directives
-    require-explanation: false # don't require an explanation for nolint directives
-    require-specific: false # don't require nolint directives to be specific about which linter is being skipped
-
+version: "2"
+run:
+  go: "1.20"
 linters:
-  # please, do not use `enable-all`: it's deprecated and will be removed soon.
-  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
-  disable-all: true
+  default: none
   enable:
-    - forbidigo
     - bodyclose
     - dogsled
     - dupl
-    - errorlint
     - errcheck
-    # - funlen # TOFIX
+    - errorlint
     - gochecknoinits
-    # - goconst # TOFIX
     - gocritic
-    # - gocyclo # TOFIX
-    - gofmt
-    - goimports
-    # - gomnd # TOFIX
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - lll
@@ -70,36 +21,74 @@ linters:
     - noctx
     - nolintlint
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
     - whitespace
-
-run:
-  go: "1.20"
-  timeout: "10m"
-  forbidigo:
-    forbid:
-      - p: ^fmt\.Print.*$
-        msg: Do not commit print statements.
-
-issues:
-  exclude-rules:
-    - path: (.+)_test.go
-      linters:
-        - lll
-        - revive
-        - wsl
-        - govet
-        - godot
-        - errcheck
-        - stylecheck
-        - dupl
-        - gocritic
-        - gochecknoinits
-        - errorlint
-
-  exclude:
-    - G204
+  settings:
+    dupl:
+      threshold: 100
+    funlen:
+      lines: 100
+      statements: 50
+    goconst:
+      min-len: 3
+      min-occurrences: 4
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 15
+    lll:
+      line-length: 140
+    misspell:
+      locale: US
+    nolintlint:
+      require-explanation: false
+      require-specific: false
+      allow-unused: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - errcheck
+          - errorlint
+          - gochecknoinits
+          - gocritic
+          - godot
+          - govet
+          - lll
+          - revive
+          - staticcheck
+          - wsl
+        path: (.+)_test.go
+      - path: (.+)\.go$
+        text: G204
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/Jguer/yay/v12
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

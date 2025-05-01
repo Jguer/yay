@@ -10,6 +10,9 @@ RUN echo "docker ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/docker
 # Create a non-root user and switch to it
 USER docker
 
+# Add /app/bin to the PATH
+ENV PATH="/app/bin:$PATH"
+
 # Set the working directory
 WORKDIR /workspace
 

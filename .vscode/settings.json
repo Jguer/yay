@@ -1,0 +1,7 @@
+{
+    "go.lintTool": "golangci-lint",
+    "gopls": {
+        "formatting.gofumpt": true,
+        "formatting.local": "github.com/Jguer/yay/v12"
+    }
+}
