@@ -571,7 +571,7 @@ msgstr "hiba telepítés közben:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "make hiba: %s"
+msgstr "fordítási hiba: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
