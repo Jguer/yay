@@ -32,6 +32,8 @@ jobs:
           chown -R yay:yay /home/yay/go/ &&
             su yay -c "make test-integration"
       - name: Build yay Artifact
+        env:
+          GOFLAGS: -buildvcs=false -tags=next
         run: make
       - name: Upload yay Artifact
         uses: actions/upload-artifact@v4
