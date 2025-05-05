@@ -31,7 +31,9 @@ func initGotext() {
 		// Split LANGUAGE by ':' and prioritize the first locale
 		// Should fix in gotext to support this
 		locales := strings.Split(lc, ":")
-		gotext.Configure(localePath, locales[0], "yay")
+		if len(locales) > 0 && locales[0] != "" {
+			gotext.Configure(localePath, locales[0], "yay")
+		}
 	} else if lc := os.Getenv("LC_ALL"); lc != "" {
 		gotext.Configure(localePath, lc, "yay")
 	} else if lc := os.Getenv("LC_MESSAGES"); lc != "" {
