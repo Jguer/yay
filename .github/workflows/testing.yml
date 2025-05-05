@@ -34,7 +34,9 @@ jobs:
       - name: Build yay Artifact
         run: make
       - name: Upload yay Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: yay
           path: ./yay
+          if-no-files-found: error
+          overwrite: true
