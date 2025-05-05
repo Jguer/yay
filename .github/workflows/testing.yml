@@ -22,6 +22,7 @@ jobs:
         run: /app/bin/golangci-lint run -v ./...
       - name: Run Build and Tests
         run: make test
+
       - name: Run Integration Tests
         continue-on-error: true
         run: |
@@ -29,4 +30,11 @@ jobs:
           chown -R yay:yay . &&
           cp -r ~/go/ /home/yay/go/ &&
           chown -R yay:yay /home/yay/go/ &&
-          su yay -c "make test-integration"
+            su yay -c "make test-integration"
+      - name: Build yay Artifact
+        run: make
+      - name: Upload yay Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: yay
+          path: ./yay
