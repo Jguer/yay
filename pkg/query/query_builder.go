@@ -152,6 +152,11 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
 		dbName := sourceAUR
 
+		if aurErr != nil {
+			s.logger.Errorln(ErrAURSearch{inner: aurErr})
+			return
+		}
+
 		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
 				s.queryMap[dbName] = map[string]interface{}{}
