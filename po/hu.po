@@ -494,7 +494,7 @@ msgstr ""
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
-msgstr "Nem lehet eltávolítani %s: %s"
+msgstr "Nem lehet eltávolítani a következőt: %s: %s"
 
 #: print.go:32
 msgid "Version"
