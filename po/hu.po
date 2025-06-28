@@ -364,7 +364,7 @@ msgstr "Csomag alapja"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Csomag alapjának azonosítója"
+msgstr "Csomagazonosító-alap"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
