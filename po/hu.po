@@ -710,7 +710,7 @@ msgstr "az AUR-csomagok eltávolítása a gyorsítótárból..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "nem követett AUR fájlok eltávolítása a gyorsítótárból..."
+msgstr "nem követett AUR-fájlok eltávolítása a gyorsítótárból..."
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
