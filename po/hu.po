@@ -292,7 +292,7 @@ msgstr "Utoljára módosítva"
 
 #: print.go:35
 msgid "Licenses"
-msgstr "Engedélyek"
+msgstr "Licencek"
 
 #: pkg/dep/dep_graph.go:77
 msgid "Local"
