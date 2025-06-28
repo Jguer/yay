@@ -2,11 +2,11 @@
 # Translators:
 # Szigeti Péter, 2021
 # Gergő Kasza, 2022
-# summoner001, 2025
+# summoner <summoner@vivaldi.net>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: summoner001, 2025\n"
+"Last-Translator: summoner <summoner@vivaldi.net>, 2025\n"
 "Language-Team: Hungarian (https://app.transifex.com/yay-1/teams/123732/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -87,7 +87,7 @@ msgstr "%s: Nincs változtatás -- kihagyás"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s\\: nem használható a cél --aur -- kihagyás"
+msgstr "%s: nem használható a cél az --aur kapcsolóval -- kihagyás"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
