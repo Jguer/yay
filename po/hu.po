@@ -591,7 +591,8 @@ msgstr "hiba a következő visszaállításakor: %s: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "hiba történt a csomag frissítése közben, a telepítés oka %s"
+msgstr ""
+"hiba történt a csomag telepítési okának frissítésekor a következőre: %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
