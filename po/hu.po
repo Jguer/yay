@@ -690,7 +690,7 @@ msgstr[1] "csomagok"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "a(z) „%s” csomag nem található"
+msgstr "nem található a(z) „%s” csomag"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
