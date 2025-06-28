@@ -187,7 +187,7 @@ msgstr "Függőség"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "Függőség(ek)"
+msgstr "Függőség(ek):"
 
 #: print.go:33
 msgid "Description"
