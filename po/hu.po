@@ -555,7 +555,7 @@ msgstr "a szerkesztő nem lépett ki sikeresen, megszakítva: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "hiba a forrásfájlok letöltése közben: %s"
+msgstr "hiba a forrásfájlok letöltésekor: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
