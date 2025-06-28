@@ -702,7 +702,7 @@ msgstr "a csomag nem található a tárolókban"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
-msgstr "hiba a kulcsok importálása közben"
+msgstr "hiba a kulcsok importálásakor"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
