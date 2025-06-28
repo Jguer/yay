@@ -183,7 +183,7 @@ msgstr "Törlés (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
-msgstr "Függőség"
+msgstr "Függőség:"
 
 #: print.go:38
 msgid "Depends On"
