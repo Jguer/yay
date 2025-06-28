@@ -221,7 +221,7 @@ msgstr "Mivel szerkeszti a PKGBUILD-et?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
-msgstr "Hiba történt az AUR-ban való keresés közben: %s\n"
+msgstr "Hiba történt az AUR-ban való kereséskor: %s\n"
 
 #: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
