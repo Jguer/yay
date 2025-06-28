@@ -672,7 +672,7 @@ msgstr "nincs megadva célkönyvtár"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "nincs mit telepíteni ehhez: %s"
+msgstr "nincs mit telepíteni a következőhöz: %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
