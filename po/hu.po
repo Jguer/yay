@@ -95,7 +95,7 @@ msgstr "%s: nem használható a cél a --repo kapcsolóval -- kihagyás"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s: csomagfrissítés figyelmen kívül hagyása (%s => %s)"
+msgstr "%s: csomagfrissítés mellőzése (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
