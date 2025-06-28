@@ -506,7 +506,7 @@ msgstr "Szavazatok"
 
 #: print.go:87
 msgid "Yay version v%s"
-msgstr "Yay v%s verzió"
+msgstr "Yay verziója: v%s"
 
 #: pkg/menus/menu.go:49
 msgid "[N]one"
