@@ -91,7 +91,7 @@ msgstr "%s: nem használható a cél az --aur kapcsolóval -- kihagyás"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s\\: nem használható a cél --repo -- kihagyás"
+msgstr "%s: nem használható a cél a --repo kapcsolóval -- kihagyás"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
