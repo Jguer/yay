@@ -256,7 +256,7 @@ msgstr "Először beküldve"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Elavultnak jelölt AUR csomagok:"
+msgstr "Elavultnak jelölt AUR-csomagok:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
