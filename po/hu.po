@@ -628,8 +628,7 @@ msgstr "nem sikerült lekérni az AUR gyorsítótárát"
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr ""
-"figyelmen kívül hagyja a fejlesztői csomag frissítését (nem talált AUR-"
-"információt):"
+"mellőzi a fejlesztői csomag frissítését (nem található AUR-információ):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
