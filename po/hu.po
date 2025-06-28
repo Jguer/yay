@@ -583,7 +583,7 @@ msgstr "hiba a következő olvasásakor: %s"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "hiba az adatbázisok frissítése közben"
+msgstr "hiba az adatbázisok frissítésekor"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
