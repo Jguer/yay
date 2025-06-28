@@ -587,7 +587,7 @@ msgstr "hiba az adatbázisok frissítése közben"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "hiba a(z) %s visszaállítása közben: %s"
+msgstr "hiba a következő visszaállításakor: %s: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
