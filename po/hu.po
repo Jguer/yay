@@ -461,7 +461,7 @@ msgstr "%[1]d szolgáltató érhető el a következőhöz: %[2]d:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr "Lehet, hogy már fut a pacman. Várjon..."
+msgstr "Lehet, hogy már fut a pacman. Kis türelmet..."
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
