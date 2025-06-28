@@ -611,7 +611,7 @@ msgstr "nem sikerült elemezni a következőt: %s -- kihagyás: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "nem sikerült elemezni %s: %s"
+msgstr "nem sikerült elemezni a következőt: %s: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
