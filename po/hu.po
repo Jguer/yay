@@ -575,7 +575,7 @@ msgstr "fordítási hiba: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "hiba a(z) %s beolvasztása közben: %s"
+msgstr "hiba a következő beolvasztásakor: %s: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
