@@ -567,7 +567,7 @@ msgstr "hiba a tárolóból származó csomagok telepítésekor"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
-msgstr "hiba telepítés közben:"
+msgstr "hiba a következő telepítésekor:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
