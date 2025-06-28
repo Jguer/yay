@@ -595,7 +595,7 @@ msgstr "hiba a csomag telepítési okának frissítésekor a következőre: %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr "kifejezett"
+msgstr "kifejezetten"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
