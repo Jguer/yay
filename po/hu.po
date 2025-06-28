@@ -348,7 +348,7 @@ msgstr "Elavult"
 
 #: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
-msgstr "Importálásra szoruló PGP kulcsok:"
+msgstr "Importálandó PGP-kulcsok:"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
