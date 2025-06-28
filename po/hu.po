@@ -706,7 +706,7 @@ msgstr "hiba a kulcsok importálása közben"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "az AUR csomagok eltávolítása a gyorsítótárból..."
+msgstr "az AUR-csomagok eltávolítása a gyorsítótárból..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
