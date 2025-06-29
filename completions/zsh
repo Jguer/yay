@@ -1,5 +1,5 @@
 #compdef yay
-# vim:tabstop=2 shiftwidth=2 filetype=zsh
+# vim:noexpandtab tabstop=2 shiftwidth=2 filetype=zsh
 
 typeset -A opt_args
 setopt extendedglob
@@ -23,20 +23,20 @@ _pacman_opts_commands=(
 
 # options for passing to _arguments: options common to all commands
 _pacman_opts_common=(
-	{-N,--repo}'[Assume targets are from the repositories]'
-	{-a,--aur}'[Assume targets are from the AUR]'
+	'(-N --repo)'{-N,--repo}'[Assume targets are from the repositories]'
+	'(-a --aur)'{-a,--aur}'[Assume targets are from the AUR]'
 	'--aururl[Set an alternative AUR URL]:url'
 	'--aurrpcurl[Set an alternative URL for the AUR /rpc endpoint]:url'
 	'--arch[Set an alternate architecture]'
-	{-b,--dbpath}'[Alternate database location]:database_location:_files -/'
+	'(-b --dbpath)'{-b,--dbpath}'[Alternate database location]:database_location:_files -/'
 	'--color[colorize the output]:color options:(always never auto)'
-	{-h,--help}'[Display syntax for the given operation]'
-	{-r,--root}'[Set alternate installation root]:installation root:_files -/'
-	{-v,--verbose}'[Be more verbose]'
+	'(- *)'{-h,--help}'[Display syntax for the given operation]'
+	'(-r --root)'{-r,--root}'[Set alternate installation root]:installation root:_files -/'
+	'(-v --verbose)'{-v,--verbose}'[Be more verbose]'
 	'--cachedir[Alternate package cache location]:cache_location:_files -/'
 	'--config[An alternate configuration file]:config file:_files'
-	'--makepkgconf[makepkg.conf file to use]:config file:_files'
-	'--nomakepkgconf[Use the default makepkg.conf]'
+	'(--nomakepkgconf)--makepkgconf[makepkg.conf file to use]:config file:_files'
+	'(--makepkgconf)--nomakepkgconf[Use the default makepkg.conf]'
 	'--requestsplitn[Max amount of packages to query per AUR request]:number'
 	'--completioninterval[Time in days to refresh completion cache]:number'
 	'--confirm[Always ask for confirmation]'
@@ -59,47 +59,49 @@ _pacman_opts_common=(
 	'--gpg[gpg command to use]:gpg:_files'
 
 	'--sortby[Sort AUR results by a specific field during search]:sortby options:(votes popularity id baseid name base submitted modified)'
-	'--answerclean[Set a predetermined answer for the clean build menu]:answer'
-	'--answerdiff[Set a predetermined answer for the diff menu]:answer'
-	'--answeredit[Set a predetermined answer for the edit pkgbuild menu]:answer'
-	'--answerupgrade[Set a predetermined answer for the upgrade menu]:answer'
-	'--noanswerclean[Unset the answer for the clean build menu]'
-	'--noanswerdiff[Unset the answer for the diff menu]'
-	'--noansweredit[Unset the answer for the edit pkgbuild menu]'
-	'--noanswerupgrade[Unset the answer for the upgrade menu]'
+	'--searchby[Search for packages using a specified field]:query'
+	'(--noanswerclean)--answerclean[Set a predetermined answer for the clean build menu]:answer'
+	'(--noanswerdiff)--answerdiff[Set a predetermined answer for the diff menu]:answer'
+	'(--noansweredit)--answeredit[Set a predetermined answer for the edit pkgbuild menu]:answer'
+	'(--noanswerupgrade)--answerupgrade[Set a predetermined answer for the upgrade menu]:answer'
+	'(--answerclean)--noanswerclean[Unset the answer for the clean build menu]'
+	'(--answerdiff)--noanswerdiff[Unset the answer for the diff menu]'
+	'(--answeredit)--noansweredit[Unset the answer for the edit pkgbuild menu]'
+	'(--answerupgrade)--noanswerupgrade[Unset the answer for the upgrade menu]'
 	'--cleanmenu[Give the option to clean build PKGBUILDS]'
 	'--diffmenu[Give the option to show diffs for build files]'
 	'--editmenu[Give the option to edit/view PKGBUILDS]'
-	"--askremovemake[Ask to remove makedepends after install]"
-	"--askyesremovemake[Ask to remove makedepends after install(with "Y" as default)]"
-	"--removemake[Remove makedepends after install]"
-	"--noremovemake[Don't remove makedepends after install]"
+	'(--askyesremovemake --removemake --noremovemake)--askremovemake[Ask to remove makedepends after install]'
+	'(--askremovemake --removemake --noremovemake)--askyesremovemake[Ask to remove makedepends after install(with "Y" as default)]'
+	'(--askremovemake --askyesremovemake --noremovemake)--removemake[Remove makedepends after install]'
+	"(--askremovemake --askyesremovemake --removemake)--noremovemake[Don't remove makedepends after install]"
 
-	'--bottomup[Show AUR packages first]'
-	'--topdown[Show repository packages first]'
-	'--singlelineresults[List each search result on its own line]'
-	'--doublelineresults[List each search result on two lines, like pacman]'
+	'(--bottomup)--topdown[Show repository packages first]'
+	'(--topdown)--bottomup[Show AUR packages first]'
+	'(--doublelineresults)--singlelineresults[List each search result on its own line]'
+	'(--singlelineresults)--doublelineresults[List each search result on two lines, like pacman]'
 	'--devel[Check -git/-svn/-hg development version]'
 	'--cleanafter[Clean package sources after successful build]'
 	'--keepsrc[Keep pkg/ and src/ after building packages]'
 	'--timeupdate[Check packages modification date and version]'
-	'--redownload[Always download pkgbuilds of targets]'
-	'--redownloadall[Always download pkgbuilds of all AUR packages]'
-	'--noredownload[Skip pkgbuild download if in cache and up to date]'
-	'--rebuild[Always build target packages]'
-	'--rebuildall[Always build all AUR packages]'
+	'--separatesources[Separate query results by source, AUR and sync]'
+	'(--redownloadall --noredownload)--redownload[Always download pkgbuilds of targets]'
+	'(--redownload --noredownload)--redownloadall[Always download pkgbuilds of all AUR packages]'
+	'(--redownload --redownloadall)--noredownload[Skip pkgbuild download if in cache and up to date]'
 	'--provides[Look for matching providers when searching for packages]'
 	'--pgpfetch[Prompt to import PGP keys from PKGBUILDs]'
 	"--useask[Automatically resolve conflicts using pacman's ask flag]"
 	'--combinedupgrade[Refresh then perform the repo and AUR upgrade together]'
-	'--rebuildtree[Always build all AUR packages even if installed]'
-	'--norebuild[Skip package build if in cache and up to date]'
+	'--batchinstall[Build multiple AUR packages then install them together]'
+	'(--rebuildall --rebuildtree --norebuild)--rebuild[Always build target packages]'
+	'(--rebuild --rebuildtree --norebuild)--rebuildall[Always build all AUR packages]'
+	'(--rebuild --rebuildall --norebuild)--rebuildtree[Always build all AUR packages even if installed]'
+	'(--rebuild --rebuildall --rebuildtree)--norebuild[Skip package build if in cache and up to date]'
 	'--mflags[Pass arguments to makepkg]:mflags'
 	'--gpgflags[Pass arguments to gpg]:gpgflags'
+	'--sudo[The command to use for sudo calls]:command'
+	'--sudoflags[Passes arguments to sudo]:flag'
 	'--sudoloop[Loop sudo calls in the background to avoid timeout]'
-	'--searchby[Search for packages using a specified field]'
-	'--sortby[Sort AUR results by a specific field during search]'
-	'--batchinstall[Build multiple AUR packages then install them together]'
 )
 
 # options for passing to _arguments: options for --upgrade commands
@@ -110,9 +112,9 @@ _pacman_opts_pkgfile=(
 	'--dbonly[Only remove database entry, do not remove files]'
 	'--overwrite[Overwrite conflicting files]:file:_files -g "*"'
 	'--needed[Do not reinstall up to date packages]'
-	'--asdeps[mark packages as non-explicitly installed]'
-	'--asexplicit[mark packages as explicitly installed]'
-	{-p,--print}'[Only print the targets instead of performing the operation]'
+	'(--asexplicit)--asdeps[mark packages as non-explicitly installed]'
+	'(--asdeps)--asexplicit[mark packages as explicitly installed]'
+	'(-p --print)'{-p,--print}'[Only print the targets instead of performing the operation]'
 	'*--ignore[Ignore a package upgrade]:package: _pacman_completions_all_packages'
 	'*--ignoregroup[Ignore a group upgrade]:package group:_pacman_completions_all_groups'
 	'--print-format[Specify how the targets should be printed]'
@@ -130,73 +132,73 @@ _pacman_opts_query_actions=(
 
 # options for passing to _arguments: options for --query and subcommands
 _pacman_opts_query_modifiers=(
-	{-c,--changelog}'[List package changelog]'
-	{-d,--deps}'[List packages installed as dependencies]'
-	{-e,--explicit}'[List packages explicitly installed]'
+	'(-c --changelog)'{-c,--changelog}'[List package changelog]'
+	'(-d --deps)'{-d,--deps}'[List packages installed as dependencies]'
+	'(-e --explicit)'{-e,--explicit}'[List packages explicitly installed]'
 	{\*-i,\*--info}'[View package information]'
 	{\*-k,\*--check}'[Check package files]'
-	{-l,--list}'[List package contents]'
-	{-m,--foreign}'[List installed packages not found in sync db(s)]'
-	{-n,--native}'[List installed packages found in sync db(s)]'
-	{-q,--quiet}'[Show less information for query and search]'
-	{-t,--unrequired}'[List packages not required by any package]'
-	{-u,--upgrades}'[List packages that can be upgraded]'
+	'(-l --list)'{-l,--list}'[List package contents]'
+	'(-m --foreign)'{-m,--foreign}'[List installed packages not found in sync db(s)]'
+	'(-n --native)'{-n,--native}'[List installed packages found in sync db(s)]'
+	'(-q --quiet)'{-q,--quiet}'[Show less information for query and search]'
+	'(-t --unrequired)'{-t,--unrequired}'[List packages not required by any package]'
+	'(-u --upgrades)'{-u,--upgrades}'[List packages that can be upgraded]'
 )
 
 # -Y
 _pacman_opts_yay_modifiers=(
-	{-c,--clean}'[Remove unneeded dependencies]'
+	'(-c --clean)'{-c,--clean}'[Remove unneeded dependencies]'
 	'--gendb[Generates development package DB used for updating]'
 )
 
 # -G
 _pacman_opts_getpkgbuild_modifiers=(
-	{-f,--force}'[Force download for existing ABS packages]'
-	{-p,--print}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
+	'(-f --force)'{-f,--force}'[Force download for existing ABS packages]'
+	'(-p --print)'{-p,--print}'[Print PKGBUILDs]:package:_pacman_completions_all_packages'
 )
 
 # -W
 _pacman_opts_web_modifiers=(
-	{-u,--unvote}'[Unvote AUR package]:package:_pacman_completions_all_packages'
-	{-v,--vote}'[Vote AUR package]:package:_pacman_completions_all_packages'
+	'(-u --unvote)'{-u,--unvote}'[Unvote AUR package]:package:_pacman_completions_all_packages'
+	'(-v --vote)'{-v,--vote}'[Vote AUR package]:package:_pacman_completions_all_packages'
 )
 
 # -P
 _pacman_opts_print_modifiers=(
-		{-c,--complete}'[Used for completions]'
-		{-d,--defaultconfig}'[Print default yay configuration]'
-		{-g,--config}'[Print current yay configuration]'
-		{-n,--numberupgrades}'[Print number of updates]'
-		{-s,--stats}'[Display system package statistics]'
-		{-u,--upgrades}'[Print update list]'
-		{-w,--news}'[Print arch news]'
+		'(-c --complete)'{-c,--complete}'[Used for completions]'
+		'(-d --defaultconfig)'{-d,--defaultconfig}'[Print default yay configuration]'
+		'(-g --config)'{-g,--config}'[Print current yay configuration]'
+		'(-n --numberupgrades)'{-n,--numberupgrades}'[Print number of updates]'
+		'(-s --stats)'{-s,--stats}'[Display system package statistics]'
+		'(-u --upgrades)'{-u,--upgrades}'[Print update list]'
+		'(-w --news)'{-w,--news}'[Print arch news]'
 )
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(
-	{-c,--cascade}'[Remove all dependent packages]'
-	{-d,--nodeps}'[Skip dependency checks]'
+	'(-c --cascade)'{-c,--cascade}'[Remove all dependent packages]'
+	'(-d --nodeps)'{-d,--nodeps}'[Skip dependency checks]'
 	'*--assume-installed[Add virtual package to satisfy dependencies]'
-	{-n,--nosave}'[Remove protected configuration files]'
-	{-p,--print}'[Only print the targets instead of performing the operation]'
+	'(-n --nosave)'{-n,--nosave}'[Remove protected configuration files]'
+	'(-p --print)'{-p,--print}'[Only print the targets instead of performing the operation]'
 	{\*-s,\*--recursive}'[Remove dependencies not required by other packages]'
-	{-u,--unneeded}'[Remove unneeded packages]'
+	'(-u --unneeded)'{-u,--unneeded}'[Remove unneeded packages]'
 	'--dbonly[Only remove database entry, do not remove files]'
 	'--print-format[Specify how the targets should be printed]'
 	'*:installed package:_pacman_completions_installed_packages'
 )
 
 _pacman_opts_database=(
-	'--asdeps[mark packages as non-explicitly installed]'
-	'--asexplicit[mark packages as explicitly installed]'
+	'(--asexplicit)--asdeps[mark packages as non-explicitly installed]'
+	'(--asdeps)--asexplicit[mark packages as explicitly installed]'
 	'*:installed package:_pacman_completions_installed_packages'
 )
 
 _pacman_opts_files=(
-	{-l,--list}'[List the files owned by the queried package]:package:_pacman_completions_all_packages'
-	{-x,--regex}'[Enable searching using regular expressions]:regex:'
-	{-y,--refresh}'[Download fresh files databases from the server]'
+	'(-l --list)'{-l,--list}'[List the files owned by the queried package]:package:_pacman_completions_all_packages'
+	'(-x --regex)'{-x,--regex}'[Enable searching using regular expressions]:regex:'
+	'(-y --refresh)'{-y,--refresh}'[Download fresh files databases from the server]'
 	'--machinereadable[Produce machine-readable output]'
-	{-q,--quiet}'[Show less information for query and search]'
+	'(-q --quiet)'{-q,--quiet}'[Show less information for query and search]'
 )
 
 # options for passing to _arguments: options for --sync command
@@ -215,16 +217,16 @@ _pacman_opts_sync_modifiers=(
 	{\*-d,\*--nodeps}'[Skip dependency checks]'
 	'*--assume-installed[Add virtual package to satisfy dependencies]'
 	{\*-i,\*--info}'[View package information]'
-	{-l,--list}'[List all packages in a repository]'
-	{-p,--print}'[Print download URIs for each package to be installed]'
-	{-q,--quiet}'[Show less information for query and search]'
+	'(-l --list)'{-l,--list}'[List all packages in a repository]'
+	'(-p --print)'{-p,--print}'[Print download URIs for each package to be installed]'
+	'(-q --quiet)'{-q,--quiet}'[Show less information for query and search]'
 	{\*-u,\*--sysupgrade}'[Upgrade all out-of-date packages]'
-	{-w,--downloadonly}'[Download packages only]'
+	'(-w --downloadonly)'{-w,--downloadonly}'[Download packages only]'
 	{\*-y,\*--refresh}'[Download fresh package databases]'
 	'*--ignore[Ignore a package upgrade]:package: _pacman_completions_all_packages'
 	'*--ignoregroup[Ignore a group upgrade]:package group:_pacman_completions_all_groups'
-	'--asdeps[Install packages as non-explicitly installed]'
-	'--asexplicit[Install packages as explicitly installed]'
+	'(--asexplicit)--asdeps[Install packages as non-explicitly installed]'
+	'(--asdeps)--asexplicit[Install packages as explicitly installed]'
 	'--overwrite[Overwrite conflicting files]:files:_files'
 	'--print-format[Specify how the targets should be printed]'
 )
