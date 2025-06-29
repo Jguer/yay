@@ -202,6 +202,30 @@ func TestConfiguration_setPrivilegeElevator_doas(t *testing.T) {
 	assert.False(t, config.SudoLoop)
 }
 
+// GIVEN default config and sudo loop enabled
+// GIVEN run0 in path
+// WHEN setPrivilegeElevator gets called
+// THEN sudobin should be changed to "run0"
+func TestConfiguration_setPrivilegeElevator_run0(t *testing.T) {
+	path := t.TempDir()
+
+	doas := filepath.Join(path, "run0")
+	_, err := os.Create(doas)
+	os.Chmod(doas, 0o755)
+	assert.NoError(t, err)
+
+	config := DefaultConfig("test")
+	config.SudoLoop = true
+	config.SudoFlags = "-v"
+
+	t.Setenv("PATH", path)
+	err = config.setPrivilegeElevator()
+	assert.NoError(t, err)
+	assert.Equal(t, "run0", config.SudoBin)
+	assert.Equal(t, "", config.SudoFlags)
+	assert.False(t, config.SudoLoop)
+}
+
 // GIVEN config with wrapper and sudo loop enabled
 // GIVEN wrapper is in path
 // WHEN setPrivilegeElevator gets called
