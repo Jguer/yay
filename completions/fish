@@ -224,6 +224,7 @@ complete -c $progname -n "not $noopt" -l topdown -d 'Shows repository packages f
 complete -c $progname -n "not $noopt" -l bottomup -d 'Shows aur packages first and then repository' -f
 complete -c $progname -n "not $noopt" -l singlelineresults -d 'List each search result on its own line' -f
 complete -c $progname -n "not $noopt" -l doublelineresults -d 'List each search result on two lines, like pacman' -f
+complete -c $progname -n "not $noopt" -l showpackageurls -d 'Show the URL of each package in the search results' -f
 complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg development version' -f
 complete -c $progname -n "not $noopt" -l cleanafter -d 'Clean package sources after successful build' -f
 complete -c $progname -n "not $noopt" -l keepsrc -d 'Keep pkg/ and src/ after building packages' -f

@@ -51,7 +51,13 @@ func aurPkgSearchString(
 	pkg *aur.Pkg,
 	dbExecutor db.Executor,
 	singleLineResults bool,
+	showPackageURLs bool,
 ) string {
+	lineEnding := "\n    "
+	if singleLineResults {
+		lineEnding = "\t"
+	}
+
 	toPrint := text.Bold(text.ColorHash("aur")) + "/" + text.Bold(pkg.Name) +
 		" " + text.Cyan(pkg.Version) +
 		text.Bold(" (+"+strconv.Itoa(pkg.NumVotes)) +
@@ -73,19 +79,24 @@ func aurPkgSearchString(
 		}
 	}
 
-	if singleLineResults {
-		toPrint += "\t"
-	} else {
-		toPrint += "\n    "
-	}
-
+	toPrint += lineEnding
 	toPrint += pkg.Description
+
+	if showPackageURLs {
+		toPrint += lineEnding
+		toPrint += "Package URL: https://aur.archlinux.org/packages/" + pkg.Name
+	}
 
 	return toPrint
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineResults bool) string {
+func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineResults, showPackageURLs bool) string {
+	lineEnding := "\n    "
+	if singleLineResults {
+		lineEnding = "\t"
+	}
+
 	toPrint := text.Bold(text.ColorHash(pkg.DB().Name())) + "/" + text.Bold(pkg.Name()) +
 		" " + text.Cyan(pkg.Version()) +
 		text.Bold(" ("+text.Human(pkg.Size())+
@@ -104,13 +115,15 @@ func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineRe
 		}
 	}
 
-	if singleLineResults {
-		toPrint += "\t"
-	} else {
-		toPrint += "\n    "
-	}
-
+	toPrint += lineEnding
 	toPrint += pkg.Description()
+	if showPackageURLs {
+		toPrint += lineEnding
+		toPrint += fmt.Sprintf(
+			"Package URL: https://archlinux.org/packages/%s/%s/%s",
+			pkg.DB().Name(), pkg.Architecture(), pkg.Name(),
+		)
+	}
 
 	return toPrint
 }

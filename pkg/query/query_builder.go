@@ -47,6 +47,7 @@ type SourceQueryBuilder struct {
 	bottomUp          bool
 	singleLineResults bool
 	separateSources   bool
+	showPackageURLs   bool
 
 	aurClient aur.QueryClient
 	logger    *text.Logger
@@ -61,6 +62,7 @@ func NewSourceQueryBuilder(
 	bottomUp,
 	singleLineResults bool,
 	separateSources bool,
+	showPackageURLs bool,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
 		aurClient:         aurClient,
@@ -71,6 +73,7 @@ func NewSourceQueryBuilder(
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
 		separateSources:   separateSources,
+		showPackageURLs:   showPackageURLs,
 		queryMap:          map[string]map[string]interface{}{},
 		results:           make([]abstractResult, 0, 100),
 	}
@@ -237,9 +240,9 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 
 		switch pPkg := pkg.(type) {
 		case aur.Pkg:
-			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults)
+			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults, s.showPackageURLs)
 		case alpm.IPackage:
-			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults)
+			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults, s.showPackageURLs)
 		}
 
 		s.logger.Println(toPrint)
