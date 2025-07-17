@@ -51,7 +51,7 @@ New operations:
     yay {-Y --yay}         [options] [package(s)]
 
 If no operation is specified 'yay -Syu' will be performed
-If no operation is specified and targets are provided -Y will be assumed
+If no operation is specified and targets are provided, -Y will be assumed
 
 New options:
     -N --repo             Assume targets are from the repositories
@@ -122,18 +122,18 @@ Permanent configuration options:
 
     --timeupdate          Check packages' AUR page for changes during sysupgrade
 
-show specific options:
+show specific options (used with -P):
     -c --complete         Used for completions
     -d --defaultconfig    Print default yay configuration
     -g --currentconfig    Print current yay configuration
     -s --stats            Display system package statistics
     -w --news             Print arch news
 
-yay specific options:
+yay specific options (used with -Y):
     -c --clean            Remove unneeded dependencies (-cc to ignore optdepends)
        --gendb            Generates development package DB used for updating
 
-getpkgbuild specific options:
+getpkgbuild specific options (used with -G):
     -f --force            Force download for existing ABS packages
     -p --print            Print pkgbuild of packages`)
 }
