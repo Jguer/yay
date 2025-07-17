@@ -542,7 +542,7 @@ func hasParam(arg string) bool {
 }
 
 // Parses short hand options such as:
-// -Syu -b/some/path -.
+// -Syu -b /some/path -.
 func (a *Arguments) parseShortOption(arg, param string) (usedNext bool, err error) {
 	if arg == "-" {
 		err = a.AddArg("-")
@@ -655,6 +655,14 @@ func (a *Arguments) Parse() error {
 		if len(a.Targets) > 0 {
 			a.Op = "Y"
 		} else {
+			// Handle args incompatible with -Syu
+			if a.ExistsArg("c", "clean") {
+				fmt.Println(gotext.Get("the clean command requires an operation to be specified"))
+				fmt.Println(gotext.Get("did you mean yay -Scc (clean caches) or yay -Ycc (clean orphaned packages)?"))
+
+				return errors.New(gotext.Get("invalid option"))
+			}
+
 			if _, err := a.parseShortOption("-Syu", ""); err != nil {
 				return err
 			}
