@@ -52,7 +52,7 @@ func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 	keepInstalled := false
 	keepCurrent := false
 
-	_, removeAll, _ := cmdArgs.GetArg("c", "clean")
+	removeAll := cmdArgs.ExistsArg("c", "clean")
 
 	for _, v := range run.PacmanConf.CleanMethod {
 		switch v {
