@@ -34,7 +34,7 @@ func NewService(dbExecutor db.Executor, cfg *settings.Configuration, logger *tex
 ) (*Service, error) {
 	srcinfos, err := ParseSrcinfoFilesByBase(logger, pkgBuildDirs, true)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return &Service{
 		dbExecutor:   dbExecutor,
