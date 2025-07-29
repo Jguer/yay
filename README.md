@@ -8,7 +8,7 @@
 
 Yet Another Yogurt - An AUR Helper Written in Go
 
-### Help translate yay: [Transifex](https://www.transifex.com/yay-1/yay/)
+### Help translate yay: [Transifex](https://app.transifex.com/yay-1/yay/)
 
 ## Features
 
