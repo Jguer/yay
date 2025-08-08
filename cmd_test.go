@@ -113,7 +113,7 @@ func TestYogurtMenuAURDB(t *testing.T) {
 		CmdBuilder: cmdBuilder,
 		VCSStore:   &vcs.Mock{},
 		QueryBuilder: query.NewSourceQueryBuilder(aurCache, logger, "votes", parser.ModeAny, "name",
-			true, false, true, false),
+			true, false, true, false, false),
 		AURClient: aurCache,
 	}
 	err = handleCmd(context.Background(), run, cmdArgs, db)

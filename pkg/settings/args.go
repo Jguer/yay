@@ -73,6 +73,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.SingleLineResults = true
 	case "doublelineresults":
 		c.SingleLineResults = false
+	case "showpackagetimestamps":
+		c.ShowPackageTimestamps = boolValue
 	case "showpackageurls":
 		c.ShowPackageURLs = boolValue
 	case "completioninterval":

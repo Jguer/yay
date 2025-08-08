@@ -39,15 +39,16 @@ type Builder interface {
 }
 
 type SourceQueryBuilder struct {
-	results           []abstractResult
-	sortBy            string
-	searchBy          string
-	targetMode        parser.TargetMode
-	queryMap          map[string]map[string]interface{}
-	bottomUp          bool
-	singleLineResults bool
-	separateSources   bool
-	showPackageURLs   bool
+	results               []abstractResult
+	sortBy                string
+	searchBy              string
+	targetMode            parser.TargetMode
+	queryMap              map[string]map[string]any
+	bottomUp              bool
+	singleLineResults     bool
+	separateSources       bool
+	showPackageTimestamps bool
+	showPackageURLs       bool
 
 	aurClient aur.QueryClient
 	logger    *text.Logger
@@ -62,20 +63,22 @@ func NewSourceQueryBuilder(
 	bottomUp,
 	singleLineResults bool,
 	separateSources bool,
+	showPackageTimestamps bool,
 	showPackageURLs bool,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
-		aurClient:         aurClient,
-		logger:            logger,
-		bottomUp:          bottomUp,
-		sortBy:            sortBy,
-		targetMode:        targetMode,
-		searchBy:          searchBy,
-		singleLineResults: singleLineResults,
-		separateSources:   separateSources,
-		showPackageURLs:   showPackageURLs,
-		queryMap:          map[string]map[string]interface{}{},
-		results:           make([]abstractResult, 0, 100),
+		aurClient:             aurClient,
+		logger:                logger,
+		bottomUp:              bottomUp,
+		sortBy:                sortBy,
+		targetMode:            targetMode,
+		searchBy:              searchBy,
+		singleLineResults:     singleLineResults,
+		separateSources:       separateSources,
+		showPackageTimestamps: showPackageTimestamps,
+		showPackageURLs:       showPackageURLs,
+		queryMap:              map[string]map[string]any{},
+		results:               make([]abstractResult, 0, 100),
 	}
 }
 
@@ -157,7 +160,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]interface{}{}
+				s.queryMap[dbName] = map[string]any{}
 			}
 
 			by := getSearchBy(s.searchBy)
@@ -185,7 +188,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		for i := range repoResults {
 			dbName := repoResults[i].DB().Name()
 			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]interface{}{}
+				s.queryMap[dbName] = map[string]any{}
 			}
 
 			s.queryMap[dbName][repoResults[i].Name()] = repoResults[i]
@@ -240,7 +243,7 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 
 		switch pPkg := pkg.(type) {
 		case aur.Pkg:
-			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults, s.showPackageURLs)
+			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults, s.showPackageTimestamps, s.showPackageURLs)
 		case alpm.IPackage:
 			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults, s.showPackageURLs)
 		}
@@ -292,7 +295,7 @@ func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 		desc := strings.ToLower(pkg.Description)
 		targ := strings.ToLower(pkgN)
 
-		if !(strings.Contains(name, targ) || strings.Contains(desc, targ)) {
+		if !strings.Contains(name, targ) && !strings.Contains(desc, targ) {
 			return false
 		}
 	}

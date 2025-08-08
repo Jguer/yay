@@ -51,6 +51,7 @@ func aurPkgSearchString(
 	pkg *aur.Pkg,
 	dbExecutor db.Executor,
 	singleLineResults bool,
+	showPackageTimestamps bool,
 	showPackageURLs bool,
 ) string {
 	lineEnding := "\n    "
@@ -82,16 +83,21 @@ func aurPkgSearchString(
 	toPrint += lineEnding
 	toPrint += pkg.Description
 
+	if showPackageTimestamps {
+		toPrint += lineEnding
+		toPrint += fmt.Sprintf("- Submitted: %s (UTC) Updated: %s (UTC)", text.FormatTime(pkg.FirstSubmitted), text.FormatTime(pkg.LastModified))
+	}
+
 	if showPackageURLs {
 		toPrint += lineEnding
-		toPrint += "Package URL: https://aur.archlinux.org/packages/" + pkg.Name
+		toPrint += "- https://aur.archlinux.org/packages/" + pkg.Name
 	}
 
 	return toPrint
 }
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
-func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineResults, showPackageURLs bool) string {
+func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineResults bool, showPackageURLs bool) string {
 	lineEnding := "\n    "
 	if singleLineResults {
 		lineEnding = "\t"
@@ -117,6 +123,7 @@ func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineRe
 
 	toPrint += lineEnding
 	toPrint += pkg.Description()
+
 	if showPackageURLs {
 		toPrint += lineEnding
 		toPrint += fmt.Sprintf(

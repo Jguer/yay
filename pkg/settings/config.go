@@ -67,6 +67,7 @@ type Configuration struct {
 	BatchInstall           bool   `json:"batchinstall"`
 	SingleLineResults      bool   `json:"singlelineresults"`
 	SeparateSources        bool   `json:"separatesources"`
+	ShowPackageTimestamps  bool   `json:"showpackagetimestamps"`
 	ShowPackageURLs        bool   `json:"showpackageurls"`
 	Debug                  bool   `json:"debug"`
 	UseRPC                 bool   `json:"rpc"`
@@ -80,7 +81,7 @@ type Configuration struct {
 	ReBuild    parser.RebuildMode `json:"rebuild"`
 }
 
-// SaveConfig writes yay config to file.
+// Save writes yay config to file.
 func (c *Configuration) Save(configPath, version string) error {
 	c.Version = version
 

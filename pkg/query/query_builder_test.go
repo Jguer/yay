@@ -22,18 +22,19 @@ import (
 func TestSourceQueryBuilder(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
-		desc              string
-		search            []string
-		bottomUp          bool
-		separateSources   bool
-		sortBy            string
-		verbosity         SearchVerbosity
-		targetMode        parser.TargetMode
-		singleLineResults bool
-		searchBy          string
-		showPackageURLs   bool
-		wantResults       []string
-		wantOutput        []string
+		desc                  string
+		search                []string
+		bottomUp              bool
+		separateSources       bool
+		sortBy                string
+		verbosity             SearchVerbosity
+		targetMode            parser.TargetMode
+		singleLineResults     bool
+		searchBy              string
+		showPackageTimestamps bool
+		showPackageURLs       bool
+		wantResults           []string
+		wantOutput            []string
 	}
 
 	testCases := []testCase{
@@ -262,14 +263,15 @@ func TestSourceQueryBuilder(t *testing.T) {
 			},
 		},
 		{
-			desc:            "sort-by-name showpackageurls",
-			search:          []string{"linux"},
-			bottomUp:        true,
-			separateSources: true,
-			sortBy:          "name",
-			verbosity:       Detailed,
-			showPackageURLs: true,
-			wantResults:     []string{"linux-ck", "linux", "linux-zen"},
+			desc:                  "sort-by-name showpackageurls",
+			search:                []string{"linux"},
+			bottomUp:              true,
+			separateSources:       true,
+			sortBy:                "name",
+			verbosity:             Detailed,
+			showPackageTimestamps: true,
+			showPackageURLs:       true,
+			wantResults:           []string{"linux-ck", "linux", "linux-zen"},
 			wantOutput: []string{
 				"\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n    Package URL: https://aur.archlinux.org/packages/linux-ck\n",
 				"\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n    Package URL: https://archlinux.org/packages/core/any/linux\n",
@@ -277,15 +279,16 @@ func TestSourceQueryBuilder(t *testing.T) {
 			},
 		},
 		{
-			desc:              "sort-by-name singleline showpackageurls",
-			search:            []string{"linux"},
-			bottomUp:          true,
-			separateSources:   true,
-			sortBy:            "name",
-			verbosity:         Detailed,
-			singleLineResults: true,
-			showPackageURLs:   true,
-			wantResults:       []string{"linux-ck", "linux", "linux-zen"},
+			desc:                  "sort-by-name singleline showpackageurls",
+			search:                []string{"linux"},
+			bottomUp:              true,
+			separateSources:       true,
+			sortBy:                "name",
+			verbosity:             Detailed,
+			singleLineResults:     true,
+			showPackageTimestamps: true,
+			showPackageURLs:       true,
+			wantResults:           []string{"linux-ck", "linux", "linux-zen"},
 			wantOutput: []string{
 				"\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\tThe Linux-ck kernel and modules with ck's hrtimer patches\tPackage URL: https://aur.archlinux.org/packages/linux-ck\n",
 				"\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\tThe Linux kernel and modules\tPackage URL: https://archlinux.org/packages/core/any/linux\n",
@@ -378,7 +381,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, tc.targetMode, tc.searchBy, tc.bottomUp,
-				tc.singleLineResults, tc.separateSources, tc.showPackageURLs)
+				tc.singleLineResults, tc.separateSources, tc.showPackageTimestamps, tc.showPackageURLs)
 
 			queryBuilder.Execute(context.Background(), mockDB, tc.search)
 

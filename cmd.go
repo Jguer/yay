@@ -54,8 +54,10 @@ If no operation is specified 'yay -Syu' will be performed
 If no operation is specified and targets are provided -Y will be assumed
 
 New options:
-    -N --repo             Assume targets are from the repositories
-    -a --aur              Assume targets are from the AUR
+    -N --repo             	Assume targets are from the repositories
+    -a --aur              	Assume targets are from the AUR
+		--showpackagetimestamps Show submission and update timestamps of each package in the search results
+		--showpackageurls				Show the URL of each package in the search results
 
 Permanent configuration options:
     --save                Causes the following options to be saved back to the

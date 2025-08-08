@@ -439,6 +439,7 @@ func isArg(arg string) bool {
 	case "singlelineresults":
 	case "doublelineresults":
 	case "separatesources":
+	case "showpackagetimestamps":
 	case "showpackageurls":
 	default:
 		return false
@@ -565,7 +566,6 @@ func (a *Arguments) parseShortOption(arg, param string) (usedNext bool, err erro
 			break
 		} else {
 			err = a.AddArg(char)
-
 			if err != nil {
 				return
 			}
