@@ -25,13 +25,11 @@ set -l sync '__fish_contains_opt -s S sync'
 set -l upgrade '__fish_contains_opt -s U upgrade'
 set -l files '__fish_contains_opt -s F files'
 
-
-
 complete -c $progname -e
 complete -c $progname -f
 # HACK: We only need these two to coerce fish to stop file completion and complete options
-complete -c $progname -n "$noopt" -a "-D" -d "Modify the package database"
-complete -c $progname -n "$noopt" -a "-Q" -d "Query the package database"
+complete -c $progname -n "$noopt" -a -D -d "Modify the package database"
+complete -c $progname -n "$noopt" -a -Q -d "Query the package database"
 
 # Primary operations
 complete -c $progname -s D -f -l database -n "$noopt" -d 'Modify the package database'
@@ -152,7 +150,6 @@ complete -c $progname -n "$sync" -xa "$listall $listgroups"
 # In practice, it's going to be tar.xz, tar.gz, tar.zst, or just pkg.tar (uncompressed pkg)
 complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.zst; __fish_complete_suffix pkg.tar.xz; __fish_complete_suffix pkg.tar.gz; __fish_complete_suffix pkg.tar;)' -d 'Package file'
 
-
 # Yay operations
 complete -c $progname -s Y -f -l yay -n "$noopt" -d 'Yay specific operations'
 complete -c $progname -s P -f -l show -n "$noopt" -d 'Print information'
@@ -224,6 +221,7 @@ complete -c $progname -n "not $noopt" -l topdown -d 'Shows repository packages f
 complete -c $progname -n "not $noopt" -l bottomup -d 'Shows aur packages first and then repository' -f
 complete -c $progname -n "not $noopt" -l singlelineresults -d 'List each search result on its own line' -f
 complete -c $progname -n "not $noopt" -l doublelineresults -d 'List each search result on two lines, like pacman' -f
+complete -c $progname -n "not $noopt" -l showpackagetimestamps -d 'Show submission and update timestamps of each package in the search results' -f
 complete -c $progname -n "not $noopt" -l showpackageurls -d 'Show the URL of each package in the search results' -f
 complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg development version' -f
 complete -c $progname -n "not $noopt" -l cleanafter -d 'Clean package sources after successful build' -f
