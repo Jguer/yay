@@ -52,7 +52,8 @@ func aurPkgSearchString(
 	dbExecutor db.Executor,
 	singleLineResults bool,
 ) string {
-	toPrint := text.Bold(text.ColorHash("aur")) + "/" + text.Bold(pkg.Name) +
+	linkText := text.Bold(text.ColorHash("aur")) + "/" + text.Bold(pkg.Name)
+	toPrint := text.CreateRepoLink("aur", "", pkg.Name, linkText) +
 		" " + text.Cyan(pkg.Version) +
 		text.Bold(" (+"+strconv.Itoa(pkg.NumVotes)) +
 		" " + text.Bold(strconv.FormatFloat(pkg.Popularity, 'f', 2, 64)+") ")
@@ -86,7 +87,8 @@ func aurPkgSearchString(
 
 // PrintSearch receives a RepoSearch type and outputs pretty text.
 func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineResults bool) string {
-	toPrint := text.Bold(text.ColorHash(pkg.DB().Name())) + "/" + text.Bold(pkg.Name()) +
+	linkText := text.Bold(text.ColorHash(pkg.DB().Name())) + "/" + text.Bold(pkg.Name())
+	toPrint := text.CreateRepoLink(pkg.DB().Name(), pkg.Architecture(), pkg.Name(), linkText) +
 		" " + text.Cyan(pkg.Version()) +
 		text.Bold(" ("+text.Human(pkg.Size())+
 			" "+text.Human(pkg.ISize())+") ")

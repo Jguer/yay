@@ -39,6 +39,7 @@ type Package struct {
 	PReason       alpm.PkgReason
 	PDepends      alpm.IDependList
 	PProvides     alpm.IDependList
+	PArchitecture string
 }
 
 func (p *Package) Base() string {
@@ -95,7 +96,7 @@ func (p *Package) Validation() alpm.Validation {
 
 // Architecture returns the package target Architecture.
 func (p *Package) Architecture() string {
-	panic("not implemented")
+	return p.PArchitecture
 }
 
 // Backup returns a list of package backups.

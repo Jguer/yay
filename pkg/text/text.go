@@ -47,3 +47,38 @@ func LessRunes(iRunes, jRunes []rune) bool {
 
 	return len(iRunes) < len(jRunes)
 }
+
+var RepoUrls = map[string]string{
+	"core": "https://archlinux.org/packages/core",
+	"core-testing": "https://archlinux.org/packages/core-testing",
+	"extra": "https://archlinux.org/packages/extra",
+	"extra-testing": "https://archlinux.org/packages/extra-testing",
+	"gnome-unstable": "https://archlinux.org/packages/gnome-unstable",
+	"kde-unstable": "https://archlinux.org/packages/kde-unstable",
+	"multilib": "https://archlinux.org/packages/multilib",
+	"multilib-testing": "https://archlinux.org/packages/multilib-testing",
+	"testing": "https://archlinux.org/packages/testing",
+	"aur": "https://aur.archlinux.org/packages",
+}
+
+func CreateOSC8Link(url, text string) string {
+	osc8Start := "\033]8;;" + url + "\033\\"
+	osc8End := "\033]8;;\033\\"
+	return osc8Start + text + osc8End
+}
+
+func CreateRepoLink(repo, arch, pkgName, text string) string {
+	urlBase, ok := RepoUrls[repo]
+	if !ok {
+		return text
+	}
+
+	var url string
+	if repo == "aur" || repo == "devel" {
+		url = urlBase + "/" + pkgName
+	} else {
+		url = urlBase + "/" + arch + "/" + pkgName
+	}
+
+	return CreateOSC8Link(url, text)
+}

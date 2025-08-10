@@ -82,7 +82,8 @@ func (u UpSlice) Print(logger *text.Logger) {
 		left, right := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 
 		logger.Printf(text.Magenta(fmt.Sprintf(numberPadding, len(u.Up)-k)))
-		logger.Printf(namePadding, StylizedNameWithRepository(upgrade))
+		nameText := text.CreateRepoLink(upgrade.Repository, "", upgrade.Name, StylizedNameWithRepository(upgrade))
+		logger.Printf(namePadding, nameText)
 		logger.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
 		if upgrade.Extra != "" {
 			logger.Println(strings.Repeat(" ", longestNumber), upgrade.Extra)
@@ -100,7 +101,8 @@ func (u UpSlice) PrintDeps(logger *text.Logger) {
 		upgrade := &u.PulledDeps[k]
 		left, right := query.GetVersionDiff(upgrade.LocalVersion, upgrade.RemoteVersion)
 
-		logger.Printf(namePadding, StylizedNameWithRepository(upgrade))
+		nameText := text.CreateRepoLink(upgrade.Repository, "", upgrade.Name, StylizedNameWithRepository(upgrade))
+		logger.Printf(namePadding, nameText)
 		logger.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
 		if upgrade.Extra != "" {
 			logger.Println(strings.Repeat(" ", longestNumber), strings.ToLower(upgrade.Extra))
