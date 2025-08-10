@@ -49,16 +49,16 @@ func LessRunes(iRunes, jRunes []rune) bool {
 }
 
 var RepoUrls = map[string]string{
-	"core": "https://archlinux.org/packages/core",
-	"core-testing": "https://archlinux.org/packages/core-testing",
-	"extra": "https://archlinux.org/packages/extra",
-	"extra-testing": "https://archlinux.org/packages/extra-testing",
-	"gnome-unstable": "https://archlinux.org/packages/gnome-unstable",
-	"kde-unstable": "https://archlinux.org/packages/kde-unstable",
-	"multilib": "https://archlinux.org/packages/multilib",
+	"core":             "https://archlinux.org/packages/core",
+	"core-testing":     "https://archlinux.org/packages/core-testing",
+	"extra":            "https://archlinux.org/packages/extra",
+	"extra-testing":    "https://archlinux.org/packages/extra-testing",
+	"gnome-unstable":   "https://archlinux.org/packages/gnome-unstable",
+	"kde-unstable":     "https://archlinux.org/packages/kde-unstable",
+	"multilib":         "https://archlinux.org/packages/multilib",
 	"multilib-testing": "https://archlinux.org/packages/multilib-testing",
-	"testing": "https://archlinux.org/packages/testing",
-	"aur": "https://aur.archlinux.org/packages",
+	"testing":          "https://archlinux.org/packages/testing",
+	"aur":              "https://aur.archlinux.org/packages",
 }
 
 func CreateOSC8Link(url, text string) string {

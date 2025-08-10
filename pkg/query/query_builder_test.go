@@ -157,9 +157,9 @@ func TestSourceQueryBuilder(t *testing.T) {
 			verbosity:       NumberMenu,
 			wantResults:     []string{"linux-ck", "linux-zen", "linux"},
 			wantOutput: []string{
-				   "\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
-				   "\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
-				   "\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
+				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
+				"\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 			},
 		},
 		{
@@ -185,9 +185,9 @@ func TestSourceQueryBuilder(t *testing.T) {
 			verbosity:       NumberMenu,
 			wantResults:     []string{"linux-ck", "linux", "linux-zen"},
 			wantOutput: []string{
-				   "\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
-				   "\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
-				   "\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
+				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
+				"\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
 			},
 		},
 		{
@@ -199,9 +199,9 @@ func TestSourceQueryBuilder(t *testing.T) {
 			verbosity:       NumberMenu,
 			wantResults:     []string{"linux-zen", "linux", "linux-ck"},
 			wantOutput: []string{
-				   "\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
-				   "\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
-				   "\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
+				"\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
+				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 		{
@@ -283,7 +283,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			targetMode:      parser.ModeAUR,
 			wantResults:     []string{"linux-ck"},
 			wantOutput: []string{
-				   "\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 	}
@@ -293,21 +293,21 @@ func TestSourceQueryBuilder(t *testing.T) {
 			mockDB := mock.NewDB("core")
 			return []mock.IPackage{
 				&mock.Package{
-					PName:        "linux",
-					PVersion:     "5.16.0",
-					PDescription: "The Linux kernel and modules",
-					PSize:        1,
-					PISize:       1,
-					PDB:          mockDB,
+					PName:         "linux",
+					PVersion:      "5.16.0",
+					PDescription:  "The Linux kernel and modules",
+					PSize:         1,
+					PISize:        1,
+					PDB:           mockDB,
 					PArchitecture: "x86_64",
 				},
 				&mock.Package{
-					PName:        "linux-zen",
-					PVersion:     "5.16.0",
-					PDescription: "The Linux ZEN kernel and modules",
-					PSize:        1,
-					PISize:       1,
-					PDB:          mockDB,
+					PName:         "linux-zen",
+					PVersion:      "5.16.0",
+					PDescription:  "The Linux ZEN kernel and modules",
+					PSize:         1,
+					PISize:        1,
+					PDB:           mockDB,
 					PArchitecture: "x86_64",
 				},
 			}
