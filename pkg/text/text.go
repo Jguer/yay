@@ -59,6 +59,7 @@ var RepoUrls = map[string]string{
 	"multilib-testing": "https://archlinux.org/packages/multilib-testing",
 	"testing":          "https://archlinux.org/packages/testing",
 	"aur":              "https://aur.archlinux.org/packages",
+	"devel":            "https://aur.archlinux.org/packages",
 }
 
 func CreateOSC8Link(url, text string) string {
