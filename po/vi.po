@@ -363,7 +363,7 @@ msgstr "Gói gốc"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Base ID Của Gói"
+msgstr "ID của gói gốc"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
