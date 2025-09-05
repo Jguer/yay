@@ -242,7 +242,7 @@ msgstr "Không thể tìm gói từ AUR cho"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr "Cài đặt layer thất bại, quay trở lại layer tiếp theo."
+msgstr "Cài đặt lớp thất bại, đang đến lớp tiếp theo."
 
 #: pkg/sync/build/errors.go:16
 msgid ""
