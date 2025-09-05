@@ -403,15 +403,15 @@ msgstr "Gỡ phụ thuộc xây dựng gói sau khi cài đặt?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr "Thay Thế"
+msgstr "Thay thế"
 
 #: pkg/db/ialpm/alpm.go:191 print.go:30
 msgid "Repository"
-msgstr "Kho Chứa"
+msgstr "Kho chứa"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
-msgstr "Kho Chứa AUR"
+msgstr "Kho chứa AUR"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
