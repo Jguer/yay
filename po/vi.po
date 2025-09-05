@@ -175,7 +175,7 @@ msgstr "Đang dọn (%d/%d): %s"
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Mâu thuẫn với"
+msgstr "Mâu Thuẫn Với"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
