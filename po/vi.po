@@ -167,7 +167,7 @@ msgstr "K.tra Ph.thuộc"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
-msgstr "Đang kiểm tra các gói dành tự xây dựng..."
+msgstr "Đang kiểm tra các gói tự xây dựng..."
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
