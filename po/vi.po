@@ -238,7 +238,7 @@ msgstr "Các gói được cài đặt cụ thể: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Không thể tìm gói từ AUR cho"
+msgstr "Không thể tìm gói AUR cho"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
