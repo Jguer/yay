@@ -195,7 +195,7 @@ msgstr "Mô tả"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Hiện ra sự khác nhau?"
+msgstr "Hiện ra các thay đổi?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
