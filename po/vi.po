@@ -183,7 +183,7 @@ msgstr "Đang xóa (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
-msgstr "Gói Phụ thuộc"
+msgstr "Gói phụ thuộc"
 
 #: print.go:38
 msgid "Depends On"
