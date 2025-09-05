@@ -187,7 +187,7 @@ msgstr "Gói phụ thuộc"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "Phụ Thuộc Vào"
+msgstr "Phụ thuộc vào"
 
 #: print.go:33
 msgid "Description"
