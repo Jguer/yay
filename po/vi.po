@@ -455,7 +455,7 @@ msgstr "Những gói sau đây không phù hợp với kiến trúc máy tính c
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "Có %[1]d nhà phát hành cho %[2]d:"
+msgstr "Có %[1]d nhà phát hành cho %[2]s:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
