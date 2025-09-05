@@ -4,11 +4,11 @@
 # Katoji Rikito, 2023
 # Nguyễn Tri Phương, 2024
 # Phong Phạm Thanh, 2025
-# Minh Nguyen <mr.hatdau@gmail.com>, 2025
+# Nguyễn Hoàng Minh <mr.hatdau@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Minh Nguyen <mr.hatdau@gmail.com>, 2025\n"
+"Last-Translator: Nguyễn Hoàng Minh <mr.hatdau@gmail.com>, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/yay-1/teams/123732/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -61,7 +61,7 @@ msgstr "%s đã được xây dựng -- đang bỏ qua"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s chưa được thiết đặt"
+msgstr "%s chưa được đặt"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
