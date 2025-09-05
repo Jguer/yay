@@ -77,7 +77,7 @@ msgstr "%s để nâng cấp/cài đặt"
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
-msgstr "cũng sẽ được cài đặt cho hoạt động này."
+msgstr "%s cũng sẽ được cài đặt cho hoạt động này."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
