@@ -723,7 +723,7 @@ msgstr "không sử dùng được hàm CreateHandle: %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
-msgstr "không thể xử lý hoạt động"
+msgstr "lệnh không được xử lý"
 
 #: cmd.go:450
 msgid "unknown-version"
