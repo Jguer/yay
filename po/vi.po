@@ -135,7 +135,7 @@ msgstr "(Đã cài đặt: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Mồ Côi)"
+msgstr "(Đơn lẻ)"
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
