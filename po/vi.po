@@ -387,7 +387,7 @@ msgstr "Những gói cài đặt (vd: 1 2 3, 1-3 hoặc ^4)"
 
 #: print.go:49
 msgid "Popularity"
-msgstr "Độ Phổ Biến"
+msgstr "Độ phổ biến"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
@@ -395,7 +395,7 @@ msgstr "Tiếp tục cài đặt?"
 
 #: print.go:37
 msgid "Provides"
-msgstr "Cung Cấp"
+msgstr "Cung cấp"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
