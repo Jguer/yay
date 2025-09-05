@@ -163,7 +163,7 @@ msgstr "Kiểm tra gói phụ thuộc"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "K.tra Ph.thuộc"
+msgstr "K.tra ph.thuộc"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
