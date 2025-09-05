@@ -355,7 +355,7 @@ msgstr "Tệp PKGBUILD đã ở bản mới nhất, đang bỏ qua: %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "Những PKGBUILD cần chỉnh sửa? "
+msgstr "Những tệp PKGBUILD cần chỉnh sửa? "
 
 #: print.go:61
 msgid "Package Base"
