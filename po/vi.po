@@ -555,7 +555,7 @@ msgstr "có lỗi trong khi đang tải nguồn: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "lỗi khi thu thập %s: %s"
+msgstr "có lỗi trong khi thu thập %s: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
