@@ -151,7 +151,7 @@ msgstr "URL của AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Thêm %s hoặc %s làm biến môi trường của bạn."
+msgstr "Thêm %s hoặc %s làm vào các biến môi trường của bạn"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
