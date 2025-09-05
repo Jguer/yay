@@ -371,7 +371,7 @@ msgstr "Gói không ở trong AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Những gói để chạy cleanBuild?"
+msgstr "Những gói để chạy cleanBuild (xây dựng từ nguồn)?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
