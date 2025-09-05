@@ -65,7 +65,7 @@ msgstr "%s chưa được đặt"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
-msgstr "Có mặt %s "
+msgstr "%s có tồn tại"
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
