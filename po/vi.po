@@ -587,7 +587,7 @@ msgstr "có lỗi trong khi đưa về trạng thái mặc định %s: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr "lỗi khi đang cập nhật lý do tải gói sang %s"
+msgstr "có lỗi trong khi đang cập nhật lý do tải gói sang %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
