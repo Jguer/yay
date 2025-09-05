@@ -73,7 +73,7 @@ msgstr "%s đã là phiên bản mới nhất -- đang bỏ qua"
 
 #: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "để nâng cấp/cài đặt"
+msgstr "%s để nâng cấp/cài đặt"
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
