@@ -431,7 +431,7 @@ msgstr "Chỉ hiện gói từ kho chứa"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Kích cỡ kho nhớ tạm pacman %s: %s"
+msgstr "Kích cỡ bộ nhớ tạm pacman %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
