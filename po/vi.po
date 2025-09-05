@@ -23,7 +23,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Vị trí lưu tệp dựng:"
+"Vị trí lưu tệp xây dựng:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
