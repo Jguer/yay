@@ -115,7 +115,7 @@ msgstr "(%d/%d) Đã tải xuống PKGBUILD từ ABS: %s"
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
-msgstr "(%d/%d) Đã tải xuống PKGBUILD: %s"
+msgstr "(%d/%d) Đã tải PKGBUILD: %s"
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
