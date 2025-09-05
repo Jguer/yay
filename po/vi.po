@@ -443,7 +443,7 @@ msgstr "URL Snapshot"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
-msgstr "Đồng Bộ Hóa"
+msgstr "Đồng bộ hóa"
 
 #: print.go:100
 msgid "Ten biggest packages:"
