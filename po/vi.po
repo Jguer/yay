@@ -359,7 +359,7 @@ msgstr "Những tệp PKGBUILD cần chỉnh sửa? "
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Base Của Gói"
+msgstr "Gói gốc"
 
 #: print.go:60
 msgid "Package Base ID"
