@@ -267,7 +267,7 @@ msgstr "Tìm thấy kho chứa git: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "Hoàn thành GenDB. Không cài đặt gói nào."
+msgstr "Hoàn thành GenDB. Không cài đặt gói nào"
 
 #: print.go:36
 msgid "Groups"
