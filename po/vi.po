@@ -579,7 +579,7 @@ msgstr "có lỗi trong khi đọc tệp %s"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "có lỗi trong khi làm mới dữ liệu"
+msgstr "có lỗi trong khi cập nhật cơ sở dữ liệu"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
