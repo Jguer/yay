@@ -251,7 +251,7 @@ msgstr "Đã thất bại khi cài đặt những gói sau. Yêu cầu can thi�
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Lần nộp đầu tiên:"
+msgstr "Lần nộp đầu tiên"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
