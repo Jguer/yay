@@ -247,7 +247,7 @@ msgstr "Cài đặt lớp thất bại, đang đến lớp tiếp theo."
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
-msgstr "Cài đặt những gói dưới đây thất bại. Yêu cầu can thiệp thủ công:"
+msgstr "Đã thất bại khi cài đặt những gói sau. Yêu cầu can thiệp thủ công:"
 
 #: print.go:45
 msgid "First Submitted"
