@@ -303,7 +303,7 @@ msgstr "Người bảo trì"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Yêu Cầu Make"
+msgstr "Gói phụ thuộc cho make"
 
 #: print.go:40
 msgid "Make Deps"
