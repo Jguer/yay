@@ -220,7 +220,7 @@ msgstr "Chỉnh sửa PKGBUILD bằng?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
-msgstr "Lỗi khi thực hiện tìm kiếm AUR: %s\n"
+msgstr "Lỗi khi thực hiện tìm kiếm trong AUR: %s\n"
 
 #: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
