@@ -127,7 +127,7 @@ msgstr "(%d/%d) Đang đọc SRCINFO: %s"
 
 #: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
-msgstr "(Đã Cài Đặt)"
+msgstr "(Đã cài đặt)"
 
 #: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
