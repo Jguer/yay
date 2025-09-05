@@ -567,7 +567,7 @@ msgstr "có lỗi trong khi cài đặt:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "có lỗi trong khi tạo tệp: %s"
+msgstr "có lỗi trong khi tạo: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
