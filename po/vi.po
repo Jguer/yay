@@ -255,7 +255,7 @@ msgstr "Lần nộp đầu tiên"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Gói AUR Đã Bị Đánh Dấu Lỗi Thời"
+msgstr "Các gói AUR bị đánh dấu lỗi thời:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
