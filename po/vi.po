@@ -551,7 +551,7 @@ msgstr "phần mềm chỉnh sửa không thoát thành công, đang ngắt: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "lỗi khi đang tải nguồn: %s"
+msgstr "có lỗi trong khi đang tải nguồn: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
