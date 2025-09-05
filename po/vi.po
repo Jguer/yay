@@ -559,7 +559,7 @@ msgstr "lỗi khi thu thập %s: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "lỗi khi đang tải gói từ kho mã nguồn (repo)"
+msgstr "có lỗi trong khi đang tải gói từ kho mã nguồn (repo)"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
