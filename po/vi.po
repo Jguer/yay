@@ -131,7 +131,7 @@ msgstr "(Đã cài đặt)"
 
 #: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
-msgstr "(Đã Cài Đặt: %s)"
+msgstr "(Đã cài đặt: %s)"
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
