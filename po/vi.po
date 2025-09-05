@@ -315,7 +315,7 @@ msgstr "Đang thiếu"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Missing AUR Debug Packages:"
-msgstr "Thiếu gói AUR gỡ lỗi:"
+msgstr "Đang thiếu gói AUR gỡ lỗi:"
 
 #: print.go:31
 msgid "Name"
