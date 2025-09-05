@@ -101,7 +101,7 @@ msgstr "%s: đang bỏ qua cập nhật gói (%s => %s)"
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s: phiên bản cục bộ (%s) mới hơn từ AUR (%s)"
+msgstr "%s: phiên bản cục bộ (%s) mới hơn phiên bản từ AUR (%s)"
 
 #: vote.go:51
 msgid ""
