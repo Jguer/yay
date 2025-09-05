@@ -599,7 +599,7 @@ msgstr "tạo thư mục '%s' thất bại: %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "mở tệp cài đặt `%s` thất bại: %s"
+msgstr "mở tệp cài đặt '%s' thất bại: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
