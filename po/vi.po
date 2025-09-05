@@ -351,7 +351,7 @@ msgstr "Khóa PGP cần nhập:"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD đã ở bản mới nhất, bỏ qua tải xuống: %s"
+msgstr "Tệp PKGBUILD đã ở bản mới nhất, đang bỏ qua: %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
