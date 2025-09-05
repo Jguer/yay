@@ -423,7 +423,7 @@ msgstr "Đang tìm kiếm phiên bản cập nhật từ AUR..."
 
 #: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
-msgstr "Đang tìm kiếm cập nhật từ cơ sở dữ liệu..."
+msgstr "Đang tìm kiếm phiên bản cập nhật từ cơ sở dữ liệu..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
