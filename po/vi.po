@@ -299,7 +299,7 @@ msgstr "Cục bộ"
 
 #: print.go:48
 msgid "Maintainer"
-msgstr "Người Bảo Trì"
+msgstr "Người bảo trì"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
