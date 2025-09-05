@@ -419,7 +419,7 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
-msgstr "Đang tìm kiếm cập nhật từ AUR..."
+msgstr "Đang tìm kiếm phiên bản cập nhật từ AUR..."
 
 #: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
