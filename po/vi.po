@@ -159,7 +159,7 @@ msgstr "Tránh chạy yay khi là root hoặc dùng sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Kiểm tra Gói Phụ thuộc"
+msgstr "Kiểm tra gói phụ thuộc"
 
 #: print.go:41
 msgid "Check Deps"
