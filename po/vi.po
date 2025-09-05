@@ -463,7 +463,7 @@ msgstr "Có thể đang có một tiến trình Pacman khác đang chạy. Đang
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Tổng Kích Cỡ chiếm dụng bởi các gói: %s"
+msgstr "Tổng kích cỡ chiếm dụng bởi các gói: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
