@@ -291,11 +291,11 @@ msgstr "Lần sửa cuối"
 
 #: print.go:35
 msgid "Licenses"
-msgstr "Giấy Phép"
+msgstr "Giấy phép"
 
 #: pkg/dep/dep_graph.go:77
 msgid "Local"
-msgstr "Cục Bộ"
+msgstr "Cục bộ"
 
 #: print.go:48
 msgid "Maintainer"
