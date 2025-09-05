@@ -499,7 +499,7 @@ msgstr "Phiên bản"
 
 #: print.go:50
 msgid "Votes"
-msgstr "Bầu chọn"
+msgstr "Số lượng bầu chọn"
 
 #: print.go:87
 msgid "Yay version v%s"
