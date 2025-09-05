@@ -31,7 +31,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Hãy nhập số (Mặc định = 1)"
+"Hãy nhập số (mặc định = 1)"
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
