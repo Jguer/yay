@@ -225,8 +225,8 @@ msgstr "Lỗi khi thực hiện tìm kiếm trong AUR: %s\n"
 #: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"Bỏ lại các gói này có thể khiến cho bản cập nhật không đầy đủ và làm hỏng hệ"
-" thống"
+"Việc bỏ qua các gói có thể khiến cho bản cập nhật không đầy đủ và làm hỏng "
+"hệ thống"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
