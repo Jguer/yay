@@ -435,7 +435,7 @@ msgstr "Kích cỡ bộ nhớ tạm pacman %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Kích cỡ kho nhớ tạm yay %s: %s"
+msgstr "Kích cỡ bộ nhớ tạm yay %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
