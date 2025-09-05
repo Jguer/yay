@@ -1,0 +1,732 @@
+# 
+# Translators:
+# su va, 2023
+# Tín Nguyễn, 2024
+# Nguyễn Tri Phương, 2024
+# Phong Phạm Thanh, 2025
+# Minh Nguyen <mr.hatdau@gmail.com>, 2025
+# 
+msgid ""
+msgstr ""
+"Last-Translator: Minh Nguyen <mr.hatdau@gmail.com>, 2025\n"
+"Language-Team: Vietnamese (Viet Nam) (https://app.transifex.com/yay-1/teams/123732/vi_VN/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: vi_VN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: xgotext\n"
+
+#: clean.go:83
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Vị trí lưu tệp dựng:"
+
+#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Hãy nhập số (Mặc định = 1)"
+
+#: pkg/menus/menu.go:32
+msgid " (Build Files Exist)"
+msgstr "(File để Build có sẵn)"
+
+#: pkg/menus/menu.go:27
+msgid " (Installed)"
+msgstr "(Đã cài đặt)"
+
+#: cmd.go:453
+msgid " [Installed]"
+msgstr "[Đã cài đặt]"
+
+#: cmd.go:410 vote.go:36
+msgid " there is nothing to do"
+msgstr "không còn gì "
+
+#: pkg/menus/menu.go:49
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgstr "%s [A] Tất cả [Ab] Hủy [I] Đã cài [No] Chưa cài hoặc (1 2 3, 1-3, ^4)"
+
+#: pkg/sync/build/installer.go:308
+msgid "%s already made -- skipping build"
+msgstr "%s đã make -- bỏ qua bước "
+
+#: pkg/menus/edit_menu.go:57
+msgid "%s is not set"
+msgstr "%s chưa được đặt"
+
+#: pkg/settings/exe/cmd_builder.go:257
+msgid "%s is present."
+msgstr "%s đã có sẵn."
+
+#: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
+msgid "%s is up to date -- skipping"
+msgstr "%s đã cập nhật -- bỏ qua"
+
+#: pkg/upgrade/service.go:291
+msgid "%s to upgrade/install."
+msgstr "%s để nâng cấp/cài đặt."
+
+#: pkg/upgrade/service.go:285
+msgid "%s will also be installed for this operation."
+msgstr "%s cũng sẽ được cài đặt để thực hiện việc này."
+
+#: pkg/sync/srcinfo/pgp/keys.go:124
+msgid "%s, required by: %s"
+msgstr "%s, bắt buộc cho:%s"
+
+#: pkg/menus/diff_menu.go:49
+msgid "%s: No changes -- skipping"
+msgstr "%s: Không thay đổi -- bỏ qua"
+
+#: pkg/query/filter.go:22
+msgid "%s: can't use target with option --aur -- skipping"
+msgstr "%s: không thể dùng target với lựa chọn --aur -- bỏ qua"
+
+#: pkg/query/filter.go:17
+msgid "%s: can't use target with option --repo -- skipping"
+msgstr "%s: không thể dùng đối tượng với lựa chọn --repo -- bỏ qua"
+
+#: pkg/upgrade/sources.go:57
+msgid "%s: ignoring package upgrade (%s => %s)"
+msgstr "%s: bỏ qua việc nâng cấp gói (%s => %s)"
+
+#: pkg/query/aur_warnings.go:46
+msgid "%s: local (%s) is newer than AUR (%s)"
+msgstr "%s: bản trên máy (%s) mới hơn bản trên AUR (%s)"
+
+#: vote.go:51
+msgid ""
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
+msgstr "%s: set các biến môi trường AUR_USERNAME và AUR_PASSWORD để bầu chọn"
+
+#: pkg/download/unified.go:192
+msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
+msgstr "(%d/%d) Đã tải xuống PKGBUILD từ ABS: %s"
+
+#: pkg/download/aur.go:92 pkg/download/unified.go:188
+msgid "(%d/%d) Downloaded PKGBUILD: %s"
+msgstr "(%d/%d) Đã tải xuống PKGBUILD: %s"
+
+#: pkg/download/aur.go:82
+msgid "(%d/%d) Failed to download PKGBUILD: %s"
+msgstr "(%d/%d) Tải xuống PKGBUILD thất bại: %s"
+
+#: pkg/sync/srcinfo/service.go:109
+msgid "(%d/%d) Parsing SRCINFO: %s"
+msgstr "(%d/%d) Đang đọc SRCINFO: %s"
+
+#: pkg/query/types.go:103 pkg/query/types.go:72
+msgid "(Installed)"
+msgstr "(Đã cài)"
+
+#: pkg/query/types.go:101 pkg/query/types.go:70
+msgid "(Installed: %s)"
+msgstr "(Đã cài: %s)"
+
+#: pkg/query/types.go:61
+msgid "(Orphaned)"
+msgstr "(Đã bị bỏ)"
+
+#: pkg/query/types.go:65
+msgid "(Out-of-date: %s)"
+msgstr "(Chưa được cập nhật: %s)"
+
+#: pkg/dep/dep_graph.go:75
+msgid "AUR"
+msgstr "AUR"
+
+#: print.go:44
+msgid "AUR URL"
+msgstr "AUR "
+
+#: pkg/menus/edit_menu.go:58
+msgid "Add %s or %s to your environment variables"
+msgstr "Thêm %s hoặc %s vào các biến môi trường của bạn"
+
+#: main.go:60
+msgid "Avoid running yay as root/sudo."
+msgstr "Tránh chạy yay bằng root/sudo."
+
+#: pkg/dep/dep_graph.go:63
+msgid "Check Dependency"
+msgstr "Kiểm tra gói phụ thuộc"
+
+#: print.go:41
+msgid "Check Deps"
+msgstr "Kiểm tra các gói phụ thuộc"
+
+#: pkg/upgrade/service.go:89
+msgid "Checking development packages..."
+msgstr "Đang kiểm tra các gói dev"
+
+#: pkg/sync/workdir/clean.go:45
+msgid "Cleaning (%d/%d): %s"
+msgstr "Đang dọn (%d/%d): %s"
+
+#: print.go:42
+msgid "Conflicts With"
+msgstr "Xung đột với"
+
+#: pkg/menus/clean_menu.go:62
+msgid "Deleting (%d/%d): %s"
+msgstr "Đang xóa (%d/%d): %s"
+
+#: pkg/dep/dep_graph.go:61
+msgid "Dependency"
+msgstr "Gói phụ thuộc"
+
+#: print.go:38
+msgid "Depends On"
+msgstr "Phụ thuộc vào"
+
+#: print.go:33
+msgid "Description"
+msgstr "Mô tả"
+
+#: pkg/menus/diff_menu.go:160
+msgid "Diffs to show?"
+msgstr "Hiện ra sự khác nhau?"
+
+#: pkg/settings/migrations.go:25
+msgid "Disable 'provides' setting by default"
+msgstr "Tắt cài đặt 'provides' theo mặc định"
+
+#: clean.go:78
+msgid "Do you want to remove ALL AUR packages from cache?"
+msgstr "Bạn có muốn loại bỏ TOÀN BỘ gói AUR ra khỏi kho nhớ tạm không?"
+
+#: clean.go:95
+msgid "Do you want to remove ALL untracked AUR files?"
+msgstr "Bạn có muốn loại bỏ TOÀN BỘ các tệp AUR chưa được theo dõi không?"
+
+#: clean.go:80
+msgid "Do you want to remove all other AUR packages from cache?"
+msgstr ""
+"Bạn có muốn loại bỏ toàn bộ các tệp AUR còn lại trong kho nhớ tạm không?"
+
+#: pkg/menus/edit_menu.go:61
+msgid "Edit PKGBUILD with?"
+msgstr "Chỉnh sửa PKGBUILD bằng?"
+
+#: pkg/query/errors.go:13
+msgid "Error during AUR search: %s\n"
+msgstr "Lỗi khi thực hiện tìm kiếm AUR: %s\n"
+
+#: pkg/upgrade/service.go:295
+msgid "Excluding packages may cause partial upgrades and break systems"
+msgstr ""
+"Bỏ lại các gói này có thể khiến cho bản cập nhật không đầy đủ và làm hỏng hệ"
+" thống"
+
+#: pkg/dep/dep_graph.go:60
+msgid "Explicit"
+msgstr "Cụ thể"
+
+#: print.go:91
+msgid "Explicitly installed packages: %s"
+msgstr "Các gói được cài đặt cụ thể:"
+
+#: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
+msgid "Failed to find AUR package for"
+msgstr "Không thể tìm gói AUR cho"
+
+#: pkg/sync/build/installer.go:120
+msgid "Failed to install layer, rolling up to next layer."
+msgstr "Cài đặt layer thất bại, quay trở lại layer tiếp theo"
+
+#: pkg/sync/build/errors.go:16
+msgid ""
+"Failed to install the following packages. Manual intervention is required:"
+msgstr "Cài đặt những gói dưới đây thất bại. Yêu cầu can thiệp thủ công:"
+
+#: print.go:45
+msgid "First Submitted"
+msgstr "Bản Nộp Đầu Tiên"
+
+#: pkg/query/aur_warnings.go:83
+msgid "Flagged Out Of Date AUR Packages:"
+msgstr "Gói AUR Đã Bị Đánh Dấu Lỗi Thời"
+
+#: print.go:90
+msgid "Foreign installed packages: %s"
+msgstr "Gói ngoại lai đã được cài đặt: %s"
+
+#: pkg/vcs/vcs.go:144
+msgid "Found git repo: %s"
+msgstr "Tìm thấy kho chứa git: %s"
+
+#: vcs.go:72
+msgid "GenDB finished. No packages were installed"
+msgstr "Hoàn thành GenDB. Không cài đặt gói nào."
+
+#: print.go:36
+msgid "Groups"
+msgstr "Nhóm"
+
+#: pkg/sync/srcinfo/pgp/keys.go:88
+msgid "Import?"
+msgstr "Nhập?"
+
+#: pkg/sync/srcinfo/pgp/keys.go:97
+msgid "Importing keys with gpg..."
+msgstr "Đang nhập khóa với gpg..."
+
+#: print.go:46
+msgid "Keywords"
+msgstr "Từ khóa"
+
+#: print.go:47
+msgid "Last Modified"
+msgstr "Sửa Lần Cuối"
+
+#: print.go:35
+msgid "Licenses"
+msgstr "Giấy Phép"
+
+#: pkg/dep/dep_graph.go:77
+msgid "Local"
+msgstr "Cục Bộ"
+
+#: print.go:48
+msgid "Maintainer"
+msgstr "Người Bảo Trì"
+
+#: pkg/dep/dep_graph.go:62
+msgid "Make Dependency"
+msgstr "Yêu Cầu Make"
+
+#: print.go:40
+msgid "Make Deps"
+msgstr "Y/c Make"
+
+#: pkg/dep/dep_graph.go:79
+msgid "Missing"
+msgstr "Thiếu"
+
+#: pkg/query/aur_warnings.go:75
+msgid "Missing AUR Debug Packages:"
+msgstr "Thiếu gói AUR gỡ lỗi:"
+
+#: print.go:31
+msgid "Name"
+msgstr "Tên"
+
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+msgid "No AUR package found for"
+msgstr "Không tìm thấy gói AUR cho"
+
+#: pkg/dep/dep_graph.go:182
+msgid "No package found for"
+msgstr "Không tìm thấy gói cho"
+
+#: print.go:225
+msgid "None"
+msgstr "Không Có"
+
+#: print.go:39
+msgid "Optional Deps"
+msgstr "Phụ Thuộc Không Bắt Buộc"
+
+#: pkg/query/aur_warnings.go:79
+msgid "Orphan (unmaintained) AUR Packages:"
+msgstr "Gói AUR Orphan (không được bảo trì)"
+
+#: print.go:53 print.go:55
+msgid "Out-of-date"
+msgstr "Lỗi thời"
+
+#: pkg/sync/srcinfo/pgp/keys.go:115
+msgid "PGP keys need importing:"
+msgstr "Khóa PGP cần nhập:"
+
+#: pkg/sync/workdir/preparer.go:252
+msgid "PKGBUILD up to date, skipping download: %s"
+msgstr "PKGBUILD đã ở bản mới nhất, bỏ qua tải xuống: %s"
+
+#: pkg/menus/edit_menu.go:130
+msgid "PKGBUILDs to edit?"
+msgstr "Những PKGBUILD cần chỉnh sửa? "
+
+#: print.go:61
+msgid "Package Base"
+msgstr "Base Của Gói"
+
+#: print.go:60
+msgid "Package Base ID"
+msgstr "Base ID Của Gói"
+
+#: pkg/query/aur_warnings.go:71
+msgid "Packages not in AUR:"
+msgstr "Gói không ở trong AUR:"
+
+#: pkg/menus/clean_menu.go:54
+msgid "Packages to cleanBuild?"
+msgstr "Những gói để chạy cleanBuild?"
+
+#: pkg/dep/dep_graph.go:202
+msgid "Packages to exclude"
+msgstr "Những gói bỏ lại"
+
+#: pkg/upgrade/service.go:294
+msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
+msgstr "Những gói bỏ lại (ví dụ: \"1 2 3\", \"1-3\", \"^4\" hay tên kho chứa)"
+
+#: cmd.go:392
+msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
+msgstr "Những gói cài đặt (vd: 1 2 3, 1-3 hoặc ^4)"
+
+#: print.go:49
+msgid "Popularity"
+msgstr "Độ Phổ Biến"
+
+#: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
+msgid "Proceed with install?"
+msgstr "Tiếp tục cài đặt?"
+
+#: print.go:37
+msgid "Provides"
+msgstr "Cung Cấp"
+
+#: pkg/sync/workdir/preparer.go:125
+msgid "Remove make dependencies after install?"
+msgstr "Gỡ phụ thuộc xây dựng gói sau khi cài đặt?"
+
+#: print.go:43
+msgid "Replaces"
+msgstr "Thay Thế"
+
+#: pkg/db/ialpm/alpm.go:191 print.go:30
+msgid "Repository"
+msgstr "Kho Chứa"
+
+#: pkg/dep/dep_graph.go:730
+msgid "Repository AUR"
+msgstr "Kho Chứa AUR"
+
+#: pkg/dep/dep_graph.go:78
+msgid "SRCINFO"
+msgstr "SRCINFO"
+
+#: pkg/upgrade/service.go:71
+msgid "Searching AUR for updates..."
+msgstr "Đang tìm kiếm cập nhật từ AUR..."
+
+#: pkg/upgrade/service.go:159
+msgid "Searching databases for updates..."
+msgstr "Đang tìm kiếm cập nhật từ cơ sở dữ liệu..."
+
+#: pkg/query/query_builder.go:214
+msgid "Showing repo packages only"
+msgstr "Chỉ hiện gói từ kho chứa"
+
+#: print.go:95
+msgid "Size of pacman cache %s: %s"
+msgstr "Kích cỡ kho nhớ tạm pacman %s: %s"
+
+#: print.go:98
+msgid "Size of yay cache %s: %s"
+msgstr "Kích cỡ kho nhớ tạm yay %s: %s"
+
+#: print.go:62
+msgid "Snapshot URL"
+msgstr "URL Snapshot"
+
+#: pkg/dep/dep_graph.go:76
+msgid "Sync"
+msgstr "Đồng Bộ Hóa"
+
+#: print.go:100
+msgid "Ten biggest packages:"
+msgstr "Mười gói lớn nhất:"
+
+#: pkg/sync/sync.go:124
+msgid "The following packages are not compatible with your architecture:"
+msgstr "Những gói sau đây không phù hợp với kiến trúc máy tính của bạn:"
+
+#: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
+msgid "There are %[1]d providers available for %[2]s:"
+msgstr "Có %[1]d nhà phát hành cho %[2]d:"
+
+#: pkg/settings/exe/cmd_builder.go:258
+msgid "There may be another Pacman instance running. Waiting..."
+msgstr "Có thể đang có một tiến trình Pacman khác đang chạy. Đang đợi..."
+
+#: print.go:92
+msgid "Total Size occupied by packages: %s"
+msgstr "Tổng Kích Cỡ chiếm dụng bởi các gói:"
+
+#: print.go:89
+msgid "Total installed packages: %s"
+msgstr "Tổng các gói đã cài đặt: %s"
+
+#: pkg/sync/sync.go:132
+msgid "Try to build them anyway?"
+msgstr "Vẫn xây dựng gói?"
+
+#: print.go:34
+msgid "URL"
+msgstr "URL"
+
+#: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
+msgid "Unable to clean:"
+msgstr "Không thể dọn:"
+
+#: get.go:42 get.go:74
+msgid "Unable to find the following packages:"
+msgstr "Không thể tìm thấy những gói sau:"
+
+#: vote.go:20
+msgid "Unable to handle package vote for: %s. err: %s"
+msgstr "Không thể xử lý phiếu bầu cho gói: %s. Lỗi: %s"
+
+#: clean.go:170
+msgid "Unable to remove %s: %s"
+msgstr "Không thể xóa %s:%s"
+
+#: print.go:32
+msgid "Version"
+msgstr "Phiên bản"
+
+#: print.go:50
+msgid "Votes"
+msgstr "Bầu chọn"
+
+#: print.go:87
+msgid "Yay version v%s"
+msgstr "Phiên bản yay số %s"
+
+#: pkg/menus/menu.go:49
+msgid "[N]one"
+msgstr "[N] Không có"
+
+#: pkg/settings/errors.go:29
+msgid "aborting due to user"
+msgstr "hủy bởi người dùng"
+
+#: pkg/settings/parser/parser.go:608
+msgid "argument '-' specified without input on stdin"
+msgstr "đối số '-' được dùng mà không có đầu vào từ stdin"
+
+#: local_install.go:26
+msgid "cannot find PKGBUILD and .SRCINFO in directory"
+msgstr "không tìm được PKGBUILD và .SRCINFO trong thư mục"
+
+#: pkg/sync/build/pkg_archive.go:148
+msgid "cannot find package name: %v"
+msgstr "không thể tìm thấy gói: %v"
+
+#: pkg/sync/build/errors.go:30
+msgid "could not find PKGDEST for: %s"
+msgstr "không thể tìm thấy PKGDEST cho: %s"
+
+#: errors.go:9
+msgid "could not find all required packages"
+msgstr "không thể tìm thấy các gói yêu cầu"
+
+#: pkg/sync/build/errors.go:61
+msgid "could not find any package archives listed in %s"
+msgstr "không thể tìm thấy các gói lưu trữ được liệt kê ở %s"
+
+#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
+msgid "dependency"
+msgstr "phần phụ thuộc"
+
+#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
+msgid "devel check for package failed: '%s' encountered an error"
+msgstr "không kiểm tra được gói tự xây dựng: %s đã bị lỗi"
+
+#: pkg/menus/edit_menu.go:110
+msgid "editor did not exit successfully, aborting: %s"
+msgstr "phần mềm chỉnh sửa không thoát thành công, đang ngắt: %s"
+
+#: pkg/sync/workdir/aur_source.go:24
+msgid "error downloading sources: %s"
+msgstr "lỗi khi đang tải nguồn: %s"
+
+#: pkg/download/errors.go:25
+msgid "error fetching %s: %s"
+msgstr "lỗi khi thu thập %s: %s"
+
+#: pkg/sync/build/errors.go:9
+msgid "error installing repo packages"
+msgstr "lỗi khi đang tải gói từ kho mã nguồn (repo)"
+
+#: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
+msgid "error installing:"
+msgstr "có lỗi trong khi cài đặt:"
+
+#: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
+msgid "error making: %s"
+msgstr "có lỗi trong khi tạo tệp:"
+
+#: pkg/sync/workdir/merge.go:24
+msgid "error merging %s: %s"
+msgstr "có lỗi trong khi hợp nhất %s: %s"
+
+#: pkg/download/unified.go:59
+msgid "error reading %s"
+msgstr "có lỗi trong khi đọc tệp %s"
+
+#: sync.go:36
+msgid "error refreshing databases"
+msgstr "có lỗi trong khi làm mới dữ liệu"
+
+#: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
+msgid "error resetting %s: %s"
+msgstr "lỗi khi đưa về trạng thái mặc định %s: %s"
+
+#: pkg/sync/build/errors.go:53
+msgid "error updating package install reason to %s"
+msgstr "lỗi khi đang cập nhật lý do tải gói sang %s"
+
+#: pkg/sync/build/errors.go:48
+msgid "explicit"
+msgstr "cụ thể"
+
+#: pkg/settings/errors.go:23
+msgid "failed to create directory '%s': %s"
+msgstr "tạo thư mục '%s' thất bại: %s"
+
+#: pkg/settings/config.go:281
+msgid "failed to open config file '%s': %s"
+msgstr "mở tệp cài đặt `%s` thất bại: %s"
+
+#: pkg/sync/srcinfo/service.go:114
+msgid "failed to parse %s -- skipping: %s"
+msgstr "thất bị khi đọc %s -- sẽ bỏ qua: %s"
+
+#: pkg/sync/srcinfo/service.go:118
+msgid "failed to parse %s: %s"
+msgstr "thất bại khi đọc %s: %s"
+
+#: local_install.go:77
+msgid "failed to parse .SRCINFO"
+msgstr "thất bại khi đọc .SRCINFO"
+
+#: pkg/settings/config.go:291
+msgid "failed to read config file '%s': %s"
+msgstr "thất bại khi đọc tệp cài đặt '%s': %s"
+
+#: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
+msgid "failed to retrieve aur Cache"
+msgstr "tải kho nhớ AUR thất bại"
+
+#: pkg/upgrade/sources.go:27
+msgid "ignoring package devel upgrade (no AUR info found):"
+msgstr ""
+"bỏ qua cập nhật phần mềm tự xây dựng (không tìm thấy thông tin trên AUR):"
+
+#: pkg/text/errors.go:8
+msgid "input too long"
+msgstr "nhập liệu quá dài"
+
+#: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
+msgid "invalid number: %s"
+msgstr "số không hợp lệ: %s"
+
+#: pkg/settings/parser/parser.go:174
+msgid "invalid option '%s'"
+msgstr "lựa chọn '%s' không hợp lệ"
+
+#: cmd.go:197
+msgid "invalid option: '--deps' and '--explicit' may not be used together"
+msgstr ""
+"lựa chọn không hợp lệ: '--deps' và '--explicit' không thể sử dụng cùng nhau"
+
+#: pkg/download/abs.go:22
+msgid "invalid repository"
+msgstr "kho không khả dụng"
+
+#: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
+msgid "invalid value: %d is not between %d and %d"
+msgstr "giá trị không hợp lệ: %d không nằm giữa %d và %d"
+
+#: pkg/text/input.go:48
+msgid "no"
+msgstr "không"
+
+#: pkg/sync/srcinfo/pgp/keys.go:110
+msgid "no keys to import"
+msgstr "không có keys để thêm vào"
+
+#: pkg/query/errors.go:20
+msgid "no query was executed"
+msgstr "không có truy vấn được thực hành"
+
+#: local_install.go:66
+msgid "no target directories specified"
+msgstr "không có thư mục được xác định"
+
+#: pkg/sync/build/installer.go:242
+msgid "nothing to install for %s"
+msgstr "không có gì để tải cho %s"
+
+#: pkg/settings/parser/parser.go:164
+msgid "only one operation may be used at a time"
+msgstr "chỉ được sử dụng một lệnh trong một lần gọi"
+
+#: pkg/cmd/graph/main.go:70
+msgid "only one target is allowed"
+msgstr "chỉ cho phép 1 đối tượng duy nhất"
+
+#: pkg/upgrade/service.go:291
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "các gói"
+
+#: print.go:187
+msgid "package '%s' was not found"
+msgstr "không tìm thấy gói'%s'"
+
+#: pkg/download/errors.go:15
+msgid "package not found in AUR"
+msgstr "không tìm được gói trong AUR"
+
+#: pkg/download/abs.go:23
+msgid "package not found in repos"
+msgstr "không tìm được gói trong các kho"
+
+#: pkg/sync/srcinfo/pgp/keys.go:100
+msgid "problem importing keys"
+msgstr "có vấn đề trong khi thêm keys"
+
+#: clean.go:105
+msgid "removing AUR packages from cache..."
+msgstr "đang xóa các gói AUR khỏi bộ nhớ đệm..."
+
+#: clean.go:178 pkg/sync/workdir/clean.go:41
+msgid "removing untracked AUR files from cache..."
+msgstr "đang loại bỏ các tệp AUR không được theo dõi khỏi bộ nhớ"
+
+#: pkg/sync/build/errors.go:38
+msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
+msgstr ""
+"tệp PKGDEST của %s được gọi trong lệnh makepkg nhưng không tồn tại: %s"
+
+#: pkg/sync/sync.go:45
+msgid "there is nothing to do"
+msgstr "không thể làm được gì cả"
+
+#: pkg/db/ialpm/alpm.go:247
+msgid "unable to CreateHandle: %s"
+msgstr "không sử dùng được hàm CreateHandle: %s"
+
+#: cmd.go:186
+msgid "unhandled operation"
+msgstr "không thể xử lý hoạt động"
+
+#: cmd.go:450
+msgid "unknown-version"
+msgstr "phiên-bản-không-xác-định"
+
+#: pkg/text/input.go:47
+msgid "yes"
+msgstr "có"
