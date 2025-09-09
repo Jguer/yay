@@ -2,13 +2,13 @@
 # Translators:
 # J G, 2022
 # lakejason0 <sunliyuan200402@outlook.com>, 2023
-# Kisaragi Hiu <flyingfeather1501@gmail.com>, 2023
 # Oliver Tzeng, 2025
 # zangmen hsu(neko_0xff) <chzang55@gmail.com>, 2025
+# Kisaragi Hiu <flyingfeather1501@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: zangmen hsu(neko_0xff) <chzang55@gmail.com>, 2025\n"
+"Last-Translator: Kisaragi Hiu <flyingfeather1501@gmail.com>, 2025\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/yay-1/teams/123732/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -450,7 +450,7 @@ msgstr "以下套件不支援您的系統架構："
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "對於 %[2] 有 %[1]d 個結果："
+msgstr "對於 %[2]s 有 %[1]d 個結果："
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
