@@ -11,5 +11,5 @@ COPY go.mod .
 RUN pacman-key --init && pacman -Sy && pacman -S --overwrite=* --noconfirm archlinux-keyring && \
     pacman -Su --overwrite=* --needed --noconfirm pacman doxygen meson asciidoc go git gcc make sudo base-devel && \
     rm -rfv /var/cache/pacman/* /var/lib/pacman/sync/* && \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.1.5 && \
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.4.0 && \
     go mod download 
