@@ -244,7 +244,6 @@ func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[strin
 
 	aurPkgsAdded := []*aurc.Pkg{}
 	for pkgBuildDir, pkgbuild := range srcInfos {
-
 		aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
 		if err != nil {
 			return nil, err
@@ -259,7 +258,6 @@ func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[strin
 		}
 
 		for _, pkg := range aurPkgs {
-
 			reason := Explicit
 			if pkg := g.dbExecutor.LocalPackage(pkg.Name); pkg != nil {
 				reason = Reason(pkg.Reason())

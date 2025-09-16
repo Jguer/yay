@@ -103,7 +103,7 @@ func editPkgbuilds(log *text.Logger, pkgbuildDirs map[string]string, bases []str
 	if len(pkgbuilds) > 0 {
 		editor, editorArgs := editor(log, editorConfig, editorFlags, noConfirm)
 		editorArgs = append(editorArgs, pkgbuilds...)
-		editcmd := exec.Command(editor, editorArgs...)
+		editcmd := exec.CommandContext(context.Background(), editor, editorArgs...)
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
 		if err := editcmd.Run(); err != nil {

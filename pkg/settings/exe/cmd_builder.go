@@ -284,7 +284,7 @@ func (c *CmdBuilder) sudoLoopBackground() {
 
 func (c *CmdBuilder) updateSudo() {
 	for {
-		err := c.Show(exec.Command(c.SudoBin, "-v"))
+		err := c.Show(exec.CommandContext(context.Background(), c.SudoBin, "-v"))
 		if err != nil {
 			c.Log.Errorln(err)
 		} else {
