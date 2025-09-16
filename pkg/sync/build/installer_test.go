@@ -88,7 +88,6 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			tmpDir := td.TempDir()
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
@@ -356,7 +355,6 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
 			jfinPkgTar := tmpDirJfin + "/jellyfin-server-10.8.8-1-x86_64.pkg.tar.zst"
@@ -561,7 +559,6 @@ func TestInstaller_CompileFailed(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
 
@@ -718,7 +715,6 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			pkgTars := []string{
 				tmpDir + "/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
@@ -854,7 +850,6 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			tmpDir := td.TempDir()
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
@@ -979,7 +974,6 @@ func TestInstaller_InstallGroup(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			tmpDir := td.TempDir()
 
@@ -1176,7 +1170,6 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			tmpDir := td.TempDir()
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
@@ -1294,7 +1287,6 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			mockDB := &mock.DBExecutor{}
 			mockRunner := &exe.MockRunner{}
@@ -1391,7 +1383,6 @@ func TestInstaller_KeepSrc(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			tmpDir := td.TempDir()
 			pkgTar := tmpDir + "/yay-92.0.0-1-x86_64.pkg.tar.zst"

@@ -43,7 +43,7 @@ type SourceQueryBuilder struct {
 	sortBy            string
 	searchBy          string
 	targetMode        parser.TargetMode
-	queryMap          map[string]map[string]interface{}
+	queryMap          map[string]map[string]any
 	bottomUp          bool
 	singleLineResults bool
 	separateSources   bool
@@ -71,7 +71,7 @@ func NewSourceQueryBuilder(
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
 		separateSources:   separateSources,
-		queryMap:          map[string]map[string]interface{}{},
+		queryMap:          map[string]map[string]any{},
 		results:           make([]abstractResult, 0, 100),
 	}
 }
@@ -154,7 +154,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]interface{}{}
+				s.queryMap[dbName] = map[string]any{}
 			}
 
 			by := getSearchBy(s.searchBy)
@@ -182,7 +182,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		for i := range repoResults {
 			dbName := repoResults[i].DB().Name()
 			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]interface{}{}
+				s.queryMap[dbName] = map[string]any{}
 			}
 
 			s.queryMap[dbName][repoResults[i].Name()] = repoResults[i]

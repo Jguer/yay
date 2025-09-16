@@ -133,7 +133,7 @@ func TestParsePackageList(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc // capture range variable
+		// capture range variable
 		t.Run(tc.desc, func(t *testing.T) {
 			t.Parallel()
 

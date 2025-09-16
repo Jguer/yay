@@ -84,7 +84,6 @@ func TestNewInfoStore(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := NewInfoStore(tt.args.filePath, tt.args.cmdBuilder,
@@ -231,7 +230,6 @@ func TestInfoStoreToUpgrade(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
@@ -364,7 +362,6 @@ func TestInfoStore_NeedsUpdate(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
@@ -413,7 +410,6 @@ func TestInfoStore_Update(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
@@ -476,7 +472,6 @@ func TestInfoStore_Remove(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{
@@ -524,7 +519,6 @@ func TestInfoStore_CleanOrphans(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			v := &InfoStore{

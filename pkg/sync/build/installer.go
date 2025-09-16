@@ -3,6 +3,7 @@ package build
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -126,9 +127,7 @@ func (installer *Installer) Install(ctx context.Context,
 }
 
 func mergeLayers(layer1, layer2 map[string]*dep.InstallInfo) map[string]*dep.InstallInfo {
-	for name, info := range layer2 {
-		layer1[name] = info
-	}
+	maps.Copy(layer1, layer2)
 
 	return layer1
 }

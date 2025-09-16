@@ -73,7 +73,7 @@ func biggestPackages(logger *text.Logger, dbExecutor db.Executor) {
 		return
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		logger.Printf("%s: %s\n", text.Bold(pkgS[i].Name()), text.Cyan(text.Human(pkgS[i].ISize())))
 	}
 }

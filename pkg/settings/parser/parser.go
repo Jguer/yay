@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"strings"
 
@@ -87,9 +88,7 @@ func (a *Arguments) Copy() (cp *Arguments) {
 
 	cp.Op = a.Op
 
-	for k, v := range a.Options {
-		cp.Options[k] = v
-	}
+	maps.Copy(cp.Options, a.Options)
 
 	cp.Targets = make([]string, len(a.Targets))
 	copy(cp.Targets, a.Targets)

@@ -123,7 +123,6 @@ func TestIntRange_Get(t *testing.T) {
 		{name: "normal end range false", fields: fields{1, 2}, args: args{3}, want: false},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			r := IntRange{
@@ -183,7 +182,6 @@ func TestIntRanges_Get(t *testing.T) {
 		{name: "normal end range false", rs: IntRanges{{1, 2}}, args: args{3}, want: false},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			if got := tt.rs.Get(tt.args.n); got != tt.want {

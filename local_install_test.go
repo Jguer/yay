@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -508,10 +509,8 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 	}
 
 	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
-		for _, arg := range cmd.Args {
-			if arg == "--printsrcinfo" {
-				return string(srcinfo), "", nil
-			}
+		if slices.Contains(cmd.Args, "--printsrcinfo") {
+			return string(srcinfo), "", nil
 		}
 		return strings.Join(tars, "\n"), "", nil
 	}

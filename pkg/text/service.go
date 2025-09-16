@@ -38,7 +38,7 @@ func (l *Logger) Debugln(a ...any) {
 		return
 	}
 
-	l.Println(append([]interface{}{
+	l.Println(append([]any{
 		Bold(yellow(fmt.Sprintf("[DEBUG:%s]", l.name))),
 	}, a...)...)
 }
@@ -52,15 +52,15 @@ func (l *Logger) OperationInfo(a ...any) {
 }
 
 func (l *Logger) SprintOperationInfo(a ...any) string {
-	return fmt.Sprint(append([]interface{}{Bold(Cyan(opSymbol + " ")), boldCode}, a...)...) + ResetCode
+	return fmt.Sprint(append([]any{Bold(Cyan(opSymbol + " ")), boldCode}, a...)...) + ResetCode
 }
 
 func (l *Logger) Info(a ...any) {
-	l.Print(append([]interface{}{Bold(Green(arrow + " "))}, a...)...)
+	l.Print(append([]any{Bold(Green(arrow + " "))}, a...)...)
 }
 
 func (l *Logger) Infoln(a ...any) {
-	l.Println(append([]interface{}{Bold(Green(arrow))}, a...)...)
+	l.Println(append([]any{Bold(Green(arrow))}, a...)...)
 }
 
 func (l *Logger) Warn(a ...any) {
@@ -72,7 +72,7 @@ func (l *Logger) Warnln(a ...any) {
 }
 
 func (l *Logger) SprintWarn(a ...any) string {
-	return fmt.Sprint(append([]interface{}{Bold(yellow(smallArrow + " "))}, a...)...)
+	return fmt.Sprint(append([]any{Bold(yellow(smallArrow + " "))}, a...)...)
 }
 
 func (l *Logger) Error(a ...any) {
@@ -84,7 +84,7 @@ func (l *Logger) Errorln(a ...any) {
 }
 
 func (l *Logger) SprintError(a ...any) string {
-	return fmt.Sprint(append([]interface{}{Bold(Red(smallArrow + " "))}, a...)...)
+	return fmt.Sprint(append([]any{Bold(Red(smallArrow + " "))}, a...)...)
 }
 
 func (l *Logger) Printf(format string, a ...any) {

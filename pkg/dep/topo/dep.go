@@ -2,6 +2,7 @@ package topo
 
 import (
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/Jguer/go-alpm/v2"
@@ -344,9 +345,7 @@ func (g *Graph[T, V]) buildTransitive(root T, nextFn func(T) NodeSet[T]) NodeSet
 
 func (s NodeSet[T]) copy() NodeSet[T] {
 	out := make(NodeSet[T], len(s))
-	for k, v := range s {
-		out[k] = v
-	}
+	maps.Copy(out, s)
 
 	return out
 }

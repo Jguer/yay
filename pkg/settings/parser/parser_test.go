@@ -37,7 +37,6 @@ func TestOption_Add(t *testing.T) {
 		}, want: []string{"c"}},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			o := &Option{
@@ -75,7 +74,6 @@ func TestOption_Set(t *testing.T) {
 		}, want: []string{"c"}},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			o := &Option{
@@ -105,7 +103,6 @@ func TestOption_First(t *testing.T) {
 		}, want: ""},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			o := &Option{
@@ -158,7 +155,6 @@ func TestArguments_CopyGlobal(t *testing.T) {
 		}},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			cmdArgs := &Arguments{
@@ -207,7 +203,6 @@ func TestArguments_Copy(t *testing.T) {
 		}},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			cmdArgs := &Arguments{
@@ -265,7 +260,6 @@ func TestArguments_FormatArgs(t *testing.T) {
 		}, wantArgs: []string{"-Y", "--overwrite", "/tmp/a", "--overwrite", "/tmp/b", "--overwrite", "/tmp/c", "--needed"}},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			cmdArgs := &Arguments{
@@ -313,7 +307,6 @@ func TestArguments_FormatGlobalArgs(t *testing.T) {
 		}, wantArgs: []string(nil)},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			cmdArgs := &Arguments{

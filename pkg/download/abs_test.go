@@ -123,7 +123,6 @@ func Test_getPackageURL(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := getPackagePKGBUILDURL(tt.args.pkgName)
@@ -174,7 +173,6 @@ func TestGetABSPkgbuild(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			httpClient := &testClient{
@@ -257,7 +255,6 @@ func Test_getPackageRepoURL(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := getPackageRepoURL(tt.args.pkgName)

@@ -23,10 +23,7 @@ func SplitDBFromName(pkg string) (db, name string) {
 
 // LessRunes compares two rune values, and returns true if the first argument is lexicographicaly smaller.
 func LessRunes(iRunes, jRunes []rune) bool {
-	maxLen := len(iRunes)
-	if maxLen > len(jRunes) {
-		maxLen = len(jRunes)
-	}
+	maxLen := min(len(iRunes), len(jRunes))
 
 	for idx := 0; idx < maxLen; idx++ {
 		ir := iRunes[idx]

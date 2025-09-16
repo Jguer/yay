@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -170,14 +171,7 @@ func parseSource(source string) (url, branch string, protocols []string) {
 
 	protocols = strings.SplitN(split[0], "+", 2)
 
-	git := false
-
-	for _, protocol := range protocols {
-		if protocol == "git" {
-			git = true
-			break
-		}
-	}
+	git := slices.Contains(protocols, "git")
 
 	protocols = protocols[len(protocols)-1:]
 

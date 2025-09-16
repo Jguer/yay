@@ -10,8 +10,8 @@ import (
 )
 
 type Call struct {
-	Res  []interface{}
-	Args []interface{}
+	Res  []any
+	Args []any
 	Dir  string
 }
 
@@ -51,8 +51,8 @@ func (m *MockBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs
 
 	m.BuildMakepkgCmdCallsMu.Lock()
 	m.BuildMakepkgCmdCalls = append(m.BuildMakepkgCmdCalls, Call{
-		Res: []interface{}{res},
-		Args: []interface{}{
+		Res: []any{res},
+		Args: []any{
 			ctx,
 			dir,
 			extraArgs,
@@ -103,7 +103,7 @@ func (m *MockBuilder) GetKeepSrc() bool {
 func (m *MockRunner) Capture(cmd *exec.Cmd) (stdout, stderr string, err error) {
 	m.CaptureCallsMu.Lock()
 	m.CaptureCalls = append(m.CaptureCalls, Call{
-		Args: []interface{}{
+		Args: []any{
 			cmd,
 		},
 		Dir: cmd.Dir,
@@ -125,7 +125,7 @@ func (m *MockRunner) Show(cmd *exec.Cmd) error {
 
 	m.ShowCallsMu.Lock()
 	m.ShowCalls = append(m.ShowCalls, Call{
-		Args: []interface{}{
+		Args: []any{
 			cmd,
 		},
 		Dir: cmd.Dir,

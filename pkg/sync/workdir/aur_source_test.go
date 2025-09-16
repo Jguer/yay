@@ -80,7 +80,6 @@ func Test_downloadPKGBUILDSource(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			cmdBuilder := &TestMakepkgBuilder{
 				parentBuilder: &exe.CmdBuilder{

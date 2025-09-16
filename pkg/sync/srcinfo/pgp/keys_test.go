@@ -220,7 +220,6 @@ func TestCheckPgpKeys(t *testing.T) {
 	}
 
 	for _, tt := range testcases {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			mockRunner := &exe.MockRunner{
 				ShowFn: tt.showFn,

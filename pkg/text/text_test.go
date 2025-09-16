@@ -40,7 +40,6 @@ func TestLessRunes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := LessRunes(tt.args.iRunes, tt.args.jRunes)
