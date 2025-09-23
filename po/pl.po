@@ -1,4 +1,4 @@
-#
+# 
 # Translators:
 # J G, 2021
 # Oskar <me@medzik.dev>, 2022
@@ -9,10 +9,11 @@
 # Mariusz Bubak, 2024
 # Bartłomiej Konecki, 2024
 # Tadeusz Magura-Witkowski, 2024
-#
+# Tymon Marek, 2025
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Tadeusz Magura-Witkowski, 2024\n"
+"Last-Translator: Tymon Marek, 2025\n"
 "Language-Team: Polish (https://app.transifex.com/yay-1/teams/123732/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -463,7 +464,7 @@ msgstr "Te paczki nie są kompatybilne z architekturą Twojego systemu:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "Jest %[1]d możliwych źródeł dla %[2]s:"
+msgstr "Jest %d możliwych źródeł dla %s:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
