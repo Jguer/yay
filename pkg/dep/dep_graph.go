@@ -11,6 +11,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
@@ -68,22 +69,26 @@ const (
 	Sync
 	Local
 	SrcInfo
+	CustomRepo
 	Missing
 )
 
 var SourceNames = map[Source]string{
-	AUR:     gotext.Get("AUR"),
-	Sync:    gotext.Get("Sync"),
-	Local:   gotext.Get("Local"),
-	SrcInfo: gotext.Get("SRCINFO"),
-	Missing: gotext.Get("Missing"),
+	AUR:       gotext.Get("AUR"),
+	Sync:      gotext.Get("Sync"),
+	Local:     gotext.Get("Local"),
+	SrcInfo:   gotext.Get("SRCINFO"),
+	CustomRepo: gotext.Get("Custom"),
+	Missing:   gotext.Get("Missing"),
 }
 
 var bgColorMap = map[Source]string{
-	AUR:     "lightblue",
-	Sync:    "lemonchiffon",
-	Local:   "darkolivegreen1",
-	Missing: "tomato",
+	AUR:       "lightblue",
+	Sync:      "lemonchiffon",
+	Local:     "darkolivegreen1",
+	SrcInfo:   "lightgreen",
+	CustomRepo: "lightcoral",
+	Missing:   "tomato",
 }
 
 var colorMap = map[Reason]string{
@@ -97,13 +102,14 @@ type Grapher struct {
 	logger        *text.Logger
 	providerCache map[string][]aur.Pkg
 
-	dbExecutor  db.Executor
-	aurClient   aurc.QueryClient
-	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
-	noConfirm   bool // If true, the graph will not prompt for confirmation
-	noDeps      bool // If true, the graph will not include dependencies
-	noCheckDeps bool // If true, the graph will not include check dependencies
-	needed      bool // If true, the graph will only include packages that are not installed
+	dbExecutor     db.Executor
+	aurClient      aurc.QueryClient
+	customRepoMgr  *customrepo.Manager
+	fullGraph      bool // If true, the graph will include all dependencies including already installed ones or repo
+	noConfirm      bool // If true, the graph will not prompt for confirmation
+	noDeps         bool // If true, the graph will not include dependencies
+	noCheckDeps    bool // If true, the graph will not include check dependencies
+	needed         bool // If true, the graph will only include packages that are not installed
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
@@ -111,15 +117,36 @@ func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 	logger *text.Logger,
 ) *Grapher {
 	return &Grapher{
-		dbExecutor:    dbExecutor,
-		aurClient:     aurCache,
-		fullGraph:     fullGraph,
-		noConfirm:     noConfirm,
-		noDeps:        noDeps,
-		noCheckDeps:   noCheckDeps,
-		needed:        needed,
-		providerCache: make(map[string][]aurc.Pkg, 5),
-		logger:        logger,
+		dbExecutor:     dbExecutor,
+		aurClient:      aurCache,
+		customRepoMgr:  nil, // Will be set later if needed
+		fullGraph:      fullGraph,
+		noConfirm:      noConfirm,
+		noDeps:         noDeps,
+		noCheckDeps:    noCheckDeps,
+		needed:         needed,
+		providerCache:  make(map[string][]aurc.Pkg, 5),
+		logger:         logger,
+	}
+}
+
+// NewGrapherWithCustomRepos creates a new Grapher with custom repository support
+func NewGrapherWithCustomRepos(dbExecutor db.Executor, aurCache aurc.QueryClient,
+	customRepoMgr *customrepo.Manager,
+	fullGraph, noConfirm, noDeps, noCheckDeps, needed bool,
+	logger *text.Logger,
+) *Grapher {
+	return &Grapher{
+		dbExecutor:     dbExecutor,
+		aurClient:      aurCache,
+		customRepoMgr:  customRepoMgr,
+		fullGraph:      fullGraph,
+		noConfirm:      noConfirm,
+		noDeps:         noDeps,
+		noCheckDeps:    noCheckDeps,
+		needed:         needed,
+		providerCache:  make(map[string][]aurc.Pkg, 5),
+		logger:         logger,
 	}
 }
 
@@ -155,10 +182,28 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 				continue
 			}
 
+			// Check custom repositories
+			if g.customRepoMgr != nil {
+				if customPkg, err := g.findInCustomRepos(ctx, target.Name); err == nil && customPkg != nil {
+					g.GraphCustomRepoPkg(ctx, graph, customPkg)
+					continue
+				}
+			}
+
 			fallthrough
 		case "aur":
 			aurTargets = append(aurTargets, target.Name)
 		default:
+			// Check if it's a custom repository
+			if g.customRepoMgr != nil {
+				if repo, exists := g.customRepoMgr.GetRepository(target.DB); exists {
+					if customPkg, err := repo.GetPackage(ctx, target.Name); err == nil {
+						g.GraphCustomRepoPkg(ctx, graph, customPkg)
+						continue
+					}
+				}
+			}
+
 			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
 			if err != nil {
 				return nil, err
@@ -846,4 +891,111 @@ func aurDepModToAlpmDep(mod string) alpm.DepMod {
 		return alpm.DepModLT
 	}
 	return alpm.DepModAny
+}
+
+// findInCustomRepos searches for a package in all custom repositories
+func (g *Grapher) findInCustomRepos(ctx context.Context, packageName string) (*customrepo.PackageInfo, error) {
+	if g.customRepoMgr == nil {
+		return nil, fmt.Errorf("no custom repository manager")
+	}
+
+	repos := g.customRepoMgr.ListRepositories()
+	for _, repo := range repos {
+		if !repo.IsSearchable() {
+			continue
+		}
+
+		pkg, err := repo.GetPackage(ctx, packageName)
+		if err == nil && pkg != nil {
+			return pkg, nil
+		}
+	}
+
+	return nil, fmt.Errorf("package not found in custom repositories")
+}
+
+// GraphCustomRepoPkg adds a custom repository package to the dependency graph
+func (g *Grapher) GraphCustomRepoPkg(ctx context.Context, graph *topo.Graph[string, *InstallInfo], pkg *customrepo.PackageInfo) {
+	reason := Explicit
+	if localPkg := g.dbExecutor.LocalPackage(pkg.Name); localPkg != nil {
+		reason = Reason(localPkg.Reason())
+
+		if g.needed {
+			if db.VerCmp(localPkg.Version(), pkg.Version) >= 0 {
+				g.logger.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(pkg.Name+"-"+pkg.Version)))
+				return
+			}
+		}
+	}
+
+	graph.AddNode(pkg.Name)
+
+	// Add provides
+	for _, provide := range pkg.Provides {
+		graph.AddNode(provide)
+		graph.DependOn(provide, pkg.Name)
+	}
+
+	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
+		Color:      colorMap[reason],
+		Background: bgColorMap[CustomRepo],
+		Value: &InstallInfo{
+			Source:      CustomRepo,
+			Reason:      reason,
+			Version:     pkg.Version,
+			SyncDBName:  &pkg.Source,
+		},
+	})
+
+	// Add dependencies
+	if !g.noDeps && len(pkg.Depends) > 0 {
+		g.addCustomRepoDepNodes(ctx, pkg, graph)
+	}
+}
+
+// addCustomRepoDepNodes adds dependency nodes for a custom repository package
+func (g *Grapher) addCustomRepoDepNodes(ctx context.Context, pkg *customrepo.PackageInfo, graph *topo.Graph[string, *InstallInfo]) {
+	for _, dep := range pkg.Depends {
+		// Check if dependency is already satisfied by installed packages
+		if localPkg := g.dbExecutor.LocalPackage(dep); localPkg != nil {
+			continue
+		}
+
+		// Check if dependency is available in sync repositories
+		if syncPkg := g.dbExecutor.SyncSatisfier(dep); syncPkg != nil {
+			g.GraphSyncPkg(ctx, graph, syncPkg, nil)
+			graph.DependOn(pkg.Name, dep)
+			continue
+		}
+
+		// Check if dependency is available in AUR
+		aurPkgs, err := g.aurClient.Get(ctx, &aurc.Query{
+			By:       aurc.Name,
+			Needles:  []string{dep},
+			Contains: false,
+		})
+		if err == nil && len(aurPkgs) > 0 {
+			aurPkg := &aurPkgs[0]
+			g.GraphAURTarget(ctx, graph, aurPkg, &InstallInfo{
+				AURBase: &aurPkg.PackageBase,
+				Reason:  Dep,
+				Source:  AUR,
+				Version: aurPkg.Version,
+			})
+			graph.DependOn(pkg.Name, dep)
+			continue
+		}
+
+		// Check if dependency is available in custom repositories
+		if g.customRepoMgr != nil {
+			if customDep, err := g.findInCustomRepos(ctx, dep); err == nil && customDep != nil {
+				g.GraphCustomRepoPkg(ctx, graph, customDep)
+				graph.DependOn(pkg.Name, dep)
+				continue
+			}
+		}
+
+		// Dependency not found
+		g.logger.Errorln(gotext.Get("No package found for dependency"), " ", dep)
+	}
 }

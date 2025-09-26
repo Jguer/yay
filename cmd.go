@@ -12,6 +12,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/completion"
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/download"
 	"github.com/Jguer/yay/v12/pkg/intrange"
@@ -133,6 +134,12 @@ yay specific options (used with -Y):
     -c --clean            Remove unneeded dependencies (-cc to ignore optdepends)
        --gendb            Generates development package DB used for updating
 
+custom repository options:
+    --repo-add <name> <type> <url/path> [options]  Add a custom repository
+    --repo-remove <name>                           Remove a custom repository
+    --repo-list                                    List all custom repositories
+    --repo-update                                  Update all custom repositories
+
 getpkgbuild specific options (used with -G):
     -f --force            Force download for existing ABS packages
     -p --print            Print pkgbuild of packages`)
@@ -181,6 +188,20 @@ func handleCmd(ctx context.Context, run *runtime.Runtime,
 			dbExecutor, run.QueryBuilder)
 	case "W", "web":
 		return handleWeb(ctx, run, cmdArgs)
+	}
+
+	// Handle custom repository commands
+	if cmdArgs.ExistsArg("repo-add") {
+		return handleRepoAdd(ctx, run, cmdArgs)
+	}
+	if cmdArgs.ExistsArg("repo-remove") {
+		return handleRepoRemove(ctx, run, cmdArgs)
+	}
+	if cmdArgs.ExistsArg("repo-list") {
+		return handleRepoList(ctx, run, cmdArgs)
+	}
+	if cmdArgs.ExistsArg("repo-update") {
+		return handleRepoUpdate(ctx, run, cmdArgs)
 	}
 
 	return errors.New(gotext.Get("unhandled operation"))
@@ -463,5 +484,156 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 			cmdArgs, run.Cfg.Mode, settings.NoConfirm))
 	}
 
+	return nil
+}
+
+
+// handleRepoAdd handles the --repo-add command
+func handleRepoAdd(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
+	if len(cmdArgs.Targets) < 3 {
+		return fmt.Errorf("usage: --repo-add <name> <type> <url/path> [options]")
+	}
+	
+	name := cmdArgs.Targets[0]
+	repoType := cmdArgs.Targets[1]
+	urlOrPath := cmdArgs.Targets[2]
+	
+	// Create repository configuration
+	repo := settings.CustomRepo{
+		Name:       name,
+		Type:       repoType,
+		Searchable: true,
+		Priority:   100, // Default priority
+	}
+	
+	switch repoType {
+	case "local":
+		repo.Path = urlOrPath
+	case "git", "http":
+		repo.URL = urlOrPath
+	default:
+		return fmt.Errorf("unsupported repository type: %s", repoType)
+	}
+	
+	// Validate configuration
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		cacheDir = "/tmp/yay"
+	}
+	factory := customrepo.NewRepositoryFactory(cacheDir)
+	if err := factory.ValidateRepositoryConfig(repo); err != nil {
+		return fmt.Errorf("invalid repository configuration: %v", err)
+	}
+	
+	// Add to configuration
+	run.Cfg.CustomRepos = append(run.Cfg.CustomRepos, repo)
+	
+	// Save configuration
+	configPath := settings.GetConfigPath()
+	if configPath == "" {
+		return fmt.Errorf("could not determine config path")
+	}
+	
+	if err := run.Cfg.Save(configPath, run.Cfg.Version); err != nil {
+		return fmt.Errorf("failed to save configuration: %v", err)
+	}
+	
+	run.Logger.Println(text.Bold(text.Green("Repository added successfully:")))
+	run.Logger.Printf("  Name: %s\n", name)
+	run.Logger.Printf("  Type: %s\n", repoType)
+	run.Logger.Printf("  URL/Path: %s\n", urlOrPath)
+	
+	return nil
+}
+
+// handleRepoRemove handles the --repo-remove command
+func handleRepoRemove(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
+	if len(cmdArgs.Targets) < 1 {
+		return fmt.Errorf("usage: --repo-remove <name>")
+	}
+	
+	name := cmdArgs.Targets[0]
+	
+	// Find and remove repository
+	found := false
+	var newRepos []settings.CustomRepo
+	for _, repo := range run.Cfg.CustomRepos {
+		if repo.Name != name {
+			newRepos = append(newRepos, repo)
+		} else {
+			found = true
+		}
+	}
+	
+	if !found {
+		return fmt.Errorf("repository not found: %s", name)
+	}
+	
+	run.Cfg.CustomRepos = newRepos
+	
+	// Save configuration
+	configPath := settings.GetConfigPath()
+	if configPath == "" {
+		return fmt.Errorf("could not determine config path")
+	}
+	
+	if err := run.Cfg.Save(configPath, run.Cfg.Version); err != nil {
+		return fmt.Errorf("failed to save configuration: %v", err)
+	}
+	
+	run.Logger.Println(text.Bold(text.Green("Repository removed successfully:")))
+	run.Logger.Printf("  Name: %s\n", name)
+	
+	return nil
+}
+
+// handleRepoList handles the --repo-list command
+func handleRepoList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
+	if len(run.Cfg.CustomRepos) == 0 {
+		run.Logger.Println("No custom repositories configured.")
+		return nil
+	}
+	
+	run.Logger.Println(text.Bold("Custom Repositories:"))
+	run.Logger.Println()
+	
+	for _, repo := range run.Cfg.CustomRepos {
+		run.Logger.Printf("  %s (%s)\n", text.Bold(repo.Name), repo.Type)
+		if repo.Type == "local" {
+			run.Logger.Printf("    Path: %s\n", repo.Path)
+		} else {
+			run.Logger.Printf("    URL: %s\n", repo.URL)
+		}
+		run.Logger.Printf("    Searchable: %t\n", repo.Searchable)
+		run.Logger.Printf("    Priority: %d\n", repo.Priority)
+		run.Logger.Println()
+	}
+	
+	return nil
+}
+
+// handleRepoUpdate handles the --repo-update command
+func handleRepoUpdate(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
+	// Create custom repository manager
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		run.Logger.Warnln("Failed to get cache directory for custom repositories:", err)
+		cacheDir = "/tmp/yay"
+	}
+	
+	factory := customrepo.NewRepositoryFactory(cacheDir)
+	customRepoMgr, err := factory.CreateManagerFromConfig(run.Cfg)
+	if err != nil {
+		return fmt.Errorf("failed to create custom repository manager: %v", err)
+	}
+	
+	run.Logger.Println("Updating custom repositories...")
+	
+	if err := customRepoMgr.UpdateAll(ctx); err != nil {
+		run.Logger.Warnln("Some repositories failed to update:", err)
+	} else {
+		run.Logger.Println(text.Bold(text.Green("All custom repositories updated successfully.")))
+	}
+	
 	return nil
 }

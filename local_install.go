@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/multierror"
@@ -84,7 +85,21 @@ func installLocalPKGBUILD(
 		srcInfos[targetDir] = pkgbuild
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
+	// Create custom repository manager
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		run.Logger.Warnln("Failed to get cache directory for custom repositories:", err)
+		cacheDir = "/tmp/yay"
+	}
+	
+	factory := customrepo.NewRepositoryFactory(cacheDir)
+	customRepoMgr, err := factory.CreateManagerFromConfig(run.Cfg)
+	if err != nil {
+		run.Logger.Warnln("Failed to create custom repository manager:", err)
+		customRepoMgr = customrepo.NewManager(run.Cfg)
+	}
+
+	grapher := dep.NewGrapherWithCustomRepos(dbExecutor, aurCache, customRepoMgr, false, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		run.Logger.Child("grapher"))
 	graph, err := grapher.GraphFromSrcInfos(ctx, nil, srcInfos)

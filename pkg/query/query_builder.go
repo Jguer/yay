@@ -14,6 +14,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -48,12 +49,14 @@ type SourceQueryBuilder struct {
 	singleLineResults bool
 	separateSources   bool
 
-	aurClient aur.QueryClient
-	logger    *text.Logger
+	aurClient      aur.QueryClient
+	customRepoMgr  *customrepo.Manager
+	logger         *text.Logger
 }
 
 func NewSourceQueryBuilder(
 	aurClient aur.QueryClient,
+	customRepoMgr *customrepo.Manager,
 	logger *text.Logger,
 	sortBy string,
 	targetMode parser.TargetMode,
@@ -64,6 +67,7 @@ func NewSourceQueryBuilder(
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
 		aurClient:         aurClient,
+		customRepoMgr:     customRepoMgr,
 		logger:            logger,
 		bottomUp:          bottomUp,
 		sortBy:            sortBy,
@@ -204,6 +208,31 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		}
 	}
 
+	// Search custom repositories
+	if s.customRepoMgr != nil {
+		customResults, err := s.customRepoMgr.SearchAll(ctx, strings.Join(pkgS, " "))
+		if err != nil {
+			s.logger.Warnln("Error searching custom repositories:", err)
+		} else {
+			for _, pkg := range customResults {
+				dbName := pkg.Source
+				if s.queryMap[dbName] == nil {
+					s.queryMap[dbName] = map[string]any{}
+				}
+
+				s.queryMap[dbName][pkg.Name] = pkg
+
+				sortableResults.results = append(sortableResults.results, abstractResult{
+					source:      dbName,
+					name:        pkg.Name,
+					description: pkg.Description,
+					provides:    pkg.Provides,
+					votes:       -1, // Custom repos don't have votes
+				})
+			}
+		}
+	}
+
 	sort.Sort(sortableResults)
 	s.results = sortableResults.results
 
@@ -240,6 +269,8 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults)
 		case alpm.IPackage:
 			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults)
+		case customrepo.PackageInfo:
+			toPrint += customRepoPkgSearchString(&pPkg, dbExecutor, s.singleLineResults)
 		}
 
 		s.logger.Println(toPrint)
