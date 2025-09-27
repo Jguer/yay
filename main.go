@@ -10,6 +10,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
@@ -267,6 +268,25 @@ func handleRepoListEarly(ctx context.Context, cfg *settings.Configuration, cmdAr
 
 // handleRepoUpdateEarly handles --repo-update without initializing runtime
 func handleRepoUpdateEarly(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, logger *text.Logger) {
-	logger.Println("Repository update requires runtime initialization.")
-	logger.Println("Please use: yay --repo-update (without other flags)")
+	// Create custom repository manager
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		logger.Warnln("Failed to get cache directory for custom repositories:", err)
+		cacheDir = "/tmp/yay"
+	}
+	
+	factory := customrepo.NewRepositoryFactory(cacheDir)
+	customRepoMgr, err := factory.CreateManagerFromConfig(cfg)
+	if err != nil {
+		logger.Errorln("Failed to create custom repository manager:", err)
+		return
+	}
+	
+	logger.Println("Updating custom repositories...")
+	
+	if err := customRepoMgr.UpdateAll(ctx); err != nil {
+		logger.Warnln("Some repositories failed to update:", err)
+	} else {
+		logger.Println(text.Bold(text.Green("All custom repositories updated successfully.")))
+	}
 }

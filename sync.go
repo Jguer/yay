@@ -115,6 +115,22 @@ func earlyRefresh(ctx context.Context, cfg *settings.Configuration, cmdBuilder e
 	arguments.DelArg("l", "list")
 	arguments.ClearTargets()
 
+	// Update custom repositories before refreshing pacman databases
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		// If we can't get cache dir, just continue with pacman refresh
+	} else {
+		factory := customrepo.NewRepositoryFactory(cacheDir)
+		customRepoMgr, err := factory.CreateManagerFromConfig(cfg)
+		if err == nil {
+			// Update all custom repositories
+			if err := customRepoMgr.UpdateAll(ctx); err != nil {
+				// Log warning but continue with pacman refresh
+				fmt.Printf("Warning: Some custom repositories failed to update: %v\n", err)
+			}
+		}
+	}
+
 	return cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
 		arguments, cfg.Mode, settings.NoConfirm))
 }
