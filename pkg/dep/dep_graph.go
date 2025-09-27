@@ -3,7 +3,9 @@ package dep
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	aurc "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
@@ -27,6 +29,7 @@ type InstallInfo struct {
 	SrcinfoPath  *string
 	AURBase      *string
 	SyncDBName   *string
+	CustomRepoPath *string
 
 	IsGroup bool
 	Upgrade bool
@@ -936,14 +939,43 @@ func (g *Grapher) GraphCustomRepoPkg(ctx context.Context, graph *topo.Graph[stri
 		graph.DependOn(provide, pkg.Name)
 	}
 
+	// Get directory containing PKGBUILD
+	var pkgDir string
+	g.logger.Debugln("PKGBUILD path for", pkg.Name, ":", pkg.Path)
+	if strings.Contains(pkg.Path, "custom-repos") {
+		// This is a custom repository path, we need to get the actual PKGBUILD path
+		// For HTTP repositories, we need to download the PKGBUILD first
+		if g.customRepoMgr != nil {
+			if repo, exists := g.customRepoMgr.GetRepository(pkg.Source); exists {
+				if pkgbuildPath, err := repo.GetPKGBUILDPath(ctx, pkg.Name); err == nil {
+					pkgDir = filepath.Dir(pkgbuildPath)
+					g.logger.Debugln("Downloaded PKGBUILD to:", pkgbuildPath)
+				} else {
+					g.logger.Warnln("Failed to get PKGBUILD path for", pkg.Name, ":", err)
+					pkgDir = filepath.Dir(pkg.Path) // fallback
+				}
+			} else {
+				g.logger.Warnln("Repository not found:", pkg.Source)
+				pkgDir = filepath.Dir(pkg.Path) // fallback
+			}
+		} else {
+			g.logger.Warnln("Custom repository manager not available")
+			pkgDir = filepath.Dir(pkg.Path) // fallback
+		}
+	} else {
+		// This is a local path, use it directly
+		pkgDir = filepath.Dir(pkg.Path)
+	}
+	g.logger.Debugln("Using PKGBUILD directory:", pkgDir)
 	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
 		Color:      colorMap[reason],
 		Background: bgColorMap[CustomRepo],
 		Value: &InstallInfo{
-			Source:      CustomRepo,
-			Reason:      reason,
-			Version:     pkg.Version,
-			SyncDBName:  &pkg.Source,
+			Source:         CustomRepo,
+			Reason:         reason,
+			Version:        pkg.Version,
+			SyncDBName:     &pkg.Source,
+			CustomRepoPath: &pkgDir,
 		},
 	})
 

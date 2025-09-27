@@ -135,8 +135,8 @@ yay specific options (used with -Y):
        --gendb            Generates development package DB used for updating
 
 custom repository options:
-    --repo-add <name> <type> <url/path> [options]  Add a custom repository
-    --repo-remove <name>                           Remove a custom repository
+    --repo-add=name,type,url/path                  Add a custom repository
+    --repo-remove=name                             Remove a custom repository
     --repo-list                                    List all custom repositories
     --repo-update                                  Update all custom repositories
 

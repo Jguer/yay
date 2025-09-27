@@ -189,6 +189,40 @@ func (r *HTTPRepository) GetPKGBUILDPath(ctx context.Context, name string) (stri
 		return "", err
 	}
 	
+	// Also download .SRCINFO if available
+	srcinfoPath := filepath.Join(r.path, name, ".SRCINFO")
+	srcinfoURL := strings.TrimSuffix(r.url, "/") + "/" + name + "/.SRCINFO"
+	
+	srcinfoReq, err := http.NewRequestWithContext(ctx, "GET", srcinfoURL, nil)
+	if err == nil {
+		// Add authentication if configured
+		if r.auth != nil {
+			switch r.auth.Type {
+			case "token":
+				srcinfoReq.Header.Set("Authorization", "Bearer "+r.auth.Token)
+			case "basic":
+				srcinfoReq.SetBasicAuth(r.auth.Username, r.auth.Password)
+			}
+		}
+		
+		srcinfoResp, err := r.client.Do(srcinfoReq)
+		if err == nil && srcinfoResp.StatusCode == http.StatusOK {
+			srcinfoFile, err := os.Create(srcinfoPath)
+			if err == nil {
+				io.Copy(srcinfoFile, srcinfoResp.Body)
+				srcinfoFile.Close()
+			}
+			srcinfoResp.Body.Close()
+		} else if err != nil {
+			// Log error for debugging
+			fmt.Printf("Failed to download .SRCINFO: %v\n", err)
+		} else {
+			fmt.Printf("Failed to download .SRCINFO: status %d\n", srcinfoResp.StatusCode)
+		}
+	} else {
+		fmt.Printf("Failed to create .SRCINFO request: %v\n", err)
+	}
+	
 	return localPath, nil
 }
 
@@ -247,23 +281,120 @@ func (r *HTTPRepository) getPackageFromCache(name string) (*PackageInfo, error) 
 }
 
 func (r *HTTPRepository) searchFromDirectory(ctx context.Context, query string) ([]PackageInfo, error) {
-	// This is a simplified implementation
-	// In a real implementation, you would parse directory listings
-	// or use a more sophisticated discovery mechanism
+	// Get directory listing
+	req, err := http.NewRequestWithContext(ctx, "GET", r.url, nil)
+	if err != nil {
+		return nil, err
+	}
 	
-	// For now, return empty results
-	// This would need to be implemented based on the specific
-	// HTTP repository structure
-	return []PackageInfo{}, nil
+	// Add authentication if configured
+	if r.auth != nil {
+		switch r.auth.Type {
+		case "token":
+			req.Header.Set("Authorization", "Bearer "+r.auth.Token)
+		case "basic":
+			req.SetBasicAuth(r.auth.Username, r.auth.Password)
+		}
+	}
+	
+	resp, err := r.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get directory listing: %s", resp.Status)
+	}
+	
+	// Read directory listing HTML
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Parse HTML to find package directories
+	// Look for links that end with "/"
+	html := string(body)
+	var packages []PackageInfo
+	
+	// Simple regex-like parsing for directory links
+	lines := strings.Split(html, "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "href=") && strings.Contains(line, "/") {
+			// Extract directory name from href
+			start := strings.Index(line, "href=\"")
+			if start != -1 {
+				start += 6 // len("href=\"")
+				end := strings.Index(line[start:], "\"")
+				if end != -1 {
+					dirName := line[start : start+end]
+					if strings.HasSuffix(dirName, "/") && dirName != "../" && dirName != "./" {
+						// Remove trailing slash
+						dirName = strings.TrimSuffix(dirName, "/")
+						
+						// Check if this directory contains a PKGBUILD
+						pkgInfo, err := r.getPackageFromDirectory(ctx, dirName)
+						if err == nil {
+							// Check if package name matches query
+							if strings.Contains(strings.ToLower(pkgInfo.Name), strings.ToLower(query)) ||
+							   strings.Contains(strings.ToLower(pkgInfo.Description), strings.ToLower(query)) {
+								packages = append(packages, *pkgInfo)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return packages, nil
 }
 
 func (r *HTTPRepository) getPackageFromDirectory(ctx context.Context, name string) (*PackageInfo, error) {
-	// This is a simplified implementation
-	// In a real implementation, you would parse directory listings
-	// or use a more sophisticated discovery mechanism
+	// Download PKGBUILD from the package directory
+	pkgbuildURL := r.url + "/" + name + "/PKGBUILD"
 	
-	// For now, return error
-	// This would need to be implemented based on the specific
-	// HTTP repository structure
-	return nil, fmt.Errorf("package not found: %s", name)
+	req, err := http.NewRequestWithContext(ctx, "GET", pkgbuildURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Add authentication if configured
+	if r.auth != nil {
+		switch r.auth.Type {
+		case "token":
+			req.Header.Set("Authorization", "Bearer "+r.auth.Token)
+		case "basic":
+			req.SetBasicAuth(r.auth.Username, r.auth.Password)
+		}
+	}
+	
+	resp, err := r.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("package not found: %s", name)
+	}
+	
+	// Read PKGBUILD content
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Parse PKGBUILD to extract package info
+	pkgInfo, err := parsePKGBUILDContent(string(body))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse PKGBUILD: %w", err)
+	}
+	
+	// Set source and path
+	pkgInfo.Source = r.name
+	pkgInfo.Path = filepath.Join(r.path, name, "PKGBUILD")
+	
+	return pkgInfo, nil
 }

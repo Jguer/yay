@@ -185,12 +185,27 @@ func (r *LocalRepository) parsePKGBUILD(pkgbuildPath string) (*PackageInfo, erro
 	
 	// Extract depends
 	if depends := extractArrayVariable(contentStr, "depends"); len(depends) > 0 {
-		pkgInfo.Depends = depends
+		// Filter out invalid dependencies that might be parsing errors
+		var validDepends []string
+		for _, dep := range depends {
+			// Skip dependencies that look like parsing errors
+			if strings.Contains(dep, "=") && !strings.Contains(dep, ">=") && !strings.Contains(dep, "<=") && !strings.Contains(dep, "!=") {
+				continue
+			}
+			validDepends = append(validDepends, dep)
+		}
+		pkgInfo.Depends = validDepends
 	}
 	
 	// Extract conflicts
 	if conflicts := extractArrayVariable(contentStr, "conflicts"); len(conflicts) > 0 {
 		pkgInfo.Conflicts = conflicts
+	}
+	
+	// Extract options (for debugging)
+	if options := extractArrayVariable(contentStr, "options"); len(options) > 0 {
+		// Store options in a field if needed, or just log for debugging
+		// For now, we'll just skip this as it's not critical for basic functionality
 	}
 	
 	return pkgInfo, nil

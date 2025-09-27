@@ -191,6 +191,24 @@ func (installer *Installer) handleLayer(ctx context.Context,
 			case dep.Dep, dep.MakeDep, dep.CheckDep:
 				syncDeps.Add(compositePkgName)
 			}
+		case dep.CustomRepo:
+			// Custom repository packages are handled like AUR packages
+			// They need to be built and installed locally
+			nameToBaseMap[name] = name // Use package name as base for custom repos
+			if installer.origTargets.Contains(name) {
+				aurOrigTargetBases.Add(name)
+			}
+
+			switch info.Reason {
+			case dep.Explicit:
+				if cmdArgs.ExistsArg("asdeps", "asdep") {
+					aurDeps.Add(name)
+				} else {
+					aurExp.Add(name)
+				}
+			case dep.Dep, dep.MakeDep, dep.CheckDep:
+				aurDeps.Add(name)
+			}
 		}
 	}
 

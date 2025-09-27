@@ -193,7 +193,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 	pkgBuildDirsByBase := make(map[string]string, len(targets))
 
 	for _, layer := range targets {
-		for _, info := range layer {
+		for name, info := range layer {
 			switch info.Source {
 			case dep.AUR:
 				pkgBase := *info.AURBase
@@ -205,6 +205,18 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 			case dep.SrcInfo:
 				pkgBase := *info.AURBase
 				pkgBuildDirsByBase[pkgBase] = *info.SrcinfoPath
+			case dep.CustomRepo:
+				// Custom repository packages need to be copied to build directory
+				pkgBase := name
+				if info.CustomRepoPath != nil {
+					// Copy PKGBUILD from custom repository to build directory
+					buildDir := filepath.Join(preper.cfg.BuildDir, pkgBase)
+					if err := preper.copyCustomRepoPkg(ctx, *info.CustomRepoPath, buildDir); err != nil {
+						preper.log.Warnln("Failed to copy custom repo package:", err)
+						continue
+					}
+					pkgBuildDirsByBase[pkgBase] = buildDir
+				}
 			}
 		}
 	}
@@ -219,7 +231,24 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		return pkgBuildDirsByBase, nil
 	}
 
-	if err := mergePkgbuilds(ctx, preper.cmdBuilder, pkgBuildDirsByBase); err != nil {
+	// Filter out custom repository packages from mergePkgbuilds
+	aurPkgBuildDirs := make(map[string]string)
+	for base, dir := range pkgBuildDirsByBase {
+		// Check if this is a custom repository package by looking for .git directory
+		// Custom repository packages have .git directory but no remote
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			// Check if this is a custom repository package (no remote)
+			_, stderr, err := preper.cmdBuilder.Capture(
+				preper.cmdBuilder.BuildGitCmd(ctx, dir, "remote", "get-url", "origin"))
+			if err != nil && strings.Contains(stderr, "No such remote") {
+				// This is a custom repository package, skip merge
+				continue
+			}
+		}
+		aurPkgBuildDirs[base] = dir
+	}
+	
+	if err := mergePkgbuilds(ctx, preper.cmdBuilder, aurPkgBuildDirs); err != nil {
 		return nil, err
 	}
 
@@ -239,6 +268,89 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 	}
 
 	return pkgBuildDirsByBase, nil
+}
+
+// copyCustomRepoPkg copies PKGBUILD and related files from custom repository to build directory
+func (preper *Preparer) copyCustomRepoPkg(ctx context.Context, srcDir, dstDir string) error {
+	// Create destination directory
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		return err
+	}
+	
+	// Initialize git repository in build directory
+	if err := preper.cmdBuilder.Show(preper.cmdBuilder.BuildGitCmd(ctx, dstDir, "init")); err != nil {
+		preper.log.Warnln("Failed to initialize git repository:", err)
+	}
+	
+	// Copy PKGBUILD
+	srcPKGBUILD := filepath.Join(srcDir, "PKGBUILD")
+	dstPKGBUILD := filepath.Join(dstDir, "PKGBUILD")
+	if err := preper.copyFile(srcPKGBUILD, dstPKGBUILD); err != nil {
+		return fmt.Errorf("failed to copy PKGBUILD: %w", err)
+	}
+	
+	// Copy .SRCINFO if it exists
+	srcSRCINFO := filepath.Join(srcDir, ".SRCINFO")
+	dstSRCINFO := filepath.Join(dstDir, ".SRCINFO")
+	if _, err := os.Stat(srcSRCINFO); err == nil {
+		if err := preper.copyFile(srcSRCINFO, dstSRCINFO); err != nil {
+			preper.log.Warnln("Failed to copy .SRCINFO:", err)
+		}
+	}
+	
+	// Copy other files that might be needed (patches, install scripts, etc.)
+	files, err := os.ReadDir(srcDir)
+	if err != nil {
+		return err
+	}
+	
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		
+		fileName := file.Name()
+		// Skip PKGBUILD and .SRCINFO as they're already copied
+		if fileName == "PKGBUILD" || fileName == ".SRCINFO" {
+			continue
+		}
+		
+		// Copy other files
+		srcFile := filepath.Join(srcDir, fileName)
+		dstFile := filepath.Join(dstDir, fileName)
+		if err := preper.copyFile(srcFile, dstFile); err != nil {
+			preper.log.Warnln("Failed to copy file", fileName+":", err)
+		}
+	}
+	
+	// Add and commit files to git repository
+	if err := preper.cmdBuilder.Show(preper.cmdBuilder.BuildGitCmd(ctx, dstDir, "add", ".")); err != nil {
+		preper.log.Warnln("Failed to add files to git:", err)
+	}
+	
+	if err := preper.cmdBuilder.Show(preper.cmdBuilder.BuildGitCmd(ctx, dstDir, "commit", "-m", "Initial commit")); err != nil {
+		preper.log.Warnln("Failed to commit files to git:", err)
+	}
+	
+	return nil
+}
+
+// copyFile copies a single file
+func (preper *Preparer) copyFile(src, dst string) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+	
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+	
+	_, err = dstFile.ReadFrom(srcFile)
+	return err
 }
 
 func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuildDir string) bool {
