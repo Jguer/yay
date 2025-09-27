@@ -343,7 +343,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			w := &strings.Builder{}
-			queryBuilder := NewSourceQueryBuilder(mockAUR,
+			queryBuilder := NewSourceQueryBuilder(mockAUR, nil,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, tc.targetMode, tc.searchBy, tc.bottomUp,
 				tc.singleLineResults, tc.separateSources)
