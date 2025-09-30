@@ -136,7 +136,7 @@ func TestSyncUpgrade(t *testing.T) {
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -247,7 +247,7 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -378,7 +378,7 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -571,7 +571,7 @@ pkgname = python-vosk
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))

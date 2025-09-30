@@ -204,14 +204,16 @@ The command to use for \fBpacman\fR calls. This can be a command in
 \fBPATH\fR or an absolute path to the file.
 
 .TP
-.B \-\-tar <command>
-The command to use for \fBbsdtar\fR calls. This can be a command in
-\fBPATH\fR or an absolute path to the file.
-
-.TP
 .B \-\-git <command>
 The command to use for \fBgit\fR calls. This can be a command in
 \fBPATH\fR or an absolute path to the file.
+
+.TP
+.B \-\-gitflags <flags>
+Passes arguments to git. These flags get passed to every instance where
+git is called by yay. Arguments are split on whitespace before being
+passed to git. Multiple arguments may be passed by supplying a space
+separated list that is quoted by the shell.
 
 .TP
 .B \-\-gpg <command>
