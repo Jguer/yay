@@ -1,8 +1,11 @@
 package text
 
 import (
+	"os"
 	"strings"
 	"unicode"
+
+	"golang.org/x/term"
 )
 
 const (
@@ -66,6 +69,11 @@ func CreateOSC8Link(url, text string) string {
 }
 
 func CreateRepoLink(repo, arch, pkgName, text string) string {
+	isTerminal := term.IsTerminal(int(os.Stdout.Fd()))
+	if !isTerminal {
+		return text
+	}
+
 	urlBase, ok := RepoUrls[repo]
 	if !ok {
 		return text
