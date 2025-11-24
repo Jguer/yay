@@ -700,7 +700,7 @@ msgstr[2] "paquetes"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "paquete '%s' no fue encontrado"
+msgstr "paquete «%s» no fue encontrado"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
