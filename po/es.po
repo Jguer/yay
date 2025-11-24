@@ -11,10 +11,11 @@
 # C C, 2023
 # Tom, 2024
 # Claudio Yanez, 2025
+# prflr88 <prflr88@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Claudio Yanez, 2025\n"
+"Last-Translator: prflr88 <prflr88@gmail.com>, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/yay-1/teams/123732/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -717,11 +718,11 @@ msgstr "problema al importar llaves"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "borrando paquetes AUR del caché..."
+msgstr "borrando paquetes AUR de la caché..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "borrando archivos AUR no rastreados del caché..."
+msgstr "borrando archivos AUR no rastreados de la caché..."
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
