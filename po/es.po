@@ -526,7 +526,7 @@ msgstr "abortando por el usuario"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "argumento '-' especificado sin entrada en stdin"
+msgstr "argumento «-» especificado sin entrada en stdin"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
