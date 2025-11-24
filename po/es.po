@@ -637,7 +637,7 @@ msgstr "no se pudo recuperar el aur Cache"
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr ""
 "ignorando la actualización del paquete devel (no se ha encontrado "
-"información en AUR):"
+"información en el AUR):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
