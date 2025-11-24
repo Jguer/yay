@@ -376,7 +376,7 @@ msgstr "ID de paquete base"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
-msgstr "Paquetes que no están en AUR:"
+msgstr "Paquetes que no están en el AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
