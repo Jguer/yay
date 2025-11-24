@@ -8,7 +8,6 @@
 # brandon galvis, 2023
 # Angel López, 2023
 # C C, 2023
-# Tom, 2024
 # Claudio Yanez, 2025
 # prflr88 <prflr88@gmail.com>, 2025
 # 
@@ -77,11 +76,11 @@ msgstr "%s está actualizado -- ignorando"
 
 #: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "%s por actualizar/instalar"
+msgstr "%s por actualizar/instalar."
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
-msgstr "%s también será instalado para esta operación"
+msgstr "%s también será instalado para esta operación."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
