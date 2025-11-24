@@ -627,7 +627,7 @@ msgstr "fallo al analizar .SRCINFO"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "fracaso al leer archivo de configuración «%s»: %s"
+msgstr "no se pudo al leer archivo de configuración «%s»: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
