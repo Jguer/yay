@@ -623,7 +623,7 @@ msgstr "no se pudo al analizar %s: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
-msgstr "fallo al analizar .SRCINFO"
+msgstr "no se pudo analizar .SRCINFO"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
