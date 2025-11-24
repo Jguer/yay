@@ -555,7 +555,8 @@ msgstr "dependencia"
 #: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr ""
-"verificación de desarrollo para el paquete fallada: «%s» encontrado un error"
+"la verificación de desarrollo para el paquete ha fallado: «%s» se encontró "
+"un error"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
