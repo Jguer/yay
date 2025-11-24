@@ -2,7 +2,6 @@
 # Translators:
 # J G, 2021
 # Ivan Garcia, 2021
-# Juan Manuel Beltrán Osa, 2021
 # Percy De La Rosa, 2022
 # Brighton Saldaña, 2022
 # Antonio Alvarado-Hernández, 2023
@@ -556,8 +555,7 @@ msgstr "dependencia"
 #: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr ""
-"verificación de desarrollo para el paquete fallada: '1 %s' encontrado un "
-"error"
+"verificación de desarrollo para el paquete fallada: «%s» encontrado un error"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
