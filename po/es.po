@@ -580,7 +580,7 @@ msgstr "error al instalar:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "error compilando: %s"
+msgstr "error al compilar: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
