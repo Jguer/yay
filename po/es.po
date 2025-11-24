@@ -704,7 +704,7 @@ msgstr "paquete «%s» no fue encontrado"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "paquete no encontrado en AUR"
+msgstr "paquete no encontrado en el AUR"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
