@@ -716,11 +716,11 @@ msgstr "problema al importar llaves"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "borrando paquetes AUR de la caché..."
+msgstr "borrando paquetes del AUR de la caché..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "borrando archivos AUR no rastreados de la caché..."
+msgstr "borrando archivos del AUR no rastreados de la caché..."
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
