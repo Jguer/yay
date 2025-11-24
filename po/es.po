@@ -442,11 +442,11 @@ msgstr "Mostrando solamente paquetes de los repositorios"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Tamaño del cache de pacman %s:%s"
+msgstr "Tamaño de la cache de pacman %s:%s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Tamaño del cache de yay %s:%s"
+msgstr "Tamaño de la cache de yay %s:%s"
 
 #: print.go:62
 msgid "Snapshot URL"
