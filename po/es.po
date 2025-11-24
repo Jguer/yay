@@ -636,7 +636,7 @@ msgstr "no se pudo recuperar el aur Cache"
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr ""
-"ignorando la actualización del paquete devel (no se ha encontrado "
+"ignorando la actualización del paquete de desarollo (no se ha encontrado "
 "información en el AUR):"
 
 #: pkg/text/errors.go:8
