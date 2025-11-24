@@ -596,7 +596,7 @@ msgstr "error refrescando las bases de datos"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "error al hacer reset en %s: %s"
+msgstr "error al reiniciar en %s: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
