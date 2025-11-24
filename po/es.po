@@ -324,7 +324,7 @@ msgstr "Ausente"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Missing AUR Debug Packages:"
-msgstr "Paquetes de depuración de AUR faltantes"
+msgstr "Paquetes de depuración del AUR faltantes"
 
 #: print.go:31
 msgid "Name"
