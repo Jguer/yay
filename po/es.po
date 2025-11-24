@@ -627,7 +627,7 @@ msgstr "fallo al analizar .SRCINFO"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "fracaso al leer archivo de configuración '%s': %s"
+msgstr "fracaso al leer archivo de configuración «%s»: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
@@ -649,7 +649,7 @@ msgstr "número no válido: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "opción no válida '%s'"
+msgstr "opción no válida «%s»"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
