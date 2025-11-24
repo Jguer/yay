@@ -631,7 +631,7 @@ msgstr "no se pudo al leer archivo de configuración «%s»: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr "Error al recuperar el aur Cache"
+msgstr "no se pudo recuperar el aur Cache"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
