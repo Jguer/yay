@@ -211,7 +211,7 @@ msgstr "Deshabilitar ajuste «provee» por omisión "
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "¿Quieres borrar TODOS los paquetes de AUR de la caché?"
+msgstr "¿Quieres borrar TODOS los paquetes del AUR de la caché?"
 
 #: clean.go:95
 msgid "Do you want to remove ALL untracked AUR files?"
