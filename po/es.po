@@ -107,7 +107,7 @@ msgstr "%s: actualización del paquete ignorada (%s => %s)"
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
 msgstr ""
-"%s: paquete local (%s) es más nuevo que el paquete disponible en el AUR (%s)"
+"%s: paquete local (%s) es más nuevo que el paquete disponible en AUR (%s)"
 
 #: vote.go:51
 msgid ""
