@@ -36,7 +36,7 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Introduzca un número (por defecto=1): "
+"Introduzca un número (por omisión=1): "
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
