@@ -256,8 +256,8 @@ msgstr "No se pudo instalar la capa, rodando hacia la siguiente capa "
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"No se pudieron instalar los siguientes paquetes. Una intervención manual es "
-"requerida:"
+"No se pudieron instalar los siguientes paquetes. Se requiere intervención "
+"manual:"
 
 #: print.go:45
 msgid "First Submitted"
