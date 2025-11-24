@@ -332,7 +332,7 @@ msgstr "Nombre"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
 msgid "No AUR package found for"
-msgstr "Ningún paquete AUR para"
+msgstr "Ningún paquete del AUR para"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
@@ -348,7 +348,7 @@ msgstr "Dependencias opcionales"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Paquetes AUR huérfanos (no mantenidos): "
+msgstr "Paquetes del AUR huérfanos (no mantenidos): "
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
