@@ -615,11 +615,11 @@ msgstr "no se pudo al abrir archivo de configuración «%s»: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "fracaso al analizar %s -- ignorando: %s"
+msgstr "no se pudo analizar %s -- ignorando: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "fracaso al analizar %s: %s"
+msgstr "no se pudo al analizar %s: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
