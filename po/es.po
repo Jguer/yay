@@ -9,11 +9,11 @@
 # Angel López, 2023
 # C C, 2023
 # Claudio Yanez, 2025
-# prflr88 <prflr88@gmail.com>, 2025
+# Pablo Lezaeta Reyes <prflr88@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: prflr88 <prflr88@gmail.com>, 2025\n"
+"Last-Translator: Pablo Lezaeta Reyes <prflr88@gmail.com>, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/yay-1/teams/123732/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -324,7 +324,7 @@ msgstr "Ausente"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Missing AUR Debug Packages:"
-msgstr "Paquetes de depuración del AUR faltantes"
+msgstr "Paquetes de depuración del AUR faltantes:"
 
 #: print.go:31
 msgid "Name"
