@@ -264,7 +264,7 @@ msgstr "Primera vez subido"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Paquetes de AUR marcados como desactualizados:"
+msgstr "Paquetes del AUR marcados como desactualizados:"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
