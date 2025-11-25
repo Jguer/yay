@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -427,18 +426,11 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 	}
 
 	if run.Cfg.Mode.AtLeastAUR() && (len(cmdArgs.Targets) == 0 || aur) {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, run.Cfg.AURURL+"/packages.gz", http.NoBody)
+		scanner, err := download.GetPackageScanner(ctx, httpClient, run.Cfg.AURURL)
 		if err != nil {
 			return err
 		}
-
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		scanner := bufio.NewScanner(resp.Body)
+		defer scanner.Close()
 
 		scanner.Scan()
 

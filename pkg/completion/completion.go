@@ -1,26 +1,25 @@
 package completion
 
 import (
-	"bufio"
 	"context"
-	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/download"
 )
 
 type PkgSynchronizer interface {
 	SyncPackages(...string) []db.IPackage
 }
 
+// httpRequestDoer interface matches the unified interface in download package
 type httpRequestDoer interface {
+	Get(string) (*http.Response, error)
 	Do(req *http.Request) (*http.Response, error)
 }
 
@@ -77,29 +76,11 @@ func Update(ctx context.Context, httpClient httpRequestDoer,
 
 // CreateAURList creates a new completion file.
 func createAURList(ctx context.Context, client httpRequestDoer, aurURL string, out io.Writer) error {
-	u, err := url.Parse(aurURL)
+	scanner, err := download.GetPackageScanner(ctx, client, aurURL)
 	if err != nil {
 		return err
 	}
-
-	u.Path = path.Join(u.Path, "packages.gz")
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), http.NoBody)
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("invalid status code: %d", resp.StatusCode)
-	}
-
-	scanner := bufio.NewScanner(resp.Body)
+	defer scanner.Close()
 
 	scanner.Scan()
 

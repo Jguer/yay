@@ -1,11 +1,14 @@
 package download
 
 import (
+	"bufio"
+	"compress/gzip"
 	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"path"
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
@@ -97,4 +100,78 @@ func AURPKGBUILDRepos(
 	wg.Wait()
 
 	return cloned, errs.Return()
+}
+
+// gzipReadCloser wraps a gzip.Reader and the original Closer to ensure
+// the underlying resource is closed properly when we're done.
+type gzipReadCloser struct {
+	*gzip.Reader
+	originalCloser io.Closer
+}
+
+func (g *gzipReadCloser) Close() error {
+	gzErr := g.Reader.Close()
+	bodyErr := g.originalCloser.Close()
+
+	if gzErr != nil {
+		return gzErr
+	}
+	return bodyErr
+}
+
+// ScannerCloser combines a bufio.Scanner with a Close method
+type ScannerCloser struct {
+	*bufio.Scanner
+	closer io.Closer
+}
+
+// Close closes the underlying resource
+func (s *ScannerCloser) Close() error {
+	if s.closer != nil {
+		return s.closer.Close()
+	}
+	return nil
+}
+
+// GetPackageScanner fetches the AUR packages.gz file and returns a scanner for reading its contents.
+// This function uses the unified httpRequestDoer interface which provides both Get and Do methods.
+// The caller must call Close() on the returned ScannerCloser when done to properly release resources.
+func GetPackageScanner(ctx context.Context, client httpRequestDoer, aurURL string) (*ScannerCloser, error) {
+	u, err := url.Parse(aurURL)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "packages.gz")
+	packagesURL := u.String()
+
+	resp, err := client.Get(packagesURL)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, fmt.Errorf("invalid status code: %d", resp.StatusCode)
+	}
+
+	// Try to decompress the response body regardless of Content-Encoding header
+	var readCloser io.ReadCloser
+	gzReader, err := gzip.NewReader(resp.Body)
+	if err == nil {
+		readCloser = &gzipReadCloser{
+			Reader:         gzReader,
+			originalCloser: resp.Body,
+		}
+	} else {
+		readCloser = resp.Body
+	}
+
+	scanner := bufio.NewScanner(readCloser)
+
+	return &ScannerCloser{
+		Scanner: scanner,
+		closer:  readCloser,
+	}, nil
 }
