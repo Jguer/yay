@@ -79,12 +79,12 @@ func createAURList(ctx context.Context, client download.HTTPRequestDoer, aurURL 
 	scanner.Scan()
 
 	for scanner.Scan() {
-		text := scanner.Text()
-		if strings.HasPrefix(text, "#") {
+		pkgName := scanner.Text()
+		if strings.HasPrefix(pkgName, "#") {
 			continue
 		}
 
-		if _, err := io.WriteString(out, text+"\tAUR\n"); err != nil {
+		if _, err := io.WriteString(out, pkgName+"\tAUR\n"); err != nil {
 			return err
 		}
 	}
