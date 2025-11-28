@@ -162,11 +162,6 @@ func (p *Package) SHA256Sum() string {
 	panic("not implemented")
 }
 
-// MD5Sum returns package MD5Sum.
-func (p *Package) MD5Sum() string {
-	panic("not implemented")
-}
-
 // Packager returns package packager name.
 func (p *Package) Packager() string {
 	panic("not implemented")

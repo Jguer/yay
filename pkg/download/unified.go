@@ -225,7 +225,7 @@ func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
 		}
 
 		// If the package is not found in the database and it was expected to be
-		if pkg == nil && dbName != "" {
+		if dbName != "" {
 			return dbName, name, true, true
 		}
 	}
