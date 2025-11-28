@@ -3,7 +3,6 @@ package completion
 import (
 	"context"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,23 +10,18 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/download"
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type PkgSynchronizer interface {
 	SyncPackages(...string) []db.IPackage
 }
 
-// httpRequestDoer interface matches the unified interface in download package
-type httpRequestDoer interface {
-	Get(string) (*http.Response, error)
-	Do(req *http.Request) (*http.Response, error)
-}
-
 // Show provides completion info for shells.
-func Show(ctx context.Context, httpClient httpRequestDoer,
-	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool,
+func Show(ctx context.Context, httpClient download.HTTPRequestDoer,
+	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool, logger *text.Logger,
 ) error {
-	err := Update(ctx, httpClient, dbExecutor, aurURL, completionPath, interval, force)
+	err := Update(ctx, httpClient, dbExecutor, aurURL, completionPath, interval, force, logger)
 	if err != nil {
 		return err
 	}
@@ -44,8 +38,8 @@ func Show(ctx context.Context, httpClient httpRequestDoer,
 }
 
 // Update updates completion cache to be used by Complete.
-func Update(ctx context.Context, httpClient httpRequestDoer,
-	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool,
+func Update(ctx context.Context, httpClient download.HTTPRequestDoer,
+	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool, logger *text.Logger,
 ) error {
 	info, err := os.Stat(completionPath)
 
@@ -60,7 +54,7 @@ func Update(ctx context.Context, httpClient httpRequestDoer,
 			return errf
 		}
 
-		if createAURList(ctx, httpClient, aurURL, out) != nil {
+		if createAURList(ctx, httpClient, aurURL, out, logger) != nil {
 			defer os.Remove(completionPath)
 		}
 
@@ -74,9 +68,9 @@ func Update(ctx context.Context, httpClient httpRequestDoer,
 	return nil
 }
 
-// CreateAURList creates a new completion file.
-func createAURList(ctx context.Context, client httpRequestDoer, aurURL string, out io.Writer) error {
-	scanner, err := download.GetPackageScanner(ctx, client, aurURL)
+// createAURList creates a new completion file.
+func createAURList(ctx context.Context, client download.HTTPRequestDoer, aurURL string, out io.Writer, logger *text.Logger) error {
+	scanner, err := download.GetPackageScanner(ctx, client, aurURL, logger)
 	if err != nil {
 		return err
 	}

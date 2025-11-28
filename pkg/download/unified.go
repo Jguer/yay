@@ -18,7 +18,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
-type httpRequestDoer interface {
+// HTTPRequestDoer is an interface for HTTP clients that can perform GET requests.
+type HTTPRequestDoer interface {
 	Get(string) (*http.Response, error)
 }
 

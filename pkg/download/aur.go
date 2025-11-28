@@ -2,6 +2,7 @@ package download
 
 import (
 	"bufio"
+	"bytes"
 	"compress/gzip"
 	"context"
 	"fmt"
@@ -18,7 +19,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
-func AURPKGBUILD(httpClient httpRequestDoer, pkgName, aurURL string) ([]byte, error) {
+func AURPKGBUILD(httpClient HTTPRequestDoer, pkgName, aurURL string) ([]byte, error) {
 	values := url.Values{}
 	values.Set("h", pkgName)
 	pkgURL := aurURL + "/cgit/aur.git/plain/PKGBUILD?" + values.Encode()
@@ -102,30 +103,13 @@ func AURPKGBUILDRepos(
 	return cloned, errs.Return()
 }
 
-// gzipReadCloser wraps a gzip.Reader and the original Closer to ensure
-// the underlying resource is closed properly when we're done.
-type gzipReadCloser struct {
-	*gzip.Reader
-	originalCloser io.Closer
-}
-
-func (g *gzipReadCloser) Close() error {
-	gzErr := g.Reader.Close()
-	bodyErr := g.originalCloser.Close()
-
-	if gzErr != nil {
-		return gzErr
-	}
-	return bodyErr
-}
-
-// ScannerCloser combines a bufio.Scanner with a Close method
+// ScannerCloser combines a bufio.Scanner with a Close method.
 type ScannerCloser struct {
 	*bufio.Scanner
 	closer io.Closer
 }
 
-// Close closes the underlying resource
+// Close closes the underlying gzip reader if present.
 func (s *ScannerCloser) Close() error {
 	if s.closer != nil {
 		return s.closer.Close()
@@ -134,9 +118,8 @@ func (s *ScannerCloser) Close() error {
 }
 
 // GetPackageScanner fetches the AUR packages.gz file and returns a scanner for reading its contents.
-// This function uses the unified httpRequestDoer interface which provides both Get and Do methods.
 // The caller must call Close() on the returned ScannerCloser when done to properly release resources.
-func GetPackageScanner(ctx context.Context, client httpRequestDoer, aurURL string) (*ScannerCloser, error) {
+func GetPackageScanner(ctx context.Context, client HTTPRequestDoer, aurURL string, logger *text.Logger) (*ScannerCloser, error) {
 	u, err := url.Parse(aurURL)
 	if err != nil {
 		return nil, err
@@ -146,7 +129,6 @@ func GetPackageScanner(ctx context.Context, client httpRequestDoer, aurURL strin
 	packagesURL := u.String()
 
 	resp, err := client.Get(packagesURL)
-
 	if err != nil {
 		return nil, err
 	}
@@ -156,22 +138,33 @@ func GetPackageScanner(ctx context.Context, client httpRequestDoer, aurURL strin
 		return nil, fmt.Errorf("invalid status code: %d", resp.StatusCode)
 	}
 
-	// Try to decompress the response body regardless of Content-Encoding header
-	var readCloser io.ReadCloser
-	gzReader, err := gzip.NewReader(resp.Body)
-	if err == nil {
-		readCloser = &gzipReadCloser{
-			Reader:         gzReader,
-			originalCloser: resp.Body,
-		}
-	} else {
-		readCloser = resp.Body
+	// Read the entire body to allow trying gzip decompression
+	body, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if err != nil {
+		return nil, err
 	}
 
-	scanner := bufio.NewScanner(readCloser)
+	// Try to decompress as gzip; if that fails, use raw body
+	var reader io.Reader
+	var closer io.Closer
+
+	gzReader, gzErr := gzip.NewReader(bytes.NewReader(body))
+	if gzErr == nil {
+		reader = gzReader
+		closer = gzReader
+	} else {
+		if logger != nil {
+			logger.Debugln("gzip decompression not needed, using raw response body")
+		}
+		reader = bytes.NewReader(body)
+	}
+
+	scanner := bufio.NewScanner(reader)
 
 	return &ScannerCloser{
 		Scanner: scanner,
-		closer:  readCloser,
+		closer:  closer,
 	}, nil
 }
