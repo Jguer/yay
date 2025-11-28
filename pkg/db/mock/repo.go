@@ -42,6 +42,8 @@ type Package struct {
 	PArchitecture string
 }
 
+var _ alpm.IPackage = (*Package)(nil)
+
 func (p *Package) Base() string {
 	return p.PBase
 }
