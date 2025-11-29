@@ -7,6 +7,7 @@ import (
 
 	aur "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -102,6 +103,7 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 	pkgS = ExpandPackages(pkgS, dbExecutor)
 	aurS, repoS := PackageSlices(pkgS, run.Cfg, dbExecutor)
 
+	aurNames := mapset.NewThreadUnsafeSet[string]()
 	if len(aurS) != 0 {
 		// Use the AUR client to search for AUR packages not currently installed
 
@@ -110,6 +112,12 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 		for _, pkg := range aurS {
 			_, name := text.SplitDBFromName(pkg)
 
+			if aurNames.Contains(name) {
+				// This package has already been specified
+				continue
+			}
+
+			aurNames.Add(name)
 			localPkg := dbExecutor.LocalPackage(name)
 			if localPkg != nil {
 				localAurPkgs = append(localAurPkgs, localPkg)
@@ -126,15 +134,15 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 			run.Logger.Errorln(err)
 		}
 
-		// Check for any missing packages, print errors for any not found
-		found := make(map[string]struct{}, len(remoteAurPkgs))
+		// Check for any missing packages and print errors for any not found
+		found := mapset.NewThreadUnsafeSet[string]()
 		for i := range remoteAurPkgs {
-			found[remoteAurPkgs[i].Name] = struct{}{}
+			found.Add(remoteAurPkgs[i].Name)
 		}
 
 		missing := false
 		for _, name := range noDB {
-			if _, ok := found[name]; !ok {
+			if !found.Contains(name) {
 				missing = true
 				run.Logger.Errorln(gotext.Get("No AUR package found for"), " ", name)
 			}
@@ -143,6 +151,43 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 		// Mimic pacman's behavior by exiting if any packages are missing.
 		if missing {
 			return nil
+		}
+	}
+
+	// Include any pending AUR upgrades if requested
+	if cmdArgs.ExistsArg("u", "sysupgrade") && run.Cfg.Mode.AtLeastAUR() {
+		grapher := dep.NewGrapher(dbExecutor, run.AURClient, false, settings.NoConfirm,
+			true, true, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
+		upService := upgrade.NewUpgradeService(
+			grapher, run.AURClient, dbExecutor, run.VCSStore,
+			run.Cfg, settings.NoConfirm, run.Logger.Child("upgrade"))
+
+		aurData, aurUp, develUp, err := upService.GetAURUpgrades(ctx, false)
+
+		if err == nil {
+			for i := range develUp.Up {
+				up := &develUp.Up[i]
+				// don't duplicate entries
+				if aurNames.Contains(up.Name) {
+					continue
+				}
+
+				aurPkg := aurData[up.Name]
+				remoteAurPkgs = append(remoteAurPkgs, *aurPkg)
+			}
+
+			for i := range aurUp.Up {
+				up := &aurUp.Up[i]
+				// don't duplicate entries
+				if aurNames.Contains(up.Name) {
+					continue
+				}
+
+				aurPkg := aurData[up.Name]
+				remoteAurPkgs = append(remoteAurPkgs, *aurPkg)
+			}
+		} else {
+			run.Logger.Errorln(err)
 		}
 	}
 

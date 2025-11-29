@@ -57,42 +57,11 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	enableDowngrade bool,
 	filter Filter,
 ) (err error) {
-	var (
-		develUp UpSlice
-		errs    multierror.MultiError
-		aurdata = make(map[string]*aur.Pkg)
-		aurUp   UpSlice
-	)
+	var errs multierror.MultiError
 
-	remote := u.dbExecutor.InstalledRemotePackages()
-	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
-
-	if u.cfg.Mode.AtLeastAUR() {
-		u.log.OperationInfoln(gotext.Get("Searching AUR for updates..."))
-
-		_aurdata, err := u.aurCache.Get(ctx, &aur.Query{Needles: remoteNames, By: aur.Name})
-
+	aurdata, aurUp, develUp, err := u.GetAURUpgrades(ctx, enableDowngrade)
+	if err != nil {
 		errs.Add(err)
-
-		if err == nil {
-			for i := range _aurdata {
-				pkg := &_aurdata[i]
-				aurdata[pkg.Name] = pkg
-				u.AURWarnings.AddToWarnings(remote, pkg)
-			}
-
-			u.AURWarnings.CalculateMissing(remoteNames, remote, aurdata)
-
-			aurUp = UpAUR(u.log, remote, aurdata, u.cfg.TimeUpdate, enableDowngrade)
-
-			if u.cfg.Devel {
-				u.log.OperationInfoln(gotext.Get("Checking development packages..."))
-
-				develUp = UpDevel(ctx, u.log, remote, aurdata, u.vcsStore)
-
-				u.vcsStore.CleanOrphans(remote)
-			}
-		}
 	}
 
 	aurPkgsAdded := []*aur.Pkg{}
@@ -231,6 +200,45 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 	})
 
 	return aurUp, repoUp
+}
+
+func (u *UpgradeService) GetAURUpgrades(ctx context.Context, enableDowngrade bool) (
+	aurdata map[string]*aur.Pkg, aurUp, develUp UpSlice, err error,
+) {
+	aurdata = make(map[string]*aur.Pkg)
+	remote := u.dbExecutor.InstalledRemotePackages()
+	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
+
+	if !u.cfg.Mode.AtLeastAUR() {
+		return aurdata, aurUp, develUp, err
+	}
+
+	u.log.OperationInfoln(gotext.Get("Searching AUR for updates..."))
+
+	_aurdata, err := u.aurCache.Get(ctx, &aur.Query{Needles: remoteNames, By: aur.Name})
+	if err != nil {
+		return aurdata, aurUp, develUp, err
+	}
+
+	for i := range _aurdata {
+		pkg := &_aurdata[i]
+		aurdata[pkg.Name] = pkg
+		u.AURWarnings.AddToWarnings(remote, pkg)
+	}
+
+	u.AURWarnings.CalculateMissing(remoteNames, remote, aurdata)
+
+	aurUp = UpAUR(u.log, remote, aurdata, u.cfg.TimeUpdate, enableDowngrade)
+
+	if u.cfg.Devel {
+		u.log.OperationInfoln(gotext.Get("Checking development packages..."))
+
+		develUp = UpDevel(ctx, u.log, remote, aurdata, u.vcsStore)
+
+		u.vcsStore.CleanOrphans(remote)
+	}
+
+	return aurdata, aurUp, develUp, nil
 }
 
 func (u *UpgradeService) GraphUpgrades(ctx context.Context,
