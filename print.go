@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
 	"unicode"
 
 	aur "github.com/Jguer/aur"
+	alpm "github.com/Jguer/go-alpm/v2"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 	"golang.org/x/sys/unix"
@@ -264,4 +266,144 @@ func getColumnCount() int {
 	}
 
 	return 80
+}
+
+// printLocalPackages prints installed AUR packages according to the user-defined format. Mimics pacman's
+// print format.
+func printLocalPackages(config *settings.Configuration, pkgs []alpm.IPackage) {
+	format := config.PrintFormat
+
+	for _, pkg := range pkgs {
+		printString := format
+
+		// %a : arch
+		printString = strings.ReplaceAll(printString, "%a", pkg.Architecture())
+		// %b : build date
+		buildDate := pkg.BuildDate().Local().Unix()
+		printString = strings.ReplaceAll(printString, "%b", text.FormatTimeQuery(int(buildDate)))
+		// %d : description
+		printString = strings.ReplaceAll(printString, "%d", pkg.Description())
+		// %e : pkgbase
+		printString = strings.ReplaceAll(printString, "%e", pkg.Base())
+		// %f : filename
+		printString = strings.ReplaceAll(printString, "%f", pkg.FileName())
+		// %g : base64 encoded PGP signature
+		printString = strings.ReplaceAll(printString, "%g", pkg.Base64Signature())
+		// %h : sha256sum
+		printString = strings.ReplaceAll(printString, "%h", pkg.SHA256Sum())
+		// %n : pkgname
+		printString = strings.ReplaceAll(printString, "%n", pkg.Name())
+		// %p : packager
+		printString = strings.ReplaceAll(printString, "%p", pkg.Packager())
+		// %v : pkgver
+		printString = strings.ReplaceAll(printString, "%v", pkg.Version())
+		// %l : location
+		printString = strings.ReplaceAll(printString, "%l", getLocalPkgLocation(config, pkg))
+		// %r : repo
+		printString = strings.ReplaceAll(printString, "%r", "aur")
+		// %s : size
+		// TODO: Different per op
+		sizeStr := fmt.Sprintf("%d", pkg.Size())
+		printString = strings.ReplaceAll(printString, "%s", sizeStr)
+		// %u : URL
+		printString = strings.ReplaceAll(printString, "%u", pkg.URL())
+		// %C : checkdepends
+		printString = strings.ReplaceAll(printString, "%C", dependsListToString(pkg.CheckDepends()))
+		// %D : depends
+		printString = strings.ReplaceAll(printString, "%D", dependsListToString(pkg.Depends()))
+		// %G : groups
+		printString = strings.ReplaceAll(printString, "%G", strings.Join(pkg.Groups().Slice(), " "))
+		// %H : conflicts
+		printString = strings.ReplaceAll(printString, "%H", dependsListToString(pkg.Conflicts()))
+		// %M : makedepends
+		printString = strings.ReplaceAll(printString, "%M", dependsListToString(pkg.MakeDepends()))
+		// %O : optdepends
+		printString = strings.ReplaceAll(printString, "%O", dependsListToString(pkg.OptionalDepends()))
+		// %P : provides
+		printString = strings.ReplaceAll(printString, "%P", dependsListToString(pkg.Provides()))
+		// %R : replaces
+		printString = strings.ReplaceAll(printString, "%R", dependsListToString(pkg.Replaces()))
+		// %L : licenses
+		printString = strings.ReplaceAll(printString, "%L", strings.Join(pkg.Licenses().Slice(), " "))
+
+		fmt.Println(printString)
+	}
+}
+
+// getLocalPkgLocation returns the local package file location if it exists in the build directory.
+// Otherwise, it falls back to the AUR snapshot URL.
+func getLocalPkgLocation(config *settings.Configuration, pkg alpm.IPackage) string {
+	pkgFileName := fmt.Sprintf("%s-%s-%s.pkg.tar.zst", pkg.Name(), pkg.Version(), pkg.Architecture())
+	pkgLocation := filepath.Join(config.BuildDir, pkg.Name(), pkgFileName)
+	if _, err := os.Stat(pkgLocation); err == nil {
+		return fmt.Sprintf("file://%s", pkgLocation)
+	}
+
+	// Fallback to AUR snapshot URL
+	return fmt.Sprintf("%s/cgit/aur.git/snapshot/%s.tar.gz", config.AURURL, pkg.Name())
+}
+
+func dependsListToString(depList alpm.IDependList) string {
+	strList := []string{}
+	_ = depList.ForEach(func(dep *alpm.Depend) error {
+		strList = append(strList, dep.Name)
+		return nil
+	})
+
+	return strings.Join(strList, " ")
+}
+
+// printAurPackages prints remote AUR packages according to the user-defined format. Mimics pacman's
+// print format. All format options with information not available from the AUR are removed.
+func printAurPackages(config *settings.Configuration, pkgs []aur.Pkg) {
+	// Remove all unhandled format options so they don't appear in the output.
+	unusedFormats := strings.NewReplacer(
+		"%a", "", // arch
+		"%b", "", // build date
+		"%f", "", // filename
+		"%g", "", // base64 encoded PGP signature
+		"%h", "", // sha256sum
+		"%p", "", // packager
+		"%s", "", // size
+	)
+	format := unusedFormats.Replace(config.PrintFormat)
+
+	for _, pkg := range pkgs {
+		printString := format
+
+		// %d : description
+		printString = strings.ReplaceAll(printString, "%d", pkg.Description)
+		// %e : pkgbase
+		printString = strings.ReplaceAll(printString, "%e", pkg.PackageBase)
+		// %n : pkgname
+		printString = strings.ReplaceAll(printString, "%n", pkg.Name)
+		// %v : pkgver
+		printString = strings.ReplaceAll(printString, "%v", pkg.Version)
+		// %l : location
+		printString = strings.ReplaceAll(printString, "%l", config.AURURL+pkg.URLPath)
+		// %r : repo
+		printString = strings.ReplaceAll(printString, "%r", "aur")
+		// %u : URL
+		printString = strings.ReplaceAll(printString, "%u", pkg.URL)
+		// %C : checkdepends
+		printString = strings.ReplaceAll(printString, "%C", strings.Join(pkg.CheckDepends, " "))
+		// %D : depends
+		printString = strings.ReplaceAll(printString, "%D", strings.Join(pkg.Depends, " "))
+		// %G : groups
+		printString = strings.ReplaceAll(printString, "%G", strings.Join(pkg.Groups, " "))
+		// %H : conflicts
+		printString = strings.ReplaceAll(printString, "%H", strings.Join(pkg.Conflicts, " "))
+		// %M : makedepends
+		printString = strings.ReplaceAll(printString, "%M", strings.Join(pkg.MakeDepends, " "))
+		// %O : optdepends
+		printString = strings.ReplaceAll(printString, "%O", strings.Join(pkg.OptDepends, " "))
+		// %P : provides
+		printString = strings.ReplaceAll(printString, "%P", strings.Join(pkg.Provides, " "))
+		// %R : replaces
+		printString = strings.ReplaceAll(printString, "%R", strings.Join(pkg.Replaces, " "))
+		// %L : licenses
+		printString = strings.ReplaceAll(printString, "%L", strings.Join(pkg.License, " "))
+
+		fmt.Println(printString)
+	}
 }
