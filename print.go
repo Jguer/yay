@@ -302,8 +302,9 @@ func printLocalPackages(config *settings.Configuration, pkgs []alpm.IPackage) {
 		// %r : repo
 		printString = strings.ReplaceAll(printString, "%r", "aur")
 		// %s : size
-		// TODO: Different per op
-		sizeStr := fmt.Sprintf("%d", pkg.Size())
+		// pacman uses download size, but no download size info is available for AUR packages, so we
+		// use installed size instead.
+		sizeStr := fmt.Sprintf("%d", pkg.ISize())
 		printString = strings.ReplaceAll(printString, "%s", sizeStr)
 		// %u : URL
 		printString = strings.ReplaceAll(printString, "%u", pkg.URL())

@@ -152,6 +152,10 @@ func (a *Arguments) NeedRoot(mode TargetMode) bool {
 
 		return true
 	case "U", "upgrade":
+		if a.ExistsArg("p", "print", "print-format") {
+			return false
+		}
+
 		return true
 	default:
 		return false
