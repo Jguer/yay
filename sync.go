@@ -118,8 +118,7 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 			}
 
 			aurNames.Add(name)
-			localPkg := dbExecutor.LocalPackage(name)
-			if localPkg != nil {
+			if localPkg := dbExecutor.LocalPackage(name); localPkg != nil {
 				localAurPkgs = append(localAurPkgs, localPkg)
 			} else {
 				noDB = append(noDB, name)
@@ -165,36 +164,34 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 		aurData, aurUp, develUp, err := upService.GetAURUpgrades(ctx, false)
 
 		if err == nil {
-			for i := range develUp.Up {
-				up := &develUp.Up[i]
-				// don't duplicate entries
-				if aurNames.Contains(up.Name) {
-					continue
-				}
+			processUpgrade := func(slice upgrade.UpSlice) {
+				for i := range slice.Up {
+					up := &slice.Up[i]
+					// Ensure we don't add duplicates
+					if aurNames.Contains(up.Name) {
+						continue
+					}
 
-				aurNames.Add(up.Name)
-				aurPkg := aurData[up.Name]
-				remoteAurPkgs = append(remoteAurPkgs, *aurPkg)
+					aurNames.Add(up.Name)
+					// Since these are upgrades, all packages should be local. Check just in case
+					if localPkg := dbExecutor.LocalPackage(up.Name); localPkg != nil {
+						localAurPkgs = append(localAurPkgs, localPkg)
+					} else {
+						aurPkg := aurData[up.Name]
+						remoteAurPkgs = append(remoteAurPkgs, *aurPkg)
+					}
+				}
 			}
 
-			for i := range aurUp.Up {
-				up := &aurUp.Up[i]
-				// don't duplicate entries
-				if aurNames.Contains(up.Name) {
-					continue
-				}
-
-				aurNames.Add(up.Name)
-				aurPkg := aurData[up.Name]
-				remoteAurPkgs = append(remoteAurPkgs, *aurPkg)
-			}
+			processUpgrade(develUp)
+			processUpgrade(aurUp)
 		} else {
 			run.Logger.Errorln(err)
 		}
 	}
 
-	if len(repoS) > 0 {
-		// Use pacman to print repo packages
+	if len(repoS) > 0 || (cmdArgs.ExistsArg("u", "sysupgrade") && run.Cfg.Mode.AtLeastRepo()) {
+		// Use pacman to print repo packages and upgrades
 
 		arguments := cmdArgs.Copy()
 		// If this argument is present, we already refreshed the databases. Remove so pacman doesn't

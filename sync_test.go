@@ -168,7 +168,7 @@ func TestSyncPrint_MixedTargetsCallPacmanAndAUR(t *testing.T) {
 	require.Equal(t, []string{"yay-bin"}, queried)
 }
 
-func TestSyncPrint_UpgradeChecksAUR(t *testing.T) {
+func TestSyncPrint_UpgradeChecksPacmanAndAUR(t *testing.T) {
 	t.Parallel()
 
 	env := newSyncPrintTestEnv(t)
@@ -202,8 +202,8 @@ func TestSyncPrint_UpgradeChecksAUR(t *testing.T) {
 
 	err := syncPrint(env.ctx, env.run, env.args, env.db)
 	require.NoError(t, err)
-	// Make sure pacman was not called and AUR was
-	assert.Len(t, env.runner.ShowCalls, 0)
+	// Make sure pacman and AUR were both called
+	require.Len(t, env.runner.ShowCalls, 1)
 	require.Equal(t, []string{"yay-bin"}, queried)
 }
 
