@@ -31,6 +31,182 @@ import (
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
+type syncPrintTestEnv struct {
+	ctx    context.Context
+	run    *runtime.Runtime
+	args   *parser.Arguments
+	db     *mock.DBExecutor
+	runner *exe.MockRunner
+	aur    *mockaur.MockAUR
+}
+
+func newSyncPrintTestEnv(t *testing.T) *syncPrintTestEnv {
+	t.Helper()
+
+	mockRunner := &exe.MockRunner{}
+	mockBuilder := &exe.MockBuilder{
+		Runner: mockRunner,
+		BuildPacmanCmdFn: func(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd {
+			return exec.CommandContext(ctx, "pacman")
+		},
+	}
+
+	mockAUR := &mockaur.MockAUR{}
+
+	run := &runtime.Runtime{
+		Cfg:        &settings.Configuration{},
+		Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n"), true, "test"),
+		CmdBuilder: mockBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient:  mockAUR,
+	}
+
+	dbExec := &mock.DBExecutor{
+		PackagesFromGroupFn: func(string) []mock.IPackage { return nil },
+		SyncSatisfierFn:     func(string) mock.IPackage { return nil },
+		LocalPackageFn:      func(string) mock.IPackage { return nil },
+		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
+			return map[string]alpm.IPackage{}
+		},
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
+		RefreshHandleFn:               func() error { return nil },
+	}
+
+	args := parser.MakeArguments()
+	require.NoError(t, args.AddArg("S"))
+
+	return &syncPrintTestEnv{
+		ctx:    context.Background(),
+		run:    run,
+		args:   args,
+		db:     dbExec,
+		runner: mockRunner,
+		aur:    mockAUR,
+	}
+}
+
+func TestSyncPrint_RepoTargetsUsePacmanOnly(t *testing.T) {
+	t.Parallel()
+
+	env := newSyncPrintTestEnv(t)
+	env.db.SyncSatisfierFn = func(name string) mock.IPackage {
+		if name == "vim" {
+			return &mock.Package{PName: name}
+		}
+
+		return nil
+	}
+	env.args.AddTarget("vim")
+
+	aurCalls := 0
+	env.aur.GetFn = func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+		aurCalls++
+		return []aur.Pkg{}, nil
+	}
+
+	err := syncPrint(env.ctx, env.run, env.args, env.db)
+	require.NoError(t, err)
+	// Make sure pacman was called and AUR was not
+	require.Len(t, env.runner.ShowCalls, 1)
+	assert.Equal(t, 0, aurCalls)
+}
+
+func TestSyncPrint_AURTargetsSkipPacman(t *testing.T) {
+	t.Parallel()
+
+	env := newSyncPrintTestEnv(t)
+	env.args.AddTarget("yay-bin")
+
+	var queried []string
+	env.aur.GetFn = func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+		queried = append([]string(nil), query.Needles...)
+		return []aur.Pkg{
+			{
+				Name:        query.Needles[0],
+				PackageBase: query.Needles[0],
+				Version:     "1.0.0",
+			},
+		}, nil
+	}
+
+	err := syncPrint(env.ctx, env.run, env.args, env.db)
+	require.NoError(t, err)
+	// Make sure pacman was not called and AUR was
+	assert.Len(t, env.runner.ShowCalls, 0)
+	require.Equal(t, []string{"yay-bin"}, queried)
+}
+
+func TestSyncPrint_MixedTargetsCallPacmanAndAUR(t *testing.T) {
+	t.Parallel()
+
+	env := newSyncPrintTestEnv(t)
+	env.db.SyncSatisfierFn = func(name string) mock.IPackage {
+		if name == "vim" {
+			return &mock.Package{PName: name}
+		}
+
+		return nil
+	}
+	env.args.AddTarget("vim", "yay-bin")
+
+	var queried []string
+	env.aur.GetFn = func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+		queried = append([]string(nil), query.Needles...)
+		return []aur.Pkg{
+			{
+				Name:        query.Needles[0],
+				PackageBase: query.Needles[0],
+				Version:     "2.0.0",
+			},
+		}, nil
+	}
+
+	err := syncPrint(env.ctx, env.run, env.args, env.db)
+	require.NoError(t, err)
+	// Make sure both pacman and AUR were called
+	require.Len(t, env.runner.ShowCalls, 1)
+	require.Equal(t, []string{"yay-bin"}, queried)
+}
+
+func TestSyncPrint_UpgradeChecksAUR(t *testing.T) {
+	t.Parallel()
+
+	env := newSyncPrintTestEnv(t)
+	require.NoError(t, env.args.AddArg("u"))
+
+	env.db.InstalledRemotePackagesFn = func() map[string]alpm.IPackage {
+		return map[string]alpm.IPackage{
+			"yay-bin": &mock.Package{
+				PName:    "yay-bin",
+				PVersion: "1.0.0",
+				PBase:    "yay-bin",
+				PReason:  alpm.PkgReasonExplicit,
+			},
+		}
+	}
+	env.db.InstalledRemotePackageNamesFn = func() []string {
+		return []string{"yay-bin"}
+	}
+
+	var queried []string
+	env.aur.GetFn = func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+		queried = append([]string(nil), query.Needles...)
+		return []aur.Pkg{
+			{
+				Name:        "yay-bin",
+				PackageBase: "yay-bin",
+				Version:     "2.0.0",
+			},
+		}, nil
+	}
+
+	err := syncPrint(env.ctx, env.run, env.args, env.db)
+	require.NoError(t, err)
+	// Make sure pacman was not called and AUR was
+	assert.Len(t, env.runner.ShowCalls, 0)
+	require.Equal(t, []string{"yay-bin"}, queried)
+}
+
 func TestSyncUpgrade(t *testing.T) {
 	t.Parallel()
 	makepkgBin := t.TempDir() + "/makepkg"

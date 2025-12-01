@@ -32,6 +32,137 @@ func ptrString(s string) *string {
 	return &s
 }
 
+func TestUpgradeService_GetAURUpgrades(t *testing.T) {
+	t.Parallel()
+
+	remoteNames := []string{"yay", "example-git"}
+	remotePackages := func() map[string]mock.IPackage {
+		return map[string]mock.IPackage{
+			"yay": &mock.Package{
+				PName:    "yay",
+				PBase:    "yay",
+				PVersion: "10.2.3",
+				PReason:  alpm.PkgReasonExplicit,
+			},
+			"example-git": &mock.Package{
+				PName:    "example-git",
+				PBase:    "example",
+				PVersion: "2.2.1",
+				PReason:  alpm.PkgReasonDepend,
+			},
+		}
+	}
+
+	tests := []struct {
+		name            string
+		mode            parser.TargetMode
+		aurPkgs         []aur.Pkg
+		vcsToUpgrade    []string
+		wantAURDataKeys []string
+		wantAurUp       []db.Upgrade
+		wantDevelUp     []db.Upgrade
+		wantErr         error
+	}{
+		{
+			name:            "repo mode only skips aur upgrade checks",
+			mode:            parser.ModeRepo,
+			wantAURDataKeys: []string{},
+		},
+		{
+			name:         "aur and devel upgrades",
+			mode:         parser.ModeAny,
+			vcsToUpgrade: []string{"example-git"},
+			aurPkgs: []aur.Pkg{
+				{Name: "yay", Version: "10.2.4", PackageBase: "yay"},
+				{Name: "example-git", Version: "2.3.0", PackageBase: "example"},
+			},
+			wantAURDataKeys: []string{"yay", "example-git"},
+			wantAurUp: []db.Upgrade{
+				{
+					Name:          "yay",
+					Base:          "yay",
+					Repository:    "aur",
+					LocalVersion:  "10.2.3",
+					RemoteVersion: "10.2.4",
+					Reason:        alpm.PkgReasonExplicit,
+				},
+				{
+					Name:          "example-git",
+					Base:          "example",
+					Repository:    "aur",
+					LocalVersion:  "2.2.1",
+					RemoteVersion: "2.3.0",
+					Reason:        alpm.PkgReasonDepend,
+				},
+			},
+			wantDevelUp: []db.Upgrade{
+				{
+					Name:          "example-git",
+					Base:          "example",
+					Repository:    "devel",
+					LocalVersion:  "2.2.1",
+					RemoteVersion: "latest-commit",
+					Reason:        alpm.PkgReasonDepend,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dbExe := &mock.DBExecutor{
+				InstalledRemotePackageNamesFn: func() []string {
+					return append([]string(nil), remoteNames...)
+				},
+				InstalledRemotePackagesFn: func() map[string]mock.IPackage {
+					return remotePackages()
+				},
+			}
+
+			mockAUR := &mockaur.MockAUR{
+				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+					require.Equal(t, remoteNames, query.Needles)
+					require.Equal(t, aur.Name, query.By)
+					return append([]aur.Pkg(nil), tt.aurPkgs...), nil
+				},
+			}
+
+			vcsStore := &vcs.Mock{
+				ToUpgradeReturn: tt.vcsToUpgrade,
+			}
+
+			logger := text.NewLogger(io.Discard, os.Stderr,
+				strings.NewReader(""), true, "test")
+
+			u := &UpgradeService{
+				log:         logger,
+				aurCache:    mockAUR,
+				dbExecutor:  dbExe,
+				vcsStore:    vcsStore,
+				cfg:         &settings.Configuration{Mode: tt.mode, Devel: true},
+				AURWarnings: query.NewWarnings(logger),
+			}
+
+			aurdata, aurUp, develUp, err := u.GetAURUpgrades(context.Background(), false)
+
+			if tt.wantErr != nil {
+				require.ErrorIs(t, err, tt.wantErr)
+			} else {
+				require.NoError(t, err)
+			}
+
+			keys := make([]string, 0, len(aurdata))
+			for k := range aurdata {
+				keys = append(keys, k)
+			}
+			assert.ElementsMatch(t, tt.wantAURDataKeys, keys)
+
+			assert.ElementsMatch(t, tt.wantAurUp, aurUp.Up)
+			assert.ElementsMatch(t, tt.wantDevelUp, develUp.Up)
+		})
+	}
+}
+
 func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	t.Parallel()
 	linuxDepInfo := &dep.InstallInfo{
