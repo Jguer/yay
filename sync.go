@@ -172,6 +172,7 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 					continue
 				}
 
+				aurNames.Add(up.Name)
 				aurPkg := aurData[up.Name]
 				remoteAurPkgs = append(remoteAurPkgs, *aurPkg)
 			}
@@ -183,6 +184,7 @@ func syncPrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 					continue
 				}
 
+				aurNames.Add(up.Name)
 				aurPkg := aurData[up.Name]
 				remoteAurPkgs = append(remoteAurPkgs, *aurPkg)
 			}
