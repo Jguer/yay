@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	aurc "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
@@ -474,6 +475,8 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 // Removes found deps from the deps mapset and returns the found deps.
 func (g *Grapher) findDepsFromAUR(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo],
+	parentPkgName string,
 	deps mapset.Set[string],
 ) []aurc.Pkg {
 	pkgsToAdd := make([]aurc.Pkg, 0, deps.Cardinality())
@@ -541,7 +544,24 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		aurPkgs = satisfyingPkgs
 
 		if len(aurPkgs) == 0 {
-			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", depString)
+			// set of packages that require this dependency
+			requiredBySet := mapset.NewThreadUnsafeSet[string]()
+
+			// add current parent
+			requiredBySet.Add(parentPkgName)
+
+			// if dependency is already in graph, get all packages that require it
+			if graph.Exists(depName) {
+				if deps := graph.ImmediateDependencies(depName); deps != nil {
+					for parent := range deps {
+						requiredBySet.Add(parent)
+					}
+				}
+			}
+
+			requiredBySlice := requiredBySet.ToSlice()
+			requiredByStr := strings.Join(requiredBySlice, ", ")
+			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", depString, " (", gotext.Get("required by"), ": ", requiredByStr, ")")
 
 			continue
 		}
@@ -671,7 +691,7 @@ func (g *Grapher) addNodes(
 	}
 
 	// Check AUR
-	pkgsToAdd := g.findDepsFromAUR(ctx, targetsToFind)
+	pkgsToAdd := g.findDepsFromAUR(ctx, graph, parentPkgName, targetsToFind)
 	for i := range pkgsToAdd {
 		aurPkg := &pkgsToAdd[i]
 		if err := graph.DependOn(aurPkg.Name, parentPkgName); err != nil {
