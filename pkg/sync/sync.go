@@ -64,8 +64,11 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	}
 
 	go func() {
-		errComp := completion.Update(ctx, run.HTTPClient, o.dbExecutor,
-			o.cfg.AURURL, o.cfg.CompletionPath, o.cfg.CompletionInterval, false, o.logger)
+		if !completion.NeedsUpdate(o.cfg.CompletionPath, o.cfg.CompletionInterval, false) {
+			return
+		}
+		errComp := completion.UpdateCache(ctx, run.HTTPClient, o.dbExecutor,
+			o.cfg.AURURL, o.cfg.CompletionPath, o.logger)
 		if errComp != nil {
 			o.logger.Warnln(errComp)
 		}
