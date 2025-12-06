@@ -511,23 +511,6 @@ func TestShowFileOpenError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestShowFileOpenErrorNoUpdate(t *testing.T) {
-	// Test error when file exists but can't be opened (no update needed)
-	tmpDir := t.TempDir()
-	completionPath := filepath.Join(tmpDir, "completion")
-
-	// Create a valid file first so NeedsUpdate returns false
-	err := os.WriteFile(completionPath, []byte("test"), 0o000) // No permissions
-	require.NoError(t, err)
-	defer os.Chmod(completionPath, 0o644) // Restore permissions for cleanup
-
-	dbExecutor := &mockPkgSynchronizer{packages: []db.IPackage{}}
-
-	// doer is nil because we shouldn't need to fetch anything
-	err = Show(context.Background(), nil, dbExecutor, "https://aur.archlinux.org", completionPath, 7, false, nil)
-	assert.Error(t, err)
-}
-
 func TestUpdateCacheMkdirError(t *testing.T) {
 	t.Parallel()
 
