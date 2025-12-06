@@ -55,7 +55,11 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 			return nil, err
 		}
 
-		transport.DialContext = dialer.(proxy.ContextDialer).DialContext
+		contextDialer, ok := dialer.(proxy.ContextDialer)
+		if !ok {
+			return nil, fmt.Errorf("SOCKS5 dialer does not support DialContext")
+		}
+		transport.DialContext = contextDialer.DialContext
 	}
 
 	httpClient := &http.Client{
