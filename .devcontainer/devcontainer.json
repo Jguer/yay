@@ -4,6 +4,7 @@
 		"context": "..",
 		"dockerfile": "../.devcontainer/Dockerfile"
 	},
+	"overrideCommand": true,
 	"customizations": {
 		"vscode": {
 			"extensions": [

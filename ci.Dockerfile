@@ -10,6 +10,8 @@ COPY go.mod .
 RUN set -eux; \
     pacman-key --init; \
     pacman -Syu --noconfirm --needed archlinux-keyring pacman go git gcc make base-devel sudo asciidoc doxygen meson; \
+    sed -i 's/^#DisableSandboxFilesystem/DisableSandboxFilesystem/' /etc/pacman.conf; \
+    sed -i 's/^#DisableSandboxSyscalls/DisableSandboxSyscalls/' /etc/pacman.conf; \
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.7.2; \
     go mod download; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
