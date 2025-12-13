@@ -6,9 +6,10 @@ WORKDIR /app
 
 COPY go.mod .
 
+# asciidoc, doxygen, meson needed for pacman-git
 RUN set -eux; \
     pacman-key --init; \
-    pacman -Syu --noconfirm --needed archlinux-keyring pacman go git gcc make base-devel sudo; \
+    pacman -Syu --noconfirm --needed archlinux-keyring pacman go git gcc make base-devel sudo asciidoc doxygen meson; \
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.7.2; \
     go mod download; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
