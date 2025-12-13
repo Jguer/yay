@@ -33,7 +33,7 @@ jobs:
           useradd github
           echo 'github ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
           chmod -R 777 pacman-git
-          su github -c 'cd pacman-git; yes | makepkg -i --nocheck'
+          su github -c 'cd pacman-git; yes | makepkg -si --nocheck'
       - name: Run Build and Tests with pacman-git
         run: |
           make test
