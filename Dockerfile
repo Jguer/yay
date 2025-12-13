@@ -7,8 +7,8 @@ ARG ARCH
 
 WORKDIR /app
 
-COPY . .
+RUN pacman -Syyu --overwrite=* --noconfirm
 
-RUN pacman -Syu --overwrite=* --noconfirm
+COPY . .
 
 RUN make release VERSION=${VERSION} PREFIX=${PREFIX} ARCH=${ARCH}
