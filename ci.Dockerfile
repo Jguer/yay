@@ -6,12 +6,10 @@ WORKDIR /app
 
 COPY go.mod .
 
-ARG EXTRA_PKGS=""
 RUN set -eux; \
     pacman-key --init; \
     pacman -Syu --noconfirm --needed archlinux-keyring pacman go git gcc make base-devel sudo; \
-    if [ -n "${EXTRA_PKGS}" ]; then pacman -S --noconfirm --needed ${EXTRA_PKGS}; fi; \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.4.0; \
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.7.2; \
     go mod download; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
     rm -rf /usr/share/man/* /usr/share/doc/* || true; \
