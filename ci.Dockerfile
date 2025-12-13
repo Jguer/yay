@@ -1,4 +1,4 @@
-FROM docker.io/gmanka/archlinuxarm:base-devel
+FROM quay.io/gmanka/archlinuxarm:base-devel
 LABEL maintainer="Jguer,docker@jguer.space"
 
 ENV GO111MODULE=on
