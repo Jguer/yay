@@ -10,6 +10,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
@@ -104,6 +105,24 @@ func main() {
 		}
 	}
 
+	// Handle custom repository commands before initializing runtime
+	if cmdArgs.ExistsArg("repo-add") {
+		handleRepoAddEarly(ctx, cfg, cmdArgs, fallbackLog)
+		return
+	}
+	if cmdArgs.ExistsArg("repo-remove") {
+		handleRepoRemoveEarly(ctx, cfg, cmdArgs, fallbackLog)
+		return
+	}
+	if cmdArgs.ExistsArg("repo-list") {
+		handleRepoListEarly(ctx, cfg, cmdArgs, fallbackLog)
+		return
+	}
+	if cmdArgs.ExistsArg("repo-update") {
+		handleRepoUpdateEarly(ctx, cfg, cmdArgs, fallbackLog)
+		return
+	}
+
 	// Build run
 	run, err := runtime.NewRuntime(cfg, cmdArgs, yayVersion)
 	if err != nil {
@@ -150,5 +169,124 @@ func main() {
 
 		// fallback
 		ret = 1
+	}
+}
+
+// handleRepoAddEarly handles --repo-add without initializing runtime
+func handleRepoAddEarly(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, logger *text.Logger) {
+	// Get arguments from the repo-add option
+	repoAddArgs := cmdArgs.Options["repo-add"]
+	if repoAddArgs == nil || len(repoAddArgs.Args) < 3 {
+		logger.Errorln("Usage: --repo-add <name> <type> <url/path>")
+		return
+	}
+
+	name := repoAddArgs.Args[0]
+	repoType := repoAddArgs.Args[1]
+	urlOrPath := repoAddArgs.Args[2]
+
+	// Create new custom repository
+	repo := settings.CustomRepo{
+		Name:       name,
+		Type:       repoType,
+		Searchable: true,
+		Priority:   100, // Default priority
+	}
+
+	if repoType == "local" {
+		repo.Path = urlOrPath
+	} else {
+		repo.URL = urlOrPath
+	}
+
+	// Add to configuration
+	cfg.CustomRepos = append(cfg.CustomRepos, repo)
+
+	// Save configuration
+	configPath := settings.GetConfigPath()
+	if err := cfg.Save(configPath, yayVersion); err != nil {
+		logger.Errorln("Failed to save configuration:", err)
+		return
+	}
+
+	logger.Printf("Added custom repository: %s (%s)\n", name, repoType)
+}
+
+// handleRepoRemoveEarly handles --repo-remove without initializing runtime
+func handleRepoRemoveEarly(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, logger *text.Logger) {
+	// Get arguments from the repo-remove option
+	repoRemoveArgs := cmdArgs.Options["repo-remove"]
+	if repoRemoveArgs == nil || len(repoRemoveArgs.Args) < 1 {
+		logger.Errorln("Usage: --repo-remove <name>")
+		return
+	}
+
+	name := repoRemoveArgs.Args[0]
+
+	// Find and remove repository
+	for i, repo := range cfg.CustomRepos {
+		if repo.Name == name {
+			cfg.CustomRepos = append(cfg.CustomRepos[:i], cfg.CustomRepos[i+1:]...)
+			
+			// Save configuration
+			configPath := settings.GetConfigPath()
+			if err := cfg.Save(configPath, yayVersion); err != nil {
+				logger.Errorln("Failed to save configuration:", err)
+				return
+			}
+
+			logger.Printf("Removed custom repository: %s\n", name)
+			return
+		}
+	}
+
+	logger.Errorln("Repository not found:", name)
+}
+
+// handleRepoListEarly handles --repo-list without initializing runtime
+func handleRepoListEarly(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, logger *text.Logger) {
+	if len(cfg.CustomRepos) == 0 {
+		logger.Println("No custom repositories configured.")
+		return
+	}
+
+	logger.Println(text.Bold("Custom Repositories:"))
+	logger.Println()
+
+	for _, repo := range cfg.CustomRepos {
+		logger.Printf("  %s (%s)\n", text.Bold(repo.Name), repo.Type)
+		if repo.Type == "local" {
+			logger.Printf("    Path: %s\n", repo.Path)
+		} else {
+			logger.Printf("    URL: %s\n", repo.URL)
+		}
+		logger.Printf("    Searchable: %t\n", repo.Searchable)
+		logger.Printf("    Priority: %d\n", repo.Priority)
+		logger.Println()
+	}
+}
+
+// handleRepoUpdateEarly handles --repo-update without initializing runtime
+func handleRepoUpdateEarly(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, logger *text.Logger) {
+	// Create custom repository manager
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		logger.Warnln("Failed to get cache directory for custom repositories:", err)
+		cacheDir = "/tmp/yay"
+	}
+	
+	factory := customrepo.NewRepositoryFactory(cacheDir)
+	customRepoMgr, err := factory.CreateManagerFromConfig(cfg)
+	if err != nil {
+		logger.Errorln("Failed to create custom repository manager:", err)
+		return
+	}
+	
+	logger.Println("Updating custom repositories...")
+	
+	if err := customRepoMgr.UpdateAll(ctx); err != nil {
+		logger.Warnln("Some repositories failed to update:", err)
+	} else {
+		logger.Println(text.Bold(text.Green("All custom repositories updated successfully.")))
 	}
 }

@@ -288,7 +288,7 @@ func TestSyncSearchAURDB(t *testing.T) {
 			run := &runtime.Runtime{
 				CmdBuilder: cmdBuilder,
 				AURClient:  mockAUR,
-				QueryBuilder: query.NewSourceQueryBuilder(mockAUR, newTestLogger(), "votes", parser.ModeAny, "name",
+				QueryBuilder: query.NewSourceQueryBuilder(mockAUR, nil, newTestLogger(), "votes", parser.ModeAny, "name",
 					tc.bottomUp, tc.singleLine, tc.mixed),
 				Logger: newTestLogger(),
 				Cfg:    &settings.Configuration{},

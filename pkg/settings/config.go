@@ -71,12 +71,36 @@ type Configuration struct {
 	UseRPC                 bool   `json:"rpc"`
 	DoubleConfirm          bool   `json:"doubleconfirm"` // confirm install before and after build
 
+	// Custom repositories support
+	CustomRepos []CustomRepo `json:"customRepos,omitempty"`
+
 	CompletionPath string `json:"-"`
 	VCSFilePath    string `json:"-"`
 	// ConfigPath     string `json:"-"`
 	SaveConfig bool               `json:"-"`
 	Mode       parser.TargetMode  `json:"-"`
 	ReBuild    parser.RebuildMode `json:"rebuild"`
+}
+
+// CustomRepo represents a custom PKGBUILD repository configuration
+type CustomRepo struct {
+	Name       string            `json:"name"`                 // Repository name
+	Type       string            `json:"type"`                 // Repository type: "local", "git", "http"
+	URL        string            `json:"url,omitempty"`        // URL for git/http repositories
+	Path       string            `json:"path,omitempty"`       // Local path for local repositories
+	Branch     string            `json:"branch,omitempty"`     // Git branch (optional)
+	Searchable bool              `json:"searchable"`           // Whether to include in search results
+	Priority   int               `json:"priority"`             // Search priority (lower = higher priority)
+	Auth       *RepoAuth         `json:"auth,omitempty"`       // Authentication configuration
+}
+
+// RepoAuth represents authentication configuration for repositories
+type RepoAuth struct {
+	Type     string `json:"type"`     // "ssh_key", "token", "basic"
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Token    string `json:"token,omitempty"`
+	KeyPath  string `json:"keyPath,omitempty"`
 }
 
 // SaveConfig writes yay config to file.
@@ -275,6 +299,13 @@ func NewConfig(logger *text.Logger, configPath, version string) (*Configuration,
 }
 
 func (c *Configuration) load(configPath string) {
+	// Perform migration if needed
+	migration := NewConfigMigration(configPath)
+	if err := migration.MigrateIfNeeded(); err != nil {
+		fmt.Fprintln(os.Stderr,
+			gotext.Get("failed to migrate config file '%s': %s", configPath, err))
+	}
+
 	cfile, err := os.Open(configPath)
 	if !os.IsNotExist(err) && err != nil {
 		fmt.Fprintln(os.Stderr,
@@ -290,5 +321,10 @@ func (c *Configuration) load(configPath string) {
 			fmt.Fprintln(os.Stderr,
 				gotext.Get("failed to read config file '%s': %s", configPath, err))
 		}
+	}
+
+	// Ensure CustomRepos is initialized if not present
+	if c.CustomRepos == nil {
+		c.CustomRepos = []CustomRepo{}
 	}
 }

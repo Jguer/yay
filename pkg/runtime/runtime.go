@@ -10,6 +10,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
@@ -126,8 +127,23 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		return nil, err
 	}
 
+	// Create custom repository manager
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		logger.Warnln("Failed to get cache directory for custom repositories:", err)
+		cacheDir = filepath.Join(os.TempDir(), "yay")
+	}
+	
+	factory := customrepo.NewRepositoryFactory(cacheDir)
+	customRepoMgr, err := factory.CreateManagerFromConfig(cfg)
+	if err != nil {
+		logger.Warnln("Failed to create custom repository manager:", err)
+		customRepoMgr = customrepo.NewManager(cfg)
+	}
+
 	queryBuilder := query.NewSourceQueryBuilder(
 		aurClient,
+		customRepoMgr,
 		logger.Child("mixed.querybuilder"), cfg.SortBy,
 		cfg.Mode, cfg.SearchBy,
 		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)

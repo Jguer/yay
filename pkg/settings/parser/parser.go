@@ -439,6 +439,11 @@ func isArg(arg string) bool {
 	case "singlelineresults":
 	case "doublelineresults":
 	case "separatesources":
+	// custom repository options
+	case "repo-add":
+	case "repo-remove":
+	case "repo-list":
+	case "repo-update":
 	default:
 		return false
 	}
@@ -533,6 +538,9 @@ func hasParam(arg string) bool {
 	case "completioninterval":
 	case "sortby":
 	case "searchby":
+	// custom repository options
+	case "repo-add":
+	case "repo-remove":
 	default:
 		return false
 	}

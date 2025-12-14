@@ -7,6 +7,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/multierror"
@@ -43,7 +44,21 @@ func syncInstall(ctx context.Context,
 		}
 	}
 
-	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
+	// Create custom repository manager
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		run.Logger.Warnln("Failed to get cache directory for custom repositories:", err)
+		cacheDir = "/tmp/yay"
+	}
+	
+	factory := customrepo.NewRepositoryFactory(cacheDir)
+	customRepoMgr, err := factory.CreateManagerFromConfig(run.Cfg)
+	if err != nil {
+		run.Logger.Warnln("Failed to create custom repository manager:", err)
+		customRepoMgr = customrepo.NewManager(run.Cfg)
+	}
+
+	grapher := dep.NewGrapherWithCustomRepos(dbExecutor, aurCache, customRepoMgr, false, settings.NoConfirm,
 		noDeps, noCheck, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
@@ -99,6 +114,22 @@ func earlyRefresh(ctx context.Context, cfg *settings.Configuration, cmdBuilder e
 	arguments.DelArg("i", "info")
 	arguments.DelArg("l", "list")
 	arguments.ClearTargets()
+
+	// Update custom repositories before refreshing pacman databases
+	cacheDir, err := customrepo.GetDefaultCacheDir()
+	if err != nil {
+		// If we can't get cache dir, just continue with pacman refresh
+	} else {
+		factory := customrepo.NewRepositoryFactory(cacheDir)
+		customRepoMgr, err := factory.CreateManagerFromConfig(cfg)
+		if err == nil {
+			// Update all custom repositories
+			if err := customRepoMgr.UpdateAll(ctx); err != nil {
+				// Log warning but continue with pacman refresh
+				fmt.Printf("Warning: Some custom repositories failed to update: %v\n", err)
+			}
+		}
+	}
 
 	return cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
 		arguments, cfg.Mode, settings.NoConfirm))

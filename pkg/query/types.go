@@ -8,6 +8,7 @@ import (
 	"github.com/Jguer/go-alpm/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/customrepo"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -113,6 +114,36 @@ func syncPkgSearchString(pkg alpm.IPackage, dbExecutor db.Executor, singleLineRe
 	}
 
 	toPrint += pkg.Description()
+
+	return toPrint
+}
+
+// customRepoPkgSearchString formats custom repository package information for display
+func customRepoPkgSearchString(
+	pkg *customrepo.PackageInfo,
+	dbExecutor db.Executor,
+	singleLineResults bool,
+) string {
+	linkText := text.Bold(text.ColorHash(pkg.Source)) + "/" + text.Bold(pkg.Name)
+	toPrint := text.CreateRepoLink(pkg.Source, "", pkg.Name, linkText) +
+		" " + text.Cyan(pkg.Version) +
+		text.Bold(" (custom) ")
+
+	if localPkg := dbExecutor.LocalPackage(pkg.Name); localPkg != nil {
+		if localPkg.Version() != pkg.Version {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localPkg.Version())))
+		} else {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
+		}
+	}
+
+	if singleLineResults {
+		toPrint += "\t"
+	} else {
+		toPrint += "\n    "
+	}
+
+	toPrint += pkg.Description
 
 	return toPrint
 }
