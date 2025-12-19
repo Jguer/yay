@@ -136,6 +136,11 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.MakepkgConf = ""
 	case "pacman":
 		c.PacmanBin = value
+	// chroot option
+	case "chroot":
+		c.Chroot = boolValue
+	case "chrootdir":
+		c.ChrootDir = value
 	case "git":
 		c.GitBin = value
 	case "gpg":

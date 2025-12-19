@@ -33,14 +33,15 @@ type (
 		downloadOnly         bool
 		installBuiltPackages bool
 		log                  *text.Logger
-
 		manualConfirmRequired bool
+		chroot                bool
+		chrootPath            string
 	}
 )
 
 func NewInstaller(dbExecutor db.Executor,
 	exeCmd exe.ICmdBuilder, vcsStore vcs.Store, targetMode parser.TargetMode,
-	rebuildMode parser.RebuildMode, downloadOnly bool, logger *text.Logger,
+	rebuildMode parser.RebuildMode, downloadOnly bool, chroot bool, chrootPath string, logger *text.Logger,
 ) *Installer {
 	return &Installer{
 		dbExecutor:            dbExecutor,
@@ -54,6 +55,8 @@ func NewInstaller(dbExecutor db.Executor,
 		installBuiltPackages:  true,
 		log:                   logger,
 		manualConfirmRequired: true,
+		chroot:                chroot,
+		chrootPath:            chrootPath,
 	}
 }
 
@@ -341,7 +344,18 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		args = []string{"--nobuild", "--noextract", "--ignorearch"}
 		installer.log.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
 	default:
-		args = []string{"-f", "--noconfirm", "--noextract", "--noprepare", "--holdver"}
+		args = []string{}
+		if installer.chroot {
+			if cb, ok := installer.exeCmd.(*exe.CmdBuilder); ok {
+				newCb := *cb
+				newCb.MakepkgBin = "makechrootpkg"
+				installer.exeCmd = &newCb
+			}
+			args = []string{"-r", installer.chrootPath, "--"}
+			args = append(args, []string{"-f", "--noconfirm", "--noprepare", "--holdver"}...)
+		} else {
+			args = append(args, []string{"-f", "--noconfirm", "--noextract", "--noprepare", "--holdver"}...)
+		}
 		if installIncompatible {
 			args = append(args, "--ignorearch")
 		}

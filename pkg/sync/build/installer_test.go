@@ -135,7 +135,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -505,7 +505,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, parser.RebuildModeNo, false, newTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, parser.RebuildModeNo, false, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -559,7 +559,7 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 	cmdBuilder.Runner = mockRunner
 
 	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-		parser.RebuildModeNo, false, newTestLogger())
+		parser.RebuildModeNo, false, false, newTestLogger())
 
 	called := false
 	hook := func(ctx context.Context) error {
@@ -691,7 +691,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -860,7 +860,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("jellyfin")
@@ -1000,7 +1000,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, true, newTestLogger())
+				parser.RebuildModeNo, true, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -1105,7 +1105,7 @@ func TestInstaller_InstallGroup(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, true, newTestLogger())
+				parser.RebuildModeNo, true, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("kubernetes-tools")
@@ -1324,7 +1324,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				tc.rebuildOption, false, newTestLogger())
+				tc.rebuildOption, false, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -1410,7 +1410,7 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 			}
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, tc.targetMode,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("u", "upgrades") // Make sure both args are removed
@@ -1521,7 +1521,7 @@ func TestInstaller_KeepSrc(t *testing.T) {
 			}
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")

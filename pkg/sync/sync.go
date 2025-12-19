@@ -52,7 +52,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	preparer := workdir.NewPreparer(o.dbExecutor, run.CmdBuilder, o.cfg, o.logger.Child("workdir"))
 	installer := build.NewInstaller(o.dbExecutor, run.CmdBuilder,
 		run.VCSStore, o.cfg.Mode, o.cfg.ReBuild,
-		cmdArgs.ExistsArg("w", "downloadonly"), run.Logger.Child("installer"))
+		cmdArgs.ExistsArg("w", "downloadonly"), o.cfg.Chroot, o.cfg.ChrootDir, run.Logger.Child("installer"))
 
 	shouldInstall := !cmdArgs.ExistsArg("w", "downloadonly")
 	if cmdArgs.Op == "B" && !cmdArgs.ExistsArg("i", "install") {

@@ -10,6 +10,7 @@ import (
 	alpm "github.com/Jguer/dyalpm"
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v12/pkg/chroot"
 	"github.com/Jguer/yay/v12/pkg/completion"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/download"
@@ -144,6 +145,38 @@ func handleCmd(ctx context.Context, run *runtime.Runtime,
 
 	if run.Cfg.SudoLoop && cmdArgs.NeedRoot(run.Cfg.Mode) {
 		run.CmdBuilder.SudoLoop()
+	}
+
+	// Full chroot handling (mirrors paru behaviour): create/update/run inside chroot
+	if run.Cfg.Chroot {
+		// lazy import of chroot package
+		c := &chroot.Chroot{
+			Sudo:        run.Cfg.SudoBin,
+			Path:        run.Cfg.ChrootDir,
+			PacmanConf:  run.Cfg.PacmanConf,
+			MakepkgConf: run.Cfg.MakepkgConf,
+			MFlags:      strings.Fields(run.Cfg.MFlags),
+			Ro:          []string{},
+			Rw:          run.PacmanConf.CacheDir,
+			RootPkgs:    run.Cfg.RootChrootPkgs,
+		}
+
+		if cmdArgs.ExistsArg("p", "print") {
+			run.Logger.Println(run.Cfg.ChrootDir)
+			return nil
+		}
+
+		if !c.Exists() {
+			if err := c.Create(); err != nil {
+				return err
+			}
+		}
+
+		if cmdArgs.ExistsArg("u", "sysupgrade") {
+			if err := c.Update(); err != nil {
+				return err
+			}
+		}
 	}
 
 	switch cmdArgs.Op {
