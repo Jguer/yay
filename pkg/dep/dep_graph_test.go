@@ -4,15 +4,18 @@
 package dep
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	aurc "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -40,6 +43,31 @@ func getFromFile(t *testing.T, filePath string) mockaur.GetFunc {
 	return func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
 		return pkgs, nil
 	}
+}
+
+func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
+	mockDB := &mock.DBExecutor{}
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		// Simulate "no AUR package found" for any query.
+		return []aur.Pkg{}, nil
+	}}
+
+	var stderr bytes.Buffer
+	logger := text.NewLogger(io.Discard, &stderr, strings.NewReader(""), true, "test")
+
+	g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, logger)
+
+	graph := NewGraph()
+
+	depString := "missingdep>=1.0"
+	depName := "missingdep"
+	require.NoError(t, graph.DependOn(depName, "existingParent"))
+
+	toFind := mapset.NewThreadUnsafeSet(depString)
+	_ = g.findDepsFromAUR(context.Background(), graph, "currentParent", toFind)
+
+	out := stderr.String()
+	require.Contains(t, out, "No AUR package found for "+depString+" (required by: currentParent, existingParent)")
 }
 
 func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
