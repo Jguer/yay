@@ -1,13 +1,16 @@
 package query
 
 import (
-	"hash/fnv"
 	"strings"
 
 	"github.com/adrg/strutil"
 )
 
 const minVotes = 30
+const (
+	separateSourceMax = 45.0
+	separateSourceMin = 5.0
+)
 
 // TODO: Add support for Popularity and LastModified
 func (a *abstractResults) aurSortByMetric(pkg *abstractResult) float64 {
@@ -58,29 +61,35 @@ func (a *abstractResults) separateSourceScore(source string, score float64) floa
 		return 50
 	}
 
-	switch source {
-	case sourceAUR:
-		return 0
-	case "core":
-		return 40
-	case "extra":
-		return 30
-	case "community":
-		return 20
-	case "multilib":
-		return 10
-	}
-
 	if v, ok := a.separateSourceCache[source]; ok {
 		return v
 	}
 
-	h := fnv.New32a()
-	h.Write([]byte(source))
-	sourceScore := float64(int(h.Sum32())%9 + 2)
-	a.separateSourceCache[source] = sourceScore
+	// AUR is always lowest priority
+	if source == sourceAUR {
+		return 0
+	}
 
-	return sourceScore
+	// Score sync repositories based on pacman.conf order (as reflected by dbExecutor.Repos()).
+	// First repo gets max, last repo gets min, evenly distributed across the range.
+	for i, repo := range a.repoOrder {
+		if repo != source {
+			continue
+		}
+
+		n := len(a.repoOrder)
+		if n == 1 {
+			a.separateSourceCache[source] = separateSourceMax
+			return separateSourceMax
+		}
+
+		step := (separateSourceMax - separateSourceMin) / float64(n-1)
+		sourceScore := separateSourceMax - (float64(i) * step)
+		a.separateSourceCache[source] = sourceScore
+		return sourceScore
+	}
+
+	return 0
 }
 
 func (a *abstractResults) calculateMetric(pkg *abstractResult) float64 {

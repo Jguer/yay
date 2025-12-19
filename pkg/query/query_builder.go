@@ -20,7 +20,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
-const sourceAUR = "aur"
+const sourceAUR = "AUR"
 
 type SearchVerbosity int
 
@@ -91,6 +91,7 @@ type abstractResults struct {
 	metric          strutil.StringMetric
 	separateSources bool
 	sortBy          string
+	repoOrder       []string
 
 	distanceCache       map[string]float64
 	separateSourceCache map[string]float64
@@ -143,6 +144,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		metric:              metric,
 		separateSources:     s.separateSources,
 		sortBy:              s.sortBy,
+		repoOrder:           dbExecutor.Repos(),
 		distanceCache:       map[string]float64{},
 		separateSourceCache: map[string]float64{},
 	}
