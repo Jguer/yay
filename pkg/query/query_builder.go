@@ -148,35 +148,6 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		distanceCache:       map[string]float64{},
 		separateSourceCache: map[string]float64{},
 	}
-
-	if s.targetMode.AtLeastAUR() {
-		var aurResults []aur.Pkg
-		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
-		dbName := sourceAUR
-
-		for i := range aurResults {
-			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]any{}
-			}
-
-			by := getSearchBy(s.searchBy)
-			if (by == aur.NameDesc || by == aur.None || by == aur.Name) &&
-				!matchesSearch(&aurResults[i], pkgS) {
-				continue
-			}
-
-			s.queryMap[dbName][aurResults[i].Name] = aurResults[i]
-
-			sortableResults.results = append(sortableResults.results, abstractResult{
-				source:      dbName,
-				name:        aurResults[i].Name,
-				description: aurResults[i].Description,
-				provides:    aurResults[i].Provides,
-				votes:       aurResults[i].NumVotes,
-			})
-		}
-	}
-
 	var repoResults []alpm.IPackage
 	if s.targetMode.AtLeastRepo() {
 		repoResults = dbExecutor.SyncPackages(pkgS...)
@@ -202,6 +173,34 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 				description: repoResults[i].Description(),
 				provides:    provides,
 				votes:       -1,
+			})
+		}
+	}
+
+	if s.targetMode.AtLeastAUR() {
+		var aurResults []aur.Pkg
+		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
+		dbName := sourceAUR
+
+		for i := range aurResults {
+			if s.queryMap[dbName] == nil {
+				s.queryMap[dbName] = map[string]any{}
+			}
+
+			by := getSearchBy(s.searchBy)
+			if (by == aur.NameDesc || by == aur.None || by == aur.Name) &&
+				!matchesSearch(&aurResults[i], pkgS) {
+				continue
+			}
+
+			s.queryMap[dbName][aurResults[i].Name] = aurResults[i]
+
+			sortableResults.results = append(sortableResults.results, abstractResult{
+				source:      dbName,
+				name:        aurResults[i].Name,
+				description: aurResults[i].Description,
+				provides:    aurResults[i].Provides,
+				votes:       aurResults[i].NumVotes,
 			})
 		}
 	}
