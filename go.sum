@@ -1,5 +1,7 @@
 github.com/Jguer/aur v1.2.3 h1:D+OGgLxnAnZnw88DsRvnRQsn0Poxsy9ng7pBcsA0krM=
 github.com/Jguer/aur v1.2.3/go.mod h1:Dahvb6L1yr0rR7svyYSDwaRJoQMeyvJblwJ3QH/7CUs=
+github.com/Jguer/aur v1.3.0 h1:skdjp/P9kB75TBaJmn9PKK/kCeA9QsgjdUrORZ3gldU=
+github.com/Jguer/aur v1.3.0/go.mod h1:F8Awo+WKzTxlXtNOO4pDQjMkePLZ+oMSbu+1fKLTTLo=
 github.com/Jguer/go-alpm/v2 v2.3.1 h1:6xgyL28aI4E4gng/cH+kvCnpa95f4Qgmddmh8A7iTGk=
 github.com/Jguer/go-alpm/v2 v2.3.1/go.mod h1:lfe8gSe83F/KERaQvEfrSqQ4n+8bES+ZIyKWR/gm3MI=
 github.com/Jguer/votar v1.0.0 h1:drPYpV5Py5BeAQS8xezmT6uCEfLzotNjLf5yfmlHKTg=
