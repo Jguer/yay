@@ -31,12 +31,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -49,7 +43,6 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.REGISTRY_IMAGE }}
             ghcr.io/${{ env.REGISTRY_IMAGE }}
           tags: |
             type=raw,value=latest
@@ -63,7 +56,7 @@ jobs:
           file: ci.Dockerfile
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=ghcr.io/${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         run: |
@@ -93,12 +86,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -111,7 +98,6 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.REGISTRY_IMAGE }}
             ghcr.io/${{ env.REGISTRY_IMAGE }}
           tags: |
             type=raw,value=latest
@@ -121,23 +107,17 @@ jobs:
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
-          # Extract Docker Hub tags
-          DH_TAGS=$(echo '${{ steps.meta.outputs.tags }}' | grep -v "^ghcr.io" | xargs -I {} echo "-t {}")
-          
           # Extract GitHub Container Registry tags
-          GHCR_TAGS=$(echo '${{ steps.meta.outputs.tags }}' | grep "^ghcr.io" | xargs -I {} echo "-t {}")
+          GHCR_TAGS=$(echo '${{ steps.meta.outputs.tags }}' | xargs -I {} echo "-t {}")
           
           # Create a manifest list using the image digests from /tmp/digests/*
           DIGESTS=$(for file in /tmp/digests/*; do
-            echo -n "${{ env.REGISTRY_IMAGE }}@$(cat $file) "
+            echo -n "ghcr.io/${{ env.REGISTRY_IMAGE }}@$(cat $file) "
           done)
-          
-          # Create the manifest list for Docker Hub
-          docker buildx imagetools create $DH_TAGS $DIGESTS
           
           # Create the manifest list for GitHub Container Registry
           docker buildx imagetools create $GHCR_TAGS $DIGESTS
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:latest
+          docker buildx imagetools inspect ghcr.io/${{ env.REGISTRY_IMAGE }}:latest

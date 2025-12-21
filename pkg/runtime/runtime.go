@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -42,18 +43,27 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 	runner := exe.NewOSRunner(logger.Child("runner"))
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
-	if socks5_proxy := os.Getenv("SOCKS5_PROXY"); socks5_proxy != "" {
-		dialer, err := proxy.SOCKS5("tcp", socks5_proxy, nil, proxy.Direct)
+	transport.IdleConnTimeout = 90 * time.Second
+	transport.TLSHandshakeTimeout = 30 * time.Second
+	transport.ResponseHeaderTimeout = 30 * time.Second
+	transport.MaxIdleConns = 100
+	transport.MaxIdleConnsPerHost = 10
+
+	if socks5Proxy := os.Getenv("SOCKS5_PROXY"); socks5Proxy != "" {
+		dialer, err := proxy.SOCKS5("tcp", socks5Proxy, nil, proxy.Direct)
 		if err != nil {
 			return nil, err
 		}
-		transport = &http.Transport{Dial: dialer.Dial}
+
+		contextDialer, ok := dialer.(proxy.ContextDialer)
+		if !ok {
+			return nil, fmt.Errorf("SOCKS5 dialer does not support DialContext")
+		}
+		transport.DialContext = contextDialer.DialContext
 	}
 
 	httpClient := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
+		Timeout:   30 * time.Second,
 		Transport: transport,
 	}
 
@@ -128,7 +138,7 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		PacmanConf:   pacmanConf,
 		VCSStore:     vcsStore,
 		CmdBuilder:   cmdBuilder,
-		HTTPClient:   &http.Client{},
+		HTTPClient:   httpClient,
 		VoteClient:   voteClient,
 		AURClient:    aurCache,
 		Logger:       logger,

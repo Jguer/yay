@@ -76,7 +76,7 @@ func syncInstall(ctx context.Context,
 
 	opService := sync.NewOperationService(ctx, dbExecutor, run)
 	multiErr := &multierror.MultiError{}
-	targets := graph.TopoSortedLayerMap(func(s string, ii *dep.InstallInfo) error {
+	targets := graph.TopoSortedLayers(func(s string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
 			multiErr.Add(fmt.Errorf("%w: %s %s", ErrPackagesNotFound, s, ii.Version))
 		}
