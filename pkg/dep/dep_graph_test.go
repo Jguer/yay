@@ -809,3 +809,69 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 		})
 	}
 }
+
+func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncSatisfierFn:        func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn:    func(string) []mock.IPackage { return nil },
+		LocalPackageFn:         func(string) mock.IPackage { return nil },
+		LocalSatisfierExistsFn: func(string) bool { return false },
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		ok := aur.Pkg{
+			Name:        "okpkg",
+			PackageBase: "okpkg",
+			Version:     "1.0.0",
+		}
+
+		switch query.By {
+		case aurc.Name:
+			// Return only packages that exist.
+			pkgs := make([]aur.Pkg, 0, len(query.Needles))
+			for _, needle := range query.Needles {
+				if needle == ok.Name {
+					pkgs = append(pkgs, ok)
+				}
+			}
+			return pkgs, nil
+		case aurc.Provides:
+			// Provider lookup is done per-target.
+			if len(query.Needles) > 0 && query.Needles[0] == ok.Name {
+				return []aur.Pkg{ok}, nil
+			}
+			return []aur.Pkg{}, nil
+		default:
+			return []aur.Pkg{}, nil
+		}
+	}}
+
+	g := NewGrapher(mockDB, mockAUR,
+		false, true, true, true, false,
+		text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+
+	t.Run("returns error when all targets are missing", func(t *testing.T) {
+		_, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "missing2"})
+		require.Error(t, err)
+
+		var targetNotFound *aur.ErrTargetNotFound
+		require.ErrorAs(t, err, &targetNotFound)
+	})
+
+	t.Run("does not error when at least one target is found", func(t *testing.T) {
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "okpkg"})
+		require.NoError(t, err)
+
+		layers := got.TopoSortedLayers(nil)
+		require.EqualValues(t, []map[string]*InstallInfo{
+			{
+				"okpkg": {
+					Source:  AUR,
+					Reason:  Explicit,
+					Version: "1.0.0",
+					AURBase: ptrString("okpkg"),
+				},
+			},
+		}, layers, layers)
+	})
+}

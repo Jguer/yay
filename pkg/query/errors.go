@@ -23,5 +23,5 @@ func (e ErrNoQuery) Error() string {
 type ErrTargetNotFound struct{}
 
 func (e ErrTargetNotFound) Error() string {
-    return gotext.Get("no package found for targets")
+	return gotext.Get("no package found for targets")
 }

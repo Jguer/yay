@@ -15,7 +15,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
 	aur "github.com/Jguer/yay/v12/pkg/query"
-	query "github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -474,8 +473,8 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
 	if packagesNotFound == len(targets) {
-        return graph, &query.ErrTargetNotFound{} 
-    }
+		return graph, &aur.ErrTargetNotFound{}
+	}
 
 	return graph, nil
 }
