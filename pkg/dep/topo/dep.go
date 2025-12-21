@@ -9,11 +9,21 @@ import (
 )
 
 type (
-	NodeSet[T comparable]     map[T]bool
+	// NodeSet is a set of nodes represented as a map for O(1) membership checks.
+	// The boolean value is not meaningful; presence of the key indicates membership.
+	NodeSet[T comparable] map[T]bool
+
+	// ProvidesMap maps a "provides" key (an alias/satisfier name) to information about the
+	// node that provides it.
 	ProvidesMap[T comparable] map[T]*DependencyInfo[T]
-	DepMap[T comparable]      map[T]NodeSet[T]
+
+	// DepMap maps a node to a set of nodes. In Graph this is used for adjacency:
+	// - dependencies: node -> its direct dependencies
+	// - dependents:   node -> its direct dependents
+	DepMap[T comparable] map[T]NodeSet[T]
 )
 
+// Slice returns the set contents as a slice in unspecified order.
 func (n NodeSet[T]) Slice() []T {
 	var slice []T
 
@@ -24,19 +34,29 @@ func (n NodeSet[T]) Slice() []T {
 	return slice
 }
 
+// NodeInfo carries optional rendering metadata (Color/Background) plus the node's value.
 type NodeInfo[V any] struct {
 	Color      string
 	Background string
 	Value      V
 }
 
+// DependencyInfo describes which node provides a given dependency/satisfier, along with the
+// original dependency metadata (alpm.Depend).
 type DependencyInfo[T comparable] struct {
 	Provider T
 	alpm.Depend
 }
 
+// CheckFn is a callback used by traversal helpers. It receives the node id plus the node's value.
 type CheckFn[T comparable, V any] func(T, V) error
 
+// Graph is a directed dependency graph.
+//
+// Edge direction:
+// - An edge is added with DependOn(child, parent), meaning "child depends on parent".
+// - Internally, dependencies maps child -> parents (direct dependencies).
+// - Internally, dependents maps parent -> children (direct dependents).
 type Graph[T comparable, V any] struct {
 	nodes NodeSet[T]
 
@@ -52,6 +72,7 @@ type Graph[T comparable, V any] struct {
 	dependents DepMap[T]
 }
 
+// New returns an empty Graph.
 func New[T comparable, V any]() *Graph[T, V] {
 	return &Graph[T, V]{
 		nodes:        make(NodeSet[T]),
@@ -62,40 +83,57 @@ func New[T comparable, V any]() *Graph[T, V] {
 	}
 }
 
+// Len returns the number of nodes currently present in the graph.
 func (g *Graph[T, V]) Len() int {
 	return len(g.nodes)
 }
 
+// Exists reports whether node exists in the graph's node set.
 func (g *Graph[T, V]) Exists(node T) bool {
 	_, ok := g.nodes[node]
 
 	return ok
 }
 
+// AddNode adds node to the graph. It is safe to call multiple times.
 func (g *Graph[T, V]) AddNode(node T) {
 	g.nodes[node] = true
 }
 
-func (g *Graph[T, V]) ProvidesExists(provides T) bool {
+// HasProvides reports whether the given provides key is registered.
+func (g *Graph[T, V]) HasProvides(provides T) bool {
 	_, ok := g.provides[provides]
 
 	return ok
 }
 
-func (g *Graph[T, V]) GetProviderNode(provides T) *DependencyInfo[T] {
+// GetProviderInfo returns the dependency info for a provider.
+func (g *Graph[T, V]) GetProviderInfo(provides T) *DependencyInfo[T] {
 	return g.provides[provides]
 }
 
-func (g *Graph[T, V]) Provides(provides T, depInfo *alpm.Depend, node T) {
+// AddProvides registers that node provides the given provides key.
+//
+// Note: despite the "Add" name, this is a single mapping; calling it again with the same
+// provides key overwrites the previous entry.
+func (g *Graph[T, V]) AddProvides(provides T, depInfo *alpm.Depend, node T) {
 	g.provides[provides] = &DependencyInfo[T]{
 		Provider: node,
 		Depend:   *depInfo,
 	}
 }
 
+// ForEach calls f for every node in the graph.
+//
+// The value passed to f is the node's NodeInfo.Value if set via SetNodeInfo; otherwise it is
+// the zero value of V.
 func (g *Graph[T, V]) ForEach(f CheckFn[T, V]) error {
 	for node := range g.nodes {
-		if err := f(node, g.nodeInfo[node].Value); err != nil {
+		var v V
+		if info := g.nodeInfo[node]; info != nil {
+			v = info.Value
+		}
+		if err := f(node, v); err != nil {
 			return err
 		}
 	}
@@ -103,14 +141,21 @@ func (g *Graph[T, V]) ForEach(f CheckFn[T, V]) error {
 	return nil
 }
 
+// SetNodeInfo sets metadata and value for node. Node does not need to already exist in the graph.
 func (g *Graph[T, V]) SetNodeInfo(node T, nodeInfo *NodeInfo[V]) {
 	g.nodeInfo[node] = nodeInfo
 }
 
+// GetNodeInfo returns metadata/value for node, or nil if none was set.
 func (g *Graph[T, V]) GetNodeInfo(node T) *NodeInfo[V] {
 	return g.nodeInfo[node]
 }
 
+// DependOn adds an edge meaning "child depends on parent".
+//
+// This ensures both nodes exist in the graph and rejects:
+// - self edges (ErrSelfReferential)
+// - edges that would introduce a cycle (ErrCircular)
 func (g *Graph[T, V]) DependOn(child, parent T) error {
 	if child == parent {
 		return ErrSelfReferential
@@ -124,12 +169,16 @@ func (g *Graph[T, V]) DependOn(child, parent T) error {
 	g.AddNode(child)
 
 	// Add edges.
-	g.dependents.addNodeToNodeset(parent, child)
-	g.dependencies.addNodeToNodeset(child, parent)
+	g.dependents.add(parent, child)
+	g.dependencies.add(child, parent)
 
 	return nil
 }
 
+// String renders the graph in GraphViz DOT format.
+//
+// Nodes are emitted as `"node"` entries with optional color metadata from NodeInfo.
+// Edges are emitted in the direction: dependent -> dependency (child -> parent).
 func (g *Graph[T, V]) String() string {
 	var sb strings.Builder
 
@@ -161,6 +210,7 @@ func (g *Graph[T, V]) String() string {
 	return sb.String()
 }
 
+// DependsOn reports whether child depends (transitively) on parent.
 func (g *Graph[T, V]) DependsOn(child, parent T) bool {
 	deps := g.Dependencies(child)
 	_, ok := deps[parent]
@@ -168,9 +218,10 @@ func (g *Graph[T, V]) DependsOn(child, parent T) bool {
 	return ok
 }
 
-func (g *Graph[T, V]) HasDependent(parent, child T) bool {
+// HasDependent reports whether parent has dependent as a (transitive) dependent.
+func (g *Graph[T, V]) HasDependent(parent, dependent T) bool {
 	deps := g.Dependents(parent)
-	_, ok := deps[child]
+	_, ok := deps[dependent]
 
 	return ok
 }
@@ -193,8 +244,18 @@ func (g *Graph[T, V]) leavesMap() map[T]V {
 	return leaves
 }
 
-// TopoSortedLayerMap returns a slice of all of the graph nodes in topological sort order with their node info.
-func (g *Graph[T, V]) TopoSortedLayerMap(checkFn CheckFn[T, V]) []map[T]V {
+// TopoSortedLayers returns a slice of all of the graph nodes in topological sort order with their node info.
+//
+// The returned slice is layered: each element is a "layer" of nodes that have no remaining
+// dependencies at that stage of the process.
+//
+// Practical meaning with this graph's edge direction (DependOn(child, parent)):
+// - Earlier layers contain nodes with fewer/zero dependencies (i.e. dependencies-first order).
+// - A node appears only after all of its dependencies have appeared in earlier layers.
+//
+// If checkFn is non-nil, it is called once per node when it is emitted in a layer. Returning an
+// error causes TopoSortedLayers to return nil.
+func (g *Graph[T, V]) TopoSortedLayers(checkFn CheckFn[T, V]) []map[T]V {
 	layers := []map[T]V{}
 
 	// Copy the graph
@@ -222,7 +283,7 @@ func (g *Graph[T, V]) TopoSortedLayerMap(checkFn CheckFn[T, V]) []map[T]V {
 }
 
 // returns if it was the last
-func (dm DepMap[T]) removeFromDepmap(key, node T) bool {
+func (dm DepMap[T]) remove(key, node T) bool {
 	if nodes := dm[key]; len(nodes) == 1 {
 		// The only element in the nodeset must be `node`, so we
 		// can delete the entry entirely.
@@ -238,11 +299,14 @@ func (dm DepMap[T]) removeFromDepmap(key, node T) bool {
 // Prune removes the node,
 // its dependencies if there are no other dependents
 // and its dependents
+//
+// It returns the list of nodes that were removed (including node). The returned order is based
+// on recursive traversal and is not guaranteed to be stable.
 func (g *Graph[T, V]) Prune(node T) []T {
 	pruned := []T{node}
 	// Remove edges from things that depend on `node`.
 	for dependent := range g.dependents[node] {
-		last := g.dependencies.removeFromDepmap(dependent, node)
+		last := g.dependencies.remove(dependent, node)
 		if last {
 			pruned = append(pruned, g.Prune(dependent)...)
 		}
@@ -252,7 +316,7 @@ func (g *Graph[T, V]) Prune(node T) []T {
 
 	// Remove all edges from node to the things it depends on.
 	for dependency := range g.dependencies[node] {
-		last := g.dependents.removeFromDepmap(dependency, node)
+		last := g.dependents.remove(dependency, node)
 		if last {
 			pruned = append(pruned, g.Prune(dependency)...)
 		}
@@ -268,14 +332,14 @@ func (g *Graph[T, V]) Prune(node T) []T {
 func (g *Graph[T, V]) remove(node T) {
 	// Remove edges from things that depend on `node`.
 	for dependent := range g.dependents[node] {
-		g.dependencies.removeFromDepmap(dependent, node)
+		g.dependencies.remove(dependent, node)
 	}
 
 	delete(g.dependents, node)
 
 	// Remove all edges from node to the things it depends on.
 	for dependency := range g.dependencies[node] {
-		g.dependents.removeFromDepmap(dependency, node)
+		g.dependents.remove(dependency, node)
 	}
 
 	delete(g.dependencies, node)
@@ -284,19 +348,27 @@ func (g *Graph[T, V]) remove(node T) {
 	delete(g.nodes, node)
 }
 
+// Dependencies returns all transitive dependencies of child (excluding child itself).
+// The returned set is nil if child is not present in the graph.
 func (g *Graph[T, V]) Dependencies(child T) NodeSet[T] {
 	return g.buildTransitive(child, g.ImmediateDependencies)
 }
 
+// ImmediateDependencies returns the direct dependencies of node.
+// The returned set is nil if node has no direct dependencies (or is not present).
 func (g *Graph[T, V]) ImmediateDependencies(node T) NodeSet[T] {
 	return g.dependencies[node]
 }
 
+// Dependents returns all transitive dependents of parent (excluding parent itself).
+// The returned set is nil if parent is not present in the graph.
 func (g *Graph[T, V]) Dependents(parent T) NodeSet[T] {
-	return g.buildTransitive(parent, g.immediateDependents)
+	return g.buildTransitive(parent, g.ImmediateDependents)
 }
 
-func (g *Graph[T, V]) immediateDependents(node T) NodeSet[T] {
+// ImmediateDependents returns the direct dependents of node.
+// The returned set is nil if node has no direct dependents (or is not present).
+func (g *Graph[T, V]) ImmediateDependents(node T) NodeSet[T] {
 	return g.dependents[node]
 }
 
@@ -359,7 +431,7 @@ func (dm DepMap[T]) copy() DepMap[T] {
 	return out
 }
 
-func (dm DepMap[T]) addNodeToNodeset(key, node T) {
+func (dm DepMap[T]) add(key, node T) {
 	nodes, ok := dm[key]
 	if !ok {
 		nodes = make(NodeSet[T])

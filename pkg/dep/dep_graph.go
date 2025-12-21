@@ -227,7 +227,7 @@ func (g *Grapher) addAurPkgProvides(pkg *aurc.Pkg, graph *topo.Graph[string, *In
 	for i := range pkg.Provides {
 		depName, mod, version := splitDep(pkg.Provides[i])
 		g.logger.Debugln(pkg.String() + " provides: " + depName)
-		graph.Provides(depName, &alpm.Depend{
+		graph.AddProvides(depName, &alpm.Depend{
 			Name:    depName,
 			Version: version,
 			Mod:     aurDepModToAlpmDep(mod),
@@ -319,7 +319,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	graph.AddNode(pkg.Name())
 	_ = pkg.Provides().ForEach(func(p *alpm.Depend) error {
 		g.logger.Debugln(pkg.Name() + " provides: " + p.String())
-		graph.Provides(p.Name, p, pkg.Name())
+		graph.AddProvides(p.Name, p, pkg.Name())
 		return nil
 	})
 
@@ -588,7 +588,7 @@ func (g *Grapher) addNodes(
 	// Check if in graph already
 	for _, depString := range targetsToFind.ToSlice() {
 		depName, _, _ := splitDep(depString)
-		if !graph.Exists(depName) && !graph.ProvidesExists(depName) {
+		if !graph.Exists(depName) && !graph.HasProvides(depName) {
 			continue
 		}
 
@@ -600,7 +600,7 @@ func (g *Grapher) addNodes(
 			targetsToFind.Remove(depString)
 		}
 
-		if p := graph.GetProviderNode(depName); p != nil {
+		if p := graph.GetProviderInfo(depName); p != nil {
 			if provideSatisfies(p.String(), depString, p.Version) {
 				if err := graph.DependOn(p.Provider, parentPkgName); err != nil {
 					g.logger.Warnln(p.Provider, parentPkgName, err)
