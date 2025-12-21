@@ -324,9 +324,13 @@ msgstr "Ontbrekende AUR-foutopsporingspakketten:"
 msgid "Name"
 msgstr "Naam"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Geen AUR-pakket gevonden voor "
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "benodigd door"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
