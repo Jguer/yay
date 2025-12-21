@@ -552,7 +552,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 
 			// if dependency is already in graph, get all packages that require it
 			if graph.Exists(depName) {
-				if deps := graph.ImmediateDependencies(depName); deps != nil {
+				if deps := graph.Dependents(depName); deps != nil {
 					for parent := range deps {
 						requiredBySet.Add(parent)
 					}

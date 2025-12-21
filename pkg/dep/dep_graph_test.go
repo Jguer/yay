@@ -61,13 +61,13 @@ func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
 
 	depString := "missingdep>=1.0"
 	depName := "missingdep"
-	require.NoError(t, graph.DependOn(depName, "existingParent"))
+	require.NoError(t, graph.DependOn("existingNeeds", depName))
 
 	toFind := mapset.NewThreadUnsafeSet(depString)
-	_ = g.findDepsFromAUR(context.Background(), graph, "currentParent", toFind)
+	_ = g.findDepsFromAUR(context.Background(), graph, "currentNeeds", toFind)
 
 	out := stderr.String()
-	require.Contains(t, out, "No AUR package found for "+depString+" (required by: currentParent, existingParent)")
+	require.Contains(t, out, "No AUR package found for "+depString+" (required by: currentNeeds, existingNeeds)")
 }
 
 func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
