@@ -94,7 +94,7 @@ func installLocalPKGBUILD(
 
 	opService := sync.NewOperationService(ctx, dbExecutor, run)
 	multiErr := &multierror.MultiError{}
-	targets := graph.TopoSortedLayerMap(func(name string, ii *dep.InstallInfo) error {
+	targets := graph.TopoSortedLayers(func(name string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
 			multiErr.Add(fmt.Errorf("%w: %s %s", ErrPackagesNotFound, name, ii.Version))
 		}

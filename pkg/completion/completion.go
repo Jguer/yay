@@ -13,6 +13,25 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
+// NeedsUpdate checks if the completion cache needs to be regenerated.
+// Returns true if the file doesn't exist, is older than interval days, or force is true.
+func NeedsUpdate(completionPath string, interval int, force bool) bool {
+	if force {
+		return true
+	}
+
+	info, err := os.Stat(completionPath)
+	if os.IsNotExist(err) {
+		return true
+	}
+
+	if interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24) {
+		return true
+	}
+
+	return false
+}
+
 type PkgSynchronizer interface {
 	SyncPackages(...string) []db.IPackage
 }
@@ -21,9 +40,10 @@ type PkgSynchronizer interface {
 func Show(ctx context.Context, httpClient download.HTTPRequestDoer,
 	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool, logger *text.Logger,
 ) error {
-	err := Update(ctx, httpClient, dbExecutor, aurURL, completionPath, interval, force, logger)
-	if err != nil {
-		return err
+	if NeedsUpdate(completionPath, interval, force) {
+		if err := UpdateCache(ctx, httpClient, dbExecutor, aurURL, completionPath, logger); err != nil {
+			return err
+		}
 	}
 
 	in, err := os.OpenFile(completionPath, os.O_RDWR|os.O_CREATE, 0o644)
@@ -37,35 +57,26 @@ func Show(ctx context.Context, httpClient download.HTTPRequestDoer,
 	return err
 }
 
-// Update updates completion cache to be used by Complete.
-func Update(ctx context.Context, httpClient download.HTTPRequestDoer,
-	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool, logger *text.Logger,
+// UpdateCache regenerates the completion cache file unconditionally.
+func UpdateCache(ctx context.Context, httpClient download.HTTPRequestDoer,
+	dbExecutor PkgSynchronizer, aurURL, completionPath string, logger *text.Logger,
 ) error {
-	info, err := os.Stat(completionPath)
-
-	if os.IsNotExist(err) || (interval != -1 && time.Since(info.ModTime()).Hours() >= float64(interval*24)) || force {
-		errd := os.MkdirAll(filepath.Dir(completionPath), 0o755)
-		if errd != nil {
-			return errd
-		}
-
-		out, errf := os.Create(completionPath)
-		if errf != nil {
-			return errf
-		}
-
-		if createAURList(ctx, httpClient, aurURL, out, logger) != nil {
-			defer os.Remove(completionPath)
-		}
-
-		erra := createRepoList(dbExecutor, out)
-
-		out.Close()
-
-		return erra
+	if err := os.MkdirAll(filepath.Dir(completionPath), 0o755); err != nil {
+		return err
 	}
 
-	return nil
+	out, err := os.Create(completionPath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	if err := createAURList(ctx, httpClient, aurURL, out, logger); err != nil {
+		os.Remove(completionPath)
+		return err
+	}
+
+	return createRepoList(dbExecutor, out)
 }
 
 // createAURList creates a new completion file.

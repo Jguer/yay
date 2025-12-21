@@ -167,7 +167,8 @@ func (t *DBExecutor) Repos() []string {
 	if t.ReposFn != nil {
 		return t.ReposFn()
 	}
-	panic("implement me")
+	// Tests that don't care about repo ordering shouldn't need to stub this out.
+	return nil
 }
 
 func (t *DBExecutor) SatisfierFromDB(s, s2 string) (IPackage, error) {

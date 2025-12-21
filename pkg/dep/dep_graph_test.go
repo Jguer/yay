@@ -233,7 +233,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.want, layers, layers)
 		})
 	}
@@ -347,7 +347,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.want, layers, layers)
 		})
 	}
@@ -549,7 +549,7 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
 		})
 	}
@@ -694,7 +694,7 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
 		})
 	}
@@ -832,7 +832,7 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
 		})
 	}

@@ -289,6 +289,10 @@ func TestSourceQueryBuilder(t *testing.T) {
 	}
 
 	mockDB := &mock.DBExecutor{
+		ReposFn: func() []string {
+			// Match pacman.conf parsing order for source separation.
+			return []string{"core"}
+		},
 		SyncPackagesFn: func(pkgs ...string) []mock.IPackage {
 			mockDB := mock.NewDB("core")
 			return []mock.IPackage{
