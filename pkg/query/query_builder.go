@@ -158,29 +158,22 @@ func (a *abstractResults) GetSortFunc(sortBy string, bottomUp bool) SortFunc {
 		}
 	}
 
-	// Secondary sort by metric (tie-breaker)
+	// Sort by metric as a tie-breaker. Also handle separating sources when not a tie
 	{
 		originalSortFunc := sortFunc
 		sortFunc = func(pkgA, pkgB abstractResult) int {
 			if cmpResult := originalSortFunc(pkgA, pkgB); cmpResult != 0 {
+				if a.separateSources {
+					if cmpSources := strings.Compare(pkgA.source, pkgB.source); cmpSources != 0 {
+						return cmpSources
+					}
+				}
 				return cmpResult
 			}
 
 			metricA := a.calculateMetric(&pkgA)
 			metricB := a.calculateMetric(&pkgB)
 			return cmp.Compare(metricA, metricB)
-		}
-	}
-
-	if a.separateSources {
-		// Sort by source first
-		originalSortFunc := sortFunc
-		sortFunc = func(pkgA, pkgB abstractResult) int {
-			cmpSources := strings.Compare(pkgA.source, pkgB.source)
-			if cmpSources == 0 {
-				return originalSortFunc(pkgA, pkgB)
-			}
-			return cmpSources
 		}
 	}
 
