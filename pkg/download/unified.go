@@ -18,7 +18,8 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
-type httpRequestDoer interface {
+// HTTPRequestDoer is an interface for HTTP clients that can perform GET requests.
+type HTTPRequestDoer interface {
 	Get(string) (*http.Response, error)
 }
 
@@ -204,7 +205,6 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 	return cloned, errs.Return()
 }
 
-// TODO: replace with dep.ResolveTargets.
 func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
 	logger *text.Logger, target string, mode parser.TargetMode,
 ) (dbname, pkgname string, isAUR, toSkip bool) {
@@ -218,13 +218,11 @@ func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
 		}
 
 		if pkg != nil {
-			name = getURLName(pkg)
-			dbName = pkg.DB().Name()
-			return dbName, name, false, false
+			return pkg.DB().Name(), getURLName(pkg), false, false
 		}
 
-		// If the package is not found in the database and it was expected to be
-		if pkg == nil && dbName != "" {
+		// Package not found in specified DB - skip it
+		if dbName != "" {
 			return dbName, name, true, true
 		}
 	}

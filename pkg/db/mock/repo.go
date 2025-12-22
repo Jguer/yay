@@ -42,6 +42,8 @@ type Package struct {
 	PArchitecture string
 }
 
+var _ alpm.IPackage = (*Package)(nil)
+
 func (p *Package) Base() string {
 	return p.PBase
 }
@@ -159,11 +161,6 @@ func (p *Package) Licenses() alpm.StringList {
 
 // SHA256Sum returns package SHA256Sum.
 func (p *Package) SHA256Sum() string {
-	panic("not implemented")
-}
-
-// MD5Sum returns package MD5Sum.
-func (p *Package) MD5Sum() string {
 	panic("not implemented")
 }
 

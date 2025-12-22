@@ -19,3 +19,9 @@ type ErrNoQuery struct{}
 func (e ErrNoQuery) Error() string {
 	return gotext.Get("no query was executed")
 }
+
+type ErrTargetNotFound struct{}
+
+func (e ErrTargetNotFound) Error() string {
+	return gotext.Get("no package found for targets")
+}

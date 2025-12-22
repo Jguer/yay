@@ -127,8 +127,9 @@ func asexp(ctx context.Context,
 func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 	dir string,
 ) (pkgdests map[string]string, pkgVersion string, err error) {
+	args := []string{"--packagelist", "--ignorearch"}
 	stdout, stderr, err := cmdBuilder.Capture(
-		cmdBuilder.BuildMakepkgCmd(ctx, dir, "--packagelist"))
+		cmdBuilder.BuildMakepkgCmd(ctx, dir, args...))
 	if err != nil {
 		return nil, "", fmt.Errorf("%s %w", stderr, err)
 	}

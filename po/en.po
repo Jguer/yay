@@ -307,8 +307,12 @@ msgid "Name"
 msgstr ""
 
 #: pkg/dep/dep_graph.go:442
-#: pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
 msgstr ""
 
 #: pkg/dep/dep_graph.go:182

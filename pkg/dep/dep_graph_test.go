@@ -4,15 +4,18 @@
 package dep
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	aurc "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -40,6 +43,31 @@ func getFromFile(t *testing.T, filePath string) mockaur.GetFunc {
 	return func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
 		return pkgs, nil
 	}
+}
+
+func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
+	mockDB := &mock.DBExecutor{}
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		// Simulate "no AUR package found" for any query.
+		return []aur.Pkg{}, nil
+	}}
+
+	var stderr bytes.Buffer
+	logger := text.NewLogger(io.Discard, &stderr, strings.NewReader(""), true, "test")
+
+	g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, logger)
+
+	graph := NewGraph()
+
+	depString := "missingdep>=1.0"
+	depName := "missingdep"
+	require.NoError(t, graph.DependOn("existingNeeds", depName))
+
+	toFind := mapset.NewThreadUnsafeSet(depString)
+	_ = g.findDepsFromAUR(context.Background(), graph, "currentNeeds", toFind)
+
+	out := stderr.String()
+	require.Contains(t, out, "No AUR package found for "+depString+" (required by: currentNeeds, existingNeeds)")
 }
 
 func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
@@ -205,7 +233,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.want, layers, layers)
 		})
 	}
@@ -319,7 +347,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.want, layers, layers)
 		})
 	}
@@ -521,7 +549,7 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
 		})
 	}
@@ -666,7 +694,7 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
 		})
 	}
@@ -804,8 +832,74 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
-			layers := got.TopoSortedLayerMap(nil)
+			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
 		})
 	}
+}
+
+func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncSatisfierFn:        func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn:    func(string) []mock.IPackage { return nil },
+		LocalPackageFn:         func(string) mock.IPackage { return nil },
+		LocalSatisfierExistsFn: func(string) bool { return false },
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		ok := aur.Pkg{
+			Name:        "okpkg",
+			PackageBase: "okpkg",
+			Version:     "1.0.0",
+		}
+
+		switch query.By {
+		case aurc.Name:
+			// Return only packages that exist.
+			pkgs := make([]aur.Pkg, 0, len(query.Needles))
+			for _, needle := range query.Needles {
+				if needle == ok.Name {
+					pkgs = append(pkgs, ok)
+				}
+			}
+			return pkgs, nil
+		case aurc.Provides:
+			// Provider lookup is done per-target.
+			if len(query.Needles) > 0 && query.Needles[0] == ok.Name {
+				return []aur.Pkg{ok}, nil
+			}
+			return []aur.Pkg{}, nil
+		default:
+			return []aur.Pkg{}, nil
+		}
+	}}
+
+	g := NewGrapher(mockDB, mockAUR,
+		false, true, true, true, false,
+		text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+
+	t.Run("returns error when all targets are missing", func(t *testing.T) {
+		_, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "missing2"})
+		require.Error(t, err)
+
+		var targetNotFound *aur.ErrTargetNotFound
+		require.ErrorAs(t, err, &targetNotFound)
+	})
+
+	t.Run("does not error when at least one target is found", func(t *testing.T) {
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "okpkg"})
+		require.NoError(t, err)
+
+		layers := got.TopoSortedLayers(nil)
+		require.EqualValues(t, []map[string]*InstallInfo{
+			{
+				"okpkg": {
+					Source:  AUR,
+					Reason:  Explicit,
+					Version: "1.0.0",
+					AURBase: ptrString("okpkg"),
+				},
+			},
+		}, layers, layers)
+	})
 }

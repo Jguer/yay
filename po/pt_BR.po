@@ -326,9 +326,13 @@ msgstr "Pacotes de debug do AUR em falta:"
 msgid "Name"
 msgstr "Nome"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Nenhum pacote AUR localizado para"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "requerido por"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"

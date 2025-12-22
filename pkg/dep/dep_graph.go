@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	aurc "github.com/Jguer/aur"
 	alpm "github.com/Jguer/go-alpm/v2"
@@ -227,7 +228,7 @@ func (g *Grapher) addAurPkgProvides(pkg *aurc.Pkg, graph *topo.Graph[string, *In
 	for i := range pkg.Provides {
 		depName, mod, version := splitDep(pkg.Provides[i])
 		g.logger.Debugln(pkg.String() + " provides: " + depName)
-		graph.Provides(depName, &alpm.Depend{
+		graph.AddProvides(depName, &alpm.Depend{
 			Name:    depName,
 			Version: version,
 			Mod:     aurDepModToAlpmDep(mod),
@@ -319,7 +320,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	graph.AddNode(pkg.Name())
 	_ = pkg.Provides().ForEach(func(p *alpm.Depend) error {
 		g.logger.Debugln(pkg.Name() + " provides: " + p.String())
-		graph.Provides(p.Name, p, pkg.Name())
+		graph.AddProvides(p.Name, p, pkg.Name())
 		return nil
 	})
 
@@ -422,6 +423,8 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 	aurPkgsAdded := []*aurc.Pkg{}
 
+	var packagesNotFound int
+
 	for _, target := range targets {
 		if cachedProvidePkg, ok := g.providerCache[target]; ok {
 			aurPkgs = cachedProvidePkg
@@ -435,6 +438,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 		if len(aurPkgs) == 0 {
 			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", target)
+			packagesNotFound++
 
 			continue
 		}
@@ -469,11 +473,17 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
+	if packagesNotFound == len(targets) {
+		return graph, &aur.ErrTargetNotFound{}
+	}
+
 	return graph, nil
 }
 
 // Removes found deps from the deps mapset and returns the found deps.
 func (g *Grapher) findDepsFromAUR(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo],
+	parentPkgName string,
 	deps mapset.Set[string],
 ) []aurc.Pkg {
 	pkgsToAdd := make([]aurc.Pkg, 0, deps.Cardinality())
@@ -541,7 +551,24 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		aurPkgs = satisfyingPkgs
 
 		if len(aurPkgs) == 0 {
-			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", depString)
+			// set of packages that require this dependency
+			requiredBySet := mapset.NewThreadUnsafeSet[string]()
+
+			// add current parent
+			requiredBySet.Add(parentPkgName)
+
+			// if dependency is already in graph, get all packages that require it
+			if graph.Exists(depName) {
+				if deps := graph.Dependents(depName); deps != nil {
+					for parent := range deps {
+						requiredBySet.Add(parent)
+					}
+				}
+			}
+
+			requiredBySlice := requiredBySet.ToSlice()
+			requiredByStr := strings.Join(requiredBySlice, ", ")
+			g.logger.Errorln(gotext.Get("No AUR package found for"), " ", depString, " (", gotext.Get("required by"), ": ", requiredByStr, ")")
 
 			continue
 		}
@@ -588,7 +615,7 @@ func (g *Grapher) addNodes(
 	// Check if in graph already
 	for _, depString := range targetsToFind.ToSlice() {
 		depName, _, _ := splitDep(depString)
-		if !graph.Exists(depName) && !graph.ProvidesExists(depName) {
+		if !graph.Exists(depName) && !graph.HasProvides(depName) {
 			continue
 		}
 
@@ -600,7 +627,7 @@ func (g *Grapher) addNodes(
 			targetsToFind.Remove(depString)
 		}
 
-		if p := graph.GetProviderNode(depName); p != nil {
+		if p := graph.GetProviderInfo(depName); p != nil {
 			if provideSatisfies(p.String(), depString, p.Version) {
 				if err := graph.DependOn(p.Provider, parentPkgName); err != nil {
 					g.logger.Warnln(p.Provider, parentPkgName, err)
@@ -671,7 +698,7 @@ func (g *Grapher) addNodes(
 	}
 
 	// Check AUR
-	pkgsToAdd := g.findDepsFromAUR(ctx, targetsToFind)
+	pkgsToAdd := g.findDepsFromAUR(ctx, graph, parentPkgName, targetsToFind)
 	for i := range pkgsToAdd {
 		aurPkg := &pkgsToAdd[i]
 		if err := graph.DependOn(aurPkg.Name, parentPkgName); err != nil {

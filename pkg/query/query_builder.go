@@ -20,7 +20,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
-const sourceAUR = "aur"
+const sourceAUR = "AUR"
 
 type SearchVerbosity int
 
@@ -91,6 +91,7 @@ type abstractResults struct {
 	metric          strutil.StringMetric
 	separateSources bool
 	sortBy          string
+	repoOrder       []string
 
 	distanceCache       map[string]float64
 	separateSourceCache map[string]float64
@@ -143,8 +144,37 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		metric:              metric,
 		separateSources:     s.separateSources,
 		sortBy:              s.sortBy,
+		repoOrder:           dbExecutor.Repos(),
 		distanceCache:       map[string]float64{},
 		separateSourceCache: map[string]float64{},
+	}
+	var repoResults []alpm.IPackage
+	if s.targetMode.AtLeastRepo() {
+		repoResults = dbExecutor.SyncPackages(pkgS...)
+
+		for i := range repoResults {
+			dbName := repoResults[i].DB().Name()
+			if s.queryMap[dbName] == nil {
+				s.queryMap[dbName] = map[string]any{}
+			}
+
+			s.queryMap[dbName][repoResults[i].Name()] = repoResults[i]
+
+			rawProvides := repoResults[i].Provides().Slice()
+
+			provides := make([]string, len(rawProvides))
+			for j := range rawProvides {
+				provides[j] = rawProvides[j].Name
+			}
+
+			sortableResults.results = append(sortableResults.results, abstractResult{
+				source:      repoResults[i].DB().Name(),
+				name:        repoResults[i].Name(),
+				description: repoResults[i].Description(),
+				provides:    provides,
+				votes:       -1,
+			})
+		}
 	}
 
 	if s.targetMode.AtLeastAUR() {
@@ -171,35 +201,6 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 				description: aurResults[i].Description,
 				provides:    aurResults[i].Provides,
 				votes:       aurResults[i].NumVotes,
-			})
-		}
-	}
-
-	var repoResults []alpm.IPackage
-	if s.targetMode.AtLeastRepo() {
-		repoResults = dbExecutor.SyncPackages(pkgS...)
-
-		for i := range repoResults {
-			dbName := repoResults[i].DB().Name()
-			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]any{}
-			}
-
-			s.queryMap[dbName][repoResults[i].Name()] = repoResults[i]
-
-			rawProvides := repoResults[i].Provides().Slice()
-
-			provides := make([]string, len(rawProvides))
-			for j := range rawProvides {
-				provides[j] = rawProvides[j].Name
-			}
-
-			sortableResults.results = append(sortableResults.results, abstractResult{
-				source:      repoResults[i].DB().Name(),
-				name:        repoResults[i].Name(),
-				description: repoResults[i].Description(),
-				provides:    provides,
-				votes:       -1,
 			})
 		}
 	}

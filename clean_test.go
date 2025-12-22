@@ -170,12 +170,7 @@ func TestIntegrationCleanAUR(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mockRunner := &exe.MockRunner{
-				CaptureFn: func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
-					return "", "", nil
-				},
-				ShowFn: func(cmd *exec.Cmd) error { return nil },
-			}
+			mockRunner := &exe.MockRunner{}
 
 			cfg := &settings.Configuration{
 				BuildDir: buildDir,
@@ -194,9 +189,9 @@ func TestIntegrationCleanAUR(t *testing.T) {
 			cmdArgs.AddArg(tc.args...)
 
 			// Create the package directories to be cleaned
-			err := os.MkdirAll(yayGitDir, 0755)
+			err := os.MkdirAll(yayGitDir, 0o755)
 			require.NoError(t, err)
-			err = os.MkdirAll(zoomDir, 0755)
+			err = os.MkdirAll(zoomDir, 0o755)
 			require.NoError(t, err)
 
 			err = handleCmd(context.Background(),

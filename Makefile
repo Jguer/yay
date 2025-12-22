@@ -131,4 +131,4 @@ locale:
 	done
 
 ${LOCALEDIR}/%.mo: ${LOCALEDIR}/%.po
-	msgfmt $< -o $@
+	msgfmt -o $@ $<

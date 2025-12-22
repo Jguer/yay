@@ -59,7 +59,7 @@ func convertPkgNameForURL(pkgName string) string {
 }
 
 // ABSPKGBUILD retrieves the PKGBUILD file to a dest directory.
-func ABSPKGBUILD(httpClient httpRequestDoer, dbName, pkgName string) ([]byte, error) {
+func ABSPKGBUILD(httpClient HTTPRequestDoer, dbName, pkgName string) ([]byte, error) {
 	packageURL := getPackagePKGBUILDURL(pkgName)
 
 	resp, err := httpClient.Get(packageURL)

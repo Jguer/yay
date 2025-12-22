@@ -66,6 +66,10 @@ func CreateOSC8Link(url, text string) string {
 }
 
 func CreateRepoLink(repo, arch, pkgName, text string) string {
+	if !UseColor {
+		return text
+	}
+
 	urlBase, ok := RepoUrls[repo]
 	if !ok {
 		return text

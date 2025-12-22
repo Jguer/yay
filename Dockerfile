@@ -9,4 +9,6 @@ WORKDIR /app
 
 COPY . .
 
+RUN pacman -Syu --overwrite=* --noconfirm
+
 RUN make release VERSION=${VERSION} PREFIX=${PREFIX} ARCH=${ARCH}

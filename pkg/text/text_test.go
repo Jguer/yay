@@ -177,3 +177,63 @@ msgstr "ja"
 	}
 	gotext.SetLanguage("")
 }
+
+func TestCreateRepoLink(t *testing.T) {
+	tests := []struct {
+		name     string
+		useColor bool
+		repo     string
+		arch     string
+		pkgName  string
+		text     string
+		want     string
+	}{
+		{
+			name:     "color disabled returns text",
+			useColor: false,
+			repo:     "core",
+			arch:     "x86_64",
+			pkgName:  "linux",
+			text:     "core/linux",
+			want:     "core/linux",
+		},
+		{
+			name:     "unknown repo returns text",
+			useColor: true,
+			repo:     "unknown",
+			arch:     "x86_64",
+			pkgName:  "linux",
+			text:     "core/linux",
+			want:     "core/linux",
+		},
+		{
+			name:     "aur repo uses package url",
+			useColor: true,
+			repo:     "aur",
+			arch:     "any",
+			pkgName:  "yay",
+			text:     "aur/yay",
+			want:     "\033]8;;https://aur.archlinux.org/packages/yay\033\\aur/yay\033]8;;\033\\",
+		},
+		{
+			name:     "core repo uses arch in url",
+			useColor: true,
+			repo:     "core",
+			arch:     "x86_64",
+			pkgName:  "linux",
+			text:     "core/linux",
+			want:     "\033]8;;https://archlinux.org/packages/core/x86_64/linux\033\\core/linux\033]8;;\033\\",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			original := UseColor
+			UseColor = tt.useColor
+			t.Cleanup(func() { UseColor = original })
+
+			got := CreateRepoLink(tt.repo, tt.arch, tt.pkgName, tt.text)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
