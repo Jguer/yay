@@ -4,11 +4,11 @@
 # Giulio Terigi, 2022
 # Simone Dotto <simonedotto@protonmail.com>, 2022
 # jheitz223, 2023
-# Vincenzo Reale <vinx.reale@gmail.com>, 2024
+# Vincenzo Reale <vinx.reale@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Vincenzo Reale <vinx.reale@gmail.com>, 2024\n"
+"Last-Translator: Vincenzo Reale <vinx.reale@gmail.com>, 2025\n"
 "Language-Team: Italian (Italy) (https://app.transifex.com/yay-1/teams/123732/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -324,9 +324,13 @@ msgstr "Pacchetti AUR di debug mancanti:"
 msgid "Name"
 msgstr "Nome"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Nessun pacchetto AUR trovato per"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "richiesto da"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"

@@ -132,7 +132,7 @@ func TestYogurtMenuAURDB(t *testing.T) {
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))

@@ -182,6 +182,102 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 	}
 }
 
+func TestInstaller_BuildOnlySkipsInstall(t *testing.T) {
+	t.Parallel()
+
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	tmpDir := t.TempDir()
+	pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
+
+	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+		return pkgTar, "", nil
+	}
+
+	i := 0
+	showOverride := func(cmd *exec.Cmd) error {
+		i++
+		if i == 2 {
+			f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+			require.NoError(t, err)
+			require.NoError(t, f.Close())
+		}
+		return nil
+	}
+
+	mockDB := &mock.DBExecutor{}
+	mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:      makepkgBin,
+		SudoBin:         "su",
+		PacmanBin:       pacmanBin,
+		Runner:          mockRunner,
+		SudoLoopEnabled: false,
+	}
+
+	cmdBuilder.Runner = mockRunner
+
+	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+		parser.RebuildModeNo, false, newTestLogger())
+	installer.SetInstallBuiltPackages(false)
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddTarget("yay")
+
+	pkgBuildDirs := map[string]string{
+		"yay": tmpDir,
+	}
+
+	targets := []map[string]*dep.InstallInfo{
+		{
+			"yay": {
+				Source:      dep.AUR,
+				Reason:      dep.Explicit,
+				Version:     "91.0.0-1",
+				SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
+				AURBase:     ptrString("yay"),
+			},
+		},
+	}
+
+	err = installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{}, false)
+	require.NoError(t, err)
+
+	wantShow := []string{
+		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+	}
+
+	require.Len(t, mockRunner.ShowCalls, len(wantShow))
+	require.Len(t, mockRunner.CaptureCalls, 1)
+
+	for i, call := range mockRunner.ShowCalls {
+		show := call.Args[0].(*exec.Cmd).String()
+		show = strings.ReplaceAll(show, tmpDir, "/testdir")
+		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+		show = strings.ReplaceAll(show, pacmanBin, "pacman")
+
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), show)
+		assert.NotContains(t, show, "pacman -U")
+	}
+
+	for _, call := range mockRunner.CaptureCalls {
+		capture := call.Args[0].(*exec.Cmd).String()
+		capture = strings.ReplaceAll(capture, tmpDir, "/testdir")
+		capture = strings.ReplaceAll(capture, makepkgBin, "makepkg")
+		capture = strings.ReplaceAll(capture, pacmanBin, "pacman")
+		assert.Subset(t, strings.Split(capture, " "), strings.Split("makepkg --packagelist", " "), capture)
+	}
+}
+
 func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 	t.Parallel()
 

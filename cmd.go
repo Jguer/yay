@@ -328,11 +328,7 @@ func handleUpgrade(ctx context.Context,
 func handleBuild(ctx context.Context,
 	run *runtime.Runtime, dbExecutor db.Executor, cmdArgs *parser.Arguments,
 ) error {
-	if cmdArgs.ExistsArg("i", "install") {
-		return installLocalPKGBUILD(ctx, run, cmdArgs, dbExecutor)
-	}
-
-	return nil
+	return installLocalPKGBUILD(ctx, run, cmdArgs, dbExecutor)
 }
 
 func handleSync(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor db.Executor) error {

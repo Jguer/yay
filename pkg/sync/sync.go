@@ -50,6 +50,12 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		run.VCSStore, o.cfg.Mode, o.cfg.ReBuild,
 		cmdArgs.ExistsArg("w", "downloadonly"), run.Logger.Child("installer"))
 
+	shouldInstall := !cmdArgs.ExistsArg("w", "downloadonly")
+	if cmdArgs.Op == "B" && !cmdArgs.ExistsArg("i", "install") {
+		shouldInstall = false
+	}
+	installer.SetInstallBuiltPackages(shouldInstall)
+
 	pkgBuildDirs, errInstall := preparer.Run(ctx, run, targets)
 	if errInstall != nil {
 		return errInstall

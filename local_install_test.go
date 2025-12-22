@@ -172,9 +172,149 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+	}
+}
+
+func TestIntegrationLocalBuildOnly(t *testing.T) {
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	gitBin := t.TempDir() + "/git"
+	tmpDir := t.TempDir()
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(gitBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	tars := []string{
+		tmpDir + "/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
+		tmpDir + "/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
+		tmpDir + "/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst",
+	}
+
+	wantShow := []string{
+		"makepkg --verifysource --skippgpcheck -f -Cc",
+		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
+		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
+		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+	}
+
+	wantCapture := []string{
+		"makepkg --packagelist",
+		"git -C testdata/jfin git reset --hard HEAD",
+		"git -C testdata/jfin git merge --no-edit --ff",
+		"makepkg --packagelist",
+	}
+
+	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+		return strings.Join(tars, "\n"), "", nil
+	}
+
+	once := sync.Once{}
+
+	showOverride := func(cmd *exec.Cmd) error {
+		once.Do(func() {
+			for _, tar := range tars {
+				f, err := os.OpenFile(tar, os.O_RDONLY|os.O_CREATE, 0o666)
+				require.NoError(t, err)
+				require.NoError(t, f.Close())
+			}
+		})
+		return nil
+	}
+
+	mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:       makepkgBin,
+		SudoBin:          "su",
+		PacmanBin:        pacmanBin,
+		PacmanConfigPath: "/etc/pacman.conf",
+		GitBin:           "git",
+		Runner:           mockRunner,
+		SudoLoopEnabled:  false,
+	}
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddArg("B")
+	cmdArgs.AddTarget("testdata/jfin")
+	settings.NoConfirm = true
+	defer func() { settings.NoConfirm = false }()
+	db := &mock.DBExecutor{
+		AlpmArchitecturesFn: func() ([]string, error) {
+			return []string{"x86_64"}, nil
+		},
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "dotnet-sdk>=6", "dotnet-sdk<7", "dotnet-runtime>=6", "dotnet-runtime<7", "jellyfin-server=10.8.4", "jellyfin-web=10.8.4":
+				return false
+			}
+
+			return true
+		},
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "dotnet-runtime>=6", "dotnet-runtime<7":
+				return &mock.Package{
+					PName:    "dotnet-runtime-6.0",
+					PBase:    "dotnet-runtime-6.0",
+					PVersion: "6.0.100-1",
+					PDB:      mock.NewDB("community"),
+				}
+			case "dotnet-sdk>=6", "dotnet-sdk<7":
+				return &mock.Package{
+					PName:    "dotnet-sdk-6.0",
+					PBase:    "dotnet-sdk-6.0",
+					PVersion: "6.0.100-1",
+					PDB:      mock.NewDB("community"),
+				}
+			}
+
+			return nil
+		},
+		LocalPackageFn:                func(s string) mock.IPackage { return nil },
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
+	}
+
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
+			},
+		},
+	}
+
+	err = handleCmd(context.Background(), run, cmdArgs, db)
+	require.NoError(t, err)
+
+	require.Len(t, mockRunner.ShowCalls, len(wantShow))
+	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
+
+	for i, call := range mockRunner.ShowCalls {
+		show := call.Args[0].(*exec.Cmd).String()
+		show = strings.ReplaceAll(show, tmpDir, "/testdir")
+		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+		show = strings.ReplaceAll(show, pacmanBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
+
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
@@ -291,7 +431,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -447,7 +587,7 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -607,7 +747,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -743,7 +883,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -869,7 +1009,7 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
@@ -1010,7 +1150,7 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 		show = strings.ReplaceAll(show, tmpDir2, "/testdir2") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
-		show = strings.ReplaceAll(show, gitBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
