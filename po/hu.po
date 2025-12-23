@@ -2,11 +2,11 @@
 # Translators:
 # Szigeti Péter, 2021
 # Gergő Kasza, 2022
-# summoner <summoner@vivaldi.net>, 2025
+# summoner <summoner@disroot.org>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: summoner <summoner@vivaldi.net>, 2025\n"
+"Last-Translator: summoner <summoner@disroot.org>, 2025\n"
 "Language-Team: Hungarian (https://app.transifex.com/yay-1/teams/123732/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -322,9 +322,13 @@ msgstr "Hiányzó AUR-hibakereső-csomagok:"
 msgid "Name"
 msgstr "Név"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Nem található AUR-csomag a következőhöz:"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "szükséges a következő(k)höz"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
@@ -552,7 +556,7 @@ msgstr "a csomag fejlesztői ellenőrzése nem sikerült: a(z) „%s” hibát �
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "a szerkesztő nem lépett ki sikeresen, megszakítva: %s"
+msgstr "nem lépett ki sikeresen a szerkesztő, megszakítva: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
