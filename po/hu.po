@@ -1,7 +1,6 @@
 # 
 # Translators:
 # Szigeti Péter, 2021
-# Gergő Kasza, 2022
 # summoner <summoner@disroot.org>, 2025
 # 
 msgid ""
@@ -167,7 +166,7 @@ msgstr "Függőségek ellenőrzése"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
-msgstr "Fejlesztői csomagok ellenőrzése..."
+msgstr "Fejlesztői csomagok ellenőrzése…"
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
@@ -280,7 +279,7 @@ msgstr "Importálás?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "Kulcsok importálása gpg-vel..."
+msgstr "Kulcsok importálása gpg-vel…"
 
 #: print.go:46
 msgid "Keywords"
@@ -425,11 +424,11 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
-msgstr "Frissítések keresése az AUR-ban..."
+msgstr "Frissítések keresése az AUR-ban…"
 
 #: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
-msgstr "Frissítések keresése az adatbázisokban..."
+msgstr "Frissítések keresése az adatbázisokban…"
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
@@ -466,7 +465,7 @@ msgstr "%[1]d szolgáltató érhető el a következőhöz: %[2]d:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr "Lehet, hogy már fut a pacman. Kis türelmet..."
+msgstr "Lehet, hogy már fut a pacman. Kis türelmet…"
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
@@ -711,11 +710,11 @@ msgstr "hiba a kulcsok importálásakor"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "AUR-csomagok eltávolítása a gyorsítótárból..."
+msgstr "AUR-csomagok eltávolítása a gyorsítótárból…"
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr "nem követett AUR-fájlok eltávolítása a gyorsítótárból..."
+msgstr "nem követett AUR-fájlok eltávolítása a gyorsítótárból…"
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
