@@ -315,7 +315,7 @@ msgstr "이름"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
-msgstr "다음에 대한 AUR 패키지를 찾을 수 없음"
+msgstr "다음 AUR 패키지를 찾을 수 없음"
 
 #: pkg/dep/dep_graph.go:564
 msgid "required by"
