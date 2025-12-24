@@ -1,10 +1,10 @@
 # 
 # Translators:
-# Davidmp <medipas@gmail.com>, 2024
+# Davidmp <medipas@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Davidmp <medipas@gmail.com>, 2024\n"
+"Last-Translator: Davidmp <medipas@gmail.com>, 2025\n"
 "Language-Team: Catalan (Spain) (https://app.transifex.com/yay-1/teams/123732/ca_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -316,9 +316,13 @@ msgstr "Manquen paquets de depuració de l'AUR:"
 msgid "Name"
 msgstr "Nom"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "No s'ha trobat cap paquet d'AUR per a"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "requerit per "
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
