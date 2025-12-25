@@ -428,8 +428,6 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 		}
 		defer scanner.Close()
 
-		scanner.Scan()
-
 		for scanner.Scan() {
 			name := scanner.Text()
 			if cmdArgs.ExistsArg("q", "quiet") {
