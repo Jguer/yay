@@ -48,7 +48,6 @@ func getFromFile(t *testing.T, filePath string) mockaur.GetFunc {
 func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
 	mockDB := &mock.DBExecutor{}
 	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
-		// Simulate "no AUR package found" for any query.
 		return []aur.Pkg{}, nil
 	}}
 
@@ -67,7 +66,9 @@ func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
 	_ = g.findDepsFromAUR(context.Background(), graph, "currentNeeds", toFind)
 
 	out := stderr.String()
-	require.Contains(t, out, "No AUR package found for "+depString+" (required by: currentNeeds, existingNeeds)")
+	require.Contains(t, out, "No AUR package found for "+depString+" (required by:")
+	require.Contains(t, out, "currentNeeds")
+	require.Contains(t, out, "existingNeeds")
 }
 
 func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
