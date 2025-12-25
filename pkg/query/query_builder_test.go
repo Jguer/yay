@@ -504,30 +504,6 @@ func TestSourceQueryBuilderSortByFields(t *testing.T) {
 			wantNames: []string{"ruby-yard", "yay", "yay-git"},
 		},
 		{
-			desc:      "sort-by-baseid topdown",
-			sortBy:    "baseid",
-			bottomUp:  false,
-			wantNames: []string{"yay-git", "yay", "ruby-yard"},
-		},
-		{
-			desc:      "sort-by-baseid bottomup",
-			sortBy:    "baseid",
-			bottomUp:  true,
-			wantNames: []string{"ruby-yard", "yay", "yay-git"},
-		},
-		{
-			desc:      "sort-by-id topdown",
-			sortBy:    "id",
-			bottomUp:  false,
-			wantNames: []string{"yay-git", "yay", "ruby-yard"},
-		},
-		{
-			desc:      "sort-by-id bottomup",
-			sortBy:    "id",
-			bottomUp:  true,
-			wantNames: []string{"ruby-yard", "yay", "yay-git"},
-		},
-		{
 			desc:      "sort-by-modified topdown",
 			sortBy:    "modified",
 			bottomUp:  false,

@@ -84,8 +84,6 @@ type abstractResult struct {
 	name           string
 	description    string
 	packageBase    string
-	packageId      int
-	packageBaseId  int
 	votes          int
 	popularity     float64
 	firstSubmitted int
@@ -123,14 +121,6 @@ func (a *abstractResults) GetSortFunc(sortBy string, bottomUp bool) SortFunc {
 	case "base":
 		sortFunc = func(pkgA, pkgB abstractResult) int {
 			return cmp.Compare(pkgA.packageBase, pkgB.packageBase)
-		}
-	case "baseid":
-		sortFunc = func(pkgA, pkgB abstractResult) int {
-			return cmp.Compare(pkgA.packageBaseId, pkgB.packageBaseId)
-		}
-	case "id":
-		sortFunc = func(pkgA, pkgB abstractResult) int {
-			return cmp.Compare(pkgA.packageId, pkgB.packageId)
 		}
 	case "modified":
 		sortFunc = func(pkgA, pkgB abstractResult) int {
@@ -232,8 +222,6 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 				name:           repoResults[i].Name(),
 				description:    repoResults[i].Description(),
 				packageBase:    repoResults[i].Base(),
-				packageId:      -1,
-				packageBaseId:  -1,
 				votes:          -1,
 				popularity:     -1,
 				firstSubmitted: -1,
@@ -266,8 +254,6 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 				name:           aurResults[i].Name,
 				description:    aurResults[i].Description,
 				packageBase:    aurResults[i].PackageBase,
-				packageId:      aurResults[i].ID,
-				packageBaseId:  aurResults[i].PackageBaseID,
 				votes:          aurResults[i].NumVotes,
 				popularity:     aurResults[i].Popularity,
 				firstSubmitted: aurResults[i].FirstSubmitted,

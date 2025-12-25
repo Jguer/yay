@@ -58,7 +58,7 @@ _pacman_opts_common=(
 	'--git[git command to use]:git:_files'
 	'--gpg[gpg command to use]:gpg:_files'
 
-	'--sortby[Sort AUR results by a specific field during search]:sortby options:(votes popularity id baseid name base submitted modified)'
+	'--sortby[Sort AUR results by a specific field during search]:sortby options:(votes popularity name base submitted modified)'
 	'--searchby[Search for packages using a specified field]:query'
 	'(--noanswerclean)--answerclean[Set a predetermined answer for the clean build menu]:answer'
 	'(--noanswerdiff)--answerdiff[Set a predetermined answer for the diff menu]:answer'
