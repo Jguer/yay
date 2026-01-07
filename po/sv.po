@@ -2,11 +2,11 @@
 # Translators:
 # J G, 2021
 # August Wikerfors, 2023
-# Luna Jernberg <droidbittin@gmail.com>, 2024
+# Luna Jernberg <droidbittin@gmail.com>, 2026
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Luna Jernberg <droidbittin@gmail.com>, 2024\n"
+"Last-Translator: Luna Jernberg <droidbittin@gmail.com>, 2026\n"
 "Language-Team: Swedish (https://app.transifex.com/yay-1/teams/123732/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -319,9 +319,13 @@ msgstr "Saknar AUR-felsökningspaket:"
 msgid "Name"
 msgstr "Namn"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Inga AUR paket hittades för"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "krävs av:"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
