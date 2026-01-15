@@ -173,7 +173,11 @@ func (installer *Installer) handleLayer(ctx context.Context,
 					aurExp.Add(name)
 				}
 			case dep.Dep, dep.MakeDep, dep.CheckDep:
-				aurDeps.Add(name)
+				if cmdArgs.ExistsArg("asexplicit", "asexp") {
+					aurExp.Add(name)
+				} else {
+					aurDeps.Add(name)
+				}
 			}
 		case dep.Sync:
 			if info.Upgrade {
@@ -195,7 +199,11 @@ func (installer *Installer) handleLayer(ctx context.Context,
 					syncExp.Add(compositePkgName)
 				}
 			case dep.Dep, dep.MakeDep, dep.CheckDep:
-				syncDeps.Add(compositePkgName)
+				if cmdArgs.ExistsArg("asexplicit", "asexp") {
+					syncExp.Add(compositePkgName)
+				} else {
+					syncDeps.Add(compositePkgName)
+				}
 			}
 		}
 	}
