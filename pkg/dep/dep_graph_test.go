@@ -701,7 +701,7 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 	}
 }
 
-func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
+func TestGrapher_GraphFromTargets_ExplicitTargets(t *testing.T) {
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -786,15 +786,15 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 	}}
 
 	installInfos := map[string]*InstallInfo{
-		"gourou dep": {
+		"gourou": {
 			Source:  AUR,
-			Reason:  Dep,
+			Reason:  Explicit,
 			Version: "0.8.1",
 			AURBase: ptrString("gourou"),
 		},
-		"libzip dep": {
+		"libzip": {
 			Source:     Sync,
-			Reason:     Dep,
+			Reason:     Explicit,
 			Version:    "1.9.2-1",
 			SyncDBName: ptrString("extra"),
 		},
@@ -810,8 +810,8 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 			name:    "gourou libzip",
 			targets: []string{"gourou", "libzip"},
 			wantLayers: []map[string]*InstallInfo{
-				{"gourou": installInfos["gourou dep"]},
-				{"libzip": installInfos["libzip dep"]},
+				{"gourou": installInfos["gourou"]},
+				{"libzip": installInfos["libzip"]},
 			},
 			wantErr: false,
 		},
@@ -819,8 +819,8 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 			name:    "aur/gourou extra/libzip",
 			targets: []string{"aur/gourou", "extra/libzip"},
 			wantLayers: []map[string]*InstallInfo{
-				{"gourou": installInfos["gourou dep"]},
-				{"libzip": installInfos["libzip dep"]},
+				{"gourou": installInfos["gourou"]},
+				{"libzip": installInfos["libzip"]},
 			},
 			wantErr: false,
 		},

@@ -332,11 +332,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 		SyncDBName: &dbName,
 	}
 
-	if upgradeInfo == nil {
-		if localPkg := g.dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
-			info.Reason = Reason(localPkg.Reason())
-		}
-	} else {
+	if upgradeInfo != nil {
 		info.Upgrade = true
 		info.Reason = Reason(upgradeInfo.Reason)
 		info.LocalVersion = upgradeInfo.LocalVersion
@@ -450,11 +446,8 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			g.providerCache[target] = []aurc.Pkg{*aurPkg}
 		}
 
-		reason := Explicit
-		if pkg := g.dbExecutor.LocalPackage(aurPkg.Name); pkg != nil {
-			reason = Reason(pkg.Reason())
-
-			if g.needed {
+		if g.needed {
+			if pkg := g.dbExecutor.LocalPackage(aurPkg.Name); pkg != nil {
 				if db.VerCmp(pkg.Version(), aurPkg.Version) >= 0 {
 					g.logger.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(pkg.Name()+"-"+pkg.Version())))
 					continue
@@ -464,7 +457,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 		graph = g.GraphAURTarget(ctx, graph, aurPkg, &InstallInfo{
 			AURBase: &aurPkg.PackageBase,
-			Reason:  reason,
+			Reason:  Explicit,
 			Source:  AUR,
 			Version: aurPkg.Version,
 		})
