@@ -41,7 +41,7 @@ func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
 
 	// slightly overweight sync sources by always giving them max popularity
 	popularity := 1.0
-	if pkg.source == sourceAUR {
+	if pkg.source == "aur" {
 		popularity = a.aurSortByMetric(pkg)
 	}
 
@@ -66,7 +66,7 @@ func (a *abstractResults) separateSourceScore(source string, score float64) floa
 	}
 
 	// AUR is always lowest priority
-	if source == sourceAUR {
+	if source == "aur" {
 		return 0
 	}
 

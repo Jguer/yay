@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	aurc "github.com/Jguer/aur"
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
@@ -311,18 +311,19 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 
 func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo],
-	pkg alpm.IPackage, upgradeInfo *db.SyncUpgrade,
+	pkg alpm.Package, upgradeInfo *db.SyncUpgrade,
 ) *topo.Graph[string, *InstallInfo] {
 	if graph == nil {
 		graph = NewGraph()
 	}
 
 	graph.AddNode(pkg.Name())
-	_ = pkg.Provides().ForEach(func(p *alpm.Depend) error {
+	provides := pkg.Provides()
+	for i := range provides {
+		p := &provides[i]
 		g.logger.Debugln(pkg.Name() + " provides: " + p.String())
 		graph.AddProvides(p.Name, p, pkg.Name())
-		return nil
-	})
+	}
 
 	dbName := pkg.DB().Name()
 	info := &InstallInfo{
@@ -512,16 +513,25 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 
 		for i := range aurPkgs {
 			pkg := &aurPkgs[i]
-			if deps.Contains(pkg.Name) {
-				g.providerCache[pkg.Name] = append(g.providerCache[pkg.Name], *pkg)
+			// Cache by the full depString (including version) for each dep whose name matches
+			for _, depString := range deps.ToSlice() {
+				depName, _, _ := splitDep(depString)
+				if depName == pkg.Name {
+					g.providerCache[depString] = append(g.providerCache[depString], *pkg)
+				}
 			}
 
 			for _, val := range pkg.Provides {
 				if val == pkg.Name {
 					continue
 				}
-				if deps.Contains(val) {
-					g.providerCache[val] = append(g.providerCache[val], *pkg)
+				// Also check provides against versioned deps
+				provideName, _, _ := splitDep(val)
+				for _, depString := range deps.ToSlice() {
+					depName, _, _ := splitDep(depString)
+					if depName == provideName {
+						g.providerCache[depString] = append(g.providerCache[depString], *pkg)
+					}
 				}
 			}
 		}
@@ -595,7 +605,6 @@ func (g *Grapher) ValidateAndSetNodeInfo(graph *topo.Graph[string, *InstallInfo]
 		if info.Value.Reason < nodeInfo.Value.Reason {
 			return // refuse to downgrade reason
 		}
-
 		if info.Value.Upgrade {
 			return // refuse to overwrite an upgrade
 		}
@@ -685,7 +694,7 @@ func (g *Grapher) addNodes(
 				},
 			})
 
-		if newDeps := alpmPkg.Depends().Slice(); len(newDeps) != 0 && g.fullGraph {
+		if newDeps := alpmPkg.Depends(); len(newDeps) != 0 && g.fullGraph {
 			newDepsSlice := make([]string, 0, len(newDeps))
 			for _, newDep := range newDeps {
 				newDepsSlice = append(newDepsSlice, newDep.Name)
@@ -862,7 +871,7 @@ func archStringToString(alpmArches []string, archString []gosrc.ArchString) []st
 func aurDepModToAlpmDep(mod string) alpm.DepMod {
 	switch mod {
 	case "=":
-		return alpm.DepModEq
+		return alpm.DepModEQ
 	case ">=":
 		return alpm.DepModGE
 	case "<=":

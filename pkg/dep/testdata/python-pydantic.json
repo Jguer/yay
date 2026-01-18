@@ -1,0 +1,3 @@
+[
+    {"ID":2000001,"Name":"python-pydantic","PackageBaseID":200001,"PackageBase":"python-pydantic","Version":"2.5.0-1","Description":"Data validation using Python type hints","URL":"https://github.com/pydantic/pydantic","NumVotes":50,"Popularity":2.0,"OutOfDate":null,"Maintainer":"testmaint","Submitter":"testmaint","FirstSubmitted":1600000000,"LastModified":1700000000,"URLPath":"/cgit/aur.git/snapshot/python-pydantic.tar.gz","Depends":["python","python-typing-extensions"],"MakeDepends":["python-build","python-installer"],"CheckDepends":["python-pytest","python-pytest-mock"],"License":["MIT"]}
+]

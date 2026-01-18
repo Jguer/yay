@@ -5,7 +5,7 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 )
 
 type (

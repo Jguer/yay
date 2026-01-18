@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	"github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
 
@@ -60,29 +60,29 @@ func TestAlpmExecutor(t *testing.T) {
 	h := aExec.handle
 	assert.NotNil(t, h)
 
-	root, err := h.Root()
+	root := h.Root()
 	assert.Nil(t, err)
 	assert.Equal(t, "/", root)
 
-	dbPath, err := h.DBPath()
+	dbPath := h.DBPath()
 	assert.Nil(t, err)
 	assert.Equal(t, "/var/lib/pacman/", dbPath)
 
 	cache, err := h.CacheDirs()
 	assert.Nil(t, err)
-	assert.Equal(t, []string{"/cachedir/", "/another/"}, cache.Slice())
+	assert.Equal(t, []string{"/cachedir/", "/another/"}, cache)
 
-	log, err := h.LogFile()
+	log := h.LogFile()
 	assert.Nil(t, err)
 	assert.Equal(t, "/logfile", log)
 
-	gpg, err := h.GPGDir()
+	gpg := h.GPGDir()
 	assert.Nil(t, err)
 	assert.Equal(t, "/gpgdir/", gpg)
 
 	hook, err := h.HookDirs()
 	assert.Nil(t, err)
-	assert.Equal(t, []string{"/usr/share/libalpm/hooks/", "/hookdir/"}, hook.Slice())
+	assert.Equal(t, []string{"/usr/share/libalpm/hooks/", "/hookdir/"}, hook)
 
 	arch, err := alpmTestGetArch(h)
 	assert.Nil(t, err)
@@ -90,27 +90,27 @@ func TestAlpmExecutor(t *testing.T) {
 
 	ignorePkg, err := h.IgnorePkgs()
 	assert.Nil(t, err)
-	assert.Equal(t, []string{"ignore", "this", "package"}, ignorePkg.Slice())
+	assert.Equal(t, []string{"ignore", "this", "package"}, ignorePkg)
 
 	ignoreGroup, err := h.IgnoreGroups()
 	assert.Nil(t, err)
-	assert.Equal(t, []string{"ignore", "this", "group"}, ignoreGroup.Slice())
+	assert.Equal(t, []string{"ignore", "this", "group"}, ignoreGroup)
 
 	noUp, err := h.NoUpgrades()
 	assert.Nil(t, err)
-	assert.Equal(t, []string{"noupgrade"}, noUp.Slice())
+	assert.Equal(t, []string{"noupgrade"}, noUp)
 
 	noEx, err := h.NoExtracts()
 	assert.Nil(t, err)
-	assert.Equal(t, []string{"noextract"}, noEx.Slice())
+	assert.Equal(t, []string{"noextract"}, noEx)
 
-	check, err := h.CheckSpace()
+	check := h.CheckSpace()
 	assert.Nil(t, err)
 	assert.Equal(t, true, check)
 }
 
-func alpmTestGetArch(h *alpm.Handle) ([]string, error) {
-	architectures, err := h.GetArchitectures()
+func alpmTestGetArch(h alpm.Handle) ([]string, error) {
+	architectures, err := h.Architectures()
 
-	return architectures.Slice(), err
+	return architectures, err
 }

@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
 
@@ -30,7 +30,7 @@ type Store interface {
 	// RemovePackages removes the VCS info of the packages given as arg if they exist.
 	RemovePackages(pkgs []string)
 	// Clean orphaned VCS info.
-	CleanOrphans(pkgs map[string]alpm.IPackage)
+	CleanOrphans(pkgs map[string]alpm.Package)
 	// Load loads the VCS info from disk.
 	Load() error
 	// Save saves the VCS info to disk.
@@ -315,7 +315,7 @@ func (v *InfoStore) Load() error {
 	return nil
 }
 
-func (v *InfoStore) CleanOrphans(pkgs map[string]alpm.IPackage) {
+func (v *InfoStore) CleanOrphans(pkgs map[string]alpm.Package) {
 	missing := make([]string, 0)
 
 	for pkgName := range v.OriginsByPackage {

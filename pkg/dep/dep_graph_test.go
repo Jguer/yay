@@ -14,7 +14,7 @@ import (
 	"testing"
 
 	aurc "github.com/Jguer/aur"
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/stretchr/testify/require"
 
@@ -29,7 +29,8 @@ func ptrString(s string) *string {
 	return &s
 }
 
-func getFromFile(t *testing.T, filePath string) mockaur.GetFunc {
+func getFromFile(t testing.TB, filePath string) mockaur.GetFunc {
+	t.Helper()
 	f, err := os.Open(filePath)
 	require.NoError(t, err)
 
@@ -254,9 +255,9 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 					PDB:      mock.NewDB("community"),
 					PProvides: mock.DependList{
 						Depends: []alpm.Depend{
-							{Name: "java-environment", Version: "11", Mod: alpm.DepModEq},
-							{Name: "java-environment-openjdk", Version: "11", Mod: alpm.DepModEq},
-							{Name: "jdk11-openjdk", Version: "11.0.19.u7-1", Mod: alpm.DepModEq},
+							{Name: "java-environment", Version: "11", Mod: alpm.DepModEQ},
+							{Name: "java-environment-openjdk", Version: "11", Mod: alpm.DepModEQ},
+							{Name: "jdk11-openjdk", Version: "11.0.19.u7-1", Mod: alpm.DepModEQ},
 						},
 					},
 				}
@@ -902,5 +903,378 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 				},
 			},
 		}, layers, layers)
+	})
+}
+
+// TestGrapher_GraphFromAUR_SplitPkgInternalDeps tests split packages where
+// packages from the same base depend on each other (like gstreamer-git).
+func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncPackageFn:       func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			// AUR packages and versioned AUR deps return nil
+			case "gstreamer-git", "gst-plugins-base-libs-git", "gst-plugins-good-git",
+				"gstreamer-git=1.24.0.r37-1", "gst-plugins-base-libs-git=1.24.0.r37-1":
+				return nil
+			case "libxml2":
+				return &mock.Package{
+					PName:    "libxml2",
+					PVersion: "2.12.0-1",
+					PDB:      mock.NewDB("core"),
+				}
+			case "glib2":
+				return &mock.Package{
+					PName:    "glib2",
+					PVersion: "2.78.0-1",
+					PDB:      mock.NewDB("core"),
+				}
+			case "orc":
+				return &mock.Package{
+					PName:    "orc",
+					PVersion: "0.4.34-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "libxv":
+				return &mock.Package{
+					PName:    "libxv",
+					PVersion: "1.0.12-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "iso-codes":
+				return &mock.Package{
+					PName:    "iso-codes",
+					PVersion: "4.15.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "libpulse":
+				return &mock.Package{
+					PName:    "libpulse",
+					PVersion: "16.1-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "wavpack":
+				return &mock.Package{
+					PName:    "wavpack",
+					PVersion: "5.6.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			}
+
+			panic("implement me " + s)
+		},
+
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "gstreamer-git", "gstreamer-git=1.24.0.r37-1",
+				"gst-plugins-base-libs-git", "gst-plugins-base-libs-git=1.24.0.r37-1",
+				"gst-plugins-good-git":
+				return false
+			case "libxml2", "glib2", "orc", "libxv", "iso-codes", "libpulse", "wavpack",
+				"git", "meson", "ninja": // makedepends
+				return true
+			}
+
+			panic("implement me " + s)
+		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		if len(query.Needles) > 0 {
+			for _, needle := range query.Needles {
+				if needle == "gstreamer-git" || needle == "gst-plugins-base-libs-git" || needle == "gst-plugins-good-git" {
+					gstFn := getFromFile(t, "testdata/gstreamer-git.json")
+					return gstFn(ctx, query)
+				}
+			}
+		}
+
+		return []aur.Pkg{}, nil // Return empty for unknown packages
+	}}
+
+	installInfos := map[string]*InstallInfo{
+		"gstreamer-git exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "1.24.0.r37-1",
+			AURBase: ptrString("gstreamer-git"),
+		},
+		"gstreamer-git dep": {
+			Source:  AUR,
+			Reason:  Dep,
+			Version: "1.24.0.r37-1",
+			AURBase: ptrString("gstreamer-git"),
+		},
+		"gst-plugins-base-libs-git exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "1.24.0.r37-1",
+			AURBase: ptrString("gstreamer-git"),
+		},
+		"gst-plugins-base-libs-git dep": {
+			Source:  AUR,
+			Reason:  Dep,
+			Version: "1.24.0.r37-1",
+			AURBase: ptrString("gstreamer-git"),
+		},
+		"gst-plugins-good-git exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "1.24.0.r37-1",
+			AURBase: ptrString("gstreamer-git"),
+		},
+	}
+
+	tests := []struct {
+		name       string
+		targets    []string
+		wantLayers []map[string]*InstallInfo
+		wantErr    bool
+	}{
+		{
+			name:    "gst-plugins-good-git pulls in base libs and gstreamer",
+			targets: []string{"gst-plugins-good-git"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gst-plugins-good-git": installInfos["gst-plugins-good-git exp"]},
+				{"gst-plugins-base-libs-git": installInfos["gst-plugins-base-libs-git dep"]},
+				{"gstreamer-git": installInfos["gstreamer-git dep"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "gst-plugins-base-libs-git pulls in gstreamer",
+			targets: []string{"gst-plugins-base-libs-git"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gst-plugins-base-libs-git": installInfos["gst-plugins-base-libs-git exp"]},
+				{"gstreamer-git": installInfos["gstreamer-git dep"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "explicit gstreamer-git with gst-plugins-good-git",
+			targets: []string{"gstreamer-git", "gst-plugins-good-git"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gst-plugins-good-git": installInfos["gst-plugins-good-git exp"]},
+				{"gst-plugins-base-libs-git": installInfos["gst-plugins-base-libs-git dep"]},
+				{"gstreamer-git": installInfos["gstreamer-git exp"]},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "all three packages explicitly",
+			targets: []string{"gstreamer-git", "gst-plugins-base-libs-git", "gst-plugins-good-git"},
+			wantLayers: []map[string]*InstallInfo{
+				{"gst-plugins-good-git": installInfos["gst-plugins-good-git exp"]},
+				{"gst-plugins-base-libs-git": installInfos["gst-plugins-base-libs-git exp"]},
+				{"gstreamer-git": installInfos["gstreamer-git exp"]},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewGrapher(mockDB, mockAUR,
+				false, true, false, false, false,
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			require.NoError(t, err)
+			layers := got.TopoSortedLayers(nil)
+			require.EqualValues(t, tt.wantLayers, layers, layers)
+		})
+	}
+}
+
+// TestGrapher_GraphFromAUR_CheckDeps tests packages with CheckDepends.
+func TestGrapher_GraphFromAUR_CheckDeps(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncPackageFn:       func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "python-pydantic":
+				return nil
+			case "python":
+				return &mock.Package{
+					PName:    "python",
+					PVersion: "3.11.0-1",
+					PDB:      mock.NewDB("core"),
+				}
+			case "python-typing-extensions":
+				return &mock.Package{
+					PName:    "python-typing-extensions",
+					PVersion: "4.8.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "python-build":
+				return &mock.Package{
+					PName:    "python-build",
+					PVersion: "1.0.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "python-installer":
+				return &mock.Package{
+					PName:    "python-installer",
+					PVersion: "0.7.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "python-pytest":
+				return &mock.Package{
+					PName:    "python-pytest",
+					PVersion: "7.4.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "python-pytest-mock":
+				return &mock.Package{
+					PName:    "python-pytest-mock",
+					PVersion: "3.11.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			}
+
+			panic("implement me " + s)
+		},
+
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "python-pydantic",
+				"python-pytest", "python-pytest-mock": // check deps not installed
+				return false
+			case "python", "python-typing-extensions", "python-build", "python-installer":
+				return true
+			}
+
+			panic("implement me " + s)
+		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		if len(query.Needles) > 0 && query.Needles[0] == "python-pydantic" {
+			pydanticFn := getFromFile(t, "testdata/python-pydantic.json")
+			return pydanticFn(ctx, query)
+		}
+
+		return []aur.Pkg{}, nil // Return empty for unknown packages
+	}}
+
+	t.Run("with check deps enabled", func(t *testing.T) {
+		g := NewGrapher(mockDB, mockAUR,
+			false, true, false, false, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"python-pydantic"})
+		require.NoError(t, err)
+		layers := got.TopoSortedLayers(nil)
+
+		// Should have the main package and its check deps
+		require.Len(t, layers, 2)
+		require.Contains(t, layers[0], "python-pydantic")
+		// Check deps should be in the second layer
+		require.Contains(t, layers[1], "python-pytest")
+		require.Contains(t, layers[1], "python-pytest-mock")
+	})
+
+	t.Run("with check deps disabled", func(t *testing.T) {
+		g := NewGrapher(mockDB, mockAUR,
+			false, true, false, true, false, // noCheckDeps = true
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"python-pydantic"})
+		require.NoError(t, err)
+		layers := got.TopoSortedLayers(nil)
+
+		// Should only have the main package (no check deps)
+		require.Len(t, layers, 1)
+		require.Contains(t, layers[0], "python-pydantic")
+	})
+}
+
+// TestGrapher_GraphFromAUR_VirtualProvides tests packages that provide virtual packages
+// (like mesa-git providing vulkan-driver, opengl-driver).
+func TestGrapher_GraphFromAUR_VirtualProvides(t *testing.T) {
+	mockDB := &mock.DBExecutor{
+		SyncPackageFn:       func(string) mock.IPackage { return nil },
+		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "mesa-git":
+				return nil
+			case "libdrm":
+				return &mock.Package{
+					PName:    "libdrm",
+					PVersion: "2.4.117-1",
+					PDB:      mock.NewDB("core"),
+				}
+			case "vulkan-icd-loader":
+				return &mock.Package{
+					PName:    "vulkan-icd-loader",
+					PVersion: "1.3.268-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			case "vulkan-radeon":
+				return &mock.Package{
+					PName:    "vulkan-radeon",
+					PVersion: "23.3.0-1",
+					PDB:      mock.NewDB("extra"),
+					PProvides: mock.DependList{
+						Depends: []alpm.Depend{
+							{Name: "vulkan-driver", Version: "", Mod: alpm.DepModAny},
+						},
+					},
+				}
+			}
+
+			// Most mesa deps are already installed
+			switch s {
+			case "libxxf86vm", "libxdamage", "libxshmfence", "libelf", "libunwind",
+				"libglvnd", "wayland", "lm_sensors", "zstd", "expat":
+				return &mock.Package{
+					PName:    s,
+					PVersion: "1.0.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			}
+
+			panic("implement me " + s)
+		},
+
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "mesa-git", "vulkan-driver", "opengl-driver":
+				return false
+			case "libdrm", "libxxf86vm", "libxdamage", "libxshmfence", "libelf",
+				"libunwind", "libglvnd", "wayland", "lm_sensors", "vulkan-icd-loader",
+				"zstd", "expat",
+				"git", "meson", "ninja", "llvm", "clang": // makedepends
+				return true
+			}
+
+			panic("implement me " + s)
+		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		if len(query.Needles) > 0 && query.Needles[0] == "mesa-git" {
+			mesaFn := getFromFile(t, "testdata/mesa-git.json")
+			return mesaFn(ctx, query)
+		}
+
+		return []aur.Pkg{}, nil // Return empty for unknown packages
+	}}
+
+	t.Run("mesa-git provides vulkan-driver and opengl-driver", func(t *testing.T) {
+		g := NewGrapher(mockDB, mockAUR,
+			false, true, false, false, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"mesa-git"})
+		require.NoError(t, err)
+		layers := got.TopoSortedLayers(nil)
+
+		require.Len(t, layers, 1)
+		require.Contains(t, layers[0], "mesa-git")
+		require.Equal(t, "24.0.0.r1234-1", layers[0]["mesa-git"].Version)
+		require.Equal(t, "mesa-git", *layers[0]["mesa-git"].AURBase)
 	})
 }

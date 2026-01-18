@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	pacmanconf "github.com/Morganamilo/go-pacmanconf"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,7 +47,7 @@ func TestCleanHanging(t *testing.T) {
 	}
 
 	dbExc := &mock.DBExecutor{
-		PackageOptionalDependsFn: func(i alpm.IPackage) []alpm.Depend {
+		PackageOptionalDependsFn: func(i alpm.Package) []alpm.Depend {
 			if i.Name() == "linux" {
 				return []alpm.Depend{
 					{
@@ -58,8 +58,8 @@ func TestCleanHanging(t *testing.T) {
 
 			return []alpm.Depend{}
 		},
-		PackageProvidesFn: func(p alpm.IPackage) []alpm.Depend { return []alpm.Depend{} },
-		PackageDependsFn:  func(p alpm.IPackage) []alpm.Depend { return []alpm.Depend{} },
+		PackageProvidesFn: func(p alpm.Package) []alpm.Depend { return []alpm.Depend{} },
+		PackageDependsFn:  func(p alpm.Package) []alpm.Depend { return []alpm.Depend{} },
 		LocalPackagesFn: func() []mock.IPackage {
 			return []mock.IPackage{
 				&mock.Package{
@@ -143,7 +143,7 @@ func TestIntegrationCleanAUR(t *testing.T) {
 	}
 
 	dbExc := &mock.DBExecutor{
-		PackageOptionalDependsFn: func(i alpm.IPackage) []alpm.Depend {
+		PackageOptionalDependsFn: func(i alpm.Package) []alpm.Depend {
 			if i.Name() == "linux" {
 				return []alpm.Depend{
 					{
@@ -154,10 +154,10 @@ func TestIntegrationCleanAUR(t *testing.T) {
 
 			return []alpm.Depend{}
 		},
-		PackageProvidesFn: func(p alpm.IPackage) []alpm.Depend { return []alpm.Depend{} },
-		PackageDependsFn:  func(p alpm.IPackage) []alpm.Depend { return []alpm.Depend{} },
-		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-			return map[string]alpm.IPackage{
+		PackageProvidesFn: func(p alpm.Package) []alpm.Depend { return []alpm.Depend{} },
+		PackageDependsFn:  func(p alpm.Package) []alpm.Depend { return []alpm.Depend{} },
+		InstalledRemotePackagesFn: func() map[string]alpm.Package {
+			return map[string]alpm.Package{
 				"zoom": &mock.Package{
 					PName:    "zoom",
 					PVersion: "6.5.8-1",

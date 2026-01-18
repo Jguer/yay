@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

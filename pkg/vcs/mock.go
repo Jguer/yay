@@ -4,7 +4,7 @@ import (
 	"context"
 	"slices"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	gosrc "github.com/Morganamilo/go-srcinfo"
 )
 
@@ -31,5 +31,5 @@ func (m *Mock) Load() error {
 	return nil
 }
 
-func (m *Mock) CleanOrphans(pkgs map[string]alpm.IPackage) {
+func (m *Mock) CleanOrphans(pkgs map[string]alpm.Package) {
 }

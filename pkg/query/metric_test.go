@@ -27,7 +27,7 @@ func TestSeparateSourceScore_UsesRepoOrderEvenlyDistributed(t *testing.T) {
 		assert.InDelta(t, 31.6, a.separateSourceScore("extra", sim), delta)
 		assert.InDelta(t, 18.3, a.separateSourceScore("community", sim), delta)
 		assert.InDelta(t, 5.0, a.separateSourceScore("multilib", sim), delta)
-		assert.Equal(t, 0.0, a.separateSourceScore(sourceAUR, sim))
+		assert.Equal(t, 0.0, a.separateSourceScore("aur", sim))
 	})
 
 	t.Run("arch arm repos (core/extra/alarm/aur)", func(t *testing.T) {
@@ -41,7 +41,6 @@ func TestSeparateSourceScore_UsesRepoOrderEvenlyDistributed(t *testing.T) {
 		assert.InDelta(t, 45.0, a.separateSourceScore("core", sim), delta)
 		assert.InDelta(t, 31.6, a.separateSourceScore("extra", sim), delta)
 		assert.InDelta(t, 18.3, a.separateSourceScore("alarm", sim), delta)
-		assert.InDelta(t, 5.0, a.separateSourceScore("aur", sim), delta)
-		assert.Equal(t, 0.0, a.separateSourceScore(sourceAUR, sim))
+		assert.Equal(t, 0.0, a.separateSourceScore("aur", sim))
 	})
 }

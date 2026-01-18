@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/completion"

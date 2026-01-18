@@ -10,6 +10,8 @@ const (
 	nDefault = "n"
 )
 
+
+
 // SplitDBFromName split apart db/package to db and package.
 func SplitDBFromName(pkg string) (db, name string) {
 	split := strings.SplitN(pkg, "/", 2)

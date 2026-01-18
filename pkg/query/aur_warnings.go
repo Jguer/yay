@@ -6,7 +6,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -25,7 +25,7 @@ func NewWarnings(logger *text.Logger) *AURWarnings {
 	return &AURWarnings{log: logger}
 }
 
-func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.IPackage, aurPkg *aur.Pkg) {
+func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.Package, aurPkg *aur.Pkg) {
 	name := aurPkg.Name
 	pkg, ok := remote[name]
 	if !ok {
@@ -53,7 +53,7 @@ func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.IPackage, aurP
 }
 
 func (warnings *AURWarnings) CalculateMissing(remoteNames []string,
-	remote map[string]alpm.IPackage, aurData map[string]*aur.Pkg,
+	remote map[string]alpm.Package, aurData map[string]*aur.Pkg,
 ) {
 	for _, name := range remoteNames {
 		if _, ok := aurData[name]; !ok && !remote[name].ShouldIgnore() {

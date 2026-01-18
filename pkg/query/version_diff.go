@@ -6,7 +6,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/text"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 )
 
 func GetVersionDiff(oldVersion, newVersion string) (left, right string) {
@@ -74,6 +74,6 @@ func isDevelName(name string) bool {
 	return strings.Contains(name, "-always-")
 }
 
-func isDevelPackage(pkg alpm.IPackage) bool {
+func isDevelPackage(pkg alpm.Package) bool {
 	return isDevelName(pkg.Name()) || isDevelName(pkg.Base())
 }

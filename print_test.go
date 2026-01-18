@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/Jguer/aur"
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,8 +48,8 @@ func TestPrintUpdateList(t *testing.T) {
 		ReposFn: func() []string {
 			return []string{"core"}
 		},
-		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-			return map[string]alpm.IPackage{
+		InstalledRemotePackagesFn: func() map[string]alpm.Package {
+			return map[string]alpm.Package{
 				"vosk-api": &mock.Package{
 					PName:    "vosk-api",
 					PVersion: "0.3.43-1",
@@ -108,8 +108,8 @@ func TestPrintUpdateList(t *testing.T) {
 		ReposFn: func() []string {
 			return []string{"core"}
 		},
-		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-			return map[string]alpm.IPackage{
+		InstalledRemotePackagesFn: func() map[string]alpm.Package {
+			return map[string]alpm.Package{
 				"vosk-api": &mock.Package{
 					PName:    "vosk-api",
 					PVersion: "0.3.43-1",

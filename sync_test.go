@@ -15,7 +15,7 @@ import (
 	"testing"
 
 	"github.com/Jguer/aur"
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -84,8 +84,8 @@ func TestSyncUpgrade(t *testing.T) {
 		ReposFn: func() []string {
 			return []string{"core"}
 		},
-		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-			return map[string]alpm.IPackage{}
+		InstalledRemotePackagesFn: func() map[string]alpm.Package {
+			return map[string]alpm.Package{}
 		},
 		InstalledRemotePackageNamesFn: func() []string {
 			return []string{}
@@ -196,8 +196,8 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 		ReposFn: func() []string {
 			return []string{"core"}
 		},
-		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-			return map[string]alpm.IPackage{}
+		InstalledRemotePackagesFn: func() map[string]alpm.Package {
+			return map[string]alpm.Package{}
 		},
 		InstalledRemotePackageNamesFn: func() []string {
 			return []string{}
@@ -307,8 +307,8 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 		ReposFn: func() []string {
 			return []string{"core"}
 		},
-		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-			return map[string]alpm.IPackage{}
+		InstalledRemotePackagesFn: func() map[string]alpm.Package {
+			return map[string]alpm.Package{}
 		},
 		InstalledRemotePackageNamesFn: func() []string {
 			return []string{}
@@ -481,8 +481,8 @@ pkgname = python-vosk
 		SyncSatisfierFn: func(s string) mock.IPackage {
 			return nil
 		},
-		InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-			return map[string]alpm.IPackage{
+		InstalledRemotePackagesFn: func() map[string]alpm.Package {
+			return map[string]alpm.Package{
 				"vosk-api": &mock.Package{
 					PName:    "vosk-api",
 					PVersion: "0.3.43-1",
@@ -681,8 +681,8 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 				ReposFn: func() []string {
 					return []string{"core"}
 				},
-				InstalledRemotePackagesFn: func() map[string]alpm.IPackage {
-					return map[string]alpm.IPackage{}
+				InstalledRemotePackagesFn: func() map[string]alpm.Package {
+					return map[string]alpm.Package{}
 				},
 				InstalledRemotePackageNamesFn: func() []string {
 					return []string{}

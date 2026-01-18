@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	aur "github.com/Jguer/aur"
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
@@ -242,7 +242,13 @@ func hangingPackages(removeOptional bool, dbExecutor db.Executor) (hanging []str
 
 func getFolderSize(path string) (size int64) {
 	_ = filepath.WalkDir(path, func(p string, entry fs.DirEntry, err error) error {
-		info, _ := entry.Info()
+		if err != nil || entry == nil {
+			return nil
+		}
+		info, infoErr := entry.Info()
+		if infoErr != nil || info == nil {
+			return nil
+		}
 		size += info.Size()
 		return nil
 	})

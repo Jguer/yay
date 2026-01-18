@@ -9,7 +9,7 @@ import (
 	"unicode"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 	"github.com/adrg/strutil"
 	"github.com/adrg/strutil/metrics"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -20,8 +20,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
-
-const sourceAUR = "AUR"
 
 type SearchVerbosity int
 
@@ -198,7 +196,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 	}
 	sortableResults.sortByFunc = sortableResults.GetSortFunc(s.sortBy, s.bottomUp)
 
-	var repoResults []alpm.IPackage
+	var repoResults []alpm.Package
 	if s.targetMode.AtLeastRepo() {
 		repoResults = dbExecutor.SyncPackages(pkgS...)
 
@@ -210,7 +208,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 			s.queryMap[dbName][repoResults[i].Name()] = repoResults[i]
 
-			rawProvides := repoResults[i].Provides().Slice()
+			rawProvides := repoResults[i].Provides()
 
 			provides := make([]string, len(rawProvides))
 			for j := range rawProvides {
@@ -234,7 +232,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 	if s.targetMode.AtLeastAUR() {
 		var aurResults []aur.Pkg
 		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
-		dbName := sourceAUR
+		dbName := "aur"
 
 		for i := range aurResults {
 			if s.queryMap[dbName] == nil {
@@ -297,7 +295,7 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 		switch pPkg := pkg.(type) {
 		case aur.Pkg:
 			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults)
-		case alpm.IPackage:
+		case alpm.Package:
 			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults)
 		}
 

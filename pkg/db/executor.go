@@ -3,13 +3,13 @@ package db
 import (
 	"time"
 
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 type (
-	IPackage = alpm.IPackage
+	IPackage = alpm.Package
 	Depend   = alpm.Depend
 )
 
@@ -30,7 +30,7 @@ type Upgrade struct {
 }
 
 type SyncUpgrade struct {
-	Package      alpm.IPackage
+	Package      alpm.Package
 	LocalVersion string
 	Reason       alpm.PkgReason
 }

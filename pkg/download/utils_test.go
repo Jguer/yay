@@ -10,9 +10,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/db/mock"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 )
 
@@ -53,14 +54,12 @@ func (c *testGitBuilder) Capture(cmd *exec.Cmd) (stdout, stderr string, err erro
 
 type (
 	testDB struct {
-		alpm.IDB
+		alpm.Database
 		name string
 	}
 	testPackage struct {
-		db.IPackage
-		name string
-		base string
-		db   *testDB
+		*mock.Package
+		db *testDB
 	}
 	testDBSearcher struct {
 		absPackagesDB map[string]string
@@ -78,24 +77,18 @@ func (d *testDB) Name() string {
 	return d.name
 }
 
-func (p *testPackage) Name() string {
-	return p.name
-}
-
-func (p *testPackage) Base() string {
-	return p.base
-}
-
-func (p *testPackage) DB() alpm.IDB {
+func (p *testPackage) DB() alpm.Database {
 	return p.db
 }
 
 func (d *testDBSearcher) SyncPackage(name string) db.IPackage {
 	if v, ok := d.absPackagesDB[name]; ok {
 		return &testPackage{
-			name: name,
-			base: name,
-			db:   &testDB{name: v},
+			Package: &mock.Package{
+				PName: name,
+				PBase: name,
+			},
+			db: &testDB{name: v},
 		}
 	}
 
@@ -105,9 +98,11 @@ func (d *testDBSearcher) SyncPackage(name string) db.IPackage {
 func (d *testDBSearcher) SyncPackageFromDB(name string, db string) db.IPackage {
 	if v, ok := d.absPackagesDB[name]; ok && v == db {
 		return &testPackage{
-			name: name,
-			base: name,
-			db:   &testDB{name: v},
+			Package: &mock.Package{
+				PName: name,
+				PBase: name,
+			},
+			db: &testDB{name: v},
 		}
 	}
 

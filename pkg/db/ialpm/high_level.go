@@ -1,7 +1,7 @@
 package ialpm
 
 import (
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -9,7 +9,7 @@ import (
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively.
 func (ae *AlpmExecutor) getPackageNamesBySource() {
 	if ae.installedRemotePkgMap == nil {
-		ae.installedRemotePkgMap = map[string]alpm.IPackage{}
+		ae.installedRemotePkgMap = map[string]alpm.Package{}
 	}
 	for _, localpkg := range ae.LocalPackages() {
 		pkgName := localpkg.Name()
@@ -25,7 +25,7 @@ func (ae *AlpmExecutor) getPackageNamesBySource() {
 		"sync_len", len(ae.installedSyncPkgNames), "remote_len", len(ae.installedRemotePkgNames))
 }
 
-func (ae *AlpmExecutor) InstalledRemotePackages() map[string]alpm.IPackage {
+func (ae *AlpmExecutor) InstalledRemotePackages() map[string]alpm.Package {
 	if ae.installedRemotePkgMap == nil {
 		ae.getPackageNamesBySource()
 	}

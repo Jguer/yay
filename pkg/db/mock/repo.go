@@ -1,29 +1,15 @@
 package mock
 
 import (
+	"io"
 	"time"
 
-	alpm "github.com/Jguer/go-alpm/v2"
+	alpm "github.com/Jguer/dyalpm"
 )
 
+// DependList is a lightweight helper for test fixtures.
 type DependList struct {
-	Depends []Depend
-}
-
-func (d DependList) Slice() []alpm.Depend {
-	return d.Depends
-}
-
-func (d DependList) ForEach(f func(*alpm.Depend) error) error {
-	for i := range d.Depends {
-		dep := &d.Depends[i]
-		err := f(dep)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	Depends []alpm.Depend
 }
 
 type Package struct {
@@ -37,12 +23,12 @@ type Package struct {
 	PSize         int64
 	PVersion      string
 	PReason       alpm.PkgReason
-	PDepends      alpm.IDependList
-	PProvides     alpm.IDependList
+	PDepends      DependList
+	PProvides     DependList
 	PArchitecture string
 }
 
-var _ alpm.IPackage = (*Package)(nil)
+var _ alpm.Package = (*Package)(nil)
 
 func (p *Package) Base() string {
 	return p.PBase
@@ -52,7 +38,7 @@ func (p *Package) BuildDate() time.Time {
 	return p.PBuildDate
 }
 
-func (p *Package) DB() alpm.IDB {
+func (p *Package) DB() alpm.Database {
 	return p.PDB
 }
 
@@ -102,35 +88,32 @@ func (p *Package) Architecture() string {
 }
 
 // Backup returns a list of package backups.
-func (p *Package) Backup() alpm.BackupList {
+func (p *Package) Backup() []alpm.Backup {
 	panic("not implemented")
 }
 
 // Conflicts returns the conflicts of the package as a DependList.
-func (p *Package) Conflicts() alpm.IDependList {
+func (p *Package) Conflicts() []alpm.Depend {
 	panic("not implemented")
 }
 
 // Depends returns the package's dependency list.
-func (p *Package) Depends() alpm.IDependList {
-	if p.PDepends != nil {
-		return p.PDepends
-	}
-	return alpm.DependList{}
+func (p *Package) Depends() []alpm.Depend {
+	return p.PDepends.Depends
 }
 
 // Depends returns the package's optional dependency list.
-func (p *Package) OptionalDepends() alpm.IDependList {
+func (p *Package) OptionalDepends() []alpm.Depend {
 	panic("not implemented")
 }
 
 // Depends returns the package's check dependency list.
-func (p *Package) CheckDepends() alpm.IDependList {
+func (p *Package) CheckDepends() []alpm.Depend {
 	panic("not implemented")
 }
 
 // Depends returns the package's make dependency list.
-func (p *Package) MakeDepends() alpm.IDependList {
+func (p *Package) MakeDepends() []alpm.Depend {
 	panic("not implemented")
 }
 
@@ -145,7 +128,7 @@ func (p *Package) ContainsFile(path string) (alpm.File, error) {
 }
 
 // Groups returns the groups the package belongs to.
-func (p *Package) Groups() alpm.StringList {
+func (p *Package) Groups() []string {
 	panic("not implemented")
 }
 
@@ -155,7 +138,7 @@ func (p *Package) InstallDate() time.Time {
 }
 
 // Licenses returns the package license list.
-func (p *Package) Licenses() alpm.StringList {
+func (p *Package) Licenses() []string {
 	panic("not implemented")
 }
 
@@ -170,11 +153,8 @@ func (p *Package) Packager() string {
 }
 
 // Provides returns DependList of packages provides by package.
-func (p *Package) Provides() alpm.IDependList {
-	if p.PProvides == nil {
-		return alpm.DependList{}
-	}
-	return p.PProvides
+func (p *Package) Provides() []alpm.Depend {
+	return p.PProvides.Depends
 }
 
 // Origin returns package origin.
@@ -183,7 +163,7 @@ func (p *Package) Origin() alpm.PkgFrom {
 }
 
 // Replaces returns a DependList with the packages this package replaces.
-func (p *Package) Replaces() alpm.IDependList {
+func (p *Package) Replaces() []alpm.Depend {
 	panic("not implemented")
 }
 
@@ -193,19 +173,19 @@ func (p *Package) URL() string {
 }
 
 // ComputeRequiredBy returns the names of reverse dependencies of a package.
-func (p *Package) ComputeRequiredBy() []string {
+func (p *Package) ComputeRequiredBy() ([]string, error) {
 	panic("not implemented")
 }
 
 // ComputeOptionalFor returns the names of packages that optionally
 // require the given package.
-func (p *Package) ComputeOptionalFor() []string {
+func (p *Package) ComputeOptionalFor() ([]string, error) {
 	panic("not implemented")
 }
 
 // SyncNewVersion checks if there is a new version of the
 // package in a given DBlist.
-func (p *Package) SyncNewVersion(l alpm.IDBList) alpm.IPackage {
+func (p *Package) SyncNewVersion(dbs []alpm.Database) alpm.Package {
 	panic("not implemented")
 }
 
@@ -213,8 +193,57 @@ func (p *Package) Type() string {
 	panic("not implemented")
 }
 
+func (p *Package) CheckMD5Sum() error {
+	panic("not implemented")
+}
+
+func (p *Package) CheckPGPSignature() (alpm.SigList, error) {
+	panic("not implemented")
+}
+
+func (p *Package) Contains(path string) bool {
+	panic("not implemented")
+}
+
+func (p *Package) Free() error {
+	return nil
+}
+
+// New methods required by dyalpm refactoring
+func (p *Package) HasScriptlet() bool {
+	return false
+}
+
+func (p *Package) DownloadSize() int64 {
+	return 0
+}
+
+func (p *Package) NativeHandle() alpm.Handle {
+	return nil
+}
+
+func (p *Package) Sig() string {
+	return ""
+}
+
+func (p *Package) PkgValidation() alpm.PkgValidation {
+	return alpm.PkgValidationUnknown
+}
+
+func (p *Package) XData() string {
+	return ""
+}
+
+func (p *Package) Changelog() (io.ReadCloser, error) {
+	return nil, nil
+}
+
+func (p *Package) SyncGetNewVersion(dbsSync []alpm.Database) alpm.Package {
+	return nil
+}
+
 type DB struct {
-	alpm.IDB
+	alpm.Database
 	name string
 }
 
@@ -224,4 +253,24 @@ func NewDB(name string) *DB {
 
 func (d *DB) Name() string {
 	return d.name
+}
+
+func (d *DB) Pkg(name string) alpm.Package {
+	return nil
+}
+
+func (d *DB) PkgCache() alpm.PackageIterator {
+	return alpm.PackageIterator{}
+}
+
+func (d *DB) Search(needles []string) alpm.PackageIterator {
+	return alpm.PackageIterator{}
+}
+
+func (d *DB) SetServers(servers []string) error {
+	return nil
+}
+
+func (d *DB) SetUsage(usage int) error {
+	return nil
 }
