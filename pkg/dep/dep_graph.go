@@ -158,6 +158,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 
 			fallthrough
 		case "aur":
+		case "AUR":
 			aurTargets = append(aurTargets, target.Name)
 		default:
 			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
