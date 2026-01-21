@@ -173,7 +173,12 @@ func (installer *Installer) handleLayer(ctx context.Context,
 					aurExp.Add(name)
 				}
 			case dep.Dep, dep.MakeDep, dep.CheckDep:
-				aurDeps.Add(name)
+				// Only apply --asexplicit to packages that are explicitly targeted
+				if cmdArgs.ExistsArg("asexplicit", "asexp") && installer.origTargets.Contains(name) {
+					aurExp.Add(name)
+				} else {
+					aurDeps.Add(name)
+				}
 			}
 		case dep.Sync:
 			if info.Upgrade {
@@ -195,7 +200,12 @@ func (installer *Installer) handleLayer(ctx context.Context,
 					syncExp.Add(compositePkgName)
 				}
 			case dep.Dep, dep.MakeDep, dep.CheckDep:
-				syncDeps.Add(compositePkgName)
+				// Only apply --asexplicit to packages that are explicitly targeted
+				if cmdArgs.ExistsArg("asexplicit", "asexp") && installer.origTargets.Contains(name) {
+					syncExp.Add(compositePkgName)
+				} else {
+					syncDeps.Add(compositePkgName)
+				}
 			}
 		}
 	}

@@ -1536,3 +1536,151 @@ func TestInstaller_KeepSrc(t *testing.T) {
 		})
 	}
 }
+
+// TestInstaller_InstallAsExplicit tests that --asexplicit flag only affects
+// targeted packages, not their dependencies. This is a regression test for
+// the bug where --asexplicit was ignored when reinstalling packages previously
+// installed as dependencies.
+func TestInstaller_InstallAsExplicit(t *testing.T) {
+	t.Parallel()
+
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	tmpDir := t.TempDir()
+
+	type testCase struct {
+		desc        string
+		cmdArgs     func() *parser.Arguments
+		targets     []map[string]*dep.InstallInfo
+		wantShow    []string
+		wantCapture []string
+	}
+
+	testCases := []testCase{
+		{
+			desc: "reinstall dep as explicit with --asexplicit (AUR)",
+			cmdArgs: func() *parser.Arguments {
+				args := parser.MakeArguments()
+				args.AddArg("asexplicit")
+				args.AddTarget("yay")
+				return args
+			},
+			targets: []map[string]*dep.InstallInfo{
+				{
+					"yay": {
+						Source:      dep.AUR,
+						Reason:      dep.Dep,
+						Version:     "91.0.0-1",
+						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
+						AURBase:     ptrString("yay"),
+					},
+				},
+			},
+			wantShow: []string{
+				"makepkg --nobuild --ignorearch",
+				"makepkg --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"pacman -U --config -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
+				"pacman -D --asexplicit -q --config -- yay",
+			},
+			wantCapture: []string{"makepkg --packagelist"},
+		},
+		{
+			desc: "reinstall dep as explicit with --asexplicit (Sync)",
+			cmdArgs: func() *parser.Arguments {
+				args := parser.MakeArguments()
+				args.AddArg("asexplicit")
+				args.AddTarget("linux")
+				return args
+			},
+			targets: []map[string]*dep.InstallInfo{
+				{
+					"linux": {
+						Source:     dep.Sync,
+						Reason:     dep.Dep,
+						Version:    "17.0.0-1",
+						SyncDBName: ptrString("core"),
+					},
+				},
+			},
+			wantShow: []string{
+				"pacman -S --config /etc/pacman.conf -- core/linux",
+				"pacman -D -q --asexplicit --config /etc/pacman.conf -- linux",
+			},
+			wantCapture: []string{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(td *testing.T) {
+pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
+
+captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+return pkgTar, "", nil
+}
+
+showOverride := func(cmd *exec.Cmd) error {
+if strings.Contains(cmd.String(), "makepkg -f --noconfirm") && cmd.Dir == tmpDir {
+					f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+					require.NoError(td, err)
+					require.NoError(td, f.Close())
+				}
+				return nil
+			}
+
+			isCorrectInstalledOverride := func(string, string) bool {
+				return false
+			}
+
+			mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFn: isCorrectInstalledOverride}
+			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+			cmdBuilder := &exe.CmdBuilder{
+				MakepkgBin:       makepkgBin,
+				SudoBin:          "su",
+				PacmanBin:        pacmanBin,
+				PacmanConfigPath: "/etc/pacman.conf",
+				Runner:           mockRunner,
+				SudoLoopEnabled:  false,
+			}
+
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				parser.RebuildModeNo, false, newTestLogger())
+
+			cmdArgs := tc.cmdArgs()
+
+			pkgBuildDirs := map[string]string{
+				"yay": tmpDir,
+			}
+
+			errI := installer.Install(context.Background(), cmdArgs, tc.targets, pkgBuildDirs, []string{}, false)
+			require.NoError(td, errI)
+
+			require.Len(td, mockRunner.ShowCalls, len(tc.wantShow))
+			require.Len(td, mockRunner.CaptureCalls, len(tc.wantCapture))
+
+			for i, call := range mockRunner.ShowCalls {
+				show := call.Args[0].(*exec.Cmd).String()
+				show = strings.ReplaceAll(show, tmpDir, "/testdir")
+				show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+				show = strings.ReplaceAll(show, pacmanBin, "pacman")
+
+				assert.Subset(td, strings.Split(show, " "), strings.Split(tc.wantShow[i], " "), show)
+			}
+
+			for i, call := range mockRunner.CaptureCalls {
+				capture := call.Args[0].(*exec.Cmd).String()
+				capture = strings.ReplaceAll(capture, tmpDir, "/testdir")
+				capture = strings.ReplaceAll(capture, makepkgBin, "makepkg")
+				capture = strings.ReplaceAll(capture, pacmanBin, "pacman")
+				assert.Subset(td, strings.Split(capture, " "), strings.Split(tc.wantCapture[i], " "), capture)
+			}
+		})
+	}
+}
