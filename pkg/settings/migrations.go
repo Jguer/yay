@@ -39,9 +39,30 @@ func (migration *configProviderMigration) TargetVersion() string {
 	return "11.2.1"
 }
 
+type configSortByMigration struct{}
+
+func (migration *configSortByMigration) String() string {
+	return gotext.Get("Reset 'sortby' setting to default")
+}
+
+func (migration *configSortByMigration) Do(config *Configuration) bool {
+	if config.SortBy != "" {
+		config.SortBy = ""
+
+		return true
+	}
+
+	return false
+}
+
+func (migration *configSortByMigration) TargetVersion() string {
+	return "13.0.0"
+}
+
 func DefaultMigrations() []configMigration {
 	return []configMigration{
 		&configProviderMigration{},
+		&configSortByMigration{},
 	}
 }
 
