@@ -1620,14 +1620,14 @@ func TestInstaller_InstallAsExplicit(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(td *testing.T) {
-pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
+			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
 
-captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
-return pkgTar, "", nil
-}
+			captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+				return pkgTar, "", nil
+			}
 
-showOverride := func(cmd *exec.Cmd) error {
-if strings.Contains(cmd.String(), "makepkg -f --noconfirm") && cmd.Dir == tmpDir {
+			showOverride := func(cmd *exec.Cmd) error {
+				if strings.Contains(cmd.String(), "makepkg -f --noconfirm") && cmd.Dir == tmpDir {
 					f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
 					require.NoError(td, err)
 					require.NoError(td, f.Close())
