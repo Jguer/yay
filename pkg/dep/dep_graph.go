@@ -38,7 +38,7 @@ func (i *InstallInfo) String() string {
 }
 
 type (
-	Reason uint
+	Reason int
 	Source int
 )
 

@@ -93,8 +93,12 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle alpm.Handle) error 
 			return err
 		}
 
-		alpmDB.SetServers(repo.Servers)
-		alpmDB.SetUsage(int(toUsage(repo.Usage)))
+		if err := alpmDB.SetServers(repo.Servers); err != nil {
+			return err
+		}
+		if err := alpmDB.SetUsage(int(toUsage(repo.Usage))); err != nil {
+			return err
+		}
 	}
 
 	if err := alpmHandle.SetCacheDirs(pacmanConf.CacheDir); err != nil {
@@ -251,7 +255,9 @@ func (ae *AlpmExecutor) RefreshHandle() error {
 		return errConf
 	}
 
-	alpmSetQuestionCallback(alpmHandle, ae.questionCallback())
+	if err := alpmSetQuestionCallback(alpmHandle, ae.questionCallback()); err != nil {
+		return err
+	}
 	alpmSetLogCallback(alpmHandle, ae.logCallback())
 	ae.handle = alpmHandle
 	ae.syncDBsCache = nil
@@ -294,9 +300,7 @@ func (ae *AlpmExecutor) SyncSatisfier(pkgName string) alpm.Package {
 	}
 	// Use FindDBSatisfier across sync databases
 	dbSlice := make([]alpm.Database, len(dbs))
-	for i, db := range dbs {
-		dbSlice[i] = db
-	}
+	copy(dbSlice, dbs)
 	return ae.handle.FindDBSatisfier(dbSlice, pkgName)
 }
 
@@ -458,12 +462,7 @@ func (ae *AlpmExecutor) SyncUpgrades(enableDowngrade bool) (
 }
 
 func (ae *AlpmExecutor) BiggestPackages() []alpm.Package {
-	localPackages := []alpm.Package{}
-	for _, pkg := range ae.localDB.PkgCache().SortBySize() {
-		localPackages = append(localPackages, pkg)
-	}
-
-	return localPackages
+	return append([]alpm.Package{}, ae.localDB.PkgCache().SortBySize()...)
 }
 
 func (ae *AlpmExecutor) LastBuildTime() time.Time {
@@ -515,8 +514,8 @@ func alpmSetLogCallback(alpmHandle alpm.Handle, cb func(alpm.LogLevel, string)) 
 	_ = cb
 }
 
-func alpmSetQuestionCallback(alpmHandle alpm.Handle, cb func(alpm.QuestionAny)) {
-	alpmHandle.SetQuestionCallbackFunc(func(q alpm.Question) {
+func alpmSetQuestionCallback(alpmHandle alpm.Handle, cb func(alpm.QuestionAny)) error {
+	return alpmHandle.SetQuestionCallbackFunc(func(q alpm.Question) {
 		cb(alpm.QuestionAny{Question: q})
 	})
 }
