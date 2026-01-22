@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	yayVersion = "12.5.3"            // To be set by compiler.
+	yayVersion = "13.0.0"            // To be set by compiler.
 	localePath = "/usr/share/locale" // To be set by compiler.
 )
 
