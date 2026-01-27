@@ -14,10 +14,11 @@
 # Vladislav Grechannik, 2024
 # ratijas, 2024
 # Vladimir Yerilov, 2025
+# Maxim Tyuterev, 2026
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Vladimir Yerilov, 2025\n"
+"Last-Translator: Maxim Tyuterev, 2026\n"
 "Language-Team: Russian (Russia) (https://app.transifex.com/yay-1/teams/123732/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -331,9 +332,13 @@ msgstr "Отсутствующие в AUR пакеты для отладки:"
 msgid "Name"
 msgstr "Название"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Не найден пакет AUR для"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "нужен для"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
