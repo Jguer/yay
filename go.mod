@@ -16,6 +16,7 @@ require (
 	golang.org/x/sys v0.40.0
 	golang.org/x/term v0.39.0
 	gopkg.in/h2non/gock.v1 v1.1.2
+	gopkg.in/ini.v1 v1.67.1
 )
 
 require (
@@ -26,7 +27,7 @@ require (
 	github.com/itchyny/gojq v0.12.18 // indirect
 	github.com/itchyny/timefmt-go v0.1.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/ohler55/ojg v1.27.0 // indirect
+	github.com/ohler55/ojg v1.28.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
