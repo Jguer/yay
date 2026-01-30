@@ -14,7 +14,7 @@ import (
 )
 
 // NeedsUpdate checks if the completion cache needs to be regenerated.
-// Returns true if the file doesn't exist, is older than interval days, or force is true.
+// Returns true if the file doesn't exist, is older than interval days, is empty, or force is true.
 func NeedsUpdate(completionPath string, interval int, force bool) bool {
 	if force {
 		return true
@@ -22,6 +22,11 @@ func NeedsUpdate(completionPath string, interval int, force bool) bool {
 
 	info, err := os.Stat(completionPath)
 	if os.IsNotExist(err) {
+		return true
+	}
+
+	// If the file is empty or invalid, regenerate it
+	if info.Size() == 0 {
 		return true
 	}
 

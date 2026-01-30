@@ -210,6 +210,18 @@ func TestNeedsUpdate(t *testing.T) {
 			force:          false,
 			expectedResult: false,
 		},
+		{
+			name: "empty file returns true",
+			setupFile: func(t *testing.T, path string) {
+				t.Helper()
+				// Create an empty file
+				err := os.WriteFile(path, []byte(""), 0o600)
+				require.NoError(t, err)
+			},
+			interval:       7,
+			force:          false,
+			expectedResult: true,
+		},
 	}
 
 	for _, tt := range tests {
