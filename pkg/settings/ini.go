@@ -13,7 +13,7 @@ const SystemConfigPath = "/etc/yay.conf"
 
 // loadINI parses an INI configuration file and applies values to the Configuration.
 // It silently returns nil if the file doesn't exist.
-// Uses struct tags for mapping (e.g., `ini:"aururl"`).
+// Uses struct tags for mapping (e.g., `ini:"AurUrl"`).
 func (c *Configuration) loadINI(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil
