@@ -80,11 +80,6 @@ func main() {
 		return
 	}
 
-	if errS := cfg.RunMigrations(fallbackLog,
-		settings.DefaultMigrations(), configPath, yayVersion); errS != nil {
-		fallbackLog.Errorln(errS)
-	}
-
 	cmdArgs := parser.MakeArguments()
 
 	// Parse command line

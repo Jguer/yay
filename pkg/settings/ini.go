@@ -3,6 +3,7 @@ package settings
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/ini.v1"
 )
@@ -41,4 +42,32 @@ func (c *Configuration) loadINI(path string) error {
 	}
 
 	return nil
+}
+
+// SaveINI writes the configuration to an INI file at the specified path.
+func (c *Configuration) SaveINI(path string) error {
+	cfg := ini.Empty(ini.LoadOptions{
+		AllowBooleanKeys: true,
+	})
+
+	// Use [options] section for compatibility with system config
+	section, err := cfg.NewSection("options")
+	if err != nil {
+		return fmt.Errorf("failed to create INI section: %w", err)
+	}
+
+	if err := section.ReflectFrom(c); err != nil {
+		return fmt.Errorf("failed to reflect config to INI: %w", err)
+	}
+
+	// Ensure parent directory exists
+	if dir := filepath.Dir(path); dir != "" {
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			if mkErr := os.MkdirAll(dir, 0o755); mkErr != nil {
+				return fmt.Errorf("failed to create config directory: %w", mkErr)
+			}
+		}
+	}
+
+	return cfg.SaveTo(path)
 }

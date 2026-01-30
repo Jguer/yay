@@ -242,3 +242,121 @@ func TestSystemConfigPath(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "/etc/yay.conf", SystemConfigPath)
 }
+
+func TestConfigurationSaveINI(t *testing.T) {
+	t.Parallel()
+
+	t.Run("save and reload config", func(t *testing.T) {
+		t.Parallel()
+
+		cfg := DefaultConfig("test")
+		cfg.AURURL = "https://custom.aur.org"
+		cfg.BuildDir = "/custom/build"
+		cfg.Editor = "nvim"
+		cfg.Devel = true
+		cfg.SudoLoop = true
+		cfg.RequestSplitN = 150
+		cfg.BottomUp = true
+		cfg.CleanAfter = false
+
+		tmpDir := t.TempDir()
+		iniPath := filepath.Join(tmpDir, "yay.conf")
+
+		err := cfg.SaveINI(iniPath)
+		require.NoError(t, err)
+
+		// Verify file was created
+		_, err = os.Stat(iniPath)
+		require.NoError(t, err)
+
+		// Load into new config and verify values
+		cfg2 := DefaultConfig("test")
+		err = cfg2.loadINI(iniPath)
+		require.NoError(t, err)
+
+		assert.Equal(t, "https://custom.aur.org", cfg2.AURURL)
+		assert.Equal(t, "/custom/build", cfg2.BuildDir)
+		assert.Equal(t, "nvim", cfg2.Editor)
+		assert.True(t, cfg2.Devel)
+		assert.True(t, cfg2.SudoLoop)
+		assert.Equal(t, 150, cfg2.RequestSplitN)
+		assert.True(t, cfg2.BottomUp)
+		assert.False(t, cfg2.CleanAfter)
+	})
+
+	t.Run("save creates directory if not exists", func(t *testing.T) {
+		t.Parallel()
+
+		cfg := DefaultConfig("test")
+		cfg.AURURL = "https://test.aur.org"
+
+		tmpDir := t.TempDir()
+		nestedPath := filepath.Join(tmpDir, "nested", "dir", "yay.conf")
+
+		err := cfg.SaveINI(nestedPath)
+		require.NoError(t, err)
+
+		// Verify file was created
+		_, err = os.Stat(nestedPath)
+		require.NoError(t, err)
+	})
+
+	t.Run("roundtrip preserves all field types", func(t *testing.T) {
+		t.Parallel()
+
+		cfg := DefaultConfig("test")
+		// String fields
+		cfg.AURURL = "https://roundtrip.aur.org"
+		cfg.AURRPCURL = "https://roundtrip.aur.org/rpc"
+		cfg.BuildDir = "/roundtrip/build"
+		cfg.Editor = "emacs"
+		cfg.EditorFlags = "-nw"
+		cfg.SudoBin = "doas"
+		cfg.SudoFlags = "-n"
+		cfg.ReDownload = "all"
+		cfg.ReBuild = "tree"
+
+		// Integer fields
+		cfg.RequestSplitN = 75
+		cfg.CompletionInterval = 5
+		cfg.MaxConcurrentDownloads = 8
+
+		// Boolean fields
+		cfg.BottomUp = true
+		cfg.SudoLoop = false
+		cfg.Devel = true
+		cfg.CleanAfter = false
+		cfg.UseRPC = true
+		cfg.BatchInstall = true
+
+		tmpDir := t.TempDir()
+		iniPath := filepath.Join(tmpDir, "yay.conf")
+
+		err := cfg.SaveINI(iniPath)
+		require.NoError(t, err)
+
+		cfg2 := DefaultConfig("test")
+		err = cfg2.loadINI(iniPath)
+		require.NoError(t, err)
+
+		// Verify all fields
+		assert.Equal(t, cfg.AURURL, cfg2.AURURL)
+		assert.Equal(t, cfg.AURRPCURL, cfg2.AURRPCURL)
+		assert.Equal(t, cfg.BuildDir, cfg2.BuildDir)
+		assert.Equal(t, cfg.Editor, cfg2.Editor)
+		assert.Equal(t, cfg.EditorFlags, cfg2.EditorFlags)
+		assert.Equal(t, cfg.SudoBin, cfg2.SudoBin)
+		assert.Equal(t, cfg.SudoFlags, cfg2.SudoFlags)
+		assert.Equal(t, cfg.ReDownload, cfg2.ReDownload)
+		assert.Equal(t, cfg.ReBuild, cfg2.ReBuild)
+		assert.Equal(t, cfg.RequestSplitN, cfg2.RequestSplitN)
+		assert.Equal(t, cfg.CompletionInterval, cfg2.CompletionInterval)
+		assert.Equal(t, cfg.MaxConcurrentDownloads, cfg2.MaxConcurrentDownloads)
+		assert.Equal(t, cfg.BottomUp, cfg2.BottomUp)
+		assert.Equal(t, cfg.SudoLoop, cfg2.SudoLoop)
+		assert.Equal(t, cfg.Devel, cfg2.Devel)
+		assert.Equal(t, cfg.CleanAfter, cfg2.CleanAfter)
+		assert.Equal(t, cfg.UseRPC, cfg2.UseRPC)
+		assert.Equal(t, cfg.BatchInstall, cfg2.BatchInstall)
+	})
+}

@@ -7,6 +7,7 @@ import (
 
 const (
 	configFileName     string = "config.json" // configFileName holds the name of the config file.
+	iniConfigFileName  string = "yay.conf"    // iniConfigFileName holds the name of the INI config file.
 	vcsFileName        string = "vcs.json"    // vcsFileName holds the name of the vcs file.
 	completionFileName string = "completion.cache"
 	systemdCache       string = "/var/cache/yay" // systemd should handle cache creation
@@ -24,6 +25,26 @@ func GetConfigPath() string {
 		configDir := filepath.Join(configHome, ".config", "yay")
 		if err := initDir(configDir); err == nil {
 			return filepath.Join(configDir, configFileName)
+		}
+	}
+
+	return ""
+}
+
+// GetINIConfigPath returns the path to the user's INI config file (yay.conf).
+// This is used for both loading (with priority over JSON) and saving.
+func GetINIConfigPath() string {
+	if configHome := os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
+		configDir := filepath.Join(configHome, "yay")
+		if err := initDir(configDir); err == nil {
+			return filepath.Join(configDir, iniConfigFileName)
+		}
+	}
+
+	if configHome := os.Getenv("HOME"); configHome != "" {
+		configDir := filepath.Join(configHome, ".config", "yay")
+		if err := initDir(configDir); err == nil {
+			return filepath.Join(configDir, iniConfigFileName)
 		}
 	}
 

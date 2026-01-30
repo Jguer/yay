@@ -83,35 +83,15 @@ type Configuration struct {
 	ReBuild        parser.RebuildMode `json:"rebuild" ini:"ReBuild"`
 }
 
-// SaveConfig writes yay config to file.
+// Save writes yay config to INI file.
 func (c *Configuration) Save(configPath, version string) error {
-	c.Version = version
-
-	marshalledinfo, err := json.MarshalIndent(c, "", "\t")
-	if err != nil {
-		return err
+	// Use INI config path instead of JSON
+	iniPath := GetINIConfigPath()
+	if iniPath == "" {
+		return fmt.Errorf("unable to determine config path")
 	}
 
-	// https://github.com/Jguer/yay/issues/1325
-	marshalledinfo = append(marshalledinfo, '\n')
-	// https://github.com/Jguer/yay/issues/1399
-	if _, err = os.Stat(filepath.Dir(configPath)); os.IsNotExist(err) && err != nil {
-		if mkErr := os.MkdirAll(filepath.Dir(configPath), 0o755); mkErr != nil {
-			return mkErr
-		}
-	}
-
-	in, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	if _, err = in.Write(marshalledinfo); err != nil {
-		return err
-	}
-
-	return in.Sync()
+	return c.SaveINI(iniPath)
 }
 
 func (c *Configuration) expandEnv() {
@@ -241,8 +221,16 @@ func NewConfig(logger *text.Logger, configPath, version string) (*Configuration,
 		logger.Errorln(err)
 	}
 
-	// Load user JSON config (overrides system config)
+	// Load user JSON config (legacy, overrides system config)
 	newConfig.load(configPath)
+
+	// Load user INI config (takes priority over JSON when both exist)
+	userINIPath := GetINIConfigPath()
+	if userINIPath != "" {
+		if err := newConfig.loadINI(userINIPath); err != nil && logger != nil {
+			logger.Errorln(err)
+		}
+	}
 
 	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
 		newConfig.BuildDir = aurdest
