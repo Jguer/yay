@@ -44,21 +44,8 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 	)
 
 	pkgS = query.RemoveInvalidTargets(run.Logger, pkgS, run.Cfg.Mode)
-
-	expandedPackages := []string{}
-	for _, pkg := range pkgS {
-		groupPackages := dbExecutor.PackagesFromGroup(pkg)
-		if len(groupPackages) > 0 {
-			for _, p := range groupPackages {
-				expandedPackages = append(expandedPackages, p.Name())
-			}
-		} else {
-			expandedPackages = append(expandedPackages, pkg)
-		}
-	}
-	pkgS = expandedPackages
-
-	aurS, repoS := packageSlices(pkgS, run.Cfg, dbExecutor)
+	pkgS = ExpandPackages(pkgS, dbExecutor)
+	aurS, repoS := PackageSlices(pkgS, run.Cfg, dbExecutor)
 
 	if len(repoS) == 0 && len(aurS) == 0 {
 		if run.Cfg.Mode != parser.ModeRepo {
@@ -123,8 +110,25 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 	return err
 }
 
+// ExpandPackages expands group names into the packages they contain.
+func ExpandPackages(packages []string, dbExecutor db.Executor) []string {
+	expandedPackages := []string{}
+	for _, pkg := range packages {
+		groupPackages := dbExecutor.PackagesFromGroup(pkg)
+		if len(groupPackages) > 0 {
+			for _, p := range groupPackages {
+				expandedPackages = append(expandedPackages, p.Name())
+			}
+		} else {
+			expandedPackages = append(expandedPackages, pkg)
+		}
+	}
+
+	return expandedPackages
+}
+
 // PackageSlices separates an input slice into aur and repo slices.
-func packageSlices(toCheck []string, config *settings.Configuration, dbExecutor db.Executor) (aurNames, repoNames []string) {
+func PackageSlices(toCheck []string, config *settings.Configuration, dbExecutor db.Executor) (aurNames, repoNames []string) {
 	for _, _pkg := range toCheck {
 		dbName, name := text.SplitDBFromName(_pkg)
 

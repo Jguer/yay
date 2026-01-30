@@ -74,9 +74,10 @@ type Configuration struct {
 	CompletionPath string `json:"-"`
 	VCSFilePath    string `json:"-"`
 	// ConfigPath     string `json:"-"`
-	SaveConfig bool               `json:"-"`
-	Mode       parser.TargetMode  `json:"-"`
-	ReBuild    parser.RebuildMode `json:"rebuild"`
+	SaveConfig  bool               `json:"-"`
+	Mode        parser.TargetMode  `json:"-"`
+	ReBuild     parser.RebuildMode `json:"rebuild"`
+	PrintFormat string             `json:"-"`
 }
 
 // SaveConfig writes yay config to file.
@@ -238,6 +239,7 @@ func DefaultConfig(version string) *Configuration {
 		UseRPC:                 true,
 		DoubleConfirm:          true,
 		Mode:                   parser.ModeAny,
+		PrintFormat:            "%l",
 	}
 }
 

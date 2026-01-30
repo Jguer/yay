@@ -82,6 +82,9 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.SortBy = value
 	case "searchby":
 		c.SearchBy = value
+	case "print-format":
+		c.PrintFormat = value
+		return false
 	case "noconfirm":
 		NoConfirm = boolValue
 	case "config":

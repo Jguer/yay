@@ -338,8 +338,7 @@ func handleSync(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argum
 	case cmdArgs.ExistsArg("s", "search"):
 		return syncSearch(ctx, targets, dbExecutor, run.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
 	case cmdArgs.ExistsArg("p", "print", "print-format"):
-		return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
-			cmdArgs, run.Cfg.Mode, settings.NoConfirm))
+		return syncPrint(ctx, run, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("c", "clean"):
 		return syncClean(ctx, run, cmdArgs, dbExecutor)
 	case cmdArgs.ExistsArg("l", "list"):
