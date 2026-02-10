@@ -14,10 +14,11 @@
 # Manuel Schneider, 2023
 # Marethyu _, 2023
 # Severin Hamader <severin.hamader@yahoo.de>, 2025
+# 0x3C50 No, 2026
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Severin Hamader <severin.hamader@yahoo.de>, 2025\n"
+"Last-Translator: 0x3C50 No, 2026\n"
 "Language-Team: German (https://app.transifex.com/yay-1/teams/123732/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -334,9 +335,13 @@ msgstr "Fehlende AUR Debug-Pakete: "
 msgid "Name"
 msgstr "Name"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Kein AUR-Paket gefunden für"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "benötigt von"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
