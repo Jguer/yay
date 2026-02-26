@@ -76,7 +76,7 @@ msgstr "Myös %s asennetaan tätä toimenpidettä varten."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
-msgstr "%s, tarpeellinen riippuvuus seuraavalle\\: %s "
+msgstr "%s, tarpeellinen riippuvuus seuraavalle: %s "
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
