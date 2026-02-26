@@ -80,15 +80,15 @@ msgstr "%s, tarpeellinen riippuvuus seuraavalle: %s "
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
-msgstr "%s\\: Ei muutoksia -- jatketaan"
+msgstr "%s: Ei muutoksia -- jatketaan"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s\\: kohdetta ei voi käyttää valinnalla --aur -- jätetään huomiotta"
+msgstr "%s: kohdetta ei voi käyttää valinnalla --aur -- jätetään huomiotta"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s\\: kohdetta ei voi käyttää valinnalla --repo -- jätetään huomiotta"
+msgstr "%s: kohdetta ei voi käyttää valinnalla --repo -- jätetään huomiotta"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
