@@ -115,11 +115,11 @@ msgstr "(%d/%d) PKGBUILD ladattu: %s "
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) PKGBUILDin lataaminen epäonnistui\\: %s "
+msgstr "(%d/%d) PKGBUILDin lataaminen epäonnistui: %s "
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Jäsennetään SRCINFO\\: %s "
+msgstr "(%d/%d) Jäsennetään SRCINFO: %s "
 
 #: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
