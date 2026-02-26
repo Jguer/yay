@@ -230,7 +230,7 @@ msgstr "Nimellä pyydetty"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "Käskystä asennetut paketit: %s"
+msgstr "Nimellä pyydetyt, asennetut paketit: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
