@@ -176,7 +176,7 @@ msgstr "Ei sovi seuraavan kanssa yhteen"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
-msgstr "Poistetaan (%d/%d)\\: %s "
+msgstr "Poistetaan (%d/%d): %s "
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
