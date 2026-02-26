@@ -257,11 +257,11 @@ msgstr "Vanhentuneeksi merkityt AUR-paketit: "
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Vieraat asennetut paketit\\: %s"
+msgstr "Vieraat asennetut paketit: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Seuraava git-tietovaranto löytyi\\: %s "
+msgstr "Seuraava git-tietovaranto löytyi: %s "
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
