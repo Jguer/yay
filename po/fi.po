@@ -245,7 +245,7 @@ msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
 "Seuraavien pakettien asennus epäonnistui. Käyttäjältä edellytetään "
-"toimenpiteitä\\:"
+"toimenpiteitä:"
 
 #: print.go:45
 msgid "First Submitted"
@@ -253,7 +253,7 @@ msgstr "Ladattiin palveluun ensimmäistä kertaa"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Vanhentuneeksi merkityt AUR-paketit\\: "
+msgstr "Vanhentuneeksi merkityt AUR-paketit: "
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
