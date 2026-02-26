@@ -127,7 +127,7 @@ msgstr "(Asennettu)"
 
 #: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
-msgstr "(Asennettu\\: %s) "
+msgstr "(Asennettu: %s) "
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
@@ -135,7 +135,7 @@ msgstr "(Orvoksi jäänyt) "
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(Vanhentunut\\: %s) "
+msgstr "(Vanhentunut: %s) "
 
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
