@@ -216,7 +216,7 @@ msgstr "Millä haluat muokata PKGBUILD-tiedostoa?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
-msgstr "Virhe AUR-haun aikana\\: %s \n"
+msgstr "Virhe AUR-haun aikana: %s \n"
 
 #: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
