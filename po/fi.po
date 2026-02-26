@@ -595,7 +595,7 @@ msgstr "paketin päivittäminen epäonnistui; riippuvuus/nimellä pyydetty:  %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr "suora"
+msgstr "nimellä pyydetty"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
