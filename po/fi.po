@@ -156,11 +156,11 @@ msgstr ""
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Tarkista Riippuvuus"
+msgstr "Tarkista riippuvuus"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Tarkista Riippuvuudet"
+msgstr "Tarkista riippuvuudet"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
