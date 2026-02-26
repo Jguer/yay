@@ -103,15 +103,15 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s\\: aseta ympäristömuuttujat AUR_USERNAME ja AUR_PASSWORD äänestääksesi "
+"%s: aseta ympäristömuuttujat AUR_USERNAME ja AUR_PASSWORD äänestääksesi "
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) PKGBUILD ladattu ABS:stä\\: %s "
+msgstr "(%d/%d) PKGBUILD ladattu ABS:stä: %s "
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
-msgstr "(%d/%d) PKGBUILD ladattu\\: %s "
+msgstr "(%d/%d) PKGBUILD ladattu: %s "
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
