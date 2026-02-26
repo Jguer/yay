@@ -92,11 +92,11 @@ msgstr "%s: kohdetta ei voi käyttää valinnalla --repo -- jätetään huomiott
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s\\: pakettia ei päivitetä (%s => %s) "
+msgstr "%s: pakettia ei päivitetä (%s => %s) "
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s\\: paikallinen (%s) on uudempi kuin AUR:ssa (%s) "
+msgstr "%s: paikallinen (%s) on uudempi kuin AUR:ssa (%s) "
 
 #: vote.go:51
 msgid ""
