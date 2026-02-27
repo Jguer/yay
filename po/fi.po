@@ -429,7 +429,7 @@ msgstr "Etsitään päivityksiä tietokannoista..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "Vain tietovarantopaketit näytetään"
+msgstr "Vain tietovarastopaketit näytetään"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
@@ -563,7 +563,7 @@ msgstr "kohteen %s noutaminen epäonnistui: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "tietovarantopakettien asentaminen epäonnistui"
+msgstr "tietovarastopakettien asentaminen epäonnistui"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
