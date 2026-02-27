@@ -381,7 +381,7 @@ msgstr "Pois jätettävät paketit"
 
 #: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Pois jätettävät paketit (esim. \"1 2 3\", \"1-3\", \"^4\" tai tietovarannon nimi)"
+msgstr "Pois jätettävät paketit (esim. \"1 2 3\", \"1-3\", \"^4\" tai tietovarasto nimi)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -409,7 +409,7 @@ msgstr "Korvaa"
 
 #: pkg/db/ialpm/alpm.go:191 print.go:30
 msgid "Repository"
-msgstr "Tietovaranto"
+msgstr "Tietovarasto"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
