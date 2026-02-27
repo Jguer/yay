@@ -261,7 +261,7 @@ msgstr "Vieraat asennetut paketit: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Seuraava git-tietovaranto löytyi: %s "
+msgstr "Seuraava git-tietovarasto löytyi: %s "
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
