@@ -649,7 +649,7 @@ msgstr ""
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "tietovaranto ei kelpaa"
+msgstr "tietovarasto ei kelpaa"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
