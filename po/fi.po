@@ -413,7 +413,7 @@ msgstr "Tietovarasto"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
-msgstr "Tietovaranto AUR"
+msgstr "Tietovarasto AUR"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
