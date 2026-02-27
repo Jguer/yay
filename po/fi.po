@@ -699,7 +699,7 @@ msgstr "pakettia ei löytynyt AUR:ista"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "pakettia ei löytynyt tietovarannoista"
+msgstr "pakettia ei löytynyt tietovarastoista"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
