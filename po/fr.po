@@ -1,17 +1,16 @@
-# 
 # Translators:
 # Benjamin Chenebault, 2023
 # anthony tonitch <d.tonitch@gmail.com>, 2024
 # Edgar Fournival, 2024
 # J G, 2024
-# Mélanie Chauvel <aria@ariasuni.eu>, 2024
 # Sylvain Bx, 2024
 # Mathias Brugger, 2024
 # Léane GRASSER, 2024
+# ariasuni <aria@ariasuni.eu>, 2026
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Léane GRASSER, 2024\n"
+"Last-Translator: ariasuni <aria@ariasuni.eu>, 2026\n"
 "Language-Team: French (https://app.transifex.com/yay-1/teams/123732/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -329,9 +328,13 @@ msgstr "Paquets de débogage de l'AUR manquants :"
 msgid "Name"
 msgstr "Nom"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Aucun paquet trouvé sur l'AUR correspondant à"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "requis par"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
