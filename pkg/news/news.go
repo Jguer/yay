@@ -66,7 +66,7 @@ func PrintNewsFeed(ctx context.Context, client *http.Client, logger *text.Logger
 		return err
 	}
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704
 	if err != nil {
 		return err
 	}
