@@ -119,8 +119,6 @@ Permanent configuration options:
     --sudoflags           <flags> Pass arguments to sudo
     --sudoloop            Loop sudo calls in the background to avoid timeout
 
-    --timeupdate          Check packages' AUR page for changes during sysupgrade
-
 show specific options (used with -P):
     -c --complete         Used for completions
     -d --defaultconfig    Print default yay configuration

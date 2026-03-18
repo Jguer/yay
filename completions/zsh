@@ -83,7 +83,6 @@ _pacman_opts_common=(
 	'--devel[Check -git/-svn/-hg development version]'
 	'--cleanafter[Clean package sources after successful build]'
 	'--keepsrc[Keep pkg/ and src/ after building packages]'
-	'--timeupdate[Check packages modification date and version]'
 	'--separatesources[Separate query results by source, AUR and sync]'
 	'(--redownloadall --noredownload)--redownload[Always download pkgbuilds of targets]'
 	'(--redownload --noredownload)--redownloadall[Always download pkgbuilds of all AUR packages]'

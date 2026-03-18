@@ -106,7 +106,6 @@ pacman -S --needed git base-devel yay
 | `yay -Gp <AUR Package>`           | Print to stdout PKGBUILD from ABS or AUR.                                                                  |
 | `yay -Ps`                         | Print system statistics.                                                                                   |
 | `yay -Syu --devel`                | Perform system upgrade, but also check for development package updates.                                    |
-| `yay -Syu --timeupdate`           | Perform system upgrade and use PKGBUILD modification time (not version number) to determine update.        |
 | `yay -Wu <AUR Package>`           | Unvote for package (Requires setting `AUR_USERNAME` and `AUR_PASSWORD` environment variables) (yay v11.3+) |
 | `yay -Wv <AUR Package>`           | Vote for package (Requires setting `AUR_USERNAME` and `AUR_PASSWORD` environment variables). (yay v11.3+)  |
 | `yay -Y --combinedupgrade --save` | Make combined upgrade the default mode.                                                                    |

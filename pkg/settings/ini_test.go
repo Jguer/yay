@@ -93,7 +93,6 @@ MaxConcurrentDownloads = 4
 # Boolean options
 BottomUp = true
 SudoLoop = false
-TimeUpdate = yes
 Devel = no
 CleanAfter = true
 KeepSrc = false
@@ -154,7 +153,6 @@ DoubleConfirm = false
 		// Boolean options
 		assert.True(t, cfg.BottomUp)
 		assert.False(t, cfg.SudoLoop)
-		assert.True(t, cfg.TimeUpdate)
 		assert.False(t, cfg.Devel)
 		assert.True(t, cfg.CleanAfter)
 		assert.False(t, cfg.KeepSrc)

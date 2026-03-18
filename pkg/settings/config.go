@@ -58,7 +58,6 @@ type Configuration struct {
 	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads" ini:"MaxConcurrentDownloads"`
 	BottomUp               bool   `json:"bottomup" ini:"BottomUp"`
 	SudoLoop               bool   `json:"sudoloop" ini:"SudoLoop"`
-	TimeUpdate             bool   `json:"timeupdate" ini:"TimeUpdate"`
 	Devel                  bool   `json:"devel" ini:"Devel"`
 	CleanAfter             bool   `json:"cleanAfter" ini:"CleanAfter"`
 	KeepSrc                bool   `json:"keepSrc" ini:"KeepSrc"`

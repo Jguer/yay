@@ -227,7 +227,6 @@ complete -c $progname -n "not $noopt" -l doublelineresults -d 'List each search 
 complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg development version' -f
 complete -c $progname -n "not $noopt" -l cleanafter -d 'Clean package sources after successful build' -f
 complete -c $progname -n "not $noopt" -l keepsrc -d 'Keep pkg/ and src/ after building packages' -f
-complete -c $progname -n "not $noopt" -l timeupdate -d 'Check package modification date and version' -f
 complete -c $progname -n "not $noopt" -l redownload -d 'Redownload PKGBUILD of package even if up-to-date' -f
 complete -c $progname -n "not $noopt" -l redownloadall -d 'Redownload PKGBUILD of package and deps even if up-to-date' -f
 complete -c $progname -n "not $noopt" -l noredownload -d 'Do not redownload up-to-date PKGBUILDs' -f

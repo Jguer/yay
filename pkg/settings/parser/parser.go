@@ -379,7 +379,6 @@ func isArg(arg string) bool {
 	case "afterclean", "cleanafter":
 	case "keepsrc":
 	case "devel":
-	case "timeupdate":
 	case "topdown":
 	case "bottomup":
 	case "completioninterval":
