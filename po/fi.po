@@ -1,22 +1,15 @@
 # Translators:
-# Benjamin Chenebault, 2023
-# anthony tonitch <d.tonitch@gmail.com>, 2024
-# Edgar Fournival, 2024
-# J G, 2024
-# Sylvain Bx, 2024
-# Mathias Brugger, 2024
-# Léane GRASSER, 2024
-# ariasuni <aria@ariasuni.eu>, 2026
+# Joonas Miettinen, 2026
 # 
 msgid ""
 msgstr ""
-"Last-Translator: ariasuni <aria@ariasuni.eu>, 2026\n"
-"Language-Team: French (https://app.transifex.com/yay-1/teams/123732/fr/)\n"
+"Last-Translator: Joonas Miettinen, 2026\n"
+"Language-Team: Finnish (https://app.transifex.com/yay-1/teams/123732/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Language: fi\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
 #: clean.go:83
@@ -25,7 +18,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Répertoire de compilation :"
+"Kääntöhakemisto:"
 
 #: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
 msgid ""
@@ -33,396 +26,394 @@ msgid ""
 "Enter a number (default=1): "
 msgstr ""
 "\n"
-"Saisissez un nombre (valeur par défaut : 1) :"
+"Anna numero (oletusarvo=1):"
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr " (Les fichiers de compilation existent)"
+msgstr "(Kääntötiedostot ovat olemassa)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
-msgstr " (Installé)"
+msgstr "(Asennettu)"
 
 #: cmd.go:453
 msgid " [Installed]"
-msgstr " [Installé]"
+msgstr "[Asennettu]"
 
 #: cmd.go:410 vote.go:36
 msgid " there is nothing to do"
-msgstr " il n'y a rien à faire"
+msgstr "ei tehtävää"
 
 #: pkg/menus/menu.go:49
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
-msgstr "%s [A]Tous [Ab]Annuler [I]nstallés [No]nInstallés ou (1 2 3, 1-3, ^4)"
+msgstr ""
+"%s [A]Kaikki [Ab]Keskeytä [I]Asennettu [No]Ei asennettu tai (1 2 3, 1-3, ^4)"
+" "
 
 #: pkg/sync/build/installer.go:308
 msgid "%s already made -- skipping build"
-msgstr "%s déjà créé -- compilation ignorée"
+msgstr "%s on jo käännetty --- ei käännetä"
 
 #: pkg/menus/edit_menu.go:57
 msgid "%s is not set"
-msgstr "%s n'est pas définie"
+msgstr "asetusta %s ei ole asetettu"
 
 #: pkg/settings/exe/cmd_builder.go:257
 msgid "%s is present."
-msgstr "%s existe."
+msgstr "%s on olemassa."
 
 #: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
 msgid "%s is up to date -- skipping"
-msgstr "%s est à jour -- ignoré"
+msgstr "Asennuskohdetta %s ei tarvitse päivittää --- jatketaan"
 
 #: pkg/upgrade/service.go:291
 msgid "%s to upgrade/install."
-msgstr "%s à mettre à jour ou à installer."
+msgstr "%s päivittääksesi tai asentaaksesi."
 
 #: pkg/upgrade/service.go:285
 msgid "%s will also be installed for this operation."
-msgstr "%s à installer pour effectuer cette opération."
+msgstr "Myös %s asennetaan tätä toimenpidettä varten."
 
 #: pkg/sync/srcinfo/pgp/keys.go:124
 msgid "%s, required by: %s"
-msgstr "%s, nécessaire pour : %s"
+msgstr "%s, tarpeellinen riippuvuus seuraavalle: %s "
 
 #: pkg/menus/diff_menu.go:49
 msgid "%s: No changes -- skipping"
-msgstr "%s : Aucun changement -- ignoré"
+msgstr "%s: Ei muutoksia -- jatketaan"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s : la cible est incompatible avec l'option --aur -- ignoré"
+msgstr "%s: kohdetta ei voi käyttää valinnalla --aur -- jätetään huomiotta"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s : la cible est incompatible avec l'option --repo -- ignoré"
+msgstr "%s: kohdetta ei voi käyttää valinnalla --repo -- jätetään huomiotta"
 
 #: pkg/upgrade/sources.go:57
 msgid "%s: ignoring package upgrade (%s => %s)"
-msgstr "%s : mise à jour du paquet ignorée (%s => %s)"
+msgstr "%s: pakettia ei päivitetä (%s => %s) "
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr ""
-"%s : le paquet local (%s) est plus récent que le paquet disponible sur l'AUR"
-" (%s)"
+msgstr "%s: paikallinen (%s) on uudempi kuin AUR:ssa (%s) "
 
 #: vote.go:51
 msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"%s : définissez les variables d'environnement AUR_USERNAME et AUR_PASSWORD "
-"avant de pouvoir voter"
+"%s: aseta ympäristömuuttujat AUR_USERNAME ja AUR_PASSWORD äänestääksesi "
 
 #: pkg/download/unified.go:192
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
-msgstr "(%d/%d) PKGBUILD téléchargé depuis l'ABS : %s"
+msgstr "(%d/%d) PKGBUILD ladattu ABS:stä: %s "
 
 #: pkg/download/aur.go:92 pkg/download/unified.go:188
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
-msgstr "(%d/%d) PKGBUILD téléchargé : %s"
+msgstr "(%d/%d) PKGBUILD ladattu: %s "
 
 #: pkg/download/aur.go:82
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
-msgstr "(%d/%d) Échec du téléchargement du PKGBUILD : %s"
+msgstr "(%d/%d) PKGBUILDin lataaminen epäonnistui: %s "
 
 #: pkg/sync/srcinfo/service.go:109
 msgid "(%d/%d) Parsing SRCINFO: %s"
-msgstr "(%d/%d) Analyse du SRCINFO : %s"
+msgstr "(%d/%d) Jäsennetään SRCINFO: %s "
 
 #: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
-msgstr "(Installé)"
+msgstr "(Asennettu)"
 
 #: pkg/query/types.go:101 pkg/query/types.go:70
 msgid "(Installed: %s)"
-msgstr "(Installé : %s)"
+msgstr "(Asennettu: %s) "
 
 #: pkg/query/types.go:61
 msgid "(Orphaned)"
-msgstr "(Orphelin)"
+msgstr "(Orvoksi jäänyt) "
 
 #: pkg/query/types.go:65
 msgid "(Out-of-date: %s)"
-msgstr "(Obsolète : %s)"
+msgstr "(Vanhentunut: %s) "
 
 #: pkg/dep/dep_graph.go:75
 msgid "AUR"
-msgstr "AUR"
+msgstr "AUR "
 
 #: print.go:44
 msgid "AUR URL"
-msgstr "URL sur l'AUR"
+msgstr "AUR URL "
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
-msgstr "Ajoutez %s ou %s à vos variables d'environnement"
+msgstr "Lisää %s tai %s ympäristömuuttujiisi"
 
 #: main.go:60
 msgid "Avoid running yay as root/sudo."
-msgstr "Évitez d'exécuter yay en tant que root ou via sudo."
+msgstr ""
+"yay:ia ei suositella ajettavan pääkäyttäjänä tai sudo-komennon kanssa."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Dépendance de vérification"
+msgstr "Tarkista riippuvuus"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Dépendances vérif."
+msgstr "Tarkista riippuvuudet"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
-msgstr "Vérification des paquets de développement…"
+msgstr "Tarkistetaan kehityspaketit..."
 
 #: pkg/sync/workdir/clean.go:45
 msgid "Cleaning (%d/%d): %s"
-msgstr "Nettoyage (%d/%d) : %s"
+msgstr "Puhdistetaan (%d/%d): %s "
 
 #: print.go:42
 msgid "Conflicts With"
-msgstr "Est en conflit avec"
+msgstr "Ei sovi seuraavan kanssa yhteen"
 
 #: pkg/menus/clean_menu.go:62
 msgid "Deleting (%d/%d): %s"
-msgstr "Suppression (%d/%d) : %s"
+msgstr "Poistetaan (%d/%d): %s "
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
-msgstr "Dépendance"
+msgstr "Riippuvuus"
 
 #: print.go:38
 msgid "Depends On"
-msgstr "Dépend de"
+msgstr "Riippuu seuraavasta"
 
 #: print.go:33
 msgid "Description"
-msgstr "Description"
+msgstr "Kuvaus"
 
 #: pkg/menus/diff_menu.go:160
 msgid "Diffs to show?"
-msgstr "Diffs à afficher ?"
+msgstr "Näytä erot?"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr "Désactiver par défaut le paramètre \"provides\""
+msgstr "Poista asetus 'provides' käytöstä oletusarvoisesti"
 
 #: clean.go:78
 msgid "Do you want to remove ALL AUR packages from cache?"
-msgstr "Voulez-vous supprimer TOUS les paquets de l'AUR dans le cache ?"
+msgstr "Haluatko poistaa KAIKKI AUR-paketit välimuistista?"
 
 #: clean.go:95
 msgid "Do you want to remove ALL untracked AUR files?"
-msgstr ""
-"Voulez-vous supprimer TOUS les fichiers non suivis des paquets de l'AUR ?"
+msgstr "Haluatko poistaa KAIKKI seuraamattomat AUR-tiedostot?"
 
 #: clean.go:80
 msgid "Do you want to remove all other AUR packages from cache?"
-msgstr ""
-"Voulez-vous supprimer tous les autres paquets de l'AUR dans le cache ?"
+msgstr "Haluatko poistaa kaikki muut AUR-paketit välimuistista?"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
-msgstr "Modifier le PKGBUILD avec ?"
+msgstr "Millä haluat muokata PKGBUILD-tiedostoa?"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
-msgstr "Erreur lors de la recherche dans l'AUR : %s\n"
+msgstr "Virhe AUR-haun aikana: %s \n"
 
 #: pkg/upgrade/service.go:295
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
-"L'exclusion de paquets peut mener à une mise à jour partielle de votre "
-"système et pourrait le casser"
+"Pakettien jättäminen pois voi kohtaa osittaiseen päivitykseen ja voi rikkoa "
+"järjestelmiä"
 
 #: pkg/dep/dep_graph.go:60
 msgid "Explicit"
-msgstr "Explicite"
+msgstr "Nimellä pyydetty"
 
 #: print.go:91
 msgid "Explicitly installed packages: %s"
-msgstr "Paquets installés explicitement : %s"
+msgstr "Asennetut nimellä pyydetyt paketit: %s"
 
 #: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
 msgid "Failed to find AUR package for"
-msgstr "Impossible de trouver un paquet sur l'AUR correspondant à"
+msgstr "AUR-paketteja ei löytynyt seuraavalle(ille)"
 
 #: pkg/sync/build/installer.go:120
 msgid "Failed to install layer, rolling up to next layer."
-msgstr "Échec de l'installation de la couche, passage à la couche suivante."
+msgstr "Kerroksen asennus epäonnistui, siirrytään seuraavaan kerrokseen."
 
 #: pkg/sync/build/errors.go:16
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"Échec de l'installation des paquets suivants. Une intervention manuelle est "
-"requise :"
+"Seuraavien pakettien asennus epäonnistui. Käyttäjältä edellytetään "
+"toimenpiteitä:"
 
 #: print.go:45
 msgid "First Submitted"
-msgstr "Envoyé le"
+msgstr "Ladattiin palveluun ensimmäistä kertaa"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Paquets de l'AUR marqués comme obsolètes :"
+msgstr "Vanhentuneeksi merkityt AUR-paketit: "
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Paquets étrangers installés : %s"
+msgstr "Vieraat asennetut paketit: %s"
 
 #: pkg/vcs/vcs.go:144
 msgid "Found git repo: %s"
-msgstr "Dépôt Git trouvé : %s"
+msgstr "Seuraava git-tietovarasto löytyi: %s "
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "GenDB terminé. Aucun paquet n'a été installé"
+msgstr "GenDB valmistui. Yhtään pakettia ei asennettu"
 
 #: print.go:36
 msgid "Groups"
-msgstr "Groupes"
+msgstr "Ryhmät"
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
-msgstr "Importer ?"
+msgstr "Tuo?"
 
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
-msgstr "Importation des clés avec gpg…"
+msgstr "Tuodaan avaimet gpg:in avulla..."
 
 #: print.go:46
 msgid "Keywords"
-msgstr "Mots-clés"
+msgstr "Avainsanat"
 
 #: print.go:47
 msgid "Last Modified"
-msgstr "Modifié le"
+msgstr "Viimeksi muokattu"
 
 #: print.go:35
 msgid "Licenses"
-msgstr "Licences"
+msgstr "Lisenssit"
 
 #: pkg/dep/dep_graph.go:77
 msgid "Local"
-msgstr "Local"
+msgstr "Paikallinen"
 
 #: print.go:48
 msgid "Maintainer"
-msgstr "Mainteneur"
+msgstr "Ylläpitäjä"
 
 #: pkg/dep/dep_graph.go:62
 msgid "Make Dependency"
-msgstr "Dépendance de création"
+msgstr "Kääntöriippuvuus"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Dépendances créat."
+msgstr "Kääntöriippuvuudet"
 
 #: pkg/dep/dep_graph.go:79
 msgid "Missing"
-msgstr "Manquant"
+msgstr "Puuttuva(vat)"
 
 #: pkg/query/aur_warnings.go:75
 msgid "Missing AUR Debug Packages:"
-msgstr "Paquets de débogage de l'AUR manquants :"
+msgstr "Puuttuvat AUR-virheenkorjauspaketit:"
 
 #: print.go:31
 msgid "Name"
-msgstr "Nom"
+msgstr "Nimi"
 
 #: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
-msgstr "Aucun paquet trouvé sur l'AUR correspondant à"
+msgstr "Seuraavalle(ville) ei löytynyt yhtään AUR-pakettia"
 
 #: pkg/dep/dep_graph.go:564
 msgid "required by"
-msgstr "requis par"
+msgstr "on seuraavan edellyttämä: "
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
-msgstr "Aucun paquet trouvé correspondant à"
+msgstr "Yhtään pakettia ei löytynyt seuraavalle(ville)"
 
 #: print.go:225
 msgid "None"
-msgstr "--"
+msgstr "Ei mitään/yhtään"
 
 #: print.go:39
 msgid "Optional Deps"
-msgstr "Dépendances opt."
+msgstr "Valinnaiset riippuvuudet"
 
 #: pkg/query/aur_warnings.go:79
 msgid "Orphan (unmaintained) AUR Packages:"
-msgstr "Paquets de l'AUR orphelins (non maintenus) :"
+msgstr "Orvot (ei ylläpitäjää) AUR-paketit:"
 
 #: print.go:53 print.go:55
 msgid "Out-of-date"
-msgstr "Obsolète"
+msgstr "Vanhentunut"
 
 #: pkg/sync/srcinfo/pgp/keys.go:115
 msgid "PGP keys need importing:"
-msgstr "Des clés PGP doivent être importées :"
+msgstr "PGP-avaimet täytyy tuoda:"
 
 #: pkg/sync/workdir/preparer.go:252
 msgid "PKGBUILD up to date, skipping download: %s"
-msgstr "PKGBUILD à jour, téléchargement ignoré : %s"
+msgstr "PKGBUILD on uusin, jätetään lataamatta: %s"
 
 #: pkg/menus/edit_menu.go:130
 msgid "PKGBUILDs to edit?"
-msgstr "PKGBUILDs à modifier ?"
+msgstr "Muokattavat PKGBUILD-tiedostot?"
 
 #: print.go:61
 msgid "Package Base"
-msgstr "Paquet base"
+msgstr "Paketin perusta"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "ID du paquet base"
+msgstr "Paketin perustan tunniste"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
-msgstr "Paquets absents de l'AUR :"
+msgstr "Paketit joita ei löydy AUR:ista:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Paquets à cleanBuild ?"
+msgstr "Paketit jotka haluat asentaa puhtaasti (cleanBuild)?"
 
 #: pkg/dep/dep_graph.go:202
 msgid "Packages to exclude"
-msgstr "Paquets à exclure"
+msgstr "Pois jätettävät paketit"
 
 #: pkg/upgrade/service.go:294
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr "Paquets à exclure : (ex. « 1 2 3 », « 1-3 », « ^4 » ou noms de dépôt)"
+msgstr "Pois jätettävät paketit (esim. \"1 2 3\", \"1-3\", \"^4\" tai tietovarasto nimi)"
 
 #: cmd.go:392
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Paquets à installer (ex. 1 2 3, 1-3 ou ^4)"
+msgstr "Asennettavat paketit (esim. 1 2 3, 1-3 tai ^4)"
 
 #: print.go:49
 msgid "Popularity"
-msgstr "Popularité"
+msgstr "Suosio"
 
 #: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
-msgstr "Procéder à l'installation ?"
+msgstr "Jatka asennukseen?"
 
 #: print.go:37
 msgid "Provides"
-msgstr "Fournit"
+msgstr "Mahdollistaa"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Supprimer les dépendances de création après l'installation ?"
+msgstr "Poista kääntöriippuvuudet asennuksen jälkeen?"
 
 #: print.go:43
 msgid "Replaces"
-msgstr "Remplace"
+msgstr "Korvaa"
 
 #: pkg/db/ialpm/alpm.go:191 print.go:30
 msgid "Repository"
-msgstr "Dépôt"
+msgstr "Tietovarasto"
 
 #: pkg/dep/dep_graph.go:730
 msgid "Repository AUR"
-msgstr "Dépôt AUR"
+msgstr "Tietovarasto AUR"
 
 #: pkg/dep/dep_graph.go:78
 msgid "SRCINFO"
@@ -430,61 +421,60 @@ msgstr "SRCINFO"
 
 #: pkg/upgrade/service.go:71
 msgid "Searching AUR for updates..."
-msgstr "Recherche des mises à jour sur l'AUR…"
+msgstr "Etsitään päivityksitä AUR:ista..."
 
 #: pkg/upgrade/service.go:159
 msgid "Searching databases for updates..."
-msgstr "Recherche des mises à jour dans les bases de données…"
+msgstr "Etsitään päivityksiä tietokannoista..."
 
 #: pkg/query/query_builder.go:214
 msgid "Showing repo packages only"
-msgstr "Affichage uniquement des paquets provenant des dépôts"
+msgstr "Vain tietovarastopaketit näytetään"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Taille du cache de pacman %s : %s"
+msgstr "pacman-välimuistin koko %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Taille du cache de yay %s : %s"
+msgstr "yay-välimuistin koko %s: %s"
 
 #: print.go:62
 msgid "Snapshot URL"
-msgstr "URL de l'instantané"
+msgstr "Tilannekuvan URL"
 
 #: pkg/dep/dep_graph.go:76
 msgid "Sync"
-msgstr "Sync"
+msgstr "Synkronoi"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "Les dix paquets les plus lourds :"
+msgstr "Kymmenen suurinta pakettia:"
 
 #: pkg/sync/sync.go:124
 msgid "The following packages are not compatible with your architecture:"
-msgstr "Les paquets suivants sont incompatibles avec votre architecture :"
+msgstr ""
+"Seuraavat paketit eivät ole yhteensopivia tietokonearkkitehtuurisi kanssa:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "%[1]d paquets fournissant %[2]s sont disponibles :"
+msgstr "%s[1]d tarjoajaa saatavilla %[2]:lle:"
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
-msgstr ""
-"Il semblerait qu'une autre instance de Pacman soit en cours d'exécution. En "
-"attente…"
+msgstr "Toinen pacman-prosessi saattaa olla käynnissä. Odotetaan..."
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Taille totale occupée par les paquets : %s"
+msgstr "Paketit vievät muistia yhteensä: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
-msgstr "Nombre de paquets installés : %s"
+msgstr "Yhteensä asennettuja paketteja: %s"
 
 #: pkg/sync/sync.go:132
 msgid "Try to build them anyway?"
-msgstr "Essayer quand même de les compiler ?"
+msgstr "Yritä silti kääntää ne?"
 
 #: print.go:34
 msgid "URL"
@@ -492,263 +482,258 @@ msgstr "URL"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
-msgstr "Impossible de nettoyer :"
+msgstr "Ei voida puhdistaa:"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
-msgstr "Impossible de trouver les paquets suivants :"
+msgstr "Seuraavia paketteja ei löytynyt:"
 
 #: vote.go:20
 msgid "Unable to handle package vote for: %s. err: %s"
-msgstr "Impossible de gérer le vote pour : %s. Erreur : %s"
+msgstr "Ääntä paketille %s ei voitu käsitellä. Virheviesti: %s"
 
 #: clean.go:170
 msgid "Unable to remove %s: %s"
-msgstr "Impossible de supprimer %s : %s"
+msgstr "Pakettia %s ei voitu poistaa: %s"
 
 #: print.go:32
 msgid "Version"
-msgstr "Version"
+msgstr "Versio"
 
 #: print.go:50
 msgid "Votes"
-msgstr "Votes"
+msgstr "Äänet"
 
 #: print.go:87
 msgid "Yay version v%s"
-msgstr "Yay version v%s"
+msgstr "yay-versio v%s"
 
 #: pkg/menus/menu.go:49
 msgid "[N]one"
-msgstr "[N]Aucun"
+msgstr "[N]Ei yhtään"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "abandon dû à l'utilisateur"
+msgstr "keskeytetään käyttäjän pyynnöstä"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
-msgstr "argument '-' spécifié et aucune entrée dans stdin"
+msgstr "argumentti '-' annettu ilman stdin-syötettä"
 
 #: local_install.go:26
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
-msgstr ""
-"impossible de trouver les fichiers PKGBUILD et .SRCINFO dans le répertoire"
+msgstr "hakemistosta ei löydy PKGBUILD- ja .SRCINFO-tiedostoa"
 
 #: pkg/sync/build/pkg_archive.go:148
 msgid "cannot find package name: %v"
-msgstr "impossible de trouver le nom de paquet : %v"
+msgstr "paketin nimeä ei löydy: %v"
 
 #: pkg/sync/build/errors.go:30
 msgid "could not find PKGDEST for: %s"
-msgstr "impossible de trouver le PKGDEST pour : %s"
+msgstr "PKGDEST ei löytynyt paketille %s"
 
 #: errors.go:9
 msgid "could not find all required packages"
-msgstr "impossible de trouver tous les paquets requis"
+msgstr "kaikkia vaadittuja paketteja ei löytynyt"
 
 #: pkg/sync/build/errors.go:61
 msgid "could not find any package archives listed in %s"
-msgstr "aucune archive de paquet trouvée parmi celles listées dans %s"
+msgstr "yhtään pakettiarkistoa ei löytynyt listasta %s"
 
 #: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
 msgid "dependency"
-msgstr "dépendance"
+msgstr "riippuvuus"
 
 #: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr ""
-"échec de la vérification du paquet de développement : '%s' a rencontré une "
-"erreur"
+msgstr "kehitystarkistus paketille '%s' kohtasi virheen"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
-msgstr "l'éditeur ne s'est pas terminé avec succès, abandon : %s"
+msgstr ""
+"muokkausohjelma kaatui tai se suljettiin virheellisesti, keskeytetään: %s"
 
 #: pkg/sync/workdir/aur_source.go:24
 msgid "error downloading sources: %s"
-msgstr "erreur lors du téléchargement des sources : %s"
+msgstr "lähteiden lataaminen epäonnistui: %s"
 
 #: pkg/download/errors.go:25
 msgid "error fetching %s: %s"
-msgstr "erreur lors de la récupération de %s : %s"
+msgstr "kohteen %s noutaminen epäonnistui: %s"
 
 #: pkg/sync/build/errors.go:9
 msgid "error installing repo packages"
-msgstr "erreur lors de l'installation des paquets provenant des dépôts"
+msgstr "tietovarastopakettien asentaminen epäonnistui"
 
 #: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
 msgid "error installing:"
-msgstr "erreur lors de l'installation de :"
+msgstr "seuraavan(ien) asentaminen epäonnistui:"
 
 #: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
 msgid "error making: %s"
-msgstr "erreur lors de la compilation de : %s"
+msgstr "seuraavan(ien) kääntäminen epäonnistui: %s"
 
 #: pkg/sync/workdir/merge.go:24
 msgid "error merging %s: %s"
-msgstr "erreur lors de la fusion (%s) : %s"
+msgstr "kohteiden %s yhdistäminen epäonnistui: %s"
 
 #: pkg/download/unified.go:59
 msgid "error reading %s"
-msgstr "erreur lors de la lecture de %s"
+msgstr "kohdetta %s ei voinut lukea"
 
 #: sync.go:36
 msgid "error refreshing databases"
-msgstr "erreur lors de l'actualisation des bases de données"
+msgstr "tietokantojen päivittäminen epäonnistui"
 
 #: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
-msgstr "erreur lors de la réinitialisation de %s : %s"
+msgstr "kohteen %s nollaaminen epäonnistui: %s"
 
 #: pkg/sync/build/errors.go:53
 msgid "error updating package install reason to %s"
-msgstr ""
-"erreur lors de la modification du motif d'installation du paquet en « %s »"
+msgstr "paketin päivittäminen epäonnistui; riippuvuus/nimellä pyydetty:  %s"
 
 #: pkg/sync/build/errors.go:48
 msgid "explicit"
-msgstr "explicite"
+msgstr "nimellä pyydetty"
 
 #: pkg/settings/errors.go:23
 msgid "failed to create directory '%s': %s"
-msgstr "échec de la création du répertoire '%s' : %s"
+msgstr "hakemistoa '%s' ei voitu luoda: %s"
 
 #: pkg/settings/config.go:281
 msgid "failed to open config file '%s': %s"
-msgstr "échec de l'ouverture du fichier de configuration '%s' : %s"
+msgstr "asetustiedostoa '%s' ei voitu lukea: %s"
 
 #: pkg/sync/srcinfo/service.go:114
 msgid "failed to parse %s -- skipping: %s"
-msgstr "échec de l'analyse de %s -- ignoré : %s"
+msgstr "kohteen '%s' jäsentäminen epäonnistui ja se jätetään välistä: %s"
 
 #: pkg/sync/srcinfo/service.go:118
 msgid "failed to parse %s: %s"
-msgstr "échec de l'analyse de %s : %s"
+msgstr "kohteen '%s' jäsentäminen epäonnistui: %s"
 
 #: local_install.go:77
 msgid "failed to parse .SRCINFO"
-msgstr "échec de l'analyse du .SRCINFO"
+msgstr ".SRCINFOn jäsentäminen epäonnistui"
 
 #: pkg/settings/config.go:291
 msgid "failed to read config file '%s': %s"
-msgstr "échec de la lecture du fichier de configuration '%s' : %s"
+msgstr "asetustiedostoa '%s' ei voitu lukea: %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
 msgid "failed to retrieve aur Cache"
-msgstr "échec de la récupération du cache AUR"
+msgstr "AUR-välimuistia ei voitu noutaa"
 
 #: pkg/upgrade/sources.go:27
 msgid "ignoring package devel upgrade (no AUR info found):"
-msgstr ""
-"mise à jour du paquet de développement ignorée (infos AUR introuvables) :"
+msgstr "paketin kehityspäivitys jätetään huomiotta (AUR-tietoja ei löytynyt):"
 
 #: pkg/text/errors.go:8
 msgid "input too long"
-msgstr "entrée trop longue"
+msgstr "syöte on liian pitkä"
 
 #: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
 msgid "invalid number: %s"
-msgstr "nombre invalide : %s"
+msgstr "numero ei kelpaa: %s"
 
 #: pkg/settings/parser/parser.go:174
 msgid "invalid option '%s'"
-msgstr "option '%s' invalide"
+msgstr "valinta ei kelpaa: '%s'"
 
 #: cmd.go:197
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"option invalide : '--deps' et '--explicit' ne peuvent pas être utilisés "
-"ensemble"
+"valinta ei kelpaa: valintoja '--deps' ja '--explicit' ei voi tehdä samaan "
+"aikaan"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
-msgstr "dépôt invalide"
+msgstr "tietovarasto ei kelpaa"
 
 #: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
 msgid "invalid value: %d is not between %d and %d"
-msgstr "valeur invalide : %d n'est pas entre %d et %d"
+msgstr "arvo ei kelpaa: %d ei ole %d:n ja %d:n välillä"
 
 #: pkg/text/input.go:48
 msgid "no"
-msgstr "non"
+msgstr "ei"
 
 #: pkg/sync/srcinfo/pgp/keys.go:110
 msgid "no keys to import"
-msgstr "aucune clé à importer"
+msgstr "ei tuotavia avaimia"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
-msgstr "aucune requête n'a été exécutée"
+msgstr "yhtään kyselyä ei toteutettu"
 
 #: local_install.go:66
 msgid "no target directories specified"
-msgstr "aucun répertoire cible spécifié"
+msgstr "yhtään kohdehakemistoa ei määritetty"
 
 #: pkg/sync/build/installer.go:242
 msgid "nothing to install for %s"
-msgstr "rien à installer pour %s"
+msgstr "ei asennettavaa valinnalla(oilla) %s"
 
 #: pkg/settings/parser/parser.go:164
 msgid "only one operation may be used at a time"
-msgstr "une seule opération peut être réalisée à la fois"
+msgstr "toimenpiteitä voi käyttää vain yhtä kerrallaan"
 
 #: pkg/cmd/graph/main.go:70
 msgid "only one target is allowed"
-msgstr "une seule cible est autorisée"
+msgstr "vain yksi kohde sallitaan"
 
 #: pkg/upgrade/service.go:291
 msgid "package"
 msgid_plural "packages"
-msgstr[0] "paquet"
-msgstr[1] "paquets"
-msgstr[2] "paquets"
+msgstr[0] "paketit"
+msgstr[1] "paketit"
 
 #: print.go:187
 msgid "package '%s' was not found"
-msgstr "le paquet '%s' est introuvable"
+msgstr "pakettia '%s' ei löytynyt"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
-msgstr "paquet introuvable dans l'AUR"
+msgstr "pakettia ei löytynyt AUR:ista"
 
 #: pkg/download/abs.go:23
 msgid "package not found in repos"
-msgstr "paquet introuvable dans les dépôts"
+msgstr "pakettia ei löytynyt tietovarastoista"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
-msgstr "erreur lors de l'importation des clés"
+msgstr "avainten tuomisessa esiintyi ongelma"
 
 #: clean.go:105
 msgid "removing AUR packages from cache..."
-msgstr "suppression des paquets de l'AUR du cache…"
+msgstr "poistetaan AUR-paketit välimuistista..."
 
 #: clean.go:178 pkg/sync/workdir/clean.go:41
 msgid "removing untracked AUR files from cache..."
-msgstr ""
-"suppression des fichiers non suivis dans les paquets de l'AUR en cache…"
+msgstr "poistetaan seuraamattomat AUR-tiedostot välimuistista..."
 
 #: pkg/sync/build/errors.go:38
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
-msgstr "le PKGDEST pour %s est listé par makepkg mais n'existe pas : %s"
+msgstr ""
+"paketin %s PKGDEST on makepkg:n listalla mutta sitä ei ole olemassa: %s"
 
 #: pkg/sync/sync.go:45
 msgid "there is nothing to do"
-msgstr "il n'y a rien à faire"
+msgstr "ei tehtävää"
 
 #: pkg/db/ialpm/alpm.go:247
 msgid "unable to CreateHandle: %s"
-msgstr "impossible de CreateHandle : %s"
+msgstr "käsittelyn luonti (CreateHandle) epäonnistui: %s"
 
 #: cmd.go:186
 msgid "unhandled operation"
-msgstr "opération non gérée"
+msgstr "käsittelemätön toimenpide"
 
 #: cmd.go:450
 msgid "unknown-version"
-msgstr "version-inconnue"
+msgstr "tuntematon versio"
 
 #: pkg/text/input.go:47
 msgid "yes"
-msgstr "oui"
+msgstr "kyllä"

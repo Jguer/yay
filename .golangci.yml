@@ -1,6 +1,6 @@
 version: "2"
 run:
-  go: "1.20"
+  go: "1.26"
 linters:
   default: none
   enable:
@@ -75,6 +75,14 @@ linters:
         path: (.+)_test.go
       - path: (.+)\.go$
         text: G204
+      - path: (.+)\.go$
+        text: G115
+      - path: (.+)\.go$
+        text: G703
+      - path: (.+)\.go$
+        text: G705
+      - path: (.+)\.go$
+        text: QF1012
     paths:
       - third_party$
       - builtin$

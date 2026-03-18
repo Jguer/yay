@@ -204,7 +204,7 @@ func (c *CmdBuilder) deElevateCommand(ctx context.Context, cmd *exec.Cmd) *exec.
 	cmdArgs = append(cmdArgs, path)
 	cmdArgs = append(cmdArgs, cmd.Args[1:]...)
 
-	systemdCmd := exec.CommandContext(ctx, "systemd-run", cmdArgs...)
+	systemdCmd := exec.CommandContext(ctx, "systemd-run", cmdArgs...) // #nosec G702
 	systemdCmd.Dir = cmd.Dir
 
 	return systemdCmd

@@ -7,14 +7,21 @@ import (
 )
 
 const minVotes = 30
+const minPopularity = 0.5
 const (
 	separateSourceMax = 45.0
 	separateSourceMin = 5.0
 )
 
-// TODO: Add support for Popularity and LastModified
 func (a *abstractResults) aurSortByMetric(pkg *abstractResult) float64 {
-	return 1 - (minVotes / (minVotes + float64(pkg.votes)))
+	votesScore := 1 - (minVotes / (minVotes + float64(pkg.votes)))
+	if pkg.popularity <= 0 {
+		return votesScore
+	}
+
+	popularityScore := 1 - (minPopularity / (minPopularity + pkg.popularity))
+
+	return (votesScore + popularityScore) / 2
 }
 
 func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
