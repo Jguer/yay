@@ -10,8 +10,6 @@ import (
 )
 
 func TestColorHash(t *testing.T) {
-	t.Parallel()
-
 	original := UseColor
 	defer func() { UseColor = original }()
 
