@@ -29,6 +29,8 @@ import (
 // This validates that the RPC metadata is correctly parsed and dependencies
 // are properly resolved without needing PKGBUILD parsing.
 func TestGrapher_ReliableParser_AWSCliGit(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -93,36 +95,47 @@ func TestGrapher_ReliableParser_AWSCliGit(t *testing.T) {
 		return []aur.Pkg{}, nil
 	}}
 
-	t.Run("parses aws-cli-git with all its dependencies", func(t *testing.T) {
-		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
-			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
-		require.NoError(t, err)
-		layers := got.TopoSortedLayers(nil)
+	tests := []struct {
+		name          string
+		assertVersion bool
+	}{
+		{
+			name:          "parses aws-cli-git with all its dependencies",
+			assertVersion: true,
+		},
+		{
+			name: "reuses parsed aws-cli metadata",
+		},
+	}
 
-		require.NotEmpty(t, layers)
-		require.Contains(t, layers[0], "aws-cli-git")
-		require.Equal(t, "1.27.145.r11217.g5885ee4dc-1", layers[0]["aws-cli-git"].Version)
-		require.Equal(t, "aws-cli-git", *layers[0]["aws-cli-git"].AURBase)
-		require.Equal(t, Explicit, layers[0]["aws-cli-git"].Reason)
-		require.Equal(t, AUR, layers[0]["aws-cli-git"].Source)
-	})
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(td *testing.T) {
+			td.Parallel()
 
-	t.Run("validates provides field for aws-cli", func(t *testing.T) {
-		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
-			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
-		require.NoError(t, err)
-		layers := got.TopoSortedLayers(nil)
+			g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+			got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
+			require.NoError(td, err)
+			layers := got.TopoSortedLayers(nil)
 
-		require.NotEmpty(t, layers)
-		require.Contains(t, layers[0], "aws-cli-git")
-	})
+			require.NotEmpty(td, layers)
+			require.Contains(td, layers[0], "aws-cli-git")
+			if tc.assertVersion {
+				require.Equal(td, "1.27.145.r11217.g5885ee4dc-1", layers[0]["aws-cli-git"].Version)
+				require.Equal(td, "aws-cli-git", *layers[0]["aws-cli-git"].AURBase)
+				require.Equal(td, Explicit, layers[0]["aws-cli-git"].Reason)
+				require.Equal(td, AUR, layers[0]["aws-cli-git"].Source)
+			}
+		})
+	}
 }
 
 // TestGrapher_ReliableSolver_LiriDesktopGit tests the dependency solver
 // with complex dependency chains like liri-desktop-git metapackage.
 func TestGrapher_ReliableSolver_LiriDesktopGit(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -181,50 +194,65 @@ func TestGrapher_ReliableSolver_LiriDesktopGit(t *testing.T) {
 		return []aur.Pkg{}, nil
 	}}
 
-	t.Run("liri-desktop-git pulls all dependencies", func(t *testing.T) {
-		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
-			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
-		require.NoError(t, err)
-		layers := got.TopoSortedLayers(nil)
+	tests := []struct {
+		name                string
+		assertTotalPackages bool
+		assertPackageCount  int
+	}{
+		{
+			name:                "liri-desktop-git pulls all dependencies",
+			assertTotalPackages: true,
+			assertPackageCount:  6,
+		},
+		{
+			name:                "complex dependency chain resolves in correct order",
+			assertTotalPackages: false,
+		},
+	}
 
-		totalPkgs := 0
-		for _, layer := range layers {
-			totalPkgs += len(layer)
-		}
-		// 6 packages: liri-desktop-git + 4 deps + liri-cmake-shared-git (makedep)
-		require.Equal(t, 6, totalPkgs)
-		require.Contains(t, layers[0], "liri-desktop-git")
-		require.Equal(t, Explicit, layers[0]["liri-desktop-git"].Reason)
-	})
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(td *testing.T) {
+			td.Parallel()
 
-	t.Run("complex dependency chain resolves in correct order", func(t *testing.T) {
-		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
-			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
-		require.NoError(t, err)
-		layers := got.TopoSortedLayers(nil)
+			g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+			got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
+			require.NoError(td, err)
+			layers := got.TopoSortedLayers(nil)
 
-		require.Contains(t, layers[0], "liri-desktop-git")
-
-		allPkgs := make(map[string]bool)
-		for _, layer := range layers {
-			for pkg := range layer {
-				allPkgs[pkg] = true
+			require.Contains(td, layers[0], "liri-desktop-git")
+			if tc.assertTotalPackages {
+				totalPkgs := 0
+				for _, layer := range layers {
+					totalPkgs += len(layer)
+				}
+				// 6 packages: liri-desktop-git + 4 deps + liri-cmake-shared-git (makedep)
+				require.Equal(td, tc.assertPackageCount, totalPkgs)
+				require.Equal(td, Explicit, layers[0]["liri-desktop-git"].Reason)
 			}
-		}
-		require.True(t, allPkgs["liri-desktop-git"])
-		require.True(t, allPkgs["liri-shell-git"])
-		require.True(t, allPkgs["liri-settings-git"])
-		require.True(t, allPkgs["fluid-git"])
-		require.True(t, allPkgs["libliri-git"])
-		require.True(t, allPkgs["liri-cmake-shared-git"]) // makedepend
-	})
+
+			allPkgs := make(map[string]bool)
+			for _, layer := range layers {
+				for pkg := range layer {
+					allPkgs[pkg] = true
+				}
+			}
+			require.True(td, allPkgs["liri-desktop-git"])
+			require.True(td, allPkgs["liri-shell-git"])
+			require.True(td, allPkgs["liri-settings-git"])
+			require.True(td, allPkgs["fluid-git"])
+			require.True(td, allPkgs["libliri-git"])
+			require.True(td, allPkgs["liri-cmake-shared-git"]) // makedepend
+		})
+	}
 }
 
 // TestGrapher_SplitPackages_Clion tests split packages where multiple packages
 // come from the same package base, ensuring no rebuilding or reinstalling multiple times.
 func TestGrapher_SplitPackages_Clion(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -340,6 +368,8 @@ func TestGrapher_SplitPackages_Clion(t *testing.T) {
 // TestGrapher_SplitPackages_SamsungUnifiedDriver tests split packages where
 // packages depend on another package from the same package base.
 func TestGrapher_SplitPackages_SamsungUnifiedDriver(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -473,6 +503,8 @@ func TestGrapher_SplitPackages_SamsungUnifiedDriver(t *testing.T) {
 
 // TestGrapher_SplitPackages_NX tests independent split packages like nxproxy and nxagent.
 func TestGrapher_SplitPackages_NX(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -637,6 +669,8 @@ func TestGrapher_SplitPackages_NX(t *testing.T) {
 // TestGrapher_SplitPackages_ReversedOrder tests that split packages resolve
 // correctly regardless of the order they are specified in.
 func TestGrapher_SplitPackages_ReversedOrder(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -696,6 +730,8 @@ func TestGrapher_SplitPackages_ReversedOrder(t *testing.T) {
 // TestGrapher_MultipleInstallInfo ensures that when the same package appears as
 // both explicit target and dependency, the explicit reason takes precedence.
 func TestGrapher_MultipleInstallInfo(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -755,6 +791,8 @@ func TestGrapher_MultipleInstallInfo(t *testing.T) {
 
 // TestGrapher_VersionedDependencies tests proper handling of versioned dependencies.
 func TestGrapher_VersionedDependencies(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
