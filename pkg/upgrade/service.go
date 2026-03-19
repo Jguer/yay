@@ -83,7 +83,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 
 			u.AURWarnings.CalculateMissing(remoteNames, remote, aurdata)
 
-			aurUp = UpAUR(u.log, remote, aurdata, u.cfg.TimeUpdate, enableDowngrade)
+			aurUp = UpAUR(u.log, remote, aurdata, enableDowngrade)
 
 			if u.cfg.Devel {
 				u.log.OperationInfoln(gotext.Get("Checking development packages..."))

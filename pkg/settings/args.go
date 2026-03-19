@@ -63,8 +63,6 @@ func (c *Configuration) handleOption(option, value string) bool {
 		return !boolValue
 	case "devel":
 		c.Devel = boolValue
-	case "timeupdate":
-		c.TimeUpdate = boolValue
 	case "topdown":
 		c.BottomUp = false
 	case "bottomup":
