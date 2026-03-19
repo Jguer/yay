@@ -12,13 +12,14 @@ import (
 
 	"github.com/Jguer/aur"
 	alpm "github.com/Jguer/dyalpm"
+	gosrc "github.com/Morganamilo/go-srcinfo"
+	"github.com/stretchr/testify/require"
+
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/text"
-	gosrc "github.com/Morganamilo/go-srcinfo"
-	"github.com/stretchr/testify/require"
 )
 
 func TestDepSplitDep(t *testing.T) {

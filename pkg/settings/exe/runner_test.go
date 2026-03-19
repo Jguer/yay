@@ -10,8 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Jguer/yay/v12/pkg/text"
 )
 
 func TestOSRunnerCapture(t *testing.T) {

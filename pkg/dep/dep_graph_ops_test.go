@@ -11,13 +11,14 @@ import (
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/dyalpm"
+	gosrc "github.com/Morganamilo/go-srcinfo"
+	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/stretchr/testify/require"
+
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/text"
-	gosrc "github.com/Morganamilo/go-srcinfo"
-	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGrapher_GraphFromTargetsBranches(t *testing.T) {

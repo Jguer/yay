@@ -10,9 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/stretchr/testify/require"
 )
 
 func TestBuildGitCmd(t *testing.T) {

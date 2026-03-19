@@ -12,12 +12,13 @@ import (
 	"testing"
 
 	"github.com/Jguer/aur"
+	"github.com/stretchr/testify/require"
+
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	"github.com/Jguer/yay/v12/pkg/dep"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGraphPackageRequiresSingleTarget(t *testing.T) {

@@ -7,8 +7,9 @@ import (
 	"testing"
 
 	"github.com/Jguer/aur"
-	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Jguer/yay/v12/pkg/dep"
 )
 
 func TestInfoToInstallInfo(t *testing.T) {
