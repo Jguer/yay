@@ -34,7 +34,7 @@ func TestBuildGitCmd(t *testing.T) {
 		require.NotContains(t, strings.Join(cmd.Env, "|"), "GIT_WORK_TREE=")
 		require.NotContains(t, strings.Join(cmd.Env, "|"), "GIT_DIR=")
 	} else {
-		require.Equal(t, "systemd-run", cmd.Path)
+		require.Equal(t, "systemd-run", filepath.Base(cmd.Path))
 	}
 }
 
