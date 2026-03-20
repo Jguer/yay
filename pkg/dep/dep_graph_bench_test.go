@@ -353,7 +353,7 @@ func BenchmarkGraphFromTargets_GstreamerGit(b *testing.B) {
 			mockDB := newBenchMockDB()
 			mockAUR := newBenchMockAUR(b)
 			logger := text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test")
-			g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, logger)
+			g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, false, logger)
 
 			// Verify correctness once before benchmarking
 			graph, err := g.GraphFromTargets(context.Background(), nil, tc.targets)
@@ -407,7 +407,7 @@ func BenchmarkGraphFromTargets_Jellyfin(b *testing.B) {
 			mockDB := newJellyfinMockDB()
 			mockAUR := newJellyfinMockAUR(b)
 			logger := text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test")
-			g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, logger)
+			g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, false, logger)
 
 			// Verify correctness once before benchmarking
 			graph, err := g.GraphFromTargets(context.Background(), nil, tc.targets)
@@ -458,7 +458,7 @@ func BenchmarkGraphFromTargets_CephProvides(b *testing.B) {
 			mockDB := newCephMockDB()
 			mockAUR := newCephMockAUR()
 			logger := text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test")
-			g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, logger)
+			g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, false, logger)
 
 			// Verify correctness once before benchmarking
 			graph, err := g.GraphFromTargets(context.Background(), nil, tc.targets)
@@ -489,7 +489,7 @@ func BenchmarkGraphFromTargets_AndroidSDK(b *testing.B) {
 	mockDB := newAndroidSDKMockDB()
 	mockAUR := newAndroidSDKMockAUR(b)
 	logger := text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test")
-	g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, logger)
+	g := NewGrapher(mockDB, mockAUR, false, true, tc.noDeps, tc.noCheckDeps, false, false, logger)
 
 	// Verify correctness once before benchmarking
 	graph, err := g.GraphFromTargets(context.Background(), nil, tc.targets)
@@ -509,7 +509,7 @@ func BenchmarkTopoSortedLayers(b *testing.B) {
 		mockDB := newBenchMockDB()
 		mockAUR := newBenchMockAUR(b)
 		logger := text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test")
-		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, logger)
+		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, false, logger)
 
 		graph, err := g.GraphFromTargets(context.Background(), nil, []string{"gst-plugins-good-git"})
 		require.NoError(b, err)
@@ -528,7 +528,7 @@ func BenchmarkTopoSortedLayers(b *testing.B) {
 		mockDB := newJellyfinMockDB()
 		mockAUR := newJellyfinMockAUR(b)
 		logger := text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test")
-		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, logger)
+		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, false, logger)
 
 		graph, err := g.GraphFromTargets(context.Background(), nil, []string{"jellyfin"})
 		require.NoError(b, err)

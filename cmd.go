@@ -114,6 +114,7 @@ Permanent configuration options:
     --provides            Look for matching providers when searching for packages
     --pgpfetch            Prompt to import PGP keys from PKGBUILDs
     --useask              Automatically resolve conflicts using pacman's ask flag
+    --ignoremissing       Ignore missing packages instead of failing
 
     --sudo                <file>  sudo command to use
     --sudoflags           <flags> Pass arguments to sudo
@@ -183,7 +184,7 @@ func handleCmd(ctx context.Context, run *runtime.Runtime,
 	return errors.New(gotext.Get("unhandled operation"))
 }
 
-// getFilter returns filter function which can keep packages which were only
+// getFilter returns filter functmakeion which can keep packages which were only
 // explicitly installed or ones installed as dependencies for showing available
 // updates or their count.
 func getFilter(cmdArgs *parser.Arguments) (upgrade.Filter, error) {

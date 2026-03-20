@@ -98,17 +98,18 @@ type Grapher struct {
 	logger        *text.Logger
 	providerCache map[string][]aur.Pkg
 
-	dbExecutor  db.Executor
-	aurClient   aurc.QueryClient
-	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
-	noConfirm   bool // If true, the graph will not prompt for confirmation
-	noDeps      bool // If true, the graph will not include dependencies
-	noCheckDeps bool // If true, the graph will not include check dependencies
-	needed      bool // If true, the graph will only include packages that are not installed
+	dbExecutor    db.Executor
+	aurClient     aurc.QueryClient
+	fullGraph     bool // If true, the graph will include all dependencies including already installed ones or repo
+	noConfirm     bool // If true, the graph will not prompt for confirmation
+	noDeps        bool // If true, the graph will not include dependencies
+	noCheckDeps   bool // If true, the graph will not include check dependencies
+	needed        bool // If true, the graph will only include packages that are not installed
+	ignoreMissing bool // If true, the graph will not error when packages are not found
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
-	fullGraph, noConfirm, noDeps, noCheckDeps, needed bool,
+	fullGraph, noConfirm, noDeps, noCheckDeps, needed, ignoreMissing bool,
 	logger *text.Logger,
 ) *Grapher {
 	return &Grapher{
@@ -119,6 +120,7 @@ func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 		noDeps:        noDeps,
 		noCheckDeps:   noCheckDeps,
 		needed:        needed,
+		ignoreMissing: ignoreMissing,
 		providerCache: make(map[string][]aurc.Pkg, 5),
 		logger:        logger,
 	}
@@ -191,7 +193,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		return nil, errA
 	}
 
-	if packagesNotFound > 0 {
+	if packagesNotFound > 0 && !g.ignoreMissing {
 		return nil, &aur.ErrTargetNotFound{}
 	}
 
@@ -480,7 +482,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
-	if packagesNotFound > 0 {
+	if packagesNotFound > 0 && !g.ignoreMissing {
 		return graph, &aur.ErrTargetNotFound{}
 	}
 

@@ -55,7 +55,7 @@ func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
 	var stderr bytes.Buffer
 	logger := text.NewLogger(io.Discard, &stderr, strings.NewReader(""), true, "test")
 
-	g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, logger)
+	g := NewGrapher(mockDB, mockAUR, false, true, false, false, false, false, logger)
 
 	graph := NewGraph()
 
@@ -231,7 +231,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(tt.fields.dbExecutor,
 				tt.fields.aurCache, false, true,
-				tt.fields.noDeps, tt.fields.noCheckDeps, false,
+				tt.fields.noDeps, tt.fields.noCheckDeps, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
@@ -345,7 +345,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(tt.fields.dbExecutor,
 				tt.fields.aurCache, false, true,
-				tt.fields.noDeps, tt.fields.noCheckDeps, false,
+				tt.fields.noDeps, tt.fields.noCheckDeps, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
 			require.NoError(t, err)
@@ -484,9 +484,7 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 			targets: []string{"ceph-libs-bin", "ceph-bin"},
 			wantLayers: []map[string]*InstallInfo{
 				{"ceph-bin": installInfos["ceph-bin exp"]},
-				{"cUpdate the behavior introduced in commit c466b96:
-Ensure yay -S fails if any requested package (repo or AUR) is not found, instead of succeeding when at least one AUR package resolves.
-Do not allow partial success. Return a non-zero exit status and list all missing packages.eph-libs-bin": installInfos["ceph-libs-bin exp"]},
+				{"ceph-libs-bin": installInfos["ceph-libs-bin exp"]},
 			},
 			wantErr: false,
 		},
@@ -549,7 +547,7 @@ Do not allow partial success. Return a non-zero exit status and list all missing
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
-				false, true, false, false, false,
+				false, true, false, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
@@ -694,7 +692,7 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
-				false, true, false, false, false,
+				false, true, false, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
@@ -832,7 +830,7 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
-				false, true, false, false, false,
+				false, true, false, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
@@ -879,7 +877,7 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 	}}
 
 	g := NewGrapher(mockDB, mockAUR,
-		false, true, true, true, false,
+		false, true, true, true, false, false,
 		text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 
 	t.Run("returns error when all targets are missing", func(t *testing.T) {
@@ -896,6 +894,27 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 
 		var targetNotFound *aur.ErrTargetNotFound
 		require.ErrorAs(t, err, &targetNotFound)
+	})
+
+	t.Run("ignore missing allows partial success", func(t *testing.T) {
+		gIgnore := NewGrapher(mockDB, mockAUR,
+			false, true, true, true, false, true, // ignoreMissing = true
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+
+		got, err := gIgnore.GraphFromTargets(context.Background(), nil, []string{"missing1", "okpkg"})
+		require.NoError(t, err)
+
+		layers := got.TopoSortedLayers(nil)
+		require.EqualValues(t, []map[string]*InstallInfo{
+			{
+				"okpkg": {
+					Source:  AUR,
+					Reason:  Explicit,
+					Version: "1.0.0",
+					AURBase: ptrString("okpkg"),
+				},
+			},
+		}, layers)
 	})
 }
 
@@ -1070,7 +1089,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
-				false, true, false, false, false,
+				false, true, false, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
 			require.NoError(t, err)
@@ -1155,7 +1174,7 @@ func TestGrapher_GraphFromAUR_CheckDeps(t *testing.T) {
 
 	t.Run("with check deps enabled", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR,
-			false, true, false, false, false,
+			false, true, false, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 		got, err := g.GraphFromTargets(context.Background(), nil, []string{"python-pydantic"})
 		require.NoError(t, err)
@@ -1171,7 +1190,7 @@ func TestGrapher_GraphFromAUR_CheckDeps(t *testing.T) {
 
 	t.Run("with check deps disabled", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR,
-			false, true, false, true, false, // noCheckDeps = true
+			false, true, false, true, false, false, // noCheckDeps = true
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 		got, err := g.GraphFromTargets(context.Background(), nil, []string{"python-pydantic"})
 		require.NoError(t, err)
@@ -1259,7 +1278,7 @@ func TestGrapher_GraphFromAUR_VirtualProvides(t *testing.T) {
 
 	t.Run("mesa-git provides vulkan-driver and opengl-driver", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR,
-			false, true, false, false, false,
+			false, true, false, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 		got, err := g.GraphFromTargets(context.Background(), nil, []string{"mesa-git"})
 		require.NoError(t, err)

@@ -134,7 +134,7 @@ func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.
 
 	targets := mapset.NewThreadUnsafeSet(cmdArgs.Targets...)
 	grapher := dep.NewGrapher(dbExecutor, run.AURClient, false, true,
-		false, false, cmdArgs.ExistsArg("needed"), logger.Child("grapher"))
+		false, false, cmdArgs.ExistsArg("needed"), false, logger.Child("grapher"))
 
 	upService := upgrade.NewUpgradeService(
 		grapher, run.AURClient, dbExecutor, run.VCSStore,

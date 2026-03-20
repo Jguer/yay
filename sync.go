@@ -44,7 +44,8 @@ func syncInstall(ctx context.Context,
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
-		noDeps, noCheck, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
+		noDeps, noCheck, cmdArgs.ExistsArg("needed"), cmdArgs.ExistsArg("ignoremissing"),
+		run.Logger.Child("grapher"))
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {

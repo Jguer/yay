@@ -47,7 +47,7 @@ func handleCmd(logger *text.Logger) error {
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm,
-		cmdArgs.ExistsDouble("d", "nodeps"), false, false,
+		cmdArgs.ExistsDouble("d", "nodeps"), false, false, cmdArgs.ExistsArg("ignoremissing"),
 		run.Logger.Child("grapher"))
 
 	return graphPackage(context.Background(), grapher, cmdArgs.Targets)
