@@ -2,7 +2,6 @@ package query
 
 import (
 	"strings"
-
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/aur"
@@ -64,8 +63,8 @@ func (warnings *AURWarnings) CalculateMissing(remoteNames []string,
 		
 		pkg := aurData[name]
 
-		if pkg == nil{
-			continue
+		if pkg == nil {
+		    continue
 		}
 
 		base := pkg.PackageBase
