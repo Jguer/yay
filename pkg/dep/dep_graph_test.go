@@ -484,7 +484,9 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 			targets: []string{"ceph-libs-bin", "ceph-bin"},
 			wantLayers: []map[string]*InstallInfo{
 				{"ceph-bin": installInfos["ceph-bin exp"]},
-				{"ceph-libs-bin": installInfos["ceph-libs-bin exp"]},
+				{"cUpdate the behavior introduced in commit c466b96:
+Ensure yay -S fails if any requested package (repo or AUR) is not found, instead of succeeding when at least one AUR package resolves.
+Do not allow partial success. Return a non-zero exit status and list all missing packages.eph-libs-bin": installInfos["ceph-libs-bin exp"]},
 			},
 			wantErr: false,
 		},
@@ -889,20 +891,11 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 	})
 
 	t.Run("does not error when at least one target is found", func(t *testing.T) {
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "okpkg"})
-		require.NoError(t, err)
+		_, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "okpkg"})
+		require.Error(t, err)
 
-		layers := got.TopoSortedLayers(nil)
-		require.EqualValues(t, []map[string]*InstallInfo{
-			{
-				"okpkg": {
-					Source:  AUR,
-					Reason:  Explicit,
-					Version: "1.0.0",
-					AURBase: ptrString("okpkg"),
-				},
-			},
-		}, layers, layers)
+		var targetNotFound *aur.ErrTargetNotFound
+		require.ErrorAs(t, err, &targetNotFound)
 	})
 }
 

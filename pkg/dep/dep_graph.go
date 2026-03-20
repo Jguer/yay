@@ -136,6 +136,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	}
 
 	aurTargets := make([]string, 0, len(targets))
+	var packagesNotFound int
 
 	for _, targetString := range targets {
 		target := ToTarget(targetString)
@@ -180,6 +181,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			}
 
 			g.logger.Errorln(gotext.Get("No package found for"), " ", target)
+			packagesNotFound++
 		}
 	}
 
@@ -187,6 +189,10 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 	graph, errA = g.GraphFromAUR(ctx, graph, aurTargets)
 	if errA != nil {
 		return nil, errA
+	}
+
+	if packagesNotFound > 0 {
+		return nil, &aur.ErrTargetNotFound{}
 	}
 
 	return graph, nil
@@ -474,7 +480,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 
 	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
-	if packagesNotFound == len(targets) {
+	if packagesNotFound > 0 {
 		return graph, &aur.ErrTargetNotFound{}
 	}
 
