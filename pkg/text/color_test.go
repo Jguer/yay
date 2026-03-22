@@ -9,6 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestColorHash is intentionally not parallel because it mutates the
+// package-level UseColor variable. No other parallel test in this
+// package reads UseColor, so sequential execution is sufficient.
 func TestColorHash(t *testing.T) {
 	original := UseColor
 	defer func() { UseColor = original }()

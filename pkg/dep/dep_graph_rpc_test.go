@@ -95,40 +95,35 @@ func TestGrapher_ReliableParser_AWSCliGit(t *testing.T) {
 		return []aur.Pkg{}, nil
 	}}
 
-	tests := []struct {
-		name          string
-		assertVersion bool
-	}{
-		{
-			name:          "parses aws-cli-git with all its dependencies",
-			assertVersion: true,
-		},
-		{
-			name: "reuses parsed aws-cli metadata",
-		},
-	}
+	t.Run("parses aws-cli-git with all its dependencies", func(td *testing.T) {
+		td.Parallel()
 
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(td *testing.T) {
-			td.Parallel()
+		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
+		require.NoError(td, err)
+		layers := got.TopoSortedLayers(nil)
 
-			g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
-				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
-			require.NoError(td, err)
-			layers := got.TopoSortedLayers(nil)
+		require.NotEmpty(td, layers)
+		require.Contains(td, layers[0], "aws-cli-git")
+		require.Equal(td, "1.27.145.r11217.g5885ee4dc-1", layers[0]["aws-cli-git"].Version)
+		require.Equal(td, "aws-cli-git", *layers[0]["aws-cli-git"].AURBase)
+		require.Equal(td, Explicit, layers[0]["aws-cli-git"].Reason)
+		require.Equal(td, AUR, layers[0]["aws-cli-git"].Source)
+	})
 
-			require.NotEmpty(td, layers)
-			require.Contains(td, layers[0], "aws-cli-git")
-			if tc.assertVersion {
-				require.Equal(td, "1.27.145.r11217.g5885ee4dc-1", layers[0]["aws-cli-git"].Version)
-				require.Equal(td, "aws-cli-git", *layers[0]["aws-cli-git"].AURBase)
-				require.Equal(td, Explicit, layers[0]["aws-cli-git"].Reason)
-				require.Equal(td, AUR, layers[0]["aws-cli-git"].Source)
-			}
-		})
-	}
+	t.Run("validates provides field for aws-cli", func(td *testing.T) {
+		td.Parallel()
+
+		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
+		require.NoError(td, err)
+		layers := got.TopoSortedLayers(nil)
+
+		require.NotEmpty(td, layers)
+		require.Contains(td, layers[0], "aws-cli-git")
+	})
 }
 
 // TestGrapher_ReliableSolver_LiriDesktopGit tests the dependency solver
@@ -194,58 +189,49 @@ func TestGrapher_ReliableSolver_LiriDesktopGit(t *testing.T) {
 		return []aur.Pkg{}, nil
 	}}
 
-	tests := []struct {
-		name                string
-		assertTotalPackages bool
-		assertPackageCount  int
-	}{
-		{
-			name:                "liri-desktop-git pulls all dependencies",
-			assertTotalPackages: true,
-			assertPackageCount:  6,
-		},
-		{
-			name:                "complex dependency chain resolves in correct order",
-			assertTotalPackages: false,
-		},
-	}
+	t.Run("liri-desktop-git pulls all dependencies", func(td *testing.T) {
+		td.Parallel()
 
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(td *testing.T) {
-			td.Parallel()
+		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
+		require.NoError(td, err)
+		layers := got.TopoSortedLayers(nil)
 
-			g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
-				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
-			require.NoError(td, err)
-			layers := got.TopoSortedLayers(nil)
+		totalPkgs := 0
+		for _, layer := range layers {
+			totalPkgs += len(layer)
+		}
+		// 6 packages: liri-desktop-git + 4 deps + liri-cmake-shared-git (makedep)
+		require.Equal(td, 6, totalPkgs)
+		require.Contains(td, layers[0], "liri-desktop-git")
+		require.Equal(td, Explicit, layers[0]["liri-desktop-git"].Reason)
+	})
 
-			require.Contains(td, layers[0], "liri-desktop-git")
-			if tc.assertTotalPackages {
-				totalPkgs := 0
-				for _, layer := range layers {
-					totalPkgs += len(layer)
-				}
-				// 6 packages: liri-desktop-git + 4 deps + liri-cmake-shared-git (makedep)
-				require.Equal(td, tc.assertPackageCount, totalPkgs)
-				require.Equal(td, Explicit, layers[0]["liri-desktop-git"].Reason)
+	t.Run("complex dependency chain resolves in correct order", func(td *testing.T) {
+		td.Parallel()
+
+		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+		got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
+		require.NoError(td, err)
+		layers := got.TopoSortedLayers(nil)
+
+		require.Contains(td, layers[0], "liri-desktop-git")
+
+		allPkgs := make(map[string]bool)
+		for _, layer := range layers {
+			for pkg := range layer {
+				allPkgs[pkg] = true
 			}
-
-			allPkgs := make(map[string]bool)
-			for _, layer := range layers {
-				for pkg := range layer {
-					allPkgs[pkg] = true
-				}
-			}
-			require.True(td, allPkgs["liri-desktop-git"])
-			require.True(td, allPkgs["liri-shell-git"])
-			require.True(td, allPkgs["liri-settings-git"])
-			require.True(td, allPkgs["fluid-git"])
-			require.True(td, allPkgs["libliri-git"])
-			require.True(td, allPkgs["liri-cmake-shared-git"]) // makedepend
-		})
-	}
+		}
+		require.True(td, allPkgs["liri-desktop-git"])
+		require.True(td, allPkgs["liri-shell-git"])
+		require.True(td, allPkgs["liri-settings-git"])
+		require.True(td, allPkgs["fluid-git"])
+		require.True(td, allPkgs["libliri-git"])
+		require.True(td, allPkgs["liri-cmake-shared-git"]) // makedepend
+	})
 }
 
 // TestGrapher_SplitPackages_Clion tests split packages where multiple packages

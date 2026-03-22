@@ -5,7 +5,6 @@ package workdir
 
 import (
 	"context"
-	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -17,28 +16,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
-
-func TestAnyExistInCache(t *testing.T) {
-	t.Parallel()
-
-	existing := t.TempDir()
-	require.True(t, anyExistInCache(map[string]string{
-		"first": existing,
-	}))
-
-	require.False(t, anyExistInCache(map[string]string{
-		"first": t.TempDir() + "/does-not-exist",
-	}))
-}
-
-func anyExistInCache(dirs map[string]string) bool {
-	for _, dir := range dirs {
-		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			return true
-		}
-	}
-	return false
-}
 
 func TestMergePkgbuilds(t *testing.T) {
 	t.Parallel()
@@ -77,8 +54,6 @@ func TestCleanAfter(t *testing.T) {
 }
 
 func TestRemoveMake(t *testing.T) {
-	t.Parallel()
-
 	var old bool
 	old, settings.NoConfirm = settings.NoConfirm, false
 	defer func() { settings.NoConfirm = old }()
