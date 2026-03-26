@@ -83,7 +83,6 @@ func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 			run.Logger.Println(gotext.Get("No valid pacman cache directories found. Skipping cache clean.")) 
 			return nil
 		}
-		
 	}
 
 	if !run.Cfg.Mode.AtLeastAUR() {
