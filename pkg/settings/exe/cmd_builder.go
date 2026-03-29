@@ -291,7 +291,6 @@ func (c *CmdBuilder) waitLock(dbPath string) {
 	}
 
 	c.Log.Warnln(gotext.Get("%s is present.", lockDBPath))
-	c.Log.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
 
 	// Finding out which instance is running
 	ownerPID, err := findLockOwner(lockDBPath)
