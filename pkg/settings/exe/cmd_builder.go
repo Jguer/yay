@@ -301,7 +301,7 @@ func (c *CmdBuilder) waitLock(dbPath string) {
 		var response string
 		if _, scanErr := fmt.Scan(&response); scanErr == nil && strings.ToLower(strings.TrimSpace(response)) == "y" {
 			if removeErr := os.Remove(lockDBPath); removeErr != nil {
-				c.Log.Warnln("Could not remove lock file: %s", removeErr)
+				c.Log.Warnln(gotext.Get("Could not remove lock file: %s", removeErr))
 			} else {
 				c.Log.Println(gotext.Get("Lock file removed"))
 			}
