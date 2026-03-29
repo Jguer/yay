@@ -6,6 +6,7 @@ package exe
 import (
 	"context"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -71,4 +72,34 @@ func TestBuildPrivilegeElevatorCommand(t *testing.T) {
 	cmd := builder.buildPrivilegeElevatorCommand(context.Background(), []string{"echo", "hello"})
 	require.Equal(t, "su", filepath.Base(cmd.Path))
 	require.Equal(t, []string{"su", "-c", "echo hello"}, cmd.Args)
+}
+
+func TestFindLockOwner(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	lockPath := filepath.Join(dir, "db.lck")
+
+	f, err := os.Create(lockPath)
+	require.NoError(t, err)
+	defer f.Close()
+
+	pid, err := findLockOwner(lockPath)
+	require.NoError(t, err)
+	require.Equal(t, os.Getpid(), pid)
+}
+
+func TestFindLockOwnerStale(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	lockPath := filepath.Join(dir, "db.lck")
+
+	f, err := os.Create(lockPath)
+	require.NoError(t, err)
+	f.Close()
+
+	pid, err := findLockOwner(lockPath)
+	require.Error(t, err)
+	require.Equal(t, 0, pid)
 }

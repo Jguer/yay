@@ -248,7 +248,42 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 	return exec.CommandContext(ctx, argArr[0], argArr[1:]...)
 }
 
-// waitLock will lock yay checking the status of db.lck until it does not exist.
+func findLockOwner(lockPath string) (int, error) {
+	fds, err := filepath.Glob("/proc/*/fd/*")
+	if err != nil {
+		return 0, fmt.Errorf("could not read /proc: %w", err)
+	}
+
+	// checking every pid running if they have the lock for the db
+	for _, fd := range fds {
+		target, err := os.Readlink(fd)
+		if err != nil {
+			continue
+		}
+
+		if target != lockPath {
+			continue
+		}
+
+		parts := strings.Split(fd, "/")
+
+		if len(parts) < 4 {
+			continue
+		}
+
+		pid, err := strconv.Atoi(parts[2])
+		if err != nil {
+			continue
+		}
+
+		return pid, nil
+	}
+
+	return 0, fmt.Errorf("lock file exists but no living process owns it (stale lock)")
+}
+
+// waitLock will lock yay checking the status of db.lck until it does not exist
+// or handle it if it is in a stale lock state
 func (c *CmdBuilder) waitLock(dbPath string) {
 	lockDBPath := filepath.Join(dbPath, "db.lck")
 	if _, err := os.Stat(lockDBPath); err != nil {
@@ -257,6 +292,29 @@ func (c *CmdBuilder) waitLock(dbPath string) {
 
 	c.Log.Warnln(gotext.Get("%s is present.", lockDBPath))
 	c.Log.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
+
+	// Finding out which instance is running
+	ownerPID, err := findLockOwner(lockDBPath)
+	if err != nil {
+		c.Log.Warnln(gotext.Get("The lock file does not appear to be owned by any running process."))
+		c.Log.Warnln(gotext.Get("It may be stale. Want to remove it? [y/N]"))
+
+		var response string
+		if _, scanErr := fmt.Scan(&response); scanErr == nil && strings.ToLower(strings.TrimSpace(response)) == "y" {
+			if removeErr := os.Remove(lockDBPath); removeErr != nil {
+				c.Log.Warnln("Could not remove lock file: %s", removeErr)
+			} else {
+				c.Log.Println(gotext.Get("Lock file removed"))
+			}
+		}
+		return
+	}
+
+	if ownerPID == os.Getppid() {
+		c.Log.Warn(gotext.Get("Lock is held by parent process (%d). Waiting for it to finish...", ownerPID))
+	} else {
+		c.Log.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
+	}
 
 	for {
 		time.Sleep(3 * time.Second)
