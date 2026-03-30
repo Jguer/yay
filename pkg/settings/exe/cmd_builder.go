@@ -238,7 +238,7 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 	argArr = append(argArr, args.Targets...)
 
 	if needsRoot {
-		c.waitLock(c.PacmanDBPath)
+		c.waitLock(ctx, c.PacmanDBPath)
 
 		if os.Geteuid() != 0 {
 			return c.buildPrivilegeElevatorCommand(ctx, argArr)
@@ -254,10 +254,14 @@ func findLockOwner(lockPath string) (int, error) {
 		return 0, fmt.Errorf("could not read /proc: %w", err)
 	}
 
+	var permissionSkips int
 	// checking every pid running if they have the lock for the db
 	for _, fd := range fds {
 		target, err := os.Readlink(fd)
 		if err != nil {
+			if os.IsPermission(err) {
+				permissionSkips++
+			}
 			continue
 		}
 
@@ -278,13 +282,19 @@ func findLockOwner(lockPath string) (int, error) {
 
 		return pid, nil
 	}
+	if permissionSkips > 0 {
+		// Warn before concluding stale
+		fmt.Fprintf(os.Stderr,
+			"warning: could not inspect %d process(es) in /proc (permission denied) — "+
+				"lock may be held by a root-owned process\n", permissionSkips)
+	}
 
 	return 0, fmt.Errorf("lock file exists but no living process owns it (stale lock)")
 }
 
 // waitLock will lock yay checking the status of db.lck until it does not exist
 // or handle it if it is in a stale lock state
-func (c *CmdBuilder) waitLock(dbPath string) {
+func (c *CmdBuilder) waitLock(ctx context.Context, dbPath string) {
 	lockDBPath := filepath.Join(dbPath, "db.lck")
 	if _, err := os.Stat(lockDBPath); err != nil {
 		return
@@ -296,11 +306,16 @@ func (c *CmdBuilder) waitLock(dbPath string) {
 	ownerPID, err := findLockOwner(lockDBPath)
 	if err != nil {
 		c.Log.Warnln(gotext.Get("The lock file does not appear to be owned by any running process."))
-		c.Log.Warnln(gotext.Get("It may be stale. Want to remove it? [y/N]"))
+		c.Log.Warn(gotext.Get("It may be stale. Want to remove it? [y/N] "))
 
 		var response string
 		if _, scanErr := fmt.Scan(&response); scanErr == nil && strings.ToLower(strings.TrimSpace(response)) == "y" {
-			if removeErr := os.Remove(lockDBPath); removeErr != nil {
+			cmd := exec.CommandContext(ctx, "sudo", "rm", lockDBPath)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+
+			if removeErr := cmd.Run(); removeErr != nil {
 				c.Log.Warnln(gotext.Get("Could not remove lock file: %s", removeErr))
 			} else {
 				c.Log.Println(gotext.Get("Lock file removed"))
