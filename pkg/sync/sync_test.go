@@ -20,6 +20,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const waitGracePeriod = 50 * time.Millisecond
+
 func TestStartCompletionUpdateSkipsWhenCacheIsFresh(t *testing.T) {
 	originalNeedsUpdate := completionNeedsUpdate
 	originalUpdateCache := completionUpdateCache
@@ -85,7 +87,7 @@ func TestStartCompletionUpdateWaitsForBackgroundUpdate(t *testing.T) {
 	select {
 	case <-waitReturned:
 		t.Fatal("wait returned before completion update finished")
-	case <-time.After(50 * time.Millisecond):
+	case <-time.After(waitGracePeriod):
 	}
 
 	close(release)
