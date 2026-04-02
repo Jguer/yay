@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"sync"
 
 	"github.com/Jguer/yay/v12/pkg/completion"
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -16,6 +17,11 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/leonelquinteros/gotext"
+)
+
+var (
+	completionNeedsUpdate = completion.NeedsUpdate
+	completionUpdateCache = completion.UpdateCache
 )
 
 type OperationService struct {
@@ -69,14 +75,9 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 
-	if completion.NeedsUpdate(o.cfg.CompletionPath, o.cfg.CompletionInterval, false) {
-		go func() {
-			errComp := completion.UpdateCache(ctx, run.HTTPClient, o.dbExecutor,
-				o.cfg.AURURL, o.cfg.CompletionPath, o.logger)
-			if errComp != nil {
-				o.logger.Warnln(errComp)
-			}
-		}()
+	waitForCompletionUpdate := o.startCompletionUpdate(ctx, run)
+	if waitForCompletionUpdate != nil {
+		defer waitForCompletionUpdate()
 	}
 
 	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg,
@@ -121,6 +122,27 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	}
 
 	return multiErr.Return()
+}
+
+func (o *OperationService) startCompletionUpdate(ctx context.Context, run *runtime.Runtime) func() {
+	if !completionNeedsUpdate(o.cfg.CompletionPath, o.cfg.CompletionInterval, false) {
+		return nil
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+
+		errComp := completionUpdateCache(ctx, run.HTTPClient, o.dbExecutor,
+			o.cfg.AURURL, o.cfg.CompletionPath, o.logger)
+		if errComp != nil {
+			o.logger.Warnln(errComp)
+		}
+	}()
+
+	return wg.Wait
 }
 
 func (o *OperationService) manualConfirmRequired(cmdArgs *parser.Arguments) bool {
