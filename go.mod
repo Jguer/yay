@@ -2,7 +2,7 @@ module github.com/Jguer/yay/v12
 
 require (
 	github.com/Jguer/aur v1.3.0
-	github.com/Jguer/dyalpm v0.1.1
+	github.com/Jguer/dyalpm v0.1.2
 	github.com/Jguer/votar v1.0.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
@@ -21,7 +21,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/ebitengine/purego v0.9.1 // indirect
+	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/itchyny/gojq v0.12.18 // indirect

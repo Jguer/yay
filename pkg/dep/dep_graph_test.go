@@ -47,6 +47,8 @@ func getFromFile(t testing.TB, filePath string) mockaur.GetFunc {
 }
 
 func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{}
 	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
 		return []aur.Pkg{}, nil
@@ -73,6 +75,8 @@ func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
 }
 
 func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn: func(string) mock.IPackage { return nil },
 		SyncSatisfierFn: func(s string) mock.IPackage {
@@ -242,6 +246,8 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 }
 
 func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn: func(string) mock.IPackage { return nil },
 		SyncSatisfierFn: func(s string) mock.IPackage {
@@ -356,6 +362,8 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 }
 
 func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -558,6 +566,8 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 }
 
 func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -703,6 +713,8 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 }
 
 func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -841,6 +853,8 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 }
 
 func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncSatisfierFn:        func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn:    func(string) []mock.IPackage { return nil },
@@ -909,6 +923,8 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 // TestGrapher_GraphFromAUR_SplitPkgInternalDeps tests split packages where
 // packages from the same base depend on each other (like gstreamer-git).
 func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -1089,6 +1105,8 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 
 // TestGrapher_GraphFromAUR_CheckDeps tests packages with CheckDepends.
 func TestGrapher_GraphFromAUR_CheckDeps(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },
@@ -1193,6 +1211,8 @@ func TestGrapher_GraphFromAUR_CheckDeps(t *testing.T) {
 // TestGrapher_GraphFromAUR_VirtualProvides tests packages that provide virtual packages
 // (like mesa-git providing vulkan-driver, opengl-driver).
 func TestGrapher_GraphFromAUR_VirtualProvides(t *testing.T) {
+	t.Parallel()
+
 	mockDB := &mock.DBExecutor{
 		SyncPackageFn:       func(string) mock.IPackage { return nil },
 		PackagesFromGroupFn: func(string) []mock.IPackage { return []mock.IPackage{} },

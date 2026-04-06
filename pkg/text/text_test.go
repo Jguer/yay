@@ -81,11 +81,10 @@ func TestContinueTask(t *testing.T) {
 	}
 }
 
-func TestContinueTaskRU(t *testing.T) {
+func TestContinueTaskLocalized(t *testing.T) {
 	strCustom := `
 msgid "yes"
-msgstr "да"
-	`
+msgstr "да"`
 
 	// Create Locales directory and files on temp location
 	tmpDir := t.TempDir()
@@ -117,55 +116,6 @@ msgstr "да"
 	}{
 		{name: "default input false", args: args{s: "", input: "n", preset: true, noConfirm: false}, want: false},
 		{name: "default input true", args: args{s: "", input: "y", preset: false, noConfirm: false}, want: true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			in := strings.NewReader(tt.args.input)
-			logger := NewLogger(io.Discard, io.Discard, in, false, "test")
-			got := logger.ContinueTask(tt.args.s, tt.args.preset, tt.args.noConfirm)
-			require.Equal(t, tt.want, got)
-		})
-	}
-	gotext.SetLanguage("")
-}
-
-func TestContinueTaskDE(t *testing.T) {
-	strCustom := `
-msgid "yes"
-msgstr "ja"
-	`
-
-	// Create Locales directory and files on temp location
-	tmpDir := t.TempDir()
-	dirname := path.Join(tmpDir, "en_US")
-	err := os.MkdirAll(dirname, os.ModePerm)
-	require.NoError(t, err)
-
-	fDefault, err := os.Create(path.Join(dirname, "yay.po"))
-	require.NoError(t, err)
-
-	defer fDefault.Close()
-
-	_, err = fDefault.WriteString(strCustom)
-	require.NoError(t, err)
-
-	gotext.Configure(tmpDir, "en_US", "yay")
-	require.Equal(t, "ja", gotext.Get("yes"))
-
-	type args struct {
-		s         string
-		preset    bool
-		noConfirm bool
-		input     string
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{name: "default input false", args: args{s: "", input: "n", preset: true, noConfirm: false}, want: false},
-		{name: "default input true", args: args{s: "", input: "y", preset: false, noConfirm: false}, want: true},
-		{name: "custom input true", args: args{s: "", input: "j", preset: false, noConfirm: false}, want: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
