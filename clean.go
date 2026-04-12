@@ -67,11 +67,11 @@ func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 		validDirExists := false
 
 		for _, dir := range run.PacmanConf.CacheDir {
-		    info, err := os.Stat(dir)
-		    if err == nil && info.IsDir() {
-		        validDirExists = true
-		        break
-		    }
+			info, err := os.Stat(dir)
+			if err == nil && info.IsDir() {
+				validDirExists = true
+				break
+			}
 		}
 
 		if validDirExists {
@@ -80,7 +80,7 @@ func syncClean(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 				return err
 			}
 		} else {
-			run.Logger.Println(gotext.Get("No valid pacman cache directories found. Skipping cache clean.")) 
+			run.Logger.Println(gotext.Get("No valid pacman cache directories found. Skipping cache clean."))
 			return nil
 		}
 	}
