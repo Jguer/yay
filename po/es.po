@@ -40,7 +40,7 @@ msgstr ""
 
 #: pkg/menus/menu.go:32
 msgid " (Build Files Exist)"
-msgstr " (Archivos de compilación existen)"
+msgstr " (Ya existen archivos de construcción)"
 
 #: pkg/menus/menu.go:27
 msgid " (Installed)"
