@@ -8,7 +8,7 @@ require (
 	github.com/Morganamilo/go-srcinfo v1.0.0
 	github.com/adrg/strutil v0.3.1
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
-	github.com/deckarep/golang-set/v2 v2.8.0
+	github.com/deckarep/golang-set/v2 v2.9.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/leonelquinteros/gotext v1.7.2
 	github.com/stretchr/testify v1.11.1
@@ -29,6 +29,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/ohler55/ojg v1.28.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	go.mongodb.org/mongo-driver v1.17.4 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
