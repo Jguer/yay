@@ -406,6 +406,7 @@ func isArg(arg string) bool {
 	case "builddir":
 	case "editor":
 	case "editorflags":
+	case "pkgbuildpager":
 	case "makepkg":
 	case "makepkgconf":
 	case "nomakepkgconf":
@@ -517,6 +518,7 @@ func hasParam(arg string) bool {
 	case "builddir":
 	case "editor":
 	case "editorflags":
+	case "pkgbuildpager":
 	case "makepkg":
 	case "makepkgconf":
 	case "pacman":
