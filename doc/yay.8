@@ -194,6 +194,13 @@ passed to the editor. Multiple arguments may be passed by supplying a space
 separated list that is quoted by the shell.
 
 .TP
+.B \-\-pkgbuildpager <command>
+Command used to display PKGBUILDs printed by \fB\-Gp\fR. The generated
+PKGBUILD output is piped to the command on standard input. The command is run
+through \fBsh -c\fR. If this is not set, PKGBUILDs are printed directly to
+standard output.
+
+.TP
 .B \-\-makepkg <command>
 The command to use for \fBmakepkg\fR calls. This can be a command in
 \fBPATH\fR or an absolute path to the file.

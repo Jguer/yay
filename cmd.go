@@ -65,6 +65,7 @@ Permanent configuration options:
     --builddir    <dir>   Directory used to download and run PKGBUILDS
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor
+    --pkgbuildpager <cmd> Command to page PKGBUILDs printed by -Gp
     --makepkg     <file>  makepkg command to use
     --mflags      <flags> Pass arguments to makepkg
     --pacman      <file>  pacman command to use
@@ -307,8 +308,8 @@ func handleWeb(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 
 func handleGetpkgbuild(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
-		return printPkgbuilds(dbExecutor, run.AURClient,
-			run.HTTPClient, run.Logger, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL)
+		return printPkgbuilds(ctx, dbExecutor, run.AURClient,
+			run.HTTPClient, run.Logger, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL, run.Cfg.PkgbuildPager)
 	}
 
 	return getPkgbuilds(ctx, dbExecutor, run.AURClient, run,
