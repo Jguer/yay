@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"sync"
 
 	"github.com/Jguer/yay/v12/pkg/completion"
 	"github.com/Jguer/yay/v12/pkg/db"
@@ -41,6 +42,9 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	cmdArgs *parser.Arguments,
 	targets []map[string]*dep.InstallInfo, excluded []string,
 ) error {
+	var completionWg sync.WaitGroup
+	defer completionWg.Wait()
+
 	if len(targets) == 0 {
 		o.logger.Println("", gotext.Get("there is nothing to do"))
 		return nil
@@ -70,7 +74,10 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	}
 
 	if completion.NeedsUpdate(o.cfg.CompletionPath, o.cfg.CompletionInterval, false) {
+		completionWg.Add(1)
 		go func() {
+			defer completionWg.Done()
+
 			errComp := completion.UpdateCache(ctx, run.HTTPClient, o.dbExecutor,
 				o.cfg.AURURL, o.cfg.CompletionPath, o.logger)
 			if errComp != nil {
