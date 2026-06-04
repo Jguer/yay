@@ -17,6 +17,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/intrange"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -51,10 +52,12 @@ type SourceQueryBuilder struct {
 
 	aurClient aur.QueryClient
 	logger    *text.Logger
+	cfg       *settings.Configuration
 }
 
 func NewSourceQueryBuilder(
 	aurClient aur.QueryClient,
+	cfg *settings.Configuration,
 	logger *text.Logger,
 	sortBy string,
 	targetMode parser.TargetMode,
@@ -65,6 +68,7 @@ func NewSourceQueryBuilder(
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
 		aurClient:         aurClient,
+		cfg:               cfg,
 		logger:            logger,
 		bottomUp:          bottomUp,
 		sortBy:            sortBy,
@@ -261,6 +265,30 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		}
 	}
 
+	if s.targetMode == parser.ModeAny && s.cfg != nil {
+		externalResults, err := s.cfg.SearchExternalPackages(ctx, pkgS)
+		if err != nil {
+			s.logger.Errorln(err)
+		} else {
+			for i := range externalResults {
+				result := externalResults[i]
+				if s.queryMap[result.Repository] == nil {
+					s.queryMap[result.Repository] = map[string]any{}
+				}
+
+				s.queryMap[result.Repository][result.Name] = result
+				sortableResults.results = append(sortableResults.results, abstractResult{
+					source:      result.Repository,
+					name:        result.Name,
+					description: result.Description,
+					packageBase: result.Base,
+					votes:       -1,
+					popularity:  -1,
+				})
+			}
+		}
+	}
+
 	sort.Sort(sortableResults)
 	s.results = sortableResults.results
 
@@ -297,6 +325,8 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults)
 		case alpm.Package:
 			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults)
+		case settings.ExternalSearchResult:
+			toPrint += externalPkgSearchString(&pPkg, s.singleLineResults)
 		}
 
 		s.logger.Println(toPrint)

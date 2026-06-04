@@ -13,11 +13,50 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	"github.com/Jguer/yay/v12/pkg/intrange"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+type mockQueryLuaRunner struct {
+	search func(ctx context.Context, terms []string) ([]settings.ExternalSearchResult, error)
+}
+
+func (m *mockQueryLuaRunner) CallOnPrompt(name, defaultAns string) (string, bool, error) {
+	return "", false, nil
+}
+
+func (m *mockQueryLuaRunner) CallShouldIncludeAURUpdate(candidate settings.AURUpdateContext) (bool, bool, error) {
+	return false, false, nil
+}
+
+func (m *mockQueryLuaRunner) CallListExternalUpgrades(ctx context.Context) ([]settings.ExternalUpgrade, error) {
+	return nil, nil
+}
+
+func (m *mockQueryLuaRunner) CallRunExternalUpgrades(ctx context.Context, repository string, upgrades []settings.ExternalUpgrade) (bool, error) {
+	return false, nil
+}
+
+func (m *mockQueryLuaRunner) CallSearchExternalPackages(ctx context.Context, terms []string) ([]settings.ExternalSearchResult, error) {
+	if m.search == nil {
+		return nil, nil
+	}
+
+	return m.search(ctx, terms)
+}
+
+func (m *mockQueryLuaRunner) CallInstallExternalPackages(ctx context.Context, repository string, targets []settings.ExternalInstallTarget) (bool, error) {
+	return false, nil
+}
+
+func (m *mockQueryLuaRunner) HasProvider(name string) bool { return true }
+
+func (m *mockQueryLuaRunner) Close() {}
 
 func TestSourceQueryBuilder(t *testing.T) {
 	t.Parallel()
@@ -293,7 +332,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			w := &strings.Builder{}
-			queryBuilder := NewSourceQueryBuilder(mockAUR,
+			queryBuilder := NewSourceQueryBuilder(mockAUR, nil,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, tc.targetMode, tc.searchBy, tc.bottomUp,
 				tc.singleLineResults, tc.separateSources)
@@ -311,6 +350,50 @@ func TestSourceQueryBuilder(t *testing.T) {
 			assert.Equal(t, strings.Join(tc.wantOutput, ""), w.String())
 		})
 	}
+}
+
+func TestSourceQueryBuilderExternalSearchResults(t *testing.T) {
+	t.Parallel()
+
+	loggerOut := &strings.Builder{}
+	logger := text.NewLogger(loggerOut, io.Discard, strings.NewReader(""), false, "test")
+	cfg := &settings.Configuration{}
+	cfg.SetLuaEngine(&mockQueryLuaRunner{search: func(_ context.Context, terms []string) ([]settings.ExternalSearchResult, error) {
+		assert.Equal(t, []string{"ripgrep"}, terms)
+		return []settings.ExternalSearchResult{{
+			Name:             "ripgrep",
+			Repository:       "homebrew",
+			Version:          "14.1.0",
+			InstalledVersion: "14.0.0",
+			Description:      "Search tool",
+			Extra:            "formula",
+		}}, nil
+	}})
+
+	queryBuilder := NewSourceQueryBuilder(&mockaur.MockAUR{GetFn: func(context.Context, *aur.Query) ([]aur.Pkg, error) {
+		return []aur.Pkg{}, nil
+	}}, cfg, logger, "name", parser.ModeAny, "name", false, false, true)
+
+	mockDB := &mock.DBExecutor{
+		ReposFn:          func() []string { return []string{"core"} },
+		SyncPackagesFn:   func(...string) []mock.IPackage { return nil },
+		LocalPackageFn:   func(string) mock.IPackage { return nil },
+	}
+
+	queryBuilder.Execute(context.Background(), mockDB, []string{"ripgrep"})
+	require.Len(t, queryBuilder.results, 1)
+	assert.Equal(t, "homebrew", queryBuilder.results[0].source)
+	assert.Equal(t, "ripgrep", queryBuilder.results[0].name)
+
+	require.NoError(t, queryBuilder.Results(mockDB, Detailed))
+	assert.Contains(t, loggerOut.String(), "homebrew")
+	assert.Contains(t, loggerOut.String(), "ripgrep")
+	assert.Contains(t, loggerOut.String(), "Search tool")
+
+	include, exclude, _, otherExclude := intrange.ParseNumberMenu("1")
+	targets, err := queryBuilder.GetTargets(include, exclude, otherExclude)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"homebrew/ripgrep"}, targets)
 }
 
 func TestSourceQueryBuilderTieSortsByRepoOrder(t *testing.T) {
@@ -419,7 +502,7 @@ func TestSourceQueryBuilderTieSortsByRepoOrder(t *testing.T) {
 			mockDB.ReposFn = func() []string {
 				return tc.repoOrder
 			}
-			queryBuilder := NewSourceQueryBuilder(mockAUR,
+			queryBuilder := NewSourceQueryBuilder(mockAUR, nil,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				"", parser.ModeAny, "", tc.bottomUp,
 				false, true)
@@ -463,7 +546,7 @@ func TestSourceQueryBuilderTieDoesNotSeparateSources(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			w := &strings.Builder{}
-			queryBuilder := NewSourceQueryBuilder(mockAUR,
+			queryBuilder := NewSourceQueryBuilder(mockAUR, nil,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				"", parser.ModeAny, "", tc.bottomUp,
 				false, true)
@@ -582,7 +665,7 @@ func TestSourceQueryBuilderSortByFields(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			w := &strings.Builder{}
-			queryBuilder := NewSourceQueryBuilder(mockAUR,
+			queryBuilder := NewSourceQueryBuilder(mockAUR, nil,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, parser.ModeAny, "", tc.bottomUp,
 				false, false)

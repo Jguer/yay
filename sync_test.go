@@ -31,6 +31,49 @@ import (
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
 
+type mockExternalInstallLuaRunner struct {
+	install func(ctx context.Context, repository string, targets []settings.ExternalInstallTarget) (bool, error)
+	has     func(name string) bool
+}
+
+func (m *mockExternalInstallLuaRunner) CallOnPrompt(name, defaultAns string) (string, bool, error) {
+	return "", false, nil
+}
+
+func (m *mockExternalInstallLuaRunner) CallShouldIncludeAURUpdate(candidate settings.AURUpdateContext) (bool, bool, error) {
+	return false, false, nil
+}
+
+func (m *mockExternalInstallLuaRunner) CallListExternalUpgrades(ctx context.Context) ([]settings.ExternalUpgrade, error) {
+	return nil, nil
+}
+
+func (m *mockExternalInstallLuaRunner) CallRunExternalUpgrades(ctx context.Context, repository string, upgrades []settings.ExternalUpgrade) (bool, error) {
+	return false, nil
+}
+
+func (m *mockExternalInstallLuaRunner) CallSearchExternalPackages(ctx context.Context, terms []string) ([]settings.ExternalSearchResult, error) {
+	return nil, nil
+}
+
+func (m *mockExternalInstallLuaRunner) CallInstallExternalPackages(ctx context.Context, repository string, targets []settings.ExternalInstallTarget) (bool, error) {
+	if m.install == nil {
+		return false, nil
+	}
+
+	return m.install(ctx, repository, targets)
+}
+
+func (m *mockExternalInstallLuaRunner) HasProvider(name string) bool {
+	if m.has == nil {
+		return false
+	}
+
+	return m.has(name)
+}
+
+func (m *mockExternalInstallLuaRunner) Close() {}
+
 func TestSyncUpgrade(t *testing.T) {
 	t.Parallel()
 	makepkgBin := t.TempDir() + "/makepkg"
@@ -141,6 +184,50 @@ func TestSyncUpgrade(t *testing.T) {
 		// options are in a different order on different systems and on CI root user is used
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
 	}
+}
+
+func TestSyncInstallExternalTargets(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	cfg := &settings.Configuration{RemoveMake: "no"}
+	cfg.SetLuaEngine(&mockExternalInstallLuaRunner{
+		has: func(name string) bool { return name == "homebrew" },
+		install: func(_ context.Context, repository string, targets []settings.ExternalInstallTarget) (bool, error) {
+			called = true
+			assert.Equal(t, "homebrew", repository)
+			assert.Equal(t, []settings.ExternalInstallTarget{{Name: "ripgrep", Repository: "homebrew"}}, targets)
+			return true, nil
+		},
+	})
+
+	mockRunner := &exe.MockRunner{
+		CaptureFn: func(cmd *exec.Cmd) (stdout string, stderr string, err error) { return "", "", nil },
+		ShowFn:    func(cmd *exec.Cmd) error { return nil },
+	}
+
+	run := &runtime.Runtime{
+		Cfg:        cfg,
+		Logger:     text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), true, "test"),
+		CmdBuilder: exe.NewCmdBuilder(cfg, mockRunner, text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), true, "test"), "/var/lib/pacman"),
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{}, nil
+		}},
+	}
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddArg("S")
+	cmdArgs.AddTarget("homebrew/ripgrep")
+
+	dbExc := &mock.DBExecutor{
+		ReposFn: func() []string { return []string{"core"} },
+	}
+
+	require.NoError(t, syncInstall(context.Background(), run, cmdArgs, dbExc))
+	assert.True(t, called)
+	assert.Empty(t, mockRunner.ShowCalls)
+	assert.Empty(t, mockRunner.CaptureCalls)
 }
 
 func TestSyncUpgrade_IgnoreAll(t *testing.T) {

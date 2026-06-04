@@ -52,7 +52,7 @@ func CleanFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 
 	toClean, errClean := selectionMenu(run.Logger, pkgbuildDirsByBase, bases, installed,
 		gotext.Get("Packages to cleanBuild?"),
-		settings.NoConfirm, run.Cfg.AnswerClean, skipFunc)
+		settings.NoConfirm, run.Cfg.OnPrompt("clean", run.Cfg.AnswerClean), skipFunc)
 	if errClean != nil {
 		return errClean
 	}

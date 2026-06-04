@@ -547,9 +547,75 @@ The config directory is \fI$XDG_CONFIG_HOME/yay/\fR. If
 \fB$XDG_CONFIG_HOME\fR is unset, the config directory will fall back to
 \fI$HOME/.config/yay\fR.
 
-\fIconfig.json\fR Is used to store all of Yay's config options. Editing
-this file should be done through Yay, using the options
-mentioned in \fBPERMANENT CONFIGURATION SETTINGS\fR.
+\fIyay.conf\fR is the primary user configuration file.
+
+\fIconfig.json\fR is a legacy compatibility file and is only read when no
+Lua config is present.
+
+\fIinit.lua\fR is an experimental Lua config. When present, it replaces
+\fIyay.conf\fR and \fIconfig.json\fR for user configuration loading.
+Use \fByay.opt.<key>\fR to set normal options. See the repository's
+\fIinit.lua.example\fR for a complete sample.
+
+.SS LUA CONFIGURATION
+When present, \fIinit.lua\fR is loaded from the current working directory
+before normal operation begins. If no working-directory Lua config exists,
+yay falls back to the config directory.
+
+.TP
+.B yay.opt.<key>
+Sets regular yay configuration values. Keys may be written in snake_case or
+with the existing config names.
+
+.TP
+.B yay.api.getenv(name)
+Returns the environment variable value or \fBnil\fR.
+
+.TP
+.B yay.api.expand(path)
+Expands environment variables and \fI~/...\fR.
+
+.TP
+.B yay.api.info(message), yay.api.warn(message), yay.api.error(message)
+Write log messages during config loading or hook execution.
+
+.TP
+.B yay.api.capture(cmd, ...), yay.api.run(cmd, ...)
+Run external commands from Lua. \fBcapture\fR returns stdout, stderr, and an
+exit code. \fBrun\fR inherits stdio and returns an exit code.
+
+.TP
+.B yay.api.json_decode(json)
+Decodes JSON text into Lua tables.
+
+.TP
+.B yay.hook.on_prompt(name, default)
+Overrides menu answers for the \fBclean\fR, \fBdiff\fR, \fBedit\fR, and
+\fBupgrade\fR prompts. Return a string to replace the default answer, or
+return \fBdefault\fR/\fBnil\fR to keep the built-in behavior.
+
+.TP
+.B yay.hook.should_include_aur_update(pkg)
+Overrides the built-in version-based AUR upgrade decision. Return \fBtrue\fR
+to include the package in the upgrade list, \fBfalse\fR to exclude it, or
+\fBnil\fR to keep yay's default decision.
+
+The \fBpkg\fR table contains \fBname\fR, \fBbase\fR, \fBrepository\fR,
+\fBlocal_version\fR, \fBremote_version\fR, \fBlocal_build_date\fR,
+\fBremote_last_modified\fR, and \fBdefault_include\fR.
+
+This can be used to recreate the old behavior of selecting AUR updates by
+update time instead of only by version, by comparing
+\fBremote_last_modified\fR against \fBlocal_build_date\fR when the versions
+are unchanged.
+
+.TP
+.B yay.provider.<name>.list(), yay.provider.<name>.upgrade(items)
+Registers a fully Lua-managed external upgrade provider. \fBlist()\fR returns
+an array of upgrade items, and \fBupgrade(items)\fR executes the selected
+items. Each item may contain \fBname\fR, \fBrepository\fR, \fBbase\fR,
+\fBlocal_version\fR, \fBremote_version\fR, and \fBextra\fR. See
+\fIinit.lua.example\fR for a Homebrew-based example.
 
 .TP
 .B CACHE DIRECTORY

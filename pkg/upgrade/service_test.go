@@ -32,6 +32,49 @@ func ptrString(s string) *string {
 	return &s
 }
 
+type mockLuaUpgradeRunner struct {
+	listExternal func(context.Context) ([]settings.ExternalUpgrade, error)
+	runExternal  func(context.Context, string, []settings.ExternalUpgrade) (bool, error)
+}
+
+func (m *mockLuaUpgradeRunner) CallOnPrompt(name, defaultAns string) (string, bool, error) {
+	return "", false, nil
+}
+
+func (m *mockLuaUpgradeRunner) CallShouldIncludeAURUpdate(candidate settings.AURUpdateContext) (bool, bool, error) {
+	return false, false, nil
+}
+
+func (m *mockLuaUpgradeRunner) CallListExternalUpgrades(ctx context.Context) ([]settings.ExternalUpgrade, error) {
+	if m.listExternal == nil {
+		return nil, nil
+	}
+
+	return m.listExternal(ctx)
+}
+
+func (m *mockLuaUpgradeRunner) CallRunExternalUpgrades(ctx context.Context, repository string, upgrades []settings.ExternalUpgrade) (bool, error) {
+	if m.runExternal == nil {
+		return false, nil
+	}
+
+	return m.runExternal(ctx, repository, upgrades)
+}
+
+func (m *mockLuaUpgradeRunner) CallSearchExternalPackages(ctx context.Context, terms []string) ([]settings.ExternalSearchResult, error) {
+	return nil, nil
+}
+
+func (m *mockLuaUpgradeRunner) CallInstallExternalPackages(ctx context.Context, repository string, targets []settings.ExternalInstallTarget) (bool, error) {
+	return false, nil
+}
+
+func (m *mockLuaUpgradeRunner) HasProvider(name string) bool {
+	return false
+}
+
+func (m *mockLuaUpgradeRunner) Close() {}
+
 func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	t.Parallel()
 	linuxDepInfo := &dep.InstallInfo{
@@ -684,6 +727,110 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 			assert.ElementsMatch(t, tt.wantExclude, excluded)
 		})
 	}
+}
+
+func TestUpgradeService_ExternalUpgrades(t *testing.T) {
+	t.Parallel()
+
+	t.Run("runs selected external upgrades when no graph packages exist", func(t *testing.T) {
+		t.Parallel()
+
+		dbExe := &mock.DBExecutor{
+			InstalledRemotePackageNamesFn: func() []string { return []string{} },
+			InstalledRemotePackagesFn:     func() map[string]mock.IPackage { return map[string]mock.IPackage{} },
+			SyncUpgradesFn:               func(bool) (map[string]db.SyncUpgrade, error) { return map[string]db.SyncUpgrade{}, nil },
+			ReposFn:                      func() []string { return []string{"core"} },
+		}
+
+		logger := text.NewLogger(io.Discard, os.Stderr, strings.NewReader("\n"), true, "test")
+		grapher := dep.NewGrapher(dbExe, &mockaur.MockAUR{GetFn: func(context.Context, *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{}, nil
+		}}, false, true, false, false, false, logger)
+
+		executed := make([]settings.ExternalUpgrade, 0)
+		cfg := &settings.Configuration{Mode: parser.ModeAny}
+		cfg.SetLuaEngine(&mockLuaUpgradeRunner{
+			listExternal: func(context.Context) ([]settings.ExternalUpgrade, error) {
+				return []settings.ExternalUpgrade{{Name: "wget", Repository: "homebrew", LocalVersion: "1.0", RemoteVersion: "2.0"}}, nil
+			},
+			runExternal: func(_ context.Context, repository string, upgrades []settings.ExternalUpgrade) (bool, error) {
+				assert.Equal(t, "homebrew", repository)
+				executed = append(executed, upgrades...)
+				return true, nil
+			},
+		})
+
+		u := &UpgradeService{
+			log:         logger,
+			grapher:     grapher,
+			aurCache:    &mockaur.MockAUR{GetFn: func(context.Context, *aur.Query) ([]aur.Pkg, error) { return []aur.Pkg{}, nil }},
+			dbExecutor:  dbExe,
+			vcsStore:    &vcs.Mock{},
+			cfg:         cfg,
+			AURWarnings: query.NewWarnings(logger),
+		}
+
+		graph, err := u.GraphUpgrades(context.Background(), nil, false, func(*Upgrade) bool { return true })
+		require.NoError(t, err)
+		assert.Equal(t, 0, graph.Len())
+
+		excluded, err := u.UserExcludeUpgrades(graph)
+		require.NoError(t, err)
+		assert.Empty(t, excluded)
+		assert.True(t, u.HasSelectedExternalUpgrades())
+
+		require.NoError(t, u.RunExternalUpgrades(context.Background()))
+		assert.Equal(t, []settings.ExternalUpgrade{{Name: "wget", Repository: "homebrew", LocalVersion: "1.0", RemoteVersion: "2.0"}}, executed)
+	})
+
+	t.Run("excluded external upgrades are not executed", func(t *testing.T) {
+		t.Parallel()
+
+		dbExe := &mock.DBExecutor{
+			InstalledRemotePackageNamesFn: func() []string { return []string{} },
+			InstalledRemotePackagesFn:     func() map[string]mock.IPackage { return map[string]mock.IPackage{} },
+			SyncUpgradesFn:               func(bool) (map[string]db.SyncUpgrade, error) { return map[string]db.SyncUpgrade{}, nil },
+			ReposFn:                      func() []string { return []string{"core"} },
+		}
+
+		logger := text.NewLogger(io.Discard, os.Stderr, strings.NewReader("1\n"), true, "test")
+		grapher := dep.NewGrapher(dbExe, &mockaur.MockAUR{GetFn: func(context.Context, *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{}, nil
+		}}, false, true, false, false, false, logger)
+
+		runs := 0
+		cfg := &settings.Configuration{Mode: parser.ModeAny}
+		cfg.SetLuaEngine(&mockLuaUpgradeRunner{
+			listExternal: func(context.Context) ([]settings.ExternalUpgrade, error) {
+				return []settings.ExternalUpgrade{{Name: "wget", Repository: "homebrew", LocalVersion: "1.0", RemoteVersion: "2.0"}}, nil
+			},
+			runExternal: func(context.Context, string, []settings.ExternalUpgrade) (bool, error) {
+				runs++
+				return true, nil
+			},
+		})
+
+		u := &UpgradeService{
+			log:         logger,
+			grapher:     grapher,
+			aurCache:    &mockaur.MockAUR{GetFn: func(context.Context, *aur.Query) ([]aur.Pkg, error) { return []aur.Pkg{}, nil }},
+			dbExecutor:  dbExe,
+			vcsStore:    &vcs.Mock{},
+			cfg:         cfg,
+			AURWarnings: query.NewWarnings(logger),
+		}
+
+		graph, err := u.GraphUpgrades(context.Background(), nil, false, func(*Upgrade) bool { return true })
+		require.NoError(t, err)
+
+		excluded, err := u.UserExcludeUpgrades(graph)
+		require.NoError(t, err)
+		assert.Empty(t, excluded)
+		assert.False(t, u.HasSelectedExternalUpgrades())
+
+		require.NoError(t, u.RunExternalUpgrades(context.Background()))
+		assert.Equal(t, 0, runs)
+	})
 }
 
 func TestUpgradeService_Warnings(t *testing.T) {

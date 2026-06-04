@@ -9,6 +9,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db"
+	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -113,6 +114,36 @@ func syncPkgSearchString(pkg alpm.Package, dbExecutor db.Executor, singleLineRes
 	}
 
 	toPrint += pkg.Description()
+
+	return toPrint
+}
+
+func externalPkgSearchString(pkg *settings.ExternalSearchResult, singleLineResults bool) string {
+	toPrint := text.Bold(text.ColorHash(pkg.Repository)) + "/" + text.Bold(pkg.Name)
+
+	if pkg.Version != "" {
+		toPrint += " " + text.Cyan(pkg.Version)
+	}
+
+	if pkg.Extra != "" {
+		toPrint += text.Bold(" (" + pkg.Extra + ")")
+	}
+
+	if pkg.InstalledVersion != "" {
+		if pkg.Version != "" && pkg.InstalledVersion != pkg.Version {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", pkg.InstalledVersion)))
+		} else {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
+		}
+	}
+
+	if singleLineResults {
+		toPrint += "\t"
+	} else {
+		toPrint += "\n    "
+	}
+
+	toPrint += pkg.Description
 
 	return toPrint
 }

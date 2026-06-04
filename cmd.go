@@ -88,6 +88,10 @@ Permanent configuration options:
     --noanswerdiff        Unset the answer for the edit diff menu
     --noansweredit        Unset the answer for the edit pkgbuild menu
     --noanswerupgrade     Unset the answer for the upgrade menu
+						  Experimental: if init.lua exists in the yay config
+						  directory, it replaces yay.conf/config.json and can
+						  set yay.opt.*, yay.hook.on_prompt(name, default),
+						  and yay.api.{getenv,expand,info,warn,error}
     --cleanmenu           Give the option to clean build PKGBUILDS
     --diffmenu            Give the option to show diffs for build files
     --editmenu            Give the option to edit/view PKGBUILDS

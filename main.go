@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
+	lualoader "github.com/Jguer/yay/v12/pkg/settings/lua"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -79,6 +80,12 @@ func main() {
 
 		return
 	}
+
+	// Experimental: load init.lua (if present) on top of the parsed config.
+	if errLua := lualoader.LoadInto(fallbackLog, cfg); errLua != nil {
+		fallbackLog.Errorln(errLua)
+	}
+	defer cfg.CloseLua()
 
 	cmdArgs := parser.MakeArguments()
 

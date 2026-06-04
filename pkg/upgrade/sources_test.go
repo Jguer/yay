@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	aur "github.com/Jguer/aur"
 	"github.com/stretchr/testify/assert"
@@ -27,6 +28,7 @@ func Test_upAUR(t *testing.T) {
 		remote          map[string]alpm.Package
 		aurdata         map[string]*aur.Pkg
 		enableDowngrade bool
+		include         IncludeAURUpdateFunc
 	}
 	tests := []struct {
 		name string
@@ -112,13 +114,33 @@ func Test_upAUR(t *testing.T) {
 			},
 			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{}},
 		},
+		{
+			name: "Lua Include Unchanged Version By LastModified",
+			args: args{
+				remote: map[string]alpm.Package{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0", PBuildDate: time.Unix(100, 0)},
+				},
+				aurdata: map[string]*aur.Pkg{"hello": {Version: "2.0.0", Name: "hello", LastModified: 200, PackageBase: "hello"}},
+				include: func(local alpm.Package, remote *aur.Pkg, defaultInclude bool) bool {
+					return defaultInclude || int64(remote.LastModified) > local.BuildDate().Unix()
+				},
+			},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{{
+				Name:          "hello",
+				Base:          "hello",
+				Repository:    "aur",
+				LocalVersion:  "2.0.0",
+				RemoteVersion: "2.0.0",
+				Extra:         "Lua hook selected package: AUR modified 1970-01-01T00:03:20Z after local build 1970-01-01T00:01:40Z",
+			}}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
 			got := UpAUR(text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), false, "test"),
-				tt.args.remote, tt.args.aurdata, tt.args.enableDowngrade)
+					tt.args.remote, tt.args.aurdata, tt.args.enableDowngrade, tt.args.include)
 			assert.ElementsMatch(t, tt.want.Repos, got.Repos)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
 			assert.Equal(t, tt.want.Len(), got.Len())

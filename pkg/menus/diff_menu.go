@@ -158,7 +158,7 @@ func DiffFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	}
 
 	toDiff, errMenu := selectionMenu(run.Logger, pkgbuildDirsByBase, bases, installed, gotext.Get("Diffs to show?"),
-		settings.NoConfirm, run.Cfg.AnswerDiff, nil)
+		settings.NoConfirm, run.Cfg.OnPrompt("diff", run.Cfg.AnswerDiff), nil)
 	if errMenu != nil || len(toDiff) == 0 {
 		return errMenu
 	}

@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"context"
+	"time"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -10,6 +11,10 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
+
+// IncludeAURUpdateFunc can override the default version-based inclusion
+// decision for an AUR package candidate.
+type IncludeAURUpdateFunc func(local db.IPackage, remote *query.Pkg, defaultInclude bool) bool
 
 func UpDevel(
 	ctx context.Context,
@@ -63,7 +68,7 @@ func printIgnoringPackage(log *text.Logger, pkg db.IPackage, newPkgVersion strin
 // UpAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
 func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*query.Pkg,
-	enableDowngrade bool,
+	enableDowngrade bool, include IncludeAURUpdateFunc,
 ) UpSlice {
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"aur"}}
 
@@ -73,22 +78,41 @@ func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*
 			continue
 		}
 
-		if (db.VerCmp(pkg.Version(), aurPkg.Version) < 0) ||
-			(enableDowngrade && (db.VerCmp(pkg.Version(), aurPkg.Version) > 0)) {
-			if pkg.ShouldIgnore() {
-				printIgnoringPackage(log, pkg, aurPkg.Version)
+		defaultInclude := (db.VerCmp(pkg.Version(), aurPkg.Version) < 0) ||
+			(enableDowngrade && (db.VerCmp(pkg.Version(), aurPkg.Version) > 0))
+		shouldInclude := defaultInclude
+		if include != nil {
+			shouldInclude = include(pkg, aurPkg, defaultInclude)
+		}
+		if !shouldInclude {
+			continue
+		}
+
+		if pkg.ShouldIgnore() {
+			printIgnoringPackage(log, pkg, aurPkg.Version)
+			continue
+		}
+
+		upgrade := Upgrade{
+			Name:          aurPkg.Name,
+			Base:          aurPkg.PackageBase,
+			Repository:    "aur",
+			LocalVersion:  pkg.Version(),
+			RemoteVersion: aurPkg.Version,
+			Reason:        pkg.Reason(),
+		}
+		if !defaultInclude && pkg.Version() == aurPkg.Version {
+			if localBuildDate := pkg.BuildDate(); !localBuildDate.IsZero() {
+				upgrade.Extra = gotext.Get("Lua hook selected package: AUR modified %s after local build %s",
+					time.Unix(int64(aurPkg.LastModified), 0).Format(time.RFC3339),
+					localBuildDate.Format(time.RFC3339),
+				)
 			} else {
-				toUpgrade.Up = append(toUpgrade.Up,
-					Upgrade{
-						Name:          aurPkg.Name,
-						Base:          aurPkg.PackageBase,
-						Repository:    "aur",
-						LocalVersion:  pkg.Version(),
-						RemoteVersion: aurPkg.Version,
-						Reason:        pkg.Reason(),
-					})
+				upgrade.Extra = gotext.Get("Lua hook selected package with unchanged version")
 			}
 		}
+
+		toUpgrade.Up = append(toUpgrade.Up, upgrade)
 	}
 
 	return toUpgrade

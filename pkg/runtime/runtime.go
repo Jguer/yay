@@ -128,6 +128,7 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 
 	queryBuilder := query.NewSourceQueryBuilder(
 		aurClient,
+		cfg,
 		logger.Child("mixed.querybuilder"), cfg.SortBy,
 		cfg.Mode, cfg.SearchBy,
 		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)

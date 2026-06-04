@@ -95,6 +95,118 @@ pacman -S --needed git base-devel yay
 - Use `yay -Y --devel --save` to make development package updates permanently
   enabled (`yay` and `yay -Syu` will then always check dev packages)
 
+## Lua Configuration (Experimental)
+
+If `init.lua` exists in the current working directory, yay uses it for local
+testing. Otherwise it falls back to the yay config directory. In either case,
+Lua config replaces the user `yay.conf` and legacy `config.json` files.
+
+- Working directory path: `./init.lua`
+- Config path: `$XDG_CONFIG_HOME/yay/init.lua`
+- Fallback path: `$HOME/.config/yay/init.lua`
+- Shipped example: [`init.lua.example`](./init.lua.example)
+
+### `yay.opt`
+
+Use `yay.opt.<key>` for normal configuration values. Lua keys accept the same
+settings as the INI config and can be written in snake_case or their existing
+config name.
+
+```lua
+yay.opt.editor = "nvim"
+yay.opt.build_dir = yay.api.expand("~/.cache/yay")
+yay.opt.clean_menu = true
+yay.opt.request_split_n = 150
+```
+
+### `yay.api`
+
+- `yay.api.getenv(name)` returns the environment variable value or `nil`
+- `yay.api.expand(path)` expands environment variables and `~/...`
+- `yay.api.info(message)` writes an info log line
+- `yay.api.warn(message)` writes a warning log line
+- `yay.api.error(message)` writes an error log line
+- `yay.api.capture(cmd, ...)` runs a command and returns `stdout`, `stderr`, and `exit_code`
+- `yay.api.run(cmd, ...)` runs a command with inherited stdio and returns `exit_code`
+- `yay.api.json_decode(json)` decodes JSON into Lua tables
+
+### Hooks
+
+- `yay.hook.on_prompt(name, default)` can override menu answers for `clean`,
+  `diff`, `edit`, and `upgrade`
+- `yay.hook.should_include_aur_update(pkg)` can override the built-in
+  version-based AUR upgrade decision
+
+The `pkg` table passed to `should_include_aur_update` contains:
+
+- `name`
+- `base`
+- `repository`
+- `local_version`
+- `remote_version`
+- `local_build_date`
+- `remote_last_modified`
+- `default_include`
+
+This is enough to recreate the old behavior of selecting AUR updates by update
+time instead of version:
+
+```lua
+yay.hook.should_include_aur_update = function(pkg)
+  if pkg.default_include then
+    return true
+  end
+
+  if pkg.repository ~= "aur" then
+    return false
+  end
+
+  if pkg.local_version ~= pkg.remote_version then
+    return false
+  end
+
+  if pkg.local_build_date == 0 then
+    return false
+  end
+
+  return pkg.remote_last_modified > pkg.local_build_date
+end
+```
+
+### External Providers
+
+Lua can also register fully custom upgrade providers under `yay.provider`.
+Each provider owns both discovery and execution logic, so yay only handles the
+menu plumbing.
+
+- `yay.provider.<name>.search(terms)` returns a Lua array of search results
+- `yay.provider.<name>.install(items)` executes the selected search/yogurt items for that provider
+- `yay.provider.<name>.list()` returns a Lua array of upgrade items
+- `yay.provider.<name>.upgrade(items)` executes the selected items for that provider
+
+Each search result can contain:
+
+- `name`
+- `repository`
+- `base`
+- `version`
+- `installed_version`
+- `description`
+- `extra`
+
+Each upgrade item can contain:
+
+- `name`
+- `repository`
+- `base`
+- `local_version`
+- `remote_version`
+- `extra`
+
+The shipped [`init.lua.example`](./init.lua.example) includes a Homebrew
+provider that uses `brew search` and `brew install` for search/yogurt mode,
+plus `brew outdated --json=v2` and `brew upgrade` for upgrades.
+
 ## Examples of Custom Operations
 
 | Command                           | Description                                                                                                |

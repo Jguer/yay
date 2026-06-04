@@ -127,7 +127,7 @@ func EditFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 	}
 
 	toEdit, errMenu := selectionMenu(run.Logger, pkgbuildDirsByBase, bases, installed,
-		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, run.Cfg.AnswerEdit, nil)
+		gotext.Get("PKGBUILDs to edit?"), settings.NoConfirm, run.Cfg.OnPrompt("edit", run.Cfg.AnswerEdit), nil)
 	if errMenu != nil || len(toEdit) == 0 {
 		return errMenu
 	}
