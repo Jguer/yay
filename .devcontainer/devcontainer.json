@@ -2,8 +2,14 @@
 	"name": "Existing Dockerfile",
 	"build": {
 		"context": "..",
-		"dockerfile": "../.devcontainer/Dockerfile"
+		"dockerfile": "../.devcontainer/Dockerfile",
+		"options": [
+			"--platform=linux/amd64"
+		]
 	},
+	"runArgs": [
+		"--platform=linux/amd64"
+	],
 	"overrideCommand": true,
 	"customizations": {
 		"vscode": {
