@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 archlinux@sha256:80ee11bda3cb40c46061bbc91db00e3eb8e6147cb17189b4dc9554e501c791a0
+FROM --platform=linux/amd64 archlinux@sha256:a9a1e6db522cf5f8018c920d035e2bfbf8e39c485ee737ce0388990898f2f042
 LABEL maintainer="Jguer,docker@jguer.space"
 
 ENV GO111MODULE=on
@@ -14,7 +14,7 @@ RUN set -eux; \
     pacman -Syu --noconfirm --needed \
         pacman-contrib zsh git-delta openssh bat go github-cli \
         archlinux-keyring git gcc make sudo asciidoc doxygen meson curl; \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.12.2; \
+    curl -sSfL https://golangci-lint.run/install.sh | sh -s v2.12.2; \
     go mod download; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
     rm -rf /usr/share/man/* /usr/share/doc/* || true
