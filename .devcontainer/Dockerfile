@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 archlinux@sha256:a9a1e6db522cf5f8018c920d035e2bfbf8e39c485ee737ce0388990898f2f042
+FROM --platform=linux/amd64 archlinux@sha256:c84ad63503efc5d386e30a5f44945fa8eee10fcb21b3d5fceda260783de394ff
 LABEL maintainer="Jguer,docker@jguer.space"
 
 ENV GO111MODULE=on
