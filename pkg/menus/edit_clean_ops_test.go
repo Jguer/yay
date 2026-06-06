@@ -35,8 +35,8 @@ func TestEditPkgbuilds(t *testing.T) {
 
 	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test")
 	pkgb := t.TempDir()
-	require.NoError(t, os.WriteFile(filepath.Join(pkgb, "PKGBUILD"), []byte("test"), 0o644))
-	require.NoError(t, os.WriteFile(filepath.Join(pkgb, "subpackage"), []byte("pkg"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(pkgb, "PKGBUILD"), []byte("test"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(pkgb, "subpackage"), []byte("pkg"), 0o600))
 	err := editPkgbuilds(logger, map[string]string{"pkg": pkgb}, []string{"pkg"}, "echo", "", nil, false)
 	require.NoError(t, err)
 }

@@ -136,6 +136,7 @@ func TestSyncUpgrade(t *testing.T) {
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
 	for i, call := range mockRunner.ShowCalls {
+		require.Less(t, i, len(wantShow), "unexpected number of show commands")
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
@@ -247,6 +248,7 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
 	for i, call := range mockRunner.ShowCalls {
+		require.Less(t, i, len(wantShow), "unexpected number of show commands")
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
@@ -513,6 +515,7 @@ func TestSyncUpgrade_IgnoreOne(t *testing.T) {
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
 	for i, call := range mockRunner.ShowCalls {
+		require.Less(t, i, len(wantShow), "unexpected number of show commands")
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
@@ -705,6 +708,7 @@ pkgname = python-vosk
 		fmt.Sprintf("%#v", sanitizeCalls(mockRunner.CaptureCalls, tmpDir, makepkgBin, pacmanBin, gitBin)))
 
 	for i, call := range mockRunner.ShowCalls {
+		require.Less(t, i, len(wantShow), "unexpected number of show commands")
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
@@ -854,6 +858,7 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 			require.Len(t, mockRunner.CaptureCalls, 0)
 
 			for i, call := range mockRunner.ShowCalls {
+				require.Less(t, i, len(tc.want), "unexpected number of show commands")
 				show := call.Args[0].(*exec.Cmd).String()
 				show = strings.ReplaceAll(show, pacmanBin, "pacman")
 
