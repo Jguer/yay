@@ -2,7 +2,6 @@ package settings
 
 import (
 	"bytes"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -14,11 +13,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/leonelquinteros/gotext"
-	"gopkg.in/ini.v1"
 )
-
-//go:embed yay.conf
-var defaultsINI []byte
 
 // HideMenus indicates if pacman's provider menus must be hidden.
 var HideMenus = false
@@ -28,69 +23,90 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
-	AURURL                 string `json:"aururl" ini:"AurUrl"`
-	AURRPCURL              string `json:"aurrpcurl" ini:"AurRpcUrl"`
-	BuildDir               string `json:"buildDir" ini:"BuildDir"`
-	Editor                 string `json:"editor" ini:"Editor"`
-	EditorFlags            string `json:"editorflags" ini:"EditorFlags"`
-	MakepkgBin             string `json:"makepkgbin" ini:"MakepkgBin"`
-	MakepkgConf            string `json:"makepkgconf" ini:"MakepkgConf"`
-	PacmanBin              string `json:"pacmanbin" ini:"PacmanBin"`
-	PacmanConf             string `json:"pacmanconf" ini:"PacmanConf"`
-	ReDownload             string `json:"redownload" ini:"ReDownload"`
-	AnswerClean            string `json:"answerclean" ini:"AnswerClean"`
-	AnswerDiff             string `json:"answerdiff" ini:"AnswerDiff"`
-	AnswerEdit             string `json:"answeredit" ini:"AnswerEdit"`
-	AnswerUpgrade          string `json:"answerupgrade" ini:"AnswerUpgrade"`
-	GitBin                 string `json:"gitbin" ini:"GitBin"`
-	GpgBin                 string `json:"gpgbin" ini:"GpgBin"`
-	GpgFlags               string `json:"gpgflags" ini:"GpgFlags"`
-	MFlags                 string `json:"mflags" ini:"MFlags"`
-	SortBy                 string `json:"sortby" ini:"SortBy"`
-	SearchBy               string `json:"searchby" ini:"SearchBy"`
-	GitFlags               string `json:"gitflags" ini:"GitFlags"`
-	RemoveMake             string `json:"removemake" ini:"RemoveMake"`
-	SudoBin                string `json:"sudobin" ini:"SudoBin"`
-	SudoFlags              string `json:"sudoflags" ini:"SudoFlags"`
-	Version                string `json:"version" ini:"-"`
-	RequestSplitN          int    `json:"requestsplitn" ini:"RequestSplitN"`
-	CompletionInterval     int    `json:"completionrefreshtime" ini:"CompletionInterval"`
-	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads" ini:"MaxConcurrentDownloads"`
-	BottomUp               bool   `json:"bottomup" ini:"BottomUp"`
-	SudoLoop               bool   `json:"sudoloop" ini:"SudoLoop"`
-	Devel                  bool   `json:"devel" ini:"Devel"`
-	CleanAfter             bool   `json:"cleanAfter" ini:"CleanAfter"`
-	KeepSrc                bool   `json:"keepSrc" ini:"KeepSrc"`
-	Provides               bool   `json:"provides" ini:"Provides"`
-	PGPFetch               bool   `json:"pgpfetch" ini:"PgpFetch"`
-	CleanMenu              bool   `json:"cleanmenu" ini:"CleanMenu"`
-	DiffMenu               bool   `json:"diffmenu" ini:"DiffMenu"`
-	EditMenu               bool   `json:"editmenu" ini:"EditMenu"`
-	CombinedUpgrade        bool   `json:"combinedupgrade" ini:"CombinedUpgrade"`
-	UseAsk                 bool   `json:"useask" ini:"UseAsk"`
-	BatchInstall           bool   `json:"batchinstall" ini:"BatchInstall"`
-	SingleLineResults      bool   `json:"singlelineresults" ini:"SingleLineResults"`
-	SeparateSources        bool   `json:"separatesources" ini:"SeparateSources"`
-	Debug                  bool   `json:"debug" ini:"Debug"`
-	UseRPC                 bool   `json:"rpc" ini:"Rpc"`
-	DoubleConfirm          bool   `json:"doubleconfirm" ini:"DoubleConfirm"` // confirm install before and after build
+	AURURL                 string `json:"aururl"`
+	AURRPCURL              string `json:"aurrpcurl"`
+	BuildDir               string `json:"buildDir"`
+	Editor                 string `json:"editor"`
+	EditorFlags            string `json:"editorflags"`
+	MakepkgBin             string `json:"makepkgbin"`
+	MakepkgConf            string `json:"makepkgconf"`
+	PacmanBin              string `json:"pacmanbin"`
+	PacmanConf             string `json:"pacmanconf"`
+	ReDownload             string `json:"redownload"`
+	AnswerClean            string `json:"answerclean"`
+	AnswerDiff             string `json:"answerdiff"`
+	AnswerEdit             string `json:"answeredit"`
+	AnswerUpgrade          string `json:"answerupgrade"`
+	GitBin                 string `json:"gitbin"`
+	GpgBin                 string `json:"gpgbin"`
+	GpgFlags               string `json:"gpgflags"`
+	MFlags                 string `json:"mflags"`
+	SortBy                 string `json:"sortby"`
+	SearchBy               string `json:"searchby"`
+	GitFlags               string `json:"gitflags"`
+	RemoveMake             string `json:"removemake"`
+	SudoBin                string `json:"sudobin"`
+	SudoFlags              string `json:"sudoflags"`
+	Version                string `json:"version"`
+	RequestSplitN          int    `json:"requestsplitn"`
+	CompletionInterval     int    `json:"completionrefreshtime"`
+	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads"`
+	BottomUp               bool   `json:"bottomup"`
+	SudoLoop               bool   `json:"sudoloop"`
+	Devel                  bool   `json:"devel"`
+	CleanAfter             bool   `json:"cleanAfter"`
+	KeepSrc                bool   `json:"keepSrc"`
+	Provides               bool   `json:"provides"`
+	PGPFetch               bool   `json:"pgpfetch"`
+	CleanMenu              bool   `json:"cleanmenu"`
+	DiffMenu               bool   `json:"diffmenu"`
+	EditMenu               bool   `json:"editmenu"`
+	CombinedUpgrade        bool   `json:"combinedupgrade"`
+	UseAsk                 bool   `json:"useask"`
+	BatchInstall           bool   `json:"batchinstall"`
+	SingleLineResults      bool   `json:"singlelineresults"`
+	SeparateSources        bool   `json:"separatesources"`
+	Debug                  bool   `json:"debug"`
+	UseRPC                 bool   `json:"rpc"`
+	DoubleConfirm          bool   `json:"doubleconfirm"` // confirm install before and after build
 
-	CompletionPath string             `json:"-" ini:"-"`
-	VCSFilePath    string             `json:"-" ini:"-"`
-	SaveConfig     bool               `json:"-" ini:"-"`
-	Mode           parser.TargetMode  `json:"-" ini:"-"`
-	ReBuild        parser.RebuildMode `json:"rebuild" ini:"ReBuild"`
+	CompletionPath string `json:"-"`
+	VCSFilePath    string `json:"-"`
+	// ConfigPath     string `json:"-"`
+	SaveConfig bool               `json:"-"`
+	Mode       parser.TargetMode  `json:"-"`
+	ReBuild    parser.RebuildMode `json:"rebuild"`
 }
 
-// Save writes yay config to INI file.
+// SaveConfig writes yay config to file.
 func (c *Configuration) Save(configPath, version string) error {
-	// Use INI config path instead of JSON
-	iniPath := GetINIConfigPath()
-	if iniPath == "" {
-		return fmt.Errorf("unable to determine config path")
+	c.Version = version
+
+	marshalledinfo, err := json.MarshalIndent(c, "", "\t")
+	if err != nil {
+		return err
 	}
 
-	return c.SaveINI(iniPath)
+	// https://github.com/Jguer/yay/issues/1325
+	marshalledinfo = append(marshalledinfo, '\n')
+	// https://github.com/Jguer/yay/issues/1399
+	if _, err = os.Stat(filepath.Dir(configPath)); os.IsNotExist(err) && err != nil {
+		if mkErr := os.MkdirAll(filepath.Dir(configPath), 0o755); mkErr != nil {
+			return mkErr
+		}
+	}
+
+	in, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	if _, err = in.Write(marshalledinfo); err != nil {
+		return err
+	}
+
+	return in.Sync()
 }
 
 func (c *Configuration) expandEnv() {
@@ -173,34 +189,54 @@ func (c *Configuration) setPrivilegeElevator() error {
 }
 
 func DefaultConfig(version string) *Configuration {
-	cfg := &Configuration{
-		Version: version,
-		Mode:    parser.ModeAny,
+	return &Configuration{
+		AURURL:                 "https://aur.archlinux.org",
+		BuildDir:               os.ExpandEnv("$HOME/.cache/yay"),
+		CleanAfter:             false,
+		KeepSrc:                false,
+		Editor:                 "",
+		EditorFlags:            "",
+		Devel:                  false,
+		MakepkgBin:             "makepkg",
+		MakepkgConf:            "",
+		PacmanBin:              "pacman",
+		PGPFetch:               true,
+		PacmanConf:             "/etc/pacman.conf",
+		GpgFlags:               "",
+		MFlags:                 "",
+		GitFlags:               "",
+		BottomUp:               true,
+		CompletionInterval:     7,
+		MaxConcurrentDownloads: 1,
+		SortBy:                 "",
+		SearchBy:               "name-desc",
+		SudoLoop:               false,
+		GitBin:                 "git",
+		GpgBin:                 "gpg",
+		SudoBin:                "sudo",
+		SudoFlags:              "",
+		RequestSplitN:          150,
+		ReDownload:             "no",
+		ReBuild:                "no",
+		BatchInstall:           false,
+		AnswerClean:            "",
+		AnswerDiff:             "",
+		AnswerEdit:             "",
+		AnswerUpgrade:          "",
+		RemoveMake:             "ask",
+		Provides:               true,
+		CleanMenu:              true,
+		DiffMenu:               true,
+		EditMenu:               false,
+		UseAsk:                 false,
+		CombinedUpgrade:        true,
+		SeparateSources:        true,
+		Version:                version,
+		Debug:                  false,
+		UseRPC:                 true,
+		DoubleConfirm:          true,
+		Mode:                   parser.ModeAny,
 	}
-
-	// Load defaults from embedded INI
-	iniCfg, err := ini.LoadSources(ini.LoadOptions{
-		AllowBooleanKeys:    true,
-		Insensitive:         true,
-		InsensitiveSections: true,
-		IgnoreInlineComment: true,
-	}, defaultsINI)
-	if err != nil {
-		// Fallback to minimal defaults if embedded config fails
-		cfg.AURURL = "https://aur.archlinux.org"
-		cfg.BuildDir = os.ExpandEnv("$HOME/.cache/yay")
-		return cfg
-	}
-
-	// Map the default section
-	_ = iniCfg.Section("").MapTo(cfg)
-
-	// Also map [options] section if present
-	if iniCfg.HasSection("options") {
-		_ = iniCfg.Section("options").MapTo(cfg)
-	}
-
-	return cfg
 }
 
 func NewConfig(logger *text.Logger, configPath, version string) (*Configuration, error) {
@@ -214,22 +250,7 @@ func NewConfig(logger *text.Logger, configPath, version string) (*Configuration,
 	newConfig.BuildDir = cacheHome
 	newConfig.CompletionPath = filepath.Join(cacheHome, completionFileName)
 	newConfig.VCSFilePath = filepath.Join(cacheHome, vcsFileName)
-
-	// Load system-wide INI config first (silently ignored if not present)
-	if err := newConfig.loadINI(SystemConfigPath); err != nil && logger != nil {
-		logger.Errorln(err)
-	}
-
-	// Load user JSON config (legacy, overrides system config)
 	newConfig.load(configPath)
-
-	// Load user INI config (takes priority over JSON when both exist)
-	userINIPath := GetINIConfigPath()
-	if userINIPath != "" {
-		if err := newConfig.loadINI(userINIPath); err != nil && logger != nil {
-			logger.Errorln(err)
-		}
-	}
 
 	if aurdest := os.Getenv("AURDEST"); aurdest != "" {
 		newConfig.BuildDir = aurdest
