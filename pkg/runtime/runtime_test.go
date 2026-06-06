@@ -19,7 +19,6 @@ import (
 )
 
 func TestBuildRuntime(t *testing.T) {
-	t.Parallel()
 	path := "../../testdata/pacman.conf"
 
 	absPath, err := filepath.Abs(path)
@@ -55,7 +54,6 @@ func TestBuildRuntime(t *testing.T) {
 }
 
 func TestBuildRuntimeSearchUsesMetadataCacheWhenRPCDisabled(t *testing.T) {
-	t.Parallel()
 	path := "../../testdata/pacman.conf"
 
 	absPath, err := filepath.Abs(path)
@@ -76,7 +74,7 @@ func TestBuildRuntimeSearchUsesMetadataCacheWhenRPCDisabled(t *testing.T) {
 			"LastModified": 1660494113
 		}
 	]`)
-	require.NoError(t, os.WriteFile(filepath.Join(buildDir, "aur.json"), cacheContent, 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(buildDir, "aur.json"), cacheContent, 0o600))
 
 	cfg := &settings.Configuration{
 		Debug:       true,
