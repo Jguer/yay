@@ -50,12 +50,13 @@ _pacman_repo_list() {
 
 _yay() {
   compopt -o default
-  local common core cur database files prev query remove sync upgrade o
+  local common core cur database deptest files prev query remove sync upgrade build o
   local yays show getpkgbuild web
   local cur prev words cword
 
   _init_completion || return
   database=('asdeps asexplicit')
+  deptest=()
   files=('list machinereadable refresh regex' 'l x y')
   query=('changelog check deps explicit file foreign groups info list native owns
           search unrequired upgrades' 'c e g i k l m n o p s t u')
@@ -64,15 +65,16 @@ _yay() {
          info list needed nodeps assume-installed print refresh recursive search sysupgrade aur repo'
     'c g i l p s u w y a N')
   upgrade=('asdeps asexplicit overwrite needed nodeps assume-installed print recursive' 'p')
-  core=('database files help query remove sync upgrade version' 'D F Q R S U V h')
+  build=()
+  core=('build database deptest files help query remove sync upgrade version' 'B D F Q R S T U V h')
 
   ##yay stuff
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
-          noconfirm noprogressbar noscriptlet quiet root verbose
-          makepkg pacman git gpg gpgflags config requestsplitn sudoloop
+          noconfirm noprogressbar noscriptlet quiet root verbose disable-download-timeout sysroot
+          save builddir editor editorflags makepkg pacman git gitflags gpg gpgflags mflags config requestsplitn sudoloop sudo sudoflags
           redownload noredownload redownloadall rebuild rebuildall rebuildtree norebuild sortby
           singlelineresults doublelineresults answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
-          noansweredit noanswerupgrade cleanmenu diffmenu editmenu cleanafter keepsrc
+          noansweredit noanswerupgrade cleanmenu diffmenu editmenu cleanafter keepsrc topdown bottomup devel separatesources
           provides pgpfetch
           useask combinedupgrade aur repo makepkgconf
           nomakepkgconf askremovemake askyesremovemake removemake noremovemake completioninterval aururl aurrpcurl
@@ -83,7 +85,7 @@ _yay() {
   getpkgbuild=('force print' 'f p')
   web=('vote unvote' 'v u')
 
-  for o in 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'U upgrade' 'Y yays' 'P show' 'G getpkgbuild' 'W web'; do
+  for o in 'B build' 'D database' 'F files' 'Q query' 'R remove' 'S sync' 'T deptest' 'U upgrade' 'Y yays' 'P show' 'G getpkgbuild' 'W web'; do
     _arch_incomp "$o" && break
   done
 
@@ -113,6 +115,9 @@ _yay() {
           { _arch_incomp 'l list' && _pacman_repo_list; } ||
           { _arch_incomp 's search' && compopt +o default; } ||
           _yay_pkg
+        ;;
+      T)
+        _pacman_pkg T
         ;;
       U)
         _pacman_file

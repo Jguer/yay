@@ -11,13 +11,14 @@ set -l yayspecific '__fish_contains_opt -s Y yay'
 set -l webspecific '__fish_contains_opt -s W web'
 set -l show '__fish_contains_opt -s P show'
 set -l getpkgbuild '__fish_contains_opt -s G getpkgbuild'
+set -l build '__fish_contains_opt -s B build'
 
 # Pacman constants
 set -l listinstalled "(pacman -Q | string replace ' ' \t)"
 set -l listrepos "(__fish_print_pacman_repos)"
 set -l listgroups "(pacman -Sg)\t'Package Group'"
 
-set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F -s Y -s W -s P -s G database query sync remove upgrade deptest files show getpkgbuild web yay'
+set -l noopt 'not __fish_contains_opt -s S -s D -s Q -s R -s U -s T -s F -s Y -s W -s P -s G -s B database query sync remove upgrade deptest files show getpkgbuild web yay build'
 set -l database '__fish_contains_opt -s D database'
 set -l query '__fish_contains_opt -s Q query'
 set -l remove '__fish_contains_opt -s R remove'
@@ -41,6 +42,7 @@ complete -c $progname -s S -f -l sync -n "$noopt" -d 'Synchronize packages'
 complete -c $progname -s T -f -l deptest -n "$noopt" -d 'Check dependencies'
 complete -c $progname -s U -l upgrade -n "$noopt" -d 'Upgrade or add a local package'
 complete -c $progname -s F -f -l files -n "$noopt" -d 'Query the files database'
+complete -c $progname -s B -f -l build -n "$noopt" -d 'Build from a local PKGBUILD'
 complete -c $progname -s V -f -l version -d 'Display version and exit'
 complete -c $progname -s h -f -l help -d 'Display help'
 
@@ -106,7 +108,7 @@ end
 # Database options
 set -l has_db_opt '__fish_contains_opt asdeps asexplicit check -s k'
 complete -c $progname -n "$database; and not $has_db_opt" -s k -l check -d 'Check database validity'
-complete -c $progname -n "$database" -s q -l quite -d 'Suppress output of success messages' -f
+complete -c $progname -n "$database" -s q -l quiet -d 'Suppress output of success messages' -f
 complete -c $progname -n "$database; and not $has_db_opt" -l asdeps -d 'Mark PACKAGE as dependency' -x
 complete -c $progname -n "$database; and not $has_db_opt" -l asexplicit -d 'Mark PACKAGE as explicitly installed' -x
 complete -c $progname -n "$has_db_opt; and $database" -xa "$listinstalled"
@@ -188,27 +190,27 @@ complete -c $progname -n "$getpkgbuild" -s p -l print -d 'Print pkgbuild of pack
 
 # Permanent configuration settings
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
-complete -c $progname -n "not $noopt" -l aururl -d 'Set an alternative AUR URL' -f
-complete -c $progname -n "not $noopt" -l aurrpcurl -d 'Set an alternative URL for the AUR /rpc endpoint' -f
+complete -c $progname -n "not $noopt" -l aururl -d 'Set an alternative AUR URL' -x
+complete -c $progname -n "not $noopt" -l aurrpcurl -d 'Set an alternative URL for the AUR /rpc endpoint' -x
 complete -c $progname -n "not $noopt" -l builddir -d 'Directory to use for Building AUR Packages' -r
-complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -f
-complete -c $progname -n "not $noopt" -l editorflags -d 'Editor flags to use' -f
-complete -c $progname -n "not $noopt" -l makepkg -d 'Makepkg command to use' -f
-complete -c $progname -n "not $noopt" -l pacman -d 'Pacman command to use' -f
-complete -c $progname -n "not $noopt" -l tar -d 'Tar command to use' -f
-complete -c $progname -n "not $noopt" -l git -d 'Git command to use' -f
-complete -c $progname -n "not $noopt" -l gpg -d 'Gpg command to use' -f
+complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -r
+complete -c $progname -n "not $noopt" -l editorflags -d 'Editor flags to use' -x
+complete -c $progname -n "not $noopt" -l makepkg -d 'Makepkg command to use' -r
+complete -c $progname -n "not $noopt" -l pacman -d 'Pacman command to use' -r
+complete -c $progname -n "not $noopt" -l git -d 'Git command to use' -r
+complete -c $progname -n "not $noopt" -l gitflags -d 'Git flags to use' -x
+complete -c $progname -n "not $noopt" -l gpg -d 'Gpg command to use' -r
 complete -c $progname -n "not $noopt" -l config -d 'The pacman config file to use' -r
 complete -c $progname -n "not $noopt" -l makepkgconf -d 'Use custom makepkg.conf location' -r
 complete -c $progname -n "not $noopt" -l nomakepkgconf -d 'Use default makepkg.conf' -f
-complete -c $progname -n "not $noopt" -l requestsplitn -d 'Max amount of packages to query per AUR request' -f
-complete -c $progname -n "not $noopt" -l completioninterval -d 'Refresh interval for completion cache' -f
+complete -c $progname -n "not $noopt" -l requestsplitn -d 'Max amount of packages to query per AUR request' -x
+complete -c $progname -n "not $noopt" -l completioninterval -d 'Refresh interval for completion cache' -x
 complete -c $progname -n "not $noopt" -l sortby -d 'Sort AUR results by a specific field during search' -xa "{votes,popularity,name,base,submitted,modified}"
 complete -c $progname -n "not $noopt" -l searchby -d 'Search for AUR packages by querying the specified field' -xa "{name,name-desc,maintainer,depends,checkdepends,makedepends,optdepends}"
 complete -c $progname -n "not $noopt" -l answerclean -d 'Set a predetermined answer for the clean build menu' -xa "{All,None,Installed,NotInstalled}"
 complete -c $progname -n "not $noopt" -l answerdiff -d 'Set a predetermined answer for the edit diff menu' -xa "{All,None,Installed,NotInstalled}"
 complete -c $progname -n "not $noopt" -l answeredit -d 'Set a predetermined answer for the edit pkgbuild menu' -xa "{All,None,Installed,NotInstalled}"
-complete -c $progname -n "not $noopt" -l answerupgrade -d 'Set a predetermined answer for the upgrade menu' -f
+complete -c $progname -n "not $noopt" -l answerupgrade -d 'Set a predetermined answer for the upgrade menu' -x
 complete -c $progname -n "not $noopt" -l noanswerclean -d 'Unset the answer for the clean build menu' -f
 complete -c $progname -n "not $noopt" -l noanswerdiff -d 'Unset the answer for the diff menu' -f
 complete -c $progname -n "not $noopt" -l noansweredit -d 'Unset the answer for the edit pkgbuild menu' -f
@@ -227,6 +229,7 @@ complete -c $progname -n "not $noopt" -l doublelineresults -d 'List each search 
 complete -c $progname -n "not $noopt" -l devel -d 'Check -git/-svn/-hg development version' -f
 complete -c $progname -n "not $noopt" -l cleanafter -d 'Clean package sources after successful build' -f
 complete -c $progname -n "not $noopt" -l keepsrc -d 'Keep pkg/ and src/ after building packages' -f
+complete -c $progname -n "not $noopt" -l separatesources -d 'Separate query results by source, AUR and sync' -f
 complete -c $progname -n "not $noopt" -l redownload -d 'Redownload PKGBUILD of package even if up-to-date' -f
 complete -c $progname -n "not $noopt" -l redownloadall -d 'Redownload PKGBUILD of package and deps even if up-to-date' -f
 complete -c $progname -n "not $noopt" -l noredownload -d 'Do not redownload up-to-date PKGBUILDs' -f
@@ -239,6 +242,8 @@ complete -c $progname -n "not $noopt" -l rebuild -d 'Always build target package
 complete -c $progname -n "not $noopt" -l rebuildall -d 'Always build all AUR packages' -f
 complete -c $progname -n "not $noopt" -l rebuildtree -d 'Always build all AUR packages even if installed' -f
 complete -c $progname -n "not $noopt" -l norebuild -d 'Skip package build if in cache and up to date' -f
-complete -c $progname -n "not $noopt" -l mflags -d 'Pass the following options to makepkg' -f
-complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options to gpg' -f
+complete -c $progname -n "not $noopt" -l mflags -d 'Pass the following options to makepkg' -x
+complete -c $progname -n "not $noopt" -l gpgflags -d 'Pass the following options to gpg' -x
+complete -c $progname -n "not $noopt" -l sudo -d 'The command to use for sudo calls' -r
+complete -c $progname -n "not $noopt" -l sudoflags -d 'Pass arguments to sudo' -x
 complete -c $progname -n "not $noopt" -l sudoloop -d 'Loop sudo calls in the background to avoid timeout' -f

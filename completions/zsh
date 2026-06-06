@@ -6,6 +6,7 @@ setopt extendedglob
 
 # options for passing to _arguments: main pacman commands
 _pacman_opts_commands=(
+	{-B,--build}'[Build from a local PKGBUILD]'
 	{-D,--database}'[Modify database]'
 	{-F,--files}'[Query the files database]'
 	{-G,--getpkgbuild}'[Get PKGBUILD from ABS or AUR]'
@@ -41,12 +42,14 @@ _pacman_opts_common=(
 	'--completioninterval[Time in days to refresh completion cache]:number'
 	'--confirm[Always ask for confirmation]'
 	'--debug[Display debug messages]'
+	'--disable-download-timeout[Use relaxed timeouts for download]'
 	'--gpgdir[Set an alternate directory for GnuPG (instead of /etc/pacman.d/gnupg)]: :_files -/'
 	'--hookdir[Set an alternate hook location]: :_files -/'
 	'--logfile[An alternate log file]:config file:_files'
 	'--noconfirm[Do not ask for confirmation]'
 	'--noprogressbar[Do not show a progress bar when downloading files]'
 	'--noscriptlet[Do not execute the install scriptlet if one exists]'
+	'--sysroot[Operate on a mounted guest system]:system root:_files -/'
 
 	'--save[Causes config options to be saved back to the config file]'
 
@@ -56,6 +59,7 @@ _pacman_opts_common=(
 	'--makepkg[makepkg command to use]:makepkg:_files'
 	'--pacman[pacman command to use]:pacman:_files'
 	'--git[git command to use]:git:_files'
+	'--gitflags[Flags to pass to git]:gitflags'
 	'--gpg[gpg command to use]:gpg:_files'
 
 	'--sortby[Sort AUR results by a specific field during search]:sortby options:(votes popularity name base submitted modified)'
@@ -166,11 +170,15 @@ _pacman_opts_web_modifiers=(
 _pacman_opts_print_modifiers=(
 		'(-c --complete)'{-c,--complete}'[Used for completions]'
 		'(-d --defaultconfig)'{-d,--defaultconfig}'[Print default yay configuration]'
-		'(-g --config)'{-g,--config}'[Print current yay configuration]'
-		'(-n --numberupgrades)'{-n,--numberupgrades}'[Print number of updates]'
+		'(-g --currentconfig)'{-g,--currentconfig}'[Print current yay configuration]'
+		'(-q --quiet)'{-q,--quiet}'[Only show titles when printing news]'
 		'(-s --stats)'{-s,--stats}'[Display system package statistics]'
-		'(-u --upgrades)'{-u,--upgrades}'[Print update list]'
 		'(-w --news)'{-w,--news}'[Print arch news]'
+)
+
+# -B
+_pacman_opts_build_modifiers=(
+	'*:directory:_files -/'
 )
 # options for passing to _arguments: options for --remove command
 _pacman_opts_remove=(
@@ -311,6 +319,13 @@ _pacman_action_deptest () {
 		'(--deptest)-T' \
 		"$_pacman_opts_common[@]" \
 		":packages:_pacman_all_packages"
+}
+
+_pacman_action_build() {
+	_arguments -s : \
+		'(-B --build)'{-B,--build} \
+		"$_pacman_opts_common[@]" \
+		"$_pacman_opts_build_modifiers[@]"
 }
 
 
@@ -504,14 +519,19 @@ _pacman_zsh_comp() {
 		Q*)
 			_pacman_action_query
 			;;
+		B*)
+			_pacman_action_build
+			;;
 		P*)
 			 _arguments -s : \
 				'-P' \
+				"$_pacman_opts_common[@]" \
 				"$_pacman_opts_print_modifiers[@]"
 			;;
 		W*)
 			 _arguments -s : \
 				'-W' \
+				"$_pacman_opts_common[@]" \
 				"$_pacman_opts_web_modifiers[@]"
 			;;
 		R*)
@@ -555,11 +575,13 @@ _pacman_zsh_comp() {
 		Y*)
 			_arguments -s : \
 				'-Y' \
+				"$_pacman_opts_common[@]" \
 				"$_pacman_opts_yay_modifiers[@]"
 			;;
 		G*)
 			_arguments -s : \
 				'-G' \
+				"$_pacman_opts_common[@]" \
 				"$_pacman_opts_getpkgbuild_modifiers[@]"
 			;;
 
@@ -578,6 +600,9 @@ _pacman_zsh_comp() {
 					;;
 				*--query*)
 					_pacman_action_query
+					;;
+				*--build*)
+					_pacman_action_build
 					;;
 				*--remove*)
 					_pacman_action_remove
