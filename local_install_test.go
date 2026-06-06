@@ -429,7 +429,9 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
 	for i, call := range mockRunner.ShowCalls {
-		require.Less(t, i, len(wantShow), "unexpected number of show commands")
+		if i >= len(wantShow) {
+			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
+		}
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
@@ -884,7 +886,9 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
 	for i, call := range mockRunner.ShowCalls {
-		require.Less(t, i, len(wantShow), "unexpected number of show commands")
+		if i >= len(wantShow) {
+			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
+		}
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")

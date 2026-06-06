@@ -248,7 +248,9 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
 	for i, call := range mockRunner.ShowCalls {
-		require.Less(t, i, len(wantShow), "unexpected number of show commands")
+		if i >= len(wantShow) {
+			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
+		}
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
