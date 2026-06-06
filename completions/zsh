@@ -53,6 +53,7 @@ _pacman_opts_common=(
 	'--builddir[Directory to use for building AUR Packages]:build dir:_files -/'
 	'--editor[Editor to use when editing PKGBUILDs]:editor:_files'
 	'--editorflags[Flags to pass to editor]'
+	'--pkgbuildpager[Command used to display PKGBUILDs printed by -Gp]:command'
 	'--makepkg[makepkg command to use]:makepkg:_files'
 	'--pacman[pacman command to use]:pacman:_files'
 	'--git[git command to use]:git:_files'

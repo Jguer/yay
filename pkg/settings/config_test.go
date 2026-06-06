@@ -11,6 +11,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Jguer/yay/v12/pkg/settings/parser"
 )
 
 // GIVEN a non existing build dir in the config
@@ -109,6 +111,33 @@ func TestNewConfigAURDESTTildeExpansion(t *testing.T) {
 
 	_, err = os.Stat(filepath.Join(homeDir, "test-build-dir"))
 	assert.NoError(t, err)
+}
+
+func TestConfigurationPkgbuildPagerOption(t *testing.T) {
+	config := DefaultConfig("test")
+
+	ok := config.handleOption("pkgbuildpager", "bat -pp --color=always -lPKGBUILD")
+
+	require.True(t, ok)
+	assert.Equal(t, "bat -pp --color=always -lPKGBUILD", config.PkgbuildPager)
+}
+
+func TestConfigurationParsePkgbuildPagerOption(t *testing.T) {
+	oldArgs := os.Args
+	t.Cleanup(func() {
+		os.Args = oldArgs
+	})
+
+	os.Args = []string{"yay", "--pkgbuildpager", "bat -pp --color=always -lPKGBUILD", "-Gp", "yay"}
+	config := DefaultConfig("test")
+	cmdArgs := parser.MakeArguments()
+
+	require.NoError(t, config.ParseCommandLine(cmdArgs))
+
+	assert.Equal(t, "bat -pp --color=always -lPKGBUILD", config.PkgbuildPager)
+	assert.False(t, cmdArgs.ExistsArg("pkgbuildpager"))
+	assert.Equal(t, "G", cmdArgs.Op)
+	assert.Equal(t, []string{"yay"}, cmdArgs.Targets)
 }
 
 // GIVEN default config

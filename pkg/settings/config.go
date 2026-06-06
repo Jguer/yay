@@ -33,6 +33,7 @@ type Configuration struct {
 	BuildDir               string `json:"buildDir" ini:"BuildDir"`
 	Editor                 string `json:"editor" ini:"Editor"`
 	EditorFlags            string `json:"editorflags" ini:"EditorFlags"`
+	PkgbuildPager          string `json:"pkgbuildpager" ini:"PkgbuildPager"`
 	MakepkgBin             string `json:"makepkgbin" ini:"MakepkgBin"`
 	MakepkgConf            string `json:"makepkgconf" ini:"MakepkgConf"`
 	PacmanBin              string `json:"pacmanbin" ini:"PacmanBin"`
@@ -99,6 +100,7 @@ func (c *Configuration) expandEnv() {
 	c.BuildDir = expandEnvOrHome(c.BuildDir)
 	c.Editor = expandEnvOrHome(c.Editor)
 	c.EditorFlags = os.ExpandEnv(c.EditorFlags)
+	c.PkgbuildPager = os.ExpandEnv(c.PkgbuildPager)
 	c.MakepkgBin = expandEnvOrHome(c.MakepkgBin)
 	c.MakepkgConf = expandEnvOrHome(c.MakepkgConf)
 	c.PacmanBin = expandEnvOrHome(c.PacmanBin)
