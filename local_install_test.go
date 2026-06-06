@@ -167,8 +167,13 @@ func TestIntegrationLocalInstall(t *testing.T) {
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
+	remainingWantShow := wantShow
 	for i, call := range mockRunner.ShowCalls {
-		require.Less(t, i, len(wantShow), "unexpected number of show commands")
+		if len(remainingWantShow) == 0 {
+			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
+		}
+		wantShowValue := remainingWantShow[0]
+		remainingWantShow = remainingWantShow[1:]
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
@@ -176,7 +181,7 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
-		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShowValue, " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
 
@@ -428,10 +433,13 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
+	remainingWantShow := wantShow
 	for i, call := range mockRunner.ShowCalls {
-		if i >= len(wantShow) {
+		if len(remainingWantShow) == 0 {
 			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
 		}
+		wantShowValue := remainingWantShow[0]
+		remainingWantShow = remainingWantShow[1:]
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
@@ -439,7 +447,7 @@ func TestIntegrationLocalInstallMissingDep(t *testing.T) {
 		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
-		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShowValue, " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
 
@@ -748,8 +756,13 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
+	remainingWantShow := wantShow
 	for i, call := range mockRunner.ShowCalls {
-		require.Less(t, i, len(wantShow), "unexpected number of show commands")
+		if len(remainingWantShow) == 0 {
+			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
+		}
+		wantShowValue := remainingWantShow[0]
+		remainingWantShow = remainingWantShow[1:]
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
@@ -757,7 +770,7 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
-		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShowValue, " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
 
@@ -885,10 +898,13 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
+	remainingWantShow := wantShow
 	for i, call := range mockRunner.ShowCalls {
-		if i >= len(wantShow) {
+		if len(remainingWantShow) == 0 {
 			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
 		}
+		wantShowValue := remainingWantShow[0]
+		remainingWantShow = remainingWantShow[1:]
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, tmpDir, "/testdir") // replace the temp dir with a static path
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
@@ -896,7 +912,7 @@ func TestIntegrationLocalInstallMissingFiles(t *testing.T) {
 		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
-		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShowValue, " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
 

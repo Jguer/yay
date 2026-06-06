@@ -135,15 +135,20 @@ func TestSyncUpgrade(t *testing.T) {
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
+	remainingWantShow := wantShow
 	for i, call := range mockRunner.ShowCalls {
-		require.Less(t, i, len(wantShow), "unexpected number of show commands")
+		if len(remainingWantShow) == 0 {
+			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
+		}
+		wantShowValue := remainingWantShow[0]
+		remainingWantShow = remainingWantShow[1:]
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
 		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
-		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShowValue, " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
 
@@ -247,17 +252,20 @@ func TestSyncUpgrade_IgnoreAll(t *testing.T) {
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
 	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
 
+	remainingWantShow := wantShow
 	for i, call := range mockRunner.ShowCalls {
-		if i >= len(wantShow) {
+		if len(remainingWantShow) == 0 {
 			t.Fatalf("unexpected number of show commands: got %d, want %d", i+1, len(wantShow))
 		}
+		wantShowValue := remainingWantShow[0]
+		remainingWantShow = remainingWantShow[1:]
 		show := call.Args[0].(*exec.Cmd).String()
 		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
 		show = strings.ReplaceAll(show, pacmanBin, "pacman")
 		show = strings.ReplaceAll(show, gitBin, "git")
 
 		// options are in a different order on different systems and on CI root user is used
-		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShowValue, " "), fmt.Sprintf("%d - %s", i, show))
 	}
 }
 
