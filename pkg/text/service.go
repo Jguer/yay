@@ -13,7 +13,7 @@ const (
 
 type Logger struct {
 	name   string
-	Debug  bool
+	debug  bool
 	stdout io.Writer
 	stderr io.Writer
 	r      io.Reader
@@ -21,7 +21,7 @@ type Logger struct {
 
 func NewLogger(stdout, stderr io.Writer, r io.Reader, debug bool, name string) *Logger {
 	return &Logger{
-		Debug:  debug,
+		debug:  debug,
 		name:   name,
 		r:      r,
 		stderr: stderr,
@@ -30,17 +30,29 @@ func NewLogger(stdout, stderr io.Writer, r io.Reader, debug bool, name string) *
 }
 
 func (l *Logger) Child(name string) *Logger {
-	return NewLogger(l.stdout, l.stderr, l.r, l.Debug, name)
+	return NewLogger(l.stdout, l.stderr, l.r, l.debug, name)
 }
 
-func (l *Logger) Debugln(a ...any) {
-	if !l.Debug {
+func (l *Logger) sprintDebug(a ...any) string {
+	return fmt.Sprint(append([]any{
+		Bold(yellow(fmt.Sprintf("[DEBUG:%s]", l.name))),
+	}, a...)...)
+}
+
+func (l *Logger) Debug(a ...any) {
+	if !l.debug {
 		return
 	}
 
-	l.Println(append([]any{
-		Bold(yellow(fmt.Sprintf("[DEBUG:%s]", l.name))),
-	}, a...)...)
+	l.Print(l.sprintDebug(a...))
+}
+
+func (l *Logger) Debugln(a ...any) {
+	if !l.debug {
+		return
+	}
+
+	l.Println(l.sprintDebug(a...))
 }
 
 func (l *Logger) OperationInfoln(a ...any) {

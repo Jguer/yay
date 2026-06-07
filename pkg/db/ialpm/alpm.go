@@ -150,6 +150,8 @@ func configureAlpm(pacmanConf *pacmanconf.Config, alpmHandle alpm.Handle) error 
 func (ae *AlpmExecutor) logCallback() func(level alpm.LogLevel, str string) {
 	return func(level alpm.LogLevel, str string) {
 		switch level {
+		case alpm.LogDebug:
+			ae.log.Debug(str)
 		case alpm.LogWarning:
 			ae.log.Warn(str)
 		case alpm.LogError:
@@ -258,7 +260,9 @@ func (ae *AlpmExecutor) RefreshHandle() error {
 	if err := alpmSetQuestionCallback(alpmHandle, ae.questionCallback()); err != nil {
 		return err
 	}
-	alpmSetLogCallback(alpmHandle, ae.logCallback())
+	if err := alpmSetLogCallback(alpmHandle, ae.logCallback()); err != nil {
+		return err
+	}
 	ae.handle = alpmHandle
 	ae.syncDBsCache = nil
 
@@ -507,11 +511,8 @@ func (ae *AlpmExecutor) AlpmArchitectures() ([]string, error) {
 	return architectures, err
 }
 
-func alpmSetLogCallback(alpmHandle alpm.Handle, cb func(alpm.LogLevel, string)) {
-	// dyalpm uses a different callback mechanism - log callback not easily supported
-	// due to va_list in libalpm. Skip setting log callback.
-	_ = alpmHandle
-	_ = cb
+func alpmSetLogCallback(alpmHandle alpm.Handle, cb func(alpm.LogLevel, string)) error {
+	return alpmHandle.SetLogCallbackFunc(cb)
 }
 
 func alpmSetQuestionCallback(alpmHandle alpm.Handle, cb func(alpm.QuestionAny)) error {
