@@ -19,7 +19,7 @@ LOCALEDIR := po
 SYSTEMLOCALEPATH := $(PREFIX)/share/locale/
 
 # ls -1 po | sed -e 's/\.po$//' | paste -sd " "
-LANGS := ca cs de en es eu fr_FR he hu id it_IT ja ko nl pl_PL pt_BR pt ru_RU ru sk sv tr uk vi vi_VN zh_CN zh_TW
+LANGS := ca ca_ES cs da da_DK de en es eu fi fr fr_FR he he_IL hu id it_IT ja ko nl pl pl_PL pt pt_BR ru ru_RU sk sv tr uk vi vi_VN zh_CN zh_TW
 POTFILE := default.pot
 POFILES := $(addprefix $(LOCALEDIR)/,$(addsuffix .po,$(LANGS)))
 MOFILES := $(POFILES:.po=.mo)
