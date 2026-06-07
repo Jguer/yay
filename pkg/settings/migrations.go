@@ -56,7 +56,7 @@ func (migration *configSortByMigration) Do(config *Configuration) bool {
 }
 
 func (migration *configSortByMigration) TargetVersion() string {
-	return "13.0.0"
+	return "12.6.0"
 }
 
 func DefaultMigrations() []configMigration {

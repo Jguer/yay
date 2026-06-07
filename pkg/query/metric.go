@@ -52,7 +52,7 @@ func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
 		popularity = a.aurSortByMetric(pkg)
 	}
 
-	sim = sim*0.5 + simDesc*0.2 + popularity*0.3
+	sim = sim*0.35 + simDesc*0.15 + popularity*0.50
 
 	a.distanceCache[pkg.name] = sim
 

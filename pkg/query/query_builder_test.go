@@ -567,13 +567,13 @@ func TestSourceQueryBuilderSortByFields(t *testing.T) {
 			desc:      "sort-by-metric topdown",
 			sortBy:    "",
 			bottomUp:  false,
-			wantNames: []string{"yay", "yay-git", "ruby-yard"},
+			wantNames: []string{"yay", "ruby-yard", "yay-git"},
 		},
 		{
 			desc:      "sort-by-metric bottomup",
 			sortBy:    "",
 			bottomUp:  true,
-			wantNames: []string{"ruby-yard", "yay-git", "yay"},
+			wantNames: []string{"yay-git", "ruby-yard", "yay"},
 		},
 	}
 
@@ -597,6 +597,76 @@ func TestSourceQueryBuilderSortByFields(t *testing.T) {
 			assert.Equal(t, tc.wantNames, gotNames)
 		})
 	}
+}
+
+func TestSourceQueryBuilderChromeRanking(t *testing.T) {
+	t.Parallel()
+
+	mockDB := &mock.DBExecutor{
+		ReposFn: func() []string {
+			return []string{"extra"}
+		},
+		SyncPackagesFn: func(pkgs ...string) []mock.IPackage {
+			return nil
+		},
+		LocalPackageFn: func(string) mock.IPackage {
+			return nil
+		},
+	}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{
+				{
+					Description: "The popular web browser by Google (Stable Channel)",
+					Name:        "google-chrome",
+					NumVotes:    2351,
+					Popularity:  13.24,
+					PackageBase: "google-chrome",
+					Version:     "149.0.7827.53-1",
+				},
+				{
+					Description: "Extract Android APKs for running in Chrome OS OR Chrome in OS X, Linux and Windows",
+					Name:        "chromeos-apk-git",
+					NumVotes:    37,
+					Popularity:  0.00,
+					PackageBase: "chromeos-apk-git",
+					Version:     "20201218.r129.f13a94d-1",
+				},
+				{
+					Description: "External extension updater for Chromium based browsers",
+					Name:        "chromexup",
+					NumVotes:    5,
+					Popularity:  0.00,
+					PackageBase: "chromexup",
+					Version:     "0.5.4-5",
+				},
+				{
+					Description: "Standalone server that implements the W3C WebDriver standard (for goog",
+					Name:        "chromedriver",
+					NumVotes:    52,
+					Popularity:  0.50,
+					PackageBase: "chromedriver",
+					Version:     "149.0.7827.54-1",
+				},
+			}, nil
+		},
+	}
+
+	w := &strings.Builder{}
+	queryBuilder := NewSourceQueryBuilder(mockAUR,
+		text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
+		"", parser.ModeAny, "", false,
+		false, false)
+
+	queryBuilder.Execute(context.Background(), mockDB, []string{"chrome"})
+
+	gotNames := make([]string, len(queryBuilder.results))
+	for i, result := range queryBuilder.results {
+		gotNames[i] = result.name
+	}
+
+	assert.Equal(t, []string{"google-chrome", "chromedriver", "chromeos-apk-git", "chromexup"}, gotNames)
 }
 
 func newYayQueryBuilderMocks() (*mock.DBExecutor, *mockaur.MockAUR) {

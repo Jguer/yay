@@ -613,6 +613,10 @@ func (a *Arguments) parseStdin() error {
 		a.AddTarget(scanner.Text())
 	}
 
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
 	return os.Stdin.Close()
 }
 

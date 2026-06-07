@@ -181,7 +181,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 	pkgS = RemoveInvalidTargets(s.logger, pkgS, s.targetMode)
 
-	metric := &metrics.Hamming{
+	metric := &metrics.JaroWinkler{
 		CaseSensitive: false,
 	}
 

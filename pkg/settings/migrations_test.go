@@ -188,37 +188,37 @@ func TestSortByMigration(t *testing.T) {
 		{
 			desc: "to upgrade",
 			testConfig: &Configuration{
-				Version: "12.9.0",
+				Version: "12.5.7",
 				SortBy:  "name",
 			},
-			newVersion: "13.0.0",
+			newVersion: "12.6.0",
 			wantSave:   true,
 		},
 		{
 			desc: "to upgrade-git",
 			testConfig: &Configuration{
-				Version: "12.9.0.r7.g6f60892",
+				Version: "12.3.0.r7.g6f60892",
 				SortBy:  "votes",
 			},
-			newVersion: "13.0.0",
+			newVersion: "12.6.0",
 			wantSave:   true,
 		},
 		{
 			desc: "to not upgrade",
 			testConfig: &Configuration{
-				Version: "12.9.0",
+				Version: "12.2.0",
 				SortBy:  "",
 			},
-			newVersion: "13.0.0",
+			newVersion: "12.6.0",
 			wantSave:   false,
 		},
 		{
 			desc: "to not upgrade - target version",
 			testConfig: &Configuration{
-				Version: "13.0.0",
+				Version: "12.6.0",
 				SortBy:  "name",
 			},
-			newVersion: "13.0.0",
+			newVersion: "12.6.0",
 			wantSave:   false,
 		},
 		{
