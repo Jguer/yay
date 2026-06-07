@@ -28,6 +28,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/ohler55/ojg v1.28.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/yuin/gopher-lua v1.1.2 // indirect
 	go.mongodb.org/mongo-driver v1.17.9 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

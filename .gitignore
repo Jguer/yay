@@ -32,3 +32,6 @@ qemu-*
 node_modules/
 xgotext
 .devcontainer/
+init.lua
+dyalpm/
+!doc/init.lua

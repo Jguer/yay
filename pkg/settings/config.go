@@ -23,59 +23,59 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
-	AURURL                 string `json:"aururl"`
-	AURRPCURL              string `json:"aurrpcurl"`
-	BuildDir               string `json:"buildDir"`
-	Editor                 string `json:"editor"`
-	EditorFlags            string `json:"editorflags"`
-	MakepkgBin             string `json:"makepkgbin"`
-	MakepkgConf            string `json:"makepkgconf"`
-	PacmanBin              string `json:"pacmanbin"`
-	PacmanConf             string `json:"pacmanconf"`
-	ReDownload             string `json:"redownload"`
-	AnswerClean            string `json:"answerclean"`
-	AnswerDiff             string `json:"answerdiff"`
-	AnswerEdit             string `json:"answeredit"`
-	AnswerUpgrade          string `json:"answerupgrade"`
-	GitBin                 string `json:"gitbin"`
-	GpgBin                 string `json:"gpgbin"`
-	GpgFlags               string `json:"gpgflags"`
-	MFlags                 string `json:"mflags"`
-	SortBy                 string `json:"sortby"`
-	SearchBy               string `json:"searchby"`
-	GitFlags               string `json:"gitflags"`
-	RemoveMake             string `json:"removemake"`
-	SudoBin                string `json:"sudobin"`
-	SudoFlags              string `json:"sudoflags"`
-	Version                string `json:"version"`
-	RequestSplitN          int    `json:"requestsplitn"`
-	CompletionInterval     int    `json:"completionrefreshtime"`
-	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads"`
-	BottomUp               bool   `json:"bottomup"`
-	SudoLoop               bool   `json:"sudoloop"`
-	Devel                  bool   `json:"devel"`
-	CleanAfter             bool   `json:"cleanAfter"`
-	KeepSrc                bool   `json:"keepSrc"`
-	Provides               bool   `json:"provides"`
-	PGPFetch               bool   `json:"pgpfetch"`
-	CleanMenu              bool   `json:"cleanmenu"`
-	DiffMenu               bool   `json:"diffmenu"`
-	EditMenu               bool   `json:"editmenu"`
-	CombinedUpgrade        bool   `json:"combinedupgrade"`
-	UseAsk                 bool   `json:"useask"`
-	BatchInstall           bool   `json:"batchinstall"`
-	SingleLineResults      bool   `json:"singlelineresults"`
-	SeparateSources        bool   `json:"separatesources"`
-	Debug                  bool   `json:"debug"`
-	UseRPC                 bool   `json:"rpc"`
-	DoubleConfirm          bool   `json:"doubleconfirm"` // confirm install before and after build
+	AURURL                 string `json:"aururl" lua:"aururl"`
+	AURRPCURL              string `json:"aurrpcurl" lua:"aurrpcurl"`
+	BuildDir               string `json:"buildDir" lua:"build_dir"`
+	Editor                 string `json:"editor" lua:"editor"`
+	EditorFlags            string `json:"editorflags" lua:"editor_flags"`
+	MakepkgBin             string `json:"makepkgbin" lua:"makepkg_bin"`
+	MakepkgConf            string `json:"makepkgconf" lua:"makepkg_conf"`
+	PacmanBin              string `json:"pacmanbin" lua:"pacman_bin"`
+	PacmanConf             string `json:"pacmanconf" lua:"pacman_conf"`
+	ReDownload             string `json:"redownload" lua:"redownload"`
+	AnswerClean            string `json:"answerclean" lua:"-"`
+	AnswerDiff             string `json:"answerdiff" lua:"-"`
+	AnswerEdit             string `json:"answeredit" lua:"-"`
+	AnswerUpgrade          string `json:"answerupgrade" lua:"-"`
+	GitBin                 string `json:"gitbin" lua:"git_bin"`
+	GpgBin                 string `json:"gpgbin" lua:"gpg_bin"`
+	GpgFlags               string `json:"gpgflags" lua:"gpg_flags"`
+	MFlags                 string `json:"mflags" lua:"mflags"`
+	SortBy                 string `json:"sortby" lua:"sort_by"`
+	SearchBy               string `json:"searchby" lua:"search_by"`
+	GitFlags               string `json:"gitflags" lua:"git_flags"`
+	RemoveMake             string `json:"removemake" lua:"remove_make"`
+	SudoBin                string `json:"sudobin" lua:"sudo_bin"`
+	SudoFlags              string `json:"sudoflags" lua:"sudo_flags"`
+	Version                string `json:"version" lua:"-"`
+	RequestSplitN          int    `json:"requestsplitn" lua:"request_split_n"`
+	CompletionInterval     int    `json:"completionrefreshtime" lua:"completion_refresh_time"`
+	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads" lua:"max_concurrent_downloads"`
+	BottomUp               bool   `json:"bottomup" lua:"bottom_up"`
+	SudoLoop               bool   `json:"sudoloop" lua:"sudo_loop"`
+	Devel                  bool   `json:"devel" lua:"devel"`
+	CleanAfter             bool   `json:"cleanAfter" lua:"clean_after"`
+	KeepSrc                bool   `json:"keepSrc" lua:"keep_src"`
+	Provides               bool   `json:"provides" lua:"provides"`
+	PGPFetch               bool   `json:"pgpfetch" lua:"pgp_fetch"`
+	CleanMenu              bool   `json:"cleanmenu" lua:"clean_menu"`
+	DiffMenu               bool   `json:"diffmenu" lua:"diff_menu"`
+	EditMenu               bool   `json:"editmenu" lua:"edit_menu"`
+	CombinedUpgrade        bool   `json:"combinedupgrade" lua:"combined_upgrade"`
+	UseAsk                 bool   `json:"useask" lua:"use_ask"`
+	BatchInstall           bool   `json:"batchinstall" lua:"batch_install"`
+	SingleLineResults      bool   `json:"singlelineresults" lua:"single_line_results"`
+	SeparateSources        bool   `json:"separatesources" lua:"separate_sources"`
+	Debug                  bool   `json:"debug" lua:"debug"`
+	UseRPC                 bool   `json:"rpc" lua:"rpc"`
+	DoubleConfirm          bool   `json:"doubleconfirm" lua:"double_confirm"` // confirm install before and after build
 
-	CompletionPath string `json:"-"`
-	VCSFilePath    string `json:"-"`
+	CompletionPath string `json:"-" lua:"-"`
+	VCSFilePath    string `json:"-" lua:"-"`
 	// ConfigPath     string `json:"-"`
-	SaveConfig bool               `json:"-"`
-	Mode       parser.TargetMode  `json:"-"`
-	ReBuild    parser.RebuildMode `json:"rebuild"`
+	SaveConfig bool               `json:"-" lua:"-"`
+	Mode       parser.TargetMode  `json:"-" lua:"-"`
+	ReBuild    parser.RebuildMode `json:"rebuild" lua:"rebuild"`
 }
 
 // SaveConfig writes yay config to file.

@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
+	"github.com/Jguer/yay/v12/pkg/settings/lua"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -83,6 +84,15 @@ func main() {
 	if errS := cfg.RunMigrations(fallbackLog,
 		settings.DefaultMigrations(), configPath, yayVersion); errS != nil {
 		fallbackLog.Errorln(errS)
+	}
+
+	if luaPath := settings.GetLuaConfigPath(cfg.Debug); luaPath != "" {
+		if errLua := lua.LoadInto(fallbackLog, luaPath, cfg); errLua != nil {
+			fallbackLog.Errorln(errLua)
+			ret = 1
+
+			return
+		}
 	}
 
 	cmdArgs := parser.MakeArguments()

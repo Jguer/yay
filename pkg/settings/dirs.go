@@ -7,7 +7,8 @@ import (
 
 const (
 	configFileName     string = "config.json" // configFileName holds the name of the config file.
-	vcsFileName        string = "vcs.json"    // vcsFileName holds the name of the vcs file.
+	luaConfigFileName  string = "init.lua"
+	vcsFileName        string = "vcs.json" // vcsFileName holds the name of the vcs file.
 	completionFileName string = "completion.cache"
 	systemdCache       string = "/var/cache/yay" // systemd should handle cache creation
 )
@@ -24,6 +25,31 @@ func GetConfigPath() string {
 		configDir := filepath.Join(configHome, ".config", "yay")
 		if err := initDir(configDir); err == nil {
 			return filepath.Join(configDir, configFileName)
+		}
+	}
+
+	return ""
+}
+
+// GetLuaConfigPath returns the first configured init.lua path that exists.
+func GetLuaConfigPath(debug bool) string {
+	var candidates []string
+
+	if debug {
+		candidates = append(candidates, luaConfigFileName)
+	}
+
+	if configHome := os.Getenv("XDG_CONFIG_HOME"); configHome != "" {
+		candidates = append(candidates, filepath.Join(configHome, "yay", luaConfigFileName))
+	}
+
+	if configHome := os.Getenv("HOME"); configHome != "" {
+		candidates = append(candidates, filepath.Join(configHome, ".config", "yay", luaConfigFileName))
+	}
+
+	for _, candidate := range candidates {
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
 		}
 	}
 

@@ -29,3 +29,29 @@ func Test_getCacheHome(t *testing.T) {
 	require.NoError(t, os.Unsetenv("TMPDIR"))
 	require.NoError(t, os.Unsetenv("SUDO_USER"))
 }
+
+func TestGetLuaConfigPath(t *testing.T) {
+	configHome := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configHome)
+	require.NoError(t, os.Unsetenv("HOME"))
+
+	assert.Empty(t, GetLuaConfigPath(false))
+
+	luaDir := filepath.Join(configHome, "yay")
+	require.NoError(t, os.MkdirAll(luaDir, 0o755))
+	luaPath := filepath.Join(luaDir, "init.lua")
+	require.NoError(t, os.WriteFile(luaPath, []byte("-- test"), 0o600))
+
+	assert.Equal(t, luaPath, GetLuaConfigPath(false))
+}
+
+func TestGetLuaConfigPathDebugCwd(t *testing.T) {
+	require.NoError(t, os.Unsetenv("XDG_CONFIG_HOME"))
+	require.NoError(t, os.Unsetenv("HOME"))
+
+	t.Chdir(t.TempDir())
+	require.NoError(t, os.WriteFile("init.lua", []byte("-- test"), 0o600))
+
+	assert.Equal(t, "init.lua", GetLuaConfigPath(true))
+	assert.Empty(t, GetLuaConfigPath(false))
+}
