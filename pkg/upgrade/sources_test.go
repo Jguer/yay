@@ -169,9 +169,9 @@ func Test_upDevel(t *testing.T) {
 					"hello4": &mock.Package{PName: "hello4", PVersion: "4.0.0"},
 				},
 				aurdata: map[string]*aur.Pkg{
-					"hello":  {Version: "2.0.0", Name: "hello"},
+					"hello":  {Version: "2.0.0", Name: "hello", LastModified: 1700000000},
 					"hello2": {Version: "2.0.0", Name: "hello2"},
-					"hello4": {Version: "2.0.0", Name: "hello4"},
+					"hello4": {Version: "2.0.0", Name: "hello4", LastModified: 1700000004},
 				},
 			},
 			want: UpSlice{
@@ -181,12 +181,14 @@ func Test_upDevel(t *testing.T) {
 						Repository:    "devel",
 						LocalVersion:  "2.0.0",
 						RemoteVersion: "latest-commit",
+						LastModified:  1700000000,
 					},
 					{
 						Name:          "hello4",
 						Repository:    "devel",
 						LocalVersion:  "4.0.0",
 						RemoteVersion: "latest-commit",
+						LastModified:  1700000004,
 					},
 				},
 			},

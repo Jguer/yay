@@ -58,6 +58,10 @@ func aurPkgSearchString(
 		text.Bold(" (+"+strconv.Itoa(pkg.NumVotes)) +
 		" " + text.Bold(strconv.FormatFloat(pkg.Popularity, 'f', 2, 64)+") ")
 
+	if ageTag := text.FormatAgeTag(int64(pkg.LastModified)); ageTag != "" {
+		toPrint += ageTag + " "
+	}
+
 	if pkg.Maintainer == "" {
 		toPrint += text.Bold(text.Red(gotext.Get("(Orphaned)"))) + " "
 	}

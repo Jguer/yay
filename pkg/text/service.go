@@ -35,7 +35,7 @@ func (l *Logger) Child(name string) *Logger {
 
 func (l *Logger) sprintDebug(a ...any) string {
 	return fmt.Sprint(append([]any{
-		Bold(yellow(fmt.Sprintf("[DEBUG:%s]", l.name))),
+		Bold(Yellow(fmt.Sprintf("[DEBUG:%s]", l.name))),
 	}, a...)...)
 }
 
@@ -84,7 +84,7 @@ func (l *Logger) Warnln(a ...any) {
 }
 
 func (l *Logger) SprintWarn(a ...any) string {
-	return fmt.Sprint(append([]any{Bold(yellow(smallArrow + " "))}, a...)...)
+	return fmt.Sprint(append([]any{Bold(Yellow(smallArrow + " "))}, a...)...)
 }
 
 func (l *Logger) Error(a ...any) {

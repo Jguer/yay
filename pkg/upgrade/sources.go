@@ -23,7 +23,8 @@ func UpDevel(
 
 	for pkgName, pkg := range remote {
 		if localCache.ToUpgrade(ctx, pkgName) {
-			if _, ok := aurdata[pkgName]; !ok {
+			aurPkg, ok := aurdata[pkgName]
+			if !ok {
 				log.Warnln(gotext.Get("ignoring package devel upgrade (no AUR info found):"), pkgName)
 				continue
 			}
@@ -41,6 +42,7 @@ func UpDevel(
 					LocalVersion:  pkg.Version(),
 					RemoteVersion: "latest-commit",
 					Reason:        pkg.Reason(),
+					LastModified:  int64(aurPkg.LastModified),
 				})
 		}
 	}
@@ -86,6 +88,7 @@ func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*
 						LocalVersion:  pkg.Version(),
 						RemoteVersion: aurPkg.Version,
 						Reason:        pkg.Reason(),
+						LastModified:  int64(aurPkg.LastModified),
 					})
 			}
 		}

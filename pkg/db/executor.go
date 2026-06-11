@@ -27,6 +27,7 @@ type Upgrade struct {
 	RemoteVersion string
 	Reason        alpm.PkgReason
 	Extra         string // Extra information to be displayed
+	LastModified  int64  // Unix timestamp of last AUR modification, 0 for non-AUR packages
 }
 
 type SyncUpgrade struct {

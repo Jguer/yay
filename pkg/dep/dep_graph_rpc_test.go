@@ -283,11 +283,11 @@ func TestGrapher_SplitPackages_Clion(t *testing.T) {
 	}}
 
 	installInfos := map[string]*InstallInfo{
-		"clion exp":       {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion")},
-		"clion-jre exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion")},
-		"clion-cmake exp": {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion")},
-		"clion-gdb exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion")},
-		"clion-lldb exp":  {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion")},
+		"clion exp":       {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120},
+		"clion-jre exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120},
+		"clion-cmake exp": {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120},
+		"clion-gdb exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120},
+		"clion-lldb exp":  {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120},
 	}
 
 	tests := []struct {
@@ -565,11 +565,11 @@ func TestGrapher_SplitPackages_NX(t *testing.T) {
 	}}
 
 	installInfos := map[string]*InstallInfo{
-		"nxproxy exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx")},
-		"nxagent exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx")},
-		"nx-x11 dep":   {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: ptrString("nx")},
-		"libxcomp dep": {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: ptrString("nx")},
-		"libxcomp exp": {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx")},
+		"nxproxy exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449},
+		"nxagent exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449},
+		"nx-x11 dep":   {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449},
+		"libxcomp dep": {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449},
+		"libxcomp exp": {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449},
 	}
 
 	tests := []struct {

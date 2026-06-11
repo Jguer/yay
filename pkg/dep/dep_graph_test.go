@@ -162,10 +162,11 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 			want: []map[string]*InstallInfo{
 				{
 					"jellyfin": {
-						Source:  AUR,
-						Reason:  Explicit,
-						Version: "10.8.8-1",
-						AURBase: ptrString("jellyfin"),
+						Source:       AUR,
+						Reason:       Explicit,
+						Version:      "10.8.8-1",
+						AURBase:      ptrString("jellyfin"),
+						LastModified: 1669830147,
 					},
 				},
 				{
@@ -193,24 +194,27 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 			want: []map[string]*InstallInfo{
 				{
 					"jellyfin": {
-						Source:  AUR,
-						Reason:  Explicit,
-						Version: "10.8.8-1",
-						AURBase: ptrString("jellyfin"),
+						Source:       AUR,
+						Reason:       Explicit,
+						Version:      "10.8.8-1",
+						AURBase:      ptrString("jellyfin"),
+						LastModified: 1669830147,
 					},
 				},
 				{
 					"jellyfin-web": {
-						Source:  AUR,
-						Reason:  Dep,
-						Version: "10.8.8-1",
-						AURBase: ptrString("jellyfin"),
+						Source:       AUR,
+						Reason:       Dep,
+						Version:      "10.8.8-1",
+						AURBase:      ptrString("jellyfin"),
+						LastModified: 1669830147,
 					},
 					"jellyfin-server": {
-						Source:  AUR,
-						Reason:  Dep,
-						Version: "10.8.8-1",
-						AURBase: ptrString("jellyfin"),
+						Source:       AUR,
+						Reason:       Dep,
+						Version:      "10.8.8-1",
+						AURBase:      ptrString("jellyfin"),
+						LastModified: 1669830147,
 					},
 				},
 				{
@@ -328,10 +332,11 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 			want: []map[string]*InstallInfo{
 				{
 					"android-sdk": {
-						Source:  AUR,
-						Reason:  Explicit,
-						Version: "26.1.1-2",
-						AURBase: ptrString("android-sdk"),
+						Source:       AUR,
+						Reason:       Explicit,
+						Version:      "26.1.1-2",
+						AURBase:      ptrString("android-sdk"),
+						LastModified: 1647982720,
 					},
 				},
 				{
@@ -1012,34 +1017,39 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 
 	installInfos := map[string]*InstallInfo{
 		"gstreamer-git exp": {
-			Source:  AUR,
-			Reason:  Explicit,
-			Version: "1.24.0.r37-1",
-			AURBase: ptrString("gstreamer-git"),
+			Source:       AUR,
+			Reason:       Explicit,
+			Version:      "1.24.0.r37-1",
+			AURBase:      ptrString("gstreamer-git"),
+			LastModified: 1700000000,
 		},
 		"gstreamer-git dep": {
-			Source:  AUR,
-			Reason:  Dep,
-			Version: "1.24.0.r37-1",
-			AURBase: ptrString("gstreamer-git"),
+			Source:       AUR,
+			Reason:       Dep,
+			Version:      "1.24.0.r37-1",
+			AURBase:      ptrString("gstreamer-git"),
+			LastModified: 1700000000,
 		},
 		"gst-plugins-base-libs-git exp": {
-			Source:  AUR,
-			Reason:  Explicit,
-			Version: "1.24.0.r37-1",
-			AURBase: ptrString("gstreamer-git"),
+			Source:       AUR,
+			Reason:       Explicit,
+			Version:      "1.24.0.r37-1",
+			AURBase:      ptrString("gstreamer-git"),
+			LastModified: 1700000000,
 		},
 		"gst-plugins-base-libs-git dep": {
-			Source:  AUR,
-			Reason:  Dep,
-			Version: "1.24.0.r37-1",
-			AURBase: ptrString("gstreamer-git"),
+			Source:       AUR,
+			Reason:       Dep,
+			Version:      "1.24.0.r37-1",
+			AURBase:      ptrString("gstreamer-git"),
+			LastModified: 1700000000,
 		},
 		"gst-plugins-good-git exp": {
-			Source:  AUR,
-			Reason:  Explicit,
-			Version: "1.24.0.r37-1",
-			AURBase: ptrString("gstreamer-git"),
+			Source:       AUR,
+			Reason:       Explicit,
+			Version:      "1.24.0.r37-1",
+			AURBase:      ptrString("gstreamer-git"),
+			LastModified: 1700000000,
 		},
 	}
 

@@ -119,6 +119,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			Devel:        true,
 			LocalVersion: up.LocalVersion,
 			Version:      up.RemoteVersion,
+			LastModified: up.LastModified,
 		})
 		names.Add(up.Name)
 		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
@@ -149,6 +150,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			Upgrade:      true,
 			Version:      up.RemoteVersion,
 			LocalVersion: up.LocalVersion,
+			LastModified: up.LastModified,
 		})
 		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
 	}
@@ -215,6 +217,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				LocalVersion:  info.LocalVersion,
 				Reason:        alpmReason,
 				Extra:         extra,
+				LastModified:  info.LastModified,
 			})
 		case dep.Sync:
 			repoUp.Up = append(repoUp.Up, Upgrade{

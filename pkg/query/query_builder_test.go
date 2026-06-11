@@ -8,6 +8,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Jguer/aur"
 
@@ -19,8 +20,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// linuxCkLastModified matches the mock linux-ck package fixture.
+const linuxCkLastModified = 1646250901
+
+// linuxCkAgeTag is the expected age badge when NowFunc is pinned to linuxCkFixedNow.
+// 365 days after linuxCkLastModified -> "[365d]" in cyan.
+const linuxCkAgeTag = "\x1b[36m[365d]\x1b[0m"
+
+var linuxCkFixedNow = time.Unix(linuxCkLastModified+365*24*3600, 0)
+
 func TestSourceQueryBuilder(t *testing.T) {
-	t.Parallel()
+	text.NowFunc = func() time.Time { return linuxCkFixedNow }
+	t.Cleanup(func() { text.NowFunc = time.Now })
+
 	type testCase struct {
 		desc              string
 		search            []string
@@ -45,7 +57,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			verbosity:       Detailed,
 			wantResults:     []string{"linux-ck", "linux-zen", "linux"},
 			wantOutput: []string{
-				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 			},
@@ -61,7 +73,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			wantOutput: []string{
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
-				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 		{
@@ -73,7 +85,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			verbosity:       Detailed,
 			wantResults:     []string{"linux-ck", "linux-zen", "linux"},
 			wantOutput: []string{
-				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 			},
@@ -89,7 +101,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			wantOutput: []string{
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
-				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 		{
@@ -101,7 +113,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			verbosity:       NumberMenu,
 			wantResults:     []string{"linux-ck", "linux-zen", "linux"},
 			wantOutput: []string{
-				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 				"\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
 				"\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 			},
@@ -117,7 +129,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			wantOutput: []string{
 				"\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 				"\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
-				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 		{
@@ -129,7 +141,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			verbosity:       NumberMenu,
 			wantResults:     []string{"linux-ck", "linux", "linux-zen"},
 			wantOutput: []string{
-				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 				"\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
 				"\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
 			},
@@ -145,7 +157,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			wantOutput: []string{
 				"\x1b[35m1\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux ZEN kernel and modules\n",
 				"\x1b[35m2\x1b[0m \x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\n    The Linux kernel and modules\n",
-				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b[35m3\x1b[0m \x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 		{
@@ -199,7 +211,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			singleLineResults: true,
 			wantResults:       []string{"linux-ck", "linux", "linux-zen"},
 			wantOutput: []string{
-				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\tThe Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \tThe Linux-ck kernel and modules with ck's hrtimer patches\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\tThe Linux kernel and modules\n",
 				"\x1b]8;;https://archlinux.org/packages/core/x86_64/linux-zen\x1b\\\x1b[1m\x1b[33mcore\x1b[0m\x1b[0m/\x1b[1mlinux-zen\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.0\x1b[0m\x1b[1m (1.0 B 1.0 B) \x1b[0m\tThe Linux ZEN kernel and modules\n",
 			},
@@ -215,7 +227,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			targetMode:      parser.ModeAUR,
 			wantResults:     []string{"linux-ck"},
 			wantOutput: []string{
-				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 		{
@@ -227,7 +239,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			targetMode:      parser.ModeAUR,
 			wantResults:     []string{"linux-ck"},
 			wantOutput: []string{
-				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
+				"\x1b]8;;https://aur.archlinux.org/packages/linux-ck\x1b\\\x1b[1m\x1b[34maur\x1b[0m\x1b[0m/\x1b[1mlinux-ck\x1b[0m\x1b]8;;\x1b\\ \x1b[36m5.16.12-1\x1b[0m\x1b[1m (+450\x1b[0m \x1b[1m1.51) \x1b[0m\x1b[36m[365d]\x1b[0m \n    The Linux-ck kernel and modules with ck's hrtimer patches\n",
 			},
 		},
 	}

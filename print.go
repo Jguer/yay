@@ -170,8 +170,14 @@ func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.
 			if quietMode {
 				run.Logger.Printf("%s\n", pkgName)
 			} else {
-				run.Logger.Printf("%s %s -> %s\n", text.Bold(pkgName), text.Bold(text.Green(ii.LocalVersion)),
-					text.Bold(text.Green(ii.Version)))
+				ageTag := text.FormatAgeTag(ii.LastModified)
+				if ageTag != "" {
+					run.Logger.Printf("%s %s -> %s %s\n", text.Bold(pkgName),
+						text.Bold(text.Green(ii.LocalVersion)), text.Bold(text.Green(ii.Version)), ageTag)
+				} else {
+					run.Logger.Printf("%s %s -> %s\n", text.Bold(pkgName),
+						text.Bold(text.Green(ii.LocalVersion)), text.Bold(text.Green(ii.Version)))
+				}
 			}
 
 			targets.Remove(pkgName)

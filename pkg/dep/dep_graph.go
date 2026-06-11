@@ -28,9 +28,10 @@ type InstallInfo struct {
 	AURBase      *string
 	SyncDBName   *string
 
-	IsGroup bool
-	Upgrade bool
-	Devel   bool
+	IsGroup      bool
+	Upgrade      bool
+	Devel        bool
+	LastModified int64 // Unix timestamp, non-zero only for AUR packges
 }
 
 func (i *InstallInfo) String() string {
@@ -464,10 +465,11 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 		}
 
 		graph = g.GraphAURTarget(ctx, graph, aurPkg, &InstallInfo{
-			AURBase: &aurPkg.PackageBase,
-			Reason:  reason,
-			Source:  AUR,
-			Version: aurPkg.Version,
+			AURBase:      &aurPkg.PackageBase,
+			Reason:       reason,
+			Source:       AUR,
+			Version:      aurPkg.Version,
+			LastModified: int64(aurPkg.LastModified),
 		})
 		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
 	}
@@ -720,10 +722,11 @@ func (g *Grapher) addNodes(
 				Color:      colorMap[depType],
 				Background: bgColorMap[AUR],
 				Value: &InstallInfo{
-					Source:  AUR,
-					Reason:  depType,
-					AURBase: &aurPkg.PackageBase,
-					Version: aurPkg.Version,
+					Source:       AUR,
+					Reason:       depType,
+					AURBase:      &aurPkg.PackageBase,
+					Version:      aurPkg.Version,
+					LastModified: int64(aurPkg.LastModified),
 				},
 			})
 
