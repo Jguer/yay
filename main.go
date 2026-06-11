@@ -11,6 +11,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v12/pkg/db/ialpm"
+	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/lua"
@@ -86,12 +87,22 @@ func main() {
 		fallbackLog.Errorln(errS)
 	}
 
+	var luaEngine *lua.Engine
+
 	if luaPath := settings.GetLuaConfigPath(cfg.Debug); luaPath != "" {
-		if errLua := lua.LoadInto(fallbackLog, luaPath, cfg); errLua != nil {
+		eng, errLua := lua.LoadInto(fallbackLog, luaPath, cfg)
+		if errLua != nil {
 			fallbackLog.Errorln(errLua)
 			ret = 1
 
 			return
+		}
+
+		if eng.HasHooks() {
+			luaEngine = eng
+			defer luaEngine.Close()
+		} else {
+			eng.Close()
 		}
 	}
 
@@ -115,7 +126,12 @@ func main() {
 	}
 
 	// Build run
-	run, err := runtime.NewRuntime(cfg, cmdArgs, yayVersion)
+	var searchRenderer query.SearchRenderer
+	if luaEngine != nil {
+		searchRenderer = luaEngine
+	}
+
+	run, err := runtime.NewRuntime(cfg, cmdArgs, yayVersion, searchRenderer)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fallbackLog.Errorln(str)

@@ -24,7 +24,7 @@ func TestLoadIntoStrictFailsOnUnknownKey(t *testing.T) {
 	`)
 
 	cfg := &testConfig{}
-	err := LoadInto(nil, path, cfg)
+	_, err := LoadInto(nil, path, cfg)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "unknown yay.opt key: unknown_key")
 }
@@ -35,7 +35,7 @@ func TestLoadIntoStrictFailsOnTypeMismatch(t *testing.T) {
 	`)
 
 	cfg := &testConfig{}
-	err := LoadInto(nil, path, cfg)
+	_, err := LoadInto(nil, path, cfg)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "yay.opt.devel: expected boolean")
 }
@@ -48,8 +48,9 @@ func TestLoadIntoAppliesValidValues(t *testing.T) {
 	`)
 
 	cfg := &testConfig{}
-	err := LoadInto(nil, path, cfg)
+	e, err := LoadInto(nil, path, cfg)
 	require.NoError(t, err)
+	defer e.Close()
 	require.Equal(t, "/tmp/yay", cfg.BuildDir)
 	require.Equal(t, 123, cfg.RequestSplitN)
 	require.True(t, cfg.Devel)

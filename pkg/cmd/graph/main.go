@@ -29,7 +29,7 @@ func handleCmd(logger *text.Logger) error {
 		return errP
 	}
 
-	run, err := runtime.NewRuntime(cfg, cmdArgs, "1.0.0")
+	run, err := runtime.NewRuntime(cfg, cmdArgs, "1.0.0", nil)
 	if err != nil {
 		return err
 	}

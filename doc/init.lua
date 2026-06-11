@@ -51,3 +51,19 @@ yay.opt.separate_sources = true -- Separate query results by source (repo vs AUR
 yay.opt.debug = false -- Enable debug logging and local init.lua lookup convenience.
 yay.opt.rpc = true -- Use AUR RPC for dependency/query operations.
 yay.opt.double_confirm = true -- Ask for confirmation before and after builds during upgrades.
+
+-- Search-display hooks (yay.on)
+--
+-- Override how AUR/repo search-result lines are rendered. Return a string for
+-- the full line, or nil to fall back to yay's default formatter. See
+-- doc/lua.md for the full field list and contract.
+--
+-- yay.on("search_aur", function(pkg)
+--   local prefix = pkg.index and (pkg.index .. " ") or ""
+--   return string.format("%saur/%s %s (+%d %.2f)", prefix, pkg.name, pkg.version, pkg.votes, pkg.popularity)
+-- end)
+--
+-- yay.on("search_repo", function(pkg)
+--   local prefix = pkg.index and (pkg.index .. " ") or ""
+--   return string.format("%s%s/%s %s", prefix, pkg.source, pkg.name, pkg.version)
+-- end)

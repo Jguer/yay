@@ -30,6 +30,18 @@ const (
 	Minimal
 )
 
+// Search-display event names passed to a SearchRenderer.
+const (
+	SearchEventAUR  = "search_aur"
+	SearchEventRepo = "search_repo"
+)
+
+// SearchRenderer overrides how a single search-result line is rendered. handled
+// is false when the renderer defers to the built-in formatter for that row.
+type SearchRenderer interface {
+	Render(event string, pkg map[string]any) (line string, handled bool, err error)
+}
+
 type Builder interface {
 	Len() int
 	Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string)
@@ -51,6 +63,7 @@ type SourceQueryBuilder struct {
 
 	aurClient aur.QueryClient
 	logger    *text.Logger
+	renderer  SearchRenderer
 }
 
 func NewSourceQueryBuilder(
@@ -62,6 +75,7 @@ func NewSourceQueryBuilder(
 	bottomUp,
 	singleLineResults bool,
 	separateSources bool,
+	renderer SearchRenderer,
 ) *SourceQueryBuilder {
 	return &SourceQueryBuilder{
 		aurClient:         aurClient,
@@ -72,6 +86,7 @@ func NewSourceQueryBuilder(
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
 		separateSources:   separateSources,
+		renderer:          renderer,
 		queryMap:          map[string]map[string]any{},
 		results:           make([]abstractResult, 0, 100),
 	}
@@ -280,17 +295,44 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 			continue
 		}
 
-		var toPrint string
+		pkg := s.queryMap[s.results[i].source][s.results[i].name]
 
-		if verboseSearch == NumberMenu {
-			if s.bottomUp {
-				toPrint += text.Magenta(strconv.Itoa(len(s.results)-i)) + " "
-			} else {
-				toPrint += text.Magenta(strconv.Itoa(i+1)) + " "
+		if s.renderer != nil {
+			var (
+				event string
+				m     map[string]any
+			)
+
+			switch pPkg := pkg.(type) {
+			case aur.Pkg:
+				event, m = SearchEventAUR, aurPkgToMap(&pPkg, dbExecutor)
+			case alpm.Package:
+				event, m = SearchEventRepo, syncPkgToMap(pPkg, dbExecutor)
+			}
+
+			if m != nil {
+				m["count"] = len(s.results)
+				if verboseSearch == NumberMenu {
+					m["index"] = s.menuIndex(i)
+				}
+
+				line, handled, err := s.renderer.Render(event, m)
+				if err != nil {
+					return err
+				}
+
+				if handled {
+					s.logger.Println(line)
+					continue
+				}
 			}
 		}
 
-		pkg := s.queryMap[s.results[i].source][s.results[i].name]
+		var toPrint string
+
+		if verboseSearch == NumberMenu {
+			toPrint += text.Magenta(strconv.Itoa(s.menuIndex(i))) + " "
+		}
 
 		switch pPkg := pkg.(type) {
 		case aur.Pkg:
@@ -303,6 +345,16 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 	}
 
 	return nil
+}
+
+// menuIndex returns the 1-based selection number shown in the number menu for
+// result i, honoring bottom-up ordering.
+func (s *SourceQueryBuilder) menuIndex(i int) int {
+	if s.bottomUp {
+		return len(s.results) - i
+	}
+
+	return i + 1
 }
 
 func (s *SourceQueryBuilder) Len() int {

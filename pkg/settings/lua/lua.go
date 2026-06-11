@@ -13,18 +13,99 @@ const (
 	optTableName = "opt"
 )
 
+var validEvents = map[string]bool{"search_aur": true, "search_repo": true}
+
 type Engine struct {
-	L *lua.LState
+	L     *lua.LState
+	hooks map[string]*lua.LFunction
 }
 
 func New() *Engine {
 	state := lua.NewState()
 
+	e := &Engine{L: state, hooks: map[string]*lua.LFunction{}}
+
 	yayTbl := state.NewTable()
 	state.SetGlobal(globalName, yayTbl)
 	state.SetField(yayTbl, optTableName, state.NewTable())
+	state.SetField(yayTbl, "on", state.NewFunction(e.luaOn))
 
-	return &Engine{L: state}
+	return e
+}
+
+// luaOn registers a Lua callback for a search-display event (yay.on).
+func (e *Engine) luaOn(L *lua.LState) int {
+	event := L.CheckString(1)
+	fn := L.CheckFunction(2)
+
+	if !validEvents[event] {
+		L.RaiseError("yay.on: unknown event %q", event)
+		return 0
+	}
+
+	e.hooks[event] = fn
+
+	return 0
+}
+
+// HasHooks reports whether any search-display callback has been registered.
+func (e *Engine) HasHooks() bool {
+	return len(e.hooks) > 0
+}
+
+// Render invokes the callback registered for event with pkg. It returns the
+// produced line and handled=true when a callback returned a string; handled is
+// false when no callback is registered or the callback deferred to the default
+// formatter (returned nil/nothing/non-string).
+func (e *Engine) Render(event string, pkg map[string]any) (string, bool, error) {
+	fn, ok := e.hooks[event]
+	if !ok {
+		return "", false, nil
+	}
+
+	e.L.Push(fn)
+	e.L.Push(e.toTable(pkg))
+
+	if err := e.L.PCall(1, 1, nil); err != nil {
+		return "", false, fmt.Errorf("init.lua %s hook: %w", event, err)
+	}
+
+	ret := e.L.Get(-1)
+	e.L.Pop(1)
+
+	if s, ok := ret.(lua.LString); ok {
+		return string(s), true, nil
+	}
+
+	return "", false, nil
+}
+
+// toTable converts a Go map into a Lua table for passing to a callback.
+func (e *Engine) toTable(pkg map[string]any) *lua.LTable {
+	tbl := e.L.NewTable()
+
+	for k, v := range pkg {
+		switch val := v.(type) {
+		case string:
+			e.L.SetField(tbl, k, lua.LString(val))
+		case int:
+			e.L.SetField(tbl, k, lua.LNumber(val))
+		case int64:
+			e.L.SetField(tbl, k, lua.LNumber(val))
+		case float64:
+			e.L.SetField(tbl, k, lua.LNumber(val))
+		case bool:
+			e.L.SetField(tbl, k, lua.LBool(val))
+		case []string:
+			seq := e.L.NewTable()
+			for _, item := range val {
+				seq.Append(lua.LString(item))
+			}
+			e.L.SetField(tbl, k, seq)
+		}
+	}
+
+	return tbl
 }
 
 func (e *Engine) Close() {

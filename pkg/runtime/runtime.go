@@ -38,7 +38,7 @@ type Runtime struct {
 	Logger       *text.Logger
 }
 
-func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
+func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string, searchRenderer query.SearchRenderer) (*Runtime, error) {
 	logger := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime")
 	runner := exe.NewOSRunner(logger.Child("runner"))
 
@@ -130,7 +130,7 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		aurCache,
 		logger.Child("mixed.querybuilder"), cfg.SortBy,
 		cfg.Mode, cfg.SearchBy,
-		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
+		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources, searchRenderer)
 
 	run := &Runtime{
 		Cfg:          cfg,

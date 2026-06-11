@@ -38,7 +38,7 @@ func TestBuildRuntime(t *testing.T) {
 	version := "1.0.0"
 
 	// Call the function being tested
-	run, err := runtime.NewRuntime(cfg, cmdArgs, version)
+	run, err := runtime.NewRuntime(cfg, cmdArgs, version, nil)
 	require.NoError(t, err)
 
 	// Assert the function's output
@@ -88,7 +88,7 @@ func TestBuildRuntimeSearchUsesMetadataCacheWhenRPCDisabled(t *testing.T) {
 	}
 	cmdArgs := parser.MakeArguments()
 
-	run, err := runtime.NewRuntime(cfg, cmdArgs, "1.0.0")
+	run, err := runtime.NewRuntime(cfg, cmdArgs, "1.0.0", nil)
 	require.NoError(t, err)
 
 	run.QueryBuilder.Execute(context.Background(), &mock.DBExecutor{}, []string{"yay"})

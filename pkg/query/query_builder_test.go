@@ -5,6 +5,7 @@ package query
 
 import (
 	"context"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -18,6 +19,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // linuxCkLastModified matches the mock linux-ck package fixture.
@@ -305,7 +307,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, tc.targetMode, tc.searchBy, tc.bottomUp,
-				tc.singleLineResults, tc.separateSources)
+				tc.singleLineResults, tc.separateSources, nil)
 
 			queryBuilder.Execute(context.Background(), mockDB, tc.search)
 
@@ -431,7 +433,7 @@ func TestSourceQueryBuilderTieSortsByRepoOrder(t *testing.T) {
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				"", parser.ModeAny, "", tc.bottomUp,
-				false, true)
+				false, true, nil)
 
 			queryBuilder.Execute(context.Background(), mockDB, []string{"systemd"})
 
@@ -475,7 +477,7 @@ func TestSourceQueryBuilderTieDoesNotSeparateSources(t *testing.T) {
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				"", parser.ModeAny, "", tc.bottomUp,
-				false, true)
+				false, true, nil)
 
 			queryBuilder.Execute(context.Background(), mockDB, []string{"yay"})
 
@@ -594,7 +596,7 @@ func TestSourceQueryBuilderSortByFields(t *testing.T) {
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, parser.ModeAny, "", tc.bottomUp,
-				false, false)
+				false, false, nil)
 
 			queryBuilder.Execute(context.Background(), mockDB, []string{"yay"})
 
@@ -666,7 +668,7 @@ func TestSourceQueryBuilderChromeRanking(t *testing.T) {
 	queryBuilder := NewSourceQueryBuilder(mockAUR,
 		text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 		"", parser.ModeAny, "", false,
-		false, false)
+		false, false, nil)
 
 	queryBuilder.Execute(context.Background(), mockDB, []string{"chrome"})
 
@@ -744,4 +746,135 @@ func newYayQueryBuilderMocks() (*mock.DBExecutor, *mockaur.MockAUR) {
 	}
 
 	return mockDB, mockAUR
+}
+
+type recordedRender struct {
+	event string
+	pkg   map[string]any
+}
+
+type recordingRenderer struct {
+	calls        []recordedRender
+	deferDefault bool
+	err          error
+}
+
+func (r *recordingRenderer) Render(event string, pkg map[string]any) (string, bool, error) {
+	r.calls = append(r.calls, recordedRender{event: event, pkg: pkg})
+
+	if r.err != nil {
+		return "", false, r.err
+	}
+
+	if r.deferDefault {
+		return "", false, nil
+	}
+
+	return "HOOK " + event + " " + pkg["name"].(string), true, nil
+}
+
+func (r *recordingRenderer) byName() map[string]recordedRender {
+	out := make(map[string]recordedRender, len(r.calls))
+	for _, c := range r.calls {
+		out[c.pkg["name"].(string)] = c
+	}
+
+	return out
+}
+
+func newRendererQueryBuilder(w *strings.Builder, aurClient aur.QueryClient, rr SearchRenderer) *SourceQueryBuilder {
+	return NewSourceQueryBuilder(aurClient,
+		text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
+		"", parser.ModeAny, "", false,
+		true, false, rr)
+}
+
+func TestSourceQueryBuilderRendererNumberMenu(t *testing.T) {
+	t.Parallel()
+
+	mockDB, mockAUR := newYayQueryBuilderMocks()
+	w := &strings.Builder{}
+	rr := &recordingRenderer{}
+	qb := newRendererQueryBuilder(w, mockAUR, rr)
+
+	qb.Execute(context.Background(), mockDB, []string{"yay"})
+	require.NoError(t, qb.Results(mockDB, NumberMenu))
+
+	// One repo + two AUR results -> three hook calls and three printed lines.
+	require.Len(t, rr.calls, 3)
+
+	lines := strings.Split(strings.TrimRight(w.String(), "\n"), "\n")
+	require.Len(t, lines, 3)
+	for _, line := range lines {
+		assert.True(t, strings.HasPrefix(line, "HOOK "), "line owned by hook: %q", line)
+	}
+
+	byName := rr.byName()
+	require.Contains(t, byName, "ruby-yard")
+	require.Contains(t, byName, "yay")
+	require.Contains(t, byName, "yay-git")
+
+	assert.Equal(t, SearchEventRepo, byName["ruby-yard"].event)
+	assert.Equal(t, "extra", byName["ruby-yard"].pkg["source"])
+	assert.Equal(t, SearchEventAUR, byName["yay"].event)
+	assert.Equal(t, "aur", byName["yay"].pkg["source"])
+
+	indices := map[int]bool{}
+	for _, c := range rr.calls {
+		assert.Equal(t, 3, c.pkg["count"])
+		idx, ok := c.pkg["index"].(int)
+		require.True(t, ok, "index present in number menu")
+		indices[idx] = true
+	}
+	assert.Equal(t, map[int]bool{1: true, 2: true, 3: true}, indices)
+}
+
+func TestSourceQueryBuilderRendererDetailedNoIndex(t *testing.T) {
+	t.Parallel()
+
+	mockDB, mockAUR := newYayQueryBuilderMocks()
+	w := &strings.Builder{}
+	rr := &recordingRenderer{}
+	qb := newRendererQueryBuilder(w, mockAUR, rr)
+
+	qb.Execute(context.Background(), mockDB, []string{"yay"})
+	require.NoError(t, qb.Results(mockDB, Detailed))
+
+	require.Len(t, rr.calls, 3)
+	for _, c := range rr.calls {
+		assert.Equal(t, 3, c.pkg["count"])
+		_, hasIndex := c.pkg["index"]
+		assert.False(t, hasIndex, "index absent in detailed mode")
+	}
+}
+
+func TestSourceQueryBuilderRendererDeferFallsBackToDefault(t *testing.T) {
+	t.Parallel()
+
+	mockDB, mockAUR := newYayQueryBuilderMocks()
+	w := &strings.Builder{}
+	rr := &recordingRenderer{deferDefault: true}
+	qb := newRendererQueryBuilder(w, mockAUR, rr)
+
+	qb.Execute(context.Background(), mockDB, []string{"yay"})
+	require.NoError(t, qb.Results(mockDB, Detailed))
+
+	// Renderer was consulted for every row but deferred, so no hook output.
+	require.Len(t, rr.calls, 3)
+	assert.NotContains(t, w.String(), "HOOK ")
+	assert.Contains(t, w.String(), "yay")
+}
+
+func TestSourceQueryBuilderRendererErrorPropagates(t *testing.T) {
+	t.Parallel()
+
+	mockDB, mockAUR := newYayQueryBuilderMocks()
+	w := &strings.Builder{}
+	rr := &recordingRenderer{err: errors.New("render boom")}
+	qb := newRendererQueryBuilder(w, mockAUR, rr)
+
+	qb.Execute(context.Background(), mockDB, []string{"yay"})
+	err := qb.Results(mockDB, Detailed)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "render boom")
 }
