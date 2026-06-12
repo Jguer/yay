@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	VeryRecentPkgThreshold = 24 * time.Hour     // < 1 day → red
-	RecentPkgThreshold     = 7 * 24 * time.Hour // < 7 days → yellow
+	veryRecentPkgThreshold = 24 * time.Hour     // < 1 day → red
+	recentPkgThreshold     = 7 * 24 * time.Hour // < 7 days → yellow
 )
 
 // FormatDuration formats a duration as at most two significant units ("2d", "3h", "38d8h", "1h30m", "45m").
@@ -49,9 +49,9 @@ func FormatAgeTag(lastModified int64) string {
 	tag := "[" + FormatDuration(age) + "]"
 
 	switch {
-	case age < VeryRecentPkgThreshold:
+	case age < veryRecentPkgThreshold:
 		return Bold(Red(tag))
-	case age < RecentPkgThreshold:
+	case age < recentPkgThreshold:
 		return Bold(Yellow(tag))
 	default:
 		return Cyan(tag)
