@@ -127,15 +127,16 @@ func aurPkgToMap(pkg *aur.Pkg, dbExecutor db.Executor) map[string]any {
 	copy(provides, pkg.Provides)
 
 	m := map[string]any{
-		"source":       "aur",
-		"name":         pkg.Name,
-		"version":      pkg.Version,
-		"description":  pkg.Description,
-		"votes":        pkg.NumVotes,
-		"popularity":   pkg.Popularity,
-		"out_of_date":  pkg.OutOfDate,
-		"package_base": pkg.PackageBase,
-		"provides":     provides,
+		"source":        "aur",
+		"name":          pkg.Name,
+		"version":       pkg.Version,
+		"description":   pkg.Description,
+		"votes":         pkg.NumVotes,
+		"popularity":    pkg.Popularity,
+		"out_of_date":   pkg.OutOfDate,
+		"package_base":  pkg.PackageBase,
+		"provides":      provides,
+		"last_modified": pkg.LastModified,
 	}
 
 	if pkg.Maintainer != "" {

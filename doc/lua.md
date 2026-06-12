@@ -100,6 +100,7 @@ yourself.
 | `votes` | number | |
 | `popularity` | number | |
 | `out_of_date` | number | unix timestamp; `0` when not flagged |
+| `last_modified` | number | unix timestamp of last AUR package modification |
 | `package_base` | string | |
 | `provides` | array of strings | possibly empty |
 | `maintainer` | string | **`nil` when orphaned** |

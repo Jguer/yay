@@ -878,3 +878,29 @@ func TestSourceQueryBuilderRendererErrorPropagates(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "render boom")
 }
+
+func TestSourceQueryBuilderRendererAURPkgHasLastModified(t *testing.T) {
+	t.Parallel()
+
+	mockDB, mockAUR := newYayQueryBuilderMocks()
+	w := &strings.Builder{}
+	rr := &recordingRenderer{}
+	qb := newRendererQueryBuilder(w, mockAUR, rr)
+
+	qb.Execute(context.Background(), mockDB, []string{"yay"})
+	require.NoError(t, qb.Results(mockDB, Detailed))
+
+	byName := rr.byName()
+	require.Contains(t, byName, "yay")
+	require.Contains(t, byName, "yay-git")
+
+	assert.Equal(t, 1765742501, byName["yay"].pkg["last_modified"],
+		"last_modified must match the AUR fixture value")
+	assert.Equal(t, 1765742519, byName["yay-git"].pkg["last_modified"],
+		"last_modified must match the AUR fixture value")
+
+	// Repo packages must not carry a last_modified field.
+	require.Contains(t, byName, "ruby-yard")
+	_, hasLastModified := byName["ruby-yard"].pkg["last_modified"]
+	assert.False(t, hasLastModified, "repo packages must not have last_modified")
+}
