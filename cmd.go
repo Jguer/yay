@@ -77,6 +77,7 @@ Permanent configuration options:
     --nomakepkgconf       Use the default makepkg.conf
 
     --requestsplitn <n>   Max amount of packages to query per AUR request
+    --upgrademinage <h>   Withhold AUR updates until the package is <h> hours old (0 to disable)
     --completioninterval  <n> Time in days to refresh completion cache
     --sortby    <field>   Sort AUR results by a specific field during search
     --searchby  <field>   Search for packages using a specified field

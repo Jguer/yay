@@ -39,6 +39,7 @@ _pacman_opts_common=(
 	'(--nomakepkgconf)--makepkgconf[makepkg.conf file to use]:config file:_files'
 	'(--makepkgconf)--nomakepkgconf[Use the default makepkg.conf]'
 	'--requestsplitn[Max amount of packages to query per AUR request]:number'
+	'--upgrademinage[Withhold AUR updates until the package is n hours old]:hours'
 	'--completioninterval[Time in days to refresh completion cache]:number'
 	'--confirm[Always ask for confirmation]'
 	'--debug[Display debug messages]'

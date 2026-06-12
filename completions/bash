@@ -71,7 +71,7 @@ _yay() {
   ##yay stuff
   common=('arch cachedir color config confirm dbpath debug gpgdir help hookdir logfile
           noconfirm noprogressbar noscriptlet quiet root verbose disable-download-timeout sysroot
-          save builddir editor editorflags makepkg pacman git gitflags gpg gpgflags mflags config requestsplitn sudoloop sudo sudoflags
+          save builddir editor editorflags makepkg pacman git gitflags gpg gpgflags mflags config requestsplitn upgrademinage sudoloop sudo sudoflags
           redownload noredownload redownloadall rebuild rebuildall rebuildtree norebuild sortby
           singlelineresults doublelineresults answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
           noansweredit noanswerupgrade cleanmenu diffmenu editmenu cleanafter keepsrc topdown bottomup devel separatesources

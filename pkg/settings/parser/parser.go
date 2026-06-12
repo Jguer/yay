@@ -415,6 +415,7 @@ func isArg(arg string) bool {
 	case "sudo":
 	case "sudoflags":
 	case "requestsplitn":
+	case "upgrademinage":
 	case "sudoloop":
 	case "provides":
 	case "pgpfetch":
@@ -525,6 +526,7 @@ func hasParam(arg string) bool {
 	case "sudo":
 	case "sudoflags":
 	case "requestsplitn":
+	case "upgrademinage":
 	case "answerclean":
 	case "answerdiff":
 	case "answeredit":

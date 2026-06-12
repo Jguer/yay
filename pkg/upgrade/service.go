@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/Jguer/aur"
 	alpm "github.com/Jguer/dyalpm"
@@ -83,7 +84,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 
 			u.AURWarnings.CalculateMissing(remoteNames, remote, aurdata)
 
-			aurUp = UpAUR(u.log, remote, aurdata, enableDowngrade)
+			aurUp = UpAUR(u.log, remote, aurdata, enableDowngrade, u.cfg.UpgradeMinAge, time.Now())
 
 			if u.cfg.Devel {
 				u.log.OperationInfoln(gotext.Get("Checking development packages..."))

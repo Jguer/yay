@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	aur "github.com/Jguer/aur"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,11 @@ func Test_upAUR(t *testing.T) {
 		remote          map[string]alpm.Package
 		aurdata         map[string]*aur.Pkg
 		enableDowngrade bool
+		minAgeHours     int
 	}
+
+	// Fixed reference time so age-based cases are deterministic.
+	now := time.Unix(1_700_000_000, 0)
 	tests := []struct {
 		name string
 		args args
@@ -112,13 +117,41 @@ func Test_upAUR(t *testing.T) {
 			},
 			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{}},
 		},
+		{
+			name: "Update delayed by minimum age",
+			args: args{
+				minAgeHours: 48,
+				remote: map[string]alpm.Package{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0"},
+				},
+				// Modified 1h before now, below the 48h minimum.
+				aurdata: map[string]*aur.Pkg{
+					"hello": {Version: "2.1.0", Name: "hello", LastModified: int(now.Add(-time.Hour).Unix())},
+				},
+			},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{}},
+		},
+		{
+			name: "Update older than minimum age",
+			args: args{
+				minAgeHours: 48,
+				remote: map[string]alpm.Package{
+					"hello": &mock.Package{PName: "hello", PVersion: "2.0.0"},
+				},
+				// Modified 72h before now, past the 48h minimum.
+				aurdata: map[string]*aur.Pkg{
+					"hello": {Version: "2.1.0", Name: "hello", LastModified: int(now.Add(-72 * time.Hour).Unix())},
+				},
+			},
+			want: UpSlice{Repos: []string{"aur"}, Up: []Upgrade{{Name: "hello", Repository: "aur", LocalVersion: "2.0.0", RemoteVersion: "2.1.0", LastModified: now.Add(-72 * time.Hour).Unix()}}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
 			got := UpAUR(text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), false, "test"),
-				tt.args.remote, tt.args.aurdata, tt.args.enableDowngrade)
+				tt.args.remote, tt.args.aurdata, tt.args.enableDowngrade, tt.args.minAgeHours, now)
 			assert.ElementsMatch(t, tt.want.Repos, got.Repos)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
 			assert.Equal(t, tt.want.Len(), got.Len())

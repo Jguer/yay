@@ -149,6 +149,11 @@ func (c *Configuration) handleOption(option, value string) bool {
 		if err == nil && n > 0 {
 			c.RequestSplitN = n
 		}
+	case "upgrademinage":
+		n, err := strconv.Atoi(value)
+		if err == nil && n >= 0 {
+			c.UpgradeMinAge = n
+		}
 	case "sudoloop":
 		c.SudoLoop = boolValue
 	case "provides":

@@ -49,6 +49,7 @@ type Configuration struct {
 	SudoFlags              string `json:"sudoflags" lua:"sudo_flags"`
 	Version                string `json:"version" lua:"-"`
 	RequestSplitN          int    `json:"requestsplitn" lua:"request_split_n"`
+	UpgradeMinAge          int    `json:"upgrademinage" lua:"upgrade_min_age"`
 	CompletionInterval     int    `json:"completionrefreshtime" lua:"completion_refresh_time"`
 	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads" lua:"max_concurrent_downloads"`
 	BottomUp               bool   `json:"bottomup" lua:"bottom_up"`
@@ -216,6 +217,7 @@ func DefaultConfig(version string) *Configuration {
 		SudoBin:                "sudo",
 		SudoFlags:              "",
 		RequestSplitN:          150,
+		UpgradeMinAge:          0,
 		ReDownload:             "no",
 		ReBuild:                "no",
 		BatchInstall:           false,

@@ -241,6 +241,14 @@ AUR query will cause an error. This should only make a noticeable difference
 with very large requests (>500) packages.
 
 .TP
+.B \-\-upgrademinage <hours>
+Withhold an AUR package upgrade until at least this many hours have passed since
+the package was last modified on the AUR. This adds a cooldown so freshly pushed
+updates are not offered immediately, giving time for problems to surface. Only
+affects AUR packages; repository packages are unaffected. A value of 0 (the
+default) disables the delay.
+
+.TP
 .B \-\-completioninterval <days>
 Time in days to refresh the completion cache. Setting this to 0 will cause
 the cache to be refreshed every time, while setting this to -1 will cause the

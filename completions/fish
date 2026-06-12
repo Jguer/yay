@@ -204,6 +204,7 @@ complete -c $progname -n "not $noopt" -l config -d 'The pacman config file to us
 complete -c $progname -n "not $noopt" -l makepkgconf -d 'Use custom makepkg.conf location' -r
 complete -c $progname -n "not $noopt" -l nomakepkgconf -d 'Use default makepkg.conf' -f
 complete -c $progname -n "not $noopt" -l requestsplitn -d 'Max amount of packages to query per AUR request' -x
+complete -c $progname -n "not $noopt" -l upgrademinage -d 'Withhold AUR updates until the package is n hours old' -x
 complete -c $progname -n "not $noopt" -l completioninterval -d 'Refresh interval for completion cache' -x
 complete -c $progname -n "not $noopt" -l sortby -d 'Sort AUR results by a specific field during search' -xa "{votes,popularity,name,base,submitted,modified}"
 complete -c $progname -n "not $noopt" -l searchby -d 'Search for AUR packages by querying the specified field' -xa "{name,name-desc,maintainer,depends,checkdepends,makedepends,optdepends}"

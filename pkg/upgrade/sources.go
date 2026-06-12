@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"context"
+	"time"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -64,8 +65,10 @@ func printIgnoringPackage(log *text.Logger, pkg db.IPackage, newPkgVersion strin
 
 // UpAUR gathers foreign packages and checks if they have new versions.
 // Output: Upgrade type package list.
+// minAgeHours, when > 0, withholds updates whose AUR package was last modified
+// fewer than that many hours before now.
 func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*query.Pkg,
-	enableDowngrade bool,
+	enableDowngrade bool, minAgeHours int, now time.Time,
 ) UpSlice {
 	toUpgrade := UpSlice{Up: make([]Upgrade, 0), Repos: []string{"aur"}}
 
@@ -77,6 +80,18 @@ func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*
 
 		if (db.VerCmp(pkg.Version(), aurPkg.Version) < 0) ||
 			(enableDowngrade && (db.VerCmp(pkg.Version(), aurPkg.Version) > 0)) {
+			if minAgeHours > 0 && aurPkg.LastModified > 0 {
+				age := now.Sub(time.Unix(int64(aurPkg.LastModified), 0))
+				if age < time.Duration(minAgeHours)*time.Hour {
+					log.Warnln(gotext.Get(
+						"%s: delaying upgrade (updated %s ago, minimum age is %dh)",
+						text.Cyan(name),
+						age.Round(time.Hour).String(), minAgeHours))
+
+					continue
+				}
+			}
+
 			if pkg.ShouldIgnore() {
 				printIgnoringPackage(log, pkg, aurPkg.Version)
 			} else {
