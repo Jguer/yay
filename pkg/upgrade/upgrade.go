@@ -85,10 +85,9 @@ func (u UpSlice) Print(logger *text.Logger) {
 		logger.Print(fmt.Sprintf(namePadding, StylizedNameWithRepository(upgrade)))
 		ageTag := text.FormatAgeTag(upgrade.LastModified)
 		if ageTag != "" {
-			logger.Printf("%s -> %s %s\n", fmt.Sprintf(versionPadding, left), right, ageTag)
-		} else {
-			logger.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
+			ageTag = " " + ageTag
 		}
+		logger.Printf("%s -> %s%s\n", fmt.Sprintf(versionPadding, left), right, ageTag)
 		if upgrade.Extra != "" {
 			logger.Println(strings.Repeat(" ", longestNumber), upgrade.Extra)
 		}
@@ -108,10 +107,9 @@ func (u UpSlice) PrintDeps(logger *text.Logger) {
 		logger.Printf("%s", fmt.Sprintf(namePadding, StylizedNameWithRepository(upgrade)))
 		ageTag := text.FormatAgeTag(upgrade.LastModified)
 		if ageTag != "" {
-			logger.Printf("%s -> %s %s\n", fmt.Sprintf(versionPadding, left), right, ageTag)
-		} else {
-			logger.Printf("%s -> %s\n", fmt.Sprintf(versionPadding, left), right)
+			ageTag = " " + ageTag
 		}
+		logger.Printf("%s -> %s%s\n", fmt.Sprintf(versionPadding, left), right, ageTag)
 		if upgrade.Extra != "" {
 			logger.Println(strings.Repeat(" ", longestNumber), strings.ToLower(upgrade.Extra))
 		}

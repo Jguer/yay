@@ -1,7 +1,6 @@
 package text
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -32,7 +31,7 @@ func FormatDuration(d time.Duration) string {
 	case hours > 0:
 		return strconv.Itoa(hours) + "h"
 	default:
-		return fmt.Sprintf("%dm", minutes)
+		return strconv.Itoa(minutes) + "m"
 	}
 }
 
