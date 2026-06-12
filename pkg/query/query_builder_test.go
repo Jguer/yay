@@ -23,10 +23,6 @@ import (
 // linuxCkLastModified matches the mock linux-ck package fixture.
 const linuxCkLastModified = 1646250901
 
-// linuxCkAgeTag is the expected age badge when NowFunc is pinned to linuxCkFixedNow.
-// 365 days after linuxCkLastModified -> "[365d]" in cyan.
-const linuxCkAgeTag = "\x1b[36m[365d]\x1b[0m"
-
 var linuxCkFixedNow = time.Unix(linuxCkLastModified+365*24*3600, 0)
 
 func TestSourceQueryBuilder(t *testing.T) {
