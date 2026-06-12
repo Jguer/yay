@@ -30,6 +30,7 @@ const linuxCkAgeTag = "\x1b[36m[365d]\x1b[0m"
 var linuxCkFixedNow = time.Unix(linuxCkLastModified+365*24*3600, 0)
 
 func TestSourceQueryBuilder(t *testing.T) {
+	// Cannot run in parallel: mutates text.NowFunc, a package-level var.
 	text.NowFunc = func() time.Time { return linuxCkFixedNow }
 	t.Cleanup(func() { text.NowFunc = time.Now })
 

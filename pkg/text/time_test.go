@@ -34,6 +34,7 @@ func TestFormatDuration(t *testing.T) {
 		want string
 	}{
 		{name: "sub-minute discarded", in: 59*time.Second + 999*time.Millisecond, want: "0m"},
+		{name: "pure minutes", in: 45 * time.Minute, want: "45m"},
 		{name: "does not round up to next day", in: 23*time.Hour + 59*time.Minute + 31*time.Second, want: "23h59m"},
 		{name: "exact day", in: 24 * time.Hour, want: "1d"},
 		{name: "day and hour", in: 6*24*time.Hour + 23*time.Hour + 59*time.Minute, want: "6d23h"},

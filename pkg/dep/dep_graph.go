@@ -31,7 +31,7 @@ type InstallInfo struct {
 	IsGroup      bool
 	Upgrade      bool
 	Devel        bool
-	LastModified int64 // Unix timestamp, non-zero only for AUR packges
+	LastModified int64 // Unix timestamp, non-zero only for AUR packages
 }
 
 func (i *InstallInfo) String() string {
