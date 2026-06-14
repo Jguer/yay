@@ -36,6 +36,7 @@ type (
 		manualConfirmRequired bool
 		chroot                bool
 		chrootPath            string
+		builtAURArchives      []string
 	}
 )
 
@@ -237,7 +238,11 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	lastLayer bool,
 	noConfirm bool,
 ) error {
-	all := aurDepNames.Union(aurExpNames).ToSlice()
+	// Process deps before explicits so that dep archives are in builtAURArchives
+	// when building packages that depend on them (critical in rollup scenarios).
+	all := make([]string, 0, aurDepNames.Cardinality()+aurExpNames.Cardinality())
+	all = append(all, aurDepNames.ToSlice()...)
+	all = append(all, aurExpNames.ToSlice()...)
 	if len(all) == 0 {
 		return nil
 	}
@@ -260,6 +265,11 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 			pkgdests, errMake = installer.buildPkg(ctx, dir, base,
 				installIncompatible, cmdArgs.ExistsArg("needed"), aurOrigTargetBases.Contains(base))
 			builtPkgDests[base] = pkgdests
+			if errMake == nil && installer.chroot {
+				for _, archive := range pkgdests {
+					installer.builtAURArchives = append(installer.builtAURArchives, archive)
+				}
+			}
 			if errMake != nil {
 				if !lastLayer {
 					return fmt.Errorf("%s - %w", gotext.Get("error making: %s", base), errMake)
@@ -324,6 +334,12 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		args = append(args, "--ignorearch")
 	}
 
+	if installer.chroot {
+		// In chroot mode, makedepends are handled inside the chroot.
+		// Skip host-side dep installation to avoid "target not found" for AUR makedeps.
+		args = append(args, "--nodeps")
+	}
+
 	// pkgver bump
 	if err := installer.exeCmd.Show(
 		installer.exeCmd.BuildMakepkgCmd(ctx, dir, args...)); err != nil {
@@ -337,22 +353,32 @@ func (installer *Installer) buildPkg(ctx context.Context,
 
 	switch {
 	case needed && installer.pkgsAreAlreadyInstalled(pkgdests, pkgVersion) || installer.downloadOnly:
-		args = []string{"--nobuild", "--noextract", "--ignorearch"}
-		pkgdests = map[string]string{}
 		installer.log.Warnln(gotext.Get("%s is up to date -- skipping", text.Cyan(base+"-"+pkgVersion)))
-	case installer.skipAlreadyBuiltPkg(isTarget, pkgdests):
+		pkgdests = map[string]string{}
+		if installer.chroot {
+			// makechrootpkg does not understand --nobuild; nothing to inject.
+			return pkgdests, nil
+		}
 		args = []string{"--nobuild", "--noextract", "--ignorearch"}
+	case installer.skipAlreadyBuiltPkg(isTarget, pkgdests):
 		installer.log.Warnln(gotext.Get("%s already made -- skipping build", text.Cyan(base+"-"+pkgVersion)))
+		if installer.chroot {
+			// makechrootpkg does not understand --nobuild. The archive already
+			// exists on disk; add it to the injection list and return it directly.
+			for _, archive := range pkgdests {
+				installer.builtAURArchives = append(installer.builtAURArchives, archive)
+			}
+			return pkgdests, nil
+		}
+		args = []string{"--nobuild", "--noextract", "--ignorearch"}
 	default:
 		args = []string{}
 		if installer.chroot {
-			if cb, ok := installer.exeCmd.(*exe.CmdBuilder); ok {
-				newCb := *cb
-				newCb.MakepkgBin = "makechrootpkg"
-				installer.exeCmd = &newCb
+			args = []string{"-r", installer.chrootPath}
+			for _, archive := range installer.builtAURArchives {
+				args = append(args, "-I", archive)
 			}
-			args = []string{"-r", installer.chrootPath, "--"}
-			args = append(args, []string{"-f", "--noconfirm", "--noprepare", "--holdver"}...)
+			args = append(args, "--", "-f", "--noconfirm", "--holdver")
 		} else {
 			args = append(args, []string{"-f", "--noconfirm", "--noextract", "--noprepare", "--holdver"}...)
 		}
@@ -365,8 +391,17 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		args = append(args, "-c")
 	}
 
+	buildExeCmd := installer.exeCmd
+	if installer.chroot {
+		if cb, ok := installer.exeCmd.(*exe.CmdBuilder); ok {
+			newCb := *cb
+			newCb.MakepkgBin = "makechrootpkg"
+			buildExeCmd = &newCb
+		}
+	}
+
 	errMake := installer.exeCmd.Show(
-		installer.exeCmd.BuildMakepkgCmd(ctx,
+		buildExeCmd.BuildMakepkgCmd(ctx,
 			dir, args...))
 	if errMake != nil {
 		return nil, errMake

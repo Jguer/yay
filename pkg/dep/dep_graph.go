@@ -106,6 +106,9 @@ type Grapher struct {
 	noDeps      bool // If true, the graph will not include dependencies
 	noCheckDeps bool // If true, the graph will not include check dependencies
 	needed      bool // If true, the graph will only include packages that are not installed
+	// chrootMode forces locally-installed AUR makedeps back into the dep graph so they
+	// are rebuilt and can be injected into the clean chroot via -I <archive>.
+	chrootMode bool
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
@@ -123,6 +126,14 @@ func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 		providerCache: make(map[string][]aurc.Pkg, 5),
 		logger:        logger,
 	}
+}
+
+// SetChrootMode enables chroot-aware dependency resolution. In this mode,
+// locally-installed AUR packages (those not present in any sync repo) are not
+// treated as satisfied: they are re-queried from AUR and added to the build
+// graph so that fresh archives can be produced and injected into the chroot.
+func (g *Grapher) SetChrootMode(enabled bool) {
+	g.chrootMode = enabled
 }
 
 func NewGraph() *topo.Graph[string, *InstallInfo] {
@@ -667,6 +678,14 @@ func (g *Grapher) addNodes(
 			}
 		}
 
+		// In chroot mode, a locally-installed package that is NOT present in any
+		// sync repo is likely an AUR package. The clean chroot won't have it, so
+		// we must rebuild it and inject the archive via -I. Skip the "satisfied"
+		// shortcut and let the package fall through to the AUR lookup below.
+		if g.chrootMode && g.dbExecutor.SyncSatisfier(depString) == nil {
+			continue
+		}
+
 		targetsToFind.Remove(depString)
 	}
 
@@ -736,6 +755,19 @@ func (g *Grapher) addNodes(
 	// Add missing to graph
 	for _, depString := range targetsToFind.ToSlice() {
 		depName, mod, ver := splitDep(depString)
+
+		// In chroot mode we may have let locally-installed non-repo packages fall
+		// through the installed/sync checks hoping the AUR lookup would pick them
+		// up. If AUR lookup also missed them (e.g. they are from an unofficial
+		// repo), treat them as satisfied rather than blocking the entire install.
+		if g.chrootMode && g.dbExecutor.LocalSatisfierExists(depString) {
+			g.logger.Warnln(gotext.Get(
+				"chroot: %s is locally installed but not found in repos or AUR; "+
+					"it may be missing from the chroot", depName))
+
+			continue
+		}
+
 		// no dep found. add as missing
 		if err := graph.DependOn(depName, parentPkgName); err != nil {
 			g.logger.Warnln("missing dep warn:", depString, parentPkgName, err)
