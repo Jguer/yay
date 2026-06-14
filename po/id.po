@@ -163,7 +163,7 @@ msgstr "Periksa Ketergantungan"
 
 #: print.go:41
 msgid "Check Deps"
-msgstr "Periksa Dependensi"
+msgstr "Periksa Ketergantungan"
 
 #: pkg/upgrade/service.go:89
 msgid "Checking development packages..."
