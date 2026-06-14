@@ -87,7 +87,7 @@ msgstr "%s: Tidak ada perubahan -- melewatkan"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: tidak dapat menggunakan target dengan --aur -- melewatkan"
+msgstr "%s: tidak dapat menggunakan target dengan opsi --aur -- melewatkan"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
