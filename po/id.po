@@ -516,7 +516,7 @@ msgstr "[T]idak Ada"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "membatalkan atas pemerintah pengguna"
+msgstr "pembatalan atas permintaan pengguna"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
