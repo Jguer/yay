@@ -1,12 +1,12 @@
-# 
 # Translators:
 # Ludovico, 2022
 # Alif Fathur, 2024
 # Linerly <linerly@proton.me>, 2024
+# Degenerate Comms, 2026
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Linerly <linerly@proton.me>, 2024\n"
+"Last-Translator: Degenerate Comms, 2026\n"
 "Language-Team: Indonesian (https://app.transifex.com/yay-1/teams/123732/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -320,9 +320,13 @@ msgstr "Paket Debug AUR Yang Tidak Ditemukan:"
 msgid "Name"
 msgstr "Nama"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "Tidak ada paket AUR yang ditemukan untuk"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "dibutuhkan oleh"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
