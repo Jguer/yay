@@ -159,7 +159,7 @@ msgstr "Hindari menjalankan yay sebagai root/sudo."
 
 #: pkg/dep/dep_graph.go:63
 msgid "Check Dependency"
-msgstr "Periksa Dependensi"
+msgstr "Periksa Ketergantungan"
 
 #: print.go:41
 msgid "Check Deps"
@@ -183,7 +183,7 @@ msgstr "Menghapus (%d/%d): %s"
 
 #: pkg/dep/dep_graph.go:61
 msgid "Dependency"
-msgstr "Dependensi"
+msgstr "Ketergantungan"
 
 #: print.go:38
 msgid "Depends On"
