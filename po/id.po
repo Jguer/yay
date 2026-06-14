@@ -484,7 +484,7 @@ msgstr "URL"
 
 #: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
-msgstr "Tidak dapat membersihkan:"
+msgstr "Tidak dapat dibersihkan:"
 
 #: get.go:42 get.go:74
 msgid "Unable to find the following packages:"
@@ -516,7 +516,7 @@ msgstr "[T]idak Ada"
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
-msgstr "membatalkan karena pengguna"
+msgstr "membatalkan atas pemerintah pengguna"
 
 #: pkg/settings/parser/parser.go:608
 msgid "argument '-' specified without input on stdin"
