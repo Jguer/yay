@@ -18,6 +18,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
+	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
 )
@@ -31,6 +32,7 @@ type UpgradeService struct {
 	vcsStore   vcs.Store
 	cfg        *settings.Configuration
 	log        *text.Logger
+	lua        *settingslua.Engine
 	noConfirm  bool
 
 	AURWarnings *query.AURWarnings
@@ -50,6 +52,10 @@ func NewUpgradeService(grapher *dep.Grapher, aurCache aur.QueryClient,
 		log:         logger,
 		AURWarnings: query.NewWarnings(logger.Child("warnings")),
 	}
+}
+
+func (u *UpgradeService) SetLua(engine *settingslua.Engine) {
+	u.lua = engine
 }
 
 // upGraph adds packages to upgrade to the graph.
@@ -252,12 +258,7 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 	return graph, nil
 }
 
-// userExcludeUpgrades asks the user which packages to exclude from the upgrade and
-// removes them from the graph
-func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) ([]string, error) {
-	if graph.Len() == 0 {
-		return []string{}, nil
-	}
+func (u *UpgradeService) upgradeSelection(graph *topo.Graph[string, *dep.InstallInfo]) UpSlice {
 	aurUp, repoUp := u.graphToUpSlice(graph)
 
 	sort.Sort(repoUp)
@@ -280,6 +281,41 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 		}
 	}
 
+	return allUp
+}
+
+func (u *UpgradeService) runUpgradeSelectHook(graph *topo.Graph[string, *dep.InstallInfo], allUp UpSlice) (
+	[]string, bool, error,
+) {
+	if u.lua == nil || !u.lua.HasAutocmd(settingslua.EventUpgradeSelect) {
+		return []string{}, false, nil
+	}
+
+	result, err := u.lua.RunUpgradeSelect(upgradeSelectEvent(allUp))
+	if err != nil {
+		return nil, false, err
+	}
+
+	excluded := u.pruneUpgradeNames(graph, result.Exclude)
+
+	return excluded, result.SkipMenu, nil
+}
+
+func (u *UpgradeService) pruneUpgradeNames(graph *topo.Graph[string, *dep.InstallInfo], names []string) []string {
+	excluded := make([]string, 0, len(names))
+	for _, name := range names {
+		if !graph.Exists(name) {
+			continue
+		}
+
+		u.log.Debugln("pruning", name)
+		excluded = append(excluded, graph.Prune(name)...)
+	}
+
+	return excluded
+}
+
+func (u *UpgradeService) printUpgradeSelection(allUp UpSlice) {
 	if len(allUp.PulledDeps) > 0 {
 		u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")),
 			len(allUp.PulledDeps), text.Bold(gotext.Get("%s will also be installed for this operation.",
@@ -290,6 +326,33 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	u.log.Printf("%s"+text.Bold(" %d ")+"%s\n", text.Bold(text.Cyan("::")),
 		len(allUp.Up), text.Bold(gotext.Get("%s to upgrade/install.", gotext.GetN("package", "packages", len(allUp.Up)))))
 	allUp.Print(u.log)
+}
+
+// userExcludeUpgrades asks the user which packages to exclude from the upgrade and
+// removes them from the graph
+func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.InstallInfo]) ([]string, error) {
+	if graph.Len() == 0 {
+		return []string{}, nil
+	}
+	allUp := u.upgradeSelection(graph)
+
+	excluded, skipMenu, err := u.runUpgradeSelectHook(graph, allUp)
+	if err != nil {
+		return nil, err
+	}
+	if skipMenu {
+		return excluded, nil
+	}
+	if len(excluded) > 0 {
+		// The hook pruned packages; refresh the selection to reflect the
+		// smaller graph and skip the menu if nothing is left to upgrade.
+		allUp = u.upgradeSelection(graph)
+		if len(allUp.Up) == 0 {
+			return excluded, nil
+		}
+	}
+
+	u.printUpgradeSelection(allUp)
 
 	u.log.Infoln(gotext.Get("Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"))
 	u.log.Warnln(gotext.Get("Excluding packages may cause partial upgrades and break systems"))
@@ -308,10 +371,9 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 	// No exclusions or inclusions specified, return early
 	if noIncludes && len(exclude) == 0 && otherExclude.Cardinality() == 0 {
-		return []string{}, nil
+		return excluded, nil
 	}
 
-	excluded := make([]string, 0)
 	for i := range allUp.Up {
 		up := &allUp.Up[i]
 		upgradeID := len(allUp.Up) - i
@@ -337,4 +399,73 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	}
 
 	return excluded, nil
+}
+
+func upgradeSelectEvent(allUp UpSlice) *settingslua.UpgradeSelectEvent {
+	return &settingslua.UpgradeSelectEvent{
+		Match:              "sysupgrade",
+		Upgrades:           upgradeSelectPackages(allUp.Up, true),
+		PulledDependencies: upgradeSelectPackages(allUp.PulledDeps, false),
+		Repositories:       upgradeSelectRepositories(allUp),
+	}
+}
+
+func upgradeSelectPackages(upgrades []Upgrade, selectable bool) []settingslua.UpgradeSelectPackage {
+	packages := make([]settingslua.UpgradeSelectPackage, 0, len(upgrades))
+	for i := range upgrades {
+		up := &upgrades[i]
+		id := 0
+		if selectable {
+			id = len(upgrades) - i
+		}
+
+		packages = append(packages, settingslua.UpgradeSelectPackage{
+			ID:            id,
+			Name:          up.Name,
+			Base:          up.Base,
+			Repository:    up.Repository,
+			LocalVersion:  up.LocalVersion,
+			RemoteVersion: up.RemoteVersion,
+			Reason:        upgradeSelectReason(up.Reason),
+			Extra:         up.Extra,
+			LastModified:  up.LastModified,
+		})
+	}
+
+	return packages
+}
+
+func upgradeSelectRepositories(allUp UpSlice) []string {
+	seen := mapset.NewThreadUnsafeSet[string]()
+	repositories := []string{}
+	add := func(repository string) {
+		if repository == "" || !seen.Add(repository) {
+			return
+		}
+
+		repositories = append(repositories, repository)
+	}
+
+	for _, repository := range allUp.Repos {
+		add(repository)
+	}
+	for i := range allUp.Up {
+		add(allUp.Up[i].Repository)
+	}
+	for i := range allUp.PulledDeps {
+		add(allUp.PulledDeps[i].Repository)
+	}
+
+	return repositories
+}
+
+func upgradeSelectReason(reason alpm.PkgReason) string {
+	switch reason {
+	case alpm.PkgReasonExplicit:
+		return "explicit"
+	case alpm.PkgReasonDepend:
+		return "dependency"
+	default:
+		return "unknown"
+	}
 }

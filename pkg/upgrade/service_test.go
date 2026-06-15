@@ -21,6 +21,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
+	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
@@ -30,6 +31,77 @@ import (
 
 func ptrString(s string) *string {
 	return &s
+}
+
+func newUpgradeSelectTestService(input io.Reader, luaEngine *settingslua.Engine) *UpgradeService {
+	logger := text.NewLogger(io.Discard, io.Discard, input, true, "test")
+	u := &UpgradeService{
+		log: logger,
+		dbExecutor: &mock.DBExecutor{
+			ReposFn: func() []string { return []string{"core"} },
+		},
+		cfg:         &settings.Configuration{Mode: parser.ModeAny},
+		AURWarnings: query.NewWarnings(logger),
+	}
+	u.SetLua(luaEngine)
+
+	return u
+}
+
+func newUpgradeSelectTestGraph(t *testing.T) *topo.Graph[string, *dep.InstallInfo] {
+	t.Helper()
+
+	graph := dep.NewGraph()
+	graph.AddNode("linux")
+	graph.SetNodeInfo("linux", &topo.NodeInfo[*dep.InstallInfo]{
+		Value: &dep.InstallInfo{
+			Reason:       dep.Explicit,
+			Source:       dep.Sync,
+			SyncDBName:   ptrString("core"),
+			LocalVersion: "1.0",
+			Version:      "2.0",
+			Upgrade:      true,
+		},
+	})
+
+	graph.AddNode("yay")
+	graph.SetNodeInfo("yay", &topo.NodeInfo[*dep.InstallInfo]{
+		Value: &dep.InstallInfo{
+			Reason:       dep.Explicit,
+			Source:       dep.AUR,
+			AURBase:      ptrString("yay"),
+			LocalVersion: "1.0",
+			Version:      "2.0",
+			Upgrade:      true,
+			LastModified: 123,
+		},
+	})
+
+	graph.AddNode("example-git")
+	graph.AddNode("new-dep")
+	require.NoError(t, graph.DependOn("example-git", "new-dep"))
+	graph.SetNodeInfo("example-git", &topo.NodeInfo[*dep.InstallInfo]{
+		Value: &dep.InstallInfo{
+			Reason:       dep.Explicit,
+			Source:       dep.AUR,
+			AURBase:      ptrString("example"),
+			LocalVersion: "1.0",
+			Version:      "2.0",
+			Upgrade:      true,
+			LastModified: 456,
+		},
+	})
+	graph.SetNodeInfo("new-dep", &topo.NodeInfo[*dep.InstallInfo]{
+		Value: &dep.InstallInfo{
+			Reason:     dep.Dep,
+			Source:     dep.Sync,
+			SyncDBName: ptrString("core"),
+			Version:    "1.0",
+			Upgrade:    true,
+		},
+	})
+
+	return graph
 }
 
 func TestUpgradeService_GraphUpgrades(t *testing.T) {
@@ -684,6 +756,92 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 			assert.ElementsMatch(t, tt.wantExclude, excluded)
 		})
 	}
+}
+
+func TestUpgradeService_UserExcludeUpgradesWithoutLuaHookUsesNativeMenu(t *testing.T) {
+	graph := newUpgradeSelectTestGraph(t)
+	u := newUpgradeSelectTestService(strings.NewReader("2\n"), nil)
+
+	excluded, err := u.UserExcludeUpgrades(graph)
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []string{"example-git", "new-dep"}, excluded)
+	assert.True(t, graph.Exists("linux"))
+	assert.True(t, graph.Exists("yay"))
+	assert.False(t, graph.Exists("example-git"))
+	assert.False(t, graph.Exists("new-dep"))
+}
+
+func TestUpgradeService_UserExcludeUpgradesLuaHookPrunesGraph(t *testing.T) {
+	engine := settingslua.New()
+	defer engine.Close()
+	require.NoError(t, engine.L.DoString(`
+		yay.create_autocmd("UpgradeSelect", {
+			callback = function()
+				return { exclude = { "example-git" } }
+			end,
+		})
+	`))
+
+	graph := newUpgradeSelectTestGraph(t)
+	u := newUpgradeSelectTestService(strings.NewReader("\n"), engine)
+
+	excluded, err := u.UserExcludeUpgrades(graph)
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []string{"example-git", "new-dep"}, excluded)
+	assert.True(t, graph.Exists("linux"))
+	assert.True(t, graph.Exists("yay"))
+	assert.False(t, graph.Exists("example-git"))
+	assert.False(t, graph.Exists("new-dep"))
+}
+
+func TestUpgradeService_UserExcludeUpgradesLuaHookSkipMenuAvoidsInput(t *testing.T) {
+	engine := settingslua.New()
+	defer engine.Close()
+	require.NoError(t, engine.L.DoString(`
+		yay.create_autocmd("UpgradeSelect", {
+			callback = function()
+				return { exclude = { "yay" }, skip_menu = true }
+			end,
+		})
+	`))
+
+	graph := newUpgradeSelectTestGraph(t)
+	u := newUpgradeSelectTestService(strings.NewReader(""), engine)
+
+	excluded, err := u.UserExcludeUpgrades(graph)
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []string{"yay"}, excluded)
+	assert.True(t, graph.Exists("linux"))
+	assert.True(t, graph.Exists("example-git"))
+	assert.True(t, graph.Exists("new-dep"))
+	assert.False(t, graph.Exists("yay"))
+}
+
+func TestUpgradeService_UserExcludeUpgradesLuaHookFallsThroughToNativeMenu(t *testing.T) {
+	engine := settingslua.New()
+	defer engine.Close()
+	require.NoError(t, engine.L.DoString(`
+		yay.create_autocmd("UpgradeSelect", {
+			callback = function()
+				return { exclude = { "example-git" }, skip_menu = false }
+			end,
+		})
+	`))
+
+	graph := newUpgradeSelectTestGraph(t)
+	u := newUpgradeSelectTestService(strings.NewReader("1\n"), engine)
+
+	excluded, err := u.UserExcludeUpgrades(graph)
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []string{"example-git", "new-dep", "yay"}, excluded)
+	assert.True(t, graph.Exists("linux"))
+	assert.False(t, graph.Exists("yay"))
+	assert.False(t, graph.Exists("example-git"))
+	assert.False(t, graph.Exists("new-dep"))
 }
 
 func TestUpgradeService_Warnings(t *testing.T) {

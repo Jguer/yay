@@ -53,6 +53,24 @@ yay.opt.rpc = true -- Use AUR RPC for dependency/query operations.
 yay.opt.double_confirm = true -- Ask for confirmation before and after builds during upgrades.
 
 -- Hooks
+-- Run Lua before yay prints the upgrade exclusion menu. Return package names
+-- from event.data.upgrades to pre-exclude them. Set skip_menu = false, or omit
+-- it, to show the native menu after these exclusions are applied.
+--
+-- yay.create_autocmd("UpgradeSelect", {
+--   desc = "skip selected large upgrades",
+--   callback = function(event)
+--     local exclude = {}
+--     for _, pkg in ipairs(event.data.upgrades) do
+--       if pkg.repository == "aur" and pkg.name:match("%-git$") then
+--         table.insert(exclude, pkg.name)
+--       end
+--     end
+--
+--     return { exclude = exclude, skip_menu = true }
+--   end,
+-- })
+--
 -- Run Lua after AUR PKGBUILD repos are downloaded/merged and before the
 -- clean/diff/edit menus or source downloads.
 --
