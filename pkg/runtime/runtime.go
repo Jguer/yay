@@ -13,6 +13,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 	"github.com/Jguer/yay/v12/pkg/vcs"
@@ -36,6 +37,7 @@ type Runtime struct {
 	VoteClient   *vote.Client
 	AURClient    aur.QueryClient
 	Logger       *text.Logger
+	Lua          *settingslua.Engine
 }
 
 func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {

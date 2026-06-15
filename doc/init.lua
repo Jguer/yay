@@ -51,3 +51,22 @@ yay.opt.separate_sources = true -- Separate query results by source (repo vs AUR
 yay.opt.debug = false -- Enable debug logging and local init.lua lookup convenience.
 yay.opt.rpc = true -- Use AUR RPC for dependency/query operations.
 yay.opt.double_confirm = true -- Ask for confirmation before and after builds during upgrades.
+
+-- Hooks
+-- Run Lua after AUR PKGBUILD repos are downloaded/merged and before the
+-- clean/diff/edit menus or source downloads.
+--
+-- yay.create_autocmd("AURPreInstall", {
+--   desc = "inspect or modify AUR package files",
+--   callback = function(event)
+--     if event.data.pkgbuild:match("forbidden.example") then
+--       error(event.match .. ": forbidden source URL")
+--     end
+--
+--     -- File edits are picked up by later menus and build steps.
+--     -- local path = event.data.pkgbuild_path
+--     -- local f = assert(io.open(path, "a"))
+--     -- f:write("\n# edited by yay init.lua\n")
+--     -- f:close()
+--   end,
+-- })

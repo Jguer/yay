@@ -86,13 +86,16 @@ func main() {
 		fallbackLog.Errorln(errS)
 	}
 
+	var luaEngine *lua.Engine
 	if luaPath := settings.GetLuaConfigPath(cfg.Debug); luaPath != "" {
-		if errLua := lua.LoadInto(fallbackLog, luaPath, cfg); errLua != nil {
-			fallbackLog.Errorln(errLua)
+		luaEngine, err = lua.Load(fallbackLog, luaPath, cfg)
+		if err != nil {
+			fallbackLog.Errorln(err)
 			ret = 1
 
 			return
 		}
+		defer luaEngine.Close()
 	}
 
 	cmdArgs := parser.MakeArguments()
@@ -125,6 +128,7 @@ func main() {
 
 		return
 	}
+	run.Lua = luaEngine
 
 	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))
 	if err != nil {

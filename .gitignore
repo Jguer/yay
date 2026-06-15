@@ -35,3 +35,4 @@ xgotext
 init.lua
 dyalpm/
 !doc/init.lua
+reference

@@ -225,12 +225,9 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 
 	remoteNames := preper.dbExecutor.InstalledRemotePackageNames()
 	remoteNamesCache := mapset.NewThreadUnsafeSet(remoteNames...)
-	for _, hookFn := range preper.hooks {
-		if hookFn.Type == PreDownloadSourcesHook {
-			if err := hookFn.Hookfn(ctx, run, os.Stdout, pkgBuildDirsByBase, remoteNamesCache); err != nil {
-				return nil, err
-			}
-		}
+	if err := preper.runPreDownloadSourcesHooks(ctx, run, os.Stdout,
+		pkgBuildDirsByBase, remoteNamesCache, targets); err != nil {
+		return nil, err
 	}
 
 	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,

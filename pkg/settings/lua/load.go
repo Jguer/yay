@@ -7,19 +7,19 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
-// LoadInto applies the yay.opt values from path onto cfg.
-func LoadInto(_ *text.Logger, path string, cfg any) error {
+// Load loads path, applies its yay.opt values onto cfg, and returns the live engine.
+func Load(_ *text.Logger, path string, cfg any) (*Engine, error) {
 	engine := New()
-	defer engine.Close()
 
 	if err := engine.L.DoFile(path); err != nil {
-		return err
+		engine.Close()
+		return nil, err
 	}
 
 	unknown, errs := engine.Apply(cfg)
 
 	if len(unknown) == 0 && len(errs) == 0 {
-		return nil
+		return engine, nil
 	}
 
 	merr := &multierror.MultiError{}
@@ -32,5 +32,20 @@ func LoadInto(_ *text.Logger, path string, cfg any) error {
 		merr.Add(fmt.Errorf("init.lua: %w", err))
 	}
 
-	return merr.Return()
+	if err := merr.Return(); err != nil {
+		engine.Close()
+		return nil, err
+	}
+
+	return engine, nil
+}
+
+// LoadInto applies the yay.opt values from path onto cfg.
+func LoadInto(logger *text.Logger, path string, cfg any) error {
+	engine, err := Load(logger, path, cfg)
+	if engine != nil {
+		defer engine.Close()
+	}
+
+	return err
 }

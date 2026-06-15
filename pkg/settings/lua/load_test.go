@@ -54,3 +54,20 @@ func TestLoadIntoAppliesValidValues(t *testing.T) {
 	require.Equal(t, 123, cfg.RequestSplitN)
 	require.True(t, cfg.Devel)
 }
+
+func TestLoadReturnsLiveEngine(t *testing.T) {
+	path := writeLuaFile(t, `
+		yay.create_autocmd("AURPreInstall", {
+			callback = function() end,
+		})
+		yay.opt.build_dir = "/tmp/yay"
+	`)
+
+	cfg := &testConfig{}
+	engine, err := Load(nil, path, cfg)
+	require.NoError(t, err)
+	defer engine.Close()
+
+	require.Equal(t, "/tmp/yay", cfg.BuildDir)
+	require.True(t, engine.HasAutocmd(EventAURPreInstall))
+}

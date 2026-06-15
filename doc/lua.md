@@ -47,3 +47,107 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 
 A ready-to-copy example
 lives at [`doc/init.lua`](init.lua).
+
+## AUR pre-install hooks
+
+`init.lua` can register hooks with a small autocmd API:
+
+```lua
+yay.create_autocmd("AURPreInstall", {
+  desc = "inspect or modify AUR package files",
+  callback = function(event)
+    -- event.match is the package base.
+    -- event.data has package metadata and local file paths.
+  end,
+})
+```
+
+`AURPreInstall` runs once per AUR package base, in sorted package-base order,
+after the AUR PKGBUILD repositories are downloaded and merged. It runs before
+the clean, diff, and edit menus, and before source downloads or builds.
+
+If a callback raises a Lua error, yay aborts the install before build work
+starts. The error includes the event name and package base.
+
+Changing fields in the Lua `event` table does not change yay's internal
+package state. Hooks can still edit files through Lua's normal `io` and `os`
+libraries; later menus and build steps will see those file changes.
+
+### AURPreInstall event
+
+The callback receives this table:
+
+```lua
+{
+  event = "AURPreInstall",
+  match = "pkgbase",
+  data = {
+    base = "pkgbase",
+    dir = "/path/to/build/pkgbase",
+    pkgbuild_path = "/path/to/build/pkgbase/PKGBUILD",
+    srcinfo_path = "/path/to/build/pkgbase/.SRCINFO",
+    pkgbuild = "...PKGBUILD contents...",
+    version = "1:1.2.3-4",
+    last_modified = 1700000000,
+    installed = true,
+    packages = {
+      {
+        name = "pkgname",
+        version = "1:1.2.3-4",
+        local_version = "1:1.2.3-3",
+        reason = "explicit",
+        upgrade = true,
+        devel = false,
+      },
+    },
+    srcinfo = {
+      pkgbase = "pkgbase",
+      pkgver = "1.2.3",
+      pkgrel = "4",
+      epoch = "1",
+      version = "1:1.2.3-4",
+      pkgdesc = "description",
+      url = "https://example.invalid",
+      arch = { "x86_64" },
+      license = { "MIT" },
+      depends = { "glibc" },
+      makedepends = { "go" },
+      checkdepends = { "bats" },
+      optdepends = { "pkg: optional feature" },
+      provides = { "virtual-pkg" },
+      conflicts = { "old-pkg" },
+      replaces = { "older-pkg" },
+    },
+  },
+}
+```
+
+`data.packages` contains the target packages for that base. Split packages are
+listed separately. `reason` is one of `explicit`, `dependency`,
+`make_dependency`, `check_dependency`, or `unknown`.
+
+### Example
+
+```lua
+yay.create_autocmd("AURPreInstall", {
+  desc = "block forbidden sources and patch a PKGBUILD",
+  callback = function(event)
+    if event.data.pkgbuild:match("forbidden.example") then
+      error(event.match .. ": forbidden source URL")
+    end
+
+    if event.match == "demo-pkg" then
+      local path = event.data.pkgbuild_path
+      local f = assert(io.open(path, "r"))
+      local body = f:read("*a")
+      f:close()
+
+      body = body:gsub("options=%('strip'%)", "options=('!strip')")
+
+      f = assert(io.open(path, "w"))
+      f:write(body)
+      f:close()
+    end
+  end,
+})
+```
