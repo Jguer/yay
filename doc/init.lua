@@ -60,7 +60,7 @@ yay.opt.double_confirm = true -- Ask for confirmation before and after builds du
 --   desc = "inspect or modify AUR package files",
 --   callback = function(event)
 --     if event.data.pkgbuild:match("forbidden.example") then
---       error(event.match .. ": forbidden source URL")
+--       yay.abort(event.match .. ": forbidden source URL")
 --     end
 --
 --     -- File edits are picked up by later menus and build steps.

@@ -31,7 +31,7 @@ func TestCreateAutocmdRegistersAndRunsInOrder(t *testing.T) {
 		})
 	`))
 
-	autocmds := e.Autocmds(EventAURPreInstall)
+	autocmds := e.autocmds[EventAURPreInstall]
 	require.Len(t, autocmds, 2)
 	require.Equal(t, "first", autocmds[0].Desc)
 
@@ -90,4 +90,20 @@ func TestRunAURPreInstallReturnsCallbackErrorWithEventAndBase(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "AURPreInstall demo-base")
 	require.Contains(t, err.Error(), "blocked by policy")
+}
+
+func TestRunAURPreInstallReturnsAbortWithoutTraceback(t *testing.T) {
+	e := New()
+	defer e.Close()
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("AURPreInstall", {
+			callback = function()
+				yay.abort("blocked by policy")
+			end,
+		})
+	`))
+
+	err := e.RunAURPreInstall(&AURPreInstallEvent{Base: "demo-base"})
+	require.EqualError(t, err, "AURPreInstall demo-base: blocked by policy")
 }

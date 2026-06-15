@@ -190,6 +190,7 @@ func aurPreInstallInstalled(packages []settingslua.AURPreInstallPackage, srcinfo
 	for _, pkg := range packages {
 		if pkg.LocalVersion != "" || installed.Contains(pkg.Name) {
 			isInstalled = true
+			break
 		}
 	}
 
@@ -208,7 +209,11 @@ func aurPreInstallLastModified(base string, targets []map[string]*dep.InstallInf
 
 	for _, layer := range targets {
 		for _, info := range layer {
-			if info.AURBase != nil && *info.AURBase == base && info.LastModified > lastModified {
+			if info == nil || info.AURBase == nil {
+				continue
+			}
+
+			if *info.AURBase == base && info.LastModified > lastModified {
 				lastModified = info.LastModified
 			}
 		}

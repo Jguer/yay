@@ -28,6 +28,7 @@ func New() *Engine {
 	yayTbl := state.NewTable()
 	state.SetGlobal(globalName, yayTbl)
 	state.SetField(yayTbl, optTableName, state.NewTable())
+	state.SetField(yayTbl, "abort", state.NewFunction(abort))
 	state.SetField(yayTbl, "create_autocmd", state.NewFunction(engine.createAutocmd))
 
 	return engine

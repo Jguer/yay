@@ -93,17 +93,6 @@ func (e *Engine) HasAutocmd(event string) bool {
 	return e != nil && len(e.autocmds[event]) > 0
 }
 
-func (e *Engine) Autocmds(event string) []Autocmd {
-	if e == nil {
-		return nil
-	}
-
-	out := make([]Autocmd, len(e.autocmds[event]))
-	copy(out, e.autocmds[event])
-
-	return out
-}
-
 func (e *Engine) RunAURPreInstall(event *AURPreInstallEvent) error {
 	if !e.HasAutocmd(EventAURPreInstall) {
 		return nil
@@ -115,7 +104,12 @@ func (e *Engine) RunAURPreInstall(event *AURPreInstallEvent) error {
 			NRet:    0,
 			Protect: true,
 		}, e.aurPreInstallTable(event)); err != nil {
-			return fmt.Errorf("%s %s: %w", EventAURPreInstall, event.Base, err)
+			wrapped := err
+			if abortErr, ok := luaAbortError(err); ok {
+				wrapped = abortErr
+			}
+
+			return fmt.Errorf("%s %s: %w", EventAURPreInstall, event.Base, wrapped)
 		}
 	}
 

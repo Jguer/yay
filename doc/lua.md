@@ -66,8 +66,9 @@ yay.create_autocmd("AURPreInstall", {
 after the AUR PKGBUILD repositories are downloaded and merged. It runs before
 the clean, diff, and edit menus, and before source downloads or builds.
 
-If a callback raises a Lua error, yay aborts the install before build work
-starts. The error includes the event name and package base.
+Use `yay.abort("message")` for controlled policy stops without a Lua
+traceback. If a callback raises a Lua error, yay aborts the install before
+build work starts and includes the Lua traceback for debugging.
 
 Changing fields in the Lua `event` table does not change yay's internal
 package state. Hooks can still edit files through Lua's normal `io` and `os`
@@ -133,7 +134,7 @@ yay.create_autocmd("AURPreInstall", {
   desc = "block forbidden sources and patch a PKGBUILD",
   callback = function(event)
     if event.data.pkgbuild:match("forbidden.example") then
-      error(event.match .. ": forbidden source URL")
+      yay.abort(event.match .. ": forbidden source URL")
     end
 
     if event.match == "demo-pkg" then
