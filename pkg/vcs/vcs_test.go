@@ -36,7 +36,7 @@ func TestParsing(t *testing.T) {
 	}
 
 	urls := []string{
-		"git+https://github.com/example/project.git",
+		"git+https://github.com/neovim/neovim.git",
 		"git://github.com/jguer/yay.git#branch=master",
 		"git://github.com/davidgiven/ack",
 		"git://github.com/jguer/yay.git#tag=v3.440",
@@ -45,7 +45,7 @@ func TestParsing(t *testing.T) {
 	}
 
 	sources := []source{
-		{"github.com/example/project.git", "HEAD", []string{"https"}},
+		{"github.com/neovim/neovim.git", "HEAD", []string{"https"}},
 		{"github.com/jguer/yay.git", "master", []string{"git"}},
 		{"github.com/davidgiven/ack", "HEAD", []string{"git"}},
 		{"", "", nil},

@@ -37,10 +37,7 @@ type Runtime struct {
 	VoteClient   *vote.Client
 	AURClient    aur.QueryClient
 	Logger       *text.Logger
-	// Lua wraps a single gopher-lua LState, which is not goroutine-safe.
-	// Only access it from a single goroutine (today: the sequential
-	// pre-install hook path).
-	Lua *settingslua.Engine
+	Lua          *settingslua.Engine // not goroutine-safe
 }
 
 func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
