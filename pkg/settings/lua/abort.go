@@ -37,3 +37,13 @@ func luaAbortError(err error) (abortError, bool) {
 
 	return abortErr, ok
 }
+
+// wrapLuaErr strips the gopher-lua API wrapper from abort errors so callers
+// see the clean abort message instead of a Lua traceback.
+func wrapLuaErr(err error) error {
+	if abortErr, ok := luaAbortError(err); ok {
+		return abortErr
+	}
+
+	return err
+}

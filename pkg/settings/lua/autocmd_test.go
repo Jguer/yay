@@ -65,6 +65,23 @@ func TestCreateAutocmdRegistersUpgradeSelect(t *testing.T) {
 	require.True(t, e.HasAutocmd(EventUpgradeSelect))
 }
 
+func TestCreateAutocmdRegistersAURPostDownload(t *testing.T) {
+	e := New()
+	defer e.Close()
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("AURPostDownload", {
+			desc = "inspect downloaded sources",
+			callback = function() end,
+		})
+	`))
+
+	autocmds := e.autocmds[EventAURPostDownload]
+	require.Len(t, autocmds, 1)
+	require.Equal(t, "inspect downloaded sources", autocmds[0].Desc)
+	require.True(t, e.HasAutocmd(EventAURPostDownload))
+}
+
 func TestCreateAutocmdRejectsInvalidEvent(t *testing.T) {
 	e := New()
 	defer e.Close()
@@ -123,6 +140,76 @@ func TestRunAURPreInstallReturnsAbortWithoutTraceback(t *testing.T) {
 
 	err := e.RunAURPreInstall(&AURPreInstallEvent{Base: "demo-base"})
 	require.EqualError(t, err, "AURPreInstall demo-base: blocked by policy")
+}
+
+func TestRunAURPostDownloadEventTableShape(t *testing.T) {
+	e := New()
+	defer e.Close()
+
+	seen := []string{}
+	e.L.SetGlobal("record", e.L.NewFunction(func(L *glua.LState) int {
+		seen = append(seen, L.CheckString(1))
+		return 0
+	}))
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("AURPostDownload", {
+			callback = function(event)
+				if event.event ~= "AURPostDownload" then error("bad event") end
+				if event.match ~= "demo-base" then error("bad match") end
+				if event.data.base ~= "demo-base" then error("bad base") end
+				if event.data.dir ~= "/build/demo-base" then error("bad dir") end
+				if event.data.pkgbuild_path ~= "/build/demo-base/PKGBUILD" then error("bad pkgbuild path") end
+				if event.data.srcinfo_path ~= "/build/demo-base/.SRCINFO" then error("bad srcinfo path") end
+				if event.data.pkgbuild ~= "pkgbase=demo-base" then error("bad pkgbuild") end
+				if event.data.version ~= "1.0-1" then error("bad version") end
+				if event.data.last_modified ~= 123 then error("bad last modified") end
+				if event.data.installed ~= true then error("bad installed") end
+				if event.data.packages[1].name ~= "demo" then error("bad package") end
+				if event.data.srcinfo.pkgbase ~= "demo-base" then error("bad srcinfo") end
+				if event.data.install_paths ~= nil then error("unexpected install paths") end
+				if event.data.source_paths ~= nil then error("unexpected source paths") end
+				if event.data.sources ~= nil then error("unexpected sources") end
+
+				record(event.match .. ":" .. event.data.pkgbuild_path)
+			end,
+		})
+	`))
+
+	err := e.RunAURPostDownload(&AURPreInstallEvent{
+		Base:         "demo-base",
+		Dir:          "/build/demo-base",
+		PKGBUILDPath: "/build/demo-base/PKGBUILD",
+		SRCINFOPath:  "/build/demo-base/.SRCINFO",
+		PKGBUILD:     "pkgbase=demo-base",
+		Version:      "1.0-1",
+		LastModified: 123,
+		Installed:    true,
+		Packages: []AURPreInstallPackage{{
+			Name: "demo",
+		}},
+		SRCINFO: AURPreInstallSRCINFO{
+			Pkgbase: "demo-base",
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, []string{"demo-base:/build/demo-base/PKGBUILD"}, seen)
+}
+
+func TestRunAURPostDownloadReturnsAbortWithoutTraceback(t *testing.T) {
+	e := New()
+	defer e.Close()
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("AURPostDownload", {
+			callback = function()
+				yay.abort("blocked by policy")
+			end,
+		})
+	`))
+
+	err := e.RunAURPostDownload(&AURPreInstallEvent{Base: "demo-base"})
+	require.EqualError(t, err, "AURPostDownload demo-base: blocked by policy")
 }
 
 func TestRunUpgradeSelectEventTableShapeAndReturn(t *testing.T) {

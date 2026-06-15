@@ -91,18 +91,24 @@ func sortedAURBases(pkgbuildDirsByBase map[string]string) []string {
 func aurPreInstallEvent(base, path string, packages []settingslua.AURPreInstallPackage,
 	installed mapset.Set[string], targets []map[string]*dep.InstallInfo,
 ) (settingslua.AURPreInstallEvent, error) {
+	return aurPackageEvent(settingslua.EventAURPreInstall, base, path, packages, installed, targets)
+}
+
+func aurPackageEvent(eventName, base, path string, packages []settingslua.AURPreInstallPackage,
+	installed mapset.Set[string], targets []map[string]*dep.InstallInfo,
+) (settingslua.AURPreInstallEvent, error) {
 	dir, pkgbuildPath, srcinfoPath := aurPreInstallPaths(path)
 
 	pkgbuildBytes, err := os.ReadFile(pkgbuildPath)
 	if err != nil {
 		return settingslua.AURPreInstallEvent{},
-			fmt.Errorf("%s %s: read PKGBUILD: %w", settingslua.EventAURPreInstall, base, err)
+			fmt.Errorf("%s %s: read PKGBUILD: %w", eventName, base, err)
 	}
 
 	srcinfo, err := gosrc.ParseFile(srcinfoPath)
 	if err != nil {
 		return settingslua.AURPreInstallEvent{},
-			fmt.Errorf("%s %s: parse .SRCINFO: %w", settingslua.EventAURPreInstall, base, err)
+			fmt.Errorf("%s %s: parse .SRCINFO: %w", eventName, base, err)
 	}
 
 	if len(packages) == 0 {

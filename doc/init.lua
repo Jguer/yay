@@ -73,7 +73,7 @@ yay.opt.double_confirm = true -- Ask for confirmation before and after builds du
 --       end
 --     end
 --
---     return { exclude = exclude, skip_menu = true }
+--     return { exclude = exclude, skip_menu = false }
 --   end,
 -- })
 --
@@ -93,5 +93,17 @@ yay.opt.double_confirm = true -- Ask for confirmation before and after builds du
 --     -- local f = assert(io.open(path, "a"))
 --     -- f:write("\n# edited by yay init.lua\n")
 --     -- f:close()
+--   end,
+-- })
+--
+-- Run Lua after yay downloads/verifies package sources and before builds or
+-- installs. AURPostDownload receives the same payload shape as AURPreInstall.
+--
+-- yay.create_autocmd("AURPostDownload", {
+--   desc = "block forbidden source URLs after download",
+--   callback = function(event)
+--     if event.data.pkgbuild:match("forbidden.example") then
+--       yay.abort(event.match .. ": forbidden source URL")
+--     end
 --   end,
 -- })

@@ -83,7 +83,7 @@ yay.create_autocmd("UpgradeSelect", {
       end
     end
 
-    return { exclude = exclude, skip_menu = true }
+    return { exclude = exclude, skip_menu = false }
   end,
 })
 ```
@@ -240,6 +240,52 @@ yay.create_autocmd("AURPreInstall", {
       f = assert(io.open(path, "w"))
       f:write(body)
       f:close()
+    end
+  end,
+})
+```
+
+## AUR post-download hooks
+
+`AURPostDownload` runs once per AUR package base, in sorted package-base order,
+after yay runs `makepkg --verifysource` for package sources and before
+compatibility checks, PGP key import prompts, builds, or package installs.
+
+Use `yay.abort("message")` to stop the operation without a Lua traceback.
+`AURPostDownload` receives the same payload shape as `AURPreInstall`; only the
+`event` value differs.
+
+### AURPostDownload event
+
+The callback receives this table:
+
+```lua
+{
+  event = "AURPostDownload",
+  match = "pkgbase",
+  data = {
+    base = "pkgbase",
+    dir = "/path/to/build/pkgbase",
+    pkgbuild_path = "/path/to/build/pkgbase/PKGBUILD",
+    srcinfo_path = "/path/to/build/pkgbase/.SRCINFO",
+    pkgbuild = "...PKGBUILD contents...",
+    version = "1:1.2.3-4",
+    last_modified = 1700000000,
+    installed = true,
+    packages = { ... },
+    srcinfo = { ... },
+  },
+}
+```
+
+### Example
+
+```lua
+yay.create_autocmd("AURPostDownload", {
+  desc = "block forbidden source URLs after download",
+  callback = function(event)
+    if event.data.pkgbuild:match("forbidden.example") then
+      yay.abort(event.match .. ": forbidden source URL")
     end
   end,
 })

@@ -235,6 +235,10 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		preper.log.Errorln(errP)
 	}
 
+	if err := runAURPostDownloadLuaHooks(run, pkgBuildDirsByBase, remoteNamesCache, targets); err != nil {
+		return nil, err
+	}
+
 	return pkgBuildDirsByBase, nil
 }
 

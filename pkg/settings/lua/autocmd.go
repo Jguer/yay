@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	EventAURPreInstall = "AURPreInstall"
-	EventUpgradeSelect = "UpgradeSelect"
+	EventAURPreInstall   = "AURPreInstall"
+	EventAURPostDownload = "AURPostDownload"
+	EventUpgradeSelect   = "UpgradeSelect"
 )
 
 type Autocmd struct {
@@ -82,7 +83,7 @@ type UpgradeSelectResult struct {
 
 func (e *Engine) createAutocmd(state *glua.LState) int {
 	event := state.CheckString(1)
-	if event != EventAURPreInstall && event != EventUpgradeSelect {
+	if event != EventAURPreInstall && event != EventAURPostDownload && event != EventUpgradeSelect {
 		state.ArgError(1, fmt.Sprintf("unsupported event %q", event))
 		return 0
 	}
@@ -129,12 +130,25 @@ func (e *Engine) RunAURPreInstall(event *AURPreInstallEvent) error {
 			NRet:    0,
 			Protect: true,
 		}, e.aurPreInstallTable(event)); err != nil {
-			wrapped := err
-			if abortErr, ok := luaAbortError(err); ok {
-				wrapped = abortErr
-			}
+			return fmt.Errorf("%s %s: %w", EventAURPreInstall, event.Base, wrapLuaErr(err))
+		}
+	}
 
-			return fmt.Errorf("%s %s: %w", EventAURPreInstall, event.Base, wrapped)
+	return nil
+}
+
+func (e *Engine) RunAURPostDownload(event *AURPreInstallEvent) error {
+	if !e.HasAutocmd(EventAURPostDownload) {
+		return nil
+	}
+
+	for _, autocmd := range e.autocmds[EventAURPostDownload] {
+		if err := e.L.CallByParam(glua.P{
+			Fn:      autocmd.callback,
+			NRet:    0,
+			Protect: true,
+		}, e.aurPostDownloadTable(event)); err != nil {
+			return fmt.Errorf("%s %s: %w", EventAURPostDownload, event.Base, wrapLuaErr(err))
 		}
 	}
 
@@ -159,12 +173,7 @@ func (e *Engine) RunUpgradeSelect(event *UpgradeSelectEvent) (UpgradeSelectResul
 			NRet:    1,
 			Protect: true,
 		}, e.upgradeSelectTable(event)); err != nil {
-			wrapped := err
-			if abortErr, ok := luaAbortError(err); ok {
-				wrapped = abortErr
-			}
-
-			return result, fmt.Errorf("%s: %w", EventUpgradeSelect, wrapped)
+			return result, fmt.Errorf("%s: %w", EventUpgradeSelect, wrapLuaErr(err))
 		}
 
 		value := e.L.Get(-1)
@@ -196,6 +205,29 @@ func (e *Engine) aurPreInstallTable(event *AURPreInstallEvent) *glua.LTable {
 	data := state.NewTable()
 
 	eventTable.RawSetString("event", glua.LString(EventAURPreInstall))
+	eventTable.RawSetString("match", glua.LString(event.Base))
+	eventTable.RawSetString("data", data)
+
+	data.RawSetString("base", glua.LString(event.Base))
+	data.RawSetString("dir", glua.LString(event.Dir))
+	data.RawSetString("pkgbuild_path", glua.LString(event.PKGBUILDPath))
+	data.RawSetString("srcinfo_path", glua.LString(event.SRCINFOPath))
+	data.RawSetString("pkgbuild", glua.LString(event.PKGBUILD))
+	data.RawSetString("version", glua.LString(event.Version))
+	data.RawSetString("last_modified", glua.LNumber(event.LastModified))
+	data.RawSetString("installed", glua.LBool(event.Installed))
+	data.RawSetString("packages", e.packagesTable(event.Packages))
+	data.RawSetString("srcinfo", e.srcinfoTable(&event.SRCINFO))
+
+	return eventTable
+}
+
+func (e *Engine) aurPostDownloadTable(event *AURPreInstallEvent) *glua.LTable {
+	state := e.L
+	eventTable := state.NewTable()
+	data := state.NewTable()
+
+	eventTable.RawSetString("event", glua.LString(EventAURPostDownload))
 	eventTable.RawSetString("match", glua.LString(event.Base))
 	eventTable.RawSetString("data", data)
 
@@ -312,18 +344,19 @@ func (e *Engine) parseUpgradeSelectResult(value glua.LValue, validExcludes mapse
 				return
 			}
 
-			name, ok := val.(glua.LString)
+			lname, ok := val.(glua.LString)
 			if !ok {
 				parseErr = fmt.Errorf("exclude entries must be strings")
 				return
 			}
 
-			if !validExcludes.Contains(string(name)) {
-				parseErr = fmt.Errorf("unknown upgrade exclusion %q", string(name))
+			name := string(lname)
+			if !validExcludes.Contains(name) {
+				parseErr = fmt.Errorf("unknown upgrade exclusion %q", name)
 				return
 			}
 
-			result.Exclude = append(result.Exclude, string(name))
+			result.Exclude = append(result.Exclude, name)
 		})
 		if parseErr != nil {
 			return result, parseErr
