@@ -36,3 +36,6 @@ init.lua
 dyalpm/
 !doc/init.lua
 reference
+
+# Generated docs site (scripts/gendocs output)
+site/
