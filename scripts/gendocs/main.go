@@ -49,7 +49,8 @@ func main() {
 	writePage(*out, "init-lua.html", "init.lua template", mdToHTML([]byte(initMD)))
 
 	// index / landing page
-	writePage(*out, "index.html", "yay", mdToHTML([]byte(indexMD())))
+	indexMD := mustRead(filepath.Join(*docs, "index.md"))
+	writePage(*out, "index.html", "yay", mdToHTML(indexMD))
 
 	fmt.Printf("site written to %s\n", *out)
 }
@@ -366,55 +367,3 @@ func fatal(err error) {
 	os.Exit(1)
 }
 
-// ── index page ────────────────────────────────────────────────────────────────
-
-// indexMD returns the Markdown source for the landing page.
-// The fence variable sidesteps the Go raw-string-literal / backtick conflict.
-func indexMD() string {
-	fence := "```"
-	return `# yay
-
-**Yet Another Yogurt** — an AUR helper for Arch Linux, written in Go.
-
-yay wraps pacman for official-repository packages and adds full AUR support:
-PKGBUILD downloading, cross-source dependency resolution, makepkg-based
-building, devel/VCS package tracking, and AUR voting. A single
-pacman-compatible CLI for both sources.
-
-## Install
-
-Available in the Arch Linux community repositories:
-
-` + fence + `
-sudo pacman -S yay
-` + fence + `
-
-Or build from the AUR:
-
-` + fence + `
-git clone https://aur.archlinux.org/yay.git
-cd yay && makepkg -si
-` + fence + `
-
-## Documentation
-
-- [Manual — yay(8)](man.html) — complete command and option reference
-- [Lua API](lua.html) — init.lua hooks, autocmds, and configuration
-- [init.lua template](init-lua.html) — ready-to-copy configuration template
-
-## Quick reference
-
-` + fence + `
-yay foo                     # search and install (yogurt mode)
-yay -Syu                    # full upgrade: repo + AUR
-yay -Sua                    # AUR-only upgrade
-yay -G foo                  # download PKGBUILD
-yay -Ps                     # system statistics and health check
-yay --devel --save          # enable VCS package tracking
-` + fence + `
-
-## Source
-
-[github.com/Jguer/yay](https://github.com/Jguer/yay)
-`
-}
