@@ -117,6 +117,7 @@ The callback receives this table:
         remote_version = "1.2.3-4",
         reason = "explicit",
         last_modified = 1700000000,
+        maintainer = "username",
       },
     },
     pulled_dependencies = {
@@ -129,6 +130,7 @@ The callback receives this table:
         remote_version = "1.0-1",
         reason = "dependency",
         last_modified = 0,
+        maintainer = "",
       },
     },
   },

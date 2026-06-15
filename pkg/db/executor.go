@@ -26,8 +26,10 @@ type Upgrade struct {
 	LocalVersion  string
 	RemoteVersion string
 	Reason        alpm.PkgReason
-	Extra         string // Extra information to be displayed
-	LastModified  int64  // Unix timestamp of last AUR modification, 0 for non-AUR packages
+	// Technical debt. This is provider specific information
+	Extra        string // Extra information to be displayed
+	LastModified int64  // Unix timestamp of last AUR modification, 0 for non-AUR packages
+	Maintainer   string // AUR maintainer username, empty for orphaned or non-AUR packages
 }
 
 type SyncUpgrade struct {

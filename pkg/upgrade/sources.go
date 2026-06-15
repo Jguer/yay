@@ -43,6 +43,7 @@ func UpDevel(
 					RemoteVersion: "latest-commit",
 					Reason:        pkg.Reason(),
 					LastModified:  int64(aurPkg.LastModified),
+					Maintainer:    aurPkg.Maintainer,
 				})
 		}
 	}
@@ -89,6 +90,7 @@ func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*
 						RemoteVersion: aurPkg.Version,
 						Reason:        pkg.Reason(),
 						LastModified:  int64(aurPkg.LastModified),
+						Maintainer:    aurPkg.Maintainer,
 					})
 			}
 		}

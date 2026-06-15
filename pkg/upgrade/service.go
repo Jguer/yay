@@ -265,19 +265,19 @@ func (u *UpgradeService) upgradeSelection(graph *topo.Graph[string, *dep.Install
 	sort.Sort(aurUp)
 
 	allUp := UpSlice{Repos: append(repoUp.Repos, aurUp.Repos...)}
-	for _, up := range repoUp.Up {
-		if up.LocalVersion == "" && up.Reason != alpm.PkgReasonExplicit {
-			allUp.PulledDeps = append(allUp.PulledDeps, up)
+	for i := range repoUp.Up {
+		if repoUp.Up[i].LocalVersion == "" && repoUp.Up[i].Reason != alpm.PkgReasonExplicit {
+			allUp.PulledDeps = append(allUp.PulledDeps, repoUp.Up[i])
 		} else {
-			allUp.Up = append(allUp.Up, up)
+			allUp.Up = append(allUp.Up, repoUp.Up[i])
 		}
 	}
 
-	for _, up := range aurUp.Up {
-		if up.LocalVersion == "" && up.Reason != alpm.PkgReasonExplicit {
-			allUp.PulledDeps = append(allUp.PulledDeps, up)
+	for i := range aurUp.Up {
+		if aurUp.Up[i].LocalVersion == "" && aurUp.Up[i].Reason != alpm.PkgReasonExplicit {
+			allUp.PulledDeps = append(allUp.PulledDeps, aurUp.Up[i])
 		} else {
-			allUp.Up = append(allUp.Up, up)
+			allUp.Up = append(allUp.Up, aurUp.Up[i])
 		}
 	}
 
@@ -427,6 +427,7 @@ func upgradeSelectPackages(upgrades []Upgrade, selectable bool) []settingslua.Up
 			RemoteVersion: up.RemoteVersion,
 			Reason:        upgradeSelectReason(up.Reason),
 			LastModified:  up.LastModified,
+			Maintainer:    up.Maintainer,
 		})
 	}
 

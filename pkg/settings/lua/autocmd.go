@@ -74,6 +74,7 @@ type UpgradeSelectPackage struct {
 	RemoteVersion string
 	Reason        string
 	LastModified  int64
+	Maintainer    string
 }
 
 type UpgradeSelectResult struct {
@@ -162,8 +163,8 @@ func (e *Engine) RunUpgradeSelect(event *UpgradeSelectEvent) (UpgradeSelectResul
 	}
 
 	validExcludes := mapset.NewThreadUnsafeSetWithSize[string](len(event.Upgrades))
-	for _, pkg := range event.Upgrades {
-		validExcludes.Add(pkg.Name)
+	for i := range event.Upgrades {
+		validExcludes.Add(event.Upgrades[i].Name)
 	}
 
 	seenExcludes := mapset.NewThreadUnsafeSet[string]()
@@ -258,7 +259,8 @@ func (e *Engine) upgradeSelectPackagesTable(packages []UpgradeSelectPackage) *gl
 	state := e.L
 	tbl := state.NewTable()
 
-	for _, pkg := range packages {
+	for i := range packages {
+		pkg := &packages[i]
 		pkgTbl := state.NewTable()
 		pkgTbl.RawSetString("id", glua.LNumber(pkg.ID))
 		pkgTbl.RawSetString("name", glua.LString(pkg.Name))
@@ -268,6 +270,7 @@ func (e *Engine) upgradeSelectPackagesTable(packages []UpgradeSelectPackage) *gl
 		pkgTbl.RawSetString("remote_version", glua.LString(pkg.RemoteVersion))
 		pkgTbl.RawSetString("reason", glua.LString(pkg.Reason))
 		pkgTbl.RawSetString("last_modified", glua.LNumber(pkg.LastModified))
+		pkgTbl.RawSetString("maintainer", glua.LString(pkg.Maintainer))
 		tbl.Append(pkgTbl)
 	}
 
