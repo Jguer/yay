@@ -285,18 +285,19 @@ func (u *UpgradeService) upgradeSelection(graph *topo.Graph[string, *dep.Install
 }
 
 func (u *UpgradeService) runUpgradeSelectHook(graph *topo.Graph[string, *dep.InstallInfo], allUp UpSlice) (
-	[]string, bool, error,
+	excluded []string, skipMenu bool, err error,
 ) {
 	if u.lua == nil || !u.lua.HasAutocmd(settingslua.EventUpgradeSelect) {
 		return []string{}, false, nil
 	}
 
-	result, err := u.lua.RunUpgradeSelect(upgradeSelectEvent(allUp))
+	var result settingslua.UpgradeSelectResult
+	result, err = u.lua.RunUpgradeSelect(upgradeSelectEvent(allUp))
 	if err != nil {
 		return nil, false, err
 	}
 
-	excluded := u.pruneUpgradeNames(graph, result.Exclude)
+	excluded = u.pruneUpgradeNames(graph, result.Exclude)
 
 	return excluded, result.SkipMenu, nil
 }
