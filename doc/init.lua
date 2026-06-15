@@ -103,3 +103,33 @@ yay.opt.double_confirm = true -- Ask for confirmation before and after builds du
 --     end
 --   end,
 -- })
+--
+-- Run Lua once after a successful install/upgrade transaction (skipped on
+-- --downloadonly). The callback is fire-and-forget; returning has no effect.
+--
+-- yay.create_autocmd("PostInstall", {
+--   desc = "log every package yay installed",
+--   callback = function(event)
+--     for _, pkg in ipairs(event.data.packages) do
+--       if pkg.installed then
+--         yay.log.info(pkg.name .. " " .. pkg.version .. " installed (" .. pkg.source .. ")")
+--       end
+--     end
+--   end,
+-- })
+--
+-- Run Lua during -Ss / -S number menu after ranking, before display. Return
+-- an ordered array of {source=, name=} to filter/reorder; nil = unchanged.
+--
+-- yay.create_autocmd("SearchFilter", {
+--   desc = "show only AUR results",
+--   callback = function(event)
+--     local out = {}
+--     for _, r in ipairs(event.data.results) do
+--       if r.source == "aur" then
+--         out[#out + 1] = { source = r.source, name = r.name }
+--       end
+--     end
+--     return out
+--   end,
+-- })

@@ -133,6 +133,7 @@ func main() {
 		luaEngine.SetLogger(run.Logger.Child("lua"))
 	}
 	run.Lua = luaEngine
+	run.QueryBuilder.SetLua(luaEngine)
 
 	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))
 	if err != nil {

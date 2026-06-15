@@ -10,6 +10,7 @@ import (
 	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
+	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/sync/build"
 	"github.com/Jguer/yay/v12/pkg/sync/srcinfo"
@@ -125,6 +126,13 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 
 	if err := installer.RunPostInstallHooks(ctx); err != nil {
 		multiErr.Add(err)
+	}
+
+	if !cmdArgs.ExistsArg("w", "downloadonly") && run.Lua != nil &&
+		run.Lua.HasAutocmd(settingslua.EventPostInstall) {
+		if err := run.Lua.RunPostInstall(postInstallEvent(targets, failedAndIgnored)); err != nil {
+			multiErr.Add(err)
+		}
 	}
 
 	return multiErr.Return()

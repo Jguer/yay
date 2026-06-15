@@ -17,6 +17,7 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/intrange"
+	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -35,6 +36,7 @@ type Builder interface {
 	Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string)
 	Results(dbExecutor db.Executor, verboseSearch SearchVerbosity) error
 	GetTargets(include, exclude intrange.IntRanges, otherExclude mapset.Set[string]) ([]string, error)
+	SetLua(engine *settingslua.Engine)
 }
 
 type SortFunc func(pkgA, pkgB abstractResult) int
@@ -51,6 +53,7 @@ type SourceQueryBuilder struct {
 
 	aurClient aur.QueryClient
 	logger    *text.Logger
+	lua       *settingslua.Engine
 }
 
 func NewSourceQueryBuilder(
@@ -75,6 +78,10 @@ func NewSourceQueryBuilder(
 		queryMap:          map[string]map[string]any{},
 		results:           make([]abstractResult, 0, 100),
 	}
+}
+
+func (s *SourceQueryBuilder) SetLua(engine *settingslua.Engine) {
+	s.lua = engine
 }
 
 type abstractResult struct {
@@ -262,7 +269,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 	}
 
 	sort.Sort(sortableResults)
-	s.results = sortableResults.results
+	s.results = s.applySearchFilter(sortableResults.results)
 
 	if aurErr != nil {
 		s.logger.Errorln(ErrAURSearch{inner: aurErr})
@@ -352,4 +359,47 @@ func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 	}
 
 	return true
+}
+
+func (s *SourceQueryBuilder) applySearchFilter(results []abstractResult) []abstractResult {
+	if s.lua == nil || !s.lua.HasAutocmd(settingslua.EventSearchFilter) {
+		return results
+	}
+
+	pkgs := make([]settingslua.SearchResultPackage, len(results))
+	for i := range results {
+		pkgs[i] = settingslua.SearchResultPackage{
+			Source:         results[i].source,
+			Name:           results[i].name,
+			Description:    results[i].description,
+			Base:           results[i].packageBase,
+			Votes:          results[i].votes,
+			Popularity:     results[i].popularity,
+			FirstSubmitted: results[i].firstSubmitted,
+			LastModified:   results[i].lastModified,
+			Provides:       results[i].provides,
+		}
+	}
+
+	refs, err := s.lua.RunSearchFilter(&settingslua.SearchFilterEvent{Results: pkgs})
+	if err != nil {
+		s.logger.Errorln(err)
+		return results
+	}
+
+	if refs == nil {
+		return results
+	}
+
+	byRef := make(map[settingslua.SearchResultRef]abstractResult, len(results))
+	for i := range results {
+		byRef[settingslua.SearchResultRef{Source: results[i].source, Name: results[i].name}] = results[i]
+	}
+
+	filtered := make([]abstractResult, 0, len(refs))
+	for _, ref := range refs {
+		filtered = append(filtered, byRef[ref])
+	}
+
+	return filtered
 }

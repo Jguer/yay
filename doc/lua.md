@@ -302,3 +302,113 @@ yay.create_autocmd("AURPostDownload", {
   end,
 })
 ```
+
+---
+
+## Post-install hooks
+
+`PostInstall` fires once after a successful install/upgrade transaction, before
+yay exits. It is skipped when `--downloadonly` (`-w`) is used. Because the
+installation is already complete when the callback runs, calling `yay.abort`
+logs the message but cannot roll back anything.
+
+### PostInstall event
+
+```lua
+{
+  event = "PostInstall",
+  data = {
+    packages = {
+      {
+        name          = "pkgname",
+        version       = "1.2.3-1",    -- resolved version
+        local_version = "1.0.0-1",    -- previously installed ("" if not installed)
+        source        = "aur",        -- "aur" | "sync" | "local" | "srcinfo" | "missing"
+        reason        = "explicit",   -- "explicit" | "dependency" | "make_dependency" | "check_dependency" | "unknown"
+        installed     = true,         -- false for AUR bases that failed but were tolerated
+        upgrade       = false,        -- true when replacing an older version
+        devel         = false,        -- true for VCS (-git/-svn/…) packages
+      },
+      -- one entry per package yay resolved; sorted alphabetically
+    },
+  },
+}
+```
+
+The `packages` array covers every node yay resolved into the transaction (all
+sources, all topo layers). Transitive repo dependencies pulled in by pacman
+but not explicitly tracked by yay are **not** included. The callback is
+fire-and-forget: no return value is read.
+
+### Example
+
+```lua
+yay.create_autocmd("PostInstall", {
+  desc = "log every package yay installed",
+  callback = function(event)
+    for _, pkg in ipairs(event.data.packages) do
+      if pkg.installed then
+        yay.log.info(pkg.name .. " " .. pkg.version .. " installed (" .. pkg.source .. ")")
+      end
+    end
+  end,
+})
+```
+
+---
+
+## Search-filter hooks
+
+`SearchFilter` runs during `yay -Ss` and the `yay -S` number menu, after
+results are ranked and sorted but before they are displayed. The callback
+receives the full ordered result list and may return a filtered or reordered
+subset. Returning `nil` (or nothing) leaves the list unchanged.
+
+Multiple `SearchFilter` hooks **chain**: each hook receives the output of the
+previous hook. An unknown `(source, name)` pair in the return table is a hard
+error; duplicate refs are deduplicated first-wins. Hook errors are logged and
+the **unfiltered** results are shown rather than aborting the command.
+
+### SearchFilter event
+
+```lua
+{
+  event = "SearchFilter",
+  data = {
+    results = {
+      {
+        source          = "aur",      -- "aur" or the pacman DB name (e.g. "core", "extra")
+        name            = "pkgname",
+        description     = "A useful package",
+        base            = "pkgbase",
+        votes           = 123,        -- -1 for sync packages
+        popularity      = 1.23,       -- -1 for sync packages
+        first_submitted = 1700000000, -- -1 for sync packages
+        last_modified   = 1700000001, -- -1 for sync packages
+        provides        = { "virtual-pkg" },
+      },
+      -- …
+    },
+  },
+}
+```
+
+The callback must return `nil` or an array of `{source=, name=}` tables. Every
+`(source, name)` pair must exist in the input; unknown pairs are an error.
+
+### Example
+
+```lua
+yay.create_autocmd("SearchFilter", {
+  desc = "show only AUR results",
+  callback = function(event)
+    local out = {}
+    for _, r in ipairs(event.data.results) do
+      if r.source == "aur" then
+        out[#out + 1] = { source = r.source, name = r.name }
+      end
+    end
+    return out
+  end,
+})
+```
