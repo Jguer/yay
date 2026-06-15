@@ -31,7 +31,8 @@ type InstallInfo struct {
 	IsGroup      bool
 	Upgrade      bool
 	Devel        bool
-	LastModified int64 // Unix timestamp, non-zero only for AUR packages
+	LastModified int64  // Unix timestamp, non-zero only for AUR packages
+	Maintainer   string // AUR maintainer username, empty for orphaned or non-AUR packages
 }
 
 func (i *InstallInfo) String() string {
@@ -470,6 +471,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 			Source:       AUR,
 			Version:      aurPkg.Version,
 			LastModified: int64(aurPkg.LastModified),
+			Maintainer:   aurPkg.Maintainer,
 		})
 		aurPkgsAdded = append(aurPkgsAdded, aurPkg)
 	}
@@ -727,6 +729,7 @@ func (g *Grapher) addNodes(
 					AURBase:      &aurPkg.PackageBase,
 					Version:      aurPkg.Version,
 					LastModified: int64(aurPkg.LastModified),
+					Maintainer:   aurPkg.Maintainer,
 				},
 			})
 

@@ -11,6 +11,8 @@ yay can optionally load a Lua configuration file, `init.lua`. `init.lua` overlay
 
 ## Setting options with `yay.opt`
 
+<p class="api-since">Available from yay v13.0.0</p>
+
 Assign to keys on the `yay.opt` table using the exact option names shown
 below.
 
@@ -50,6 +52,8 @@ lives at [`doc/init.lua`](init.lua).
 
 ## Logging with `yay.log`
 
+<p class="api-since">Available from yay v13.0.0</p>
+
 Lua config and hooks can write through yay's normal logger:
 
 ```lua
@@ -64,6 +68,8 @@ message and does not stop execution; use `yay.abort("message")` for controlled
 hook stops.
 
 ## Upgrade selection hooks
+
+<p class="api-since">Available from yay v13.0.0</p>
 
 `UpgradeSelect` runs during `yay -Syu` after yay has built and sorted the
 upgrade graph, and before the native "Packages to exclude" menu is printed.
@@ -142,6 +148,8 @@ native menu. `pulled_dependencies` entries are shown separately by yay and use
 `id = 0` because they are not directly selectable.
 
 ## AUR pre-install hooks
+
+<p class="api-since">Available from yay v13.0.0</p>
 
 `init.lua` can register hooks with a small autocmd API:
 
@@ -248,6 +256,8 @@ yay.create_autocmd("AURPreInstall", {
 ```
 
 ## AUR post-download hooks
+
+<p class="api-since">Available from yay v13.0.0</p>
 
 `AURPostDownload` runs once per AUR package base, in sorted package-base order,
 after yay runs `makepkg --verifysource` for package sources and before

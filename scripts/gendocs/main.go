@@ -21,6 +21,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	bf "github.com/russross/blackfriday/v2"
@@ -37,20 +38,21 @@ func main() {
 
 	// yay.8 (troff man page) → Markdown → HTML
 	man8 := mustRead(filepath.Join(*docs, "yay.8"))
-	writePage(*out, "man.html", "yay(8) Manual", mdToHTML(troff2md(man8)))
+	writePage(*out, "man.html", pageData{Title: "yay(8) Manual", Body: template.HTML(mdToHTML(troff2md(man8)))})
 
-	// lua.md → HTML
+	// lua.md → HTML with TOC and version badges
 	luaMD := mustRead(filepath.Join(*docs, "lua.md"))
-	writePage(*out, "lua.html", "Lua API", mdToHTML(luaMD))
+	luaBody, luaTOC := buildLuaPage(mdToHTML(luaMD))
+	writePage(*out, "lua.html", pageData{Title: "Lua API", Body: luaBody, TOC: luaTOC})
 
 	// init.lua source as a code block
 	initLua := mustRead(filepath.Join(*docs, "init.lua"))
 	initMD := "# init.lua template\n\n```lua\n" + string(initLua) + "```\n"
-	writePage(*out, "init-lua.html", "init.lua template", mdToHTML([]byte(initMD)))
+	writePage(*out, "init-lua.html", pageData{Title: "init.lua template", Body: template.HTML(mdToHTML([]byte(initMD)))})
 
 	// index / landing page
 	indexMD := mustRead(filepath.Join(*docs, "index.md"))
-	writePage(*out, "index.html", "yay", mdToHTML(indexMD))
+	writePage(*out, "index.html", pageData{Title: "yay", Body: template.HTML(mdToHTML(indexMD))})
 
 	fmt.Printf("site written to %s\n", *out)
 }
@@ -81,6 +83,15 @@ pre code{background:none;padding:0;font-size:.85em}
 a{color:#0067c0}
 strong{font-weight:600}
 footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #e0e0e0;color:#666;font-size:.875rem}
+.page-toc{position:fixed;top:5rem;right:1rem;width:220px;max-height:calc(100vh - 6rem);overflow-y:auto;background:#f9f9f9;border:1px solid #e0e0e0;border-radius:4px;padding:.75rem 1rem}
+.page-toc strong{display:block;margin-bottom:.5rem;color:#555;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+.page-toc ul{list-style:none;margin:0;padding:0}
+.page-toc li{margin:.15rem 0}
+.page-toc a{color:#0067c0;text-decoration:none;font-size:.8rem;line-height:1.4;display:block}
+.page-toc a:hover{text-decoration:underline}
+.toc-h3{padding-left:.75rem}
+@media(max-width:1200px){.page-toc{display:none}}
+.api-since{font-size:.8rem;color:#666;font-style:italic;margin:-.25rem 0 .75rem}
 </style>
 </head>
 <body>
@@ -90,6 +101,7 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #e0e0e0;color:#666;
 <a href="lua.html">Lua API</a>
 <a href="init-lua.html">init.lua</a>
 </nav>
+{{if .TOC}}<aside class="page-toc">{{.TOC}}</aside>{{end}}
 <main>
 {{.Body}}
 </main>
@@ -100,19 +112,68 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #e0e0e0;color:#666;
 type pageData struct {
 	Title string
 	Body  template.HTML
+	TOC   template.HTML // optional; non-empty → TOC sidebar is rendered
 }
 
-func writePage(dir, name, title string, body []byte) {
+func writePage(dir, name string, data pageData) {
 	path := filepath.Join(dir, name)
 	f, err := os.Create(path)
 	if err != nil {
 		fatal(err)
 	}
 	defer f.Close()
-	if err := pageTmpl.Execute(f, pageData{Title: title, Body: template.HTML(body)}); err != nil {
+	if err := pageTmpl.Execute(f, data); err != nil {
 		fatal(err)
 	}
 	fmt.Printf("  %s\n", path)
+}
+
+// ── Lua page: TOC + version badges ────────────────────────────────────────────
+
+// reHeading matches an h2 or h3 element with an id attribute as produced by
+// blackfriday's AutoHeadingIDs extension.  The (?s) flag makes . match \n so
+// multi-line heading content (rare but possible) is covered.
+var reHeading = regexp.MustCompile(`(?s)<(h[23]) id="([^"]+)"[^>]*>(.*?)</h[23]>`)
+
+// reTag strips HTML tags to obtain plain text for TOC labels.
+var reTag = regexp.MustCompile(`<[^>]+>`)
+
+// buildLuaPage extracts headings for the table of contents and returns the
+// body HTML unchanged alongside the TOC HTML.
+func buildLuaPage(body []byte) (newBody template.HTML, toc template.HTML) {
+	s := string(body)
+
+	// Collect headings in document order to build the TOC.
+	type entry struct {
+		level int
+		id    string
+		label string // plain text, HTML-escaped when written into TOC
+	}
+	var entries []entry
+	for _, m := range reHeading.FindAllStringSubmatch(s, -1) {
+		lvl := 2
+		if m[1] == "h3" {
+			lvl = 3
+		}
+		// Strip inner tags (e.g. <code>) to get a plain-text label.
+		label := strings.TrimSpace(reTag.ReplaceAllString(m[3], ""))
+		entries = append(entries, entry{lvl, m[2], label})
+	}
+
+	// Build the TOC HTML: h3 entries are indented via the .toc-h3 class.
+	var b strings.Builder
+	b.WriteString("<strong>On this page</strong>\n<ul>\n")
+	for _, e := range entries {
+		class := ""
+		if e.level == 3 {
+			class = ` class="toc-h3"`
+		}
+		fmt.Fprintf(&b, "<li%s><a href=\"#%s\">%s</a></li>\n",
+			class, e.id, template.HTMLEscapeString(e.label))
+	}
+	b.WriteString("</ul>")
+
+	return template.HTML(s), template.HTML(b.String())
 }
 
 // ── Markdown → HTML ───────────────────────────────────────────────────────────

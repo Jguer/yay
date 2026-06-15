@@ -167,6 +167,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Version:      "10.8.8-1",
 						AURBase:      ptrString("jellyfin"),
 						LastModified: 1669830147,
+						Maintainer:   "z3ntu",
 					},
 				},
 				{
@@ -199,6 +200,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Version:      "10.8.8-1",
 						AURBase:      ptrString("jellyfin"),
 						LastModified: 1669830147,
+						Maintainer:   "z3ntu",
 					},
 				},
 				{
@@ -208,6 +210,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Version:      "10.8.8-1",
 						AURBase:      ptrString("jellyfin"),
 						LastModified: 1669830147,
+						Maintainer:   "z3ntu",
 					},
 					"jellyfin-server": {
 						Source:       AUR,
@@ -215,6 +218,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Version:      "10.8.8-1",
 						AURBase:      ptrString("jellyfin"),
 						LastModified: 1669830147,
+						Maintainer:   "z3ntu",
 					},
 				},
 				{
@@ -337,6 +341,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 						Version:      "26.1.1-2",
 						AURBase:      ptrString("android-sdk"),
 						LastModified: 1647982720,
+						Maintainer:   "dreamingincode",
 					},
 				},
 				{
@@ -1022,6 +1027,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Version:      "1.24.0.r37-1",
 			AURBase:      ptrString("gstreamer-git"),
 			LastModified: 1700000000,
+			Maintainer:   "testmaint",
 		},
 		"gstreamer-git dep": {
 			Source:       AUR,
@@ -1029,6 +1035,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Version:      "1.24.0.r37-1",
 			AURBase:      ptrString("gstreamer-git"),
 			LastModified: 1700000000,
+			Maintainer:   "testmaint",
 		},
 		"gst-plugins-base-libs-git exp": {
 			Source:       AUR,
@@ -1036,6 +1043,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Version:      "1.24.0.r37-1",
 			AURBase:      ptrString("gstreamer-git"),
 			LastModified: 1700000000,
+			Maintainer:   "testmaint",
 		},
 		"gst-plugins-base-libs-git dep": {
 			Source:       AUR,
@@ -1043,6 +1051,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Version:      "1.24.0.r37-1",
 			AURBase:      ptrString("gstreamer-git"),
 			LastModified: 1700000000,
+			Maintainer:   "testmaint",
 		},
 		"gst-plugins-good-git exp": {
 			Source:       AUR,
@@ -1050,6 +1059,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Version:      "1.24.0.r37-1",
 			AURBase:      ptrString("gstreamer-git"),
 			LastModified: 1700000000,
+			Maintainer:   "testmaint",
 		},
 	}
 

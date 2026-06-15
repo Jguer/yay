@@ -125,6 +125,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		Version:      "latest-commit",
 		Upgrade:      true,
 		Devel:        true,
+		Maintainer:   "morganamilo",
 	}
 
 	newDepInfo := &dep.InstallInfo{
@@ -145,6 +146,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		Version:      "2.2.1.r69.g8a10460-1",
 		Upgrade:      true,
 		Devel:        false,
+		Maintainer:   "morganamilo",
 	}
 
 	yayDepInfo := &dep.InstallInfo{
@@ -155,6 +157,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 		Version:      "10.2.4",
 		Upgrade:      true,
 		Devel:        false,
+		Maintainer:   "jguer",
 	}
 
 	coreDB := mock.NewDB("core")
@@ -227,10 +230,11 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	mockAUR := &mockaur.MockAUR{
 		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 			return []aur.Pkg{
-				{Name: "yay", Version: "10.2.4", PackageBase: "yay"},
+				{Name: "yay", Version: "10.2.4", PackageBase: "yay", Maintainer: "jguer"},
 				{
 					Name: "example-git", Version: "2.2.1.r69.g8a10460-1",
 					PackageBase: "example", Depends: []string{"new-dep"},
+					Maintainer:  "morganamilo",
 				},
 			}, nil
 		},
