@@ -141,7 +141,6 @@ func TestRunUpgradeSelectEventTableShapeAndReturn(t *testing.T) {
 				if event.data.upgrades[1].local_version ~= "1.0" then error("bad local version") end
 				if event.data.upgrades[1].remote_version ~= "2.0" then error("bad remote version") end
 				if event.data.upgrades[1].reason ~= "explicit" then error("bad reason") end
-				if event.data.upgrades[1].extra ~= "extra text" then error("bad extra") end
 				if event.data.upgrades[1].last_modified ~= 123 then error("bad last modified") end
 				if event.data.upgrades[2].id ~= 1 then error("bad second upgrade id") end
 				if event.data.pulled_dependencies[1].id ~= 0 then error("bad dependency id") end
@@ -165,7 +164,6 @@ func TestRunUpgradeSelectEventTableShapeAndReturn(t *testing.T) {
 				LocalVersion:  "1.0",
 				RemoteVersion: "2.0",
 				Reason:        "explicit",
-				Extra:         "extra text",
 				LastModified:  123,
 			},
 			{ID: 1, Name: "yay", Base: "yay", Repository: "aur"},

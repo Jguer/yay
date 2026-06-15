@@ -427,7 +427,6 @@ func upgradeSelectPackages(upgrades []Upgrade, selectable bool) []settingslua.Up
 			LocalVersion:  up.LocalVersion,
 			RemoteVersion: up.RemoteVersion,
 			Reason:        upgradeSelectReason(up.Reason),
-			Extra:         up.Extra,
 			LastModified:  up.LastModified,
 		})
 	}

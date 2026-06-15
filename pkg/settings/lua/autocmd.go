@@ -74,7 +74,6 @@ type UpgradeSelectPackage struct {
 	LocalVersion  string
 	RemoteVersion string
 	Reason        string
-	Extra         string
 	LastModified  int64
 }
 
@@ -263,7 +262,6 @@ func (e *Engine) upgradeSelectPackagesTable(packages []UpgradeSelectPackage) *gl
 		pkgTbl.RawSetString("local_version", glua.LString(pkg.LocalVersion))
 		pkgTbl.RawSetString("remote_version", glua.LString(pkg.RemoteVersion))
 		pkgTbl.RawSetString("reason", glua.LString(pkg.Reason))
-		pkgTbl.RawSetString("extra", glua.LString(pkg.Extra))
 		pkgTbl.RawSetString("last_modified", glua.LNumber(pkg.LastModified))
 		tbl.Append(pkgTbl)
 	}
