@@ -200,34 +200,19 @@ func (e *Engine) RunUpgradeSelect(event *UpgradeSelectEvent) (UpgradeSelectResul
 }
 
 func (e *Engine) aurPreInstallTable(event *AURPreInstallEvent) *glua.LTable {
-	state := e.L
-	eventTable := state.NewTable()
-	data := state.NewTable()
-
-	eventTable.RawSetString("event", glua.LString(EventAURPreInstall))
-	eventTable.RawSetString("match", glua.LString(event.Base))
-	eventTable.RawSetString("data", data)
-
-	data.RawSetString("base", glua.LString(event.Base))
-	data.RawSetString("dir", glua.LString(event.Dir))
-	data.RawSetString("pkgbuild_path", glua.LString(event.PKGBUILDPath))
-	data.RawSetString("srcinfo_path", glua.LString(event.SRCINFOPath))
-	data.RawSetString("pkgbuild", glua.LString(event.PKGBUILD))
-	data.RawSetString("version", glua.LString(event.Version))
-	data.RawSetString("last_modified", glua.LNumber(event.LastModified))
-	data.RawSetString("installed", glua.LBool(event.Installed))
-	data.RawSetString("packages", e.packagesTable(event.Packages))
-	data.RawSetString("srcinfo", e.srcinfoTable(&event.SRCINFO))
-
-	return eventTable
+	return e.aurEventTable(EventAURPreInstall, event)
 }
 
 func (e *Engine) aurPostDownloadTable(event *AURPreInstallEvent) *glua.LTable {
+	return e.aurEventTable(EventAURPostDownload, event)
+}
+
+func (e *Engine) aurEventTable(eventName string, event *AURPreInstallEvent) *glua.LTable {
 	state := e.L
 	eventTable := state.NewTable()
 	data := state.NewTable()
 
-	eventTable.RawSetString("event", glua.LString(EventAURPostDownload))
+	eventTable.RawSetString("event", glua.LString(eventName))
 	eventTable.RawSetString("match", glua.LString(event.Base))
 	eventTable.RawSetString("data", data)
 
