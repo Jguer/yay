@@ -129,7 +129,7 @@ func (e *Engine) RunAURPreInstall(event *AURPreInstallEvent) error {
 			Fn:      autocmd.callback,
 			NRet:    0,
 			Protect: true,
-		}, e.aurPreInstallTable(event)); err != nil {
+		}, e.aurEventTable(EventAURPreInstall, event)); err != nil {
 			return fmt.Errorf("%s %s: %w", EventAURPreInstall, event.Base, wrapLuaErr(err))
 		}
 	}
@@ -147,7 +147,7 @@ func (e *Engine) RunAURPostDownload(event *AURPreInstallEvent) error {
 			Fn:      autocmd.callback,
 			NRet:    0,
 			Protect: true,
-		}, e.aurPostDownloadTable(event)); err != nil {
+		}, e.aurEventTable(EventAURPostDownload, event)); err != nil {
 			return fmt.Errorf("%s %s: %w", EventAURPostDownload, event.Base, wrapLuaErr(err))
 		}
 	}
@@ -197,14 +197,6 @@ func (e *Engine) RunUpgradeSelect(event *UpgradeSelectEvent) (UpgradeSelectResul
 	}
 
 	return result, nil
-}
-
-func (e *Engine) aurPreInstallTable(event *AURPreInstallEvent) *glua.LTable {
-	return e.aurEventTable(EventAURPreInstall, event)
-}
-
-func (e *Engine) aurPostDownloadTable(event *AURPreInstallEvent) *glua.LTable {
-	return e.aurEventTable(EventAURPostDownload, event)
 }
 
 func (e *Engine) aurEventTable(eventName string, event *AURPreInstallEvent) *glua.LTable {
