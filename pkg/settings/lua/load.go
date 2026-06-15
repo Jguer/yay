@@ -8,8 +8,13 @@ import (
 )
 
 // Load loads path, applies its yay.opt values onto cfg, and returns the live engine.
-func Load(_ *text.Logger, path string, cfg any) (*Engine, error) {
-	engine := New()
+func Load(logger *text.Logger, path string, cfg any) (*Engine, error) {
+	var luaLogger *text.Logger
+	if logger != nil {
+		luaLogger = logger.Child("lua")
+	}
+
+	engine := NewWithLogger(luaLogger)
 
 	if err := engine.L.DoFile(path); err != nil {
 		engine.Close()

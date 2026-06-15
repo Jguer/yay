@@ -133,7 +133,6 @@ func TestRunUpgradeSelectEventTableShapeAndReturn(t *testing.T) {
 		yay.create_autocmd("UpgradeSelect", {
 			callback = function(event)
 				if event.event ~= "UpgradeSelect" then error("bad event") end
-				if event.match ~= "sysupgrade" then error("bad match") end
 				if event.data.upgrades[1].id ~= 2 then error("bad upgrade id") end
 				if event.data.upgrades[1].name ~= "linux" then error("bad upgrade name") end
 				if event.data.upgrades[1].base ~= "linux" then error("bad upgrade base") end
@@ -145,8 +144,6 @@ func TestRunUpgradeSelectEventTableShapeAndReturn(t *testing.T) {
 				if event.data.upgrades[2].id ~= 1 then error("bad second upgrade id") end
 				if event.data.pulled_dependencies[1].id ~= 0 then error("bad dependency id") end
 				if event.data.pulled_dependencies[1].name ~= "new-dep" then error("bad dependency name") end
-				if event.data.repositories[1] ~= "core" then error("bad first repository") end
-				if event.data.repositories[2] ~= "aur" then error("bad second repository") end
 
 				return { exclude = { "linux" }, skip_menu = true }
 			end,
@@ -154,7 +151,6 @@ func TestRunUpgradeSelectEventTableShapeAndReturn(t *testing.T) {
 	`))
 
 	result, err := e.RunUpgradeSelect(&UpgradeSelectEvent{
-		Match: "sysupgrade",
 		Upgrades: []UpgradeSelectPackage{
 			{
 				ID:            2,
@@ -171,7 +167,6 @@ func TestRunUpgradeSelectEventTableShapeAndReturn(t *testing.T) {
 		PulledDependencies: []UpgradeSelectPackage{
 			{ID: 0, Name: "new-dep", Repository: "core", Reason: "dependency"},
 		},
-		Repositories: []string{"core", "aur"},
 	})
 	require.NoError(t, err)
 	require.Equal(t, UpgradeSelectResult{Exclude: []string{"linux"}, SkipMenu: true}, result)
@@ -236,7 +231,7 @@ func TestRunUpgradeSelectRejectsUnknownExcludedPackage(t *testing.T) {
 		Upgrades: []UpgradeSelectPackage{{Name: "pkg-a"}},
 	})
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "UpgradeSelect sysupgrade")
+	require.Contains(t, err.Error(), "UpgradeSelect")
 	require.Contains(t, err.Error(), `unknown upgrade exclusion "typo"`)
 }
 
@@ -255,5 +250,5 @@ func TestRunUpgradeSelectReturnsAbortWithoutTraceback(t *testing.T) {
 	_, err := e.RunUpgradeSelect(&UpgradeSelectEvent{
 		Upgrades: []UpgradeSelectPackage{{Name: "pkg-a"}},
 	})
-	require.EqualError(t, err, "UpgradeSelect sysupgrade: blocked by policy")
+	require.EqualError(t, err, "UpgradeSelect: blocked by policy")
 }

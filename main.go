@@ -128,6 +128,10 @@ func main() {
 
 		return
 	}
+
+	if luaEngine != nil {
+		luaEngine.SetLogger(run.Logger.Child("lua"))
+	}
 	run.Lua = luaEngine
 
 	dbExecutor, err := ialpm.NewExecutor(run.PacmanConf, run.Logger.Child("db"))

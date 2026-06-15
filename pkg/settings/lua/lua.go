@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/Jguer/yay/v12/pkg/text"
+
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -16,13 +18,19 @@ const (
 type Engine struct {
 	L        *lua.LState
 	autocmds map[string][]Autocmd
+	logger   *text.Logger
 }
 
 func New() *Engine {
+	return NewWithLogger(nil)
+}
+
+func NewWithLogger(logger *text.Logger) *Engine {
 	state := lua.NewState()
 	engine := &Engine{
 		L:        state,
 		autocmds: make(map[string][]Autocmd),
+		logger:   logger,
 	}
 
 	yayTbl := state.NewTable()
@@ -30,8 +38,13 @@ func New() *Engine {
 	state.SetField(yayTbl, optTableName, state.NewTable())
 	state.SetField(yayTbl, "abort", state.NewFunction(abort))
 	state.SetField(yayTbl, "create_autocmd", state.NewFunction(engine.createAutocmd))
+	engine.registerLog(yayTbl)
 
 	return engine
+}
+
+func (e *Engine) SetLogger(logger *text.Logger) {
+	e.logger = logger
 }
 
 func (e *Engine) Close() {

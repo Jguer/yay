@@ -48,6 +48,21 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 A ready-to-copy example
 lives at [`doc/init.lua`](init.lua).
 
+## Logging with `yay.log`
+
+Lua config and hooks can write through yay's normal logger:
+
+```lua
+yay.log.debug("build dir:", yay.opt.build_dir)
+yay.log.info("loaded init.lua")
+yay.log.warn("skipping", "pkgname")
+yay.log.error("policy check failed")
+```
+
+`debug` only prints when debug logging is enabled. `error` logs an error-level
+message and does not stop execution; use `yay.abort("message")` for controlled
+hook stops.
+
 ## Upgrade selection hooks
 
 `UpgradeSelect` runs during `yay -Syu` after yay has built and sorted the
@@ -57,11 +72,13 @@ native menu after applying hook exclusions.
 
 ```lua
 yay.create_autocmd("UpgradeSelect", {
-  desc = "skip selected large upgrades",
+  desc = "skip recently modified AUR upgrades",
   callback = function(event)
     local exclude = {}
+    local recent_cutoff = os.time() - (3 * 24 * 60 * 60)
     for _, pkg in ipairs(event.data.upgrades) do
-      if pkg.repository == "aur" and pkg.name:match("%-git$") then
+      if pkg.repository == "aur" and pkg.last_modified >= recent_cutoff then
+        yay.log.debug("pre-excluding recently modified AUR package:", pkg.name)
         table.insert(exclude, pkg.name)
       end
     end
@@ -89,9 +106,7 @@ The callback receives this table:
 ```lua
 {
   event = "UpgradeSelect",
-  match = "sysupgrade",
   data = {
-    repositories = { "core", "extra", "aur" },
     upgrades = {
       {
         id = 3,
@@ -210,6 +225,7 @@ yay.create_autocmd("AURPreInstall", {
   desc = "block forbidden sources and patch a PKGBUILD",
   callback = function(event)
     if event.data.pkgbuild:match("forbidden.example") then
+      yay.log.warn(event.match .. ": forbidden source URL")
       yay.abort(event.match .. ": forbidden source URL")
     end
 

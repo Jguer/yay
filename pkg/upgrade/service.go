@@ -403,10 +403,8 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 
 func upgradeSelectEvent(allUp UpSlice) *settingslua.UpgradeSelectEvent {
 	return &settingslua.UpgradeSelectEvent{
-		Match:              "sysupgrade",
 		Upgrades:           upgradeSelectPackages(allUp.Up, true),
 		PulledDependencies: upgradeSelectPackages(allUp.PulledDeps, false),
-		Repositories:       upgradeSelectRepositories(allUp),
 	}
 }
 
@@ -432,30 +430,6 @@ func upgradeSelectPackages(upgrades []Upgrade, selectable bool) []settingslua.Up
 	}
 
 	return packages
-}
-
-func upgradeSelectRepositories(allUp UpSlice) []string {
-	seen := mapset.NewThreadUnsafeSet[string]()
-	repositories := []string{}
-	add := func(repository string) {
-		if repository == "" || !seen.Add(repository) {
-			return
-		}
-
-		repositories = append(repositories, repository)
-	}
-
-	for _, repository := range allUp.Repos {
-		add(repository)
-	}
-	for i := range allUp.Up {
-		add(allUp.Up[i].Repository)
-	}
-	for i := range allUp.PulledDeps {
-		add(allUp.PulledDeps[i].Repository)
-	}
-
-	return repositories
 }
 
 func upgradeSelectReason(reason alpm.PkgReason) string {

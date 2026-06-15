@@ -60,10 +60,8 @@ type AURPreInstallSRCINFO struct {
 }
 
 type UpgradeSelectEvent struct {
-	Match              string
 	Upgrades           []UpgradeSelectPackage
 	PulledDependencies []UpgradeSelectPackage
-	Repositories       []string
 }
 
 type UpgradeSelectPackage struct {
@@ -166,7 +164,7 @@ func (e *Engine) RunUpgradeSelect(event *UpgradeSelectEvent) (UpgradeSelectResul
 				wrapped = abortErr
 			}
 
-			return result, fmt.Errorf("%s %s: %w", EventUpgradeSelect, upgradeSelectMatch(event), wrapped)
+			return result, fmt.Errorf("%s: %w", EventUpgradeSelect, wrapped)
 		}
 
 		value := e.L.Get(-1)
@@ -174,7 +172,7 @@ func (e *Engine) RunUpgradeSelect(event *UpgradeSelectEvent) (UpgradeSelectResul
 
 		hookResult, err := e.parseUpgradeSelectResult(value, validExcludes)
 		if err != nil {
-			return result, fmt.Errorf("%s %s: %w", EventUpgradeSelect, upgradeSelectMatch(event), err)
+			return result, fmt.Errorf("%s: %w", EventUpgradeSelect, err)
 		}
 
 		for _, name := range hookResult.Exclude {
@@ -221,12 +219,10 @@ func (e *Engine) upgradeSelectTable(event *UpgradeSelectEvent) *glua.LTable {
 	data := state.NewTable()
 
 	eventTable.RawSetString("event", glua.LString(EventUpgradeSelect))
-	eventTable.RawSetString("match", glua.LString(upgradeSelectMatch(event)))
 	eventTable.RawSetString("data", data)
 
 	data.RawSetString("upgrades", e.upgradeSelectPackagesTable(event.Upgrades))
 	data.RawSetString("pulled_dependencies", e.upgradeSelectPackagesTable(event.PulledDependencies))
-	data.RawSetString("repositories", e.stringArray(event.Repositories))
 
 	return eventTable
 }
@@ -344,14 +340,6 @@ func (e *Engine) parseUpgradeSelectResult(value glua.LValue, validExcludes mapse
 	}
 
 	return result, nil
-}
-
-func upgradeSelectMatch(event *UpgradeSelectEvent) string {
-	if event.Match != "" {
-		return event.Match
-	}
-
-	return "sysupgrade"
 }
 
 func (e *Engine) stringArray(values []string) *glua.LTable {

@@ -52,17 +52,23 @@ yay.opt.debug = false -- Enable debug logging and local init.lua lookup convenie
 yay.opt.rpc = true -- Use AUR RPC for dependency/query operations.
 yay.opt.double_confirm = true -- Ask for confirmation before and after builds during upgrades.
 
+-- Logging
+-- yay.log.info("loaded yay init.lua")
+-- yay.log.debug("build dir:", yay.opt.build_dir)
+
 -- Hooks
 -- Run Lua before yay prints the upgrade exclusion menu. Return package names
 -- from event.data.upgrades to pre-exclude them. Set skip_menu = false, or omit
 -- it, to show the native menu after these exclusions are applied.
 --
 -- yay.create_autocmd("UpgradeSelect", {
---   desc = "skip selected large upgrades",
+--   desc = "skip recently modified AUR upgrades",
 --   callback = function(event)
 --     local exclude = {}
+--     local recent_cutoff = os.time() - (3 * 24 * 60 * 60)
 --     for _, pkg in ipairs(event.data.upgrades) do
---       if pkg.repository == "aur" and pkg.name:match("%-git$") then
+--       if pkg.repository == "aur" and pkg.last_modified >= recent_cutoff then
+--         yay.log.warn("pre-excluding recently modified AUR package:", pkg.name)
 --         table.insert(exclude, pkg.name)
 --       end
 --     end
@@ -78,6 +84,7 @@ yay.opt.double_confirm = true -- Ask for confirmation before and after builds du
 --   desc = "inspect or modify AUR package files",
 --   callback = function(event)
 --     if event.data.pkgbuild:match("forbidden.example") then
+--       yay.log.warn(event.match .. ": forbidden source URL")
 --       yay.abort(event.match .. ": forbidden source URL")
 --     end
 --
