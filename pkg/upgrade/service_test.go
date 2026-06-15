@@ -234,7 +234,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				{
 					Name: "example-git", Version: "2.2.1.r69.g8a10460-1",
 					PackageBase: "example", Depends: []string{"new-dep"},
-					Maintainer:  "morganamilo",
+					Maintainer: "morganamilo",
 				},
 			}, nil
 		},

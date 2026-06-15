@@ -427,4 +427,3 @@ func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "gendocs:", err)
 	os.Exit(1)
 }
-
