@@ -748,19 +748,16 @@ func newYayQueryBuilderMocks() (*mock.DBExecutor, *mockaur.MockAUR) {
 	return mockDB, mockAUR
 }
 
-type recordedRender struct {
-	event string
-	pkg   map[string]any
-}
-
 type recordingRenderer struct {
-	calls        []recordedRender
+	calls        int
+	results      []map[string]any
 	deferDefault bool
 	err          error
 }
 
-func (r *recordingRenderer) Render(event string, pkg map[string]any) (string, bool, error) {
-	r.calls = append(r.calls, recordedRender{event: event, pkg: pkg})
+func (r *recordingRenderer) RenderSearch(results []map[string]any) (string, bool, error) {
+	r.calls++
+	r.results = results
 
 	if r.err != nil {
 		return "", false, r.err
@@ -770,13 +767,22 @@ func (r *recordingRenderer) Render(event string, pkg map[string]any) (string, bo
 		return "", false, nil
 	}
 
-	return "HOOK " + event + " " + pkg["name"].(string), true, nil
+	var b strings.Builder
+	for i, pkg := range results {
+		if i > 0 {
+			b.WriteByte('\n')
+		}
+
+		b.WriteString("HOOK " + pkg["source"].(string) + " " + pkg["name"].(string))
+	}
+
+	return b.String(), true, nil
 }
 
-func (r *recordingRenderer) byName() map[string]recordedRender {
-	out := make(map[string]recordedRender, len(r.calls))
-	for _, c := range r.calls {
-		out[c.pkg["name"].(string)] = c
+func (r *recordingRenderer) byName() map[string]map[string]any {
+	out := make(map[string]map[string]any, len(r.results))
+	for _, pkg := range r.results {
+		out[pkg["name"].(string)] = pkg
 	}
 
 	return out
@@ -800,8 +806,9 @@ func TestSourceQueryBuilderRendererNumberMenu(t *testing.T) {
 	qb.Execute(context.Background(), mockDB, []string{"yay"})
 	require.NoError(t, qb.Results(mockDB, NumberMenu))
 
-	// One repo + two AUR results -> three hook calls and three printed lines.
-	require.Len(t, rr.calls, 3)
+	// Hook is called once for the whole menu.
+	require.Equal(t, 1, rr.calls)
+	require.Len(t, rr.results, 3)
 
 	lines := strings.Split(strings.TrimRight(w.String(), "\n"), "\n")
 	require.Len(t, lines, 3)
@@ -814,15 +821,12 @@ func TestSourceQueryBuilderRendererNumberMenu(t *testing.T) {
 	require.Contains(t, byName, "yay")
 	require.Contains(t, byName, "yay-git")
 
-	assert.Equal(t, SearchEventRepo, byName["ruby-yard"].event)
-	assert.Equal(t, "extra", byName["ruby-yard"].pkg["source"])
-	assert.Equal(t, SearchEventAUR, byName["yay"].event)
-	assert.Equal(t, "aur", byName["yay"].pkg["source"])
+	assert.Equal(t, "extra", byName["ruby-yard"]["source"])
+	assert.Equal(t, "aur", byName["yay"]["source"])
 
 	indices := map[int]bool{}
-	for _, c := range rr.calls {
-		assert.Equal(t, 3, c.pkg["count"])
-		idx, ok := c.pkg["index"].(int)
+	for _, pkg := range rr.results {
+		idx, ok := pkg["index"].(int)
 		require.True(t, ok, "index present in number menu")
 		indices[idx] = true
 	}
@@ -840,10 +844,10 @@ func TestSourceQueryBuilderRendererDetailedNoIndex(t *testing.T) {
 	qb.Execute(context.Background(), mockDB, []string{"yay"})
 	require.NoError(t, qb.Results(mockDB, Detailed))
 
-	require.Len(t, rr.calls, 3)
-	for _, c := range rr.calls {
-		assert.Equal(t, 3, c.pkg["count"])
-		_, hasIndex := c.pkg["index"]
+	require.Equal(t, 1, rr.calls)
+	require.Len(t, rr.results, 3)
+	for _, pkg := range rr.results {
+		_, hasIndex := pkg["index"]
 		assert.False(t, hasIndex, "index absent in detailed mode")
 	}
 }
@@ -859,8 +863,8 @@ func TestSourceQueryBuilderRendererDeferFallsBackToDefault(t *testing.T) {
 	qb.Execute(context.Background(), mockDB, []string{"yay"})
 	require.NoError(t, qb.Results(mockDB, Detailed))
 
-	// Renderer was consulted for every row but deferred, so no hook output.
-	require.Len(t, rr.calls, 3)
+	// Renderer was consulted once but deferred, so no hook output.
+	require.Equal(t, 1, rr.calls)
 	assert.NotContains(t, w.String(), "HOOK ")
 	assert.Contains(t, w.String(), "yay")
 }
@@ -894,13 +898,13 @@ func TestSourceQueryBuilderRendererAURPkgHasLastModified(t *testing.T) {
 	require.Contains(t, byName, "yay")
 	require.Contains(t, byName, "yay-git")
 
-	assert.Equal(t, 1765742501, byName["yay"].pkg["last_modified"],
+	assert.Equal(t, 1765742501, byName["yay"]["last_modified"],
 		"last_modified must match the AUR fixture value")
-	assert.Equal(t, 1765742519, byName["yay-git"].pkg["last_modified"],
+	assert.Equal(t, 1765742519, byName["yay-git"]["last_modified"],
 		"last_modified must match the AUR fixture value")
 
-	// Repo packages must not carry a last_modified field.
+	// Repo packages carry -1 sentinel (uniform schema).
 	require.Contains(t, byName, "ruby-yard")
-	_, hasLastModified := byName["ruby-yard"].pkg["last_modified"]
-	assert.False(t, hasLastModified, "repo packages must not have last_modified")
+	assert.Equal(t, -1, byName["ruby-yard"]["last_modified"],
+		"repo packages carry -1 sentinel for last_modified")
 }

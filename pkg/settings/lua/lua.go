@@ -13,17 +13,17 @@ const (
 	optTableName = "opt"
 )
 
-var validEvents = map[string]bool{"search_aur": true, "search_repo": true}
+var validEvents = map[string]bool{"render_search": true}
 
 type Engine struct {
-	L     *lua.LState
-	hooks map[string]*lua.LFunction
+	L             *lua.LState
+	renderSearch  *lua.LFunction
 }
 
 func New() *Engine {
 	state := lua.NewState()
 
-	e := &Engine{L: state, hooks: map[string]*lua.LFunction{}}
+	e := &Engine{L: state}
 
 	yayTbl := state.NewTable()
 	state.SetGlobal(globalName, yayTbl)
@@ -33,7 +33,7 @@ func New() *Engine {
 	return e
 }
 
-// luaOn registers a Lua callback for a search-display event (yay.on).
+// luaOn registers a Lua callback for the render_search event (yay.on).
 func (e *Engine) luaOn(L *lua.LState) int {
 	event := L.CheckString(1)
 	fn := L.CheckFunction(2)
@@ -43,31 +43,29 @@ func (e *Engine) luaOn(L *lua.LState) int {
 		return 0
 	}
 
-	e.hooks[event] = fn
+	e.renderSearch = fn
 
 	return 0
 }
 
 // HasHooks reports whether any search-display callback has been registered.
 func (e *Engine) HasHooks() bool {
-	return len(e.hooks) > 0
+	return e.renderSearch != nil
 }
 
-// Render invokes the callback registered for event with pkg. It returns the
-// produced line and handled=true when a callback returned a string; handled is
-// false when no callback is registered or the callback deferred to the default
-// formatter (returned nil/nothing/non-string).
-func (e *Engine) Render(event string, pkg map[string]any) (string, bool, error) {
-	fn, ok := e.hooks[event]
-	if !ok {
+// RenderSearch invokes the render_search callback with the full result list.
+// handled=true when the callback returned a string; false when no callback is
+// registered or it deferred (returned nil/nothing/non-string).
+func (e *Engine) RenderSearch(results []map[string]any) (string, bool, error) {
+	if e.renderSearch == nil {
 		return "", false, nil
 	}
 
-	e.L.Push(fn)
-	e.L.Push(e.toTable(pkg))
+	e.L.Push(e.renderSearch)
+	e.L.Push(e.resultsToTable(results))
 
 	if err := e.L.PCall(1, 1, nil); err != nil {
-		return "", false, fmt.Errorf("init.lua %s hook: %w", event, err)
+		return "", false, fmt.Errorf("init.lua render_search hook: %w", err)
 	}
 
 	ret := e.L.Get(-1)
@@ -78,6 +76,15 @@ func (e *Engine) Render(event string, pkg map[string]any) (string, bool, error) 
 	}
 
 	return "", false, nil
+}
+
+func (e *Engine) resultsToTable(results []map[string]any) *lua.LTable {
+	tbl := e.L.NewTable()
+	for i := range results {
+		tbl.Append(e.toTable(results[i]))
+	}
+
+	return tbl
 }
 
 // toTable converts a Go map into a Lua table for passing to a callback.

@@ -50,77 +50,65 @@ lives at [`doc/init.lua`](init.lua).
 
 ## Hooks (`yay.on`)
 
-Search-result lines can be rendered by your own Lua function. Register a
-callback with `yay.on(event, fn)`. `event` is a string naming one of the
-supported events; passing any other event name aborts startup (fail-fast,
-like an unknown `yay.opt` key).
+The entire search result list can be rendered by your own Lua function. Register
+a callback with `yay.on(event, fn)`. `event` must be a supported event name;
+passing any other string aborts startup (fail-fast, like an unknown `yay.opt` key).
 
 ```lua
-yay.on("search_aur", function(pkg)
-  local prefix = pkg.index and (pkg.index .. " ") or ""
-  return string.format("%saur/%s %s (+%d %.2f)",
-    prefix, pkg.name, pkg.version, pkg.votes, pkg.popularity)
+yay.on("render_search", function(results)
+  local out = {}
+  for _, pkg in ipairs(results) do
+    local prefix = pkg.index and (pkg.index .. " ") or ""
+    out[#out + 1] = string.format("%s%s/%s %s", prefix, pkg.source, pkg.name, pkg.version)
+  end
+  return table.concat(out, "\n")
 end)
 ```
 
 ### Events
 
-- `"search_aur"` — fired once per AUR result.
-- `"search_repo"` — fired once per repo (sync) result.
+- `"render_search"` — fired **once** with the whole result list; the callback
+  returns the entire menu output as a single string.
 
 Hooks fire only in the detailed search view (`-Ss`) and the interactive number
 menu (`yay <term>`). Name-only output (`-Sq`) and package info (`-Si`) are not
-hooked, so machine-readable output stays stable.
+hooked, so machine-readable output stays stable. When there are no results the
+hook is not called.
 
-Each event holds a single callback; calling `yay.on` again for the same event
-replaces the previous one (last-wins).
+There is a single slot per callback; calling `yay.on("render_search", …)` again
+replaces the previous registration (last-wins).
 
 ### Return contract
 
-- Return a **string**: it is printed verbatim as the entire line — yay prepends
-  nothing, including the number-menu index. Reproduce the index yourself from
-  `pkg.index` if you want it.
+- Return a **string**: it is printed verbatim as the entire menu — yay prepends
+  nothing, including number-menu indices. Reproduce each index from `pkg.index`
+  if you want them.
 - Return `nil`, nothing, or a non-string value: yay falls back to its built-in
-  formatter for that row (the documented "defer to default" path).
+  per-line formatter for the whole menu (the "defer to default" path).
 - Raise a Lua `error(...)`: the search aborts and yay exits non-zero with
-  `init.lua <event> hook: ...`.
+  `init.lua render_search hook: ...`.
 
 No color/format helpers are exposed. Returned text is printed as-is; embed your
 own ANSI escapes if you want styling, and honor `--color=never`/`NO_COLOR`
 yourself.
 
-### `search_aur` fields
+### Result entry fields
+
+Every element of `results` uses the same schema regardless of source (AUR or repo).
+AUR-only numeric fields are `-1` for repo packages.
 
 | key | type | notes |
 | --- | --- | --- |
-| `source` | string | always `"aur"` |
+| `source` | string | `"aur"` or repo/DB name (e.g. `"extra"`) |
 | `name` | string | |
 | `version` | string | |
 | `description` | string | |
-| `votes` | number | |
-| `popularity` | number | |
-| `out_of_date` | number | unix timestamp; `0` when not flagged |
-| `last_modified` | number | unix timestamp of last AUR package modification |
 | `package_base` | string | |
+| `votes` | number | AUR vote count; **`-1` for repo packages** |
+| `popularity` | number | AUR popularity; **`-1` for repo packages** |
+| `first_submitted` | number | unix timestamp; **`-1` for repo packages** |
+| `last_modified` | number | unix timestamp; **`-1` for repo packages** |
 | `provides` | array of strings | possibly empty |
-| `maintainer` | string | **`nil` when orphaned** |
 | `installed` | boolean | |
 | `installed_version` | string | **`nil` when not installed** |
-| `count` | number | total number of result rows |
-| `index` | number | 1-based selection number; **`nil` outside the number menu** |
-
-### `search_repo` fields
-
-| key | type | notes |
-| --- | --- | --- |
-| `source` | string | repo/DB name, e.g. `"extra"` |
-| `name` | string | |
-| `version` | string | |
-| `description` | string | |
-| `size` | number | download size in bytes |
-| `installed_size` | number | installed size in bytes |
-| `groups` | array of strings | possibly empty |
-| `installed` | boolean | |
-| `installed_version` | string | **`nil` when not installed** |
-| `count` | number | total number of result rows |
 | `index` | number | 1-based selection number; **`nil` outside the number menu** |

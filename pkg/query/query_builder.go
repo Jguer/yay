@@ -30,16 +30,10 @@ const (
 	Minimal
 )
 
-// Search-display event names passed to a SearchRenderer.
-const (
-	SearchEventAUR  = "search_aur"
-	SearchEventRepo = "search_repo"
-)
-
-// SearchRenderer overrides how a single search-result line is rendered. handled
-// is false when the renderer defers to the built-in formatter for that row.
+// SearchRenderer overrides how the whole search result list is rendered.
+// handled is false when the renderer defers to the built-in per-line formatter.
 type SearchRenderer interface {
-	Render(event string, pkg map[string]any) (line string, handled bool, err error)
+	RenderSearch(results []map[string]any) (output string, handled bool, err error)
 }
 
 type Builder interface {
@@ -95,6 +89,7 @@ func NewSourceQueryBuilder(
 type abstractResult struct {
 	source         string
 	name           string
+	version        string
 	description    string
 	packageBase    string
 	votes          int
@@ -233,6 +228,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 			sortableResults.results = append(sortableResults.results, abstractResult{
 				source:         repoResults[i].DB().Name(),
 				name:           repoResults[i].Name(),
+			version:         repoResults[i].Version(),
 				description:    repoResults[i].Description(),
 				packageBase:    repoResults[i].Base(),
 				votes:          -1,
@@ -265,6 +261,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 			sortableResults.results = append(sortableResults.results, abstractResult{
 				source:         dbName,
 				name:           aurResults[i].Name,
+			version:         aurResults[i].Version,
 				description:    aurResults[i].Description,
 				packageBase:    aurResults[i].PackageBase,
 				votes:          aurResults[i].NumVotes,
@@ -289,6 +286,17 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 }
 
 func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch SearchVerbosity) error {
+	if verboseSearch != Minimal && s.renderer != nil && len(s.results) > 0 {
+		handled, err := s.renderViaHook(dbExecutor, verboseSearch)
+		if err != nil {
+			return err
+		}
+
+		if handled {
+			return nil
+		}
+	}
+
 	for i := range s.results {
 		if verboseSearch == Minimal {
 			s.logger.Println(s.results[i].name)
@@ -297,39 +305,7 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 
 		pkg := s.queryMap[s.results[i].source][s.results[i].name]
 
-		if s.renderer != nil {
-			var (
-				event string
-				m     map[string]any
-			)
-
-			switch pPkg := pkg.(type) {
-			case aur.Pkg:
-				event, m = SearchEventAUR, aurPkgToMap(&pPkg, dbExecutor)
-			case alpm.Package:
-				event, m = SearchEventRepo, syncPkgToMap(pPkg, dbExecutor)
-			}
-
-			if m != nil {
-				m["count"] = len(s.results)
-				if verboseSearch == NumberMenu {
-					m["index"] = s.menuIndex(i)
-				}
-
-				line, handled, err := s.renderer.Render(event, m)
-				if err != nil {
-					return err
-				}
-
-				if handled {
-					s.logger.Println(line)
-					continue
-				}
-			}
-		}
-
 		var toPrint string
-
 		if verboseSearch == NumberMenu {
 			toPrint += text.Magenta(strconv.Itoa(s.menuIndex(i))) + " "
 		}
@@ -345,6 +321,61 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 	}
 
 	return nil
+}
+
+// renderViaHook builds one uniform map per result (display order, with index in
+// number-menu mode) and hands the whole list to the renderer. Returns
+// handled=false (without printing) when the renderer defers, so the caller falls
+// back to the built-in formatter.
+func (s *SourceQueryBuilder) renderViaHook(dbExecutor db.Executor, verboseSearch SearchVerbosity) (bool, error) {
+	pkgMaps := make([]map[string]any, len(s.results))
+	for i := range s.results {
+		m := resultToMap(s.results[i], dbExecutor)
+		if verboseSearch == NumberMenu {
+			m["index"] = s.menuIndex(i)
+		}
+
+		pkgMaps[i] = m
+	}
+
+	output, handled, err := s.renderer.RenderSearch(pkgMaps)
+	if err != nil {
+		return false, err
+	}
+
+	if !handled {
+		return false, nil
+	}
+
+	s.logger.Println(output)
+
+	return true, nil
+}
+
+// resultToMap projects a normalized search result into the Lua-facing table.
+// AUR-only numeric fields (votes/popularity/first_submitted/last_modified) are
+// -1 for repo packages, matching the sentinels stored in abstractResult.
+func resultToMap(r abstractResult, dbExecutor db.Executor) map[string]any {
+	m := map[string]any{
+		"source":          r.source,
+		"name":            r.name,
+		"version":         r.version,
+		"description":     r.description,
+		"package_base":    r.packageBase,
+		"votes":           r.votes,
+		"popularity":      r.popularity,
+		"first_submitted": r.firstSubmitted,
+		"last_modified":   r.lastModified,
+		"provides":        r.provides,
+	}
+
+	if localPkg := dbExecutor.LocalPackage(r.name); localPkg != nil {
+		m["installed"], m["installed_version"] = true, localPkg.Version()
+	} else {
+		m["installed"] = false
+	}
+
+	return m
 }
 
 // menuIndex returns the 1-based selection number shown in the number menu for

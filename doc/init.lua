@@ -52,18 +52,27 @@ yay.opt.debug = false -- Enable debug logging and local init.lua lookup convenie
 yay.opt.rpc = true -- Use AUR RPC for dependency/query operations.
 yay.opt.double_confirm = true -- Ask for confirmation before and after builds during upgrades.
 
--- Search-display hooks (yay.on)
+-- Search-display hook (yay.on)
 --
--- Override how AUR/repo search-result lines are rendered. Return a string for
--- the full line, or nil to fall back to yay's default formatter. See
+-- Override how the whole search result list is rendered. Return a string for
+-- the entire menu output, or nil to fall back to yay's default formatter. See
 -- doc/lua.md for the full field list and contract.
 --
--- yay.on("search_aur", function(pkg)
---   local prefix = pkg.index and (pkg.index .. " ") or ""
---   return string.format("%saur/%s %s (+%d %.2f)", prefix, pkg.name, pkg.version, pkg.votes, pkg.popularity)
--- end)
+-- AUR-only numeric fields (votes, popularity, first_submitted, last_modified)
+-- are -1 for repo packages; use that as a guard for AUR-specific formatting.
 --
--- yay.on("search_repo", function(pkg)
---   local prefix = pkg.index and (pkg.index .. " ") or ""
---   return string.format("%s%s/%s %s", prefix, pkg.source, pkg.name, pkg.version)
+-- yay.on("render_search", function(results)
+--   local out = {}
+--   for _, pkg in ipairs(results) do
+--     local prefix = pkg.index and (pkg.index .. " ") or ""
+--     local line = string.format("%s%s/%s %s", prefix, pkg.source, pkg.name, pkg.version)
+--     if pkg.votes >= 0 then  -- AUR package: append vote count and popularity
+--       line = line .. string.format(" (+%d %.2f)", pkg.votes, pkg.popularity)
+--     end
+--     if pkg.installed then
+--       line = line .. " [installed]"
+--     end
+--     out[#out + 1] = line .. "\n    " .. pkg.description
+--   end
+--   return table.concat(out, "\n")
 -- end)
