@@ -13,7 +13,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 )
 
@@ -191,5 +190,7 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 	err := downloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.Error(t, err)
 	assert.Equal(t, 5, int(cmdBuilder.passes))
-	assert.Len(t, err.(*multierror.MultiError).Errors, 5)
+	joined, ok := err.(interface{ Unwrap() []error })
+	assert.True(t, ok)
+	assert.Len(t, joined.Unwrap(), 5)
 }

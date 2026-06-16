@@ -1,12 +1,14 @@
 package workdir
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/runtime"
@@ -79,13 +81,7 @@ func aurPreInstallEvents(pkgbuildDirsByBase map[string]string, installed mapset.
 }
 
 func sortedAURBases(pkgbuildDirsByBase map[string]string) []string {
-	bases := make([]string, 0, len(pkgbuildDirsByBase))
-	for base := range pkgbuildDirsByBase {
-		bases = append(bases, base)
-	}
-	sort.Strings(bases)
-
-	return bases
+	return slices.Sorted(maps.Keys(pkgbuildDirsByBase))
 }
 
 func aurPreInstallEvent(base, path string, packages []settingslua.AURPreInstallPackage,
@@ -114,9 +110,7 @@ func aurPackageEvent(eventName, base, path string, packages []settingslua.AURPre
 	if len(packages) == 0 {
 		packages = packagesFromSRCINFO(srcinfo)
 	}
-	sort.Slice(packages, func(i, j int) bool {
-		return packages[i].Name < packages[j].Name
-	})
+	slices.SortFunc(packages, func(a, b settingslua.AURPreInstallPackage) int { return cmp.Compare(a.Name, b.Name) })
 
 	return settingslua.AURPreInstallEvent{
 		Base:         base,

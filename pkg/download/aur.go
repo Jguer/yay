@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -59,7 +59,7 @@ func AURPKGBUILDRepos(
 
 	var (
 		mux  sync.Mutex
-		errs multierror.MultiError
+		errs []error
 		wg   sync.WaitGroup
 	)
 
@@ -80,7 +80,7 @@ func AURPKGBUILDRepos(
 			mux.Lock()
 			progress := len(cloned)
 			if err != nil {
-				errs.Add(err)
+				errs = append(errs, err)
 				mux.Unlock()
 				logger.OperationInfoln(
 					gotext.Get("(%d/%d) Failed to download PKGBUILD: %s",
@@ -100,7 +100,7 @@ func AURPKGBUILDRepos(
 
 	wg.Wait()
 
-	return cloned, errs.Return()
+	return cloned, errors.Join(errs...)
 }
 
 // ScannerCloser combines a bufio.Scanner with a Close method.

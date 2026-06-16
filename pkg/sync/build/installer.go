@@ -2,13 +2,13 @@ package build
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"os"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
@@ -80,15 +80,15 @@ func (installer *Installer) AddPostInstallHook(hook PostInstallHookFunc) {
 }
 
 func (installer *Installer) RunPostInstallHooks(ctx context.Context) error {
-	var errMulti multierror.MultiError
+	var errs []error
 
 	for _, hook := range installer.postInstallHooks {
 		if err := hook(ctx); err != nil {
-			errMulti.Add(err)
+			errs = append(errs, err)
 		}
 	}
 
-	return errMulti.Return()
+	return errors.Join(errs...)
 }
 
 func (installer *Installer) Install(ctx context.Context,
@@ -108,7 +108,7 @@ func (installer *Installer) Install(ctx context.Context,
 	installer.log.Debugln("origTargets:", installer.origTargets)
 
 	// Reorganize targets into layers of dependencies
-	var errMulti multierror.MultiError
+	var errs []error
 	for i := len(targets) - 1; i >= 0; i-- {
 		lastLayer := i == 0
 		errI := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, lastLayer, excluded)
@@ -118,7 +118,7 @@ func (installer *Installer) Install(ctx context.Context,
 		}
 
 		if errI != nil {
-			errMulti.Add(errI)
+			errs = append(errs, errI)
 			if lastLayer {
 				break
 			}
@@ -129,7 +129,7 @@ func (installer *Installer) Install(ctx context.Context,
 		}
 	}
 
-	return errMulti.Return()
+	return errors.Join(errs...)
 }
 
 func mergeLayers(layer1, layer2 map[string]*dep.InstallInfo) map[string]*dep.InstallInfo {

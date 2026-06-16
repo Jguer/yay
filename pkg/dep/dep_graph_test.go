@@ -66,7 +66,7 @@ func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
 	require.NoError(t, graph.DependOn("existingNeeds", depName))
 
 	toFind := mapset.NewThreadUnsafeSet(depString)
-	_ = g.findDepsFromAUR(context.Background(), graph, "currentNeeds", toFind)
+	_ = g.findDepsFromAUR(t.Context(), graph, "currentNeeds", toFind)
 
 	out := stderr.String()
 	require.Contains(t, out, "No AUR package found for "+depString+" (required by:")
@@ -241,11 +241,12 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			g := NewGrapher(tt.fields.dbExecutor,
 				tt.fields.aurCache, false, true,
 				tt.fields.noDeps, tt.fields.noCheckDeps, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.args.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.want, layers, layers)
@@ -363,7 +364,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 				tt.fields.aurCache, false, true,
 				tt.fields.noDeps, tt.fields.noCheckDeps, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.args.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.args.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.want, layers, layers)
@@ -567,7 +568,7 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
 				false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
@@ -714,7 +715,7 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
 				false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
@@ -854,7 +855,7 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
 				false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
@@ -905,7 +906,8 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 		text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 
 	t.Run("returns error when all targets are missing", func(t *testing.T) {
-		_, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "missing2"})
+		t.Parallel()
+		_, err := g.GraphFromTargets(t.Context(), nil, []string{"missing1", "missing2"})
 		require.Error(t, err)
 
 		var targetNotFound *aur.ErrTargetNotFound
@@ -913,7 +915,8 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 	})
 
 	t.Run("does not error when at least one target is found", func(t *testing.T) {
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"missing1", "okpkg"})
+		t.Parallel()
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"missing1", "okpkg"})
 		require.NoError(t, err)
 
 		layers := got.TopoSortedLayers(nil)
@@ -1115,7 +1118,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			g := NewGrapher(mockDB, mockAUR,
 				false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
@@ -1202,7 +1205,7 @@ func TestGrapher_GraphFromAUR_CheckDeps(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR,
 			false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"python-pydantic"})
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"python-pydantic"})
 		require.NoError(t, err)
 		layers := got.TopoSortedLayers(nil)
 
@@ -1218,7 +1221,7 @@ func TestGrapher_GraphFromAUR_CheckDeps(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR,
 			false, true, false, true, false, // noCheckDeps = true
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"python-pydantic"})
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"python-pydantic"})
 		require.NoError(t, err)
 		layers := got.TopoSortedLayers(nil)
 
@@ -1308,7 +1311,7 @@ func TestGrapher_GraphFromAUR_VirtualProvides(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR,
 			false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"mesa-git"})
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"mesa-git"})
 		require.NoError(t, err)
 		layers := got.TopoSortedLayers(nil)
 

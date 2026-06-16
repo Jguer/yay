@@ -100,7 +100,7 @@ func TestGrapher_ReliableParser_AWSCliGit(t *testing.T) {
 
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
+		got, err := g.GraphFromTargets(td.Context(), nil, []string{"aws-cli-git"})
 		require.NoError(td, err)
 		layers := got.TopoSortedLayers(nil)
 
@@ -117,7 +117,7 @@ func TestGrapher_ReliableParser_AWSCliGit(t *testing.T) {
 
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"aws-cli-git"})
+		got, err := g.GraphFromTargets(td.Context(), nil, []string{"aws-cli-git"})
 		require.NoError(td, err)
 		layers := got.TopoSortedLayers(nil)
 
@@ -194,7 +194,7 @@ func TestGrapher_ReliableSolver_LiriDesktopGit(t *testing.T) {
 
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
+		got, err := g.GraphFromTargets(td.Context(), nil, []string{"liri-desktop-git"})
 		require.NoError(td, err)
 		layers := got.TopoSortedLayers(nil)
 
@@ -213,7 +213,7 @@ func TestGrapher_ReliableSolver_LiriDesktopGit(t *testing.T) {
 
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"liri-desktop-git"})
+		got, err := g.GraphFromTargets(td.Context(), nil, []string{"liri-desktop-git"})
 		require.NoError(td, err)
 		layers := got.TopoSortedLayers(nil)
 
@@ -326,9 +326,10 @@ func TestGrapher_SplitPackages_Clion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
@@ -338,7 +339,7 @@ func TestGrapher_SplitPackages_Clion(t *testing.T) {
 	t.Run("packages from same base share AURBase", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil,
+		got, err := g.GraphFromTargets(t.Context(), nil,
 			[]string{"clion", "clion-jre", "clion-cmake"})
 		require.NoError(t, err)
 		layers := got.TopoSortedLayers(nil)
@@ -444,9 +445,10 @@ func TestGrapher_SplitPackages_SamsungUnifiedDriver(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 
@@ -471,7 +473,7 @@ func TestGrapher_SplitPackages_SamsungUnifiedDriver(t *testing.T) {
 	t.Run("split package internal deps resolved correctly", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"samsung-unified-driver"})
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"samsung-unified-driver"})
 		require.NoError(t, err)
 		layers := got.TopoSortedLayers(nil)
 
@@ -614,9 +616,10 @@ func TestGrapher_SplitPackages_NX(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-			got, err := g.GraphFromTargets(context.Background(), nil, tt.targets)
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
 			require.NoError(t, err)
 			layers := got.TopoSortedLayers(nil)
 			require.EqualValues(t, tt.wantLayers, layers, layers)
@@ -627,11 +630,11 @@ func TestGrapher_SplitPackages_NX(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 
-		got1, err := g.GraphFromTargets(context.Background(), nil, []string{"nxproxy"})
+		got1, err := g.GraphFromTargets(t.Context(), nil, []string{"nxproxy"})
 		require.NoError(t, err)
 		layers1 := got1.TopoSortedLayers(nil)
 
-		got2, err := g.GraphFromTargets(context.Background(), nil, []string{"nxagent"})
+		got2, err := g.GraphFromTargets(t.Context(), nil, []string{"nxagent"})
 		require.NoError(t, err)
 		layers2 := got2.TopoSortedLayers(nil)
 
@@ -693,7 +696,7 @@ func TestGrapher_SplitPackages_ReversedOrder(t *testing.T) {
 	t.Run("nxproxy nxagent order", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"nxproxy", "nxagent"})
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"nxproxy", "nxagent"})
 		require.NoError(t, err)
 		layers1 := got.TopoSortedLayers(nil)
 
@@ -704,7 +707,7 @@ func TestGrapher_SplitPackages_ReversedOrder(t *testing.T) {
 	t.Run("nxagent nxproxy reversed order", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"nxagent", "nxproxy"})
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"nxagent", "nxproxy"})
 		require.NoError(t, err)
 		layers2 := got.TopoSortedLayers(nil)
 
@@ -758,7 +761,7 @@ func TestGrapher_MultipleInstallInfo(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 
-		got, err := g.GraphFromTargets(context.Background(), nil,
+		got, err := g.GraphFromTargets(t.Context(), nil,
 			[]string{"samsung-unified-driver", "samsung-unified-driver-common"})
 		require.NoError(t, err)
 		layers := got.TopoSortedLayers(nil)
@@ -826,7 +829,7 @@ func TestGrapher_VersionedDependencies(t *testing.T) {
 	t.Run("versioned dependency satisfied by higher version", func(t *testing.T) {
 		g := NewGrapher(mockDB, mockAUR, false, true, false, false, false,
 			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-		got, err := g.GraphFromTargets(context.Background(), nil, []string{"versioned-pkg"})
+		got, err := g.GraphFromTargets(t.Context(), nil, []string{"versioned-pkg"})
 		require.NoError(t, err)
 		layers := got.TopoSortedLayers(nil)
 

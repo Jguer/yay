@@ -1,8 +1,10 @@
 package dep
 
 import (
+	"cmp"
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -822,13 +824,7 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*a
 
 	alpmArch = append(alpmArch, "") // srcinfo assumes no value as ""
 
-	getDesc := func(pkg *gosrc.Package) string {
-		if pkg.Pkgdesc != "" {
-			return pkg.Pkgdesc
-		}
-
-		return srcInfo.Pkgdesc
-	}
+	getDesc := func(pkg *gosrc.Package) string { return cmp.Or(pkg.Pkgdesc, srcInfo.Pkgdesc) }
 
 	for i := range srcInfo.Packages {
 		pkg := &srcInfo.Packages[i]
@@ -841,21 +837,16 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*a
 			Version:       srcInfo.Version(),
 			Description:   getDesc(pkg),
 			URL:           pkg.URL,
-			Depends: append(archStringToString(alpmArch, pkg.Depends),
-				archStringToString(alpmArch, srcInfo.Depends)...),
-			MakeDepends:  archStringToString(alpmArch, srcInfo.MakeDepends),
-			CheckDepends: archStringToString(alpmArch, srcInfo.CheckDepends),
-			Conflicts: append(archStringToString(alpmArch, pkg.Conflicts),
-				archStringToString(alpmArch, srcInfo.Conflicts)...),
-			Provides: append(archStringToString(alpmArch, pkg.Provides),
-				archStringToString(alpmArch, srcInfo.Provides)...),
-			Replaces: append(archStringToString(alpmArch, pkg.Replaces),
-				archStringToString(alpmArch, srcInfo.Replaces)...),
-			OptDepends: append(archStringToString(alpmArch, pkg.OptDepends),
-				archStringToString(alpmArch, srcInfo.OptDepends)...),
-			Groups:   pkg.Groups,
-			License:  pkg.License,
-			Keywords: []string{},
+			Depends:       slices.Concat(archStringToString(alpmArch, pkg.Depends), archStringToString(alpmArch, srcInfo.Depends)),
+			MakeDepends:   archStringToString(alpmArch, srcInfo.MakeDepends),
+			CheckDepends:  archStringToString(alpmArch, srcInfo.CheckDepends),
+			Conflicts:     slices.Concat(archStringToString(alpmArch, pkg.Conflicts), archStringToString(alpmArch, srcInfo.Conflicts)),
+			Provides:      slices.Concat(archStringToString(alpmArch, pkg.Provides), archStringToString(alpmArch, srcInfo.Provides)),
+			Replaces:      slices.Concat(archStringToString(alpmArch, pkg.Replaces), archStringToString(alpmArch, srcInfo.Replaces)),
+			OptDepends:    slices.Concat(archStringToString(alpmArch, pkg.OptDepends), archStringToString(alpmArch, srcInfo.OptDepends)),
+			Groups:        pkg.Groups,
+			License:       pkg.License,
+			Keywords:      []string{},
 		})
 	}
 

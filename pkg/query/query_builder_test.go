@@ -307,7 +307,7 @@ func TestSourceQueryBuilder(t *testing.T) {
 				tc.sortBy, tc.targetMode, tc.searchBy, tc.bottomUp,
 				tc.singleLineResults, tc.separateSources)
 
-			queryBuilder.Execute(context.Background(), mockDB, tc.search)
+			queryBuilder.Execute(t.Context(), mockDB, tc.search)
 
 			assert.Len(t, queryBuilder.results, len(tc.wantResults))
 			assert.Equal(t, len(tc.wantResults), queryBuilder.Len())
@@ -433,7 +433,7 @@ func TestSourceQueryBuilderTieSortsByRepoOrder(t *testing.T) {
 				"", parser.ModeAny, "", tc.bottomUp,
 				false, true)
 
-			queryBuilder.Execute(context.Background(), mockDB, []string{"systemd"})
+			queryBuilder.Execute(t.Context(), mockDB, []string{"systemd"})
 
 			gotNames := make([]string, len(queryBuilder.results))
 			for i, result := range queryBuilder.results {
@@ -471,13 +471,14 @@ func TestSourceQueryBuilderTieDoesNotSeparateSources(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
+			t.Parallel()
 			w := &strings.Builder{}
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				"", parser.ModeAny, "", tc.bottomUp,
 				false, true)
 
-			queryBuilder.Execute(context.Background(), mockDB, []string{"yay"})
+			queryBuilder.Execute(t.Context(), mockDB, []string{"yay"})
 
 			gotNames := make([]string, len(queryBuilder.results))
 			for i, result := range queryBuilder.results {
@@ -590,13 +591,14 @@ func TestSourceQueryBuilderSortByFields(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
+			t.Parallel()
 			w := &strings.Builder{}
 			queryBuilder := NewSourceQueryBuilder(mockAUR,
 				text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
 				tc.sortBy, parser.ModeAny, "", tc.bottomUp,
 				false, false)
 
-			queryBuilder.Execute(context.Background(), mockDB, []string{"yay"})
+			queryBuilder.Execute(t.Context(), mockDB, []string{"yay"})
 
 			gotNames := make([]string, len(queryBuilder.results))
 			for i, result := range queryBuilder.results {
@@ -668,7 +670,7 @@ func TestSourceQueryBuilderChromeRanking(t *testing.T) {
 		"", parser.ModeAny, "", false,
 		false, false)
 
-	queryBuilder.Execute(context.Background(), mockDB, []string{"chrome"})
+	queryBuilder.Execute(t.Context(), mockDB, []string{"chrome"})
 
 	gotNames := make([]string, len(queryBuilder.results))
 	for i, result := range queryBuilder.results {

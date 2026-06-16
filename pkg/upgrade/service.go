@@ -2,8 +2,9 @@ package upgrade
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/Jguer/aur"
@@ -15,7 +16,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/dep"
 	"github.com/Jguer/yay/v12/pkg/dep/topo"
 	"github.com/Jguer/yay/v12/pkg/intrange"
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/query"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
@@ -65,7 +65,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 ) (err error) {
 	var (
 		develUp UpSlice
-		errs    multierror.MultiError
+		errs    []error
 		aurdata = make(map[string]*aur.Pkg)
 		aurUp   UpSlice
 	)
@@ -78,7 +78,7 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 
 		_aurdata, err := u.aurCache.Get(ctx, &aur.Query{Needles: remoteNames, By: aur.Name})
 
-		errs.Add(err)
+		errs = append(errs, err)
 
 		if err == nil {
 			for i := range _aurdata {
@@ -185,10 +185,10 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			graph = u.grapher.GraphSyncPkg(ctx, graph, up.Package, &upgradeInfo)
 		}
 
-		errs.Add(err)
+		errs = append(errs, err)
 	}
 
-	return errs.Return()
+	return errors.Join(errs...)
 }
 
 func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallInfo]) (aurUp, repoUp UpSlice) {
@@ -264,8 +264,8 @@ func (u *UpgradeService) GraphUpgrades(ctx context.Context,
 func (u *UpgradeService) upgradeSelection(graph *topo.Graph[string, *dep.InstallInfo]) UpSlice {
 	aurUp, repoUp := u.graphToUpSlice(graph)
 
-	sort.Sort(repoUp)
-	sort.Sort(aurUp)
+	slices.SortFunc(repoUp.Up, repoUp.compare)
+	slices.SortFunc(aurUp.Up, aurUp.compare)
 
 	allUp := UpSlice{Repos: append(repoUp.Repos, aurUp.Repos...)}
 	for i := range repoUp.Up {

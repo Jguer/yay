@@ -4,7 +4,6 @@
 package query
 
 import (
-	"context"
 	"io"
 	"strings"
 	"testing"
@@ -30,7 +29,7 @@ func TestSourceQueryBuilderSearchFilterHook(t *testing.T) {
 
 	// Baseline: build without a Lua hook and record count.
 	baselineQB := NewSourceQueryBuilder(mockAUR, logger, "", parser.ModeAny, "", false, false, false)
-	baselineQB.Execute(context.Background(), mockDB, []string{"yay"})
+	baselineQB.Execute(t.Context(), mockDB, []string{"yay"})
 	baselineCount := len(baselineQB.results)
 	require.Greater(t, baselineCount, 0, "baseline query must return at least one result")
 
@@ -68,7 +67,7 @@ func TestSourceQueryBuilderSearchFilterHook(t *testing.T) {
 
 	filteredQB := NewSourceQueryBuilder(mockAUR, logger, "", parser.ModeAny, "", false, false, false)
 	filteredQB.SetLua(e)
-	filteredQB.Execute(context.Background(), mockDB, []string{"yay"})
+	filteredQB.Execute(t.Context(), mockDB, []string{"yay"})
 
 	assert.Equal(t, aurCount, len(filteredQB.results),
 		"filtered results should equal the number of AUR packages in the baseline")

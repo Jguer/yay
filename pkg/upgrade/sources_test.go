@@ -4,7 +4,6 @@
 package upgrade
 
 import (
-	"context"
 	"io"
 	"os"
 	"strings"
@@ -121,7 +120,7 @@ func Test_upAUR(t *testing.T) {
 				tt.args.remote, tt.args.aurdata, tt.args.enableDowngrade)
 			assert.ElementsMatch(t, tt.want.Repos, got.Repos)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)
-			assert.Equal(t, tt.want.Len(), got.Len())
+			assert.Equal(t, len(tt.want.Up), len(got.Up))
 		})
 	}
 }
@@ -223,7 +222,7 @@ func Test_upDevel(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := UpDevel(context.Background(),
+			got := UpDevel(t.Context(),
 				text.NewLogger(io.Discard, os.Stderr, strings.NewReader(""), false, "test"),
 				tt.args.remote, tt.args.aurdata, tt.args.cached)
 			assert.ElementsMatch(t, tt.want.Up, got.Up)

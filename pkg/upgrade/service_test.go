@@ -414,6 +414,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			grapher := dep.NewGrapher(dbExe, mockAUR,
 				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
@@ -435,7 +436,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 				AURWarnings: query.NewWarnings(logger),
 			}
 
-			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
+			got, err := u.GraphUpgrades(t.Context(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -596,6 +597,7 @@ func TestUpgradeService_GraphUpgradesMissingDep(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			grapher := dep.NewGrapher(dbExe, mockAUR,
 				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
@@ -617,7 +619,7 @@ func TestUpgradeService_GraphUpgradesMissingDep(t *testing.T) {
 				AURWarnings: query.NewWarnings(logger),
 			}
 
-			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
+			got, err := u.GraphUpgrades(t.Context(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -717,6 +719,7 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			grapher := dep.NewGrapher(dbExe, mockAUR,
 				false, true, false, false, false, text.NewLogger(tt.fields.output, os.Stderr,
 					tt.fields.input, true, "test"))
@@ -739,7 +742,7 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 				AURWarnings: query.NewWarnings(logger),
 			}
 
-			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
+			got, err := u.GraphUpgrades(t.Context(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -763,6 +766,7 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 }
 
 func TestUpgradeService_UserExcludeUpgradesWithoutLuaHookUsesNativeMenu(t *testing.T) {
+	t.Parallel()
 	graph := newUpgradeSelectTestGraph(t)
 	u := newUpgradeSelectTestService(strings.NewReader("2\n"), nil)
 
@@ -777,6 +781,7 @@ func TestUpgradeService_UserExcludeUpgradesWithoutLuaHookUsesNativeMenu(t *testi
 }
 
 func TestUpgradeService_UserExcludeUpgradesLuaHookPrunesGraph(t *testing.T) {
+	t.Parallel()
 	engine := settingslua.New()
 	defer engine.Close()
 	require.NoError(t, engine.L.DoString(`
@@ -801,6 +806,7 @@ func TestUpgradeService_UserExcludeUpgradesLuaHookPrunesGraph(t *testing.T) {
 }
 
 func TestUpgradeService_UserExcludeUpgradesLuaHookSkipMenuAvoidsInput(t *testing.T) {
+	t.Parallel()
 	engine := settingslua.New()
 	defer engine.Close()
 	require.NoError(t, engine.L.DoString(`
@@ -825,6 +831,7 @@ func TestUpgradeService_UserExcludeUpgradesLuaHookSkipMenuAvoidsInput(t *testing
 }
 
 func TestUpgradeService_UserExcludeUpgradesLuaHookFallsThroughToNativeMenu(t *testing.T) {
+	t.Parallel()
 	engine := settingslua.New()
 	defer engine.Close()
 	require.NoError(t, engine.L.DoString(`
@@ -936,7 +943,7 @@ func TestUpgradeService_Warnings(t *testing.T) {
 		AURWarnings: query.NewWarnings(logger),
 	}
 
-	_, err := u.GraphUpgrades(context.Background(), nil, false, func(*Upgrade) bool { return true })
+	_, err := u.GraphUpgrades(t.Context(), nil, false, func(*Upgrade) bool { return true })
 	require.NoError(t, err)
 
 	assert.Equal(t, []string{"missing"}, u.AURWarnings.Missing)
@@ -1105,7 +1112,7 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 				AURWarnings: query.NewWarnings(logger),
 			}
 
-			got, err := u.GraphUpgrades(context.Background(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
+			got, err := u.GraphUpgrades(t.Context(), tt.args.graph, tt.args.enableDowngrade, func(*Upgrade) bool { return true })
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeService.GraphUpgrades() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -1,7 +1,8 @@
 package sync
 
 import (
-	"sort"
+	"maps"
+	"slices"
 
 	"github.com/Jguer/yay/v12/pkg/dep"
 	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
@@ -18,12 +19,7 @@ func postInstallEvent(targets []map[string]*dep.InstallInfo, failedAndIgnored ma
 		}
 	}
 
-	names := make([]string, 0, len(merged))
-	for name := range merged {
-		names = append(names, name)
-	}
-
-	sort.Strings(names)
+	names := slices.Sorted(maps.Keys(merged))
 
 	packages := make([]settingslua.PostInstallPackage, 0, len(names))
 	for _, name := range names {

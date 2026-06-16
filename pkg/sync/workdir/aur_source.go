@@ -2,6 +2,7 @@ package workdir
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"runtime"
 	"sync"
@@ -9,7 +10,6 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
@@ -119,7 +119,7 @@ func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilde
 		close(fanInChanErrors)
 	}()
 
-	returnErr := multierror.MultiError{}
+	var errs []error
 
 receiver:
 	for {
@@ -132,9 +132,9 @@ receiver:
 			if !ok {
 				break receiver
 			}
-			returnErr.Add(err)
+			errs = append(errs, err)
 		}
 	}
 
-	return returnErr.Return()
+	return errors.Join(errs...)
 }

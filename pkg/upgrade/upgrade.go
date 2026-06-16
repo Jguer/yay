@@ -26,30 +26,31 @@ type UpSlice struct {
 	PulledDeps []Upgrade
 }
 
-func (u UpSlice) Len() int      { return len(u.Up) }
-func (u UpSlice) Swap(i, j int) { u.Up[i], u.Up[j] = u.Up[j], u.Up[i] }
-
-func (u UpSlice) Less(i, j int) bool {
-	if u.Up[i].Repository == u.Up[j].Repository {
-		iRunes := []rune(u.Up[i].Name)
-		jRunes := []rune(u.Up[j].Name)
-
-		return text.LessRunes(iRunes, jRunes)
+func (u UpSlice) compare(a, b Upgrade) int { //nolint:gocritic // slices.SortFunc comparator must take values; UpSlice.Up is []Upgrade
+	if a.Repository == b.Repository {
+		if text.LessRunes([]rune(a.Name), []rune(b.Name)) {
+			return -1
+		}
+		if text.LessRunes([]rune(b.Name), []rune(a.Name)) {
+			return 1
+		}
+		return 0
 	}
-
 	for _, db := range u.Repos {
 		switch db {
-		case u.Up[i].Repository:
-			return true
-		case u.Up[j].Repository:
-			return false
+		case a.Repository:
+			return -1
+		case b.Repository:
+			return 1
 		}
 	}
-
-	iRunes := []rune(u.Up[i].Repository)
-	jRunes := []rune(u.Up[j].Repository)
-
-	return text.LessRunes(iRunes, jRunes)
+	if text.LessRunes([]rune(a.Repository), []rune(b.Repository)) {
+		return -1
+	}
+	if text.LessRunes([]rune(b.Repository), []rune(a.Repository)) {
+		return 1
+	}
+	return 0
 }
 
 // calculateFormatting calculates formatting parameters for printing upgrades

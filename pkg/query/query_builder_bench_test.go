@@ -1,10 +1,8 @@
 //go:build !integration
-// +build !integration
 
 package query
 
 import (
-	"context"
 	"io"
 	"strings"
 	"testing"
@@ -23,8 +21,9 @@ func BenchmarkApplySearchFilter_noLua(b *testing.B) {
 	qb := NewSourceQueryBuilder(mockAUR, logger, "", parser.ModeAny, "", false, false, false)
 
 	// Pre-populate results so the benchmark only measures the filter path.
-	qb.Execute(context.Background(), mockDB, []string{"yay"})
+	qb.Execute(b.Context(), mockDB, []string{"yay"})
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -34,7 +33,7 @@ func BenchmarkApplySearchFilter_noLua(b *testing.B) {
 
 // BenchmarkApplySearchFilter_withLua measures applySearchFilter when a Lua
 // SearchFilter hook is registered but performs a passthrough (returns all
-// results). This isolates the overhead of the Lua dispatch + table marshalling.
+// results). This isolates the overhead of the Lua dispatch + table marshaling.
 func BenchmarkApplySearchFilter_withLua(b *testing.B) {
 	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "bench")
 	mockDB, mockAUR := newYayQueryBuilderMocks()
@@ -58,8 +57,9 @@ func BenchmarkApplySearchFilter_withLua(b *testing.B) {
 
 	qb := NewSourceQueryBuilder(mockAUR, logger, "", parser.ModeAny, "", false, false, false)
 	qb.SetLua(e)
-	qb.Execute(context.Background(), mockDB, []string{"yay"})
+	qb.Execute(b.Context(), mockDB, []string{"yay"})
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -73,11 +73,12 @@ func BenchmarkExecute_noLua(b *testing.B) {
 	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "bench")
 	mockDB, mockAUR := newYayQueryBuilderMocks()
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
 		qb := NewSourceQueryBuilder(mockAUR, logger, "", parser.ModeAny, "", false, false, false)
-		qb.Execute(context.Background(), mockDB, []string{"yay"})
+		qb.Execute(b.Context(), mockDB, []string{"yay"})
 	}
 }
 
@@ -106,11 +107,12 @@ func BenchmarkExecute_withLuaFilter(b *testing.B) {
 		b.Fatalf("lua setup: %v", err)
 	}
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
 		qb := NewSourceQueryBuilder(mockAUR, logger, "", parser.ModeAny, "", false, false, false)
 		qb.SetLua(e)
-		qb.Execute(context.Background(), mockDB, []string{"yay"})
+		qb.Execute(b.Context(), mockDB, []string{"yay"})
 	}
 }

@@ -333,7 +333,7 @@ func TestPrintUpdateList(t *testing.T) {
 			cmdArgs.AddArg(tc.args...)
 			cmdArgs.AddTarget(tc.targets...)
 
-			err = handleCmd(context.Background(), run, cmdArgs, tc.mockData.db)
+			err = handleCmd(t.Context(), run, cmdArgs, tc.mockData.db)
 
 			w.Close()
 			out, _ := io.ReadAll(r)

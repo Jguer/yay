@@ -1,6 +1,7 @@
 package main // import "github.com/Jguer/yay"
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"os"
@@ -35,12 +36,8 @@ func initGotext() {
 		if len(locales) > 0 && locales[0] != "" {
 			gotext.Configure(localePath, locales[0], "yay")
 		}
-	} else if lc := os.Getenv("LC_ALL"); lc != "" {
-		gotext.Configure(localePath, lc, "yay")
-	} else if lc := os.Getenv("LC_MESSAGES"); lc != "" {
-		gotext.Configure(localePath, lc, "yay")
 	} else {
-		gotext.Configure(localePath, os.Getenv("LANG"), "yay")
+		gotext.Configure(localePath, cmp.Or(os.Getenv("LC_ALL"), os.Getenv("LC_MESSAGES"), os.Getenv("LANG")), "yay")
 	}
 }
 

@@ -3,6 +3,7 @@ package menus
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
@@ -25,14 +25,14 @@ const (
 func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *text.Logger,
 	pkgbuildDirs map[string]string, bases []string,
 ) error {
-	var errMulti multierror.MultiError
+	var errs []error
 
 	for _, pkg := range bases {
 		dir := pkgbuildDirs[pkg]
 
 		start, err := getLastSeenHash(ctx, cmdBuilder, dir)
 		if err != nil {
-			errMulti.Add(err)
+			errs = append(errs, err)
 
 			continue
 		}
@@ -40,7 +40,7 @@ func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *
 		if start != gitEmptyTree {
 			hasDiff, err := gitHasDiff(ctx, cmdBuilder, dir)
 			if err != nil {
-				errMulti.Add(err)
+				errs = append(errs, err)
 
 				continue
 			}
@@ -66,7 +66,7 @@ func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *
 		_ = cmdBuilder.Show(cmdBuilder.BuildGitCmd(ctx, dir, args...))
 	}
 
-	return errMulti.Return()
+	return errors.Join(errs...)
 }
 
 // Check whether or not a diff exists between the last reviewed diff and
@@ -133,16 +133,16 @@ func gitUpdateSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir strin
 }
 
 func updatePkgbuildSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgbuildDirs map[string]string, bases []string) error {
-	var errMulti multierror.MultiError
+	var errs []error
 
 	for _, pkg := range bases {
 		dir := pkgbuildDirs[pkg]
 		if err := gitUpdateSeenRef(ctx, cmdBuilder, dir); err != nil {
-			errMulti.Add(err)
+			errs = append(errs, err)
 		}
 	}
 
-	return errMulti.Return()
+	return errors.Join(errs...)
 }
 
 func DiffFn(ctx context.Context, run *runtime.Runtime, w io.Writer,

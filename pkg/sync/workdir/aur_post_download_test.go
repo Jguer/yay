@@ -18,6 +18,7 @@ import (
 )
 
 func TestAURPostDownloadEventsUseAURPreInstallPayload(t *testing.T) {
+	t.Parallel()
 	base := "demo-base"
 	dir := writeAURPostDownloadPackage(t, base)
 
@@ -47,11 +48,12 @@ func TestAURPostDownloadEventsUseAURPreInstallPayload(t *testing.T) {
 }
 
 func TestRunAURPostDownloadLuaHooksRunsBasesInSortedOrder(t *testing.T) {
+	t.Parallel()
 	firstDir := writeAURPostDownloadPackage(t, "a-base")
 	secondDir := writeAURPostDownloadPackage(t, "z-base")
 
 	engine := settingslua.New()
-	defer engine.Close()
+	t.Cleanup(engine.Close)
 
 	order := []string{}
 	engine.L.SetGlobal("record", engine.L.NewFunction(func(L *glua.LState) int {

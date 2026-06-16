@@ -16,8 +16,9 @@ type testConfig struct {
 }
 
 func TestApply(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.opt.build_dir = "/tmp/yay"
@@ -36,8 +37,9 @@ func TestApply(t *testing.T) {
 }
 
 func TestApplyUnknownAndTypeMismatch(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.opt.does_not_exist = "x"
@@ -59,8 +61,9 @@ func TestApplyUnknownAndTypeMismatch(t *testing.T) {
 }
 
 func TestApplyIgnoresAnswerOptionsWithoutLuaTags(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.opt.answer_clean = "All"
@@ -75,8 +78,9 @@ func TestApplyIgnoresAnswerOptionsWithoutLuaTags(t *testing.T) {
 }
 
 func TestApplyRejectsNonPointer(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	_, errs := e.Apply(testConfig{})
 	assert.Len(t, errs, 1)

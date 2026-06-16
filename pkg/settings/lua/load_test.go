@@ -19,6 +19,7 @@ func writeLuaFile(t *testing.T, body string) string {
 }
 
 func TestLoadIntoStrictFailsOnUnknownKey(t *testing.T) {
+	t.Parallel()
 	path := writeLuaFile(t, `
 		yay.opt.unknown_key = true
 	`)
@@ -30,6 +31,7 @@ func TestLoadIntoStrictFailsOnUnknownKey(t *testing.T) {
 }
 
 func TestLoadIntoStrictFailsOnTypeMismatch(t *testing.T) {
+	t.Parallel()
 	path := writeLuaFile(t, `
 		yay.opt.devel = "true"
 	`)
@@ -41,6 +43,7 @@ func TestLoadIntoStrictFailsOnTypeMismatch(t *testing.T) {
 }
 
 func TestLoadIntoAppliesValidValues(t *testing.T) {
+	t.Parallel()
 	path := writeLuaFile(t, `
 		yay.opt.build_dir = "/tmp/yay"
 		yay.opt.request_split_n = 123
@@ -56,6 +59,7 @@ func TestLoadIntoAppliesValidValues(t *testing.T) {
 }
 
 func TestLoadReturnsLiveEngine(t *testing.T) {
+	t.Parallel()
 	path := writeLuaFile(t, `
 		yay.create_autocmd("AURPreInstall", {
 			callback = function() end,
@@ -66,7 +70,7 @@ func TestLoadReturnsLiveEngine(t *testing.T) {
 	cfg := &testConfig{}
 	engine, err := Load(nil, path, cfg)
 	require.NoError(t, err)
-	defer engine.Close()
+	t.Cleanup(engine.Close)
 
 	require.Equal(t, "/tmp/yay", cfg.BuildDir)
 	require.True(t, engine.HasAutocmd(EventAURPreInstall))

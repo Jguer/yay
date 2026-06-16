@@ -1,9 +1,9 @@
 package lua
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
@@ -27,17 +27,17 @@ func Load(logger *text.Logger, path string, cfg any) (*Engine, error) {
 		return engine, nil
 	}
 
-	merr := &multierror.MultiError{}
+	var joinErrs []error
 
 	for _, key := range unknown {
-		merr.Add(fmt.Errorf("init.lua: unknown yay.opt key: %s", key))
+		joinErrs = append(joinErrs, fmt.Errorf("init.lua: unknown yay.opt key: %s", key))
 	}
 
 	for _, err := range errs {
-		merr.Add(fmt.Errorf("init.lua: %w", err))
+		joinErrs = append(joinErrs, fmt.Errorf("init.lua: %w", err))
 	}
 
-	if err := merr.Return(); err != nil {
+	if err := errors.Join(joinErrs...); err != nil {
 		engine.Close()
 		return nil, err
 	}

@@ -87,8 +87,8 @@ func makeSearchFilterEvent(n int) *SearchFilterEvent {
 			Description:    "benchmark package",
 			Votes:          100 + i,
 			Popularity:     float64(i) * 0.1,
-			FirstSubmitted: 1_600_000_000 + int(i)*1000,
-			LastModified:   1_700_000_000 + int(i)*1000,
+			FirstSubmitted: 1_600_000_000 + i*1000,
+			LastModified:   1_700_000_000 + i*1000,
 		}
 	}
 
@@ -150,6 +150,7 @@ func BenchmarkRunSearchFilter_10(b *testing.B) {
 
 	event := makeSearchFilterEvent(10)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -166,6 +167,7 @@ func BenchmarkRunSearchFilter_100(b *testing.B) {
 
 	event := makeSearchFilterEvent(100)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -183,6 +185,7 @@ func BenchmarkRunAURPreInstall(b *testing.B) {
 
 	event := makeAURPreInstallEvent()
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -200,6 +203,7 @@ func BenchmarkRunUpgradeSelect_10(b *testing.B) {
 
 	event := makeUpgradeSelectEvent(10)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -217,6 +221,7 @@ func BenchmarkRunPostInstall_10(b *testing.B) {
 
 	event := makePostInstallEvent(10)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
@@ -232,6 +237,7 @@ func BenchmarkHasAutocmd_miss(b *testing.B) {
 	e := New()
 	defer e.Close()
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {

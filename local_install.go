@@ -12,7 +12,6 @@ import (
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
@@ -93,15 +92,15 @@ func installLocalPKGBUILD(
 	}
 
 	opService := sync.NewOperationService(ctx, dbExecutor, run)
-	multiErr := &multierror.MultiError{}
+	var errs []error
 	targets := graph.TopoSortedLayers(func(name string, ii *dep.InstallInfo) error {
 		if ii.Source == dep.Missing {
-			multiErr.Add(fmt.Errorf("%w: %s %s", ErrPackagesNotFound, name, ii.Version))
+			errs = append(errs, fmt.Errorf("%w: %s %s", ErrPackagesNotFound, name, ii.Version))
 		}
 		return nil
 	})
 
-	if err := multiErr.Return(); err != nil {
+	if err := errors.Join(errs...); err != nil {
 		return err
 	}
 	return opService.Run(ctx, run, cmdArgs, targets, []string{})

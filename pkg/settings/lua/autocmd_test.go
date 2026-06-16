@@ -8,8 +8,9 @@ import (
 )
 
 func TestCreateAutocmdRegistersAndRunsInOrder(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	order := []string{}
 	e.L.SetGlobal("record", e.L.NewFunction(func(L *glua.LState) int {
@@ -49,8 +50,9 @@ func TestCreateAutocmdRegistersAndRunsInOrder(t *testing.T) {
 }
 
 func TestCreateAutocmdRegistersUpgradeSelect(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.create_autocmd("UpgradeSelect", {
@@ -66,8 +68,9 @@ func TestCreateAutocmdRegistersUpgradeSelect(t *testing.T) {
 }
 
 func TestCreateAutocmdRegistersAURPostDownload(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.create_autocmd("AURPostDownload", {
@@ -83,8 +86,9 @@ func TestCreateAutocmdRegistersAURPostDownload(t *testing.T) {
 }
 
 func TestCreateAutocmdRejectsInvalidEvent(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	err := e.L.DoString(`
 		yay.create_autocmd("User", {
@@ -96,8 +100,9 @@ func TestCreateAutocmdRejectsInvalidEvent(t *testing.T) {
 }
 
 func TestCreateAutocmdRejectsMissingCallback(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	err := e.L.DoString(`
 		yay.create_autocmd("AURPreInstall", {
@@ -109,8 +114,9 @@ func TestCreateAutocmdRejectsMissingCallback(t *testing.T) {
 }
 
 func TestRunAURPreInstallReturnsCallbackErrorWithEventAndBase(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.create_autocmd("AURPreInstall", {
@@ -127,8 +133,9 @@ func TestRunAURPreInstallReturnsCallbackErrorWithEventAndBase(t *testing.T) {
 }
 
 func TestRunAURPreInstallReturnsAbortWithoutTraceback(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.create_autocmd("AURPreInstall", {
@@ -143,8 +150,9 @@ func TestRunAURPreInstallReturnsAbortWithoutTraceback(t *testing.T) {
 }
 
 func TestRunAURPostDownloadEventTableShape(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	seen := []string{}
 	e.L.SetGlobal("record", e.L.NewFunction(func(L *glua.LState) int {
@@ -197,8 +205,9 @@ func TestRunAURPostDownloadEventTableShape(t *testing.T) {
 }
 
 func TestRunAURPostDownloadReturnsAbortWithoutTraceback(t *testing.T) {
+	t.Parallel()
 	e := New()
-	defer e.Close()
+	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.create_autocmd("AURPostDownload", {

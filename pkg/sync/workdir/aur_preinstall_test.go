@@ -21,6 +21,7 @@ import (
 )
 
 func TestAURPreInstallEventsFromPackageFiles(t *testing.T) {
+	t.Parallel()
 	base := "demo-base"
 	dir := writeAURPreInstallPackage(t, base)
 	targets := []map[string]*dep.InstallInfo{
@@ -89,11 +90,12 @@ func TestAURPreInstallEventsFromPackageFiles(t *testing.T) {
 }
 
 func TestRunAURPreInstallLuaHooksRunsBasesInSortedOrder(t *testing.T) {
+	t.Parallel()
 	firstDir := writeAURPreInstallPackage(t, "a-base")
 	secondDir := writeAURPreInstallPackage(t, "z-base")
 
 	engine := settingslua.New()
-	defer engine.Close()
+	t.Cleanup(engine.Close)
 
 	order := []string{}
 	engine.L.SetGlobal("record", engine.L.NewFunction(func(L *glua.LState) int {
@@ -157,7 +159,7 @@ func TestRunPreDownloadSourcesHooksRunsLuaBeforeMenus(t *testing.T) {
 		}},
 	}
 
-	err := preper.runPreDownloadSourcesHooks(context.Background(), &runtime.Runtime{Lua: engine}, io.Discard,
+	err := preper.runPreDownloadSourcesHooks(t.Context(), &runtime.Runtime{Lua: engine}, io.Discard,
 		map[string]string{base: dir}, mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
@@ -169,11 +171,12 @@ func TestRunPreDownloadSourcesHooksRunsLuaBeforeMenus(t *testing.T) {
 }
 
 func TestRunAURPreInstallLuaHooksReturnsCallbackError(t *testing.T) {
+	t.Parallel()
 	base := "demo-base"
 	dir := writeAURPreInstallPackage(t, base)
 
 	engine := settingslua.New()
-	defer engine.Close()
+	t.Cleanup(engine.Close)
 
 	require.NoError(t, engine.L.DoString(`
 		yay.create_autocmd("AURPreInstall", {

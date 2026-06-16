@@ -2,6 +2,7 @@ package download
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,7 +13,6 @@ import (
 	"github.com/Jguer/aur"
 
 	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/settings/exe"
 	"github.com/Jguer/yay/v12/pkg/settings/parser"
 	"github.com/Jguer/yay/v12/pkg/text"
@@ -89,7 +89,7 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 
 	var (
 		mux  sync.Mutex
-		errs multierror.MultiError
+		errs []error
 		wg   sync.WaitGroup
 	)
 
@@ -118,13 +118,13 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 				pkgbuild, err = ABSPKGBUILD(httpClient, dbName, pkgName)
 			}
 
+			mux.Lock()
 			if err == nil {
-				mux.Lock()
 				pkgbuilds[target] = pkgbuild
-				mux.Unlock()
 			} else {
-				errs.Add(err)
+				errs = append(errs, err)
 			}
+			mux.Unlock()
 
 			<-sem
 			wg.Done()
@@ -133,7 +133,7 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 
 	wg.Wait()
 
-	return pkgbuilds, errs.Return()
+	return pkgbuilds, errors.Join(errs...)
 }
 
 func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.QueryClient,
@@ -144,7 +144,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 
 	var (
 		mux  sync.Mutex
-		errs multierror.MultiError
+		errs []error
 		wg   sync.WaitGroup
 	)
 
@@ -175,14 +175,14 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 
 			progress := 0
 
+			mux.Lock()
 			if err != nil {
-				errs.Add(err)
+				errs = append(errs, err)
 			} else {
-				mux.Lock()
 				cloned[target] = newClone
 				progress = len(cloned)
-				mux.Unlock()
 			}
+			mux.Unlock()
 
 			if aur {
 				logger.OperationInfoln(
@@ -202,7 +202,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 
 	wg.Wait()
 
-	return cloned, errs.Return()
+	return cloned, errors.Join(errs...)
 }
 
 func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,

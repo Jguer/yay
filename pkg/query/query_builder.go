@@ -3,7 +3,7 @@ package query
 import (
 	"cmp"
 	"context"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -108,16 +108,6 @@ type abstractResults struct {
 	separateSourceCache map[string]float64
 }
 
-func (a *abstractResults) Len() int      { return len(a.results) }
-func (a *abstractResults) Swap(i, j int) { a.results[i], a.results[j] = a.results[j], a.results[i] }
-
-func (a *abstractResults) Less(i, j int) bool {
-	pkgA := a.results[i]
-	pkgB := a.results[j]
-	// Sort in descending order by default
-	return a.sortByFunc(pkgA, pkgB) > 0
-}
-
 func (a *abstractResults) GetSortFunc(sortBy string, bottomUp bool) SortFunc {
 	var sortFunc SortFunc
 
@@ -159,7 +149,7 @@ func (a *abstractResults) GetSortFunc(sortBy string, bottomUp bool) SortFunc {
 		sortFunc = func(pkgA, pkgB abstractResult) int {
 			if cmpResult := originalSortFunc(pkgA, pkgB); cmpResult != 0 {
 				if a.separateSources {
-					if cmpSources := strings.Compare(pkgA.source, pkgB.source); cmpSources != 0 {
+					if cmpSources := cmp.Compare(pkgA.source, pkgB.source); cmpSources != 0 {
 						return cmpSources
 					}
 				}
@@ -268,7 +258,9 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		}
 	}
 
-	sort.Sort(sortableResults)
+	slices.SortFunc(sortableResults.results, func(a, b abstractResult) int {
+		return sortableResults.sortByFunc(b, a)
+	})
 	s.results = s.applySearchFilter(sortableResults.results)
 
 	if aurErr != nil {
@@ -345,7 +337,7 @@ func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 	}
 
 	for _, pkgN := range terms {
-		if strings.IndexFunc(pkgN, unicode.IsSymbol) != -1 {
+		if strings.ContainsFunc(pkgN, unicode.IsSymbol) {
 			return true
 		}
 

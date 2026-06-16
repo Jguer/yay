@@ -2,12 +2,12 @@ package sync
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/Jguer/yay/v12/pkg/completion"
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/multierror"
 	"github.com/Jguer/yay/v12/pkg/runtime"
 	"github.com/Jguer/yay/v12/pkg/settings"
 	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
@@ -75,16 +75,13 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	}
 
 	if completion.NeedsUpdate(o.cfg.CompletionPath, o.cfg.CompletionInterval, false) {
-		completionWg.Add(1)
-		go func() {
-			defer completionWg.Done()
-
+		completionWg.Go(func() {
 			errComp := completion.UpdateCache(ctx, run.HTTPClient, o.dbExecutor,
 				o.cfg.AURURL, o.cfg.CompletionPath, o.logger)
 			if errComp != nil {
 				o.logger.Warnln(errComp)
 			}
-		}()
+		})
 	}
 
 	srcInfo, errInstall := srcinfo.NewService(o.dbExecutor, o.cfg,
@@ -111,11 +108,11 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		return errInstall
 	}
 
-	var multiErr multierror.MultiError
+	var errs []error
 
 	failedAndIgnored, err := installer.CompileFailedAndIgnored()
 	if err != nil {
-		multiErr.Add(err)
+		errs = append(errs, err)
 	}
 
 	if !cmdArgs.ExistsArg("w", "downloadonly") {
@@ -125,17 +122,17 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	}
 
 	if err := installer.RunPostInstallHooks(ctx); err != nil {
-		multiErr.Add(err)
+		errs = append(errs, err)
 	}
 
 	if !cmdArgs.ExistsArg("w", "downloadonly") && run.Lua != nil &&
 		run.Lua.HasAutocmd(settingslua.EventPostInstall) {
 		if err := run.Lua.RunPostInstall(postInstallEvent(targets, failedAndIgnored)); err != nil {
-			multiErr.Add(err)
+			errs = append(errs, err)
 		}
 	}
 
-	return multiErr.Return()
+	return errors.Join(errs...)
 }
 
 func (o *OperationService) manualConfirmRequired(cmdArgs *parser.Arguments) bool {
