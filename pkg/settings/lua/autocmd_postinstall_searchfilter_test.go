@@ -224,3 +224,46 @@ func TestRunSearchFilterChainsMultipleHooks(t *testing.T) {
 		{Source: "aur", Name: "pkgA"},
 	}, refs)
 }
+
+// TestRunSearchFilterSecondHookCannotReintroduce verifies that a package
+// dropped by an earlier SearchFilter hook cannot be reintroduced by a later
+// hook, even if the later hook explicitly names the dropped package.
+func TestRunSearchFilterSecondHookCannotReintroduce(t *testing.T) {
+	t.Parallel()
+
+	e := New()
+	defer e.Close()
+
+	// Hook 1: drops pkgC.
+	// Hook 2: attempts to return pkgC which it did not receive.
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("SearchFilter", {
+			callback = function(event)
+				-- returns only pkgA and pkgB; drops pkgC
+				return {
+					{ source = "aur",  name = "pkgA" },
+					{ source = "sync", name = "pkgB" },
+				}
+			end,
+		})
+		yay.create_autocmd("SearchFilter", {
+			callback = function(event)
+				-- tries to smuggle in pkgC which was dropped by hook 1
+				return {
+					{ source = "aur",  name = "pkgA" },
+					{ source = "aur",  name = "pkgC" },
+				}
+			end,
+		})
+	`))
+
+	_, err := e.RunSearchFilter(&SearchFilterEvent{
+		Results: []SearchResultPackage{
+			{Source: "aur", Name: "pkgA"},
+			{Source: "sync", Name: "pkgB"},
+			{Source: "aur", Name: "pkgC"},
+		},
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "unknown search result aur/pkgC")
+}

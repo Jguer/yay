@@ -414,14 +414,16 @@ func (e *Engine) RunSearchFilter(event *SearchFilterEvent) ([]SearchResultRef, e
 		return nil, nil
 	}
 
-	indexByRef := make(map[SearchResultRef]int, len(event.Results))
-	for i, pkg := range event.Results {
-		indexByRef[SearchResultRef{Source: pkg.Source, Name: pkg.Name}] = i
-	}
-
 	active := event.Results
 
 	for _, autocmd := range e.autocmds[EventSearchFilter] {
+		// Rebuild the validation map from the current active set so that a
+		// later hook cannot reintroduce packages that an earlier hook dropped.
+		activeByRef := make(map[SearchResultRef]int, len(active))
+		for i, pkg := range active {
+			activeByRef[SearchResultRef{Source: pkg.Source, Name: pkg.Name}] = i
+		}
+
 		if err := e.L.CallByParam(glua.P{
 			Fn:      autocmd.callback,
 			NRet:    1,
@@ -433,7 +435,7 @@ func (e *Engine) RunSearchFilter(event *SearchFilterEvent) ([]SearchResultRef, e
 		value := e.L.Get(-1)
 		e.L.Pop(1)
 
-		refs, returned, err := parseSearchFilterResult(value, indexByRef)
+		refs, returned, err := parseSearchFilterResult(value, activeByRef)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", EventSearchFilter, err)
 		}
@@ -444,7 +446,7 @@ func (e *Engine) RunSearchFilter(event *SearchFilterEvent) ([]SearchResultRef, e
 
 		next := make([]SearchResultPackage, 0, len(refs))
 		for _, ref := range refs {
-			next = append(next, event.Results[indexByRef[ref]])
+			next = append(next, active[activeByRef[ref]])
 		}
 
 		active = next
