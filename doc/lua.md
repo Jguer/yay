@@ -307,6 +307,8 @@ yay.create_autocmd("AURPostDownload", {
 
 ## Post-install hooks
 
+<p class="api-since">Available from yay v13.0.0</p>
+
 `PostInstall` fires once after a successful install/upgrade transaction, before
 yay exits. It is skipped when `--downloadonly` (`-w`) is used. Because the
 installation is already complete when the callback runs, calling `yay.abort`
@@ -370,6 +372,8 @@ error; duplicate refs are deduplicated first-wins. Hook errors are logged and
 the **unfiltered** results are shown rather than aborting the command.
 
 ### SearchFilter event
+
+<p class="api-since">Available from yay v13.0.0</p>
 
 ```lua
 {
