@@ -7,6 +7,12 @@
 _obj
 _test
 .vscode
+AGENTS.md
+.claude
+.agents
+.claude
+.copilot
+.pi
 
 *.cgo1.go
 *.cgo2.c
