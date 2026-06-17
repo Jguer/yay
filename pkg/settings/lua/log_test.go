@@ -54,7 +54,7 @@ func TestLogDebugUsesLoggerDebugGate(t *testing.T) {
 	engine.SetLogger(debugLogger)
 
 	require.NoError(t, engine.L.DoString(`yay.log.debug("visible")`))
-	require.Equal(t, "[DEBUG:lua]visible\n", stdout.String())
+	require.Equal(t, "[DEBUG:lua] visible\n", stdout.String())
 	require.Empty(t, stderr.String())
 }
 
@@ -97,6 +97,6 @@ func TestLoadUsesLuaChildLogger(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(engine.Close)
 
-	require.Equal(t, "[DEBUG:lua]loaded\n", stdout.String())
+	require.Equal(t, "[DEBUG:lua] loaded\n", stdout.String())
 	require.Empty(t, stderr.String())
 }
