@@ -25,11 +25,6 @@ func newTestLogger() *text.Logger {
 	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
 }
 
-//go:fix inline
-func ptrString(s string) *string {
-	return new(s)
-}
-
 func TestInstaller_InstallNeeded(t *testing.T) {
 	t.Parallel()
 

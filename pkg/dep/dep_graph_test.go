@@ -24,11 +24,6 @@ import (
 	"github.com/Jguer/yay/v12/pkg/text"
 )
 
-//go:fix inline
-func ptrString(s string) *string {
-	return new(s)
-}
-
 func getFromFile(t testing.TB, filePath string) mockaur.GetFunc {
 	t.Helper()
 	f, err := os.Open(filePath)

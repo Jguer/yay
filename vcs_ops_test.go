@@ -22,8 +22,3 @@ func TestInfoToInstallInfo(t *testing.T) {
 	require.Equal(t, &dep.InstallInfo{AURBase: new("foo-base"), Source: dep.AUR}, info[0]["foo"])
 	require.Equal(t, &dep.InstallInfo{AURBase: new("bar-base"), Source: dep.AUR}, info[0]["bar"])
 }
-
-//go:fix inline
-func ptr(s string) *string {
-	return new(s)
-}

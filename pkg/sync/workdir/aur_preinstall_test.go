@@ -233,8 +233,3 @@ pkgname = demo-doc
 
 	return dir
 }
-
-//go:fix inline
-func ptrString(s string) *string {
-	return new(s)
-}

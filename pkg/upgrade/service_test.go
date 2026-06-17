@@ -28,11 +28,6 @@ import (
 	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
 )
 
-//go:fix inline
-func ptrString(s string) *string {
-	return new(s)
-}
-
 func newUpgradeSelectTestService(input io.Reader, luaEngine *settingslua.Engine) *UpgradeService {
 	logger := text.NewLogger(io.Discard, io.Discard, input, true, "test")
 	u := &UpgradeService{
