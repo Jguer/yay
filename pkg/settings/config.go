@@ -76,6 +76,10 @@ type Configuration struct {
 	SaveConfig bool               `json:"-" lua:"-"`
 	Mode       parser.TargetMode  `json:"-" lua:"-"`
 	ReBuild    parser.RebuildMode `json:"rebuild" lua:"rebuild"`
+
+	Chroot                 bool     `json:"chroot"`
+	ChrootDir              string   `json:"chrootdir"`
+	RootChrootPkgs         []string `json:"root_chroot_pkgs"`
 }
 
 // SaveConfig writes yay config to file.
@@ -119,6 +123,7 @@ func (c *Configuration) expandEnv() {
 	c.MakepkgConf = expandEnvOrHome(c.MakepkgConf)
 	c.PacmanBin = expandEnvOrHome(c.PacmanBin)
 	c.PacmanConf = expandEnvOrHome(c.PacmanConf)
+	c.ChrootDir = expandEnvOrHome(c.ChrootDir)
 	c.GpgFlags = os.ExpandEnv(c.GpgFlags)
 	c.MFlags = os.ExpandEnv(c.MFlags)
 	c.GitFlags = os.ExpandEnv(c.GitFlags)
@@ -202,6 +207,9 @@ func DefaultConfig(version string) *Configuration {
 		PacmanBin:              "pacman",
 		PGPFetch:               true,
 		PacmanConf:             "/etc/pacman.conf",
+		Chroot:                 false,
+		ChrootDir:              "/var/lib/aurbuild",
+		RootChrootPkgs:         []string{"base-devel"},
 		GpgFlags:               "",
 		MFlags:                 "",
 		GitFlags:               "",

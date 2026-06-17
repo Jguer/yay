@@ -135,7 +135,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -228,7 +228,7 @@ func TestInstaller_BuildOnlySkipsInstall(t *testing.T) {
 	cmdBuilder.Runner = mockRunner
 
 	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-		parser.RebuildModeNo, false, newTestLogger())
+		parser.RebuildModeNo, false, false, "", newTestLogger())
 	installer.SetInstallBuiltPackages(false)
 
 	cmdArgs := parser.MakeArguments()
@@ -505,7 +505,7 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 
 			cmdBuilder.Runner = mockRunner
 
-			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, parser.RebuildModeNo, false, newTestLogger())
+			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny, parser.RebuildModeNo, false, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -559,7 +559,7 @@ func TestInstaller_RunPostHooks(t *testing.T) {
 	cmdBuilder.Runner = mockRunner
 
 	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-		parser.RebuildModeNo, false, newTestLogger())
+		parser.RebuildModeNo, false, false, "", newTestLogger())
 
 	called := false
 	hook := func(ctx context.Context) error {
@@ -691,7 +691,7 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("needed")
@@ -860,7 +860,7 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("jellyfin")
@@ -1000,7 +1000,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, true, newTestLogger())
+				parser.RebuildModeNo, true, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -1105,7 +1105,7 @@ func TestInstaller_InstallGroup(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, true, newTestLogger())
+				parser.RebuildModeNo, true, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("kubernetes-tools")
@@ -1324,7 +1324,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 			cmdBuilder.Runner = mockRunner
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				tc.rebuildOption, false, newTestLogger())
+				tc.rebuildOption, false, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -1410,7 +1410,7 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 			}
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, tc.targetMode,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddArg("u", "upgrades") // Make sure both args are removed
@@ -1521,7 +1521,7 @@ func TestInstaller_KeepSrc(t *testing.T) {
 			}
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, "", newTestLogger())
 
 			cmdArgs := parser.MakeArguments()
 			cmdArgs.AddTarget("yay")
@@ -1670,7 +1670,7 @@ func TestInstaller_InstallAsExplicit(t *testing.T) {
 			}
 
 			installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
-				parser.RebuildModeNo, false, newTestLogger())
+				parser.RebuildModeNo, false, false, "", newTestLogger())
 
 			cmdArgs := tc.cmdArgs()
 
@@ -1702,4 +1702,139 @@ func TestInstaller_InstallAsExplicit(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestInstaller_ChrootInjectsAURDepsWithI verifies that when building an AUR package
+// in chroot mode, previously-built AUR dependency archives are passed via -I to
+// makechrootpkg so they are available inside the clean chroot environment.
+func TestInstaller_ChrootInjectsAURDepsWithI(t *testing.T) {
+	t.Parallel()
+
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	chrootDir := t.TempDir()
+
+	for _, bin := range []string{makepkgBin, pacmanBin} {
+		f, err := os.OpenFile(bin, os.O_RDONLY|os.O_CREATE, 0o755)
+		require.NoError(t, err)
+		require.NoError(t, f.Close())
+	}
+
+	tmpDepDir := t.TempDir()
+	tmpMainDir := t.TempDir()
+
+	depPkgTar := tmpDepDir + "/dep-pkg-1.0.0-1-x86_64.pkg.tar.zst"
+	mainPkgTar := tmpMainDir + "/main-pkg-1.0.0-1-x86_64.pkg.tar.zst"
+
+	captureOverride := func(cmd *exec.Cmd) (string, string, error) {
+		if cmd.Dir == tmpDepDir {
+			return depPkgTar, "", nil
+		}
+		return mainPkgTar, "", nil
+	}
+
+	// Show calls (in order):
+	// 1: makepkg --nobuild (pre-pass for dep-pkg)
+	// 2: makechrootpkg -r ... -- ... (build dep-pkg)       ← creates depPkgTar
+	// 3: pacman -U (install dep-pkg)
+	// 4: pacman -D --asdep (mark dep-pkg)
+	// 5: makepkg --nobuild (pre-pass for main-pkg)
+	// 6: makechrootpkg -r ... -I depPkgTar -- ... (build main-pkg)  ← creates mainPkgTar
+	// 7: pacman -U (install main-pkg)
+	// 8: pacman -D --asexplicit (mark main-pkg)
+	showCallIdx := 0
+	showOverride := func(cmd *exec.Cmd) error {
+		showCallIdx++
+		switch showCallIdx {
+		case 2:
+			f, err := os.OpenFile(depPkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+			require.NoError(t, err)
+			require.NoError(t, f.Close())
+		case 6:
+			f, err := os.OpenFile(mainPkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+			require.NoError(t, err)
+			require.NoError(t, f.Close())
+		}
+		return nil
+	}
+
+	mockDB := &mock.DBExecutor{IsCorrectVersionInstalledFn: func(string, string) bool { return false }}
+	mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:      makepkgBin,
+		SudoBin:         "su",
+		PacmanBin:       pacmanBin,
+		Runner:          mockRunner,
+		SudoLoopEnabled: false,
+	}
+
+	installer := NewInstaller(mockDB, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+		parser.RebuildModeNo, false, true, chrootDir, newTestLogger())
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddTarget("main-pkg")
+
+	pkgBuildDirs := map[string]string{
+		"dep-pkg":  tmpDepDir,
+		"main-pkg": tmpMainDir,
+	}
+
+	depBase := "dep-pkg"
+	mainBase := "main-pkg"
+
+	// targets[0] is processed last (the user target).
+	// targets[1] is processed first (the AUR dependency).
+	targets := []map[string]*dep.InstallInfo{
+		{
+			"main-pkg": {
+				Source:  dep.AUR,
+				Reason:  dep.Explicit,
+				Version: "1.0.0-1",
+				AURBase: &mainBase,
+			},
+		},
+		{
+			"dep-pkg": {
+				Source:  dep.AUR,
+				Reason:  dep.Dep,
+				Version: "1.0.0-1",
+				AURBase: &depBase,
+			},
+		},
+	}
+
+	errI := installer.Install(context.Background(), cmdArgs, targets, pkgBuildDirs, []string{}, false)
+	require.NoError(t, errI)
+
+	require.Len(t, mockRunner.ShowCalls, 8)
+	require.Len(t, mockRunner.CaptureCalls, 2)
+
+	normalize := func(s, dir, replacement string) string {
+		return strings.ReplaceAll(s, dir, replacement)
+	}
+
+	// Show[1] = actual build of dep-pkg: must use makechrootpkg, no -I flag yet.
+	depBuildShow := mockRunner.ShowCalls[1].Args[0].(*exec.Cmd).String()
+	depBuildShow = normalize(depBuildShow, chrootDir, "/chrootdir")
+	assert.Contains(t, depBuildShow, "makechrootpkg", "dep build should use makechrootpkg")
+	assert.NotContains(t, depBuildShow, "-I", "dep build should have no -I flag")
+
+	// Show[5] = actual build of main-pkg: must use makechrootpkg and -I depPkgTar.
+	mainBuildShow := mockRunner.ShowCalls[5].Args[0].(*exec.Cmd).String()
+	mainBuildShow = normalize(mainBuildShow, chrootDir, "/chrootdir")
+	assert.Contains(t, mainBuildShow, "makechrootpkg", "main build should use makechrootpkg")
+	assert.Contains(t, mainBuildShow, "-I", "main build should inject dep archive with -I")
+	assert.Contains(t, mainBuildShow, depPkgTar, "main build should reference the dep archive path")
+
+	// Pre-pass calls (Show[0] and Show[4]) must still use the original makepkg binary
+	// and must include --nodeps so the host doesn't try to install AUR makedepends.
+	prePassDep := mockRunner.ShowCalls[0].Args[0].(*exec.Cmd).String()
+	assert.Contains(t, prePassDep, "--nobuild", "pre-pass should use --nobuild")
+	assert.Contains(t, prePassDep, "--nodeps", "pre-pass must skip host dep installation in chroot mode")
+	assert.NotContains(t, prePassDep, "makechrootpkg", "pre-pass must not use makechrootpkg")
+
+	prePassMain := mockRunner.ShowCalls[4].Args[0].(*exec.Cmd).String()
+	assert.Contains(t, prePassMain, "--nobuild", "pre-pass should use --nobuild")
+	assert.Contains(t, prePassMain, "--nodeps", "pre-pass must skip host dep installation in chroot mode")
+	assert.NotContains(t, prePassMain, "makechrootpkg", "pre-pass must not use makechrootpkg")
 }

@@ -438,6 +438,9 @@ func isArg(arg string) bool {
 	case "singlelineresults":
 	case "doublelineresults":
 	case "separatesources":
+	// chroot option
+	case "chroot":
+	case "chrootdir":
 	default:
 		return false
 	}
@@ -532,6 +535,7 @@ func hasParam(arg string) bool {
 	case "completioninterval":
 	case "sortby":
 	case "searchby":
+	case "chrootdir":
 	default:
 		return false
 	}
