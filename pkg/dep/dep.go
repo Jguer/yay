@@ -3,8 +3,8 @@ package dep
 import (
 	"strings"
 
-	"github.com/Jguer/yay/v12/pkg/db"
-	aur "github.com/Jguer/yay/v12/pkg/query"
+	"github.com/Jguer/yay/v13/pkg/db"
+	aur "github.com/Jguer/yay/v13/pkg/query"
 )
 
 func splitDep(dep string) (pkg, mod, ver string) {

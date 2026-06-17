@@ -17,8 +17,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Jguer/yay/v12/pkg/settings/exe"
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/settings/exe"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 // WHEN some AUR bases exist and others are fresh

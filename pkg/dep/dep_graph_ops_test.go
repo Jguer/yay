@@ -14,10 +14,10 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Jguer/yay/v12/pkg/db/mock"
-	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
-	"github.com/Jguer/yay/v12/pkg/query"
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/db/mock"
+	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
+	"github.com/Jguer/yay/v13/pkg/query"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 func TestGrapher_GraphFromTargetsBranches(t *testing.T) {

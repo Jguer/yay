@@ -3,7 +3,7 @@ package ialpm
 import (
 	alpm "github.com/Jguer/dyalpm"
 
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 // GetPackageNamesBySource returns package names with and without correspondence in SyncDBS respectively.

@@ -10,12 +10,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Jguer/yay/v12/pkg/db/mock"
-	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/settings"
-	"github.com/Jguer/yay/v12/pkg/settings/exe"
-	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/Jguer/yay/v12/pkg/vcs"
+	"github.com/Jguer/yay/v13/pkg/db/mock"
+	"github.com/Jguer/yay/v13/pkg/dep"
+	"github.com/Jguer/yay/v13/pkg/settings"
+	"github.com/Jguer/yay/v13/pkg/settings/exe"
+	"github.com/Jguer/yay/v13/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/vcs"
 )
 
 func newTestLogger() *text.Logger {

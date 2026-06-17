@@ -12,9 +12,9 @@ import (
 
 	alpm "github.com/Jguer/dyalpm"
 
-	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/db/mock"
-	"github.com/Jguer/yay/v12/pkg/settings/exe"
+	"github.com/Jguer/yay/v13/pkg/db"
+	"github.com/Jguer/yay/v13/pkg/db/mock"
+	"github.com/Jguer/yay/v13/pkg/settings/exe"
 )
 
 type testRunner struct{}

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"sync"
 
-	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
 )
 
 type Call struct {

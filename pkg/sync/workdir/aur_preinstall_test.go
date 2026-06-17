@@ -13,10 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 	glua "github.com/yuin/gopher-lua"
 
-	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/runtime"
-	"github.com/Jguer/yay/v12/pkg/settings"
-	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
+	"github.com/Jguer/yay/v13/pkg/dep"
+	"github.com/Jguer/yay/v13/pkg/runtime"
+	"github.com/Jguer/yay/v13/pkg/settings"
+	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
 )
 
 func TestAURPreInstallEventsFromPackageFiles(t *testing.T) {

@@ -11,8 +11,8 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/stretchr/testify/require"
 
-	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
-	"github.com/Jguer/yay/v12/pkg/text"
+	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 func TestHandlePackageVoteNoResults(t *testing.T) {

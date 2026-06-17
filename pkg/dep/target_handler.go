@@ -1,6 +1,6 @@
 package dep
 
-import "github.com/Jguer/yay/v12/pkg/text"
+import "github.com/Jguer/yay/v13/pkg/text"
 
 type Target struct {
 	DB      string

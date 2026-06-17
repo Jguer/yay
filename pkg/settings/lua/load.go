@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 // Load loads path, applies its yay.opt values onto cfg, and returns the live engine.

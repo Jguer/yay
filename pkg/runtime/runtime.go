@@ -10,13 +10,13 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/query"
-	"github.com/Jguer/yay/v12/pkg/settings"
-	"github.com/Jguer/yay/v12/pkg/settings/exe"
-	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
-	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/Jguer/yay/v12/pkg/vcs"
+	"github.com/Jguer/yay/v13/pkg/query"
+	"github.com/Jguer/yay/v13/pkg/settings"
+	"github.com/Jguer/yay/v13/pkg/settings/exe"
+	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
+	"github.com/Jguer/yay/v13/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/vcs"
 
 	"github.com/Jguer/aur"
 	"github.com/Jguer/aur/metadata"

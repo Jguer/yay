@@ -14,18 +14,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/db/mock"
-	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/dep/topo"
-	"github.com/Jguer/yay/v12/pkg/query"
-	"github.com/Jguer/yay/v12/pkg/settings"
-	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
-	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
-	"github.com/Jguer/yay/v12/pkg/vcs"
+	"github.com/Jguer/yay/v13/pkg/db"
+	"github.com/Jguer/yay/v13/pkg/db/mock"
+	"github.com/Jguer/yay/v13/pkg/dep"
+	"github.com/Jguer/yay/v13/pkg/dep/topo"
+	"github.com/Jguer/yay/v13/pkg/query"
+	"github.com/Jguer/yay/v13/pkg/settings"
+	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
+	"github.com/Jguer/yay/v13/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/vcs"
 
-	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
+	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
 )
 
 func newUpgradeSelectTestService(input io.Reader, luaEngine *settingslua.Engine) *UpgradeService {

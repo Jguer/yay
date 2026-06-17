@@ -16,10 +16,10 @@ import (
 
 	"github.com/Jguer/aur"
 
-	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
-	"github.com/Jguer/yay/v12/pkg/settings/exe"
-	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
+	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
+	"github.com/Jguer/yay/v13/pkg/settings/exe"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 func newTestLogger() *text.Logger {

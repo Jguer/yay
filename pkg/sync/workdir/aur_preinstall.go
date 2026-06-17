@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/runtime"
-	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
+	"github.com/Jguer/yay/v13/pkg/dep"
+	"github.com/Jguer/yay/v13/pkg/runtime"
+	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"

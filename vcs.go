@@ -7,11 +7,11 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/dep"
-	"github.com/Jguer/yay/v12/pkg/runtime"
-	"github.com/Jguer/yay/v12/pkg/sync/srcinfo"
-	"github.com/Jguer/yay/v12/pkg/sync/workdir"
+	"github.com/Jguer/yay/v13/pkg/db"
+	"github.com/Jguer/yay/v13/pkg/dep"
+	"github.com/Jguer/yay/v13/pkg/runtime"
+	"github.com/Jguer/yay/v13/pkg/sync/srcinfo"
+	"github.com/Jguer/yay/v13/pkg/sync/workdir"
 )
 
 func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {

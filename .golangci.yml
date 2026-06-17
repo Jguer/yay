@@ -94,7 +94,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/Jguer/yay/v12
+        - github.com/Jguer/yay/v13
   exclusions:
     generated: lax
     paths:

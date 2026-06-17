@@ -7,9 +7,9 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v12/pkg/intrange"
-	"github.com/Jguer/yay/v12/pkg/settings"
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/intrange"
+	"github.com/Jguer/yay/v13/pkg/settings"
+	"github.com/Jguer/yay/v13/pkg/text"
 
 	mapset "github.com/deckarep/golang-set/v2"
 )

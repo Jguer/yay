@@ -1,7 +1,7 @@
 package lua
 
 import (
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/text"
 
 	glua "github.com/yuin/gopher-lua"
 )

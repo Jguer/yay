@@ -1,4 +1,4 @@
-module github.com/Jguer/yay/v12/scripts
+module github.com/Jguer/yay/v13/scripts
 
 go 1.26
 

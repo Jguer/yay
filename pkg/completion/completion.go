@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/download"
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/db"
+	"github.com/Jguer/yay/v13/pkg/download"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 // NeedsUpdate checks if the completion cache needs to be regenerated.

@@ -14,11 +14,11 @@ import (
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Jguer/yay/v12/pkg/db"
-	"github.com/Jguer/yay/v12/pkg/db/mock"
-	mockaur "github.com/Jguer/yay/v12/pkg/dep/mock"
-	"github.com/Jguer/yay/v12/pkg/dep/topo"
-	"github.com/Jguer/yay/v12/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/db"
+	"github.com/Jguer/yay/v13/pkg/db/mock"
+	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
+	"github.com/Jguer/yay/v13/pkg/dep/topo"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 func TestDepSplitDep(t *testing.T) {

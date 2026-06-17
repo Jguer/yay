@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Jguer/yay/v12/pkg/settings/parser"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
 )
 
 // normalizePath removes trailing slashes from paths (except for root "/").

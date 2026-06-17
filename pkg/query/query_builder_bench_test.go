@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	settingslua "github.com/Jguer/yay/v12/pkg/settings/lua"
-	"github.com/Jguer/yay/v12/pkg/settings/parser"
-	"github.com/Jguer/yay/v12/pkg/text"
+	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
+	"github.com/Jguer/yay/v13/pkg/text"
 )
 
 // BenchmarkApplySearchFilter_noLua measures applySearchFilter when no Lua
