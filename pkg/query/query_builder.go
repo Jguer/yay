@@ -369,7 +369,6 @@ func (s *SourceQueryBuilder) applySearchFilter(results []abstractResult) []abstr
 			Popularity:     results[i].popularity,
 			FirstSubmitted: results[i].firstSubmitted,
 			LastModified:   results[i].lastModified,
-			Provides:       results[i].provides,
 		}
 	}
 

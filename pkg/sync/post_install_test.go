@@ -59,12 +59,7 @@ func TestPostInstallEvent(t *testing.T) {
 		},
 	}
 
-	// pkgB failed to install.
-	failedAndIgnored := map[string]error{
-		"pkgB": assert.AnError,
-	}
-
-	event := postInstallEvent(targets, failedAndIgnored)
+	event := postInstallEvent(targets)
 
 	// Must be sorted by name.
 	want := &settingslua.PostInstallEvent{
@@ -75,9 +70,6 @@ func TestPostInstallEvent(t *testing.T) {
 				LocalVersion: "1.0-1",
 				Source:       "aur",
 				Reason:       "explicit",
-				Installed:    true,
-				Upgrade:      true,
-				Devel:        false,
 			},
 			{
 				Name:         "pkgB",
@@ -85,18 +77,12 @@ func TestPostInstallEvent(t *testing.T) {
 				LocalVersion: "",
 				Source:       "aur",
 				Reason:       "dependency",
-				Installed:    false, // in failedAndIgnored
-				Upgrade:      false,
-				Devel:        true,
 			},
 			{
-				Name:      "pkgC",
-				Version:   "3.0-1",
-				Source:    "sync",
-				Reason:    "make_dependency",
-				Installed: true,
-				Upgrade:   false,
-				Devel:     false,
+				Name:    "pkgC",
+				Version: "3.0-1",
+				Source:  "sync",
+				Reason:  "make_dependency",
 			},
 		},
 	}

@@ -131,12 +131,10 @@ func makePostInstallEvent(n int) *PostInstallEvent {
 	pkgs := make([]PostInstallPackage, n)
 	for i := range pkgs {
 		pkgs[i] = PostInstallPackage{
-			Name:      "pkg-" + string(rune('a'+i%26)),
-			Version:   "2.0-1",
-			Source:    "aur",
-			Reason:    "explicit",
-			Installed: true,
-			Upgrade:   true,
+			Name:    "pkg-" + string(rune('a'+i%26)),
+			Version: "2.0-1",
+			Source:  "aur",
+			Reason:  "explicit",
 		}
 	}
 

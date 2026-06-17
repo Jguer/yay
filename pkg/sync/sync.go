@@ -127,7 +127,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 
 	if !cmdArgs.ExistsArg("w", "downloadonly") && run.Lua != nil &&
 		run.Lua.HasAutocmd(settingslua.EventPostInstall) {
-		if err := run.Lua.RunPostInstall(postInstallEvent(targets, failedAndIgnored)); err != nil {
+		if err := run.Lua.RunPostInstall(postInstallEvent(targets)); err != nil {
 			errs = append(errs, err)
 		}
 	}

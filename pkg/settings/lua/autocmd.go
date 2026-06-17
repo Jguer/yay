@@ -94,9 +94,6 @@ type PostInstallPackage struct {
 	LocalVersion string
 	Source       string
 	Reason       string
-	Installed    bool
-	Upgrade      bool
-	Devel        bool
 }
 
 type SearchFilterEvent struct {
@@ -112,7 +109,6 @@ type SearchResultPackage struct {
 	Popularity     float64
 	FirstSubmitted int
 	LastModified   int
-	Provides       []string
 }
 
 type SearchResultRef struct {
@@ -478,9 +474,6 @@ func (e *Engine) postInstallPackagesTable(packages []PostInstallPackage) *glua.L
 		pkgTbl.RawSetString("local_version", glua.LString(pkg.LocalVersion))
 		pkgTbl.RawSetString("source", glua.LString(pkg.Source))
 		pkgTbl.RawSetString("reason", glua.LString(pkg.Reason))
-		pkgTbl.RawSetString("installed", glua.LBool(pkg.Installed))
-		pkgTbl.RawSetString("upgrade", glua.LBool(pkg.Upgrade))
-		pkgTbl.RawSetString("devel", glua.LBool(pkg.Devel))
 		tbl.Append(pkgTbl)
 	}
 
@@ -508,7 +501,6 @@ func (e *Engine) searchResultPackagesTable(packages []SearchResultPackage) *glua
 		pkgTbl.RawSetString("popularity", glua.LNumber(pkg.Popularity))
 		pkgTbl.RawSetString("first_submitted", glua.LNumber(pkg.FirstSubmitted))
 		pkgTbl.RawSetString("last_modified", glua.LNumber(pkg.LastModified))
-		pkgTbl.RawSetString("provides", e.stringArray(pkg.Provides))
 		tbl.Append(pkgTbl)
 	}
 

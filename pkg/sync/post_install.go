@@ -11,7 +11,7 @@ import (
 // postInstallEvent flattens the resolved topo layers into the PostInstall
 // payload. Packages recorded in failedAndIgnored (last-layer AUR build
 // failures tolerated by the installer) are marked installed = false.
-func postInstallEvent(targets []map[string]*dep.InstallInfo, failedAndIgnored map[string]error) *settingslua.PostInstallEvent {
+func postInstallEvent(targets []map[string]*dep.InstallInfo) *settingslua.PostInstallEvent {
 	merged := map[string]*dep.InstallInfo{}
 	for _, layer := range targets {
 		maps.Copy(merged, layer)
@@ -22,16 +22,12 @@ func postInstallEvent(targets []map[string]*dep.InstallInfo, failedAndIgnored ma
 	packages := make([]settingslua.PostInstallPackage, 0, len(names))
 	for _, name := range names {
 		info := merged[name]
-		_, failed := failedAndIgnored[name]
 		packages = append(packages, settingslua.PostInstallPackage{
 			Name:         name,
 			Version:      info.Version,
 			LocalVersion: info.LocalVersion,
 			Source:       luaSource(info.Source),
 			Reason:       luaReason(info.Reason),
-			Installed:    !failed,
-			Upgrade:      info.Upgrade,
-			Devel:        info.Devel,
 		})
 	}
 

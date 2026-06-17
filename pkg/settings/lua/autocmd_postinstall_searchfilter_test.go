@@ -47,9 +47,6 @@ func TestRunPostInstallEventTableShape(t *testing.T) {
 				LocalVersion: "1.0.0-1",
 				Source:       "aur",
 				Reason:       "explicit",
-				Installed:    true,
-				Upgrade:      false,
-				Devel:        true,
 			},
 		},
 	})
@@ -118,7 +115,6 @@ func TestRunSearchFilterEventTableShapeAndReturn(t *testing.T) {
 				Popularity:     3.14,
 				FirstSubmitted: 1000,
 				LastModified:   2000,
-				Provides:       []string{"pkgA-compat"},
 			},
 			{Source: "sync", Name: "pkgB"},
 			{Source: "aur", Name: "pkgC"},
