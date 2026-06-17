@@ -52,7 +52,7 @@ func (l *Logger) Debugln(a ...any) {
 		return
 	}
 
-	l.Println(l.sprintDebug(a...))
+	l.Println(append([]any{Bold(Yellow(fmt.Sprintf("[DEBUG:%s]", l.name)))}, a...)...)
 }
 
 func (l *Logger) OperationInfoln(a ...any) {
