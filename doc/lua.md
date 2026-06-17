@@ -303,8 +303,6 @@ yay.create_autocmd("AURPostDownload", {
 })
 ```
 
----
-
 ## Post-install hooks
 
 <p class="api-since">Available from yay v13.0.0</p>
@@ -350,8 +348,7 @@ yay.create_autocmd("PostInstall", {
     end
   end,
 })
-
----
+```
 
 ## Search-filter hooks
 
