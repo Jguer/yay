@@ -14,9 +14,7 @@ import (
 func postInstallEvent(targets []map[string]*dep.InstallInfo, failedAndIgnored map[string]error) *settingslua.PostInstallEvent {
 	merged := map[string]*dep.InstallInfo{}
 	for _, layer := range targets {
-		for name, info := range layer {
-			merged[name] = info
-		}
+		maps.Copy(merged, layer)
 	}
 
 	names := slices.Sorted(maps.Keys(merged))

@@ -25,8 +25,9 @@ func newTestLogger() *text.Logger {
 	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
 }
 
+//go:fix inline
 func ptrString(s string) *string {
-	return &s
+	return new(s)
 }
 
 func TestInstaller_InstallNeeded(t *testing.T) {
@@ -88,7 +89,6 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			tmpDir := td.TempDir()
@@ -151,8 +151,8 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			}
@@ -244,8 +244,8 @@ func TestInstaller_BuildOnlySkipsInstall(t *testing.T) {
 				Source:      dep.AUR,
 				Reason:      dep.Explicit,
 				Version:     "91.0.0-1",
-				SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-				AURBase:     ptrString("yay"),
+				SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+				AURBase:     new("yay"),
 			},
 		},
 	}
@@ -321,14 +321,14 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 					"linux": {
 						Source:     dep.Sync,
 						Reason:     dep.Dep,
 						Version:    "17.0.0-1",
-						SyncDBName: ptrString("core"),
+						SyncDBName: new("core"),
 					},
 				},
 			},
@@ -350,15 +350,15 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				}, {
 					"linux": {
 						Source:     dep.Sync,
 						Reason:     dep.Dep,
 						Version:    "17.0.0-1",
-						SyncDBName: ptrString("core"),
+						SyncDBName: new("core"),
 					},
 				},
 			},
@@ -376,13 +376,13 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 						Source:     dep.Sync,
 						Reason:     dep.Explicit,
 						Version:    "18.0.0-1",
-						SyncDBName: ptrString("extra"),
+						SyncDBName: new("extra"),
 					},
 					"linux": {
 						Source:     dep.Sync,
 						Reason:     dep.Explicit,
 						Version:    "17.0.0-1",
-						SyncDBName: ptrString("core"),
+						SyncDBName: new("core"),
 					},
 				},
 			},
@@ -404,15 +404,15 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 					"jellyfin-server": {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "10.8.8-1",
-						SrcinfoPath: ptrString(tmpDirJfin + "/.SRCINFO"),
-						AURBase:     ptrString("jellyfin"),
+						SrcinfoPath: new(tmpDirJfin + "/.SRCINFO"),
+						AURBase:     new("jellyfin"),
 					},
 				},
 			},
@@ -436,16 +436,16 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				}, {
 					"jellyfin-server": {
 						Source:      dep.AUR,
 						Reason:      dep.MakeDep,
 						Version:     "10.8.8-1",
-						SrcinfoPath: ptrString(tmpDirJfin + "/.SRCINFO"),
-						AURBase:     ptrString("jellyfin"),
+						SrcinfoPath: new(tmpDirJfin + "/.SRCINFO"),
+						AURBase:     new("jellyfin"),
 					},
 				},
 			},
@@ -453,7 +453,6 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
 			jfinPkgTar := tmpDirJfin + "/jellyfin-server-10.8.8-1-x86_64.pkg.tar.zst"
@@ -610,8 +609,8 @@ func TestInstaller_CompileFailed(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -628,8 +627,8 @@ func TestInstaller_CompileFailed(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -642,15 +641,15 @@ func TestInstaller_CompileFailed(t *testing.T) {
 			failPkgInstall: false,
 			targets: []map[string]*dep.InstallInfo{
 				{"bob": {
-					AURBase: ptrString("yay"),
+					AURBase: new("yay"),
 				}},
 				{
 					"yay": {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -658,7 +657,6 @@ func TestInstaller_CompileFailed(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
@@ -759,23 +757,23 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 					Source:      dep.AUR,
 					Reason:      dep.Explicit,
 					Version:     "10.8.4-1",
-					SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-					AURBase:     ptrString("jellyfin"),
+					SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+					AURBase:     new("jellyfin"),
 				}},
 				{
 					"jellyfin-server": {
 						Source:      dep.AUR,
 						Reason:      dep.Dep,
 						Version:     "10.8.4-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("jellyfin"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("jellyfin"),
 					},
 					"jellyfin-web": {
 						Source:      dep.AUR,
 						Reason:      dep.Dep,
 						Version:     "10.8.4-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("jellyfin"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("jellyfin"),
 					},
 				},
 				{
@@ -783,19 +781,19 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 						Source:     dep.Sync,
 						Reason:     dep.Dep,
 						Version:    "6.0.12.sdk112-1",
-						SyncDBName: ptrString("community"),
+						SyncDBName: new("community"),
 					},
 					"aspnet-runtime": {
 						Source:     dep.Sync,
 						Reason:     dep.Dep,
 						Version:    "6.0.12.sdk112-1",
-						SyncDBName: ptrString("community"),
+						SyncDBName: new("community"),
 					},
 					"dotnet-sdk-6.0": {
 						Source:     dep.Sync,
 						Reason:     dep.MakeDep,
 						Version:    "6.0.12.sdk112-1",
-						SyncDBName: ptrString("community"),
+						SyncDBName: new("community"),
 					},
 				},
 			},
@@ -816,7 +814,6 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			pkgTars := []string{
@@ -953,7 +950,6 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			tmpDir := td.TempDir()
@@ -1015,8 +1011,8 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			}
@@ -1079,7 +1075,6 @@ func TestInstaller_InstallGroup(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			tmpDir := td.TempDir()
@@ -1119,7 +1114,7 @@ func TestInstaller_InstallGroup(t *testing.T) {
 						Reason:     dep.Explicit,
 						Version:    "",
 						IsGroup:    true,
-						SyncDBName: ptrString("community"),
+						SyncDBName: new("community"),
 					},
 				},
 			}
@@ -1196,8 +1191,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -1220,8 +1215,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -1244,8 +1239,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -1268,8 +1263,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Dep,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -1277,7 +1272,6 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			tmpDir := td.TempDir()
@@ -1396,7 +1390,6 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			mockDB := &mock.DBExecutor{}
@@ -1421,7 +1414,7 @@ func TestInstaller_InstallUpgrade(t *testing.T) {
 						Source:     dep.Sync,
 						Reason:     dep.Dep,
 						Version:    "17.0.0-1",
-						SyncDBName: ptrString("core"),
+						SyncDBName: new("core"),
 					},
 				},
 			}
@@ -1485,8 +1478,8 @@ func TestInstaller_KeepSrc(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Explicit,
 						Version:     "92.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -1494,7 +1487,6 @@ func TestInstaller_KeepSrc(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			tmpDir := td.TempDir()
@@ -1596,8 +1588,8 @@ func TestInstaller_InstallAsExplicit(t *testing.T) {
 						Source:      dep.AUR,
 						Reason:      dep.Dep,
 						Version:     "91.0.0-1",
-						SrcinfoPath: ptrString(tmpDir + "/.SRCINFO"),
-						AURBase:     ptrString("yay"),
+						SrcinfoPath: new(tmpDir + "/.SRCINFO"),
+						AURBase:     new("yay"),
 					},
 				},
 			},
@@ -1623,7 +1615,7 @@ func TestInstaller_InstallAsExplicit(t *testing.T) {
 						Source:     dep.Sync,
 						Reason:     dep.Dep,
 						Version:    "17.0.0-1",
-						SyncDBName: ptrString("core"),
+						SyncDBName: new("core"),
 					},
 				},
 			},
@@ -1636,7 +1628,6 @@ func TestInstaller_InstallAsExplicit(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.desc, func(td *testing.T) {
 			td.Parallel()
 			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"

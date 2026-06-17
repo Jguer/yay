@@ -12,6 +12,7 @@ linters:
     - gochecknoinits
     - gocritic
     - goprintffuncname
+    - modernize
     - gosec
     - govet
     - ineffassign

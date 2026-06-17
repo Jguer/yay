@@ -1,5 +1,4 @@
 //go:build !integration
-// +build !integration
 
 package main
 
@@ -43,7 +42,6 @@ func TestPrintPkgbuilds(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			defer gock.Off()
 			gock.New("https://aur.archlinux.org").

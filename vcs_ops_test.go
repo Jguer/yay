@@ -1,5 +1,4 @@
 //go:build !integration
-// +build !integration
 
 package main
 
@@ -20,10 +19,11 @@ func TestInfoToInstallInfo(t *testing.T) {
 
 	require.Len(t, info, 1)
 	require.Len(t, info[0], 2)
-	require.Equal(t, &dep.InstallInfo{AURBase: ptr("foo-base"), Source: dep.AUR}, info[0]["foo"])
-	require.Equal(t, &dep.InstallInfo{AURBase: ptr("bar-base"), Source: dep.AUR}, info[0]["bar"])
+	require.Equal(t, &dep.InstallInfo{AURBase: new("foo-base"), Source: dep.AUR}, info[0]["foo"])
+	require.Equal(t, &dep.InstallInfo{AURBase: new("bar-base"), Source: dep.AUR}, info[0]["bar"])
 }
 
+//go:fix inline
 func ptr(s string) *string {
-	return &s
+	return new(s)
 }

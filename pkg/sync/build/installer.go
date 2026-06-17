@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"maps"
 	"os"
+	"slices"
 
 	"github.com/Jguer/yay/v12/pkg/db"
 	"github.com/Jguer/yay/v12/pkg/dep"
@@ -109,9 +110,9 @@ func (installer *Installer) Install(ctx context.Context,
 
 	// Reorganize targets into layers of dependencies
 	var errs []error
-	for i := len(targets) - 1; i >= 0; i-- {
+	for i, v := range slices.Backward(targets) {
 		lastLayer := i == 0
-		errI := installer.handleLayer(ctx, cmdArgs, targets[i], pkgBuildDirs, lastLayer, excluded)
+		errI := installer.handleLayer(ctx, cmdArgs, v, pkgBuildDirs, lastLayer, excluded)
 		if errI == nil && lastLayer {
 			// success after rollups
 			return nil
@@ -125,7 +126,7 @@ func (installer *Installer) Install(ctx context.Context,
 
 			// rollup
 			installer.log.Warnln(gotext.Get("Failed to install layer, rolling up to next layer."), "error:", errI)
-			targets[i-1] = mergeLayers(targets[i-1], targets[i])
+			targets[i-1] = mergeLayers(targets[i-1], v)
 		}
 	}
 

@@ -3,6 +3,7 @@ package menus
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -16,26 +17,26 @@ import (
 func pkgbuildNumberMenu(logger *text.Logger, pkgbuildDirs map[string]string,
 	bases []string, installed mapset.Set[string],
 ) {
-	toPrint := ""
+	var toPrint strings.Builder
 
 	for n, pkgBase := range bases {
 		dir := pkgbuildDirs[pkgBase]
-		toPrint += fmt.Sprintf(text.Magenta("%3d")+" %-40s", len(pkgbuildDirs)-n,
-			text.Bold(pkgBase))
+		toPrint.WriteString(fmt.Sprintf(text.Magenta("%3d")+" %-40s", len(pkgbuildDirs)-n,
+			text.Bold(pkgBase)))
 
 		if installed.Contains(pkgBase) {
-			toPrint += text.Bold(text.Green(gotext.Get(" (Installed)")))
+			toPrint.WriteString(text.Bold(text.Green(gotext.Get(" (Installed)"))))
 		}
 
 		// TODO: remove or refactor to check if git dir is unclean
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			toPrint += text.Bold(text.Green(gotext.Get(" (Build Files Exist)")))
+			toPrint.WriteString(text.Bold(text.Green(gotext.Get(" (Build Files Exist)"))))
 		}
 
-		toPrint += "\n"
+		toPrint.WriteString("\n")
 	}
 
-	logger.Print(toPrint)
+	logger.Print(toPrint.String())
 }
 
 func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []string, installed mapset.Set[string],

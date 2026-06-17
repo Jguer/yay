@@ -1,5 +1,4 @@
 //go:build !integration
-// +build !integration
 
 // Package dep provides tests for tree resolution and parsing using RPC/.SRCINFO metadata
 // instead of PKGBUILD parsing. These tests validate:
@@ -283,11 +282,11 @@ func TestGrapher_SplitPackages_Clion(t *testing.T) {
 	}}
 
 	installInfos := map[string]*InstallInfo{
-		"clion exp":       {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-jre exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-cmake exp": {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-gdb exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-lldb exp":  {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: ptrString("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion exp":       {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-jre exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-cmake exp": {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-gdb exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-lldb exp":  {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
 	}
 
 	tests := []struct {
@@ -567,11 +566,11 @@ func TestGrapher_SplitPackages_NX(t *testing.T) {
 	}}
 
 	installInfos := map[string]*InstallInfo{
-		"nxproxy exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"nxagent exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"nx-x11 dep":   {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"libxcomp dep": {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"libxcomp exp": {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: ptrString("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"nxproxy exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"nxagent exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"nx-x11 dep":   {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"libxcomp dep": {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"libxcomp exp": {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
 	}
 
 	tests := []struct {

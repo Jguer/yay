@@ -1,5 +1,4 @@
 //go:build !integration
-// +build !integration
 
 package workdir
 
@@ -73,8 +72,8 @@ func TestRunAURPostDownloadLuaHooksRunsBasesInSortedOrder(t *testing.T) {
 		mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
-				"a": {Source: dep.AUR, AURBase: ptrString("a-base")},
-				"z": {Source: dep.AUR, AURBase: ptrString("z-base")},
+				"a": {Source: dep.AUR, AURBase: new("a-base")},
+				"z": {Source: dep.AUR, AURBase: new("z-base")},
 			},
 		})
 	require.NoError(t, err)

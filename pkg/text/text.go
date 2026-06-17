@@ -25,7 +25,7 @@ func SplitDBFromName(pkg string) (db, name string) {
 func LessRunes(iRunes, jRunes []rune) bool {
 	maxLen := min(len(iRunes), len(jRunes))
 
-	for idx := 0; idx < maxLen; idx++ {
+	for idx := range maxLen {
 		ir := iRunes[idx]
 		jr := jRunes[idx]
 

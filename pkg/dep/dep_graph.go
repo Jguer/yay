@@ -763,18 +763,19 @@ func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 		return &options[0]
 	}
 
-	str := text.Bold(gotext.Get("There are %[1]d providers available for %[2]s:", size, dep))
-	str += "\n"
+	var str strings.Builder
+	str.WriteString(text.Bold(gotext.Get("There are %[1]d providers available for %[2]s:", size, dep)))
+	str.WriteString("\n")
 
 	size = 1
-	str += g.logger.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    ")
+	str.WriteString(g.logger.SprintOperationInfo(gotext.Get("Repository AUR"), "\n    "))
 
 	for i := range options {
-		str += fmt.Sprintf("%d) %s ", size, options[i].Name)
+		str.WriteString(fmt.Sprintf("%d) %s ", size, options[i].Name))
 		size++
 	}
 
-	g.logger.OperationInfoln(str)
+	g.logger.OperationInfoln(str.String())
 
 	for {
 		g.logger.Println(gotext.Get("\nEnter a number (default=1): "))

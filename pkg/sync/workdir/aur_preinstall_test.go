@@ -1,5 +1,4 @@
 //go:build !integration
-// +build !integration
 
 package workdir
 
@@ -115,8 +114,8 @@ func TestRunAURPreInstallLuaHooksRunsBasesInSortedOrder(t *testing.T) {
 		mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
-				"a": {Source: dep.AUR, AURBase: ptrString("a-base")},
-				"z": {Source: dep.AUR, AURBase: ptrString("z-base")},
+				"a": {Source: dep.AUR, AURBase: new("a-base")},
+				"z": {Source: dep.AUR, AURBase: new("z-base")},
 			},
 		})
 	require.NoError(t, err)
@@ -235,6 +234,7 @@ pkgname = demo-doc
 	return dir
 }
 
+//go:fix inline
 func ptrString(s string) *string {
-	return &s
+	return new(s)
 }

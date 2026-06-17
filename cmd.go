@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	alpm "github.com/Jguer/dyalpm"
@@ -412,8 +413,8 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 ) error {
 	aur := false
 
-	for i := len(cmdArgs.Targets) - 1; i >= 0; i-- {
-		if cmdArgs.Targets[i] == "aur" && run.Cfg.Mode.AtLeastAUR() {
+	for i, v := range slices.Backward(cmdArgs.Targets) {
+		if v == "aur" && run.Cfg.Mode.AtLeastAUR() {
 			cmdArgs.Targets = append(cmdArgs.Targets[:i], cmdArgs.Targets[i+1:]...)
 			aur = true
 		}
