@@ -346,13 +346,10 @@ yay.create_autocmd("PostInstall", {
   desc = "log every package yay installed",
   callback = function(event)
     for _, pkg in ipairs(event.data.packages) do
-      if pkg.installed then
-        yay.log.info(pkg.name .. " " .. pkg.version .. " installed (" .. pkg.source .. ")")
-      end
+      yay.log.info(pkg.name .. " " .. pkg.version .. " (" .. pkg.source .. ")")
     end
   end,
 })
-```
 
 ---
 

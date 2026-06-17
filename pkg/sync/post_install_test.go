@@ -17,15 +17,13 @@ func TestPostInstallEvent(t *testing.T) {
 	base := "aur-base"
 	targets := []map[string]*dep.InstallInfo{
 		{
-			// Layer 0: two AUR packages, one of which will fail.
+			// Layer 0: two AUR packages.
 			"pkgA": {
 				Source:       dep.AUR,
 				Reason:       dep.Explicit,
 				Version:      "2.0-1",
 				LocalVersion: "1.0-1",
 				AURBase:      &base,
-				Upgrade:      true,
-				Devel:        false,
 			},
 			"pkgB": {
 				Source:       dep.AUR,
@@ -33,8 +31,6 @@ func TestPostInstallEvent(t *testing.T) {
 				Version:      "1.1-1",
 				LocalVersion: "",
 				AURBase:      &base,
-				Upgrade:      false,
-				Devel:        true,
 			},
 		},
 		{
@@ -43,8 +39,6 @@ func TestPostInstallEvent(t *testing.T) {
 				Source:  dep.Sync,
 				Reason:  dep.MakeDep,
 				Version: "3.0-1",
-				Upgrade: false,
-				Devel:   false,
 			},
 			// pkgA appears in layer 1 too; layer merge last-wins → this version.
 			"pkgA": {
@@ -53,8 +47,6 @@ func TestPostInstallEvent(t *testing.T) {
 				Version:      "2.0-2",
 				LocalVersion: "1.0-1",
 				AURBase:      &base,
-				Upgrade:      true,
-				Devel:        false,
 			},
 		},
 	}

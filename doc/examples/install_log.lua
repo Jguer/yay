@@ -15,19 +15,11 @@ yay.create_autocmd("PostInstall", {
     local ts = os.date("%Y-%m-%dT%H:%M:%S")
 
     for _, pkg in ipairs(event.data.packages) do
-      if pkg.installed then
-        local action = pkg.upgrade and "upgrade" or "install"
-        local version_change
-        if pkg.upgrade then
-          version_change = pkg.local_version .. " -> " .. pkg.version
-        else
-          version_change = pkg.version
-        end
-
-        local flags = pkg.devel and " devel" or ""
-        f:write(string.format("%s  %-9s %-7s %-14s %-12s %s%s\n",
-          ts, action, pkg.source, pkg.reason, pkg.name, version_change, flags))
-      end
+      local upgrade = pkg.local_version ~= ""
+      local action = upgrade and "upgrade" or "install"
+      local version_change = upgrade and (pkg.local_version .. " -> " .. pkg.version) or pkg.version
+      f:write(string.format("%s  %-9s %-7s %-14s %-12s %s\n",
+        ts, action, pkg.source, pkg.reason, pkg.name, version_change))
     end
 
     f:close()

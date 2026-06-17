@@ -31,9 +31,6 @@ func TestRunPostInstallEventTableShape(t *testing.T) {
 				if pkg.local_version ~= "1.0.0-1" then error("bad local_version") end
 				if pkg.source ~= "aur" then error("bad source") end
 				if pkg.reason ~= "explicit" then error("bad reason") end
-				if pkg.installed ~= true then error("bad installed") end
-				if pkg.upgrade ~= false then error("bad upgrade") end
-				if pkg.devel ~= true then error("bad devel") end
 				setRan()
 			end,
 		})
@@ -93,8 +90,6 @@ func TestRunSearchFilterEventTableShapeAndReturn(t *testing.T) {
 				if math.abs(r.popularity - 3.14) > 0.001 then error("bad popularity") end
 				if r.first_submitted ~= 1000 then error("bad first_submitted") end
 				if r.last_modified ~= 2000 then error("bad last_modified") end
-				if r.provides[1] ~= "pkgA-compat" then error("bad provides") end
-
 				-- Return reversed order, dropping pkgC
 				return {
 					{ source = "sync", name = "pkgB" },

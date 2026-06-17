@@ -8,9 +8,7 @@ import (
 	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
 )
 
-// postInstallEvent flattens the resolved topo layers into the PostInstall
-// payload. Packages recorded in failedAndIgnored (last-layer AUR build
-// failures tolerated by the installer) are marked installed = false.
+// postInstallEvent flattens the resolved topo layers into the PostInstall payload.
 func postInstallEvent(targets []map[string]*dep.InstallInfo) *settingslua.PostInstallEvent {
 	merged := map[string]*dep.InstallInfo{}
 	for _, layer := range targets {
