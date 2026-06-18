@@ -76,8 +76,8 @@ func UpAUR(log *text.Logger, remote map[string]db.IPackage, aurdata map[string]*
 			continue
 		}
 
-		if (db.VerCmp(pkg.Version(), aurPkg.Version) < 0) ||
-			(enableDowngrade && (db.VerCmp(pkg.Version(), aurPkg.Version) > 0)) {
+		cmp := db.VerCmp(pkg.Version(), aurPkg.Version)
+		if cmp < 0 || (enableDowngrade && cmp > 0) {
 			if pkg.ShouldIgnore() {
 				printIgnoringPackage(log, pkg, aurPkg.Version)
 			} else {

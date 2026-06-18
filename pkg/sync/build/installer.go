@@ -152,10 +152,13 @@ func (installer *Installer) handleLayer(ctx context.Context,
 ) error {
 	// Install layer
 	nameToBaseMap := make(map[string]string, len(layer))
-	syncDeps, syncExp, syncGroups := mapset.NewThreadUnsafeSet[string](),
-		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
-	aurDeps, aurExp, aurOrigTargetBases := mapset.NewThreadUnsafeSet[string](),
-		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
+	// Pre-size to len(layer) to avoid internal map resizing; a layer rarely has
+	// more entries than it has packages.
+	setCap := len(layer)
+	syncDeps, syncExp, syncGroups := mapset.NewThreadUnsafeSetWithSize[string](setCap),
+		mapset.NewThreadUnsafeSetWithSize[string](setCap), mapset.NewThreadUnsafeSetWithSize[string](setCap)
+	aurDeps, aurExp, aurOrigTargetBases := mapset.NewThreadUnsafeSetWithSize[string](setCap),
+		mapset.NewThreadUnsafeSetWithSize[string](setCap), mapset.NewThreadUnsafeSetWithSize[string](setCap)
 
 	upgradeSync := false
 	for name, info := range layer {

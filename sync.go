@@ -84,6 +84,14 @@ func syncInstall(ctx context.Context,
 		return nil
 	})
 
+	// DependOn no longer rejects cycles eagerly (it was only ever logged as a
+	// warning, never fatal). Surface cyclic packages here so the user is still
+	// told which packages form an unresolvable dependency loop; those packages
+	// are absent from `targets` and will simply not be installed.
+	if cyclic := graph.CyclicNodes(); len(cyclic) != 0 {
+		run.Logger.Warnln(gotext.Get("circular dependencies detected, skipping: %v", cyclic))
+	}
+
 	if err := errors.Join(errs...); err != nil {
 		return err
 	}

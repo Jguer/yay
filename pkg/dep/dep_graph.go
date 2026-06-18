@@ -499,10 +499,16 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 
 	depsSlice := deps.ToSlice()
 
+	// Pre-parse every dep once into a name -> [depStrings] lookup so the per-AUR-package
+	// inner loops below are O(1) map lookups instead of re-splitting every dep for every
+	// package and every provides entry. Splits the O(|aurPkgs|*|deps|*|provides|) nested
+	// work down to O(|deps| + |aurPkgs|*|provides|).
+	nameToDepStrings := make(map[string][]string, deps.Cardinality())
 	missingNeedles := make([]string, 0, deps.Cardinality())
 	for _, depString := range depsSlice {
+		depName, _, _ := splitDep(depString)
+		nameToDepStrings[depName] = append(nameToDepStrings[depName], depString)
 		if _, ok := g.providerCache[depString]; !ok {
-			depName, _, _ := splitDep(depString)
 			missingNeedles = append(missingNeedles, depName)
 		}
 	}
@@ -520,25 +526,19 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 
 		for i := range aurPkgs {
 			pkg := &aurPkgs[i]
-			// Cache by the full depString (including version) for each dep whose name matches
-			for _, depString := range depsSlice {
-				depName, _, _ := splitDep(depString)
-				if depName == pkg.Name {
-					g.providerCache[depString] = append(g.providerCache[depString], *pkg)
-				}
+			// Cache by the full depString (including version) for each dep whose name matches.
+			for _, depString := range nameToDepStrings[pkg.Name] {
+				g.providerCache[depString] = append(g.providerCache[depString], *pkg)
 			}
 
 			for _, val := range pkg.Provides {
 				if val == pkg.Name {
 					continue
 				}
-				// Also check provides against versioned deps
+				// Also check provides against versioned deps.
 				provideName, _, _ := splitDep(val)
-				for _, depString := range depsSlice {
-					depName, _, _ := splitDep(depString)
-					if depName == provideName {
-						g.providerCache[depString] = append(g.providerCache[depString], *pkg)
-					}
+				for _, depString := range nameToDepStrings[provideName] {
+					g.providerCache[depString] = append(g.providerCache[depString], *pkg)
 				}
 			}
 		}

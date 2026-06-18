@@ -2,7 +2,6 @@ package topo
 
 import (
 	"fmt"
-	"maps"
 	"strings"
 
 	alpm "github.com/Jguer/dyalpm"
@@ -153,16 +152,15 @@ func (g *Graph[T, V]) GetNodeInfo(node T) *NodeInfo[V] {
 
 // DependOn adds an edge meaning "child depends on parent".
 //
-// This ensures both nodes exist in the graph and rejects:
-// - self edges (ErrSelfReferential)
-// - edges that would introduce a cycle (ErrCircular)
+// This ensures both nodes exist in the graph and rejects self edges (ErrSelfReferential).
+//
+// Cycle detection is NOT performed here: a per-edge transitive BFS is O(V) per call
+// and O(V*E) total for graph construction, while real dependency graphs are DAGs by
+// construction. Cycles (packaging errors) are detected at sort time by
+// TopoSortedLayers / HasCycle using Kahn's algorithm in a single O(V+E) pass.
 func (g *Graph[T, V]) DependOn(child, parent T) error {
 	if child == parent {
 		return ErrSelfReferential
-	}
-
-	if g.DependsOn(parent, child) {
-		return ErrCircular
 	}
 
 	g.AddNode(parent)
@@ -226,24 +224,6 @@ func (g *Graph[T, V]) HasDependent(parent, dependent T) bool {
 	return ok
 }
 
-// leavesMap returns a map of leaves with the node as key and the node info value as value.
-func (g *Graph[T, V]) leavesMap() map[T]V {
-	leaves := make(map[T]V, 0)
-
-	for node := range g.nodes {
-		if _, ok := g.dependencies[node]; !ok {
-			nodeInfo := g.GetNodeInfo(node)
-			if nodeInfo == nil {
-				nodeInfo = &NodeInfo[V]{}
-			}
-
-			leaves[node] = nodeInfo.Value
-		}
-	}
-
-	return leaves
-}
-
 // TopoSortedLayers returns a slice of all of the graph nodes in topological sort order with their node info.
 //
 // The returned slice is layered: each element is a "layer" of nodes that have no remaining
@@ -256,30 +236,124 @@ func (g *Graph[T, V]) leavesMap() map[T]V {
 // If checkFn is non-nil, it is called once per node when it is emitted in a layer. Returning an
 // error causes TopoSortedLayers to return nil.
 func (g *Graph[T, V]) TopoSortedLayers(checkFn CheckFn[T, V]) []map[T]V {
+	// Kahn's algorithm. In-degree of a node = number of its direct dependencies.
+	// A node is ready to emit once all of its dependencies have been emitted.
+	// This is O(V+E), allocates a single small int map instead of cloning the graph,
+	// and leaves the original graph untouched.
+	inDegree := make(map[T]int, g.Len())
+	for node := range g.nodes {
+		inDegree[node] = len(g.dependencies[node])
+	}
+
 	layers := []map[T]V{}
 
-	// Copy the graph
-	shrinkingGraph := g.clone()
-
-	for {
-		leaves := shrinkingGraph.leavesMap()
-		if len(leaves) == 0 {
-			break
-		}
-
-		layers = append(layers, leaves)
-
-		for leafNode := range leaves {
-			if checkFn != nil {
-				if err := checkFn(leafNode, leaves[leafNode]); err != nil {
-					return nil
-				}
-			}
-			shrinkingGraph.remove(leafNode)
+	// Seed the first layer with all dependency-free nodes.
+	current := make(map[T]V, g.Len())
+	for node := range g.nodes {
+		if inDegree[node] == 0 {
+			current[node] = g.nodeValue(node)
 		}
 	}
 
+	for len(current) > 0 {
+		layers = append(layers, current)
+
+		nextLayer := make(map[T]V, len(current))
+		for node := range current {
+			if checkFn != nil {
+				if err := checkFn(node, current[node]); err != nil {
+					return nil
+				}
+			}
+			// Decrement in-degree of this node's direct dependents; those reaching 0
+			// become ready for the next layer.
+			for dependent := range g.dependents[node] {
+				inDegree[dependent]--
+				if inDegree[dependent] == 0 {
+					nextLayer[dependent] = g.nodeValue(dependent)
+				}
+			}
+		}
+		current = nextLayer
+	}
+
 	return layers
+}
+
+// nodeValue returns the NodeInfo value for node, or the zero value of V if unset.
+func (g *Graph[T, V]) nodeValue(node T) V {
+	var v V
+	if info := g.nodeInfo[node]; info != nil {
+		v = info.Value
+	}
+	return v
+}
+
+// HasCycle reports whether the graph contains a directed cycle.
+//
+// A cycle exists when a topological sort cannot emit all nodes, i.e. some nodes never
+// reach in-degree zero. This is the deferred cycle check that DependOn no longer
+// performs eagerly; call it (or inspect len(TopoSortedLayers(nil)) < Len()) when a
+// cycle would be a fatal condition. It runs in O(V+E) and does not modify the graph.
+// kahnPass runs Kahn's algorithm and returns the nodes that were emitted
+// (i.e. reachable from dependency-free roots). Nodes not returned are part of
+// one or more cycles and can never be topologically sorted.
+func (g *Graph[T, V]) kahnPass() []T {
+	inDegree := make(map[T]int, g.Len())
+	for node := range g.nodes {
+		inDegree[node] = len(g.dependencies[node])
+	}
+
+	queue := make([]T, 0, g.Len())
+	for node := range g.nodes {
+		if inDegree[node] == 0 {
+			queue = append(queue, node)
+		}
+	}
+
+	emitted := make([]T, 0, g.Len())
+	for len(queue) > 0 {
+		node := queue[0]
+		queue = queue[1:]
+		emitted = append(emitted, node)
+		for dependent := range g.dependents[node] {
+			inDegree[dependent]--
+			if inDegree[dependent] == 0 {
+				queue = append(queue, dependent)
+			}
+		}
+	}
+
+	return emitted
+}
+
+// HasCycle reports whether the graph contains a directed cycle.
+//
+// A cycle exists when a topological sort cannot emit all nodes, i.e. some nodes never
+// reach in-degree zero. This is the deferred cycle check that DependOn no longer
+// performs eagerly; call it (or inspect len(TopoSortedLayers(nil)) < Len()) when a
+// cycle would be a fatal condition. It runs in O(V+E) and does not modify the graph.
+func (g *Graph[T, V]) HasCycle() bool {
+	return len(g.kahnPass()) != g.Len()
+}
+
+// CyclicNodes returns the nodes that cannot be emitted by a topological sort,
+// i.e. those participating in one or more directed cycles. The slice is empty
+// when the graph is acyclic. Useful for surfacing which packages form the cycle
+// in a user-facing warning. Runs in O(V+E) and does not modify the graph.
+func (g *Graph[T, V]) CyclicNodes() []T {
+	emitted := g.kahnPass()
+	emittedSet := make(map[T]bool, len(emitted))
+	for _, n := range emitted {
+		emittedSet[n] = true
+	}
+	cyclic := make([]T, 0)
+	for node := range g.nodes {
+		if !emittedSet[node] {
+			cyclic = append(cyclic, node)
+		}
+	}
+	return cyclic
 }
 
 // returns if it was the last
@@ -329,25 +403,6 @@ func (g *Graph[T, V]) Prune(node T) []T {
 	return pruned
 }
 
-func (g *Graph[T, V]) remove(node T) {
-	// Remove edges from things that depend on `node`.
-	for dependent := range g.dependents[node] {
-		g.dependencies.remove(dependent, node)
-	}
-
-	delete(g.dependents, node)
-
-	// Remove all edges from node to the things it depends on.
-	for dependency := range g.dependencies[node] {
-		g.dependents.remove(dependency, node)
-	}
-
-	delete(g.dependencies, node)
-
-	// Finally, remove the node itself.
-	delete(g.nodes, node)
-}
-
 // Dependencies returns all transitive dependencies of child (excluding child itself).
 // The returned set is nil if child is not present in the graph.
 func (g *Graph[T, V]) Dependencies(child T) NodeSet[T] {
@@ -370,15 +425,6 @@ func (g *Graph[T, V]) Dependents(parent T) NodeSet[T] {
 // The returned set is nil if node has no direct dependents (or is not present).
 func (g *Graph[T, V]) ImmediateDependents(node T) NodeSet[T] {
 	return g.dependents[node]
-}
-
-func (g *Graph[T, V]) clone() *Graph[T, V] {
-	return &Graph[T, V]{
-		dependencies: g.dependencies.copy(),
-		dependents:   g.dependents.copy(),
-		nodes:        g.nodes.copy(),
-		nodeInfo:     g.nodeInfo, // not copied, as it is not modified
-	}
 }
 
 // buildTransitive starts at `root` and continues calling `nextFn` to keep discovering more nodes until
@@ -413,22 +459,6 @@ func (g *Graph[T, V]) buildTransitive(root T, nextFn func(T) NodeSet[T]) NodeSet
 		// avoiding any aliasing while we range over searchNext and append
 		// to discovered in the same iteration.
 		searchNext, discovered = discovered, searchNext
-	}
-
-	return out
-}
-
-func (s NodeSet[T]) copy() NodeSet[T] {
-	out := make(NodeSet[T], len(s))
-	maps.Copy(out, s)
-
-	return out
-}
-
-func (dm DepMap[T]) copy() DepMap[T] {
-	out := make(DepMap[T], len(dm))
-	for k := range dm {
-		out[k] = dm[k].copy()
 	}
 
 	return out

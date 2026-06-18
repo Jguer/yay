@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -21,6 +22,12 @@ import (
 )
 
 const defaultTimeout = 15 * time.Second
+
+// maxConcurrentVCS caps the number of concurrent git ls-remote child processes spawned
+// by Update / needsUpdate. Without a cap, a package with many sources (large -git
+// packages can have 10+) multiplied across all devel packages checked in parallel by
+// UpDevel can exhaust the process table and network connections.
+var maxConcurrentVCS = runtime.NumCPU()
 
 type Store interface {
 	// ToUpgrade returns true if the package needs to be updated.
@@ -122,6 +129,8 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.
 
 	info := make(OriginInfoByURL)
 
+	sem := make(chan struct{}, maxConcurrentVCS)
+
 	checkSource := func(source gosrc.ArchString) {
 		defer wg.Done()
 
@@ -130,7 +139,12 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.
 			return
 		}
 
+		// Cap concurrent git ls-remote processes; release before taking the mutex
+		// so the I/O bound part is throttled but the (cheap) state update is not.
+		sem <- struct{}{}
 		commit := v.getCommit(ctx, url, branch, protocols)
+		<-sem
+
 		if commit == "" {
 			return
 		}
@@ -226,8 +240,12 @@ func (v *InfoStore) needsUpdate(ctx context.Context, infos OriginInfoByURL) bool
 	closed := make(chan struct{})
 	defer close(closed)
 
+	sem := make(chan struct{}, maxConcurrentVCS)
+
 	checkHash := func(url string, info OriginInfo) {
+		sem <- struct{}{}
 		hash := v.getCommit(ctx, url, info.Branch, info.Protocols)
+		<-sem
 
 		var sendTo chan<- struct{}
 		if hash != "" && hash != info.SHA {

@@ -87,6 +87,26 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 ) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
+	// Resolve names in parallel first: getPackageUsableName may call the AUR RPC
+	// for name lookup, and doing it serially in the dispatch loop makes the
+	// resolution phase sequential for all targets even though it is I/O-bound.
+	type resolvedTarget struct {
+		dbName, pkgName string
+		isAUR, skip     bool
+	}
+	resolved := make([]resolvedTarget, len(targets))
+
+	var resolveWg sync.WaitGroup
+	for i, target := range targets {
+		resolveWg.Add(1)
+		go func(i int, t string) {
+			defer resolveWg.Done()
+			dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, logger, t, mode)
+			resolved[i] = resolvedTarget{dbName, name, isAUR, toSkip}
+		}(i, target)
+	}
+	resolveWg.Wait()
+
 	var (
 		mux  sync.Mutex
 		errs []error
@@ -95,10 +115,9 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 
 	sem := make(chan uint8, MaxConcurrentFetch)
 
-	for _, target := range targets {
-		// Probably replaceable by something in query.
-		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, logger, target, mode)
-		if toSkip {
+	for i, target := range targets {
+		r := resolved[i]
+		if r.skip {
 			continue
 		}
 
@@ -128,7 +147,7 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 
 			<-sem
 			wg.Done()
-		}(target, dbName, name, isAUR)
+		}(target, r.dbName, r.pkgName, r.isAUR)
 	}
 
 	wg.Wait()
@@ -142,6 +161,26 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 ) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
 
+	// Resolve names in parallel first: getPackageUsableName may call the AUR RPC
+	// for name lookup, and doing it serially in the dispatch loop makes the
+	// resolution phase sequential for all targets even though it is I/O-bound.
+	type resolvedTarget struct {
+		dbName, pkgName string
+		isAUR, skip     bool
+	}
+	resolved := make([]resolvedTarget, len(targets))
+
+	var resolveWg sync.WaitGroup
+	for i, target := range targets {
+		resolveWg.Add(1)
+		go func(i int, t string) {
+			defer resolveWg.Done()
+			dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, logger, t, mode)
+			resolved[i] = resolvedTarget{dbName, name, isAUR, toSkip}
+		}(i, target)
+	}
+	resolveWg.Wait()
+
 	var (
 		mux  sync.Mutex
 		errs []error
@@ -150,10 +189,9 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 
 	sem := make(chan uint8, MaxConcurrentFetch)
 
-	for _, target := range targets {
-		// Probably replaceable by something in query.
-		dbName, name, isAUR, toSkip := getPackageUsableName(dbExecutor, aurClient, logger, target, mode)
-		if toSkip {
+	for i, target := range targets {
+		r := resolved[i]
+		if r.skip {
 			continue
 		}
 
@@ -197,7 +235,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 			<-sem
 
 			wg.Done()
-		}(target, dbName, name, isAUR)
+		}(target, r.dbName, r.pkgName, r.isAUR)
 	}
 
 	wg.Wait()

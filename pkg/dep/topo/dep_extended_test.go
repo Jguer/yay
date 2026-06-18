@@ -23,15 +23,97 @@ func TestGraph_AddNodeAndLenAndExists(t *testing.T) {
 	require.False(t, graph.Exists("missing"))
 }
 
-func TestGraph_DependOnRejectsInvalidEdges(t *testing.T) {
+func TestGraph_DependOnRejectsSelfEdges(t *testing.T) {
 	t.Parallel()
 
 	graph := New[string, struct{}]()
 	require.EqualError(t, ErrSelfReferential, graph.DependOn("a", "a").Error())
 
+	// DependOn no longer detects cycles eagerly (O(V) per edge); cycles are
+	// detected at sort time via HasCycle / TopoSortedLayers.
 	require.NoError(t, graph.DependOn("a", "b"))
-	require.EqualError(t, ErrCircular, graph.DependOn("b", "a").Error())
+	require.NoError(t, graph.DependOn("b", "a"))
 	require.NoError(t, graph.DependOn("c", "b"))
+	require.True(t, graph.HasCycle())
+}
+
+func TestGraph_HasCycle(t *testing.T) {
+	t.Parallel()
+
+	t.Run("acyclic", func(t *testing.T) {
+		t.Parallel()
+		graph := New[string, struct{}]()
+		require.NoError(t, graph.DependOn("yay", "go"))
+		require.NoError(t, graph.DependOn("foo", "yay"))
+		require.False(t, graph.HasCycle())
+		require.Len(t, graph.TopoSortedLayers(nil), 3)
+	})
+
+	t.Run("two-node cycle", func(t *testing.T) {
+		t.Parallel()
+		graph := New[string, struct{}]()
+		require.NoError(t, graph.DependOn("a", "b"))
+		require.NoError(t, graph.DependOn("b", "a"))
+		require.True(t, graph.HasCycle())
+		// Nodes in the cycle are never emitted; only dependency-free nodes outside
+		// the cycle (none here) would appear.
+		require.Empty(t, graph.TopoSortedLayers(nil))
+	})
+
+	t.Run("self-loop rejected by DependOn not by HasCycle", func(t *testing.T) {
+		t.Parallel()
+		graph := New[string, struct{}]()
+		require.EqualError(t, ErrSelfReferential, graph.DependOn("a", "a").Error())
+	})
+}
+
+func TestGraph_CyclicNodes(t *testing.T) {
+	t.Parallel()
+
+	t.Run("acyclic returns empty", func(t *testing.T) {
+		t.Parallel()
+		graph := New[string, struct{}]()
+		require.NoError(t, graph.DependOn("yay", "go"))
+		require.NoError(t, graph.DependOn("foo", "yay"))
+		require.Empty(t, graph.CyclicNodes())
+		require.False(t, graph.HasCycle())
+	})
+
+	t.Run("two-node cycle names both nodes", func(t *testing.T) {
+		t.Parallel()
+		graph := New[string, struct{}]()
+		require.NoError(t, graph.DependOn("a", "b"))
+		require.NoError(t, graph.DependOn("b", "a"))
+		cyclic := graph.CyclicNodes()
+		require.Len(t, cyclic, 2)
+		set := map[string]bool{}
+		for _, n := range cyclic {
+			set[n] = true
+		}
+		require.True(t, set["a"])
+		require.True(t, set["b"])
+		require.True(t, graph.HasCycle())
+	})
+
+	t.Run("cycle plus acyclic nodes names only cycle", func(t *testing.T) {
+		t.Parallel()
+		graph := New[string, struct{}]()
+		// acyclic chain: foo -> yay -> go
+		require.NoError(t, graph.DependOn("yay", "go"))
+		require.NoError(t, graph.DependOn("foo", "yay"))
+		// cycle: a -> b -> a
+		require.NoError(t, graph.DependOn("a", "b"))
+		require.NoError(t, graph.DependOn("b", "a"))
+		cyclic := graph.CyclicNodes()
+		require.Len(t, cyclic, 2)
+		// the acyclic chain must still sort fully
+		layers := graph.TopoSortedLayers(nil)
+		emitted := 0
+		for _, layer := range layers {
+			emitted += len(layer)
+		}
+		require.Equal(t, 3, emitted, "acyclic nodes must still be emitted")
+	})
 }
 
 func TestGraph_ForEachAndForEachError(t *testing.T) {
