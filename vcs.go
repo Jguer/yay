@@ -21,7 +21,7 @@ func infoToInstallInfo(info []aur.Pkg) []map[string]*dep.InstallInfo {
 	for i := range info {
 		pkg := &info[i]
 		installInfo[0][pkg.Name] = &dep.InstallInfo{
-			AURBase: &pkg.PackageBase,
+			AURBase: pkg.PackageBase,
 			Source:  dep.AUR,
 		}
 	}

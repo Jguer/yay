@@ -155,7 +155,7 @@ func TestGrapher_GraphSyncGroupAndValidateNodeInfo(t *testing.T) {
 	groupInfo := graph.GetNodeInfo("editors").Value
 	require.NotNil(t, groupInfo)
 	require.True(t, groupInfo.IsGroup)
-	require.Equal(t, "community", *groupInfo.SyncDBName)
+	require.Equal(t, "community", groupInfo.SyncDBName)
 
 	target := "grouped"
 	graph.SetNodeInfo(target, &topo.NodeInfo[*InstallInfo]{Value: &InstallInfo{Reason: Explicit}})

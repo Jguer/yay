@@ -390,11 +390,10 @@ func (g *Graph[T, V]) buildTransitive(root T, nextFn func(T) NodeSet[T]) NodeSet
 
 	out := make(NodeSet[T])
 	searchNext := []T{root}
+	discovered := make([]T, 0, 8)
 
 	for len(searchNext) > 0 {
-		// List of new nodes from this layer of the dependency graph. This is
-		// assigned to `searchNext` at the end of the outer "discovery" loop.
-		discovered := []T{}
+		discovered = discovered[:0]
 
 		for _, node := range searchNext {
 			// For each node to discover, find the next nodes.
@@ -409,7 +408,11 @@ func (g *Graph[T, V]) buildTransitive(root T, nextFn func(T) NodeSet[T]) NodeSet
 			}
 		}
 
-		searchNext = discovered
+		// Swap slices so the two backing arrays alternate roles each layer,
+		// keeping searchNext and discovered on separate backing arrays and
+		// avoiding any aliasing while we range over searchNext and append
+		// to discovered in the same iteration.
+		searchNext, discovered = discovered, searchNext
 	}
 
 	return out

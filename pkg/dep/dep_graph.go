@@ -22,19 +22,18 @@ import (
 )
 
 type InstallInfo struct {
-	Source       Source
-	Reason       Reason
+	LastModified int64
 	Version      string
 	LocalVersion string
-	SrcinfoPath  *string
-	AURBase      *string
-	SyncDBName   *string
-
+	AURBase      string
+	SyncDBName   string
+	SrcinfoPath  string
+	Maintainer   string
+	Source       Source
+	Reason       Reason
 	IsGroup      bool
 	Upgrade      bool
 	Devel        bool
-	LastModified int64  // Unix timestamp, non-zero only for AUR packages
-	Maintainer   string // AUR maintainer username, empty for orphaned or non-AUR packages
 }
 
 func (i *InstallInfo) String() string {
@@ -278,8 +277,8 @@ func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[strin
 				Value: &InstallInfo{
 					Source:      SrcInfo,
 					Reason:      reason,
-					SrcinfoPath: &pkgBuildDir,
-					AURBase:     &pkg.PackageBase,
+					SrcinfoPath: pkgBuildDir,
+					AURBase:     pkg.PackageBase,
 					Version:     pkg.Version,
 				},
 			})
@@ -334,7 +333,7 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 		Source:     Sync,
 		Reason:     Explicit,
 		Version:    pkg.Version(),
-		SyncDBName: &dbName,
+		SyncDBName: dbName,
 	}
 
 	if upgradeInfo == nil {
@@ -373,7 +372,7 @@ func (g *Grapher) GraphSyncGroup(ctx context.Context,
 			Source:     Sync,
 			Reason:     Explicit,
 			Version:    "",
-			SyncDBName: &dbName,
+			SyncDBName: dbName,
 			IsGroup:    true,
 		},
 	})
@@ -468,7 +467,7 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 		}
 
 		graph = g.GraphAURTarget(ctx, graph, aurPkg, &InstallInfo{
-			AURBase:      &aurPkg.PackageBase,
+			AURBase:      aurPkg.PackageBase,
 			Reason:       reason,
 			Source:       AUR,
 			Version:      aurPkg.Version,
@@ -498,8 +497,10 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		return []aurc.Pkg{}
 	}
 
+	depsSlice := deps.ToSlice()
+
 	missingNeedles := make([]string, 0, deps.Cardinality())
-	for _, depString := range deps.ToSlice() {
+	for _, depString := range depsSlice {
 		if _, ok := g.providerCache[depString]; !ok {
 			depName, _, _ := splitDep(depString)
 			missingNeedles = append(missingNeedles, depName)
@@ -520,7 +521,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		for i := range aurPkgs {
 			pkg := &aurPkgs[i]
 			// Cache by the full depString (including version) for each dep whose name matches
-			for _, depString := range deps.ToSlice() {
+			for _, depString := range depsSlice {
 				depName, _, _ := splitDep(depString)
 				if depName == pkg.Name {
 					g.providerCache[depString] = append(g.providerCache[depString], *pkg)
@@ -533,7 +534,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 				}
 				// Also check provides against versioned deps
 				provideName, _, _ := splitDep(val)
-				for _, depString := range deps.ToSlice() {
+				for _, depString := range depsSlice {
 					depName, _, _ := splitDep(depString)
 					if depName == provideName {
 						g.providerCache[depString] = append(g.providerCache[depString], *pkg)
@@ -543,7 +544,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		}
 	}
 
-	for _, depString := range deps.ToSlice() {
+	for _, depString := range depsSlice {
 		var aurPkgs []aurc.Pkg
 		depName, _, _ := splitDep(depString)
 
@@ -696,7 +697,7 @@ func (g *Grapher) addNodes(
 					Source:     Sync,
 					Reason:     depType,
 					Version:    alpmPkg.Version(),
-					SyncDBName: &dbName,
+					SyncDBName: dbName,
 				},
 			})
 
@@ -728,7 +729,7 @@ func (g *Grapher) addNodes(
 				Value: &InstallInfo{
 					Source:       AUR,
 					Reason:       depType,
-					AURBase:      &aurPkg.PackageBase,
+					AURBase:      aurPkg.PackageBase,
 					Version:      aurPkg.Version,
 					LastModified: int64(aurPkg.LastModified),
 					Maintainer:   aurPkg.Maintainer,

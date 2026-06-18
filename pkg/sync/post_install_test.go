@@ -23,14 +23,14 @@ func TestPostInstallEvent(t *testing.T) {
 				Reason:       dep.Explicit,
 				Version:      "2.0-1",
 				LocalVersion: "1.0-1",
-				AURBase:      &base,
+				AURBase:      base,
 			},
 			"pkgB": {
 				Source:       dep.AUR,
 				Reason:       dep.Dep,
 				Version:      "1.1-1",
 				LocalVersion: "",
-				AURBase:      &base,
+				AURBase:      base,
 			},
 		},
 		{
@@ -46,7 +46,7 @@ func TestPostInstallEvent(t *testing.T) {
 				Reason:       dep.Explicit,
 				Version:      "2.0-2",
 				LocalVersion: "1.0-1",
-				AURBase:      &base,
+				AURBase:      base,
 			},
 		},
 	}

@@ -302,13 +302,13 @@ func verifyLayers(t testing.TB, expected, actual []map[string]*InstallInfo) {
 			require.Equal(t, expectedInfo.Source, actualInfo.Source, "source mismatch for %s", name)
 			require.Equal(t, expectedInfo.Reason, actualInfo.Reason, "reason mismatch for %s", name)
 			require.Equal(t, expectedInfo.Version, actualInfo.Version, "version mismatch for %s", name)
-			if expectedInfo.AURBase != nil {
-				require.NotNil(t, actualInfo.AURBase, "AURBase should not be nil for %s", name)
-				require.Equal(t, *expectedInfo.AURBase, *actualInfo.AURBase, "AURBase mismatch for %s", name)
+			if expectedInfo.AURBase != "" {
+				require.NotEmpty(t, actualInfo.AURBase, "AURBase should not be empty for %s", name)
+				require.Equal(t, expectedInfo.AURBase, actualInfo.AURBase, "AURBase mismatch for %s", name)
 			}
-			if expectedInfo.SyncDBName != nil {
-				require.NotNil(t, actualInfo.SyncDBName, "SyncDBName should not be nil for %s", name)
-				require.Equal(t, *expectedInfo.SyncDBName, *actualInfo.SyncDBName, "SyncDBName mismatch for %s", name)
+			if expectedInfo.SyncDBName != "" {
+				require.NotEmpty(t, actualInfo.SyncDBName, "SyncDBName should not be empty for %s", name)
+				require.Equal(t, expectedInfo.SyncDBName, actualInfo.SyncDBName, "SyncDBName mismatch for %s", name)
 			}
 		}
 	}
@@ -322,27 +322,27 @@ func BenchmarkGraphFromTargets_GstreamerGit(b *testing.B) {
 			name:    "SingleTarget",
 			targets: []string{"gst-plugins-good-git"},
 			expectedLayers: []map[string]*InstallInfo{
-				{"gst-plugins-good-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
-				{"gst-plugins-base-libs-git": {Source: AUR, Reason: Dep, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
-				{"gstreamer-git": {Source: AUR, Reason: Dep, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
+				{"gst-plugins-good-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
+				{"gst-plugins-base-libs-git": {Source: AUR, Reason: Dep, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
+				{"gstreamer-git": {Source: AUR, Reason: Dep, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
 			},
 		},
 		{
 			name:    "TwoTargets",
 			targets: []string{"gstreamer-git", "gst-plugins-good-git"},
 			expectedLayers: []map[string]*InstallInfo{
-				{"gst-plugins-good-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
-				{"gst-plugins-base-libs-git": {Source: AUR, Reason: Dep, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
-				{"gstreamer-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
+				{"gst-plugins-good-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
+				{"gst-plugins-base-libs-git": {Source: AUR, Reason: Dep, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
+				{"gstreamer-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
 			},
 		},
 		{
 			name:    "AllThreeExplicit",
 			targets: []string{"gstreamer-git", "gst-plugins-base-libs-git", "gst-plugins-good-git"},
 			expectedLayers: []map[string]*InstallInfo{
-				{"gst-plugins-good-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
-				{"gst-plugins-base-libs-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
-				{"gstreamer-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: new("gstreamer-git")}},
+				{"gst-plugins-good-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
+				{"gst-plugins-base-libs-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
+				{"gstreamer-git": {Source: AUR, Reason: Explicit, Version: "1.24.0.r37-1", AURBase: "gstreamer-git"}},
 			},
 		},
 	}
@@ -378,8 +378,8 @@ func BenchmarkGraphFromTargets_Jellyfin(b *testing.B) {
 			noDeps:      true,
 			noCheckDeps: false,
 			expectedLayers: []map[string]*InstallInfo{
-				{"jellyfin": {Source: AUR, Reason: Explicit, Version: "10.8.8-1", AURBase: new("jellyfin")}},
-				{"dotnet-sdk-6.0": {Source: Sync, Reason: MakeDep, Version: "6.0.100-1", SyncDBName: new("community")}},
+				{"jellyfin": {Source: AUR, Reason: Explicit, Version: "10.8.8-1", AURBase: "jellyfin"}},
+				{"dotnet-sdk-6.0": {Source: Sync, Reason: MakeDep, Version: "6.0.100-1", SyncDBName: "community"}},
 			},
 		},
 		{
@@ -388,14 +388,14 @@ func BenchmarkGraphFromTargets_Jellyfin(b *testing.B) {
 			noDeps:      false,
 			noCheckDeps: false,
 			expectedLayers: []map[string]*InstallInfo{
-				{"jellyfin": {Source: AUR, Reason: Explicit, Version: "10.8.8-1", AURBase: new("jellyfin")}},
+				{"jellyfin": {Source: AUR, Reason: Explicit, Version: "10.8.8-1", AURBase: "jellyfin"}},
 				{
-					"jellyfin-web":    {Source: AUR, Reason: Dep, Version: "10.8.8-1", AURBase: new("jellyfin")},
-					"jellyfin-server": {Source: AUR, Reason: Dep, Version: "10.8.8-1", AURBase: new("jellyfin")},
+					"jellyfin-web":    {Source: AUR, Reason: Dep, Version: "10.8.8-1", AURBase: "jellyfin"},
+					"jellyfin-server": {Source: AUR, Reason: Dep, Version: "10.8.8-1", AURBase: "jellyfin"},
 				},
 				{
-					"dotnet-sdk-6.0":     {Source: Sync, Reason: MakeDep, Version: "6.0.100-1", SyncDBName: new("community")},
-					"dotnet-runtime-6.0": {Source: Sync, Reason: Dep, Version: "6.0.100-1", SyncDBName: new("community")},
+					"dotnet-sdk-6.0":     {Source: Sync, Reason: MakeDep, Version: "6.0.100-1", SyncDBName: "community"},
+					"dotnet-runtime-6.0": {Source: Sync, Reason: Dep, Version: "6.0.100-1", SyncDBName: "community"},
 				},
 			},
 		},
@@ -430,24 +430,24 @@ func BenchmarkGraphFromTargets_CephProvides(b *testing.B) {
 			name:    "CephBinWithLibsBin",
 			targets: []string{"ceph-bin", "ceph-libs-bin"},
 			expectedLayers: []map[string]*InstallInfo{
-				{"ceph-bin": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: new("ceph-bin")}},
-				{"ceph-libs-bin": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: new("ceph-bin")}},
+				{"ceph-bin": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: "ceph-bin"}},
+				{"ceph-libs-bin": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: "ceph-bin"}},
 			},
 		},
 		{
 			name:    "CephOnly",
 			targets: []string{"ceph"},
 			expectedLayers: []map[string]*InstallInfo{
-				{"ceph": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: new("ceph")}},
-				{"ceph-libs": {Source: AUR, Reason: Dep, Version: "17.2.6-2", AURBase: new("ceph")}},
+				{"ceph": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: "ceph"}},
+				{"ceph-libs": {Source: AUR, Reason: Dep, Version: "17.2.6-2", AURBase: "ceph"}},
 			},
 		},
 		{
 			name:    "CephBinOnly",
 			targets: []string{"ceph-bin"},
 			expectedLayers: []map[string]*InstallInfo{
-				{"ceph-bin": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: new("ceph-bin")}},
-				{"ceph-libs": {Source: AUR, Reason: Dep, Version: "17.2.6-2", AURBase: new("ceph")}},
+				{"ceph-bin": {Source: AUR, Reason: Explicit, Version: "17.2.6-2", AURBase: "ceph-bin"}},
+				{"ceph-libs": {Source: AUR, Reason: Dep, Version: "17.2.6-2", AURBase: "ceph"}},
 			},
 		},
 	}
@@ -480,8 +480,8 @@ func BenchmarkGraphFromTargets_AndroidSDK(b *testing.B) {
 		name:    "WithJDK",
 		targets: []string{"android-sdk", "jdk11-openjdk"},
 		expectedLayers: []map[string]*InstallInfo{
-			{"android-sdk": {Source: AUR, Reason: Explicit, Version: "26.1.1-2", AURBase: new("android-sdk")}},
-			{"jdk11-openjdk": {Source: Sync, Reason: Explicit, Version: "11.0.12.u7-1", SyncDBName: new("community")}},
+			{"android-sdk": {Source: AUR, Reason: Explicit, Version: "26.1.1-2", AURBase: "android-sdk"}},
+			{"jdk11-openjdk": {Source: Sync, Reason: Explicit, Version: "11.0.12.u7-1", SyncDBName: "community"}},
 		},
 	}
 

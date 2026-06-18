@@ -28,6 +28,7 @@ import (
 	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
 )
 
+
 func newUpgradeSelectTestService(input io.Reader, luaEngine *settingslua.Engine) *UpgradeService {
 	logger := text.NewLogger(io.Discard, io.Discard, input, true, "test")
 	u := &UpgradeService{
@@ -52,7 +53,7 @@ func newUpgradeSelectTestGraph(t *testing.T) *topo.Graph[string, *dep.InstallInf
 		Value: &dep.InstallInfo{
 			Reason:       dep.Explicit,
 			Source:       dep.Sync,
-			SyncDBName:   new("core"),
+			SyncDBName:   "core",
 			LocalVersion: "1.0",
 			Version:      "2.0",
 			Upgrade:      true,
@@ -64,7 +65,7 @@ func newUpgradeSelectTestGraph(t *testing.T) *topo.Graph[string, *dep.InstallInf
 		Value: &dep.InstallInfo{
 			Reason:       dep.Explicit,
 			Source:       dep.AUR,
-			AURBase:      new("yay"),
+			AURBase:      "yay",
 			LocalVersion: "1.0",
 			Version:      "2.0",
 			Upgrade:      true,
@@ -79,7 +80,7 @@ func newUpgradeSelectTestGraph(t *testing.T) *topo.Graph[string, *dep.InstallInf
 		Value: &dep.InstallInfo{
 			Reason:       dep.Explicit,
 			Source:       dep.AUR,
-			AURBase:      new("example"),
+			AURBase:      "example",
 			LocalVersion: "1.0",
 			Version:      "2.0",
 			Upgrade:      true,
@@ -90,7 +91,7 @@ func newUpgradeSelectTestGraph(t *testing.T) *topo.Graph[string, *dep.InstallInf
 		Value: &dep.InstallInfo{
 			Reason:     dep.Dep,
 			Source:     dep.Sync,
-			SyncDBName: new("core"),
+			SyncDBName: "core",
 			Version:    "1.0",
 			Upgrade:    true,
 		},
@@ -104,10 +105,9 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	linuxDepInfo := &dep.InstallInfo{
 		Reason:       dep.Explicit,
 		Source:       dep.Sync,
-		AURBase:      nil,
 		LocalVersion: "4.5.0-1",
 		Version:      "5.0.0-1",
-		SyncDBName:   new("core"),
+		SyncDBName:   "core",
 		Upgrade:      true,
 		Devel:        false,
 	}
@@ -115,7 +115,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	exampleDepInfoDevel := &dep.InstallInfo{
 		Source:       dep.AUR,
 		Reason:       dep.Dep,
-		AURBase:      new("example"),
+		AURBase:      "example",
 		LocalVersion: "2.2.1.r32.41baa362-1",
 		Version:      "latest-commit",
 		Upgrade:      true,
@@ -126,7 +126,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	newDepInfo := &dep.InstallInfo{
 		Source:       dep.Sync,
 		Reason:       dep.Dep,
-		SyncDBName:   new("core"),
+		SyncDBName:   "core",
 		Version:      "3.0.1-2",
 		LocalVersion: "",
 		Upgrade:      true,
@@ -136,7 +136,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	exampleDepInfoAUR := &dep.InstallInfo{
 		Source:       dep.AUR,
 		Reason:       dep.Dep,
-		AURBase:      new("example"),
+		AURBase:      "example",
 		LocalVersion: "2.2.1.r32.41baa362-1",
 		Version:      "2.2.1.r69.g8a10460-1",
 		Upgrade:      true,
@@ -147,7 +147,7 @@ func TestUpgradeService_GraphUpgrades(t *testing.T) {
 	yayDepInfo := &dep.InstallInfo{
 		Reason:       dep.Explicit,
 		Source:       dep.AUR,
-		AURBase:      new("yay"),
+		AURBase:      "yay",
 		LocalVersion: "10.2.3",
 		Version:      "10.2.4",
 		Upgrade:      true,
@@ -465,7 +465,7 @@ func TestUpgradeService_GraphUpgradesMissingDep(t *testing.T) {
 	exampleDepInfoAUR := &dep.InstallInfo{
 		Source:       dep.AUR,
 		Reason:       dep.Dep,
-		AURBase:      new("example"),
+		AURBase:      "example",
 		LocalVersion: "2.2.1.r32.41baa362-1",
 		Version:      "2.2.1.r69.g8a10460-1",
 		Upgrade:      true,
@@ -475,7 +475,7 @@ func TestUpgradeService_GraphUpgradesMissingDep(t *testing.T) {
 	yayDepInfo := &dep.InstallInfo{
 		Reason:       dep.Explicit,
 		Source:       dep.AUR,
-		AURBase:      new("yay"),
+		AURBase:      "yay",
 		LocalVersion: "10.2.3",
 		Version:      "10.2.4",
 		Upgrade:      true,
@@ -951,7 +951,7 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 	zfsDKMSInfo := &dep.InstallInfo{
 		Reason:       dep.Explicit,
 		Source:       dep.AUR,
-		AURBase:      new("zfs-dkms"),
+		AURBase:      "zfs-dkms",
 		LocalVersion: "2.1.10-1",
 		Version:      "2.1.11-1",
 		Upgrade:      true,
@@ -961,7 +961,7 @@ func TestUpgradeService_GraphUpgrades_zfs_dkms(t *testing.T) {
 	zfsUtilsInfo := &dep.InstallInfo{
 		Reason:       dep.Dep,
 		Source:       dep.AUR,
-		AURBase:      new("zfs-utils"),
+		AURBase:      "zfs-utils",
 		LocalVersion: "2.1.10-1",
 		Version:      "2.1.11-1",
 		Upgrade:      true,

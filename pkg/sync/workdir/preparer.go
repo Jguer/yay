@@ -196,15 +196,15 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		for _, info := range layer {
 			switch info.Source {
 			case dep.AUR:
-				pkgBase := *info.AURBase
+				pkgBase := info.AURBase
 				pkgBuildDir := filepath.Join(preper.cfg.BuildDir, pkgBase)
 				if preper.needToCloneAURBase(info, pkgBuildDir) {
 					aurBasesToClone.Add(pkgBase)
 				}
 				pkgBuildDirsByBase[pkgBase] = pkgBuildDir
 			case dep.SrcInfo:
-				pkgBase := *info.AURBase
-				pkgBuildDirsByBase[pkgBase] = *info.SrcinfoPath
+				pkgBase := info.AURBase
+				pkgBuildDirsByBase[pkgBase] = info.SrcinfoPath
 			}
 		}
 	}
@@ -252,7 +252,7 @@ func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuil
 		if db.VerCmp(pkgbuild.Version(), installInfo.Version) >= 0 {
 			preper.log.OperationInfoln(
 				gotext.Get("PKGBUILD up to date, skipping download: %s",
-					text.Cyan(*installInfo.AURBase)))
+					text.Cyan(installInfo.AURBase)))
 			return false
 		}
 	}

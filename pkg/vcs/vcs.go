@@ -119,7 +119,9 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 
 func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.ArchString) {
 	var wg sync.WaitGroup
+
 	info := make(OriginInfoByURL)
+
 	checkSource := func(source gosrc.ArchString) {
 		defer wg.Done()
 
@@ -141,13 +143,9 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.
 		}
 
 		v.OriginsByPackage[pkgName] = info
+		v.mux.Unlock()
 
 		v.logger.Debugln(gotext.Get("Found git repo: %s", text.Cyan(url)))
-
-		if err := v.Save(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
-		v.mux.Unlock()
 	}
 
 	for _, source := range sources {
@@ -157,6 +155,12 @@ func (v *InfoStore) Update(ctx context.Context, pkgName string, sources []gosrc.
 	}
 
 	wg.Wait()
+
+	if len(info) > 0 {
+		if err := v.Save(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
 }
 
 // parseSource returns the git url, default branch and protocols it supports.

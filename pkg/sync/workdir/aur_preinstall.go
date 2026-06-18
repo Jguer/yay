@@ -148,7 +148,7 @@ func aurTargetPackagesByBase(targets []map[string]*dep.InstallInfo) map[string][
 
 	for _, layer := range targets {
 		for name, info := range layer {
-			if info == nil || info.AURBase == nil {
+			if info == nil || info.AURBase == "" {
 				continue
 			}
 
@@ -156,7 +156,7 @@ func aurTargetPackagesByBase(targets []map[string]*dep.InstallInfo) map[string][
 				continue
 			}
 
-			base := *info.AURBase
+			base := info.AURBase
 			packages[base] = append(packages[base], settingslua.AURPreInstallPackage{
 				Name:         name,
 				Version:      info.Version,
@@ -209,11 +209,11 @@ func aurPreInstallLastModified(base string, targets []map[string]*dep.InstallInf
 
 	for _, layer := range targets {
 		for _, info := range layer {
-			if info == nil || info.AURBase == nil {
+			if info == nil || info.AURBase == "" {
 				continue
 			}
 
-			if *info.AURBase == base && info.LastModified > lastModified {
+			if info.AURBase == base && info.LastModified > lastModified {
 				lastModified = info.LastModified
 			}
 		}

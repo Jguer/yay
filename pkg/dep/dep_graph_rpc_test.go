@@ -106,7 +106,7 @@ func TestGrapher_ReliableParser_AWSCliGit(t *testing.T) {
 		require.NotEmpty(td, layers)
 		require.Contains(td, layers[0], "aws-cli-git")
 		require.Equal(td, "1.27.145.r11217.g5885ee4dc-1", layers[0]["aws-cli-git"].Version)
-		require.Equal(td, "aws-cli-git", *layers[0]["aws-cli-git"].AURBase)
+		require.Equal(td, "aws-cli-git", layers[0]["aws-cli-git"].AURBase)
 		require.Equal(td, Explicit, layers[0]["aws-cli-git"].Reason)
 		require.Equal(td, AUR, layers[0]["aws-cli-git"].Source)
 	})
@@ -282,11 +282,11 @@ func TestGrapher_SplitPackages_Clion(t *testing.T) {
 	}}
 
 	installInfos := map[string]*InstallInfo{
-		"clion exp":       {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-jre exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-cmake exp": {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-gdb exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
-		"clion-lldb exp":  {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: new("clion"), LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion exp":       {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: "clion", LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-jre exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: "clion", LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-cmake exp": {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: "clion", LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-gdb exp":   {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: "clion", LastModified: 1768325120, Maintainer: "Zrax"},
+		"clion-lldb exp":  {Source: AUR, Reason: Explicit, Version: "2025.3.1.1-1", AURBase: "clion", LastModified: 1768325120, Maintainer: "Zrax"},
 	}
 
 	tests := []struct {
@@ -345,8 +345,8 @@ func TestGrapher_SplitPackages_Clion(t *testing.T) {
 
 		require.Len(t, layers, 1)
 		for _, info := range layers[0] {
-			require.NotNil(t, info.AURBase)
-			require.Equal(t, "clion", *info.AURBase)
+			require.NotEmpty(t, info.AURBase)
+			require.Equal(t, "clion", info.AURBase)
 		}
 	})
 }
@@ -481,8 +481,8 @@ func TestGrapher_SplitPackages_SamsungUnifiedDriver(t *testing.T) {
 
 		for _, layer := range layers {
 			for _, info := range layer {
-				require.NotNil(t, info.AURBase)
-				require.Equal(t, "samsung-unified-driver", *info.AURBase)
+				require.NotEmpty(t, info.AURBase)
+				require.Equal(t, "samsung-unified-driver", info.AURBase)
 			}
 		}
 	})
@@ -566,11 +566,11 @@ func TestGrapher_SplitPackages_NX(t *testing.T) {
 	}}
 
 	installInfos := map[string]*InstallInfo{
-		"nxproxy exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"nxagent exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"nx-x11 dep":   {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"libxcomp dep": {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
-		"libxcomp exp": {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: new("nx"), LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"nxproxy exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: "nx", LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"nxagent exp":  {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: "nx", LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"nx-x11 dep":   {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: "nx", LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"libxcomp dep": {Source: AUR, Reason: Dep, Version: "3.5.99.27-3", AURBase: "nx", LastModified: 1693834449, Maintainer: "harrietobrien"},
+		"libxcomp exp": {Source: AUR, Reason: Explicit, Version: "3.5.99.27-3", AURBase: "nx", LastModified: 1693834449, Maintainer: "harrietobrien"},
 	}
 
 	tests := []struct {
@@ -637,8 +637,8 @@ func TestGrapher_SplitPackages_NX(t *testing.T) {
 		require.NoError(t, err)
 		layers2 := got2.TopoSortedLayers(nil)
 
-		require.Equal(t, "nx", *layers1[0]["nxproxy"].AURBase)
-		require.Equal(t, "nx", *layers2[0]["nxagent"].AURBase)
+		require.Equal(t, "nx", layers1[0]["nxproxy"].AURBase)
+		require.Equal(t, "nx", layers2[0]["nxagent"].AURBase)
 
 		totalPkgs1 := 0
 		for _, layer := range layers1 {

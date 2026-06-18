@@ -24,6 +24,7 @@ import (
 	"github.com/Jguer/yay/v13/pkg/text"
 )
 
+
 func getFromFile(t testing.TB, filePath string) mockaur.GetFunc {
 	t.Helper()
 	f, err := os.Open(filePath)
@@ -160,7 +161,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Source:       AUR,
 						Reason:       Explicit,
 						Version:      "10.8.8-1",
-						AURBase:      new("jellyfin"),
+						AURBase:      "jellyfin",
 						LastModified: 1669830147,
 						Maintainer:   "z3ntu",
 					},
@@ -170,7 +171,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Source:     Sync,
 						Reason:     MakeDep,
 						Version:    "6.0.100-1",
-						SyncDBName: new("community"),
+						SyncDBName: "community",
 					},
 				},
 			},
@@ -193,7 +194,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Source:       AUR,
 						Reason:       Explicit,
 						Version:      "10.8.8-1",
-						AURBase:      new("jellyfin"),
+						AURBase:      "jellyfin",
 						LastModified: 1669830147,
 						Maintainer:   "z3ntu",
 					},
@@ -203,7 +204,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Source:       AUR,
 						Reason:       Dep,
 						Version:      "10.8.8-1",
-						AURBase:      new("jellyfin"),
+						AURBase:      "jellyfin",
 						LastModified: 1669830147,
 						Maintainer:   "z3ntu",
 					},
@@ -211,7 +212,7 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Source:       AUR,
 						Reason:       Dep,
 						Version:      "10.8.8-1",
-						AURBase:      new("jellyfin"),
+						AURBase:      "jellyfin",
 						LastModified: 1669830147,
 						Maintainer:   "z3ntu",
 					},
@@ -221,13 +222,13 @@ func TestGrapher_GraphFromTargets_jellyfin(t *testing.T) {
 						Source:     Sync,
 						Reason:     MakeDep,
 						Version:    "6.0.100-1",
-						SyncDBName: new("community"),
+						SyncDBName: "community",
 					},
 					"dotnet-runtime-6.0": {
 						Source:     Sync,
 						Reason:     Dep,
 						Version:    "6.0.100-1",
-						SyncDBName: new("community"),
+						SyncDBName: "community",
 					},
 				},
 			},
@@ -335,7 +336,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 						Source:       AUR,
 						Reason:       Explicit,
 						Version:      "26.1.1-2",
-						AURBase:      new("android-sdk"),
+						AURBase:      "android-sdk",
 						LastModified: 1647982720,
 						Maintainer:   "dreamingincode",
 					},
@@ -345,7 +346,7 @@ func TestGrapher_GraphProvides_androidsdk(t *testing.T) {
 						Source:     Sync,
 						Reason:     Explicit,
 						Version:    "11.0.12.u7-1",
-						SyncDBName: new("community"),
+						SyncDBName: "community",
 					},
 				},
 			},
@@ -450,31 +451,31 @@ func TestGrapher_GraphFromAUR_Deps_ceph_bin(t *testing.T) {
 			Source:  AUR,
 			Reason:  Explicit,
 			Version: "17.2.6-2",
-			AURBase: new("ceph-bin"),
+			AURBase: "ceph-bin",
 		},
 		"ceph-libs-bin exp": {
 			Source:  AUR,
 			Reason:  Explicit,
 			Version: "17.2.6-2",
-			AURBase: new("ceph-bin"),
+			AURBase: "ceph-bin",
 		},
 		"ceph exp": {
 			Source:  AUR,
 			Reason:  Explicit,
 			Version: "17.2.6-2",
-			AURBase: new("ceph"),
+			AURBase: "ceph",
 		},
 		"ceph-libs exp": {
 			Source:  AUR,
 			Reason:  Explicit,
 			Version: "17.2.6-2",
-			AURBase: new("ceph"),
+			AURBase: "ceph",
 		},
 		"ceph-libs dep": {
 			Source:  AUR,
 			Reason:  Dep,
 			Version: "17.2.6-2",
-			AURBase: new("ceph"),
+			AURBase: "ceph",
 		},
 	}
 
@@ -639,25 +640,25 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 			Source:  AUR,
 			Reason:  Explicit,
 			Version: "0.8.1",
-			AURBase: new("gourou"),
+			AURBase: "gourou",
 		},
 		"libzip dep": {
 			Source:     Sync,
 			Reason:     Dep,
 			Version:    "1.9.2-1",
-			SyncDBName: new("extra"),
+			SyncDBName: "extra",
 		},
 		"libzip exp": {
 			Source:     Sync,
 			Reason:     Explicit,
 			Version:    "1.9.2-1",
-			SyncDBName: new("extra"),
+			SyncDBName: "extra",
 		},
 		"libzip-git exp": {
 			Source:  AUR,
 			Reason:  Explicit,
 			Version: "1.9.2.r159.gb3ac716c-1",
-			AURBase: new("libzip-git"),
+			AURBase: "libzip-git",
 		},
 	}
 
@@ -809,13 +810,13 @@ func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 			Source:  AUR,
 			Reason:  Dep,
 			Version: "0.8.1",
-			AURBase: new("gourou"),
+			AURBase: "gourou",
 		},
 		"libzip dep": {
 			Source:     Sync,
 			Reason:     Dep,
 			Version:    "1.9.2-1",
-			SyncDBName: new("extra"),
+			SyncDBName: "extra",
 		},
 	}
 
@@ -921,7 +922,7 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 					Source:  AUR,
 					Reason:  Explicit,
 					Version: "1.0.0",
-					AURBase: new("okpkg"),
+					AURBase: "okpkg",
 				},
 			},
 		}, layers, layers)
@@ -1023,7 +1024,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Source:       AUR,
 			Reason:       Explicit,
 			Version:      "1.24.0.r37-1",
-			AURBase:      new("gstreamer-git"),
+			AURBase:      "gstreamer-git",
 			LastModified: 1700000000,
 			Maintainer:   "testmaint",
 		},
@@ -1031,7 +1032,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Source:       AUR,
 			Reason:       Dep,
 			Version:      "1.24.0.r37-1",
-			AURBase:      new("gstreamer-git"),
+			AURBase:      "gstreamer-git",
 			LastModified: 1700000000,
 			Maintainer:   "testmaint",
 		},
@@ -1039,7 +1040,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Source:       AUR,
 			Reason:       Explicit,
 			Version:      "1.24.0.r37-1",
-			AURBase:      new("gstreamer-git"),
+			AURBase:      "gstreamer-git",
 			LastModified: 1700000000,
 			Maintainer:   "testmaint",
 		},
@@ -1047,7 +1048,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Source:       AUR,
 			Reason:       Dep,
 			Version:      "1.24.0.r37-1",
-			AURBase:      new("gstreamer-git"),
+			AURBase:      "gstreamer-git",
 			LastModified: 1700000000,
 			Maintainer:   "testmaint",
 		},
@@ -1055,7 +1056,7 @@ func TestGrapher_GraphFromAUR_SplitPkgInternalDeps(t *testing.T) {
 			Source:       AUR,
 			Reason:       Explicit,
 			Version:      "1.24.0.r37-1",
-			AURBase:      new("gstreamer-git"),
+			AURBase:      "gstreamer-git",
 			LastModified: 1700000000,
 			Maintainer:   "testmaint",
 		},
@@ -1313,6 +1314,6 @@ func TestGrapher_GraphFromAUR_VirtualProvides(t *testing.T) {
 		require.Len(t, layers, 1)
 		require.Contains(t, layers[0], "mesa-git")
 		require.Equal(t, "24.0.0.r1234-1", layers[0]["mesa-git"].Version)
-		require.Equal(t, "mesa-git", *layers[0]["mesa-git"].AURBase)
+		require.Equal(t, "mesa-git", layers[0]["mesa-git"].AURBase)
 	})
 }

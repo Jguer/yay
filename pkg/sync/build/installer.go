@@ -161,9 +161,9 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	for name, info := range layer {
 		switch info.Source {
 		case dep.AUR, dep.SrcInfo:
-			nameToBaseMap[name] = *info.AURBase
+			nameToBaseMap[name] = info.AURBase
 			if installer.origTargets.Contains(name) {
-				aurOrigTargetBases.Add(*info.AURBase)
+				aurOrigTargetBases.Add(info.AURBase)
 			}
 
 			switch info.Reason {
@@ -186,7 +186,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 				upgradeSync = true
 				continue // do not add to targets, let pacman handle it
 			}
-			compositePkgName := fmt.Sprintf("%s/%s", *info.SyncDBName, name)
+			compositePkgName := fmt.Sprintf("%s/%s", info.SyncDBName, name)
 
 			if info.IsGroup {
 				syncGroups.Add(compositePkgName)

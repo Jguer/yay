@@ -46,7 +46,8 @@ type SourceQueryBuilder struct {
 	sortBy            string
 	searchBy          string
 	targetMode        parser.TargetMode
-	queryMap          map[string]map[string]any
+	aurQueryMap       map[string]*aur.Pkg
+	repoQueryMap      map[string]alpm.Package
 	bottomUp          bool
 	singleLineResults bool
 	separateSources   bool
@@ -75,7 +76,8 @@ func NewSourceQueryBuilder(
 		searchBy:          searchBy,
 		singleLineResults: singleLineResults,
 		separateSources:   separateSources,
-		queryMap:          map[string]map[string]any{},
+		aurQueryMap:       map[string]*aur.Pkg{},
+		repoQueryMap:      map[string]alpm.Package{},
 		results:           make([]abstractResult, 0, 100),
 	}
 }
@@ -199,11 +201,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 		for i := range repoResults {
 			dbName := repoResults[i].DB().Name()
-			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]any{}
-			}
-
-			s.queryMap[dbName][repoResults[i].Name()] = repoResults[i]
+			s.repoQueryMap[repoResults[i].Name()] = repoResults[i]
 
 			rawProvides := repoResults[i].Provides()
 
@@ -213,7 +211,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 			}
 
 			sortableResults.results = append(sortableResults.results, abstractResult{
-				source:         repoResults[i].DB().Name(),
+				source:         dbName,
 				name:           repoResults[i].Name(),
 				description:    repoResults[i].Description(),
 				packageBase:    repoResults[i].Base(),
@@ -232,17 +230,13 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		dbName := "aur"
 
 		for i := range aurResults {
-			if s.queryMap[dbName] == nil {
-				s.queryMap[dbName] = map[string]any{}
-			}
-
 			by := getSearchBy(s.searchBy)
 			if (by == aur.NameDesc || by == aur.None || by == aur.Name) &&
 				!matchesSearch(&aurResults[i], pkgS) {
 				continue
 			}
 
-			s.queryMap[dbName][aurResults[i].Name] = aurResults[i]
+			s.aurQueryMap[aurResults[i].Name] = &aurResults[i]
 
 			sortableResults.results = append(sortableResults.results, abstractResult{
 				source:         dbName,
@@ -289,13 +283,12 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 			}
 		}
 
-		pkg := s.queryMap[s.results[i].source][s.results[i].name]
-
-		switch pPkg := pkg.(type) {
-		case aur.Pkg:
-			toPrint += aurPkgSearchString(&pPkg, dbExecutor, s.singleLineResults)
-		case alpm.Package:
-			toPrint += syncPkgSearchString(pPkg, dbExecutor, s.singleLineResults)
+		if s.results[i].source == "aur" {
+			pkg := s.aurQueryMap[s.results[i].name]
+			toPrint += aurPkgSearchString(pkg, dbExecutor, s.singleLineResults)
+		} else {
+			pkg := s.repoQueryMap[s.results[i].name]
+			toPrint += syncPkgSearchString(pkg, dbExecutor, s.singleLineResults)
 		}
 
 		s.logger.Println(toPrint)

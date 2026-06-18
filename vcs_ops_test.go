@@ -19,6 +19,6 @@ func TestInfoToInstallInfo(t *testing.T) {
 
 	require.Len(t, info, 1)
 	require.Len(t, info[0], 2)
-	require.Equal(t, &dep.InstallInfo{AURBase: new("foo-base"), Source: dep.AUR}, info[0]["foo"])
-	require.Equal(t, &dep.InstallInfo{AURBase: new("bar-base"), Source: dep.AUR}, info[0]["bar"])
+	require.Equal(t, &dep.InstallInfo{AURBase: "foo-base", Source: dep.AUR}, info[0]["foo"])
+	require.Equal(t, &dep.InstallInfo{AURBase: "bar-base", Source: dep.AUR}, info[0]["bar"])
 }

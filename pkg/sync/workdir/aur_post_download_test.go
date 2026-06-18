@@ -25,7 +25,7 @@ func TestAURPostDownloadEventsUseAURPreInstallPayload(t *testing.T) {
 		mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
-				"demo": {Source: dep.AUR, AURBase: &base, Version: "1.0-1"},
+			"demo": {Source: dep.AUR, AURBase: base, Version: "1.0-1"},
 			},
 		})
 	require.NoError(t, err)
@@ -72,8 +72,8 @@ func TestRunAURPostDownloadLuaHooksRunsBasesInSortedOrder(t *testing.T) {
 		mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
-				"a": {Source: dep.AUR, AURBase: new("a-base")},
-				"z": {Source: dep.AUR, AURBase: new("z-base")},
+				"a": {Source: dep.AUR, AURBase: "a-base"},
+				"z": {Source: dep.AUR, AURBase: "z-base"},
 			},
 		})
 	require.NoError(t, err)

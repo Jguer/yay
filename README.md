@@ -2,7 +2,7 @@
 [![yay-bin](https://img.shields.io/aur/version/yay-bin?color=1793d1&label=yay-bin&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay-bin/)
 [![yay-git](https://img.shields.io/aur/version/yay-git?color=1793d1&label=yay-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/yay-git/)
 ![AUR votes](https://img.shields.io/aur/votes/yay?color=333333&style=for-the-badge)
-[![GitHub license](https://img.shields.io/github/license/jguer/yay?color=333333&style=for-the-badge)](https://github.com/Jguer/yay/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/jguer/yay?color=333333&style=for-the-badge)](https://github.com/Jguer/yay/blob/next/LICENSE)
 
 # yay
 
