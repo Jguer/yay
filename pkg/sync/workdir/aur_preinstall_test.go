@@ -30,7 +30,7 @@ func TestAURPreInstallEventsFromPackageFiles(t *testing.T) {
 				Reason:       dep.MakeDep,
 				Version:      "1:1.2.3-4",
 				LocalVersion: "1:1.2.3-3",
-			AURBase:      base,
+				AURBase:      base,
 				Upgrade:      true,
 				Devel:        true,
 				LastModified: 1700000001,
@@ -39,7 +39,7 @@ func TestAURPreInstallEventsFromPackageFiles(t *testing.T) {
 				Source:       dep.AUR,
 				Reason:       dep.Explicit,
 				Version:      "1:1.2.3-4",
-			AURBase:      base,
+				AURBase:      base,
 				LastModified: 1700000000,
 			},
 		},
@@ -162,7 +162,7 @@ func TestRunPreDownloadSourcesHooksRunsLuaBeforeMenus(t *testing.T) {
 		map[string]string{base: dir}, mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
-			"demo": {Source: dep.AUR, AURBase: base},
+				"demo": {Source: dep.AUR, AURBase: base},
 			},
 		})
 	require.NoError(t, err)
@@ -189,7 +189,7 @@ func TestRunAURPreInstallLuaHooksReturnsCallbackError(t *testing.T) {
 		map[string]string{base: dir}, mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
-			"demo": {Source: dep.AUR, AURBase: base},
+				"demo": {Source: dep.AUR, AURBase: base},
 			},
 		})
 	require.Error(t, err)
@@ -233,4 +233,3 @@ pkgname = demo-doc
 
 	return dir
 }
-

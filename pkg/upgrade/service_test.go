@@ -28,7 +28,6 @@ import (
 	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
 )
 
-
 func newUpgradeSelectTestService(input io.Reader, luaEngine *settingslua.Engine) *UpgradeService {
 	logger := text.NewLogger(io.Discard, io.Discard, input, true, "test")
 	u := &UpgradeService{

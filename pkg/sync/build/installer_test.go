@@ -25,7 +25,6 @@ func newTestLogger() *text.Logger {
 	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
 }
 
-
 func TestInstaller_InstallNeeded(t *testing.T) {
 	t.Parallel()
 

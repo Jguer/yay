@@ -25,7 +25,7 @@ func TestAURPostDownloadEventsUseAURPreInstallPayload(t *testing.T) {
 		mapset.NewThreadUnsafeSet[string](),
 		[]map[string]*dep.InstallInfo{
 			{
-			"demo": {Source: dep.AUR, AURBase: base, Version: "1.0-1"},
+				"demo": {Source: dep.AUR, AURBase: base, Version: "1.0-1"},
 			},
 		})
 	require.NoError(t, err)

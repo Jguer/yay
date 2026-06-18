@@ -24,7 +24,6 @@ import (
 	"github.com/Jguer/yay/v13/pkg/text"
 )
 
-
 func getFromFile(t testing.TB, filePath string) mockaur.GetFunc {
 	t.Helper()
 	f, err := os.Open(filePath)
