@@ -3,7 +3,9 @@ package lua
 
 import (
 	"fmt"
+	"path/filepath"
 	"reflect"
+	"strings"
 
 	"github.com/Jguer/yay/v13/pkg/text"
 
@@ -105,6 +107,37 @@ func (e *Engine) optTable() (*lua.LTable, bool) {
 	optTbl, ok := e.L.GetField(yayTbl, optTableName).(*lua.LTable)
 
 	return optTbl, ok
+}
+
+// SetSearchDir makes require() resolve modules relative to dir (e.g.
+// require("hooks.maintainer_change")) and drops the default "./?.lua" entry so
+// require() searches only dir and the absolute system paths, never an unrelated
+// CWD. When dir is the CWD, the prepended patterns already cover it.
+func (e *Engine) SetSearchDir(dir string) {
+	pkg := e.L.GetGlobal("package")
+
+	current, ok := e.L.GetField(pkg, "path").(lua.LString)
+	if !ok {
+		return
+	}
+
+	pattern := filepath.Join(dir, "?.lua") + ";" + filepath.Join(dir, "?", "init.lua")
+	e.L.SetField(pkg, "path", lua.LString(pattern+";"+absolutePatterns(string(current))))
+}
+
+// absolutePatterns keeps only the absolute entries of a package.path string,
+// dropping CWD-relative ones such as "./?.lua".
+func absolutePatterns(path string) string {
+	segments := strings.Split(path, ";")
+	kept := segments[:0]
+
+	for _, seg := range segments {
+		if filepath.IsAbs(seg) {
+			kept = append(kept, seg)
+		}
+	}
+
+	return strings.Join(kept, ";")
 }
 
 func luaKeyForField(field *reflect.StructField) string {

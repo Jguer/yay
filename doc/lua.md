@@ -2,6 +2,8 @@
 
 yay can optionally load a Lua configuration file, `init.lua`. `init.lua` overlays whatever is in `config.json`, and any command-line flag you pass still wins over `init.lua`.
 
+yay uses the [Lua 5.1 interpreter](https://www.lua.org/manual/5.1/) to run `init.lua`. The Lua standard library is available.
+
 ## Location
 
 `init.lua` is looked up, in order:
@@ -66,6 +68,44 @@ yay.log.error("policy check failed")
 `debug` only prints when debug logging is enabled. `error` logs an error-level
 message and does not stop execution; use `yay.abort("message")` for controlled
 hook stops.
+
+## Requiring modules with `require()`
+
+<p class="api-since">Available from yay v13.0.1</p>
+
+`init.lua` can pull in other Lua files with the standard `require()`
+function. yay prepends the directory that contains `init.lua` to
+`package.path`, so modules resolve relative to your yay config directory
+rather than the directory you run yay from.
+
+Given this layout:
+
+```
+$XDG_CONFIG_HOME/yay/
+  init.lua
+  hooks/
+    maintainer_change.lua
+```
+
+`init.lua` can do:
+
+```lua
+require("hooks.maintainer_change")
+```
+
+`require("name")` looks up, in order:
+
+1. `<config_dir>/name.lua`
+2. `<config_dir>/name/init.lua`
+
+Dotted module names map onto the filesystem, so
+`require("hooks.maintainer_change")` loads
+`<config_dir>/hooks/maintainer_change.lua`. This lets you split hooks and
+helpers across multiple files and keep `init.lua` small.
+
+Required modules run in the same Lua state as `init.lua`, so anything they
+register through `yay.create_autocmd` or assign to `yay.opt` takes effect just
+as if it were written inline.
 
 ## Upgrade selection hooks
 

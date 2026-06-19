@@ -3,6 +3,7 @@ package lua
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 
 	"github.com/Jguer/yay/v13/pkg/text"
 )
@@ -15,6 +16,7 @@ func Load(logger *text.Logger, path string, cfg any) (*Engine, error) {
 	}
 
 	engine := NewWithLogger(luaLogger)
+	engine.SetSearchDir(filepath.Dir(path))
 
 	if err := engine.L.DoFile(path); err != nil {
 		engine.Close()
