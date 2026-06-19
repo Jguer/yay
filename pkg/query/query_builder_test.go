@@ -17,6 +17,7 @@ import (
 	"github.com/Jguer/yay/v13/pkg/text"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // linuxCkLastModified matches the mock linux-ck package fixture.
@@ -745,4 +746,81 @@ func newYayQueryBuilderMocks() (*mock.DBExecutor, *mockaur.MockAUR) {
 	}
 
 	return mockDB, mockAUR
+}
+
+// TestSourceQueryBuilderSamePkgNameAcrossRepos verifies that when the same
+// package name appears in two different repos (e.g. extra and extra-testing),
+// Results() renders each entry from its own repo's metadata. Without the
+// composite db/name key in repoQueryMap, both results would share the last
+// stored entry and one description would appear twice while the other was lost.
+func TestSourceQueryBuilderSamePkgNameAcrossRepos(t *testing.T) {
+	t.Parallel()
+
+	const (
+		descExtra        = "The Linux kernel and modules (extra)"
+		descExtraTesting = "The Linux kernel and modules (extra-testing)"
+	)
+
+	extraDB := mock.NewDB("extra")
+	extraTestingDB := mock.NewDB("extra-testing")
+
+	mockDB := &mock.DBExecutor{
+		ReposFn: func() []string {
+			return []string{"extra", "extra-testing"}
+		},
+		SyncPackagesFn: func(pkgs ...string) []mock.IPackage {
+			return []mock.IPackage{
+				&mock.Package{
+					PBase:         "linux",
+					PName:         "linux",
+					PVersion:      "6.1.0",
+					PDescription:  descExtra,
+					PSize:         1,
+					PISize:        1,
+					PDB:           extraDB,
+					PArchitecture: "x86_64",
+				},
+				&mock.Package{
+					PBase:         "linux",
+					PName:         "linux",
+					PVersion:      "6.2.0-rc1",
+					PDescription:  descExtraTesting,
+					PSize:         1,
+					PISize:        1,
+					PDB:           extraTestingDB,
+					PArchitecture: "x86_64",
+				},
+			}
+		},
+		LocalPackageFn: func(string) mock.IPackage {
+			return nil
+		},
+	}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(_ context.Context, _ *aur.Query) ([]aur.Pkg, error) {
+			return nil, nil
+		},
+	}
+
+	w := &strings.Builder{}
+	queryBuilder := NewSourceQueryBuilder(
+		mockAUR,
+		text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
+		"", parser.ModeAny, "", false, false, false,
+	)
+
+	queryBuilder.Execute(t.Context(), mockDB, []string{"linux"})
+
+	require.Len(t, queryBuilder.results, 2, "both repo entries must be in results")
+
+	err := queryBuilder.Results(mockDB, Detailed)
+	require.NoError(t, err)
+
+	out := w.String()
+
+	// Each description must appear exactly once. A failure here means both
+	// results were rendered using the same repoQueryMap entry.
+	assert.Equal(t, 1, strings.Count(out, descExtra), "extra description must appear exactly once")
+	assert.Equal(t, 1, strings.Count(out, descExtraTesting), "extra-testing description must appear exactly once")
 }

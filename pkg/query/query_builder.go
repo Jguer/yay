@@ -201,7 +201,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 		for i := range repoResults {
 			dbName := repoResults[i].DB().Name()
-			s.repoQueryMap[repoResults[i].Name()] = repoResults[i]
+			s.repoQueryMap[dbName+"/"+repoResults[i].Name()] = repoResults[i]
 
 			rawProvides := repoResults[i].Provides()
 
@@ -287,7 +287,7 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 			pkg := s.aurQueryMap[s.results[i].name]
 			toPrint += aurPkgSearchString(pkg, dbExecutor, s.singleLineResults)
 		} else {
-			pkg := s.repoQueryMap[s.results[i].name]
+			pkg := s.repoQueryMap[s.results[i].source+"/"+s.results[i].name]
 			toPrint += syncPkgSearchString(pkg, dbExecutor, s.singleLineResults)
 		}
 
