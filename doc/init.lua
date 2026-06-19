@@ -6,7 +6,7 @@
 
 -- Strings
 yay.opt.aururl = "https://aur.archlinux.org" -- Base AUR URL.
-yay.opt.aurrpcurl = "https://aur.archlinux.org/rpc?" -- AUR RPC endpoint URL.
+yay.opt.aurrpcurl = "" -- AUR RPC endpoint URL; empty uses default endpoint.
 yay.opt.build_dir = os.getenv("HOME") .. "/.cache/yay" -- Build/cache directory for AUR packages.
 yay.opt.editor = os.getenv("EDITOR") or os.getenv("VISUAL") or "vi" -- Editor command used for PKGBUILD edits; empty uses VISUAL/EDITOR.
 yay.opt.editor_flags = "" -- Extra flags passed to the editor command.
@@ -20,12 +20,15 @@ yay.opt.gpg_bin = "gpg" -- gpg executable.
 yay.opt.gpg_flags = "" -- Extra flags passed to gpg.
 yay.opt.mflags = "" -- Extra flags passed to makepkg.
 yay.opt.sort_by = "" -- AUR search sort field: "votes" | "popularity" | "name" | "base" | "submitted" | "modified" | "".
-yay.opt.search_by = "name-desc" -- AUR search field: "name" | "name-desc" | "maintainer" | "depends" | "checkdepends" | "makedepends" | "optdepends" | "provides" | "conflicts" | "replaces" | "groups" | "keywords" | "comaintainers".
+yay.opt.search_by = "name-desc" -- AUR search field: "name" | "name-desc" | "maintainer" | "submitter" | "depends" | "makedepends" | "optdepends" | "checkdepends" | "provides" | "conflicts" | "replaces" | "groups" | "keywords" | "comaintainers".
 yay.opt.git_flags = "" -- Extra flags passed to git.
 yay.opt.remove_make = "ask" -- Remove makedepends mode: "no" | "yes" | "ask" | "askyes".
 yay.opt.sudo_bin = "sudo" -- Privilege elevation command.
 yay.opt.sudo_flags = "" -- Extra flags passed to the sudo command.
 yay.opt.rebuild = "no" -- Build mode: "no" | "yes" | "tree" | "all".
+yay.opt.answer_clean = "" --  yay v13.0.1+ Pre-select clean menu answer: "" | "All" | "None" | "Installed" | "NotInstalled" (also accepts menu syntax: ranges, ^n, "abort").
+yay.opt.answer_diff = "" --  yay v13.0.1+ Pre-select diff menu answer: "" | "All" | "None" | "Installed" | "NotInstalled" (also accepts menu syntax: ranges, ^n, "abort").
+yay.opt.answer_edit = "" --  yay v13.0.1+ Pre-select edit menu answer: "" | "All" | "None" | "Installed" | "NotInstalled" (also accepts menu syntax: ranges, ^n, "abort").
 
 -- Integers
 yay.opt.request_split_n = 150 -- Max packages per AUR RPC request (use values > 0).

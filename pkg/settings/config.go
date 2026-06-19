@@ -33,9 +33,9 @@ type Configuration struct {
 	PacmanBin              string `json:"pacmanbin" lua:"pacman_bin"`
 	PacmanConf             string `json:"pacmanconf" lua:"pacman_conf"`
 	ReDownload             string `json:"redownload" lua:"redownload"`
-	AnswerClean            string `json:"answerclean" lua:"-"`
-	AnswerDiff             string `json:"answerdiff" lua:"-"`
-	AnswerEdit             string `json:"answeredit" lua:"-"`
+	AnswerClean            string `json:"answerclean" lua:"answer_clean"`
+	AnswerDiff             string `json:"answerdiff" lua:"answer_diff"`
+	AnswerEdit             string `json:"answeredit" lua:"answer_edit"`
 	AnswerUpgrade          string `json:"answerupgrade" lua:"-"`
 	GitBin                 string `json:"gitbin" lua:"git_bin"`
 	GpgBin                 string `json:"gpgbin" lua:"gpg_bin"`

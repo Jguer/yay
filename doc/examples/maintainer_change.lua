@@ -9,10 +9,12 @@
 --
 -- The cache is updated whenever a new or changed maintainer is seen.
 --
--- Cache file location: <build_dir>/maintainer_cache
+-- Cache file location: <cache_dir>/maintainer_cache
 -- Format: one "pkgname=maintainer" entry per line.
 
-local cache_file = yay.opt.build_dir .. "/maintainer_cache"
+-- missing reliable cfg getter
+local cache_dir = (os.getenv("XDG_CACHE_HOME") or (os.getenv("HOME") .. "/.cache")) .. "/yay"
+local cache_file = cache_dir .. "/maintainer_cache"
 
 local function load_cache()
   local cache = {}

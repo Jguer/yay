@@ -11,7 +11,9 @@ type testConfig struct {
 	BuildDir      string `json:"buildDir" lua:"build_dir"`
 	RequestSplitN int    `json:"requestsplitn" lua:"request_split_n"`
 	Devel         bool   `json:"devel" lua:"devel"`
-	AnswerClean   string `json:"answerclean"`
+	AnswerClean   string `json:"answerclean" lua:"answer_clean"`
+	AnswerDiff    string `json:"answerdiff" lua:"answer_diff"`
+	AnswerEdit    string `json:"answeredit" lua:"answer_edit"`
 	Ignored       string `json:"-" lua:"-"`
 }
 
@@ -60,21 +62,25 @@ func TestApplyUnknownAndTypeMismatch(t *testing.T) {
 	assert.Equal(t, "/tmp/ok", cfg.BuildDir)
 }
 
-func TestApplyIgnoresAnswerOptionsWithoutLuaTags(t *testing.T) {
+func TestApplyAppliesAnswerOptionsFromLua(t *testing.T) {
 	t.Parallel()
 	e := New()
 	t.Cleanup(e.Close)
 
 	require.NoError(t, e.L.DoString(`
 		yay.opt.answer_clean = "All"
+		yay.opt.answer_diff = "None"
+		yay.opt.answer_edit = "Installed"
 	`))
 
 	cfg := &testConfig{}
 	unknown, errs := e.Apply(cfg)
 
-	assert.Equal(t, []string{"answer_clean"}, unknown)
+	assert.Empty(t, unknown)
 	assert.Empty(t, errs)
-	assert.Empty(t, cfg.AnswerClean)
+	assert.Equal(t, "All", cfg.AnswerClean)
+	assert.Equal(t, "None", cfg.AnswerDiff)
+	assert.Equal(t, "Installed", cfg.AnswerEdit)
 }
 
 func TestApplyRejectsNonPointer(t *testing.T) {
