@@ -677,9 +677,18 @@ func (g *Grapher) addNodes(
 
 	// Check Sync
 	for _, depString := range targetsToFind.ToSlice() {
+		depName, _, _ := splitDep(depString)
 		alpmPkg := g.dbExecutor.SyncSatisfier(depString)
 		if alpmPkg == nil {
-			continue
+			// Fallback: try exact name match. SyncSatisfier uses FindDBSatisfier
+			// which can miss packages in custom repos in certain edge cases
+			// (e.g. dependency exists in the repo DB but FindDBSatisfier
+			// doesn't return it). See yay issue #2246, #2518.
+			if syncPkg := g.dbExecutor.SyncPackage(depName); syncPkg != nil {
+				alpmPkg = syncPkg
+			} else {
+				continue
+			}
 		}
 
 		if err := graph.DependOn(alpmPkg.Name(), parentPkgName); err != nil {

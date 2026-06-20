@@ -718,6 +718,109 @@ func TestGrapher_GraphFromAUR_Deps_gourou(t *testing.T) {
 	}
 }
 
+// TestGrapher_GraphFromAUR_SyncPackageFallback tests the fallback in addNodes
+// where SyncSatisfier returns nil but SyncPackage finds the dependency by
+// exact name match.
+func TestGrapher_GraphFromAUR_SyncPackageFallback(t *testing.T) {
+	t.Parallel()
+
+	mockDB := &mock.DBExecutor{
+		SyncPackageFn: func(s string) mock.IPackage {
+			switch s {
+			case "sync-dep":
+				return &mock.Package{
+					PName:    "sync-dep",
+					PVersion: "2.0.0-1",
+					PDB:      mock.NewDB("extra"),
+				}
+			}
+			return nil
+		},
+		PackagesFromGroupFn: func(string) []mock.IPackage { return nil },
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "my-aur-pkg":
+				return nil
+			case "sync-dep":
+				return nil
+			}
+			panic("implement me " + s)
+		},
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "my-aur-pkg", "sync-dep":
+				return false
+			}
+			panic("implement me " + s)
+		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
+	}
+
+	mockAUR := &mockaur.MockAUR{GetFn: func(ctx context.Context, query *aurc.Query) ([]aur.Pkg, error) {
+		mockPkgs := map[string]aur.Pkg{
+			"my-aur-pkg": {
+				Name:        "my-aur-pkg",
+				PackageBase: "my-aur-pkg",
+				Version:     "1.0.0-1",
+				Depends:     []string{"sync-dep"},
+			},
+		}
+
+		pkgs := make([]aur.Pkg, 0, len(query.Needles))
+		for _, needle := range query.Needles {
+			if pkg, ok := mockPkgs[needle]; ok {
+				pkgs = append(pkgs, pkg)
+			}
+		}
+		return pkgs, nil
+	}}
+
+	installInfos := map[string]*InstallInfo{
+		"my-aur-pkg exp": {
+			Source:  AUR,
+			Reason:  Explicit,
+			Version: "1.0.0-1",
+			AURBase: "my-aur-pkg",
+		},
+		"sync-dep dep": {
+			Source:     Sync,
+			Reason:     Dep,
+			Version:    "2.0.0-1",
+			SyncDBName: "extra",
+		},
+	}
+
+	tests := []struct {
+		name       string
+		targets    []string
+		wantLayers []map[string]*InstallInfo
+		wantErr    bool
+	}{
+		{
+			name:    "sync-package-fallback",
+			targets: []string{"my-aur-pkg"},
+			wantLayers: []map[string]*InstallInfo{
+				{"my-aur-pkg": installInfos["my-aur-pkg exp"]},
+				{"sync-dep": installInfos["sync-dep dep"]},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			g := NewGrapher(mockDB, mockAUR,
+				false, true, false, false, false,
+				text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
+			got, err := g.GraphFromTargets(t.Context(), nil, tt.targets)
+			require.NoError(t, err)
+			layers := got.TopoSortedLayers(nil)
+			require.EqualValues(t, tt.wantLayers, layers, layers)
+		})
+	}
+}
+
 func TestGrapher_GraphFromTargets_ReinstalledDeps(t *testing.T) {
 	t.Parallel()
 
