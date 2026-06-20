@@ -453,7 +453,7 @@ yay.create_autocmd("SearchFilter", {
 
 ## Editor support
 
-<p class="api-since">Available from yay v13.0.0</p>
+<p class="api-since">Available from yay v13.0.1</p>
 
 yay ships a [lua-language-server](https://luals.github.io/) type definition file
 at [`meta/yay.meta.lua`](../meta/yay.meta.lua). It declares the `yay` global,
