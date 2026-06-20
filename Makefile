@@ -95,6 +95,7 @@ install: build ${MOFILES}
 	install -Dm644 completions/bash $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
 	install -Dm644 completions/zsh $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
 	install -Dm644 completions/fish $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
+	install -Dm644 meta/yay.meta.lua $(DESTDIR)$(PREFIX)/share/${PKGNAME}/meta/yay.meta.lua
 	for lang in ${LANGS}; do \
 		install -Dm644 ${LOCALEDIR}/$${lang}.mo $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/${PKGNAME}.mo; \
 	done
@@ -106,6 +107,7 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/bash-completion/completions/${PKGNAME}
 	rm -f $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_${PKGNAME}
 	rm -f $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d/${PKGNAME}.fish
+	rm -f $(DESTDIR)$(PREFIX)/share/${PKGNAME}/meta/yay.meta.lua
 	for lang in ${LANGS}; do \
 		rm -f $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/${PKGNAME}.mo; \
 	done
