@@ -11,7 +11,6 @@ import (
 	"github.com/Jguer/aur"
 	"github.com/Jguer/dyalpm"
 	gosrc "github.com/Morganamilo/go-srcinfo"
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v13/pkg/db/mock"
@@ -193,7 +192,6 @@ func TestGrapher_FindDepsFromAURSatisfiesMissingAndErrorPaths(t *testing.T) {
 	graph := NewGraph()
 	graph.AddNode("root")
 	graph.AddProvides("dep-lib", &dyalpm.Depend{Name: "dep-lib", Version: "2.0"}, "dep-provider")
-	deps := mapset.NewThreadUnsafeSet("dep-lib")
-	found := grapher.findDepsFromAUR(context.Background(), graph, "root", deps)
+	found, _ := grapher.findDepsFromAUR(context.Background(), graph, "root", []string{"dep-lib"})
 	require.Len(t, found, 1)
 }

@@ -14,7 +14,6 @@ import (
 
 	aurc "github.com/Jguer/aur"
 	alpm "github.com/Jguer/dyalpm"
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v13/pkg/db"
@@ -60,8 +59,7 @@ func TestGrapher_findDepsFromAUR_logsRequiredByForMissingDep(t *testing.T) {
 	depName := "missingdep"
 	require.NoError(t, graph.DependOn("existingNeeds", depName))
 
-	toFind := mapset.NewThreadUnsafeSet(depString)
-	_ = g.findDepsFromAUR(t.Context(), graph, "currentNeeds", toFind)
+	_, _ = g.findDepsFromAUR(t.Context(), graph, "currentNeeds", []string{depString})
 
 	out := stderr.String()
 	require.Contains(t, out, "No AUR package found for "+depString+" (required by:")

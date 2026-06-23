@@ -7,26 +7,102 @@ import (
 	aur "github.com/Jguer/yay/v13/pkg/query"
 )
 
+// splitDep parses a dependency string into its package name, comparison
+// operator and version. It is an allocation-free equivalent of the previous
+// strings.FieldsFunc implementation:
+//
+//   - fields are maximal runs of non-operator bytes (operators: '<' '>' '=');
+//   - mod is every operator byte concatenated, in order;
+//   - 0 fields -> "","",""; 1 field -> field0,"",""; else field0, mod, field1.
+//
+// splitDep sits on the hottest path of dependency resolution and is called many
+// times per package, so it scans once and reuses slices of dep for the name and
+// version, and interns the operator string so the common path never allocates.
 func splitDep(dep string) (pkg, mod, ver string) {
-	split := strings.FieldsFunc(dep, func(c rune) bool {
-		match := c == '>' || c == '<' || c == '='
+	var (
+		f0s, f0e = -1, -1 // first field bounds
+		f1s, f1e = -1, -1 // second field bounds
+		fields   int
+		modBuf   [8]byte // operator bytes in order; real deps use at most 2
+		modLen   int
+	)
 
-		if match {
-			mod += string(c)
+	for i := 0; i < len(dep); {
+		if c := dep[i]; c == '<' || c == '>' || c == '=' {
+			if modLen < len(modBuf) {
+				modBuf[modLen] = c
+			}
+			modLen++
+			i++
+
+			continue
 		}
 
-		return match
-	})
+		start := i
+		for i < len(dep) && dep[i] != '<' && dep[i] != '>' && dep[i] != '=' {
+			i++
+		}
 
-	if len(split) == 0 {
+		fields++
+		switch fields {
+		case 1:
+			f0s, f0e = start, i
+		case 2:
+			f1s, f1e = start, i
+		}
+	}
+
+	switch fields {
+	case 0:
 		return "", "", ""
+	case 1:
+		return dep[f0s:f0e], "", ""
 	}
 
-	if len(split) == 1 {
-		return split[0], "", ""
+	n := min(modLen, len(modBuf))
+
+	return dep[f0s:f0e], internMod(modBuf[:n], modLen, dep), dep[f1s:f1e]
+}
+
+// internMod returns the operator string for the collected operator bytes
+// without allocating for the combinations that occur in practice. Switching on
+// string(b) is special-cased by the compiler to avoid a heap allocation; only
+// the unreachable overflow path (more operator bytes than modBuf can hold)
+// falls back to rebuilding the exact string from dep.
+func internMod(b []byte, modLen int, dep string) string {
+	if modLen > len(b) {
+		// Extremely rare malformed input: reconstruct every operator byte to
+		// stay byte-for-byte compatible with the previous implementation.
+		var sb strings.Builder
+		for i := 0; i < len(dep); i++ {
+			if c := dep[i]; c == '<' || c == '>' || c == '=' {
+				sb.WriteByte(c)
+			}
+		}
+
+		return sb.String()
 	}
 
-	return split[0], mod, split[1]
+	switch string(b) {
+	case "":
+		return ""
+	case "=":
+		return "="
+	case "<":
+		return "<"
+	case ">":
+		return ">"
+	case "<=":
+		return "<="
+	case ">=":
+		return ">="
+	case "=<":
+		return "=<"
+	case "=>":
+		return "=>"
+	default:
+		return string(b)
+	}
 }
 
 func pkgSatisfies(name, version, dep string) bool {
