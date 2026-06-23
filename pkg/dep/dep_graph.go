@@ -498,10 +498,9 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 	}
 
 	pkgsToAdd = make([]aurc.Pkg, 0, len(deps))
-	depsSlice := deps
 
 	missingNeedles := make([]string, 0, len(deps))
-	for _, depString := range depsSlice {
+	for _, depString := range deps {
 		if _, ok := g.providerCache[depString]; !ok {
 			depName, _, _ := splitDep(depString)
 			missingNeedles = append(missingNeedles, depName)
@@ -522,7 +521,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		for i := range aurPkgs {
 			pkg := &aurPkgs[i]
 			// Cache by the full depString (including version) for each dep whose name matches
-			for _, depString := range depsSlice {
+			for _, depString := range deps {
 				depName, _, _ := splitDep(depString)
 				if depName == pkg.Name {
 					g.providerCache[depString] = append(g.providerCache[depString], *pkg)
@@ -535,7 +534,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 				}
 				// Also check provides against versioned deps
 				provideName, _, _ := splitDep(val)
-				for _, depString := range depsSlice {
+				for _, depString := range deps {
 					depName, _, _ := splitDep(depString)
 					if depName == provideName {
 						g.providerCache[depString] = append(g.providerCache[depString], *pkg)
@@ -545,7 +544,7 @@ func (g *Grapher) findDepsFromAUR(ctx context.Context,
 		}
 	}
 
-	for _, depString := range depsSlice {
+	for _, depString := range deps {
 		var aurPkgs []aurc.Pkg
 		depName, _, _ := splitDep(depString)
 
@@ -639,12 +638,6 @@ func (g *Grapher) addNodes(
 	keep := pending[:0]
 	for _, depString := range pending {
 		depName, _, _ := splitDep(depString)
-		if !graph.Exists(depName) && !graph.HasProvides(depName) {
-			keep = append(keep, depString)
-
-			continue
-		}
-
 		handled := false
 
 		if graph.Exists(depName) {
@@ -677,11 +670,7 @@ func (g *Grapher) addNodes(
 		depName, _, _ := splitDep(depString)
 		if !g.dbExecutor.LocalSatisfierExists(depString) {
 			keep = append(keep, depString)
-
-			continue
-		}
-
-		if g.fullGraph {
+		} else if g.fullGraph {
 			g.ValidateAndSetNodeInfo(
 				graph,
 				depName,

@@ -89,9 +89,7 @@ func (g *Graph[T, V]) Len() int {
 
 // Exists reports whether node exists in the graph's node set.
 func (g *Graph[T, V]) Exists(node T) bool {
-	_, ok := g.nodes[node]
-
-	return ok
+	return g.nodes[node]
 }
 
 // AddNode adds node to the graph. It is safe to call multiple times.
@@ -128,11 +126,7 @@ func (g *Graph[T, V]) AddProvides(provides T, depInfo *alpm.Depend, node T) {
 // the zero value of V.
 func (g *Graph[T, V]) ForEach(f CheckFn[T, V]) error {
 	for node := range g.nodes {
-		var v V
-		if info := g.nodeInfo[node]; info != nil {
-			v = info.Value
-		}
-		if err := f(node, v); err != nil {
+		if err := f(node, g.nodeValue(node)); err != nil {
 			return err
 		}
 	}
@@ -224,7 +218,7 @@ func (g *Graph[T, V]) DependsOn(child, parent T) bool {
 // reachable reports whether target is reachable from start by repeatedly
 // following nextFn. It returns as soon as target is found.
 func (g *Graph[T, V]) reachable(start, target T, nextFn func(T) NodeSet[T]) bool {
-	if _, ok := g.nodes[start]; !ok {
+	if !g.nodes[start] {
 		return false
 	}
 
@@ -252,10 +246,7 @@ func (g *Graph[T, V]) reachable(start, target T, nextFn func(T) NodeSet[T]) bool
 
 // HasDependent reports whether parent has dependent as a (transitive) dependent.
 func (g *Graph[T, V]) HasDependent(parent, dependent T) bool {
-	deps := g.Dependents(parent)
-	_, ok := deps[dependent]
-
-	return ok
+	return g.Dependents(parent)[dependent]
 }
 
 // TopoSortedLayers returns a slice of all of the graph nodes in topological sort order with their node info.
@@ -279,7 +270,7 @@ func (g *Graph[T, V]) TopoSortedLayers(checkFn CheckFn[T, V]) []map[T]V {
 		pending[node] = len(g.dependencies[node])
 	}
 
-	current := make(map[T]V, 0)
+	current := make(map[T]V)
 	for node, deg := range pending {
 		if deg == 0 {
 			current[node] = g.nodeValue(node)
@@ -326,16 +317,15 @@ func (g *Graph[T, V]) nodeValue(node T) V {
 
 // returns if it was the last
 func (dm DepMap[T]) remove(key, node T) bool {
-	if nodes := dm[key]; len(nodes) == 1 {
-		// The only element in the nodeset must be `node`, so we
-		// can delete the entry entirely.
+	nodes := dm[key]
+	if len(nodes) == 1 {
 		delete(dm, key)
 		return true
-	} else {
-		// Otherwise, remove the single node from the nodeset.
-		delete(nodes, node)
-		return false
 	}
+
+	delete(nodes, node)
+
+	return false
 }
 
 // Prune removes the node,

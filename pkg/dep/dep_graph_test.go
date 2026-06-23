@@ -894,12 +894,11 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 		}
 	}}
 
-	g := NewGrapher(mockDB, mockAUR,
-		false, true, true, true, false,
-		text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
-
 	t.Run("returns error when all targets are missing", func(t *testing.T) {
 		t.Parallel()
+		g := NewGrapher(mockDB, mockAUR,
+			false, true, true, true, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 		_, err := g.GraphFromTargets(t.Context(), nil, []string{"missing1", "missing2"})
 		require.Error(t, err)
 
@@ -909,6 +908,9 @@ func TestGrapher_GraphFromTargets_TargetNotFound(t *testing.T) {
 
 	t.Run("does not error when at least one target is found", func(t *testing.T) {
 		t.Parallel()
+		g := NewGrapher(mockDB, mockAUR,
+			false, true, true, true, false,
+			text.NewLogger(io.Discard, io.Discard, &os.File{}, true, "test"))
 		got, err := g.GraphFromTargets(t.Context(), nil, []string{"missing1", "okpkg"})
 		require.NoError(t, err)
 
