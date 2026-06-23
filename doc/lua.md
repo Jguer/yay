@@ -453,10 +453,10 @@ yay.create_autocmd("SearchFilter", {
 
 ## Editor support
 
-<p class="api-since">Available from yay v13.0.1</p>
+<p class="api-since">Available from yay v13.0.2</p>
 
 yay ships a [lua-language-server](https://luals.github.io/) type definition file
-at [`meta/yay.meta.lua`](../meta/yay.meta.lua). It declares the `yay` global,
+at [`meta/yay.d.lua`](../meta/yay.d.lua). It declares the `yay` global,
 every `yay.opt` field, and all autocmd event payloads so your editor can provide
 completion, hover documentation, and catch typos such as unknown option names or
 misspelled event fields.

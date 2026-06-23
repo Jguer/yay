@@ -11,62 +11,58 @@
 
 -- Aliases
 
----@alias yay.RebuildMode "no" | "yes" | "tree" | "all"
+---@alias yay.menuAnswer "" | "All" | "None" | "Installed" | "NotInstalled" | "abort"
 
 ---@alias yay.Event "AURPreInstall" | "AURPostDownload" | "UpgradeSelect" | "PostInstall" | "SearchFilter"
 
 -- Options: yay.opt
 
 ---@class yay.opt
---- Strings
----@field aururl string
----@field aurrpcurl string
----@field build_dir string
----@field editor string
----@field editor_flags string
----@field makepkg_bin string
----@field makepkg_conf string
----@field pacman_bin string
----@field pacman_conf string
----@field redownload string
----@field answer_clean string
----@field answer_diff string
----@field answer_edit string
----@field git_bin string
----@field gpg_bin string
----@field gpg_flags string
----@field mflags string
----@field sort_by string
----@field search_by string
----@field git_flags string
----@field remove_make string
----@field sudo_bin string
----@field sudo_flags string
---- Integers
----@field request_split_n integer
----@field completion_refresh_time integer
----@field max_concurrent_downloads integer
---- Booleans
----@field bottom_up boolean
----@field sudo_loop boolean
----@field devel boolean
----@field clean_after boolean
----@field keep_src boolean
----@field provides boolean
----@field pgp_fetch boolean
----@field clean_menu boolean
----@field diff_menu boolean
----@field edit_menu boolean
----@field combined_upgrade boolean
----@field use_ask boolean
----@field batch_install boolean
----@field single_line_results boolean
----@field separate_sources boolean
----@field debug boolean
----@field rpc boolean
----@field double_confirm boolean
---- Typed
----@field rebuild yay.RebuildMode
+---@field aururl string Base AUR URL
+---@field aurrpcurl string AUR RPC endpoint URL; empty uses default endpoint.
+---@field build_dir string Build/cache directory for AUR packages.
+---@field editor string Editor command used for PKGBUILD edits; empty uses VISUAL/EDITOR.
+---@field editor_flags string Extra flags passed to the editor command.
+---@field makepkg_bin string makepkg executable (name in PATH or absolute path).
+---@field makepkg_conf string makepkg.conf path; empty uses default makepkg config.
+---@field pacman_bin string pacman executable.
+---@field pacman_conf string pacman.conf file path.
+---@field redownload "no" | "yes" | "all" PKGBUILD download mode.
+---@field git_bin string git executable.
+---@field gpg_bin string gpg executable.
+---@field gpg_flags string Extra flags passed to gpg.
+---@field mflags string Extra flags passed to makepkg.
+---@field sort_by "votes" | "popularity" | "name" | "base" | "submitted" | "modified" | "" AUR search sort field.
+---@field search_by "name" | "name-desc" | "maintainer" | "submitter" | "depends" | "makedepends" | "optdepends" | "checkdepends" | "provides" | "conflicts" | "replaces" | "groups" | "keywords" | "comaintainers" AUR search field.
+---@field git_flags string Extra flags passed to git.
+---@field remove_make "no" | "yes" | "ask" | "askyes" Remove makedepends mode.
+---@field sudo_bin string Privilege elevation command.
+---@field sudo_flags string Extra flags passed to the sudo command.
+---@field rebuild "no" | "yes" | "tree" | "all" Build mode.
+---@field answer_clean yay.menuAnswer yay v13.0.1+ Pre-select clean menu answer (also accepts menu syntax: ranges, ^n).
+---@field answer_diff yay.menuAnswer yay v13.0.1+ Pre-select diff menu answer (also accepts menu syntax: ranges, ^n).
+---@field answer_edit yay.menuAnswer yay v13.0.1+ Pre-select edit menu answer (also accepts menu syntax: ranges, ^n).
+---@field request_split_n integer Max packages per AUR RPC request (use values > 0).
+---@field completion_refresh_time integer Completion cache refresh days: -1 (never), 0 (always), >0 (every N days).
+---@field max_concurrent_downloads integer Parallel PKGBUILD source downloads; 0 uses CPU count.
+---@field bottom_up boolean Show AUR packages before repo packages in mixed results.
+---@field sudo_loop boolean Keep sudo session alive in the background during long builds.
+---@field devel boolean Check development/VCS packages on sysupgrade.
+---@field clean_after boolean Remove untracked files after install.
+---@field keep_src boolean Keep pkg/ and src/ after successful builds.
+---@field provides boolean Resolve matching providers when dependencies are ambiguous.
+---@field pgp_fetch boolean Prompt to import unknown PGP keys from validpgpkeys.
+---@field clean_menu boolean Show pre-build clean menu.
+---@field diff_menu boolean Show diff menu before building.
+---@field edit_menu boolean Show PKGBUILD edit menu before building.
+---@field combined_upgrade boolean Use combined repo+AUR upgrade flow on sysupgrade.
+---@field use_ask boolean Use pacman's --ask to auto-confirm known conflicts.
+---@field batch_install boolean Queue AUR package installs instead of installing each package immediately.
+---@field single_line_results boolean Use single-line search result format.
+---@field separate_sources boolean Separate query results by source (repo vs AUR).
+---@field debug boolean Enable debug logging and local init.lua lookup convenience.
+---@field rpc boolean Use AUR RPC for dependency/query operations.
+---@field double_confirm boolean Ask for confirmation before and after builds during upgrades.
 
 -- Logging: yay.log
 
@@ -213,20 +209,20 @@
 ---@field desc? string
 ---@field callback fun(event: yay.SearchFilterEvent): yay.SearchResultRef[]?
 
+---@overload fun(event: "AURPreInstall", opts: yay.AURPreInstallOpts)
+---@overload fun(event: "AURPostDownload", opts: yay.AURPostDownloadOpts)
+---@overload fun(event: "UpgradeSelect", opts: yay.UpgradeSelectOpts)
+---@overload fun(event: "PostInstall", opts: yay.PostInstallOpts)
+---@overload fun(event: "SearchFilter", opts: yay.SearchFilterOpts)
+---@class yay.create_autocmd
+
 -- The yay global
 
 ---@class yay
 ---@field opt? yay.opt
 ---@field log? yay.log
 ---@field abort? fun(reason: string)
+---@field create_autocmd? yay.create_autocmd
 
 ---@type yay
 yay = {}
-
----@overload fun(event: "AURPreInstall", opts: yay.AURPreInstallOpts)
----@overload fun(event: "AURPostDownload", opts: yay.AURPostDownloadOpts)
----@overload fun(event: "UpgradeSelect", opts: yay.UpgradeSelectOpts)
----@overload fun(event: "PostInstall", opts: yay.PostInstallOpts)
----@overload fun(event: "SearchFilter", opts: yay.SearchFilterOpts)
----@diagnostic disable-next-line: inject-field
-yay.create_autocmd = function(event, opts) end
