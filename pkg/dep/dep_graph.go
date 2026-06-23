@@ -486,8 +486,6 @@ func (g *Grapher) GraphFromAUR(ctx context.Context,
 	return graph, nil
 }
 
-// findDepsFromAUR resolves deps against the AUR. It returns the packages it
-// found (to be added to the graph) and the deps it could not satisfy (missing).
 func (g *Grapher) findDepsFromAUR(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo],
 	parentPkgName string,
@@ -628,10 +626,6 @@ func (g *Grapher) addNodes(
 	deps []string,
 	depType Reason,
 ) {
-	// pending holds the deduplicated deps still needing resolution. It is a fresh
-	// slice owned by this call, so each phase filters it in place: unhandled deps
-	// are kept, resolved ones dropped. This replaces the previous mapset and its
-	// four ToSlice snapshots, which dominated allocations on this hot path.
 	pending := dedupeDeps(deps)
 
 	// Check if in graph already
@@ -768,9 +762,7 @@ func (g *Grapher) addNodes(
 	}
 }
 
-// dedupeDeps returns the unique entries of deps in first-seen order as a fresh
-// slice the caller may safely mutate (addNodes filters it in place). Dependency
-// lists are short, so the linear membership scan avoids a map allocation.
+// dedupeDeps returns the unique entries of deps in first-seen order.
 func dedupeDeps(deps []string) []string {
 	if len(deps) == 0 {
 		return nil

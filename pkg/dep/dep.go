@@ -7,17 +7,7 @@ import (
 	aur "github.com/Jguer/yay/v13/pkg/query"
 )
 
-// splitDep parses a dependency string into its package name, comparison
-// operator and version. It is an allocation-free equivalent of the previous
-// strings.FieldsFunc implementation:
-//
-//   - fields are maximal runs of non-operator bytes (operators: '<' '>' '=');
-//   - mod is every operator byte concatenated, in order;
-//   - 0 fields -> "","",""; 1 field -> field0,"",""; else field0, mod, field1.
-//
-// splitDep sits on the hottest path of dependency resolution and is called many
-// times per package, so it scans once and reuses slices of dep for the name and
-// version, and interns the operator string so the common path never allocates.
+// splitDep splits a dependency string into name, operator and version.
 func splitDep(dep string) (pkg, mod, ver string) {
 	var (
 		f0s, f0e = -1, -1 // first field bounds
@@ -64,15 +54,9 @@ func splitDep(dep string) (pkg, mod, ver string) {
 	return dep[f0s:f0e], internMod(modBuf[:n], modLen, dep), dep[f1s:f1e]
 }
 
-// internMod returns the operator string for the collected operator bytes
-// without allocating for the combinations that occur in practice. Switching on
-// string(b) is special-cased by the compiler to avoid a heap allocation; only
-// the unreachable overflow path (more operator bytes than modBuf can hold)
-// falls back to rebuilding the exact string from dep.
+// internMod returns the operator string without allocating for common cases.
 func internMod(b []byte, modLen int, dep string) string {
 	if modLen > len(b) {
-		// Extremely rare malformed input: reconstruct every operator byte to
-		// stay byte-for-byte compatible with the previous implementation.
 		var sb strings.Builder
 		for i := 0; i < len(dep); i++ {
 			if c := dep[i]; c == '<' || c == '>' || c == '=' {

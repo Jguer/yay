@@ -154,10 +154,6 @@ func (g *Graph[T, V]) DependOn(child, parent T) error {
 		return ErrSelfReferential
 	}
 
-	// A cycle child -> parent -> ... -> child can only exist if child is already
-	// a node: edges only reference existing nodes, so a child absent from the
-	// graph is unreachable from parent. Skipping the traversal makes every edge
-	// that introduces a new dependency O(1).
 	if g.Exists(child) && g.DependsOn(parent, child) {
 		return ErrCircular
 	}
@@ -208,15 +204,10 @@ func (g *Graph[T, V]) String() string {
 }
 
 // DependsOn reports whether child depends (transitively) on parent.
-//
-// The traversal short-circuits as soon as parent is reached, so it does not
-// materialize the full transitive dependency set.
 func (g *Graph[T, V]) DependsOn(child, parent T) bool {
 	return g.reachable(child, parent, g.ImmediateDependencies)
 }
 
-// reachable reports whether target is reachable from start by repeatedly
-// following nextFn. It returns as soon as target is found.
 func (g *Graph[T, V]) reachable(start, target T, nextFn func(T) NodeSet[T]) bool {
 	if !g.nodes[start] {
 		return false
@@ -263,8 +254,6 @@ func (g *Graph[T, V]) HasDependent(parent, dependent T) bool {
 func (g *Graph[T, V]) TopoSortedLayers(checkFn CheckFn[T, V]) []map[T]V {
 	layers := []map[T]V{}
 
-	// pending tracks, for each node, how many of its dependencies have not yet
-	// been emitted. A node becomes ready (a "leaf") once this reaches zero.
 	pending := make(map[T]int, len(g.nodes))
 	for node := range g.nodes {
 		pending[node] = len(g.dependencies[node])
@@ -303,8 +292,6 @@ func (g *Graph[T, V]) TopoSortedLayers(checkFn CheckFn[T, V]) []map[T]V {
 	return layers
 }
 
-// nodeValue returns the node's stored value, or the zero value of V when no
-// node info has been recorded for it.
 func (g *Graph[T, V]) nodeValue(node T) V {
 	if info := g.nodeInfo[node]; info != nil {
 		return info.Value
