@@ -11,6 +11,39 @@ yay uses the [Lua 5.1 interpreter](https://www.lua.org/manual/5.1/) to run `init
 1. `$XDG_CONFIG_HOME/yay/init.lua`
 2. `$HOME/.config/yay/init.lua`
 
+[Example init.lua](./init.lua)
+
+## Editor support
+
+<p class="api-since">Available from yay v13.0.2</p>
+
+yay ships a [lua-language-server](https://luals.github.io/) type definition file
+at [`meta/yay.d.lua`](../meta/yay.d.lua). It declares the `yay` global,
+every `yay.opt` field, and all autocmd event payloads so your editor can provide
+completion, hover documentation, and catch typos such as unknown option names or
+misspelled event fields.
+
+### Setup
+
+Point lua-language-server at the `meta/` directory via `workspace.library` in
+your [configuration file](https://luals.github.io/wiki/configuration/).
+With a `.luarc.json` in your project root, next to `init.lua`:
+
+```json
+{
+  "runtime": { "version": "Lua 5.1" },
+  "workspace": {
+    "library": ["/usr/share/yay/meta"]
+  }
+}
+```
+
+Replace `/usr/share/yay/meta` with the path to the `meta/` directory in your
+local yay checkout or installation. The runtime version should be `Lua 5.1`
+because yay runs `init.lua` through the [gopher-lua](https://github.com/yuin/gopher-lua) Lua 5.1 interpreter.
+
+lua-language-server is available for [VS Code](https://marketplace.visualstudio.com/items?itemName=sumneko.lua), [Neovim](https://luals.github.io/#neovim-install), [JetBrains](https://plugins.jetbrains.com/plugin/22315-sumnekolua), and [other editors](https://luals.github.io/#other-install) that support the Language Server Protocol.
+
 ## Setting options with `yay.opt`
 
 <p class="api-since">Available from yay v13.0.0</p>
@@ -450,40 +483,3 @@ yay.create_autocmd("SearchFilter", {
   end,
 })
 ```
-
-## Editor support
-
-<p class="api-since">Available from yay v13.0.2</p>
-
-yay ships a [lua-language-server](https://luals.github.io/) type definition file
-at [`meta/yay.d.lua`](../meta/yay.d.lua). It declares the `yay` global,
-every `yay.opt` field, and all autocmd event payloads so your editor can provide
-completion, hover documentation, and catch typos such as unknown option names or
-misspelled event fields.
-
-### Setup
-
-Point lua-language-server at the `meta/` directory via `workspace.library` in
-your [configuration file](https://luals.github.io/wiki/configuration/).
-With a `.luarc.json` in your project root:
-
-```json
-{
-  "runtime": { "version": "Lua 5.1" },
-  "workspace": {
-    "library": ["/usr/share/yay/meta"]
-  }
-}
-```
-
-Replace `/usr/share/yay/meta` with the path to the `meta/` directory in your
-local yay checkout or installation. The runtime version should be `Lua 5.1`
-because yay runs `init.lua` through the [gopher-lua](https://github.com/yuin/gopher-lua)
-Lua 5.1 interpreter.
-
-If you keep your `init.lua` in `$XDG_CONFIG_HOME/yay/`, place the same
-`.luarc.json` next to it so the language server picks up the library
-automatically.
-
-lua-language-server is available for VS Code, Neovim, Helix, and other editors
-that support the Language Server Protocol.
