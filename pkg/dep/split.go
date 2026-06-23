@@ -63,8 +63,6 @@ func internMod(b []byte, modLen int, dep string) string {
 	}
 
 	switch string(b) {
-	case "":
-		return ""
 	case "=":
 		return "="
 	case "<":
