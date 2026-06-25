@@ -96,6 +96,7 @@ type abstractResult struct {
 	firstSubmitted int
 	lastModified   int
 	provides       []string
+	metricScore    float64
 }
 
 type abstractResults struct {
@@ -106,7 +107,6 @@ type abstractResults struct {
 	sortByFunc      SortFunc
 	repoOrder       []string
 
-	distanceCache       map[string]float64
 	separateSourceCache map[string]float64
 }
 
@@ -158,9 +158,7 @@ func (a *abstractResults) GetSortFunc(sortBy string, bottomUp bool) SortFunc {
 				return cmpResult
 			}
 
-			metricA := a.calculateMetric(&pkgA)
-			metricB := a.calculateMetric(&pkgB)
-			return cmp.Compare(metricA, metricB)
+			return cmp.Compare(pkgA.metricScore, pkgB.metricScore)
 		}
 	}
 
@@ -175,23 +173,32 @@ func (a *abstractResults) GetSortFunc(sortBy string, bottomUp bool) SortFunc {
 	return sortFunc
 }
 
+// prepareMetrics computes the expensive Jaro-Winkler-based rank once per result
+// before sorting so the comparator stays cheap.
+func (a *abstractResults) prepareMetrics() {
+	a.separateSourceCache = make(map[string]float64, len(a.repoOrder))
+
+	for i := range a.results {
+		a.results[i].metricScore = a.calculateMetric(&a.results[i])
+	}
+}
+
 func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor, pkgS []string) {
 	var aurErr error
 
 	pkgS = RemoveInvalidTargets(s.logger, pkgS, s.targetMode)
 
 	metric := &metrics.JaroWinkler{
-		CaseSensitive: false,
+		// Case-sensitive: we lower-case the corpus once in GetMetric, search string normalized in Execute.
+		CaseSensitive: true,
 	}
 
 	sortableResults := &abstractResults{
-		results:             []abstractResult{},
-		search:              strings.Join(pkgS, ""),
-		metric:              metric,
-		separateSources:     s.separateSources,
-		repoOrder:           dbExecutor.Repos(),
-		distanceCache:       map[string]float64{},
-		separateSourceCache: map[string]float64{},
+		results:         []abstractResult{},
+		search:          strings.ToLower(strings.Join(pkgS, "")),
+		metric:          metric,
+		separateSources: s.separateSources,
+		repoOrder:       dbExecutor.Repos(),
 	}
 	sortableResults.sortByFunc = sortableResults.GetSortFunc(s.sortBy, s.bottomUp)
 
@@ -251,6 +258,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 			})
 		}
 	}
+	sortableResults.prepareMetrics()
 
 	slices.SortFunc(sortableResults.results, func(a, b abstractResult) int {
 		return sortableResults.sortByFunc(b, a)

@@ -25,26 +25,23 @@ func (a *abstractResults) aurSortByMetric(pkg *abstractResult) float64 {
 }
 
 func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
-	if v, ok := a.distanceCache[pkg.name]; ok {
-		return v
-	}
-
-	if strings.EqualFold(pkg.name, a.search) {
+	name := strings.ToLower(pkg.name)
+	if name == a.search {
 		return 1.0
 	}
 
-	sim := strutil.Similarity(pkg.name, a.search, a.metric)
+	sim := strutil.Similarity(name, a.search, a.metric)
 
 	for _, prov := range pkg.provides {
 		// If the package provides search, it's a perfect match
 		// AUR packages don't populate provides
-		candidate := strutil.Similarity(prov, a.search, a.metric) * 0.80
+		candidate := strutil.Similarity(strings.ToLower(prov), a.search, a.metric) * 0.80
 		if candidate > sim {
 			sim = candidate
 		}
 	}
 
-	simDesc := strutil.Similarity(pkg.description, a.search, a.metric)
+	simDesc := strutil.Similarity(strings.ToLower(pkg.description), a.search, a.metric)
 
 	// slightly overweight sync sources by always giving them max popularity
 	popularity := 1.0
@@ -52,11 +49,7 @@ func (a *abstractResults) GetMetric(pkg *abstractResult) float64 {
 		popularity = a.aurSortByMetric(pkg)
 	}
 
-	sim = sim*0.35 + simDesc*0.15 + popularity*0.50
-
-	a.distanceCache[pkg.name] = sim
-
-	return sim
+	return sim*0.35 + simDesc*0.15 + popularity*0.50
 }
 
 func (a *abstractResults) separateSourceScore(source string, score float64) float64 {
