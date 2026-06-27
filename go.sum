@@ -1,7 +1,7 @@
-github.com/Jguer/aur v1.3.0 h1:skdjp/P9kB75TBaJmn9PKK/kCeA9QsgjdUrORZ3gldU=
-github.com/Jguer/aur v1.3.0/go.mod h1:F8Awo+WKzTxlXtNOO4pDQjMkePLZ+oMSbu+1fKLTTLo=
-github.com/Jguer/dyalpm v0.1.3 h1:hXwzc9LInpg4F1walco+1eS+AziK4ybqBWwUPUbfREg=
-github.com/Jguer/dyalpm v0.1.3/go.mod h1:QfKO3rYndbmh5ptIGYa1Uw5DOeIDPbCG1gJGbyqWaiI=
+github.com/Jguer/aur v1.3.1 h1:KZIsDlzolXRo8gSxsYXLLOF25Wk5vt6FJTeSTpKpDfs=
+github.com/Jguer/aur v1.3.1/go.mod h1:vg8FixA+sl+FEbGGsiM2y2vqtAiQb/XdHIJi94rL03I=
+github.com/Jguer/dyalpm v0.1.4 h1:oTS36Xgj/rESqlz71/hGeW9R9cmb77vDndQ0p3iDmMk=
+github.com/Jguer/dyalpm v0.1.4/go.mod h1:f78SsAmF2fdicKMcKB2j7sW7tHrJdrT+S3jRrIfuaWc=
 github.com/Jguer/votar v1.0.0 h1:drPYpV5Py5BeAQS8xezmT6uCEfLzotNjLf5yfmlHKTg=
 github.com/Jguer/votar v1.0.0/go.mod h1:rc6vgVlTqNjI4nAnPbDTbdxw/N7kXkbB8BcUDjeFbYQ=
 github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5 h1:TMscPjkb1ThXN32LuFY5bEYIcXZx3YlwzhS1GxNpn/c=
@@ -21,6 +21,8 @@ github.com/deckarep/golang-set/v2 v2.9.0 h1:prva4eP9UysWagLyKrtn074ughi0NnkIf0A4
 github.com/deckarep/golang-set/v2 v2.9.0/go.mod h1:EWknQXbs0mcFpat2QOoXV0Ee57cD+w6ZEN76BR2JVrM=
 github.com/ebitengine/purego v0.10.1 h1:dewVBCBT2GaMu1SrNTYxQhgQBethzfhiwvZiLGP/qyY=
 github.com/ebitengine/purego v0.10.1/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
+github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPEgAXnvj1Ro=
+github.com/go-viper/mapstructure/v2 v2.5.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 h1:2VTzZjLZBgl62/EtslCrtky5vbi9dd7HrQPQIx6wqiw=
@@ -36,8 +38,6 @@ github.com/itchyny/timefmt-go v0.1.8 h1:1YEo1JvfXeAHKdjelbYr/uCuhkybaHCeTkH8Bo79
 github.com/itchyny/timefmt-go v0.1.8/go.mod h1:5E46Q+zj7vbTgWY8o5YkMeYb4I6GeWLFnetPy5oBrAI=
 github.com/leonelquinteros/gotext v1.7.2 h1:bDPndU8nt+/kRo1m4l/1OXiiy2v7Z7dfPQ9+YP7G1Mc=
 github.com/leonelquinteros/gotext v1.7.2/go.mod h1:9/haCkm5P7Jay1sxKDGJ5WIg4zkz8oZKw4ekNpALob8=
-github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
-github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 h1:W6apQkHrMkS0Muv8G/TipAy/FJl/rCYT0+EuS8+Z0z4=
 github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32/go.mod h1:9wM+0iRr9ahx58uYLpLIr5fm8diHn0JbqRycJi6w0Ms=
 github.com/ohler55/ojg v1.28.1 h1:Xy93DelhLSZNeWv8GPKtP6qMqkUlZlAxBP/AQcC5RfY=

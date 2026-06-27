@@ -1,8 +1,8 @@
 module github.com/Jguer/yay/v13
 
 require (
-	github.com/Jguer/aur v1.3.0
-	github.com/Jguer/dyalpm v0.1.3
+	github.com/Jguer/aur v1.3.1
+	github.com/Jguer/dyalpm v0.1.4
 	github.com/Jguer/votar v1.0.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
@@ -22,11 +22,11 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
+	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/itchyny/gojq v0.12.19 // indirect
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/ohler55/ojg v1.28.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.17.9 // indirect
@@ -34,4 +34,5 @@ require (
 )
 
 go 1.26
+
 toolchain go1.26.0
