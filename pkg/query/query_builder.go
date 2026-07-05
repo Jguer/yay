@@ -293,10 +293,10 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 
 		if s.results[i].source == "aur" {
 			pkg := s.aurQueryMap[s.results[i].name]
-			toPrint += aurPkgSearchString(pkg, dbExecutor, s.singleLineResults)
+			toPrint += s.renderAUR(pkg, dbExecutor)
 		} else {
 			pkg := s.repoQueryMap[s.results[i].source+"/"+s.results[i].name]
-			toPrint += syncPkgSearchString(pkg, dbExecutor, s.singleLineResults)
+			toPrint += s.renderSync(pkg, dbExecutor)
 		}
 
 		s.logger.Println(toPrint)
@@ -394,4 +394,69 @@ func (s *SourceQueryBuilder) applySearchFilter(results []abstractResult) []abstr
 	}
 
 	return filtered
+}
+
+func (s *SourceQueryBuilder) renderAUR(pkg *aur.Pkg, dbExecutor db.Executor) string {
+	var installed bool
+	var localVersion string
+	if localPkg := dbExecutor.LocalPackage(pkg.Name); localPkg != nil {
+		installed = true
+		if localPkg.Version() != pkg.Version {
+			localVersion = localPkg.Version()
+		}
+	}
+
+	if s.lua != nil && s.lua.HasAutocmd(settingslua.EventRenderAUR) {
+		rendered, ok, err := s.lua.RunRenderAUR(&settingslua.RenderAUREvent{
+			Name:           pkg.Name,
+			Version:        pkg.Version,
+			Description:    pkg.Description,
+			Base:           pkg.PackageBase,
+			Votes:          pkg.NumVotes,
+			Popularity:     pkg.Popularity,
+			Maintainer:     pkg.Maintainer,
+			OutOfDate:      pkg.OutOfDate,
+			FirstSubmitted: pkg.FirstSubmitted,
+			LastModified:   pkg.LastModified,
+			LocalVersion:   localVersion,
+		})
+		if err != nil {
+			s.logger.Errorln(err)
+		} else if ok {
+			return rendered
+		}
+	}
+
+	return aurPkgSearchStringResolved(pkg, installed, localVersion, s.singleLineResults)
+}
+
+func (s *SourceQueryBuilder) renderSync(pkg alpm.Package, dbExecutor db.Executor) string {
+	var installed bool
+	var localVersion string
+	if localPkg := dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
+		installed = true
+		if localPkg.Version() != pkg.Version() {
+			localVersion = localPkg.Version()
+		}
+	}
+
+	groups := dbExecutor.PackageGroups(pkg)
+
+	if s.lua != nil && s.lua.HasAutocmd(settingslua.EventRenderSync) {
+		rendered, ok, err := s.lua.RunRenderSync(&settingslua.RenderSyncEvent{
+			Repository:    pkg.DB().Name(),
+			Name:          pkg.Name(),
+			Description:   pkg.Description(),
+			Version:       pkg.Version(),
+			Groups:        groups,
+			LocalVersion:  localVersion,
+		})
+		if err != nil {
+			s.logger.Errorln(err)
+		} else if ok {
+			return rendered
+		}
+	}
+
+	return syncPkgSearchStringResolved(pkg, groups, installed, localVersion, s.singleLineResults)
 }

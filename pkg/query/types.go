@@ -8,7 +8,6 @@ import (
 	alpm "github.com/Jguer/dyalpm"
 	"github.com/leonelquinteros/gotext"
 
-	"github.com/Jguer/yay/v13/pkg/db"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
 
@@ -47,11 +46,9 @@ func getSearchBy(value string) aur.By {
 	}
 }
 
-func aurPkgSearchString(
-	pkg *aur.Pkg,
-	dbExecutor db.Executor,
-	singleLineResults bool,
-) string {
+// aurPkgSearchStringResolved renders a search result for an AUR package.
+// It accepts pre-resolved installed state to avoid a second LocalPackage call.
+func aurPkgSearchStringResolved(pkg *aur.Pkg, installed bool, localVersion string, singleLineResults bool) string {
 	linkText := text.Bold(text.ColorHash("aur")) + "/" + text.Bold(pkg.Name)
 	toPrint := text.CreateRepoLink("aur", "", pkg.Name, linkText) +
 		" " + text.Cyan(pkg.Version) +
@@ -70,9 +67,9 @@ func aurPkgSearchString(
 		toPrint += text.Bold(text.Red(gotext.Get("(Out-of-date: %s)", text.FormatTime(pkg.OutOfDate)))) + " "
 	}
 
-	if localPkg := dbExecutor.LocalPackage(pkg.Name); localPkg != nil {
-		if localPkg.Version() != pkg.Version {
-			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localPkg.Version())))
+	if installed {
+		if localVersion != "" {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localVersion)))
 		} else {
 			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
 		}
@@ -89,22 +86,22 @@ func aurPkgSearchString(
 	return toPrint
 }
 
-// PrintSearch receives a RepoSearch type and outputs pretty text.
-func syncPkgSearchString(pkg alpm.Package, dbExecutor db.Executor, singleLineResults bool) string {
+// syncPkgSearchStringResolved renders a search result for a sync package.
+// It accepts pre-resolved groups and installed state to avoid second DB calls.
+func syncPkgSearchStringResolved(pkg alpm.Package, groups []string, installed bool, localVersion string, singleLineResults bool) string {
 	linkText := text.Bold(text.ColorHash(pkg.DB().Name())) + "/" + text.Bold(pkg.Name())
 	toPrint := text.CreateRepoLink(pkg.DB().Name(), pkg.Architecture(), pkg.Name(), linkText) +
 		" " + text.Cyan(pkg.Version()) +
 		text.Bold(" ("+text.Human(pkg.Size())+
 			" "+text.Human(pkg.ISize())+") ")
 
-	packageGroups := dbExecutor.PackageGroups(pkg)
-	if len(packageGroups) != 0 {
-		toPrint += fmt.Sprint(packageGroups, " ")
+	if len(groups) != 0 {
+		toPrint += fmt.Sprint(groups, " ")
 	}
 
-	if localPkg := dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
-		if localPkg.Version() != pkg.Version() {
-			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localPkg.Version())))
+	if installed {
+		if localVersion != "" {
+			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localVersion)))
 		} else {
 			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
 		}

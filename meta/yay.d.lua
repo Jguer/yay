@@ -13,7 +13,7 @@
 
 ---@alias yay.menuAnswer "" | "All" | "None" | "Installed" | "NotInstalled" | "abort"
 
----@alias yay.Event "AURPreInstall" | "AURPostDownload" | "UpgradeSelect" | "PostInstall" | "SearchFilter"
+---@alias yay.Event "AURPreInstall" | "AURPostDownload" | "UpgradeSelect" | "PostInstall" | "SearchFilter" | "RenderAUR" | "RenderSync"
 
 -- Options: yay.opt
 
@@ -209,11 +209,54 @@
 ---@field desc? string
 ---@field callback fun(event: yay.SearchFilterEvent): yay.SearchResultRef[]?
 
+-- Event payloads: RenderAUR
+
+---@class yay.RenderAURData
+---@field name string
+---@field version string
+---@field description string
+---@field base string
+---@field votes integer
+---@field popularity number
+---@field maintainer string
+---@field out_of_date integer
+---@field first_submitted integer
+---@field last_modified integer
+---@field local_version string
+
+---@class yay.RenderAUREvent
+---@field event "RenderAUR"
+---@field data yay.RenderAURData
+
+---@class yay.RenderAUROpts
+---@field desc? string
+---@field callback fun(event: yay.RenderAUREvent): string?
+
+-- Event payloads: RenderSync
+
+---@class yay.RenderSyncData
+---@field repository string
+---@field name string
+---@field description string
+---@field version string
+---@field groups string[]
+---@field local_version string
+
+---@class yay.RenderSyncEvent
+---@field event "RenderSync"
+---@field data yay.RenderSyncData
+
+---@class yay.RenderSyncOpts
+---@field desc? string
+---@field callback fun(event: yay.RenderSyncEvent): string?
+
 ---@overload fun(event: "AURPreInstall", opts: yay.AURPreInstallOpts)
 ---@overload fun(event: "AURPostDownload", opts: yay.AURPostDownloadOpts)
 ---@overload fun(event: "UpgradeSelect", opts: yay.UpgradeSelectOpts)
 ---@overload fun(event: "PostInstall", opts: yay.PostInstallOpts)
 ---@overload fun(event: "SearchFilter", opts: yay.SearchFilterOpts)
+---@overload fun(event: "RenderAUR", opts: yay.RenderAUROpts)
+---@overload fun(event: "RenderSync", opts: yay.RenderSyncOpts)
 ---@class yay.create_autocmd
 
 -- The yay global
