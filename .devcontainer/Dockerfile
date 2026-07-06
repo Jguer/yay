@@ -12,7 +12,7 @@ RUN set -eux; \
     sed -i 's/^#\?DisableSandbox.*/DisableSandbox/' /etc/pacman.conf || true; \
     sed -i 's/^#\?DownloadUser.*/#DownloadUser = alpm/' /etc/pacman.conf || true; \
     pacman -Syu --noconfirm --needed \
-        pacman-contrib zsh git-delta openssh bat go github-cli \
+        pacman-contrib zsh git-delta openssh bat go github-cli ripgrep \
         archlinux-keyring git gcc make sudo asciidoc doxygen meson curl; \
     curl -sSfL https://golangci-lint.run/install.sh | sh -s v2.12.2; \
     go mod download; \
@@ -25,8 +25,9 @@ RUN useradd -m -s /bin/bash docker \
 
 USER docker
 
-# Install xgotext
-RUN go install github.com/leonelquinteros/gotext/cli/xgotext@latest
+# Install xgotext and gopls (Go language server)
+RUN go install github.com/leonelquinteros/gotext/cli/xgotext@latest \
+    && go install golang.org/x/tools/gopls@latest
 
 ENV PATH="/app/bin:/home/docker/go/bin:$PATH"
 

@@ -520,7 +520,7 @@ not undo an earlier hook's string.
     out_of_date     = 0,        -- 0 if current; Unix timestamp if flagged
     first_submitted = 1700000000,
     last_modified   = 1700000001,
-    local_version   = "",       -- non-empty when a different version is installed
+    local_version   = "",       -- installed version, or "" when not installed
   },
 }
 ```
@@ -536,7 +536,7 @@ not undo an earlier hook's string.
     description   = "A useful package",
     version       = "2.0-1",
     groups        = {},        -- array of group strings, often empty
-    local_version = "",        -- non-empty when a different version is installed
+    local_version = "",        -- installed version, or "" when not installed
   },
 }
 ```

@@ -7,6 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	aurc "github.com/Jguer/aur"
+
+	dbmock "github.com/Jguer/yay/v13/pkg/db/mock"
 	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
 	"github.com/Jguer/yay/v13/pkg/settings/parser"
 	"github.com/Jguer/yay/v13/pkg/text"
@@ -119,4 +122,78 @@ func TestSourceQueryBuilderRenderAURNilFallsBack(t *testing.T) {
 	out := w.String()
 	// Default AUR rendering must appear when hook returns nil.
 	assert.Contains(t, out, "(+2461", "default AUR rendering must appear when hook returns nil")
+}
+
+func TestSourceQueryBuilderRenderAURHookReceivesLocalVersionWhenSame(t *testing.T) {
+	t.Parallel()
+
+	e := settingslua.New()
+	defer e.Close()
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("RenderAUR", {
+			callback = function(event)
+				return "LOCAL:" .. event.data.local_version
+			end,
+		})
+	`))
+
+	mockDB := &dbmock.DBExecutor{
+		LocalPackageFn: func(string) dbmock.IPackage {
+			return &dbmock.Package{PName: "yay", PVersion: "12.5.7-1"}
+		},
+	}
+	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test")
+
+	qb := NewSourceQueryBuilder(nil, logger, "", parser.ModeAny, "", false, false, false)
+	qb.SetLua(e)
+
+	rendered := qb.renderAUR(&aurc.Pkg{Name: "yay", Version: "12.5.7-1"}, mockDB)
+	require.Equal(t, "LOCAL:12.5.7-1", rendered)
+}
+
+func TestSourceQueryBuilderRenderSyncHookReceivesLocalVersionWhenSame(t *testing.T) {
+	t.Parallel()
+
+	e := settingslua.New()
+	defer e.Close()
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("RenderSync", {
+			callback = function(event)
+				return "LOCAL:" .. event.data.local_version
+			end,
+		})
+	`))
+
+	mockDB := &dbmock.DBExecutor{
+		LocalPackageFn: func(string) dbmock.IPackage {
+			return &dbmock.Package{PName: "ruby-yard", PVersion: "0.9.34-5"}
+		},
+	}
+	pkg := &dbmock.Package{PDB: dbmock.NewDB("extra"), PName: "ruby-yard", PVersion: "0.9.34-5"}
+	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test")
+
+	qb := NewSourceQueryBuilder(nil, logger, "", parser.ModeAny, "", false, false, false)
+	qb.SetLua(e)
+
+	rendered := qb.renderSync(pkg, mockDB)
+	require.Equal(t, "LOCAL:0.9.34-5", rendered)
+}
+
+func TestSourceQueryBuilderDefaultRenderUsesShortInstalledTagWhenSame(t *testing.T) {
+	t.Parallel()
+
+	mockDB := &dbmock.DBExecutor{
+		LocalPackageFn: func(string) dbmock.IPackage {
+			return &dbmock.Package{PName: "yay", PVersion: "12.5.7-1"}
+		},
+	}
+	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test")
+
+	qb := NewSourceQueryBuilder(nil, logger, "", parser.ModeAny, "", false, false, false)
+
+	rendered := qb.renderAUR(&aurc.Pkg{Name: "yay", Version: "12.5.7-1"}, mockDB)
+	assert.Contains(t, rendered, "(Installed)")
+	assert.NotContains(t, rendered, "(Installed: 12.5.7-1)")
 }

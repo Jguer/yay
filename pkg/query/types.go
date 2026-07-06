@@ -48,7 +48,7 @@ func getSearchBy(value string) aur.By {
 
 // aurPkgSearchStringResolved renders a search result for an AUR package.
 // It accepts pre-resolved installed state to avoid a second LocalPackage call.
-func aurPkgSearchStringResolved(pkg *aur.Pkg, installed bool, localVersion string, singleLineResults bool) string {
+func aurPkgSearchStringResolved(pkg *aur.Pkg, localVersion string, singleLineResults bool) string {
 	linkText := text.Bold(text.ColorHash("aur")) + "/" + text.Bold(pkg.Name)
 	toPrint := text.CreateRepoLink("aur", "", pkg.Name, linkText) +
 		" " + text.Cyan(pkg.Version) +
@@ -67,12 +67,11 @@ func aurPkgSearchStringResolved(pkg *aur.Pkg, installed bool, localVersion strin
 		toPrint += text.Bold(text.Red(gotext.Get("(Out-of-date: %s)", text.FormatTime(pkg.OutOfDate)))) + " "
 	}
 
-	if installed {
-		if localVersion != "" {
-			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localVersion)))
-		} else {
-			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
-		}
+	switch {
+	case localVersion == pkg.Version:
+		toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
+	case localVersion != "":
+		toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localVersion)))
 	}
 
 	if singleLineResults {
@@ -87,8 +86,8 @@ func aurPkgSearchStringResolved(pkg *aur.Pkg, installed bool, localVersion strin
 }
 
 // syncPkgSearchStringResolved renders a search result for a sync package.
-// It accepts pre-resolved groups and installed state to avoid second DB calls.
-func syncPkgSearchStringResolved(pkg alpm.Package, groups []string, installed bool, localVersion string, singleLineResults bool) string {
+// It accepts pre-resolved groups and local version state to avoid second DB calls.
+func syncPkgSearchStringResolved(pkg alpm.Package, groups []string, localVersion string, singleLineResults bool) string {
 	linkText := text.Bold(text.ColorHash(pkg.DB().Name())) + "/" + text.Bold(pkg.Name())
 	toPrint := text.CreateRepoLink(pkg.DB().Name(), pkg.Architecture(), pkg.Name(), linkText) +
 		" " + text.Cyan(pkg.Version()) +
@@ -99,12 +98,11 @@ func syncPkgSearchStringResolved(pkg alpm.Package, groups []string, installed bo
 		toPrint += fmt.Sprint(groups, " ")
 	}
 
-	if installed {
-		if localVersion != "" {
-			toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localVersion)))
-		} else {
-			toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
-		}
+	switch {
+	case localVersion == pkg.Version():
+		toPrint += text.Bold(text.Green(gotext.Get("(Installed)")))
+	case localVersion != "":
+		toPrint += text.Bold(text.Green(gotext.Get("(Installed: %s)", localVersion)))
 	}
 
 	if singleLineResults {

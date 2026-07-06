@@ -397,13 +397,9 @@ func (s *SourceQueryBuilder) applySearchFilter(results []abstractResult) []abstr
 }
 
 func (s *SourceQueryBuilder) renderAUR(pkg *aur.Pkg, dbExecutor db.Executor) string {
-	var installed bool
 	var localVersion string
 	if localPkg := dbExecutor.LocalPackage(pkg.Name); localPkg != nil {
-		installed = true
-		if localPkg.Version() != pkg.Version {
-			localVersion = localPkg.Version()
-		}
+		localVersion = localPkg.Version()
 	}
 
 	if s.lua != nil && s.lua.HasAutocmd(settingslua.EventRenderAUR) {
@@ -427,29 +423,25 @@ func (s *SourceQueryBuilder) renderAUR(pkg *aur.Pkg, dbExecutor db.Executor) str
 		}
 	}
 
-	return aurPkgSearchStringResolved(pkg, installed, localVersion, s.singleLineResults)
+	return aurPkgSearchStringResolved(pkg, localVersion, s.singleLineResults)
 }
 
 func (s *SourceQueryBuilder) renderSync(pkg alpm.Package, dbExecutor db.Executor) string {
-	var installed bool
 	var localVersion string
 	if localPkg := dbExecutor.LocalPackage(pkg.Name()); localPkg != nil {
-		installed = true
-		if localPkg.Version() != pkg.Version() {
-			localVersion = localPkg.Version()
-		}
+		localVersion = localPkg.Version()
 	}
 
 	groups := dbExecutor.PackageGroups(pkg)
 
 	if s.lua != nil && s.lua.HasAutocmd(settingslua.EventRenderSync) {
 		rendered, ok, err := s.lua.RunRenderSync(&settingslua.RenderSyncEvent{
-			Repository:    pkg.DB().Name(),
-			Name:          pkg.Name(),
-			Description:   pkg.Description(),
-			Version:       pkg.Version(),
-			Groups:        groups,
-			LocalVersion:  localVersion,
+			Repository:   pkg.DB().Name(),
+			Name:         pkg.Name(),
+			Description:  pkg.Description(),
+			Version:      pkg.Version(),
+			Groups:       groups,
+			LocalVersion: localVersion,
 		})
 		if err != nil {
 			s.logger.Errorln(err)
@@ -458,5 +450,5 @@ func (s *SourceQueryBuilder) renderSync(pkg alpm.Package, dbExecutor db.Executor
 		}
 	}
 
-	return syncPkgSearchStringResolved(pkg, groups, installed, localVersion, s.singleLineResults)
+	return syncPkgSearchStringResolved(pkg, groups, localVersion, s.singleLineResults)
 }
