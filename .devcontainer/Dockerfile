@@ -13,7 +13,7 @@ RUN set -eux; \
     sed -i 's/^#\?DownloadUser.*/#DownloadUser = alpm/' /etc/pacman.conf || true; \
     pacman -Syu --noconfirm --needed \
         pacman-contrib zsh git-delta openssh bat go github-cli ripgrep \
-        archlinux-keyring git gcc make sudo asciidoc doxygen meson curl; \
+        archlinux-keyring git gcc make sudo asciidoc doxygen meson curl nodejs npm; \
     curl -sSfL https://golangci-lint.run/install.sh | sh -s v2.12.2; \
     go mod download; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
@@ -27,7 +27,7 @@ USER docker
 RUN go install github.com/leonelquinteros/gotext/cli/xgotext@latest \
     && go install golang.org/x/tools/gopls@latest
 
-ENV PATH="/app/bin:/home/docker/go/bin:$PATH"
+ENV PATH="/app/bin:/home/docker/go/bin:/home/docker/.local/bin:$PATH"
 
 WORKDIR /workspace
 

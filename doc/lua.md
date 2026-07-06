@@ -176,6 +176,11 @@ lists are unioned. If any hook returns `skip_menu = true`, yay applies all hook
 exclusions and skips the native menu. With `skip_menu = false` or no return
 value, hook exclusions are applied first and then the native menu is shown.
 
+More examples: [`doc/examples/recently_modified.lua`](examples/recently_modified.lua)
+(pre-exclude recently modified AUR upgrades) and
+[`doc/examples/maintainer_change.lua`](examples/maintainer_change.lua) (warn on
+AUR maintainer changes).
+
 Returned exclusions must name packages from `event.data.upgrades`. Unknown
 names are treated as hook errors so typos do not silently upgrade the wrong
 package. Pulled dependencies are visible in `event.data.pulled_dependencies`,
@@ -414,6 +419,9 @@ sources, all topo layers). Transitive repo dependencies pulled in by pacman
 but not explicitly tracked by yay are **not** included. The callback is
 fire-and-forget: no return value is read.
 
+More examples: [`doc/examples/install_log.lua`](examples/install_log.lua)
+(append every installed/upgraded package to a persistent log file).
+
 ### Example
 
 ```lua
@@ -467,6 +475,9 @@ the **unfiltered** results are shown rather than aborting the command.
 The callback must return `nil` or an array of `{source=, name=}` tables. Every
 `(source, name)` pair must exist in the input; unknown pairs are an error.
 
+More examples: [`doc/examples/hide_first_submitted.lua`](examples/hide_first_submitted.lua)
+(hide AUR packages submitted in the last 14 days).
+
 ### Example
 
 ```lua
@@ -501,6 +512,10 @@ default rendering rather than aborting the command.
 Multiple hooks of the same event **run in registration order**; the **last**
 hook that returns a non-`nil` string wins. A later hook returning `nil` does
 not undo an earlier hook's string.
+
+More examples: [`doc/examples/single_line.lua`](examples/single_line.lua)
+(reproduces `yay.opt.single_line_results` with colored, single-line AUR and
+sync results).
 
 ### RenderAUR event
 
