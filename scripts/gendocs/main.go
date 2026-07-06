@@ -66,32 +66,44 @@ var pageTmpl = template.Must(template.New("").Parse(`<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{.Title}} — yay</title>
 <style>
+:root{
+--bg:#fff;--fg:#1a1a1a;--border:#e0e0e0;--border-light:#eee;
+--link:#0067c0;--code-bg:#f4f4f4;--muted:#666;
+--toc-bg:#f9f9f9;--toc-heading:#555;
+}
+@media(prefers-color-scheme:dark){
+:root{
+--bg:#14171a;--fg:#dcdcdc;--border:#33383d;--border-light:#262a2e;
+--link:#5aa9ff;--code-bg:#1f2327;--muted:#999;
+--toc-bg:#1a1d20;--toc-heading:#aaa;
+}
+}
 *,*::before,*::after{box-sizing:border-box}
-body{font:16px/1.7 system-ui,sans-serif;max-width:820px;margin:0 auto;padding:2rem 1.25rem;color:#1a1a1a}
-nav{margin-bottom:2.5rem;padding-bottom:.75rem;border-bottom:1px solid #e0e0e0;display:flex;gap:1.5rem;flex-wrap:wrap}
-nav a{text-decoration:none;color:#0067c0;font-size:.95rem}
+body{font:16px/1.7 system-ui,sans-serif;max-width:820px;margin:0 auto;padding:2rem 1.25rem;color:var(--fg);background:var(--bg)}
+nav{margin-bottom:2.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);display:flex;gap:1.5rem;flex-wrap:wrap}
+nav a{text-decoration:none;color:var(--link);font-size:.95rem}
 nav a:hover{text-decoration:underline}
 h1{font-size:1.9rem;margin-bottom:.5rem}
-h2{font-size:1.2rem;margin:2rem 0 .5rem;padding-bottom:.2rem;border-bottom:1px solid #eee}
+h2{font-size:1.2rem;margin:2rem 0 .5rem;padding-bottom:.2rem;border-bottom:1px solid var(--border-light)}
 h3{font-size:1.05rem;margin:1.5rem 0 .25rem}
 p{margin-bottom:.75rem}
 ul,ol{margin:0 0 .75rem 1.5rem}
 li{margin-bottom:.15rem}
-code{font-family:ui-monospace,monospace;font-size:.875em;background:#f4f4f4;padding:1px 5px;border-radius:3px}
-pre{background:#f4f4f4;padding:1rem;overflow-x:auto;border-radius:4px;margin-bottom:1rem;line-height:1.5}
+code{font-family:ui-monospace,monospace;font-size:.875em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+pre{background:var(--code-bg);padding:1rem;overflow-x:auto;border-radius:4px;margin-bottom:1rem;line-height:1.5}
 pre code{background:none;padding:0;font-size:.85em}
-a{color:#0067c0}
+a{color:var(--link)}
 strong{font-weight:600}
-footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #e0e0e0;color:#666;font-size:.875rem}
-.page-toc{position:fixed;top:5rem;right:1rem;width:220px;max-height:calc(100vh - 6rem);overflow-y:auto;background:#f9f9f9;border:1px solid #e0e0e0;border-radius:4px;padding:.75rem 1rem}
-.page-toc strong{display:block;margin-bottom:.5rem;color:#555;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--muted);font-size:.875rem}
+.page-toc{position:fixed;top:5rem;right:1rem;width:220px;max-height:calc(100vh - 6rem);overflow-y:auto;background:var(--toc-bg);border:1px solid var(--border);border-radius:4px;padding:.75rem 1rem}
+.page-toc strong{display:block;margin-bottom:.5rem;color:var(--toc-heading);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
 .page-toc ul{list-style:none;margin:0;padding:0}
 .page-toc li{margin:.15rem 0}
-.page-toc a{color:#0067c0;text-decoration:none;font-size:.8rem;line-height:1.4;display:block}
+.page-toc a{color:var(--link);text-decoration:none;font-size:.8rem;line-height:1.4;display:block}
 .page-toc a:hover{text-decoration:underline}
 .toc-h3{padding-left:.75rem}
 @media(max-width:1200px){.page-toc{display:none}}
-.api-since{font-size:.8rem;color:#666;font-style:italic;margin:-.25rem 0 .75rem}
+.api-since{font-size:.8rem;color:var(--muted);font-style:italic;margin:-.25rem 0 .75rem}
 </style>
 </head>
 <body>
