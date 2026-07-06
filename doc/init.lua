@@ -131,3 +131,29 @@ yay.opt.double_confirm = true
 --     return out
 --   end,
 -- })
+--
+-- Render a custom string for each AUR result row during -Ss / -S number menu.
+-- Return a string to use it; return nil (or nothing) to fall back to default.
+--
+-- yay.create_autocmd("RenderAUR", {
+--   desc = "compact AUR search lines",
+--   callback = function(event)
+--     local d = event.data
+--     local tag = d.local_version ~= "" and (" [installed: " .. d.local_version .. "]") or ""
+--     return string.format("aur/%s %s (+%d)%s\n    %s",
+--       d.name, d.version, d.votes, tag, d.description)
+--   end,
+-- })
+--
+-- Render a custom string for each sync/repo result row during -Ss / -S number menu.
+-- Return a string to use it; return nil (or nothing) to fall back to default.
+--
+-- yay.create_autocmd("RenderSync", {
+--   desc = "compact sync search lines",
+--   callback = function(event)
+--     local d = event.data
+--     local tag = d.local_version ~= "" and (" [installed: " .. d.local_version .. "]") or ""
+--     return string.format("%s/%s %s%s\n    %s",
+--       d.repository, d.name, d.version, tag, d.description)
+--   end,
+-- })

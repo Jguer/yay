@@ -13,6 +13,8 @@ const (
 	EventUpgradeSelect   = "UpgradeSelect"
 	EventPostInstall     = "PostInstall"
 	EventSearchFilter    = "SearchFilter"
+	EventRenderAUR       = "RenderAUR"
+	EventRenderSync      = "RenderSync"
 )
 
 type Autocmd struct {
@@ -116,10 +118,34 @@ type SearchResultRef struct {
 	Name   string
 }
 
+type RenderAUREvent struct {
+	Name           string
+	Version        string
+	Description    string
+	Base           string
+	Votes          int
+	Popularity     float64
+	Maintainer     string
+	OutOfDate      int
+	FirstSubmitted int
+	LastModified   int
+	LocalVersion   string
+}
+
+type RenderSyncEvent struct {
+	Repository   string
+	Name         string
+	Description  string
+	Version      string
+	Groups       []string
+	LocalVersion string
+}
+
 func (e *Engine) createAutocmd(state *glua.LState) int {
 	event := state.CheckString(1)
 	if event != EventAURPreInstall && event != EventAURPostDownload &&
-		event != EventUpgradeSelect && event != EventPostInstall && event != EventSearchFilter {
+		event != EventUpgradeSelect && event != EventPostInstall && event != EventSearchFilter &&
+		event != EventRenderAUR && event != EventRenderSync {
 		state.ArgError(1, fmt.Sprintf("unsupported event %q", event))
 		return 0
 	}
@@ -505,6 +531,82 @@ func (e *Engine) searchResultPackagesTable(packages []SearchResultPackage) *glua
 	}
 
 	return tbl
+}
+
+func (e *Engine) renderAURTable(event *RenderAUREvent) *glua.LTable {
+	eventTable, data := e.newEventTable(EventRenderAUR)
+	data.RawSetString("name", glua.LString(event.Name))
+	data.RawSetString("version", glua.LString(event.Version))
+	data.RawSetString("description", glua.LString(event.Description))
+	data.RawSetString("base", glua.LString(event.Base))
+	data.RawSetString("votes", glua.LNumber(event.Votes))
+	data.RawSetString("popularity", glua.LNumber(event.Popularity))
+	data.RawSetString("maintainer", glua.LString(event.Maintainer))
+	data.RawSetString("out_of_date", glua.LNumber(event.OutOfDate))
+	data.RawSetString("first_submitted", glua.LNumber(event.FirstSubmitted))
+	data.RawSetString("last_modified", glua.LNumber(event.LastModified))
+	data.RawSetString("local_version", glua.LString(event.LocalVersion))
+	return eventTable
+}
+
+func (e *Engine) renderSyncTable(event *RenderSyncEvent) *glua.LTable {
+	eventTable, data := e.newEventTable(EventRenderSync)
+	data.RawSetString("repository", glua.LString(event.Repository))
+	data.RawSetString("name", glua.LString(event.Name))
+	data.RawSetString("description", glua.LString(event.Description))
+	data.RawSetString("version", glua.LString(event.Version))
+	data.RawSetString("groups", e.stringArray(event.Groups))
+	data.RawSetString("local_version", glua.LString(event.LocalVersion))
+	return eventTable
+}
+
+func (e *Engine) RunRenderAUR(event *RenderAUREvent) (rendered string, ok bool, err error) {
+	if !e.HasAutocmd(EventRenderAUR) {
+		return "", false, nil
+	}
+
+	return e.runRender(EventRenderAUR, func() *glua.LTable {
+		return e.renderAURTable(event)
+	})
+}
+
+func (e *Engine) RunRenderSync(event *RenderSyncEvent) (rendered string, ok bool, err error) {
+	if !e.HasAutocmd(EventRenderSync) {
+		return "", false, nil
+	}
+
+	return e.runRender(EventRenderSync, func() *glua.LTable {
+		return e.renderSyncTable(event)
+	})
+}
+
+func (e *Engine) runRender(eventName string, newEventTable func() *glua.LTable) (rendered string, ok bool, err error) {
+	for _, autocmd := range e.autocmds[eventName] {
+		if err := e.L.CallByParam(glua.P{
+			Fn:      autocmd.callback,
+			NRet:    1,
+			Protect: true,
+		}, newEventTable()); err != nil {
+			return "", false, fmt.Errorf("%s: %w", eventName, wrapLuaErr(err))
+		}
+
+		value := e.L.Get(-1)
+		e.L.Pop(1)
+
+		if value == glua.LNil {
+			continue
+		}
+
+		str, isStr := value.(glua.LString)
+		if !isStr {
+			return "", false, fmt.Errorf("%s: callback must return a string or nil, got %s", eventName, value.Type())
+		}
+
+		rendered = string(str)
+		ok = true
+	}
+
+	return rendered, ok, nil
 }
 
 func parseSearchFilterResult(value glua.LValue, valid map[SearchResultRef]int) ([]SearchResultRef, bool, error) {

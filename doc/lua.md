@@ -483,3 +483,86 @@ yay.create_autocmd("SearchFilter", {
   end,
 })
 ```
+
+## Render hooks
+
+`RenderAUR` and `RenderSync` fire once per result row during `yay -Ss` and
+the `yay <pkg>` number menu, after results are ranked, sorted, and (optionally)
+filtered. The callback receives per-package metadata and may return a `string`
+that fully replaces what yay would print for that row. Returning `nil` (or
+nothing) falls back to yay's built-in formatting.
+
+The menu number prefix (magenta index shown in the number menu) is always
+prepended by yay itself; the callback controls only the package portion of the
+line. `-q`/`--quiet` (minimal verbosity) is unaffected — name-only output
+never calls these hooks. Hook errors are logged and that row falls back to
+default rendering rather than aborting the command.
+
+Multiple hooks of the same event **run in registration order**; the **last**
+hook that returns a non-`nil` string wins. A later hook returning `nil` does
+not undo an earlier hook's string.
+
+### RenderAUR event
+
+<p class="api-since">Available from yay v13.1.0</p>
+
+```lua
+{
+  event = "RenderAUR",
+  data = {
+    name            = "pkgname",
+    version         = "1.0-1",
+    description     = "A useful package",
+    base            = "pkgbase",
+    votes           = 42,
+    popularity      = 1.23,
+    maintainer      = "alice",
+    out_of_date     = 0,        -- 0 if current; Unix timestamp if flagged
+    first_submitted = 1700000000,
+    last_modified   = 1700000001,
+    local_version   = "",       -- installed version, or "" when not installed
+  },
+}
+```
+
+### RenderSync event
+
+<p class="api-since">Available from yay v13.1.0</p>
+
+```lua
+{
+  event = "RenderSync",
+  data = {
+    repository    = "extra",   -- pacman DB name (e.g. "core", "extra")
+    name          = "pkgname",
+    description   = "A useful package",
+    version       = "2.0-1",
+    groups        = {},        -- array of group strings, often empty
+    local_version = "",        -- installed version, or "" when not installed
+  },
+}
+```
+
+### Example
+
+```lua
+yay.create_autocmd("RenderAUR", {
+  desc = "compact AUR search lines",
+  callback = function(event)
+    local d = event.data
+    local tag = d.local_version ~= "" and (" [installed: " .. d.local_version .. "]") or ""
+    return string.format("aur/%s %s (+%d)%s\n    %s",
+      d.name, d.version, d.votes, tag, d.description)
+  end,
+})
+
+yay.create_autocmd("RenderSync", {
+  desc = "compact sync search lines",
+  callback = function(event)
+    local d = event.data
+    local tag = d.local_version ~= "" and (" [installed: " .. d.local_version .. "]") or ""
+    return string.format("%s/%s %s%s\n    %s",
+      d.repository, d.name, d.version, tag, d.description)
+  end,
+})
+```
