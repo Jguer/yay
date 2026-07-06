@@ -133,12 +133,12 @@ type RenderAUREvent struct {
 }
 
 type RenderSyncEvent struct {
-	Repository    string
-	Name          string
-	Description   string
-	Version       string
-	Groups        []string
-	LocalVersion  string
+	Repository   string
+	Name         string
+	Description  string
+	Version      string
+	Groups       []string
+	LocalVersion string
 }
 
 func (e *Engine) createAutocmd(state *glua.LState) int {
@@ -565,7 +565,9 @@ func (e *Engine) RunRenderAUR(event *RenderAUREvent) (rendered string, ok bool, 
 		return "", false, nil
 	}
 
-	return e.runRender(EventRenderAUR, e.renderAURTable(event))
+	return e.runRender(EventRenderAUR, func() *glua.LTable {
+		return e.renderAURTable(event)
+	})
 }
 
 func (e *Engine) RunRenderSync(event *RenderSyncEvent) (rendered string, ok bool, err error) {
@@ -573,16 +575,18 @@ func (e *Engine) RunRenderSync(event *RenderSyncEvent) (rendered string, ok bool
 		return "", false, nil
 	}
 
-	return e.runRender(EventRenderSync, e.renderSyncTable(event))
+	return e.runRender(EventRenderSync, func() *glua.LTable {
+		return e.renderSyncTable(event)
+	})
 }
 
-func (e *Engine) runRender(eventName string, eventTable *glua.LTable) (rendered string, ok bool, err error) {
+func (e *Engine) runRender(eventName string, newEventTable func() *glua.LTable) (rendered string, ok bool, err error) {
 	for _, autocmd := range e.autocmds[eventName] {
 		if err := e.L.CallByParam(glua.P{
 			Fn:      autocmd.callback,
 			NRet:    1,
 			Protect: true,
-		}, eventTable); err != nil {
+		}, newEventTable()); err != nil {
 			return "", false, fmt.Errorf("%s: %w", eventName, wrapLuaErr(err))
 		}
 

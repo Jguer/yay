@@ -1,7 +1,6 @@
 package lua
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -92,6 +91,32 @@ func TestRunRenderAURNonStringReturnIsError(t *testing.T) {
 	require.Contains(t, err.Error(), "callback must return a string or nil")
 }
 
+func TestRunRenderAURHooksReceiveIndependentEventTables(t *testing.T) {
+	t.Parallel()
+
+	e := New()
+	defer e.Close()
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("RenderAUR", {
+			callback = function(event)
+				event.data.name = "mutated"
+				return nil
+			end,
+		})
+		yay.create_autocmd("RenderAUR", {
+			callback = function(event)
+				return event.data.name
+			end,
+		})
+	`))
+
+	rendered, ok, err := e.RunRenderAUR(&RenderAUREvent{Name: "pkgA"})
+	require.NoError(t, err)
+	require.True(t, ok)
+	require.Equal(t, "pkgA", rendered)
+}
+
 func TestRunRenderAURLastHookWins(t *testing.T) {
 	t.Parallel()
 
@@ -180,12 +205,12 @@ func TestRunRenderSyncEventShapeAndStringReturn(t *testing.T) {
 	`))
 
 	rendered, ok, err := e.RunRenderSync(&RenderSyncEvent{
-		Repository:    "extra",
-		Name:          "mypkg",
-		Description:   "My sync package",
-		Version:       "2.0-1",
-		Groups:        []string{"base"},
-		LocalVersion:  "1.9-2",
+		Repository:   "extra",
+		Name:         "mypkg",
+		Description:  "My sync package",
+		Version:      "2.0-1",
+		Groups:       []string{"base"},
+		LocalVersion: "1.9-2",
 	})
 	require.NoError(t, err)
 	require.True(t, ok)
@@ -216,6 +241,6 @@ func TestRunRenderNoHookReturnsFalse(t *testing.T) {
 		rendered, ok, err := e.RunRenderSync(&RenderSyncEvent{Name: "mypkg"})
 		require.NoError(t, err)
 		require.False(t, ok)
-		_ = strings.Contains(rendered, "") // use rendered
+		require.Equal(t, "", rendered)
 	})
 }
