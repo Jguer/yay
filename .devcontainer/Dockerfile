@@ -19,13 +19,11 @@ RUN set -eux; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
     rm -rf /usr/share/man/* /usr/share/doc/* || true
 
-# Non-root user with passwordless sudo
 RUN useradd -m -s /bin/bash docker \
     && echo "docker ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/docker
 
 USER docker
 
-# Install xgotext and gopls (Go language server)
 RUN go install github.com/leonelquinteros/gotext/cli/xgotext@latest \
     && go install golang.org/x/tools/gopls@latest
 
