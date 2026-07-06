@@ -487,7 +487,7 @@ yay.create_autocmd("SearchFilter", {
 ## Render hooks
 
 `RenderAUR` and `RenderSync` fire once per result row during `yay -Ss` and
-the `yay -S` number menu, after results are ranked, sorted, and (optionally)
+the `yay <pkg>` number menu, after results are ranked, sorted, and (optionally)
 filtered. The callback receives per-package metadata and may return a `string`
 that fully replaces what yay would print for that row. Returning `nil` (or
 nothing) falls back to yay's built-in formatting.
@@ -502,9 +502,9 @@ Multiple hooks of the same event **run in registration order**; the **last**
 hook that returns a non-`nil` string wins. A later hook returning `nil` does
 not undo an earlier hook's string.
 
-<p class="api-since">Available from yay v13.0.2</p>
-
 ### RenderAUR event
+
+<p class="api-since">Available from yay v13.1.0</p>
 
 ```lua
 {
@@ -526,6 +526,8 @@ not undo an earlier hook's string.
 ```
 
 ### RenderSync event
+
+<p class="api-since">Available from yay v13.1.0</p>
 
 ```lua
 {
