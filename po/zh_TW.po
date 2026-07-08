@@ -1,14 +1,14 @@
-# 
 # Translators:
 # J G, 2022
 # lakejason0 <sunliyuan200402@outlook.com>, 2023
 # Oliver Tzeng, 2025
 # zangmen hsu(neko_0xff) <chzang55@gmail.com>, 2025
 # Kisaragi Hiu <flyingfeather1501@gmail.com>, 2025
+# 山外 呆萌, 2026
 # 
 msgid ""
 msgstr ""
-"Last-Translator: Kisaragi Hiu <flyingfeather1501@gmail.com>, 2025\n"
+"Last-Translator: 山外 呆萌, 2026\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/yay-1/teams/123732/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -316,9 +316,13 @@ msgstr "缺少 AUR 除錯套件包："
 msgid "Name"
 msgstr "名稱"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
 msgid "No AUR package found for"
 msgstr "沒有找到 AUR 套件包"
+
+#: pkg/dep/dep_graph.go:564
+msgid "required by"
+msgstr "依賴以下套件包<br>"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
