@@ -322,7 +322,7 @@ msgstr "沒有找到 AUR 套件包"
 
 #: pkg/dep/dep_graph.go:564
 msgid "required by"
-msgstr "依賴以下軟件包<br>"
+msgstr "依賴以下套件包<br>"
 
 #: pkg/dep/dep_graph.go:182
 msgid "No package found for"
