@@ -457,7 +457,7 @@ msgstr "Následující balíčky nejsou kompatibilní s vaší architekturou:"
 
 #: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
 msgid "There are %[1]d providers available for %[2]s:"
-msgstr "Pro %s je dostupných %d poskytovatelů: "
+msgstr "Pro %[2]s je dostupných %[1]d poskytovatelů: "
 
 #: pkg/settings/exe/cmd_builder.go:258
 msgid "There may be another Pacman instance running. Waiting..."
