@@ -52,8 +52,10 @@ func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *
 			}
 		}
 
+		logger.Println(text.Bold(text.Cyan("==>") + " " + gotext.Get("Showing diff for %s", text.Bold(pkg))))
+
 		args := []string{
-			"diff",
+			"--no-pager", "diff",
 			start + "..HEAD@{upstream}", "--src-prefix",
 			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO",
 		}
