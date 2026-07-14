@@ -12,6 +12,9 @@ description: |
   - Takes the repository forward with proactive improvements
   - Maintains a persistent memory of work done and what remains
   Always polite, constructive, and mindful of the project's goals.
+engine:
+  id: copilot
+  model: gpt-5.6-luna
 
 on:
   schedule: every 12h
@@ -45,6 +48,7 @@ permissions: read-all
 network:
   allowed:
   - defaults
+  - "proxy.golang.org"
   - dotnet
   - node
   - python
@@ -69,6 +73,11 @@ safe-outputs:
     run-started: "{workflow_name} is processing {event_type}, see [workflow run]({run_url})..."
     run-success: "✓ {workflow_name} completed successfully, see [workflow run]({run_url})."
     run-failure: "✗ {workflow_name} encountered {status}, see [workflow run]({run_url})."
+  threat-detection:
+    enabled: true
+    engine:
+      id: copilot
+      model: gpt-5.6-luna
   add-comment:
     max: 10
     target: "*"
