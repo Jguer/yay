@@ -415,6 +415,14 @@ func (ae *AlpmExecutor) PackageProvides(pkg alpm.Package) []alpm.Depend {
 	return pkg.Provides()
 }
 
+func (ae *AlpmExecutor) PackageReplaces(pkg alpm.Package) []alpm.Depend {
+	if pkgWithReplaces, ok := pkg.(interface{ Replaces() []alpm.Depend }); ok {
+		return pkgWithReplaces.Replaces()
+	}
+
+	return nil
+}
+
 func (ae *AlpmExecutor) PackageGroups(pkg alpm.Package) []string {
 	return pkg.Groups()
 }
