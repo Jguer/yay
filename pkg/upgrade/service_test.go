@@ -759,6 +759,70 @@ func TestUpgradeService_GraphUpgradesNoUpdates(t *testing.T) {
 	}
 }
 
+func TestUpgradeService_GraphUpgradesPrefersSyncReplacementOverAUR(t *testing.T) {
+	t.Parallel()
+
+	coreDB := mock.NewDB("extra")
+	dbExe := &mock.DBExecutor{
+		InstalledRemotePackageNamesFn: func() []string {
+			return []string{"sdl2"}
+		},
+		InstalledRemotePackagesFn: func() map[string]mock.IPackage {
+			return map[string]mock.IPackage{
+				"sdl2": &mock.Package{
+					PName:    "sdl2",
+					PBase:    "sdl2",
+					PVersion: "2.30.11-1",
+					PReason:  alpm.PkgReasonDepend,
+				},
+			}
+		},
+		SyncUpgradesFn: func(bool) (map[string]db.SyncUpgrade, error) {
+			return map[string]db.SyncUpgrade{
+				"sdl2-compat": {
+					Package: &mock.Package{
+						PName:    "sdl2-compat",
+						PVersion: "2.32.50-1",
+						PReason:  alpm.PkgReasonDepend,
+						PDB:      coreDB,
+						PReplaces: mock.DependList{Depends: []alpm.Depend{
+							{Name: "sdl2"},
+						}},
+					},
+					LocalVersion: "-",
+					Reason:       alpm.PkgReasonDepend,
+				},
+			}, nil
+		},
+		ReposFn: func() []string { return []string{"extra"} },
+	}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(_ context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			assert.Empty(t, query.Needles)
+			return []aur.Pkg{}, nil
+		},
+	}
+
+	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
+	grapher := dep.NewGrapher(dbExe, mockAUR, false, true, false, false, false, logger)
+	service := &UpgradeService{
+		log:         logger,
+		grapher:     grapher,
+		aurCache:    mockAUR,
+		dbExecutor:  dbExe,
+		vcsStore:    &vcs.Mock{},
+		cfg:         &settings.Configuration{Mode: parser.ModeAny},
+		AURWarnings: query.NewWarnings(logger),
+	}
+
+	graph, err := service.GraphUpgrades(t.Context(), nil, false, func(*Upgrade) bool { return true })
+	require.NoError(t, err)
+	assert.False(t, graph.Exists("sdl2"))
+	require.True(t, graph.Exists("sdl2-compat"))
+	assert.Equal(t, dep.Sync, graph.GetNodeInfo("sdl2-compat").Value.Source)
+}
+
 func TestUpgradeService_UserExcludeUpgradesWithoutLuaHookUsesNativeMenu(t *testing.T) {
 	t.Parallel()
 	graph := newUpgradeSelectTestGraph(t)

@@ -26,11 +26,10 @@ func removeMake(ctx context.Context, config *settings.Configuration,
 		removeArguments.AddTarget(pkg)
 	}
 
-	oldValue := settings.NoConfirm
-	settings.NoConfirm = true
+	// removeMake always runs non-interactively; pass noConfirm=true directly
+	// rather than mutating the global settings.NoConfirm.
 	err = cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
-		removeArguments, config.Mode, settings.NoConfirm))
-	settings.NoConfirm = oldValue
+		removeArguments, config.Mode, true))
 
 	return err
 }

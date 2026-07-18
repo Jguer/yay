@@ -54,6 +54,7 @@ type Executor interface {
 	PackageGroups(IPackage) []string
 	PackageOptionalDepends(IPackage) []Depend
 	PackageProvides(IPackage) []Depend
+	PackageReplaces(IPackage) []Depend
 	PackagesFromGroup(string) []IPackage
 	PackagesFromGroupAndDB(string, string) ([]IPackage, error)
 	RefreshHandle() error
