@@ -14,7 +14,7 @@ description: |
   Always polite, constructive, and mindful of the project's goals.
 engine:
   id: copilot
-  model: gpt-5.6-luna
+  model: gpt-5.6
 
 on:
   schedule: every 12h
@@ -79,7 +79,7 @@ safe-outputs:
     enabled: true
     engine:
       id: copilot
-      model: gpt-5.6-luna
+      model: gpt-5.6
   add-comment:
     max: 10
     target: "*"
