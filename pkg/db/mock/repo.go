@@ -25,6 +25,7 @@ type Package struct {
 	PReason       alpm.PkgReason
 	PDepends      DependList
 	PProvides     DependList
+	PReplaces     DependList
 	PArchitecture string
 }
 
@@ -164,7 +165,7 @@ func (p *Package) Origin() alpm.PkgFrom {
 
 // Replaces returns a DependList with the packages this package replaces.
 func (p *Package) Replaces() []alpm.Depend {
-	panic("not implemented")
+	return p.PReplaces.Depends
 }
 
 // URL returns the upstream URL of the package.

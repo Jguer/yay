@@ -64,14 +64,34 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	filter Filter,
 ) (err error) {
 	var (
-		develUp UpSlice
-		errs    []error
-		aurdata = make(map[string]*aur.Pkg)
-		aurUp   UpSlice
+		develUp      UpSlice
+		errs         []error
+		aurdata      = make(map[string]*aur.Pkg)
+		aurUp        UpSlice
+		syncUpgrades map[string]db.SyncUpgrade
 	)
 
 	remote := u.dbExecutor.InstalledRemotePackages()
 	remoteNames := u.dbExecutor.InstalledRemotePackageNames()
+
+	if u.cfg.Mode.AtLeastRepo() {
+		syncUpgrades, err = u.dbExecutor.SyncUpgrades(enableDowngrade)
+		errs = append(errs, err)
+
+		replaced := u.syncReplacedPackageNames(syncUpgrades)
+		if replaced.Cardinality() > 0 {
+			filteredRemote := make(map[string]db.IPackage, len(remote))
+			for name, pkg := range remote {
+				if !replaced.Contains(name) {
+					filteredRemote[name] = pkg
+				}
+			}
+			remote = filteredRemote
+			remoteNames = slices.DeleteFunc(slices.Clone(remoteNames), func(name string) bool {
+				return replaced.Contains(name)
+			})
+		}
+	}
 
 	if u.cfg.Mode.AtLeastAUR() {
 		u.log.OperationInfoln(gotext.Get("Searching AUR for updates..."))
@@ -168,7 +188,6 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	if u.cfg.Mode.AtLeastRepo() {
 		u.log.OperationInfoln(gotext.Get("Searching databases for updates..."))
 
-		syncUpgrades, err := u.dbExecutor.SyncUpgrades(enableDowngrade)
 		for _, up := range syncUpgrades {
 			if filter != nil && !filter(&db.Upgrade{
 				Name:          up.Package.Name(),
@@ -184,11 +203,20 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 			upgradeInfo := up
 			graph = u.grapher.GraphSyncPkg(ctx, graph, up.Package, &upgradeInfo)
 		}
-
-		errs = append(errs, err)
 	}
 
 	return errors.Join(errs...)
+}
+
+func (u *UpgradeService) syncReplacedPackageNames(syncUpgrades map[string]db.SyncUpgrade) mapset.Set[string] {
+	replaced := mapset.NewThreadUnsafeSet[string]()
+	for _, up := range syncUpgrades {
+		for _, replacement := range u.dbExecutor.PackageReplaces(up.Package) {
+			replaced.Add(replacement.Name)
+		}
+	}
+
+	return replaced
 }
 
 func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallInfo]) (aurUp, repoUp UpSlice) {

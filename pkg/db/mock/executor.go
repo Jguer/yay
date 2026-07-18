@@ -27,6 +27,7 @@ type DBExecutor struct {
 	PackageDependsFn              func(IPackage) []Depend
 	PackageOptionalDependsFn      func(alpm.Package) []alpm.Depend
 	PackageProvidesFn             func(IPackage) []Depend
+	PackageReplacesFn             func(IPackage) []Depend
 	PackagesFromGroupFn           func(string) []IPackage
 	PackagesFromGroupAndDBFn      func(string, string) ([]IPackage, error)
 	RefreshHandleFn               func() error
@@ -132,6 +133,17 @@ func (t *DBExecutor) PackageProvides(iPackage IPackage) []Depend {
 	}
 
 	panic("implement me")
+}
+
+func (t *DBExecutor) PackageReplaces(iPackage IPackage) []Depend {
+	if t.PackageReplacesFn != nil {
+		return t.PackageReplacesFn(iPackage)
+	}
+	if pkg, ok := iPackage.(interface{ Replaces() []alpm.Depend }); ok {
+		return pkg.Replaces()
+	}
+
+	return nil
 }
 
 func (t *DBExecutor) PackagesFromGroup(s string) []IPackage {
