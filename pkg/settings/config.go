@@ -28,6 +28,7 @@ type Configuration struct {
 	BuildDir               string `json:"buildDir" lua:"build_dir"`
 	Editor                 string `json:"editor" lua:"editor"`
 	EditorFlags            string `json:"editorflags" lua:"editor_flags"`
+	Pager                  string `json:"pager" lua:"pager"`
 	MakepkgBin             string `json:"makepkgbin" lua:"makepkg_bin"`
 	MakepkgConf            string `json:"makepkgconf" lua:"makepkg_conf"`
 	PacmanBin              string `json:"pacmanbin" lua:"pacman_bin"`
@@ -115,6 +116,7 @@ func (c *Configuration) expandEnv() {
 	c.BuildDir = expandEnvOrHome(c.BuildDir)
 	c.Editor = expandEnvOrHome(c.Editor)
 	c.EditorFlags = os.ExpandEnv(c.EditorFlags)
+	c.Pager = os.ExpandEnv(c.Pager)
 	c.MakepkgBin = expandEnvOrHome(c.MakepkgBin)
 	c.MakepkgConf = expandEnvOrHome(c.MakepkgConf)
 	c.PacmanBin = expandEnvOrHome(c.PacmanBin)
@@ -196,6 +198,7 @@ func DefaultConfig(version string) *Configuration {
 		KeepSrc:                false,
 		Editor:                 "",
 		EditorFlags:            "",
+		Pager:                  "",
 		Devel:                  false,
 		MakepkgBin:             "makepkg",
 		MakepkgConf:            "",

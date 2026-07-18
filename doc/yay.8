@@ -307,9 +307,10 @@ using '--cleanmenu=false' on the command line
 Show the diff menu. This menu gives you the option to view diffs from
 build files before building.
 
-Diffs are shown via \fBgit diff\fR which uses
-less by default. This behaviour can be changed via git's config, the
-\fB$GIT_PAGER\fR or \fB$PAGER\fR environment variables.
+Diffs for all selected packages are collected and shown through a single
+pager. The pager is taken from the \fBpager\fR config option (also settable
+via Lua as \fByay.opt.pager\fR), then \fB$PAGER\fR, then \fBless\fR (or
+\fBcat\fR if less is unavailable).
 
 .TP
 .B \-\-editmenu
@@ -539,6 +540,11 @@ Overridden by \-\-builddir.
 .B VISUAL, EDITOR
 When editor is not configured, use these variables to pick what editor
 to use when editing PKGBUILDS.
+
+.TP
+.B PAGER
+When pager is not configured, use this variable when showing PKGBUILD diffs.
+If unset, yay uses \fBless\fR when available, otherwise \fBcat\fR.
 
 .SH FILES
 .TP

@@ -66,7 +66,7 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 
 **Strings**
 
-`aururl`, `aurrpcurl`, `build_dir`, `editor`, `editor_flags`, `makepkg_bin`,
+`aururl`, `aurrpcurl`, `build_dir`, `editor`, `editor_flags`, `pager`, `makepkg_bin`,
 `makepkg_conf`, `pacman_bin`, `pacman_conf`, `redownload`, `rebuild`, `git_bin`,
 `gpg_bin`, `gpg_flags`, `mflags`, `sort_by`, `search_by`, `git_flags`,
 `remove_make`, `sudo_bin`, `sudo_flags`
