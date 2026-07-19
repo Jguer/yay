@@ -75,26 +75,31 @@ func (s *Service) CheckPGPKeys(ctx context.Context) error {
 
 func (s *Service) UpdateVCSStore(ctx context.Context, targets []map[string]*dep.InstallInfo, ignore map[string]error,
 ) error {
+	targetPackages := make(map[string]struct{})
+	for _, target := range targets {
+		for pkgName := range target {
+			targetPackages[pkgName] = struct{}{}
+		}
+	}
+
 	for _, srcinfo := range s.srcInfos {
 		if srcinfo.Source == nil {
 			continue
 		}
 
-		// TODO: high complexity - refactor
 		for i := range srcinfo.Packages {
-			for j := range targets {
-				if _, ok := targets[j][srcinfo.Packages[i].Pkgname]; !ok {
-					s.log.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "not in targets")
-					continue
-				}
-				if _, ok := ignore[srcinfo.Packages[i].Pkgname]; ok {
-					s.log.Debugln("skipping VCS update for", srcinfo.Packages[i].Pkgname, "due to install error")
-					continue
-				}
-
-				s.log.Debugln("checking VCS entry for", srcinfo.Packages[i].Pkgname, fmt.Sprintf("source: %v", srcinfo.Source))
-				s.vcsStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
+			pkgName := srcinfo.Packages[i].Pkgname
+			if _, ok := targetPackages[pkgName]; !ok {
+				s.log.Debugln("skipping VCS update for", pkgName, "not in targets")
+				continue
 			}
+			if _, ok := ignore[pkgName]; ok {
+				s.log.Debugln("skipping VCS update for", pkgName, "due to install error")
+				continue
+			}
+
+			s.log.Debugln("checking VCS entry for", pkgName, fmt.Sprintf("source: %v", srcinfo.Source))
+			s.vcsStore.Update(ctx, pkgName, srcinfo.Source)
 		}
 	}
 
