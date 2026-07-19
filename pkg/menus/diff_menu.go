@@ -23,9 +23,35 @@ const (
 )
 
 func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *text.Logger,
-	pkgbuildDirs map[string]string, bases []string,
+	pkgbuildDirs map[string]string, bases []string, pagerConfig string,
 ) error {
-	var errs []error
+	combined, errs := collectPkgbuildDiffs(ctx, cmdBuilder, logger, pkgbuildDirs, bases)
+	if combined == "" {
+		return errors.Join(errs...)
+	}
+
+	if !isStdoutTerminal() {
+		logger.Print(combined)
+
+		return errors.Join(errs...)
+	}
+
+	if err := runPager(ctx, combined, pagerConfig); err != nil {
+		errs = append(errs, err)
+	}
+
+	return errors.Join(errs...)
+}
+
+// collectPkgbuildDiffs captures each selected package's git diff with --no-pager
+// and joins them with package headers into one buffer for a single pager session.
+func collectPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *text.Logger,
+	pkgbuildDirs map[string]string, bases []string,
+) (string, []error) {
+	var (
+		errs []error
+		buf  strings.Builder
+	)
 
 	for _, pkg := range bases {
 		dir := pkgbuildDirs[pkg]
@@ -53,7 +79,7 @@ func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *
 		}
 
 		args := []string{
-			"diff",
+			"--no-pager", "diff",
 			start + "..HEAD@{upstream}", "--src-prefix",
 			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO",
 		}
@@ -63,10 +89,24 @@ func showPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logger *
 			args = append(args, "--color=never")
 		}
 
-		_ = cmdBuilder.Show(cmdBuilder.BuildGitCmd(ctx, dir, args...))
+		stdout, stderr, err := cmdBuilder.Capture(cmdBuilder.BuildGitCmd(ctx, dir, args...))
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s%w", stderr, err))
+
+			continue
+		}
+
+		if stdout == "" {
+			continue
+		}
+
+		buf.WriteString(logger.SprintOperationInfo(gotext.Get("Showing diff for %s", text.Bold(pkg))))
+		buf.WriteByte('\n')
+		buf.WriteString(stdout)
+		buf.WriteString("\n\n")
 	}
 
-	return errors.Join(errs...)
+	return buf.String(), errs
 }
 
 // Check whether or not a diff exists between the last reviewed diff and
@@ -163,7 +203,7 @@ func DiffFn(ctx context.Context, run *runtime.Runtime, w io.Writer,
 		return errMenu
 	}
 
-	if errD := showPkgbuildDiffs(ctx, run.CmdBuilder, run.Logger, pkgbuildDirsByBase, toDiff); errD != nil {
+	if errD := showPkgbuildDiffs(ctx, run.CmdBuilder, run.Logger, pkgbuildDirsByBase, toDiff, run.Cfg.Pager); errD != nil {
 		return errD
 	}
 

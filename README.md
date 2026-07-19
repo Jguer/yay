@@ -119,11 +119,12 @@ pacman -S --needed git base-devel yay
   Make sure you have the `Color` option in your `/etc/pacman.conf`
   (see issue [#123](https://github.com/Jguer/yay/issues/123)).
 
-- **Sometimes diffs are printed to the terminal, and other times they are paged via less. How do I fix this?**
+- **How do I change the pager used for PKGBUILD diffs?**
 
-  yay uses `git diff` to display diffs, which by default tells less not to
-  page if the output can fit into one terminal length. This behavior can be
-  overridden by exporting your own flags (`export LESS=SRX`).
+  Diffs for all selected packages are collected and shown in a single pager
+  session. Set `pager` in `config.json` or `yay.opt.pager` in `init.lua`, or
+  set `PAGER` to override the default (`less`, or `cat` if less is unavailable).
+  Example: `yay.opt.pager = "delta"` or `export PAGER=less`.
 
 - **yay is not asking me to edit PKGBUILDS, and I don't like the diff menu! What can I do?**
 
