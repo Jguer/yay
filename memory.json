@@ -11,6 +11,12 @@
   },
   "prs_created": [
     {
+      "branch": "repo-assist/improve-deduplicate-vcs-updates",
+      "description": "refactor(srcinfo): deduplicate VCS updates across target maps",
+      "date": "2026-07-19",
+      "test_status": "Blocked: repository requires Go 1.26.0; installed Go 1.24.13 and toolchain download is forbidden."
+    },
+    {
       "branch": "repo-assist/fix-issue-1243-diff-pagination",
       "description": "fix(diff): add --no-pager and package header to git diff, closes #1243",
       "date": "2026-07-14"
@@ -25,5 +31,5 @@
     "title": "[repo-assist] Monthly Activity 2026-07",
     "month": "2026-07"
   },
-  "notes": "2026-07-18: Selected tasks 4, 2, and 1. No engineering change was justified after reviewing Makefile, Go dependencies, and CI; Go 1.26 toolchain unavailable (local Go 1.24.13, toolchain download forbidden). Issue/comment contents were unavailable for triage and labelling, so no GitHub actions were taken."
+  "notes": "2026-07-19: Selected tasks 2, 5, and 3. GitHub issue/comment reads were unavailable, so no issue guidance or labels were invented. Implemented a focused coding improvement on branch repo-assist/improve-deduplicate-vcs-updates: UpdateVCSStore now indexes target package names once and avoids repeated VCS updates across duplicate target maps; added regression coverage. Tests blocked because the repository requires Go 1.26.0 while only Go 1.24.13 is installed and toolchain download is forbidden."
 }
