@@ -105,18 +105,23 @@ func TestService_CheckPGPKeys(t *testing.T) {
 func TestService_UpdateVCSStore(t *testing.T) {
 	vcsStore := &vcs.Mock{}
 	srv := &Service{
+		log: newTestLogger(),
 		srcInfos: map[string]*gosrc.Srcinfo{
 			"pkg1": {
 				Packages: []gosrc.Package{
 					{Pkgname: "pkg1"},
 				},
-				Source: []gosrc.ArchString{{Value: "git+https://example.com/pkg1.git"}},
+				PackageBase: gosrc.PackageBase{
+					Source: []gosrc.ArchString{{Value: "git+https://example.com/pkg1.git"}},
+				},
 			},
 			"pkg2": {
 				Packages: []gosrc.Package{
 					{Pkgname: "pkg2"},
 				},
-				Source: []gosrc.ArchString{{Value: "git+https://example.com/pkg2.git"}},
+				PackageBase: gosrc.PackageBase{
+					Source: []gosrc.ArchString{{Value: "git+https://example.com/pkg2.git"}},
+				},
 			},
 		},
 		vcsStore: vcsStore,
