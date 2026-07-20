@@ -45,12 +45,13 @@ if: needs.pre_activation.outputs.check_result == 'success'
 
 timeout-minutes: 60
 
-permissions: read-all
+permissions: read-all  # writes are performed via safe-outputs, not the workflow token
 
 network:
   allowed:
   - defaults
-  - "proxy.golang.org"
+  - go                  # Go module proxy, checksum DB, and toolchain manifest
+  - "dl.google.com"      # Go toolchain download host (not in the `go` ecosystem)
   - dotnet
   - node
   - python
