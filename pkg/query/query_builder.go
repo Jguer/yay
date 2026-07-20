@@ -337,13 +337,13 @@ func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 		return true
 	}
 
+	name := strings.ToLower(pkg.Name)
+	desc := strings.ToLower(pkg.Description)
 	for _, pkgN := range terms {
 		if strings.ContainsFunc(pkgN, unicode.IsSymbol) {
 			return true
 		}
 
-		name := strings.ToLower(pkg.Name)
-		desc := strings.ToLower(pkg.Description)
 		targ := strings.ToLower(pkgN)
 
 		if !strings.Contains(name, targ) && !strings.Contains(desc, targ) {
