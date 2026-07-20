@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-07-20T01:23:45Z",
-  "run_id": "29710803988",
+  "last_run": "2026-07-20T13:31:26Z",
+  "run_id": "29746439172",
   "backlog_cursor": {
     "issues": 1773,
     "comment": "processed up to issue #1773 in first batch"
@@ -37,5 +37,5 @@
     "title": "[repo-assist] Monthly Activity 2026-07",
     "month": "2026-07"
   },
-  "notes": "2026-07-20: Selected tasks 3, 2, and 5. GitHub issue/PR reads were unavailable, so no issue investigation, labels, or comments were invented. Implemented query search optimization on repo-assist/improve-search-filter-normalization; package name and description are now lowercased once per multi-term search. Validation remains blocked because the repository requires Go 1.26.0 while only Go 1.24.13 is installed and toolchain download is forbidden. Monthly-summary maintenance was unavailable without the issue ID."
+  "notes": "2026-07-20: Selected tasks 3, 2, and 1. The collected issue snapshot exposed only numbers and labels, not titles, bodies, or comments; four issues were unlabelled, but no labels were applied because their content was unavailable. No issue fix or comment was attempted. Repository tests were blocked by missing libalpm.so, pacman-conf, and the Go covdata tool; golangci-lint was unavailable. Monthly-summary maintenance could not be performed because the summary issue ID/body was not present in the collected data."
 }
