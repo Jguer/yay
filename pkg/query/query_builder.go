@@ -195,7 +195,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 	sortableResults := &abstractResults{
 		results:         []abstractResult{},
-		search:          strings.ToLower(strings.Join(pkgS, "")),
+		search:          strings.ToLower(strings.Join(pkgS, " ")),
 		metric:          metric,
 		separateSources: s.separateSources,
 		repoOrder:       dbExecutor.Repos(),
@@ -341,7 +341,7 @@ func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 	desc := strings.ToLower(pkg.Description)
 	for _, pkgN := range terms {
 		if strings.ContainsFunc(pkgN, unicode.IsSymbol) {
-			return true
+			continue
 		}
 
 		targ := strings.ToLower(pkgN)
