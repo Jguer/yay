@@ -3,6 +3,7 @@
 package runtime
 
 import (
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -44,6 +45,9 @@ func normalizePacmanConf(conf *pacmanconf.Config) {
 
 func TestPacmanConf(t *testing.T) {
 	t.Parallel()
+	if _, err := exec.LookPath("pacman-conf"); err != nil {
+		t.Skipf("pacman-conf is unavailable: %v", err)
+	}
 	path := "../../testdata/pacman.conf"
 
 	absPath, err := filepath.Abs(path)

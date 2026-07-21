@@ -5,6 +5,7 @@ package runtime_test
 import (
 	"context"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -18,6 +19,7 @@ import (
 )
 
 func TestBuildRuntime(t *testing.T) {
+	requirePacmanConf(t)
 	path := "../../testdata/pacman.conf"
 
 	absPath, err := filepath.Abs(path)
@@ -53,6 +55,7 @@ func TestBuildRuntime(t *testing.T) {
 }
 
 func TestBuildRuntimeSearchUsesMetadataCacheWhenRPCDisabled(t *testing.T) {
+	requirePacmanConf(t)
 	path := "../../testdata/pacman.conf"
 
 	absPath, err := filepath.Abs(path)
@@ -92,4 +95,11 @@ func TestBuildRuntimeSearchUsesMetadataCacheWhenRPCDisabled(t *testing.T) {
 
 	run.QueryBuilder.Execute(context.Background(), &mock.DBExecutor{}, []string{"yay"})
 	assert.Equal(t, 1, run.QueryBuilder.Len())
+}
+
+func requirePacmanConf(t *testing.T) {
+	t.Helper()
+	if _, err := exec.LookPath("pacman-conf"); err != nil {
+		t.Skipf("pacman-conf is unavailable: %v", err)
+	}
 }
