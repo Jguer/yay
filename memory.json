@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-07-21T01:22:42Z",
-  "run_id": "29792888435",
+  "last_run": "2026-07-21T13:22:38Z",
+  "run_id": "29833998813",
   "backlog_cursor": {
     "issues": 1773,
     "comment": "processed up to issue #1773 in first batch"
@@ -31,11 +31,17 @@
       "description": "perf(query): normalize package name and description once per multi-term search",
       "date": "2026-07-20",
       "test_status": "Blocked: repository requires Go 1.26.0; installed Go 1.24.13 and toolchain download is forbidden."
+    },
+    {
+      "branch": "repo-assist/improve-skip-missing-arch-deps",
+      "description": "test: skip environment-dependent tests when libalpm or pacman-conf is unavailable",
+      "date": "2026-07-21",
+      "test_status": "go test ./... and make build passed; make lint blocked because golangci-lint is unavailable"
     }
   ],
   "monthly_summary_issue": {
     "title": "[repo-assist] Monthly Activity 2026-07",
     "month": "2026-07"
   },
-  "notes": "2026-07-20: Selected tasks 3, 2, and 1. The collected issue snapshot exposed only numbers and labels; four issues were unlabelled, but no labels were applied because their content was unavailable. No issue fix or comment was attempted. Repository tests were blocked by missing libalpm.so, pacman-conf, and the Go covdata tool; golangci-lint was unavailable. Monthly-summary maintenance could not be performed because the summary issue ID/body was not present in the collected data. 2026-07-21: Selected tasks 2, 1, and 3. Required issue titles, bodies, comments, labels, and the monthly summary issue contents were not available in the workspace, and GitHub read tools were unavailable, so no safe investigation, labelling, fix, or summary update could be made. Recorded missing-data limitation rather than guessing or posting noise."
+  "notes": "2026-07-20: Selected tasks 3, 2, and 1. The collected issue snapshot exposed only numbers and labels; four issues were unlabelled, but no labels were applied because their content was unavailable. No issue fix or comment was attempted. Repository tests were blocked by missing libalpm.so, pacman-conf, and the Go covdata tool; golangci-lint was unavailable. Monthly-summary maintenance could not be performed because the summary issue ID/body was not present in the collected data. 2026-07-21: Selected tasks 2, 1, and 3. Required issue titles, bodies, comments, labels, and the monthly summary issue contents were not available in the workspace, and GitHub read tools were unavailable, so no safe investigation, labelling, fix, or summary update could be made. Recorded missing-data limitation rather than guessing or posting noise. 2026-07-21: Selected tasks 4, 3, and 5. Added environment-aware skips for tests requiring libalpm and pacman-conf, preventing false failures and nil dereference panics on non-Arch runners. Created branch repo-assist/improve-skip-missing-arch-deps and committed aa4bdc9. No issue-specific fix or labels were attempted because GitHub read data was unavailable; monthly summary could not be safely updated."
 }
