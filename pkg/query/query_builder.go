@@ -235,11 +235,12 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 		var aurResults []aur.Pkg
 		aurResults, aurErr = queryAUR(ctx, s.aurClient, pkgS, s.searchBy)
 		dbName := "aur"
+		searchTerms := normalizeSearchTerms(pkgS)
 
 		for i := range aurResults {
 			by := getSearchBy(s.searchBy)
 			if (by == aur.NameDesc || by == aur.None || by == aur.Name) &&
-				!matchesSearch(&aurResults[i], pkgS) {
+				!matchesSearch(&aurResults[i], searchTerms) {
 				continue
 			}
 
@@ -332,6 +333,14 @@ func (s *SourceQueryBuilder) GetTargets(include, exclude intrange.IntRanges,
 	return targets, nil
 }
 
+func normalizeSearchTerms(terms []string) []string {
+	normalized := make([]string, len(terms))
+	for i, term := range terms {
+		normalized[i] = strings.ToLower(term)
+	}
+	return normalized
+}
+
 func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 	if len(terms) <= 1 {
 		return true
@@ -344,9 +353,7 @@ func matchesSearch(pkg *aur.Pkg, terms []string) bool {
 			continue
 		}
 
-		targ := strings.ToLower(pkgN)
-
-		if !strings.Contains(name, targ) && !strings.Contains(desc, targ) {
+		if !strings.Contains(name, pkgN) && !strings.Contains(desc, pkgN) {
 			return false
 		}
 	}
