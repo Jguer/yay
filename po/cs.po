@@ -49,7 +49,7 @@ msgid " there is nothing to do"
 msgstr "není co dělat"
 
 #: pkg/menus/menu.go:49
-msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]t Installed or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s [A]Vše [Ab]Zrušit [I]Nainstalováno [No]Nenainstalováno nebo (1 2 3, 1-3, "
 "^4)"

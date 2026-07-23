@@ -51,7 +51,7 @@ msgid " there is nothing to do"
 msgstr "der er intet at gøre"
 
 #: pkg/menus/menu.go:49
-msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]t Installed or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s [A]lle [Ab]afbryd [I]nstalleret [No]Ikke installeret eller (1 2 3, 1-3, "
 "^4)"
