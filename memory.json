@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-07-23T01:23:46Z",
-  "run_id": "29971587691",
+  "last_run": "2026-07-23T13:23:07Z",
+  "run_id": "30010838086",
   "backlog_cursor": {
     "issues": 1773,
     "comment": "processed up to issue #1773 in first batch"
@@ -44,6 +44,13 @@
       "date": "2026-07-22",
       "commit": "77eb3b7",
       "test_status": "go test ./pkg/query passed; make build passed; make test blocked by missing libalpm.so, pacman-conf, and covdata; make lint blocked because golangci-lint is unavailable"
+    },
+    {
+      "branch": "repo-assist/improve-search-filter-unknown-results-20260723",
+      "description": "fix(query): ignore unknown search-filter references instead of appending zero-value results",
+      "date": "2026-07-23",
+      "commit": "505dbfe",
+      "test_status": "go test ./pkg/query passed; make build passed"
     }
   ],
   "monthly_summary_issue": {
