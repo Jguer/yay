@@ -63,7 +63,7 @@ Permanent configuration options:
 
     --aururl      <url>   Set an alternative AUR URL
     --aurrpcurl   <url>   Set an alternative URL for the AUR /rpc endpoint
-    --builddir    <dir>   Directory used to download and run PKGBUILDS
+    --builddir    <dir>   Directory used to download and run PKGBUILDs
     --editor      <file>  Editor to use when editing PKGBUILDs
     --editorflags <flags> Pass arguments to editor
     --makepkg     <file>  makepkg command to use
@@ -83,17 +83,17 @@ Permanent configuration options:
     --searchby  <field>   Search for packages using a specified field
     --answerclean   <a>   Set a predetermined answer for the clean build menu
     --answerdiff    <a>   Set a predetermined answer for the diff menu
-    --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
+    --answeredit    <a>   Set a predetermined answer for the edit PKGBUILD menu
     --answerupgrade <a>   Set a predetermined answer for the upgrade menu
     --noanswerclean       Unset the answer for the clean build menu
-    --noanswerdiff        Unset the answer for the edit diff menu
-    --noansweredit        Unset the answer for the edit pkgbuild menu
+    --noanswerdiff        Unset the answer for the diff menu
+    --noansweredit        Unset the answer for the edit PKGBUILD menu
     --noanswerupgrade     Unset the answer for the upgrade menu
-    --cleanmenu           Give the option to clean build PKGBUILDS
+    --cleanmenu           Give the option to clean build PKGBUILDs
     --diffmenu            Give the option to show diffs for build files
-    --editmenu            Give the option to edit/view PKGBUILDS
+    --editmenu            Give the option to edit/view PKGBUILDs
     --askremovemake       Ask to remove makedepends after install
-    --askyesremovemake    Ask to remove makedepends after install("Y" as default)
+    --askyesremovemake    Ask to remove makedepends after install ("Y" as default)
     --removemake          Remove makedepends after install
     --noremovemake        Don't remove makedepends after install
 
@@ -109,9 +109,9 @@ Permanent configuration options:
     --rebuildall          Always build all AUR packages
     --norebuild           Skip package build if in cache and up to date
     --rebuildtree         Always build all AUR packages even if installed
-    --redownload          Always download pkgbuilds of targets
-    --noredownload        Skip pkgbuild download if in cache and up to date
-    --redownloadall       Always download pkgbuilds of all AUR packages
+    --redownload          Always download PKGBUILDs of targets
+    --noredownload        Skip PKGBUILD download if in cache and up to date
+    --redownloadall       Always download PKGBUILDs of all AUR packages
     --provides            Look for matching providers when searching for packages
     --pgpfetch            Prompt to import PGP keys from PKGBUILDs
     --useask              Automatically resolve conflicts using pacman's ask flag
@@ -125,7 +125,7 @@ show specific options (used with -P):
     -d --defaultconfig    Print default yay configuration
     -g --currentconfig    Print current yay configuration
     -s --stats            Display system package statistics
-    -w --news             Print arch news
+    -w --news             Print Arch news
 
 yay specific options (used with -Y):
     -c --clean            Remove unneeded dependencies (-cc to ignore optdepends)
@@ -133,7 +133,7 @@ yay specific options (used with -Y):
 
 getpkgbuild specific options (used with -G):
     -f --force            Force download for existing ABS packages
-    -p --print            Print pkgbuild of packages`)
+    -p --print            Print PKGBUILD of packages`)
 }
 
 func handleCmd(ctx context.Context, run *runtime.Runtime,

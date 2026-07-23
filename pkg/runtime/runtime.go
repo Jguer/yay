@@ -94,7 +94,7 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		metadata.WithDebugLogger(logger.Debugln),
 	)
 	if errAURCache != nil {
-		return nil, fmt.Errorf(gotext.Get("failed to retrieve aur Cache")+": %w", errAURCache)
+		return nil, fmt.Errorf(gotext.Get("failed to retrieve AUR cache")+": %w", errAURCache)
 	}
 
 	aurClient, errAUR := rpc.NewClient(

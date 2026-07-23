@@ -43,7 +43,7 @@ func handleCmd(logger *text.Logger) error {
 		metadata.WithCacheFilePath(
 			filepath.Join(cfg.BuildDir, "aur.json")))
 	if err != nil {
-		return fmt.Errorf("%s: %w", gotext.Get("failed to retrieve aur Cache"), err)
+		return fmt.Errorf("%s: %w", gotext.Get("failed to retrieve AUR cache"), err)
 	}
 
 	grapher := dep.NewGrapher(dbExecutor, aurCache, true, settings.NoConfirm,

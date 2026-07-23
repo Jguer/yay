@@ -213,16 +213,16 @@ complete -c $progname -n "not $noopt" -l answeredit -d 'Set a predetermined answ
 complete -c $progname -n "not $noopt" -l answerupgrade -d 'Set a predetermined answer for the upgrade menu' -x
 complete -c $progname -n "not $noopt" -l noanswerclean -d 'Unset the answer for the clean build menu' -f
 complete -c $progname -n "not $noopt" -l noanswerdiff -d 'Unset the answer for the diff menu' -f
-complete -c $progname -n "not $noopt" -l noansweredit -d 'Unset the answer for the edit pkgbuild menu' -f
+complete -c $progname -n "not $noopt" -l noansweredit -d 'Unset the answer for the edit PKGBUILD menu' -f
 complete -c $progname -n "not $noopt" -l noanswerupgrade -d 'Unset the answer for the upgrade menu' -f
-complete -c $progname -n "not $noopt" -l cleanmenu -d 'Give the option to clean build PKGBUILDS' -f
+complete -c $progname -n "not $noopt" -l cleanmenu -d 'Give the option to clean build PKGBUILDs' -f
 complete -c $progname -n "not $noopt" -l diffmenu -d 'Give the option to show diffs for build files' -f
-complete -c $progname -n "not $noopt" -l editmenu -d 'Give the option to edit/view PKGBUILDS' -f
+complete -c $progname -n "not $noopt" -l editmenu -d 'Give the option to edit/view PKGBUILDs' -f
 complete -c $progname -n "not $noopt" -l askremovemake -d 'Ask to remove make deps after install' -f
-complete -c $progname -n "not $noopt" -l askyesremovemake -d 'Ask to remove make deps after install(with "Y" as default)' -f
+complete -c $progname -n "not $noopt" -l askyesremovemake -d 'Ask to remove make deps after install (with "Y" as default)' -f
 complete -c $progname -n "not $noopt" -l removemake -d 'Remove make deps after install' -f
 complete -c $progname -n "not $noopt" -l noremovemake -d 'Do not remove make deps after install' -f
-complete -c $progname -n "not $noopt" -l topdown -d 'Shows repository packages first and then aur' -f
+complete -c $progname -n "not $noopt" -l topdown -d 'Shows repository packages first and then AUR' -f
 complete -c $progname -n "not $noopt" -l bottomup -d 'Shows aur packages first and then repository' -f
 complete -c $progname -n "not $noopt" -l singlelineresults -d 'List each search result on its own line' -f
 complete -c $progname -n "not $noopt" -l doublelineresults -d 'List each search result on two lines, like pacman' -f
