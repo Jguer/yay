@@ -77,7 +77,7 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 
 **Integers**
 
-`request_split_n`, `completion_refresh_time`, `max_concurrent_downloads`
+`request_split_n`, `completion_refresh_time`, `min_age`, `max_concurrent_downloads`
 
 **Booleans**
 

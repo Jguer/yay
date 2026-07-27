@@ -8,6 +8,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Jguer/aur"
 	alpm "github.com/Jguer/dyalpm"
@@ -102,9 +103,10 @@ func TestGrapher_GraphSyncPkgAndUpgrade(t *testing.T) {
 	require.False(t, info.Upgrade)
 
 	upgraded := grapher.GraphSyncPkg(context.TODO(), nil, &mock.Package{
-		PName:    "yaysrc",
-		PVersion: "2.0.0",
-		PDB:      mock.NewDB("core"),
+		PName:      "yaysrc",
+		PVersion:   "2.0.0",
+		PDB:        mock.NewDB("core"),
+		PBuildDate: time.Unix(1_700_000_100, 0),
 	}, &db.SyncUpgrade{
 		Package: &mock.Package{
 			PName: "yaysrc",
@@ -118,6 +120,7 @@ func TestGrapher_GraphSyncPkgAndUpgrade(t *testing.T) {
 	require.NotNil(t, upgradeInfo)
 	require.True(t, upgradeInfo.Upgrade)
 	require.Equal(t, "1.0.0", upgradeInfo.LocalVersion)
+	require.Equal(t, int64(1_700_000_100), upgradeInfo.LastModified)
 }
 
 func TestGrapher_GraphSyncGroupAndValidateNodeInfo(t *testing.T) {
@@ -201,4 +204,17 @@ func TestMakeAURPKGFromSrcinfo(t *testing.T) {
 
 	_, err = makeAURPKGFromSrcinfo(dbFail, srcinfo)
 	require.Error(t, err)
+}
+
+func TestSyncLastModified(t *testing.T) {
+	t.Parallel()
+
+	require.Equal(t, int64(0), syncLastModified(nil))
+
+	zero := &mock.Package{}
+	require.Equal(t, int64(0), syncLastModified(zero))
+
+	built := time.Unix(1_700_000_000, 0)
+	pkg := &mock.Package{PBuildDate: built}
+	require.Equal(t, built.Unix(), syncLastModified(pkg))
 }

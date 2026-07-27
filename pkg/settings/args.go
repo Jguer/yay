@@ -179,6 +179,11 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.RemoveMake = "askyes"
 	case "separatesources":
 		c.SeparateSources = boolValue
+	case "minage":
+		n, err := strconv.Atoi(value)
+		if err == nil && n >= 0 {
+			c.MinAge = n
+		}
 	default:
 		return false
 	}

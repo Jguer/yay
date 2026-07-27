@@ -438,6 +438,7 @@ func isArg(arg string) bool {
 	case "singlelineresults":
 	case "doublelineresults":
 	case "separatesources":
+	case "minage":
 	default:
 		return false
 	}
@@ -532,6 +533,7 @@ func hasParam(arg string) bool {
 	case "completioninterval":
 	case "sortby":
 	case "searchby":
+	case "minage":
 	default:
 		return false
 	}

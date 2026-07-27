@@ -69,10 +69,14 @@ func syncInstall(ctx context.Context,
 
 		upService.AURWarnings.Print()
 
+		minAgeIgnore := applyMinAge(ctx, run, cmdArgs, graph, false)
+
 		excluded, errSysUp = upService.UserExcludeUpgrades(graph)
 		if errSysUp != nil {
 			return errSysUp
 		}
+
+		excluded = append(excluded, minAgeIgnore...)
 	}
 
 	opService := sync.NewOperationService(ctx, dbExecutor, run)

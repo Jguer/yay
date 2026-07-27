@@ -146,6 +146,10 @@ func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.
 		return errSysUp
 	}
 
+	if run.Cfg.MinAge > 0 {
+		applyMinAge(ctx, run, cmdArgs, graph, true)
+	}
+
 	if graph.Len() == 0 {
 		return fmt.Errorf("")
 	}

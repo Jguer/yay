@@ -32,6 +32,7 @@ yay.opt.answer_edit = ""
 
 yay.opt.request_split_n = 150
 yay.opt.completion_refresh_time = 7
+yay.opt.min_age = 0
 yay.opt.max_concurrent_downloads = 1
 
 yay.opt.bottom_up = true

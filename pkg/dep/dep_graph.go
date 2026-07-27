@@ -29,6 +29,8 @@ type InstallInfo struct {
 	SyncDBName   string
 	SrcinfoPath  string
 	Maintainer   string
+	PkgArchive   string
+	AURGitRef    string
 	Source       Source
 	Reason       Reason
 	IsGroup      bool
@@ -312,6 +314,19 @@ func (g *Grapher) addDepNodes(ctx context.Context, pkg *aur.Pkg, graph *topo.Gra
 	}
 }
 
+func syncLastModified(pkg alpm.Package) int64 {
+	if pkg == nil {
+		return 0
+	}
+
+	t := pkg.BuildDate()
+	if t.IsZero() {
+		return 0
+	}
+
+	return t.Unix()
+}
+
 func (g *Grapher) GraphSyncPkg(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo],
 	pkg alpm.Package, upgradeInfo *db.SyncUpgrade,
@@ -330,10 +345,11 @@ func (g *Grapher) GraphSyncPkg(ctx context.Context,
 
 	dbName := pkg.DB().Name()
 	info := &InstallInfo{
-		Source:     Sync,
-		Reason:     Explicit,
-		Version:    pkg.Version(),
-		SyncDBName: dbName,
+		Source:       Sync,
+		Reason:       Explicit,
+		Version:      pkg.Version(),
+		SyncDBName:   dbName,
+		LastModified: syncLastModified(pkg),
 	}
 
 	if upgradeInfo == nil {
@@ -699,10 +715,11 @@ func (g *Grapher) addNodes(
 				Color:      colorMap[depType],
 				Background: bgColorMap[Sync],
 				Value: &InstallInfo{
-					Source:     Sync,
-					Reason:     depType,
-					Version:    alpmPkg.Version(),
-					SyncDBName: dbName,
+					Source:       Sync,
+					Reason:       depType,
+					Version:      alpmPkg.Version(),
+					SyncDBName:   dbName,
+					LastModified: syncLastModified(alpmPkg),
 				},
 			})
 

@@ -156,6 +156,8 @@ func (installer *Installer) handleLayer(ctx context.Context,
 		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
 	aurDeps, aurExp, aurOrigTargetBases := mapset.NewThreadUnsafeSet[string](),
 		mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
+	cacheDeps, cacheExp := mapset.NewThreadUnsafeSet[string](), mapset.NewThreadUnsafeSet[string]()
+	var cacheArchives []string
 
 	upgradeSync := false
 	for name, info := range layer {
@@ -182,6 +184,26 @@ func (installer *Installer) handleLayer(ctx context.Context,
 				}
 			}
 		case dep.Sync:
+			if info.PkgArchive != "" {
+				cacheArchives = append(cacheArchives, info.PkgArchive)
+				switch info.Reason {
+				case dep.Explicit:
+					if cmdArgs.ExistsArg("asdeps", "asdep") {
+						cacheDeps.Add(name)
+					} else {
+						cacheExp.Add(name)
+					}
+				case dep.Dep, dep.MakeDep, dep.CheckDep:
+					if cmdArgs.ExistsArg("asexplicit", "asexp") && installer.origTargets.Contains(name) {
+						cacheExp.Add(name)
+					} else {
+						cacheDeps.Add(name)
+					}
+				}
+
+				continue
+			}
+
 			if info.Upgrade {
 				upgradeSync = true
 				continue // do not add to targets, let pacman handle it
@@ -218,6 +240,18 @@ func (installer *Installer) handleLayer(ctx context.Context,
 		excluded, upgradeSync, installer.appendNoConfirm())
 	if errShow != nil {
 		return ErrInstallRepoPkgs
+	}
+
+	if len(cacheArchives) > 0 {
+		if err := installPkgArchive(ctx, installer.exeCmd, installer.targetMode,
+			installer.vcsStore, cmdArgs, cacheArchives, installer.appendNoConfirm()); err != nil {
+			return err
+		}
+
+		if err := setInstallReason(ctx, installer.exeCmd, installer.targetMode, cmdArgs,
+			cacheDeps.ToSlice(), cacheExp.ToSlice()); err != nil {
+			return err
+		}
 	}
 
 	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp,

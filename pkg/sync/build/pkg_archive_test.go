@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v13/pkg/settings/exe"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
+	"github.com/Jguer/yay/v13/pkg/vcs"
 )
 
 func TestParsePackageList(t *testing.T) {
@@ -164,4 +166,40 @@ func TestParsePackageList(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInstallPkgArchive(t *testing.T) {
+	t.Parallel()
+
+	var builtArgs *parser.Arguments
+	runner := &exe.MockRunner{
+		ShowFn: func(cmd *exec.Cmd) error {
+			return nil
+		},
+	}
+	cmdBuilder := &exe.MockBuilder{
+		Runner: runner,
+		BuildPacmanCmdFn: func(ctx context.Context, args *parser.Arguments, mode parser.TargetMode, noConfirm bool) *exec.Cmd {
+			builtArgs = args
+
+			return exec.CommandContext(ctx, "pacman")
+		},
+	}
+
+	cmdArgs := parser.MakeArguments()
+	require.NoError(t, cmdArgs.AddArg("S", "y", "u"))
+
+	err := installPkgArchive(
+		context.Background(),
+		cmdBuilder,
+		parser.ModeAny,
+		&vcs.Mock{},
+		cmdArgs,
+		[]string{"/cache/foo.pkg.tar.zst"},
+		true,
+	)
+	require.NoError(t, err)
+	require.NotNil(t, builtArgs)
+	require.Equal(t, "U", builtArgs.Op)
+	require.Equal(t, []string{"/cache/foo.pkg.tar.zst"}, builtArgs.Targets)
 }

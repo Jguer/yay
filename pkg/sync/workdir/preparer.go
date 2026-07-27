@@ -18,6 +18,7 @@ import (
 	"github.com/Jguer/yay/v13/pkg/settings/parser"
 	"github.com/Jguer/yay/v13/pkg/sync/build"
 	"github.com/Jguer/yay/v13/pkg/text"
+	"github.com/Jguer/yay/v13/pkg/upgrade"
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -213,6 +214,19 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		preper.cmdBuilder, preper.log.Child("download"), aurBasesToClone.ToSlice(),
 		preper.cfg.AURURL, preper.cfg.BuildDir, false); errA != nil {
 		return nil, errA
+	}
+
+	for _, layer := range targets {
+		for _, info := range layer {
+			if info.AURGitRef == "" || info.AURBase == "" {
+				continue
+			}
+
+			pkgDir := filepath.Join(preper.cfg.BuildDir, info.AURBase)
+			if err := upgrade.CheckoutAURGitRef(ctx, preper.cmdBuilder, pkgDir, info.AURGitRef); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	if !preper.downloadSources {

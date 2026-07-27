@@ -44,6 +44,7 @@
 ---@field answer_edit yay.menuAnswer yay v13.0.1+ Pre-select edit menu answer (also accepts menu syntax: ranges, ^n).
 ---@field request_split_n integer Max packages per AUR RPC request (use values > 0).
 ---@field completion_refresh_time integer Completion cache refresh days: -1 (never), 0 (always), >0 (every N days).
+---@field min_age integer Prefer package versions at least this old on upgrade; 0 disables.
 ---@field max_concurrent_downloads integer Parallel PKGBUILD source downloads; 0 uses CPU count.
 ---@field bottom_up boolean Show AUR packages before repo packages in mixed results.
 ---@field sudo_loop boolean Keep sudo session alive in the background during long builds.

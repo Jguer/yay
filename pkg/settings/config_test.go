@@ -312,3 +312,15 @@ func TestConfiguration_setPrivilegeElevator_pacman_auth_sudo(t *testing.T) {
 	assert.Equal(t, "-v", config.SudoFlags)
 	assert.True(t, config.SudoLoop)
 }
+
+func TestConfigurationMinAgeJSON(t *testing.T) {
+	t.Parallel()
+
+	cfg := DefaultConfig("test")
+	require.NoError(t, json.Unmarshal([]byte(`{"minage":14}`), cfg))
+	require.Equal(t, 14, cfg.MinAge)
+
+	out, err := json.Marshal(cfg)
+	require.NoError(t, err)
+	require.Contains(t, string(out), `"minage":14`)
+}

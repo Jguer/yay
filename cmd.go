@@ -79,6 +79,7 @@ Permanent configuration options:
 
     --requestsplitn <n>   Max amount of packages to query per AUR request
     --completioninterval  <n> Time in days to refresh completion cache
+    --minage      <days>  Prefer package versions at least this old on upgrade (0 disables)
     --sortby    <field>   Sort AUR results by a specific field during search
     --searchby  <field>   Search for packages using a specified field
     --answerclean   <a>   Set a predetermined answer for the clean build menu
