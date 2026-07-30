@@ -11,6 +11,7 @@ import (
 type Mock struct {
 	OriginsByPackage map[string]OriginInfoByURL
 	ToUpgradeReturn  []string
+	Updates          []string
 }
 
 func (m *Mock) ToUpgrade(ctx context.Context, pkgName string) bool {
@@ -18,6 +19,7 @@ func (m *Mock) ToUpgrade(ctx context.Context, pkgName string) bool {
 }
 
 func (m *Mock) Update(ctx context.Context, pkgName string, sources []gosrc.ArchString) {
+	m.Updates = append(m.Updates, pkgName)
 }
 
 func (m *Mock) Save() error {

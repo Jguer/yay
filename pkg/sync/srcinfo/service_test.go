@@ -103,20 +103,28 @@ func TestService_CheckPGPKeys(t *testing.T) {
 }
 
 func TestService_UpdateVCSStore(t *testing.T) {
+	vcsStore := &vcs.Mock{}
 	srv := &Service{
+		log: newTestLogger(),
 		srcInfos: map[string]*gosrc.Srcinfo{
 			"pkg1": {
 				Packages: []gosrc.Package{
 					{Pkgname: "pkg1"},
+				},
+				PackageBase: gosrc.PackageBase{
+					Source: []gosrc.ArchString{{Value: "git+https://example.com/pkg1.git"}},
 				},
 			},
 			"pkg2": {
 				Packages: []gosrc.Package{
 					{Pkgname: "pkg2"},
 				},
+				PackageBase: gosrc.PackageBase{
+					Source: []gosrc.ArchString{{Value: "git+https://example.com/pkg2.git"}},
+				},
 			},
 		},
-		vcsStore: &vcs.Mock{},
+		vcsStore: vcsStore,
 	}
 
 	targets := []map[string]*dep.InstallInfo{
@@ -124,9 +132,13 @@ func TestService_UpdateVCSStore(t *testing.T) {
 			"pkg1": {},
 			"pkg2": {},
 		},
+		{
+			"pkg1": {},
+		},
 	}
 	ignore := map[string]error{}
 
 	err := srv.UpdateVCSStore(context.Background(), targets, ignore)
 	assert.NoError(t, err)
+	assert.ElementsMatch(t, []string{"pkg1", "pkg2"}, vcsStore.Updates)
 }
