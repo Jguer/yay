@@ -47,7 +47,7 @@ func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []
 	pkgbuildNumberMenu(logger, pkgbuildDirs, bases, installed)
 
 	logger.Infoln(message)
-	logger.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
+	logger.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]t Installed or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
 
 	selectInput, err := logger.GetInput(defaultAnswer, noConfirm)
 	if err != nil {
@@ -81,7 +81,7 @@ func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []
 			continue
 		}
 
-		if !anyInstalled && (eOtherInclude.Contains("no") || eOtherInclude.Contains("notinstalled")) {
+		if !anyInstalled && (eOtherInclude.Contains("no") || eOtherInclude.Contains("notinstalled") || eOtherInclude.Contains("not")) {
 			selected = append(selected, pkgBase)
 			continue
 		}

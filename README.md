@@ -126,7 +126,7 @@ pacman -S --needed git base-devel yay
   set `PAGER` to override the default (`less`, or `cat` if less is unavailable).
   Example: `yay.opt.pager = "delta"` or `export PAGER=less`.
 
-- **yay is not asking me to edit PKGBUILDS, and I don't like the diff menu! What can I do?**
+- **yay is not asking me to edit PKGBUILDs, and I don't like the diff menu! What can I do?**
 
   `yay --editmenu --diffmenu=false --save`
 

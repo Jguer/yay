@@ -51,7 +51,7 @@ msgid " there is nothing to do"
 msgstr "der er intet at gøre"
 
 #: pkg/menus/menu.go:49
-msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
+msgid "%s [A]ll [Ab]ort [I]nstalled [No]t Installed or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s [A]lle [Ab]afbryd [I]nstalleret [No]Ikke installeret eller (1 2 3, 1-3, "
 "^4)"
@@ -376,7 +376,7 @@ msgid "Packages not in AUR:"
 msgstr "Pakker er ikke i AUR:"
 
 #: pkg/menus/clean_menu.go:54
-msgid "Packages to cleanBuild?"
+msgid "Packages to clean build?"
 msgstr "Hvilke pakker til cleanBuild?"
 
 #: pkg/dep/dep_graph.go:202
@@ -626,7 +626,7 @@ msgid "failed to read config file '%s': %s"
 msgstr "mislykkedes med at læse konfigurationsfil '%s': %s"
 
 #: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
-msgid "failed to retrieve aur Cache"
+msgid "failed to retrieve AUR cache"
 msgstr "mislykkedes med at hente aur Cache"
 
 #: pkg/upgrade/sources.go:27
