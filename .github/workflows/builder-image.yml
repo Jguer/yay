@@ -8,6 +8,10 @@ on:
       - "ci.Dockerfile"
       - ".github/workflows/builder-image.yml"
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   REGISTRY_IMAGE: jguer/yay-builder
 
