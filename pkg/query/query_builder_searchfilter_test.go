@@ -76,3 +76,32 @@ func TestSourceQueryBuilderSearchFilterHook(t *testing.T) {
 			"every result after the SearchFilter hook must be from aur")
 	}
 }
+
+func TestSourceQueryBuilderSearchFilterHookSkipsUnknownResults(t *testing.T) {
+	t.Parallel()
+
+	e := settingslua.New()
+	defer e.Close()
+
+	require.NoError(t, e.L.DoString(`
+		yay.create_autocmd("SearchFilter", {
+			callback = function(_)
+				return {
+					{ source = "aur", name = "known" },
+					{ source = "aur", name = "unknown" },
+				}
+			end,
+		})
+	`))
+
+	builder := &SourceQueryBuilder{
+		lua:    e,
+		logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test"),
+	}
+	filtered := builder.applySearchFilter([]abstractResult{
+		{source: "aur", name: "known", description: "known package"},
+	})
+
+	require.Len(t, filtered, 1)
+	assert.Equal(t, "known", filtered[0].name)
+}

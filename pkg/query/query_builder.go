@@ -397,7 +397,9 @@ func (s *SourceQueryBuilder) applySearchFilter(results []abstractResult) []abstr
 
 	filtered := make([]abstractResult, 0, len(refs))
 	for _, ref := range refs {
-		filtered = append(filtered, byRef[ref])
+		if result, ok := byRef[ref]; ok {
+			filtered = append(filtered, result)
+		}
 	}
 
 	return filtered
