@@ -78,16 +78,17 @@ func collectPkgbuildDiffs(ctx context.Context, cmdBuilder exe.ICmdBuilder, logge
 			}
 		}
 
-		args := []string{
-			"--no-pager", "diff",
-			start + "..HEAD@{upstream}", "--src-prefix",
-			dir + "/", "--dst-prefix", dir + "/", "--", ".", ":(exclude).SRCINFO",
-		}
+		args := []string{"--no-pager", "diff"}
 		if text.UseColor {
 			args = append(args, "--color=always")
 		} else {
 			args = append(args, "--color=never")
 		}
+
+		args = append(args,
+			start+"..HEAD@{upstream}", "--src-prefix",
+			dir+"/", "--dst-prefix", dir+"/", "--", ".", ":(exclude).SRCINFO",
+		)
 
 		stdout, stderr, err := cmdBuilder.Capture(cmdBuilder.BuildGitCmd(ctx, dir, args...))
 		if err != nil {
