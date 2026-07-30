@@ -1,0 +1,14 @@
+# Template PKGBUILD for yay PKGBUILD-repository e2e tests.
+# @PKGNAME@ and @PKGVER@ are substituted by e2e/run.sh. The package builds
+# instantly (no sources, no compilation) and just drops a marker file so a
+# successful install proves the package came from the configured repository.
+pkgname=@PKGNAME@
+pkgver=@PKGVER@
+pkgrel=1
+pkgdesc="yay e2e PKGBUILD repository test package"
+arch=('any')
+license=('MIT')
+
+package() {
+  install -Dm644 /dev/null "$pkgdir/usr/share/@PKGNAME@/marker"
+}
