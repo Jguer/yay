@@ -79,21 +79,15 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 		errs = append(errs, err)
 
 		replaced := u.syncReplacedPackageNames(syncUpgrades)
-		if replaced.Cardinality() > 0 {
-			filteredRemote := make(map[string]db.IPackage, len(remote))
-			for name, pkg := range remote {
-				if !replaced.Contains(name) {
-					filteredRemote[name] = pkg
-				}
-			}
-			remote = filteredRemote
-			remoteNames = slices.DeleteFunc(slices.Clone(remoteNames), func(name string) bool {
-				return replaced.Contains(name)
-			})
-		}
+		remote, remoteNames = dropFromRemote(remote, remoteNames, replaced)
 	}
 
 	if u.cfg.Mode.AtLeastAUR() {
+		// PKGBUILD repositories mask the AUR: handle installed packages owned by a
+		// configured repo before querying the AUR so they are never double-counted.
+		repoMasked := u.graphPkgbuildRepoUpgrades(ctx, graph, remote, enableDowngrade, filter, &errs)
+		remote, remoteNames = dropFromRemote(remote, remoteNames, repoMasked)
+
 		u.log.OperationInfoln(gotext.Get("Searching AUR for updates..."))
 
 		_aurdata, err := u.aurCache.Get(ctx, &aur.Query{Needles: remoteNames, By: aur.Name})
@@ -208,6 +202,81 @@ func (u *UpgradeService) upGraph(ctx context.Context, graph *topo.Graph[string, 
 	return errors.Join(errs...)
 }
 
+// dropFromRemote removes drop's members from the remote package map and name
+// slice, returning the filtered copies (or the originals when drop is empty).
+func dropFromRemote(remote map[string]db.IPackage, remoteNames []string,
+	drop mapset.Set[string],
+) (filteredRemote map[string]db.IPackage, filteredNames []string) {
+	if drop.Cardinality() == 0 {
+		return remote, remoteNames
+	}
+
+	filtered := make(map[string]db.IPackage, len(remote))
+	for name, pkg := range remote {
+		if !drop.Contains(name) {
+			filtered[name] = pkg
+		}
+	}
+
+	names := slices.DeleteFunc(slices.Clone(remoteNames), func(name string) bool {
+		return drop.Contains(name)
+	})
+
+	return filtered, names
+}
+
+// graphPkgbuildRepoUpgrades graphs upgrades for installed packages owned by a
+// configured PKGBUILD repo and returns the set of repo-owned installed package
+// names, which the caller strips from the AUR check so repos mask the AUR.
+func (u *UpgradeService) graphPkgbuildRepoUpgrades(ctx context.Context,
+	graph *topo.Graph[string, *dep.InstallInfo], remote map[string]db.IPackage,
+	enableDowngrade bool, filter Filter, errs *[]error,
+) mapset.Set[string] {
+	masked := mapset.NewThreadUnsafeSet[string]()
+	if !u.grapher.HasPkgbuildRepos() {
+		return masked
+	}
+
+	for name, localPkg := range remote {
+		entry, ok := u.grapher.PkgbuildRepoEntry(name)
+		if !ok {
+			continue
+		}
+
+		// The repo owns this package; never let the AUR upgrade it.
+		masked.Add(name)
+
+		localVersion := localPkg.Version()
+
+		cmp := db.VerCmp(entry.Version, localVersion)
+		if cmp == 0 || (cmp < 0 && !enableDowngrade) {
+			continue // up to date (or a downgrade the user did not request)
+		}
+
+		reason := dep.Explicit
+		if localPkg.Reason() == alpm.PkgReasonDepend {
+			reason = dep.Dep
+		}
+
+		if filter != nil && !filter(&db.Upgrade{
+			Name:          name,
+			RemoteVersion: entry.Version,
+			Repository:    entry.RepoName,
+			Base:          entry.Pkgbase,
+			LocalVersion:  localVersion,
+			Reason:        localPkg.Reason(),
+		}) {
+			continue
+		}
+
+		if _, err := u.grapher.GraphPkgbuildRepoUpgrade(ctx, graph, entry, name, localVersion, reason); err != nil {
+			*errs = append(*errs, err)
+		}
+	}
+
+	return masked
+}
+
 func (u *UpgradeService) syncReplacedPackageNames(syncUpgrades map[string]db.SyncUpgrade) mapset.Set[string] {
 	replaced := mapset.NewThreadUnsafeSet[string]()
 	for _, up := range syncUpgrades {
@@ -262,6 +331,16 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				RemoteVersion: info.Version,
 				Repository:    info.SyncDBName,
 				Base:          "",
+				LocalVersion:  info.LocalVersion,
+				Reason:        alpmReason,
+				Extra:         extra,
+			})
+		case dep.PkgbuildRepo:
+			aurUp.Up = append(aurUp.Up, Upgrade{
+				Name:          name,
+				RemoteVersion: info.Version,
+				Repository:    info.RepoName,
+				Base:          info.AURBase,
 				LocalVersion:  info.LocalVersion,
 				Reason:        alpmReason,
 				Extra:         extra,

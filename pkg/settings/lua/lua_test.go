@@ -83,6 +83,74 @@ func TestApplyAppliesAnswerOptionsFromLua(t *testing.T) {
 	assert.Equal(t, "Installed", cfg.AnswerEdit)
 }
 
+type repoTestConfig struct {
+	BuildDir      string         `lua:"build_dir"`
+	PkgbuildRepos []pkgbuildRepo `lua:"pkgbuild_repos"`
+}
+
+type pkgbuildRepo struct {
+	Name  string `lua:"name"`
+	URL   string `lua:"url"`
+	Depth int    `lua:"depth"`
+}
+
+func TestApplyPkgbuildRepos(t *testing.T) {
+	t.Parallel()
+	e := New()
+	t.Cleanup(e.Close)
+
+	require.NoError(t, e.L.DoString(`
+		yay.opt.build_dir = "/tmp/yay"
+		yay.opt.pkgbuild_repos = {
+			["yay-pkgbuild"] = {
+				url = "https://github.com/Jguer/yay-PKGBUILD",
+				depth = 2,
+			},
+			["local-repo"] = {
+				url = "file:///srv/pkgbuilds",
+			},
+		}
+	`))
+
+	cfg := &repoTestConfig{}
+	unknown, errs := e.Apply(cfg)
+
+	assert.Empty(t, unknown)
+	assert.Empty(t, errs)
+	assert.Equal(t, "/tmp/yay", cfg.BuildDir)
+
+	// The keyed table becomes a slice sorted by repo name for determinism.
+	require.Len(t, cfg.PkgbuildRepos, 2)
+
+	assert.Equal(t, "local-repo", cfg.PkgbuildRepos[0].Name)
+	assert.Equal(t, "file:///srv/pkgbuilds", cfg.PkgbuildRepos[0].URL)
+	assert.Equal(t, 0, cfg.PkgbuildRepos[0].Depth)
+
+	assert.Equal(t, "yay-pkgbuild", cfg.PkgbuildRepos[1].Name)
+	assert.Equal(t, "https://github.com/Jguer/yay-PKGBUILD", cfg.PkgbuildRepos[1].URL)
+	assert.Equal(t, 2, cfg.PkgbuildRepos[1].Depth)
+}
+
+func TestApplyPkgbuildReposRejectsUnknownRepoKey(t *testing.T) {
+	t.Parallel()
+	e := New()
+	t.Cleanup(e.Close)
+
+	require.NoError(t, e.L.DoString(`
+		yay.opt.pkgbuild_repos = {
+			["yay-pkgbuild"] = {
+				url = "https://github.com/Jguer/yay-PKGBUILD",
+				nonsense = true,
+			},
+		}
+	`))
+
+	cfg := &repoTestConfig{}
+	_, errs := e.Apply(cfg)
+
+	assert.Len(t, errs, 1)
+}
+
 func TestApplyRejectsNonPointer(t *testing.T) {
 	t.Parallel()
 	e := New()

@@ -42,6 +42,8 @@ func luaSource(source dep.Source) string {
 		return "local"
 	case dep.SrcInfo:
 		return "srcinfo"
+	case dep.PkgbuildRepo:
+		return "pkgbuild_repo"
 	default:
 		return "missing"
 	}

@@ -49,3 +49,32 @@ jobs:
           path: ./yay
           if-no-files-found: error
           overwrite: true
+
+  e2e:
+    name: E2E PKGBUILD repositories
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/jguer/yay-builder:latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: go.mod
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      # makepkg refuses to run as root, so the e2e suite runs as an
+      # unprivileged user with passwordless sudo for pacman.
+      - name: Set up unprivileged build user
+        run: |
+          pacman -Sy --needed --noconfirm base-devel git
+          id -u e2e >/dev/null 2>&1 || useradd -m e2e
+          echo 'e2e ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/e2e
+          chmod 0440 /etc/sudoers.d/e2e
+          chown -R e2e:e2e .
+          install -d -o e2e -g e2e /home/e2e/go
+      - name: Run E2E tests
+        run: su e2e -c "env HOME=/home/e2e GOFLAGS=-buildvcs=false make test-e2e"

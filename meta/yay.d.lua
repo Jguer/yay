@@ -63,6 +63,13 @@
 ---@field debug boolean Enable debug logging and local init.lua lookup convenience.
 ---@field rpc boolean Use AUR RPC for dependency/query operations.
 ---@field double_confirm boolean Ask for confirmation before and after builds during upgrades.
+---@field pkgbuild_repos table<string, yay.PkgbuildRepo> Named PKGBUILD repositories that take priority over the AUR. init.lua only.
+
+-- PKGBUILD repositories: yay.opt.pkgbuild_repos
+
+---@class yay.PkgbuildRepo
+---@field url string Repo location, following the makepkg source convention: an https git URL, a git+file:// local git repo, or a file:// local directory used in place.
+---@field depth? integer Recursive PKGBUILD scan depth (default 3).
 
 -- Logging: yay.log
 

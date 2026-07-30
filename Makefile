@@ -56,6 +56,13 @@ test:
 test-integration:
 	$(GO) test -tags=integration $(FLAGS) ./...
 
+# End-to-end tests for PKGBUILD repository support. Requires an Arch Linux
+# environment with makepkg/pacman/git and passwordless sudo, run as a non-root
+# user (makepkg refuses to run as root). See e2e/README.md.
+.PHONY: test-e2e
+test-e2e:
+	./e2e/run.sh
+
 .PHONY: build
 build: $(BIN)
 

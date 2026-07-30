@@ -95,6 +95,13 @@ func main() {
 		defer luaEngine.Close()
 	}
 
+	if err = cfg.NormalizePkgbuildRepos(); err != nil {
+		fallbackLog.Errorln(err)
+		ret = 1
+
+		return
+	}
+
 	cmdArgs := parser.MakeArguments()
 
 	// Parse command line

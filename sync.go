@@ -46,6 +46,12 @@ func syncInstall(ctx context.Context,
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
 		noDeps, noCheck, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
 
+	pkgbuildRepos, err := loadPkgbuildRepoIndex(ctx, run, refreshArg)
+	if err != nil {
+		return fmt.Errorf("%s: %w", gotext.Get("error loading PKGBUILD repositories"), err)
+	}
+	grapher.SetPkgbuildRepos(pkgbuildRepos)
+
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {
 		return err

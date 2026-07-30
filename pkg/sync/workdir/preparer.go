@@ -97,15 +97,30 @@ func NewPreparer(dbExecutor db.Executor, cmdBuilder exe.ICmdBuilder,
 	return preper
 }
 
-func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs map[string]string) build.PostInstallHookFunc {
-	if !preper.cfg.CleanAfter || len(pkgBuildDirs) == 0 {
+func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs map[string]string,
+	targets []map[string]*dep.InstallInfo,
+) build.PostInstallHookFunc {
+	cleanDirs := make(map[string]string, len(pkgBuildDirs))
+	for _, layer := range targets {
+		for _, info := range layer {
+			if info.Source != dep.AUR && info.Source != dep.SrcInfo {
+				continue
+			}
+
+			if dir, ok := pkgBuildDirs[info.AURBase]; ok {
+				cleanDirs[info.AURBase] = dir
+			}
+		}
+	}
+
+	if !preper.cfg.CleanAfter || len(cleanDirs) == 0 {
 		return nil
 	}
 
-	preper.log.Debugln("added post install hook to clean up AUR dirs", pkgBuildDirs)
+	preper.log.Debugln("added post install hook to clean up AUR dirs", cleanDirs)
 
 	return func(ctx context.Context) error {
-		cleanAfter(ctx, run, run.CmdBuilder, pkgBuildDirs)
+		cleanAfter(ctx, run, run.CmdBuilder, cleanDirs)
 		return nil
 	}
 }
@@ -191,6 +206,11 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 ) (map[string]string, error) {
 	aurBasesToClone := mapset.NewThreadUnsafeSet[string]()
 	pkgBuildDirsByBase := make(map[string]string, len(targets))
+	// mergeDirsByBase holds the per-package git clones (AUR and local SrcInfo
+	// checkouts) that get a git reset/merge. PKGBUILD-repo directories are
+	// managed by the repo refresh — they are either a plain directory or a
+	// subdirectory of a shared clone — so they must not be merged per package.
+	mergeDirsByBase := make(map[string]string, len(targets))
 
 	for _, layer := range targets {
 		for _, info := range layer {
@@ -202,7 +222,12 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 					aurBasesToClone.Add(pkgBase)
 				}
 				pkgBuildDirsByBase[pkgBase] = pkgBuildDir
+				mergeDirsByBase[pkgBase] = pkgBuildDir
 			case dep.SrcInfo:
+				pkgBase := info.AURBase
+				pkgBuildDirsByBase[pkgBase] = info.SrcinfoPath
+				mergeDirsByBase[pkgBase] = info.SrcinfoPath
+			case dep.PkgbuildRepo:
 				pkgBase := info.AURBase
 				pkgBuildDirsByBase[pkgBase] = info.SrcinfoPath
 			}
@@ -219,7 +244,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		return pkgBuildDirsByBase, nil
 	}
 
-	if err := mergePkgbuilds(ctx, preper.cmdBuilder, pkgBuildDirsByBase); err != nil {
+	if err := mergePkgbuilds(ctx, preper.cmdBuilder, mergeDirsByBase); err != nil {
 		return nil, err
 	}
 

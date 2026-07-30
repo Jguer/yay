@@ -89,6 +89,51 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 A ready-to-copy example
 lives at [`doc/init.lua`](init.lua).
 
+## PKGBUILD repositories with `yay.opt.pkgbuild_repos`
+
+A PKGBUILD repository is a directory of PKGBUILDs — local or served over git —
+that yay treats much like the AUR. Packages found in a PKGBUILD repository
+**take priority over the AUR**, so a repository can mask an AUR package with a
+custom build. Installed packages owned by a repository are upgraded from it on
+`yay -Syu` (or `yay -Sua`) instead of the AUR. PKGBUILD repositories are
+configured only through `init.lua`.
+
+Assign a table keyed by repository name. Each entry has a `url` and an optional
+`depth`:
+
+```lua
+yay.opt.pkgbuild_repos = {
+  ["yay-pkgbuild"] = {
+    url = "https://github.com/Jguer/yay-PKGBUILD",
+    depth = 3,
+  },
+  -- A local git repository:
+  ["local-git"] = { url = "git+file:///srv/pkgbuild-repo" },
+  -- A plain local directory, used in place with no clone or refresh:
+  ["scratch"] = { url = "file:///home/user/pkgbuilds" },
+}
+```
+
+### `url`
+
+The repository location, following the makepkg source convention. The scheme
+decides how yay treats it:
+
+- `https://`, `ssh://`, a `.git` suffix, or a `git+…` prefix are cloned into
+  yay's build cache. The clone is created on first use and pulled again on
+  `yay -Sy`, so routine installs work offline. Use authenticated transports;
+  insecure `http://` and `git://` URLs are not supported.
+- `file://…` points at a local directory that is scanned in place — no clone,
+  no refresh.
+
+### `depth`
+
+How many directory levels below the repository root yay scans for PKGBUILDs.
+Defaults to `3`. A repository is a directory tree of package directories, each
+containing a `PKGBUILD` and a committed `.SRCINFO`. yay never generates
+`.SRCINFO` while indexing: `makepkg --printsrcinfo` executes PKGBUILD content,
+so metadata generation belongs in the repository's reviewed build workflow.
+
 ## Logging with `yay.log`
 
 <p class="api-since">Available from yay v13.0.0</p>
@@ -405,7 +450,7 @@ logs the message but cannot roll back anything.
         name          = "pkgname",
         version       = "1.2.3-1",    -- resolved version
         local_version = "1.0.0-1",    -- previously installed ("" if not installed)
-        source        = "aur",        -- "aur" | "sync" | "local" | "srcinfo" | "missing"
+        source        = "aur",        -- "aur" | "sync" | "local" | "srcinfo" | "pkgbuild_repo" | "missing"
         reason        = "explicit",   -- "explicit" | "dependency" | "make_dependency" | "check_dependency" | "unknown"
       },
       -- one entry per package yay resolved; sorted alphabetically

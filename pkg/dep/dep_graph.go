@@ -17,6 +17,7 @@ import (
 	"github.com/Jguer/yay/v13/pkg/db"
 	"github.com/Jguer/yay/v13/pkg/dep/topo"
 	"github.com/Jguer/yay/v13/pkg/intrange"
+	"github.com/Jguer/yay/v13/pkg/pkgbuildrepo"
 	aur "github.com/Jguer/yay/v13/pkg/query"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
@@ -27,6 +28,7 @@ type InstallInfo struct {
 	LocalVersion string
 	AURBase      string
 	SyncDBName   string
+	RepoName     string // PKGBUILD-repo name this package is attributed to, for display.
 	SrcinfoPath  string
 	Maintainer   string
 	Source       Source
@@ -53,6 +55,12 @@ func (s Source) String() string {
 	return SourceNames[s]
 }
 
+// IsBuiltFromSource reports whether packages from this source are built locally
+// through the makepkg pipeline, rather than installed by pacman from a sync DB.
+func (s Source) IsBuiltFromSource() bool {
+	return s == AUR || s == SrcInfo || s == PkgbuildRepo
+}
+
 const (
 	Explicit Reason = iota // 0
 	Dep                    // 1
@@ -72,22 +80,25 @@ const (
 	Sync
 	Local
 	SrcInfo
+	PkgbuildRepo
 	Missing
 )
 
 var SourceNames = map[Source]string{
-	AUR:     gotext.Get("AUR"),
-	Sync:    gotext.Get("Sync"),
-	Local:   gotext.Get("Local"),
-	SrcInfo: gotext.Get("SRCINFO"),
-	Missing: gotext.Get("Missing"),
+	AUR:          gotext.Get("AUR"),
+	Sync:         gotext.Get("Sync"),
+	Local:        gotext.Get("Local"),
+	SrcInfo:      gotext.Get("SRCINFO"),
+	PkgbuildRepo: gotext.Get("PKGBUILD Repo"),
+	Missing:      gotext.Get("Missing"),
 }
 
 var bgColorMap = map[Source]string{
-	AUR:     "lightblue",
-	Sync:    "lemonchiffon",
-	Local:   "darkolivegreen1",
-	Missing: "tomato",
+	AUR:          "lightblue",
+	Sync:         "lemonchiffon",
+	Local:        "darkolivegreen1",
+	PkgbuildRepo: "lightcyan",
+	Missing:      "tomato",
 }
 
 var colorMap = map[Reason]string{
@@ -101,13 +112,40 @@ type Grapher struct {
 	logger        *text.Logger
 	providerCache map[string][]aur.Pkg
 
-	dbExecutor  db.Executor
-	aurClient   aurc.QueryClient
-	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
-	noConfirm   bool // If true, the graph will not prompt for confirmation
-	noDeps      bool // If true, the graph will not include dependencies
-	noCheckDeps bool // If true, the graph will not include check dependencies
-	needed      bool // If true, the graph will only include packages that are not installed
+	dbExecutor db.Executor
+	aurClient  aurc.QueryClient
+
+	// pkgbuildRepo holds the configured PKGBUILD repos (masks the AUR); may be nil.
+	pkgbuildRepo *pkgbuildrepo.Index
+	// repoPkgCache memoizes the srcinfo->pkg derivation per repo entry.
+	repoPkgCache map[*pkgbuildrepo.Entry][]*aurc.Pkg
+
+	fullGraph   bool // include all dependencies, including already-installed or repo ones
+	noConfirm   bool // do not prompt for confirmation
+	noDeps      bool // do not include dependencies
+	noCheckDeps bool // do not include check dependencies
+	needed      bool // only include packages that are not installed
+}
+
+// SetPkgbuildRepos wires the configured PKGBUILD repositories into the grapher.
+// Packages found there mask AUR packages during resolution.
+func (g *Grapher) SetPkgbuildRepos(index *pkgbuildrepo.Index) {
+	g.pkgbuildRepo = index
+}
+
+// HasPkgbuildRepos reports whether any PKGBUILD repositories are configured.
+func (g *Grapher) HasPkgbuildRepos() bool {
+	return g.pkgbuildRepo != nil
+}
+
+// PkgbuildRepoEntry returns the repo entry providing name, if any repo is
+// configured and contains it.
+func (g *Grapher) PkgbuildRepoEntry(name string) (*pkgbuildrepo.Entry, bool) {
+	if g.pkgbuildRepo == nil {
+		return nil, false
+	}
+
+	return g.pkgbuildRepo.Get(name)
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
@@ -123,6 +161,7 @@ func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
 		noCheckDeps:   noCheckDeps,
 		needed:        needed,
 		providerCache: make(map[string][]aurc.Pkg, 5),
+		repoPkgCache:  make(map[*pkgbuildrepo.Entry][]*aurc.Pkg),
 		logger:        logger,
 	}
 }
@@ -155,6 +194,14 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 			if len(groupPackages) > 0 {
 				dbName := groupPackages[0].DB().Name()
 				g.GraphSyncGroup(ctx, graph, target.Name, dbName)
+
+				continue
+			}
+
+			if entry, ok := g.PkgbuildRepoEntry(target.Name); ok {
+				if err := g.graphPkgbuildRepoEntry(ctx, graph, entry, Explicit); err != nil {
+					return nil, err
+				}
 
 				continue
 			}
@@ -290,6 +337,137 @@ func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[strin
 	g.AddDepsForPkgs(ctx, aurPkgsAdded, graph)
 
 	return graph, nil
+}
+
+// repoEntryPkgs derives (and memoizes) the aur.Pkgs of a PKGBUILD-repo entry.
+// entry.Srcinfo is immutable, so the derivation is cached per entry to avoid
+// repeated AlpmArchitectures calls and allocations across references.
+func (g *Grapher) repoEntryPkgs(entry *pkgbuildrepo.Entry) ([]*aurc.Pkg, error) {
+	if pkgs, ok := g.repoPkgCache[entry]; ok {
+		return pkgs, nil
+	}
+
+	pkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, entry.Srcinfo)
+	if err != nil {
+		return nil, err
+	}
+
+	g.repoPkgCache[entry] = pkgs
+
+	return pkgs, nil
+}
+
+// repoInstallInfo builds the InstallInfo shared by every PKGBUILD-repo package
+// node. Callers set the deltas (upgrade fields) on the returned value.
+func repoInstallInfo(entry *pkgbuildrepo.Entry, pkg *aurc.Pkg, reason Reason) *InstallInfo {
+	return &InstallInfo{
+		Source:      PkgbuildRepo,
+		Reason:      reason,
+		SrcinfoPath: entry.Dir,
+		AURBase:     pkg.PackageBase,
+		RepoName:    entry.RepoName,
+		Version:     pkg.Version,
+	}
+}
+
+// graphPkgbuildRepoPkg adds one PKGBUILD-repo package node (with its provides
+// and dependencies) built from the repo's local PKGBUILD directory.
+func (g *Grapher) graphPkgbuildRepoPkg(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo], pkg *aurc.Pkg, info *InstallInfo,
+) {
+	graph.AddNode(pkg.Name)
+	g.addAurPkgProvides(pkg, graph)
+
+	g.ValidateAndSetNodeInfo(graph, pkg.Name, &topo.NodeInfo[*InstallInfo]{
+		Color:      colorMap[info.Reason],
+		Background: bgColorMap[PkgbuildRepo],
+		Value:      info,
+	})
+
+	g.addDepNodes(ctx, pkg, graph)
+}
+
+// graphPkgbuildRepoEntry graphs every package of a PKGBUILD-repo base as a
+// target, lowering the reason to match an already-installed package.
+func (g *Grapher) graphPkgbuildRepoEntry(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo], entry *pkgbuildrepo.Entry, reason Reason,
+) error {
+	aurPkgs, err := g.repoEntryPkgs(entry)
+	if err != nil {
+		return err
+	}
+
+	for _, pkg := range aurPkgs {
+		g.graphPkgbuildRepoPkg(ctx, graph, pkg, repoInstallInfo(entry, pkg, g.localReason(pkg.Name, reason)))
+	}
+
+	return nil
+}
+
+// graphPkgbuildRepoDep graphs the single package in entry that satisfies dep.
+// Dependencies must resolve to a concrete package node: virtual provides are
+// metadata, not packages that can be built or installed.
+func (g *Grapher) graphPkgbuildRepoDep(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo], entry *pkgbuildrepo.Entry, dep string, reason Reason,
+) (string, error) {
+	aurPkgs, err := g.repoEntryPkgs(entry)
+	if err != nil {
+		return "", err
+	}
+
+	for _, pkg := range aurPkgs {
+		if !satisfiesAur(dep, pkg) {
+			continue
+		}
+
+		g.graphPkgbuildRepoPkg(ctx, graph, pkg, repoInstallInfo(entry, pkg, g.localReason(pkg.Name, reason)))
+
+		return pkg.Name, nil
+	}
+
+	return "", nil
+}
+
+// GraphPkgbuildRepoUpgrade graphs an installed package that a configured
+// PKGBUILD repo can upgrade, marking the node as an upgrade and adding its
+// dependencies. name is the installed package (a pkgname of entry's base).
+func (g *Grapher) GraphPkgbuildRepoUpgrade(ctx context.Context,
+	graph *topo.Graph[string, *InstallInfo], entry *pkgbuildrepo.Entry,
+	name, localVersion string, reason Reason,
+) (*topo.Graph[string, *InstallInfo], error) {
+	if graph == nil {
+		graph = NewGraph()
+	}
+
+	aurPkgs, err := g.repoEntryPkgs(entry)
+	if err != nil {
+		return graph, err
+	}
+
+	for _, pkg := range aurPkgs {
+		if pkg.Name != name {
+			continue
+		}
+
+		info := repoInstallInfo(entry, pkg, reason)
+		info.LocalVersion = localVersion
+		info.Upgrade = true
+		g.graphPkgbuildRepoPkg(ctx, graph, pkg, info)
+	}
+
+	return graph, nil
+}
+
+// localReason lowers reason to the install reason of name if it is already
+// installed (an installed explicit package must not be downgraded to a dep).
+func (g *Grapher) localReason(name string, reason Reason) Reason {
+	if localPkg := g.dbExecutor.LocalPackage(name); localPkg != nil {
+		if r := Reason(localPkg.Reason()); r < reason {
+			return r
+		}
+	}
+
+	return reason
 }
 
 func (g *Grapher) AddDepsForPkgs(ctx context.Context, pkgs []*aur.Pkg, graph *topo.Graph[string, *InstallInfo]) {
@@ -713,6 +891,37 @@ func (g *Grapher) addNodes(
 			}
 
 			g.addNodes(ctx, graph, alpmPkg.Name(), newDepsSlice, Dep)
+		}
+	}
+	pending = keep
+
+	// Check PKGBUILD repos (mask the AUR)
+	keep = pending[:0]
+	for _, depString := range pending {
+		depName, _, _ := splitDep(depString)
+
+		entry, ok := g.PkgbuildRepoEntry(depName)
+		if !ok {
+			keep = append(keep, depString)
+
+			continue
+		}
+
+		pkgName, err := g.graphPkgbuildRepoDep(ctx, graph, entry, depString, depType)
+		if err != nil {
+			g.logger.Warnln("pkgbuild repo dep warn:", depString, parentPkgName, err)
+			keep = append(keep, depString)
+
+			continue
+		}
+		if pkgName == "" {
+			keep = append(keep, depString)
+
+			continue
+		}
+
+		if err := graph.DependOn(pkgName, parentPkgName); err != nil {
+			g.logger.Warnln("pkgbuild repo dep warn:", depString, parentPkgName, err)
 		}
 	}
 	pending = keep

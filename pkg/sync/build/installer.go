@@ -160,7 +160,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	upgradeSync := false
 	for name, info := range layer {
 		switch info.Source {
-		case dep.AUR, dep.SrcInfo:
+		case dep.AUR, dep.SrcInfo, dep.PkgbuildRepo:
 			nameToBaseMap[name] = info.AURBase
 			if installer.origTargets.Contains(name) {
 				aurOrigTargetBases.Add(info.AURBase)

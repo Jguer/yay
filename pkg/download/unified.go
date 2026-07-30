@@ -73,6 +73,14 @@ func downloadGitRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 	return newClone, nil
 }
 
+// PkgbuildRepoClone clones or updates a PKGBUILD repository's git repo into
+// dest/name, returning whether it was a fresh clone.
+func PkgbuildRepoClone(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
+	cloneURL, name, dest string, force bool,
+) (bool, error) {
+	return downloadGitRepo(ctx, cmdBuilder, cloneURL, name, dest, force)
+}
+
 func getURLName(pkg db.IPackage) string {
 	name := pkg.Base()
 	if name == "" {
