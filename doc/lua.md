@@ -177,7 +177,9 @@ exclusions and skips the native menu. With `skip_menu = false` or no return
 value, hook exclusions are applied first and then the native menu is shown.
 
 More examples: [`doc/examples/recently_modified.lua`](https://github.com/Jguer/yay/blob/next/doc/examples/recently_modified.lua)
-(pre-exclude recently modified AUR upgrades) and
+(pre-exclude recently modified AUR upgrades),
+[`doc/examples/minage.lua`](https://github.com/Jguer/yay/blob/next/doc/examples/minage.lua)
+(skip AUR upgrades younger than a configurable minimum age), and
 [`doc/examples/maintainer_change.lua`](https://github.com/Jguer/yay/blob/next/doc/examples/maintainer_change.lua) (warn on
 AUR maintainer changes).
 

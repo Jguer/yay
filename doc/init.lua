@@ -54,6 +54,13 @@ yay.opt.rpc = true
 yay.opt.double_confirm = true
 
 -- Hooks
+-- Copy an example from doc/examples/ into <config_dir>/hooks/ and require it.
+-- For example, to skip AUR upgrades younger than 7 days (see minage.lua to tune):
+--
+--   require("hooks.minage")
+--
+-- See doc/examples/minage.lua for configuration and hook API limitations.
+--
 -- Run Lua before yay prints the upgrade exclusion menu. Return package names
 -- from event.data.upgrades to pre-exclude them. Set skip_menu = false, or omit
 -- it, to show the native menu after these exclusions are applied.
