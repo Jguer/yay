@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -25,6 +26,42 @@ import (
 	"github.com/Jguer/yay/v13/pkg/text"
 	"github.com/Jguer/yay/v13/pkg/vcs"
 )
+
+func TestHandleHelp(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		operation  string
+		wantOutput string
+		wantCalls  int
+	}{
+		{"top-level", "", "Usage:\n    yay", 0},
+		{"yay operation", "Y", "Usage: yay {-Y --yay}", 0},
+		{"pacman operation", "S", "", 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var output bytes.Buffer
+			logger := text.NewLogger(&output, &output, strings.NewReader(""), false, "test")
+			runner := &exe.MockRunner{}
+			cmdArgs := parser.MakeArguments()
+			cmdArgs.Op = tt.operation
+			require.NoError(t, cmdArgs.AddArg("help"))
+			run := &runtime.Runtime{
+				Cfg: &settings.Configuration{Mode: parser.ModeAny},
+				CmdBuilder: &exe.CmdBuilder{PacmanBin: "pacman", PacmanConfigPath: "/etc/pacman.conf",
+					PacmanDBPath: t.TempDir(), Runner: runner, Log: logger},
+				Logger: logger,
+			}
+
+			require.NoError(t, handleHelp(t.Context(), run, cmdArgs))
+			assert.Contains(t, output.String(), tt.wantOutput)
+			assert.Len(t, runner.ShowCalls, tt.wantCalls)
+		})
+	}
+}
 
 func TestYogurtMenuAURDB(t *testing.T) {
 	t.Skip("skip until Operation service is an interface")
