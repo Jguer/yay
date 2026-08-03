@@ -60,12 +60,20 @@
       "test_status": "go test ./pkg/query passed; make build passed"
     }
   ],
-  "last_run_note": "Selected tasks 2, 4, and 10. Live issue, PR, comment, label, and monthly-summary contents remained unavailable, so no issue actions or Task 11 update were possible; missing data was reported through safeoutputs. No distinct low-risk engineering investment or forward-progress change was identified beyond recent query work. make build passed; go test ./pkg/query reproduced the known query test-contract regression.",
+  "last_run_note": "Selected tasks 2, 10, and 3. Live issue, PR, comment, label, and monthly-summary contents remained unavailable, so no issue actions or Task 11 update were possible; the limitation was recorded through safeoutputs. The known query test-contract regression remains on next and is already addressed by the existing Repo Assist fix branch; no duplicate PR was created. make build passed; go test ./pkg/query failed only on that known regression.",
   "monthly_summary_issue": {
     "title": "[repo-assist] Monthly Activity 2026-07",
     "month": "2026-07"
   },
   "run_history": [
+    {
+      "date": "2026-08-03",
+      "selected_tasks": [2, 10, 3],
+      "actions": [
+        "Confirmed the known query test-contract regression and existing Repo Assist fix branch; no duplicate PR created",
+        "Live issue, PR, comment, label, and monthly-summary data unavailable; no issue actions or Task 11 update made"
+      ]
+    },
     {
       "date": "2026-08-02",
       "selected_tasks": [2, 4, 10],
