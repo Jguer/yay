@@ -55,10 +55,13 @@ func syncInstall(ctx context.Context,
 	if cmdArgs.ExistsArg("u", "sysupgrade") {
 		var errSysUp error
 
+		run.RefreshAdoption(ctx, cmdArgs.ExistsArg("y", "refresh"))
+
 		upService := upgrade.NewUpgradeService(
 			grapher, aurCache, dbExecutor, run.VCSStore,
 			run.Cfg, settings.NoConfirm, run.Logger.Child("upgrade"))
 		upService.SetLua(run.Lua)
+		upService.AURWarnings.SetAdoptions(run.AdoptionStore.Active())
 
 		graph, errSysUp = upService.GraphUpgrades(ctx,
 			graph, cmdArgs.ExistsDouble("u", "sysupgrade"),

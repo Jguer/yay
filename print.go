@@ -101,6 +101,8 @@ func localStatistics(ctx context.Context, run *runtime.Runtime, dbExecutor db.Ex
 	biggestPackages(run.Logger, dbExecutor)
 	run.Logger.Println(text.Bold(text.Cyan("===========================================")))
 
+	run.RefreshAdoption(ctx, false)
+
 	aurData, err := run.AURClient.Get(ctx, &aur.Query{
 		Needles: remoteNames,
 		By:      aur.Name,
@@ -110,6 +112,7 @@ func localStatistics(ctx context.Context, run *runtime.Runtime, dbExecutor db.Ex
 	}
 
 	warnings := query.NewWarnings(run.Logger.Child("warnings"))
+	warnings.SetAdoptions(run.AdoptionStore.Active())
 	for i := range aurData {
 		warnings.AddToWarnings(remote, &aurData[i])
 	}
