@@ -8,6 +8,7 @@ import (
 	"github.com/Jguer/aur"
 	alpm "github.com/Jguer/dyalpm"
 
+	"github.com/Jguer/yay/v13/pkg/adoption"
 	"github.com/Jguer/yay/v13/pkg/db"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
@@ -17,12 +18,21 @@ type AURWarnings struct {
 	OutOfDate  []string
 	Missing    []string
 	LocalNewer []string
+	Adopted    []string
 
-	log *text.Logger
+	adopted map[string]adoption.Record
+	log     *text.Logger
 }
 
 func NewWarnings(logger *text.Logger) *AURWarnings {
 	return &AURWarnings{log: logger}
+}
+
+// SetAdoptions supplies the active maintainer-change records against which
+// AddToWarnings matches. Records are reconstructed from AUR metadata snapshots
+// and remain active for adoption.Window.
+func (warnings *AURWarnings) SetAdoptions(records map[string]adoption.Record) {
+	warnings.adopted = records
 }
 
 func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.Package, aurPkg *aur.Pkg) {
@@ -30,6 +40,10 @@ func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.Package, aurPk
 	pkg, ok := remote[name]
 	if !ok {
 		return
+	}
+	
+	if rec, adopted := warnings.adopted[name]; adopted {
+		warnings.Adopted = append(warnings.Adopted, adoption.FormatWarning(name, rec))
 	}
 
 	if aurPkg.Maintainer == "" && !pkg.ShouldIgnore() {
@@ -81,6 +95,10 @@ func (warnings *AURWarnings) Print() {
 
 	if len(warnings.OutOfDate) > 0 {
 		warnings.log.Warnln(gotext.Get("Flagged Out Of Date AUR Packages:"), formatNames(warnings.OutOfDate))
+	}
+
+	for _, adopted := range warnings.Adopted {
+		warnings.log.Warnln(adopted)
 	}
 
 	if len(warnings.LocalNewer) > 0 {

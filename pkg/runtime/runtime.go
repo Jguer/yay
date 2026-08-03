@@ -10,6 +10,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v13/pkg/adoption"
 	"github.com/Jguer/yay/v13/pkg/query"
 	"github.com/Jguer/yay/v13/pkg/settings"
 	"github.com/Jguer/yay/v13/pkg/settings/exe"
@@ -28,16 +29,17 @@ import (
 )
 
 type Runtime struct {
-	Cfg          *settings.Configuration
-	QueryBuilder query.Builder
-	PacmanConf   *pacmanconf.Config
-	VCSStore     vcs.Store
-	CmdBuilder   exe.ICmdBuilder
-	HTTPClient   *http.Client
-	VoteClient   *vote.Client
-	AURClient    aur.QueryClient
-	Logger       *text.Logger
-	Lua          *settingslua.Engine // not goroutine-safe
+	Cfg           *settings.Configuration
+	QueryBuilder  query.Builder
+	PacmanConf    *pacmanconf.Config
+	VCSStore      vcs.Store
+	AdoptionStore *adoption.Store
+	CmdBuilder    exe.ICmdBuilder
+	HTTPClient    *http.Client
+	VoteClient    *vote.Client
+	AURClient     aur.QueryClient
+	Logger        *text.Logger
+	Lua           *settingslua.Engine // not goroutine-safe
 }
 
 func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
@@ -128,6 +130,11 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		return nil, err
 	}
 
+	adoptionStore := adoption.NewStore(cfg.AdoptionFilePath)
+	if errAdopt := adoptionStore.Load(); errAdopt != nil {
+		logger.Child("adoption").Warnln(gotext.Get("failed to load AUR maintainer cache: %s", errAdopt))
+	}
+
 	queryBuilder := query.NewSourceQueryBuilder(
 		aurCache,
 		logger.Child("mixed.querybuilder"), cfg.SortBy,
@@ -135,16 +142,31 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 		cfg.BottomUp, cfg.SingleLineResults, cfg.SeparateSources)
 
 	run := &Runtime{
-		Cfg:          cfg,
-		QueryBuilder: queryBuilder,
-		PacmanConf:   pacmanConf,
-		VCSStore:     vcsStore,
-		CmdBuilder:   cmdBuilder,
-		HTTPClient:   httpClient,
-		VoteClient:   voteClient,
-		AURClient:    aurCache,
-		Logger:       logger,
+		Cfg:           cfg,
+		QueryBuilder:  queryBuilder,
+		PacmanConf:    pacmanConf,
+		VCSStore:      vcsStore,
+		AdoptionStore: adoptionStore,
+		CmdBuilder:    cmdBuilder,
+		HTTPClient:    httpClient,
+		VoteClient:    voteClient,
+		AURClient:     aurCache,
+		Logger:        logger,
 	}
 
 	return run, nil
+}
+
+// RefreshAdoption conditionally refreshes the AUR maintainer-change snapshot.
+// The refresh is bounded by AdoptionMaxAge unless force is set (for example on
+// an explicit -y). Failures are advisory and logged rather than propagated.
+func (r *Runtime) RefreshAdoption(ctx context.Context, force bool) {
+	if r.AdoptionStore == nil {
+		return
+	}
+
+	maxAge := time.Duration(r.Cfg.AdoptionMaxAge) * time.Hour
+	if _, err := adoption.Refresh(ctx, r.HTTPClient, r.AdoptionStore, maxAge, force); err != nil {
+		r.Logger.Child("adoption").Warnln(gotext.Get("failed to refresh AUR maintainer data: %s", err))
+	}
 }

@@ -17,6 +17,16 @@ func FormatWarning(name string, r Record) string {
 	return text.Bold(text.Red(msg))
 }
 
+func FormatTag(r Record) string {
+	age := text.FormatDuration(NowFunc().Sub(r.ObservedAt))
+
+	label := "maintainer changed"
+	if r.Kind == KindOrphanModified {
+		label = "orphan modified"
+	}
+	return text.Bold(text.Red("(" + label + " " + age + " ago)"))
+}
+
 func maintainerLabel(m string) string {
 	if m == "" {
 		return "(orphan)"

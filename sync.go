@@ -8,6 +8,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"github.com/Jguer/yay/v13/pkg/adoption"
 	"github.com/Jguer/yay/v13/pkg/db"
 	"github.com/Jguer/yay/v13/pkg/dep"
 	"github.com/Jguer/yay/v13/pkg/runtime"
@@ -42,7 +43,9 @@ func syncInstall(ctx context.Context,
 			return errRefresh
 		}
 	}
-
+	
+	run.RefreshAdoption(ctx, refreshArg)
+	
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
 		noDeps, noCheck, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
 
@@ -76,6 +79,26 @@ func syncInstall(ctx context.Context,
 		if errSysUp != nil {
 			return errSysUp
 		}
+	}
+	
+	if active := run.AdoptionStore.Active(); len(active) > 0 {
+		warned := false
+		_= graph.ForEach(func(name string, ii *dep.InstallInfo) error {
+			if ii.Source != dep.AUR {
+				return nil
+			}
+			
+			if rec, ok := active[name]; ok {
+				if !warned {
+					run.Logger.Warnln(gotext.Get("Recent AUR maintainer change(s) detected - review the PKGBUILD before installing:"))
+					warned = true
+				}
+				
+				run.Logger.Warnln(adoption.FormatWarning(name, rec))
+			}
+			
+			return nil
+		})
 	}
 
 	opService := sync.NewOperationService(ctx, dbExecutor, run)

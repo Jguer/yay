@@ -14,7 +14,8 @@ import (
 	"github.com/adrg/strutil/metrics"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
-
+	
+	"github.com/Jguer/yay/v13/pkg/adoption"
 	"github.com/Jguer/yay/v13/pkg/db"
 	"github.com/Jguer/yay/v13/pkg/intrange"
 	settingslua "github.com/Jguer/yay/v13/pkg/settings/lua"
@@ -55,6 +56,7 @@ type SourceQueryBuilder struct {
 	aurClient aur.QueryClient
 	logger    *text.Logger
 	lua       *settingslua.Engine
+	adopted   map[string]adoption.Record
 }
 
 func NewSourceQueryBuilder(
@@ -404,6 +406,10 @@ func (s *SourceQueryBuilder) applySearchFilter(results []abstractResult) []abstr
 
 	return filtered
 }
+	
+func (s *SourceQueryBuilder) SetAdoptions(records map[string]adoption.Record) {
+	s.adopted = records
+}
 
 func (s *SourceQueryBuilder) renderAUR(pkg *aur.Pkg, dbExecutor db.Executor) string {
 	var localVersion string
@@ -432,7 +438,11 @@ func (s *SourceQueryBuilder) renderAUR(pkg *aur.Pkg, dbExecutor db.Executor) str
 		}
 	}
 
-	return aurPkgSearchStringResolved(pkg, localVersion, s.singleLineResults)
+	var adoptedTag string
+	if rec, ok := s.adopted[pkg.Name]; ok {
+		adoptedTag = adoption.FormatTag(rec)
+	}
+	return aurPkgSearchStringResolved(pkg, localVersion, s.singleLineResults, adoptedTag)
 }
 
 func (s *SourceQueryBuilder) renderSync(pkg alpm.Package, dbExecutor db.Executor) string {

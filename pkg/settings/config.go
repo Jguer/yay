@@ -71,8 +71,11 @@ type Configuration struct {
 	UseRPC                 bool   `json:"rpc" lua:"rpc"`
 	DoubleConfirm          bool   `json:"doubleconfirm" lua:"double_confirm"` // confirm install before and after build
 
-	CompletionPath string `json:"-" lua:"-"`
-	VCSFilePath    string `json:"-" lua:"-"`
+	AdoptionMaxAge int `json:"adoptionmaxage" lua:"adoption_max_age"` // hours; snapshot staleness bound before refresh (0 = always)
+
+	CompletionPath   string `json:"-" lua:"-"`
+	VCSFilePath      string `json:"-" lua:"-"`
+	AdoptionFilePath string `json:"-" lua:"-"`
 	// ConfigPath     string `json:"-"`
 	SaveConfig bool               `json:"-" lua:"-"`
 	Mode       parser.TargetMode  `json:"-" lua:"-"`
@@ -238,6 +241,7 @@ func DefaultConfig(version string) *Configuration {
 		Debug:                  false,
 		UseRPC:                 true,
 		DoubleConfirm:          true,
+		AdoptionMaxAge:         24,
 		Mode:                   parser.ModeAny,
 	}
 }
@@ -253,6 +257,7 @@ func NewConfig(logger *text.Logger, configPath, version string) (*Configuration,
 	newConfig.BuildDir = cacheHome
 	newConfig.CompletionPath = filepath.Join(cacheHome, completionFileName)
 	newConfig.VCSFilePath = filepath.Join(cacheHome, vcsFileName)
+	newConfig.AdoptionFilePath = filepath.Join(cacheHome, adoptionFileName)
 	newConfig.load(configPath)
 
 	if aurdest := os.Getenv("AURDEST"); aurdest != "" {

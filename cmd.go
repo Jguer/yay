@@ -391,6 +391,10 @@ func handleSync(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argum
 
 	switch {
 	case cmdArgs.ExistsArg("s", "search"):
+		run.RefreshAdoption(ctx, cmdArgs.ExistsArg("y", "refresh"))
+		if b, ok := run.QueryBuilder.(*query.SourceQueryBuilder); ok {
+			b.SetAdoptions(run.AdoptionStore.Active())
+		}
 		return syncSearch(ctx, targets, dbExecutor, run.QueryBuilder, !cmdArgs.ExistsArg("q", "quiet"))
 	case cmdArgs.ExistsArg("p", "print", "print-format"):
 		return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,

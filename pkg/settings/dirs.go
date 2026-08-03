@@ -8,7 +8,8 @@ import (
 const (
 	configFileName     string = "config.json" // configFileName holds the name of the config file.
 	luaConfigFileName  string = "init.lua"
-	vcsFileName        string = "vcs.json" // vcsFileName holds the name of the vcs file.
+	vcsFileName        string = "vcs.json"      
+	adoptionFileName   string = "adoption.json" 
 	completionFileName string = "completion.cache"
 	systemdCache       string = "/var/cache/yay" // systemd should handle cache creation
 )
