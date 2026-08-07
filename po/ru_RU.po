@@ -13,7 +13,6 @@
 # Vladislav Grechannik, 2024
 # ratijas, 2024
 # Vladimir Yerilov, 2025
-# Maxim Tyuterev, 2026
 # Andrei Stepanov, 2026
 # 
 msgid ""
@@ -857,7 +856,7 @@ msgstr "зависимость"
 
 #: pkg/vcs/vcs.go:101 pkg/vcs/vcs.go:97
 msgid "devel check for package failed: '%s' encountered an error"
-msgstr "Проверка для пакета '%s' не закончилась успехом"
+msgstr "проверка для пакета «%s» не закончилась успехом"
 
 #: pkg/settings/parser/parser.go:667
 msgid ""
@@ -1054,7 +1053,7 @@ msgstr[3] "пакеты"
 
 #: print.go:191
 msgid "package '%s' was not found"
-msgstr "пакет '%s' не найден"
+msgstr "пакет «%s» не найден"
 
 #: pkg/download/errors.go:15
 msgid "package not found in AUR"
@@ -1090,7 +1089,7 @@ msgstr "удаление неотслеживаемых файлов AUR из к
 
 #: pkg/dep/dep_graph.go:586
 msgid "required by"
-msgstr "нужен для"
+msgstr "требуется для"
 
 #: cmd.go:207
 msgid "sudo command to use"
