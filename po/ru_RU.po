@@ -1101,7 +1101,7 @@ msgstr "файл PKGDEST для %s означен в выводе makepkg, но 
 
 #: pkg/settings/parser/parser.go:666
 msgid "the clean command requires an operation to be specified"
-msgstr "для команды clean необходимо указать операцию"
+msgstr "для команды clean требуется указать операцию"
 
 #: pkg/sync/sync.go:50
 msgid "there is nothing to do"
