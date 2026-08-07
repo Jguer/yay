@@ -717,7 +717,7 @@ msgstr "Синхронизация"
 
 #: print.go:100
 msgid "Ten biggest packages:"
-msgstr "10 самых объёмных пакетов:"
+msgstr "10 самых крупных пакетов:"
 
 #: pkg/sync/sync.go:144
 msgid "The following packages are not compatible with your architecture:"
