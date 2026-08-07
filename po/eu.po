@@ -15,28 +15,44 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
-#: pkg/menus/menu.go:32
+#: clean.go:99
+msgid ""
+"\n"
+"Build directory:"
+msgstr ""
+"\n"
+"Konpilazio direktorioa:"
+
+#: pkg/db/ialpm/alpm.go:207 pkg/dep/dep_graph.go:802
+msgid ""
+"\n"
+"Enter a number (default=1): "
+msgstr ""
+"\n"
+"Idatzi zenbaki bat (lehenetsia=1): "
+
+#: pkg/menus/menu.go:33
 msgid " (Build Files Exist)"
 msgstr " (Konpilazio fitxategiak existitzen dira)"
 
-#: pkg/menus/menu.go:27
+#: pkg/menus/menu.go:28
 msgid " (Installed)"
 msgstr " (Instalatuta)"
 
-#: cmd.go:453
+#: cmd.go:530
 msgid " [Installed]"
 msgstr " [Instalatuta]"
 
-#: cmd.go:410 vote.go:36
+#: cmd.go:496 vote.go:36
 msgid " there is nothing to do"
 msgstr " ez dago ezer egiteko"
 
-#: pkg/menus/menu.go:49
+#: pkg/menus/menu.go:50
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s Guzti[A]k [Ab]ortatu [I]nstalatuak [No]Ez instalatuak edo (1 2 3, 1-3, ^4)"
 
-#: pkg/sync/build/installer.go:308
+#: pkg/sync/build/installer.go:343
 msgid "%s already made -- skipping build"
 msgstr "%s eginda dago jada -- konpilazioa alde batera uzten"
 
@@ -44,20 +60,20 @@ msgstr "%s eginda dago jada -- konpilazioa alde batera uzten"
 msgid "%s is not set"
 msgstr "%s ezarri gabe dago"
 
-#: pkg/settings/exe/cmd_builder.go:257
+#: pkg/settings/exe/cmd_builder.go:258
 msgid "%s is present."
 msgstr "%s presente dago."
 
-#: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
+#: pkg/dep/dep_graph.go:463 pkg/sync/build/installer.go:340
 msgid "%s is up to date -- skipping"
 msgstr "%s eguneratuta dago - alde batera uzten"
 
-#: pkg/upgrade/service.go:292
+#: pkg/upgrade/service.go:359
 #, fuzzy
 msgid "%s to upgrade/install."
 msgstr "eguneratzeko pakete."
 
-#: pkg/upgrade/service.go:286
+#: pkg/upgrade/service.go:353
 msgid "%s will also be installed for this operation."
 msgstr ""
 
@@ -65,7 +81,7 @@ msgstr ""
 msgid "%s, required by: %s"
 msgstr "%s, honek beharrezkoa du: %s"
 
-#: pkg/menus/diff_menu.go:49
+#: pkg/menus/diff_menu.go:75
 msgid "%s: No changes -- skipping"
 msgstr "%s: Aldaketarik ez -- alde batera uzten"
 
@@ -77,7 +93,7 @@ msgstr "%s: ezin da helburua --aur aukerarekin erabili -- alde batera uzten"
 msgid "%s: can't use target with option --repo -- skipping"
 msgstr "%s: ezin da helburua --repo aukerarekin erabili -- alde batera uzten"
 
-#: pkg/upgrade/sources.go:57
+#: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: paketearen eguneraketa alde batera uzten (%s => %s)"
 
@@ -90,58 +106,111 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
 msgstr ""
 
-#: pkg/download/unified.go:192
+#: pkg/download/unified.go:193
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr "(%d/%d) PKGBUILD ABStik deskargatuta: %s"
 
-#: pkg/download/aur.go:92 pkg/download/unified.go:188
+#: pkg/download/aur.go:96 pkg/download/unified.go:189
 #, fuzzy
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) PKGBUILD ABStik deskargatuta: %s"
 
-#: pkg/download/aur.go:82
+#: pkg/download/aur.go:86
 #, fuzzy
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
 msgstr "(%d/%d) PKGBUILD ABStik deskargatuta: %s"
 
-#: pkg/sync/srcinfo/service.go:109
+#: pkg/sync/srcinfo/service.go:114
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) SRCINFO aztertzen: %s"
 
-#: pkg/query/types.go:72 pkg/query/types.go:103
+#: pkg/query/types.go:103 pkg/query/types.go:72
 msgid "(Installed)"
 msgstr "(Instalatuta)"
 
-#: pkg/query/types.go:70 pkg/query/types.go:101
+#: pkg/query/types.go:105 pkg/query/types.go:74
 msgid "(Installed: %s)"
 msgstr "(Instalatuta: %s)"
 
-#: pkg/query/types.go:61
+#: pkg/query/types.go:63
 msgid "(Orphaned)"
 msgstr "(Umezurtz)"
 
-#: pkg/query/types.go:65
+#: pkg/query/types.go:67
 msgid "(Out-of-date: %s)"
 msgstr "(Zaharkituta: %s)"
+
+#: pkg/dep/dep_graph.go:79
+#, fuzzy
+msgid "AUR"
+msgstr "URLa"
 
 #: print.go:44
 msgid "AUR URL"
 msgstr "AUReko URLa"
 
-#: pkg/dep/dep_graph.go:75
-#, fuzzy
-msgid "AUR"
-msgstr "URLa"
-
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
 msgstr "Gehitu %s edo %s zure ingurune-aldagaietara"
 
-#: main.go:60
+#: cmd.go:197
+msgid "Always build all AUR packages"
+msgstr ""
+
+#: cmd.go:199
+msgid "Always build all AUR packages even if installed"
+msgstr ""
+
+#: cmd.go:196
+#, fuzzy
+msgid "Always build target packages"
+msgstr "Hamar pakete handienak:"
+
+#: cmd.go:202
+msgid "Always download pkgbuilds of all AUR packages"
+msgstr ""
+
+#: cmd.go:200
+msgid "Always download pkgbuilds of targets"
+msgstr ""
+
+#: cmd.go:183
+#, fuzzy
+msgid "Ask to remove makedepends after install"
+msgstr "Konpilatzeko menpekotasunak ezabatu instalatu ostean?"
+
+#: cmd.go:184
+#, fuzzy
+msgid "Ask to remove makedepends after install(\"Y\" as default)"
+msgstr "Konpilatzeko menpekotasunak ezabatu instalatu ostean?"
+
+#: cmd.go:146
+msgid "Assume targets are from the AUR"
+msgstr ""
+
+#: cmd.go:145
+msgid "Assume targets are from the repositories"
+msgstr ""
+
+#: cmd.go:205
+msgid "Automatically resolve conflicts using pacman's ask flag"
+msgstr ""
+
+#: main.go:65
 msgid "Avoid running yay as root/sudo."
 msgstr "Saihestu yay root/sudo bezala exekutatzea."
 
-#: pkg/dep/dep_graph.go:63
+#: cmd.go:53
+msgid "Build and install a PKGBUILD"
+msgstr ""
+
+#: cmd.go:150
+msgid ""
+"Causes the following options to be saved back to the\n"
+"config file when used"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:67
 #, fuzzy
 msgid "Check Dependency"
 msgstr "Egiaztapen menpekotasunak"
@@ -150,11 +219,16 @@ msgstr "Egiaztapen menpekotasunak"
 msgid "Check Deps"
 msgstr "Egiaztapen menpekotasunak"
 
-#: pkg/upgrade/service.go:90
+#: cmd.go:195
+#, fuzzy
+msgid "Check development packages during sysupgrade"
+msgstr "Garapen paketeak egiaztatzen..."
+
+#: pkg/upgrade/service.go:115
 msgid "Checking development packages..."
 msgstr "Garapen paketeak egiaztatzen..."
 
-#: pkg/sync/workdir/clean.go:45
+#: pkg/sync/workdir/clean.go:44
 msgid "Cleaning (%d/%d): %s"
 msgstr "(%d/%d) garbitzen: %s"
 
@@ -166,7 +240,7 @@ msgstr "Gatazkak hauekin"
 msgid "Deleting (%d/%d): %s"
 msgstr "(%d/%d) ezabatzen: %s"
 
-#: pkg/dep/dep_graph.go:61
+#: pkg/dep/dep_graph.go:65
 #, fuzzy
 msgid "Dependency"
 msgstr "Behar du"
@@ -179,39 +253,56 @@ msgstr "Behar du"
 msgid "Description"
 msgstr "Deskribapena"
 
-#: pkg/menus/diff_menu.go:160
+#: pkg/menus/diff_menu.go:201
 msgid "Diffs to show?"
 msgstr "Aldaketak erakutsi?"
+
+#: cmd.go:154
+msgid "Directory used to download and run PKGBUILDS"
+msgstr ""
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
 msgstr ""
 
-#: clean.go:78
+#: cmd.go:63
+msgid "Display system package statistics"
+msgstr ""
+
+#: clean.go:94
 msgid "Do you want to remove ALL AUR packages from cache?"
 msgstr "Cachean dauden AUR pakete GUZTIAK kendu nahi dituzu?"
 
-#: clean.go:95
+#: clean.go:111
 msgid "Do you want to remove ALL untracked AUR files?"
 msgstr "Jarraipen gabeko AUR fitxategi GUZTIAK kendu nahi dituzu?"
 
-#: clean.go:80
+#: clean.go:96
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "Cachean dauden beste AUR paketeak kendu nahi dituzu?"
+
+#: cmd.go:186
+#, fuzzy
+msgid "Don't remove makedepends after install"
+msgstr "Konpilatzeko menpekotasunak ezabatu instalatu ostean?"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
 msgstr "PKGBUILD zerekin editatu?"
 
+#: cmd.go:155
+msgid "Editor to use when editing PKGBUILDs"
+msgstr ""
+
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
 msgstr "Errorea AURen bilatzerakoan: %s\n"
 
-#: pkg/upgrade/service.go:296
+#: pkg/upgrade/service.go:390
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 
-#: pkg/dep/dep_graph.go:60
+#: pkg/dep/dep_graph.go:64
 msgid "Explicit"
 msgstr ""
 
@@ -219,16 +310,16 @@ msgstr ""
 msgid "Explicitly installed packages: %s"
 msgstr "Eskuz instalatutako paketeak: %s"
 
-#: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
+#: pkg/dep/dep_graph.go:439 pkg/dep/dep_graph.go:555
 #, fuzzy
 msgid "Failed to find AUR package for"
 msgstr "Zaharkitu gisa markatutako AUR paketeak:"
 
-#: pkg/sync/build/installer.go:120
+#: pkg/sync/build/installer.go:128
 msgid "Failed to install layer, rolling up to next layer."
 msgstr ""
 
-#: pkg/sync/build/errors.go:16
+#: pkg/sync/build/errors.go:18
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
@@ -237,16 +328,20 @@ msgstr ""
 msgid "First Submitted"
 msgstr "Lehenengo bidalita"
 
-#: pkg/query/aur_warnings.go:79
+#: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Zaharkitu gisa markatutako AUR paketeak:"
+
+#: cmd.go:56
+msgid "Force download for existing ABS packages"
+msgstr ""
 
 #: print.go:90
 #, fuzzy
 msgid "Foreign installed packages: %s"
 msgstr "Kanpotik instalatu diren paketeak: %s"
 
-#: pkg/vcs/vcs.go:144
+#: pkg/vcs/vcs.go:148
 msgid "Found git repo: %s"
 msgstr "Git biltegia aurkitu da: %s"
 
@@ -254,9 +349,34 @@ msgstr "Git biltegia aurkitu da: %s"
 msgid "GenDB finished. No packages were installed"
 msgstr "GenDB amaitu da. Ez da paketerik instalatu"
 
+#: cmd.go:73
+msgid "Generates development package DB used for updating"
+msgstr ""
+
+#: cmd.go:180
+msgid "Give the option to clean build PKGBUILDS"
+msgstr ""
+
+#: cmd.go:182
+msgid "Give the option to edit/view PKGBUILDS"
+msgstr ""
+
+#: cmd.go:181
+msgid "Give the option to show diffs for build files"
+msgstr ""
+
 #: print.go:36
 msgid "Groups"
 msgstr "Taldeak"
+
+#: cmd.go:141
+msgid "If no operation is specified 'yay -Syu' will be performed"
+msgstr ""
+
+#: cmd.go:142
+msgid ""
+"If no operation is specified and targets are provided, -Y will be assumed"
+msgstr ""
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
@@ -265,6 +385,10 @@ msgstr "Inportatu?"
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
 msgstr "Gakoak GPGrekin inportatzen..."
+
+#: cmd.go:189
+msgid "Keep pkg/ and src/ after building packages"
+msgstr ""
 
 #: print.go:46
 msgid "Keywords"
@@ -278,15 +402,31 @@ msgstr "Azken aldaketa"
 msgid "Licenses"
 msgstr "Lizentziak"
 
-#: pkg/dep/dep_graph.go:77
+#: cmd.go:192
+msgid "List each search result on its own line"
+msgstr ""
+
+#: cmd.go:193
+msgid "List each search result on two lines, like pacman"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:81
 msgid "Local"
+msgstr ""
+
+#: cmd.go:203
+msgid "Look for matching providers when searching for packages"
+msgstr ""
+
+#: cmd.go:209
+msgid "Loop sudo calls in the background to avoid timeout"
 msgstr ""
 
 #: print.go:48
 msgid "Maintainer"
 msgstr "Arduraduna"
 
-#: pkg/dep/dep_graph.go:62
+#: pkg/dep/dep_graph.go:66
 #, fuzzy
 msgid "Make Dependency"
 msgstr "Menpekotasunak burutzea"
@@ -295,36 +435,57 @@ msgstr "Menpekotasunak burutzea"
 msgid "Make Deps"
 msgstr "Menpekotasunak burutzea"
 
-#: pkg/query/aur_warnings.go:71
+#: cmd.go:168
+msgid "Max amount of packages to query per AUR request"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:83
+msgid "Missing"
+msgstr ""
+
+#: pkg/query/aur_warnings.go:75
 #, fuzzy
 msgid "Missing AUR Debug Packages:"
 msgstr "Faltan dauden AUR paketeak:"
-
-#: pkg/dep/dep_graph.go:79
-msgid "Missing"
-msgstr ""
 
 #: print.go:31
 msgid "Name"
 msgstr "Izena"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:548
+#: cmd.go:133
+#, fuzzy
+msgid "New operations:"
+msgstr "sostengurik gabeko eragiketa"
+
+#: cmd.go:144
+msgid "New options:"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:444 pkg/dep/dep_graph.go:586 query.go:98
 msgid "No AUR package found for"
 msgstr ""
 
-#: pkg/dep/dep_graph.go:182
+#: pkg/dep/dep_graph.go:185
 msgid "No package found for"
 msgstr ""
 
-#: print.go:225
+#: clean.go:83
+msgid "No valid pacman cache directories found. Skipping cache clean."
+msgstr ""
+
+#: print.go:229
 msgid "None"
 msgstr "Deus ez"
+
+#: cmd.go:65
+msgid "Only show titles when printing news"
+msgstr ""
 
 #: print.go:39
 msgid "Optional Deps"
 msgstr "Hautazko menpekotasunak"
 
-#: pkg/query/aur_warnings.go:75
+#: pkg/query/aur_warnings.go:79
 #, fuzzy
 msgid "Orphan (unmaintained) AUR Packages:"
 msgstr "Umezurtz geratu diren AUR paketeak:"
@@ -337,7 +498,7 @@ msgstr "Zaharkituta"
 msgid "PGP keys need importing:"
 msgstr "PGP gakoek inportatu behar dute:"
 
-#: pkg/sync/workdir/preparer.go:252
+#: pkg/sync/workdir/preparer.go:254
 #, fuzzy
 msgid "PKGBUILD up to date, skipping download: %s"
 msgstr "PKGBUILD eguneratuta, alde batera uzten (%d/%d): %s"
@@ -346,15 +507,15 @@ msgstr "PKGBUILD eguneratuta, alde batera uzten (%d/%d): %s"
 msgid "PKGBUILDs to edit?"
 msgstr "Editatzeko PKGBUILDak?"
 
-#: print.go:60
-msgid "Package Base ID"
-msgstr "Pakete-oinarriaren IDa"
-
 #: print.go:61
 msgid "Package Base"
 msgstr "Pakete-oinarria"
 
-#: pkg/query/aur_warnings.go:67
+#: print.go:60
+msgid "Package Base ID"
+msgstr "Pakete-oinarriaren IDa"
+
+#: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
 msgstr ""
 
@@ -362,64 +523,170 @@ msgstr ""
 msgid "Packages to cleanBuild?"
 msgstr "Konpilatu aurretik garbitzeko paketeak?"
 
-#: pkg/dep/dep_graph.go:202
+#: pkg/dep/dep_graph.go:205
 #, fuzzy
 msgid "Packages to exclude"
 msgstr "eguneratzeko pakete."
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:389
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 "Kanpoan uzteko paketeak: (adb: \"1 2 3\", \"1-3\", \"^4\" edo biltegiaren "
 "izena)"
 
-#: cmd.go:392
+#: cmd.go:478
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Instalatzeko paketeak (eg.: 1 2 3, 1-3 edo ^4)"
+
+#: cmd.go:156
+msgid "Pass arguments to editor"
+msgstr ""
+
+#: cmd.go:161
+msgid "Pass arguments to git"
+msgstr ""
+
+#: cmd.go:163
+msgid "Pass arguments to gpg"
+msgstr ""
+
+#: cmd.go:158
+msgid "Pass arguments to makepkg"
+msgstr ""
+
+#: cmd.go:208
+msgid "Pass arguments to sudo"
+msgstr ""
+
+#: cmd.go:149
+msgid "Permanent configuration options:"
+msgstr ""
 
 #: print.go:49
 msgid "Popularity"
 msgstr "Ospea"
 
-#: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
+#: cmd.go:64
+msgid "Print arch news"
+msgstr ""
+
+#: cmd.go:62
+msgid "Print current yay configuration"
+msgstr ""
+
+#: cmd.go:61
+msgid "Print default yay configuration"
+msgstr ""
+
+#: cmd.go:57
+msgid "Print pkgbuild of packages"
+msgstr ""
+
+#: pkg/menus/diff_menu.go:213 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
 msgstr "Instalatu?"
+
+#: cmd.go:204
+msgid "Prompt to import PGP keys from PKGBUILDs"
+msgstr ""
 
 #: print.go:37
 msgid "Provides"
 msgstr "Hornitzen du"
 
+#: cmd.go:68
+msgid "Remove a vote from AUR package(s)"
+msgstr ""
+
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
 msgstr "Konpilatzeko menpekotasunak ezabatu instalatu ostean?"
+
+#: cmd.go:185
+#, fuzzy
+msgid "Remove makedepends after install"
+msgstr "Konpilatzeko menpekotasunak ezabatu instalatu ostean?"
+
+#: cmd.go:188
+#, fuzzy
+msgid "Remove package sources after successful install"
+msgstr "Konpilatzeko menpekotasunak ezabatu instalatu ostean?"
+
+#: cmd.go:72
+msgid "Remove unneeded dependencies (-cc to ignore optdepends)"
+msgstr ""
 
 #: print.go:43
 msgid "Replaces"
 msgstr ""
 
-#: pkg/dep/dep_graph.go:730
-msgid "Repository AUR"
-msgstr "AUR biltegia"
-
-#: print.go:30 pkg/db/ialpm/alpm.go:191
+#: pkg/db/ialpm/alpm.go:197 print.go:30
 msgid "Repository"
 msgstr "Biltegia"
 
-#: pkg/dep/dep_graph.go:78
+#: pkg/dep/dep_graph.go:792
+msgid "Repository AUR"
+msgstr "AUR biltegia"
+
+#: pkg/settings/migrations.go:45
+msgid "Reset 'sortby' setting to default"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:82
 msgid "SRCINFO"
 msgstr ""
 
-#: pkg/upgrade/service.go:72
+#: cmd.go:171
+msgid "Search for packages using a specified field"
+msgstr ""
+
+#: pkg/upgrade/service.go:97
 msgid "Searching AUR for updates..."
 msgstr "Eguneraketak AURen bilatzen..."
 
-#: pkg/upgrade/service.go:160
+#: pkg/upgrade/service.go:189
 msgid "Searching databases for updates..."
 msgstr "Datu-baseetan eguneraketak bilatzen..."
 
-#: pkg/query/query_builder.go:214
+#: cmd.go:172
+msgid "Set a predetermined answer for the clean build menu"
+msgstr ""
+
+#: cmd.go:173
+msgid "Set a predetermined answer for the diff menu"
+msgstr ""
+
+#: cmd.go:174
+msgid "Set a predetermined answer for the edit pkgbuild menu"
+msgstr ""
+
+#: cmd.go:175
+msgid "Set a predetermined answer for the upgrade menu"
+msgstr ""
+
+#: cmd.go:152
+msgid "Set an alternative AUR URL"
+msgstr ""
+
+#: cmd.go:153
+msgid "Set an alternative URL for the AUR /rpc endpoint"
+msgstr ""
+
+#: pkg/menus/diff_menu.go:104
+msgid "Showing diff for %s"
+msgstr ""
+
+#: pkg/query/query_builder.go:273
 msgid "Showing repo packages only"
 msgstr "Biltegietako paketeak soilik erakusten"
+
+#: cmd.go:190
+msgid "Shows AUR's packages first and then repository's"
+msgstr ""
+
+#: cmd.go:191
+msgid "Shows repository's packages first and then AUR's"
+msgstr ""
 
 #: print.go:95
 #, fuzzy
@@ -431,11 +698,23 @@ msgstr "%s analizatzeak huts egin du: %s"
 msgid "Size of yay cache %s: %s"
 msgstr "%s analizatzeak huts egin du: %s"
 
+#: cmd.go:198
+msgid "Skip package build if in cache and up to date"
+msgstr ""
+
+#: cmd.go:201
+msgid "Skip pkgbuild download if in cache and up to date"
+msgstr ""
+
 #: print.go:62
 msgid "Snapshot URL"
 msgstr "PKGBUILDaren argazkiaren URLa"
 
-#: pkg/dep/dep_graph.go:76
+#: cmd.go:170
+msgid "Sort AUR results by a specific field during search"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:80
 msgid "Sync"
 msgstr ""
 
@@ -443,18 +722,22 @@ msgstr ""
 msgid "Ten biggest packages:"
 msgstr "Hamar pakete handienak:"
 
-#: pkg/sync/sync.go:124
+#: pkg/sync/sync.go:144
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Ondorengo paketeak ez dira zure arkitekturarekin bateragarriak:"
 
-#: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
+#: pkg/db/ialpm/alpm.go:185 pkg/dep/dep_graph.go:788
 #, fuzzy
 msgid "There are %[1]d providers available for %[2]s:"
 msgstr "%[1]d hornitzaile eskuragarri %[2]s paketearentzat:\n"
 
-#: pkg/settings/exe/cmd_builder.go:258
+#: pkg/settings/exe/cmd_builder.go:259
 msgid "There may be another Pacman instance running. Waiting..."
 msgstr "Baliteke beste Pacman instantzia bat exekutzan aritzea. Zain..."
+
+#: cmd.go:169
+msgid "Time in days to refresh completion cache"
+msgstr ""
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
@@ -464,7 +747,7 @@ msgstr "Pakete guztiek erabilitako biltegiratzea: %s"
 msgid "Total installed packages: %s"
 msgstr "Instalatu diren paketeak: %s"
 
-#: pkg/sync/sync.go:132
+#: pkg/sync/sync.go:152
 msgid "Try to build them anyway?"
 msgstr "Saiatu konpilatzen hala ere?"
 
@@ -472,7 +755,7 @@ msgstr "Saiatu konpilatzen hala ere?"
 msgid "URL"
 msgstr "URLa"
 
-#: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
+#: clean.go:210 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 #, fuzzy
 msgid "Unable to clean:"
 msgstr "ezin da CreateHandle burutu: %s"
@@ -485,14 +768,52 @@ msgstr ""
 msgid "Unable to handle package vote for: %s. err: %s"
 msgstr ""
 
-#: clean.go:170
+#: clean.go:186
 #, fuzzy
 msgid "Unable to remove %s: %s"
 msgstr "%s analizatzeak huts egin du: %s"
 
+#: cmd.go:176
+msgid "Unset the answer for the clean build menu"
+msgstr ""
+
+#: cmd.go:177
+msgid "Unset the answer for the edit diff menu"
+msgstr ""
+
+#: cmd.go:178
+msgid "Unset the answer for the edit pkgbuild menu"
+msgstr ""
+
+#: cmd.go:179
+msgid "Unset the answer for the upgrade menu"
+msgstr ""
+
+#: cmd.go:116
+msgid "Usage:"
+msgstr ""
+
+#: cmd.go:219
+msgid ""
+"Usage: %s %s\n"
+"options:\n"
+msgstr ""
+
+#: cmd.go:166
+msgid "Use the default makepkg.conf"
+msgstr ""
+
+#: cmd.go:60
+msgid "Used for completions"
+msgstr ""
+
 #: print.go:32
 msgid "Version"
 msgstr "Bertsioa"
+
+#: cmd.go:69
+msgid "Vote for AUR package(s)"
+msgstr ""
 
 #: print.go:50
 msgid "Votes"
@@ -502,43 +823,27 @@ msgstr "Botoak"
 msgid "Yay version v%s"
 msgstr "Yay bertsioa v%s"
 
-#: pkg/menus/menu.go:49
+#: pkg/menus/menu.go:50
 msgid "[N]one"
 msgstr "I[N]or ez"
-
-#: clean.go:83
-msgid ""
-"\n"
-"Build directory:"
-msgstr ""
-"\n"
-"Konpilazio direktorioa:"
-
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
-msgid ""
-"\n"
-"Enter a number (default=1): "
-msgstr ""
-"\n"
-"Idatzi zenbaki bat (lehenetsia=1): "
 
 #: pkg/settings/errors.go:29
 msgid "aborting due to user"
 msgstr "erabiltzailearengatik bertan behera uzten"
 
-#: pkg/settings/parser/parser.go:608
+#: pkg/settings/parser/parser.go:606
 msgid "argument '-' specified without input on stdin"
 msgstr ""
 
-#: local_install.go:26
+#: local_install.go:25
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
 msgstr ""
 
-#: pkg/sync/build/pkg_archive.go:148
+#: pkg/sync/build/pkg_archive.go:149
 msgid "cannot find package name: %v"
 msgstr "ezin da paketearen izena aurkitu: %v"
 
-#: pkg/sync/build/errors.go:30
+#: pkg/sync/build/errors.go:35
 msgid "could not find PKGDEST for: %s"
 msgstr "ezin izan da aurkitu PKGDEST %s paketearentzat"
 
@@ -547,17 +852,26 @@ msgstr "ezin izan da aurkitu PKGDEST %s paketearentzat"
 msgid "could not find all required packages"
 msgstr "Ez izan dira aurkitu beharrezko pakete guztiak:"
 
-#: pkg/sync/build/errors.go:61
+#: pkg/sync/build/errors.go:66
 msgid "could not find any package archives listed in %s"
 msgstr ""
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:287
+#: pkg/sync/build/errors.go:55 pkg/upgrade/service.go:354
 #, fuzzy
 msgid "dependency"
 msgstr "Behar du"
 
-#: pkg/vcs/vcs.go:96 pkg/vcs/vcs.go:100
+#: pkg/vcs/vcs.go:101 pkg/vcs/vcs.go:97
 msgid "devel check for package failed: '%s' encountered an error"
+msgstr ""
+
+#: pkg/settings/parser/parser.go:667
+msgid ""
+"did you mean yay -Scc (clean caches) or yay -Ycc (clean orphaned packages)?"
+msgstr ""
+
+#: cmd.go:48
+msgid "dir"
 msgstr ""
 
 #: pkg/menus/edit_menu.go:110
@@ -572,16 +886,16 @@ msgstr "errorea iturriak deskargatzerakoan: %s"
 msgid "error fetching %s: %s"
 msgstr "errorea %s lortzerakoan: %s"
 
-#: pkg/sync/build/errors.go:9
+#: pkg/sync/build/errors.go:10
 msgid "error installing repo packages"
 msgstr "errorea biltegitako paketeak instalatzerakoan"
 
-#: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
+#: pkg/sync/build/installer.go:301 pkg/sync/build/installer.go:305
 #, fuzzy
 msgid "error installing:"
 msgstr "errorea biltegitako paketeak instalatzerakoan"
 
-#: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
+#: pkg/sync/build/installer.go:263 pkg/sync/build/installer.go:267
 msgid "error making: %s"
 msgstr "konpilazio akatsa: %s"
 
@@ -589,7 +903,7 @@ msgstr "konpilazio akatsa: %s"
 msgid "error merging %s: %s"
 msgstr "errorea %s bateratzerakoan: %s"
 
-#: pkg/download/unified.go:59
+#: pkg/download/unified.go:60
 msgid "error reading %s"
 msgstr "errorea %s irakurtzerakoan"
 
@@ -597,15 +911,15 @@ msgstr "errorea %s irakurtzerakoan"
 msgid "error refreshing databases"
 msgstr "errorea datu-baseak freskatzerakoan"
 
-#: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
+#: pkg/sync/workdir/clean.go:50 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
 msgstr "errorea %s berrezartzerakoan: %s"
 
-#: pkg/sync/build/errors.go:53
+#: pkg/sync/build/errors.go:58
 msgid "error updating package install reason to %s"
 msgstr ""
 
-#: pkg/sync/build/errors.go:48
+#: pkg/sync/build/errors.go:53
 msgid "explicit"
 msgstr ""
 
@@ -613,32 +927,44 @@ msgstr ""
 msgid "failed to create directory '%s': %s"
 msgstr "'%s' konfigurazio direktorioa sortzeak huts egin du: %s"
 
-#: pkg/settings/config.go:281
+#: pkg/settings/config.go:282
 msgid "failed to open config file '%s': %s"
 msgstr "'%s' konfigurazio fitxategia irekitzeak huts egin du: %s"
 
-#: pkg/sync/srcinfo/service.go:114
+#: pkg/sync/srcinfo/service.go:119
 msgid "failed to parse %s -- skipping: %s"
 msgstr "%s analizatzeak huts egin du -- alde batera uzten: %s"
 
-#: pkg/sync/srcinfo/service.go:118
+#: pkg/sync/srcinfo/service.go:123
 msgid "failed to parse %s: %s"
 msgstr "%s analizatzeak huts egin du: %s"
 
-#: local_install.go:77
+#: local_install.go:80
 #, fuzzy
 msgid "failed to parse .SRCINFO"
 msgstr "%s analizatzeak huts egin du: %s"
 
-#: pkg/settings/config.go:291
+#: pkg/settings/config.go:292
 msgid "failed to read config file '%s': %s"
 msgstr "'%s' konfigurazio fitxategia irakurtzeak huts egin du: %s"
 
-#: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
+#: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:97
 msgid "failed to retrieve aur Cache"
 msgstr ""
 
-#: pkg/upgrade/sources.go:27
+#: cmd.go:111
+msgid "file(s)"
+msgstr ""
+
+#: cmd.go:160
+msgid "git command to use"
+msgstr ""
+
+#: cmd.go:162
+msgid "gpg command to use"
+msgstr ""
+
+#: pkg/upgrade/sources.go:28
 #, fuzzy
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr "%s: paketearen eguneraketa alde batera uzten (%s => %s)"
@@ -647,15 +973,20 @@ msgstr "%s: paketearen eguneraketa alde batera uzten (%s => %s)"
 msgid "input too long"
 msgstr "sarrera luzeegia"
 
-#: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
+#: pkg/db/ialpm/alpm.go:228 pkg/dep/dep_graph.go:823
 msgid "invalid number: %s"
 msgstr "zenbaki baliogabea: %s"
 
-#: pkg/settings/parser/parser.go:174
+#: pkg/settings/parser/parser.go:669
+#, fuzzy
+msgid "invalid option"
+msgstr "'%s' aukera baliogabea"
+
+#: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
 msgstr "'%s' aukera baliogabea"
 
-#: cmd.go:197
+#: cmd.go:285
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 
@@ -664,31 +995,44 @@ msgstr ""
 msgid "invalid repository"
 msgstr "Biltegia"
 
-#: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
+#: pkg/db/ialpm/alpm.go:233 pkg/dep/dep_graph.go:829
 msgid "invalid value: %d is not between %d and %d"
 msgstr "balio baliogabea: %d ez dago %d eta %d artean"
 
-#: pkg/sync/srcinfo/pgp/keys.go:110
-msgid "no keys to import"
-msgstr "inportatzeko gakorik ez"
-
-#: pkg/query/errors.go:20
-msgid "no query was executed"
+#: cmd.go:157
+msgid "makepkg command to use"
 msgstr ""
 
-#: local_install.go:66
-msgid "no target directories specified"
+#: cmd.go:165
+msgid "makepkg.conf file to use"
 msgstr ""
 
 #: pkg/text/input.go:48
 msgid "no"
 msgstr "ez"
 
-#: pkg/sync/build/installer.go:242
+#: pkg/sync/srcinfo/pgp/keys.go:110
+msgid "no keys to import"
+msgstr "inportatzeko gakorik ez"
+
+#: pkg/query/errors.go:26
+#, fuzzy
+msgid "no package found for targets"
+msgstr "ez da aurkitu '%s' paketea"
+
+#: pkg/query/errors.go:20
+msgid "no query was executed"
+msgstr ""
+
+#: local_install.go:69
+msgid "no target directories specified"
+msgstr ""
+
+#: pkg/sync/build/installer.go:273
 msgid "nothing to install for %s"
 msgstr ""
 
-#: pkg/settings/parser/parser.go:164
+#: pkg/settings/parser/parser.go:163
 msgid "only one operation may be used at a time"
 msgstr "aldi berean operazio bakarra erabil daiteke"
 
@@ -696,7 +1040,29 @@ msgstr "aldi berean operazio bakarra erabil daiteke"
 msgid "only one target is allowed"
 msgstr ""
 
-#: print.go:187
+#: cmd.go:112
+#, fuzzy
+msgid "operation"
+msgstr "sostengurik gabeko eragiketa"
+
+#: cmd.go:121
+#, fuzzy
+msgid "operations:"
+msgstr "sostengurik gabeko eragiketa"
+
+#: cmd.go:113 cmd.go:47
+#, fuzzy
+msgid "options"
+msgstr "Hautazko menpekotasunak"
+
+#: pkg/upgrade/service.go:359
+#, fuzzy
+msgid "package"
+msgid_plural "packages"
+msgstr[0] "Pakete-oinarria"
+msgstr[1] "Pakete-oinarria"
+
+#: print.go:191
 msgid "package '%s' was not found"
 msgstr "ez da aurkitu '%s' paketea"
 
@@ -710,46 +1076,73 @@ msgstr "ez da aurkitu '%s' paketea"
 msgid "package not found in repos"
 msgstr "ez da aurkitu '%s' paketea"
 
-#: pkg/upgrade/service.go:292
+#: cmd.go:114 cmd.go:49
 #, fuzzy
-msgid "package"
-msgid_plural "packages"
-msgstr[0] "Pakete-oinarria"
-msgstr[1] "Pakete-oinarria"
+msgid "package(s)"
+msgstr "Pakete-oinarria"
+
+#: cmd.go:159
+msgid "pacman command to use"
+msgstr ""
+
+#: cmd.go:164
+msgid "pacman.conf file to use"
+msgstr ""
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
 msgstr "arazoa gakoak inportatzerakoan"
 
-#: clean.go:105
+#: clean.go:121
 msgid "removing AUR packages from cache..."
 msgstr "AUR paketeak cachetik kentzen..."
 
-#: clean.go:178 pkg/sync/workdir/clean.go:41
+#: clean.go:194 pkg/sync/workdir/clean.go:40
 msgid "removing untracked AUR files from cache..."
 msgstr "jarraipen gabeko AUR fitxategiak cachetik kentzen..."
 
-#: pkg/sync/build/errors.go:38
+#: pkg/dep/dep_graph.go:586
+#, fuzzy
+msgid "required by"
+msgstr "%s, honek beharrezkoa du: %s"
+
+#: cmd.go:207
+msgid "sudo command to use"
+msgstr ""
+
+#: pkg/sync/build/errors.go:43
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr ""
 "%s(e)rako PKGDESTa makepkg-ek zerrendatzen du, baina ez da existitzen: %s"
 
-#: pkg/sync/sync.go:45
+#: pkg/settings/parser/parser.go:666
+msgid "the clean command requires an operation to be specified"
+msgstr ""
+
+#: pkg/sync/sync.go:50
 #, fuzzy
 msgid "there is nothing to do"
 msgstr " ez dago ezer egiteko"
 
-#: pkg/db/ialpm/alpm.go:247
+#: pkg/db/ialpm/alpm.go:253
 msgid "unable to CreateHandle: %s"
 msgstr "ezin da CreateHandle burutu: %s"
 
-#: cmd.go:186
+#: cmd.go:274
 msgid "unhandled operation"
 msgstr "sostengurik gabeko eragiketa"
 
-#: cmd.go:450
+#: cmd.go:527
 msgid "unknown-version"
 msgstr "bertsio ezezaguna"
+
+#: cmd.go:224
+msgid "use 'yay {-h --help}' for global options"
+msgstr ""
+
+#: cmd.go:139
+msgid "use 'yay {-h --help}' with an operation for available options"
+msgstr ""
 
 #: pkg/text/input.go:47
 msgid "yes"

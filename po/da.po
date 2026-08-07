@@ -6,19 +6,19 @@
 # Kasper Juul Hermansen, 2024
 # Mattis Kristensen, 2024
 # Robin Madsen <romad12@student.sdu.dk>, 2026
-# 
+#
 msgid ""
 msgstr ""
 "Last-Translator: Robin Madsen <romad12@student.sdu.dk>, 2026\n"
 "Language-Team: Danish (https://app.transifex.com/yay-1/teams/123732/da/)\n"
+"Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: da\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
-#: clean.go:83
+#: clean.go:99
 msgid ""
 "\n"
 "Build directory:"
@@ -26,7 +26,7 @@ msgstr ""
 "\n"
 "Bygge-mappe"
 
-#: pkg/db/ialpm/alpm.go:201 pkg/dep/dep_graph.go:740
+#: pkg/db/ialpm/alpm.go:207 pkg/dep/dep_graph.go:802
 msgid ""
 "\n"
 "Enter a number (default=1): "
@@ -34,29 +34,29 @@ msgstr ""
 "\n"
 "Indtast et tal (default=1):"
 
-#: pkg/menus/menu.go:32
+#: pkg/menus/menu.go:33
 msgid " (Build Files Exist)"
 msgstr "(Bygge-filer eksisterer)"
 
-#: pkg/menus/menu.go:27
+#: pkg/menus/menu.go:28
 msgid " (Installed)"
 msgstr "(Installeret)"
 
-#: cmd.go:453
+#: cmd.go:530
 msgid " [Installed]"
 msgstr "[Installeret]"
 
-#: cmd.go:410 vote.go:36
+#: cmd.go:496 vote.go:36
 msgid " there is nothing to do"
 msgstr "der er intet at gøre"
 
-#: pkg/menus/menu.go:49
+#: pkg/menus/menu.go:50
 msgid "%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)"
 msgstr ""
 "%s [A]lle [Ab]afbryd [I]nstalleret [No]Ikke installeret eller (1 2 3, 1-3, "
 "^4)"
 
-#: pkg/sync/build/installer.go:308
+#: pkg/sync/build/installer.go:343
 msgid "%s already made -- skipping build"
 msgstr "%s allerede lavet -- springer bygning over"
 
@@ -64,19 +64,19 @@ msgstr "%s allerede lavet -- springer bygning over"
 msgid "%s is not set"
 msgstr "%s er ikke sat"
 
-#: pkg/settings/exe/cmd_builder.go:257
+#: pkg/settings/exe/cmd_builder.go:258
 msgid "%s is present."
 msgstr "%s er til stede."
 
-#: pkg/dep/dep_graph.go:460 pkg/sync/build/installer.go:305
+#: pkg/dep/dep_graph.go:463 pkg/sync/build/installer.go:340
 msgid "%s is up to date -- skipping"
 msgstr "%s er ajour -- springer over"
 
-#: pkg/upgrade/service.go:291
+#: pkg/upgrade/service.go:359
 msgid "%s to upgrade/install."
 msgstr "%s til at opgradere/installere"
 
-#: pkg/upgrade/service.go:285
+#: pkg/upgrade/service.go:353
 msgid "%s will also be installed for this operation."
 msgstr "%s vil også blive installeret for denne operation"
 
@@ -84,7 +84,7 @@ msgstr "%s vil også blive installeret for denne operation"
 msgid "%s, required by: %s"
 msgstr "%s, kræves af: %s"
 
-#: pkg/menus/diff_menu.go:49
+#: pkg/menus/diff_menu.go:75
 msgid "%s: No changes -- skipping"
 msgstr "%s: Ingen ændringer -- springer over"
 
@@ -96,7 +96,7 @@ msgstr "%s: kan ikke bruge mål med mulighed --aur -- springer over"
 msgid "%s: can't use target with option --repo -- skipping"
 msgstr "%s: kan ikke bruge mål med mulighed --repo -- springer over"
 
-#: pkg/upgrade/sources.go:57
+#: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
 msgstr "%s: ignorerer pakke-opgradering (%s => %s)"
 
@@ -106,25 +106,24 @@ msgstr "%s: lokal (%s) er nyere end AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
-"voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
 msgstr ""
 "%s: sæt AUR_USERNAME og AUR_PASSWORD miljø\n"
 " variable for afstemning "
 
-#: pkg/download/unified.go:192
+#: pkg/download/unified.go:193
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
 msgstr "(%d/%d) Hentede PKGBUILD fra ABS: %s"
 
-#: pkg/download/aur.go:92 pkg/download/unified.go:188
+#: pkg/download/aur.go:96 pkg/download/unified.go:189
 msgid "(%d/%d) Downloaded PKGBUILD: %s"
 msgstr "(%d/%d) Hentede PKGBUILD: %s"
 
-#: pkg/download/aur.go:82
+#: pkg/download/aur.go:86
 msgid "(%d/%d) Failed to download PKGBUILD: %s"
 msgstr "(%d/%d) fejlede med at hente PKGBUILD:%s"
 
-#: pkg/sync/srcinfo/service.go:109
+#: pkg/sync/srcinfo/service.go:114
 msgid "(%d/%d) Parsing SRCINFO: %s"
 msgstr "(%d/%d) Parser SRCINFO: %s"
 
@@ -132,19 +131,19 @@ msgstr "(%d/%d) Parser SRCINFO: %s"
 msgid "(Installed)"
 msgstr "(Installeret)"
 
-#: pkg/query/types.go:101 pkg/query/types.go:70
+#: pkg/query/types.go:105 pkg/query/types.go:74
 msgid "(Installed: %s)"
 msgstr "(Installeret: %s)"
 
-#: pkg/query/types.go:61
+#: pkg/query/types.go:63
 msgid "(Orphaned)"
 msgstr "(Forældreløs)"
 
-#: pkg/query/types.go:65
+#: pkg/query/types.go:67
 msgid "(Out-of-date: %s)"
 msgstr "(Forældet: %s)"
 
-#: pkg/dep/dep_graph.go:75
+#: pkg/dep/dep_graph.go:79
 msgid "AUR"
 msgstr "AUR"
 
@@ -156,11 +155,64 @@ msgstr "AUR URL"
 msgid "Add %s or %s to your environment variables"
 msgstr "Tilføj %s eller %s til dine miljøvariabler"
 
-#: main.go:60
+#: cmd.go:197
+msgid "Always build all AUR packages"
+msgstr ""
+
+#: cmd.go:199
+msgid "Always build all AUR packages even if installed"
+msgstr ""
+
+#: cmd.go:196
+#, fuzzy
+msgid "Always build target packages"
+msgstr "Ti største pakker:"
+
+#: cmd.go:202
+msgid "Always download pkgbuilds of all AUR packages"
+msgstr ""
+
+#: cmd.go:200
+msgid "Always download pkgbuilds of targets"
+msgstr ""
+
+#: cmd.go:183
+#, fuzzy
+msgid "Ask to remove makedepends after install"
+msgstr "Fjern make-dependencies efter installation?"
+
+#: cmd.go:184
+#, fuzzy
+msgid "Ask to remove makedepends after install(\"Y\" as default)"
+msgstr "Fjern make-dependencies efter installation?"
+
+#: cmd.go:146
+msgid "Assume targets are from the AUR"
+msgstr ""
+
+#: cmd.go:145
+msgid "Assume targets are from the repositories"
+msgstr ""
+
+#: cmd.go:205
+msgid "Automatically resolve conflicts using pacman's ask flag"
+msgstr ""
+
+#: main.go:65
 msgid "Avoid running yay as root/sudo."
 msgstr "Undgå at køre yay som root/sudo"
 
-#: pkg/dep/dep_graph.go:63
+#: cmd.go:53
+msgid "Build and install a PKGBUILD"
+msgstr ""
+
+#: cmd.go:150
+msgid ""
+"Causes the following options to be saved back to the\n"
+"config file when used"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:67
 msgid "Check Dependency"
 msgstr "Tjek Afhængighed"
 
@@ -168,11 +220,16 @@ msgstr "Tjek Afhængighed"
 msgid "Check Deps"
 msgstr "Kontroller afhængigheder"
 
-#: pkg/upgrade/service.go:89
+#: cmd.go:195
+#, fuzzy
+msgid "Check development packages during sysupgrade"
+msgstr "Tjek udviklings pakker..."
+
+#: pkg/upgrade/service.go:115
 msgid "Checking development packages..."
 msgstr "Tjek udviklings pakker..."
 
-#: pkg/sync/workdir/clean.go:45
+#: pkg/sync/workdir/clean.go:44
 msgid "Cleaning (%d/%d): %s"
 msgstr "Rengører (%d/%d): %s"
 
@@ -184,7 +241,7 @@ msgstr "Konflikter Med"
 msgid "Deleting (%d/%d): %s"
 msgstr "Sletter (%d/%d): %s"
 
-#: pkg/dep/dep_graph.go:61
+#: pkg/dep/dep_graph.go:65
 msgid "Dependency"
 msgstr "Afhængighed"
 
@@ -196,40 +253,57 @@ msgstr "Afhængig Af"
 msgid "Description"
 msgstr "Beskrivelse"
 
-#: pkg/menus/diff_menu.go:160
+#: pkg/menus/diff_menu.go:201
 msgid "Diffs to show?"
 msgstr "Forskelle at vise?"
+
+#: cmd.go:154
+msgid "Directory used to download and run PKGBUILDS"
+msgstr ""
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
 msgstr "Deaktiver 'provides' indstilling som standard"
 
-#: clean.go:78
+#: cmd.go:63
+msgid "Display system package statistics"
+msgstr ""
+
+#: clean.go:94
 msgid "Do you want to remove ALL AUR packages from cache?"
 msgstr "Vil du slette ALLE AUR-pakker fra cache?"
 
-#: clean.go:95
+#: clean.go:111
 msgid "Do you want to remove ALL untracked AUR files?"
 msgstr "Vil du fjerne ALLE untracked AUR filer?"
 
-#: clean.go:80
+#: clean.go:96
 msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "Vil du slette alle andre AUR-pakker fra cache?"
+
+#: cmd.go:186
+#, fuzzy
+msgid "Don't remove makedepends after install"
+msgstr "Fjern make-dependencies efter installation?"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
 msgstr "Rediger PKGBUILD med?"
 
+#: cmd.go:155
+msgid "Editor to use when editing PKGBUILDs"
+msgstr ""
+
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
 msgstr "Fejl under AUR-søgning: %s\n"
 
-#: pkg/upgrade/service.go:295
+#: pkg/upgrade/service.go:390
 msgid "Excluding packages may cause partial upgrades and break systems"
 msgstr ""
 "At udelukke pakker kan forårsage delvise opgraderinger og ødelægge systemer"
 
-#: pkg/dep/dep_graph.go:60
+#: pkg/dep/dep_graph.go:64
 msgid "Explicit"
 msgstr "Eksplicit"
 
@@ -237,15 +311,15 @@ msgstr "Eksplicit"
 msgid "Explicitly installed packages: %s"
 msgstr "Udtrykkeligt installerede pakker: %s"
 
-#: pkg/dep/dep_graph.go:437 pkg/dep/dep_graph.go:535
+#: pkg/dep/dep_graph.go:439 pkg/dep/dep_graph.go:555
 msgid "Failed to find AUR package for"
 msgstr "Kunne ikke finde AUR pakker for"
 
-#: pkg/sync/build/installer.go:120
+#: pkg/sync/build/installer.go:128
 msgid "Failed to install layer, rolling up to next layer."
 msgstr "Installation af lag mislykkedes, går op til næste lag."
 
-#: pkg/sync/build/errors.go:16
+#: pkg/sync/build/errors.go:18
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
@@ -259,11 +333,15 @@ msgstr "Først Indsendt"
 msgid "Flagged Out Of Date AUR Packages:"
 msgstr "Markeret forældede AUR-pakker:"
 
+#: cmd.go:56
+msgid "Force download for existing ABS packages"
+msgstr ""
+
 #: print.go:90
 msgid "Foreign installed packages: %s"
 msgstr "Fremmede installerede pakker: %s"
 
-#: pkg/vcs/vcs.go:144
+#: pkg/vcs/vcs.go:148
 msgid "Found git repo: %s"
 msgstr "Fundet git repo: %s"
 
@@ -271,9 +349,34 @@ msgstr "Fundet git repo: %s"
 msgid "GenDB finished. No packages were installed"
 msgstr "GenDB er færdig. Ingen pakker blev installeret"
 
+#: cmd.go:73
+msgid "Generates development package DB used for updating"
+msgstr ""
+
+#: cmd.go:180
+msgid "Give the option to clean build PKGBUILDS"
+msgstr ""
+
+#: cmd.go:182
+msgid "Give the option to edit/view PKGBUILDS"
+msgstr ""
+
+#: cmd.go:181
+msgid "Give the option to show diffs for build files"
+msgstr ""
+
 #: print.go:36
 msgid "Groups"
 msgstr "Grupper"
+
+#: cmd.go:141
+msgid "If no operation is specified 'yay -Syu' will be performed"
+msgstr ""
+
+#: cmd.go:142
+msgid ""
+"If no operation is specified and targets are provided, -Y will be assumed"
+msgstr ""
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
@@ -282,6 +385,10 @@ msgstr "Importer?"
 #: pkg/sync/srcinfo/pgp/keys.go:97
 msgid "Importing keys with gpg..."
 msgstr "Importerer nøgler med gpg..."
+
+#: cmd.go:189
+msgid "Keep pkg/ and src/ after building packages"
+msgstr ""
 
 #: print.go:46
 msgid "Keywords"
@@ -295,15 +402,31 @@ msgstr "Sidst Redigeret"
 msgid "Licenses"
 msgstr "Licenser"
 
-#: pkg/dep/dep_graph.go:77
+#: cmd.go:192
+msgid "List each search result on its own line"
+msgstr ""
+
+#: cmd.go:193
+msgid "List each search result on two lines, like pacman"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:81
 msgid "Local"
 msgstr "Lokal"
+
+#: cmd.go:203
+msgid "Look for matching providers when searching for packages"
+msgstr ""
+
+#: cmd.go:209
+msgid "Loop sudo calls in the background to avoid timeout"
+msgstr ""
 
 #: print.go:48
 msgid "Maintainer"
 msgstr "Vedligeholder"
 
-#: pkg/dep/dep_graph.go:62
+#: pkg/dep/dep_graph.go:66
 msgid "Make Dependency"
 msgstr "Lav Afhængighed"
 
@@ -311,7 +434,11 @@ msgstr "Lav Afhængighed"
 msgid "Make Deps"
 msgstr "Lav Afhængigheder"
 
-#: pkg/dep/dep_graph.go:79
+#: cmd.go:168
+msgid "Max amount of packages to query per AUR request"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:83
 msgid "Missing"
 msgstr "Mangler"
 
@@ -323,21 +450,34 @@ msgstr "Manglende AUR Debug-pakker:"
 msgid "Name"
 msgstr "Navn"
 
-#: pkg/dep/dep_graph.go:442 pkg/dep/dep_graph.go:564
+#: cmd.go:133
+#, fuzzy
+msgid "New operations:"
+msgstr "ubehandlet operation"
+
+#: cmd.go:144
+msgid "New options:"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:444 pkg/dep/dep_graph.go:586 query.go:98
 msgid "No AUR package found for"
 msgstr "Ingen AUR pakke fundet for"
 
-#: pkg/dep/dep_graph.go:564
-msgid "required by"
-msgstr "kræves af"
-
-#: pkg/dep/dep_graph.go:182
+#: pkg/dep/dep_graph.go:185
 msgid "No package found for"
 msgstr "Ingen pakker blev fundet for"
 
-#: print.go:225
+#: clean.go:83
+msgid "No valid pacman cache directories found. Skipping cache clean."
+msgstr ""
+
+#: print.go:229
 msgid "None"
 msgstr "Ingen"
+
+#: cmd.go:65
+msgid "Only show titles when printing news"
+msgstr ""
 
 #: print.go:39
 msgid "Optional Deps"
@@ -355,7 +495,7 @@ msgstr "Forældet"
 msgid "PGP keys need importing:"
 msgstr "PGP-nøgler skal importeres:"
 
-#: pkg/sync/workdir/preparer.go:252
+#: pkg/sync/workdir/preparer.go:254
 msgid "PKGBUILD up to date, skipping download: %s"
 msgstr "PKGBUILD er den nyeste version, undlader at hente: %s"
 
@@ -379,63 +519,170 @@ msgstr "Pakker er ikke i AUR:"
 msgid "Packages to cleanBuild?"
 msgstr "Hvilke pakker til cleanBuild?"
 
-#: pkg/dep/dep_graph.go:202
+#: pkg/dep/dep_graph.go:205
 msgid "Packages to exclude"
 msgstr "Pakker som ekskluderes"
 
-#: pkg/upgrade/service.go:294
+#: pkg/upgrade/service.go:389
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
 msgstr ""
 "Pakker som skal ekskluderes: (eks. \"1 2 3\", \"1-3\", \"^4\" eller "
 "repository-navn)"
 
-#: cmd.go:392
+#: cmd.go:478
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
 msgstr "Pakker til installation (eks. 1 2 3, 1-3 eller ^4)"
+
+#: cmd.go:156
+msgid "Pass arguments to editor"
+msgstr ""
+
+#: cmd.go:161
+msgid "Pass arguments to git"
+msgstr ""
+
+#: cmd.go:163
+msgid "Pass arguments to gpg"
+msgstr ""
+
+#: cmd.go:158
+msgid "Pass arguments to makepkg"
+msgstr ""
+
+#: cmd.go:208
+msgid "Pass arguments to sudo"
+msgstr ""
+
+#: cmd.go:149
+msgid "Permanent configuration options:"
+msgstr ""
 
 #: print.go:49
 msgid "Popularity"
 msgstr "Popularitet"
 
-#: pkg/menus/diff_menu.go:172 pkg/menus/edit_menu.go:143
+#: cmd.go:64
+msgid "Print arch news"
+msgstr ""
+
+#: cmd.go:62
+msgid "Print current yay configuration"
+msgstr ""
+
+#: cmd.go:61
+msgid "Print default yay configuration"
+msgstr ""
+
+#: cmd.go:57
+msgid "Print pkgbuild of packages"
+msgstr ""
+
+#: pkg/menus/diff_menu.go:213 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
 msgstr "Fortsæt installation?"
+
+#: cmd.go:204
+msgid "Prompt to import PGP keys from PKGBUILDs"
+msgstr ""
 
 #: print.go:37
 msgid "Provides"
 msgstr "Leverer"
 
+#: cmd.go:68
+msgid "Remove a vote from AUR package(s)"
+msgstr ""
+
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
 msgstr "Fjern make-dependencies efter installation?"
+
+#: cmd.go:185
+#, fuzzy
+msgid "Remove makedepends after install"
+msgstr "Fjern make-dependencies efter installation?"
+
+#: cmd.go:188
+#, fuzzy
+msgid "Remove package sources after successful install"
+msgstr "Fjern make-dependencies efter installation?"
+
+#: cmd.go:72
+msgid "Remove unneeded dependencies (-cc to ignore optdepends)"
+msgstr ""
 
 #: print.go:43
 msgid "Replaces"
 msgstr "Erstatter"
 
-#: pkg/db/ialpm/alpm.go:191 print.go:30
+#: pkg/db/ialpm/alpm.go:197 print.go:30
 msgid "Repository"
 msgstr "Repository"
 
-#: pkg/dep/dep_graph.go:730
+#: pkg/dep/dep_graph.go:792
 msgid "Repository AUR"
 msgstr "Repository AUR"
 
-#: pkg/dep/dep_graph.go:78
+#: pkg/settings/migrations.go:45
+#, fuzzy
+msgid "Reset 'sortby' setting to default"
+msgstr "Deaktiver 'provides' indstilling som standard"
+
+#: pkg/dep/dep_graph.go:82
 msgid "SRCINFO"
 msgstr "SRCINFO"
 
-#: pkg/upgrade/service.go:71
+#: cmd.go:171
+msgid "Search for packages using a specified field"
+msgstr ""
+
+#: pkg/upgrade/service.go:97
 msgid "Searching AUR for updates..."
 msgstr "Leder efter AUR opdateringer..."
 
-#: pkg/upgrade/service.go:159
+#: pkg/upgrade/service.go:189
 msgid "Searching databases for updates..."
 msgstr "Søger i databaser efter opdateringer..."
 
-#: pkg/query/query_builder.go:214
+#: cmd.go:172
+msgid "Set a predetermined answer for the clean build menu"
+msgstr ""
+
+#: cmd.go:173
+msgid "Set a predetermined answer for the diff menu"
+msgstr ""
+
+#: cmd.go:174
+msgid "Set a predetermined answer for the edit pkgbuild menu"
+msgstr ""
+
+#: cmd.go:175
+msgid "Set a predetermined answer for the upgrade menu"
+msgstr ""
+
+#: cmd.go:152
+msgid "Set an alternative AUR URL"
+msgstr ""
+
+#: cmd.go:153
+msgid "Set an alternative URL for the AUR /rpc endpoint"
+msgstr ""
+
+#: pkg/menus/diff_menu.go:104
+msgid "Showing diff for %s"
+msgstr ""
+
+#: pkg/query/query_builder.go:273
 msgid "Showing repo packages only"
 msgstr "Viser kun repo pakker"
+
+#: cmd.go:190
+msgid "Shows AUR's packages first and then repository's"
+msgstr ""
+
+#: cmd.go:191
+msgid "Shows repository's packages first and then AUR's"
+msgstr ""
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
@@ -445,11 +692,23 @@ msgstr "Størrelse af pacman-cache %s: %s"
 msgid "Size of yay cache %s: %s"
 msgstr "Størrelse af yay-cache %s: %s"
 
+#: cmd.go:198
+msgid "Skip package build if in cache and up to date"
+msgstr ""
+
+#: cmd.go:201
+msgid "Skip pkgbuild download if in cache and up to date"
+msgstr ""
+
 #: print.go:62
 msgid "Snapshot URL"
 msgstr "Snapshot URL"
 
-#: pkg/dep/dep_graph.go:76
+#: cmd.go:170
+msgid "Sort AUR results by a specific field during search"
+msgstr ""
+
+#: pkg/dep/dep_graph.go:80
 msgid "Sync"
 msgstr "Synkronisér"
 
@@ -457,17 +716,21 @@ msgstr "Synkronisér"
 msgid "Ten biggest packages:"
 msgstr "Ti største pakker:"
 
-#: pkg/sync/sync.go:124
+#: pkg/sync/sync.go:144
 msgid "The following packages are not compatible with your architecture:"
 msgstr "Følgende pakker er ikke kompatible med din arkitektur:"
 
-#: pkg/db/ialpm/alpm.go:179 pkg/dep/dep_graph.go:726
+#: pkg/db/ialpm/alpm.go:185 pkg/dep/dep_graph.go:788
 msgid "There are %[1]d providers available for %[2]s:"
 msgstr "Der er %[1]d udbydere tilgængelige for %[2]s:"
 
-#: pkg/settings/exe/cmd_builder.go:258
+#: pkg/settings/exe/cmd_builder.go:259
 msgid "There may be another Pacman instance running. Waiting..."
 msgstr "Der er muligvis en anden instans af Pacman som kører. Venter..."
+
+#: cmd.go:169
+msgid "Time in days to refresh completion cache"
+msgstr ""
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
@@ -477,7 +740,7 @@ msgstr "Samlet plads optaget af pakker: %s"
 msgid "Total installed packages: %s"
 msgstr "Totalt antal installerede pakker: %s"
 
-#: pkg/sync/sync.go:132
+#: pkg/sync/sync.go:152
 msgid "Try to build them anyway?"
 msgstr "Prøv at bygge dem alligevel?"
 
@@ -485,7 +748,7 @@ msgstr "Prøv at bygge dem alligevel?"
 msgid "URL"
 msgstr "URL"
 
-#: clean.go:194 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
+#: clean.go:210 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
 msgstr "Kunne ikke rydde op:"
 
@@ -497,13 +760,51 @@ msgstr "Ikke i stand til at finde de følgende pakker:"
 msgid "Unable to handle package vote for: %s. err: %s"
 msgstr "Kunne ikke håndtere pakke afstemning for %s. Fejl: %s"
 
-#: clean.go:170
+#: clean.go:186
 msgid "Unable to remove %s: %s"
 msgstr "Ikke i stand til at fjerne %s: %s"
+
+#: cmd.go:176
+msgid "Unset the answer for the clean build menu"
+msgstr ""
+
+#: cmd.go:177
+msgid "Unset the answer for the edit diff menu"
+msgstr ""
+
+#: cmd.go:178
+msgid "Unset the answer for the edit pkgbuild menu"
+msgstr ""
+
+#: cmd.go:179
+msgid "Unset the answer for the upgrade menu"
+msgstr ""
+
+#: cmd.go:116
+msgid "Usage:"
+msgstr ""
+
+#: cmd.go:219
+msgid ""
+"Usage: %s %s\n"
+"options:\n"
+msgstr ""
+
+#: cmd.go:166
+msgid "Use the default makepkg.conf"
+msgstr ""
+
+#: cmd.go:60
+msgid "Used for completions"
+msgstr ""
 
 #: print.go:32
 msgid "Version"
 msgstr "Version"
+
+#: cmd.go:69
+msgid "Vote for AUR package(s)"
+msgstr ""
 
 #: print.go:50
 msgid "Votes"
@@ -513,7 +814,7 @@ msgstr "Stemmer"
 msgid "Yay version v%s"
 msgstr "Yay version v%s"
 
-#: pkg/menus/menu.go:49
+#: pkg/menus/menu.go:50
 msgid "[N]one"
 msgstr "I[N]gen"
 
@@ -521,19 +822,19 @@ msgstr "I[N]gen"
 msgid "aborting due to user"
 msgstr "afbryder grundet bruger"
 
-#: pkg/settings/parser/parser.go:608
+#: pkg/settings/parser/parser.go:606
 msgid "argument '-' specified without input on stdin"
 msgstr "argument '-' specificeret uden input fra stdin"
 
-#: local_install.go:26
+#: local_install.go:25
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
 msgstr "kan ikke finde PKGBUILD og .SRCINFO i mappe"
 
-#: pkg/sync/build/pkg_archive.go:148
+#: pkg/sync/build/pkg_archive.go:149
 msgid "cannot find package name: %v"
 msgstr "kan ikke finde pakkenavn: %v"
 
-#: pkg/sync/build/errors.go:30
+#: pkg/sync/build/errors.go:35
 msgid "could not find PKGDEST for: %s"
 msgstr "kunne ikke finde PKGDEST for: %s"
 
@@ -541,17 +842,26 @@ msgstr "kunne ikke finde PKGDEST for: %s"
 msgid "could not find all required packages"
 msgstr "kunne ikke finde alle nødvendige pakker"
 
-#: pkg/sync/build/errors.go:61
+#: pkg/sync/build/errors.go:66
 msgid "could not find any package archives listed in %s"
 msgstr "kunne ikke finde nogle pakkearkiver listet i %s"
 
-#: pkg/sync/build/errors.go:50 pkg/upgrade/service.go:286
+#: pkg/sync/build/errors.go:55 pkg/upgrade/service.go:354
 msgid "dependency"
 msgstr "afhængighed"
 
-#: pkg/vcs/vcs.go:100 pkg/vcs/vcs.go:96
+#: pkg/vcs/vcs.go:101 pkg/vcs/vcs.go:97
 msgid "devel check for package failed: '%s' encountered an error"
 msgstr "devel-tjek til pakke mislykkedes: '%s' stødte på en fejl"
+
+#: pkg/settings/parser/parser.go:667
+msgid ""
+"did you mean yay -Scc (clean caches) or yay -Ycc (clean orphaned packages)?"
+msgstr ""
+
+#: cmd.go:48
+msgid "dir"
+msgstr ""
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
@@ -565,15 +875,15 @@ msgstr "fejl ved download af kilder: %s"
 msgid "error fetching %s: %s"
 msgstr "fejl ved hentning %s: %s"
 
-#: pkg/sync/build/errors.go:9
+#: pkg/sync/build/errors.go:10
 msgid "error installing repo packages"
 msgstr "fejlede i at installere repo pakker"
 
-#: pkg/sync/build/installer.go:266 pkg/sync/build/installer.go:270
+#: pkg/sync/build/installer.go:301 pkg/sync/build/installer.go:305
 msgid "error installing:"
 msgstr "fejl ved installation:"
 
-#: pkg/sync/build/installer.go:233 pkg/sync/build/installer.go:237
+#: pkg/sync/build/installer.go:263 pkg/sync/build/installer.go:267
 msgid "error making: %s"
 msgstr "fejl ved at lave: %s"
 
@@ -581,7 +891,7 @@ msgstr "fejl ved at lave: %s"
 msgid "error merging %s: %s"
 msgstr "fejl ved sammenfletning: %s: %s"
 
-#: pkg/download/unified.go:59
+#: pkg/download/unified.go:60
 msgid "error reading %s"
 msgstr "fejl ved læsning: %s"
 
@@ -589,15 +899,15 @@ msgstr "fejl ved læsning: %s"
 msgid "error refreshing databases"
 msgstr "fejl ved genopfriskning af databaser"
 
-#: pkg/sync/workdir/clean.go:51 pkg/sync/workdir/merge.go:17
+#: pkg/sync/workdir/clean.go:50 pkg/sync/workdir/merge.go:17
 msgid "error resetting %s: %s"
 msgstr "fejl ved nulstilling af %s: %s"
 
-#: pkg/sync/build/errors.go:53
+#: pkg/sync/build/errors.go:58
 msgid "error updating package install reason to %s"
 msgstr "fejl i at opdatere pakke installations grund til %s"
 
-#: pkg/sync/build/errors.go:48
+#: pkg/sync/build/errors.go:53
 msgid "explicit"
 msgstr "eksplicit"
 
@@ -605,31 +915,43 @@ msgstr "eksplicit"
 msgid "failed to create directory '%s': %s"
 msgstr "dannelse af mappen '%s' mislykkedes: %s"
 
-#: pkg/settings/config.go:281
+#: pkg/settings/config.go:282
 msgid "failed to open config file '%s': %s"
 msgstr "kunne ikke åbne konfigurationsfil: '%s': %s"
 
-#: pkg/sync/srcinfo/service.go:114
+#: pkg/sync/srcinfo/service.go:119
 msgid "failed to parse %s -- skipping: %s"
 msgstr "kunne ikke parse %s -- springer over: %s"
 
-#: pkg/sync/srcinfo/service.go:118
+#: pkg/sync/srcinfo/service.go:123
 msgid "failed to parse %s: %s"
 msgstr "fejlede med at parse %s: %s"
 
-#: local_install.go:77
+#: local_install.go:80
 msgid "failed to parse .SRCINFO"
 msgstr "mislykkedes med at parse .SRCINFO"
 
-#: pkg/settings/config.go:291
+#: pkg/settings/config.go:292
 msgid "failed to read config file '%s': %s"
 msgstr "mislykkedes med at læse konfigurationsfil '%s': %s"
 
-#: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:73
+#: pkg/cmd/graph/main.go:46 pkg/runtime/runtime.go:97
 msgid "failed to retrieve aur Cache"
 msgstr "mislykkedes med at hente aur Cache"
 
-#: pkg/upgrade/sources.go:27
+#: cmd.go:111
+msgid "file(s)"
+msgstr ""
+
+#: cmd.go:160
+msgid "git command to use"
+msgstr ""
+
+#: cmd.go:162
+msgid "gpg command to use"
+msgstr ""
+
+#: pkg/upgrade/sources.go:28
 msgid "ignoring package devel upgrade (no AUR info found):"
 msgstr "ignorer pakke devel-opgradering (AUR information kunne ikke findes)"
 
@@ -637,15 +959,20 @@ msgstr "ignorer pakke devel-opgradering (AUR information kunne ikke findes)"
 msgid "input too long"
 msgstr "for langt input"
 
-#: pkg/db/ialpm/alpm.go:222 pkg/dep/dep_graph.go:761
+#: pkg/db/ialpm/alpm.go:228 pkg/dep/dep_graph.go:823
 msgid "invalid number: %s"
 msgstr "ugyldigt tal: %s"
 
-#: pkg/settings/parser/parser.go:174
+#: pkg/settings/parser/parser.go:669
+#, fuzzy
+msgid "invalid option"
+msgstr "ugyldig valgmulighed '%s'"
+
+#: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
 msgstr "ugyldig valgmulighed '%s'"
 
-#: cmd.go:197
+#: cmd.go:285
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
 "ugyldig valgmulighed: '--deps' og '--explicit' kan ikke benyttes sammen"
@@ -654,9 +981,17 @@ msgstr ""
 msgid "invalid repository"
 msgstr "Ugyldigt repository"
 
-#: pkg/db/ialpm/alpm.go:227 pkg/dep/dep_graph.go:767
+#: pkg/db/ialpm/alpm.go:233 pkg/dep/dep_graph.go:829
 msgid "invalid value: %d is not between %d and %d"
 msgstr "ugyldig værdi: %d er ikke mellem %d og %d"
+
+#: cmd.go:157
+msgid "makepkg command to use"
+msgstr ""
+
+#: cmd.go:165
+msgid "makepkg.conf file to use"
+msgstr ""
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -666,19 +1001,24 @@ msgstr "nej"
 msgid "no keys to import"
 msgstr "ingen nøgler at importere"
 
+#: pkg/query/errors.go:26
+#, fuzzy
+msgid "no package found for targets"
+msgstr "Ingen pakker blev fundet for"
+
 #: pkg/query/errors.go:20
 msgid "no query was executed"
 msgstr "ingen forspørgsel blev eksekveret"
 
-#: local_install.go:66
+#: local_install.go:69
 msgid "no target directories specified"
 msgstr "ingen mål-mapper er specificerede"
 
-#: pkg/sync/build/installer.go:242
+#: pkg/sync/build/installer.go:273
 msgid "nothing to install for %s"
 msgstr "intet at installere for %s"
 
-#: pkg/settings/parser/parser.go:164
+#: pkg/settings/parser/parser.go:163
 msgid "only one operation may be used at a time"
 msgstr "kun én operation må bruges af gangen"
 
@@ -686,13 +1026,28 @@ msgstr "kun én operation må bruges af gangen"
 msgid "only one target is allowed"
 msgstr "kun ét mål er tilladt"
 
-#: pkg/upgrade/service.go:291
+#: cmd.go:112
+#, fuzzy
+msgid "operation"
+msgstr "ubehandlet operation"
+
+#: cmd.go:121
+#, fuzzy
+msgid "operations:"
+msgstr "ubehandlet operation"
+
+#: cmd.go:113 cmd.go:47
+#, fuzzy
+msgid "options"
+msgstr "Valgfri Afhængigheder"
+
+#: pkg/upgrade/service.go:359
 msgid "package"
 msgid_plural "packages"
 msgstr[0] "pakker"
 msgstr[1] "pakker"
 
-#: print.go:187
+#: print.go:191
 msgid "package '%s' was not found"
 msgstr "pakken '%s' kunne ikke findes"
 
@@ -704,37 +1059,70 @@ msgstr "pakke ikke fundet i AUR"
 msgid "package not found in repos"
 msgstr "pakke ikke fundet i repos"
 
+#: cmd.go:114 cmd.go:49
+#, fuzzy
+msgid "package(s)"
+msgstr "pakker"
+
+#: cmd.go:159
+msgid "pacman command to use"
+msgstr ""
+
+#: cmd.go:164
+msgid "pacman.conf file to use"
+msgstr ""
+
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
 msgstr "problem ved import af nøgler"
 
-#: clean.go:105
+#: clean.go:121
 msgid "removing AUR packages from cache..."
 msgstr "fjerner AUR pakker fra cache..."
 
-#: clean.go:178 pkg/sync/workdir/clean.go:41
+#: clean.go:194 pkg/sync/workdir/clean.go:40
 msgid "removing untracked AUR files from cache..."
 msgstr "fjerner AUR filer som ikke spores af cache..."
 
-#: pkg/sync/build/errors.go:38
+#: pkg/dep/dep_graph.go:586
+msgid "required by"
+msgstr "kræves af"
+
+#: cmd.go:207
+msgid "sudo command to use"
+msgstr ""
+
+#: pkg/sync/build/errors.go:43
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
 msgstr "PKGDEST til %s er noteret af makepkg men eksisterer ikke: %s"
 
-#: pkg/sync/sync.go:45
+#: pkg/settings/parser/parser.go:666
+msgid "the clean command requires an operation to be specified"
+msgstr ""
+
+#: pkg/sync/sync.go:50
 msgid "there is nothing to do"
 msgstr "der er intet at gøre"
 
-#: pkg/db/ialpm/alpm.go:247
+#: pkg/db/ialpm/alpm.go:253
 msgid "unable to CreateHandle: %s"
 msgstr "ikke i stand til at CreateHandle: %s"
 
-#: cmd.go:186
+#: cmd.go:274
 msgid "unhandled operation"
 msgstr "ubehandlet operation"
 
-#: cmd.go:450
+#: cmd.go:527
 msgid "unknown-version"
 msgstr "ukkendt-version"
+
+#: cmd.go:224
+msgid "use 'yay {-h --help}' for global options"
+msgstr ""
+
+#: cmd.go:139
+msgid "use 'yay {-h --help}' with an operation for available options"
+msgstr ""
 
 #: pkg/text/input.go:47
 msgid "yes"
