@@ -47,7 +47,10 @@ func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []
 	pkgbuildNumberMenu(logger, pkgbuildDirs, bases, installed)
 
 	logger.Infoln(message)
-	logger.Infoln(gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)", text.Cyan(gotext.Get("[N]one"))))
+	menuPrompt := gotext.Get("%s [A]ll [Ab]ort [I]nstalled [No]tInstalled or (1 2 3, 1-3, ^4)",
+		text.Cyan(gotext.Get("[N]one")))
+	logger.Infoln(menuPrompt)
+	aliases := localizedMenuAliases(menuPrompt)
 
 	selectInput, err := logger.GetInput(defaultAnswer, noConfirm)
 	if err != nil {
@@ -57,11 +60,13 @@ func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []
 	eInclude, eExclude, eOtherInclude, eOtherExclude := intrange.ParseNumberMenu(selectInput)
 	eIsInclude := len(eExclude) == 0 && eOtherExclude.Cardinality() == 0
 
-	if eOtherInclude.Contains("abort") || eOtherInclude.Contains("ab") {
+	if menuAliasSelected(eOtherInclude, aliases, "abort") ||
+		menuAliasSelected(eOtherInclude, aliases, "ab") {
 		return nil, settings.ErrUserAbort{}
 	}
 
-	if eOtherInclude.Contains("n") || eOtherInclude.Contains("none") {
+	if menuAliasSelected(eOtherInclude, aliases, "n") ||
+		menuAliasSelected(eOtherInclude, aliases, "none") {
 		return selected, nil
 	}
 
@@ -76,17 +81,20 @@ func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []
 			continue
 		}
 
-		if anyInstalled && (eOtherInclude.Contains("i") || eOtherInclude.Contains("installed")) {
+		if anyInstalled && (menuAliasSelected(eOtherInclude, aliases, "i") ||
+			menuAliasSelected(eOtherInclude, aliases, "installed")) {
 			selected = append(selected, pkgBase)
 			continue
 		}
 
-		if !anyInstalled && (eOtherInclude.Contains("no") || eOtherInclude.Contains("notinstalled")) {
+		if !anyInstalled && (menuAliasSelected(eOtherInclude, aliases, "no") ||
+			menuAliasSelected(eOtherInclude, aliases, "notinstalled")) {
 			selected = append(selected, pkgBase)
 			continue
 		}
 
-		if eOtherInclude.Contains("a") || eOtherInclude.Contains("all") {
+		if menuAliasSelected(eOtherInclude, aliases, "a") ||
+			menuAliasSelected(eOtherInclude, aliases, "all") {
 			selected = append(selected, pkgBase)
 			continue
 		}
@@ -101,4 +109,62 @@ func selectionMenu(logger *text.Logger, pkgbuildDirs map[string]string, bases []
 	}
 
 	return selected, nil
+}
+
+func localizedMenuAliases(prompt string) map[string][]string {
+	aliases := map[string][]string{
+		"all":          {"a"},
+		"abort":        {"ab"},
+		"installed":    {"i"},
+		"notinstalled": {"no"},
+		"none":         {"n"},
+	}
+
+	canonical := []string{"none", "all", "abort", "installed", "notinstalled"}
+	for _, alias := range bracketedWords(prompt) {
+		if len(canonical) == 0 {
+			break
+		}
+
+		key := canonical[0]
+		canonical = canonical[1:]
+		aliases[key] = append(aliases[key], strings.ToLower(alias))
+	}
+
+	return aliases
+}
+
+func bracketedWords(s string) []string {
+	var words []string
+	for {
+		start := strings.IndexByte(s, '[')
+		if start < 0 {
+			return words
+		}
+
+		s = s[start+1:]
+		end := strings.IndexByte(s, ']')
+		if end < 0 {
+			return words
+		}
+
+		if word := s[:end]; word != "" {
+			words = append(words, word)
+		}
+		s = s[end+1:]
+	}
+}
+
+func menuAliasSelected(input mapset.Set[string], aliases map[string][]string, canonical string) bool {
+	if input.Contains(canonical) {
+		return true
+	}
+
+	for _, alias := range aliases[canonical] {
+		if input.Contains(alias) {
+			return true
+		}
+	}
+
+	return false
 }
