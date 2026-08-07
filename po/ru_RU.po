@@ -117,8 +117,8 @@ msgid ""
 "%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
 "voting"
 msgstr ""
-"пожалуйста, укажите AUR_USERNAME и AUR_PASSWORD в переменных среды для "
-"возможности голосовать"
+"%s: укажите AUR_USERNAME и AUR_PASSWORD в переменных окружения для "
+"голосования"
 
 #: pkg/download/unified.go:193
 msgid "(%d/%d) Downloaded PKGBUILD from ABS: %s"
