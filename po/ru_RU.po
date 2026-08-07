@@ -359,7 +359,7 @@ msgstr "GenDB завершён без установки пакетов"
 
 #: cmd.go:73
 msgid "Generates development package DB used for updating"
-msgstr "Создаёт базу данных пакетов разработки для обновления"
+msgstr "Создаёт базу данных пакетов разработки, используемую для обновления"
 
 #: cmd.go:180
 msgid "Give the option to clean build PKGBUILDS"
