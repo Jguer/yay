@@ -272,7 +272,7 @@ msgstr "Каталог для загрузки и сборки PKGBUILD"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
-msgstr "Отключите настройку «обеспечивает» по умолчанию"
+msgstr "Отключите настройку «provides» по умолчанию"
 
 #: cmd.go:63
 msgid "Display system package statistics"
