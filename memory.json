@@ -1,13 +1,14 @@
 {
-  "last_run": "2026-08-07T01:45:03Z",
-  "run_id": "31138925811",
+  "last_run": "2026-08-07T03:59:31Z",
+  "run_id": "31145911409",
   "backlog_cursor": {
-    "issues": 1773,
-    "comment": "Processed through issue #1773; live issue contents remain unavailable."
+    "issues": 2895,
+    "comment": "Investigated and fixed issue #2895; continue oldest-first review from the live backlog."
   },
   "comments_made": {
     "1761": "2026-07-14 - explained src/ removal is makepkg behaviour; suggested --skipextract",
-    "1773": "2026-07-14 - explained doubleConfirm config option"
+    "1773": "2026-07-14 - explained doubleConfirm config option",
+    "2895": "2026-08-07 - explained localized menu shortcut parsing and linked PR #2952"
   },
   "prs_created": [
     "repo-assist/improve-deduplicate-vcs-updates",
@@ -17,21 +18,22 @@
     "repo-assist/improve-skip-missing-arch-deps",
     "repo-assist/improve-normalize-search-terms-20260722",
     "repo-assist/improve-search-filter-unknown-results-20260723",
-    "repo-assist/fix-query-search-test-contract-20260731"
+    "repo-assist/fix-query-search-test-contract-20260731",
+    "repo-assist/fix-issue-2895-localized-menu-shortcuts"
   ],
   "last_run_note": "Selected tasks 2, 3, and 10. Live issue, PR, comment, label, and monthly-summary contents unavailable; no speculative action or duplicate PR. Known query test-contract regression remains addressed on the existing Repo Assist branch. make build passed; go test ./pkg/query reproduced that regression.",
   "monthly_summary_issue": {
-    "title": "[repo-assist] Monthly Activity 2026-07",
-    "month": "2026-07"
+    "title": "[repo-assist] Monthly Activity 2026-08",
+    "month": "2026-08"
   },
   "run_history": [
     {
       "date": "2026-08-07",
       "actions": [
-        "Selected tasks 2, 3, and 10; live GitHub metadata unavailable",
-        "No speculative comments, fixes, forward-progress changes, or Task 11 update",
-        "make build passed; focused query test reproduced known regression",
-        "Reported missing data and no-op through safeoutputs"
+        "Selected tasks 2, 4, and 3; Task 4 had no actionable dependency or CI update, so work focused on the selected bug fix",
+        "Created draft PR #2952 for issue #2895 and commented with the root cause",
+        "go test ./pkg/menus and make build passed",
+        "Closed July summary #2907 and created the August monthly summary"
       ]
     },
     {
@@ -43,5 +45,5 @@
       ]
     }
   ],
-  "notes": "Repeated runs have found live GitHub issue/PR/comment/label/monthly-summary contents unavailable. Do not guess or duplicate existing Repo Assist work. Known query test-contract fix is on origin/repo-assist/fix-query-search-test-contract-20260731-2d2ff1b0b20d52f2. Earlier runs also recorded environment limits: missing libalpm.so, pacman-conf, covdata, golangci-lint, and incompatible Go versions."
+  "notes": "Draft PR #2952 fixes localized selection shortcuts for #2895. Existing contributor PRs cover #2764 and stale-lock work; do not duplicate them. Known query test-contract fix is on origin/repo-assist/fix-query-search-test-contract-20260731-2d2ff1b0b20d52f2. Earlier runs also recorded environment limits: missing libalpm.so, pacman-conf, covdata, golangci-lint, and incompatible Go versions."
 }
