@@ -12,10 +12,9 @@ description: |
   - Takes the repository forward with proactive improvements
   - Maintains a persistent memory of work done and what remains
   Always polite, constructive, and mindful of the project's goals.
+model: gpt-5.6
 engine:
   id: copilot
-  model: gpt-5.6
-
 on:
   schedule: every 12h
   workflow_dispatch:
@@ -51,12 +50,11 @@ network:
   allowed:
   - defaults
   - go                  # Go module proxy, checksum DB, and toolchain manifest
-  - "dl.google.com"      # Go toolchain download host (not in the `go` ecosystem)
   - dotnet
   - node
   - python
   - rust
-  - java
+  - java                # Covers dl.google.com (Android/JDK), Adoptium, Maven Central, etc.
 
 checkout:
   fetch: ["*"]     # fetch all remote branches to allow working on PR branches
@@ -80,7 +78,6 @@ safe-outputs:
     enabled: true
     engine:
       id: copilot
-      model: gpt-5.6
   add-comment:
     max: 10
     target: "*"
