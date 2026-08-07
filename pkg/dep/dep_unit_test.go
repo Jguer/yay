@@ -157,7 +157,7 @@ func TestProvideMenuAndMakeAURPKGFromSrcinfo(t *testing.T) {
 	require.Equal(t, "aur-pkg-two", grapherNoConfirm.provideMenu("dep", opts).Name)
 }
 
-func TestMakeAURPKGFromSrcinfo(t *testing.T) {
+func TestPackagesFromSrcinfo(t *testing.T) {
 	t.Parallel()
 
 	assertErr := errors.New("arch error")
@@ -188,7 +188,7 @@ func TestMakeAURPKGFromSrcinfo(t *testing.T) {
 		},
 	}
 
-	pkgs, err := makeAURPKGFromSrcinfo(dbExecutor, srcinfo)
+	pkgs, err := PackagesFromSrcinfo(dbExecutor, srcinfo)
 	require.NoError(t, err)
 	require.Len(t, pkgs, 1)
 	require.Equal(t, []string{"pkgdep", "xdep"}, pkgs[0].Depends)
@@ -199,6 +199,56 @@ func TestMakeAURPKGFromSrcinfo(t *testing.T) {
 		},
 	}
 
-	_, err = makeAURPKGFromSrcinfo(dbFail, srcinfo)
+	_, err = PackagesFromSrcinfo(dbFail, srcinfo)
 	require.Error(t, err)
+}
+
+func TestPackagesFromSrcinfoPkgbaseFallback(t *testing.T) {
+	t.Parallel()
+
+	dbExecutor := &mock.DBExecutor{
+		AlpmArchitecturesFn: func() ([]string, error) {
+			return []string{"x86_64"}, nil
+		},
+	}
+
+	srcinfo := &gosrc.Srcinfo{
+		PackageBase: gosrc.PackageBase{
+			Pkgbase: "yay",
+		},
+		Package: gosrc.Package{
+			URL:     "https://example.com/yay",
+			Groups:  []string{"base-group"},
+			License: []string{"MIT"},
+		},
+		Packages: []gosrc.Package{
+			{
+				Pkgname: "yay",
+			},
+		},
+	}
+
+	pkgs, err := PackagesFromSrcinfo(dbExecutor, srcinfo)
+	require.NoError(t, err)
+	require.Len(t, pkgs, 1)
+	require.Equal(t, "https://example.com/yay", pkgs[0].URL)
+	require.Equal(t, []string{"base-group"}, pkgs[0].Groups)
+	require.Equal(t, []string{"MIT"}, pkgs[0].License)
+
+	// A per-package override must still win over the pkgbase value.
+	srcinfo.Packages = []gosrc.Package{
+		{
+			Pkgname: "yay",
+			URL:     "https://example.com/yay-override",
+			Groups:  []string{"override-group"},
+			License: []string{"GPL"},
+		},
+	}
+
+	pkgs, err = PackagesFromSrcinfo(dbExecutor, srcinfo)
+	require.NoError(t, err)
+	require.Len(t, pkgs, 1)
+	require.Equal(t, "https://example.com/yay-override", pkgs[0].URL)
+	require.Equal(t, []string{"override-group"}, pkgs[0].Groups)
+	require.Equal(t, []string{"GPL"}, pkgs[0].License)
 }

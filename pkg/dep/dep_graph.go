@@ -248,7 +248,7 @@ func (g *Grapher) GraphFromSrcInfos(ctx context.Context, graph *topo.Graph[strin
 
 	aurPkgsAdded := []*aurc.Pkg{}
 	for pkgBuildDir, pkgbuild := range srcInfos {
-		aurPkgs, err := makeAURPKGFromSrcinfo(g.dbExecutor, pkgbuild)
+		aurPkgs, err := PackagesFromSrcinfo(g.dbExecutor, pkgbuild)
 		if err != nil {
 			return nil, err
 		}
@@ -836,17 +836,30 @@ func (g *Grapher) provideMenu(dep string, options []aur.Pkg) *aur.Pkg {
 	}
 }
 
-func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*aur.Pkg, error) {
+// PackagesFromSrcinfo converts repository metadata into package metadata used
+// by dependency resolution and local package information displays.
+func PackagesFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*aur.Pkg, error) {
 	pkgs := make([]*aur.Pkg, 0, 1)
 
 	alpmArch, err := dbExecutor.AlpmArchitectures()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("reading architectures for .SRCINFO: %w", err)
 	}
 
 	alpmArch = append(alpmArch, "") // srcinfo assumes no value as ""
 
 	getDesc := func(pkg *gosrc.Package) string { return cmp.Or(pkg.Pkgdesc, srcInfo.Pkgdesc) }
+
+	// srcInfo.Packages holds only the per-package overrides; anything declared
+	// once at the pkgbase level lives on srcInfo itself. Fall back to it so a
+	// plain (non-split) PKGBUILD does not report these as empty.
+	fallback := func(pkg, base []string) []string {
+		if len(pkg) > 0 {
+			return pkg
+		}
+
+		return base
+	}
 
 	for i := range srcInfo.Packages {
 		pkg := &srcInfo.Packages[i]
@@ -858,7 +871,7 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*a
 			PackageBase:   srcInfo.Pkgbase,
 			Version:       srcInfo.Version(),
 			Description:   getDesc(pkg),
-			URL:           pkg.URL,
+			URL:           cmp.Or(pkg.URL, srcInfo.URL),
 			Depends:       slices.Concat(archStringToString(alpmArch, pkg.Depends), archStringToString(alpmArch, srcInfo.Depends)),
 			MakeDepends:   archStringToString(alpmArch, srcInfo.MakeDepends),
 			CheckDepends:  archStringToString(alpmArch, srcInfo.CheckDepends),
@@ -866,8 +879,8 @@ func makeAURPKGFromSrcinfo(dbExecutor db.Executor, srcInfo *gosrc.Srcinfo) ([]*a
 			Provides:      slices.Concat(archStringToString(alpmArch, pkg.Provides), archStringToString(alpmArch, srcInfo.Provides)),
 			Replaces:      slices.Concat(archStringToString(alpmArch, pkg.Replaces), archStringToString(alpmArch, srcInfo.Replaces)),
 			OptDepends:    slices.Concat(archStringToString(alpmArch, pkg.OptDepends), archStringToString(alpmArch, srcInfo.OptDepends)),
-			Groups:        pkg.Groups,
-			License:       pkg.License,
+			Groups:        fallback(pkg.Groups, srcInfo.Groups),
+			License:       fallback(pkg.License, srcInfo.License),
 			Keywords:      []string{},
 		})
 	}
