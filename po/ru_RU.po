@@ -170,7 +170,7 @@ msgstr "Всегда собирать все пакеты AUR"
 
 #: cmd.go:199
 msgid "Always build all AUR packages even if installed"
-msgstr "Всегда собирать все пакеты AUR, даже если уже установлены"
+msgstr "Всегда собирать все пакеты AUR, даже если они уже установлены"
 
 #: cmd.go:196
 msgid "Always build target packages"
