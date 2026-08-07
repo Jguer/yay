@@ -654,6 +654,10 @@ func (a *Arguments) Parse() error {
 	}
 
 	if a.Op == "" {
+		if a.ExistsArg("h", "help") {
+			return nil
+		}
+
 		if len(a.Targets) > 0 {
 			a.Op = "Y"
 		} else {

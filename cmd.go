@@ -26,6 +26,59 @@ import (
 	"github.com/Jguer/yay/v13/pkg/vcs"
 )
 
+type helpOption struct {
+	flags       string
+	description string
+}
+
+type operationHelp struct {
+	short   string
+	long    string
+	targets string
+	options []helpOption
+}
+
+var yayOperationHelp = []operationHelp{
+	{"B", "build", "[options] [dir]", []helpOption{
+		{"-i --install", "Build and install a PKGBUILD"},
+	}},
+	{"G", "getpkgbuild", "[options] [package(s)]", []helpOption{
+		{"-f --force", "Force download for existing ABS packages"},
+		{"-p --print", "Print pkgbuild of packages"},
+	}},
+	{"P", "show", "[options]", []helpOption{
+		{"-c --complete", "Used for completions"},
+		{"-d --defaultconfig", "Print default yay configuration"},
+		{"-g --currentconfig", "Print current yay configuration"},
+		{"-s --stats", "Display system package statistics"},
+		{"-w --news", "Print arch news"},
+		{"-q --quiet", "Only show titles when printing news"},
+	}},
+	{"W", "web", "[options] [package(s)]", []helpOption{
+		{"-u --unvote", "Remove a vote from AUR package(s)"},
+		{"-v --vote", "Vote for AUR package(s)"},
+	}},
+	{"Y", "yay", "[options] [package(s)]", []helpOption{
+		{"-c --clean", "Remove unneeded dependencies (-cc to ignore optdepends)"},
+		{"   --gendb", "Generates development package DB used for updating"},
+	}},
+}
+
+func (h *operationHelp) syntax() string {
+	return fmt.Sprintf("yay {-%s --%s}", h.short, h.long)
+}
+
+func findYayOperationHelp(operation string) *operationHelp {
+	for i := range yayOperationHelp {
+		help := &yayOperationHelp[i]
+		if operation == help.short || operation == help.long {
+			return help
+		}
+	}
+
+	return nil
+}
+
 func usage(logger *text.Logger) {
 	logger.Println(`Usage:
     yay
@@ -41,15 +94,17 @@ operations:
     yay {-R --remove}      [options] <package(s)>
     yay {-S --sync}        [options] [package(s)]
     yay {-T --deptest}     [options] [package(s)]
-    yay {-U --upgrade}     [options] <file(s)>
+    yay {-U --upgrade}     [options] <file(s)>`)
 
-New operations:
-    yay {-B --build}       [options] [dir]
-    yay {-G --getpkgbuild} [options] [package(s)]
-    yay {-P --show}        [options]
-    yay {-W --web}         [options] [package(s)]
-    yay {-Y --yay}         [options] [package(s)]
+	// Yay-specific operations
+	logger.Println("\nNew operations:")
+	for i := range yayOperationHelp {
+		help := &yayOperationHelp[i]
+		logger.Printf("    %-22s %s\n", help.syntax(), help.targets)
+	}
+	logger.Println("\nuse 'yay {-h --help}' with an operation for available options")
 
+	logger.Println(`
 If no operation is specified 'yay -Syu' will be performed
 If no operation is specified and targets are provided, -Y will be assumed
 
@@ -118,27 +173,29 @@ Permanent configuration options:
 
     --sudo                <file>  sudo command to use
     --sudoflags           <flags> Pass arguments to sudo
-    --sudoloop            Loop sudo calls in the background to avoid timeout
+    --sudoloop            Loop sudo calls in the background to avoid timeout`)
+}
 
-show specific options (used with -P):
-    -c --complete         Used for completions
-    -d --defaultconfig    Print default yay configuration
-    -g --currentconfig    Print current yay configuration
-    -s --stats            Display system package statistics
-    -w --news             Print arch news
+func operationUsage(logger *text.Logger, operation string) {
+	help := findYayOperationHelp(operation)
+	if help == nil {
+		return
+	}
 
-yay specific options (used with -Y):
-    -c --clean            Remove unneeded dependencies (-cc to ignore optdepends)
-       --gendb            Generates development package DB used for updating
-
-getpkgbuild specific options (used with -G):
-    -f --force            Force download for existing ABS packages
-    -p --print            Print pkgbuild of packages`)
+	logger.Printf("Usage: %s %s\noptions:\n", help.syntax(), help.targets)
+	for _, option := range help.options {
+		logger.Printf("    %-21s %s\n", option.flags, option.description)
+	}
 }
 
 func handleCmd(ctx context.Context, run *runtime.Runtime,
 	cmdArgs *parser.Arguments, dbExecutor db.Executor,
 ) error {
+	if cmdArgs.Op == "V" || cmdArgs.Op == "version" {
+		handleVersion(run.Logger)
+		return nil
+	}
+
 	if cmdArgs.ExistsArg("h", "help") {
 		return handleHelp(ctx, run, cmdArgs)
 	}
@@ -148,9 +205,6 @@ func handleCmd(ctx context.Context, run *runtime.Runtime,
 	}
 
 	switch cmdArgs.Op {
-	case "V", "version":
-		handleVersion(run.Logger)
-		return nil
 	case "D", "database":
 		return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, run.Cfg.Mode, settings.NoConfirm))
@@ -233,13 +287,15 @@ func handleQuery(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argu
 }
 
 func handleHelp(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments) error {
-	usage(run.Logger)
 	switch cmdArgs.Op {
 	case "Y", "yay", "G", "getpkgbuild", "P", "show", "W", "web", "B", "build":
+		operationUsage(run.Logger, cmdArgs.Op)
+		return nil
+	case "":
+		usage(run.Logger)
 		return nil
 	}
 
-	run.Logger.Println("\npacman operation specific options:")
 	return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
 		cmdArgs, run.Cfg.Mode, settings.NoConfirm))
 }

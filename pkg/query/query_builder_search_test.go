@@ -46,7 +46,7 @@ func TestMatchesSearch(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.want, matchesSearch(pkg, test.terms))
+			assert.Equal(t, test.want, matchesSearch(pkg, normalizeSearchTerms(test.terms)))
 		})
 	}
 }
