@@ -1,10 +1,8 @@
-FROM --platform=linux/amd64 archlinux@sha256:c84ad63503efc5d386e30a5f44945fa8eee10fcb21b3d5fceda260783de394ff
+FROM archlinux@sha256:c84ad63503efc5d386e30a5f44945fa8eee10fcb21b3d5fceda260783de394ff
 LABEL maintainer="Jguer,docker@jguer.space"
 
 ENV GO111MODULE=on
 WORKDIR /app
-
-COPY go.mod .
 
 # Disable pacman's landlock/seccomp sandbox: it doesn't work inside BuildKit.
 # asciidoc, doxygen, meson needed for pacman-git.
@@ -12,10 +10,9 @@ RUN set -eux; \
     sed -i 's/^#\?DisableSandbox.*/DisableSandbox/' /etc/pacman.conf || true; \
     sed -i 's/^#\?DownloadUser.*/#DownloadUser = alpm/' /etc/pacman.conf || true; \
     pacman -Syu --noconfirm --needed \
-        pacman-contrib zsh git-delta openssh bat go github-cli ripgrep \
+        pacman-contrib zsh git-delta openssh bat go github-cli ripgrep pre-commit \
         archlinux-keyring git gcc make sudo asciidoc doxygen meson curl nodejs npm; \
     curl -sSfL https://golangci-lint.run/install.sh | sh -s v2.12.2; \
-    go mod download; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
     rm -rf /usr/share/man/* /usr/share/doc/* || true
 
@@ -24,8 +21,7 @@ RUN useradd -m -s /bin/bash docker \
 
 USER docker
 
-RUN go install github.com/leonelquinteros/gotext/cli/xgotext@latest \
-    && go install golang.org/x/tools/gopls@latest
+RUN go install github.com/leonelquinteros/gotext/cli/xgotext@v1.7.2
 
 ENV PATH="/app/bin:/home/docker/go/bin:/home/docker/.local/bin:$PATH"
 

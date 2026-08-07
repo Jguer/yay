@@ -70,7 +70,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		installer.AddPostInstallHook(cleanFunc)
 	}
 
-	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(run, pkgBuildDirs); cleanAURDirsFunc != nil {
+	if cleanAURDirsFunc := preparer.ShouldCleanAURDirs(run, pkgBuildDirs, targets); cleanAURDirsFunc != nil {
 		installer.AddPostInstallHook(cleanAURDirsFunc)
 	}
 

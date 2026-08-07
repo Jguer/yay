@@ -152,7 +152,7 @@ func aurTargetPackagesByBase(targets []map[string]*dep.InstallInfo) map[string][
 				continue
 			}
 
-			if info.Source != dep.AUR && info.Source != dep.SrcInfo {
+			if !info.Source.IsBuiltFromSource() {
 				continue
 			}
 

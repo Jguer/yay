@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/Jguer/yay/v13/pkg/text"
@@ -61,16 +62,7 @@ func (e *Engine) Apply(cfg any) (unknown []string, errs []error) {
 	}
 
 	sv := v.Elem()
-	st := sv.Type()
-
-	index := make(map[string]int, st.NumField())
-
-	for i := range st.NumField() {
-		field := st.Field(i)
-		if name := luaKeyForField(&field); name != "" {
-			index[name] = i
-		}
-	}
+	index := luaFieldIndex(sv.Type())
 
 	optTbl, ok := e.optTable()
 	if !ok {
@@ -149,6 +141,20 @@ func luaKeyForField(field *reflect.StructField) string {
 	return ""
 }
 
+// luaFieldIndex maps each lua-tagged field name of st to its field index.
+func luaFieldIndex(st reflect.Type) map[string]int {
+	index := make(map[string]int, st.NumField())
+
+	for i := range st.NumField() {
+		field := st.Field(i)
+		if name := luaKeyForField(&field); name != "" {
+			index[name] = i
+		}
+	}
+
+	return index
+}
+
 func assign(field reflect.Value, val lua.LValue) error {
 	switch field.Kind() {
 	case reflect.String:
@@ -172,9 +178,123 @@ func assign(field reflect.Value, val lua.LValue) error {
 		}
 
 		field.SetInt(int64(n))
+	case reflect.Slice:
+		return assignStructSlice(field, val)
 	default:
 		return fmt.Errorf("unsupported field kind %s", field.Kind())
 	}
 
 	return nil
+}
+
+// assignStructSlice fills a []Struct field from a Lua table keyed by name, e.g.
+//
+//	{ ["core"] = { url = "..." }, ["extra"] = { url = "..." } }
+//
+// Each entry becomes one struct: the table key populates the element's
+// lua:"name" field and the sub-table populates the remaining fields. Entries
+// are sorted by name so the resulting slice is deterministic despite Lua's
+// unordered table iteration.
+func assignStructSlice(field reflect.Value, val lua.LValue) error {
+	elemType := field.Type().Elem()
+	if elemType.Kind() != reflect.Struct {
+		return fmt.Errorf("unsupported slice element kind %s", elemType.Kind())
+	}
+
+	tbl, ok := val.(*lua.LTable)
+	if !ok {
+		return fmt.Errorf("expected table, got %s", val.Type())
+	}
+
+	elemIndex := luaFieldIndex(elemType)
+
+	type namedElem struct {
+		name string
+		elem reflect.Value
+	}
+
+	var (
+		entries  []namedElem
+		firstErr error
+	)
+
+	tbl.ForEach(func(k, entry lua.LValue) {
+		if firstErr != nil {
+			return
+		}
+
+		name, ok := k.(lua.LString)
+		if !ok {
+			firstErr = fmt.Errorf("entry keys must be strings, got %s", k.Type())
+			return
+		}
+
+		entryTbl, ok := entry.(*lua.LTable)
+		if !ok {
+			firstErr = fmt.Errorf("entry %q must be a table, got %s", string(name), entry.Type())
+			return
+		}
+
+		elem := reflect.New(elemType).Elem()
+		if nameIdx, found := elemIndex["name"]; found {
+			elem.Field(nameIdx).SetString(string(name))
+		}
+
+		if err := assignStructFields(elem, entryTbl, elemIndex); err != nil {
+			firstErr = fmt.Errorf("entry %q: %w", string(name), err)
+			return
+		}
+
+		entries = append(entries, namedElem{name: string(name), elem: elem})
+	})
+
+	if firstErr != nil {
+		return firstErr
+	}
+
+	// Sort by name so the resulting slice is deterministic despite Lua's
+	// unordered table iteration.
+	slices.SortFunc(entries, func(a, b namedElem) int {
+		return strings.Compare(a.name, b.name)
+	})
+
+	out := reflect.MakeSlice(field.Type(), len(entries), len(entries))
+	for i, entry := range entries {
+		out.Index(i).Set(entry.elem)
+	}
+
+	field.Set(out)
+
+	return nil
+}
+
+// assignStructFields assigns the entries of tbl onto struct value sv, matching
+// each key against the lua:"..." tags in index. Unknown keys are errors so
+// typos in nested option tables fail fast, mirroring top-level opt handling.
+func assignStructFields(sv reflect.Value, tbl *lua.LTable, index map[string]int) error {
+	var firstErr error
+
+	tbl.ForEach(func(k, entry lua.LValue) {
+		if firstErr != nil {
+			return
+		}
+
+		key, ok := k.(lua.LString)
+		if !ok {
+			firstErr = fmt.Errorf("keys must be strings, got %s", k.Type())
+			return
+		}
+
+		fieldIdx, found := index[string(key)]
+		if !found {
+			firstErr = fmt.Errorf("unknown key %q", string(key))
+			return
+		}
+
+		if err := assign(sv.Field(fieldIdx), entry); err != nil {
+			firstErr = fmt.Errorf("%s: %w", string(key), err)
+		}
+	})
+
+	return firstErr
 }

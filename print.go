@@ -163,7 +163,7 @@ func printUpdateList(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.
 		if noTargets || targets.Contains(pkgName) {
 			if ii.Source == dep.Sync && foreignFilter {
 				return nil
-			} else if ii.Source == dep.AUR && nativeFilter {
+			} else if ii.Source.IsBuiltFromSource() && nativeFilter {
 				return nil
 			}
 

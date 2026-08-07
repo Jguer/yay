@@ -86,6 +86,13 @@ func installLocalPKGBUILD(
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
 		cmdArgs.ExistsDouble("d", "nodeps"), noCheck, cmdArgs.ExistsArg("needed"),
 		run.Logger.Child("grapher"))
+
+	pkgbuildRepos, err := loadPkgbuildRepoIndex(ctx, run, false)
+	if err != nil {
+		return fmt.Errorf("%s: %w", gotext.Get("error loading PKGBUILD repositories"), err)
+	}
+	grapher.SetPkgbuildRepos(pkgbuildRepos)
+
 	graph, err := grapher.GraphFromSrcInfos(ctx, nil, srcInfos)
 	if err != nil {
 		return err
