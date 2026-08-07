@@ -7,6 +7,9 @@ on:
       - "README.md"
       - ".gitignore"
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Lint and test yay (-git)
