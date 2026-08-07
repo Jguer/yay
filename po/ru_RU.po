@@ -1109,7 +1109,7 @@ msgstr "делать больше нечего"
 
 #: pkg/db/ialpm/alpm.go:253
 msgid "unable to CreateHandle: %s"
-msgstr "невозможно выполнить CreateHandle: %s"
+msgstr "не удалось выполнить CreateHandle: %s"
 
 #: cmd.go:274
 msgid "unhandled operation"
