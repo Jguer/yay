@@ -363,3 +363,13 @@ func TestArguments_ParseStdin_broken_pipe(t *testing.T) {
 	err = args.parseStdin()
 	assert.Error(t, err)
 }
+
+func TestArguments_ParseTopLevelHelp(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+	os.Args = []string{"yay", "--help"}
+
+	args := MakeArguments()
+	require.NoError(t, args.Parse())
+	assert.Empty(t, args.Op)
+}
