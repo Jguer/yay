@@ -435,7 +435,7 @@ msgstr "Dipendenza Make"
 
 #: print.go:40
 msgid "Make Deps"
-msgstr "Make dipendenze"
+msgstr "Dipendenze Make"
 
 #: cmd.go:168
 msgid "Max amount of packages to query per AUR request"
