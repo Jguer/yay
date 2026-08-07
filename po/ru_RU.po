@@ -693,7 +693,7 @@ msgstr "Размер кэша pacman %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
-msgstr "Размер кэша \"yay\""
+msgstr "Размер кэша yay %s: %s"
 
 #: cmd.go:198
 msgid "Skip package build if in cache and up to date"
