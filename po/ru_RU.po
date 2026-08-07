@@ -236,7 +236,7 @@ msgstr "Проверять пакеты разработки (git, svn и др.)
 
 #: pkg/upgrade/service.go:115
 msgid "Checking development packages..."
-msgstr "Проверка пакетов в разработке (-git, -svn и т.п.)..."
+msgstr "Проверка пакетов в разработке (-git, -svn и др.)..."
 
 #: pkg/sync/workdir/clean.go:44
 msgid "Cleaning (%d/%d): %s"
