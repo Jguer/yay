@@ -321,7 +321,7 @@ msgstr "Пакеты, установленные по запросу польз�
 
 #: pkg/dep/dep_graph.go:439 pkg/dep/dep_graph.go:555
 msgid "Failed to find AUR package for"
-msgstr "Не удалось найти пакет AUR для"
+msgstr "Не удалось найти пакет в AUR для"
 
 #: pkg/sync/build/installer.go:128
 msgid "Failed to install layer, rolling up to next layer."
