@@ -71,6 +71,10 @@ type Configuration struct {
 	UseRPC                 bool   `json:"rpc" lua:"rpc"`
 	DoubleConfirm          bool   `json:"doubleconfirm" lua:"double_confirm"` // confirm install before and after build
 
+	// PkgbuildRepos is configured only via init.lua (yay.opt.pkgbuild_repos),
+	// never persisted to config.json.
+	PkgbuildRepos []PkgbuildRepo `json:"-" lua:"pkgbuild_repos"`
+
 	CompletionPath string `json:"-" lua:"-"`
 	VCSFilePath    string `json:"-" lua:"-"`
 	// ConfigPath     string `json:"-"`
