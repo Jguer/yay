@@ -232,7 +232,7 @@ msgstr "Зависимости проверки"
 
 #: cmd.go:195
 msgid "Check development packages during sysupgrade"
-msgstr "Проверять пакеты разработки (git, svn и т.п.) при обновлении системы"
+msgstr "Проверять пакеты разработки (git, svn и др.) при обновлении системы"
 
 #: pkg/upgrade/service.go:115
 msgid "Checking development packages..."
