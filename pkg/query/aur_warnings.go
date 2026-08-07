@@ -2,7 +2,6 @@ package query
 
 import (
 	"strings"
-
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/aur"
@@ -55,11 +54,36 @@ func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.Package, aurPk
 func (warnings *AURWarnings) CalculateMissing(remoteNames []string,
 	remote map[string]alpm.Package, aurData map[string]*aur.Pkg,
 ) {
-	for _, name := range remoteNames {
-		if _, ok := aurData[name]; !ok && !remote[name].ShouldIgnore() {
-			if _, ok := aurData[strings.TrimSuffix(name, "-debug")]; !ok {
-				warnings.Missing = append(warnings.Missing, name)
-			}
+
+	for _, name := range remoteNames{
+
+		if !strings.HasSuffix(name, "-debug"){
+			continue
+		}
+		
+		pkg := aurData[name]
+
+		if pkg == nil {
+		    continue
+		}
+
+		base := pkg.PackageBase
+		found := false
+
+		for _, otherName := range remoteNames {
+		    if otherName == name {
+		        continue
+		    }
+		
+		    otherPkg := aurData[otherName]
+		    if otherPkg != nil && otherPkg.PackageBase == base {
+		        found = true
+		        break
+		    }
+		}
+
+		if !found {
+		    warnings.Missing = append(warnings.Missing, name)
 		}
 	}
 }
