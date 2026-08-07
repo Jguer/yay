@@ -1,155 +1,47 @@
 {
-  "last_run": "2026-08-06T13:24:44Z",
-  "run_id": "31105672355",
+  "last_run": "2026-08-07T01:45:03Z",
+  "run_id": "31138925811",
   "backlog_cursor": {
     "issues": 1773,
-    "comment": "processed up to issue #1773 in first batch; live issue contents unavailable this run"
+    "comment": "Processed through issue #1773; live issue contents remain unavailable."
   },
   "comments_made": {
-    "1761": "2026-07-14 - explained src/ removal is makepkg behaviour, suggested --skipextract",
+    "1761": "2026-07-14 - explained src/ removal is makepkg behaviour; suggested --skipextract",
     "1773": "2026-07-14 - explained doubleConfirm config option"
   },
   "prs_created": [
-    {
-      "branch": "repo-assist/improve-deduplicate-vcs-updates",
-      "description": "refactor(srcinfo): deduplicate VCS updates across target maps",
-      "date": "2026-07-19",
-      "test_status": "Blocked: repository requires Go 1.26.0; installed Go 1.24.13 and toolchain download is forbidden."
-    },
-    {
-      "branch": "repo-assist/fix-issue-1243-diff-pagination",
-      "description": "fix(diff): add --no-pager and package header to git diff, closes #1243",
-      "date": "2026-07-14"
-    },
-    {
-      "branch": "repo-assist/improve-remove-global-noconfirm",
-      "description": "refactor(workdir): remove unnecessary global NoConfirm mutation in removeMake",
-      "date": "2026-07-14"
-    },
-    {
-      "branch": "repo-assist/improve-search-filter-normalization",
-      "description": "perf(query): normalize package name and description once per multi-term search",
-      "date": "2026-07-20",
-      "test_status": "Blocked: repository requires Go 1.26.0; installed Go 1.24.13 and toolchain download is forbidden."
-    },
-    {
-      "branch": "repo-assist/improve-skip-missing-arch-deps",
-      "description": "test: skip environment-dependent tests when libalpm or pacman-conf is unavailable",
-      "date": "2026-07-21",
-      "test_status": "go test ./... and make build passed; make lint blocked because golangci-lint is unavailable"
-    },
-    {
-      "branch": "repo-assist/improve-normalize-search-terms-20260722",
-      "description": "perf(query): normalize multi-term search strings once before AUR filtering",
-      "date": "2026-07-22",
-      "commit": "77eb3b7",
-      "test_status": "go test ./pkg/query passed; make build passed; make test blocked by missing libalpm.so, pacman-conf, and covdata; make lint blocked because golangci-lint is unavailable"
-    },
-    {
-      "branch": "repo-assist/improve-search-filter-unknown-results-20260723",
-      "description": "fix(query): ignore unknown search-filter references instead of appending zero-value results",
-      "date": "2026-07-23",
-      "commit": "505dbfe",
-      "test_status": "go test ./pkg/query passed; make build passed"
-    },
-    {
-      "branch": "repo-assist/fix-query-search-test-contract-20260731",
-      "description": "test(query): normalize matcher inputs in unit test",
-      "date": "2026-07-31",
-      "commit": "786f13e",
-      "test_status": "go test ./pkg/query passed; make build passed"
-    }
+    "repo-assist/improve-deduplicate-vcs-updates",
+    "repo-assist/fix-issue-1243-diff-pagination",
+    "repo-assist/improve-remove-global-noconfirm",
+    "repo-assist/improve-search-filter-normalization",
+    "repo-assist/improve-skip-missing-arch-deps",
+    "repo-assist/improve-normalize-search-terms-20260722",
+    "repo-assist/improve-search-filter-unknown-results-20260723",
+    "repo-assist/fix-query-search-test-contract-20260731"
   ],
-  "last_run_note": "Selected tasks 2, 10, and 3. Live issue, PR, comment, label, and monthly-summary contents were unavailable, so no issue comment, fix, forward-progress action, or Task 11 update was safe. No distinct local improvement was identified; the known query test-contract regression remains addressed by origin/repo-assist/fix-query-search-test-contract-20260731-2d2ff1b0b20d52f2. make build passed; focused and full tests reproduce that regression and are also blocked by missing libalpm.so and pacman-conf.",
+  "last_run_note": "Selected tasks 2, 3, and 10. Live issue, PR, comment, label, and monthly-summary contents unavailable; no speculative action or duplicate PR. Known query test-contract regression remains addressed on the existing Repo Assist branch. make build passed; go test ./pkg/query reproduced that regression.",
   "monthly_summary_issue": {
     "title": "[repo-assist] Monthly Activity 2026-07",
     "month": "2026-07"
   },
   "run_history": [
     {
-      "date": "2026-08-06",
+      "date": "2026-08-07",
       "actions": [
-        "Selected tasks 2, 10, and 3; live issue, PR, comment, label, and monthly-summary contents were unavailable, so no speculative GitHub action was taken",
-        "Reviewed local state and confirmed the known query test-contract fix already exists on origin/repo-assist/fix-query-search-test-contract-20260731-2d2ff1b0b20d52f2; no duplicate PR created",
-        "make build passed; focused and full tests reproduce the known query regression and full tests are additionally blocked by missing libalpm.so and pacman-conf",
-        "Recorded missing-data and no-op outcome through safeoutputs"
+        "Selected tasks 2, 3, and 10; live GitHub metadata unavailable",
+        "No speculative comments, fixes, forward-progress changes, or Task 11 update",
+        "make build passed; focused query test reproduced known regression",
+        "Reported missing data and no-op through safeoutputs"
       ]
     },
     {
       "date": "2026-08-06",
-      "selected_tasks": [7, 4, 10],
       "actions": [
-        "Live issue, PR, comment, label, and monthly-summary contents unavailable; no stale-PR nudge or other GitHub action made",
-        "Reviewed local CI, Dependabot, Makefile, recent history, and available branches; no distinct safe engineering or forward-progress change identified",
-        "Confirmed the known query test-contract fix is already on the existing Repo Assist branch",
-        "make build passed; go test ./... remains environment-blocked by missing libalpm.so and pacman-conf and the known query test regression",
-        "Recorded missing data and no-op outcome through safeoutputs"
-      ]
-    },
-    {
-      "date": "2026-08-05",
-      "selected_tasks": [4, 2, 3],
-      "actions": [
-        "Reviewed local CI, Dependabot, Makefile, recent history, and existing Repo Assist branches; no distinct safe engineering change or issue fix identified",
-        "Confirmed the known query test-contract regression is already addressed by the existing Repo Assist fix branch; no duplicate PR created",
-        "Live issue, PR, comment, label, and monthly-summary contents unavailable; no issue actions or Task 11 update made",
-        "make build passed; make test remains environment-blocked by Go version mismatch and missing Arch dependencies",
-        "Reported missing data and no-op outcome through safeoutputs"
-      ]
-    },
-    {
-      "date": "2026-08-05",
-      "selected_tasks": [3, 2, 5],
-      "actions": [
-        "Confirmed the known query test-contract regression and existing Repo Assist fix branch; no duplicate PR created",
-        "Reviewed local code for a distinct low-risk coding improvement; none identified without duplicating recent work",
-        "Live issue, PR, comment, label, and monthly-summary contents unavailable; no issue actions or Task 11 update made",
-        "make build passed; focused go test ./pkg/query failed only on the known regression"
-      ]
-    },
-    {
-      "date": "2026-08-04",
-      "selected_tasks": [8, 3, 2],
-      "actions": [
-        "Confirmed no distinct measurable performance improvement beyond the existing query normalization work",
-        "Reproduced the known query test-contract regression and confirmed the existing Repo Assist branch contains the minimal fix",
-        "Live issue, PR, comment, label, and monthly-summary data unavailable; no issue actions or Task 11 update made"
-      ]
-    },
-    {
-      "date": "2026-08-03",
-      "selected_tasks": [2, 10, 3],
-      "actions": [
-        "Confirmed the known query test-contract regression and existing Repo Assist fix branch; no duplicate PR created",
-        "Live issue, PR, comment, label, and monthly-summary data unavailable; no issue actions or Task 11 update made"
-      ]
-    },
-    {
-      "date": "2026-08-02",
-      "selected_tasks": [2, 4, 10],
-      "actions": [
-        "Reviewed Dependabot and CI configuration; no distinct low-risk engineering investment identified",
-        "Reviewed local code and recent Repo Assist work; no distinct forward-progress change identified",
-        "Live issue, PR, comment, label, and monthly-summary data unavailable; no issue actions or Task 11 update made"
-      ]
-    },
-    {
-      "date": "2026-08-01",
-      "selected_tasks": [10, 5, 3],
-      "actions": [
-        "Reviewed local code and recent Repo Assist work; no distinct low-risk improvement or safe issue fix identified",
-        "Reproduced the query test-contract regression; existing Repo Assist change remains the known fix",
-        "Live GitHub issue, PR, comment, label, and monthly-summary data unavailable; no issue actions or Task 11 update made"
-      ]
-    },
-    {
-      "date": "2026-07-31",
-      "selected_tasks": [3, 2, 10],
-      "actions": [
-        "Reproduced the query test-contract regression and confirmed the existing Repo Assist branch already contains the fix; no duplicate PR created",
-        "Live GitHub issue, PR, comment, label, and monthly-summary data unavailable; no issue actions or Task 11 update made"
+        "Selected tasks 2, 10, and 3; live metadata unavailable",
+        "Confirmed existing query test-contract fix branch; no duplicate PR",
+        "make build passed; tests remained blocked by known regression and missing Arch dependencies"
       ]
     }
   ],
-  "notes": "2026-07-20: Selected tasks 3, 2, and 1. The collected issue snapshot exposed only numbers and labels; four issues were unlabelled, but no labels were applied because their content was unavailable. No issue fix or comment was attempted. Repository tests were blocked by missing libalpm.so, pacman-conf, and the Go covdata tool; golangci-lint was unavailable. Monthly-summary maintenance could not be performed because the summary issue ID/body was not present in the collected data. 2026-07-21: Selected tasks 2, 1, and 3. Required issue titles, bodies, comments, labels, and the monthly summary issue contents were not available in the workspace, and GitHub read tools were unavailable, so no safe investigation, labelling, fix, or summary update could be made. Recorded missing-data limitation rather than guessing or posting noise. 2026-07-21: Selected tasks 4, 3, and 5. Added environment-aware skips for tests requiring libalpm and pacman-conf, preventing false failures and nil dereference panics on non-Arch runners. Created branch repo-assist/improve-skip-missing-arch-deps-666f0aaad78b6c4 and committed aa4bdc9. No issue-specific fix or labels were attempted because GitHub read data was unavailable; monthly summary could not be safely updated. 2026-07-22: Selected tasks 2, 3, and 5. Issue metadata and monthly-summary contents were unavailable, so no safe issue comments, fixes, labels, or summary update were possible. No low-risk coding improvement was identifiable from the local checkout without duplicating recent work. Go tests were blocked by required Go 1.26.0 and unavailable dependency/toolchain downloads. 2026-07-22: Selected tasks 8, 2, and 5. Implemented and committed query performance improvement 77eb3b7 on repo-assist/improve-normalize-search-terms-20260722; draft PR intent was accepted. Issue contents and monthly-summary issue ID/body remain unavailable, so no safe issue comment, labelling, or monthly-summary update was possible. Full tests and lint remain environment-blocked as recorded above. 2026-07-23: Selected tasks 3, 2, and 5. GitHub issue, PR, and monthly-summary contents were unavailable through the exposed read tools, so no safe issue fix, comment, labelling, or summary update was made. No distinct low-risk coding improvement was identified without duplicating recent query changes. go test ./pkg/query and make build passed. 2026-07-24: Selected tasks 3, 2, and 5. GitHub issue, PR, comment, label, and monthly-summary contents remained unavailable; reported missing data through safeoutputs and made no speculative issue actions. No distinct low-risk coding improvement was identified without duplicating recent query work. go test ./pkg/query passed. 2026-07-24: Selected tasks 2, 3, and 10. Live issue/PR/comment/label data and the monthly-summary issue body were unavailable, so no safe issue investigation/comment, fix, or Task 11 update was possible. Local history showed recent query improvements already completed; no distinct low-risk forward-progress change was made. 2026-07-25: Selected tasks 2, 9, and 3. Issue/PR/comment/label data and the monthly-summary issue body were unavailable, so no safe issue comment, fix, or Task 11 update was possible. The focused test review found no non-duplicative, clearly valuable test improvement; the query test command was blocked by the checkout requiring Go 1.26 while the runner provides Go 1.25.12. 2026-07-27: Selected tasks 3, 2, and 5. Live issue, PR, comment, label, and monthly-summary contents remained unavailable. No safe issue action or distinct coding improvement was identified; go test ./pkg/query passed. 2026-07-27: Selected tasks 3, 2, and 10. Live issue, PR, comment, label, and monthly-summary contents remained unavailable. No safe issue action or distinct forward-progress change was identified; go test ./pkg/query passed. 2026-07-28: Selected tasks 3, 2, and 10. Live issue, PR, comment, label, and monthly-summary contents remained unavailable. No safe issue investigation/comment, fix, or Task 11 update was possible. 2026-07-29: Selected tasks 1, 3, and 2. Four unlabelled issues were reported, but their contents and all live GitHub metadata were unavailable; no speculative labels, comments, or fixes were made. go test ./pkg/query passed. Missing data and no-op were reported through safeoutputs."
+  "notes": "Repeated runs have found live GitHub issue/PR/comment/label/monthly-summary contents unavailable. Do not guess or duplicate existing Repo Assist work. Known query test-contract fix is on origin/repo-assist/fix-query-search-test-contract-20260731-2d2ff1b0b20d52f2. Earlier runs also recorded environment limits: missing libalpm.so, pacman-conf, covdata, golangci-lint, and incompatible Go versions."
 }
