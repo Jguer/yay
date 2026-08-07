@@ -205,7 +205,7 @@ msgstr "Считать целевые пакеты из репозиториев
 
 #: cmd.go:205
 msgid "Automatically resolve conflicts using pacman's ask flag"
-msgstr "Автоматически разрешать конфликты с помощью флага ask pacman'а"
+msgstr "Автоматически разрешать конфликты с помощью флага ask от pacman"
 
 #: main.go:65
 msgid "Avoid running yay as root/sudo."
