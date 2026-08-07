@@ -38,30 +38,41 @@ type operationHelp struct {
 	options []helpOption
 }
 
-var yayOperationHelp = []operationHelp{
-	{"B", "build", "[options] [dir]", []helpOption{
-		{"-i --install", "Build and install a PKGBUILD"},
-	}},
-	{"G", "getpkgbuild", "[options] [package(s)]", []helpOption{
-		{"-f --force", "Force download for existing ABS packages"},
-		{"-p --print", "Print pkgbuild of packages"},
-	}},
-	{"P", "show", "[options]", []helpOption{
-		{"-c --complete", "Used for completions"},
-		{"-d --defaultconfig", "Print default yay configuration"},
-		{"-g --currentconfig", "Print current yay configuration"},
-		{"-s --stats", "Display system package statistics"},
-		{"-w --news", "Print arch news"},
-		{"-q --quiet", "Only show titles when printing news"},
-	}},
-	{"W", "web", "[options] [package(s)]", []helpOption{
-		{"-u --unvote", "Remove a vote from AUR package(s)"},
-		{"-v --vote", "Vote for AUR package(s)"},
-	}},
-	{"Y", "yay", "[options] [package(s)]", []helpOption{
-		{"-c --clean", "Remove unneeded dependencies (-cc to ignore optdepends)"},
-		{"   --gendb", "Generates development package DB used for updating"},
-	}},
+type usageOption struct {
+	flags       string
+	description string
+}
+
+func yayOperationHelp() []operationHelp {
+	strOptions := gotext.Get("options")
+	strDir := gotext.Get("dir")
+	strPackage := gotext.Get("package(s)")
+
+	return []operationHelp{
+		{"B", "build", fmt.Sprintf("[%s] [%s]", strOptions, strDir), []helpOption{
+			{"-i --install", gotext.Get("Build and install a PKGBUILD")},
+		}},
+		{"G", "getpkgbuild", fmt.Sprintf("[%s] [%s]", strOptions, strPackage), []helpOption{
+			{"-f --force", gotext.Get("Force download for existing ABS packages")},
+			{"-p --print", gotext.Get("Print pkgbuild of packages")},
+		}},
+		{"P", "show", fmt.Sprintf("[%s]", strOptions), []helpOption{
+			{"-c --complete", gotext.Get("Used for completions")},
+			{"-d --defaultconfig", gotext.Get("Print default yay configuration")},
+			{"-g --currentconfig", gotext.Get("Print current yay configuration")},
+			{"-s --stats", gotext.Get("Display system package statistics")},
+			{"-w --news", gotext.Get("Print arch news")},
+			{"-q --quiet", gotext.Get("Only show titles when printing news")},
+		}},
+		{"W", "web", fmt.Sprintf("[%s] [%s]", strOptions, strPackage), []helpOption{
+			{"-u --unvote", gotext.Get("Remove a vote from AUR package(s)")},
+			{"-v --vote", gotext.Get("Vote for AUR package(s)")},
+		}},
+		{"Y", "yay", fmt.Sprintf("[%s] [%s]", strOptions, strPackage), []helpOption{
+			{"-c --clean", gotext.Get("Remove unneeded dependencies (-cc to ignore optdepends)")},
+			{"   --gendb", gotext.Get("Generates development package DB used for updating")},
+		}},
+	}
 }
 
 func (h *operationHelp) syntax() string {
@@ -69,8 +80,9 @@ func (h *operationHelp) syntax() string {
 }
 
 func findYayOperationHelp(operation string) *operationHelp {
-	for i := range yayOperationHelp {
-		help := &yayOperationHelp[i]
+	operations := yayOperationHelp()
+	for i := range operations {
+		help := &operations[i]
 		if operation == help.short || operation == help.long {
 			return help
 		}
@@ -79,101 +91,123 @@ func findYayOperationHelp(operation string) *operationHelp {
 	return nil
 }
 
-func usage(logger *text.Logger) {
-	logger.Println(`Usage:
-    yay
-    yay <operation> [...]
-    yay <package(s)>
+func printUsageOptions(logger *text.Logger, title string, options []usageOption) {
+	logger.Println("\n" + title)
+	for _, option := range options {
+		if option.flags == "" && option.description == "" {
+			logger.Println("")
+			continue
+		}
 
-operations:
-    yay {-h --help}
-    yay {-V --version}
-    yay {-D --database}    <options> <package(s)>
-    yay {-F --files}       [options] [package(s)]
-    yay {-Q --query}       [options] [package(s)]
-    yay {-R --remove}      [options] <package(s)>
-    yay {-S --sync}        [options] [package(s)]
-    yay {-T --deptest}     [options] [package(s)]
-    yay {-U --upgrade}     [options] <file(s)>`)
+		descriptionLines := strings.Split(option.description, "\n")
+		logger.Printf("    %-21s %s\n", option.flags, descriptionLines[0])
+		for _, line := range descriptionLines[1:] {
+			logger.Printf("    %-21s %s\n", "", line)
+		}
+	}
+}
+
+func usage(logger *text.Logger) {
+	strFile := gotext.Get("file(s)")
+	strOperation := gotext.Get("operation")
+	strOptions := gotext.Get("options")
+	strPackage := gotext.Get("package(s)")
+
+	logger.Println(gotext.Get("Usage:"))
+	logger.Println("    yay")
+	logger.Printf("    yay <%s> [...]\n", strOperation)
+	logger.Printf("    yay <%s>\n", strPackage)
+
+	logger.Println("\n" + gotext.Get("operations:"))
+	logger.Println("    yay {-h --help}")
+	logger.Println("    yay {-V --version}")
+	logger.Printf("    yay {-D --database}    <%s> <%s>\n", strOptions, strPackage)
+	logger.Printf("    yay {-F --files}       [%s] [%s]\n", strOptions, strPackage)
+	logger.Printf("    yay {-Q --query}       [%s] [%s]\n", strOptions, strPackage)
+	logger.Printf("    yay {-R --remove}      [%s] <%s>\n", strOptions, strPackage)
+	logger.Printf("    yay {-S --sync}        [%s] [%s]\n", strOptions, strPackage)
+	logger.Printf("    yay {-T --deptest}     [%s] [%s]\n", strOptions, strPackage)
+	logger.Printf("    yay {-U --upgrade}     [%s] <%s>\n", strOptions, strFile)
 
 	// Yay-specific operations
-	logger.Println("\nNew operations:")
-	for i := range yayOperationHelp {
-		help := &yayOperationHelp[i]
+	logger.Println("\n" + gotext.Get("New operations:"))
+	operations := yayOperationHelp()
+	for i := range operations {
+		help := &operations[i]
 		logger.Printf("    %-22s %s\n", help.syntax(), help.targets)
 	}
-	logger.Println("\nuse 'yay {-h --help}' with an operation for available options")
+	logger.Println("\n" + gotext.Get("use 'yay {-h --help}' with an operation for available options"))
 
-	logger.Println(`
-If no operation is specified 'yay -Syu' will be performed
-If no operation is specified and targets are provided, -Y will be assumed
+	logger.Println("\n" + gotext.Get("If no operation is specified 'yay -Syu' will be performed"))
+	logger.Println(gotext.Get("If no operation is specified and targets are provided, -Y will be assumed"))
 
-New options:
-    -N --repo             Assume targets are from the repositories
-    -a --aur              Assume targets are from the AUR
+	printUsageOptions(logger, gotext.Get("New options:"), []usageOption{
+		{"-N --repo", gotext.Get("Assume targets are from the repositories")},
+		{"-a --aur", gotext.Get("Assume targets are from the AUR")},
+	})
 
-Permanent configuration options:
-    --save                Causes the following options to be saved back to the
-                          config file when used
-
-    --aururl      <url>   Set an alternative AUR URL
-    --aurrpcurl   <url>   Set an alternative URL for the AUR /rpc endpoint
-    --builddir    <dir>   Directory used to download and run PKGBUILDS
-    --editor      <file>  Editor to use when editing PKGBUILDs
-    --editorflags <flags> Pass arguments to editor
-    --makepkg     <file>  makepkg command to use
-    --mflags      <flags> Pass arguments to makepkg
-    --pacman      <file>  pacman command to use
-    --git         <file>  git command to use
-    --gitflags    <flags> Pass arguments to git
-    --gpg         <file>  gpg command to use
-    --gpgflags    <flags> Pass arguments to gpg
-    --config      <file>  pacman.conf file to use
-    --makepkgconf <file>  makepkg.conf file to use
-    --nomakepkgconf       Use the default makepkg.conf
-
-    --requestsplitn <n>   Max amount of packages to query per AUR request
-    --completioninterval  <n> Time in days to refresh completion cache
-    --sortby    <field>   Sort AUR results by a specific field during search
-    --searchby  <field>   Search for packages using a specified field
-    --answerclean   <a>   Set a predetermined answer for the clean build menu
-    --answerdiff    <a>   Set a predetermined answer for the diff menu
-    --answeredit    <a>   Set a predetermined answer for the edit pkgbuild menu
-    --answerupgrade <a>   Set a predetermined answer for the upgrade menu
-    --noanswerclean       Unset the answer for the clean build menu
-    --noanswerdiff        Unset the answer for the edit diff menu
-    --noansweredit        Unset the answer for the edit pkgbuild menu
-    --noanswerupgrade     Unset the answer for the upgrade menu
-    --cleanmenu           Give the option to clean build PKGBUILDS
-    --diffmenu            Give the option to show diffs for build files
-    --editmenu            Give the option to edit/view PKGBUILDS
-    --askremovemake       Ask to remove makedepends after install
-    --askyesremovemake    Ask to remove makedepends after install("Y" as default)
-    --removemake          Remove makedepends after install
-    --noremovemake        Don't remove makedepends after install
-
-    --cleanafter          Remove package sources after successful install
-    --keepsrc             Keep pkg/ and src/ after building packages
-    --bottomup            Shows AUR's packages first and then repository's
-    --topdown             Shows repository's packages first and then AUR's
-    --singlelineresults   List each search result on its own line
-    --doublelineresults   List each search result on two lines, like pacman
-
-    --devel               Check development packages during sysupgrade
-    --rebuild             Always build target packages
-    --rebuildall          Always build all AUR packages
-    --norebuild           Skip package build if in cache and up to date
-    --rebuildtree         Always build all AUR packages even if installed
-    --redownload          Always download pkgbuilds of targets
-    --noredownload        Skip pkgbuild download if in cache and up to date
-    --redownloadall       Always download pkgbuilds of all AUR packages
-    --provides            Look for matching providers when searching for packages
-    --pgpfetch            Prompt to import PGP keys from PKGBUILDs
-    --useask              Automatically resolve conflicts using pacman's ask flag
-
-    --sudo                <file>  sudo command to use
-    --sudoflags           <flags> Pass arguments to sudo
-    --sudoloop            Loop sudo calls in the background to avoid timeout`)
+	printUsageOptions(logger, gotext.Get("Permanent configuration options:"), []usageOption{
+		{"--save", gotext.Get("Causes the following options to be saved back to the\nconfig file when used")},
+		{},
+		{"--aururl <url>", gotext.Get("Set an alternative AUR URL")},
+		{"--aurrpcurl <url>", gotext.Get("Set an alternative URL for the AUR /rpc endpoint")},
+		{"--builddir <dir>", gotext.Get("Directory used to download and run PKGBUILDS")},
+		{"--editor <file>", gotext.Get("Editor to use when editing PKGBUILDs")},
+		{"--editorflags <flags>", gotext.Get("Pass arguments to editor")},
+		{"--makepkg <file>", gotext.Get("makepkg command to use")},
+		{"--mflags <flags>", gotext.Get("Pass arguments to makepkg")},
+		{"--pacman <file>", gotext.Get("pacman command to use")},
+		{"--git <file>", gotext.Get("git command to use")},
+		{"--gitflags <flags>", gotext.Get("Pass arguments to git")},
+		{"--gpg <file>", gotext.Get("gpg command to use")},
+		{"--gpgflags <flags>", gotext.Get("Pass arguments to gpg")},
+		{"--config <file>", gotext.Get("pacman.conf file to use")},
+		{"--makepkgconf <file>", gotext.Get("makepkg.conf file to use")},
+		{"--nomakepkgconf", gotext.Get("Use the default makepkg.conf")},
+		{},
+		{"--requestsplitn <n>", gotext.Get("Max amount of packages to query per AUR request")},
+		{"--completioninterval <n>", gotext.Get("Time in days to refresh completion cache")},
+		{"--sortby <field>", gotext.Get("Sort AUR results by a specific field during search")},
+		{"--searchby <field>", gotext.Get("Search for packages using a specified field")},
+		{"--answerclean <a>", gotext.Get("Set a predetermined answer for the clean build menu")},
+		{"--answerdiff <a>", gotext.Get("Set a predetermined answer for the diff menu")},
+		{"--answeredit <a>", gotext.Get("Set a predetermined answer for the edit pkgbuild menu")},
+		{"--answerupgrade <a>", gotext.Get("Set a predetermined answer for the upgrade menu")},
+		{"--noanswerclean", gotext.Get("Unset the answer for the clean build menu")},
+		{"--noanswerdiff", gotext.Get("Unset the answer for the edit diff menu")},
+		{"--noansweredit", gotext.Get("Unset the answer for the edit pkgbuild menu")},
+		{"--noanswerupgrade", gotext.Get("Unset the answer for the upgrade menu")},
+		{"--cleanmenu", gotext.Get("Give the option to clean build PKGBUILDS")},
+		{"--diffmenu", gotext.Get("Give the option to show diffs for build files")},
+		{"--editmenu", gotext.Get("Give the option to edit/view PKGBUILDS")},
+		{"--askremovemake", gotext.Get("Ask to remove makedepends after install")},
+		{"--askyesremovemake", gotext.Get("Ask to remove makedepends after install(\"Y\" as default)")},
+		{"--removemake", gotext.Get("Remove makedepends after install")},
+		{"--noremovemake", gotext.Get("Don't remove makedepends after install")},
+		{},
+		{"--cleanafter", gotext.Get("Remove package sources after successful install")},
+		{"--keepsrc", gotext.Get("Keep pkg/ and src/ after building packages")},
+		{"--bottomup", gotext.Get("Shows AUR's packages first and then repository's")},
+		{"--topdown", gotext.Get("Shows repository's packages first and then AUR's")},
+		{"--singlelineresults", gotext.Get("List each search result on its own line")},
+		{"--doublelineresults", gotext.Get("List each search result on two lines, like pacman")},
+		{},
+		{"--devel", gotext.Get("Check development packages during sysupgrade")},
+		{"--rebuild", gotext.Get("Always build target packages")},
+		{"--rebuildall", gotext.Get("Always build all AUR packages")},
+		{"--norebuild", gotext.Get("Skip package build if in cache and up to date")},
+		{"--rebuildtree", gotext.Get("Always build all AUR packages even if installed")},
+		{"--redownload", gotext.Get("Always download pkgbuilds of targets")},
+		{"--noredownload", gotext.Get("Skip pkgbuild download if in cache and up to date")},
+		{"--redownloadall", gotext.Get("Always download pkgbuilds of all AUR packages")},
+		{"--provides", gotext.Get("Look for matching providers when searching for packages")},
+		{"--pgpfetch", gotext.Get("Prompt to import PGP keys from PKGBUILDs")},
+		{"--useask", gotext.Get("Automatically resolve conflicts using pacman's ask flag")},
+		{},
+		{"--sudo <file>", gotext.Get("sudo command to use")},
+		{"--sudoflags <flags>", gotext.Get("Pass arguments to sudo")},
+		{"--sudoloop", gotext.Get("Loop sudo calls in the background to avoid timeout")},
+	})
 }
 
 func operationUsage(logger *text.Logger, operation string) {
@@ -182,10 +216,12 @@ func operationUsage(logger *text.Logger, operation string) {
 		return
 	}
 
-	logger.Printf("Usage: %s %s\noptions:\n", help.syntax(), help.targets)
+	logger.Print(gotext.Get("Usage: %s %s\noptions:\n", help.syntax(), help.targets))
 	for _, option := range help.options {
 		logger.Printf("    %-21s %s\n", option.flags, option.description)
 	}
+
+	logger.Println("\n" + gotext.Get("use 'yay {-h --help}' for global options"))
 }
 
 func handleCmd(ctx context.Context, run *runtime.Runtime,
