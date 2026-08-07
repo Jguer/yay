@@ -339,7 +339,7 @@ msgstr "Впервые загружен на AUR"
 
 #: pkg/query/aur_warnings.go:83
 msgid "Flagged Out Of Date AUR Packages:"
-msgstr "Пакеты AUR, помеченные как устаревшие:"
+msgstr "Пакеты AUR, отмеченные как устаревшие:"
 
 #: cmd.go:56
 msgid "Force download for existing ABS packages"
