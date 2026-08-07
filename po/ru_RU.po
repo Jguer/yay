@@ -689,7 +689,7 @@ msgstr "Сначала показывать пакеты из репозитор
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
-msgstr "Размер кэша \"pacman\""
+msgstr "Размер кэша pacman %s: %s"
 
 #: print.go:98
 msgid "Size of yay cache %s: %s"
