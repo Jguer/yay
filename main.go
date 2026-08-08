@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"os/signal"
 	"runtime/debug"
 	"strings"
 
@@ -41,13 +42,18 @@ func initGotext() {
 	}
 }
 
+func newSignalContext() (context.Context, context.CancelFunc) {
+	return signal.NotifyContext(context.Background(), os.Interrupt)
+}
+
 func main() {
 	fallbackLog := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, false, "fallback")
 	var (
-		err error
-		ctx = context.Background()
-		ret = 0
+		err       error
+		ctx, stop = newSignalContext()
+		ret       = 0
 	)
+	defer stop()
 
 	defer func() {
 		if rec := recover(); rec != nil {
