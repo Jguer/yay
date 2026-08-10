@@ -1,9 +1,9 @@
 {
-  "last_run": "2026-08-09T13:14:21Z",
-  "run_id": "31315220656",
+  "last_run": "2026-08-10T01:21:25Z",
+  "run_id": "31346808767",
   "backlog_cursor": {
-    "issues": 2918,
-    "comment": "Investigated issue #2831; continue oldest-first review from the live backlog."
+    "issues": 2891,
+    "comment": "Investigated issue #2891; continue oldest-first review from the live backlog."
   },
   "comments_made": {
     "1761": "2026-07-14 - explained src/ removal is makepkg behaviour; suggested --skipextract",
@@ -13,7 +13,8 @@
     "2918": "2026-08-08 - identified default SIGINT termination as the likely reason deferred ALPM cleanup does not run"
     ,    "2831": "2026-08-09 - explained that the existing Configuration.Pager/runPager abstraction can support configurable -Gp output without changing the default",
     "2478": "2026-08-09 - noted current next forces --no-pager and routes diffs through the centralized pager",
-    "2290": "2026-08-09 - traced repeated provider prompts to the libalpm provider question callback"
+    "2290": "2026-08-09 - traced repeated provider prompts to the libalpm provider question callback",
+    "2891": "2026-08-10 - traced destructive git reset/clean cleanup paths to reported data loss"
   },
   "prs_created": [
     "repo-assist/improve-deduplicate-vcs-updates",
@@ -24,9 +25,10 @@
     "repo-assist/improve-normalize-search-terms-20260722",
     "repo-assist/improve-search-filter-unknown-results-20260723",
     "repo-assist/fix-query-search-test-contract-20260731",
-    "repo-assist/fix-issue-2895-localized-menu-shortcuts"
+    "repo-assist/fix-issue-2895-localized-menu-shortcuts",
+    "repo-assist/fix-issue-2805-nocombinedupgrade"
   ],
-  "last_run_note": "Selected tasks 3, 2, and 4. No safe duplicate-free bug fix was available because stale-lock and pager work already has active PRs. Commented on #2478 and #2290 with code-based investigation. No actionable dependency or CI improvement was identified.",
+  "last_run_note": "Selected tasks 3, 2, and 1. Created a draft fix for #2805 adding --nocombinedupgrade, commented on #2891 with the destructive cleanup root cause, and labelled #2814 and #2831 help wanted. Updated August summary #2953.",
   "monthly_summary_issue": {
     "title": "[repo-assist] Monthly Activity 2026-08",
     "month": "2026-08"
@@ -50,5 +52,5 @@
       ]
     }
   ],
-  "notes": "Draft PR #2952 fixes localized selection shortcuts for #2895. Draft PR #2962 addresses SIGINT cleanup for #2918. Existing contributor PRs cover #2764, #2478-related pager work (#2832), and stale-lock work (#2809); do not duplicate them. Known query test-contract fix is on origin/repo-assist/fix-query-search-test-contract-20260731-2d2ff1b0b20d52f2. Earlier runs also recorded environment limits: missing libalpm.so, pacman-conf, covdata, golangci-lint, and incompatible Go versions. Unlabelled issues #2881, #2831, and #2814 remain because the repository's available labels do not include the matching documentation/enhancement names; #2713 received help wanted and #2952 received bug. This run found no actionable dependency or CI update."
+  "notes": "Draft PR #2952 fixes localized selection shortcuts for #2895. Draft PR #2962 addresses SIGINT cleanup for #2918. Draft PR for #2805 adds --nocombinedupgrade and a parser regression test. Existing contributor PRs cover #2764, #2478-related pager work (#2832), and stale-lock work (#2809); do not duplicate them. Known query test-contract fix is on origin/repo-assist/fix-query-search-test-contract-20260731-2d2ff1b0b20d52f2. Earlier runs also recorded environment limits: missing libalpm.so, pacman-conf, covdata, golangci-lint, and incompatible Go versions. #2814 and #2831 are now labelled help wanted; #2881 remains unlabelled because no matching safe label is available. #2713 received help wanted and #2952 received bug."
 }
