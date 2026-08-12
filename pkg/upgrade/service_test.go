@@ -838,6 +838,53 @@ func TestUpgradeService_UserExcludeUpgradesWithoutLuaHookUsesNativeMenu(t *testi
 	assert.False(t, graph.Exists("new-dep"))
 }
 
+func TestUpgradeService_UserExcludeUpgradesNoUpgradeMenuAvoidsInput(t *testing.T) {
+	t.Parallel()
+	graph := newUpgradeSelectTestGraph(t)
+	var output strings.Builder
+	logger := text.NewLogger(&output, io.Discard, strings.NewReader(""), true, "test")
+	u := newUpgradeSelectTestService(strings.NewReader(""), nil)
+	u.log = logger
+	u.cfg.NoUpgradeMenu = true
+
+	excluded, err := u.UserExcludeUpgrades(graph)
+	require.NoError(t, err)
+
+	assert.Empty(t, excluded)
+	assert.True(t, graph.Exists("linux"))
+	assert.True(t, graph.Exists("yay"))
+	assert.True(t, graph.Exists("example-git"))
+	assert.True(t, graph.Exists("new-dep"))
+	assert.Contains(t, output.String(), "to upgrade/install")
+	assert.NotContains(t, output.String(), "Packages to exclude")
+}
+
+func TestUpgradeService_UserExcludeUpgradesNoUpgradeMenuStillRunsLuaHook(t *testing.T) {
+	t.Parallel()
+	engine := settingslua.New()
+	defer engine.Close()
+	require.NoError(t, engine.L.DoString(`
+		yay.create_autocmd("UpgradeSelect", {
+			callback = function()
+				return { exclude = { "example-git" } }
+			end,
+		})
+	`))
+
+	graph := newUpgradeSelectTestGraph(t)
+	u := newUpgradeSelectTestService(strings.NewReader(""), engine)
+	u.cfg.NoUpgradeMenu = true
+
+	excluded, err := u.UserExcludeUpgrades(graph)
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []string{"example-git", "new-dep"}, excluded)
+	assert.True(t, graph.Exists("linux"))
+	assert.True(t, graph.Exists("yay"))
+	assert.False(t, graph.Exists("example-git"))
+	assert.False(t, graph.Exists("new-dep"))
+}
+
 func TestUpgradeService_UserExcludeUpgradesLuaHookPrunesGraph(t *testing.T) {
 	t.Parallel()
 	engine := settingslua.New()
