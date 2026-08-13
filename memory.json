@@ -16,7 +16,8 @@
     "2290": "2026-08-09 - traced repeated provider prompts to the libalpm provider question callback",
     "2891": "2026-08-10 - traced destructive git reset/clean cleanup paths to reported data loss",
     "2903": "2026-08-11 - recommended an incremental JSON-first output design and explained format trade-offs",
-    "2965": "2026-08-12 - linked draft PR #2966 and explained that the diff compares against an upstream revision while retaining local commits"
+    "2965": "2026-08-12 - linked draft PR #2966 and explained that the diff compares against an upstream revision while retaining local commits",
+    "2814": "2026-08-13 - explained the existing answerupgrade path and proposed a dedicated no-exclude option"
   },
   "prs_created": [
     "repo-assist/improve-deduplicate-vcs-updates",
@@ -32,12 +33,20 @@
     "repo-assist/fix-issue-2805-nocombinedupgrade",
     "repo-assist/test-pacman-config-overrides"
   ],
-  "last_run_note": "Selected tasks 2, 3, and 5. Commented on #2965 and linked draft PR #2966. No duplicate-free fix or clearly beneficial low-risk coding/testing improvement was available. Updated August summary #2953.",
+  "last_run_note": "Selected tasks 3, 2, and 5. Commented on #2814 with the existing answerupgrade path and a focused no-exclude option design. No duplicate-free fix or clearly beneficial low-risk coding improvement was available. Updated August summary #2953.",
   "monthly_summary_issue": {
     "title": "[repo-assist] Monthly Activity 2026-08",
     "month": "2026-08"
   },
   "run_history": [
+    {
+      "date": "2026-08-13",
+      "actions": [
+        "Selected tasks 3, 2, and 5; no duplicate-free fix or clearly beneficial low-risk coding improvement was available",
+        "Commented on #2814 with the existing answerupgrade path and a focused no-exclude option design",
+        "Updated August summary #2953"
+      ]
+    },
     {
       "date": "2026-08-12",
       "actions": [
