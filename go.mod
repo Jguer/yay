@@ -11,9 +11,9 @@ require (
 	github.com/deckarep/golang-set/v2 v2.9.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/leonelquinteros/gotext v1.7.2
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	github.com/yuin/gopher-lua v1.1.2
-	golang.org/x/net v0.57.0
+	golang.org/x/net v0.58.0
 	golang.org/x/sys v0.47.0
 	golang.org/x/term v0.45.0
 	gopkg.in/h2non/gock.v1 v1.1.2
