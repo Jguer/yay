@@ -1,9 +1,9 @@
 {
-  "last_run": "2026-08-14T01:21:29Z",
-  "run_id": "31760269067",
+  "last_run": "2026-08-18T02:07:41Z",
+  "run_id": "32090617057",
   "backlog_cursor": {
-    "issues": 2969,
-    "comment": "Reviewed the live backlog through #2969; #2965 is already covered by draft PR #2966, #2073 already has the provider-context investigation, and no separate engineering improvement was available."
+    "issues": 2973,
+    "comment": "Reviewed the live backlog through #2973; prepared a fix for #2973, which was not covered by existing Repo Assist work. Dependabot PR #2974 covers the actionable dependency update."
   },
   "comments_made": {
     "1761": "2026-07-14 - explained src/ removal is makepkg behaviour; suggested --skipextract",
@@ -19,6 +19,7 @@
     "2965": "2026-08-12 - linked draft PR #2966 and explained that the diff compares against an upstream revision while retaining local commits",
     "2814": "2026-08-13 - explained the existing answerupgrade path and proposed a dedicated no-exclude option",
     "2073": "2026-08-13 - explained the libalpm/dyalpm prerequisite for provider context"
+    ,"2973": "2026-08-18 - identified needToCloneAURBase ignoring redownload=yes and prepared a focused fix"
   },
   "prs_created": [
     "repo-assist/improve-deduplicate-vcs-updates",
@@ -33,13 +34,23 @@
     "repo-assist/fix-issue-2895-localized-menu-shortcuts",
     "repo-assist/fix-issue-2805-nocombinedupgrade",
     "repo-assist/test-pacman-config-overrides"
+    ,"repo-assist/fix-issue-2973-redownload-targets"
   ],
-  "last_run_note": "Selected tasks 3, 2, and 4. No duplicate-free fix was available because #2965 is covered by PR #2966; #2073 already has a substantive investigation; no actionable dependency or CI improvement was identified. Labelled #2881 as documentation and updated August summary #2953.",
+  "last_run_note": "Selected tasks 3, 2, and 4. Fixed #2973 by honoring redownload=yes for explicit AUR targets with regression coverage, commented on the issue, and updated August summary #2953. Existing Dependabot PR #2974 covers the actionable dependency update.",
   "monthly_summary_issue": {
     "title": "[repo-assist] Monthly Activity 2026-08",
     "month": "2026-08"
   },
   "run_history": [
+    {
+      "date": "2026-08-18",
+      "actions": [
+        "Prepared draft fix branch repo-assist/fix-issue-2973-redownload-targets for #2973",
+        "Commented on #2973 with the needToCloneAURBase root cause and fix approach",
+        "Reviewed Dependabot PR #2974; no duplicate dependency PR was created",
+        "Updated August summary #2953"
+      ]
+    },
     {
       "date": "2026-08-14",
       "actions": [
