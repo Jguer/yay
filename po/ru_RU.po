@@ -4,10 +4,10 @@
 # antsif.a, 2022
 # Demir Yerli, 2022
 # Антон Карасев <uselessfire@gmail.com>, 2023
+# falixfresh, 2024
 # Ravenso BlacK, 2024
 # Victor Golovanenko <drygdryg2014@yandex.ru>, 2024
 # Vladislav Zenkov, 2024
-# falixfresh, 2024
 # Kira Malinova, 2024
 # Dancheg97 F, 2024
 # Vladislav Grechannik, 2024
@@ -1047,9 +1047,9 @@ msgstr "параметры"
 msgid "package"
 msgid_plural "packages"
 msgstr[0] "пакет"
-msgstr[1] "пакеты"
-msgstr[2] "пакеты"
-msgstr[3] "пакеты"
+msgstr[1] "пакета"
+msgstr[2] "пакетов"
+msgstr[3] "пакетов"
 
 #: print.go:191
 msgid "package '%s' was not found"
