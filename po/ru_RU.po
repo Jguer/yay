@@ -516,7 +516,7 @@ msgstr "Группа пакетов"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "ID группы пакетов"
+msgstr "Идентификатор группы пакетов"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
