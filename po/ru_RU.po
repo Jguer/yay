@@ -158,7 +158,7 @@ msgstr "AUR"
 
 #: print.go:44
 msgid "AUR URL"
-msgstr "AUR URL"
+msgstr "Адрес AUR"
 
 #: pkg/menus/edit_menu.go:58
 msgid "Add %s or %s to your environment variables"
