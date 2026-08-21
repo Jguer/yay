@@ -704,7 +704,7 @@ msgstr "Пропускать загрузку PKGBUILD, если он есть �
 
 #: print.go:62
 msgid "Snapshot URL"
-msgstr "URL архива"
+msgstr "Адрес снимка"
 
 #: cmd.go:170
 msgid "Sort AUR results by a specific field during search"
