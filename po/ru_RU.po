@@ -536,7 +536,7 @@ msgstr "Пакеты для исключения: (напр.: \"1 2 3\", \"1-3\"
 
 #: cmd.go:478
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
-msgstr "Пакеты для установки (пример: 1 2 3, 1-3 или ^4)"
+msgstr "Пакеты для установки (напр.: 1 2 3, 1-3 или ^4)"
 
 #: cmd.go:156
 msgid "Pass arguments to editor"
