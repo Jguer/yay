@@ -748,7 +748,7 @@ msgstr "Попытаться собрать их, несмотря на несо
 
 #: print.go:34
 msgid "URL"
-msgstr "URL"
+msgstr "Адрес"
 
 #: clean.go:210 pkg/menus/clean_menu.go:65 pkg/menus/clean_menu.go:71
 msgid "Unable to clean:"
