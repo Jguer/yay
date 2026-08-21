@@ -7,9 +7,9 @@
 # falixfresh, 2024
 # Ravenso BlacK, 2024
 # Victor Golovanenko <drygdryg2014@yandex.ru>, 2024
+# Dancheg97 F, 2024
 # Vladislav Zenkov, 2024
 # Kira Malinova, 2024
-# Dancheg97 F, 2024
 # Vladislav Grechannik, 2024
 # ratijas, 2024
 # Vladimir Yerilov, 2025
@@ -828,7 +828,7 @@ msgstr "прерывание по запросу пользователя"
 
 #: pkg/settings/parser/parser.go:606
 msgid "argument '-' specified without input on stdin"
-msgstr "аргумент '-' задан без ввода из stdin"
+msgstr "аргумент \"-\" задан без ввода из stdin"
 
 #: local_install.go:25
 msgid "cannot find PKGBUILD and .SRCINFO in directory"
