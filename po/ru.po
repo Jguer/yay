@@ -358,7 +358,7 @@ msgstr "Создаёт базу данных пакетов разработки
 
 #: cmd.go:180
 msgid "Give the option to clean build PKGBUILDS"
-msgstr "Предлагать очистку каталога сборки PKGBUILD"
+msgstr "Предлагать выполнять чистую сборку PKGBUILD"
 
 #: cmd.go:182
 msgid "Give the option to edit/view PKGBUILDS"
