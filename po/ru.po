@@ -731,7 +731,7 @@ msgstr "Время в днях для обновления кэша автодо
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
-msgstr "Суммарный размер, занятый пакетами: %s"
+msgstr "Общий размер, занятый пакетами: %s"
 
 #: print.go:89
 msgid "Total installed packages: %s"
