@@ -636,7 +636,7 @@ msgstr "SRCINFO"
 
 #: cmd.go:171
 msgid "Search for packages using a specified field"
-msgstr "Искать пакеты по указанному полю"
+msgstr "Искать пакеты по заданному полю"
 
 #: pkg/upgrade/service.go:97
 msgid "Searching AUR for updates..."
