@@ -346,7 +346,7 @@ msgstr "Установлено сторонних пакетов: %s"
 
 #: pkg/vcs/vcs.go:148
 msgid "Found git repo: %s"
-msgstr "Найден git репозиторий: %s"
+msgstr "Найден git-репозиторий: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
