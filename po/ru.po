@@ -342,7 +342,7 @@ msgstr "Принудительно загружать существующие A
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
-msgstr "Cторонних пакетов установлено: "
+msgstr "Установлено сторонних пакетов: %s"
 
 #: pkg/vcs/vcs.go:148
 msgid "Found git repo: %s"
