@@ -105,7 +105,7 @@ msgstr "%s: игнорирование обновления пакета (%s => 
 
 #: pkg/query/aur_warnings.go:46
 msgid "%s: local (%s) is newer than AUR (%s)"
-msgstr "%s: локальный пакет (%s) новее, чем в AUR (%s)"
+msgstr "%s: локальная версия (%s) новее, чем в AUR (%s)"
 
 #: vote.go:51
 msgid ""
