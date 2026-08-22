@@ -350,7 +350,7 @@ msgstr "Найден git-репозиторий: %s"
 
 #: vcs.go:72
 msgid "GenDB finished. No packages were installed"
-msgstr "Генерирование БД завершено. Никакие пакеты не были установлены"
+msgstr "Генерация БД завершена. Пакеты не устанавливались"
 
 #: cmd.go:73
 msgid "Generates development package DB used for updating"
