@@ -371,7 +371,7 @@ msgstr "Предлагать правку/просмотр PKGBUILD"
 
 #: cmd.go:181
 msgid "Give the option to show diffs for build files"
-msgstr "Предлагать показывать изменения в файлах сборки"
+msgstr "Предлагать показывать различия (diff) в файлах сборки"
 
 #: print.go:36
 msgid "Groups"
