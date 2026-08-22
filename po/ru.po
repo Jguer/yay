@@ -326,7 +326,7 @@ msgstr "Ошибка установки слоя, переход на следу
 msgid ""
 "Failed to install the following packages. Manual intervention is required:"
 msgstr ""
-"Не удалось установить следующие пакеты — требуется ручное вмешательство:"
+"Не удалось установить следующие пакеты. Необходимо ручное вмешательство:"
 
 #: print.go:45
 msgid "First Submitted"
