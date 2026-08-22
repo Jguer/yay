@@ -684,7 +684,7 @@ msgstr "Сначала показывать пакеты из AUR, затем и
 
 #: cmd.go:191
 msgid "Shows repository's packages first and then AUR's"
-msgstr "Сначала показывать пакеты из репозиториев, затем AUR"
+msgstr "Сначала показывать пакеты из репозиториев, затем из AUR"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
