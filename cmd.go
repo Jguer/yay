@@ -92,6 +92,8 @@ func findYayOperationHelp(operation string) *operationHelp {
 }
 
 func printUsageOptions(logger *text.Logger, title string, options []usageOption) {
+	flagWidth := 21
+
 	logger.Println("\n" + title)
 	for _, option := range options {
 		if option.flags == "" && option.description == "" {
@@ -100,9 +102,15 @@ func printUsageOptions(logger *text.Logger, title string, options []usageOption)
 		}
 
 		descriptionLines := strings.Split(option.description, "\n")
-		logger.Printf("    %-21s %s\n", option.flags, descriptionLines[0])
+		if len(option.flags) > flagWidth {
+			// Print the description on the next line if the flags are too long
+			logger.Printf("    %s\n", option.flags)
+			logger.Printf("    %-*s %s\n", flagWidth, "", descriptionLines[0])
+		} else {
+			logger.Printf("    %-*s %s\n", flagWidth, option.flags, descriptionLines[0])
+		}
 		for _, line := range descriptionLines[1:] {
-			logger.Printf("    %-21s %s\n", "", line)
+			logger.Printf("    %-*s %s\n", flagWidth, "", line)
 		}
 	}
 }
