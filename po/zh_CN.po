@@ -10,17 +10,17 @@
 # CloverGit, 2024
 # qsdwindows <2687267056@qq.com>, 2025
 # Haowen Shi, 2025
+# 星宇 房, 2026
 # 山外 呆萌, 2026
-#
+# 
 msgid ""
 msgstr ""
 "Last-Translator: 山外 呆萌, 2026\n"
-"Language-Team: Chinese (China) (https://app.transifex.com/yay-1/teams/123732/"
-"zh_CN/)\n"
-"Language: zh_CN\n"
+"Language-Team: Chinese (China) (https://app.transifex.com/yay-1/teams/123732/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: xgotext\n"
 
@@ -110,7 +110,8 @@ msgstr "%s: 本地 (%s) 比 AUR (%s) 更新"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr "%s: 请设置 AUR_USERNAME 与 AUR_PASSWORD 环境变量以投票"
 
 #: pkg/download/unified.go:193
@@ -159,46 +160,43 @@ msgstr "将 %s 或 %s 添加到你的环境变量"
 
 #: cmd.go:197
 msgid "Always build all AUR packages"
-msgstr ""
+msgstr "总是构建所有 AUR 软件包"
 
 #: cmd.go:199
 msgid "Always build all AUR packages even if installed"
-msgstr ""
+msgstr "即使 AUR 套件已安裝，也一律建置"
 
 #: cmd.go:196
-#, fuzzy
 msgid "Always build target packages"
-msgstr "十个最大的软件包:"
+msgstr "一律建置目標套件"
 
 #: cmd.go:202
 msgid "Always download pkgbuilds of all AUR packages"
-msgstr ""
+msgstr "一律下載所有 AUR 套件的 PKGBUILD"
 
 #: cmd.go:200
 msgid "Always download pkgbuilds of targets"
-msgstr ""
+msgstr "一律下載目標套件的 PKGBUILD"
 
 #: cmd.go:183
-#, fuzzy
 msgid "Ask to remove makedepends after install"
-msgstr "安装后删除构建依赖？"
+msgstr "詢問是否在安裝後移除建置相依套件"
 
 #: cmd.go:184
-#, fuzzy
 msgid "Ask to remove makedepends after install(\"Y\" as default)"
-msgstr "安装后删除构建依赖？"
+msgstr "詢問是否在安裝後移除建置相依套件（預設為「Y」）"
 
 #: cmd.go:146
 msgid "Assume targets are from the AUR"
-msgstr ""
+msgstr "將目標視為來自 AUR"
 
 #: cmd.go:145
 msgid "Assume targets are from the repositories"
-msgstr ""
+msgstr "將目標視為來自儲存庫"
 
 #: cmd.go:205
 msgid "Automatically resolve conflicts using pacman's ask flag"
-msgstr ""
+msgstr "使用 pacman 的 ask 旗標自動解決衝突"
 
 #: main.go:65
 msgid "Avoid running yay as root/sudo."
@@ -206,13 +204,15 @@ msgstr "避免以 root/sudo 运行 yay。"
 
 #: cmd.go:53
 msgid "Build and install a PKGBUILD"
-msgstr ""
+msgstr "建置並安裝 PKGBUILD"
 
 #: cmd.go:150
 msgid ""
 "Causes the following options to be saved back to the\n"
 "config file when used"
 msgstr ""
+"使用時會將下列選項儲存回\n"
+"設定檔"
 
 #: pkg/dep/dep_graph.go:67
 msgid "Check Dependency"
@@ -223,9 +223,8 @@ msgid "Check Deps"
 msgstr "检查依赖"
 
 #: cmd.go:195
-#, fuzzy
 msgid "Check development packages during sysupgrade"
-msgstr "正在检查开发包..."
+msgstr "系統升級時檢查開發套件"
 
 #: pkg/upgrade/service.go:115
 msgid "Checking development packages..."
@@ -261,7 +260,7 @@ msgstr "显示哪些包的差异？"
 
 #: cmd.go:154
 msgid "Directory used to download and run PKGBUILDS"
-msgstr ""
+msgstr "用於下載及執行 PKGBUILD 的目錄"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
@@ -269,7 +268,7 @@ msgstr "默认禁用 'provides' 设置"
 
 #: cmd.go:63
 msgid "Display system package statistics"
-msgstr ""
+msgstr "顯示系統套件統計資訊"
 
 #: clean.go:94
 msgid "Do you want to remove ALL AUR packages from cache?"
@@ -284,9 +283,8 @@ msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "你是否要从缓存中删除所有其他 AUR 软件包？"
 
 #: cmd.go:186
-#, fuzzy
 msgid "Don't remove makedepends after install"
-msgstr "安装后删除构建依赖？"
+msgstr "不要在安裝後移除建置相依套件"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
@@ -294,7 +292,7 @@ msgstr "使用什么来编辑 PKGBUILD？"
 
 #: cmd.go:155
 msgid "Editor to use when editing PKGBUILDs"
-msgstr ""
+msgstr "編輯 PKGBUILD 時使用的編輯器"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
@@ -335,7 +333,7 @@ msgstr "标记为过时的 AUR 软件包:"
 
 #: cmd.go:56
 msgid "Force download for existing ABS packages"
-msgstr ""
+msgstr "強制下載現有的 ABS 套件"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
@@ -351,19 +349,19 @@ msgstr "GenDB 完成。 没有安装任何软件包"
 
 #: cmd.go:73
 msgid "Generates development package DB used for updating"
-msgstr ""
+msgstr "產生用於更新的開發套件資料庫"
 
 #: cmd.go:180
 msgid "Give the option to clean build PKGBUILDS"
-msgstr ""
+msgstr "提供清理 PKGBUILD 建置檔案的選項"
 
 #: cmd.go:182
 msgid "Give the option to edit/view PKGBUILDS"
-msgstr ""
+msgstr "提供編輯／檢視 PKGBUILD 的選項"
 
 #: cmd.go:181
 msgid "Give the option to show diffs for build files"
-msgstr ""
+msgstr "提供顯示建置檔差異的選項"
 
 #: print.go:36
 msgid "Groups"
@@ -371,12 +369,12 @@ msgstr "组"
 
 #: cmd.go:141
 msgid "If no operation is specified 'yay -Syu' will be performed"
-msgstr ""
+msgstr "若未指定操作，將執行「yay -Syu」"
 
 #: cmd.go:142
 msgid ""
 "If no operation is specified and targets are provided, -Y will be assumed"
-msgstr ""
+msgstr "若未指定操作但提供了目標，將視為使用「-Y」"
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
@@ -388,7 +386,7 @@ msgstr "正在导入 GPG 密钥..."
 
 #: cmd.go:189
 msgid "Keep pkg/ and src/ after building packages"
-msgstr ""
+msgstr "建置套件後保留 pkg/ 和 src/"
 
 #: print.go:46
 msgid "Keywords"
@@ -404,11 +402,11 @@ msgstr "许可证"
 
 #: cmd.go:192
 msgid "List each search result on its own line"
-msgstr ""
+msgstr "每個搜尋結果各列一行"
 
 #: cmd.go:193
 msgid "List each search result on two lines, like pacman"
-msgstr ""
+msgstr "每個搜尋結果列成兩行，如 pacman"
 
 #: pkg/dep/dep_graph.go:81
 msgid "Local"
@@ -416,11 +414,11 @@ msgstr "本地"
 
 #: cmd.go:203
 msgid "Look for matching providers when searching for packages"
-msgstr ""
+msgstr "搜尋套件時尋找相符的提供者"
 
 #: cmd.go:209
 msgid "Loop sudo calls in the background to avoid timeout"
-msgstr ""
+msgstr "在背景中重複呼叫 sudo，以避免逾時"
 
 #: print.go:48
 msgid "Maintainer"
@@ -436,7 +434,7 @@ msgstr "构建依赖"
 
 #: cmd.go:168
 msgid "Max amount of packages to query per AUR request"
-msgstr ""
+msgstr "每次 AUR 請求最多查詢的套件數量"
 
 #: pkg/dep/dep_graph.go:83
 msgid "Missing"
@@ -451,13 +449,12 @@ msgid "Name"
 msgstr "名称"
 
 #: cmd.go:133
-#, fuzzy
 msgid "New operations:"
-msgstr "未处理的操作"
+msgstr "新增操作："
 
 #: cmd.go:144
 msgid "New options:"
-msgstr ""
+msgstr "新增選項："
 
 #: pkg/dep/dep_graph.go:444 pkg/dep/dep_graph.go:586 query.go:98
 msgid "No AUR package found for"
@@ -469,7 +466,7 @@ msgstr "找不到包"
 
 #: clean.go:83
 msgid "No valid pacman cache directories found. Skipping cache clean."
-msgstr ""
+msgstr "找不到有效的 pacman 快取目錄。跳過快取清理。"
 
 #: print.go:229
 msgid "None"
@@ -477,7 +474,7 @@ msgstr "没有"
 
 #: cmd.go:65
 msgid "Only show titles when printing news"
-msgstr ""
+msgstr "顯示新聞時僅顯示標題"
 
 #: print.go:39
 msgid "Optional Deps"
@@ -533,27 +530,27 @@ msgstr "要安装的包 (示例: 1 2 3, 1-3 或 ^4)"
 
 #: cmd.go:156
 msgid "Pass arguments to editor"
-msgstr ""
+msgstr "將參數傳遞給編輯器"
 
 #: cmd.go:161
 msgid "Pass arguments to git"
-msgstr ""
+msgstr "將參數傳遞給 git"
 
 #: cmd.go:163
 msgid "Pass arguments to gpg"
-msgstr ""
+msgstr "將參數傳遞給 gpg"
 
 #: cmd.go:158
 msgid "Pass arguments to makepkg"
-msgstr ""
+msgstr "將參數傳遞給 makepkg"
 
 #: cmd.go:208
 msgid "Pass arguments to sudo"
-msgstr ""
+msgstr "將參數傳遞給 sudo"
 
 #: cmd.go:149
 msgid "Permanent configuration options:"
-msgstr ""
+msgstr "永久設定選項："
 
 #: print.go:49
 msgid "Popularity"
@@ -561,19 +558,19 @@ msgstr "受欢迎度"
 
 #: cmd.go:64
 msgid "Print arch news"
-msgstr ""
+msgstr "顯示 Arch 新聞"
 
 #: cmd.go:62
 msgid "Print current yay configuration"
-msgstr ""
+msgstr "顯示目前的 yay 設定"
 
 #: cmd.go:61
 msgid "Print default yay configuration"
-msgstr ""
+msgstr "顯示預設的 yay 設定"
 
 #: cmd.go:57
 msgid "Print pkgbuild of packages"
-msgstr ""
+msgstr "顯示套件的 PKGBUILD"
 
 #: pkg/menus/diff_menu.go:213 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
@@ -581,7 +578,7 @@ msgstr "继续安装？"
 
 #: cmd.go:204
 msgid "Prompt to import PGP keys from PKGBUILDs"
-msgstr ""
+msgstr "提示從 PKGBUILD 匯入 PGP 金鑰"
 
 #: print.go:37
 msgid "Provides"
@@ -589,25 +586,23 @@ msgstr "提供"
 
 #: cmd.go:68
 msgid "Remove a vote from AUR package(s)"
-msgstr ""
+msgstr "取消對 AUR 套件的投票"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
 msgstr "安装后删除构建依赖？"
 
 #: cmd.go:185
-#, fuzzy
 msgid "Remove makedepends after install"
-msgstr "安装后删除构建依赖？"
+msgstr "安裝後移除建置相依套件"
 
 #: cmd.go:188
-#, fuzzy
 msgid "Remove package sources after successful install"
-msgstr "安装后删除构建依赖？"
+msgstr "成功安裝後移除套件原始碼"
 
 #: cmd.go:72
 msgid "Remove unneeded dependencies (-cc to ignore optdepends)"
-msgstr ""
+msgstr "移除不需要的相依套件（使用 -cc 忽略可選相依套件）"
 
 #: print.go:43
 msgid "Replaces"
@@ -622,9 +617,8 @@ msgid "Repository AUR"
 msgstr "AUR 软件库"
 
 #: pkg/settings/migrations.go:45
-#, fuzzy
 msgid "Reset 'sortby' setting to default"
-msgstr "默认禁用 'provides' 设置"
+msgstr "將「sortby」設定重設為預設值"
 
 #: pkg/dep/dep_graph.go:82
 msgid "SRCINFO"
@@ -632,7 +626,7 @@ msgstr "SRCINFO"
 
 #: cmd.go:171
 msgid "Search for packages using a specified field"
-msgstr ""
+msgstr "使用指定欄位搜尋套件"
 
 #: pkg/upgrade/service.go:97
 msgid "Searching AUR for updates..."
@@ -644,31 +638,31 @@ msgstr "正在搜索数据库更新..."
 
 #: cmd.go:172
 msgid "Set a predetermined answer for the clean build menu"
-msgstr ""
+msgstr "設定清理建置選單的預設回答"
 
 #: cmd.go:173
 msgid "Set a predetermined answer for the diff menu"
-msgstr ""
+msgstr "設定差異選單的預設回答"
 
 #: cmd.go:174
 msgid "Set a predetermined answer for the edit pkgbuild menu"
-msgstr ""
+msgstr "設定編輯 PKGBUILD 選單的預設回答"
 
 #: cmd.go:175
 msgid "Set a predetermined answer for the upgrade menu"
-msgstr ""
+msgstr "設定升級選單的預設回答"
 
 #: cmd.go:152
 msgid "Set an alternative AUR URL"
-msgstr ""
+msgstr "設定替代的 AUR 網址"
 
 #: cmd.go:153
 msgid "Set an alternative URL for the AUR /rpc endpoint"
-msgstr ""
+msgstr "設定 AUR /rpc 端點的替代網址"
 
 #: pkg/menus/diff_menu.go:104
 msgid "Showing diff for %s"
-msgstr ""
+msgstr "正在顯示 %s 的差異"
 
 #: pkg/query/query_builder.go:273
 msgid "Showing repo packages only"
@@ -676,11 +670,11 @@ msgstr "仅显示软件库软件包"
 
 #: cmd.go:190
 msgid "Shows AUR's packages first and then repository's"
-msgstr ""
+msgstr "先顯示 AUR 套件，再顯示儲存庫套件"
 
 #: cmd.go:191
 msgid "Shows repository's packages first and then AUR's"
-msgstr ""
+msgstr "先顯示儲存庫套件，再顯示 AUR 套件"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
@@ -692,11 +686,11 @@ msgstr "yay 缓存大小 %s: %s"
 
 #: cmd.go:198
 msgid "Skip package build if in cache and up to date"
-msgstr ""
+msgstr "若快取中已有最新版本，則跳過套件建置"
 
 #: cmd.go:201
 msgid "Skip pkgbuild download if in cache and up to date"
-msgstr ""
+msgstr "若快取中已有最新版本，則跳過 PKGBUILD 下載"
 
 #: print.go:62
 msgid "Snapshot URL"
@@ -704,7 +698,7 @@ msgstr "快照 URL"
 
 #: cmd.go:170
 msgid "Sort AUR results by a specific field during search"
-msgstr ""
+msgstr "搜尋時依指定欄位排序 AUR 結果"
 
 #: pkg/dep/dep_graph.go:80
 msgid "Sync"
@@ -728,7 +722,7 @@ msgstr "可能还有另一个 Pacman 实例正在运行。等待中..."
 
 #: cmd.go:169
 msgid "Time in days to refresh completion cache"
-msgstr ""
+msgstr "自動補全快取的重新整理間隔天數"
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
@@ -764,37 +758,39 @@ msgstr "无法删除 %s: %s"
 
 #: cmd.go:176
 msgid "Unset the answer for the clean build menu"
-msgstr ""
+msgstr "取消設定清理建置選單的回答"
 
 #: cmd.go:177
 msgid "Unset the answer for the edit diff menu"
-msgstr ""
+msgstr "取消設定編輯差異選單的回答"
 
 #: cmd.go:178
 msgid "Unset the answer for the edit pkgbuild menu"
-msgstr ""
+msgstr "取消設定編輯 PKGBUILD 選單的回答"
 
 #: cmd.go:179
 msgid "Unset the answer for the upgrade menu"
-msgstr ""
+msgstr "取消設定升級選單的回答"
 
 #: cmd.go:116
 msgid "Usage:"
-msgstr ""
+msgstr "用法："
 
 #: cmd.go:219
 msgid ""
 "Usage: %s %s\n"
 "options:\n"
 msgstr ""
+"用法：%s %s\n"
+"選項：\n"
 
 #: cmd.go:166
 msgid "Use the default makepkg.conf"
-msgstr ""
+msgstr "使用預設的 makepkg.conf"
 
 #: cmd.go:60
 msgid "Used for completions"
-msgstr ""
+msgstr "用於自動補全"
 
 #: print.go:32
 msgid "Version"
@@ -802,7 +798,7 @@ msgstr "版本"
 
 #: cmd.go:69
 msgid "Vote for AUR package(s)"
-msgstr ""
+msgstr "為 AUR 套件投票"
 
 #: print.go:50
 msgid "Votes"
@@ -855,11 +851,11 @@ msgstr "软件包的开发检查失败: '%s' 遇到了错误"
 #: pkg/settings/parser/parser.go:667
 msgid ""
 "did you mean yay -Scc (clean caches) or yay -Ycc (clean orphaned packages)?"
-msgstr ""
+msgstr "您的意思是「yay -Scc」（清理快取）或「yay -Ycc」（清理孤立套件）？"
 
 #: cmd.go:48
 msgid "dir"
-msgstr ""
+msgstr "目錄"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
@@ -939,15 +935,15 @@ msgstr "无法获取 AUR 缓存"
 
 #: cmd.go:111
 msgid "file(s)"
-msgstr ""
+msgstr "檔案"
 
 #: cmd.go:160
 msgid "git command to use"
-msgstr ""
+msgstr "要使用的 git 指令"
 
 #: cmd.go:162
 msgid "gpg command to use"
-msgstr ""
+msgstr "要使用的 gpg 指令"
 
 #: pkg/upgrade/sources.go:28
 msgid "ignoring package devel upgrade (no AUR info found):"
@@ -962,9 +958,8 @@ msgid "invalid number: %s"
 msgstr "无效数字: %s"
 
 #: pkg/settings/parser/parser.go:669
-#, fuzzy
 msgid "invalid option"
-msgstr "无效选项 '%s'"
+msgstr "無效選項"
 
 #: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
@@ -984,11 +979,11 @@ msgstr "无效值: %d 不在 %d 和 %d 之间"
 
 #: cmd.go:157
 msgid "makepkg command to use"
-msgstr ""
+msgstr "要使用的 makepkg 指令"
 
 #: cmd.go:165
 msgid "makepkg.conf file to use"
-msgstr ""
+msgstr "要使用的 makepkg.conf 檔案"
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -999,9 +994,8 @@ msgid "no keys to import"
 msgstr "没有要导入的密钥"
 
 #: pkg/query/errors.go:26
-#, fuzzy
 msgid "no package found for targets"
-msgstr "找不到包"
+msgstr "找不到目標對應的套件"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
@@ -1024,19 +1018,16 @@ msgid "only one target is allowed"
 msgstr "仅允许一个目标"
 
 #: cmd.go:112
-#, fuzzy
 msgid "operation"
-msgstr "未处理的操作"
+msgstr "操作"
 
 #: cmd.go:121
-#, fuzzy
 msgid "operations:"
-msgstr "未处理的操作"
+msgstr "操作："
 
 #: cmd.go:113 cmd.go:47
-#, fuzzy
 msgid "options"
-msgstr "可选依赖"
+msgstr "選項"
 
 #: pkg/upgrade/service.go:359
 msgid "package"
@@ -1056,17 +1047,16 @@ msgid "package not found in repos"
 msgstr "软件库中找不到软件包"
 
 #: cmd.go:114 cmd.go:49
-#, fuzzy
 msgid "package(s)"
-msgstr "软件包"
+msgstr "套件"
 
 #: cmd.go:159
 msgid "pacman command to use"
-msgstr ""
+msgstr "要使用的 pacman 指令"
 
 #: cmd.go:164
 msgid "pacman.conf file to use"
-msgstr ""
+msgstr "要使用的 pacman.conf 檔案"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
@@ -1086,7 +1076,7 @@ msgstr "被需要於"
 
 #: cmd.go:207
 msgid "sudo command to use"
-msgstr ""
+msgstr "要使用的 sudo 指令"
 
 #: pkg/sync/build/errors.go:43
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
@@ -1094,7 +1084,7 @@ msgstr "%s 的 PKGDEST 由 makepkg 列出，但不存在: %s"
 
 #: pkg/settings/parser/parser.go:666
 msgid "the clean command requires an operation to be specified"
-msgstr ""
+msgstr "clean 指令需要指定操作"
 
 #: pkg/sync/sync.go:50
 msgid "there is nothing to do"
@@ -1114,11 +1104,11 @@ msgstr "未知版本"
 
 #: cmd.go:224
 msgid "use 'yay {-h --help}' for global options"
-msgstr ""
+msgstr "使用「yay {-h --help}」查看全域選項"
 
 #: cmd.go:139
 msgid "use 'yay {-h --help}' with an operation for available options"
-msgstr ""
+msgstr "搭配操作使用「yay {-h --help}」查看可用選項"
 
 #: pkg/text/input.go:47
 msgid "yes"
