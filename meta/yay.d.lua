@@ -55,6 +55,7 @@
 ---@field clean_menu boolean Show pre-build clean menu.
 ---@field diff_menu boolean Show diff menu before building.
 ---@field edit_menu boolean Show PKGBUILD edit menu before building.
+---@field no_upgrade_menu boolean Skip the package exclusion prompt after listing upgrades.
 ---@field combined_upgrade boolean Use combined repo+AUR upgrade flow on sysupgrade.
 ---@field use_ask boolean Use pacman's --ask to auto-confirm known conflicts.
 ---@field batch_install boolean Queue AUR package installs instead of installing each package immediately.

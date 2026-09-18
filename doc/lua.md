@@ -82,7 +82,7 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 **Booleans**
 
 `bottom_up`, `sudo_loop`, `devel`, `clean_after`, `keep_src`, `provides`,
-`pgp_fetch`, `clean_menu`, `diff_menu`, `edit_menu`, `combined_upgrade`,
+`pgp_fetch`, `clean_menu`, `diff_menu`, `edit_menu`, `no_upgrade_menu`, `combined_upgrade`,
 `use_ask`, `batch_install`, `single_line_results`, `separate_sources`, `debug`,
 `rpc`, `double_confirm`
 

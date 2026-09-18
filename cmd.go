@@ -180,6 +180,7 @@ func usage(logger *text.Logger) {
 		{"--cleanmenu", gotext.Get("Give the option to clean build PKGBUILDS")},
 		{"--diffmenu", gotext.Get("Give the option to show diffs for build files")},
 		{"--editmenu", gotext.Get("Give the option to edit/view PKGBUILDS")},
+		{"--noupgrademenu", gotext.Get("Do not prompt for package exclusions during upgrades")},
 		{"--askremovemake", gotext.Get("Ask to remove makedepends after install")},
 		{"--askyesremovemake", gotext.Get("Ask to remove makedepends after install(\"Y\" as default)")},
 		{"--removemake", gotext.Get("Remove makedepends after install")},

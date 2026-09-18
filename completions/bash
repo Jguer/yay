@@ -74,7 +74,7 @@ _yay() {
           save builddir editor editorflags makepkg pacman git gitflags gpg gpgflags mflags config requestsplitn sudoloop sudo sudoflags
           redownload noredownload redownloadall rebuild rebuildall rebuildtree norebuild sortby
           singlelineresults doublelineresults answerclean answerdiff answeredit answerupgrade noanswerclean noanswerdiff
-          noansweredit noanswerupgrade cleanmenu diffmenu editmenu cleanafter keepsrc topdown bottomup devel separatesources
+          noansweredit noanswerupgrade cleanmenu diffmenu editmenu noupgrademenu cleanafter keepsrc topdown bottomup devel separatesources
           provides pgpfetch
           useask combinedupgrade aur repo makepkgconf
           nomakepkgconf askremovemake askyesremovemake removemake noremovemake completioninterval aururl aurrpcurl
