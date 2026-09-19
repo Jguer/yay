@@ -50,6 +50,17 @@ func TestSelectionMenu(t *testing.T) {
 	}
 }
 
+func TestLocalizedMenuAliases(t *testing.T) {
+	t.Parallel()
+
+	aliases := localizedMenuAliases("[Н]ет [В]се [От]менить [У]становленные [Не]установленные")
+	input := mapset.NewThreadUnsafeSet[string]()
+	input.Add("в")
+
+	require.True(t, menuAliasSelected(input, aliases, "all"))
+	require.False(t, menuAliasSelected(input, aliases, "none"))
+}
+
 func TestPkgbuildNumberMenu(t *testing.T) {
 	t.Parallel()
 
