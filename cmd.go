@@ -154,6 +154,7 @@ func usage(logger *text.Logger) {
 		{"--builddir <dir>", gotext.Get("Directory used to download and run PKGBUILDS")},
 		{"--editor <file>", gotext.Get("Editor to use when editing PKGBUILDs")},
 		{"--editorflags <flags>", gotext.Get("Pass arguments to editor")},
+		{"--pkgbuildpager <cmd>", gotext.Get("Command used to display PKGBUILDs printed by -Gp")},
 		{"--makepkg <file>", gotext.Get("makepkg command to use")},
 		{"--mflags <flags>", gotext.Get("Pass arguments to makepkg")},
 		{"--pacman <file>", gotext.Get("pacman command to use")},
@@ -400,8 +401,8 @@ func handleWeb(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 
 func handleGetpkgbuild(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
-		return printPkgbuilds(dbExecutor, run.AURClient,
-			run.HTTPClient, run.Logger, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL)
+		return printPkgbuilds(ctx, dbExecutor, run.AURClient,
+			run.HTTPClient, run.Logger, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL, run.Cfg.PkgbuildPager)
 	}
 
 	return getPkgbuilds(ctx, dbExecutor, run.AURClient, run,

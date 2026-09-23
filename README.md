@@ -126,6 +126,12 @@ pacman -S --needed git base-devel yay
   set `PAGER` to override the default (`less`, or `cat` if less is unavailable).
   Example: `yay.opt.pager = "delta"` or `export PAGER=less`.
 
+- **How do I get syntax highlighting for `yay -Gp`?**
+
+  Set `pkgbuildpager` in `config.json` or `yay.opt.pkgbuild_pager` in
+  `init.lua`, e.g. `yay.opt.pkgbuild_pager = "bat -pp --color=always -lPKGBUILD"`.
+  Unset, `-Gp` keeps printing plain text to stdout so it stays pipeable.
+
 - **yay is not asking me to edit PKGBUILDS, and I don't like the diff menu! What can I do?**
 
   `yay --editmenu --diffmenu=false --save`

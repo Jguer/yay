@@ -3,9 +3,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -23,15 +28,25 @@ func TestPrintPkgbuilds(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name    string
-		targets []string
-		results []aur.Pkg
-		wantErr bool
+		name          string
+		targets       []string
+		results       []aur.Pkg
+		pkgbuildPager string
+		wantOutput    string
+		wantPager     string
+		wantErr       bool
 	}{
 		{
-			name:    "prints pkgbuild when package exists",
-			targets: []string{"aur/pkg"},
-			results: []aur.Pkg{{Name: "pkg", PackageBase: "pkg"}},
+			name:       "prints pkgbuild when package exists",
+			targets:    []string{"aur/pkg"},
+			results:    []aur.Pkg{{Name: "pkg", PackageBase: "pkg"}},
+			wantOutput: "\n\n# aur/pkg\n\npkgbuild",
+		},
+		{
+			name:      "pipes pkgbuild through configured pager",
+			targets:   []string{"aur/pkg"},
+			results:   []aur.Pkg{{Name: "pkg", PackageBase: "pkg"}},
+			wantPager: "\n\n# aur/pkg\n\npkgbuild",
 		},
 		{
 			name:    "returns error when package does not exist",
@@ -44,24 +59,57 @@ func TestPrintPkgbuilds(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			defer gock.Off()
+			pagerOut := ""
+			pkgbuildPager := tc.pkgbuildPager
+			if tc.wantPager != "" {
+				pagerOut = filepath.Join(t.TempDir(), "pager-out")
+				pkgbuildPager = fmt.Sprintf("cat > %s", strconv.Quote(pagerOut))
+			}
+
 			gock.New("https://aur.archlinux.org").
 				Get("/cgit/aur.git/plain/PKGBUILD").
 				Reply(200).
 				BodyString("pkgbuild")
 
-			err := printPkgbuilds(&mockDBSearcher{}, &mockaur.MockAUR{
+			var stdout bytes.Buffer
+			err := printPkgbuilds(context.Background(), &mockDBSearcher{}, &mockaur.MockAUR{
 				GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 					return tc.results, nil
 				},
-			}, &http.Client{}, text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test"),
-				tc.targets, parser.ModeAny, "https://aur.archlinux.org")
+			}, &http.Client{}, text.NewLogger(&stdout, io.Discard, strings.NewReader(""), true, "test"),
+				tc.targets, parser.ModeAny, "https://aur.archlinux.org", pkgbuildPager)
 			if tc.wantErr {
 				require.Error(t, err)
 				return
 			}
 			require.NoError(t, err)
+			require.Equal(t, tc.wantOutput, stdout.String())
+			if tc.wantPager != "" {
+				got, readErr := os.ReadFile(pagerOut)
+				require.NoError(t, readErr)
+				require.Equal(t, tc.wantPager, string(got))
+			}
 		})
 	}
+}
+
+func TestPrintPkgbuildsReturnsPagerError(t *testing.T) {
+	t.Parallel()
+
+	defer gock.Off()
+	gock.New("https://aur.archlinux.org").
+		Get("/cgit/aur.git/plain/PKGBUILD").
+		Reply(200).
+		BodyString("pkgbuild")
+
+	err := printPkgbuilds(context.Background(), &mockDBSearcher{}, &mockaur.MockAUR{
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{{Name: "pkg", PackageBase: "pkg"}}, nil
+		},
+	}, &http.Client{}, text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test"),
+		[]string{"aur/pkg"}, parser.ModeAny, "https://aur.archlinux.org", "exit 42")
+
+	require.ErrorContains(t, err, "failed to run pkgbuild pager")
 }
 
 type mockDBSearcher struct{}
