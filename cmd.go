@@ -177,6 +177,7 @@ func usage(logger *text.Logger) {
 		{"--noanswerdiff", gotext.Get("Unset the answer for the edit diff menu")},
 		{"--noansweredit", gotext.Get("Unset the answer for the edit pkgbuild menu")},
 		{"--noanswerupgrade", gotext.Get("Unset the answer for the upgrade menu")},
+		{"--noexcludemenu", gotext.Get("Skip the package exclusion menu during upgrades")},
 		{"--cleanmenu", gotext.Get("Give the option to clean build PKGBUILDS")},
 		{"--diffmenu", gotext.Get("Give the option to show diffs for build files")},
 		{"--editmenu", gotext.Get("Give the option to edit/view PKGBUILDS")},
