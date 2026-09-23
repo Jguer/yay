@@ -95,3 +95,32 @@ func TestPacmanConf(t *testing.T) {
 	normalizePacmanConf(pacmanConf)
 	assert.EqualValues(t, expectedPacmanConf, pacmanConf)
 }
+
+func TestRetrievePacmanConfigOverrides(t *testing.T) {
+	t.Parallel()
+	path := "../../testdata/pacman.conf"
+
+	absPath, err := filepath.Abs(path)
+	require.NoError(t, err)
+
+	args := parser.MakeArguments()
+	args.CreateOrAppendOption("dbpath", "/tmp/yay-db")
+	args.CreateOrAppendOption("arch", "aarch64", "x86_64")
+	args.CreateOrAppendOption("ignore", "ignored-package")
+	args.CreateOrAppendOption("ignoregroup", "ignored-group")
+	args.CreateOrAppendOption("cachedir", "/tmp/yay-cache")
+	args.CreateOrAppendOption("gpgdir", "/tmp/yay-gnupg")
+	args.CreateOrAppendOption("color", "never")
+
+	pacmanConf, useColor, err := retrievePacmanConfig(args, absPath)
+	require.NoError(t, err)
+	require.NotNil(t, pacmanConf)
+
+	assert.Equal(t, "/tmp/yay-db", pacmanConf.DBPath)
+	assert.Equal(t, []string{"aarch64", "x86_64"}, pacmanConf.Architecture)
+	assert.Equal(t, []string{"ignored-package"}, pacmanConf.IgnorePkg)
+	assert.Equal(t, []string{"ignored-group"}, pacmanConf.IgnoreGroup)
+	assert.Equal(t, []string{"/tmp/yay-cache"}, pacmanConf.CacheDir)
+	assert.Equal(t, "/tmp/yay-gnupg", pacmanConf.GPGDir)
+	assert.False(t, useColor)
+}
