@@ -43,3 +43,23 @@ func TestSeparateSourceScore_UsesRepoOrderEvenlyDistributed(t *testing.T) {
 		assert.Equal(t, 0.0, a.separateSourceScore("aur", sim))
 	})
 }
+
+func TestSeparateSourceScore_ExactMatchKeepsRepoOrder(t *testing.T) {
+	t.Parallel()
+
+	a := &abstractResults{
+		separateSources:     true,
+		repoOrder:           []string{"cachyos-extra-v3", "core", "extra"},
+		separateSourceCache: map[string]float64{},
+	}
+
+	custom := a.separateSourceScore("cachyos-extra-v3", 1.0)
+	extra := a.separateSourceScore("extra", 1.0)
+	aurScore := a.separateSourceScore("aur", 1.0)
+
+	assert.Greater(t, custom, extra)
+	assert.Greater(t, extra, aurScore)
+	assert.Equal(t, 50.0, aurScore)
+	// Exact matches must still outrank any non-exact match.
+	assert.Greater(t, extra+1.0, a.separateSourceScore("cachyos-extra-v3", 0.99)+0.99)
+}

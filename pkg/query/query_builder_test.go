@@ -445,6 +445,83 @@ func TestSourceQueryBuilderTieSortsByRepoOrder(t *testing.T) {
 	}
 }
 
+func TestSourceQueryBuilderExactMatchSortsByRepoOrder(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		desc        string
+		bottomUp    bool
+		repoOrder   []string
+		dbOrder     []string
+		wantSources []string
+	}{
+		{
+			desc:        "topdown custom repo first",
+			repoOrder:   []string{"cachyos-extra-v3", "core", "extra"},
+			dbOrder:     []string{"extra", "cachyos-extra-v3"},
+			wantSources: []string{"cachyos-extra-v3", "extra", "aur"},
+		},
+		{
+			desc:        "topdown extra first",
+			repoOrder:   []string{"core", "extra", "cachyos-extra-v3"},
+			dbOrder:     []string{"cachyos-extra-v3", "extra"},
+			wantSources: []string{"extra", "cachyos-extra-v3", "aur"},
+		},
+		{
+			desc:        "bottomup custom repo first",
+			bottomUp:    true,
+			repoOrder:   []string{"cachyos-extra-v3", "core", "extra"},
+			dbOrder:     []string{"extra", "cachyos-extra-v3"},
+			wantSources: []string{"aur", "extra", "cachyos-extra-v3"},
+		},
+	}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+			return []aur.Pkg{{Name: "chromium", PackageBase: "chromium", Version: "1-1"}}, nil
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			t.Parallel()
+
+			mockDB := &mock.DBExecutor{
+				ReposFn: func() []string { return tc.repoOrder },
+				SyncPackagesFn: func(pkgs ...string) []mock.IPackage {
+					res := make([]mock.IPackage, 0, len(tc.dbOrder))
+					for _, dbName := range tc.dbOrder {
+						res = append(res, &mock.Package{
+							PBase:         "chromium",
+							PName:         "chromium",
+							PVersion:      "153.0.8010.52-1",
+							PDescription:  "A web browser built for speed, simplicity, and security",
+							PDB:           mock.NewDB(dbName),
+							PArchitecture: "x86_64",
+						})
+					}
+					return res
+				},
+				LocalPackageFn: func(string) mock.IPackage { return nil },
+			}
+
+			queryBuilder := NewSourceQueryBuilder(mockAUR,
+				text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
+				"", parser.ModeAny, "", tc.bottomUp,
+				false, true)
+
+			queryBuilder.Execute(t.Context(), mockDB, []string{"chromium"})
+
+			gotSources := make([]string, len(queryBuilder.results))
+			for i, result := range queryBuilder.results {
+				gotSources[i] = result.source
+			}
+
+			assert.Equal(t, tc.wantSources, gotSources)
+		})
+	}
+}
+
 func TestSourceQueryBuilderTieDoesNotSeparateSources(t *testing.T) {
 	t.Parallel()
 
