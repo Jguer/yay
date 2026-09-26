@@ -1,15 +1,15 @@
-#
 # Translators:
-# Davidmp <medipas@gmail.com>, 2025
-#
+# Ángel Aceña, 2026
+# Davidmp <medipas@gmail.com>, 2026
+# 
 msgid ""
 msgstr ""
-"Last-Translator: Davidmp <medipas@gmail.com>, 2025\n"
+"Last-Translator: Davidmp <medipas@gmail.com>, 2026\n"
 "Language-Team: Catalan (https://app.transifex.com/yay-1/teams/123732/ca/)\n"
-"Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ca\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: xgotext\n"
 
@@ -19,7 +19,7 @@ msgid ""
 "Build directory:"
 msgstr ""
 "\n"
-"Directori de construcció:"
+"Directori de compilació:"
 
 #: pkg/db/ialpm/alpm.go:207 pkg/dep/dep_graph.go:802
 msgid ""
@@ -99,7 +99,8 @@ msgstr "%s: el paquet local (%s) és més nou que el de l'AUR (%s)"
 
 #: vote.go:51
 msgid ""
-"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for voting"
+"%s: please set AUR_USERNAME and AUR_PASSWORD environment variables for "
+"voting"
 msgstr ""
 "%s: establiu les variables d'entorn AUR_NOMDUSUARI i AUR_CONTRASENYA per "
 "votar."
@@ -150,46 +151,48 @@ msgstr "Afegiu %s o %s a les variables d'entorn."
 
 #: cmd.go:197
 msgid "Always build all AUR packages"
-msgstr ""
+msgstr "Compila sempre els tots els paquets del AUR."
 
 #: cmd.go:199
 msgid "Always build all AUR packages even if installed"
 msgstr ""
+"Compila sempre els tots els paquets del AUR fins i tot si ja estan "
+"instal·lats."
 
 #: cmd.go:196
-#, fuzzy
 msgid "Always build target packages"
-msgstr "Els deu paquets més grossos:"
+msgstr "Compila sempre els paquets objectiu"
 
 #: cmd.go:202
 msgid "Always download pkgbuilds of all AUR packages"
-msgstr ""
+msgstr "Descarrega sempre els pkgbuilds de tots els paquets del AUR."
 
 #: cmd.go:200
 msgid "Always download pkgbuilds of targets"
-msgstr ""
+msgstr "Descarrega sempre els pkgbuilds dels objectius"
 
 #: cmd.go:183
-#, fuzzy
 msgid "Ask to remove makedepends after install"
-msgstr "Suprimeixo les dependències de construcció després de la instal·lació?"
+msgstr ""
+"Demana suprimir les dependències de compilació després de la instal·lació"
 
 #: cmd.go:184
-#, fuzzy
 msgid "Ask to remove makedepends after install(\"Y\" as default)"
-msgstr "Suprimeixo les dependències de construcció després de la instal·lació?"
+msgstr ""
+"Demana eliminar makedepends després de la instal·lació (\"Y\" per defecte)"
 
 #: cmd.go:146
 msgid "Assume targets are from the AUR"
-msgstr ""
+msgstr "Dona per suposat que els objectius són del AUR."
 
 #: cmd.go:145
 msgid "Assume targets are from the repositories"
-msgstr ""
+msgstr "Dona per suposat que els objectius són dels repositoris"
 
 #: cmd.go:205
 msgid "Automatically resolve conflicts using pacman's ask flag"
 msgstr ""
+"Resol els conflictes automàticament utilitzant la funció ask de pacman"
 
 #: main.go:65
 msgid "Avoid running yay as root/sudo."
@@ -197,13 +200,15 @@ msgstr "Eviteu executar el yay com a root / sudo."
 
 #: cmd.go:53
 msgid "Build and install a PKGBUILD"
-msgstr ""
+msgstr "Compila i instal·la un PKGBUILD"
 
 #: cmd.go:150
 msgid ""
 "Causes the following options to be saved back to the\n"
 "config file when used"
 msgstr ""
+"Provoca que les següents opcions siguin guardades a\n"
+"l'arxiu de configuració quan s'utilitzi"
 
 #: pkg/dep/dep_graph.go:67
 msgid "Check Dependency"
@@ -214,9 +219,9 @@ msgid "Check Deps"
 msgstr "Comprova les dependències"
 
 #: cmd.go:195
-#, fuzzy
 msgid "Check development packages during sysupgrade"
-msgstr "Es comproven els paquets de desenvolupament..."
+msgstr ""
+"Comprova els paquets de desenvolupament durant l'actualització del sistema"
 
 #: pkg/upgrade/service.go:115
 msgid "Checking development packages..."
@@ -252,7 +257,7 @@ msgstr "Diferències per mostrar?"
 
 #: cmd.go:154
 msgid "Directory used to download and run PKGBUILDS"
-msgstr ""
+msgstr "Directori a utilitzar a l'hora de descarregar i executar PKGBUILDS"
 
 #: pkg/settings/migrations.go:25
 msgid "Disable 'provides' setting by default"
@@ -260,7 +265,7 @@ msgstr "Desactiva la configuració de \"proporciona\" per defecte."
 
 #: cmd.go:63
 msgid "Display system package statistics"
-msgstr ""
+msgstr "Mostra les estadístiques dels paquets del sistema"
 
 #: clean.go:94
 msgid "Do you want to remove ALL AUR packages from cache?"
@@ -275,9 +280,8 @@ msgid "Do you want to remove all other AUR packages from cache?"
 msgstr "Voleu suprimir tots els altres paquets de l'AUR de la memòria cau?"
 
 #: cmd.go:186
-#, fuzzy
 msgid "Don't remove makedepends after install"
-msgstr "Suprimeixo les dependències de construcció després de la instal·lació?"
+msgstr "No eliminis els makedepends després d'instal·lar"
 
 #: pkg/menus/edit_menu.go:61
 msgid "Edit PKGBUILD with?"
@@ -285,7 +289,7 @@ msgstr "Amb què voleu editar el PKGBUILD?"
 
 #: cmd.go:155
 msgid "Editor to use when editing PKGBUILDs"
-msgstr ""
+msgstr "Editor a utilitzar a l'hora de modificar PKGBUILDS"
 
 #: pkg/query/errors.go:13
 msgid "Error during AUR search: %s\n"
@@ -328,7 +332,7 @@ msgstr "Paquets de l'AUR obsolets marcats:"
 
 #: cmd.go:56
 msgid "Force download for existing ABS packages"
-msgstr ""
+msgstr "Força la descàrrega dels paquets ABS ja existents"
 
 #: print.go:90
 msgid "Foreign installed packages: %s"
@@ -344,19 +348,19 @@ msgstr "GenDB ha acabat. No s'ha instal·lat cap paquet."
 
 #: cmd.go:73
 msgid "Generates development package DB used for updating"
-msgstr ""
+msgstr "Genera una BD dels paquets de desenvolupament per a actualitzar"
 
 #: cmd.go:180
 msgid "Give the option to clean build PKGBUILDS"
-msgstr ""
+msgstr "Dona la opció de esborrar els PKGBUILDS de compilació"
 
 #: cmd.go:182
 msgid "Give the option to edit/view PKGBUILDS"
-msgstr ""
+msgstr "Dona l'opció d'editar/visualitzar PKGBUILDS"
 
 #: cmd.go:181
 msgid "Give the option to show diffs for build files"
-msgstr ""
+msgstr "Ofereix l'opció de mostrar les diferències dels fitxers de compilació"
 
 #: print.go:36
 msgid "Groups"
@@ -364,12 +368,14 @@ msgstr "Grups"
 
 #: cmd.go:141
 msgid "If no operation is specified 'yay -Syu' will be performed"
-msgstr ""
+msgstr "Si no s'especifica una operació \"yay -Syu\" serà utilitzat"
 
 #: cmd.go:142
 msgid ""
 "If no operation is specified and targets are provided, -Y will be assumed"
 msgstr ""
+"Si no s'especifica una operació i es faciliten objectius, s'utilitzarà -Y "
+"per defecte"
 
 #: pkg/sync/srcinfo/pgp/keys.go:88
 msgid "Import?"
@@ -381,7 +387,7 @@ msgstr "S'importen claus amb gpg..."
 
 #: cmd.go:189
 msgid "Keep pkg/ and src/ after building packages"
-msgstr ""
+msgstr "Manté pkg/ i src/ després de compilar paquets"
 
 #: print.go:46
 msgid "Keywords"
@@ -397,11 +403,11 @@ msgstr "Llicències"
 
 #: cmd.go:192
 msgid "List each search result on its own line"
-msgstr ""
+msgstr "Esmena cada resultat de la cerca en una línia individual"
 
 #: cmd.go:193
 msgid "List each search result on two lines, like pacman"
-msgstr ""
+msgstr "Enumera cada resultat de la cerca en dos línies, com fa pacman"
 
 #: pkg/dep/dep_graph.go:81
 msgid "Local"
@@ -409,11 +415,12 @@ msgstr "Local"
 
 #: cmd.go:203
 msgid "Look for matching providers when searching for packages"
-msgstr ""
+msgstr "Busca proveïdors disponibles a l'hora de vuscar paquets"
 
 #: cmd.go:209
 msgid "Loop sudo calls in the background to avoid timeout"
 msgstr ""
+"Executa crides de sudo en segon pla en un bucle per evitar el temps d'espera"
 
 #: print.go:48
 msgid "Maintainer"
@@ -429,7 +436,7 @@ msgstr "Dependències de construcció"
 
 #: cmd.go:168
 msgid "Max amount of packages to query per AUR request"
-msgstr ""
+msgstr "Màxima quantitat de paquets a solicitar per consulta del AUR"
 
 #: pkg/dep/dep_graph.go:83
 msgid "Missing"
@@ -444,13 +451,12 @@ msgid "Name"
 msgstr "Nom"
 
 #: cmd.go:133
-#, fuzzy
 msgid "New operations:"
-msgstr "operació no manejada"
+msgstr "Operacions noves:"
 
 #: cmd.go:144
 msgid "New options:"
-msgstr ""
+msgstr "Opcions noves:"
 
 #: pkg/dep/dep_graph.go:444 pkg/dep/dep_graph.go:586 query.go:98
 msgid "No AUR package found for"
@@ -463,6 +469,8 @@ msgstr "No s'ha trobat cap paquet per"
 #: clean.go:83
 msgid "No valid pacman cache directories found. Skipping cache clean."
 msgstr ""
+"No s'han trobat directoris de memòria cau de pacman. Omitint la seva "
+"eliminació."
 
 #: print.go:229
 msgid "None"
@@ -470,7 +478,7 @@ msgstr "Cap"
 
 #: cmd.go:65
 msgid "Only show titles when printing news"
-msgstr ""
+msgstr "Mostra els títols només quan s'imprimeixin notícies"
 
 #: print.go:39
 msgid "Optional Deps"
@@ -518,9 +526,7 @@ msgstr "Paquets per excloure"
 
 #: pkg/upgrade/service.go:389
 msgid "Packages to exclude: (eg: \"1 2 3\", \"1-3\", \"^4\" or repo name)"
-msgstr ""
-"Paquets per excloure: (p. ex.: \"1 2 3\", \"1-3\", \"^4\" o nom del "
-"repositori)"
+msgstr "Paquets per excloure: (p. ex.: \"1 2 3\", \"1-3\", \"^4\" o nom del repositori)"
 
 #: cmd.go:478
 msgid "Packages to install (eg: 1 2 3, 1-3 or ^4)"
@@ -528,27 +534,27 @@ msgstr "Paquets per instal·lar (p. ex.: 1 2 3, 1-3 o ^4)"
 
 #: cmd.go:156
 msgid "Pass arguments to editor"
-msgstr ""
+msgstr "Passa arguments a l'editor"
 
 #: cmd.go:161
 msgid "Pass arguments to git"
-msgstr ""
+msgstr "Passa arguments a git"
 
 #: cmd.go:163
 msgid "Pass arguments to gpg"
-msgstr ""
+msgstr "Passa arguments a gpg"
 
 #: cmd.go:158
 msgid "Pass arguments to makepkg"
-msgstr ""
+msgstr "Passa arguments a makepkg"
 
 #: cmd.go:208
 msgid "Pass arguments to sudo"
-msgstr ""
+msgstr "Passa arguments a sudo"
 
 #: cmd.go:149
 msgid "Permanent configuration options:"
-msgstr ""
+msgstr "Opcions de configuració permanents:"
 
 #: print.go:49
 msgid "Popularity"
@@ -556,19 +562,19 @@ msgstr "Popularitat"
 
 #: cmd.go:64
 msgid "Print arch news"
-msgstr ""
+msgstr "Imprimeix les notícies d'arch"
 
 #: cmd.go:62
 msgid "Print current yay configuration"
-msgstr ""
+msgstr "Imprimeix la configuració de yay actual"
 
 #: cmd.go:61
 msgid "Print default yay configuration"
-msgstr ""
+msgstr "Imprimeix la configuració per defecte de yay"
 
 #: cmd.go:57
 msgid "Print pkgbuild of packages"
-msgstr ""
+msgstr "Imprimeix el pkgbuild dels paquets"
 
 #: pkg/menus/diff_menu.go:213 pkg/menus/edit_menu.go:143
 msgid "Proceed with install?"
@@ -576,7 +582,7 @@ msgstr "Voleu continuar la instal·lació?"
 
 #: cmd.go:204
 msgid "Prompt to import PGP keys from PKGBUILDs"
-msgstr ""
+msgstr "Demana importar les claus PGP dels PKGBUILDs"
 
 #: print.go:37
 msgid "Provides"
@@ -584,25 +590,25 @@ msgstr "Proporciona"
 
 #: cmd.go:68
 msgid "Remove a vote from AUR package(s)"
-msgstr ""
+msgstr "Elimina un vot del(s) paquet(s) del AUR"
 
 #: pkg/sync/workdir/preparer.go:125
 msgid "Remove make dependencies after install?"
-msgstr "Suprimeixo les dependències de construcció després de la instal·lació?"
+msgstr ""
+"Suprimeixo les dependències de construcció després de la instal·lació?"
 
 #: cmd.go:185
-#, fuzzy
 msgid "Remove makedepends after install"
-msgstr "Suprimeixo les dependències de construcció després de la instal·lació?"
+msgstr "Elimina els makedepends després de la instal·lació"
 
 #: cmd.go:188
-#, fuzzy
 msgid "Remove package sources after successful install"
-msgstr "Suprimeixo les dependències de construcció després de la instal·lació?"
+msgstr "Elimina les fonts del paquet després d'una instal·lació exitosa"
 
 #: cmd.go:72
 msgid "Remove unneeded dependencies (-cc to ignore optdepends)"
 msgstr ""
+"Elimina qualsevol dependència innecesària (-cc per ignorar optdepends)"
 
 #: print.go:43
 msgid "Replaces"
@@ -617,9 +623,8 @@ msgid "Repository AUR"
 msgstr "Repositori de l'AUR"
 
 #: pkg/settings/migrations.go:45
-#, fuzzy
 msgid "Reset 'sortby' setting to default"
-msgstr "Desactiva la configuració de \"proporciona\" per defecte."
+msgstr "Reinicia la opció \"sortby\" al seu estat per defecte"
 
 #: pkg/dep/dep_graph.go:82
 msgid "SRCINFO"
@@ -627,7 +632,7 @@ msgstr "SRCINFO"
 
 #: cmd.go:171
 msgid "Search for packages using a specified field"
-msgstr ""
+msgstr "Busca paquets amb un camp específic"
 
 #: pkg/upgrade/service.go:97
 msgid "Searching AUR for updates..."
@@ -639,31 +644,32 @@ msgstr "Se cerquen actualitzacions a les bases de dades..."
 
 #: cmd.go:172
 msgid "Set a predetermined answer for the clean build menu"
-msgstr ""
+msgstr "Estableix una resposta predeterminada per al menú de compilació neta"
 
 #: cmd.go:173
 msgid "Set a predetermined answer for the diff menu"
-msgstr ""
+msgstr "Estableix una resposta predeterminada per al menú de diferències"
 
 #: cmd.go:174
 msgid "Set a predetermined answer for the edit pkgbuild menu"
 msgstr ""
+"Estableix una resposta predeterminada per al menú d'edició de pkgbuilds"
 
 #: cmd.go:175
 msgid "Set a predetermined answer for the upgrade menu"
-msgstr ""
+msgstr "Estableix una resposta predeterminada per al menú d'actualitzacions"
 
 #: cmd.go:152
 msgid "Set an alternative AUR URL"
-msgstr ""
+msgstr "Estableix una URL del AUR alternativa"
 
 #: cmd.go:153
 msgid "Set an alternative URL for the AUR /rpc endpoint"
-msgstr ""
+msgstr "Estableix una URL alternativa per al punt final /rpc de l'AUR"
 
 #: pkg/menus/diff_menu.go:104
 msgid "Showing diff for %s"
-msgstr ""
+msgstr "Es mostren les diferències per a %s"
 
 #: pkg/query/query_builder.go:273
 msgid "Showing repo packages only"
@@ -671,11 +677,11 @@ msgstr "Es mostren només paquets dels repositoris."
 
 #: cmd.go:190
 msgid "Shows AUR's packages first and then repository's"
-msgstr ""
+msgstr "Mostra primer els paquets del aur i després els del repositiri"
 
 #: cmd.go:191
 msgid "Shows repository's packages first and then AUR's"
-msgstr ""
+msgstr "Mostra primer els paquets del repositori i després els del AUR"
 
 #: print.go:95
 msgid "Size of pacman cache %s: %s"
@@ -688,10 +694,14 @@ msgstr "Mida de la memòria cau del yay %s: %s"
 #: cmd.go:198
 msgid "Skip package build if in cache and up to date"
 msgstr ""
+"Omet la compilació del paquet si es troba en la memòria cau i està "
+"actualitzat"
 
 #: cmd.go:201
 msgid "Skip pkgbuild download if in cache and up to date"
 msgstr ""
+"Omet la descàrrega del pkgbuild si es troba en la memòria cau i "
+"esta`actualitzat"
 
 #: print.go:62
 msgid "Snapshot URL"
@@ -699,7 +709,7 @@ msgstr "URL de la instantània"
 
 #: cmd.go:170
 msgid "Sort AUR results by a specific field during search"
-msgstr ""
+msgstr "Filtra els resultats del AUR per un camp específic durant la cerca"
 
 #: pkg/dep/dep_graph.go:80
 msgid "Sync"
@@ -724,7 +734,7 @@ msgstr ""
 
 #: cmd.go:169
 msgid "Time in days to refresh completion cache"
-msgstr ""
+msgstr "Temps en dies per actualitzar la memòria cau de compleció"
 
 #: print.go:92
 msgid "Total Size occupied by packages: %s"
@@ -760,37 +770,39 @@ msgstr "No es pot suprimir %s: %s"
 
 #: cmd.go:176
 msgid "Unset the answer for the clean build menu"
-msgstr ""
+msgstr "Desmarca la resposta per al menú de compilació neta"
 
 #: cmd.go:177
 msgid "Unset the answer for the edit diff menu"
-msgstr ""
+msgstr "Desmarca la resposta per al menú d'edició de diff"
 
 #: cmd.go:178
 msgid "Unset the answer for the edit pkgbuild menu"
-msgstr ""
+msgstr "Desmarca la resposta per al menú d'edició del pkgbuild"
 
 #: cmd.go:179
 msgid "Unset the answer for the upgrade menu"
-msgstr ""
+msgstr "Desmarca la resposta per al menú d'actualitzacions"
 
 #: cmd.go:116
 msgid "Usage:"
-msgstr ""
+msgstr "Ús:"
 
 #: cmd.go:219
 msgid ""
 "Usage: %s %s\n"
 "options:\n"
 msgstr ""
+"Ús %s %s\n"
+"opcions:\n"
 
 #: cmd.go:166
 msgid "Use the default makepkg.conf"
-msgstr ""
+msgstr "Usa el makepkg.conf per defecte"
 
 #: cmd.go:60
 msgid "Used for completions"
-msgstr ""
+msgstr "S'usa per a complecions"
 
 #: print.go:32
 msgid "Version"
@@ -798,7 +810,7 @@ msgstr "Versió"
 
 #: cmd.go:69
 msgid "Vote for AUR package(s)"
-msgstr ""
+msgstr "Vota un(s) paquet(s) del AUR"
 
 #: print.go:50
 msgid "Votes"
@@ -852,10 +864,12 @@ msgstr "la comprovació del paquet ha fallat: %s ha trobat un error"
 msgid ""
 "did you mean yay -Scc (clean caches) or yay -Ycc (clean orphaned packages)?"
 msgstr ""
+"volies dir yay -Scc (elimina les memòries cau) or yay -Ycc (elimina els "
+"paquets orfes)"
 
 #: cmd.go:48
 msgid "dir"
-msgstr ""
+msgstr "directori"
 
 #: pkg/menus/edit_menu.go:110
 msgid "editor did not exit successfully, aborting: %s"
@@ -935,15 +949,15 @@ msgstr "ha fallat obtenir la cau de l'AUR"
 
 #: cmd.go:111
 msgid "file(s)"
-msgstr ""
+msgstr "arxiu(s)"
 
 #: cmd.go:160
 msgid "git command to use"
-msgstr ""
+msgstr "Ordre de git per usar"
 
 #: cmd.go:162
 msgid "gpg command to use"
-msgstr ""
+msgstr "Ordre de gpg per usar"
 
 #: pkg/upgrade/sources.go:28
 msgid "ignoring package devel upgrade (no AUR info found):"
@@ -960,9 +974,8 @@ msgid "invalid number: %s"
 msgstr "número no vàlid: %s"
 
 #: pkg/settings/parser/parser.go:669
-#, fuzzy
 msgid "invalid option"
-msgstr "opció no vàlida: %s"
+msgstr "opció no vàlida"
 
 #: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
@@ -982,11 +995,11 @@ msgstr "valor no vàlid: %d no és entre %d i %d"
 
 #: cmd.go:157
 msgid "makepkg command to use"
-msgstr ""
+msgstr "Ordre de makepkg per usar"
 
 #: cmd.go:165
 msgid "makepkg.conf file to use"
-msgstr ""
+msgstr "arxiu makepkg.conf a utilitzar"
 
 #: pkg/text/input.go:48
 msgid "no"
@@ -997,9 +1010,8 @@ msgid "no keys to import"
 msgstr "sense claus per importar"
 
 #: pkg/query/errors.go:26
-#, fuzzy
 msgid "no package found for targets"
-msgstr "No s'ha trobat cap paquet per"
+msgstr "No s'ha trobat cap paquet per als objectius"
 
 #: pkg/query/errors.go:20
 msgid "no query was executed"
@@ -1022,19 +1034,16 @@ msgid "only one target is allowed"
 msgstr "només es permet una destinació"
 
 #: cmd.go:112
-#, fuzzy
 msgid "operation"
-msgstr "operació no manejada"
+msgstr "operació"
 
 #: cmd.go:121
-#, fuzzy
 msgid "operations:"
-msgstr "operació no manejada"
+msgstr "operacions"
 
 #: cmd.go:113 cmd.go:47
-#, fuzzy
 msgid "options"
-msgstr "Dependències opcionals"
+msgstr "opcions"
 
 #: pkg/upgrade/service.go:359
 msgid "package"
@@ -1055,17 +1064,16 @@ msgid "package not found in repos"
 msgstr "paquet no trobat als repositoris"
 
 #: cmd.go:114 cmd.go:49
-#, fuzzy
 msgid "package(s)"
-msgstr "paquet"
+msgstr "paquet(s)"
 
 #: cmd.go:159
 msgid "pacman command to use"
-msgstr ""
+msgstr "Ordre de pacman per usar"
 
 #: cmd.go:164
 msgid "pacman.conf file to use"
-msgstr ""
+msgstr "arxiu pacman.conf a utilitzar"
 
 #: pkg/sync/srcinfo/pgp/keys.go:100
 msgid "problem importing keys"
@@ -1086,7 +1094,7 @@ msgstr "requerit per "
 
 #: cmd.go:207
 msgid "sudo command to use"
-msgstr ""
+msgstr "Ordre de sudo per usar"
 
 #: pkg/sync/build/errors.go:43
 msgid "the PKGDEST for %s is listed by makepkg but does not exist: %s"
@@ -1094,7 +1102,7 @@ msgstr "el PKGDEST per a %s està llistat per makepkg però no existeix:%s"
 
 #: pkg/settings/parser/parser.go:666
 msgid "the clean command requires an operation to be specified"
-msgstr ""
+msgstr "L'ordre clean requereix que s'especifiqui una operació."
 
 #: pkg/sync/sync.go:50
 msgid "there is nothing to do"
@@ -1114,11 +1122,13 @@ msgstr "versió desconeguda"
 
 #: cmd.go:224
 msgid "use 'yay {-h --help}' for global options"
-msgstr ""
+msgstr "utilitza \"yay {-h --help}\" per a les opcions globals"
 
 #: cmd.go:139
 msgid "use 'yay {-h --help}' with an operation for available options"
 msgstr ""
+"utilitza \"yay {-h --help}\" amb una operació per veure les opcions "
+"disponibles"
 
 #: pkg/text/input.go:47
 msgid "yes"

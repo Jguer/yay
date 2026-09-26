@@ -57,10 +57,21 @@ func (a *abstractResults) separateSourceScore(source string, score float64) floa
 		return 0
 	}
 
+	sourceScore := a.repoOrderScore(source)
+
+	// Exact matches always rank above everything else; among them, keep
+	// pacman.conf repo order by adding a bonus in [0, 1].
 	if score == 1.0 {
-		return 50
+		return 50 + sourceScore/separateSourceMax
 	}
 
+	return sourceScore
+}
+
+// repoOrderScore scores sync repositories based on pacman.conf order (as reflected by dbExecutor.Repos()).
+// First repo gets max, last repo gets min, evenly distributed across the range.
+// AUR and unknown sources get 0.
+func (a *abstractResults) repoOrderScore(source string) float64 {
 	if v, ok := a.separateSourceCache[source]; ok {
 		return v
 	}
@@ -70,8 +81,6 @@ func (a *abstractResults) separateSourceScore(source string, score float64) floa
 		return 0
 	}
 
-	// Score sync repositories based on pacman.conf order (as reflected by dbExecutor.Repos()).
-	// First repo gets max, last repo gets min, evenly distributed across the range.
 	for i, repo := range a.repoOrder {
 		if repo != source {
 			continue
