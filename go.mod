@@ -33,4 +33,6 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 )
 
-go 1.26.0
+go 1.26
+
+toolchain go1.26.0
