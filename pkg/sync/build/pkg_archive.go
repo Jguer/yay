@@ -163,3 +163,24 @@ func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
 
 	return pkgdests, pkgVersion, nil
 }
+
+func removeDebugCounterpart(ctx context.Context, mode parser.TargetMode, cmdBuilder exe.ICmdBuilder, debugPkgs []string, cmdArgs *parser.Arguments) error {
+	removeArguments := cmdArgs.CopyGlobal()
+
+	err := removeArguments.AddArg("R", "d", "d")
+	if err != nil {
+		return err
+	}
+
+	for _, pkg := range debugPkgs {
+		removeArguments.AddTarget(pkg)
+	}
+
+	oldValue := settings.NoConfirm
+	settings.NoConfirm = true
+	err = cmdBuilder.Show(cmdBuilder.BuildPacmanCmd(ctx,
+		removeArguments, mode, settings.NoConfirm))
+	settings.NoConfirm = oldValue
+
+	return err
+}

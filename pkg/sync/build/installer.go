@@ -16,6 +16,7 @@ import (
 	"github.com/Jguer/yay/v13/pkg/text"
 	"github.com/Jguer/yay/v13/pkg/vcs"
 
+	"github.com/Morganamilo/go-srcinfo"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 )
@@ -244,6 +245,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	deps := make([]string, 0, aurDepNames.Cardinality())
 	exps := make([]string, 0, aurExpNames.Cardinality())
 	pkgArchives := make([]string, 0, len(all))
+	debugPkgs := make([]string, 0, len(all))
 
 	for _, name := range all {
 		base := nameToBase[name]
@@ -289,11 +291,27 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 
 		if hasDebug {
 			deps = append(deps, name+"-debug")
+			sourceInfo, err := srcinfo.ParseFile(dir + "/.SRCINFO")
+			if err != nil {
+				return errors.New(gotext.Get("could not read conflicts for debug package: %s", name))
+			}
+			for _, conflict := range sourceInfo.Conflicts {
+				if installer.dbExecutor.LocalPackage(conflict.Value+"-debug") != nil {
+					debugPkgs = append(debugPkgs, conflict.Value+"-debug")
+				}
+			}
 		}
 	}
 
 	if len(pkgArchives) == 0 || !installer.installBuiltPackages {
 		return nil
+	}
+
+	if len(debugPkgs) > 0 {
+		err := removeDebugCounterpart(ctx, installer.targetMode, installer.exeCmd, debugPkgs, cmdArgs)
+		if err != nil {
+			return fmt.Errorf("%s - %w", gotext.Get("error removing debug counterpart packages"), err)
+		}
 	}
 
 	if err := installPkgArchive(ctx, installer.exeCmd, installer.targetMode,
