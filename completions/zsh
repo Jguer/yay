@@ -84,6 +84,7 @@ _pacman_opts_common=(
 	'(--topdown)--bottomup[Show AUR packages first]'
 	'(--doublelineresults)--singlelineresults[List each search result on its own line]'
 	'(--singlelineresults)--doublelineresults[List each search result on two lines, like pacman]'
+	'--noage[Disable the AUR package age badge]'
 	'--devel[Check -git/-svn/-hg development version]'
 	'--cleanafter[Clean package sources after successful build]'
 	'--keepsrc[Keep pkg/ and src/ after building packages]'

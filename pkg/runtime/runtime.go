@@ -117,6 +117,7 @@ func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version 
 
 	// FIXME: get rid of global
 	text.UseColor = useColor
+	text.UseAgeBadge = !cfg.NoAge
 
 	cmdBuilder := exe.NewCmdBuilder(cfg, runner, logger.Child("cmdbuilder"), pacmanConf.DBPath)
 

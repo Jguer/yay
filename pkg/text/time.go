@@ -38,10 +38,13 @@ func FormatDuration(d time.Duration) string {
 // NowFunc returns the current time. Overridable in tests.
 var NowFunc = time.Now
 
+// UseAgeBadge determines if the AUR package age badge is displayed.
+var UseAgeBadge = true
+
 // FormatAgeTag returns a colored "[Xd]" age badge for an AUR package's LastModified timestamp.
-// Returns "" when no AUR LastModified timestamp is available.
+// Returns "" when no AUR LastModified timestamp is available or when UseAgeBadge is disabled.
 func FormatAgeTag(lastModified int64) string {
-	if lastModified == 0 {
+	if !UseAgeBadge || lastModified == 0 {
 		return ""
 	}
 
