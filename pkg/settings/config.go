@@ -70,6 +70,7 @@ type Configuration struct {
 	Debug                  bool   `json:"debug" lua:"debug"`
 	UseRPC                 bool   `json:"rpc" lua:"rpc"`
 	DoubleConfirm          bool   `json:"doubleconfirm" lua:"double_confirm"` // confirm install before and after build
+	NoAge                  bool   `json:"noage" lua:"no_age"`
 
 	CompletionPath string `json:"-" lua:"-"`
 	VCSFilePath    string `json:"-" lua:"-"`
@@ -238,6 +239,7 @@ func DefaultConfig(version string) *Configuration {
 		Debug:                  false,
 		UseRPC:                 true,
 		DoubleConfirm:          true,
+		NoAge:                  false,
 		Mode:                   parser.ModeAny,
 	}
 }
