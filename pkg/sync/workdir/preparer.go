@@ -246,6 +246,9 @@ func (preper *Preparer) needToCloneAURBase(installInfo *dep.InstallInfo, pkgbuil
 	if preper.cfg.ReDownload == "all" {
 		return true
 	}
+	if preper.cfg.ReDownload == "yes" && installInfo.Reason == dep.Explicit {
+		return true
+	}
 
 	srcinfoFile := filepath.Join(pkgbuildDir, ".SRCINFO")
 	if pkgbuild, err := gosrc.ParseFile(srcinfoFile); err == nil {
