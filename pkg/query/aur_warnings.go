@@ -55,9 +55,16 @@ func (warnings *AURWarnings) AddToWarnings(remote map[string]alpm.Package, aurPk
 func (warnings *AURWarnings) CalculateMissing(remoteNames []string,
 	remote map[string]alpm.Package, aurData map[string]*aur.Pkg,
 ) {
+	// Debug packages are named after the pkgbase, which a split package's name may not match.
+	bases := make(map[string]bool, len(aurData))
+	for _, pkg := range aurData {
+		bases[pkg.PackageBase] = true
+	}
+
 	for _, name := range remoteNames {
 		if _, ok := aurData[name]; !ok && !remote[name].ShouldIgnore() {
-			if _, ok := aurData[strings.TrimSuffix(name, "-debug")]; !ok {
+			base, isDebug := strings.CutSuffix(name, "-debug")
+			if _, ok := aurData[base]; !ok && (!isDebug || !bases[base]) {
 				warnings.Missing = append(warnings.Missing, name)
 			}
 		}
