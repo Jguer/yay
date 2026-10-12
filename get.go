@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/Jguer/aur"
@@ -17,17 +18,22 @@ import (
 )
 
 // yay -Gp.
-func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient,
+func printPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient aur.QueryClient,
 	httpClient *http.Client, logger *text.Logger, targets []string,
-	mode parser.TargetMode, aurURL string,
+	mode parser.TargetMode, aurURL, pkgbuildPager string,
 ) error {
 	pkgbuilds, err := download.PKGBUILDs(dbExecutor, aurClient, httpClient, logger, targets, aurURL, mode)
 	if err != nil {
 		logger.Errorln(err)
 	}
 
+	output := &strings.Builder{}
 	for target, pkgbuild := range pkgbuilds {
-		logger.Printf("\n\n# %s\n\n%s", target, string(pkgbuild))
+		fmt.Fprintf(output, "\n\n# %s\n\n%s", target, string(pkgbuild))
+	}
+
+	if err := printPkgbuildOutput(ctx, logger, output.String(), pkgbuildPager); err != nil {
+		return err
 	}
 
 	if len(pkgbuilds) != len(targets) {
@@ -42,6 +48,39 @@ func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient,
 		logger.Warnln(gotext.Get("Unable to find the following packages:"), " ", strings.Join(missing, ", "))
 
 		return fmt.Errorf("")
+	}
+
+	return nil
+}
+
+// printPkgbuildOutput writes the collected PKGBUILDs to stdout, or pipes them
+// through the configured pager. Unlike the diff pager there is no fallback: an
+// unset pkgbuildPager keeps -Gp's plain, script-friendly stdout.
+// The pager command is user-controlled (config / Lua), same model as $EDITOR.
+func printPkgbuildOutput(ctx context.Context, logger *text.Logger, output, pkgbuildPager string) error {
+	if output == "" {
+		return nil
+	}
+
+	if strings.TrimSpace(pkgbuildPager) == "" {
+		logger.Print(output)
+
+		return nil
+	}
+
+	cmd := exec.CommandContext(ctx, "sh", "-c", pkgbuildPager)
+	cmd.Stdin = strings.NewReader(output)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = os.Environ()
+
+	if os.Getenv("LESS") == "" {
+		// S: chop long lines; R: raw ANSI; X: no termcap init; F: quit if one screen
+		cmd.Env = append(cmd.Env, "LESS=SRXF")
+	}
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to run pkgbuild pager: %w", err)
 	}
 
 	return nil
