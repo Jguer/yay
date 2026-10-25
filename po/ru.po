@@ -966,7 +966,7 @@ msgstr "неверное число: %s"
 
 #: pkg/settings/parser/parser.go:669
 msgid "invalid option"
-msgstr "некорректный параметр"
+msgstr "неверный параметр"
 
 #: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
