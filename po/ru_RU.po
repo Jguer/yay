@@ -989,7 +989,7 @@ msgstr "недействительный репозиторий"
 
 #: pkg/db/ialpm/alpm.go:233 pkg/dep/dep_graph.go:829
 msgid "invalid value: %d is not between %d and %d"
-msgstr "некорректное значение: %d не лежит между %d и %d"
+msgstr "неверное значение: %d не лежит между %d и %d"
 
 #: cmd.go:157
 msgid "makepkg command to use"
