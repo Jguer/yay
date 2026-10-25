@@ -511,7 +511,7 @@ msgstr "Базовый пакет"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Идентификатор пакета"
+msgstr "Идентификатор базового пакета"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
