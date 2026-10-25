@@ -971,11 +971,11 @@ msgstr "неверный номер: %s"
 
 #: pkg/settings/parser/parser.go:669
 msgid "invalid option"
-msgstr "некорректный параметр"
+msgstr "неверный параметр"
 
 #: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
-msgstr "некорректный параметр '%s'"
+msgstr "неверный параметр '%s'"
 
 #: cmd.go:285
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
