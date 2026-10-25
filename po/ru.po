@@ -519,7 +519,7 @@ msgstr "Пакет не найден в AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Пакеты для чистой сборки?"
+msgstr "Очистить кэш сборки для этих пакетов?"
 
 #: pkg/dep/dep_graph.go:205
 msgid "Packages to exclude"
