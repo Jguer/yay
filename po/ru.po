@@ -975,8 +975,8 @@ msgstr "неверный параметр '%s'"
 #: cmd.go:285
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"неверная опция: невозможно использовать опции '--deps' и '--explicit' "
-"одновременно"
+"неверный параметр: невозможно использовать параметры '--deps' и '--explicit'"
+" одновременно"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
