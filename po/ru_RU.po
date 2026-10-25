@@ -967,7 +967,7 @@ msgstr "ввод слишком длинный"
 
 #: pkg/db/ialpm/alpm.go:228 pkg/dep/dep_graph.go:823
 msgid "invalid number: %s"
-msgstr "некорректный номер: %s"
+msgstr "неверный номер: %s"
 
 #: pkg/settings/parser/parser.go:669
 msgid "invalid option"
@@ -980,7 +980,7 @@ msgstr "некорректный параметр '%s'"
 #: cmd.go:285
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"некорректный параметр:  '--deps' и '--explicit' не могут быть использованы "
+"неверный параметр:  '--deps' и '--explicit' не могут быть использованы "
 "вместе"
 
 #: pkg/download/abs.go:22
