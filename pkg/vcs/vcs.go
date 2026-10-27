@@ -88,7 +88,7 @@ func (v *InfoStore) getCommit(ctx context.Context, url, branch string, protocols
 		ctxTimeout, cancel := context.WithTimeout(ctx, defaultTimeout)
 		defer cancel()
 
-		cmd := v.CmdBuilder.BuildGitCmd(ctxTimeout, "", "ls-remote", protocol+"://"+url, branch)
+		cmd := v.CmdBuilder.BuildGitCmd(ctxTimeout, "", "ls-remote", "--", protocol+"://"+url, branch)
 
 		stdout, stderr, err := v.CmdBuilder.Capture(cmd)
 		if err != nil {
