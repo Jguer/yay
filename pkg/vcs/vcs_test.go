@@ -62,6 +62,28 @@ func TestParsing(t *testing.T) {
 	}
 }
 
+func TestGetCommitDoesNotParseRemoteAsOption(t *testing.T) {
+	t.Parallel()
+
+	var commandErr error
+	runner := &exe.MockRunner{CaptureFn: func(cmd *exec.Cmd) (string, string, error) {
+		output, err := cmd.Output()
+		commandErr = err
+		return string(output), "", err
+	}}
+	store := NewInfoStore("", &exe.CmdBuilder{
+		GitBin:   "git",
+		GitFlags: []string{"-c", "remote.origin.url=example"},
+		Runner:   runner,
+	}, newTestLogger())
+
+	url, branch, protocols := parseSource("git+--upload-pack=example://host#branch=--get-url")
+	store.getCommit(context.Background(), url, branch, protocols)
+	if commandErr == nil {
+		t.Fatal("Git interpreted the remote and branch as options")
+	}
+}
+
 func TestNewInfoStore(t *testing.T) {
 	t.Parallel()
 	type args struct {
