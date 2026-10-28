@@ -23,6 +23,7 @@
 ---@field build_dir string Build/cache directory for AUR packages.
 ---@field editor string Editor command used for PKGBUILD edits; empty uses VISUAL/EDITOR.
 ---@field editor_flags string Extra flags passed to the editor command.
+---@field pager string Pager command for PKGBUILD diffs; empty uses $PAGER, then less/cat.
 ---@field makepkg_bin string makepkg executable (name in PATH or absolute path).
 ---@field makepkg_conf string makepkg.conf path; empty uses default makepkg config.
 ---@field pacman_bin string pacman executable.

@@ -15,7 +15,7 @@ yay uses the [Lua 5.1 interpreter](https://www.lua.org/manual/5.1/) to run `init
 
 ## Editor support
 
-<p class="api-since">Available from yay v13.0.2</p>
+<p class="api-since">Available from yay v13.1.0</p>
 
 yay ships a [lua-language-server](https://luals.github.io/) type definition file
 at [`meta/yay.d.lua`](../meta/yay.d.lua). It declares the `yay` global,
