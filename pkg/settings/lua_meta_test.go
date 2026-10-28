@@ -23,7 +23,7 @@ func luaMetaOptFields(meta string) map[string]bool {
 
 	inOpt := false
 
-	for _, line := range strings.Split(meta, "\n") {
+	for line := range strings.SplitSeq(meta, "\n") {
 		switch {
 		case strings.HasPrefix(line, "---@class "):
 			inOpt = strings.TrimSpace(strings.TrimPrefix(line, "---@class ")) == "yay.opt"
@@ -49,9 +49,8 @@ func TestLuaMetaCoversAllOptions(t *testing.T) {
 
 	configFields := map[string]bool{}
 
-	typ := reflect.TypeOf(Configuration{})
-	for i := range typ.NumField() {
-		if name := typ.Field(i).Tag.Get("lua"); name != "" && name != "-" {
+	for field := range reflect.TypeFor[Configuration]().Fields() {
+		if name := field.Tag.Get("lua"); name != "" && name != "-" {
 			configFields[name] = true
 		}
 	}
