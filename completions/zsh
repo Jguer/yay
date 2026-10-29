@@ -75,6 +75,7 @@ _pacman_opts_common=(
 	'--cleanmenu[Give the option to clean build PKGBUILDS]'
 	'--diffmenu[Give the option to show diffs for build files]'
 	'--editmenu[Give the option to edit/view PKGBUILDS]'
+	'--noupgrademenu[Do not prompt for package exclusions during upgrades]'
 	'(--askyesremovemake --removemake --noremovemake)--askremovemake[Ask to remove makedepends after install]'
 	'(--askremovemake --removemake --noremovemake)--askyesremovemake[Ask to remove makedepends after install(with "Y" as default)]'
 	'(--askremovemake --askyesremovemake --noremovemake)--removemake[Remove makedepends after install]'
