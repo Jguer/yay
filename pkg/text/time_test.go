@@ -46,3 +46,16 @@ func TestFormatDuration(t *testing.T) {
 		})
 	}
 }
+
+// TestFormatAgeTagToggle is intentionally not parallel because it mutates the
+// package-level UseAgeBadge variable, like TestColorHash does for UseColor.
+func TestFormatAgeTagToggle(t *testing.T) {
+	original := UseAgeBadge
+	defer func() { UseAgeBadge = original }()
+
+	UseAgeBadge = false
+	require.Equal(t, "", FormatAgeTag(1646250901))
+
+	UseAgeBadge = true
+	require.NotEqual(t, "", FormatAgeTag(1646250901))
+}
