@@ -116,6 +116,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.AnswerUpgrade = value
 	case "noanswerupgrade":
 		c.AnswerUpgrade = ""
+	case "noexcludemenu":
+		c.NoExcludeMenu = boolValue
 	case "gpgflags":
 		c.GpgFlags = value
 	case "mflags":

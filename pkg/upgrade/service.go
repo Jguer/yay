@@ -375,6 +375,9 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 	if skipMenu {
 		return excluded, nil
 	}
+	if u.cfg.NoExcludeMenu {
+		return excluded, nil
+	}
 	if len(excluded) > 0 {
 		// The hook pruned packages; refresh the selection to reflect the
 		// smaller graph and skip the menu if nothing is left to upgrade.
