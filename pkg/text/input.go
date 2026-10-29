@@ -2,7 +2,10 @@ package text
 
 import (
 	"bufio"
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -18,18 +21,39 @@ func (l *Logger) GetInput(defaultValue string, noConfirm bool) (string, error) {
 		return defaultValue, nil
 	}
 
-	reader := bufio.NewReader(l.r)
+	// The process-wide SIGINT handler only cancels a context, which a blocking
+	// read cannot observe, so watch for the interrupt here to keep Ctrl+C working.
+	sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
 
-	buf, overflow, err := reader.ReadLine()
-	if err != nil {
-		return "", err
+	type result struct {
+		buf      []byte
+		overflow bool
+		err      error
 	}
 
-	if overflow {
-		return "", ErrInputOverflow{}
-	}
+	resCh := make(chan result, 1)
 
-	return string(buf), nil
+	go func() {
+		buf, overflow, err := bufio.NewReader(l.r).ReadLine()
+		resCh <- result{buf, overflow, err}
+	}()
+
+	select {
+	case <-sigCtx.Done():
+		l.Println()
+		return "", context.Canceled
+	case res := <-resCh:
+		if res.err != nil {
+			return "", res.err
+		}
+
+		if res.overflow {
+			return "", ErrInputOverflow{}
+		}
+
+		return string(res.buf), nil
+	}
 }
 
 // ContinueTask prompts if user wants to continue task.
