@@ -179,6 +179,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.RemoveMake = "askyes"
 	case "separatesources":
 		c.SeparateSources = boolValue
+	case "clean-chroot":
+		c.CleanChroot = boolValue
 	default:
 		return false
 	}
