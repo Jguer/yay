@@ -20,19 +20,26 @@ var isStdoutTerminal = func() bool {
 // resolvePager returns the pager command string.
 // Priority: config pager → PAGER → less → cat.
 func resolvePager(pagerConfig string) string {
-	if pagerConfig != "" {
-		return pagerConfig
+	pager := pagerConfig
+	if pager == "" {
+		pager = os.Getenv("PAGER")
 	}
 
-	if pager := os.Getenv("PAGER"); pager != "" {
-		return pager
+	if pager == "" {
+		if _, err := exec.LookPath("less"); err == nil {
+			pager = "less"
+		} else {
+			return "cat"
+		}
 	}
 
-	if _, err := exec.LookPath("less"); err == nil {
-		return "less"
+	// A bare less gets -R on the command line: unlike $LESS, command-line
+	// options also override a LESS definition in the user's lesskey file.
+	if strings.TrimSpace(pager) == "less" {
+		return "less -R"
 	}
 
-	return "cat"
+	return pager
 }
 
 // pageThroughPager runs the configured pager with content on stdin.

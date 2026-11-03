@@ -25,6 +25,9 @@ func TestResolvePager(t *testing.T) {
 	}{
 		{name: "config wins", pagerConfig: "delta", pager: "less", want: "delta"},
 		{name: "PAGER when config empty", pagerConfig: "", pager: "most", want: "most"},
+		{name: "bare less gets -R", pagerConfig: "less", pager: "most", want: "less -R"},
+		{name: "PAGER bare less gets -R", pagerConfig: "", pager: "less", want: "less -R"},
+		{name: "less with options untouched", pagerConfig: "less -FX", pager: "", want: "less -FX"},
 	}
 
 	for _, tt := range tests {
