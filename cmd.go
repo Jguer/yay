@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	alpm "github.com/Jguer/dyalpm"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v13/pkg/completion"
@@ -483,11 +484,35 @@ func displayNumberMenu(ctx context.Context, run *runtime.Runtime, pkgS []string,
 		return nil
 	}
 
-	run.Logger.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4)"))
+	run.Logger.Infoln(gotext.Get("Packages to install (eg: 1 2 3, 1-3 or ^4) or to remove (eg: -1, -1-3 or -1-5 ^3)"))
 
 	numberBuf, err := run.Logger.GetInput("", false)
 	if err != nil {
 		return err
+	}
+
+	if removal, rest := intrange.SplitRemoval(numberBuf); removal != "" {
+		removeTargets, installTargets, err := splitMenuSelection(queryBuilder, removal, rest)
+		if err != nil {
+			return err
+		}
+
+		removed, err := removePackages(ctx, run, dbExecutor, removeTargets)
+		if err != nil {
+			return err
+		}
+
+		if len(installTargets) == 0 {
+			if removed == 0 {
+				run.Logger.Println(gotext.Get(" there is nothing to do"))
+			}
+
+			return nil
+		}
+
+		cmdArgs.Targets = installTargets
+
+		return syncInstall(ctx, run, cmdArgs, dbExecutor)
 	}
 
 	include, exclude, _, otherExclude := intrange.ParseNumberMenu(numberBuf)
@@ -506,6 +531,94 @@ func displayNumberMenu(ctx context.Context, run *runtime.Runtime, pkgS []string,
 	}
 
 	return syncInstall(ctx, run, cmdArgs, dbExecutor)
+}
+
+// splitMenuSelection resolves a number menu input containing removals into the
+// packages to remove and the packages to install. removal holds the removal
+// ranges (without their leading '-'), rest holds everything else. Exclusions
+// (^) apply to both the removals and the installs. A rest made only of
+// exclusions selects nothing to install.
+func splitMenuSelection(queryBuilder query.Builder, removal, rest string) (removeTargets, installTargets []string, err error) {
+	removeInclude, _, removeOther, _ := intrange.ParseNumberMenu(removal)
+	if removeOther.Cardinality() > 0 {
+		return nil, nil, errors.New(gotext.Get("invalid removal selection: %s", strings.Join(removeOther.ToSlice(), " ")))
+	}
+
+	include, exclude, otherInclude, otherExclude := intrange.ParseNumberMenu(rest)
+	if otherInclude.Cardinality() > 0 || otherExclude.Cardinality() > 0 {
+		return nil, nil, errors.New(gotext.Get("invalid selection: %s",
+			strings.Join(append(otherInclude.ToSlice(), otherExclude.ToSlice()...), " ")))
+	}
+
+	noOther := mapset.NewThreadUnsafeSet[string]()
+
+	// GetTargets ignores the include ranges when an exclusion is given,
+	// so each selection is resolved on its own and exclusions are subtracted.
+	excluded, err := queryBuilder.GetTargets(exclude, nil, noOther)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	notExcluded := func(t string) bool { return !slices.Contains(excluded, t) }
+
+	removeTargets, err = queryBuilder.GetTargets(removeInclude, nil, noOther)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	removeTargets = slices.DeleteFunc(removeTargets, func(t string) bool { return !notExcluded(t) })
+
+	if len(include) > 0 {
+		installTargets, err = queryBuilder.GetTargets(include, nil, noOther)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		installTargets = slices.DeleteFunc(installTargets, func(t string) bool { return !notExcluded(t) })
+	}
+
+	return removeTargets, installTargets, nil
+}
+
+// removePackages uninstalls the given menu targets (source/name). Targets that
+// are not installed are reported and skipped. It returns the number of
+// packages it asked pacman to remove.
+func removePackages(ctx context.Context, run *runtime.Runtime, dbExecutor db.Executor,
+	selected []string,
+) (int, error) {
+	removeArgs := parser.MakeArguments()
+	removeArgs.Op = "R"
+
+	for _, target := range selected {
+		name := target[strings.LastIndex(target, "/")+1:]
+
+		if dbExecutor.LocalPackage(name) == nil {
+			run.Logger.Warnln(gotext.Get("%s is not installed, skipping", text.Cyan(name)))
+			continue
+		}
+
+		removeArgs.AddTarget(name)
+	}
+
+	if len(removeArgs.Targets) == 0 {
+		return 0, nil
+	}
+
+	removeOptions := []struct{ question, option string }{
+		{gotext.Get("Remove unneeded dependencies too (recursive)?"), "recursive"},
+		{gotext.Get("Also remove packages that depend on them (cascade)?"), "cascade"},
+		{gotext.Get("Do not save backup files (nosave)?"), "nosave"},
+	}
+
+	for _, opt := range removeOptions {
+		if run.Logger.ContinueTask(opt.question, false, settings.NoConfirm) {
+			if err := removeArgs.AddArg(opt.option); err != nil {
+				return 0, err
+			}
+		}
+	}
+
+	return len(removeArgs.Targets), handleRemove(ctx, run, removeArgs, run.VCSStore)
 }
 
 func syncList(ctx context.Context, run *runtime.Runtime,
