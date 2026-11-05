@@ -877,3 +877,64 @@ func TestSyncUpgrade_NoCombinedUpgrade(t *testing.T) {
 		})
 	}
 }
+
+func TestSyncInstall_AURModeIgnoresRepoProvider(t *testing.T) {
+	t.Parallel()
+
+	mockRunner := &exe.MockRunner{
+		CaptureFn: func(cmd *exec.Cmd) (string, string, error) { return "", "", nil },
+		ShowFn:    func(cmd *exec.Cmd) error { return nil },
+	}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:       "makepkg",
+		SudoBin:          "su",
+		PacmanBin:        "pacman",
+		PacmanConfigPath: "/etc/pacman.conf",
+		GitBin:           "git",
+		Runner:           mockRunner,
+	}
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddArg("S")
+	cmdArgs.AddTarget("doas")
+
+	// extra/opendoas provides doas, like on a real Arch system.
+	opendoas := &mock.Package{PName: "opendoas", PVersion: "6.8.2-3", PDB: mock.NewDB("extra")}
+	db := &mock.DBExecutor{
+		SyncSatisfierFn: func(name string) alpm.Package {
+			if name == "doas" {
+				return opendoas
+			}
+			return nil
+		},
+		PackagesFromGroupFn:           func(string) []alpm.Package { return nil },
+		LocalPackageFn:                func(string) alpm.Package { return nil },
+		InstalledRemotePackageNamesFn: func() []string { return nil },
+		AlpmArchitecturesFn:           func() ([]string, error) { return []string{"x86_64"}, nil },
+		InstalledRemotePackagesFn:     func() map[string]alpm.Package { return nil },
+	}
+
+	var aurQueried []string
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+			Mode:       parser.ModeAUR,
+		},
+		Logger:     text.NewLogger(io.Discard, io.Discard, strings.NewReader("\n"), true, "test"),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				aurQueried = append(aurQueried, query.Needles...)
+				return []aur.Pkg{}, nil
+			},
+		},
+	}
+
+	_ = handleCmd(context.Background(), run, cmdArgs, db)
+
+	for _, call := range mockRunner.ShowCalls {
+		assert.NotContains(t, call.Args[0].(*exec.Cmd).String(), "opendoas")
+	}
+	assert.Contains(t, aurQueried, "doas")
+}
