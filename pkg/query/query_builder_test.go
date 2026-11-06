@@ -901,3 +901,51 @@ func TestSourceQueryBuilderSamePkgNameAcrossRepos(t *testing.T) {
 	assert.Equal(t, 1, strings.Count(out, descExtra), "extra description must appear exactly once")
 	assert.Equal(t, 1, strings.Count(out, descExtraTesting), "extra-testing description must appear exactly once")
 }
+
+// A pacman repo can be named "aur" (Arch Linux ARM has one). Its packages must
+// be rendered as sync packages, not looked up in the AUR results.
+func TestSourceQueryBuilderSyncRepoNamedAUR(t *testing.T) {
+	t.Parallel()
+
+	const desc = "The Linux kernel and modules (aur repo)"
+
+	mockDB := &mock.DBExecutor{
+		ReposFn: func() []string { return []string{"core", "aur"} },
+		SyncPackagesFn: func(pkgs ...string) []mock.IPackage {
+			return []mock.IPackage{
+				&mock.Package{
+					PBase:         "linux",
+					PName:         "linux",
+					PVersion:      "6.1.0",
+					PDescription:  desc,
+					PSize:         1,
+					PISize:        1,
+					PDB:           mock.NewDB("aur"),
+					PArchitecture: "aarch64",
+				},
+			}
+		},
+		LocalPackageFn: func(string) mock.IPackage { return nil },
+	}
+
+	mockAUR := &mockaur.MockAUR{
+		GetFn: func(_ context.Context, _ *aur.Query) ([]aur.Pkg, error) {
+			return nil, nil
+		},
+	}
+
+	w := &strings.Builder{}
+	queryBuilder := NewSourceQueryBuilder(
+		mockAUR,
+		text.NewLogger(w, io.Discard, strings.NewReader(""), false, "test"),
+		"", parser.ModeRepo, "", false, false, false,
+	)
+
+	queryBuilder.Execute(t.Context(), mockDB, []string{"linux"})
+	require.Len(t, queryBuilder.results, 1)
+
+	require.NotPanics(t, func() {
+		require.NoError(t, queryBuilder.Results(mockDB, Detailed))
+	})
+	assert.Equal(t, 1, strings.Count(w.String(), desc))
+}
