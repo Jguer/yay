@@ -97,6 +97,9 @@ type abstractResult struct {
 	lastModified   int
 	provides       []string
 	metricScore    float64
+	// isAUR is true for AUR RPC results. A sync repo can also be named "aur"
+	// (Arch Linux ARM), so source alone can't tell them apart.
+	isAUR bool
 }
 
 type abstractResults struct {
@@ -248,6 +251,7 @@ func (s *SourceQueryBuilder) Execute(ctx context.Context, dbExecutor db.Executor
 
 			sortableResults.results = append(sortableResults.results, abstractResult{
 				source:         dbName,
+				isAUR:          true,
 				name:           aurResults[i].Name,
 				description:    aurResults[i].Description,
 				packageBase:    aurResults[i].PackageBase,
@@ -292,7 +296,7 @@ func (s *SourceQueryBuilder) Results(dbExecutor db.Executor, verboseSearch Searc
 			}
 		}
 
-		if s.results[i].source == "aur" {
+		if s.results[i].isAUR {
 			pkg := s.aurQueryMap[s.results[i].name]
 			toPrint += s.renderAUR(pkg, dbExecutor)
 		} else {
