@@ -178,6 +178,35 @@ func TestConfiguration_setPrivilegeElevator_no_path(t *testing.T) {
 }
 
 // GIVEN default config and sudo loop enabled
+// GIVEN only sudo-rs in path
+// WHEN setPrivilegeElevator gets called
+// THEN sudobin should be changed to "sudo-rs" and keep sudo options
+func TestConfiguration_setPrivilegeElevator_sudo_rs(t *testing.T) {
+	path := t.TempDir()
+
+	sudoRs := filepath.Join(path, "sudo-rs")
+	_, err := os.Create(sudoRs)
+	os.Chmod(sudoRs, 0o755)
+	require.NoError(t, err)
+
+	doas := filepath.Join(path, "doas")
+	_, err = os.Create(doas)
+	os.Chmod(doas, 0o755)
+	require.NoError(t, err)
+
+	config := DefaultConfig("test")
+	config.SudoLoop = true
+	config.SudoFlags = "-v"
+
+	t.Setenv("PATH", path)
+	err = config.setPrivilegeElevator()
+	assert.NoError(t, err)
+	assert.Equal(t, "sudo-rs", config.SudoBin)
+	assert.Equal(t, "-v", config.SudoFlags)
+	assert.True(t, config.SudoLoop)
+}
+
+// GIVEN default config and sudo loop enabled
 // GIVEN doas in path
 // WHEN setPrivilegeElevator gets called
 // THEN sudobin should be changed to "doas"
@@ -309,6 +338,33 @@ func TestConfiguration_setPrivilegeElevator_pacman_auth_sudo(t *testing.T) {
 	err = config.setPrivilegeElevator()
 	assert.NoError(t, err)
 	assert.Equal(t, "sudo", config.SudoBin)
+	assert.Equal(t, "-v", config.SudoFlags)
+	assert.True(t, config.SudoLoop)
+}
+
+// GIVEN config with sudo configured and sudo loop enabled
+// GIVEN sudo-rs as PACMAN_AUTH env variable
+// WHEN setPrivilegeElevator gets called
+// THEN sudobin should be changed to "sudo-rs" and keep sudo options
+func TestConfiguration_setPrivilegeElevator_pacman_auth_sudo_rs(t *testing.T) {
+	path := t.TempDir()
+
+	for _, name := range []string{"sudo", "sudo-rs"} {
+		bin := filepath.Join(path, name)
+		_, err := os.Create(bin)
+		os.Chmod(bin, 0o755)
+		require.NoError(t, err)
+	}
+
+	config := DefaultConfig("test")
+	config.SudoLoop = true
+	config.SudoFlags = "-v"
+
+	t.Setenv("PACMAN_AUTH", "sudo-rs")
+	t.Setenv("PATH", path)
+	err := config.setPrivilegeElevator()
+	assert.NoError(t, err)
+	assert.Equal(t, "sudo-rs", config.SudoBin)
 	assert.Equal(t, "-v", config.SudoFlags)
 	assert.True(t, config.SudoLoop)
 }
