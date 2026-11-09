@@ -102,7 +102,7 @@ func gitFilteredEnv() []string {
 	var env []string
 
 	for _, envVar := range os.Environ() {
-		envKey := strings.SplitN(envVar, "=", 2)[0]
+		envKey, _, _ := strings.Cut(envVar, "=")
 		if !gitDenyList.Contains(envKey) {
 			env = append(env, envVar)
 		}
