@@ -121,7 +121,7 @@ func main() {
 	}
 
 	// Build run
-	run, err := runtime.NewRuntime(cfg, cmdArgs, yayVersion)
+	run, err := runtime.NewRuntime(ctx, cfg, cmdArgs, yayVersion)
 	if err != nil {
 		if str := err.Error(); str != "" {
 			fallbackLog.Errorln(str)
