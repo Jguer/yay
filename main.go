@@ -158,19 +158,28 @@ func main() {
 		dbExecutor.Cleanup()
 	}()
 
-	if err = handleCmd(ctx, run, cmdArgs, dbExecutor); err != nil {
-		if str := err.Error(); str != "" {
-			fallbackLog.Errorln(str)
-		}
+	err = handleCmd(ctx, run, cmdArgs, dbExecutor)
+	ret = commandExitCode(ctx, err, fallbackLog)
+}
 
-		exitError := &exec.ExitError{}
-		if errors.As(err, &exitError) {
-			// mirror pacman exit code when applicable
-			ret = exitError.ExitCode()
-			return
-		}
-
-		// fallback
-		ret = 1
+func commandExitCode(ctx context.Context, err error, log *text.Logger) int {
+	// A cancelled confirmation can return nil or a user-abort error, so inspect
+	// the signal context rather than just the command error.
+	if errors.Is(ctx.Err(), context.Canceled) {
+		return 130
 	}
+	if err == nil {
+		return 0
+	}
+	if str := err.Error(); str != "" {
+		log.Errorln(str)
+	}
+
+	exitError := &exec.ExitError{}
+	if errors.As(err, &exitError) {
+		// mirror pacman exit code when applicable
+		return exitError.ExitCode()
+	}
+
+	return 1
 }

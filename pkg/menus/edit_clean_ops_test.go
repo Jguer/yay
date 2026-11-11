@@ -24,7 +24,8 @@ func TestEditor(t *testing.T) {
 	t.Parallel()
 
 	logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test")
-	editorPath, args := editor(logger, "echo", "--help", false)
+	editorPath, args, err := editor(logger, "echo", "--help", false)
+	require.NoError(t, err)
 	require.NotEmpty(t, editorPath)
 	require.Contains(t, args, "--help")
 }

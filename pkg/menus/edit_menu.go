@@ -20,14 +20,14 @@ import (
 )
 
 // Editor returns the preferred system editor.
-func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) (editor string, args []string) {
+func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) (editor string, args []string, err error) {
 	switch {
 	case editorConfig != "":
 		editor, err := exec.LookPath(editorConfig)
 		if err != nil {
 			log.Errorln(err)
 		} else {
-			return editor, strings.Fields(editorFlags)
+			return editor, strings.Fields(editorFlags), nil
 		}
 
 		fallthrough
@@ -37,7 +37,7 @@ func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) 
 			if err != nil {
 				log.Errorln(err)
 			} else {
-				return editor, editorArgs[1:]
+				return editor, editorArgs[1:], nil
 			}
 		}
 
@@ -48,7 +48,7 @@ func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) 
 			if err != nil {
 				log.Errorln(err)
 			} else {
-				return editor, editorArgs[1:]
+				return editor, editorArgs[1:], nil
 			}
 		}
 
@@ -62,6 +62,9 @@ func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) 
 
 			editorInput, err := log.GetInput("", noConfirm)
 			if err != nil {
+				if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+					return "", nil, err
+				}
 				log.Errorln(err)
 				continue
 			}
@@ -77,7 +80,7 @@ func editor(log *text.Logger, editorConfig, editorFlags string, noConfirm bool) 
 				continue
 			}
 
-			return editor, editorArgs[1:]
+			return editor, editorArgs[1:], nil
 		}
 	}
 }
@@ -101,7 +104,10 @@ func editPkgbuilds(log *text.Logger, pkgbuildDirs map[string]string, bases []str
 	}
 
 	if len(pkgbuilds) > 0 {
-		editor, editorArgs := editor(log, editorConfig, editorFlags, noConfirm)
+		editor, editorArgs, err := editor(log, editorConfig, editorFlags, noConfirm)
+		if err != nil {
+			return err
+		}
 		editorArgs = append(editorArgs, pkgbuilds...)
 		editcmd := exec.CommandContext(context.Background(), editor, editorArgs...)
 		editcmd.Stdin, editcmd.Stdout, editcmd.Stderr = os.Stdin, os.Stdout, os.Stderr
