@@ -84,3 +84,14 @@ func CreateRepoLink(repo, arch, pkgName, text string) string {
 
 	return CreateOSC8Link(url, text)
 }
+
+// ProviderQuestionSuffix returns the " (required by X)" suffix appended to
+// provider selection prompts. It returns an empty string when the requesting
+// package is unknown.
+func ProviderQuestionSuffix(requiredBy string) string {
+	if requiredBy == "" {
+		return ""
+	}
+
+	return " (required by " + requiredBy + ")"
+}
