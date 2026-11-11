@@ -1,6 +1,7 @@
 package text
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 )
@@ -83,4 +84,15 @@ func CreateRepoLink(repo, arch, pkgName, text string) string {
 	}
 
 	return CreateOSC8Link(url, text)
+}
+
+// FormatProviderQuestion formats the provider selection prompt. When requiredBy
+// is non-empty it is appended so the user knows which package triggered the
+// dependency choice.
+func FormatProviderQuestion(depName string, providerCount int, requiredBy string) string {
+	if requiredBy == "" {
+		return fmt.Sprintf("There are %d providers available for %s:", providerCount, depName)
+	}
+
+	return fmt.Sprintf("There are %d providers available for %s (required by %s):", providerCount, depName, requiredBy)
 }
