@@ -238,7 +238,11 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 	argArr = append(argArr, args.Targets...)
 
 	if needsRoot {
-		c.waitLock(c.PacmanDBPath)
+		if err := c.waitLock(ctx, c.PacmanDBPath); err != nil {
+			cmd := exec.CommandContext(ctx, argArr[0], argArr[1:]...)
+			cmd.Err = err
+			return cmd
+		}
 
 		if os.Geteuid() != 0 {
 			return c.buildPrivilegeElevatorCommand(ctx, argArr)
@@ -249,22 +253,31 @@ func (c *CmdBuilder) BuildPacmanCmd(ctx context.Context, args *parser.Arguments,
 }
 
 // waitLock will lock yay checking the status of db.lck until it does not exist.
-func (c *CmdBuilder) waitLock(dbPath string) {
+func (c *CmdBuilder) waitLock(ctx context.Context, dbPath string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	lockDBPath := filepath.Join(dbPath, "db.lck")
 	if _, err := os.Stat(lockDBPath); err != nil {
-		return
+		return nil
 	}
 
 	c.Log.Warnln(gotext.Get("%s is present.", lockDBPath))
 	c.Log.Warn(gotext.Get("There may be another Pacman instance running. Waiting..."))
+	defer c.Log.Println()
+
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
 
 	for {
-		time.Sleep(3 * time.Second)
-
-		if _, err := os.Stat(lockDBPath); err != nil {
-			c.Log.Println()
-
-			return
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if _, err := os.Stat(lockDBPath); err != nil {
+				return nil
+			}
 		}
 	}
 }

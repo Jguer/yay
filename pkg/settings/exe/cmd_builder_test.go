@@ -5,9 +5,13 @@ package exe
 import (
 	"context"
 	"io"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/synctest"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -56,6 +60,75 @@ func TestBuildPacmanCmd(t *testing.T) {
 	require.Contains(t, strings.Join(cmd.Args, " "), "--noconfirm")
 	require.Contains(t, strings.Join(cmd.Args, " "), "--config /etc/pacman.conf")
 	require.Contains(t, strings.Join(cmd.Args, " "), "--")
+}
+
+func TestBuildPacmanCmdLock(t *testing.T) {
+	t.Parallel()
+
+	for _, name := range []string{"no lock", "canceled before wait", "canceled during wait", "lock removed"} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			dir := t.TempDir()
+			lockPath := filepath.Join(dir, "db.lck")
+			if name != "no lock" {
+				require.NoError(t, os.WriteFile(lockPath, nil, 0o600))
+			}
+
+			builder := &CmdBuilder{
+				PacmanBin:    "/missing/pacman",
+				SudoBin:      "/missing/sudo",
+				PacmanDBPath: dir,
+				Log:          text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
+			}
+			args := parser.MakeArguments()
+			require.NoError(t, args.AddArg("R"))
+
+			synctest.Test(t, func(t *testing.T) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				if name == "canceled before wait" {
+					cancel()
+				}
+
+				commands := make(chan *exec.Cmd, 1)
+				go func() {
+					commands <- builder.BuildPacmanCmd(ctx, args, parser.ModeAny, false)
+				}()
+				synctest.Wait()
+
+				if name == "canceled during wait" || name == "lock removed" {
+					require.Empty(t, commands, "command must wait while the lock exists")
+					if name == "canceled during wait" {
+						cancel()
+					} else {
+						require.NoError(t, os.Remove(lockPath))
+						time.Sleep(3 * time.Second)
+					}
+					synctest.Wait()
+				}
+
+				select {
+				case cmd := <-commands:
+					if strings.HasPrefix(name, "canceled") {
+						require.ErrorIs(t, cmd.Run(), context.Canceled)
+						require.Nil(t, cmd.Process, "canceled commands must not start a process")
+					} else {
+						require.Nil(t, cmd.Err)
+					}
+				default:
+					t.Error("command did not stop waiting")
+					require.NoError(t, os.Remove(lockPath))
+					time.Sleep(3 * time.Second)
+					synctest.Wait()
+					<-commands
+				}
+				if name != "no lock" && name != "lock removed" {
+					require.FileExists(t, lockPath, "cancellation must not remove pacman's lock")
+				}
+			})
+		})
+	}
 }
 
 func TestBuildPrivilegeElevatorCommand(t *testing.T) {
