@@ -12,7 +12,7 @@ RUN set -eux; \
     sed -i 's/^#DisableSandboxFilesystem/DisableSandboxFilesystem/' /etc/pacman.conf; \
     sed -i 's/^#DisableSandboxSyscalls/DisableSandboxSyscalls/' /etc/pacman.conf; \
     pacman -Syu --noconfirm --needed archlinux-keyring pacman go git gcc make base-devel sudo asciidoc doxygen meson; \
-    curl -sSfL https://golangci-lint.run/install.sh | sh -s v2.12.2; \
+    curl -sSfL https://golangci-lint.run/install.sh | sh -s v2.15.0; \
     go mod download; \
     rm -rf /var/lib/pacman/sync/* /var/cache/pacman/* /tmp/* /var/tmp/*; \
     rm -rf /usr/share/man/* /usr/share/doc/* || true; \

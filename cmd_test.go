@@ -114,7 +114,7 @@ func TestYogurtMenuAURDB(t *testing.T) {
 		ReposFn: func() []string {
 			return []string{"aur"}
 		},
-		SyncPackagesFn: func(s ...string) []mock.IPackage {
+		SyncPackagesFn: func(s ...string) []mock.IPackage { //nolint:unparam // signature fixed by mock.DBExecutor
 			return []mock.IPackage{
 				&mock.Package{
 					PName:    "yay",
@@ -129,7 +129,7 @@ func TestYogurtMenuAURDB(t *testing.T) {
 		},
 	}
 	aurCache := &mockaur.MockAUR{
-		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+		GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) { //nolint:unparam // signature fixed by mockaur.MockAUR
 			return []aur.Pkg{
 				{
 					Name:        "yay",
