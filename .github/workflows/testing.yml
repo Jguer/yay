@@ -1,6 +1,8 @@
 name: Test against pacman
 on:
   pull_request:
+    paths-ignore:
+      - "**/*.po"
 
 permissions:
   contents: read
