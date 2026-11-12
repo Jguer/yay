@@ -80,6 +80,46 @@ func TestContinueTask(t *testing.T) {
 	}
 }
 
+func TestGetInput(t *testing.T) {
+	t.Parallel()
+
+	t.Run("reads a line", func(t *testing.T) {
+		logger := NewLogger(io.Discard, io.Discard, strings.NewReader("answer\n"), false, "test")
+
+		got, err := logger.GetInput("", false)
+
+		require.NoError(t, err)
+		require.Equal(t, "answer", got)
+	})
+
+	t.Run("uses default without reading", func(t *testing.T) {
+		logger := NewLogger(io.Discard, io.Discard, strings.NewReader("ignored\n"), false, "test")
+
+		got, err := logger.GetInput("default", false)
+
+		require.NoError(t, err)
+		require.Equal(t, "default", got)
+	})
+
+	t.Run("no confirm uses default without reading", func(t *testing.T) {
+		logger := NewLogger(io.Discard, io.Discard, strings.NewReader("ignored\n"), false, "test")
+
+		got, err := logger.GetInput("default", true)
+
+		require.NoError(t, err)
+		require.Equal(t, "default", got)
+	})
+
+	t.Run("rejects an overflowing line", func(t *testing.T) {
+		logger := NewLogger(io.Discard, io.Discard, strings.NewReader(strings.Repeat("x", 4097)), false, "test")
+
+		_, err := logger.GetInput("", false)
+
+		var overflow ErrInputOverflow
+		require.ErrorAs(t, err, &overflow)
+	})
+}
+
 func TestContinueTaskLocalized(t *testing.T) {
 	strCustom := `
 msgid "yes"
