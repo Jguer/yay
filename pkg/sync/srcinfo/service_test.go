@@ -2,7 +2,9 @@ package srcinfo
 
 import (
 	"context"
+	"errors"
 	"io"
+	"os/exec"
 	"strings"
 	"testing"
 
@@ -78,28 +80,50 @@ func TestService_IncompatiblePkgs(t *testing.T) {
 }
 
 func TestService_CheckPGPKeys(t *testing.T) {
-	srv := &Service{
-		log: newTestLogger(),
-		pkgBuildDirs: map[string]string{
-			"pkg1": "/path/to/pkg1",
-			"pkg2": "/path/to/pkg2",
-		},
-		srcInfos: map[string]*gosrc.Srcinfo{
-			"pkg1": {
-				Packages: []gosrc.Package{
-					{Pkgname: "pkg1"},
-				},
-			},
-			"pkg2": {
-				Packages: []gosrc.Package{
-					{Pkgname: "pkg2"},
-				},
-			},
-		},
-	}
+	t.Parallel()
 
-	err := srv.CheckPGPKeys(context.Background())
-	assert.NoError(t, err)
+	for _, tc := range []struct {
+		name       string
+		fetch      bool
+		keyExists  bool
+		importFail bool
+		wantCalls  []string
+	}{
+		{name: "disabled"},
+		{name: "enabled with existing key", fetch: true, keyExists: true, wantCalls: []string{"--list-keys"}},
+		{name: "enabled with missing key", fetch: true, wantCalls: []string{"--list-keys", "--recv-keys"}},
+		{name: "import failure", fetch: true, importFail: true, wantCalls: []string{"--list-keys", "--recv-keys"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			var calls []string
+			runner := &exe.MockRunner{ShowFn: func(cmd *exec.Cmd) error {
+				calls = append(calls, cmd.Args[1])
+				if cmd.Args[1] == "--list-keys" && !tc.keyExists || cmd.Args[1] == "--recv-keys" && tc.importFail {
+					return errors.New("gpg failed")
+				}
+				return nil
+			}}
+			srv := &Service{
+				cfg:          &settings.Configuration{PGPFetch: tc.fetch},
+				log:          newTestLogger(),
+				cmdBuilder:   &exe.MockBuilder{Runner: runner},
+				pkgBuildDirs: map[string]string{"pkg1": "/path/to/pkg1"},
+				srcInfos: map[string]*gosrc.Srcinfo{
+					"pkg1": {PackageBase: gosrc.PackageBase{ValidPGPKeys: []string{"1234567890ABCDEF"}}},
+				},
+			}
+
+			err := srv.CheckPGPKeys(context.Background())
+			if tc.importFail {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tc.wantCalls, calls)
+		})
+	}
 }
 
 func TestService_UpdateVCSStore(t *testing.T) {
