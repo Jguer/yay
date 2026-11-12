@@ -2,6 +2,8 @@ package text
 
 import (
 	"bufio"
+	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"unicode"
@@ -70,6 +72,9 @@ func (l *Logger) ContinueTask(s string, preset, noConfirm bool) bool {
 	l.OperationInfo(Bold(s), Bold(postFix))
 
 	if _, err := fmt.Fscanln(l.r, &response); err != nil {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return false
+		}
 		return preset
 	}
 

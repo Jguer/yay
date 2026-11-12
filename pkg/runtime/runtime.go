@@ -40,8 +40,8 @@ type Runtime struct {
 	Lua          *settingslua.Engine // not goroutine-safe
 }
 
-func NewRuntime(cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
-	logger := text.NewLogger(os.Stdout, os.Stderr, os.Stdin, cfg.Debug, "runtime")
+func NewRuntime(ctx context.Context, cfg *settings.Configuration, cmdArgs *parser.Arguments, version string) (*Runtime, error) {
+	logger := text.NewLogger(os.Stdout, os.Stderr, text.NewContextReader(ctx, os.Stdin), cfg.Debug, "runtime")
 	runner := exe.NewOSRunner(logger.Child("runner"))
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
