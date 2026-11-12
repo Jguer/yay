@@ -1,0 +1,25 @@
+name: Check translations
+
+on:
+  pull_request:
+    paths:
+      - "po/**"
+      - ".github/workflows/locale.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  translations:
+    name: Validate translation catalogs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install gettext
+        run: sudo apt-get update && sudo apt-get install -y gettext
+      - name: Check and compile catalogs
+        run: |
+          set -e
+          for file in po/*.po; do
+            msgfmt --check-format -o /dev/null "$file"
+          done
