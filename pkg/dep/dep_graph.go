@@ -18,6 +18,7 @@ import (
 	"github.com/Jguer/yay/v13/pkg/dep/topo"
 	"github.com/Jguer/yay/v13/pkg/intrange"
 	aur "github.com/Jguer/yay/v13/pkg/query"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
 
@@ -108,6 +109,7 @@ type Grapher struct {
 	noDeps      bool // If true, the graph will not include dependencies
 	noCheckDeps bool // If true, the graph will not include check dependencies
 	needed      bool // If true, the graph will only include packages that are not installed
+	targetMode  parser.TargetMode
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
@@ -131,6 +133,10 @@ func NewGraph() *topo.Graph[string, *InstallInfo] {
 	return topo.New[string, *InstallInfo]()
 }
 
+func (g *Grapher) SetTargetMode(mode parser.TargetMode) {
+	g.targetMode = mode
+}
+
 func (g *Grapher) GraphFromTargets(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo], targets []string,
 ) (*topo.Graph[string, *InstallInfo], error) {
@@ -138,6 +144,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		graph = NewGraph()
 	}
 
+	targets = aur.RemoveInvalidTargets(g.logger, targets, g.targetMode)
 	aurTargets := make([]string, 0, len(targets))
 
 	for _, targetString := range targets {
@@ -145,6 +152,11 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 
 		switch target.DB {
 		case "": // unspecified db
+			if g.targetMode == parser.ModeAUR {
+				aurTargets = append(aurTargets, target.Name)
+				continue
+			}
+
 			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
 				g.GraphSyncPkg(ctx, graph, pkg, nil)
 
@@ -157,6 +169,11 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 				g.GraphSyncGroup(ctx, graph, target.Name, dbName)
 
 				continue
+			}
+
+			if g.targetMode == parser.ModeRepo {
+				g.logger.Errorln(gotext.Get("No package found for"), " ", target)
+				return graph, &aur.ErrTargetNotFound{}
 			}
 
 			fallthrough
