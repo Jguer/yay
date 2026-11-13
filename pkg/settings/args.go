@@ -161,6 +161,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.DiffMenu = boolValue
 	case "editmenu":
 		c.EditMenu = boolValue
+	case "noupgrademenu":
+		c.NoUpgradeMenu = boolValue
 	case "useask":
 		c.UseAsk = boolValue
 	case "combinedupgrade":

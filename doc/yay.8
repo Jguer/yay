@@ -321,6 +321,13 @@ before building.
 recommended to edit pkgbuild variables unless you know what you are doing.
 
 .TP
+.B \-\-noupgrademenu
+Do not show the package exclusion prompt after listing available upgrades. All
+remaining packages are accepted; exclusions from UpgradeSelect hooks still
+apply. Set 'noupgrademenu' in the configuration file, or use
+'--noupgrademenu=false' temporarily, to restore the prompt.
+
+.TP
 .B \-\-askremovemake
 Ask to remove makedepends after installing packages.
 

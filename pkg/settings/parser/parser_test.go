@@ -326,6 +326,9 @@ func Test_isArg(t *testing.T) {
 
 	got = isArg("dbpath")
 	assert.True(t, got)
+
+	got = isArg("noupgrademenu")
+	assert.True(t, got)
 }
 
 func TestArguments_ParseStdin(t *testing.T) {
