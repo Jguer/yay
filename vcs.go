@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"sync"
 
 	"github.com/Jguer/aur"
 	"github.com/leonelquinteros/gotext"
@@ -56,19 +55,12 @@ func createDevelDB(ctx context.Context, run *runtime.Runtime, dbExecutor db.Exec
 		return err
 	}
 
-	var wg sync.WaitGroup
-	for i := range srcinfos {
-		for iP := range srcinfos[i].Packages {
-			wg.Add(1)
-
-			go func(baseIndex string, packageIndex int) {
-				run.VCSStore.Update(ctx, srcinfos[baseIndex].Packages[packageIndex].Pkgname, srcinfos[baseIndex].Source)
-				wg.Done()
-			}(i, iP)
+	for _, srcinfo := range srcinfos {
+		for i := range srcinfo.Packages {
+			run.VCSStore.Update(ctx, srcinfo.Packages[i].Pkgname, srcinfo.Source)
 		}
 	}
 
-	wg.Wait()
 	run.Logger.OperationInfoln(gotext.Get("GenDB finished. No packages were installed"))
 
 	return nil
