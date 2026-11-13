@@ -1,6 +1,8 @@
 name: Test against pacman
 on:
   pull_request:
+    paths-ignore:
+      - "**/*.po"
 
 permissions:
   contents: read
@@ -18,6 +20,7 @@ jobs:
           # Use the latest 1.26.x patch (go.mod pins go 1.26.0, which
           # setup-go would otherwise resolve to that exact patch release).
           go-version: "1.26"
+          check-latest: true
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/go/pkg/mod

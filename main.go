@@ -1,4 +1,4 @@
-package main // import "github.com/Jguer/yay"
+package main
 
 import (
 	"cmp"
