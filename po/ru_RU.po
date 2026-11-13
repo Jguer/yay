@@ -98,11 +98,11 @@ msgstr "%s: Нет изменений --- пропуск"
 
 #: pkg/query/filter.go:22
 msgid "%s: can't use target with option --aur -- skipping"
-msgstr "%s: нельзя использовать цель с опцией --aur --- пропуск"
+msgstr "%s: нельзя использовать цель с параметром --aur --- пропуск"
 
 #: pkg/query/filter.go:17
 msgid "%s: can't use target with option --repo -- skipping"
-msgstr "%s: нельзя использовать цель с опцией --repo --- пропуск"
+msgstr "%s: нельзя использовать цель с параметром --repo --- пропуск"
 
 #: pkg/upgrade/sources.go:60
 msgid "%s: ignoring package upgrade (%s => %s)"
@@ -524,7 +524,7 @@ msgstr "Пакет не найден в AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Пакеты, для которых требуется очистить кэш сборки?"
+msgstr "Очистить кэш сборки для этих пакетов?"
 
 #: pkg/dep/dep_graph.go:205
 msgid "Packages to exclude"
@@ -967,20 +967,20 @@ msgstr "ввод слишком длинный"
 
 #: pkg/db/ialpm/alpm.go:228 pkg/dep/dep_graph.go:823
 msgid "invalid number: %s"
-msgstr "некорректный номер: %s"
+msgstr "неверный номер: %s"
 
 #: pkg/settings/parser/parser.go:669
 msgid "invalid option"
-msgstr "некорректный параметр"
+msgstr "неверный параметр"
 
 #: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
-msgstr "некорректный параметр '%s'"
+msgstr "неверный параметр '%s'"
 
 #: cmd.go:285
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"некорректный параметр:  '--deps' и '--explicit' не могут быть использованы "
+"неверный параметр:  '--deps' и '--explicit' не могут быть использованы "
 "вместе"
 
 #: pkg/download/abs.go:22
@@ -989,7 +989,7 @@ msgstr "недействительный репозиторий"
 
 #: pkg/db/ialpm/alpm.go:233 pkg/dep/dep_graph.go:829
 msgid "invalid value: %d is not between %d and %d"
-msgstr "некорректное значение: %d не лежит между %d и %d"
+msgstr "неверное значение: %d не лежит между %d и %d"
 
 #: cmd.go:157
 msgid "makepkg command to use"
