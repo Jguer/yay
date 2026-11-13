@@ -25,6 +25,58 @@ func newTestLogger() *text.Logger {
 	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
 }
 
+func TestInstaller_ForcedRebuildsCachedPackages(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name      string
+		mode      parser.RebuildMode
+		isTarget  bool
+		needed    bool
+		wantBuild bool
+	}{
+		{name: "no target", mode: parser.RebuildModeNo, isTarget: true},
+		{name: "yes target", mode: parser.RebuildModeYes, isTarget: true, wantBuild: true},
+		{name: "yes dependency", mode: parser.RebuildModeYes},
+		{name: "all target", mode: parser.RebuildModeAll, isTarget: true, wantBuild: true},
+		{name: "all dependency", mode: parser.RebuildModeAll, wantBuild: true},
+		{name: "tree target", mode: parser.RebuildModeTree, isTarget: true, wantBuild: true},
+		{name: "tree dependency", mode: parser.RebuildModeTree, wantBuild: true},
+		{name: "all needed", mode: parser.RebuildModeAll, isTarget: true, needed: true},
+		{name: "tree needed", mode: parser.RebuildModeTree, isTarget: true, needed: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			dir := t.TempDir()
+			archive := dir + "/foo-1-1-x86_64.pkg.tar.zst"
+			require.NoError(t, os.WriteFile(archive, nil, 0o600))
+			runner := &exe.MockRunner{CaptureFn: func(*exec.Cmd) (string, string, error) {
+				return archive, "", nil
+			}}
+			installer := NewInstaller(&mock.DBExecutor{
+				IsCorrectVersionInstalledFn: func(string, string) bool { return true },
+			}, &exe.MockBuilder{Runner: runner}, &vcs.Mock{}, parser.ModeAny, tc.mode, false, newTestLogger())
+
+			dests, err := installer.buildPkg(t.Context(), dir, "foo", false, tc.needed, tc.isTarget)
+			require.NoError(t, err)
+			require.Len(t, runner.ShowCalls, 2)
+			buildArgs := runner.ShowCalls[1].Args[0].(*exec.Cmd).Args
+			if tc.wantBuild {
+				require.Contains(t, buildArgs, "--holdver")
+				require.NotContains(t, buildArgs, "--nobuild")
+			} else {
+				require.Contains(t, buildArgs, "--nobuild")
+			}
+			if tc.needed {
+				require.Empty(t, dests)
+			} else {
+				require.Equal(t, map[string]string{"foo": archive}, dests)
+			}
+		})
+	}
+}
+
 func TestInstaller_InstallNeeded(t *testing.T) {
 	t.Parallel()
 
