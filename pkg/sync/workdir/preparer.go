@@ -191,6 +191,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 ) (map[string]string, error) {
 	aurBasesToClone := mapset.NewThreadUnsafeSet[string]()
 	pkgBuildDirsByBase := make(map[string]string, len(targets))
+	aurPkgBuildDirs := mapset.NewThreadUnsafeSet[string]()
 
 	for _, layer := range targets {
 		for _, info := range layer {
@@ -202,6 +203,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 					aurBasesToClone.Add(pkgBase)
 				}
 				pkgBuildDirsByBase[pkgBase] = pkgBuildDir
+				aurPkgBuildDirs.Add(pkgBuildDir)
 			case dep.SrcInfo:
 				pkgBase := info.AURBase
 				pkgBuildDirsByBase[pkgBase] = info.SrcinfoPath
@@ -228,6 +230,10 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 	if err := preper.runPreDownloadSourcesHooks(ctx, run, os.Stdout,
 		pkgBuildDirsByBase, remoteNamesCache, targets); err != nil {
 		return nil, err
+	}
+
+	for pkgBuildDir := range aurPkgBuildDirs.Iter() {
+		removeMovedGitClones(ctx, preper.cmdBuilder, preper.log, pkgBuildDir)
 	}
 
 	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
