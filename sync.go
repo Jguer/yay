@@ -15,8 +15,28 @@ import (
 	"github.com/Jguer/yay/v13/pkg/settings/exe"
 	"github.com/Jguer/yay/v13/pkg/settings/parser"
 	"github.com/Jguer/yay/v13/pkg/sync"
+	"github.com/Jguer/yay/v13/pkg/text"
 	"github.com/Jguer/yay/v13/pkg/upgrade"
 )
+
+// targetsForMode pins targets without an explicit repository to the AUR when
+// --aur is set, so that a repo package providing the same name is not picked.
+func targetsForMode(targets []string, mode parser.TargetMode) []string {
+	if mode != parser.ModeAUR {
+		return targets
+	}
+
+	pinned := make([]string, 0, len(targets))
+	for _, target := range targets {
+		if dbName, _ := text.SplitDBFromName(target); dbName == "" {
+			target = "aur/" + target
+		}
+
+		pinned = append(pinned, target)
+	}
+
+	return pinned
+}
 
 func syncInstall(ctx context.Context,
 	run *runtime.Runtime,
@@ -46,7 +66,7 @@ func syncInstall(ctx context.Context,
 	grapher := dep.NewGrapher(dbExecutor, aurCache, false, settings.NoConfirm,
 		noDeps, noCheck, cmdArgs.ExistsArg("needed"), run.Logger.Child("grapher"))
 
-	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
+	graph, err := grapher.GraphFromTargets(ctx, nil, targetsForMode(cmdArgs.Targets, run.Cfg.Mode))
 	if err != nil {
 		return err
 	}
