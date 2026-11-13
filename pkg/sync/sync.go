@@ -99,6 +99,8 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		return errIncompatible
 	}
 
+	installer.SetIncompatibleBases(incompatible)
+
 	if errPGP := srcInfo.CheckPGPKeys(ctx); errPGP != nil {
 		return errPGP
 	}

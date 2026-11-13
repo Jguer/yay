@@ -52,8 +52,8 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			isInstalled: false,
 			isBuilt:     false,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
 			},
@@ -64,7 +64,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			isInstalled: false,
 			isBuilt:     true,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
+				"makepkg --nobuild -f -C",
 				"makepkg -c --nobuild --noextract --ignorearch",
 				"pacman -U --needed --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
@@ -76,7 +76,7 @@ func TestInstaller_InstallNeeded(t *testing.T) {
 			isInstalled: true,
 			isBuilt:     false,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
+				"makepkg --nobuild -f -C",
 				"makepkg -c --nobuild --noextract --ignorearch",
 			},
 			wantCapture: []string{"makepkg --packagelist"},
@@ -249,8 +249,8 @@ func TestInstaller_BuildOnlySkipsInstall(t *testing.T) {
 	require.NoError(t, err)
 
 	wantShow := []string{
-		"makepkg --nobuild -f -C --ignorearch",
-		"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+		"makepkg --nobuild -f -C",
+		"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 	}
 
 	require.Len(t, mockRunner.ShowCalls, len(wantShow))
@@ -272,6 +272,117 @@ func TestInstaller_BuildOnlySkipsInstall(t *testing.T) {
 		capture = strings.ReplaceAll(capture, makepkgBin, "makepkg")
 		capture = strings.ReplaceAll(capture, pacmanBin, "pacman")
 		assert.Subset(t, strings.Split(capture, " "), strings.Split("makepkg --packagelist", " "), capture)
+	}
+}
+
+func TestInstaller_IgnoreArchOnlyForIncompatibleBases(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		desc              string
+		incompatibleBases []string
+		wantIgnoreArch    bool
+	}{
+		{
+			desc:           "compatible base builds without --ignorearch",
+			wantIgnoreArch: false,
+		},
+		{
+			desc:              "accepted incompatible base builds with --ignorearch",
+			incompatibleBases: []string{"yay"},
+			wantIgnoreArch:    true,
+		},
+		{
+			desc:              "another incompatible base does not affect this one",
+			incompatibleBases: []string{"other"},
+			wantIgnoreArch:    false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			t.Parallel()
+
+			makepkgBin := t.TempDir() + "/makepkg"
+			pacmanBin := t.TempDir() + "/pacman"
+			for _, bin := range []string{makepkgBin, pacmanBin} {
+				f, err := os.OpenFile(bin, os.O_RDONLY|os.O_CREATE, 0o755)
+				require.NoError(t, err)
+				require.NoError(t, f.Close())
+			}
+
+			tmpDir := t.TempDir()
+			pkgTar := tmpDir + "/yay-91.0.0-1-x86_64.pkg.tar.zst"
+
+			captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+				return pkgTar, "", nil
+			}
+
+			i := 0
+			showOverride := func(cmd *exec.Cmd) error {
+				i++
+				if i == 2 {
+					f, err := os.OpenFile(pkgTar, os.O_RDONLY|os.O_CREATE, 0o666)
+					require.NoError(t, err)
+					require.NoError(t, f.Close())
+				}
+				return nil
+			}
+
+			mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+			cmdBuilder := &exe.CmdBuilder{
+				MakepkgBin:      makepkgBin,
+				SudoBin:         "su",
+				PacmanBin:       pacmanBin,
+				Runner:          mockRunner,
+				SudoLoopEnabled: false,
+			}
+
+			installer := NewInstaller(&mock.DBExecutor{}, cmdBuilder, &vcs.Mock{}, parser.ModeAny,
+				parser.RebuildModeNo, false, newTestLogger())
+			installer.SetInstallBuiltPackages(false)
+			installer.SetIncompatibleBases(tc.incompatibleBases)
+
+			cmdArgs := parser.MakeArguments()
+			cmdArgs.AddTarget("yay")
+
+			targets := []map[string]*dep.InstallInfo{
+				{
+					"yay": {
+						Source:      dep.AUR,
+						Reason:      dep.Explicit,
+						Version:     "91.0.0-1",
+						SrcinfoPath: tmpDir + "/.SRCINFO",
+						AURBase:     "yay",
+					},
+				},
+			}
+
+			err := installer.Install(context.Background(), cmdArgs, targets,
+				map[string]string{"yay": tmpDir}, []string{}, false)
+			require.NoError(t, err)
+
+			// The pkgver bump, the package list and the build must agree on
+			// --ignorearch, or makepkg lists split packages it never builds.
+			require.Len(t, mockRunner.ShowCalls, 2)
+			require.Len(t, mockRunner.CaptureCalls, 1)
+
+			calls := []string{
+				mockRunner.ShowCalls[0].Args[0].(*exec.Cmd).String(),
+				mockRunner.CaptureCalls[0].Args[0].(*exec.Cmd).String(),
+				mockRunner.ShowCalls[1].Args[0].(*exec.Cmd).String(),
+			}
+			for _, call := range calls {
+				args := strings.Split(call, " ")
+				if tc.wantIgnoreArch {
+					assert.Contains(t, args, "--ignorearch", call)
+				} else {
+					assert.NotContains(t, args, "--ignorearch", call)
+				}
+			}
+
+			assert.Contains(t, strings.Split(calls[1], " "), "--packagelist", calls[1])
+		})
 	}
 }
 
@@ -304,8 +415,8 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 			wantShow: []string{
 				"pacman -S --config /etc/pacman.conf -- core/linux",
 				"pacman -D -q --asdeps --config /etc/pacman.conf -- linux",
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config /etc/pacman.conf -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config /etc/pacman.conf -- yay",
 			},
@@ -333,8 +444,8 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 			wantShow: []string{
 				"pacman -S --config /etc/pacman.conf -- core/linux",
 				"pacman -D -q --asdeps --config /etc/pacman.conf -- linux",
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config /etc/pacman.conf -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config /etc/pacman.conf -- yay",
 			},
@@ -385,10 +496,10 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 		{
 			desc: "same layer -- aur",
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config /etc/pacman.conf -- pacman -U --config /etc/pacman.conf -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config /etc/pacman.conf -- yay",
 			},
@@ -415,12 +526,12 @@ func TestInstaller_InstallMixedSourcesAndLayers(t *testing.T) {
 		{
 			desc: "different layer -- aur",
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config /etc/pacman.conf -- pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.8-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asdeps --config /etc/pacman.conf -- jellyfin-server",
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config /etc/pacman.conf -- pacman -U --config /etc/pacman.conf -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config /etc/pacman.conf -- yay",
 			},
@@ -795,11 +906,11 @@ func TestInstaller_InstallSplitPackage(t *testing.T) {
 			wantShow: []string{
 				"pacman -S --config /etc/pacman.conf -- community/dotnet-runtime-6.0 community/aspnet-runtime community/dotnet-sdk-6.0",
 				"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 aspnet-runtime dotnet-sdk-6.0",
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asdeps --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
-				"makepkg --nobuild -f -C --ignorearch",
+				"makepkg --nobuild -f -C",
 				"makepkg -c --nobuild --noextract --ignorearch",
 				"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
@@ -917,7 +1028,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 			isInstalled: false,
 			isBuilt:     false,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
+				"makepkg --nobuild -f -C",
 				"makepkg -c --nobuild --noextract --ignorearch",
 			},
 			wantCapture: []string{"makepkg --packagelist"},
@@ -927,7 +1038,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 			isInstalled: false,
 			isBuilt:     true,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
+				"makepkg --nobuild -f -C",
 				"makepkg -c --nobuild --noextract --ignorearch",
 			},
 			wantCapture: []string{"makepkg --packagelist"},
@@ -937,7 +1048,7 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 			isInstalled: true,
 			isBuilt:     false,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
+				"makepkg --nobuild -f -C",
 				"makepkg -c --nobuild --noextract --ignorearch",
 			},
 			wantCapture: []string{"makepkg --packagelist"},
@@ -1174,7 +1285,7 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 			isBuilt:       true,
 			isInstalled:   false,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
+				"makepkg --nobuild -f -C",
 				"makepkg -c --nobuild --noextract --ignorearch",
 				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
@@ -1198,8 +1309,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 			isBuilt:       true,
 			isInstalled:   false,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
 			},
@@ -1222,8 +1333,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 			isInstalled:   true,
 			isBuilt:       true,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
 			},
@@ -1246,8 +1357,8 @@ func TestInstaller_InstallRebuild(t *testing.T) {
 			isInstalled:   true,
 			isBuilt:       true,
 			wantShow: []string{
-				"makepkg --nobuild -f -C --ignorearch",
-				"makepkg -f -c --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild -f -C",
+				"makepkg -f -c --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config  -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asdeps --config  -- yay",
 			},
@@ -1462,7 +1573,7 @@ func TestInstaller_KeepSrc(t *testing.T) {
 		{
 			desc: "--keepsrc",
 			wantShow: []string{
-				"makepkg --nobuild -f --ignorearch",
+				"makepkg --nobuild -f",
 				"makepkg --nobuild --noextract --ignorearch",
 				"pacman -U --config  -- /testdir/yay-92.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D -q --asexplicit --config  -- yay",
@@ -1589,8 +1700,8 @@ func TestInstaller_InstallAsExplicit(t *testing.T) {
 				},
 			},
 			wantShow: []string{
-				"makepkg --nobuild --ignorearch",
-				"makepkg --noconfirm --noextract --noprepare --holdver --ignorearch",
+				"makepkg --nobuild",
+				"makepkg --noconfirm --noextract --noprepare --holdver",
 				"pacman -U --config -- /testdir/yay-91.0.0-1-x86_64.pkg.tar.zst",
 				"pacman -D --asexplicit -q --config -- yay",
 			},
