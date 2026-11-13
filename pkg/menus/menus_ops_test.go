@@ -88,6 +88,22 @@ func TestShowPkgbuildDiffHelpers(t *testing.T) {
 	require.Equal(t, "deadbeef", ref)
 }
 
+func TestGitUpdateSeenRefTracksUpstream(t *testing.T) {
+	t.Parallel()
+
+	var gotArgs []string
+	builder := &fakeMenusCmdBuilder{
+		captureFn: func(cmd *exec.Cmd) (string, string, error) {
+			gotArgs = cmd.Args
+
+			return "", "", nil
+		},
+	}
+
+	require.NoError(t, gitUpdateSeenRef(context.Background(), builder, "/tmp"))
+	require.Equal(t, []string{"git", "update-ref", gitDiffRefName, "HEAD@{upstream}"}, gotArgs)
+}
+
 type fakeMenusCmdBuilder struct {
 	captureFn  func(*exec.Cmd) (string, string, error)
 	captureCnt int

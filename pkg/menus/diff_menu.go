@@ -160,12 +160,12 @@ func getLastSeenHash(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string
 	return gitEmptyTree, nil
 }
 
-// Update the AUR_SEEN ref to HEAD. We use this ref to determine which diff were
-// reviewed by the user.
+// Update the AUR_SEEN ref to the upstream HEAD. We use this ref to determine
+// which upstream diff was reviewed by the user, excluding local commits.
 func gitUpdateSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) error {
 	_, stderr, err := cmdBuilder.Capture(
 		cmdBuilder.BuildGitCmd(ctx,
-			dir, "update-ref", gitDiffRefName, "HEAD"))
+			dir, "update-ref", gitDiffRefName, "HEAD@{upstream}"))
 	if err != nil {
 		return fmt.Errorf("%s %w", stderr, err)
 	}
