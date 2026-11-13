@@ -38,6 +38,7 @@ type Configuration struct {
 	AnswerDiff             string `json:"answerdiff" lua:"answer_diff"`
 	AnswerEdit             string `json:"answeredit" lua:"answer_edit"`
 	AnswerUpgrade          string `json:"answerupgrade" lua:"-"`
+	NoExcludeMenu          bool   `json:"noexcludemenu" lua:"no_exclude_menu"`
 	GitBin                 string `json:"gitbin" lua:"git_bin"`
 	GpgBin                 string `json:"gpgbin" lua:"gpg_bin"`
 	GpgFlags               string `json:"gpgflags" lua:"gpg_flags"`
@@ -226,6 +227,7 @@ func DefaultConfig(version string) *Configuration {
 		AnswerDiff:             "",
 		AnswerEdit:             "",
 		AnswerUpgrade:          "",
+		NoExcludeMenu:          false,
 		RemoveMake:             "ask",
 		Provides:               true,
 		CleanMenu:              true,
