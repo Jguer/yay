@@ -438,6 +438,7 @@ func isArg(arg string) bool {
 	case "singlelineresults":
 	case "doublelineresults":
 	case "separatesources":
+	case "clean-chroot": 
 	default:
 		return false
 	}
