@@ -16,8 +16,89 @@ import (
 	"github.com/Jguer/yay/v13/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
 	"github.com/Jguer/yay/v13/pkg/query"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
+
+func TestGrapher_GraphFromTargetsSourceMode(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		mode       parser.TargetMode
+		target     string
+		wantSource Source
+		wantSkip   bool
+		wantError  bool
+	}{
+		{name: "default prefers repository", target: "shared", wantSource: Sync},
+		{name: "default falls back to AUR", target: "aur-only", wantSource: AUR},
+		{name: "AUR mode prefers AUR", mode: parser.ModeAUR, target: "shared", wantSource: AUR},
+		{name: "AUR mode accepts AUR prefix", mode: parser.ModeAUR, target: "aur/shared", wantSource: AUR},
+		{name: "AUR mode skips repository prefix", mode: parser.ModeAUR, target: "extra/shared", wantSkip: true},
+		{name: "repo mode selects repository", mode: parser.ModeRepo, target: "shared", wantSource: Sync},
+		{name: "repo mode accepts repository prefix", mode: parser.ModeRepo, target: "extra/shared", wantSource: Sync},
+		{name: "repo mode skips AUR prefix", mode: parser.ModeRepo, target: "aur/shared", wantSkip: true},
+		{name: "repo mode never falls back to AUR", mode: parser.ModeRepo, target: "aur-only", wantError: true},
+		{name: "default reports missing target", target: "missing", wantError: true},
+		{name: "AUR mode reports missing target", mode: parser.ModeAUR, target: "missing", wantError: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			repoPackage := func(name string) mock.IPackage {
+				if name != "shared" && name != "repo-dep" {
+					return nil
+				}
+				return &mock.Package{PName: name, PVersion: "1", PDB: mock.NewDB("extra")}
+			}
+			dbExecutor := &mock.DBExecutor{
+				SyncSatisfierFn: repoPackage,
+				SatisfierFromDBFn: func(name, dbName string) (mock.IPackage, error) {
+					require.Equal(t, "extra", dbName)
+					return repoPackage(name), nil
+				},
+				PackagesFromGroupFn:    func(string) []mock.IPackage { return nil },
+				LocalPackageFn:         func(string) mock.IPackage { return nil },
+				LocalSatisfierExistsFn: func(string) bool { return false },
+			}
+			aurCalls := 0
+			aurClient := &mockaur.MockAUR{GetFn: func(_ context.Context, q *aur.Query) ([]aur.Pkg, error) {
+				aurCalls++
+				require.NotEqual(t, parser.ModeRepo, tt.mode, "repository-only targets must not query AUR")
+				if q.By != aur.Name || q.Needles[0] == "missing" {
+					return nil, nil
+				}
+				name := q.Needles[0]
+				return []aur.Pkg{{Name: name, PackageBase: name, Version: "1", Depends: []string{"repo-dep"}}}, nil
+			}}
+			logger := text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test")
+			grapher := NewGrapher(dbExecutor, aurClient, false, true, false, false, false, logger)
+			grapher.SetTargetMode(tt.mode)
+
+			graph, err := grapher.GraphFromTargets(t.Context(), nil, []string{tt.target})
+			if tt.wantError {
+				require.ErrorAs(t, err, new(*query.ErrTargetNotFound))
+				return
+			}
+			require.NoError(t, err)
+			if tt.wantSkip {
+				require.Zero(t, graph.Len())
+				require.Zero(t, aurCalls)
+				return
+			}
+
+			name := ToTarget(tt.target).Name
+			require.Equal(t, tt.wantSource, graph.GetNodeInfo(name).Value.Source)
+			if tt.wantSource == AUR {
+				require.Equal(t, Sync, graph.GetNodeInfo("repo-dep").Value.Source,
+					"AUR-only targets may still need repository dependencies")
+			}
+		})
+	}
+}
 
 func TestGrapher_GraphFromTargetsBranches(t *testing.T) {
 	t.Parallel()
