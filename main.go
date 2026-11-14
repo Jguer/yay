@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"runtime/debug"
 	"strings"
+	"sync"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -149,13 +150,32 @@ func main() {
 		return
 	}
 
+	// make sure the database only cleans up once
+	var cleanupOnce sync.Once
+	cleanupDatabase := func() {
+		cleanupOnce.Do(dbExecutor.Cleanup)
+	}
+
 	defer func() {
 		if rec := recover(); rec != nil {
 			fallbackLog.Errorln("Panic occurred in DB operation:", rec)
 			fallbackLog.Errorln("Stack trace:", string(debug.Stack()))
 		}
 
-		dbExecutor.Cleanup()
+		cleanupDatabase()
+	}()
+
+	cmdDone := make(chan struct{})
+	defer close(cmdDone)
+
+	// handle interrupts
+	go func() {
+		select {
+		case <-cmdDone:
+		case <-ctx.Done():
+			cleanupDatabase()
+			os.Exit(130)
+		}
 	}()
 
 	if err = handleCmd(ctx, run, cmdArgs, dbExecutor); err != nil {
