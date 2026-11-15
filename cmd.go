@@ -71,7 +71,7 @@ func yayOperationHelp() []operationHelp {
 		{"Y", "yay", fmt.Sprintf("[%s] [%s]", strOptions, strPackage), []helpOption{
 			{"-c --clean", gotext.Get("Remove unneeded dependencies (-cc to ignore optdepends)")},
 			{"   --gendb", gotext.Get("Generates development package DB used for updating")},
-			{"   --aursource", gotext.Get("Manage AUR sources: list, add, edit, delete, move")},
+			{"   --aursource", gotext.Get("Manage AUR sources: list, add, edit, delete, move, pins, unpin")},
 		}},
 	}
 }
@@ -250,6 +250,8 @@ func handleCmd(ctx context.Context, run *runtime.Runtime,
 		run.CmdBuilder.SudoLoop()
 	}
 
+	loadAURPins(run, cmdArgs, dbExecutor)
+
 	switch cmdArgs.Op {
 	case "D", "database":
 		return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
@@ -383,7 +385,8 @@ func handleYay(ctx context.Context, run *runtime.Runtime,
 ) error {
 	switch {
 	case cmdArgs.ExistsArg("aursource"):
-		return handleAURSource(run.Logger, run.Cfg, cmdArgs, settings.GetConfigPath())
+		return handleAURSource(run.Logger, run.Cfg, cmdArgs, settings.GetConfigPath(),
+			func(name string) bool { return dbExecutor.LocalPackage(name) != nil })
 	case cmdArgs.ExistsArg("gendb"):
 		return createDevelDB(ctx, run, dbExecutor)
 	case cmdArgs.ExistsDouble("c"):

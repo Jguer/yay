@@ -10,7 +10,8 @@ const (
 	luaConfigFileName  string = "init.lua"
 	vcsFileName        string = "vcs.json" // vcsFileName holds the name of the vcs file.
 	completionFileName string = "completion.cache"
-	systemdCache       string = "/var/cache/yay" // systemd should handle cache creation
+	aurPinsFileName    string = "aursources.json" // which AUR source installed packages came from
+	systemdCache       string = "/var/cache/yay"  // systemd should handle cache creation
 )
 
 func GetConfigPath() string {

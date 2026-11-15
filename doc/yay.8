@@ -108,13 +108,23 @@ the first entry, named \fBaur\fR.
 .TP
 .B edit <name> [name=<new>] [url=<url>] [rpcurl=<url>]
 Change fields of a source. An empty \fBrpcurl=\fR resets it to <url>/rpc.
+Renaming a source updates the packages pinned to it.
 .TP
 .B delete <name>
-Remove a source. Removing every source falls back to \fBaururl\fR.
+Remove a source. Removing every source falls back to \fBaururl\fR. Packages
+pinned to the deleted source are unpinned (with a notice) and upgraded from
+the normal source order.
 .TP
 .B move <name> <position>
 Move a source to a 1-based position. Earlier sources win when two sources
 provide a package with the same name.
+.TP
+.B pins
+List installed packages pinned to the AUR source they were installed from.
+.TP
+.B unpin <package>...
+Forget the recorded source of packages, so they are upgraded from the normal
+source order.
 .RE
 
 .TP
@@ -216,6 +226,15 @@ Every source is still treated as AUR: \-a/\-N filtering applies to all of them
 and \fBaur\fR in the upgrade menu matches packages from any source, while a
 source name matches only that source. Source names may not shadow official
 repositories (core, extra, multilib, ...), \fBlocal\fR or \fBdevel\fR.
+With more than one source, yay remembers which source each package was
+installed from when it is not the first one (a \fB<source>/<package>\fR
+target or a package only that source has) in \fBaursources.json\fR next to
+\fBvcs.json\fR in the cache directory. Upgrades (\-Syu, \-Sua, \-\-devel,
+\-Qua) and plain re-installs look such packages up on that source first; if
+the source was removed or no longer has the package, yay warns and uses the
+normal source order. Installing \fB<source>/<package>\fR or
+\fBaur/<package>\fR (the normal order) replaces the recorded source;
+packages that are no longer installed are forgotten.
 
 .TP
 .B \-\-builddir <dir>

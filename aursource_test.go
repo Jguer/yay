@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -25,6 +26,7 @@ func runAURSource(t *testing.T, configPath string, action string, targets ...str
 
 	cfg := settings.DefaultConfig("test")
 	_ = loadJSON(configPath, cfg)
+	cfg.AURPinsPath = filepath.Join(filepath.Dir(configPath), "aursources.json")
 
 	cmdArgs := parser.MakeArguments()
 	cmdArgs.Op = "Y"
@@ -34,7 +36,8 @@ func runAURSource(t *testing.T, configPath string, action string, targets ...str
 	var out bytes.Buffer
 	logger := text.NewLogger(&out, io.Discard, strings.NewReader(""), false, "test")
 
-	err := handleAURSource(logger, cfg, cmdArgs, configPath)
+	err := handleAURSource(logger, cfg, cmdArgs, configPath,
+		func(name string) bool { return name != "gone" })
 
 	return out.String(), err
 }
@@ -141,4 +144,53 @@ func TestPrintInfoUsesSourceLabel(t *testing.T) {
 			assert.Contains(t, got, tc.snapshot)
 		}
 	}
+}
+
+func TestHandleAURSourcePins(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.json")
+	pinsPath := filepath.Join(dir, "aursources.json")
+
+	out, err := runAURSource(t, configPath, "pins")
+	require.NoError(t, err)
+	assert.Contains(t, out, "No packages are pinned")
+
+	for _, src := range [][]string{
+		{"mirror", "https://aur.example.org"},
+		{"other", "https://other.example.org"},
+	} {
+		_, err = runAURSource(t, configPath, "add", src...)
+		require.NoError(t, err)
+	}
+
+	require.NoError(t, os.WriteFile(pinsPath,
+		[]byte(`{"packages":{"foo":"mirror","bar":"other","baz":"other","gone":"mirror","old":"removed"}}`), 0o644))
+
+	out, err = runAURSource(t, configPath, "pins")
+	require.NoError(t, err)
+	out = regexp.MustCompile(`\x1b\[[0-9;]*m`).ReplaceAllString(out, "")
+	assert.Contains(t, out, "foo mirror\n")
+	assert.Contains(t, out, "gone mirror (not installed)")
+	assert.Contains(t, out, "old removed (source not configured)")
+
+	out, err = runAURSource(t, configPath, "edit", "mirror", "name=mirror2")
+	require.NoError(t, err)
+	assert.Contains(t, out, "Updated the source of foo to 'mirror2'")
+	assert.Contains(t, out, "Updated the source of gone to 'mirror2'")
+
+	out, err = runAURSource(t, configPath, "delete", "other")
+	require.NoError(t, err)
+	assert.Contains(t, out, "bar baz no longer pinned (installed from deleted source 'other')")
+
+	_, err = runAURSource(t, configPath, "unpin", "foo", "nope")
+	require.ErrorContains(t, err, "not pinned: nope")
+
+	b, err := os.ReadFile(pinsPath)
+	require.NoError(t, err)
+
+	var file struct{ Packages map[string]string }
+	require.NoError(t, json.Unmarshal(b, &file))
+	assert.Equal(t, map[string]string{"gone": "mirror2", "old": "removed"}, file.Packages)
 }

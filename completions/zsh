@@ -153,7 +153,7 @@ _pacman_opts_query_modifiers=(
 _pacman_opts_yay_modifiers=(
 	'(-c --clean)'{-c,--clean}'[Remove unneeded dependencies]'
 	'--gendb[Generates development package DB used for updating]'
-	'--aursource[Manage AUR sources]:action:(list add edit delete move)'
+	'--aursource[Manage AUR sources]:action:(list add edit delete move pins unpin)'
 )
 
 # -G

@@ -76,6 +76,7 @@ type Configuration struct {
 
 	CompletionPath string `json:"-" lua:"-"`
 	VCSFilePath    string `json:"-" lua:"-"`
+	AURPinsPath    string `json:"-" lua:"-"` // which AUR source installed packages came from
 	// ConfigPath     string `json:"-"`
 	SaveConfig bool               `json:"-" lua:"-"`
 	Mode       parser.TargetMode  `json:"-" lua:"-"`
@@ -262,6 +263,7 @@ func NewConfig(logger *text.Logger, configPath, version string) (*Configuration,
 	newConfig.BuildDir = cacheHome
 	newConfig.CompletionPath = filepath.Join(cacheHome, completionFileName)
 	newConfig.VCSFilePath = filepath.Join(cacheHome, vcsFileName)
+	newConfig.AURPinsPath = filepath.Join(cacheHome, aurPinsFileName)
 	newConfig.load(configPath)
 
 	if aurdest := os.Getenv("AURDEST"); aurdest != "" {

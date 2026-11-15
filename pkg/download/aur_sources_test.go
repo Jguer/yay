@@ -136,6 +136,10 @@ func (p *pinningAUR) PinAURSource(pkgName, source string) bool {
 	return true
 }
 
+func (p *pinningAUR) UnpinAURSource(pkgName string) {
+	p.pinned[pkgName] = "<unpinned>"
+}
+
 func TestGetPackageUsableNameAcceptsAURSourcePrefix(t *testing.T) {
 	t.Parallel()
 
@@ -148,6 +152,12 @@ func TestGetPackageUsableNameAcceptsAURSourcePrefix(t *testing.T) {
 	assert.True(t, isAUR)
 	assert.False(t, skip)
 	assert.Equal(t, map[string]string{"foo": "mirror"}, client.pinned)
+
+	dbName, _, isAUR, skip = getPackageUsableName(searcher, client, newTestLogger(), "aur/bar", parser.ModeAny)
+	assert.Equal(t, "aur", dbName)
+	assert.True(t, isAUR)
+	assert.False(t, skip)
+	assert.Equal(t, "<unpinned>", client.pinned["bar"], "aur/<pkg> drops a recorded source")
 
 	// Unknown prefixes are still treated as pacman repositories.
 	_, _, _, skip = getPackageUsableName(searcher, client, newTestLogger(), "nosuchrepo/foo", parser.ModeAny)

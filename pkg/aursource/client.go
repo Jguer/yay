@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/Jguer/aur"
+	"github.com/leonelquinteros/gotext"
 
 	"github.com/Jguer/yay/v13/pkg/settings"
 	"github.com/Jguer/yay/v13/pkg/text"
@@ -22,8 +23,10 @@ type Client struct {
 	logger  *text.Logger
 
 	mu     sync.RWMutex
-	origin map[string]int // package name or package base -> source index
-	pins   map[string]int // package name -> source index requested as <source>/<name>
+	origin map[string]int  // package name or package base -> source index
+	pins   map[string]int  // package name -> source index to look the package up on first
+	stored map[string]bool // pins that come from the recorded install source
+	warned map[string]bool
 }
 
 // New returns a Client. sources and clients must have the same length and
@@ -39,6 +42,8 @@ func New(sources []settings.AURSource, clients []aur.QueryClient, logger *text.L
 		logger:  logger,
 		origin:  make(map[string]int),
 		pins:    make(map[string]int),
+		stored:  make(map[string]bool),
+		warned:  make(map[string]bool),
 	}
 }
 
@@ -78,8 +83,9 @@ func (c *Client) Get(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 		seen   = make(map[string]bool)
 	)
 
-	// Packages explicitly requested from a source (<source>/<name>) come from
-	// that source when it has them, regardless of priority.
+	// Packages requested from a source (<source>/<name>) or recorded as
+	// installed from one come from that source when it has them, regardless
+	// of priority.
 	c.mu.Lock()
 	for i, pkgs := range results {
 		if errs[i] != nil {
@@ -118,7 +124,10 @@ func (c *Client) Get(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 
 			seen[pkgs[j].Name] = true
 			merged = append(merged, pkgs[j])
-			c.record(&pkgs[j], i)
+
+			if !c.pinFallback(&pkgs[j], i) {
+				c.record(&pkgs[j], i)
+			}
 		}
 	}
 
@@ -127,6 +136,41 @@ func (c *Client) Get(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 	}
 
 	return merged, nil
+}
+
+// pinFallback handles a pinned package that its pinned source did not return
+// and is taken from source idx instead. It reports whether pkg was pinned.
+func (c *Client) pinFallback(pkg *aur.Pkg, idx int) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	pinned, ok := c.pins[pkg.Name]
+	if !ok {
+		return false
+	}
+
+	c.origin[pkg.Name] = idx
+	if pkg.PackageBase != "" {
+		c.origin[pkg.PackageBase] = idx
+	}
+
+	if c.warned[pkg.Name] || c.logger == nil {
+		return true
+	}
+
+	c.warned[pkg.Name] = true
+
+	if c.stored[pkg.Name] {
+		c.logger.Warnln(gotext.Get(
+			"%s was installed from AUR source '%s', which no longer has it; using '%s' instead",
+			pkg.Name, c.sources[pinned].Name, c.sources[idx].Name))
+	} else {
+		c.logger.Warnln(gotext.Get(
+			"package '%s' was not found in AUR source '%s', using '%s' instead",
+			pkg.Name, c.sources[pinned].Name, c.sources[idx].Name))
+	}
+
+	return true
 }
 
 func (c *Client) record(pkg *aur.Pkg, idx int) {
@@ -160,6 +204,7 @@ func (c *Client) PinAURSource(pkgName, source string) bool {
 		c.mu.Lock()
 		c.pins[pkgName] = i
 		c.origin[pkgName] = i
+		delete(c.stored, pkgName)
 		c.mu.Unlock()
 
 		return true
@@ -168,9 +213,28 @@ func (c *Client) PinAURSource(pkgName, source string) bool {
 	return false
 }
 
-// SourceFor returns the source a package (by name or package base) was
-// resolved from by a previous Get. It falls back to the first source.
-func (c *Client) SourceFor(name string) settings.AURSource {
+// UnpinAURSource drops any pin of pkgName, so it resolves in priority order
+// (as for an explicit "aur/<name>" target).
+func (c *Client) UnpinAURSource(pkgName string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	delete(c.pins, pkgName)
+	delete(c.stored, pkgName)
+	delete(c.origin, pkgName)
+}
+
+func (c *Client) sourceIndex(name string) int {
+	for i := range c.sources {
+		if c.sources[i].Name == name {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func (c *Client) sourceOf(name string) (settings.AURSource, int) {
 	c.mu.RLock()
 	idx, ok := c.origin[name]
 	c.mu.RUnlock()
@@ -179,7 +243,14 @@ func (c *Client) SourceFor(name string) settings.AURSource {
 		idx = 0
 	}
 
-	return c.sources[idx]
+	return c.sources[idx], idx
+}
+
+// SourceFor returns the source a package (by name or package base) was
+// resolved from by a previous Get. It falls back to the first source.
+func (c *Client) SourceFor(name string) settings.AURSource {
+	src, _ := c.sourceOf(name)
+	return src
 }
 
 // URLsFor returns the base URLs to try when downloading name, starting with
