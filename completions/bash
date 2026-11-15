@@ -77,10 +77,10 @@ _yay() {
           noansweredit noanswerupgrade cleanmenu diffmenu editmenu cleanafter keepsrc topdown bottomup devel separatesources
           provides pgpfetch
           useask combinedupgrade aur repo makepkgconf
-          nomakepkgconf askremovemake askyesremovemake removemake noremovemake completioninterval aururl aurrpcurl
+          nomakepkgconf askremovemake askyesremovemake removemake noremovemake completioninterval aururl aururls aurrpcurl
           searchby batchinstall'
     'b d h q r v')
-  yays=('clean gendb' 'c')
+  yays=('clean gendb aursource' 'c')
   show=('complete defaultconfig currentconfig stats news' 'c d g s w')
   getpkgbuild=('force print' 'f p')
   web=('vote unvote' 'v u')

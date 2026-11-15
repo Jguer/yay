@@ -83,7 +83,7 @@ func getURLName(pkg db.IPackage) string {
 }
 
 func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *http.Client,
-	logger *text.Logger, targets []string, aurURL string, mode parser.TargetMode,
+	logger *text.Logger, targets []string, aurURLs AURURLResolver, mode parser.TargetMode,
 ) (map[string][]byte, error) {
 	pkgbuilds := make(map[string][]byte, len(targets))
 
@@ -113,7 +113,7 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 			)
 
 			if aur {
-				pkgbuild, err = AURPKGBUILD(httpClient, pkgName, aurURL)
+				pkgbuild, err = aurPKGBUILDFromAny(httpClient, pkgName, aurURLs.URLsFor(pkgName))
 			} else {
 				pkgbuild, err = ABSPKGBUILD(httpClient, dbName, pkgName)
 			}
@@ -138,7 +138,7 @@ func PKGBUILDs(dbExecutor DBSearcher, aurClient aur.QueryClient, httpClient *htt
 
 func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.QueryClient,
 	cmdBuilder exe.GitCmdBuilder, logger *text.Logger,
-	targets []string, mode parser.TargetMode, aurURL, dest string, force bool,
+	targets []string, mode parser.TargetMode, aurURLs AURURLResolver, dest string, force bool,
 ) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
 
@@ -168,7 +168,7 @@ func PKGBUILDRepos(ctx context.Context, dbExecutor DBSearcher, aurClient aur.Que
 			)
 
 			if aur {
-				newClone, err = AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, pkgName, dest, force)
+				newClone, err = aurPKGBUILDRepoFromAny(ctx, cmdBuilder, aurURLs.URLsFor(pkgName), pkgName, dest, force)
 			} else {
 				newClone, err = ABSPKGBUILDRepo(ctx, cmdBuilder, dbName, pkgName, dest, force)
 			}

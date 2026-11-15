@@ -220,3 +220,51 @@ func TestApplyRejectsNonPointer(t *testing.T) {
 	_, errs := e.Apply(testConfig{})
 	assert.Len(t, errs, 1)
 }
+
+type orderedSource struct {
+	Name string `lua:"name"`
+	URL  string `lua:"url"`
+}
+
+func (s *orderedSource) UnmarshalText(b []byte) error {
+	*s = orderedSource{URL: string(b)}
+	return nil
+}
+
+type orderedSliceTestConfig struct {
+	Sources []orderedSource `lua:"sources"`
+}
+
+func TestApplyOrderedTextUnmarshalerSlice(t *testing.T) {
+	t.Parallel()
+	e := New()
+	t.Cleanup(e.Close)
+
+	require.NoError(t, e.L.DoString(`
+		yay.opt.sources = {
+			{ name = "z", url = "https://z.example" },
+			"https://a.example",
+		}
+	`))
+
+	cfg := &orderedSliceTestConfig{}
+	_, errs := e.Apply(cfg)
+
+	require.Empty(t, errs)
+	assert.Equal(t, []orderedSource{
+		{Name: "z", URL: "https://z.example"},
+		{URL: "https://a.example"},
+	}, cfg.Sources, "array order must be preserved")
+}
+
+func TestApplyOrderedSliceRejectsBadEntries(t *testing.T) {
+	t.Parallel()
+	e := New()
+	t.Cleanup(e.Close)
+
+	require.NoError(t, e.L.DoString(`yay.opt.sources = { { bogus = "x" } }`))
+
+	_, errs := e.Apply(&orderedSliceTestConfig{})
+	require.Len(t, errs, 1)
+	assert.ErrorContains(t, errs[0], `unknown key "bogus"`)
+}

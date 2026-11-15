@@ -10,7 +10,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
@@ -18,6 +20,61 @@ import (
 	"github.com/Jguer/yay/v13/pkg/settings/exe"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
+
+// AURURLResolver returns the ordered AUR base URLs to try for a package name
+// or package base.
+type AURURLResolver interface {
+	URLsFor(name string) []string
+}
+
+// StaticAURURLs is an AURURLResolver that returns the same URLs for every
+// package.
+type StaticAURURLs []string
+
+func (s StaticAURURLs) URLsFor(string) []string { return s }
+
+// aurPKGBUILDFromAny fetches a PKGBUILD from the first URL that has it.
+func aurPKGBUILDFromAny(httpClient HTTPRequestDoer, pkgName string, aurURLs []string) ([]byte, error) {
+	var errs []error
+
+	for _, aurURL := range aurURLs {
+		pkgbuild, err := AURPKGBUILD(httpClient, pkgName, aurURL)
+		if err == nil {
+			return pkgbuild, nil
+		}
+
+		errs = append(errs, err)
+	}
+
+	return nil, errors.Join(errs...)
+}
+
+// aurPKGBUILDRepoFromAny clones a PKGBUILD repository, trying each URL in
+// order until one succeeds. An existing clone is updated from its own remote.
+func aurPKGBUILDRepoFromAny(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
+	aurURLs []string, pkgName, dest string, force bool,
+) (bool, error) {
+	if len(aurURLs) == 0 {
+		return false, ErrAURPackageNotFound{pkgName: pkgName}
+	}
+
+	if _, err := os.Stat(filepath.Join(dest, pkgName, ".git")); err == nil && !force {
+		return AURPKGBUILDRepo(ctx, cmdBuilder, aurURLs[0], pkgName, dest, force)
+	}
+
+	var errs []error
+
+	for _, aurURL := range aurURLs {
+		newClone, err := AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, pkgName, dest, force)
+		if err == nil {
+			return newClone, nil
+		}
+
+		errs = append(errs, err)
+	}
+
+	return false, errors.Join(errs...)
+}
 
 func AURPKGBUILD(httpClient HTTPRequestDoer, pkgName, aurURL string) ([]byte, error) {
 	values := url.Values{}
@@ -53,7 +110,7 @@ func AURPKGBUILDRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder, aurURL, 
 func AURPKGBUILDRepos(
 	ctx context.Context,
 	cmdBuilder exe.GitCmdBuilder, logger *text.Logger,
-	targets []string, aurURL, dest string, force bool,
+	targets []string, aurURLs AURURLResolver, dest string, force bool,
 ) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
 
@@ -75,7 +132,7 @@ func AURPKGBUILDRepos(
 				wg.Done()
 			}()
 
-			newClone, err := AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, target, dest, force)
+			newClone, err := aurPKGBUILDRepoFromAny(ctx, cmdBuilder, aurURLs.URLsFor(target), target, dest, force)
 
 			mux.Lock()
 			progress := len(cloned)

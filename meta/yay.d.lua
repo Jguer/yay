@@ -17,9 +17,15 @@
 
 -- Options: yay.opt
 
+---@class yay.AURSource
+---@field name? string Label used to reference the source (defaults to the host name).
+---@field url string Base URL serving the aurweb RPC and <pkgbase>.git repositories.
+---@field rpcurl? string RPC endpoint; empty derives <url>/rpc.
+
 ---@class yay.opt
 ---@field aururl string Base AUR URL
 ---@field aurrpcurl string AUR RPC endpoint URL; empty uses default endpoint.
+---@field aururls (string|yay.AURSource)[] Ordered AUR-compatible sources; when set, replaces aururl/aurrpcurl. Earlier entries win on name conflicts.
 ---@field build_dir string Build/cache directory for AUR packages.
 ---@field editor string Editor command used for PKGBUILD edits; empty uses VISUAL/EDITOR.
 ---@field editor_flags string Extra flags passed to the editor command.

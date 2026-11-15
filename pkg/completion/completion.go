@@ -43,10 +43,10 @@ type PkgSynchronizer interface {
 
 // Show provides completion info for shells.
 func Show(ctx context.Context, httpClient download.HTTPRequestDoer,
-	dbExecutor PkgSynchronizer, aurURL, completionPath string, interval int, force bool, logger *text.Logger,
+	dbExecutor PkgSynchronizer, aurURLs []string, completionPath string, interval int, force bool, logger *text.Logger,
 ) error {
 	if NeedsUpdate(completionPath, interval, force) {
-		if err := UpdateCache(ctx, httpClient, dbExecutor, aurURL, completionPath, logger); err != nil {
+		if err := UpdateCache(ctx, httpClient, dbExecutor, aurURLs, completionPath, logger); err != nil {
 			return err
 		}
 	}
@@ -64,7 +64,7 @@ func Show(ctx context.Context, httpClient download.HTTPRequestDoer,
 
 // UpdateCache regenerates the completion cache file unconditionally.
 func UpdateCache(ctx context.Context, httpClient download.HTTPRequestDoer,
-	dbExecutor PkgSynchronizer, aurURL, completionPath string, logger *text.Logger,
+	dbExecutor PkgSynchronizer, aurURLs []string, completionPath string, logger *text.Logger,
 ) error {
 	if err := os.MkdirAll(filepath.Dir(completionPath), 0o755); err != nil {
 		return err
@@ -76,9 +76,20 @@ func UpdateCache(ctx context.Context, httpClient download.HTTPRequestDoer,
 	}
 	defer out.Close()
 
-	if err := createAURList(ctx, httpClient, aurURL, out, logger); err != nil {
-		os.Remove(completionPath)
-		return err
+	seen := make(map[string]bool)
+
+	for i, aurURL := range aurURLs {
+		if err := writeAURList(ctx, httpClient, aurURL, out, logger, seen); err != nil {
+			// The primary source is required; extra sources are best effort.
+			if i == 0 {
+				os.Remove(completionPath)
+				return err
+			}
+
+			if logger != nil {
+				logger.Debugln("skipping completion list for", aurURL+":", err)
+			}
+		}
 	}
 
 	return createRepoList(dbExecutor, out)
@@ -86,6 +97,14 @@ func UpdateCache(ctx context.Context, httpClient download.HTTPRequestDoer,
 
 // createAURList creates a new completion file.
 func createAURList(ctx context.Context, client download.HTTPRequestDoer, aurURL string, out io.Writer, logger *text.Logger) error {
+	return writeAURList(ctx, client, aurURL, out, logger, make(map[string]bool))
+}
+
+// writeAURList appends the package names of one AUR source, skipping names
+// already present in seen.
+func writeAURList(ctx context.Context, client download.HTTPRequestDoer,
+	aurURL string, out io.Writer, logger *text.Logger, seen map[string]bool,
+) error {
 	scanner, err := download.GetPackageScanner(ctx, client, aurURL, logger)
 	if err != nil {
 		return err
@@ -96,9 +115,11 @@ func createAURList(ctx context.Context, client download.HTTPRequestDoer, aurURL 
 
 	for scanner.Scan() {
 		pkgName := scanner.Text()
-		if strings.HasPrefix(pkgName, "#") {
+		if strings.HasPrefix(pkgName, "#") || seen[pkgName] {
 			continue
 		}
+
+		seen[pkgName] = true
 
 		if _, err := io.WriteString(out, pkgName+"\tAUR\n"); err != nil {
 			return err

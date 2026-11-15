@@ -94,6 +94,30 @@ is done per package whenever a package is synced. This option should only be
 used when migrating to Yay from another AUR helper.
 
 .TP
+.B \-\-aursource <action> [args]
+Manage the ordered list of AUR-compatible sources stored as \fBaururls\fR in
+the config file. Actions:
+.RS
+.TP
+.B list
+Show the sources in priority order.
+.TP
+.B add <name> <url> [rpcurl]
+Append a source. If no list exists yet, the current \fBaururl\fR is kept as
+the first entry, named \fBaur\fR.
+.TP
+.B edit <name> [name=<new>] [url=<url>] [rpcurl=<url>]
+Change fields of a source. An empty \fBrpcurl=\fR resets it to <url>/rpc.
+.TP
+.B delete <name>
+Remove a source. Removing every source falls back to \fBaururl\fR.
+.TP
+.B move <name> <position>
+Move a source to a 1-based position. Earlier sources win when two sources
+provide a package with the same name.
+.RE
+
+.TP
 .B \-c, \-\-clean
 Remove unneeded dependencies.
 
@@ -174,6 +198,17 @@ Set an alternative AUR URL.
 .TP
 .B \-\-aurrpcurl
 Set an alternative URL for the AUR /rpc endpoint.
+
+.TP
+.B \-\-aururls <url[,url...]>
+Use an ordered list of AUR-compatible sources for this invocation (or save it
+with \-\-save). May be repeated. Every source is searched and results are
+merged; the first source providing a package name wins, and PKGBUILDs are
+downloaded from the source a package was found in, falling back to the other
+sources on failure. In the config file, \fBaururls\fR entries may be a URL
+string or an object with \fBname\fR, \fBurl\fR and optional \fBrpcurl\fR.
+When set, \fBaururls\fR takes the place of \fBaururl\fR/\fBaurrpcurl\fR; an
+explicit \-\-aururl on the command line selects that single source instead.
 
 .TP
 .B \-\-builddir <dir>

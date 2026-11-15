@@ -75,6 +75,20 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 
 `answer_clean`, `answer_diff`, `answer_edit`
 
+**Lists**
+
+`aururls`: ordered AUR-compatible sources. Entries are either a base URL string
+or a table with `url` and optional `name` and `rpcurl`. Order matters: every
+source is queried and the earliest source wins when two provide the same
+package name.
+
+```lua
+yay.opt.aururls = {
+	{ name = "aur", url = "https://aur.archlinux.org" },
+	"https://aur.example.org",
+}
+```
+
 **Integers**
 
 `request_split_n`, `completion_refresh_time`, `max_concurrent_downloads`

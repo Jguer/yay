@@ -211,7 +211,7 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 
 	if _, errA := download.AURPKGBUILDRepos(ctx,
 		preper.cmdBuilder, preper.log.Child("download"), aurBasesToClone.ToSlice(),
-		preper.cfg.AURURL, preper.cfg.BuildDir, false); errA != nil {
+		run.AURURLs(), preper.cfg.BuildDir, false); errA != nil {
 		return nil, errA
 	}
 

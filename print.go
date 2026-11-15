@@ -26,8 +26,11 @@ import (
 )
 
 // printInfo prints package info like pacman -Si.
-func printInfo(logger *text.Logger, config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
+func printInfo(logger *text.Logger, source settings.AURSource, a *aur.Pkg, extendedInfo bool) {
 	printInfoValue(logger, gotext.Get("Repository"), "aur")
+	if source.Name != "" && source.Name != "aur" {
+		printInfoValue(logger, gotext.Get("AUR Source"), source.Name)
+	}
 	printInfoValue(logger, gotext.Get("Name"), a.Name)
 	printInfoValue(logger, gotext.Get("Version"), a.Version)
 	printInfoValue(logger, gotext.Get("Description"), a.Description)
@@ -41,7 +44,7 @@ func printInfo(logger *text.Logger, config *settings.Configuration, a *aur.Pkg, 
 	printInfoValue(logger, gotext.Get("Check Deps"), a.CheckDepends...)
 	printInfoValue(logger, gotext.Get("Conflicts With"), a.Conflicts...)
 	printInfoValue(logger, gotext.Get("Replaces"), a.Replaces...)
-	printInfoValue(logger, gotext.Get("AUR URL"), config.AURURL+"/packages/"+a.Name)
+	printInfoValue(logger, gotext.Get("AUR URL"), source.URL+"/packages/"+a.Name)
 	printInfoValue(logger, gotext.Get("First Submitted"), text.FormatTimeQuery(a.FirstSubmitted))
 	printInfoValue(logger, gotext.Get("Keywords"), a.Keywords...)
 	printInfoValue(logger, gotext.Get("Last Modified"), text.FormatTimeQuery(a.LastModified))
@@ -59,7 +62,7 @@ func printInfo(logger *text.Logger, config *settings.Configuration, a *aur.Pkg, 
 		printInfoValue(logger, "ID", fmt.Sprintf("%d", a.ID))
 		printInfoValue(logger, gotext.Get("Package Base ID"), fmt.Sprintf("%d", a.PackageBaseID))
 		printInfoValue(logger, gotext.Get("Package Base"), a.PackageBase)
-		printInfoValue(logger, gotext.Get("Snapshot URL"), config.AURURL+a.URLPath)
+		printInfoValue(logger, gotext.Get("Snapshot URL"), source.URL+a.URLPath)
 	}
 
 	logger.Println()

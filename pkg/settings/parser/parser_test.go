@@ -373,3 +373,29 @@ func TestArguments_ParseTopLevelHelp(t *testing.T) {
 	require.NoError(t, args.Parse())
 	assert.Empty(t, args.Op)
 }
+
+func TestArguments_ParseAURSourceImpliesYay(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+	os.Args = []string{"yay", "--aursource", "add", "mirror", "https://aur.example.org"}
+
+	args := MakeArguments()
+	require.NoError(t, args.Parse())
+	assert.Equal(t, "Y", args.Op)
+
+	action, _, ok := args.GetArg("aursource")
+	assert.True(t, ok)
+	assert.Equal(t, "add", action)
+	assert.Equal(t, []string{"mirror", "https://aur.example.org"}, args.Targets)
+}
+
+func TestArguments_ParseRepeatedAURURLs(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+	os.Args = []string{"yay", "-Ss", "--aururls", "https://a.example,https://b.example", "--aururls=https://c.example", "foo"}
+
+	args := MakeArguments()
+	require.NoError(t, args.Parse())
+	assert.Equal(t, []string{"https://a.example", "https://b.example", "https://c.example"}, args.GetArgs("aururls"))
+	assert.Equal(t, []string{"foo"}, args.Targets)
+}

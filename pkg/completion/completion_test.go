@@ -366,7 +366,7 @@ func TestUpdateCache(t *testing.T) {
 
 			dbExecutor := &mockPkgSynchronizer{packages: tt.packages}
 
-			err := UpdateCache(context.Background(), tt.doer, dbExecutor, "https://aur.archlinux.org", completionPath, nil)
+			err := UpdateCache(context.Background(), tt.doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, nil)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -473,7 +473,7 @@ func TestShow(t *testing.T) {
 			require.NoError(t, pipeErr)
 			os.Stdout = w
 
-			err := Show(context.Background(), tt.doer, dbExecutor, "https://aur.archlinux.org", completionPath, tt.interval, tt.force, nil)
+			err := Show(context.Background(), tt.doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, tt.interval, tt.force, nil)
 
 			// Close writer first, then restore stdout, then read
 			w.Close()
@@ -518,7 +518,7 @@ func TestShowFileOpenError(t *testing.T) {
 
 	dbExecutor := &mockPkgSynchronizer{packages: []db.IPackage{}}
 
-	err = Show(context.Background(), doer, dbExecutor, "https://aur.archlinux.org", completionPath, 7, true, nil)
+	err = Show(context.Background(), doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, 7, true, nil)
 	assert.Error(t, err)
 }
 
@@ -543,7 +543,7 @@ func TestUpdateCacheMkdirError(t *testing.T) {
 
 	dbExecutor := &mockPkgSynchronizer{packages: []db.IPackage{}}
 
-	err = UpdateCache(context.Background(), doer, dbExecutor, "https://aur.archlinux.org", completionPath, nil)
+	err = UpdateCache(context.Background(), doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, nil)
 	assert.Error(t, err)
 }
 

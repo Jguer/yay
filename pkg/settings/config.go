@@ -3,7 +3,9 @@ package settings
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,53 +25,54 @@ var NoConfirm = false
 
 // Configuration stores yay's config.
 type Configuration struct {
-	AURURL                 string `json:"aururl" lua:"aururl"`
-	AURRPCURL              string `json:"aurrpcurl" lua:"aurrpcurl"`
-	BuildDir               string `json:"buildDir" lua:"build_dir"`
-	Editor                 string `json:"editor" lua:"editor"`
-	EditorFlags            string `json:"editorflags" lua:"editor_flags"`
-	Pager                  string `json:"pager" lua:"pager"`
-	MakepkgBin             string `json:"makepkgbin" lua:"makepkg_bin"`
-	MakepkgConf            string `json:"makepkgconf" lua:"makepkg_conf"`
-	PacmanBin              string `json:"pacmanbin" lua:"pacman_bin"`
-	PacmanConf             string `json:"pacmanconf" lua:"pacman_conf"`
-	ReDownload             string `json:"redownload" lua:"redownload"`
-	AnswerClean            string `json:"answerclean" lua:"answer_clean"`
-	AnswerDiff             string `json:"answerdiff" lua:"answer_diff"`
-	AnswerEdit             string `json:"answeredit" lua:"answer_edit"`
-	AnswerUpgrade          string `json:"answerupgrade" lua:"-"`
-	GitBin                 string `json:"gitbin" lua:"git_bin"`
-	GpgBin                 string `json:"gpgbin" lua:"gpg_bin"`
-	GpgFlags               string `json:"gpgflags" lua:"gpg_flags"`
-	MFlags                 string `json:"mflags" lua:"mflags"`
-	SortBy                 string `json:"sortby" lua:"sort_by"`
-	SearchBy               string `json:"searchby" lua:"search_by"`
-	GitFlags               string `json:"gitflags" lua:"git_flags"`
-	RemoveMake             string `json:"removemake" lua:"remove_make"`
-	SudoBin                string `json:"sudobin" lua:"sudo_bin"`
-	SudoFlags              string `json:"sudoflags" lua:"sudo_flags"`
-	Version                string `json:"version" lua:"-"`
-	RequestSplitN          int    `json:"requestsplitn" lua:"request_split_n"`
-	CompletionInterval     int    `json:"completionrefreshtime" lua:"completion_refresh_time"`
-	MaxConcurrentDownloads int    `json:"maxconcurrentdownloads" lua:"max_concurrent_downloads"`
-	BottomUp               bool   `json:"bottomup" lua:"bottom_up"`
-	SudoLoop               bool   `json:"sudoloop" lua:"sudo_loop"`
-	Devel                  bool   `json:"devel" lua:"devel"`
-	CleanAfter             bool   `json:"cleanAfter" lua:"clean_after"`
-	KeepSrc                bool   `json:"keepSrc" lua:"keep_src"`
-	Provides               bool   `json:"provides" lua:"provides"`
-	PGPFetch               bool   `json:"pgpfetch" lua:"pgp_fetch"`
-	CleanMenu              bool   `json:"cleanmenu" lua:"clean_menu"`
-	DiffMenu               bool   `json:"diffmenu" lua:"diff_menu"`
-	EditMenu               bool   `json:"editmenu" lua:"edit_menu"`
-	CombinedUpgrade        bool   `json:"combinedupgrade" lua:"combined_upgrade"`
-	UseAsk                 bool   `json:"useask" lua:"use_ask"`
-	BatchInstall           bool   `json:"batchinstall" lua:"batch_install"`
-	SingleLineResults      bool   `json:"singlelineresults" lua:"single_line_results"`
-	SeparateSources        bool   `json:"separatesources" lua:"separate_sources"`
-	Debug                  bool   `json:"debug" lua:"debug"`
-	UseRPC                 bool   `json:"rpc" lua:"rpc"`
-	DoubleConfirm          bool   `json:"doubleconfirm" lua:"double_confirm"` // confirm install before and after build
+	AURURL                 string      `json:"aururl" lua:"aururl"`
+	AURRPCURL              string      `json:"aurrpcurl" lua:"aurrpcurl"`
+	AURURLs                []AURSource `json:"aururls,omitempty" lua:"aururls"`
+	BuildDir               string      `json:"buildDir" lua:"build_dir"`
+	Editor                 string      `json:"editor" lua:"editor"`
+	EditorFlags            string      `json:"editorflags" lua:"editor_flags"`
+	Pager                  string      `json:"pager" lua:"pager"`
+	MakepkgBin             string      `json:"makepkgbin" lua:"makepkg_bin"`
+	MakepkgConf            string      `json:"makepkgconf" lua:"makepkg_conf"`
+	PacmanBin              string      `json:"pacmanbin" lua:"pacman_bin"`
+	PacmanConf             string      `json:"pacmanconf" lua:"pacman_conf"`
+	ReDownload             string      `json:"redownload" lua:"redownload"`
+	AnswerClean            string      `json:"answerclean" lua:"answer_clean"`
+	AnswerDiff             string      `json:"answerdiff" lua:"answer_diff"`
+	AnswerEdit             string      `json:"answeredit" lua:"answer_edit"`
+	AnswerUpgrade          string      `json:"answerupgrade" lua:"-"`
+	GitBin                 string      `json:"gitbin" lua:"git_bin"`
+	GpgBin                 string      `json:"gpgbin" lua:"gpg_bin"`
+	GpgFlags               string      `json:"gpgflags" lua:"gpg_flags"`
+	MFlags                 string      `json:"mflags" lua:"mflags"`
+	SortBy                 string      `json:"sortby" lua:"sort_by"`
+	SearchBy               string      `json:"searchby" lua:"search_by"`
+	GitFlags               string      `json:"gitflags" lua:"git_flags"`
+	RemoveMake             string      `json:"removemake" lua:"remove_make"`
+	SudoBin                string      `json:"sudobin" lua:"sudo_bin"`
+	SudoFlags              string      `json:"sudoflags" lua:"sudo_flags"`
+	Version                string      `json:"version" lua:"-"`
+	RequestSplitN          int         `json:"requestsplitn" lua:"request_split_n"`
+	CompletionInterval     int         `json:"completionrefreshtime" lua:"completion_refresh_time"`
+	MaxConcurrentDownloads int         `json:"maxconcurrentdownloads" lua:"max_concurrent_downloads"`
+	BottomUp               bool        `json:"bottomup" lua:"bottom_up"`
+	SudoLoop               bool        `json:"sudoloop" lua:"sudo_loop"`
+	Devel                  bool        `json:"devel" lua:"devel"`
+	CleanAfter             bool        `json:"cleanAfter" lua:"clean_after"`
+	KeepSrc                bool        `json:"keepSrc" lua:"keep_src"`
+	Provides               bool        `json:"provides" lua:"provides"`
+	PGPFetch               bool        `json:"pgpfetch" lua:"pgp_fetch"`
+	CleanMenu              bool        `json:"cleanmenu" lua:"clean_menu"`
+	DiffMenu               bool        `json:"diffmenu" lua:"diff_menu"`
+	EditMenu               bool        `json:"editmenu" lua:"edit_menu"`
+	CombinedUpgrade        bool        `json:"combinedupgrade" lua:"combined_upgrade"`
+	UseAsk                 bool        `json:"useask" lua:"use_ask"`
+	BatchInstall           bool        `json:"batchinstall" lua:"batch_install"`
+	SingleLineResults      bool        `json:"singlelineresults" lua:"single_line_results"`
+	SeparateSources        bool        `json:"separatesources" lua:"separate_sources"`
+	Debug                  bool        `json:"debug" lua:"debug"`
+	UseRPC                 bool        `json:"rpc" lua:"rpc"`
+	DoubleConfirm          bool        `json:"doubleconfirm" lua:"double_confirm"` // confirm install before and after build
 
 	CompletionPath string `json:"-" lua:"-"`
 	VCSFilePath    string `json:"-" lua:"-"`
@@ -113,6 +116,12 @@ func (c *Configuration) Save(configPath, version string) error {
 func (c *Configuration) expandEnv() {
 	c.AURURL = os.ExpandEnv(c.AURURL)
 	c.AURRPCURL = os.ExpandEnv(c.AURRPCURL)
+
+	for i := range c.AURURLs {
+		c.AURURLs[i].URL = os.ExpandEnv(c.AURURLs[i].URL)
+		c.AURURLs[i].RPCURL = os.ExpandEnv(c.AURURLs[i].RPCURL)
+	}
+
 	c.BuildDir = expandEnvOrHome(c.BuildDir)
 	c.Editor = expandEnvOrHome(c.Editor)
 	c.EditorFlags = os.ExpandEnv(c.EditorFlags)
@@ -192,7 +201,7 @@ func (c *Configuration) setPrivilegeElevator() error {
 
 func DefaultConfig(version string) *Configuration {
 	return &Configuration{
-		AURURL:                 "https://aur.archlinux.org",
+		AURURL:                 defaultAURURL,
 		BuildDir:               os.ExpandEnv("$HOME/.cache/yay"),
 		CleanAfter:             false,
 		KeepSrc:                false,
@@ -273,6 +282,27 @@ func NewConfig(logger *text.Logger, configPath, version string) (*Configuration,
 	}
 
 	return newConfig, nil
+}
+
+// loadStrict decodes configPath into c, treating a missing file as empty but
+// returning any other error so callers that rewrite the file never clobber a
+// config they failed to read.
+func (c *Configuration) loadStrict(configPath string) error {
+	cfile, err := os.Open(configPath)
+	if os.IsNotExist(err) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+	defer cfile.Close()
+
+	if err := json.NewDecoder(cfile).Decode(c); err != nil && !errors.Is(err, io.EOF) {
+		return fmt.Errorf("%s", gotext.Get("failed to read config file '%s': %s", configPath, err))
+	}
+
+	return nil
 }
 
 func (c *Configuration) load(configPath string) {

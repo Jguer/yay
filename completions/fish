@@ -173,6 +173,7 @@ complete -c $progname -n "not $noopt" -s N -l repo -d 'Assume targets are from t
 # Yay options
 complete -c $progname -n "$yayspecific" -s c -l clean -d 'Remove unneeded dependencies' -f
 complete -c $progname -n "$yayspecific" -l gendb -d 'Generate development package DB' -f
+complete -c $progname -n "$yayspecific" -l aursource -d 'Manage AUR sources' -xa 'list add edit delete move'
 
 # Show options
 complete -c $progname -n "$show" -s c -l complete -d 'Print a list of all AUR and repo packages' -f
@@ -192,6 +193,7 @@ complete -c $progname -n "$getpkgbuild" -s p -l print -d 'Print pkgbuild of pack
 complete -c $progname -n "not $noopt" -l save -d 'Save current arguments to yay permanent configuration' -f
 complete -c $progname -n "not $noopt" -l aururl -d 'Set an alternative AUR URL' -x
 complete -c $progname -n "not $noopt" -l aurrpcurl -d 'Set an alternative URL for the AUR /rpc endpoint' -x
+complete -c $progname -n "not $noopt" -l aururls -d 'Ordered list of AUR-compatible sources' -x
 complete -c $progname -n "not $noopt" -l builddir -d 'Directory to use for Building AUR Packages' -r
 complete -c $progname -n "not $noopt" -l editor -d 'Editor to use' -r
 complete -c $progname -n "not $noopt" -l editorflags -d 'Editor flags to use' -x
