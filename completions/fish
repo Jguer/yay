@@ -35,13 +35,13 @@ complete -c $progname -n "$noopt" -a "-D" -d "Modify the package database"
 complete -c $progname -n "$noopt" -a "-Q" -d "Query the package database"
 
 # Primary operations
-complete -c $progname -s D -f -l database -n "$noopt" -d 'Modify the package database'
-complete -c $progname -s Q -f -l query -n "$noopt" -d 'Query the package database'
-complete -c $progname -s R -f -l remove -n "$noopt" -d 'Remove packages from the system'
-complete -c $progname -s S -f -l sync -n "$noopt" -d 'Synchronize packages'
+complete -c $progname -s D -f -l database -n "$noopt || $database" -d 'Modify the package database'
+complete -c $progname -s Q -f -l query -n "$noopt || $query" -d 'Query the package database'
+complete -c $progname -s R -f -l remove -n "$noopt || $remove" -d 'Remove packages from the system'
+complete -c $progname -s S -f -l sync -n "$noopt || $sync" -d 'Synchronize packages'
 complete -c $progname -s T -f -l deptest -n "$noopt" -d 'Check dependencies'
-complete -c $progname -s U -l upgrade -n "$noopt" -d 'Upgrade or add a local package'
-complete -c $progname -s F -f -l files -n "$noopt" -d 'Query the files database'
+complete -c $progname -s U -l upgrade -n "$noopt || $upgrade" -d 'Upgrade or add a local package'
+complete -c $progname -s F -f -l files -n "$noopt || $files" -d 'Query the files database'
 complete -c $progname -s B -f -l build -n "$noopt" -d 'Build from a local PKGBUILD'
 complete -c $progname -s V -f -l version -d 'Display version and exit'
 complete -c $progname -s h -f -l help -d 'Display help'
@@ -156,10 +156,10 @@ complete -c $progname -n "$upgrade" -xa '(__fish_complete_suffix pkg.tar.zst; __
 
 
 # Yay operations
-complete -c $progname -s Y -f -l yay -n "$noopt" -d 'Yay specific operations'
-complete -c $progname -s P -f -l show -n "$noopt" -d 'Print information'
-complete -c $progname -s G -f -l getpkgbuild -n "$noopt" -d 'Get PKGBUILD from ABS or AUR'
-complete -c $progname -s W -f -l web -n "$noopt" -d 'Web operations'
+complete -c $progname -s Y -f -l yay -n "$noopt || $yayspecific" -d 'Yay specific operations'
+complete -c $progname -s P -f -l show -n "$noopt || $show" -d 'Print information'
+complete -c $progname -s G -f -l getpkgbuild -n "$noopt || $getpkgbuild" -d 'Get PKGBUILD from ABS or AUR'
+complete -c $progname -s W -f -l web -n "$noopt || $webspecific" -d 'Web operations'
 
 # Web options
 complete -c $progname -n "$webspecific" -s v -l vote -d 'Vote for AUR packages' -f
