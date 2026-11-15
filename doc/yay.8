@@ -209,6 +209,13 @@ sources on failure. In the config file, \fBaururls\fR entries may be a URL
 string or an object with \fBname\fR, \fBurl\fR and optional \fBrpcurl\fR.
 When set, \fBaururls\fR takes the place of \fBaururl\fR/\fBaurrpcurl\fR; an
 explicit \-\-aururl on the command line selects that single source instead.
+Packages are labelled with their source name in search, info and upgrade
+output (\fBaur/\fR for the default source, e.g. \fBmirror/foo\fR otherwise),
+and a \fB<source>/<package>\fR target installs or downloads from that source.
+Every source is still treated as AUR: \-a/\-N filtering applies to all of them
+and \fBaur\fR in the upgrade menu matches packages from any source, while a
+source name matches only that source. Source names may not shadow official
+repositories (core, extra, multilib, ...), \fBlocal\fR or \fBdevel\fR.
 
 .TP
 .B \-\-builddir <dir>

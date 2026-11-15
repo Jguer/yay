@@ -20,9 +20,14 @@ func VerCmp(v1, v2 string) int {
 }
 
 type Upgrade struct {
-	Name          string
-	Base          string
-	Repository    string
+	Name       string
+	Base       string
+	Repository string
+	// Source is the label of the AUR source an AUR package comes from ("aur"
+	// for the default source, e.g. "mirror" otherwise); empty for repo
+	// packages. Repository stays "aur"/"devel" for every AUR source so
+	// filtering behaves the same.
+	Source        string
 	LocalVersion  string
 	RemoteVersion string
 	Reason        alpm.PkgReason

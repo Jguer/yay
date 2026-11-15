@@ -3,6 +3,7 @@ package settings
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
@@ -18,13 +19,24 @@ func (s AURSource) EffectiveName() string {
 	return defaultSourceName(strings.TrimRight(strings.TrimSpace(s.URL), "/"))
 }
 
+var reservedSourceNames = []string{
+	"core", "extra", "multilib", "testing", "core-testing", "extra-testing",
+	"multilib-testing", "gnome-unstable", "kde-unstable", "local", "devel",
+}
+
 func validateSourceName(name string) error {
 	if name == "" {
 		return errors.New(gotext.Get("source name must not be empty"))
 	}
 
-	if strings.ContainsAny(name, " \t\n,=") {
+	if strings.ContainsAny(name, " \t\n,=/") {
 		return errors.New(gotext.Get("invalid source name '%s'", name))
+	}
+
+	// Source names double as "<source>/<pkg>" prefixes and repository labels,
+	// so they must not shadow official repositories or yay's own labels.
+	if slices.Contains(reservedSourceNames, name) {
+		return errors.New(gotext.Get("source name '%s' is reserved", name))
 	}
 
 	return nil

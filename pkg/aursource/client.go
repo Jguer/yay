@@ -23,6 +23,7 @@ type Client struct {
 
 	mu     sync.RWMutex
 	origin map[string]int // package name or package base -> source index
+	pins   map[string]int // package name -> source index requested as <source>/<name>
 }
 
 // New returns a Client. sources and clients must have the same length and
@@ -37,6 +38,7 @@ func New(sources []settings.AURSource, clients []aur.QueryClient, logger *text.L
 		clients: clients,
 		logger:  logger,
 		origin:  make(map[string]int),
+		pins:    make(map[string]int),
 	}
 }
 
@@ -76,6 +78,28 @@ func (c *Client) Get(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
 		seen   = make(map[string]bool)
 	)
 
+	// Packages explicitly requested from a source (<source>/<name>) come from
+	// that source when it has them, regardless of priority.
+	c.mu.Lock()
+	for i, pkgs := range results {
+		if errs[i] != nil {
+			continue
+		}
+
+		for j := range pkgs {
+			if idx, ok := c.pins[pkgs[j].Name]; ok && idx == i && !seen[pkgs[j].Name] {
+				seen[pkgs[j].Name] = true
+				merged = append(merged, pkgs[j])
+				c.origin[pkgs[j].Name] = i
+
+				if pkgs[j].PackageBase != "" {
+					c.origin[pkgs[j].PackageBase] = i
+				}
+			}
+		}
+	}
+	c.mu.Unlock()
+
 	for i, pkgs := range results {
 		if errs[i] != nil {
 			failed++
@@ -114,10 +138,34 @@ func (c *Client) record(pkg *aur.Pkg, idx int) {
 			continue
 		}
 
+		if _, pinned := c.pins[key]; pinned {
+			continue
+		}
+
 		if prev, ok := c.origin[key]; !ok || idx < prev {
 			c.origin[key] = idx
 		}
 	}
+}
+
+// PinAURSource makes pkgName resolve from the source labelled source (as in a
+// "<source>/<name>" target) when that source provides it. It reports whether
+// source names one of the configured sources.
+func (c *Client) PinAURSource(pkgName, source string) bool {
+	for i := range c.sources {
+		if c.sources[i].Name != source {
+			continue
+		}
+
+		c.mu.Lock()
+		c.pins[pkgName] = i
+		c.origin[pkgName] = i
+		c.mu.Unlock()
+
+		return true
+	}
+
+	return false
 }
 
 // SourceFor returns the source a package (by name or package base) was

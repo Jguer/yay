@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Jguer/aur"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -109,4 +110,35 @@ func TestHandleAURSourceErrors(t *testing.T) {
 
 	_, statErr := os.Stat(configPath)
 	assert.True(t, os.IsNotExist(statErr), "failed commands must not write the config")
+}
+
+func TestPrintInfoUsesSourceLabel(t *testing.T) {
+	t.Parallel()
+
+	pkg := &aur.Pkg{Name: "foo", URLPath: "/cgit/aur.git/snapshot/foo.tar.gz"}
+
+	for _, tc := range []struct {
+		source   settings.AURSource
+		repo     string
+		pkgURL   string
+		snapshot string
+	}{
+		{settings.AURSource{Name: "aur", URL: "https://aur.archlinux.org"}, "aur",
+			"https://aur.archlinux.org/packages/foo", "https://aur.archlinux.org/cgit/aur.git/snapshot/foo.tar.gz"},
+		{settings.AURSource{Name: "mirror", URL: "https://aur.example.org"}, "mirror",
+			"https://aur.example.org/packages/foo", "https://aur.example.org/cgit/aur.git/snapshot/foo.tar.gz"},
+		{settings.AURSource{URL: "https://aur.example.org"}, "aur", "https://aur.example.org/packages/foo", ""},
+	} {
+		var out bytes.Buffer
+		logger := text.NewLogger(&out, io.Discard, strings.NewReader(""), false, "test")
+		printInfo(logger, tc.source, pkg, true)
+
+		got := out.String()
+		assert.Regexp(t, `Repository\s+: (\x1b\[0m)?`+tc.repo+`\n`, got)
+		assert.Contains(t, got, tc.pkgURL)
+
+		if tc.snapshot != "" {
+			assert.Contains(t, got, tc.snapshot)
+		}
+	}
 }

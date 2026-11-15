@@ -238,3 +238,15 @@ func TestUpdateConfigFile(t *testing.T) {
 	_, err = UpdateConfigFile(path, "v1", func(c *Configuration) error { return nil })
 	require.Error(t, err)
 }
+
+func TestAddAURSourceRejectsReservedNames(t *testing.T) {
+	t.Parallel()
+
+	cfg := DefaultConfig("test")
+	for _, name := range []string{"core", "extra", "multilib", "local", "devel", "a/b"} {
+		assert.Error(t, cfg.AddAURSource(name, "https://x.example", ""), name)
+	}
+
+	require.NoError(t, cfg.AddAURSource("mirror", "https://x.example", ""))
+	assert.Error(t, cfg.EditAURSource("mirror", map[string]string{"name": "extra"}))
+}

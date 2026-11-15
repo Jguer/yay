@@ -527,8 +527,8 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 	if run.Cfg.Mode.AtLeastAUR() && (len(cmdArgs.Targets) == 0 || aur) {
 		seen := make(map[string]bool)
 
-		for i, aurURL := range run.Cfg.AURBaseURLs() {
-			if err := listAURSource(ctx, run, httpClient, cmdArgs, dbExecutor, aurURL, seen); err != nil {
+		for i, src := range run.Cfg.AURSources() {
+			if err := listAURSource(ctx, run, httpClient, cmdArgs, dbExecutor, src, seen); err != nil {
 				// The primary source is required; extra sources are best effort.
 				if i == 0 {
 					return err
@@ -548,9 +548,9 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 }
 
 func listAURSource(ctx context.Context, run *runtime.Runtime, httpClient *http.Client,
-	cmdArgs *parser.Arguments, dbExecutor db.Executor, aurURL string, seen map[string]bool,
+	cmdArgs *parser.Arguments, dbExecutor db.Executor, src settings.AURSource, seen map[string]bool,
 ) error {
-	scanner, err := download.GetPackageScanner(ctx, httpClient, aurURL, run.Logger)
+	scanner, err := download.GetPackageScanner(ctx, httpClient, src.URL, run.Logger)
 	if err != nil {
 		return err
 	}
@@ -569,7 +569,7 @@ func listAURSource(ctx context.Context, run *runtime.Runtime, httpClient *http.C
 			continue
 		}
 
-		run.Logger.Printf("%s %s %s", text.Magenta("aur"), text.Bold(name), text.Bold(text.Green(gotext.Get("unknown-version"))))
+		run.Logger.Printf("%s %s %s", text.Magenta(src.Name), text.Bold(name), text.Bold(text.Green(gotext.Get("unknown-version"))))
 
 		if dbExecutor.LocalPackage(name) != nil {
 			run.Logger.Print(text.Bold(text.Blue(gotext.Get(" [Installed]"))))

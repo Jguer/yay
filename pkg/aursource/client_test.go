@@ -97,3 +97,44 @@ func TestSingleSourcePassesThrough(t *testing.T) {
 	require.ErrorIs(t, err, wantErr)
 	assert.Equal(t, []string{"https://aur.archlinux.org"}, c.URLsFor("anything"))
 }
+
+func TestPinAURSourcePrefersRequestedSource(t *testing.T) {
+	t.Parallel()
+
+	c := New(testSources, []aur.QueryClient{
+		returning([]aur.Pkg{{Name: "shared", PackageBase: "shared", Version: "1"}, {Name: "other", Version: "1"}}, nil),
+		returning([]aur.Pkg{{Name: "shared", PackageBase: "shared", Version: "2"}, {Name: "other", Version: "2"}}, nil),
+	}, testLogger())
+
+	assert.False(t, c.PinAURSource("shared", "unknown"), "unknown source names are not pinned")
+	assert.True(t, c.PinAURSource("shared", "mirror"))
+
+	pkgs, err := c.Get(context.Background(), &aur.Query{})
+	require.NoError(t, err)
+	require.Len(t, pkgs, 2)
+
+	byName := map[string]string{}
+	for _, p := range pkgs {
+		byName[p.Name] = p.Version
+	}
+
+	assert.Equal(t, "2", byName["shared"], "pinned package comes from the requested source")
+	assert.Equal(t, "1", byName["other"], "unpinned packages keep priority order")
+	assert.Equal(t, "mirror", c.SourceFor("shared").Name)
+	assert.Equal(t, []string{"https://aur.example.org", "https://aur.archlinux.org"}, c.URLsFor("shared"))
+}
+
+func TestPinAURSourceFallsBackWhenSourceLacksPackage(t *testing.T) {
+	t.Parallel()
+
+	c := New(testSources, []aur.QueryClient{
+		returning([]aur.Pkg{{Name: "only-aur"}}, nil),
+		returning(nil, nil),
+	}, testLogger())
+
+	require.True(t, c.PinAURSource("only-aur", "mirror"))
+
+	pkgs, err := c.Get(context.Background(), &aur.Query{})
+	require.NoError(t, err)
+	require.Len(t, pkgs, 1, "a pin never hides a package other sources provide")
+}

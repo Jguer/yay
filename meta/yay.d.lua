@@ -137,6 +137,7 @@
 ---@field name string
 ---@field base string
 ---@field repository string
+---@field aur_source? string Label of the AUR source ("aur" for the default); nil for repo packages.
 ---@field local_version string
 ---@field remote_version string
 ---@field reason string
@@ -175,6 +176,7 @@
 
 ---@class yay.SearchResultPackage
 ---@field source string
+---@field aur_source? string Label of the AUR source ("aur" for the default) when source is "aur".
 ---@field name string
 ---@field description string
 ---@field base string
@@ -219,6 +221,7 @@
 -- Event payloads: RenderAUR
 
 ---@class yay.RenderAURData
+---@field aur_source string Label of the AUR source ("aur" for the default).
 ---@field name string
 ---@field version string
 ---@field description string

@@ -249,6 +249,7 @@ func (u *UpgradeService) graphToUpSlice(graph *topo.Graph[string, *dep.InstallIn
 				Name:          name,
 				RemoteVersion: info.Version,
 				Repository:    aurRepo,
+				Source:        query.AURSourceLabel(u.aurCache, name),
 				Base:          info.AURBase,
 				LocalVersion:  info.LocalVersion,
 				Reason:        alpmReason,
@@ -413,7 +414,7 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 		// check if user wants to exclude specific things (true) or include specific things
 		if noIncludes {
 			// exclude repositories mentioned by the user
-			if otherExclude.Contains(up.Repository) {
+			if otherExclude.Contains(up.Repository) || (up.Source != "" && otherExclude.Contains(up.Source)) {
 				u.log.Debugln("pruning", up.Name)
 				excluded = append(excluded, graph.Prune(up.Name)...)
 			}
@@ -424,7 +425,8 @@ func (u *UpgradeService) UserExcludeUpgrades(graph *topo.Graph[string, *dep.Inst
 			}
 
 			// If the user explicitly wants to include a package/repository, exclude everything else
-		} else if !include.Get(upgradeID) && !otherInclude.Contains(up.Repository) {
+		} else if !include.Get(upgradeID) && !otherInclude.Contains(up.Repository) &&
+			(up.Source == "" || !otherInclude.Contains(up.Source)) {
 			u.log.Debugln("pruning", up.Name)
 			excluded = append(excluded, graph.Prune(up.Name)...)
 		}
@@ -454,6 +456,7 @@ func upgradeSelectPackages(upgrades []Upgrade, selectable bool) []settingslua.Up
 			Name:          up.Name,
 			Base:          up.Base,
 			Repository:    up.Repository,
+			AURSource:     up.Source,
 			LocalVersion:  up.LocalVersion,
 			RemoteVersion: up.RemoteVersion,
 			Reason:        upgradeSelectReason(up.Reason),

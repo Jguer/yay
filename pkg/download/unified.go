@@ -209,6 +209,13 @@ func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
 	logger *text.Logger, target string, mode parser.TargetMode,
 ) (dbname, pkgname string, isAUR, toSkip bool) {
 	dbName, name := text.SplitDBFromName(target)
+
+	// <source>/<name> for a configured AUR source other than "aur".
+	if pinner, ok := aurClient.(aurSourcePinner); ok && dbName != "" && dbName != "aur" &&
+		pinner.PinAURSource(name, dbName) {
+		dbName = "aur"
+	}
+
 	if dbName != "aur" && mode.AtLeastRepo() {
 		var pkg db.IPackage
 		if dbName != "" {
@@ -246,4 +253,10 @@ func getPackageUsableName(dbExecutor DBSearcher, aurClient aur.QueryClient,
 	}
 
 	return "aur", name, true, false
+}
+
+// aurSourcePinner is implemented by AUR clients backed by several named
+// sources; it lets a "<source>/<name>" target pick the source.
+type aurSourcePinner interface {
+	PinAURSource(pkgName, source string) bool
 }

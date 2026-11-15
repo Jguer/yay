@@ -12,8 +12,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/Jguer/aur"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
 )
 
 type mapHTTPClient map[string]string // url -> body; missing urls return 404
@@ -112,4 +115,41 @@ func TestAURPKGBUILDReposAllSourcesFail(t *testing.T) {
 	require.Error(t, err)
 	assert.Empty(t, cloned)
 	assert.Len(t, builder.clones, 2)
+}
+
+// pinningAUR accepts "mirror" as an AUR source prefix and records pins.
+type pinningAUR struct {
+	pinned map[string]string
+}
+
+func (p *pinningAUR) Get(context.Context, *aur.Query) ([]aur.Pkg, error) {
+	return []aur.Pkg{{Name: "foo", PackageBase: "foo"}}, nil
+}
+
+func (p *pinningAUR) PinAURSource(pkgName, source string) bool {
+	if source != "mirror" {
+		return false
+	}
+
+	p.pinned[pkgName] = source
+
+	return true
+}
+
+func TestGetPackageUsableNameAcceptsAURSourcePrefix(t *testing.T) {
+	t.Parallel()
+
+	client := &pinningAUR{pinned: map[string]string{}}
+	searcher := &testDBSearcher{absPackagesDB: map[string]string{}}
+
+	dbName, name, isAUR, skip := getPackageUsableName(searcher, client, newTestLogger(), "mirror/foo", parser.ModeAny)
+	assert.Equal(t, "aur", dbName)
+	assert.Equal(t, "foo", name)
+	assert.True(t, isAUR)
+	assert.False(t, skip)
+	assert.Equal(t, map[string]string{"foo": "mirror"}, client.pinned)
+
+	// Unknown prefixes are still treated as pacman repositories.
+	_, _, _, skip = getPackageUsableName(searcher, client, newTestLogger(), "nosuchrepo/foo", parser.ModeAny)
+	assert.True(t, skip)
 }

@@ -163,6 +163,12 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		case "aur":
 			aurTargets = append(aurTargets, target.Name)
 		default:
+			// <source>/<name> for a configured AUR source other than "aur".
+			if pinner, ok := g.aurClient.(aurSourcePinner); ok && pinner.PinAURSource(target.Name, target.DB) {
+				aurTargets = append(aurTargets, target.Name)
+				continue
+			}
+
 			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
 			if err != nil {
 				return nil, err
@@ -914,4 +920,10 @@ func aurDepModToAlpmDep(mod string) alpm.DepMod {
 		return alpm.DepModLT
 	}
 	return alpm.DepModAny
+}
+
+// aurSourcePinner is implemented by AUR clients backed by several named
+// sources; it lets a "<source>/<name>" target pick the source.
+type aurSourcePinner interface {
+	PinAURSource(pkgName, source string) bool
 }

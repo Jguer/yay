@@ -27,10 +27,12 @@ import (
 
 // printInfo prints package info like pacman -Si.
 func printInfo(logger *text.Logger, source settings.AURSource, a *aur.Pkg, extendedInfo bool) {
-	printInfoValue(logger, gotext.Get("Repository"), "aur")
-	if source.Name != "" && source.Name != "aur" {
-		printInfoValue(logger, gotext.Get("AUR Source"), source.Name)
+	repository := source.Name
+	if repository == "" {
+		repository = "aur"
 	}
+
+	printInfoValue(logger, gotext.Get("Repository"), repository)
 	printInfoValue(logger, gotext.Get("Name"), a.Name)
 	printInfoValue(logger, gotext.Get("Version"), a.Version)
 	printInfoValue(logger, gotext.Get("Description"), a.Description)
