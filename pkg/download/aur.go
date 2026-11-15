@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
@@ -59,6 +60,10 @@ func aurPKGBUILDRepoFromAny(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 	}
 
 	if _, err := os.Stat(filepath.Join(dest, pkgName, ".git")); err == nil && !force {
+		if errO := CheckCloneOrigin(ctx, cmdBuilder, filepath.Join(dest, pkgName), pkgName, aurURLs); errO != nil {
+			return false, errO
+		}
+
 		return AURPKGBUILDRepo(ctx, cmdBuilder, aurURLs[0], pkgName, dest, force)
 	}
 
@@ -74,6 +79,55 @@ func aurPKGBUILDRepoFromAny(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
 	}
 
 	return false, errors.Join(errs...)
+}
+
+// ErrCloneOriginMismatch is returned when an existing PKGBUILD clone was made
+// from a different AUR source than the one the package is fetched from.
+type ErrCloneOriginMismatch struct {
+	Dir, PkgName, Current, Expected string
+}
+
+func (e ErrCloneOriginMismatch) Error() string {
+	return gotext.Get("%s was cloned from %s but %s is being fetched from %s; remove %s and try again",
+		e.Dir, e.Current, e.PkgName, e.Expected, e.Dir)
+}
+
+// CheckCloneOrigin makes sure an existing clone in dir of the PKGBUILD
+// repository pkgName comes from the first of aurURLs, the source the package
+// was resolved from, rather than silently updating it from another AUR
+// source. It only applies when several AUR sources are configured; a
+// missing clone, or one whose remote cannot be read, is not an error.
+func CheckCloneOrigin(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
+	dir, pkgName string, aurURLs []string,
+) error {
+	if len(aurURLs) < 2 {
+		return nil
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {
+		return nil
+	}
+
+	stdout, _, err := cmdBuilder.Capture(cmdBuilder.BuildGitCmd(ctx, dir, "remote", "get-url", "origin"))
+	current := strings.TrimSpace(stdout)
+
+	if err != nil || current == "" {
+		return nil
+	}
+
+	expected := fmt.Sprintf("%s/%s.git", strings.TrimRight(aurURLs[0], "/"), pkgName)
+	if normalizeGitURL(current) == normalizeGitURL(expected) {
+		return nil
+	}
+
+	return ErrCloneOriginMismatch{Dir: dir, PkgName: pkgName, Current: current, Expected: expected}
+}
+
+func normalizeGitURL(u string) string {
+	u = strings.TrimRight(u, "/")
+	u = strings.TrimSuffix(u, ".git")
+
+	return strings.TrimRight(u, "/")
 }
 
 func AURPKGBUILD(httpClient HTTPRequestDoer, pkgName, aurURL string) ([]byte, error) {

@@ -235,6 +235,11 @@ the source was removed or no longer has the package, yay warns and uses the
 normal source order. Installing \fB<source>/<package>\fR or
 \fBaur/<package>\fR (the normal order) replaces the recorded source;
 packages that are no longer installed are forgotten.
+With more than one source, a cached PKGBUILD clone (in the build directory,
+or the current directory for \-G) that was cloned from a different source
+than the one the package is now fetched from is not updated or built; yay
+stops with an error naming both URLs, and the clone has to be removed (or
+replaced with \-G \-\-force) before retrying.
 
 .TP
 .B \-\-builddir <dir>
