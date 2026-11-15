@@ -217,7 +217,7 @@ func TestUpdateConfigFile(t *testing.T) {
 	}, onDisk["aururls"])
 
 	// Existing settings survive and a failing edit does not rewrite the file.
-	require.NoError(t, os.WriteFile(path, []byte(`{"editor":"nvim","aururls":["https://aur.archlinux.org"]}`), 0o644))
+	require.NoError(t, os.WriteFile(path, []byte(`{"editor":"nvim","aururls":["https://aur.archlinux.org"]}`), 0o600))
 
 	_, err = UpdateConfigFile(path, "v1", func(c *Configuration) error { return c.DeleteAURSource("nope") })
 	require.Error(t, err)
@@ -234,7 +234,7 @@ func TestUpdateConfigFile(t *testing.T) {
 	assert.Equal(t, []string{"https://aur.archlinux.org", "https://aur.example.org"}, cfg.AURBaseURLs())
 
 	// Corrupt file is reported, not overwritten.
-	require.NoError(t, os.WriteFile(path, []byte(`{not json`), 0o644))
+	require.NoError(t, os.WriteFile(path, []byte(`{not json`), 0o600))
 	_, err = UpdateConfigFile(path, "v1", func(c *Configuration) error { return nil })
 	require.Error(t, err)
 }

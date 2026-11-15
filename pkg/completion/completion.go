@@ -95,11 +95,6 @@ func UpdateCache(ctx context.Context, httpClient download.HTTPRequestDoer,
 	return createRepoList(dbExecutor, out)
 }
 
-// createAURList creates a new completion file.
-func createAURList(ctx context.Context, client download.HTTPRequestDoer, aurURL string, out io.Writer, logger *text.Logger) error {
-	return writeAURList(ctx, client, aurURL, out, logger, make(map[string]bool))
-}
-
 // writeAURList appends the package names of one AUR source, skipping names
 // already present in seen.
 func writeAURList(ctx context.Context, client download.HTTPRequestDoer,

@@ -86,7 +86,8 @@ func (c *Configuration) AddAURSource(name, rawURL, rpcURL string) error {
 		return errors.New(gotext.Get("AUR source '%s' already exists", name))
 	}
 
-	c.AURURLs = append(sources, AURSource{Name: name, URL: strings.TrimRight(rawURL, "/"), RPCURL: rpcURL})
+	sources = append(sources, AURSource{Name: name, URL: strings.TrimRight(rawURL, "/"), RPCURL: rpcURL})
+	c.AURURLs = sources
 
 	return nil
 }

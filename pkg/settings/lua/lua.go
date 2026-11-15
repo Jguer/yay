@@ -336,7 +336,7 @@ func assignStructSequence(field reflect.Value, tbl *lua.LTable) error {
 				return fmt.Errorf("entry %d: %w", i, err)
 			}
 		case lua.LString:
-			unmarshaler, _ := elem.Addr().Interface().(encoding.TextUnmarshaler)
+			unmarshaler, _ := reflect.TypeAssert[encoding.TextUnmarshaler](elem.Addr())
 			if err := unmarshaler.UnmarshalText([]byte(entry)); err != nil {
 				return fmt.Errorf("entry %d: %w", i, err)
 			}

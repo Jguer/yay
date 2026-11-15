@@ -103,7 +103,7 @@ func defaultSourceName(baseURL string) string {
 
 // AURSources returns the ordered list of AUR sources to query. When aururls is
 // not configured, the single aururl/aurrpcurl pair is the only source, which
-// keeps the pre-existing behaviour. Entries are normalized and duplicate base
+// keeps the pre-existing behavior. Entries are normalized and duplicate base
 // URLs are dropped (first occurrence wins).
 func (c *Configuration) AURSources() []AURSource {
 	if len(c.AURURLs) == 0 {

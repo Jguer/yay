@@ -192,7 +192,7 @@ func (c *Client) record(pkg *aur.Pkg, idx int) {
 	}
 }
 
-// PinAURSource makes pkgName resolve from the source labelled source (as in a
+// PinAURSource makes pkgName resolve from the source labeled source (as in a
 // "<source>/<name>" target) when that source provides it. It reports whether
 // source names one of the configured sources.
 func (c *Client) PinAURSource(pkgName, source string) bool {
@@ -234,7 +234,7 @@ func (c *Client) sourceIndex(name string) int {
 	return -1
 }
 
-func (c *Client) sourceOf(name string) (settings.AURSource, int) {
+func (c *Client) sourceOf(name string) (src settings.AURSource, idx int) {
 	c.mu.RLock()
 	idx, ok := c.origin[name]
 	c.mu.RUnlock()

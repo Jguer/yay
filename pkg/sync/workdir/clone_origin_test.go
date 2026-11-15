@@ -27,7 +27,7 @@ func TestPrepareWorkspaceRefusesCloneFromOtherSource(t *testing.T) {
 	dir := filepath.Join(buildDir, "foo")
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".git"), 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, ".SRCINFO"),
-		[]byte("pkgbase = foo\n\tpkgver = 5.0\n\tpkgrel = 1\n\tarch = any\n\npkgname = foo\n"), 0o644))
+		[]byte("pkgbase = foo\n\tpkgver = 5.0\n\tpkgrel = 1\n\tarch = any\n\npkgname = foo\n"), 0o600))
 
 	var gitCalls [][]string
 

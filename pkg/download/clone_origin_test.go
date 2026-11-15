@@ -88,7 +88,7 @@ func TestCheckCloneOrigin(t *testing.T) {
 	assert.NoError(t, CheckCloneOrigin(ctx, b, dir, "foo", []string{"http://local", "http://mirror"}))
 
 	assert.NoError(t, CheckCloneOrigin(ctx, b, dir, "foo", []string{"http://mirror"}),
-		"a single AUR source keeps the old behaviour")
+		"a single AUR source keeps the old behavior")
 	assert.NoError(t, CheckCloneOrigin(ctx, b, noRemote, "bar", both), "unreadable remotes are not checked")
 	assert.NoError(t, CheckCloneOrigin(ctx, b, filepath.Join(dest, "missing"), "missing", both))
 }

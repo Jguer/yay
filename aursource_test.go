@@ -166,7 +166,7 @@ func TestHandleAURSourcePins(t *testing.T) {
 	}
 
 	require.NoError(t, os.WriteFile(pinsPath,
-		[]byte(`{"packages":{"foo":"mirror","bar":"other","baz":"other","gone":"mirror","old":"removed"}}`), 0o644))
+		[]byte(`{"packages":{"foo":"mirror","bar":"other","baz":"other","gone":"mirror","old":"removed"}}`), 0o600))
 
 	out, err = runAURSource(t, configPath, "pins")
 	require.NoError(t, err)

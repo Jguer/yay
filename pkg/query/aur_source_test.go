@@ -33,7 +33,7 @@ func (l labeledAUR) SourceFor(name string) settings.AURSource {
 	return settings.AURSource{Name: "aur", URL: "https://aur.archlinux.org"}
 }
 
-// ansiRe matches SGR colour codes and OSC 8 hyperlink sequences.
+// ansiRe matches SGR color codes and OSC 8 hyperlink sequences.
 var ansiRe = regexp.MustCompile("\x1b\\[[0-9;]*m|\x1b\\]8;;[^\x1b]*\x1b\\\\")
 
 func stripANSI(s string) string { return ansiRe.ReplaceAllString(s, "") }
@@ -94,7 +94,7 @@ func TestSearchResultsLabelNonDefaultSources(t *testing.T) {
 
 	out := stripANSI(w.String())
 	assert.Contains(t, out, "aur/yay ", "default source keeps the aur/ label")
-	assert.Contains(t, out, "mirror/yay-git ", "other sources are labelled by name")
+	assert.Contains(t, out, "mirror/yay-git ", "other sources are labeled by name")
 	assert.NotContains(t, out, "aur/yay-git")
 
 	// Internally both stay AUR results, so -a/-N filtering and the number

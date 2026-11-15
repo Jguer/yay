@@ -160,6 +160,9 @@ func TestGetPackageUsableNameAcceptsAURSourcePrefix(t *testing.T) {
 	assert.Equal(t, "<unpinned>", client.pinned["bar"], "aur/<pkg> drops a recorded source")
 
 	// Unknown prefixes are still treated as pacman repositories.
-	_, _, _, skip = getPackageUsableName(searcher, client, newTestLogger(), "nosuchrepo/foo", parser.ModeAny)
+	dbName, name, isAUR, skip = getPackageUsableName(searcher, client, newTestLogger(), "nosuchrepo/foo", parser.ModeAny)
+	assert.Equal(t, "nosuchrepo", dbName)
+	assert.Equal(t, "foo", name)
+	assert.True(t, isAUR)
 	assert.True(t, skip)
 }

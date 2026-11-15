@@ -77,7 +77,7 @@ func Test_createAURList(t *testing.T) {
 		returnErr:        nil,
 	}
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
@@ -93,7 +93,7 @@ func Test_createAURListGzip(t *testing.T) {
 		returnErr:        nil,
 	}
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
@@ -110,7 +110,7 @@ func Test_createAURListHTTPError(t *testing.T) {
 	}
 
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.EqualError(t, err, "Not available")
 }
 
@@ -125,7 +125,7 @@ func Test_createAURListStatusError(t *testing.T) {
 	}
 
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.EqualError(t, err, "invalid status code: 503")
 }
 
@@ -558,6 +558,6 @@ func Test_createAURListWriteError(t *testing.T) {
 		returnErr:        nil,
 	}
 
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", &errorWriter{}, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", &errorWriter{}, nil, make(map[string]bool))
 	assert.EqualError(t, err, "write error")
 }

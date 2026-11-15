@@ -62,7 +62,7 @@ func TestPinFileOps(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, f.Packages, "an existing file is emptied")
 
-	require.NoError(t, os.WriteFile(path, []byte("{nope"), 0o644))
+	require.NoError(t, os.WriteFile(path, []byte("{nope"), 0o600))
 	_, err = LoadPinFile(path)
 	assert.ErrorContains(t, err, path)
 }
@@ -142,7 +142,7 @@ func TestRecordInstalled(t *testing.T) {
 
 	path := filepath.Join(t.TempDir(), PinFileName)
 	require.NoError(t, os.WriteFile(path,
-		[]byte(`{"packages":{"shared":"other","only-aur":"mirror","uninstalled":"mirror"}}`), 0o644))
+		[]byte(`{"packages":{"shared":"other","only-aur":"mirror","uninstalled":"mirror"}}`), 0o600))
 
 	c := pinTestClient(io.Discard)
 	require.True(t, c.PinAURSource("shared", "mirror"))
