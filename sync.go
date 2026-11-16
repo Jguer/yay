@@ -48,6 +48,7 @@ func syncInstall(ctx context.Context,
 	if err := grapher.SetRebuildMode(ctx, run.Cfg.ReBuild); err != nil {
 		return err
 	}
+	grapher.SetTargetMode(run.Cfg.Mode)
 
 	graph, err := grapher.GraphFromTargets(ctx, nil, cmdArgs.Targets)
 	if err != nil {

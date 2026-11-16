@@ -69,6 +69,10 @@ nextpkg:
 }
 
 func (s *Service) CheckPGPKeys(ctx context.Context) error {
+	if !s.cfg.PGPFetch {
+		return nil
+	}
+
 	_, errCPK := pgp.CheckPgpKeys(ctx, s.log.Child("pgp"), s.pkgBuildDirs, s.srcInfos, s.cmdBuilder, settings.NoConfirm)
 	return errCPK
 }

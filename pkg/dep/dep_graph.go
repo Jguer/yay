@@ -111,6 +111,7 @@ type Grapher struct {
 	noCheckDeps     bool // If true, the graph will not include check dependencies
 	needed          bool // If true, the graph will only include packages that are not installed
 	rebuildTreePkgs map[string]db.IPackage
+	targetMode      parser.TargetMode
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
@@ -182,6 +183,9 @@ func (g *Grapher) installedAURDep(depString string) string {
 
 	return ""
 }
+func (g *Grapher) SetTargetMode(mode parser.TargetMode) {
+	g.targetMode = mode
+}
 
 func (g *Grapher) GraphFromTargets(ctx context.Context,
 	graph *topo.Graph[string, *InstallInfo], targets []string,
@@ -190,6 +194,7 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 		graph = NewGraph()
 	}
 
+	targets = aur.RemoveInvalidTargets(g.logger, targets, g.targetMode)
 	aurTargets := make([]string, 0, len(targets))
 
 	for _, targetString := range targets {
@@ -197,6 +202,11 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 
 		switch target.DB {
 		case "": // unspecified db
+			if g.targetMode == parser.ModeAUR {
+				aurTargets = append(aurTargets, target.Name)
+				continue
+			}
+
 			if pkg := g.dbExecutor.SyncSatisfier(target.Name); pkg != nil {
 				g.GraphSyncPkg(ctx, graph, pkg, nil)
 
@@ -209,6 +219,11 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 				g.GraphSyncGroup(ctx, graph, target.Name, dbName)
 
 				continue
+			}
+
+			if g.targetMode == parser.ModeRepo {
+				g.logger.Errorln(gotext.Get("No package found for"), " ", target)
+				return graph, &aur.ErrTargetNotFound{}
 			}
 
 			fallthrough

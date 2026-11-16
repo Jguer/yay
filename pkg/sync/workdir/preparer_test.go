@@ -8,8 +8,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/Jguer/yay/v13/pkg/settings"
+	"github.com/Jguer/yay/v13/pkg/settings/parser"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
 
@@ -66,6 +68,37 @@ func TestPreDownloadSourcesHooks(t *testing.T) {
 			}
 
 			assert.Equal(t, tc.wantHook, got)
+		})
+	}
+}
+
+func TestShouldCleanMakeDepsDownloadOnly(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name string
+		flag string
+	}{
+		{name: "normal install"},
+		{name: "short option", flag: "w"},
+		{name: "long option", flag: "downloadonly"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			preparer := NewPreparer(nil, nil, &settings.Configuration{RemoveMake: "yes"}, newTestLogger())
+			preparer.makeDeps = []string{"library"}
+			args := parser.MakeArguments()
+			if tc.flag != "" {
+				require.NoError(t, args.AddArg(tc.flag))
+			}
+
+			hook := preparer.ShouldCleanMakeDeps(nil, args)
+			if tc.flag == "" {
+				assert.NotNil(t, hook)
+			} else {
+				assert.Nil(t, hook)
+			}
 		})
 	}
 }

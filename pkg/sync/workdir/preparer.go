@@ -111,7 +111,7 @@ func (preper *Preparer) ShouldCleanAURDirs(run *runtime.Runtime, pkgBuildDirs ma
 }
 
 func (preper *Preparer) ShouldCleanMakeDeps(run *runtime.Runtime, cmdArgs *parser.Arguments) build.PostInstallHookFunc {
-	if len(preper.makeDeps) == 0 {
+	if len(preper.makeDeps) == 0 || cmdArgs.ExistsArg("w", "downloadonly") {
 		return nil
 	}
 
