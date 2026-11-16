@@ -393,8 +393,8 @@ func (installer *Installer) skipAlreadyBuiltPkg(isTarget bool, pkgdests map[stri
 		return pkgsAreBuilt(installer.log, pkgdests)
 	case parser.RebuildModeYes:
 		return !isTarget && pkgsAreBuilt(installer.log, pkgdests)
-	// case parser.RebuildModeTree: // TODO
-	// case parser.RebuildModeAll: // TODO
+	case parser.RebuildModeTree, parser.RebuildModeAll:
+		return false
 	default:
 		// same as RebuildModeNo
 		return pkgsAreBuilt(installer.log, pkgdests)

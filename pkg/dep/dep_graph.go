@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -102,14 +103,15 @@ type Grapher struct {
 	logger        *text.Logger
 	providerCache map[string][]aur.Pkg
 
-	dbExecutor  db.Executor
-	aurClient   aurc.QueryClient
-	fullGraph   bool // If true, the graph will include all dependencies including already installed ones or repo
-	noConfirm   bool // If true, the graph will not prompt for confirmation
-	noDeps      bool // If true, the graph will not include dependencies
-	noCheckDeps bool // If true, the graph will not include check dependencies
-	needed      bool // If true, the graph will only include packages that are not installed
-	targetMode  parser.TargetMode
+	dbExecutor      db.Executor
+	aurClient       aurc.QueryClient
+	fullGraph       bool // If true, the graph will include all dependencies including already installed ones or repo
+	noConfirm       bool // If true, the graph will not prompt for confirmation
+	noDeps          bool // If true, the graph will not include dependencies
+	noCheckDeps     bool // If true, the graph will not include check dependencies
+	needed          bool // If true, the graph will only include packages that are not installed
+	rebuildTreePkgs map[string]db.IPackage
+	targetMode      parser.TargetMode
 }
 
 func NewGrapher(dbExecutor db.Executor, aurCache aurc.QueryClient,
@@ -133,6 +135,54 @@ func NewGraph() *topo.Graph[string, *InstallInfo] {
 	return topo.New[string, *InstallInfo]()
 }
 
+func (g *Grapher) SetRebuildMode(ctx context.Context, mode parser.RebuildMode) error {
+	g.rebuildTreePkgs = nil
+	if mode != parser.RebuildModeTree {
+		return nil
+	}
+
+	installed := g.dbExecutor.InstalledRemotePackages()
+	if len(installed) == 0 {
+		return nil
+	}
+
+	pkgs, err := g.aurClient.Get(ctx, &aurc.Query{
+		By: aurc.Name, Needles: slices.Sorted(maps.Keys(installed)),
+	})
+	if err != nil {
+		return err
+	}
+
+	g.rebuildTreePkgs = make(map[string]db.IPackage, len(pkgs))
+	for i := range pkgs {
+		pkg := &pkgs[i]
+		if local := installed[pkg.Name]; local != nil {
+			g.rebuildTreePkgs[pkg.Name] = local
+			g.providerCache[pkg.Name] = []aur.Pkg{*pkg}
+		}
+	}
+
+	return nil
+}
+
+func (g *Grapher) installedAURDep(depString string) string {
+	depName, depMod, _ := splitDep(depString)
+	if pkg := g.rebuildTreePkgs[depName]; pkg != nil && pkgSatisfies(depName, pkg.Version(), depString) {
+		return depName
+	}
+	for name, pkg := range g.rebuildTreePkgs {
+		for _, provide := range pkg.Provides() {
+			if depMod != "" && provide.Mod == alpm.DepModAny {
+				continue
+			}
+			if provideSatisfies(provide.String(), depString, pkg.Version()) {
+				return name
+			}
+		}
+	}
+
+	return ""
+}
 func (g *Grapher) SetTargetMode(mode parser.TargetMode) {
 	g.targetMode = mode
 }
@@ -681,6 +731,9 @@ func (g *Grapher) addNodes(
 		depName, _, _ := splitDep(depString)
 		if !g.dbExecutor.LocalSatisfierExists(depString) {
 			keep = append(keep, depString)
+		} else if name := g.installedAURDep(depString); name != "" {
+			g.providerCache[depString] = g.providerCache[name]
+			keep = append(keep, depString)
 		} else if g.fullGraph {
 			g.ValidateAndSetNodeInfo(
 				graph,
@@ -697,6 +750,10 @@ func (g *Grapher) addNodes(
 	// Check Sync
 	keep = pending[:0]
 	for _, depString := range pending {
+		if g.installedAURDep(depString) != "" {
+			keep = append(keep, depString)
+			continue
+		}
 		alpmPkg := g.dbExecutor.SyncSatisfier(depString)
 		if alpmPkg == nil {
 			keep = append(keep, depString)
@@ -738,6 +795,12 @@ func (g *Grapher) addNodes(
 	pkgsToAdd, missing := g.findDepsFromAUR(ctx, graph, parentPkgName, pending)
 	for i := range pkgsToAdd {
 		aurPkg := &pkgsToAdd[i]
+		reason := depType
+		localVersion := ""
+		if local := g.rebuildTreePkgs[aurPkg.Name]; local != nil {
+			reason = min(reason, Reason(local.Reason()))
+			localVersion = local.Version()
+		}
 		if err := graph.DependOn(aurPkg.Name, parentPkgName); err != nil {
 			g.logger.Warnln("aur dep warn:", aurPkg.Name, parentPkgName, err)
 		}
@@ -745,11 +808,12 @@ func (g *Grapher) addNodes(
 		graph.SetNodeInfo(
 			aurPkg.Name,
 			&topo.NodeInfo[*InstallInfo]{
-				Color:      colorMap[depType],
+				Color:      colorMap[reason],
 				Background: bgColorMap[AUR],
 				Value: &InstallInfo{
 					Source:       AUR,
-					Reason:       depType,
+					Reason:       reason,
+					LocalVersion: localVersion,
 					AURBase:      aurPkg.PackageBase,
 					Version:      aurPkg.Version,
 					LastModified: int64(aurPkg.LastModified),
@@ -757,6 +821,7 @@ func (g *Grapher) addNodes(
 				},
 			})
 
+		g.addAurPkgProvides(aurPkg, graph)
 		g.addDepNodes(ctx, aurPkg, graph)
 	}
 
