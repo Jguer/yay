@@ -2,7 +2,7 @@ module github.com/Jguer/yay/v13
 
 require (
 	github.com/Jguer/aur v1.3.1
-	github.com/Jguer/dyalpm v0.1.4
+	github.com/Jguer/dyalpm v0.2.0
 	github.com/Jguer/votar v1.0.0
 	github.com/Morganamilo/go-pacmanconf v0.0.0-20210502114700-cff030e927a5
 	github.com/Morganamilo/go-srcinfo v1.0.0
@@ -10,18 +10,18 @@ require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/deckarep/golang-set/v2 v2.9.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/leonelquinteros/gotext v1.7.2
+	github.com/leonelquinteros/gotext v1.8.0
 	github.com/stretchr/testify v1.12.1
 	github.com/yuin/gopher-lua v1.1.2
-	golang.org/x/net v0.59.0
-	golang.org/x/sys v0.48.0
-	golang.org/x/term v0.46.0
+	golang.org/x/net v0.62.0
+	golang.org/x/sys v0.49.0
+	golang.org/x/term v0.47.0
 	gopkg.in/h2non/gock.v1 v1.1.2
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/ebitengine/purego v0.10.1 // indirect
+	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -33,4 +33,4 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 )
 
-go 1.26.0
+go 1.27
