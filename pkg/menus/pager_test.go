@@ -36,6 +36,31 @@ func TestResolvePager(t *testing.T) {
 	}
 }
 
+func TestWithLessRawANSI(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		pager string
+		want  string
+	}{
+		{pager: "less", want: "less -R"},
+		{pager: "less -X", want: "less -X -R"},
+		{pager: "/usr/bin/less", want: "/usr/bin/less -R"},
+		{pager: "delta", want: "delta"},
+		{pager: "most", want: "most"},
+		{pager: "lesspipe", want: "lesspipe"},
+		{pager: "cat", want: "cat"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.pager, func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, tt.want, withLessRawANSI(tt.pager))
+		})
+	}
+}
+
 func TestCollectPkgbuildDiffs(t *testing.T) {
 	t.Parallel()
 
