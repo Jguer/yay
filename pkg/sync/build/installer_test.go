@@ -1040,6 +1040,52 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 	}
 }
 
+func TestInstaller_InstallDownloadOnlyRepo(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name     string
+		flag     string
+		wantFlag string
+		err      error
+	}{
+		{name: "short option", flag: "w", wantFlag: "-w"},
+		{name: "long option", flag: "downloadonly", wantFlag: "--downloadonly"},
+		{name: "failed download", flag: "w", wantFlag: "-w", err: errors.New("download failed")},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			runner := &exe.MockRunner{ShowFn: func(cmd *exec.Cmd) error { return tc.err }}
+			cmdBuilder := &exe.MockBuilder{
+				Runner: runner,
+				BuildPacmanCmdFn: func(ctx context.Context, args *parser.Arguments, _ parser.TargetMode, _ bool) *exec.Cmd {
+					return exec.CommandContext(ctx, "pacman", append(args.FormatArgs(), args.Targets...)...)
+				},
+			}
+			installer := NewInstaller(nil, cmdBuilder, nil, parser.ModeAny,
+				parser.RebuildModeNo, true, newTestLogger())
+			args := parser.MakeArguments()
+			require.NoError(t, args.AddArg("S", tc.flag))
+			args.AddTarget("app")
+			targets := []map[string]*dep.InstallInfo{{
+				"app":     {Source: dep.Sync, Reason: dep.Explicit, SyncDBName: "extra"},
+				"library": {Source: dep.Sync, Reason: dep.Dep, SyncDBName: "extra"},
+			}}
+
+			err := installer.Install(context.Background(), args, targets, nil, nil, false)
+			if tc.err != nil {
+				require.ErrorIs(t, err, ErrInstallRepoPkgs)
+			} else {
+				require.NoError(t, err)
+			}
+			require.Len(t, runner.ShowCalls, 1)
+			cmd := runner.ShowCalls[0].Args[0].(*exec.Cmd)
+			assert.ElementsMatch(t, []string{"pacman", "-S", tc.wantFlag, "extra/app", "extra/library"}, cmd.Args)
+		})
+	}
+}
+
 func TestInstaller_InstallGroup(t *testing.T) {
 	t.Parallel()
 

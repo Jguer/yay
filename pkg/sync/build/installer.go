@@ -475,7 +475,7 @@ func (installer *Installer) installSyncPackages(ctx context.Context, cmdArgs *pa
 
 	errShow := installer.exeCmd.Show(installer.exeCmd.BuildPacmanCmd(ctx,
 		arguments, installer.targetMode, noConfirm))
-	if errShow != nil {
+	if errShow != nil || installer.downloadOnly {
 		return errShow
 	}
 
