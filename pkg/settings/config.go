@@ -164,13 +164,15 @@ func (c *Configuration) String() string {
 func (c *Configuration) setPrivilegeElevator() error {
 	if auth := os.Getenv("PACMAN_AUTH"); auth != "" {
 		c.SudoBin = auth
-		if auth != "sudo" {
+		if auth != "sudo" && auth != "sudo-rs" {
 			c.SudoFlags = ""
 			c.SudoLoop = false
 		}
 	}
 
-	for _, bin := range [...]string{c.SudoBin, "sudo"} {
+	// sudo-rs accepts the same flags as sudo (including -v), so sudoflags
+	// and sudoloop can be kept.
+	for _, bin := range [...]string{c.SudoBin, "sudo", "sudo-rs"} {
 		if _, err := exec.LookPath(bin); err == nil {
 			c.SudoBin = bin
 			return nil // wrapper or sudo command existing. Retrocompatiblity
