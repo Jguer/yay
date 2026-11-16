@@ -74,6 +74,7 @@ type UpgradeSelectPackage struct {
 	Name          string
 	Base          string
 	Repository    string
+	AURSource     string // display label of the AUR source; empty for repo packages
 	LocalVersion  string
 	RemoteVersion string
 	Reason        string
@@ -104,6 +105,7 @@ type SearchFilterEvent struct {
 
 type SearchResultPackage struct {
 	Source         string
+	AURSource      string // display label of the AUR source; empty for repo packages
 	Name           string
 	Description    string
 	Base           string
@@ -119,6 +121,7 @@ type SearchResultRef struct {
 }
 
 type RenderAUREvent struct {
+	AURSource      string // display label of the AUR source, "aur" for the default
 	Name           string
 	Version        string
 	Description    string
@@ -315,6 +318,9 @@ func (e *Engine) upgradeSelectPackagesTable(packages []UpgradeSelectPackage) *gl
 		pkgTbl.RawSetString("name", glua.LString(pkg.Name))
 		pkgTbl.RawSetString("base", glua.LString(pkg.Base))
 		pkgTbl.RawSetString("repository", glua.LString(pkg.Repository))
+		if pkg.AURSource != "" {
+			pkgTbl.RawSetString("aur_source", glua.LString(pkg.AURSource))
+		}
 		pkgTbl.RawSetString("local_version", glua.LString(pkg.LocalVersion))
 		pkgTbl.RawSetString("remote_version", glua.LString(pkg.RemoteVersion))
 		pkgTbl.RawSetString("reason", glua.LString(pkg.Reason))
@@ -520,6 +526,9 @@ func (e *Engine) searchResultPackagesTable(packages []SearchResultPackage) *glua
 		pkg := &packages[i]
 		pkgTbl := e.L.NewTable()
 		pkgTbl.RawSetString("source", glua.LString(pkg.Source))
+		if pkg.AURSource != "" {
+			pkgTbl.RawSetString("aur_source", glua.LString(pkg.AURSource))
+		}
 		pkgTbl.RawSetString("name", glua.LString(pkg.Name))
 		pkgTbl.RawSetString("description", glua.LString(pkg.Description))
 		pkgTbl.RawSetString("base", glua.LString(pkg.Base))
@@ -535,6 +544,11 @@ func (e *Engine) searchResultPackagesTable(packages []SearchResultPackage) *glua
 
 func (e *Engine) renderAURTable(event *RenderAUREvent) *glua.LTable {
 	eventTable, data := e.newEventTable(EventRenderAUR)
+	aurSource := event.AURSource
+	if aurSource == "" {
+		aurSource = "aur"
+	}
+	data.RawSetString("aur_source", glua.LString(aurSource))
 	data.RawSetString("name", glua.LString(event.Name))
 	data.RawSetString("version", glua.LString(event.Version))
 	data.RawSetString("description", glua.LString(event.Description))

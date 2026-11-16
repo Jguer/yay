@@ -368,8 +368,14 @@ func (s *SourceQueryBuilder) applySearchFilter(results []abstractResult) []abstr
 
 	pkgs := make([]settingslua.SearchResultPackage, len(results))
 	for i := range results {
+		aurSource := ""
+		if results[i].source == "aur" {
+			aurSource = AURSourceLabel(s.aurClient, results[i].name)
+		}
+
 		pkgs[i] = settingslua.SearchResultPackage{
 			Source:         results[i].source,
+			AURSource:      aurSource,
 			Name:           results[i].name,
 			Description:    results[i].description,
 			Base:           results[i].packageBase,
@@ -411,8 +417,11 @@ func (s *SourceQueryBuilder) renderAUR(pkg *aur.Pkg, dbExecutor db.Executor) str
 		localVersion = localPkg.Version()
 	}
 
+	label, baseURL := AURSourceOf(s.aurClient, pkg.Name)
+
 	if s.lua != nil && s.lua.HasAutocmd(settingslua.EventRenderAUR) {
 		rendered, ok, err := s.lua.RunRenderAUR(&settingslua.RenderAUREvent{
+			AURSource:      label,
 			Name:           pkg.Name,
 			Version:        pkg.Version,
 			Description:    pkg.Description,
@@ -432,7 +441,7 @@ func (s *SourceQueryBuilder) renderAUR(pkg *aur.Pkg, dbExecutor db.Executor) str
 		}
 	}
 
-	return aurPkgSearchStringResolved(pkg, localVersion, s.singleLineResults)
+	return aurPkgSearchStringResolved(pkg, label, baseURL, localVersion, s.singleLineResults)
 }
 
 func (s *SourceQueryBuilder) renderSync(pkg alpm.Package, dbExecutor db.Executor) string {

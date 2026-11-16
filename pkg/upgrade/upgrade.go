@@ -15,8 +15,20 @@ type Filter func(*Upgrade) bool
 // Upgrade type describes a system upgrade.
 type Upgrade = db.Upgrade
 
+// DisplayRepository is the repository label shown for an upgrade: the AUR
+// source name for AUR packages ("aur" for the default source), "devel" for
+// devel packages, otherwise the sync repository.
+func DisplayRepository(u *Upgrade) string {
+	if u.Source != "" && u.Repository != "devel" {
+		return u.Source
+	}
+
+	return u.Repository
+}
+
 func StylizedNameWithRepository(u *Upgrade) string {
-	return text.Bold(text.ColorHash(u.Repository)) + "/" + text.Bold(u.Name)
+	repo := DisplayRepository(u)
+	return text.Bold(text.ColorHash(repo)) + "/" + text.Bold(u.Name)
 }
 
 // upSlice is a slice of Upgrades.

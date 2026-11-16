@@ -71,6 +71,7 @@ func yayOperationHelp() []operationHelp {
 		{"Y", "yay", fmt.Sprintf("[%s] [%s]", strOptions, strPackage), []helpOption{
 			{"-c --clean", gotext.Get("Remove unneeded dependencies (-cc to ignore optdepends)")},
 			{"   --gendb", gotext.Get("Generates development package DB used for updating")},
+			{"   --aursource", gotext.Get("Manage AUR sources: list, add, edit, delete, move, pins, unpin")},
 		}},
 	}
 }
@@ -159,6 +160,7 @@ func usage(logger *text.Logger) {
 		{},
 		{"--aururl <url>", gotext.Get("Set an alternative AUR URL")},
 		{"--aurrpcurl <url>", gotext.Get("Set an alternative URL for the AUR /rpc endpoint")},
+		{"--aururls <url,...>", gotext.Get("Ordered list of AUR-compatible sources to query")},
 		{"--builddir <dir>", gotext.Get("Directory used to download and run PKGBUILDS")},
 		{"--editor <file>", gotext.Get("Editor to use when editing PKGBUILDs")},
 		{"--editorflags <flags>", gotext.Get("Pass arguments to editor")},
@@ -247,6 +249,8 @@ func handleCmd(ctx context.Context, run *runtime.Runtime,
 	if run.Cfg.SudoLoop && cmdArgs.NeedRoot(run.Cfg.Mode) {
 		run.CmdBuilder.SudoLoop()
 	}
+
+	loadAURPins(run, cmdArgs, dbExecutor)
 
 	switch cmdArgs.Op {
 	case "D", "database":
@@ -367,7 +371,7 @@ func handlePrint(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argu
 			dbExecutor.LastBuildTime(), run.Cfg.BottomUp, double, quiet)
 	case cmdArgs.ExistsArg("c", "complete"):
 		return completion.Show(ctx, run.HTTPClient, dbExecutor,
-			run.Cfg.AURURL, run.Cfg.CompletionPath, run.Cfg.CompletionInterval, cmdArgs.ExistsDouble("c", "complete"), run.Logger)
+			run.Cfg.AURBaseURLs(), run.Cfg.CompletionPath, run.Cfg.CompletionInterval, cmdArgs.ExistsDouble("c", "complete"), run.Logger)
 	case cmdArgs.ExistsArg("s", "stats"):
 		return localStatistics(ctx, run, dbExecutor)
 	}
@@ -380,6 +384,9 @@ func handleYay(ctx context.Context, run *runtime.Runtime,
 	dbExecutor db.Executor, queryBuilder query.Builder,
 ) error {
 	switch {
+	case cmdArgs.ExistsArg("aursource"):
+		return handleAURSource(run.Logger, run.Cfg, cmdArgs, settings.GetConfigPath(),
+			func(name string) bool { return dbExecutor.LocalPackage(name) != nil })
 	case cmdArgs.ExistsArg("gendb"):
 		return createDevelDB(ctx, run, dbExecutor)
 	case cmdArgs.ExistsDouble("c"):
@@ -409,7 +416,7 @@ func handleWeb(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Argume
 func handleGetpkgbuild(ctx context.Context, run *runtime.Runtime, cmdArgs *parser.Arguments, dbExecutor download.DBSearcher) error {
 	if cmdArgs.ExistsArg("p", "print") {
 		return printPkgbuilds(dbExecutor, run.AURClient,
-			run.HTTPClient, run.Logger, cmdArgs.Targets, run.Cfg.Mode, run.Cfg.AURURL)
+			run.HTTPClient, run.Logger, cmdArgs.Targets, run.Cfg.Mode, run.AURURLs())
 	}
 
 	return getPkgbuilds(ctx, dbExecutor, run.AURClient, run,
@@ -521,24 +528,16 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 	}
 
 	if run.Cfg.Mode.AtLeastAUR() && (len(cmdArgs.Targets) == 0 || aur) {
-		scanner, err := download.GetPackageScanner(ctx, httpClient, run.Cfg.AURURL, run.Logger)
-		if err != nil {
-			return err
-		}
-		defer scanner.Close()
+		seen := make(map[string]bool)
 
-		for scanner.Scan() {
-			name := scanner.Text()
-			if cmdArgs.ExistsArg("q", "quiet") {
-				run.Logger.Println(name)
-			} else {
-				run.Logger.Printf("%s %s %s", text.Magenta("aur"), text.Bold(name), text.Bold(text.Green(gotext.Get("unknown-version"))))
-
-				if dbExecutor.LocalPackage(name) != nil {
-					run.Logger.Print(text.Bold(text.Blue(gotext.Get(" [Installed]"))))
+		for i, src := range run.Cfg.AURSources() {
+			if err := listAURSource(ctx, run, httpClient, cmdArgs, dbExecutor, src, seen); err != nil {
+				// The primary source is required; extra sources are best effort.
+				if i == 0 {
+					return err
 				}
 
-				run.Logger.Println()
+				run.Logger.Warnln(err)
 			}
 		}
 	}
@@ -546,6 +545,40 @@ func syncList(ctx context.Context, run *runtime.Runtime,
 	if run.Cfg.Mode.AtLeastRepo() && (len(cmdArgs.Targets) != 0 || !aur) {
 		return run.CmdBuilder.Show(run.CmdBuilder.BuildPacmanCmd(ctx,
 			cmdArgs, run.Cfg.Mode, settings.NoConfirm))
+	}
+
+	return nil
+}
+
+func listAURSource(ctx context.Context, run *runtime.Runtime, httpClient *http.Client,
+	cmdArgs *parser.Arguments, dbExecutor db.Executor, src settings.AURSource, seen map[string]bool,
+) error {
+	scanner, err := download.GetPackageScanner(ctx, httpClient, src.URL, run.Logger)
+	if err != nil {
+		return err
+	}
+	defer scanner.Close()
+
+	for scanner.Scan() {
+		name := scanner.Text()
+		if seen[name] {
+			continue
+		}
+
+		seen[name] = true
+
+		if cmdArgs.ExistsArg("q", "quiet") {
+			run.Logger.Println(name)
+			continue
+		}
+
+		run.Logger.Printf("%s %s %s", text.Magenta(src.Name), text.Bold(name), text.Bold(text.Green(gotext.Get("unknown-version"))))
+
+		if dbExecutor.LocalPackage(name) != nil {
+			run.Logger.Print(text.Bold(text.Blue(gotext.Get(" [Installed]"))))
+		}
+
+		run.Logger.Println()
 	}
 
 	return nil

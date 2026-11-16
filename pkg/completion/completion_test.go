@@ -77,7 +77,7 @@ func Test_createAURList(t *testing.T) {
 		returnErr:        nil,
 	}
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
@@ -93,7 +93,7 @@ func Test_createAURListGzip(t *testing.T) {
 		returnErr:        nil,
 	}
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.NoError(t, err)
 	gotOut := out.String()
 	assert.Equal(t, expectPackageCompletion, gotOut)
@@ -110,7 +110,7 @@ func Test_createAURListHTTPError(t *testing.T) {
 	}
 
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.EqualError(t, err, "Not available")
 }
 
@@ -125,7 +125,7 @@ func Test_createAURListStatusError(t *testing.T) {
 	}
 
 	out := &bytes.Buffer{}
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", out, nil, make(map[string]bool))
 	assert.EqualError(t, err, "invalid status code: 503")
 }
 
@@ -366,7 +366,7 @@ func TestUpdateCache(t *testing.T) {
 
 			dbExecutor := &mockPkgSynchronizer{packages: tt.packages}
 
-			err := UpdateCache(context.Background(), tt.doer, dbExecutor, "https://aur.archlinux.org", completionPath, nil)
+			err := UpdateCache(context.Background(), tt.doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, nil)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -473,7 +473,7 @@ func TestShow(t *testing.T) {
 			require.NoError(t, pipeErr)
 			os.Stdout = w
 
-			err := Show(context.Background(), tt.doer, dbExecutor, "https://aur.archlinux.org", completionPath, tt.interval, tt.force, nil)
+			err := Show(context.Background(), tt.doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, tt.interval, tt.force, nil)
 
 			// Close writer first, then restore stdout, then read
 			w.Close()
@@ -518,7 +518,7 @@ func TestShowFileOpenError(t *testing.T) {
 
 	dbExecutor := &mockPkgSynchronizer{packages: []db.IPackage{}}
 
-	err = Show(context.Background(), doer, dbExecutor, "https://aur.archlinux.org", completionPath, 7, true, nil)
+	err = Show(context.Background(), doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, 7, true, nil)
 	assert.Error(t, err)
 }
 
@@ -543,7 +543,7 @@ func TestUpdateCacheMkdirError(t *testing.T) {
 
 	dbExecutor := &mockPkgSynchronizer{packages: []db.IPackage{}}
 
-	err = UpdateCache(context.Background(), doer, dbExecutor, "https://aur.archlinux.org", completionPath, nil)
+	err = UpdateCache(context.Background(), doer, dbExecutor, []string{"https://aur.archlinux.org"}, completionPath, nil)
 	assert.Error(t, err)
 }
 
@@ -558,6 +558,6 @@ func Test_createAURListWriteError(t *testing.T) {
 		returnErr:        nil,
 	}
 
-	err := createAURList(context.Background(), doer, "https://aur.archlinux.org", &errorWriter{}, nil)
+	err := writeAURList(context.Background(), doer, "https://aur.archlinux.org", &errorWriter{}, nil, make(map[string]bool))
 	assert.EqualError(t, err, "write error")
 }

@@ -15,6 +15,7 @@ import (
 
 	"github.com/Jguer/yay/v13/pkg/db"
 	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
+	"github.com/Jguer/yay/v13/pkg/download"
 	"github.com/Jguer/yay/v13/pkg/settings/parser"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
@@ -54,7 +55,7 @@ func TestPrintPkgbuilds(t *testing.T) {
 					return tc.results, nil
 				},
 			}, &http.Client{}, text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test"),
-				tc.targets, parser.ModeAny, "https://aur.archlinux.org")
+				tc.targets, parser.ModeAny, download.StaticAURURLs{"https://aur.archlinux.org"})
 			if tc.wantErr {
 				require.Error(t, err)
 				return

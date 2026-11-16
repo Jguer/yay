@@ -57,7 +57,7 @@ func TestIntegrationPKGBUILDReposDefinedDBClone(t *testing.T) {
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test"),
-		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
+		targets, parser.ModeAny, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, map[string]bool{"core/linux": true, "yay-bin": true, "yay-git": true}, cloned)
@@ -86,7 +86,7 @@ func TestIntegrationPKGBUILDReposNotExist(t *testing.T) {
 	}
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test"),
-		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
+		targets, parser.ModeAny, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 
 	assert.Error(t, err)
 	assert.EqualValues(t, map[string]bool{"yay-bin": true, "yay-git": true}, cloned)
@@ -109,7 +109,7 @@ func TestIntegrationPKGBUILDFull(t *testing.T) {
 	}
 
 	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{}, testLogger.Child("test"),
-		targets, "https://aur.archlinux.org", parser.ModeAny)
+		targets, StaticAURURLs{"https://aur.archlinux.org"}, parser.ModeAny)
 
 	assert.NoError(t, err)
 
@@ -134,13 +134,13 @@ func TestIntegrationPKGBUILDReposPullWhenExists(t *testing.T) {
 
 	cloned1, err1 := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test"),
-		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
+		targets, parser.ModeAny, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 	assert.NoError(t, err1)
 	assert.EqualValues(t, map[string]bool{"core/linux": true, "yay-bin": true}, cloned1)
 
 	cloned2, err2 := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test2"),
-		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
+		targets, parser.ModeAny, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 	assert.NoError(t, err2)
 	assert.EqualValues(t, map[string]bool{"core/linux": false, "yay-bin": false}, cloned2)
 }
@@ -160,13 +160,13 @@ func TestIntegrationPKGBUILDReposForceRecloneAfterClone(t *testing.T) {
 
 	cloned1, err1 := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test"),
-		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
+		targets, parser.ModeAny, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 	assert.NoError(t, err1)
 	assert.EqualValues(t, map[string]bool{"core/linux": true, "yay-bin": true}, cloned1)
 
 	cloned2, err2 := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test2"),
-		targets, parser.ModeAny, "https://aur.archlinux.org", dir, true)
+		targets, parser.ModeAny, StaticAURURLs{"https://aur.archlinux.org"}, dir, true)
 	assert.NoError(t, err2)
 	assert.EqualValues(t, map[string]bool{"core/linux": true, "yay-bin": true}, cloned2)
 }
@@ -186,7 +186,7 @@ func TestIntegrationPKGBUILDReposModeRepoOnlyRepo(t *testing.T) {
 
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test"),
-		targets, parser.ModeRepo, "https://aur.archlinux.org", dir, false)
+		targets, parser.ModeRepo, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, map[string]bool{"linux": true}, cloned)
@@ -207,7 +207,7 @@ func TestIntegrationPKGBUILDReposWrongDBSkipsTarget(t *testing.T) {
 
 	cloned, err := PKGBUILDRepos(context.Background(), searcher, mockClient,
 		cmdBuilder, testLogger.Child("test"),
-		targets, parser.ModeAny, "https://aur.archlinux.org", dir, false)
+		targets, parser.ModeAny, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, map[string]bool{"yay-bin": true}, cloned)
@@ -226,7 +226,7 @@ func TestIntegrationPKGBUILDsModeRepoOnlyRepo(t *testing.T) {
 	searcher := &testDBSearcher{absPackagesDB: map[string]string{"linux": "core"}}
 
 	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{}, testLogger.Child("test"),
-		targets, "https://aur.archlinux.org", parser.ModeRepo)
+		targets, StaticAURURLs{"https://aur.archlinux.org"}, parser.ModeRepo)
 
 	assert.NoError(t, err)
 	assert.Len(t, fetched, 1)
@@ -247,7 +247,7 @@ func TestIntegrationPKGBUILDsAURRPCErrorStillFetchesRepo(t *testing.T) {
 	searcher := &testDBSearcher{absPackagesDB: map[string]string{"linux": "core"}}
 
 	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{}, testLogger.Child("test"),
-		targets, "https://aur.archlinux.org", parser.ModeAny)
+		targets, StaticAURURLs{"https://aur.archlinux.org"}, parser.ModeAny)
 
 	assert.NoError(t, err)
 	assert.Contains(t, fetched, "core/linux")
@@ -268,7 +268,7 @@ func TestIntegrationPKGBUILDsAUREmptySkipsAUR(t *testing.T) {
 	searcher := &testDBSearcher{absPackagesDB: map[string]string{"linux": "core"}}
 
 	fetched, err := PKGBUILDs(searcher, mockClient, &http.Client{}, testLogger.Child("test"),
-		targets, "https://aur.archlinux.org", parser.ModeAny)
+		targets, StaticAURURLs{"https://aur.archlinux.org"}, parser.ModeAny)
 
 	assert.NoError(t, err)
 	assert.Contains(t, fetched, "core/linux")

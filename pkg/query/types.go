@@ -48,9 +48,9 @@ func getSearchBy(value string) aur.By {
 
 // aurPkgSearchStringResolved renders a search result for an AUR package.
 // It accepts pre-resolved installed state to avoid a second LocalPackage call.
-func aurPkgSearchStringResolved(pkg *aur.Pkg, localVersion string, singleLineResults bool) string {
-	linkText := text.Bold(text.ColorHash("aur")) + "/" + text.Bold(pkg.Name)
-	toPrint := text.CreateRepoLink("aur", "", pkg.Name, linkText) +
+// label and baseURL identify the AUR source the package came from.
+func aurPkgSearchStringResolved(pkg *aur.Pkg, label, baseURL, localVersion string, singleLineResults bool) string {
+	toPrint := aurRepoLink(label, baseURL, pkg.Name) +
 		" " + text.Cyan(pkg.Version) +
 		text.Bold(" (+"+strconv.Itoa(pkg.NumVotes)) +
 		" " + text.Bold(strconv.FormatFloat(pkg.Popularity, 'f', 2, 64)+") ")

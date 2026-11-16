@@ -19,26 +19,26 @@ func (c *Configuration) ParseCommandLine(a *parser.Arguments) error {
 
 func (c *Configuration) extractYayOptions(a *parser.Arguments) {
 	for option, value := range a.Options {
+		if option == "aururls" {
+			continue
+		}
+
 		if c.handleOption(option, value.First()) {
 			a.DelArg(option)
 		}
 	}
 
+	// --aururls is repeatable and handled after the other options so it takes
+	// precedence over --aururl regardless of map iteration order.
+	if value, ok := a.Options["aururls"]; ok {
+		c.setAURURLsFromArgs(value.Args)
+		a.DelArg("aururls")
+	}
+
 	c.AURURL = strings.TrimRight(c.AURURL, "/")
 
 	// if AurRPCURL is set, use that for /rpc calls
-	if c.AURRPCURL == "" {
-		c.AURRPCURL = c.AURURL + "/rpc?"
-		return
-	}
-
-	if !strings.HasSuffix(c.AURRPCURL, "?") {
-		if strings.HasSuffix(c.AURRPCURL, "/rpc") {
-			c.AURRPCURL += "?"
-		} else {
-			c.AURRPCURL = strings.TrimRight(c.AURRPCURL, "/") + "/rpc?"
-		}
-	}
+	c.AURRPCURL = normalizeRPCURL(c.AURURL, c.AURRPCURL)
 }
 
 func (c *Configuration) handleOption(option, value string) bool {
@@ -49,7 +49,10 @@ func (c *Configuration) handleOption(option, value string) bool {
 
 	switch option {
 	case "aururl":
+		// An explicit --aururl on the command line selects that single source,
+		// overriding any configured aururls list.
 		c.AURURL = value
+		c.AURURLs = nil
 	case "aurrpcurl":
 		c.AURRPCURL = value
 	case "save":

@@ -77,7 +77,7 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	if completion.NeedsUpdate(o.cfg.CompletionPath, o.cfg.CompletionInterval, false) {
 		completionWg.Go(func() {
 			errComp := completion.UpdateCache(ctx, run.HTTPClient, o.dbExecutor,
-				o.cfg.AURURL, o.cfg.CompletionPath, o.logger)
+				o.cfg.AURBaseURLs(), o.cfg.CompletionPath, o.logger)
 			if errComp != nil {
 				o.logger.Warnln(errComp)
 			}
@@ -121,6 +121,14 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 		}
 	}
 
+	if shouldInstall && run.AURSources != nil {
+		if err := run.AURSources.RecordInstalled(o.cfg.AURPinsPath,
+			installedAURTargets(targets, failedAndIgnored),
+			func(name string) bool { return o.dbExecutor.LocalPackage(name) != nil }); err != nil {
+			o.logger.Warnln(gotext.Get("failed to record AUR sources:"), err)
+		}
+	}
+
 	if err := installer.RunPostInstallHooks(ctx); err != nil {
 		errs = append(errs, err)
 	}
@@ -133,6 +141,27 @@ func (o *OperationService) Run(ctx context.Context, run *runtime.Runtime,
 	}
 
 	return errors.Join(errs...)
+}
+
+// installedAURTargets returns the AUR packages in targets that did not fail.
+func installedAURTargets(targets []map[string]*dep.InstallInfo, failed map[string]error) []string {
+	var names []string
+
+	for _, layer := range targets {
+		for name, info := range layer {
+			if info.Source != dep.AUR {
+				continue
+			}
+
+			if _, ok := failed[name]; ok {
+				continue
+			}
+
+			names = append(names, name)
+		}
+	}
+
+	return names
 }
 
 func (o *OperationService) manualConfirmRequired(cmdArgs *parser.Arguments) bool {

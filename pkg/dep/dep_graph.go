@@ -228,8 +228,20 @@ func (g *Grapher) GraphFromTargets(ctx context.Context,
 
 			fallthrough
 		case "aur":
+			// An explicit aur/<name> resolves in priority order, dropping
+			// any recorded source.
+			if unpinner, ok := g.aurClient.(aurSourceUnpinner); ok && target.DB == "aur" {
+				unpinner.UnpinAURSource(target.Name)
+			}
+
 			aurTargets = append(aurTargets, target.Name)
 		default:
+			// <source>/<name> for a configured AUR source other than "aur".
+			if pinner, ok := g.aurClient.(aurSourcePinner); ok && pinner.PinAURSource(target.Name, target.DB) {
+				aurTargets = append(aurTargets, target.Name)
+				continue
+			}
+
 			pkg, err := g.dbExecutor.SatisfierFromDB(target.Name, target.DB)
 			if err != nil {
 				return nil, err
@@ -996,4 +1008,14 @@ func aurDepModToAlpmDep(mod string) alpm.DepMod {
 		return alpm.DepModLT
 	}
 	return alpm.DepModAny
+}
+
+// aurSourcePinner is implemented by AUR clients backed by several named
+// sources; it lets a "<source>/<name>" target pick the source.
+type aurSourcePinner interface {
+	PinAURSource(pkgName, source string) bool
+}
+
+type aurSourceUnpinner interface {
+	UnpinAURSource(pkgName string)
 }

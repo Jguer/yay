@@ -28,6 +28,7 @@ _pacman_opts_common=(
 	'(-a --aur)'{-a,--aur}'[Assume targets are from the AUR]'
 	'--aururl[Set an alternative AUR URL]:url'
 	'--aurrpcurl[Set an alternative URL for the AUR /rpc endpoint]:url'
+	'--aururls[Ordered list of AUR-compatible sources]:urls'
 	'--arch[Set an alternate architecture]'
 	'(-b --dbpath)'{-b,--dbpath}'[Alternate database location]:database_location:_files -/'
 	'--color[colorize the output]:color options:(always never auto)'
@@ -152,6 +153,7 @@ _pacman_opts_query_modifiers=(
 _pacman_opts_yay_modifiers=(
 	'(-c --clean)'{-c,--clean}'[Remove unneeded dependencies]'
 	'--gendb[Generates development package DB used for updating]'
+	'--aursource[Manage AUR sources]:action:(list add edit delete move pins unpin)'
 )
 
 # -G

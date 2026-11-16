@@ -19,9 +19,9 @@ import (
 // yay -Gp.
 func printPkgbuilds(dbExecutor download.DBSearcher, aurClient aur.QueryClient,
 	httpClient *http.Client, logger *text.Logger, targets []string,
-	mode parser.TargetMode, aurURL string,
+	mode parser.TargetMode, aurURLs download.AURURLResolver,
 ) error {
-	pkgbuilds, err := download.PKGBUILDs(dbExecutor, aurClient, httpClient, logger, targets, aurURL, mode)
+	pkgbuilds, err := download.PKGBUILDs(dbExecutor, aurClient, httpClient, logger, targets, aurURLs, mode)
 	if err != nil {
 		logger.Errorln(err)
 	}
@@ -57,7 +57,7 @@ func getPkgbuilds(ctx context.Context, dbExecutor download.DBSearcher, aurClient
 	}
 
 	cloned, errD := download.PKGBUILDRepos(ctx, dbExecutor, aurClient,
-		run.CmdBuilder, run.Logger, targets, run.Cfg.Mode, run.Cfg.AURURL, wd, force)
+		run.CmdBuilder, run.Logger, targets, run.Cfg.Mode, run.AURURLs(), wd, force)
 	if errD != nil {
 		run.Logger.Errorln(errD)
 	}
