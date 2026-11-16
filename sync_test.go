@@ -25,6 +25,7 @@ import (
 	"github.com/Jguer/yay/v13/pkg/db"
 	"github.com/Jguer/yay/v13/pkg/db/mock"
 	mockaur "github.com/Jguer/yay/v13/pkg/dep/mock"
+	"github.com/Jguer/yay/v13/pkg/query"
 	"github.com/Jguer/yay/v13/pkg/runtime"
 	"github.com/Jguer/yay/v13/pkg/settings"
 	"github.com/Jguer/yay/v13/pkg/settings/exe"
@@ -32,6 +33,47 @@ import (
 	"github.com/Jguer/yay/v13/pkg/text"
 	"github.com/Jguer/yay/v13/pkg/vcs"
 )
+
+func TestSyncInstallTargetMode(t *testing.T) {
+	t.Parallel()
+
+	for _, mode := range []parser.TargetMode{parser.ModeAUR, parser.ModeRepo} {
+		name := "repository only"
+		if mode == parser.ModeAUR {
+			name = "AUR only"
+		}
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			aurCalls := 0
+			dbExecutor := &mock.DBExecutor{
+				SyncSatisfierFn: func(string) mock.IPackage {
+					require.NotEqual(t, parser.ModeAUR, mode, "AUR-only targets must not search repositories")
+					return nil
+				},
+				PackagesFromGroupFn: func(string) []mock.IPackage { return nil },
+			}
+			run := &runtime.Runtime{
+				Cfg:    &settings.Configuration{Mode: mode},
+				Logger: text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), false, "test"),
+				AURClient: &mockaur.MockAUR{GetFn: func(context.Context, *aur.Query) ([]aur.Pkg, error) {
+					aurCalls++
+					require.NotEqual(t, parser.ModeRepo, mode, "repository-only targets must not query AUR")
+					return nil, nil
+				}},
+			}
+			args := parser.MakeArguments()
+			require.NoError(t, args.AddArg("S"))
+			args.AddTarget("missing")
+
+			err := syncInstall(t.Context(), run, args, dbExecutor)
+			require.ErrorAs(t, err, new(*query.ErrTargetNotFound))
+			if mode == parser.ModeAUR {
+				require.Positive(t, aurCalls)
+			}
+		})
+	}
+}
 
 func TestSyncUpgrade(t *testing.T) {
 	t.Parallel()
