@@ -29,7 +29,7 @@ import (
 func printInfo(logger *text.Logger, config *settings.Configuration, a *aur.Pkg, extendedInfo bool) {
 	printInfoValue(logger, gotext.Get("Repository"), "aur")
 	printInfoValue(logger, gotext.Get("Name"), a.Name)
-	printInfoValue(logger, gotext.Get("Version"), a.Version)
+	printInfoValue(logger, gotext.Get("Version"), fmt.Sprintf("v%s", a.Version))
 	printInfoValue(logger, gotext.Get("Description"), a.Description)
 	printInfoValue(logger, gotext.Get("URL"), a.URL)
 	printInfoValue(logger, gotext.Get("Licenses"), a.License...)
