@@ -75,6 +75,9 @@ _pacman_opts_common=(
 	'--cleanmenu[Give the option to clean build PKGBUILDS]'
 	'--diffmenu[Give the option to show diffs for build files]'
 	'--editmenu[Give the option to edit/view PKGBUILDS]'
+	'--scan[Scan AUR packages for malware before building]'
+	'--noscan[Skip malware scanning]'
+	'--scanstrict[Abort if a malware scan cannot complete]'
 	'(--askyesremovemake --removemake --noremovemake)--askremovemake[Ask to remove makedepends after install]'
 	'(--askremovemake --removemake --noremovemake)--askyesremovemake[Ask to remove makedepends after install(with "Y" as default)]'
 	'(--askremovemake --askyesremovemake --noremovemake)--removemake[Remove makedepends after install]'
@@ -152,6 +155,7 @@ _pacman_opts_query_modifiers=(
 _pacman_opts_yay_modifiers=(
 	'(-c --clean)'{-c,--clean}'[Remove unneeded dependencies]'
 	'--gendb[Generates development package DB used for updating]'
+	'--scanonly[Download and scan AUR packages for malware without building]'
 )
 
 # -G

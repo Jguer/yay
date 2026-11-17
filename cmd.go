@@ -71,6 +71,7 @@ func yayOperationHelp() []operationHelp {
 		{"Y", "yay", fmt.Sprintf("[%s] [%s]", strOptions, strPackage), []helpOption{
 			{"-c --clean", gotext.Get("Remove unneeded dependencies (-cc to ignore optdepends)")},
 			{"   --gendb", gotext.Get("Generates development package DB used for updating")},
+			{"   --scanonly", gotext.Get("Download and scan AUR packages for malware without building")},
 		}},
 	}
 }
@@ -188,6 +189,9 @@ func usage(logger *text.Logger) {
 		{"--cleanmenu", gotext.Get("Give the option to clean build PKGBUILDS")},
 		{"--diffmenu", gotext.Get("Give the option to show diffs for build files")},
 		{"--editmenu", gotext.Get("Give the option to edit/view PKGBUILDS")},
+		{"--scan", gotext.Get("Scan AUR packages for malware before building (static checks)")},
+		{"--noscan", gotext.Get("Skip malware scanning")},
+		{"--scanstrict", gotext.Get("Abort if a malware scan cannot complete")},
 		{"--askremovemake", gotext.Get("Ask to remove makedepends after install")},
 		{"--askyesremovemake", gotext.Get("Ask to remove makedepends after install(\"Y\" as default)")},
 		{"--removemake", gotext.Get("Remove makedepends after install")},
@@ -382,6 +386,8 @@ func handleYay(ctx context.Context, run *runtime.Runtime,
 	switch {
 	case cmdArgs.ExistsArg("gendb"):
 		return createDevelDB(ctx, run, dbExecutor)
+	case cmdArgs.ExistsArg("scanonly"):
+		return scanOnly(ctx, run, cmdArgs.Targets)
 	case cmdArgs.ExistsDouble("c"):
 		return cleanDependencies(ctx, run.Cfg, cmdBuilder, cmdArgs, dbExecutor, true)
 	case cmdArgs.ExistsArg("c", "clean"):

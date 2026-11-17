@@ -230,12 +230,20 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		return nil, err
 	}
 
-	if errP := downloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
+	if errP := DownloadPKGBUILDSourceFanout(ctx, preper.cmdBuilder,
 		pkgBuildDirsByBase, false, preper.cfg.MaxConcurrentDownloads); errP != nil {
+		if preper.cfg.Scan {
+			// Scanning unverifiable sources is not a security gate.
+			return nil, errP
+		}
 		preper.log.Errorln(errP)
 	}
 
 	if err := runAURPostDownloadLuaHooks(run, pkgBuildDirsByBase, remoteNamesCache, targets); err != nil {
+		return nil, err
+	}
+
+	if err := preper.scanAURPackages(ctx, pkgBuildDirsByBase); err != nil {
 		return nil, err
 	}
 

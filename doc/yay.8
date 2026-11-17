@@ -94,6 +94,12 @@ is done per package whenever a package is synced. This option should only be
 used when migrating to Yay from another AUR helper.
 
 .TP
+.B \-\-scanonly
+Download the given AUR packages and their sources, scan them for malware and
+print the reports without building or installing anything. Exits non-zero when
+any target has a malicious verdict.
+
+.TP
 .B \-c, \-\-clean
 Remove unneeded dependencies.
 
@@ -319,6 +325,25 @@ before building.
 
 \fBWarning\fR: Yay resolves dependencies ahead of time via the RPC. It is not
 recommended to edit pkgbuild variables unless you know what you are doing.
+
+.TP
+.B \-\-scan
+Scan AUR packages for malware after their sources are downloaded and before
+anything is built. Disabled by default (opt-in). Runs deterministic static
+checks over the PKGBUILD, install scripts and sources, which are unpacked with
+bsdtar for inspection; no package code is executed during a scan and no network
+access or extra dependencies are needed. A malicious verdict aborts the
+install; a suspicious verdict requires confirmation. JSON reports are written
+to \fB<builddir>/scan/\fR and cached until the package contents change.
+
+.TP
+.B \-\-noscan
+Skip malware scanning entirely.
+
+.TP
+.B \-\-scanstrict
+Abort the install when a scan cannot complete. By default an incomplete scan
+only warns.
 
 .TP
 .B \-\-askremovemake

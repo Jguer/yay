@@ -62,6 +62,8 @@ type Configuration struct {
 	CleanMenu              bool   `json:"cleanmenu" lua:"clean_menu"`
 	DiffMenu               bool   `json:"diffmenu" lua:"diff_menu"`
 	EditMenu               bool   `json:"editmenu" lua:"edit_menu"`
+	Scan                   bool   `json:"scan" lua:"scan"`
+	ScanStrict             bool   `json:"scanstrict" lua:"scan_strict"`
 	CombinedUpgrade        bool   `json:"combinedupgrade" lua:"combined_upgrade"`
 	UseAsk                 bool   `json:"useask" lua:"use_ask"`
 	BatchInstall           bool   `json:"batchinstall" lua:"batch_install"`
@@ -231,6 +233,8 @@ func DefaultConfig(version string) *Configuration {
 		CleanMenu:              true,
 		DiffMenu:               true,
 		EditMenu:               false,
+		Scan:                   false,
+		ScanStrict:             false,
 		UseAsk:                 false,
 		CombinedUpgrade:        true,
 		SeparateSources:        true,

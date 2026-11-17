@@ -173,6 +173,7 @@ complete -c $progname -n "not $noopt" -s N -l repo -d 'Assume targets are from t
 # Yay options
 complete -c $progname -n "$yayspecific" -s c -l clean -d 'Remove unneeded dependencies' -f
 complete -c $progname -n "$yayspecific" -l gendb -d 'Generate development package DB' -f
+complete -c $progname -n "$yayspecific" -l scanonly -d 'Download and scan AUR packages for malware without building' -f
 
 # Show options
 complete -c $progname -n "$show" -s c -l complete -d 'Print a list of all AUR and repo packages' -f
@@ -218,6 +219,9 @@ complete -c $progname -n "not $noopt" -l noanswerupgrade -d 'Unset the answer fo
 complete -c $progname -n "not $noopt" -l cleanmenu -d 'Give the option to clean build PKGBUILDS' -f
 complete -c $progname -n "not $noopt" -l diffmenu -d 'Give the option to show diffs for build files' -f
 complete -c $progname -n "not $noopt" -l editmenu -d 'Give the option to edit/view PKGBUILDS' -f
+complete -c $progname -n "not $noopt" -l scan -d 'Scan AUR packages for malware before building' -f
+complete -c $progname -n "not $noopt" -l noscan -d 'Skip malware scanning' -f
+complete -c $progname -n "not $noopt" -l scanstrict -d 'Abort if a malware scan cannot complete' -f
 complete -c $progname -n "not $noopt" -l askremovemake -d 'Ask to remove make deps after install' -f
 complete -c $progname -n "not $noopt" -l askyesremovemake -d 'Ask to remove make deps after install(with "Y" as default)' -f
 complete -c $progname -n "not $noopt" -l removemake -d 'Remove make deps after install' -f
