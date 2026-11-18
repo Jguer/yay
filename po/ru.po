@@ -511,7 +511,7 @@ msgstr "Базовый пакет"
 
 #: print.go:60
 msgid "Package Base ID"
-msgstr "Идентификатор пакета"
+msgstr "Идентификатор базового пакета"
 
 #: pkg/query/aur_warnings.go:71
 msgid "Packages not in AUR:"
@@ -519,7 +519,7 @@ msgstr "Пакет не найден в AUR:"
 
 #: pkg/menus/clean_menu.go:54
 msgid "Packages to cleanBuild?"
-msgstr "Пакеты для чистой сборки?"
+msgstr "Очистить кэш сборки для этих пакетов?"
 
 #: pkg/dep/dep_graph.go:205
 msgid "Packages to exclude"
@@ -966,17 +966,17 @@ msgstr "неверное число: %s"
 
 #: pkg/settings/parser/parser.go:669
 msgid "invalid option"
-msgstr "некорректный параметр"
+msgstr "неверный параметр"
 
 #: pkg/settings/parser/parser.go:173
 msgid "invalid option '%s'"
-msgstr "неверная опция '%s'"
+msgstr "неверный параметр '%s'"
 
 #: cmd.go:285
 msgid "invalid option: '--deps' and '--explicit' may not be used together"
 msgstr ""
-"неверная опция: невозможно использовать опции '--deps' и '--explicit' "
-"одновременно"
+"неверный параметр: невозможно использовать параметры '--deps' и '--explicit'"
+" одновременно"
 
 #: pkg/download/abs.go:22
 msgid "invalid repository"
