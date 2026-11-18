@@ -11,6 +11,7 @@ type testConfig struct {
 	BuildDir      string `json:"buildDir" lua:"build_dir"`
 	RequestSplitN int    `json:"requestsplitn" lua:"request_split_n"`
 	Devel         bool   `json:"devel" lua:"devel"`
+	NoUpgradeMenu bool   `json:"noupgrademenu" lua:"no_upgrade_menu"`
 	AnswerClean   string `json:"answerclean" lua:"answer_clean"`
 	AnswerDiff    string `json:"answerdiff" lua:"answer_diff"`
 	AnswerEdit    string `json:"answeredit" lua:"answer_edit"`
@@ -26,6 +27,7 @@ func TestApply(t *testing.T) {
 		yay.opt.build_dir = "/tmp/yay"
 		yay.opt.request_split_n = 200
 		yay.opt.devel = true
+		yay.opt.no_upgrade_menu = true
 	`))
 
 	cfg := &testConfig{}
@@ -36,6 +38,7 @@ func TestApply(t *testing.T) {
 	assert.Equal(t, "/tmp/yay", cfg.BuildDir)
 	assert.Equal(t, 200, cfg.RequestSplitN)
 	assert.True(t, cfg.Devel)
+	assert.True(t, cfg.NoUpgradeMenu)
 }
 
 func TestApplyUnknownAndTypeMismatch(t *testing.T) {
