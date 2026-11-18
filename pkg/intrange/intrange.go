@@ -110,3 +110,24 @@ func ParseNumberMenu(input string) (include, exclude IntRanges,
 
 	return include, exclude, otherInclude, otherExclude
 }
+
+// SplitRemoval separates the removal tokens of a number menu input from the
+// others. A removal token is a token prefixed by '-' followed by a digit,
+// e.g. -3 or -1-5. The returned removal string holds those tokens without
+// their leading '-', rest holds every other token (including ^ exclusions).
+// Both strings are space separated and can be given to ParseNumberMenu.
+func SplitRemoval(input string) (removal, rest string) {
+	var removals, others []string
+
+	for _, word := range strings.FieldsFunc(input, func(c rune) bool {
+		return unicode.IsSpace(c) || c == ','
+	}) {
+		if len(word) > 1 && word[0] == '-' && word[1] >= '0' && word[1] <= '9' {
+			removals = append(removals, word[1:])
+		} else {
+			others = append(others, word)
+		}
+	}
+
+	return strings.Join(removals, " "), strings.Join(others, " ")
+}

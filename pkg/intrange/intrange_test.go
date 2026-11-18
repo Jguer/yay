@@ -189,3 +189,27 @@ func TestIntRanges_Get(t *testing.T) {
 		})
 	}
 }
+
+func TestSplitRemoval(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		input       string
+		wantRemoval string
+		wantRest    string
+	}{
+		{"1 2 3", "", "1 2 3"},
+		{"-3", "3", ""},
+		{"-1-5 ^3", "1-5", "^3"},
+		{"-1,-3 ^2", "1 3", "^2"},
+		{"1-5 ^3", "", "1-5 ^3"},
+		{"- -a abort", "", "- -a abort"},
+		{"", "", ""},
+	}
+
+	for _, tc := range tests {
+		removal, rest := SplitRemoval(tc.input)
+		assert.Equal(t, tc.wantRemoval, removal, tc.input)
+		assert.Equal(t, tc.wantRest, rest, tc.input)
+	}
+}
