@@ -128,6 +128,8 @@ func (c *Configuration) handleOption(option, value string) bool {
 		c.Editor = value
 	case "editorflags":
 		c.EditorFlags = value
+	case "pkgbuildpager":
+		c.PkgbuildPager = value
 	case "makepkg":
 		c.MakepkgBin = value
 	case "makepkgconf":
