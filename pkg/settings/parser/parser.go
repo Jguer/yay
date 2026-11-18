@@ -400,6 +400,7 @@ func isArg(arg string) bool {
 	case "noansweredit":
 	case "answerupgrade":
 	case "noanswerupgrade":
+	case "noexcludemenu":
 	case "gpgflags":
 	case "mflags":
 	case "gitflags":
