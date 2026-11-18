@@ -60,6 +60,7 @@ type CmdBuilder struct {
 	KeepSrc          bool
 	Runner           Runner
 	Log              *text.Logger
+	CleanChroot      bool
 }
 
 func NewCmdBuilder(cfg *settings.Configuration, runner Runner, logger *text.Logger, dbPath string) *CmdBuilder {
@@ -80,6 +81,7 @@ func NewCmdBuilder(cfg *settings.Configuration, runner Runner, logger *text.Logg
 		KeepSrc:          cfg.KeepSrc,
 		Runner:           runner,
 		Log:              logger,
+		CleanChroot:      cfg.CleanChroot,
 	}
 }
 
@@ -150,12 +152,21 @@ func (c *CmdBuilder) BuildMakepkgCmd(ctx context.Context, dir string, extraArgs 
 		args = append(args, extraArgs...)
 	}
 
-	cmd := exec.CommandContext(ctx, c.MakepkgBin, args...)
+	var cmd *exec.Cmd
+
+	if c.CleanChroot {
+        	chrootArgs := []string{"--", "-i"}
+        	cmd = exec.CommandContext(ctx, "extra-x86_64-build", chrootArgs...)
+	} else {
+
+        	cmd = exec.CommandContext(ctx, c.MakepkgBin, args...)
+	}
+
 	cmd.Dir = dir
-
+	
 	cmd = c.deElevateCommand(ctx, cmd)
-
 	return cmd
+
 }
 
 // deElevateCommand, `systemd-run` code based on pikaur.
