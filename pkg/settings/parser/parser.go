@@ -421,6 +421,10 @@ func isArg(arg string) bool {
 	case "cleanmenu":
 	case "diffmenu":
 	case "editmenu":
+	case "scan":
+	case "noscan":
+	case "scanstrict":
+	case "scanonly":
 	case "useask":
 	case "combinedupgrade":
 	case "a", "aur":

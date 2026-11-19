@@ -115,9 +115,9 @@ func Test_downloadPKGBUILDSourceError(t *testing.T) {
 }
 
 // GIVEN 5 packages
-// WHEN downloadPKGBUILDSourceFanout is called
+// WHEN DownloadPKGBUILDSourceFanout is called
 // THEN 5 calls should be made to makepkg
-func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
+func Test_DownloadPKGBUILDSourceFanout(t *testing.T) {
 	t.Parallel()
 
 	pkgBuildDirs := map[string]string{
@@ -137,7 +137,7 @@ func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 				test: t,
 			}
 
-			err := downloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, true, maxConcurrentDownloads)
+			err := DownloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, true, maxConcurrentDownloads)
 			assert.NoError(t, err)
 			assert.Equal(t, 5, int(cmdBuilder.passes))
 		})
@@ -145,9 +145,9 @@ func Test_downloadPKGBUILDSourceFanout(t *testing.T) {
 }
 
 // GIVEN 1 package
-// WHEN downloadPKGBUILDSourceFanout is called
+// WHEN DownloadPKGBUILDSourceFanout is called
 // THEN 1 calls should be made to makepkg without concurrency
-func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
+func Test_DownloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 	t.Parallel()
 	cmdBuilder := &TestMakepkgBuilder{
 		parentBuilder: &exe.CmdBuilder{
@@ -159,15 +159,15 @@ func Test_downloadPKGBUILDSourceFanoutNoCC(t *testing.T) {
 
 	pkgBuildDirs := map[string]string{"yay": "/tmp/yay"}
 
-	err := downloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, false, 0)
+	err := DownloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, int(cmdBuilder.passes))
 }
 
 // GIVEN 5 packages
-// WHEN downloadPKGBUILDSourceFanout is called
+// WHEN DownloadPKGBUILDSourceFanout is called
 // THEN 5 calls should be made to makepkg
-func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
+func Test_DownloadPKGBUILDSourceFanoutError(t *testing.T) {
 	t.Parallel()
 	cmdBuilder := &TestMakepkgBuilder{
 		parentBuilder: &exe.CmdBuilder{
@@ -186,7 +186,7 @@ func Test_downloadPKGBUILDSourceFanoutError(t *testing.T) {
 		"yay-v12": "/tmp/yay-v12",
 	}
 
-	err := downloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, false, 0)
+	err := DownloadPKGBUILDSourceFanout(context.Background(), cmdBuilder, pkgBuildDirs, false, 0)
 	assert.Error(t, err)
 	assert.Equal(t, 5, int(cmdBuilder.passes))
 	joined, ok := err.(interface{ Unwrap() []error })

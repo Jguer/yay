@@ -67,7 +67,7 @@ func downloadPKGBUILDSourceWorker(ctx context.Context, wg *sync.WaitGroup,
 	wg.Done()
 }
 
-func downloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgBuildDirs map[string]string,
+func DownloadPKGBUILDSourceFanout(ctx context.Context, cmdBuilder exe.ICmdBuilder, pkgBuildDirs map[string]string,
 	incompatible bool, maxConcurrentDownloads int,
 ) error {
 	if len(pkgBuildDirs) == 0 {
