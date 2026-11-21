@@ -209,6 +209,19 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		}
 	}
 
+	if preper.cfg.DiffMenu {
+		for _, base := range aurBasesToClone.ToSlice() {
+			dir := pkgBuildDirsByBase[base]
+			if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {
+				continue
+			}
+
+			if err := menus.SeedSeenRef(ctx, preper.cmdBuilder, dir); err != nil {
+				preper.log.Debugln("unable to set AUR_SEEN in", dir, err)
+			}
+		}
+	}
+
 	if _, errA := download.AURPKGBUILDRepos(ctx,
 		preper.cmdBuilder, preper.log.Child("download"), aurBasesToClone.ToSlice(),
 		preper.cfg.AURURL, preper.cfg.BuildDir, false); errA != nil {
