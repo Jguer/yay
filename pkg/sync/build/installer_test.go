@@ -25,6 +25,58 @@ func newTestLogger() *text.Logger {
 	return text.NewLogger(io.Discard, io.Discard, strings.NewReader(""), true, "test")
 }
 
+func TestInstaller_ForcedRebuildsCachedPackages(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name      string
+		mode      parser.RebuildMode
+		isTarget  bool
+		needed    bool
+		wantBuild bool
+	}{
+		{name: "no target", mode: parser.RebuildModeNo, isTarget: true},
+		{name: "yes target", mode: parser.RebuildModeYes, isTarget: true, wantBuild: true},
+		{name: "yes dependency", mode: parser.RebuildModeYes},
+		{name: "all target", mode: parser.RebuildModeAll, isTarget: true, wantBuild: true},
+		{name: "all dependency", mode: parser.RebuildModeAll, wantBuild: true},
+		{name: "tree target", mode: parser.RebuildModeTree, isTarget: true, wantBuild: true},
+		{name: "tree dependency", mode: parser.RebuildModeTree, wantBuild: true},
+		{name: "all needed", mode: parser.RebuildModeAll, isTarget: true, needed: true},
+		{name: "tree needed", mode: parser.RebuildModeTree, isTarget: true, needed: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			dir := t.TempDir()
+			archive := dir + "/foo-1-1-x86_64.pkg.tar.zst"
+			require.NoError(t, os.WriteFile(archive, nil, 0o600))
+			runner := &exe.MockRunner{CaptureFn: func(*exec.Cmd) (string, string, error) {
+				return archive, "", nil
+			}}
+			installer := NewInstaller(&mock.DBExecutor{
+				IsCorrectVersionInstalledFn: func(string, string) bool { return true },
+			}, &exe.MockBuilder{Runner: runner}, &vcs.Mock{}, parser.ModeAny, tc.mode, false, newTestLogger())
+
+			dests, err := installer.buildPkg(t.Context(), dir, "foo", false, tc.needed, tc.isTarget)
+			require.NoError(t, err)
+			require.Len(t, runner.ShowCalls, 2)
+			buildArgs := runner.ShowCalls[1].Args[0].(*exec.Cmd).Args
+			if tc.wantBuild {
+				require.Contains(t, buildArgs, "--holdver")
+				require.NotContains(t, buildArgs, "--nobuild")
+			} else {
+				require.Contains(t, buildArgs, "--nobuild")
+			}
+			if tc.needed {
+				require.Empty(t, dests)
+			} else {
+				require.Equal(t, map[string]string{"foo": archive}, dests)
+			}
+		})
+	}
+}
+
 func TestInstaller_InstallNeeded(t *testing.T) {
 	t.Parallel()
 
@@ -1036,6 +1088,52 @@ func TestInstaller_InstallDownloadOnly(t *testing.T) {
 				capture = strings.ReplaceAll(capture, pacmanBin, "pacman")
 				assert.Subset(td, strings.Split(capture, " "), strings.Split(tc.wantCapture[i], " "), capture)
 			}
+		})
+	}
+}
+
+func TestInstaller_InstallDownloadOnlyRepo(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name     string
+		flag     string
+		wantFlag string
+		err      error
+	}{
+		{name: "short option", flag: "w", wantFlag: "-w"},
+		{name: "long option", flag: "downloadonly", wantFlag: "--downloadonly"},
+		{name: "failed download", flag: "w", wantFlag: "-w", err: errors.New("download failed")},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			runner := &exe.MockRunner{ShowFn: func(cmd *exec.Cmd) error { return tc.err }}
+			cmdBuilder := &exe.MockBuilder{
+				Runner: runner,
+				BuildPacmanCmdFn: func(ctx context.Context, args *parser.Arguments, _ parser.TargetMode, _ bool) *exec.Cmd {
+					return exec.CommandContext(ctx, "pacman", append(args.FormatArgs(), args.Targets...)...)
+				},
+			}
+			installer := NewInstaller(nil, cmdBuilder, nil, parser.ModeAny,
+				parser.RebuildModeNo, true, newTestLogger())
+			args := parser.MakeArguments()
+			require.NoError(t, args.AddArg("S", tc.flag))
+			args.AddTarget("app")
+			targets := []map[string]*dep.InstallInfo{{
+				"app":     {Source: dep.Sync, Reason: dep.Explicit, SyncDBName: "extra"},
+				"library": {Source: dep.Sync, Reason: dep.Dep, SyncDBName: "extra"},
+			}}
+
+			err := installer.Install(context.Background(), args, targets, nil, nil, false)
+			if tc.err != nil {
+				require.ErrorIs(t, err, ErrInstallRepoPkgs)
+			} else {
+				require.NoError(t, err)
+			}
+			require.Len(t, runner.ShowCalls, 1)
+			cmd := runner.ShowCalls[0].Args[0].(*exec.Cmd)
+			assert.ElementsMatch(t, []string{"pacman", "-S", tc.wantFlag, "extra/app", "extra/library"}, cmd.Args)
 		})
 	}
 }
