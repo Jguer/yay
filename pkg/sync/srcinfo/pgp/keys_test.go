@@ -25,11 +25,10 @@ func newTestLogger() *text.Logger {
 }
 
 func makeSrcinfo(pkgbase string, pgpkeys ...string) *gosrc.Srcinfo {
-	srcinfo := gosrc.Srcinfo{}
-	srcinfo.Pkgbase = pkgbase
-	srcinfo.ValidPGPKeys = pgpkeys
-
-	return &srcinfo
+	return &gosrc.Srcinfo{
+		Pkgbase:      pkgbase,
+		ValidPGPKeys: pgpkeys,
+	}
 }
 
 func TestCheckPgpKeys(t *testing.T) {
