@@ -22,7 +22,7 @@ import (
 func gitT(t *testing.T, dir string, args ...string) string {
 	t.Helper()
 
-	cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+	cmd := exec.CommandContext(t.Context(), "git", append([]string{"-C", dir}, args...)...)
 	cmd.Env = append(os.Environ(),
 		"GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=test@example.com",
 		"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=test@example.com")
@@ -50,6 +50,11 @@ func commitPkgver(t *testing.T, dir, ver string) string {
 func TestPrepareWorkspaceSeedsSeenRefBeforeUpdate(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not available")
+	}
+	// As root, CmdBuilder runs git through systemd-run unless SUDO_USER names
+	// a user to drop to. CI containers run as root without systemd.
+	if os.Geteuid() == 0 {
+		t.Setenv("SUDO_USER", "root")
 	}
 
 	aur := t.TempDir()
