@@ -124,10 +124,17 @@ func asexp(ctx context.Context,
 	return setPkgReason(ctx, cmdBuilder, mode, cmdArgs, pkgs, true)
 }
 
+// parsePackageList lists the package files makepkg would build in dir.
+// ignoreArch must match the build: without it, makepkg leaves out split
+// packages whose arch does not include CARCH, as it does when building.
 func parsePackageList(ctx context.Context, cmdBuilder exe.ICmdBuilder,
-	dir string,
+	dir string, ignoreArch bool,
 ) (pkgdests map[string]string, pkgVersion string, err error) {
-	args := []string{"--packagelist", "--ignorearch"}
+	args := []string{"--packagelist"}
+	if ignoreArch {
+		args = append(args, "--ignorearch")
+	}
+
 	stdout, stderr, err := cmdBuilder.Capture(
 		cmdBuilder.BuildMakepkgCmd(ctx, dir, args...))
 	if err != nil {

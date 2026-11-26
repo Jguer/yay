@@ -59,11 +59,11 @@ func TestIntegrationLocalInstall(t *testing.T) {
 		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
@@ -211,9 +211,9 @@ func TestIntegrationLocalBuildOnly(t *testing.T) {
 		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 	}
 
@@ -323,6 +323,159 @@ func TestIntegrationLocalBuildOnly(t *testing.T) {
 
 		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
 	}
+}
+
+// An incompatible base that the user agrees to build is still built with
+// --ignorearch: sync passes the bases accepted at the prompt to the installer.
+func TestIntegrationLocalBuildOnlyIncompatibleArch(t *testing.T) {
+	makepkgBin := t.TempDir() + "/makepkg"
+	pacmanBin := t.TempDir() + "/pacman"
+	gitBin := t.TempDir() + "/git"
+	tmpDir := t.TempDir()
+	f, err := os.OpenFile(makepkgBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(pacmanBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	f, err = os.OpenFile(gitBin, os.O_RDONLY|os.O_CREATE, 0o755)
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	tars := []string{
+		tmpDir + "/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
+		tmpDir + "/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
+		tmpDir + "/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst",
+	}
+
+	wantShow := []string{
+		"makepkg --verifysource --skippgpcheck -f -Cc",
+		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
+		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
+		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg -c --nobuild --noextract --ignorearch",
+	}
+
+	wantCapture := []string{
+		"makepkg --packagelist --ignorearch",
+		"git -C testdata/jfin git reset --hard HEAD",
+		"git -C testdata/jfin git merge --no-edit --ff",
+		"makepkg --packagelist --ignorearch",
+	}
+
+	captureOverride := func(cmd *exec.Cmd) (stdout string, stderr string, err error) {
+		return strings.Join(tars, "\n"), "", nil
+	}
+
+	once := sync.Once{}
+
+	showOverride := func(cmd *exec.Cmd) error {
+		once.Do(func() {
+			for _, tar := range tars {
+				f, err := os.OpenFile(tar, os.O_RDONLY|os.O_CREATE, 0o666)
+				require.NoError(t, err)
+				require.NoError(t, f.Close())
+			}
+		})
+		return nil
+	}
+
+	mockRunner := &exe.MockRunner{CaptureFn: captureOverride, ShowFn: showOverride}
+	cmdBuilder := &exe.CmdBuilder{
+		MakepkgBin:       makepkgBin,
+		SudoBin:          "su",
+		PacmanBin:        pacmanBin,
+		PacmanConfigPath: "/etc/pacman.conf",
+		GitBin:           "git",
+		Runner:           mockRunner,
+		SudoLoopEnabled:  false,
+	}
+
+	cmdArgs := parser.MakeArguments()
+	cmdArgs.AddArg("B")
+	cmdArgs.AddTarget("testdata/jfin")
+	settings.NoConfirm = true
+	defer func() { settings.NoConfirm = false }()
+	db := &mock.DBExecutor{
+		AlpmArchitecturesFn: func() ([]string, error) {
+			return []string{"aarch64"}, nil
+		},
+		LocalSatisfierExistsFn: func(s string) bool {
+			switch s {
+			case "dotnet-sdk>=6", "dotnet-sdk<7", "dotnet-runtime>=6", "dotnet-runtime<7", "jellyfin-server=10.8.4", "jellyfin-web=10.8.4":
+				return false
+			}
+
+			return true
+		},
+		SyncSatisfierFn: func(s string) mock.IPackage {
+			switch s {
+			case "dotnet-runtime>=6", "dotnet-runtime<7":
+				return &mock.Package{
+					PName:    "dotnet-runtime-6.0",
+					PBase:    "dotnet-runtime-6.0",
+					PVersion: "6.0.100-1",
+					PDB:      mock.NewDB("community"),
+				}
+			case "dotnet-sdk>=6", "dotnet-sdk<7":
+				return &mock.Package{
+					PName:    "dotnet-sdk-6.0",
+					PBase:    "dotnet-sdk-6.0",
+					PVersion: "6.0.100-1",
+					PDB:      mock.NewDB("community"),
+				}
+			}
+
+			return nil
+		},
+		LocalPackageFn:                func(s string) mock.IPackage { return nil },
+		InstalledRemotePackageNamesFn: func() []string { return []string{} },
+	}
+
+	run := &runtime.Runtime{
+		Cfg: &settings.Configuration{
+			RemoveMake: "no",
+		},
+		Logger:     newTestLogger(),
+		CmdBuilder: cmdBuilder,
+		VCSStore:   &vcs.Mock{},
+		AURClient: &mockaur.MockAUR{
+			GetFn: func(ctx context.Context, query *aur.Query) ([]aur.Pkg, error) {
+				return []aur.Pkg{}, nil
+			},
+		},
+	}
+
+	err = handleCmd(context.Background(), run, cmdArgs, db)
+	require.NoError(t, err)
+
+	require.Len(t, mockRunner.ShowCalls, len(wantShow))
+	require.Len(t, mockRunner.CaptureCalls, len(wantCapture))
+
+	for i, call := range mockRunner.ShowCalls {
+		require.Less(t, i, len(wantShow), "unexpected number of show commands")
+		show := call.Args[0].(*exec.Cmd).String()
+		show = strings.ReplaceAll(show, tmpDir, "/testdir")
+		show = strings.ReplaceAll(show, makepkgBin, "makepkg")
+		show = strings.ReplaceAll(show, pacmanBin, "pacman")
+		show = strings.ReplaceAll(show, gitBin, "git")
+
+		assert.Subset(t, strings.Split(show, " "), strings.Split(wantShow[i], " "), fmt.Sprintf("%d - %s", i, show))
+	}
+
+	packageLists := 0
+	for _, call := range mockRunner.CaptureCalls {
+		args := strings.Split(call.Args[0].(*exec.Cmd).String(), " ")
+		if slices.Contains(args, "--packagelist") {
+			packageLists++
+			assert.Contains(t, args, "--ignorearch")
+		}
+	}
+	assert.Equal(t, 2, packageLists)
 }
 
 func TestIntegrationLocalInstallMissingDep(t *testing.T) {
@@ -477,9 +630,9 @@ func TestIntegrationLocalInstallNeeded(t *testing.T) {
 		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 	}
 
@@ -643,11 +796,11 @@ func TestIntegrationLocalInstallGenerateSRCINFO(t *testing.T) {
 		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"pacman -S --config /etc/pacman.conf -- community/dotnet-sdk-6.0 community/dotnet-runtime-6.0",
 		"pacman -D -q --asdeps --config /etc/pacman.conf -- dotnet-runtime-6.0 dotnet-sdk-6.0",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-server-10.8.4-1-x86_64.pkg.tar.zst /testdir/jellyfin-web-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin-server jellyfin-web",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/jellyfin-10.8.4-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- jellyfin",
@@ -939,11 +1092,11 @@ func TestIntegrationLocalInstallWithDepsProvides(t *testing.T) {
 
 	wantShow := []string{
 		"makepkg --verifysource --skippgpcheck -f -Cc",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/ceph-libs-bin-17.2.6-2-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- ceph-libs-bin",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir/ceph-bin-17.2.6-2-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- ceph-bin",
@@ -1068,11 +1221,11 @@ func TestIntegrationLocalInstallTwoSrcInfosWithDeps(t *testing.T) {
 	wantShow := []string{
 		"makepkg --verifysource --skippgpcheck -f -Cc",
 		"makepkg --verifysource --skippgpcheck -f -Cc",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir1/libzip-git-1.9.2.r166.gd2c47d0f-1-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- libzip-git",
-		"makepkg --nobuild -f -C --ignorearch",
+		"makepkg --nobuild -f -C",
 		"makepkg -c --nobuild --noextract --ignorearch",
 		"pacman -U --config /etc/pacman.conf -- /testdir2/gourou-0.8.1-4-x86_64.pkg.tar.zst",
 		"pacman -D -q --asexplicit --config /etc/pacman.conf -- gourou",

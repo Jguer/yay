@@ -146,7 +146,7 @@ func TestParsePackageList(t *testing.T) {
 			}
 			cmdBuilder := &exe.CmdBuilder{Runner: mockRunner} // Simplified for this test
 
-			pkgdests, pkgVersion, err := parsePackageList(context.Background(), cmdBuilder, "/fake/dir")
+			pkgdests, pkgVersion, err := parsePackageList(context.Background(), cmdBuilder, "/fake/dir", true)
 
 			if tc.wantErr {
 				assert.Error(t, err)

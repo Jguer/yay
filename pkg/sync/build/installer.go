@@ -33,6 +33,7 @@ type (
 		origTargets          mapset.Set[string]
 		downloadOnly         bool
 		installBuiltPackages bool
+		incompatibleBases    mapset.Set[string]
 		log                  *text.Logger
 
 		manualConfirmRequired bool
@@ -53,6 +54,7 @@ func NewInstaller(dbExecutor db.Executor,
 		rebuildMode:           rebuildMode,
 		downloadOnly:          downloadOnly,
 		installBuiltPackages:  true,
+		incompatibleBases:     mapset.NewThreadUnsafeSet[string](),
 		log:                   logger,
 		manualConfirmRequired: true,
 	}
@@ -60,6 +62,13 @@ func NewInstaller(dbExecutor db.Executor,
 
 func (installer *Installer) SetInstallBuiltPackages(install bool) {
 	installer.installBuiltPackages = install
+}
+
+// SetIncompatibleBases records the package bases that do not support the
+// system architecture and that the user agreed to build anyway. Only these
+// bases are built with makepkg --ignorearch.
+func (installer *Installer) SetIncompatibleBases(bases []string) {
+	installer.incompatibleBases = mapset.NewThreadUnsafeSet(bases...)
 }
 
 func (installer *Installer) CompileFailedAndIgnored() (map[string]error, error) {
@@ -221,7 +230,7 @@ func (installer *Installer) handleLayer(ctx context.Context,
 	}
 
 	errAur := installer.installAURPackages(ctx, cmdArgs, aurDeps, aurExp,
-		aurOrigTargetBases, nameToBaseMap, pkgBuildDirs, true, lastLayer,
+		aurOrigTargetBases, nameToBaseMap, pkgBuildDirs, installer.incompatibleBases, lastLayer,
 		installer.appendNoConfirm())
 
 	return errAur
@@ -231,7 +240,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 	cmdArgs *parser.Arguments,
 	aurDepNames, aurExpNames, aurOrigTargetBases mapset.Set[string],
 	nameToBase, pkgBuildDirsByBase map[string]string,
-	installIncompatible bool,
+	incompatibleBases mapset.Set[string],
 	lastLayer bool,
 	noConfirm bool,
 ) error {
@@ -256,7 +265,7 @@ func (installer *Installer) installAURPackages(ctx context.Context,
 			var errMake error
 			installer.log.Debugln("building pkgbase", base, "package", name)
 			pkgdests, errMake = installer.buildPkg(ctx, dir, base,
-				installIncompatible, cmdArgs.ExistsArg("needed"), aurOrigTargetBases.Contains(base))
+				incompatibleBases.Contains(base), cmdArgs.ExistsArg("needed"), aurOrigTargetBases.Contains(base))
 			builtPkgDests[base] = pkgdests
 			if errMake != nil {
 				if !lastLayer {
@@ -328,7 +337,7 @@ func (installer *Installer) buildPkg(ctx context.Context,
 		return nil, err
 	}
 
-	pkgdests, pkgVersion, errList := parsePackageList(ctx, installer.exeCmd, dir)
+	pkgdests, pkgVersion, errList := parsePackageList(ctx, installer.exeCmd, dir, installIncompatible)
 	if errList != nil {
 		return nil, errList
 	}
