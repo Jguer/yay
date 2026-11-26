@@ -36,12 +36,12 @@ func TestIntegrationAURPKGBUILDReposMixedCloneAndPull(t *testing.T) {
 	targets := []string{"yay-bin", "yay-git"}
 
 	cloned1, err1 := AURPKGBUILDRepos(context.Background(), cmdBuilder, testLogger.Child("dl"),
-		targets, "https://aur.archlinux.org", dir, false)
+		targets, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 	require.NoError(t, err1)
 	assert.EqualValues(t, map[string]bool{"yay-bin": true, "yay-git": true}, cloned1)
 
 	cloned2, err2 := AURPKGBUILDRepos(context.Background(), cmdBuilder, testLogger.Child("dl2"),
-		targets, "https://aur.archlinux.org", dir, false)
+		targets, StaticAURURLs{"https://aur.archlinux.org"}, dir, false)
 	require.NoError(t, err2)
 	assert.EqualValues(t, map[string]bool{"yay-bin": false, "yay-git": false}, cloned2)
 }

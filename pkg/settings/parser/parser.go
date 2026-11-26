@@ -374,6 +374,8 @@ func isArg(arg string) bool {
 	case "disable-sandbox":
 	// yay options
 	case "aururl":
+	case "aururls":
+	case "aursource":
 	case "aurrpcurl":
 	case "save":
 	case "afterclean", "cleanafter":
@@ -510,6 +512,8 @@ func hasParam(arg string) bool {
 	case "color":
 	// yay params
 	case "aururl":
+	case "aururls":
+	case "aursource":
 	case "aurrpcurl":
 	case "mflags":
 	case "gpgflags":
@@ -658,7 +662,7 @@ func (a *Arguments) Parse() error {
 			return nil
 		}
 
-		if len(a.Targets) > 0 {
+		if len(a.Targets) > 0 || a.ExistsArg("aursource") {
 			a.Op = "Y"
 		} else {
 			// Handle args incompatible with -Syu

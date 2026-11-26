@@ -75,6 +75,20 @@ startup and reports the offending keys/values so misconfigurations fail fast.
 
 `answer_clean`, `answer_diff`, `answer_edit`
 
+**Lists**
+
+`aururls`: ordered AUR-compatible sources. Entries are either a base URL string
+or a table with `url` and optional `name` and `rpcurl`. Order matters: every
+source is queried and the earliest source wins when two provide the same
+package name.
+
+```lua
+yay.opt.aururls = {
+	{ name = "aur", url = "https://aur.archlinux.org" },
+	"https://aur.example.org",
+}
+```
+
 **Integers**
 
 `request_split_n`, `completion_refresh_time`, `max_concurrent_downloads`
@@ -200,7 +214,8 @@ The callback receives this table:
         id = 3,
         name = "pkgname",
         base = "pkgbase",
-        repository = "aur",
+        repository = "aur",           -- "aur"/"devel" for every AUR source
+        aur_source = "aur",           -- AUR source label (nil for repo packages)
         local_version = "1.2.3-3",
         remote_version = "1.2.3-4",
         reason = "explicit",
@@ -458,6 +473,7 @@ the **unfiltered** results are shown rather than aborting the command.
     results = {
       {
         source          = "aur",      -- "aur" or the pacman DB name (e.g. "core", "extra")
+        aur_source      = "aur",      -- AUR source label when source is "aur" (see aururls)
         name            = "pkgname",
         description     = "A useful package",
         base            = "pkgbase",
@@ -525,6 +541,7 @@ sync results).
 {
   event = "RenderAUR",
   data = {
+    aur_source      = "aur",    -- label of the AUR source ("aur" for the default)
     name            = "pkgname",
     version         = "1.0-1",
     description     = "A useful package",

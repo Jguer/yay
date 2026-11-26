@@ -10,7 +10,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/leonelquinteros/gotext"
@@ -18,6 +21,114 @@ import (
 	"github.com/Jguer/yay/v13/pkg/settings/exe"
 	"github.com/Jguer/yay/v13/pkg/text"
 )
+
+// AURURLResolver returns the ordered AUR base URLs to try for a package name
+// or package base.
+type AURURLResolver interface {
+	URLsFor(name string) []string
+}
+
+// StaticAURURLs is an AURURLResolver that returns the same URLs for every
+// package.
+type StaticAURURLs []string
+
+func (s StaticAURURLs) URLsFor(string) []string { return s }
+
+// aurPKGBUILDFromAny fetches a PKGBUILD from the first URL that has it.
+func aurPKGBUILDFromAny(httpClient HTTPRequestDoer, pkgName string, aurURLs []string) ([]byte, error) {
+	var errs []error
+
+	for _, aurURL := range aurURLs {
+		pkgbuild, err := AURPKGBUILD(httpClient, pkgName, aurURL)
+		if err == nil {
+			return pkgbuild, nil
+		}
+
+		errs = append(errs, err)
+	}
+
+	return nil, errors.Join(errs...)
+}
+
+// aurPKGBUILDRepoFromAny clones a PKGBUILD repository, trying each URL in
+// order until one succeeds. An existing clone is updated from its own remote.
+func aurPKGBUILDRepoFromAny(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
+	aurURLs []string, pkgName, dest string, force bool,
+) (bool, error) {
+	if len(aurURLs) == 0 {
+		return false, ErrAURPackageNotFound{pkgName: pkgName}
+	}
+
+	if _, err := os.Stat(filepath.Join(dest, pkgName, ".git")); err == nil && !force {
+		if errO := CheckCloneOrigin(ctx, cmdBuilder, filepath.Join(dest, pkgName), pkgName, aurURLs); errO != nil {
+			return false, errO
+		}
+
+		return AURPKGBUILDRepo(ctx, cmdBuilder, aurURLs[0], pkgName, dest, force)
+	}
+
+	var errs []error
+
+	for _, aurURL := range aurURLs {
+		newClone, err := AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, pkgName, dest, force)
+		if err == nil {
+			return newClone, nil
+		}
+
+		errs = append(errs, err)
+	}
+
+	return false, errors.Join(errs...)
+}
+
+// ErrCloneOriginMismatch is returned when an existing PKGBUILD clone was made
+// from a different AUR source than the one the package is fetched from.
+type ErrCloneOriginMismatch struct {
+	Dir, PkgName, Current, Expected string
+}
+
+func (e ErrCloneOriginMismatch) Error() string {
+	return gotext.Get("%s was cloned from %s but %s is being fetched from %s; remove %s and try again",
+		e.Dir, e.Current, e.PkgName, e.Expected, e.Dir)
+}
+
+// CheckCloneOrigin makes sure an existing clone in dir of the PKGBUILD
+// repository pkgName comes from the first of aurURLs, the source the package
+// was resolved from, rather than silently updating it from another AUR
+// source. It only applies when several AUR sources are configured; a
+// missing clone, or one whose remote cannot be read, is not an error.
+func CheckCloneOrigin(ctx context.Context, cmdBuilder exe.GitCmdBuilder,
+	dir, pkgName string, aurURLs []string,
+) error {
+	if len(aurURLs) < 2 {
+		return nil
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {
+		return nil
+	}
+
+	stdout, _, err := cmdBuilder.Capture(cmdBuilder.BuildGitCmd(ctx, dir, "remote", "get-url", "origin"))
+	current := strings.TrimSpace(stdout)
+
+	if err != nil || current == "" {
+		return nil
+	}
+
+	expected := fmt.Sprintf("%s/%s.git", strings.TrimRight(aurURLs[0], "/"), pkgName)
+	if normalizeGitURL(current) == normalizeGitURL(expected) {
+		return nil
+	}
+
+	return ErrCloneOriginMismatch{Dir: dir, PkgName: pkgName, Current: current, Expected: expected}
+}
+
+func normalizeGitURL(u string) string {
+	u = strings.TrimRight(u, "/")
+	u = strings.TrimSuffix(u, ".git")
+
+	return strings.TrimRight(u, "/")
+}
 
 func AURPKGBUILD(httpClient HTTPRequestDoer, pkgName, aurURL string) ([]byte, error) {
 	values := url.Values{}
@@ -53,7 +164,7 @@ func AURPKGBUILDRepo(ctx context.Context, cmdBuilder exe.GitCmdBuilder, aurURL, 
 func AURPKGBUILDRepos(
 	ctx context.Context,
 	cmdBuilder exe.GitCmdBuilder, logger *text.Logger,
-	targets []string, aurURL, dest string, force bool,
+	targets []string, aurURLs AURURLResolver, dest string, force bool,
 ) (map[string]bool, error) {
 	cloned := make(map[string]bool, len(targets))
 
@@ -75,7 +186,7 @@ func AURPKGBUILDRepos(
 				wg.Done()
 			}()
 
-			newClone, err := AURPKGBUILDRepo(ctx, cmdBuilder, aurURL, target, dest, force)
+			newClone, err := aurPKGBUILDRepoFromAny(ctx, cmdBuilder, aurURLs.URLsFor(target), target, dest, force)
 
 			mux.Lock()
 			progress := len(cloned)

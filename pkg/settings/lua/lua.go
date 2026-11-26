@@ -2,6 +2,7 @@
 package lua
 
 import (
+	"encoding"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -206,6 +207,12 @@ func assignStructSlice(field reflect.Value, val lua.LValue) error {
 		return fmt.Errorf("expected table, got %s", val.Type())
 	}
 
+	// Element types that can be parsed from a string opt in to ordered,
+	// array-style tables; everything else keeps the name-keyed form.
+	if tbl.Len() > 0 && reflect.PointerTo(elemType).Implements(textUnmarshalerType) {
+		return assignStructSequence(field, tbl)
+	}
+
 	// The name comes from the table key, so a "name" key inside the entry table
 	// would silently override it and let two entries share one name. Drop it
 	// from the assignable set so it is reported as an unknown key instead.
@@ -302,4 +309,43 @@ func assignStructFields(sv reflect.Value, tbl *lua.LTable, index map[string]int)
 	})
 
 	return firstErr
+}
+
+var textUnmarshalerType = reflect.TypeFor[encoding.TextUnmarshaler]()
+
+// assignStructSequence fills a []Struct field from a Lua array, preserving the
+// order of its entries, e.g.
+//
+//	{ "https://a.example", { name = "b", url = "https://b.example" } }
+//
+// Only element types implementing encoding.TextUnmarshaler use this form.
+// Table entries populate fields by their lua tags (including "name"); string
+// entries are parsed with UnmarshalText.
+func assignStructSequence(field reflect.Value, tbl *lua.LTable) error {
+	elemType := field.Type().Elem()
+	fieldIndex := luaFieldIndex(elemType)
+	n := tbl.Len()
+	out := reflect.MakeSlice(field.Type(), n, n)
+
+	for i := 1; i <= n; i++ {
+		elem := out.Index(i - 1)
+
+		switch entry := tbl.RawGetInt(i).(type) {
+		case *lua.LTable:
+			if err := assignStructFields(elem, entry, fieldIndex); err != nil {
+				return fmt.Errorf("entry %d: %w", i, err)
+			}
+		case lua.LString:
+			unmarshaler, _ := reflect.TypeAssert[encoding.TextUnmarshaler](elem.Addr())
+			if err := unmarshaler.UnmarshalText([]byte(entry)); err != nil {
+				return fmt.Errorf("entry %d: %w", i, err)
+			}
+		default:
+			return fmt.Errorf("entry %d must be a table, got %s", i, entry.Type())
+		}
+	}
+
+	field.Set(out)
+
+	return nil
 }

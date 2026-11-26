@@ -2,6 +2,7 @@ package workdir
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -192,12 +193,25 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 	aurBasesToClone := mapset.NewThreadUnsafeSet[string]()
 	pkgBuildDirsByBase := make(map[string]string, len(targets))
 
+	aurURLs := run.AURURLs()
+
+	var originErrs []error
+
 	for _, layer := range targets {
 		for _, info := range layer {
 			switch info.Source {
 			case dep.AUR:
 				pkgBase := info.AURBase
 				pkgBuildDir := filepath.Join(preper.cfg.BuildDir, pkgBase)
+				if _, seen := pkgBuildDirsByBase[pkgBase]; !seen {
+					// Checked before the up-to-date shortcut, which would
+					// otherwise build a cached clone from another source.
+					if err := download.CheckCloneOrigin(ctx, preper.cmdBuilder, pkgBuildDir,
+						pkgBase, aurURLs.URLsFor(pkgBase)); err != nil {
+						originErrs = append(originErrs, err)
+					}
+				}
+
 				if preper.needToCloneAURBase(info, pkgBuildDir) {
 					aurBasesToClone.Add(pkgBase)
 				}
@@ -209,9 +223,13 @@ func (preper *Preparer) PrepareWorkspace(ctx context.Context,
 		}
 	}
 
+	if len(originErrs) > 0 {
+		return nil, errors.Join(originErrs...)
+	}
+
 	if _, errA := download.AURPKGBUILDRepos(ctx,
 		preper.cmdBuilder, preper.log.Child("download"), aurBasesToClone.ToSlice(),
-		preper.cfg.AURURL, preper.cfg.BuildDir, false); errA != nil {
+		aurURLs, preper.cfg.BuildDir, false); errA != nil {
 		return nil, errA
 	}
 

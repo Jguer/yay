@@ -6,6 +6,11 @@
 
 yay.opt.aururl = "https://aur.archlinux.org"
 yay.opt.aurrpcurl = ""
+-- Ordered list of AUR-compatible sources. When set it replaces aururl/aurrpcurl.
+-- yay.opt.aururls = {
+-- 	{ name = "aur", url = "https://aur.archlinux.org" },
+-- 	{ name = "mirror", url = "https://aur.example.org", rpcurl = "https://aur.example.org/rpc" },
+-- }
 yay.opt.build_dir = os.getenv("HOME") .. "/.cache/yay"
 yay.opt.editor = os.getenv("EDITOR") or os.getenv("VISUAL") or "vi"
 yay.opt.editor_flags = ""

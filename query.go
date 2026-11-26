@@ -113,7 +113,7 @@ func syncInfo(ctx context.Context, run *runtime.Runtime,
 	}
 
 	for i := range remoteAurPkgs {
-		printInfo(run.Logger, run.Cfg, &remoteAurPkgs[i], cmdArgs.ExistsDouble("i"))
+		printInfo(run.Logger, run.AURSourceFor(remoteAurPkgs[i].Name), &remoteAurPkgs[i], cmdArgs.ExistsDouble("i"))
 	}
 
 	if missing {
