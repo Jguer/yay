@@ -169,14 +169,10 @@ func TestPackagesFromSrcinfo(t *testing.T) {
 	}
 
 	srcinfo := &gosrc.Srcinfo{
-		PackageBase: gosrc.PackageBase{
-			Pkgbase: "yay",
-		},
-		Package: gosrc.Package{
-			Depends: []gosrc.ArchString{
-				{Arch: "x86_64", Value: "xdep"},
-				{Arch: "arm", Value: "ignored"},
-			},
+		Pkgbase: "yay",
+		Depends: []gosrc.ArchString{
+			{Arch: "x86_64", Value: "xdep"},
+			{Arch: "arm", Value: "ignored"},
 		},
 		Packages: []gosrc.Package{
 			{
@@ -213,14 +209,10 @@ func TestPackagesFromSrcinfoPkgbaseFallback(t *testing.T) {
 	}
 
 	srcinfo := &gosrc.Srcinfo{
-		PackageBase: gosrc.PackageBase{
-			Pkgbase: "yay",
-		},
-		Package: gosrc.Package{
-			URL:     "https://example.com/yay",
-			Groups:  []string{"base-group"},
-			License: []string{"MIT"},
-		},
+		Pkgbase: "yay",
+		URL:     "https://example.com/yay",
+		Groups:  []string{"base-group"},
+		License: []string{"MIT"},
 		Packages: []gosrc.Package{
 			{
 				Pkgname: "yay",
