@@ -160,6 +160,24 @@ func getLastSeenHash(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string
 	return gitEmptyTree, nil
 }
 
+// SeedSeenRef sets AUR_SEEN to HEAD when the repo has none yet, so the diff
+// after an update starts from the commit that was already in the cache
+// instead of from an empty tree.
+func SeedSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) error {
+	if gitHasLastSeenRef(ctx, cmdBuilder, dir) {
+		return nil
+	}
+
+	_, stderr, err := cmdBuilder.Capture(
+		cmdBuilder.BuildGitCmd(ctx,
+			dir, "update-ref", gitDiffRefName, "HEAD"))
+	if err != nil {
+		return fmt.Errorf("%s %w", stderr, err)
+	}
+
+	return nil
+}
+
 // Update the AUR_SEEN ref to HEAD. We use this ref to determine which diff were
 // reviewed by the user.
 func gitUpdateSeenRef(ctx context.Context, cmdBuilder exe.ICmdBuilder, dir string) error {
