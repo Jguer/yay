@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/term"
@@ -35,10 +36,22 @@ func resolvePager(pagerConfig string) string {
 	return "cat"
 }
 
+// withLessRawANSI adds -R when the pager is less. A command-line option
+// overrides both $LESS and a lesskey file, so colored diffs render even when
+// the user's less configuration leaves -R out.
+func withLessRawANSI(pager string) string {
+	fields := strings.Fields(pager)
+	if len(fields) > 0 && filepath.Base(fields[0]) == "less" {
+		return pager + " -R"
+	}
+
+	return pager
+}
+
 // pageThroughPager runs the configured pager with content on stdin.
 // The pager command is user-controlled (config / $PAGER), same model as $EDITOR.
 func pageThroughPager(ctx context.Context, content, pagerConfig string) error {
-	pager := resolvePager(pagerConfig)
+	pager := withLessRawANSI(resolvePager(pagerConfig))
 	cmd := exec.CommandContext(ctx, "sh", "-c", pager)
 	cmd.Stdin = strings.NewReader(content)
 	cmd.Stdout = os.Stdout
